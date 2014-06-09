@@ -72,13 +72,15 @@ protected:
    virtual Real CalculateRange();
 
    Real RelativityCorrection(Rvector3 r1, Rvector3 r2, Real t1, Real t2);					// made changes by TUAN NGUYEN
-   Real ETminusTAICorrection(Real tA1MJD, GmatBase* participant);
-   Real EstimatedETminusTAI(Real tA1MJD);
+   //Real ETminusTAICorrection(Real tA1MJD, GmatBase* participant);
+   //Real EstimatedETminusTAI(Real tA1MJD);
+
+public:
    Real ETminusTAI(Real tA1MJD, GmatBase* participant);										// made changes by TUAN NGUYEN
 
 private:
    Real relativityCorrection;				// relativity correction (unit: km)				// made changes by TUAN NGUYEN
-   Real etminustaiCorrection;				// ET-TAI correction (unit: km. It was converted from s to km)					// made changes by TUAN NGUYEN
+   //Real etminustaiCorrection;				// ET-TAI correction (unit: km. It was converted from s to km)					// made changes by TUAN NGUYEN
    Real precisionRange;						// precision light time range (unit: km)		// made changes by TUAN NGUYEN
 
 };

@@ -87,7 +87,7 @@ public:
 
    virtual void SetSolarSystem(SolarSystem* ss);				// made changes by TUAN NGUYEN
    virtual void SetRelativityCorrection(bool useCorr);			// made changes by TUAN NGUYEN
-   virtual void SetETMinusTAICorrection(bool useCorr);			// made changes by TUAN NGUYEN
+//   virtual void SetETMinusTAICorrection(bool useCorr);			// made changes by TUAN NGUYEN
 
 protected:
    /// The names of the participants active in the Event
@@ -144,7 +144,7 @@ protected:
    SolarSystem         *solarSystem;																				// made changes by TUAN NGUYEN
    /// Flags to indicate using relativity correction and ET-TAI correction											// made changes by TUAN NGUYEN
    bool                useRelativityCorrection;																		// made changes by TUAN NGUYEN
-   bool                useETMinusTAICorrection;																		// made changes by TUAN NGUYEN
+//   bool                useETMinusTAICorrection;																		// made changes by TUAN NGUYEN
 
    virtual void EvaluateNyquist();
    virtual void CalculateTimestepEstimate();

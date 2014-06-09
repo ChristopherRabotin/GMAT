@@ -56,7 +56,7 @@ Event::Event(const std::string &type, const std::string &name) :
    bufferFillCount      (0),
    j2k                  (NULL),
    useRelativityCorrection (false),							// made changes by TUAN NGUYEN
-   useETMinusTAICorrection (false),							// made changes by TUAN NGUYEN
+//   useETMinusTAICorrection (false),							// made changes by TUAN NGUYEN
    solarSystem			(NULL)								// made changes by TUAN NGUYEN
 {
 }
@@ -101,7 +101,7 @@ Event::Event(const Event& ev) :
    bufferFillCount      (0),
    j2k                  (NULL),
    useRelativityCorrection (ev.useRelativityCorrection),	// made changes by TUAN NGUYEN
-   useETMinusTAICorrection (ev.useETMinusTAICorrection),	// made changes by TUAN NGUYEN
+//   useETMinusTAICorrection (ev.useETMinusTAICorrection),	// made changes by TUAN NGUYEN
    solarSystem			(ev.solarSystem)					// made changes by TUAN NGUYEN
 {
    for (UnsignedInt i = 0; i < ev.participantCS.size(); ++i)
@@ -135,7 +135,7 @@ Event& Event::operator=(const Event& ev)
       bufferFillCount      = 0;
       j2k                  = NULL;
 	  useRelativityCorrection = ev.useRelativityCorrection;		// made changes by TUAN NGUYEN
-	  useETMinusTAICorrection = ev.useETMinusTAICorrection;		// made changes by TUAN NGUYEN
+//	  useETMinusTAICorrection = ev.useETMinusTAICorrection;		// made changes by TUAN NGUYEN
 	  solarSystem          = ev.solarSystem;					// made changes by TUAN NGUYEN
       nyquist              = ev.nyquist;
       tolerance            = ev.tolerance;
@@ -212,19 +212,19 @@ void Event::SetRelativityCorrection(bool useCorr)
 #endif
 }
 
-// made changes by TUAN NGUYEN
-void Event::SetETMinusTAICorrection(bool useCorr)
-{
-#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
-	MessageInterface::ShowMessage("Start Event::SetETMinusTAICorrection(%s)\n", (useCorr?"true":"false"));
-#endif
-
-   useETMinusTAICorrection = useCorr;
-
-#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
-	MessageInterface::ShowMessage("Exit Event::SetETMinusTAICorrection()\n");
-#endif
-}
+//// made changes by TUAN NGUYEN
+//void Event::SetETMinusTAICorrection(bool useCorr)
+//{
+//#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
+//	MessageInterface::ShowMessage("Start Event::SetETMinusTAICorrection(%s)\n", (useCorr?"true":"false"));
+//#endif
+//
+//   useETMinusTAICorrection = useCorr;
+//
+//#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
+//	MessageInterface::ShowMessage("Exit Event::SetETMinusTAICorrection()\n");
+//#endif
+//}
 
 //------------------------------------------------------------------------------
 // void FixState(GmatBase* obj, bool lockState)

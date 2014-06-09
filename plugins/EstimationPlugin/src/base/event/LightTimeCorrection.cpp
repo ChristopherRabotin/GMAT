@@ -397,14 +397,16 @@ Real LightTimeCorrection::CalculateRange()
 	  if (useRelativityCorrection)																	// made changes by TUAN NGUYEN
 	     relativityCorrection = RelativityCorrection(r1B, r2B, t1, t2);								// made changes by TUAN NGUYEN
 
-	  etminustaiCorrection = 0.0;
-	  if (this->useETMinusTAICorrection)															// made changes by TUAN NGUYEN
-		 etminustaiCorrection = ETminusTAICorrection(t2, cb2)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;	// made changes by TUAN NGUYEN
+	  //etminustaiCorrection = 0.0;
+	  //if (this->useETMinusTAICorrection)															// made changes by TUAN NGUYEN
+		 //etminustaiCorrection = ETminusTAICorrection(t2, cb2)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;	// made changes by TUAN NGUYEN
 
-	  range = precisionRange + relativityCorrection + etminustaiCorrection;					// relativity and Et-TAI corrections were added into the range		// made changes by TUAN NGUYEN
-	  
+	  //range = precisionRange + relativityCorrection + etminustaiCorrection;					// relativity and Et-TAI corrections were added into the range		// made changes by TUAN NGUYEN
+	  range = precisionRange + relativityCorrection;												// made changes by TUAN NGUYEN
+
 	  #ifdef DEBUG_CALCULATE_RANGE
-	     MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km     ET-TAI correction = %.12le km\n", GetName().c_str(), precisionRange, relativityCorrection, etminustaiCorrection);
+//	     MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km     ET-TAI correction = %.12le km\n", GetName().c_str(), precisionRange, relativityCorrection, etminustaiCorrection);
+		 MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km\n", GetName().c_str(), precisionRange, relativityCorrection);
       #endif
 
       // Store the rest of the data used in the other measurement calculations
@@ -517,12 +519,18 @@ Real LightTimeCorrection::RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real 
 		r12Mag = r12.Norm();							// unit: km
 
 		Real c = lightSpeed;							// unit: km/s
-		Real term1 = (1+gammar)*planetMu/c/c;			// unit: km
+		Real term1 = (1+gammar)*(planetMu/c)/c;			// unit: km
 		Real correction;
 		if (planet == sun)
+		{
 			correction = term1*GmatMathUtil::Ln((r1Mag + r2Mag + r12Mag + term1)/(r1Mag + r2Mag - r12Mag + term1));
+//			MessageInterface::ShowMessage("Relatibity correction Sun: %.12le\n", correction);
+		}
 		else
+		{
 			correction = term1*GmatMathUtil::Ln((r1Mag + r2Mag + r12Mag)/(r1Mag + r2Mag - r12Mag));
+//			MessageInterface::ShowMessage("Relatibity correction Planet : %.12le\n", correction);
+		}
 		relCorr += correction;
 	}
 
@@ -547,30 +555,30 @@ Real LightTimeCorrection::GetLightTripRange()
 
 
 
-Real LightTimeCorrection::ETminusTAICorrection(Real tA1MJD, GmatBase* participant)
-{
-	Real correction = ETminusTAI(tA1MJD, participant) - EstimatedETminusTAI(tA1MJD);
-
-	return correction;
-}
-
-Real LightTimeCorrection::EstimatedETminusTAI(Real tA1MJD)
-{
-   Real M = (tA1MJD - 21544.50037076831)*86400;			// number of seconds pass J2000
-   Real E = M + 0.01671*sin(M);
-   Real ET_TAI = 32.184 + 1.657e-3*sin(E);
-
-   return ET_TAI;
-}
+//Real LightTimeCorrection::ETminusTAICorrection(Real tA1MJD, GmatBase* participant)
+//{
+//	Real correction = ETminusTAI(tA1MJD, participant) - EstimatedETminusTAI(tA1MJD);
+//
+//	return correction;
+//}
+//
+//Real LightTimeCorrection::EstimatedETminusTAI(Real tA1MJD)
+//{
+//   Real M = (tA1MJD - 21544.50037076831)*86400;			// number of seconds pass J2000
+//   Real E = M + 0.01671*sin(M);
+//   Real ET_TAI = 32.184 + 1.657e-3*sin(E);
+//
+//   return ET_TAI;
+//}
 
 /// Calculate ET - TAI at a ground station on Earth:										// made changes by TUAN NGUYEN
 Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 {
-   Real tTAI = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, tA1MJD);
+   //Real tTAI = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, tA1MJD);
 
-   // Step 1: calculate initial guessed ET-TAI
-   Real old_ETminusTAI = EstimatedETminusTAI(tA1MJD);
-   Real t_ET_old = tTAI + old_ETminusTAI;
+   //// Step 1: calculate initial guessed ET-TAI
+   //Real old_ETminusTAI = EstimatedETminusTAI(tA1MJD);
+   //Real t_ET_old = tTAI + old_ETminusTAI;
 
    // Step 2:
    // Specify celestial bodies and special celestial points:
