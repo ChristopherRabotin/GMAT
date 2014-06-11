@@ -26,6 +26,9 @@
 
 /**
  * Intermediate class used for signals that are evaluated at a single endpoint
+ *
+ * @todo SinglePointSignal classes are not needed in R2014b, the release that
+ * first contains this code.  Implement when needed.
  */
 class ESTIMATION_API SinglePointSignal: public SignalBase
 {

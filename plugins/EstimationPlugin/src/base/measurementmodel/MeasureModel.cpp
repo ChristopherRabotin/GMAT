@@ -26,6 +26,7 @@
 #include "SignalBase.hpp"
 #include "PhysicalSignal.hpp"
 //#include "SinglePointSignal.hpp"
+#include "ObservationData.hpp"
 
 #include "MessageInterface.hpp"
 #include "TextParser.hpp"
@@ -63,7 +64,9 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const std::string &name) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
+   propagator        (NULL),
    feasible          (false),
+   withLighttime     (true),
    navLog            (NULL),
    logLevel          (0),              // Default to everything
    isPhysical        (true),
@@ -95,7 +98,9 @@ MeasureModel::~MeasureModel()
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const MeasureModel& mm) :
    GmatBase          (mm),
+   propagator        (NULL),
    feasible          (false),
+   withLighttime     (mm.withLighttime),
    navLog            (mm.navLog),
    logLevel          (mm.logLevel),
    isPhysical        (mm.isPhysical),
@@ -122,7 +127,10 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
+      if (propagator)
+         propagator = NULL;
       feasible = false;
+      withLighttime = mm.withLighttime;
       navLog = mm.navLog;
       logLevel = mm.logLevel;
       isPhysical = mm.isPhysical;
@@ -649,6 +657,31 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* ps)
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator for use in signal classes to find light time solutions
+ *
+ * @param ps The propagator
+ *
+ * @todo: Extend this code to support multiple propagators
+ */
+//------------------------------------------------------------------------------
+void MeasureModel::SetPropagator(PropSetup* ps)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Setting propagator to %p in "
+            "MeasureModel\n", ps);
+   #endif
+   propagator = ps;
+
+   if (propagator)
+      for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+         signalPaths[i]->SetPropagator(propagator);
+}
+
+
+//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -671,6 +704,8 @@ bool MeasureModel::Initialize()
                   "is %d\n", logLevel);
          #endif
       }
+      else
+         logLevel = 32767;
 
       if (participantLists.size() > 0)
       {
@@ -743,6 +778,7 @@ bool MeasureModel::Initialize()
                   if (sb)
                   {
                      sb->SetSolarSystem(solarsys);
+                     sb->UsesLighttime(withLighttime);
                      if (sb->SetTransmitParticipantName(
                            participantLists[i]->at(j)) == false)
                      {
@@ -763,18 +799,20 @@ bool MeasureModel::Initialize()
                      GmatBase *obj = participants[i]->at(j);
                      if (sb->SetRefObject(obj, obj->GetType(),
                            obj->GetName()) == false)
-                     {
                         throw MeasurementException("Failed to set the transmit "
                               "participant");
-                     }
+                     else
+                        if (obj->IsOfType(Gmat::SPACEOBJECT) && propagator)
+                           sb->SetPropagator(propagator, obj);
 
                      obj = participants[i]->at(j+1);
                      if (sb->SetRefObject(obj, obj->GetType(),
                            obj->GetName()) == false)
-                     {
                         throw MeasurementException("Failed to set the receive "
                               "participant\n");
-                     }
+                     else
+                        if (obj->IsOfType(Gmat::SPACEOBJECT) && propagator)
+                           sb->SetPropagator(propagator, obj);
 
                      if (!sb->Initialize())
                      {
@@ -826,13 +864,22 @@ bool MeasureModel::Initialize()
       }
       else
       {
-
+         throw MeasurementException("Measurement has no participants");
       }
    }
 
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// const std::vector<SignalData*>& GetSignalData()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the data calculated the last time the signal was computed
+ *
+ * @return The vector of raw signal data
+ */
+//------------------------------------------------------------------------------
 const std::vector<SignalData*>& MeasureModel::GetSignalData()
 {
    return theData;
@@ -900,9 +947,26 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    bool retval = false;
    feasible = true;
 
+   /// @todo Clean up the assumption that epoch is at the end
+   // For now, measurement epochs occur at the end of the signal path (the last
+   // receiver)
+   bool epochIsAtEnd = true;
+
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
-      if (signalPaths[i]->ModelSignal() == false)
+      GmatEpoch forEpoch = 0.0;
+      if (forObservation)
+         forEpoch = forObservation->epoch;
+
+      SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
+
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("***************************************"
+               "***\n*** Starting modeling for path %d\n"
+               "******************************************\n", i);
+      #endif
+
+      if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
       {
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
@@ -914,9 +978,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    return retval; //theData;
 }
 
-//------------------------------------------------------------------------------
-// StringArray* DecomposePathString(const std::string &value)
-//------------------------------------------------------------------------------
+////------------------------------------------------------------------------------
+//// StringArray* DecomposePathString(const std::string &value)
+////------------------------------------------------------------------------------
 ///**
 // * Breaks apart a signal path string into a participant list
 // *
@@ -941,6 +1005,20 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 //}
 
 
+//------------------------------------------------------------------------------
+// const std::vector<RealArray>& CalculateMeasurementDerivatives(GmatBase* obj,
+//       Integer id)
+//------------------------------------------------------------------------------
+/**
+ * Computes the measurement derivative
+ *
+ * @param obj The "with respect to" object owning the "with respect to"
+ *            parameter.
+ * @param id The ID of the "with respect to" field
+ *
+ * @return The vector of derivative data
+ */
+//------------------------------------------------------------------------------
 const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
       GmatBase* obj, Integer id)
 {
@@ -956,4 +1034,18 @@ const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
    }
 
    return theDataDerivatives;
+}
+
+//------------------------------------------------------------------------------
+// void UsesLightTime(const bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Method used to set or clear the light time solution flag
+ *
+ * @param tf true to find light time solutions, false to omit them
+ */
+//------------------------------------------------------------------------------
+void MeasureModel::UsesLightTime(const bool tf)
+{
+   withLighttime = tf;
 }

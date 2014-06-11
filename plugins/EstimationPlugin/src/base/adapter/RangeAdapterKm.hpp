@@ -33,14 +33,15 @@ public:
    RangeAdapterKm(const std::string& name);
    virtual ~RangeAdapterKm();
    RangeAdapterKm(const RangeAdapterKm& rak);
-   RangeAdapterKm& operator=(const RangeAdapterKm& rak);
+   RangeAdapterKm&      operator=(const RangeAdapterKm& rak);
 
-   virtual GmatBase* Clone() const;
+   virtual GmatBase*    Clone() const;
 
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-         const std::string &oldName, const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
 
-   virtual bool Initialize();
+   virtual bool         Initialize();
 
    DEFAULT_TO_NO_CLONES
 

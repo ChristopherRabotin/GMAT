@@ -23,11 +23,13 @@
 #include "MeasurementException.hpp"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>            // To build DataStream for a TrackingFileSet
 
 #include "DataFileAdapter.hpp"
-#include "GmatObType.hpp"
+#include "PropSetup.hpp"
 
-#include <sstream>
+// Temporary to get Adapters hooked up
+#include "GmatObType.hpp"
 
 
 //#define DEBUG_INITIALIZATION
@@ -39,6 +41,8 @@
 //#define DEBUG_MODEL_MAPPING
 //#define DEBUG_CALCULATE
 //#define DEBUG_ADVANCE_OBSERVATION							// made changes by TUAN NGUYEN
+//#define DEBUG_EXECUTION
+//#define DEBUG_ADAPTERS
 
 // Selects between old datafile classes and the classes in the DataFile plugin
 //#define USE_DATAFILE_PLUGINS
@@ -52,11 +56,13 @@
  */
 //------------------------------------------------------------------------------
 MeasurementManager::MeasurementManager() :
+   thePropagator     (NULL),
    anchorEpoch       (GmatTimeConstants::MJD_OF_J2000),
    currentEpoch      (GmatTimeConstants::MJD_OF_J2000),
    idBase            (10000),
    largestId         (10000),
-   eventCount        (0)
+   eventCount        (0),
+   inSimulationMode  (false)
 {
 }
 
@@ -81,11 +87,13 @@ MeasurementManager::~MeasurementManager()
  */
 //------------------------------------------------------------------------------
 MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
+   thePropagator     (mm.thePropagator),
    anchorEpoch       (mm.anchorEpoch),
    currentEpoch      (mm.currentEpoch),
    idBase            (mm.idBase),
    largestId         (mm.largestId),
-   eventCount        (mm.eventCount)
+   eventCount        (mm.eventCount),
+   inSimulationMode  (mm.inSimulationMode)
 {
    modelNames = mm.modelNames;
 
@@ -129,11 +137,12 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 {
    if (&mm != this)
    {
-      anchorEpoch  = mm.anchorEpoch;
-      currentEpoch = mm.currentEpoch;
-      modelNames   = mm.modelNames;
-      eventCount   = mm.eventCount;
-
+      thePropagator     = mm.thePropagator;
+      anchorEpoch       = mm.anchorEpoch;
+      currentEpoch      = mm.currentEpoch;
+      modelNames        = mm.modelNames;
+      eventCount        = mm.eventCount;
+      inSimulationMode  = mm.inSimulationMode;
       // Clone the measurements and tracking file sets
       for (std::vector<MeasurementModel*>::iterator i = models.begin();
             i != models.end(); ++i)
@@ -150,7 +159,7 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
             i != trackingSets.end(); ++i)
          delete (*i);
 
-      models.clear();
+      trackingSets.clear();
       for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
             i != mm.trackingSets.end(); ++i)
          trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
@@ -163,10 +172,32 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 
 
 //------------------------------------------------------------------------------
+// bool SetPropagator(PropSetup* ps)
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator needed by the tracking data adapters
+ *
+ * @param ps The propagator
+ *
+ * @todo The current call supports a single propagator.  Once the estimation
+ *       system supports multiple propagators, this should be changed to a
+ *       vector of PropSetup objects.
+ *
+ * @return true if the pointer is set; false if it is NULL
+ */
+//------------------------------------------------------------------------------
+bool MeasurementManager::SetPropagator(PropSetup* ps)
+{
+   thePropagator = ps;
+   return (thePropagator != NULL);
+}
+
+
+//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
- * Verifies that the measuremetn models are ready to calculate measuremetns,
+ * Verifies that the measurement models are ready to calculate measuremetns,
  * and builds internal data structures needed to manage these calculations.
  *
  * @return true is ready to go, false if not
@@ -202,14 +233,17 @@ bool MeasurementManager::Initialize()
 
       std::vector<TrackingDataAdapter*> *setAdapters =
             trackingSets[i]->GetAdapters();
+      StringArray names;
       for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
       {
          AddMeasurement((*setAdapters)[j]);
          MeasurementData md;
          measurements.push_back(md);
+         names.push_back((*setAdapters)[j]->GetName());
 
          // Set retval?
       }
+      adapterFromTFSMap[trackingSets[i]] = names;
 
       // And the stream objects
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("Filename");
@@ -243,6 +277,13 @@ bool MeasurementManager::Initialize()
             #endif
             idToStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
          }
+
+         if (inSimulationMode)
+         {
+            if (newStream->OpenStream(inSimulationMode) == false)
+               throw MeasurementException("The stream " + filenames[i] +
+                     " failed to open in simulation mode");
+         }
       }
    }
 
@@ -269,10 +310,10 @@ bool MeasurementManager::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool MeasurementManager::PrepareForProcessing(bool simulating)
+// bool PrepareForProcessing(bool simulating, PropSetup *propagator)
 //------------------------------------------------------------------------------
 /**
- * This method...
+ * This method sets up measurement models for use in simulation or estimation
  *
  * @param simulating Flag to tell the MM that the system is only simulating, so
  *                   derivative calculations are not necessary.
@@ -283,10 +324,12 @@ bool MeasurementManager::Initialize()
 //------------------------------------------------------------------------------
 bool MeasurementManager::PrepareForProcessing(bool simulating)
 {
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
-         "Entered MeasurementManager::PrepareForProcessing() method\n");
-#endif
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
+            "Entered MeasurementManager::PrepareForProcessing() method\n");
+      MessageInterface::ShowMessage(
+            "Working with %d streams\n", streamList.size());
+   #endif
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage(
@@ -315,6 +358,13 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
 			throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + rampTableDataStreamList[j]->GetName() + "' have the same file name but different data format\n");
       }
    }
+
+   /// @todo: Set the propagators based on the spacecraft in each adapter.  This
+   ///        piece is not yet part of the GMAT implementation, but when ready,
+   ///        needs to be addressed here.
+   // Pass the propagator to the tracking data adapters
+   for (UnsignedInt i = 0; i < adapters.size(); ++i)
+      adapters[i]->SetPropagator(thePropagator);
 
    // Open all streams in streamList
    bool retval = true;
@@ -356,6 +406,8 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
             retval = false;																	// made changes by TUAN NGUYEN
       #endif																				// made changes by TUAN NGUYEN
    }																						// made changes by TUAN NGUYEN
+
+   inSimulationMode = simulating;
 
 #ifdef DEBUG_FLOW
    MessageInterface::ShowMessage(
@@ -480,6 +532,23 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
             od = &(*currentObs);																// made changes by TUAN NGUYEN
 
 		 measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);					// made changes by TUAN NGUYEN
+
+         if (measurements[j].isFeasible)
+         {
+            ++successCount;
+            eventCount += measurements[j].eventCount;
+         }
+      }
+
+      for (UnsignedInt j = 0; j < adapters.size(); ++j)
+      {
+         // Specify current observation data. If no observation data used, it
+         // passes a NULL pointer.
+         ObservationData* od = NULL;
+         if (!observations.empty())
+            od = &(*currentObs);
+
+         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
          if (measurements[j].isFeasible)
          {
             ++successCount;
@@ -513,6 +582,45 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
             eventCount = measurements[measurementToCalc].eventCount;
          }
       }
+
+      if ((measurementToCalc < (Integer)adapters.size()) && (measurementToCalc >= 0))
+      {
+         // Specify current observation data. If no observation data used, it passes a NULL pointer.
+         ObservationData* od = NULL;
+         if (!observations.empty())
+            od = &(*currentObs);
+
+         #ifdef DEBUG_CALCULATE
+            MessageInterface::ShowMessage("****** models[%d]name = '%s'\n",
+                  measurementToCalc,
+                  models[measurementToCalc]->GetName().c_str());
+            MessageInterface::ShowMessage("****** observations.size() = %d\n", observations.size());
+            if (od == NULL)
+               MessageInterface::ShowMessage("****** Observation data is not used in calculation\n");
+            else
+              MessageInterface::ShowMessage("****** currentObs: epoch = %.12lf, participants: %s  %s,  meas value = %.12lf\n", currentObs->epoch, currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), currentObs->value[0]);
+         #endif
+
+         measurements[measurementToCalc] =
+            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od);
+
+         #ifdef DEBUG_CALCULATE
+            MessageInterface::ShowMessage("****** measurements[%d] = <%p>,   "
+                  ".epoch = %.12lf,   .participants: %s  %s,   "
+                  ".value[0] = %.12le\n", measurementToCalc,
+                  &measurements[measurementToCalc],
+                  measurements[measurementToCalc].epoch,
+                  measurements[measurementToCalc].participantIDs[0].c_str(),
+                  measurements[measurementToCalc].participantIDs[1].c_str(),
+                  measurements[measurementToCalc].value[0]);
+         #endif
+
+         if (measurements[measurementToCalc].isFeasible)
+         {
+            successCount = 1;
+            eventCount = measurements[measurementToCalc].eventCount;
+         }
+      }
    }
 
    #ifdef DEBUG_FLOW
@@ -522,6 +630,7 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
             "Exit MeasurementManager::Calculate(%d, %s) method\n",
             measurementToCalc, (withEvents?"true":"false"));
    #endif
+
    return successCount;
 }
 
@@ -570,13 +679,16 @@ const MeasurementData* MeasurementManager::GetMeasurement(
  * @return The model
  */
 //------------------------------------------------------------------------------
-MeasurementModel* MeasurementManager::GetMeasurementObject(
+MeasurementModelBase* MeasurementManager::GetMeasurementObject(
       const Integer measurementToGet)
 {
-   MeasurementModel *retval = NULL;
+   MeasurementModelBase *retval = NULL;
 
    if ((measurementToGet >= 0) && (measurementToGet < (Integer)models.size()))
       retval = models[measurementToGet];
+   else if ((measurementToGet >= 0) && (measurementToGet < (Integer)adapters.size()))
+      retval = adapters[measurementToGet];
+
 
    return retval;
 }
@@ -1323,6 +1435,27 @@ const Integer MeasurementManager::GetMeasurementId(
       }
    }
 
+   /// @todo: Handle multiple measurements inside of a TrackingFileSet
+   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   {
+      if (trackingSets[i]->GetName() == modelName)
+      {
+         if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
+         {
+            /// @todo: Make measurementID accessor work for > 1 adapter in a TFS
+            StringArray tfsAdapterList =
+                  adapterFromTFSMap.find(trackingSets[i])->second;
+
+            std::string modelAdapterName = (tfsAdapterList.size() > 0 ?
+                  tfsAdapterList[0] : "Range");
+
+            for (UnsignedInt j = 0; j < adapters.size(); ++j)
+               if (adapters[j]->GetName() == modelAdapterName)
+                  foundId = adapters[j]->GetModelID();
+         }
+      }
+   }
+
    return foundId;
 }
 
@@ -1548,7 +1681,22 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             }
 		 }
       }
-   
+
+      // Now do the tracking data adapters
+      for (UnsignedInt j = 0; j < adapters.size(); ++j)
+      {
+         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
+         if (measurements[j].isFeasible)
+         {
+//            if (!withEvents)
+//               eventCount += measurements[j].eventCount;
+            retval = true;
+         }
+         #ifdef DEBUG_ADAPTERS
+            MessageInterface::ShowMessage("   Measurement %d computed; first "
+                  "value: %lf\n", j, measurements[j].value[0]);
+         #endif
+      }
    }
 
    #ifdef DEBUG_FLOW
@@ -1675,7 +1823,16 @@ bool MeasurementManager::ProcessEvent(Event *locatedEvent)
 const std::vector<RealArray>& MeasurementManager::CalculateDerivatives(
                            GmatBase *obj, Integer wrt, Integer forMeasurement)
 {
-   return models[forMeasurement]->CalculateMeasurementDerivatives(obj, wrt);
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Entered MeasurementManager::"
+            "CalculateDerivatives(%s <%p>, %d, %d)\n", obj->GetName().c_str(),
+            obj, wrt, forMeasurement);
+   #endif
+
+   if ((Integer)models.size() > forMeasurement)
+      return models[forMeasurement]->CalculateMeasurementDerivatives(obj, wrt);
+   else
+      return adapters[forMeasurement]->CalculateMeasurementDerivatives(obj,wrt);
 }
 
 
@@ -1949,6 +2106,8 @@ Integer MeasurementManager::FindModelForObservation()
        MessageInterface::ShowMessage("   Current observation type: %d\n", type);
    #endif
 
+   if (type < 9000)
+   {
    for (UnsignedInt i = 0; i < models.size(); ++i)
    {
       MeasurementData theMeas = models[i]->GetMeasurement();
@@ -1976,6 +2135,40 @@ Integer MeasurementManager::FindModelForObservation()
          {
             activeMeasurements.push_back(i);
             ++retval;
+         }
+      }
+   }
+   }
+   else
+   {
+      for (UnsignedInt i = 0; i < adapters.size(); ++i)
+      {
+         MeasurementData theMeas = adapters[i]->GetMeasurement();
+
+         #ifdef DEBUG_MODEL_MAPPING
+             MessageInterface::ShowMessage("   Current model type: %d\n",
+                   theMeas.type);
+         #endif
+
+         if (theMeas.type == type)
+         {
+            #ifdef DEBUG_MODEL_MAPPING
+                MessageInterface::ShowMessage("   Found a model of this type; "
+                      "checking participants\n");
+            #endif
+            StringArray parts = currentObs->participantIDs;
+            StringArray measParts = theMeas.participantIDs;
+            bool missingParticipant = false;
+            for (UnsignedInt j = 0; j < parts.size(); ++j)
+               if (find(measParts.begin(), measParts.end(), parts[j]) ==
+                     measParts.end())
+                  missingParticipant = true;
+
+            if (!missingParticipant)
+            {
+               activeMeasurements.push_back(i);
+               ++retval;
+            }
          }
       }
    }
@@ -2093,6 +2286,8 @@ Integer MeasurementManager::AddMeasurement(TrackingDataAdapter* adapter)
             "not initialized"), adapter->GetName().c_str(), adapter);
    #endif
    adapter->SetModelID(largestId++);
+   if (thePropagator)
+      adapter->SetPropagator(thePropagator);
    adapters.push_back(adapter);
    return -1;
 }

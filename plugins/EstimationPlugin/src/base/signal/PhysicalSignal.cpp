@@ -21,11 +21,13 @@
 #include "PhysicalSignal.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
+#include "PropSetup.hpp"
+
 #include <sstream>                  // For stringstream
 
 
 //#define DEBUG_EXECUTION
-#define SHOW_DATA
+//#define SHOW_DATA
 
 
 //------------------------------------------------------------------------------
@@ -40,13 +42,14 @@
 //------------------------------------------------------------------------------
 PhysicalSignal::PhysicalSignal(const std::string &typeStr,
       const std::string &name) :
-   SignalBase           (typeStr, name)
+   SignalBase                 (typeStr, name),
+   physicalSignalInitialized  (false)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// PhysicalSignal::~PhysicalSignal()
+// ~PhysicalSignal()
 //------------------------------------------------------------------------------
 /**
  * Destructor
@@ -63,31 +66,34 @@ PhysicalSignal::~PhysicalSignal()
 /**
  * Copy constructor
  *
- * @param gs Geometric signal copied to make a new one
+ * @param ps Physical signal copied to make a new one
  */
 //------------------------------------------------------------------------------
-PhysicalSignal::PhysicalSignal(const PhysicalSignal& gs) :
-   SignalBase           (gs)
+PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
+   SignalBase                 (ps),
+   physicalSignalInitialized  (false)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// PhysicalSignal& operator=(const PhysicalSignal& gs)
+// PhysicalSignal& operator=(const PhysicalSignal& ps)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
  *
- * @param gs PhysicalSignal that provides parameters for this one
+ * @param ps PhysicalSignal that provides parameters for this one
  *
  * @return This signal set to match gs
  */
 //------------------------------------------------------------------------------
-PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& gs)
+PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
 {
-   if (this != &gs)
+   if (this != &ps)
    {
-      GmatBase::operator=(gs);
+      GmatBase::operator=(ps);
+
+      physicalSignalInitialized = false;
    }
 
    return *this;
@@ -110,7 +116,7 @@ GmatBase* PhysicalSignal::Clone() const
 
 
 //------------------------------------------------------------------------------
-// bool ModelSignal(bool epochAtReceive)
+// bool ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 //------------------------------------------------------------------------------
 /**
  * Models the signal
@@ -121,14 +127,51 @@ GmatBase* PhysicalSignal::Clone() const
  * @return true if the signal was modeled, false if not
  */
 //------------------------------------------------------------------------------
-bool PhysicalSignal::ModelSignal(bool epochAtReceive)
+bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 {
    bool retval = false;
+   satEpoch = atEpoch;
 
    #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("      ModelSignal() called, %s\n",
-            (isInitialized ? "Already initialized" : "Initializing"));
+      MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", atEpoch,
+            epochAtReceive ? "with fixed Receiver" : "with fixed Transmitter");
    #endif
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Modeling %s -> %s\n",
+            theData.transmitParticipant.c_str(),
+            theData.receiveParticipant.c_str());
+   #endif
+
+   bool foundSat = false;
+   if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
+   {
+      theData.tTime = theData.tNode->GetRealParameter(satEpochID);
+      foundSat = true;
+   }
+
+   if (theData.rNode->IsOfType(Gmat::SPACECRAFT))
+   {
+      theData.rTime = theData.rNode->GetRealParameter(satEpochID);
+      foundSat = true;
+      if (!theData.tNode->IsOfType(Gmat::SPACECRAFT))
+         theData.tTime = theData.rTime;
+   }
+   else
+      theData.rTime = theData.tTime;
+
+   if (satEpoch == 0.0)
+      satEpoch = (epochAtReceive ? theData.rTime : theData.tTime);
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("tTime = %.12lf, rTime = %.12lf satEpoch = "
+            "%.12lf\n", theData.tTime, theData.rTime, satEpoch);
+   #endif
+
+   if (!foundSat)
+         throw MeasurementException("Error in CoreMeasurement::"
+               "CalculateRangeVectorInertial; neither participant is a "
+               "spacecraft.");
 
    if (!isInitialized)
    {
@@ -144,13 +187,25 @@ bool PhysicalSignal::ModelSignal(bool epochAtReceive)
          MessageInterface::ShowMessage("   Signal initialized; Computing data\n");
       #endif
 
+      // First make sure we start at the desired epoch
+      MoveToEpoch(satEpoch, epochAtReceive);
       CalculateRangeVectorInertial();
-      CalculateRangeVectorObs();
-      CalculateRangeRateVectorObs();
+
+      if (includeLightTime)
+      {
+         GenerateLightTimeData(satEpoch, epochAtReceive);
+      }
+      else
+      {
+         // Build the other data vectors
+         CalculateRangeVectorObs();
+         CalculateRangeRateVectorObs();
+      }
 
       // Perform feasibility check
       if (theData.stationParticipant)
       {
+         /// @todo Replace with elevation constraint test
          if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
          {
             if (theData.rangeVecObs[2] > 0)
@@ -165,14 +220,14 @@ bool PhysicalSignal::ModelSignal(bool epochAtReceive)
             else
                signalIsFeasible = false;
          }
-         #ifdef DEBUG_DEASIBILITY
+         #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("Obs vector = [%s] so %s\n",
                   theData.rangeVecObs.ToString().c_str(),
                   (signalIsFeasible ? "feasible" : "infeasible"));
          #endif
       }
       else
-      ///@todo: Put in test for obscuring bodies; for now, always feasible
+      ///@todo: Put in test for obstructing bodies; for now, always feasible
       {
          signalIsFeasible = true;
       }
@@ -211,18 +266,57 @@ bool PhysicalSignal::ModelSignal(bool epochAtReceive)
          navLog->WriteData(data.str());
       }
 
-      if (next)
-         next->ModelSignal();
+      /// @todo: check ordering here!
+      // if epoctAtReceive was true, transmitter moved and we need its epoch,
+      // if false, we need the receiver epoch
+      GmatEpoch nextEpoch = (epochAtReceive ? theData.tTime : theData.rTime);
+      // This transmitter is the receiver for the next node
+      bool nextFixed = (epochAtReceive ? true : false);
 
-      retval = true;
+      bool nodePassed = true;
+
+      if (epochAtReceive)
+      {
+         if (previous)
+            nodePassed = previous->ModelSignal(nextEpoch, nextFixed);
+      }
+      else
+      {
+         if (next)
+            nodePassed = next->ModelSignal(nextEpoch, nextFixed);
+      }
+
+      retval = nodePassed;
    }
 
    return retval;
 }
 
+
 //------------------------------------------------------------------------------
-// const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
-//       GmatBase* obj, Integer forId)
+// void InitializeSignal()
+//------------------------------------------------------------------------------
+/**
+ * Validates that everything needed is in place for the signal processing
+ *
+ * This method checks that all of the reference objects and object clones are
+ * in place, and that they are initialized and ready to do the work required for
+ * the signal computations.
+ */
+//------------------------------------------------------------------------------
+void PhysicalSignal::InitializeSignal()
+{
+   if (!physicalSignalInitialized)
+   {
+      SignalBase::InitializeSignal();
+      physicalSignalInitialized = true;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// const std::vector<RealArray>& ModelSignalDerivative(GmatBase* obj,
+//       Integer forId)
 //------------------------------------------------------------------------------
 /**
  * Generates the derivative data for the signal path
@@ -281,7 +375,10 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    Integer parameterID = -1;
    if (objPtr != NULL)
    {
-      parameterID = GetParmIdFromEstID(forId, obj);
+      if (forId > 250)
+         parameterID = GetParmIdFromEstID(forId, obj);
+      else
+         parameterID = forId;
 
       if (objPtr->GetParameterText(parameterID) == "Position")
       {
@@ -384,4 +481,99 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    }
 
    return theDataDerivatives;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GenerateLightTimeData(const GmatEpoch atEpoch,const bool epochAtReceive)
+//------------------------------------------------------------------------------
+/**
+ * Iterates propagation to generate a light time solution
+ *
+ * @param atEpoch Epoch for the fixed point state
+ * @param epochAtReceive Flag indicating that the receiver is held fixed
+ *
+ * @return true is light time data was generated, false if there was a failure
+ *         that did not throw
+ */
+//------------------------------------------------------------------------------
+bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
+      const bool epochAtReceive)
+{
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Called GenerateLightTimeData(%.12lf, "
+            "%s)\n", atEpoch, (epochAtReceive ? "Receiver fixed" :
+            "Transmitter fixed"));
+   #endif
+
+   bool retval = false;
+
+   if (includeLightTime)
+   {
+      // First make sure we start at the desired epoch
+      MoveToEpoch(atEpoch, epochAtReceive);
+
+      // Then compute the initial data
+      Rvector3 displacement = theData.rLoc - theData.tLoc;
+      Real deltaR = displacement.GetMagnitude();
+      Real deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
+            (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("   DeltaT for light travel over "
+               "distance %.3lf km = %le\n", deltaR, deltaT);
+      #endif
+
+      // Here we go; iterating for a light time solution
+      Integer loopCount = 0;
+
+      // Epoch difference, in seconds
+      Real deltaE = (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("      Starting: dEpoch = %.12le, dR = "
+               "%.3lf, dT = %.12le\n", deltaE, deltaR, deltaT);
+      #endif
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("Initial x Positions: %s  %.3lf -->  "
+               "%s  %.3lf\n", theData.tNode->GetName().c_str(), theData.tLoc(0),
+               theData.rNode->GetName().c_str(), theData.rLoc(0));
+      #endif
+
+      // Loop to half microsecond precision or 10 times, whichever comes first
+      while ((GmatMathUtil::Abs(deltaE - deltaT) > 5e-7) && (loopCount < 10))
+      {
+         #ifdef DEBUG_LIGHTTIME
+            MessageInterface::ShowMessage("      Loop iteration %d\n",
+                  loopCount);
+         #endif
+         MoveToEpoch(atEpoch + deltaT / GmatTimeConstants::SECS_PER_DAY,
+               epochAtReceive, false);
+         deltaE = (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
+         displacement = theData.rLoc - theData.tLoc;
+
+         #ifdef DEBUG_LIGHTTIME
+            MessageInterface::ShowMessage("x Positions: %s  %.3lf -->  %s  "
+                  "%.3lf\n", theData.tNode->GetName().c_str(), theData.tLoc(0),
+                  theData.rNode->GetName().c_str(), theData.rLoc(0));
+         #endif
+
+         deltaR = displacement.GetMagnitude();
+         deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
+                     (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
+         #ifdef DEBUG_LIGHTTIME
+            MessageInterface::ShowMessage("      ===> dEpoch = %.12le, dR = "
+                  "%.3lf, dT = %.12le\n", deltaE, deltaR, deltaT);
+         #endif
+         ++loopCount;
+      }
+   }
+
+   // Temporary check on data flow
+   // Build the other data vectors
+   CalculateRangeVectorObs();
+   CalculateRangeRateVectorObs();
+
+   return retval;
 }

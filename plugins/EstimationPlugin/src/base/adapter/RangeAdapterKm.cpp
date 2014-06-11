@@ -213,10 +213,14 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       for (UnsignedInt i = 0; i < data.size(); ++i)
       {
          values.push_back(0.0);
-         SignalData *current = (data[i]);
+         SignalData *current = data[i];
          while (current != NULL)
          {
             Rvector3 signalVec = current->rangeVecInertial;
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("   RangeAdapterKm: Adding %.3lf "
+                     "to %.3lf\n", signalVec.GetMagnitude(), values[i]);
+            #endif
             values[i] += signalVec.GetMagnitude();
             // Set measurement epoch to the epoch of the last receiver in the
             // first signal path
@@ -280,13 +284,15 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
       throw MeasurementException("Measurement derivative data was requested "
             "for " + instanceName + " before the measurement was set");
 
+   Integer parmId = GetParmIdFromEstID(id, obj);
    // Perform the calculations
    #ifdef DEBUG_DERIVATIVES
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
-            "Derivatives(%s, %d) called\n", obj->GetName().c_str(), id);
+            "Derivatives(%s, %d) called; parm ID is %d\n",
+            obj->GetName().c_str(), id, parmId);
    #endif
 
-   theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);
+   theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, parmId);
 
    return theDataDerivatives;
 }

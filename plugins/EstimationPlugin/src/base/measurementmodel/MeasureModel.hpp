@@ -33,6 +33,7 @@ class ProgressReporter;
 class ObservationData;
 class RampTableData;
 class MeasurementData;
+class PropSetup;
 
 
 /**
@@ -109,6 +110,7 @@ public:
 
    DEFAULT_TO_NO_CLONES
 
+   virtual void SetPropagator(PropSetup* ps);
    virtual bool Initialize();
 
 
@@ -145,6 +147,7 @@ public:
 
    const std::vector<SignalData*>& GetSignalData();
    bool IsMeasurementFeasible();
+   virtual void UsesLightTime(const bool tf);
 
    // Measurement Model Settings
    virtual bool SetProgressReporter(ProgressReporter* reporter);
@@ -162,8 +165,13 @@ protected:
    std::vector<SignalData*> theData;
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
+   /// @todo: Extend this code to support multiple propagators
+   /// The propagator used for light time solutions
+   PropSetup *propagator;
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
+   /// Flag used to control light time solution generation
+   bool withLighttime;
 
    /// The reporter for status information
    ProgressReporter *navLog;

@@ -32,6 +32,7 @@
 #include "ObservationData.hpp"
 #include "Rmatrix.hpp"
 #include "MeasurementModel.hpp"
+#include "MeasurementModelBase.hpp"
 #include "TrackingSystem.hpp"
 
 #include "CoreMeasurement.hpp"
@@ -40,6 +41,8 @@
 // Extensions for tracking data adapters
 #include "TrackingFileSet.hpp"
 #include "TrackingDataAdapter.hpp"
+
+class PropSetup;
 
 
 class ESTIMATION_API MeasurementManager
@@ -50,6 +53,7 @@ public:
    MeasurementManager(const MeasurementManager &mm);
    MeasurementManager& operator=(const MeasurementManager &mm);
 
+   bool                    SetPropagator(PropSetup *ps);
    bool                    Initialize();
    bool                    PrepareForProcessing(bool simulating = false);
    bool                    ProcessingComplete();
@@ -77,7 +81,7 @@ public:
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
    const MeasurementData*  GetMeasurement(const Integer measurementToGet);
-   MeasurementModel*       GetMeasurementObject(const Integer measurementToGet);
+   MeasurementModelBase*   GetMeasurementObject(const Integer measurementToGet);
    Integer                 GetEventCount(const Integer forMeasurement = -1);
    const StringArray&      GetStreamList();
    void                    SetStreamObject(DataFile *newStream);
@@ -118,9 +122,14 @@ protected:
    /// Pointers to the tracking systems
    std::vector<TrackingSystem*>     systems;
    /// Pointers to the measurements
-   std::vector<TrackingFileSet*> trackingSets;
+   std::vector<TrackingFileSet*>    trackingSets;
+   /// Mapping from TrackingFileSets to Adapter names
+   std::map<TrackingFileSet*,StringArray> adapterFromTFSMap;
    /// Pointers to the measurements
    std::vector<TrackingDataAdapter*> adapters;
+   /// @todo: Adjust this code when multiple propagators are supported
+   /// Propagator used by adapters for light time solution
+   PropSetup                        *thePropagator;
 
 
 
@@ -175,6 +184,8 @@ protected:
    IntegerArray                     activeMeasurements;
    /// Total number of events that must be evaluated
    Integer                          eventCount;
+   /// Flag to indicate simulation mode
+   bool                             inSimulationMode;
 
    Integer                          FindModelForObservation();
 };

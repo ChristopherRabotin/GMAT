@@ -22,20 +22,21 @@
 #include "MeasurementException.hpp"
 #include "TextParser.hpp"
 #include "MessageInterface.hpp"
+#include "PropSetup.hpp"
 #include <sstream>
 
 //------------------------------------------------------------------------------
 // Static data
 //------------------------------------------------------------------------------
 const std::string
-TrackingDataAdapter::PARAMETER_TEXT[AdapterParamCount - GmatBaseParamCount] =
+TrackingDataAdapter::PARAMETER_TEXT[AdapterParamCount - MeasurementModelBaseParamCount] =
 {
    "SignalPath",
 };
 
 
 const Gmat::ParameterType
-TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - GmatBaseParamCount] =
+TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - MeasurementModelBaseParamCount] =
 {
    Gmat::OBJECTARRAY_TYPE,
 };
@@ -54,7 +55,7 @@ TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
       const std::string &name) :
-   GmatBase             (Gmat::MEASUREMENT_MODEL, typeStr, name),
+   MeasurementModelBase (name, typeStr),
    calcData             (NULL),
    navLog               (NULL),
    logLevel             (0),
@@ -63,7 +64,8 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    modelTypeID          (-1),
    modelType            ("UnknownType"),
    multiplier           (1.0),
-   withLighttime        (false)
+   withLighttime        (false),
+   thePropagator        (NULL)
 {
 }
 
@@ -77,6 +79,8 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
 //------------------------------------------------------------------------------
 TrackingDataAdapter::~TrackingDataAdapter()
 {
+   if (thePropagator)
+      delete thePropagator;
 }
 
 
@@ -90,7 +94,7 @@ TrackingDataAdapter::~TrackingDataAdapter()
  */
 //------------------------------------------------------------------------------
 TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
-   GmatBase             (ma),
+   MeasurementModelBase (ma),
    participantLists     (ma.participantLists),
    calcData             (NULL),
    navLog               (ma.navLog),
@@ -100,7 +104,8 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    modelTypeID          (ma.modelTypeID),
    modelType            (ma.modelType),
    multiplier           (ma.multiplier),
-   withLighttime        (ma.withLighttime)
+   withLighttime        (ma.withLighttime),
+   thePropagator        (NULL)
 {
 }
 
@@ -121,7 +126,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
 {
    if (this != &ma)
    {
-      GmatBase::operator=(ma);
+      MeasurementModelBase::operator=(ma);
 
       navLog             = ma.navLog;
       logLevel           = ma.logLevel;
@@ -170,9 +175,9 @@ void TrackingDataAdapter::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 std::string TrackingDataAdapter::GetParameterText(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < AdapterParamCount)
-      return PARAMETER_TEXT[id - GmatBaseParamCount];
-   return GmatBase::GetParameterText(id);
+   if (id >= MeasurementModelBaseParamCount && id < AdapterParamCount)
+      return PARAMETER_TEXT[id - MeasurementModelBaseParamCount];
+   return MeasurementModelBase::GetParameterText(id);
 }
 
 
@@ -189,12 +194,12 @@ std::string TrackingDataAdapter::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer TrackingDataAdapter::GetParameterID(const std::string& str) const
 {
-   for (Integer i = GmatBaseParamCount; i < AdapterParamCount; i++)
+   for (Integer i = MeasurementModelBaseParamCount; i < AdapterParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      if (str == PARAMETER_TEXT[i - MeasurementModelBaseParamCount])
          return i;
    }
-   return GmatBase::GetParameterID(str);
+   return MeasurementModelBase::GetParameterID(str);
 }
 
 
@@ -212,10 +217,10 @@ Integer TrackingDataAdapter::GetParameterID(const std::string& str) const
 Gmat::ParameterType TrackingDataAdapter::GetParameterType(
       const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < AdapterParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   if (id >= MeasurementModelBaseParamCount && id < AdapterParamCount)
+      return PARAMETER_TYPE[id - MeasurementModelBaseParamCount];
 
-   return GmatBase::GetParameterType(id);
+   return MeasurementModelBase::GetParameterType(id);
 }
 
 
@@ -232,7 +237,7 @@ Gmat::ParameterType TrackingDataAdapter::GetParameterType(
 //------------------------------------------------------------------------------
 std::string TrackingDataAdapter::GetParameterTypeString(const Integer id) const
 {
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -249,7 +254,7 @@ std::string TrackingDataAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string TrackingDataAdapter::GetStringParameter(const Integer id) const
 {
-   return GmatBase::GetStringParameter(id);
+   return MeasurementModelBase::GetStringParameter(id);
 }
 
 
@@ -294,7 +299,7 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
       return false;
    }
 
-   return GmatBase::SetStringParameter(id, value);
+   return MeasurementModelBase::SetStringParameter(id, value);
 }
 
 
@@ -313,7 +318,7 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
 std::string TrackingDataAdapter::GetStringParameter(const Integer id,
       const Integer index) const
 {
-   return GmatBase::GetStringParameter(id, index);
+   return MeasurementModelBase::GetStringParameter(id, index);
 }
 
 
@@ -354,7 +359,7 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
 //      return true;
 //   }
 
-   return GmatBase::SetStringParameter(id, value, index);
+   return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
 //------------------------------------------------------------------------------
@@ -372,7 +377,7 @@ const StringArray& TrackingDataAdapter::GetStringArrayParameter(
       const Integer id) const
 {
 
-   return GmatBase::GetStringArrayParameter(id);
+   return MeasurementModelBase::GetStringArrayParameter(id);
 }
 
 
@@ -400,7 +405,7 @@ const StringArray& TrackingDataAdapter::GetStringArrayParameter(
             "signal path");
    }
 
-   return GmatBase::GetStringArrayParameter(id, index);
+   return MeasurementModelBase::GetStringArrayParameter(id, index);
 }
 
 
@@ -635,7 +640,7 @@ bool TrackingDataAdapter::SetRefObject(GmatBase* obj,
       retval = calcData->SetRefObject(obj, type, name, index);
    }
 
-   if ((index >= 0) && (index < refObjects.size()))
+   if ((index >= 0) && (index < (Integer)refObjects.size()))
    {
       refObjects[index] = obj;
    }
@@ -758,17 +763,46 @@ Integer TrackingDataAdapter::GetEventCount()
    return 0;
 }
 
-//Event* TrackingDataAdapter::GetEvent(Integer whichOne)
-//{
-//   return NULL;
-//}
-//
-//bool TrackingDataAdapter::SetEventData(Event* locatedEvent)
-//{
-//   bool retval = false;
-//
-//   return retval;
-//}
+
+//------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* ps)
+//------------------------------------------------------------------------------
+/**
+ * Passes a propagator to the adapter for use in light time iterations.  The
+ * propagator is cloned so that propagation of single spacecraft can be
+ * performed.
+ *
+ * @param ps The PropSetup that is being set
+ *
+ * @todo The current call takes a single propagator.  Once the estimation system
+ *       supports multiple propagators, this should be changed to a vector of
+ *       PropSetup objects.
+ */
+//------------------------------------------------------------------------------
+void TrackingDataAdapter::SetPropagator(PropSetup* ps)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Setting propagator to %p in "
+            "TrackingDataAdapter\n", ps);
+   #endif
+
+   if (thePropagator != NULL)
+      delete thePropagator;
+
+   if (ps != NULL)
+   {
+      thePropagator = (PropSetup*)(ps->Clone());
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("   TDA propagator is the clone %p\n",
+               thePropagator);
+      #endif
+
+         calcData->SetPropagator(thePropagator);
+   }
+   else
+      thePropagator = NULL;
+}
 
 
 //------------------------------------------------------------------------------
@@ -782,18 +816,25 @@ Integer TrackingDataAdapter::GetEventCount()
 //------------------------------------------------------------------------------
 bool TrackingDataAdapter::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Initializing a Tracking Data Adapter\n");
+   #endif
+
    bool retval = false;
 
-   if (GmatBase::Initialize())
+   if (MeasurementModelBase::Initialize())
    {
       if (calcData == NULL)
-      {
          throw MeasurementException("TrackingDataAdapter Initialization failed "
-               "because the MeasurementModel is not yet set");
-      }
+               "because the measurement model is not yet set");
+
+      if (thePropagator)
+         calcData->SetPropagator(thePropagator);
 
       calcData->SetSolarSystem(solarsys);
       calcData->SetProgressReporter(navLog);
+      calcData->UsesLightTime(withLighttime);
+
       retval = calcData->Initialize();
    }
 
@@ -803,6 +844,8 @@ bool TrackingDataAdapter::Initialize()
 
    if (navLog != NULL)
       logLevel = navLog->GetLogLevel("Adapter");
+   else
+      logLevel = 32767;
 
    if (!retval && navLog && (logLevel == 0))
       navLog->WriteData("Error initializing the measurement adapter " +
@@ -822,12 +865,8 @@ bool TrackingDataAdapter::Initialize()
  * @param correctionName The name of the correction
  * @param correctionType The type of correction
  *
- * @note This information originally was not passed via SetStringParameter
- *       because it wasn't managed by scripting on MeasurementModels.  It was
- *       managed in the TrackingSystem code.  Since it is now scripted on the
- *       measurement -- meaning on the adapter -- this code should move into the
- *       Get/SetStringParameter methods.  It is included here !!TEMPORARILY!!
- *       to get a scripted adapter functioning in GMAT Nav.
+ * @todo This method isn't yet hooked up, and might change as corrections are
+ *       incorporated into the system
  */
 //------------------------------------------------------------------------------
 void TrackingDataAdapter::SetCorrection(const std::string& correctionName,
@@ -863,7 +902,7 @@ bool TrackingDataAdapter::SetProgressReporter(ProgressReporter* reporter)
 
 
 //------------------------------------------------------------------------------
-// void TrackingDataAdapter::SetModelID(const Integer newID)
+// void SetModelID(const Integer newID)
 //------------------------------------------------------------------------------
 /**
  * Sets the model's unique ID number
@@ -930,6 +969,19 @@ void TrackingDataAdapter::SetModelTypeID(const Integer theID,
    multiplier = mult;
 }
 
+//------------------------------------------------------------------------------
+// void UsesLightTime(const bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Method used to set or clear the light time solution flag
+ *
+ * @param tf true to find light time solutions, false to omit them
+ */
+//------------------------------------------------------------------------------
+void TrackingDataAdapter::UsesLightTime(const bool tf)
+{
+   withLighttime = tf;
+}
 
 //------------------------------------------------------------------------------
 // StringArray* DecomposePathString(const std::string &value)

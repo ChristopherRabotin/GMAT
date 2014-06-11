@@ -19,6 +19,8 @@
 //------------------------------------------------------------------------------
 
 #include "SignalData.hpp"
+#include "PropSetup.hpp"
+
 
 //------------------------------------------------------------------------------
 // SignalData():
@@ -27,15 +29,19 @@
  * Constructor
  */
 //------------------------------------------------------------------------------
-SignalData::SignalData():
+SignalData::SignalData() :
    transmitParticipant  (""),
    receiveParticipant   (""),
    tNode                (NULL),
+   tMovable             (false),
    rNode                (NULL),
+   rMovable             (false),
+   tPropagator          (NULL),
+   rPropagator          (NULL),
    stationParticipant   (false),
    tTime                (21545.0),
    rTime                (21545.0),
-   solveLightTime       (false),
+   solveLightTime       (true),
    next                 (NULL)
 {
 }
@@ -50,6 +56,10 @@ SignalData::SignalData():
 //------------------------------------------------------------------------------
 SignalData::~SignalData()
 {
+   if (tPropagator != NULL)
+      delete tPropagator;
+   if (rPropagator != NULL)
+      delete rPropagator;
 }
 
 
@@ -66,7 +76,11 @@ SignalData::SignalData(const SignalData& sd) :
    transmitParticipant  (sd.transmitParticipant),
    receiveParticipant   (sd.receiveParticipant),
    tNode                (sd.tNode),
+   tMovable             (sd.tMovable),
    rNode                (sd.rNode),
+   rMovable             (sd.rMovable),
+   tPropagator          (NULL),
+   rPropagator          (NULL),
    stationParticipant   (sd.stationParticipant),
    tTime                (sd.tTime),
    rTime                (sd.rTime),
@@ -103,14 +117,25 @@ SignalData::SignalData(const SignalData& sd) :
  * @return This onject, set to match sd
  */
 //------------------------------------------------------------------------------
-SignalData& SignalData::operator =(const SignalData& sd)
+SignalData& SignalData::operator=(const SignalData& sd)
 {
    if (this != &sd)
    {
       transmitParticipant  = sd.transmitParticipant;
       receiveParticipant   = sd.receiveParticipant;
       tNode                = sd.tNode;
+      tMovable             = sd.tMovable;
       rNode                = sd.rNode;
+      rMovable             = sd.rMovable;
+
+      if (tPropagator != NULL)
+         delete tPropagator;
+      tPropagator          = NULL;
+
+      if (rPropagator != NULL)
+         delete rPropagator;
+      rPropagator          = NULL;
+
       tTime                = sd.tTime;
       rTime                = sd.rTime;
       stationParticipant   = sd.stationParticipant;

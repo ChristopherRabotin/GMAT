@@ -23,10 +23,13 @@
 #include "BodyFixedPoint.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include "PropSetup.hpp"
+#include "Propagator.hpp"
+#include "ODEModel.hpp"
 
 
 //#define DEBUG_INITIALIZATION
-
+//#define DEBUG_LIGHTTIME
 
 
 //---------------------------------
@@ -54,14 +57,17 @@ const Rvector3   SignalBase::zUnit      = Rvector3(0.0,0.0,1.0);
 //------------------------------------------------------------------------------
 SignalBase::SignalBase(const std::string &typeStr,
       const std::string &name) :
-   GmatBase          (Gmat::GENERIC_OBJECT, typeStr, name),
+   GmatBase             (Gmat::GENERIC_OBJECT, typeStr, name),
    next                 (NULL),
+   previous             (NULL),
    tcs                  (NULL),
    rcs                  (NULL),
    ocs                  (NULL),
    j2k                  (NULL),
    satEpoch             (21545.0),
+   satEpochID           (-1),
    signalIsFeasible     (false),       // Not feasible until calculated!
+   includeLightTime     (true),
    solarSystem          (NULL),
    navLog               (NULL),
    logLevel             (1)
@@ -96,13 +102,16 @@ SignalBase::~SignalBase()
 SignalBase::SignalBase(const SignalBase& sb) :
    GmatBase             (sb),
    next                 (NULL),
+   previous             (NULL),
    theData              (sb.theData),
    tcs                  (NULL),
    rcs                  (NULL),
    ocs                  (NULL),
    j2k                  (NULL),
    satEpoch             (21545.0),
+   satEpochID           (-1),
    signalIsFeasible     (false),       // Never feasible until calculated!
+   includeLightTime     (sb.includeLightTime),
    solarSystem          (sb.solarSystem),
    navLog               (sb.navLog),
    logLevel             (sb.logLevel)
@@ -136,7 +145,9 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       ocs                 = NULL;
       j2k                 = NULL;
       satEpoch            = 21545.0;
+      satEpochID          = -1;
       signalIsFeasible    = false;     // Never feasible until calculated!
+      includeLightTime    = sb.includeLightTime;
       solarSystem         = sb.solarSystem;
       navLog              = sb.navLog;
       logLevel            = sb.logLevel;
@@ -146,6 +157,7 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
          delete next;
          next = NULL;
       }
+      previous = NULL;
       if (sb.next)
          Add((SignalBase*)(sb.next->Clone()));
 
@@ -275,6 +287,7 @@ bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
    {
       if (obj->IsOfType("SpacePoint"))
       {
+         satEpochID = obj->GetParameterID("A1Epoch");
          if (theData.transmitParticipant == name)
          {
             theData.tNode = (SpacePoint*)obj;
@@ -347,6 +360,34 @@ void SignalBase::SetSolarSystem(SolarSystem* ss)
 
 
 //------------------------------------------------------------------------------
+// SignalBase* GetStart(bool epochIsAtEnd)
+//------------------------------------------------------------------------------
+/**
+ * Finds either the first or last node in the signal path
+ *
+ * @param epochIsAtEnd true to get the last node, false to get the first
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+SignalBase* SignalBase::GetStart(bool epochIsAtEnd)
+{
+   SignalBase *retval = this;
+   if (epochIsAtEnd)
+   {
+      if (next)
+         retval = next->GetStart(epochIsAtEnd);
+   }
+   else
+   {
+      if (previous)
+         retval = previous->GetStart(epochIsAtEnd);
+   }
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // SignalBase* GetNext()
 //------------------------------------------------------------------------------
 /**
@@ -380,9 +421,70 @@ bool SignalBase::Add(SignalBase* signalToAdd)
    {
       next = signalToAdd;
       theData.next = &(signalToAdd->GetSignalData());
+      signalToAdd->SetPrevious(this);
    }
 
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* propagator, GmatBase* forObj)
+//------------------------------------------------------------------------------
+/**
+ * Clones propagators for use moving objects while finding light time solutions
+ *
+ * This method is used to assign propagators to signal participants so that
+ * the iteration needed for light time computations can be performed.  The
+ * derived signal classes initialize the propagator for the specific participant
+ * it uses.
+ *
+ * This code is not likely to change when support for multiple propagators is
+ * implemented.  Dense output propagators may impact this code, because the
+ * current approach involves cloning the propagator, resulting in a reset of the
+ * intrernal data.
+ *
+ * @param propagator The propagator being passed to the signal
+ * @param forObj The participant that uses this propagator; if NULL it is set
+ *               for both the transmitter and receiver
+ */
+//------------------------------------------------------------------------------
+void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Setting a propagator <%p> in the Signal "
+            "class for %s\n", propagator, (forObj == NULL ?
+            "both participants" : forObj->GetName().c_str()));
+   #endif
+   if (propagator == NULL)
+      throw MeasurementException("The propagator passed in for the object " +
+            forObj->GetName() + " is NULL, so the object cannot be propagated "
+                  "for light time evaluation");
+
+   if (theData.solveLightTime)
+   {
+      if ((theData.tNode == forObj) || (forObj == NULL))
+      {
+         if (theData.tPropagator != NULL)
+            delete theData.tPropagator;
+         theData.tPropagator = (PropSetup *)propagator->Clone();
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("  Transmitter propagator set\n");
+         #endif
+      }
+      if ((theData.rNode == forObj) || (forObj == NULL))
+      {
+         if (theData.rPropagator != NULL)
+            delete theData.rPropagator;
+         theData.rPropagator = (PropSetup *)propagator->Clone();
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("  Receiver propagator set\n");
+         #endif
+      }
+
+      if (next)
+         next->SetPropagator(propagator, forObj);
+   }
 }
 
 
@@ -403,6 +505,8 @@ bool SignalBase::Initialize()
    {
       if (navLog)
          logLevel = navLog->GetLogLevel("Signal");
+      else
+         logLevel = 32767;
 
       if (theData.tNode && theData.rNode)
       {
@@ -456,6 +560,15 @@ std::string SignalBase::GetPathDescription(bool fullList)
 }
 
 
+//------------------------------------------------------------------------------
+// SignalData& GetSignalData()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the most recently calculated data set for the signal
+ *
+ * @return The data set
+ */
+//------------------------------------------------------------------------------
 SignalData& SignalBase::GetSignalData()
 {
    return theData;
@@ -463,7 +576,7 @@ SignalData& SignalBase::GetSignalData()
 
 
 //------------------------------------------------------------------------------
-// bool SignalBase::IsSignalFeasible()
+// bool IsSignalFeasible()
 //------------------------------------------------------------------------------
 /**
  * Retuns feasibility for the last signal calculated
@@ -591,6 +704,14 @@ void SignalBase::InitializeSignal()
             solarSystem, tcs, rcs, ocs, j2k);
    #endif
 
+   if (theData.solveLightTime)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Setting up for light time solution\n");
+      #endif
+      PrepareToPropagate();
+   }
+
    isInitialized = true;
 }
 
@@ -608,29 +729,22 @@ void SignalBase::InitializeSignal()
 //------------------------------------------------------------------------------
 void SignalBase::CalculateRangeVectorInertial()
 {
-   if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
-      satEpoch = theData.tNode->GetRealParameter(satEpochID);
-   else if (theData.rNode->IsOfType(Gmat::SPACECRAFT))
-      satEpoch = theData.rNode->GetRealParameter(satEpochID);
-   else
-      throw MeasurementException("Error in CoreMeasurement::"
-            "CalculateRangeVectorInertial; neither participant is a "
-            "spacecraft.");
-
-   theData.tTime = theData.rTime = satEpoch;
-
    std::string updateAll = "All";
    UpdateRotationMatrix(satEpoch, updateAll);
    SpacePoint *origin1 = tcs->GetOrigin();
    SpacePoint *origin2 = rcs->GetOrigin();
 
-   theData.j2kOriginSep        = origin2->GetMJ2000Position(satEpoch) -
-                         origin1->GetMJ2000Position(satEpoch);
-   theData.tLoc = theData.tNode->GetMJ2000Position(satEpoch);
-   theData.rLoc = theData.rNode->GetMJ2000Position(satEpoch);
-
+   theData.j2kOriginSep        = origin2->GetMJ2000Position(theData.rTime) -
+                                 origin1->GetMJ2000Position(theData.tTime);
    theData.rangeVecInertial = theData.rLoc - theData.j2kOriginSep -
          theData.tLoc;
+
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("Origin Sep: %s\n tLoc: %s\n rLoc: %s\n",
+            (theData.j2kOriginSep.ToString(8).c_str()),
+            (theData.tLoc.ToString(8).c_str()),
+            (theData.rLoc.ToString(8)).c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -661,6 +775,7 @@ void SignalBase::CalculateRangeVectorObs()
                                                        // multiplication by I33
 }
 
+
 //------------------------------------------------------------------------------
 // void CalculateRangeRateVectorObs(Integer p1index, Integer p2index)
 //------------------------------------------------------------------------------
@@ -675,6 +790,7 @@ void SignalBase::CalculateRangeVectorObs()
 void SignalBase::CalculateRangeRateVectorObs()
 {
    Real satEpoch;
+
    if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
       satEpoch = theData.tNode->GetRealParameter(satEpochID);
    else if (theData.rNode->IsOfType(Gmat::SPACECRAFT))
@@ -717,6 +833,7 @@ void SignalBase::CalculateRangeRateVectorObs()
       theData.rangeRateVecObs = theData.rVelRcs - theData.j2kOriginVel -
             theData.tVelTcs;
 }
+
 
 //------------------------------------------------------------------------------
 // void UpdateRotationMatrix(Real atEpoch, const std::string& whichOne)
@@ -784,6 +901,103 @@ void SignalBase::UpdateRotationMatrix(Real atEpoch, const std::string& whichOne)
 }
 
 
+//------------------------------------------------------------------------------
+// void PrepareToPropagate()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the propagators used in light time solution computations
+ */
+//------------------------------------------------------------------------------
+void SignalBase::PrepareToPropagate()
+{
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("Called SignalBase::PrepareToPropagate()\n");
+   #endif
+
+   // Set propagators for spacecraft and formations only
+   if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
+   {
+      PropSetup *tProp = theData.tPropagator;
+      Propagator *prop = tProp->GetPropagator();
+      ODEModel *ode = tProp->GetODEModel();
+      PropagationStateManager *psm = tProp->GetPropStateManager();
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("tProp Integrator has address <%p>\n",
+               prop);
+         MessageInterface::ShowMessage("tProp ODEModel has address <%p>\n",
+               ode);
+         MessageInterface::ShowMessage("PropSetup:\n**************************"
+               "*************************************************\n%s\n",
+               tProp->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      #endif
+
+      ObjectArray objects;
+      objects.push_back(theData.tNode);
+
+      psm->SetObject(theData.tNode);
+      psm->SetProperty("CartesianState");
+      psm->BuildState();
+      psm->MapObjectsToVector();
+
+      ode->SetState(psm->GetState());
+      ode->SetSolarSystem(solarSystem);
+
+      prop->SetPhysicalModel(ode);
+      prop->Initialize();
+
+      ode->SetPropStateManager(psm);
+      if (ode->BuildModelFromMap() == false)
+         throw MeasurementException("Unable to assemble the ODE model for " +
+               tProp->GetName());
+      theData.tTime = psm->GetState()->GetEpoch();
+      prop->Update(true);
+
+      if (ode->SetupSpacecraftData(&objects, 0) <= 0)
+         throw MeasurementException("Propagate::Initialize -- "
+               "ODE model for Signal cannot set spacecraft parameters");
+   }
+
+   // Set propagators for spacecraft and formations only
+   if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
+   {
+      PropSetup *rProp = theData.rPropagator;
+      Propagator *prop = rProp->GetPropagator();
+      ODEModel *ode = rProp->GetODEModel();
+      PropagationStateManager *psm = rProp->GetPropStateManager();
+
+         MessageInterface::ShowMessage("rProp Integrator has address <%p>\n",
+               rProp->GetPropagator());
+         MessageInterface::ShowMessage("rProp ODEModel has address <%p>\n",
+               rProp->GetODEModel());
+
+      ObjectArray objects;
+      objects.push_back(theData.rNode);
+
+      psm->SetObject(theData.rNode);
+      psm->SetProperty("CartesianState");
+      psm->BuildState();
+      psm->MapObjectsToVector();
+
+      ode->SetState(psm->GetState());
+      ode->SetSolarSystem(solarSystem);
+
+      prop->SetPhysicalModel(ode);
+      prop->Initialize();
+
+      ode->SetPropStateManager(psm);
+      if (ode->BuildModelFromMap() == false)
+         throw MeasurementException("Unable to assemble the ODE model for " +
+               rProp->GetName());
+      theData.rTime = psm->GetState()->GetEpoch();
+      prop->Update(true);
+
+      if (ode->SetupSpacecraftData(&objects, 0) <= 0)
+         throw MeasurementException("Propagate::Initialize -- "
+               "ODE model for Signal cannot set spacecraft parameters");
+   }
+}
+
 //-----------------------------------------------------------------------------
 // Integer GetParmIdFromEstID(Integer forId, GmatBase *obj)
 //-----------------------------------------------------------------------------
@@ -801,3 +1015,176 @@ Integer SignalBase::GetParmIdFromEstID(Integer forId, GmatBase *obj)
    return forId - obj->GetType() * 250;
 }
 
+
+//------------------------------------------------------------------------------
+// void MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive, bool moveAll)
+//------------------------------------------------------------------------------
+/**
+ * Moves participants to a specified epoch
+ *
+ * @param theEpoch The desired epoch
+ * @param epochAtReceive Flag indicating that desired epoch is for receiver
+ * @param moveAll true to move both participants
+ */
+//------------------------------------------------------------------------------
+void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
+      bool moveAll)
+{
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("Called MoveToEpoch(%.12lf, %s%s)\n",
+            theEpoch,
+            (epochAtReceive ? "Epoch at Receive" :  "Epoch at Transmit"),
+            (moveAll ? ", Moving all participants" : ""));
+   #endif
+
+   if (epochAtReceive || moveAll)
+   {
+      Real dt = (theEpoch - theData.rTime) * GmatTimeConstants::SECS_PER_DAY;
+      if (dt != 0.0)
+         StepParticipant(dt, true);
+      else
+      {
+         Rvector6 state =
+               theData.tNode->GetMJ2000State(theEpoch);
+         theData.tLoc = state.GetR();
+         theData.tVel = state.GetV();
+      }
+   }
+
+   if (!epochAtReceive || moveAll)
+   {
+      Real dt = theEpoch - theData.tTime;
+      if (dt != 0.0)
+         StepParticipant(dt, false);
+      else
+      {
+         Rvector6 state = theData.rNode->GetMJ2000State(theEpoch);
+         theData.rLoc = state.GetR();
+         theData.rVel = state.GetV();
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+// void SetPrevious(SignalBase* prev)
+//------------------------------------------------------------------------------
+/**
+ * Build the backwards link ing the doubly linked list
+ *
+ * @param prev Link to the owner of this signal in the list
+ */
+//------------------------------------------------------------------------------
+void SignalBase::SetPrevious(SignalBase* prev)
+{
+   previous = prev;
+}
+
+
+//------------------------------------------------------------------------------
+// bool StepParticipant(Real stepToTake, bool forTransmitter)
+//------------------------------------------------------------------------------
+/**
+ * Steps a participant in time, and updates the J2k state buffer accordingly
+ *
+ * @param stepToTake The amount of time needed for the propagation
+ * @param forTransmitter True to step the transmitter participant, false to
+ *                       step the receiver
+ *
+ * @return true is a step succeeded, false if it failed
+ */
+//------------------------------------------------------------------------------
+bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
+{
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("Called StepParticipant(%.12le, %s)\n",
+            stepToTake, (forTransmitter ? "stepping transmitter" :
+            "stepping receiver"));
+   #endif
+   bool retval = false;
+
+   Propagator *prop = NULL;
+   if (forTransmitter)
+   {
+      if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
+         prop = theData.tPropagator->GetPropagator();
+   }
+   else
+   {
+      if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
+         prop = theData.rPropagator->GetPropagator();
+   }
+
+   Rvector6 state;
+   if (prop)      // Handle spacecraft
+   {
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("Propagating numerically\n");
+      #endif
+      prop->UpdateFromSpaceObject();
+      const Real *outState = prop->AccessOutState();
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("   ---> Before: %.12lf\n", state[0]);
+      #endif
+
+      retval = prop->Step(stepToTake);
+      if (retval == false)
+         MessageInterface::ShowMessage("Failed to step\n");
+
+      state.Set(outState);
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("   ---> After %.12lf : %.12lf\n",
+               prop->GetStepTaken(), state(0));
+      #endif
+   }
+   else           // Handle ground stations and other analytic props
+   {
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("Propagating analytically\n");
+      #endif
+      if (forTransmitter)
+      {
+         state = theData.tNode->GetMJ2000State(theData.tTime +
+               stepToTake / GmatTimeConstants::SECS_PER_DAY);
+      }
+      else
+      {
+         state = theData.rNode->GetMJ2000State(theData.rTime +
+               stepToTake / GmatTimeConstants::SECS_PER_DAY);
+      }
+   }
+
+   if (forTransmitter)
+   {
+      theData.tLoc = state.GetR();
+      theData.tVel = state.GetV();
+      theData.tTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
+   }
+   else
+   {
+      theData.rLoc = state.GetR();
+      theData.rVel = state.GetV();
+      theData.rTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void SignalBase::UsesLighttime(const bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Manages the light time computation flag
+ *
+ * @param tf true to include light time solutions, false to omit them
+ */
+//------------------------------------------------------------------------------
+void SignalBase::UsesLighttime(const bool tf)
+{
+   includeLightTime = tf;
+   if (next)
+      next->UsesLighttime(tf);
+
+}

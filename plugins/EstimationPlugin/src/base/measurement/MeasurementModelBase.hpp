@@ -45,6 +45,8 @@ protected:
    {
       MeasurementModelBaseParamCount = GmatBaseParamCount,
    };
+
+   Integer GetParmIdFromEstID(Integer id, GmatBase *obj);
 };
 
 #endif /* MeasurementModelBase_hpp */

@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Mar 11, 2014
 /**
- * 
+ * The class of objects that define GMAT measurement models and tracking data
  */
 //------------------------------------------------------------------------------
 
@@ -28,7 +28,14 @@
 #include "DataFile.hpp"
 
 class SolarSystem;
+class PropSetup;
 
+/**
+ * User access to measurement modes and tracking data file interfaces
+ *
+ * The TrackingFile set defines the measurements and tracking data that GMAT
+ * uses in the estimation process.
+ */
 class ESTIMATION_API TrackingFileSet: public MeasurementModelBase
 {
 public:
@@ -117,14 +124,35 @@ public:
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
    virtual void SetSolarSystem(SolarSystem *ss);
+   virtual void SetPropagator(PropSetup *ps);
    virtual bool Initialize();
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
 protected:
+   /**
+    * Internal class used to match strand and model descriptions together, as
+    * scripted.
+    */
+   class MeasurementDefinition
+   {
+   public:
+      MeasurementDefinition();
+      ~MeasurementDefinition();
+      MeasurementDefinition(const MeasurementDefinition& md);
+      MeasurementDefinition& operator=(const MeasurementDefinition& md);
+
+      std::string GetDefinitionString() const;
+
+      /// The strings describing the tracking configs
+      std::vector<StringArray> strands;
+      /// The measurement types associated with each tracking config
+      StringArray types;
+   };
+
+   /// Vector of scripted easuremetn configurations
+   std::vector<MeasurementDefinition> trackingConfigs;
    /// The collection of measurements in the set
    std::vector<TrackingDataAdapter*> measurements;
-   /// The strings describing the tracking configs
-   StringArray trackingConfigs;
    /// Name of the associate tracking data file
    StringArray filenames;
    /// Flag for the inclusion of light time solution
@@ -132,6 +160,9 @@ protected:
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
+   /// @todo Adjust this code when multiple propagator support is implemented
+   /// Propagator used for light time computations
+   PropSetup *thePropagator;
    /// Pointers to ref objects that the adapters use
    ObjectArray references;
    /// Pointers to the Datafile Objects specified for this TFS

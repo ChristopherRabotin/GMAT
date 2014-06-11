@@ -23,6 +23,8 @@
 
 #include "SignalBase.hpp"
 
+class PropSetup;
+
 /**
  * Signal class used for instantaneous measurements
  *
@@ -38,11 +40,17 @@ public:
 
    virtual GmatBase* Clone() const;
 
-   virtual bool ModelSignal(bool EpochAtReceive = true);
+   virtual void InitializeSignal();
+
+   virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);
    virtual const std::vector<RealArray>&
             ModelSignalDerivative(GmatBase *obj, Integer forId);
 
 protected:
+   /// Flag indicating the initialization state of the new signal elements
+   bool physicalSignalInitialized;
+
+   bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);
 };
 
 #endif /* PhysicalSignal_hpp */

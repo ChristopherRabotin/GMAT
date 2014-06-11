@@ -30,11 +30,11 @@
  * This class provides the list of magic numbers used to identify adapters in
  * the TrackingFileSet code.  These numbers are nost visible in the GMAT .gmd
  * files, where they provide an integer reference to the measurement model type
- * of the trackign data reported on a given line.  The class builds a small
+ * of the tracking data reported on a given line.  The class builds a small
  * container mapping signal nodes (by count) and measurement types to tracking
  * data type IDs used in the .gmd file, and in GMAT's estimation subsystem.
  *
- * The TFSMagicNumbers class is a singleton class.  That feature ensures taht
+ * The TFSMagicNumbers class is a singleton class.  That feature ensures that
  * the magic number for a given configuration is identical throughout all of
  * a running instance of GMAT.
  *

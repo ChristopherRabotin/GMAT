@@ -45,3 +45,8 @@ MeasurementModelBase& MeasurementModelBase::operator=(
       GmatBase::operator=(mm);
    return *this;
 }
+
+Integer MeasurementModelBase::GetParmIdFromEstID(Integer id, GmatBase* obj)
+{
+   return id - obj->GetType() * 250;
+}

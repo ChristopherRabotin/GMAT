@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Mar 11, 2014
 /**
- * 
+ * The class of objects that define GMAT measurement models and tracking data
  */
 //------------------------------------------------------------------------------
 
@@ -66,7 +66,8 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
 TrackingFileSet::TrackingFileSet(const std::string &name) :
    MeasurementModelBase (name, "TrackingFileSet"),
    useLighttime         (false),    // Default to true once implemented
-   solarsystem          (NULL)
+   solarsystem          (NULL),
+   thePropagator        (NULL)
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -98,13 +99,15 @@ TrackingFileSet::~TrackingFileSet()
 //------------------------------------------------------------------------------
 TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    MeasurementModelBase (tfs),
-   trackingConfigs      (tfs.trackingConfigs),
    filenames            (tfs.filenames),
    useLighttime         (tfs.useLighttime),
    solarsystem          (tfs.solarsystem),
+   thePropagator        (tfs.thePropagator),
    references           (tfs.references),
    datafiles            (tfs.datafiles)
 {
+   for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
+      trackingConfigs.push_back(tfs.trackingConfigs[i]);
 }
 
 
@@ -126,10 +129,15 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       MeasurementModelBase::operator=(tfs);
 
       measurements.clear();
-      trackingConfigs = tfs.trackingConfigs;
+      trackingConfigs.clear();
+
+      for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
+         trackingConfigs.push_back(tfs.trackingConfigs[i]);
+
       filenames = tfs.filenames;
       useLighttime = tfs.useLighttime;
       solarsystem = tfs.solarsystem;
+      thePropagator = tfs.thePropagator;
       references = tfs.references;
       datafiles = tfs.datafiles;
 
@@ -298,7 +306,7 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
    if (id == TRACKINGCONFIG)
    {
       if (((Integer)trackingConfigs.size() > index) && (index >= 0))
-         return trackingConfigs[index];
+         return trackingConfigs[index].GetDefinitionString();
       else
          throw MeasurementException("Index out of bounds when trying to access "
                "a tracking data configuration");
@@ -336,20 +344,56 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 {
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("TrackingFileSet::SetStringParameter(%d, "
-            "%s, %d) called\n", id, value.c_str(), index);
+            "'%s', %d) called\n", id, value.c_str(), index);
    #endif
 
    if (id == TRACKINGCONFIG)
    {
-      if (((Integer)trackingConfigs.size() > index) && (index >= 0))
-         trackingConfigs[index] = value;
-      else if ((Integer)trackingConfigs.size() == index)
+      MeasurementDefinition theDef;
+      if (index == 0)
       {
-         trackingConfigs.push_back(value);
+         // Starting a new definition
+         MeasurementDefinition newDef;
+         trackingConfigs.push_back(newDef);
       }
+      Integer defIndex = trackingConfigs.size() - 1;
+
+      std::string rawName = value;
+      TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
+      StringArray knownTypes = mn->GetKnownTypes();
+
+      bool newStrand = false;
+      const char* valarray = value.c_str();
+      if ((valarray[0]=='{') || (trackingConfigs[defIndex].strands.size()==0))
+      {
+         newStrand = true;
+         rawName = value.substr(1);
+      }
+
+      if (newStrand)
+      {
+         StringArray trackList;
+         trackingConfigs[defIndex].strands.push_back(trackList);
+      }
+      Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
+
+      // Strip off trailing '}', and leading and trailing white space
+      UnsignedInt loc = rawName.find('}');
+      if (loc != std::string::npos)
+         rawName = rawName.substr(0,loc);
+      valarray = rawName.c_str();
+      loc = 0;
+      while ((valarray[loc] == ' ') || (valarray[loc] == '\t'))
+         ++loc;
+      Integer eloc = rawName.length() - 1;
+      while ((valarray[eloc] == ' ') || (valarray[eloc] == '\t'))
+         --eloc;
+      rawName = rawName.substr(loc, eloc-loc+1);
+
+      if (find(knownTypes.begin(), knownTypes.end(), rawName) == knownTypes.end())
+         trackingConfigs[defIndex].strands[strandIndex].push_back(rawName);
       else
-         throw MeasurementException("Index out of bounds when trying to access "
-               "a tracking data configuration");
+         trackingConfigs[defIndex].types.push_back(rawName);
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("%d members in config:\n",
@@ -399,8 +443,19 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 const StringArray& TrackingFileSet::GetStringArrayParameter(
       const Integer id) const
 {
+   static StringArray tconfigs;
    if (id == TRACKINGCONFIG)
-      return trackingConfigs;
+   {
+      tconfigs.clear();
+      for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
+//         tconfigs.push_back(trackingConfigs[i].GetDefinitionString());
+         for (UnsignedInt j = 0; j < trackingConfigs[i].strands.size(); ++j)
+            for (UnsignedInt k=0; k < trackingConfigs[i].strands[j].size(); ++k)
+               if (find(tconfigs.begin(), tconfigs.end(),
+                     trackingConfigs[i].strands[j][k]) == tconfigs.end())
+                  tconfigs.push_back(trackingConfigs[i].strands[j][k]);
+      return tconfigs;
+   }
 
    if (id == FILENAME)
       return filenames;
@@ -426,8 +481,9 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(const Integer id,
       const Integer index) const
 {
    /// todo: Build decomposed reference stuff if we need external access to it
-//   if (id == TRACKINGCONFIG)
-//      return trackingConfigs;
+   if (id == TRACKINGCONFIG)
+      if ((index >= 0) && (index < (Integer)trackingConfigs.size()))
+         return trackingConfigs[index].types;
 
    return MeasurementModelBase::GetStringArrayParameter(id, index);
 }
@@ -610,7 +666,7 @@ bool TrackingFileSet::GetBooleanParameter(const Integer id,
 
 
 //------------------------------------------------------------------------------
-// bool TrackingFileSet::SetBooleanParameter(const Integer id, const bool value,
+// bool SetBooleanParameter(const Integer id, const bool value,
 //       const Integer index)
 //------------------------------------------------------------------------------
 /**
@@ -755,29 +811,46 @@ const ObjectTypeArray& TrackingFileSet::GetRefObjectTypeArray()
 const StringArray& TrackingFileSet::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet::"
+            "GetRefObjectNameArray(%d)\n", type);
+   #endif
+
    refObjectNames.clear();
 
    // @todo Make more robust by dropping the types rather than assuming only
    //       one at the end.  Basically, get the bracket parsing working
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACE_POINT))
-      for (UnsignedInt i = 0; i < trackingConfigs.size() - 1; ++i)
-         if (find(refObjectNames.begin(), refObjectNames.end(),
-               trackingConfigs[i]) == refObjectNames.end())
-            refObjectNames.push_back(trackingConfigs[i]);
+   {
+      for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
+         for (UnsignedInt j = 0; j < trackingConfigs[i].strands.size(); ++j)
+            for (UnsignedInt k=0; k < trackingConfigs[i].strands[j].size(); ++k)
+         {
+            if (find(refObjectNames.begin(), refObjectNames.end(),
+                  trackingConfigs[i].strands[j][k]) == refObjectNames.end())
+               refObjectNames.push_back(trackingConfigs[i].strands[j][k]);
+         }
+   }
 
-   // @todo This loop statement is temporary code.  Remove when datafile objects
-   // are autogenerated.  The current code sets DataFile object nanes in the
-   // filenames array
-   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILE))
-      for (UnsignedInt i = 0; i <  filenames.size(); ++i)
-         refObjectNames.push_back(filenames[i]);
+//   // @todo This loop statement is temporary code.  Remove when datafile objects
+//   // are autogenerated.  The current code sets DataFile object names in the
+//   // filenames array
+//   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILE))
+//      for (UnsignedInt i = 0; i <  filenames.size(); ++i)
+//         refObjectNames.push_back(filenames[i]);
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Reference objects:  ");
+      for (UnsignedInt i = 0; i < refObjectNames.size(); ++i)
+         MessageInterface::ShowMessage("'%s'  ", refObjectNames[i].c_str());
+      MessageInterface::ShowMessage("\n");
+   #endif
 
    return refObjectNames;
 }
 
 //------------------------------------------------------------------------------
-// bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
-//       const std::string& name)
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Sets names for reference objects
@@ -793,27 +866,36 @@ bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
 {
    bool retval = false;
 
-   // @todo Make more robust by dropping the types rather than assuming only
-   //       one at the end.  Basically, get the bracket parsing working
-   if (type == Gmat::SPACE_POINT)
-      if (find(trackingConfigs.begin(), trackingConfigs.end(), name) ==
-            trackingConfigs.end())
-      {
-         trackingConfigs.push_back(name);
-         retval = true;
-      }
+//   Integer index = trackingConfigs.size() - 1;
+//
+//   if (index == -1)
+//   {
+//      StringArray buffer;
+//      trackingConfigs.push_back(buffer);
+//      ++index;
+//   }
+//
+//   // @todo Make more robust by dropping the types rather than assuming only
+//   //       one at the end.  Basically, get the bracket parsing working
+//   if (type == Gmat::SPACE_POINT)
+//      if (find(trackingConfigs[index].begin(), trackingConfigs[index].end(),
+//            name) == trackingConfigs[index].end())
+//      {
+//         trackingConfigs[index].push_back(name);
+//         retval = true;
+//      }
 
-   // @todo This loop statement is temporary code.  Remove when datafile objects
-   // are autogenerated.  The current code sets DataFile object nanes in the
-   // filenames array
-   if (type == Gmat::DATA_FILE)
-      if (find(filenames.begin(), filenames.end(), name) == filenames.end())
-      {
-         filenames.push_back(name);
-         retval = true;
-      }
+//   // @todo This loop statement is temporary code.  Remove when datafile objects
+//   // are autogenerated.  The current code sets DataFile object nanes in the
+//   // filenames array
+//   if (type == Gmat::DATA_FILE)
+//      if (find(filenames.begin(), filenames.end(), name) == filenames.end())
+//      {
+//         filenames.push_back(name);
+//         retval = true;
+//      }
 
-   return (retval ? retval : MeasurementModelBase::SetRefObjectName(type, name));
+   return (retval ? retval:MeasurementModelBase::SetRefObjectName(type, name));
 }
 
 //------------------------------------------------------------------------------
@@ -852,11 +934,16 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
    {
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       {
-         if (trackingConfigs[i] == oldName)
+         for (UnsignedInt j = 0; j < trackingConfigs[i].strands.size(); ++j)
          {
-            trackingConfigs[i] = newName;
-            retval = true;
-            // No break here -- repeated names allowed in this list
+            for (UnsignedInt k = 0; k < trackingConfigs[i].strands[j].size(); ++k)
+            {
+               if (trackingConfigs[i].strands[j][k] == oldName)
+               {
+                  trackingConfigs[i].strands[j][k] = newName;
+                  retval = true;
+               }
+            }
          }
       }
    }
@@ -908,15 +995,15 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
             return references[index];
    }
 
-   // @todo This loop statement is temporary code.  Remove when datafile objects
-   // are autogenerated.  The current code sets DataFile object nanes in the
-   // filenames array
-   if (type == Gmat::DATA_FILE)
-   {
-      if ((index < (Integer)datafiles.size()) && (index >= 0))
-         if (datafiles[index]->GetName() == name)
-            return datafiles[index];
-   }
+//   // @todo This loop statement is temporary code.  Remove when datafile objects
+//   // are autogenerated.  The current code sets DataFile object nanes in the
+//   // filenames array
+//   if (type == Gmat::DATA_FILE)
+//   {
+//      if ((index < (Integer)datafiles.size()) && (index >= 0))
+//         if (datafiles[index]->GetName() == name)
+//            return datafiles[index];
+//   }
 
    return MeasurementModelBase::GetRefObject(type, name, index);
 }
@@ -987,40 +1074,61 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 {
    bool retval = false;
 
-   // @todo This if statement is temporary code.  Remove when datafile objects are
-   // autogenerated
-   if (obj->IsOfType(Gmat::DATA_FILE))
-   {
-      if (find(datafiles.begin(), datafiles.end(), obj) == datafiles.end())
-      {
+//   // @todo This if statement is temporary code.  Remove when datafile objects are
+//   // autogenerated
+//   if (obj->IsOfType(Gmat::DATA_FILE))
+//   {
+//      if (find(datafiles.begin(), datafiles.end(), obj) == datafiles.end())
+//      {
 //         #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("Adding datafile %s to %s\n",
-                  name.c_str(), instanceName.c_str());
+//            MessageInterface::ShowMessage("Adding datafile %s to %s\n",
+//                  name.c_str(), instanceName.c_str());
 //         #endif
-         datafiles.push_back((DataFile*)obj);
-      }
-   }
-   else // Remove to this line (and clean up brackets)
+//         datafiles.push_back((DataFile*)obj);
+//      }
+//   }
+//   else // Remove to this line (and clean up brackets)
+//   {
+   if (find(references.begin(), references.end(), obj) == references.end())
    {
-      if (find(references.begin(), references.end(), obj) == references.end())
-      {
-         #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("Adding node %s\n", name.c_str());
-         #endif
-         references.push_back(obj);
-         retval = true;
-      }
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Adding node %s\n", name.c_str());
+      #endif
+      references.push_back(obj);
+      retval = true;
    }
+//   }
 
-   return (retval ||
-         MeasurementModelBase::SetRefObject(obj, type, name, index));
+   return (retval || MeasurementModelBase::SetRefObject(obj,type,name,index));
 }
 
+//------------------------------------------------------------------------------
+// ObjectArray& GetRefObjectArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an array of reference objects
+ *
+ * @param type The type of object requested
+ *
+ * @return The array of objects
+ */
+//------------------------------------------------------------------------------
 ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
 {
    return MeasurementModelBase::GetRefObjectArray(type);
 }
 
+//------------------------------------------------------------------------------
+// ObjectArray& GetRefObjectArray(const std::string& typeString)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an array of reference objects
+ *
+ * @param type The label for the type of object requested
+ *
+ * @return The array of objects
+ */
+//------------------------------------------------------------------------------
 ObjectArray& TrackingFileSet::GetRefObjectArray(const std::string& typeString)
 {
    return GetRefObjectArray(GetObjectType(typeString));
@@ -1028,7 +1136,7 @@ ObjectArray& TrackingFileSet::GetRefObjectArray(const std::string& typeString)
 
 
 //------------------------------------------------------------------------------
-// void TrackingFileSet::SetSolarSystem(SolarSystem* ss)
+// void SetSolarSystem(SolarSystem* ss)
 //------------------------------------------------------------------------------
 /**
  * Sets the solar system for the measurements
@@ -1039,6 +1147,25 @@ ObjectArray& TrackingFileSet::GetRefObjectArray(const std::string& typeString)
 void TrackingFileSet::SetSolarSystem(SolarSystem* ss)
 {
    solarsystem = ss;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* ps)
+//------------------------------------------------------------------------------
+/**
+ * Sets the propagator pointer used for light time computations
+ *
+ * @param ps The propagator
+ *
+ * @todo: Generalize for multiple propagators once that support is implemented
+ */
+//------------------------------------------------------------------------------
+void TrackingFileSet::SetPropagator(PropSetup* ps)
+{
+   MessageInterface::ShowMessage("Setting propagator in the tracking file set "
+         "%s to <%p>\n", instanceName.c_str(), ps);
+   thePropagator = ps;
 }
 
 
@@ -1060,48 +1187,50 @@ bool TrackingFileSet::Initialize()
    bool retval = false;
    if (MeasurementModelBase::Initialize())
    {
-      /// @todo The parsing for this stuff is not yet set.  See email 3/17/14
       // Count the adapters needed
       TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
       StringArray knownTypes = mn->GetKnownTypes();
 
-      if (find(knownTypes.begin(), knownTypes.end(),
-            trackingConfigs[trackingConfigs.size()-1]) == knownTypes.end())
-         throw MeasurementException("The TrackingFileSet " + instanceName +
-                     " does not end with a measurement type identifier");
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Tracking Configuration:\n");
+         for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
+         {
+            MessageInterface::ShowMessage("  %3d: ", i);
+            MessageInterface::ShowMessage("%s\n",
+                  trackingConfigs[i].GetDefinitionString().c_str());
+         }
+      #endif
 
       // Build the adapters
-      StringArray strand;
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       {
-         if (find(knownTypes.begin(), knownTypes.end(), trackingConfigs[i]) ==
-               knownTypes.end())
+         for (UnsignedInt j = 0; j < trackingConfigs[i].types.size(); ++j)
          {
-            strand.push_back(trackingConfigs[i]);
-         }
-         else
-         {
-            // Type identified; now build the adapter
-            TrackingDataAdapter *tda = BuildAdapter(strand, trackingConfigs[i]);
+            if (trackingConfigs[i].strands.size() != 1)
+               throw MeasurementException("Multiple strands and empty strands "
+                     "are not yet implemented");
 
-            std::string theStrand;
-            for (UnsignedInt j = 0; j < strand.size(); ++j)
-            {
-               if (j > 0)
-                  theStrand += ", ";
-               theStrand += strand[j];
-            }
+            TrackingDataAdapter *tda =
+                  BuildAdapter(trackingConfigs[i].strands[0],
+                        trackingConfigs[i].types[j]);
 
             if (tda == NULL)
             {
                throw MeasurementException("Unable to build the " +
-                     trackingConfigs[i] + " measurement using the strand {" +
-                     theStrand + "}");
+                     trackingConfigs[i].types[j] + " measurement");
             }
-            // Pass in the signal path
+
+            // Pass in the signal paths
+            std::string theStrand;
+            for (UnsignedInt k=0; k < trackingConfigs[i].strands[0].size(); ++k)
+            {
+               if (k > 0)
+                  theStrand += ", ";
+               theStrand += trackingConfigs[i].strands[0][k];
+            }
+
             tda->SetStringParameter("SignalPath", theStrand);
             measurements.push_back(tda);
-            strand.clear();
          }
       }
 
@@ -1146,6 +1275,8 @@ bool TrackingFileSet::Initialize()
       for (UnsignedInt i = 0; i < measurements.size(); ++i)
       {
          measurements[i]->SetSolarSystem(solarsystem);
+         if (thePropagator)
+            measurements[i]->SetPropagator(thePropagator);
          retval = retval && measurements[i]->Initialize();
       }
 
@@ -1155,13 +1286,23 @@ bool TrackingFileSet::Initialize()
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// std::vector<TrackingDataAdapter*> *GetAdapters()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the tracking data adapters specified in the tracking file set
+ *
+ * @return The adapters, in an std::vector
+ */
+//------------------------------------------------------------------------------
 std::vector<TrackingDataAdapter*> *TrackingFileSet::GetAdapters()
 {
    return &measurements;
 }
 
+
 //------------------------------------------------------------------------------
-// TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
+// TrackingDataAdapter* BuildAdapter(const StringArray& strand,
 //       const std::string& type)
 //------------------------------------------------------------------------------
 /**
@@ -1229,6 +1370,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
                }
             }
       }
+
    // And now build the node list
    /// @todo: Current assumption is single strand, so it needs modified here
    ///        and wrapped in an outer loop.  Hence the indentation.
@@ -1243,6 +1385,8 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    if (type == "Range")
    {
       retval = new RangeAdapterKm(instanceName + type);
+      if (retval)
+         retval->UsesLightTime(useLighttime);
    }
 
    if (retval)
@@ -1258,6 +1402,120 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    }
 
    return retval;
+}
+
+
+// Internal class definition
+
+//------------------------------------------------------------------------------
+// TrackingFileSet::MeasurementDefinition::MeasurementDefinition()
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
+TrackingFileSet::MeasurementDefinition::MeasurementDefinition()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// TrackingFileSet::MeasurementDefinition::~MeasurementDefinition()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
+TrackingFileSet::MeasurementDefinition::~MeasurementDefinition()
+{
+}
+
+//------------------------------------------------------------------------------
+// TrackingFileSet::MeasurementDefinition::MeasurementDefinition(
+//       const MeasurementDefinition& md) :
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param md The definition copied to this one
+ */
+//------------------------------------------------------------------------------
+TrackingFileSet::MeasurementDefinition::MeasurementDefinition(
+      const MeasurementDefinition& md) :
+            types       (md.types)
+{
+   for (UnsignedInt i = 0; i < md.strands.size(); ++i)
+   {
+      StringArray strand = md.strands[i];
+      strands.push_back(strand);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// MeasurementDefinition& TrackingFileSet::MeasurementDefinition::operator =(
+//       const MeasurementDefinition& md)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param md The definition copied into this one
+ *
+ * @return This MeasurementDefinition, set to match md
+ */
+//------------------------------------------------------------------------------
+TrackingFileSet::MeasurementDefinition&
+      TrackingFileSet::MeasurementDefinition::operator=(
+            const MeasurementDefinition& md)
+{
+   if (this != &md)
+   {
+      types = md.types;
+
+      strands.clear();
+      for (UnsignedInt i = 0; i < md.strands.size(); ++i)
+      {
+         StringArray strand = md.strands[i];
+         strands.push_back(strand);
+      }
+   }
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string TrackingFileSet::MeasurementDefinition::GetDefinitionString() const
+//------------------------------------------------------------------------------
+/**
+ * Generates the string describing a measurement definition
+ *
+ * @return The string, as it could appear in script
+ */
+//------------------------------------------------------------------------------
+std::string TrackingFileSet::MeasurementDefinition::GetDefinitionString() const
+{
+   std::string configstring = "{";
+   for (UnsignedInt i = 0; i < strands.size(); ++i)
+   {
+      if (i > 0)
+         configstring += ",";
+      configstring += "{";
+      for (UnsignedInt j = 0; j < strands[i].size(); ++j)
+      {
+         if (j > 0)
+            configstring += ",";
+         configstring += strands[i][j];
+      }
+      configstring += "}";
+   }
+   for (UnsignedInt i = 0; i < types.size(); ++i)
+   {
+      configstring += ",";
+      configstring += types[i];
+   }
+   configstring += "}";
+   return configstring;
 }
 
 

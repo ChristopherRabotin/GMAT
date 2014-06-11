@@ -207,6 +207,7 @@ CPP_OBJECTS = \
     measurementmodel/MeasureModel.o \
     reporter/ProgressReporter.o \
     signal/SignalBase.o \
+    signal/SignalData.o \
     signal/PhysicalSignal.o \
     trackingfile/TFSMagicNumbers.o \
     trackingfile/TrackingFileSet.o \

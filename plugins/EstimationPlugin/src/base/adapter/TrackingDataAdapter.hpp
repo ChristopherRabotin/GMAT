@@ -21,13 +21,14 @@
 #ifndef TrackingDataAdapter_hpp
 #define TrackingDataAdapter_hpp
 
-#include "GmatBase.hpp"
+#include "MeasurementModelBase.hpp"
 #include "MeasureModel.hpp"
 #include "MeasurementData.hpp"
 #include "ProgressReporter.hpp"
 
 // Forward reference
 class SolarSystem;
+class PropSetup;
 
 /**
  * Base class for the tracking data adapters
@@ -39,7 +40,7 @@ class SolarSystem;
  *
  * The adapters also assemble the derivative data needed by these processes.
  */
-class ESTIMATION_API TrackingDataAdapter: public GmatBase
+class ESTIMATION_API TrackingDataAdapter: public MeasurementModelBase
 {
 public:
    TrackingDataAdapter(const std::string &typeStr, const std::string &name);
@@ -59,9 +60,9 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool SetStringParameter(const Integer id,
                                            const std::string &value);
-   virtual std::string GetStringParameter(const Integer id,
+   virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
-   virtual bool SetStringParameter(const Integer id,
+   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
    virtual const StringArray&
@@ -70,12 +71,12 @@ public:
                         GetStringArrayParameter(const Integer id,
                                                 const Integer index) const;
 
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const std::string &label,
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-   virtual std::string GetStringParameter(const std::string &label,
+   virtual std::string  GetStringParameter(const std::string &label,
                                            const Integer index) const;
-   virtual bool SetStringParameter(const std::string &label,
+   virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value,
                                            const Integer index);
    virtual const StringArray&
@@ -88,7 +89,7 @@ public:
                         GetRefObjectNameArray(const Gmat::ObjectType type);
 //   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
 //                                         const std::string &name);
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
 //   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
@@ -96,14 +97,15 @@ public:
 //   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
 //                                     const std::string &name,
 //                                     const Integer index);
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index);
 
 
-   virtual bool Initialize();
+   virtual void         SetPropagator(PropSetup *ps);
+   virtual bool         Initialize();
 
    DEFAULT_TO_NO_CLONES
 
@@ -136,10 +138,11 @@ public:
 //   virtual bool         SetEventData(Event *locatedEvent = NULL);
 
    virtual void         SetCorrection(const std::string& correctionName,
-         const std::string& correctionType);
+                                      const std::string& correctionType);
 
    // Measurement Model Settings
-   virtual bool SetProgressReporter(ProgressReporter* reporter);
+   virtual bool         SetProgressReporter(ProgressReporter* reporter);
+   virtual void         UsesLightTime(const bool tf);
 
 protected:
    /// The ordered list of participants in the measurement
@@ -169,6 +172,8 @@ protected:
 
    /// Flags controlling the internal computations and corrections
    bool withLighttime;
+   /// Propagator used for light time solutions, when needed
+   PropSetup *thePropagator;
 
    /// Parameter IDs for the BatchEstimators
    enum
@@ -184,7 +189,7 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[AdapterParamCount -
                                                    GmatBaseParamCount];
 
-   StringArray* DecomposePathString(const std::string &value);
+   StringArray*         DecomposePathString(const std::string &value);
 };
 
 #endif /* TrackingDataAdapter_hpp */

@@ -27,6 +27,7 @@
 
 // Forward references
 class SpacePoint;
+class PropSetup;
 
 
 /**
@@ -47,8 +48,16 @@ public:
    std::string receiveParticipant;
    /// The starting participant
    SpacePoint *tNode;
+   /// Flag indicating if the transmitter moved during light time iteration
+   bool tMovable;
    /// The end point participant
    SpacePoint *rNode;
+   /// Flag indicating if the transmitter moved during light time iteration
+   bool rMovable;
+   /// The propagator used for the transmitter, if used
+   PropSetup *tPropagator;
+   /// The propagator used for the receiver, if used
+   PropSetup *rPropagator;
    /// Flag indicating if one of the participants is a ground station
    bool stationParticipant;
 

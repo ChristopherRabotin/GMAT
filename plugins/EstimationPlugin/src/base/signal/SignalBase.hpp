@@ -30,6 +30,8 @@
 #include "ProgressReporter.hpp"
 #include "SignalData.hpp"
 
+class PropSetup;
+
 
 /**
  * Base class for signals between two measurement participants
@@ -64,11 +66,15 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
 
+   SignalBase           *GetStart(bool epochIsAtEnd);
    virtual SignalBase*  GetNext();
    virtual bool         Add(SignalBase *signalToAdd);
 
+   virtual void         SetPropagator(PropSetup *propagator,
+                                      GmatBase *forObj = NULL);
    virtual bool         Initialize();
-   virtual bool         ModelSignal(bool EpochAtReceive = true) = 0;
+   virtual bool         ModelSignal(const GmatEpoch atEpoch,
+                                    bool EpochAtReceive = true) = 0;
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
@@ -77,10 +83,13 @@ public:
 
    SignalData&          GetSignalData();
    bool                 IsSignalFeasible();
+   virtual void         UsesLighttime(const bool tf);
 
 protected:
    /// The next node in the list of signals (NULL at the end of the list)
    SignalBase                 *next;
+   /// The next node in the list of signals (NULL at the start of the list)
+   SignalBase                 *previous;
 
    /// State data for the transmitting participant
    GmatState                  tState;
@@ -104,7 +113,7 @@ protected:
 
    // Storage buffers
    /// Epoch of most recent calculation
-   GmatEpoch satEpoch;
+   GmatEpoch                  satEpoch;
 
    /// Parameter ID used to retrieve internal epoch data
    Integer                    satEpochID;
@@ -130,6 +139,8 @@ protected:
    Rmatrix33                  RDot_Obs_Transmitter;
    /// Feasibility for the signal, based on information from the signal nodes
    bool                       signalIsFeasible;
+   /// Flag triggering inclusion of light time solution
+   bool                       includeLightTime;
 
    // Utility vectors and matrices
    /// Identity matrix, 3x3
@@ -156,7 +167,9 @@ protected:
    /// The current logging level for signals
    UnsignedInt                logLevel;
 
+   void                       SetPrevious(SignalBase *prev);
    virtual void               InitializeSignal();
+   virtual void               PrepareToPropagate();
 
    // Some useful methods
    // Coordinate System methods based on methods in GeometricMeasurement
@@ -167,6 +180,12 @@ protected:
                                     const std::string &whichOne = "All");
 
    Integer                    GetParmIdFromEstID(Integer forId, GmatBase *obj);
+
+   void                       MoveToEpoch(const GmatEpoch theEpoch,
+                                          bool epochAtReceive,
+                                          bool moveAll = true);
+   bool                       StepParticipant(Real stepToTake,
+                                              bool forTransmitter);
 };
 
 #endif /* SignalBase_hpp */
