@@ -1251,7 +1251,7 @@ const StringArray& MeasurementManager::GetParticipantList()
       /// @todo: This part will need changes
       // Walk through the participant list for the model
       StringArray parts = (*i)->GetStringArrayParameter("AddTrackingConfig");
-      for (UnsignedInt j = 0; j < parts.size() - 1; ++j)
+      for (UnsignedInt j = 0; j < parts.size(); ++j)
       {
          // If the participant is not in the list yet, add it
          if (find(participants.begin(), participants.end(), parts[j]) ==
