@@ -95,15 +95,27 @@ public:
       FileTypeCount,
    };
    
-   static FileManager* Instance();
+   static FileManager* Instance(const std::string &appName = "GMAT.exe");
    ~FileManager();
    
-   std::string GetBinDirectory();
-   bool        SetBinDirectory(const std::string &newBin = "");
+   /// GMAT application directory
+   std::string GetBinDirectory(const std::string &appName = "GMAT.exe");
+   bool        SetBinDirectory(const std::string &appName = "GMAT.exe",
+                               const std::string &newBin = "");
+   
+   /// GMAT working directory
+   std::string GetGmatWorkingDirectory();
+   bool        SetGmatWorkingDirectory(const std::string &newDir = "");
+   
+   /// System's current working directory of the process
+   std::string GetWorkingDirectory();
+   bool        SetWorkingDirectory(const std::string &newDir = "");
+   
+   /// Finds file path using search order
+   std::string FindPath(const std::string &fileName, const FileType type, bool forInput);
    
    std::string GetPathSeparator();
-   std::string GetWorkingDirectory();
-   bool DoesDirectoryExist(const std::string &dirPath);
+   bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
@@ -167,7 +179,9 @@ private:
          { mPath = path; mFile = file; }
    };
    
+   bool        mIsOsWindows;
    std::string mAbsBinDir;
+   std::string mGmatWorkingDir;
    std::string mPathSeparator;
    std::string mStartupFileDir;
    std::string mStartupFileName;
@@ -205,7 +219,7 @@ private:
    static FileManager *theInstance;
    static const std::string FILE_TYPE_STRING[FileTypeCount];
    
-   FileManager();
+   FileManager(const std::string &appName = "GMAT.exe");
    
    void SetPathsAbsolute();
 };

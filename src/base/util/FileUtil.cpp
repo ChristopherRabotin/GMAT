@@ -109,6 +109,7 @@ std::string GmatFileUtil::GetPathSeparator()
 {
    std::string sep = "/";
    
+   #if 0
    char *buffer;
    buffer = getenv("OS");
    if (buffer != NULL)
@@ -123,8 +124,32 @@ std::string GmatFileUtil::GetPathSeparator()
       if (osStr.find("Windows") != osStr.npos)
          sep = "\\";
    }
+   #endif
+   
+   if (IsOsWindows())
+      sep = "\\";
    
    return sep;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GMAT_API ConvertToOsFileName(const std::string &fileName)
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ConvertToOsFileName(const std::string &fileName)
+{
+   std::string fname = fileName;
+   if (IsOsWindows())
+   {
+      if (fname.find("/") != fname.npos)
+         fname = GmatStringUtil::Replace(fname, "/", "\\");
+   }
+   else
+   {
+      if (fname.find("\\") != fname.npos)
+         fname = GmatStringUtil::Replace(fname, "\\", "/");
+   }
+   return fname;
 }
 
 
@@ -324,7 +349,7 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
       {
          thePathToUse = fullPath.substr(0,appLoc);
       }
-  #endif
+   #endif
    
    std::string::size_type lastSlash = thePathToUse.find_last_of("/\\");
 
@@ -464,6 +489,35 @@ std::string GmatFileUtil::GetInvalidFileNameMessage(Integer option)
 
 
 //------------------------------------------------------------------------------
+// bool GMAT_API IsOsWindows()
+//------------------------------------------------------------------------------
+/**
+ * @return true if platform OS is Windows, false if empty buffer from getenv()
+ *              or other platform
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsOsWindows()
+{
+   char *buffer;
+   buffer = getenv("OS");
+   if (buffer != NULL)
+   {
+      #ifdef DEBUG_FILE_UTIL
+      MessageInterface::ShowMessage
+         ("GmatFileUtil::IsOsWindows() Current OS is %s\n", buffer);
+      #endif
+      
+      std::string osStr(buffer);
+      
+      if (osStr.find("Windows") != osStr.npos)
+         return true;
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool GMAT_API IsPathRelative(const std::string &fullPath)
 //------------------------------------------------------------------------------
 /**
@@ -483,13 +537,51 @@ bool GmatFileUtil::IsPathRelative(const std::string &fullPath)
 
 
 //------------------------------------------------------------------------------
-// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk = true)
+// bool GMAT_API IsPathAbsolute(const std::string &fullPath)
 //------------------------------------------------------------------------------
-bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk)
+/**
+ * @return true if given path is absolute path, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsPathAbsolute(const std::string &fullPath)
+{
+   std::string fpath = GmatStringUtil::RemoveAllBlanks(fullPath);
+   bool retval = false;
+   
+   if (IsPathRelative(fpath))
+   {
+      retval = false;
+   }
+   else
+   {
+      if (IsOsWindows())
+      {
+         if (fpath.find(":") == 1 && fpath.find("\\") != fpath.npos)
+            retval = true;
+         else
+            retval = false;
+      }
+      else
+      {
+         if (fpath.find("/") == 0 && fpath.find("/") != fpath.npos)
+            retval = true;
+         else
+            retval = false;
+      }
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk = true)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk)
 {
    if (fname == "")
    {
-      if (blankIsOk)
+      if (isBlankOk)
          return true;
       else
          return false;
@@ -542,13 +634,13 @@ bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &
 
 
 //------------------------------------------------------------------------------
-// bool DoesDirectoryExist(const std::string &fullPath, bool blankIsOk = true)
+// bool DoesDirectoryExist(const std::string &fullPath, bool isBlankOk = true)
 //------------------------------------------------------------------------------
 /*
  * @return  true  If directory exist, false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsOk)
+bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool isBlankOk)
 {
    #ifdef DEBUG_DIR_EXIST
    MessageInterface::ShowMessage
@@ -557,7 +649,7 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsO
    
    if (fullPath == "")
    {
-      if (blankIsOk)
+      if (isBlankOk)
          return true;
       else
          return false;

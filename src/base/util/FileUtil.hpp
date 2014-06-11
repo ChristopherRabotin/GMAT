@@ -31,6 +31,7 @@ namespace GmatFileUtil
    static Real   COMPARE_TOLERANCE = 1.0e-9;
    
    std::string GMAT_API GetPathSeparator();
+   std::string GMAT_API ConvertToOsFileName(const std::string &fileName);
    std::string GMAT_API GetWorkingDirectory();
    bool        GMAT_API SetWorkingDirectory(const std::string &newDir);
    std::string GMAT_API GetApplicationPath();
@@ -39,11 +40,13 @@ namespace GmatFileUtil
    std::string GMAT_API ParseFileName(const std::string &fullPath, bool removeExt = false);
    std::string GMAT_API ParseFileExtension(const std::string &fullPath, bool prependDot = false);
    std::string GMAT_API GetInvalidFileNameMessage(Integer option = 1);
-
+   
+   bool GMAT_API IsOsWindows();
    bool GMAT_API IsPathRelative(const std::string &fullPath);
-   bool GMAT_API IsValidFileName(const std::string &fname, bool blankIsOk = true);
+   bool GMAT_API IsPathAbsolute(const std::string &fullPath);
+   bool GMAT_API IsValidFileName(const std::string &fname, bool isBlankOk = true);
    bool GMAT_API IsSameFileName(const std::string &fname1, const std::string &fname2);
-   bool GMAT_API DoesDirectoryExist(const std::string &dirPath, bool blankIsOk = true);
+   bool GMAT_API DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);
    bool GMAT_API DoesFileExist(const std::string &filename);
    bool GMAT_API GetLine(std::istream *inStream, std::string &line);
    bool GMAT_API IsAppInstalled(const std::string &appName, std::string &appLoc);

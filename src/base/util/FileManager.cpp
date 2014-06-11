@@ -51,6 +51,8 @@
 //#define DEBUG_FILE_RENAME
 //#define DEBUG_MAPPING
 //#define DEBUG_STARTUP_WITH_ABSOLUTE_PATH
+//#define DEBUG_BIN_DIR
+//#define DEBUG_FIND_PATH
 
 //---------------------------------
 // static data
@@ -117,12 +119,12 @@ FileManager* FileManager::theInstance = NULL;
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// FileManager* Instance()
+// FileManager* Instance(const std::string &appName = "GMAT.exe")
 //------------------------------------------------------------------------------
-FileManager* FileManager::Instance()
+FileManager* FileManager::Instance(const std::string &appName)
 {
    if (theInstance == NULL)
-      theInstance = new FileManager;
+      theInstance = new FileManager(appName);
    return theInstance;
 }
 
@@ -147,19 +149,33 @@ FileManager::~FileManager()
    }
 }
 
+
 //------------------------------------------------------------------------------
-// std::string GetBinDirectory()
+// std::string GetBinDirectory(const std::string &appName = "GMAT.exe")
 //------------------------------------------------------------------------------
-std::string FileManager::GetBinDirectory()
+std::string FileManager::GetBinDirectory(const std::string &appName)
 {
+   #ifdef DEBUG_BIN_DIR
+   MessageInterface::ShowMessage
+      ("FileManager::GetBinDirectory() entered, appName = %s, mAbsBinDir = '%s'\n",
+       appName.c_str(), mAbsBinDir.c_str());
+   #endif
+   
    if (mAbsBinDir == "")
-      SetBinDirectory();
+      SetBinDirectory(appName);
+   
+   #ifdef DEBUG_BIN_DIR
+   MessageInterface::ShowMessage
+      ("FileManager::GetBinDirectory() returning '%s'\n", mAbsBinDir.c_str());
+   #endif
    
    return mAbsBinDir;
 }
 
+
 //------------------------------------------------------------------------------
-// bool SetBinDirectory(const std::string &binDir = "")
+// bool SetBinDirectory(const std::string &appName = "GMAT.exe",
+//                      const std::string &binDir = "")
 //------------------------------------------------------------------------------
 /**
  * Sets bin directory where GMAT.exe reside. It sets only once when GMAT.exe
@@ -167,12 +183,12 @@ std::string FileManager::GetBinDirectory()
  * GmatFileUtil::GetApplicationPath().
  */
 //------------------------------------------------------------------------------
-bool FileManager::SetBinDirectory(const std::string &binDir)
+bool FileManager::SetBinDirectory(const std::string &appName, const std::string &binDir)
 {
    #ifdef DEBUG_BIN_DIR
    MessageInterface::ShowMessage
-      ("FileManager::SetBinDirectory() entered, binDir = '%s', mAbsBinDir = '%s'\n",
-       binDir.c_str(), mAbsBinDir.c_str());
+      ("FileManager::SetBinDirectory() entered, appName = '%s', binDir = '%s', mAbsBinDir = '%s'\n",
+       appName.c_str(), binDir.c_str(), mAbsBinDir.c_str());
    #endif
    
    if (mAbsBinDir == "")
@@ -180,16 +196,16 @@ bool FileManager::SetBinDirectory(const std::string &binDir)
       std::string appFullPath = binDir;
       if (binDir == "")
          appFullPath = GmatFileUtil::GetApplicationPath();
-
+      
       #ifdef DEBUG_BIN_DIR
       MessageInterface::ShowMessage("   appFullPath = '%s'\n", appFullPath.c_str());
       #endif
       
-      // Set absolute bin directory if it is not relative path and GMAT.exe found
+      // Set absolute bin directory if it is not relative path and appName found
       if (appFullPath[0] != '.')
       {
          std::string appPath = GmatFileUtil::ParsePathName(appFullPath);
-         std::string newPath = appPath + "GMAT.exe";
+         std::string newPath = appPath + appName;
          if (GmatFileUtil::DoesFileExist(newPath))
          {
             mAbsBinDir = appPath;
@@ -201,6 +217,13 @@ bool FileManager::SetBinDirectory(const std::string &binDir)
             #endif
             return true;
          }
+         else
+         {
+            #ifdef DEBUG_BIN_DIR
+            MessageInterface::ShowMessage
+               ("   The file '%s' does not exist\n", newPath.c_str());
+            #endif
+         }
       }
    }
    
@@ -211,19 +234,45 @@ bool FileManager::SetBinDirectory(const std::string &binDir)
    return false;
 }
 
+
 //------------------------------------------------------------------------------
-// std::string GetPathSeparator()
+// std::string GetGmatWorkingDirectory()
 //------------------------------------------------------------------------------
 /**
- * @return path separator; "/" or "\\" dependends on the platform
+ * Returns GMAT working directory.  This is the directory where script is passed
+ * to GMAT from the command line.
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetPathSeparator()
+std::string FileManager::GetGmatWorkingDirectory()
 {
-   // Just return "/" for all operating system for consistency (LOJ: 2011.03.18)
-   // return GmatFileUtil::GetPathSeparator();
+   return mGmatWorkingDir;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetGmatWorkingDirectory(const std::string &newDir = "")
+//------------------------------------------------------------------------------
+/**
+ * Sets GMAT working directory.  This is the directory where script is passed
+ * to GMAT from the command line.
+ */
+//------------------------------------------------------------------------------
+bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
+{
+   // Allow resetting on purpose
+   if (newDir == "")
+   {
+      mGmatWorkingDir = newDir;
+   }
+   else
+   {
+      if (DoesDirectoryExist(newDir))
+         mGmatWorkingDir = newDir;
+      else
+         return false;
+   }
    
-   return "/";
+   return true;
 }
 
 
@@ -231,7 +280,7 @@ std::string FileManager::GetPathSeparator()
 // std::string GetWorkingDirectory()
 //------------------------------------------------------------------------------
 /**
- * @return current working directory
+ * @return System's current working directory of the process
  */
 //------------------------------------------------------------------------------
 std::string FileManager::GetWorkingDirectory()
@@ -241,15 +290,178 @@ std::string FileManager::GetWorkingDirectory()
 
 
 //------------------------------------------------------------------------------
-// bool DoesDirectoryExist(const std::string &dirPath)
+// bool SetWorkingDirectory(const std::string &newDir = "")
+//------------------------------------------------------------------------------
+/**
+ *  Sets system's current working directory of the process.
+ */
+//------------------------------------------------------------------------------
+bool FileManager::SetWorkingDirectory(const std::string &newDir)
+{
+   return GmatFileUtil::SetWorkingDirectory(newDir);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string FindPath(const std::string &fileName, const FileType type, bool forInput)
+//------------------------------------------------------------------------------
+/**
+ * Finds path for requested fileName using the following file path search order.
+ * For Input:
+ *    1) Current GMAT working directory
+ *    2) Directory from the startup file in the application directory
+ * For Output:
+ *    1) Current GMAT working directory if it has relative path
+ *    2) Directory from the startup file in the application directory
+ *       if no absolute path found or filename has no path
+ *    3) Application directory
+ *
+ * It returns blank if path not found for input file
+ *
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::FindPath(const std::string &fileName, const FileType type, bool forInput)
+{
+   #ifdef DEBUG_FIND_PATH
+   MessageInterface::ShowMessage
+      ("FileManager::FindPath() entered, fileName = '%s', type = %d, forInput = %d\n", fileName.c_str(),
+       type, forInput);
+   #endif
+   
+   std::string fullname = GmatFileUtil::ConvertToOsFileName(fileName);
+   std::string path = GmatFileUtil::ParsePathName(fullname);
+   std::string file = GmatFileUtil::ParseFileName(fullname);
+   std::string gmatPath = mGmatWorkingDir;
+   std::string defaultPath = GetPathname(type);
+   std::string tempPath;
+   std::string pathToReturn;
+   
+   #ifdef DEBUG_FIND_PATH
+   MessageInterface::ShowMessage
+      ("   fullname = '%s'\n   path = '%s'\n   file = '%s'\n   gmatpath = '%s'\n"
+       "   defaultpath = '%s'\n", fullname.c_str(), path.c_str(), file.c_str(),
+       gmatPath.c_str(), defaultPath.c_str());
+   #endif
+   
+   if (GmatFileUtil::IsPathAbsolute(fullname))
+   {
+      #ifdef DEBUG_FIND_PATH
+      MessageInterface::ShowMessage("   The filename has absolute path\n");
+      #endif
+      
+      if (GmatFileUtil::DoesFileExist(fullname))
+         pathToReturn = fullname;
+      else
+      {
+         if (forInput)
+            pathToReturn = "";
+         else // for output
+         {
+            if (GmatFileUtil::DoesFileExist(defaultPath))
+               pathToReturn = defaultPath + fullname;
+            else
+               pathToReturn = mAbsBinDir + fullname;
+         }
+      }
+   }
+   else // filename without absolute path
+   {
+      #ifdef DEBUG_FIND_PATH
+      MessageInterface::ShowMessage("   The filename does not have absolute path\n");
+      #endif
+      
+      if (forInput)
+      {
+         // First search in GMAT working directory
+         tempPath = gmatPath + fullname;
+         
+         #ifdef DEBUG_FIND_PATH
+         MessageInterface::ShowMessage("   first search Path = '%s'\n", tempPath.c_str());
+         #endif
+         
+         if (GmatFileUtil::DoesFileExist(tempPath))
+            pathToReturn = tempPath;
+         else
+         {
+            #ifdef DEBUG_FIND_PATH
+            MessageInterface::ShowMessage
+               ("   '%s' does not exist, so search in default path '%s'\n",
+                tempPath.c_str());
+            #endif
+            
+            tempPath = defaultPath + fullname;
+            
+            #ifdef DEBUG_FIND_PATH
+            MessageInterface::ShowMessage
+               ("   next search path = '%s' \n", tempPath.c_str());
+            #endif
+            
+            if (GmatFileUtil::DoesFileExist(tempPath))
+               pathToReturn = tempPath;
+            else
+               pathToReturn = "";
+         }
+      }
+      else // for output
+      {
+         if (GmatFileUtil::IsPathRelative(fullname))
+         {
+            if (DoesDirectoryExist(mGmatWorkingDir, false))
+               pathToReturn = gmatPath + fullname;
+            else
+            {
+               if (DoesDirectoryExist(defaultPath, false))
+                  pathToReturn = defaultPath + fullname;
+               else
+                  pathToReturn = mAbsBinDir + fullname;
+            }
+         }
+         else // filename without any path
+         {
+            if (DoesDirectoryExist(defaultPath, false))
+               pathToReturn = defaultPath + fullname;
+            else
+               pathToReturn = mAbsBinDir + fullname;
+         }
+      }
+   }
+   
+   #ifdef DEBUG_FIND_PATH
+   MessageInterface::ShowMessage
+      ("FileManager::FindPath() returning '%s'\n", pathToReturn.c_str());
+   #endif
+   
+   return pathToReturn;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetPathSeparator()
+//------------------------------------------------------------------------------
+/**
+ * @return path separator; "/" or "\\" dependends on the platform
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetPathSeparator()
+{
+   // Changed back to return FileUtil::GetPathSeparator(); (LOJ: 2014.06.09)
+   // Just return "/" for all operating system for consistency (LOJ: 2011.03.18)
+   //return "/";
+   
+   return GmatFileUtil::GetPathSeparator();
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true)
 //------------------------------------------------------------------------------
 /*
  * @return  true  If directory exist, false otherwise
  */
 //------------------------------------------------------------------------------
-bool FileManager::DoesDirectoryExist(const std::string &dirPath)
+bool FileManager::DoesDirectoryExist(const std::string &dirPath, bool isBlankOk)
 {
-   return GmatFileUtil::DoesDirectoryExist(dirPath);
+   return GmatFileUtil::DoesDirectoryExist(dirPath, isBlankOk);
 }
 
 
@@ -417,7 +629,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          tmpStartupFilePath = newPath;
          
          // set current directory to new path
-         if (GmatFileUtil::SetWorkingDirectory(appPath))
+         if (SetWorkingDirectory(appPath))
          {
             MessageInterface::ShowMessage
                ("GMAT working directory set to '%s'\n", appPath.c_str());
@@ -2387,34 +2599,45 @@ void FileManager::ShowMaps(const std::string &msg)
 
 
 //------------------------------------------------------------------------------
-// FileManager()
+// FileManager(const std::string &appName = "GMAT.exe")
 //------------------------------------------------------------------------------
 /*
  * Constructor
  */
 //------------------------------------------------------------------------------
-FileManager::FileManager()
+FileManager::FileManager(const std::string &appName)
 {
    MessageInterface::SetLogEnable(false); // so that debug can be written from here
-
+   
    #ifdef DEBUG_FILE_MANAGER
-   MessageInterface::ShowMessage("FileManager::FileManager() entered\n");
+   MessageInterface::ShowMessage
+      ("FileManager::FileManager() entered, MAX_PATH = %d, MAX_PATH_LEN = %d\n",
+       MAX_PATH, GmatFile::MAX_PATH_LEN);
    #endif
-
+   
+   // Set directories
+   SetBinDirectory(appName);
+   SetGmatWorkingDirectory(mAbsBinDir);
+   SetWorkingDirectory(mAbsBinDir);
+   
+   // Set platform dependent data
+   mIsOsWindows = GmatFileUtil::IsOsWindows();
    mPathSeparator = GetPathSeparator();
    mStartupFileDir = GmatFileUtil::GetWorkingDirectory() + mPathSeparator;
+   
+   // Set GMAT startup file
    mStartupFileName = "gmat_startup_file.txt";
+   
    GmatGlobal::Instance()->AddHiddenCommand("SaveMission");
-
+   
    #ifdef DEBUG_STARTUP_FILE
    MessageInterface::ShowMessage
       ("FileManager::FileManager() entered, mPathSeparator='%s', "
        "mStartupFileDir='%s', mStartupFileName='%s'\n", mPathSeparator.c_str(),
        mStartupFileDir.c_str(), mStartupFileName.c_str());
    #endif
-
+   
    RefreshFiles();
-
 }
 
 
