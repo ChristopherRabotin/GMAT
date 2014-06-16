@@ -952,7 +952,7 @@ RampTableData* DataFile::ReadRampTableData()
 bool DataFile::CloseStream()
 {
    #ifdef DEBUG_FILE_ACCESS
-	  MessageInterface::ShowMessage("Enetered DataFile::CloseStream()\n");
+	  MessageInterface::ShowMessage("Entered DataFile::CloseStream()\n");
    #endif
 
    bool retval = false;

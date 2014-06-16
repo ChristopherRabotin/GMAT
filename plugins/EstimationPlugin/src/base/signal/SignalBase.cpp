@@ -915,7 +915,8 @@ void SignalBase::PrepareToPropagate()
    #endif
 
    // Set propagators for spacecraft and formations only
-   if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
+   if ((theData.tPropagator != NULL) &&
+       (theData.tNode->IsOfType(Gmat::SPACEOBJECT)))
    {
       PropSetup *tProp = theData.tPropagator;
       Propagator *prop = tProp->GetPropagator();
@@ -959,17 +960,20 @@ void SignalBase::PrepareToPropagate()
    }
 
    // Set propagators for spacecraft and formations only
-   if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
+   if ((theData.rPropagator != NULL) &&
+       (theData.rNode->IsOfType(Gmat::SPACEOBJECT)))
    {
       PropSetup *rProp = theData.rPropagator;
       Propagator *prop = rProp->GetPropagator();
       ODEModel *ode = rProp->GetODEModel();
       PropagationStateManager *psm = rProp->GetPropStateManager();
 
+      #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("rProp Integrator has address <%p>\n",
                rProp->GetPropagator());
          MessageInterface::ShowMessage("rProp ODEModel has address <%p>\n",
                rProp->GetODEModel());
+      #endif
 
       ObjectArray objects;
       objects.push_back(theData.rNode);
@@ -1106,12 +1110,26 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    if (forTransmitter)
    {
       if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
-         prop = theData.tPropagator->GetPropagator();
+      {
+         if (theData.tPropagator != NULL)
+            prop = theData.tPropagator->GetPropagator();
+         else
+            throw MeasurementException("The propagator for the transmitting "
+                  "participant \"" + theData.transmitParticipant +
+                  "\" has not been set in the signal that needs it");
+      }
    }
    else
    {
       if (theData.rNode->IsOfType(Gmat::SPACEOBJECT))
-         prop = theData.rPropagator->GetPropagator();
+      {
+         if (theData.rPropagator != NULL)
+            prop = theData.rPropagator->GetPropagator();
+         else
+            throw MeasurementException("The propagator for the receiving "
+                  "participant \"" + theData.transmitParticipant +
+                  "\" has not been set in the signal that needs it");
+      }
    }
 
    Rvector6 state;

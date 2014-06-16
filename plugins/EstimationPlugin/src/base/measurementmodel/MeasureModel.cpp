@@ -162,7 +162,7 @@ GmatBase* MeasureModel::Clone() const
 /**
  * Sets the solar system pointer
  *
- * @param ss The solar system teh model should use
+ * @param ss The solar system the model should use
  */
 //------------------------------------------------------------------------------
 void MeasureModel::SetSolarSystem(SolarSystem *ss)
@@ -974,6 +974,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
    }
    retval = true;
+
+   #ifdef DEBUG_FEASIBILITY
+      if (feasible)
+         MessageInterface::ShowMessage("*** Feasible signal detected\n");
+   #endif
 
    return retval; //theData;
 }

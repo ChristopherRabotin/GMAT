@@ -25,8 +25,7 @@
 #include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
 //#include "TimeSystemConverter.hpp"
-#include "SpaceObject.hpp"									// made changes by TUAN NGUYEN
-#include "MessageInterface.hpp"
+#include "SpaceObject.hpp"									// made changes by TUAN NGUYEN#include "MessageInterface.hpp"
 #include "EstimatorException.hpp"							// made changes by TUAN NGUYEN
 #include "Spacecraft.hpp"									// made changes by TUAN NGUYEN
 #include "GroundstationInterface.hpp"						// made changes by TUAN NGUYEN
@@ -162,8 +161,7 @@ Estimator::~Estimator()
 Estimator::Estimator(const Estimator& est) :
    Solver               (est),
    measurementNames     (est.measurementNames),
-   modelNames           (est.modelNames),
-   solveForStrings      (est.solveForStrings),
+   modelNames           (est.modelNames),   solveForStrings      (est.solveForStrings),
    absoluteTolerance    (est.absoluteTolerance),
    relativeTolerance    (est.relativeTolerance),
    propagatorName       (est.propagatorName),
@@ -221,8 +219,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       Solver::operator=(est);
 
       measurementNames = est.measurementNames;
-      modelNames       = est.modelNames;
-      solveForStrings  = est.solveForStrings;
+      modelNames       = est.modelNames;      solveForStrings  = est.solveForStrings;
 
       absoluteTolerance = est.absoluteTolerance;
       relativeTolerance = est.relativeTolerance;
@@ -279,11 +276,7 @@ bool Estimator::Initialize()
 
    if (retval)
    {
-//	  // check the validity of the input start and end times
-//      if (estimationEnd < estimationStart)
-//         throw SolverException(
-//            "Estimator error - estimation end time is before estimation start time.\n");
-
+//	  // check the validity of the input start and end times//      if (estimationEnd < estimationStart)//         throw SolverException(//            "Estimator error - estimation end time is before estimation start time.\n");
       // Check to make sure required objects have been set
       if (!propagator)
          throw SolverException(
@@ -533,12 +526,7 @@ std::string Estimator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)
       return propagatorName;
-//   if (id == EPOCH_FORMAT)								// made changes by TUAN NGUYEN
-//      return epochFormat;								// made changes by TUAN NGUYEN
-//   if (id == START_EPOCH)								// made changes by TUAN NGUYEN
-//      return startEpoch;								// made changes by TUAN NGUYEN
-//   if (id == END_EPOCH)									// made changes by TUAN NGUYEN
-//      return endEpoch;									// made changes by TUAN NGUYEN
+//   if (id == EPOCH_FORMAT)								// made changes by TUAN NGUYEN//      return epochFormat;								// made changes by TUAN NGUYEN//   if (id == START_EPOCH)								// made changes by TUAN NGUYEN//      return startEpoch;								// made changes by TUAN NGUYEN//   if (id == END_EPOCH)									// made changes by TUAN NGUYEN//      return endEpoch;									// made changes by TUAN NGUYEN
 
    return Solver::GetStringParameter(id);
 }
@@ -592,26 +580,7 @@ bool Estimator::SetStringParameter(const Integer id,
       propagatorName = value;
       return true;
    }
-//   if (id == EPOCH_FORMAT)												// made changes by TUAN NGUYEN
-//   {																	// made changes by TUAN NGUYEN
-//      epochFormat = value;												// made changes by TUAN NGUYEN
-//      return true;														// made changes by TUAN NGUYEN
-//   }																	// made changes by TUAN NGUYEN
-//   if (id == START_EPOCH)												// made changes by TUAN NGUYEN
-//   {																	// made changes by TUAN NGUYEN
-//      startEpoch = value;												// made changes by TUAN NGUYEN
-//      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
-//      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);	// made changes by TUAN NGUYEN
-//      return true;														// made changes by TUAN NGUYEN
-//   }																	// made changes by TUAN NGUYEN
-//   if (id == END_EPOCH)													// made changes by TUAN NGUYEN
-//   {																	// made changes by TUAN NGUYEN
-//      endEpoch = value;													// made changes by TUAN NGUYEN
-//      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
-//      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
-//      return true;														// made changes by TUAN NGUYEN
-//   }																	// made changes by TUAN NGUYEN
-
+//   if (id == EPOCH_FORMAT)												// made changes by TUAN NGUYEN//   {																	// made changes by TUAN NGUYEN//      epochFormat = value;												// made changes by TUAN NGUYEN//      return true;														// made changes by TUAN NGUYEN//   }																	// made changes by TUAN NGUYEN//   if (id == START_EPOCH)												// made changes by TUAN NGUYEN//   {																	// made changes by TUAN NGUYEN//      startEpoch = value;												// made changes by TUAN NGUYEN//      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN//      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);	// made changes by TUAN NGUYEN//      return true;														// made changes by TUAN NGUYEN//   }																	// made changes by TUAN NGUYEN//   if (id == END_EPOCH)													// made changes by TUAN NGUYEN//   {																	// made changes by TUAN NGUYEN//      endEpoch = value;													// made changes by TUAN NGUYEN//      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN//      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN//      return true;														// made changes by TUAN NGUYEN//   }																	// made changes by TUAN NGUYEN
    return Solver::SetStringParameter(id, value);
 }
 
@@ -1073,6 +1042,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (propagator != NULL)
             delete propagator;
          propagator = (PropSetup*)obj->Clone();
+         measManager.SetPropagator(propagator);
          return true;
       }
    }
@@ -1081,45 +1051,11 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    if (find(measList.begin(), measList.end(), name) != measList.end())
    {
-      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
-          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
-      {
-         modelNames.push_back(obj->GetName());
-         measManager.AddMeasurement((MeasurementModel *)obj);
+      if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&          !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))      {
+         modelNames.push_back(obj->GetName());         measManager.AddMeasurement((MeasurementModel *)obj);
          return true;
       }
-      if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
-      {
-         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Loading the measurement manager\n");
-         #endif
-
-         MeasurementModel *meas;
-         // Retrieve each measurement model from the tracking system ...
-         for (UnsignedInt i = 0;
-                  i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)
-         {
-            #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-               MessageInterface::ShowMessage("   Measurement %d\n", i);
-            #endif
-
-            // ...and pass them to the measurement manager
-            meas = ((TrackingSystem*)obj)->GetMeasurement(i);
-            if (meas == NULL)
-            {
-               MessageInterface::ShowMessage("Estimator cannot initialize "
-                        "because an expected MeasurementModel is NULL\n");
-               throw SolverException("In Estimator::SetRefObject, a "
-                        "measurement in the tracking system " + obj->GetName() +
-                        " is NULL\n");
-            }
-
-            modelNames.push_back(meas->GetName());
-            measManager.AddMeasurement(meas);
-         }
-         return true;
-      }
-   }
+      if (obj->IsOfType(Gmat::TRACKING_SYSTEM))      {         #ifdef DEBUG_ESTIMATOR_INITIALIZATION            MessageInterface::ShowMessage("Loading the measurement manager\n");         #endif         MeasurementModel *meas;         // Retrieve each measurement model from the tracking system ...         for (UnsignedInt i = 0;                  i < ((TrackingSystem*)obj)->GetMeasurementCount(); ++i)         {            #ifdef DEBUG_ESTIMATOR_INITIALIZATION               MessageInterface::ShowMessage("   Measurement %d\n", i);            #endif            // ...and pass them to the measurement manager            meas = ((TrackingSystem*)obj)->GetMeasurement(i);            if (meas == NULL)            {               MessageInterface::ShowMessage("Estimator cannot initialize "                        "because an expected MeasurementModel is NULL\n");               throw SolverException("In Estimator::SetRefObject, a "                        "measurement in the tracking system " + obj->GetName() +                        " is NULL\n");            }            modelNames.push_back(meas->GetName());            measManager.AddMeasurement(meas);         }         return true;      }   }
 
    return Solver::SetRefObject(obj, type, name);
 }
@@ -1581,94 +1517,9 @@ Integer Estimator::SetSolverResults(Real*, const std::string&,
 void Estimator::SetResultValue(Integer, Real, const std::string&)
 {
 }
-
-
-// made changes by TUAN NGUYEN
-//------------------------------------------------------------------------------
-// bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
-//                    Real inputStateElement, Real* outputStateElement)
-//------------------------------------------------------------------------------
-/**
- * Method used to convert result of a state's element in A1mjd to participant's 
- * coordinate system
- *
- * @param infor					information about state's element
- * @param epoch					the epoch at which the state is converted it's 
- *                              coordinate system
- * @param inputStateElement		state's element in GMAT internal coordinate system
- *                              (A1Mjd)
- * @param outputStateElemnet	state's element in participant's coordinate system
- *
-*/
-//------------------------------------------------------------------------------
-bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement)
-{
-
-   (*outputStateElement) = inputStateElement;
-
-   if (infor->object->IsOfType(Gmat::SPACEOBJECT))
-   {
-      if ((infor->elementName == "CartesianState")||(infor->elementName == "Position")||(infor->elementName == "Velocity"))
-	  {
-         SpaceObject* obj = (SpaceObject*) (infor->object);
-         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
-         CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);
-         if (cs == NULL)
-            throw GmatBaseException("Coordinate system for "+obj->GetName()+" is not set\n");
-
-         SpacePoint* sp = obj->GetJ2000Body();
-         CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",
-			"MJ2000Eq", sp, NULL, NULL, sp, cs->GetSolarSystem());
-		
-         CoordinateConverter* cv = new CoordinateConverter();
-         Rvector6 inState(0.0,0.0,0.0,0.0,0.0,0.0);
-		 Integer index;
-		 if ((infor->elementName == "CartesianState")||(infor->elementName == "Position"))
-            index = infor->subelement-1;
-		 else if (infor->elementName == "Velocity")
-			index = infor->subelement+2;
-		 else
-            throw EstimatorException("Error in Estimator object: Parameter %s has not defined in GMAT\n");
-
-         inState.SetElement(index, inputStateElement);
-         Rvector6 outState;
-		
-         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);
-
-         (*outputStateElement) = outState[index]; 
-         delete cv;
-	  }
-   }
-
-   return true;
-}
-
-
-// made changes by TUAN NGUYEN
-//-------------------------------------------------------------------------
-// void Estimator::GetEstimationState(GmatState& outputState)
-//-------------------------------------------------------------------------
-/**
- * This Method used to convert result of estimation state to participants'
- * coordinate system
- *
- * @param outState		estimation state in participants' coordinate systems
- *
-*/
-//-------------------------------------------------------------------------
-void Estimator::GetEstimationState(GmatState& outputState)
-{
-	const std::vector<ListItem*> *map = esm.GetStateMap();
-
-	Real outputStateElement;
-	outputState.SetSize(map->size());
-
+// made changes by TUAN NGUYEN//------------------------------------------------------------------------------// bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, //                    Real inputStateElement, Real* outputStateElement)//------------------------------------------------------------------------------/** * Method used to convert result of a state's element in A1mjd to participant's  * coordinate system * * @param infor					information about state's element * @param epoch					the epoch at which the state is converted it's  *                              coordinate system * @param inputStateElement		state's element in GMAT internal coordinate system *                              (A1Mjd) * @param outputStateElemnet	state's element in participant's coordinate system **///------------------------------------------------------------------------------bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement){   (*outputStateElement) = inputStateElement;   if (infor->object->IsOfType(Gmat::SPACEOBJECT))   {      if ((infor->elementName == "CartesianState")||(infor->elementName == "Position")||(infor->elementName == "Velocity"))	  {         SpaceObject* obj = (SpaceObject*) (infor->object);         std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);         CoordinateSystem* cs = (CoordinateSystem*) obj->GetRefObject(Gmat::COORDINATE_SYSTEM, csName);         if (cs == NULL)            throw GmatBaseException("Coordinate system for "+obj->GetName()+" is not set\n");         SpacePoint* sp = obj->GetJ2000Body();         CoordinateSystem* gmatcs = CoordinateSystem::CreateLocalCoordinateSystem("bodyInertial",			"MJ2000Eq", sp, NULL, NULL, sp, cs->GetSolarSystem());		         CoordinateConverter* cv = new CoordinateConverter();         Rvector6 inState(0.0,0.0,0.0,0.0,0.0,0.0);		 Integer index;		 if ((infor->elementName == "CartesianState")||(infor->elementName == "Position"))            index = infor->subelement-1;		 else if (infor->elementName == "Velocity")			index = infor->subelement+2;		 else            throw EstimatorException("Error in Estimator object: Parameter %s has not defined in GMAT\n");         inState.SetElement(index, inputStateElement);         Rvector6 outState;		         cv->Convert(A1Mjd(epoch), inState, gmatcs, outState, cs);         (*outputStateElement) = outState[index];          delete cv;	  }   }   return true;}// made changes by TUAN NGUYEN//-------------------------------------------------------------------------// void Estimator::GetEstimationState(GmatState& outputState)//-------------------------------------------------------------------------/** * This Method used to convert result of estimation state to participants' * coordinate system * * @param outState		estimation state in participants' coordinate systems **///-------------------------------------------------------------------------void Estimator::GetEstimationState(GmatState& outputState){	const std::vector<ListItem*> *map = esm.GetStateMap();	Real outputStateElement;	outputState.SetSize(map->size());
 	for (UnsignedInt i = 0; i < map->size(); ++i)
-	{
-		ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
-		outputState[i] = outputStateElement;
-	}
-}
+	{		ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);		outputState[i] = outputStateElement;	}}
 
 
 

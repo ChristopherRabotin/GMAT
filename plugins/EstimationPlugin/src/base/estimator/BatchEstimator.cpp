@@ -59,8 +59,7 @@ BatchEstimator::PARAMETER_TEXT[] =
    "EstimationEpochFormat",         // The epoch of the solution
    "EstimationEpoch",				// The epoch of the solution
 //   "UsePrioriEstimate",											// made changes by TUAN NGUYEN
-   "InversionAlgorithm",
-   // todo Add useApriori here
+   "InversionAlgorithm",   // todo Add useApriori here
 };
 
 const Gmat::ParameterType
@@ -69,8 +68,7 @@ BatchEstimator::PARAMETER_TYPE[] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
 //   Gmat::ON_OFF_TYPE,												// made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,
-};
+   Gmat::STRING_TYPE,};
 
 
 //------------------------------------------------------------------------------
@@ -94,9 +92,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    advanceToEstimationEpoch   (false),
 //   converged                  (false),
    estimationStatus           (UNKNOWN),
-   chooseRMSP                 (true),
-   inversionType              ("")
-{
+   chooseRMSP                 (true),   inversionType              (""){
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
 }
@@ -136,9 +132,7 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    advanceToEstimationEpoch   (false),
 //   converged                  (false),
    estimationStatus           (UNKNOWN),
-   chooseRMSP                 (est.chooseRMSP),
-   inversionType              (est.inversionType)
-{
+   chooseRMSP                 (est.chooseRMSP),   inversionType              (est.inversionType){
    // Clear the loop buffer
    for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
       delete outerLoopBuffer[i];
@@ -180,9 +174,7 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
       for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
          delete outerLoopBuffer[i];
       outerLoopBuffer.clear();
-
-      inversionType = est.inversionType;
-   }
+      inversionType = est.inversionType;   }
 
    return *this;
 }
@@ -306,12 +298,7 @@ std::string BatchEstimator::GetStringParameter(const Integer id) const
       return estEpoch;
    }
 
-   if (id == INVERSION_ALGORITHM)
-   {
-      return inversionType;
-   }
-
-   return Estimator::GetStringParameter(id);
+   if (id == INVERSION_ALGORITHM)   {      return inversionType;   }   return Estimator::GetStringParameter(id);
 }
 
 
@@ -353,20 +340,7 @@ bool BatchEstimator::SetStringParameter(const Integer id,
       return retVal;
    }
 
-   if (id == INVERSION_ALGORITHM)
-   {
-      if ((value == "Internal") || (value == "Schur") || (value == "Cholesky"))
-      {
-         inversionType = value;
-         return true;
-      }
-      else
-         throw SolverException("The requested inversion routine is not an "
-               "allowed value for the field \"InversionAlgorithm\"; allowed "
-               "values are \"Internal\", \"Schur\" and \"Cholesky\"");
-   }
-
-   if (id == ESTIMATION_EPOCH)
+   if (id == INVERSION_ALGORITHM)   {      if ((value == "Internal") || (value == "Schur") || (value == "Cholesky"))      {         inversionType = value;         return true;      }      else         throw SolverException("The requested inversion routine is not an "               "allowed value for the field \"InversionAlgorithm\"; allowed "               "values are \"Internal\", \"Schur\" and \"Cholesky\"");   }   if (id == ESTIMATION_EPOCH)
    {
       if ((estEpochFormat == "FromParticipants") && (value != ""))
       {
@@ -505,8 +479,7 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// std::string BatchEstimator::GetOnOffParameter(const Integer id) const
-//------------------------------------------------------------------------------
+// std::string BatchEstimator::GetOnOffParameter(const Integer id) const//------------------------------------------------------------------------------
 /**
  * This method gets "On" or "Off" value
  *
@@ -515,19 +488,8 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
  * @return "On" or "Off" value
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
-std::string BatchEstimator::GetOnOffParameter(const Integer id) const
-{
-//   if (id == USE_PRIORI_ESTIMATE)
-//      return (useApriori ? "On" : "Off");
-
-   return Estimator::GetOnOffParameter(id);
-}
-
-
-//------------------------------------------------------------------------------
-// bool BatchEstimator::SetOnOffParameter(const Integer id) const
-//------------------------------------------------------------------------------
+// made changes by TUAN NGUYENstd::string BatchEstimator::GetOnOffParameter(const Integer id) const{//   if (id == USE_PRIORI_ESTIMATE)//      return (useApriori ? "On" : "Off");   return Estimator::GetOnOffParameter(id);}//------------------------------------------------------------------------------
+// bool BatchEstimator::SetOnOffParameter(const Integer id) const//------------------------------------------------------------------------------
 /**
  * This method gets "On" or "Off" value
  *
@@ -537,28 +499,7 @@ std::string BatchEstimator::GetOnOffParameter(const Integer id) const
  * @return true value when it successfully sets the value, false otherwise. 
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
-bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
-{
-//   if (id == USE_PRIORI_ESTIMATE)
-//  {
-//      if (value == "On")
-//	  {
-//        useApriori = true;
-//		 return true;
-//	  }
-//      if (value == "Off")
-//	  {
-//        useApriori = false;
-//		 return true;
-//	  }
-//
-//	  return false;
-//   }
-
-   return Estimator::SetOnOffParameter(id, value);
-}
-
+// made changes by TUAN NGUYENbool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value){//   if (id == USE_PRIORI_ESTIMATE)//  {//      if (value == "On")//	  {//        useApriori = true;//		 return true;//	  }//      if (value == "Off")//	  {//        useApriori = false;//		 return true;//	  }////	  return false;//   }   return Estimator::SetOnOffParameter(id, value);}
 
 //------------------------------------------------------------------------------
 // const StringArray& GetPropertyEnumStrings(const Integer id) const
@@ -803,9 +744,9 @@ bool BatchEstimator::Finalize()
 //------------------------------------------------------------------------------
 void BatchEstimator::CompleteInitialization()
 {
-   #ifdef WALK_STATE_MACHINE
+//   #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
-   #endif
+//   #endif
 
    // Show all residuals plots
    if (showAllResiduals)
@@ -841,14 +782,15 @@ void BatchEstimator::CompleteInitialization()
       currentEpoch         = gs->GetEpoch();
 
       // Tell the measManager to complete its initialization
-      bool measOK = measManager.Initialize();
+      bool measOK = measManager.SetPropagator(propagator);
+      measOK = measOK && measManager.Initialize();
       if (!measOK)
          throw SolverException(
                "BatchEstimator::CompleteInitialization - error initializing "
                "MeasurementManager.\n");
 
       // Now load up the observations
-      measManager.PrepareForProcessing();
+      measManager.PrepareForProcessing(false);
       UnsignedInt numRec = measManager.LoadObservations();					// made changes by TUAN NGUYEN
 	  if (numRec == 0)														// made changes by TUAN NGUYEN
          throw EstimatorException("No observation data is used for estimation\n");	// made changes by TUAN NGUYEN
@@ -1000,19 +942,12 @@ void BatchEstimator::FindTimeStep()
    {
       // Estimate and check for convergence after processing measurements
       currentState = ESTIMATING;
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");
-   #endif
-
-   }
+   #ifdef WALK_STATE_MACHINE      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");   #endif   }
    else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("Next state will be CALCULATING\n");
-   #endif
-   }
+   #ifdef WALK_STATE_MACHINE      MessageInterface::ShowMessage("Next state will be CALCULATING\n");   #endif   }
    else
    {
       // Calculate the time step in seconds and stay in the PROPAGATING state;
@@ -1039,8 +974,7 @@ void BatchEstimator::FindTimeStep()
 void BatchEstimator::CalculateData()
 {
    #ifdef WALK_STATE_MACHINE
-	  MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
-   #endif
+	  MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");   #endif
 
    // Update the STM
    esm.MapObjectsToSTM();
@@ -1071,12 +1005,7 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
-   
-   #ifdef WALK_STATE_MACHINE
-	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
-   #endif
-
-}
+      #ifdef WALK_STATE_MACHINE	  MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");   #endif}
 
 
 //------------------------------------------------------------------------------
@@ -1185,8 +1114,7 @@ void BatchEstimator::CheckCompletion()
             for (UnsignedInt j = 0; j <  stateSize; ++j)
                information(i,j) = 0.0;
       }
-	  measurementResiduals.clear();
-      measurementEpochs.clear();
+	  measurementResiduals.clear();      measurementEpochs.clear();
       measurementResidualID.clear();
 
       for (UnsignedInt i = 0; i <  stateSize; ++i)
@@ -1784,34 +1712,15 @@ void BatchEstimator::WriteHeader()
 
    /// 3. Write data editing criteria:
    textFile.precision(2);
-   textFile << "Data Editing Criteria:\n"
-	        << "   " << GetName() << ".OLSEInitialRMSSigma        = " << maxResidualMult << "\n"
-	        << "   " << GetName() << ".OLSEMultiplicativeConstant = " << constMult << "\n"
-			<< "   " << GetName() << ".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
-
-
+   textFile << "Data Editing Criteria:\n"	        << "   " << GetName() << ".OLSEInitialRMSSigma        = " << maxResidualMult << "\n"	        << "   " << GetName() << ".OLSEMultiplicativeConstant = " << constMult << "\n"			<< "   " << GetName() << ".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
    /// 4. Write notations used in report file:
-   textFile << "Notations Used In Report File: \n" 
-            << "   N    : Not Edited \n"                                
-            << "   U    : Unused Because No Computed Value Configuration Available \n"
-            << "   R    : Out of Ramped Table Range \n"
-            << "   BXY  : Blocked.  X = Path Index.  Y = Count Index (Doppler) \n"
-            << "   IRMS : Edited by Initial RMS Sigma Filter \n"
-            << "   OLSE : Edited by Outer-Loop Sigma Editor \n\n";
-
-
+   textFile << "Notations Used In Report File: \n"             << "   N    : Not Edited \n"                                            << "   U    : Unused Because No Computed Value Configuration Available \n"            << "   R    : Out of Ramped Table Range \n"            << "   BXY  : Blocked.  X = Path Index.  Y = Count Index (Doppler) \n"            << "   IRMS : Edited by Initial RMS Sigma Filter \n"            << "   OLSE : Edited by Outer-Loop Sigma Editor \n\n";
    /// 5. Write report header
    if (this->textFileMode == "Normal")
-      textFile << "Iter   RecNum   UTCGregorian-Epoch       Obs Type        Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
-   else if (this->textFileMode == "Verbose")
-   {
-      textFile << "Iter   RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type        Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
-      // fill out N/A for partial derivative
+      textFile << "Iter   RecNum   UTCGregorian-Epoch       Obs Type        Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";   else if (this->textFileMode == "Verbose")   {      textFile << "Iter   RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type        Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";      // fill out N/A for partial derivative
 	  for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
 		 textFile << "                         ";
-	  textFile << "     Uplink-Band         Uplink-Frequency           Range-Modulo         Doppler-Interval\n";
-   }
-   textFile.flush();
+	  textFile << "     Uplink-Band         Uplink-Frequency           Range-Modulo         Doppler-Interval\n";   }   textFile.flush();
 
 }
 
@@ -1833,60 +1742,14 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 
    textFile.precision(8);
    for (int i = 0; i < map->size(); ++i) 
-   {
-      textFile << "   "
+   {      textFile << "   "
                << (*map)[i]->objectName << "."
                << (*map)[i]->elementName << "."
                << (*map)[i]->subelement << "     "
                << GmatStringUtil::ToString(oldEstimationState[i]) << "     "					// initial state
 			   << GmatStringUtil::ToString((*estimationState)[i]) << "     "					// updated state
 			   << GmatStringUtil::ToString(dx[i]) << "\n";									// change in state
-   }
-   textFile << "\n";
-
-
-   /// 2. Write statistics
-   textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
-	        << "   Total Number Of Records : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
-			<< "   Records Removed Due To :\n"
-			<< "      . No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"
-			<< "      . Out of Ramped Table Range : " << numRemovedRecords["R"] << "\n"
-			<< "      . Signal Blocked : " << numRemovedRecords["B"] << "\n"
-			<< "      . Sigma Editing : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n"
-			<< "   Records Used For Estimation : " << measurementResiduals.size() << "\n";
-   textFile.precision(12);
-   textFile << "   WeightedRMS Residuals : " << newResidualRMS << "\n"
-            << "   PredictedRMS Residuals : " << predictedRMS << "\n";
-   }
-
-   if ((sState == CHECKINGRUN)||(sState == FINISHED))
-   {
-   textFile << "   DC Status : ";
-   switch(estimationStatus)
-   {
-   case ABSOLUTETOL_CONVERGED:
-	  textFile << "Absolute Tolerance Converged\n";
-	  break;
-   case RELATIVETOL_CONVERGED:
-	  textFile << "Relative Tolerance Converged\n";
-	  break;
-   case ABS_AND_REL_TOL_CONVERGED:
-	  textFile << "Absolute and Relative Tolerance Converged\n";
-	  break;
-   case MAX_CONSECUTIVE_DIVERGED:
-	  textFile << "Maximum Consecutive Diverged\n";
-	  break;
-   case CONVERGING:
-      textFile << "Converging\n";
-	  break;
-   case DIVERGING:
-      textFile << "Diverging\n";
-	  break;
-   case UNKNOWN:
-      textFile << "Unknown\n";
-	  break;
-   }
-   textFile << "\n";
+   }   textFile << "\n";   /// 2. Write statistics   textFile << "Iteration " << iterationsTaken << ":  Statistics \n"	        << "   Total Number Of Records : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"			<< "   Records Removed Due To :\n"			<< "      . No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"			<< "      . Out of Ramped Table Range : " << numRemovedRecords["R"] << "\n"			<< "      . Signal Blocked : " << numRemovedRecords["B"] << "\n"			<< "      . Sigma Editing : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n"			<< "   Records Used For Estimation : " << measurementResiduals.size() << "\n";   textFile.precision(12);   textFile << "   WeightedRMS Residuals : " << newResidualRMS << "\n"            << "   PredictedRMS Residuals : " << predictedRMS << "\n";   }   if ((sState == CHECKINGRUN)||(sState == FINISHED))   {   textFile << "   DC Status : ";   switch(estimationStatus)   {   case ABSOLUTETOL_CONVERGED:	  textFile << "Absolute Tolerance Converged\n";	  break;   case RELATIVETOL_CONVERGED:	  textFile << "Relative Tolerance Converged\n";	  break;   case ABS_AND_REL_TOL_CONVERGED:	  textFile << "Absolute and Relative Tolerance Converged\n";	  break;   case MAX_CONSECUTIVE_DIVERGED:	  textFile << "Maximum Consecutive Diverged\n";	  break;   case CONVERGING:      textFile << "Converging\n";	  break;   case DIVERGING:      textFile << "Diverging\n";	  break;   case UNKNOWN:      textFile << "Unknown\n";	  break;   }   textFile << "\n";
    }
 
    textFile.flush();
@@ -1989,274 +1852,4 @@ bool BatchEstimator::DataFilter()
    return retVal;
 }
 
-
-
-//------------------------------------------------------------------------------
-// Integer SchurInvert(Real *sum1, Integer array_size)
-//------------------------------------------------------------------------------
-/**
- * Matrix inversion routine using the Schur identity
- *
- * This method is a port of the inversion code from GTDS, as ported by Angel
- * Wang of Thinking Systems and then integrated into GMAT by D. Conway.
- *
- * @param sum1 The matrix to be inverted, packed in upper triangular form
- * @param array_size The size of the sum1 array
- *
- * @return 0 on success, anything else indicates a problem
- */
-//------------------------------------------------------------------------------
-Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size)
-{
-   #ifdef DEBUG_SCHUR
-      MessageInterface::ShowMessage("Performing Schur inversion\n   ");
-      MessageInterface::ShowMessage("array_size = %d\n", array_size);
-      MessageInterface::ShowMessage("Packed array:   [");
-      for (UnsignedInt i = 0; i < array_size; ++i)
-      {
-         if (i > 0)
-            MessageInterface::ShowMessage(", ");
-         MessageInterface::ShowMessage("%.15le", sum1[i]);
-      }
-      MessageInterface::ShowMessage("]\n");
-   #endif
-
-   Integer retval = -1;
-
-   // Check to see if the upper left element is invertible
-   if ((array_size > 0) && (sum1[0] != 0.0))
-   {
-      Real *delta = new Real[array_size];
-      Integer ij = 0, now = ij + 1;
-      Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size*8)-1)/2);
-
-      sum1[0] = 1.0/ sum1[0];
-      if (rowCount > 1)
-      {
-         Integer i, i1, j, j1, jl, jn, l, l1, lPlus1, n, nn, nMinus1;
-         Integer rowCountMinus1 = rowCount - 1;
-
-         // Recursively invert the n X n matrix knowing the inverse of the
-         // (n-1) X (n-1) matrix until the inverted matrix is found
-         for (n = 2; n <=rowCount; ++n)
-         {
-            nMinus1 = n-1;
-            l1 = 0;
-
-            // Compute delta working arrays
-            for (l = 1; l <= nMinus1; ++l)
-            {
-               j1 = 0;
-               delta[l-1] = 0.0;
-
-               for (j = 1; j <= l; ++j)
-               {
-                  jl = j1 + l-1;
-                  jn = j1 + n-1;
-                  delta[l-1] = delta[l-1] + (sum1[jl] * sum1[jn]);
-                  j1 +=  rowCount - j;
-               }
-
-               if (l != nMinus1)
-               {
-                  lPlus1 = l + 1;
-
-                  for (j = lPlus1; j <= nMinus1; ++j)
-                  {
-                     jn = j1 + n-1;
-                     jl = l1 + j-1;
-                     delta[l-1] += (sum1[jl] * sum1[jn]);
-                     j1 += rowCount - j;
-                  }
-                  l1 += rowCount - l;
-               }
-            }
-            j1 = n;
-            nn = rowCountMinus1 + n;
-
-            // Compute W
-            for (j = 1; j <= nMinus1; ++j)
-            {
-               sum1[nn-1] -= (delta[j-1] * sum1[j1-1]);
-               j1 += rowCount - j;
-            }
-
-            // Check if observation is '0'; if so, throw an exception
-            now = n + ij;
-            if (now > rowCount)
-               if (ij != 0)
-                  break;
-
-            if (sum1[nn-1] == 0.0)
-               continue;
-
-            sum1[nn-1] = 1.0 / sum1[nn-1];
-            j1 = n;
-
-            // Compute Y
-            for (j=1; j <= nMinus1; ++j)
-            {
-               sum1[j1-1] = -delta[j-1] * sum1[nn-1];
-               j1 += rowCount - j;
-            }
-
-            // Compute X
-            i1 = n;
-            for (i=1; i <= nMinus1; ++i)
-            {
-               j1 = i;
-               for (j=1; j <= i; ++j)
-               {
-                  sum1[j1-1] -= (sum1[i1-1] * delta[j-1]);
-                  j1 += rowCount - j;
-               }
-               i1 += rowCount - i;
-            }
-            rowCountMinus1 += rowCount - n;
-         }
-      }
-      delete [] delta;
-      retval = 0;
-   }
-   else
-   {
-      if (array_size == 0)
-         throw SolverException("Schur inversion cannot proceed; the size of "
-               "the array being inverted is zero");
-
-      if (sum1[0] == 0.0)
-         throw SolverException("Schur inversion cannot proceed; the upper "
-               "left element of the array being inverted is zero");
-   }
-
-   return retval;
-}
-
-//------------------------------------------------------------------------------
-// Integer CholeskyInvert(Real* SUM1, Integer array_size)
-//------------------------------------------------------------------------------
-/**
- * Matrix inversion routine using Cholesky decomposition
- *
- * This method is a port of the inversion code from GEODYN, as ported by Angel
- * Wang of Thinking Systems and then integrated into GMAT by D. Conway.
- *
- * @param sum1 The matrix to be inverted, packed in upper triangular form
- * @param array_size The size of the sum1 array
- *
- * @return 0 on success, anything else indicates a problem
- */
-//------------------------------------------------------------------------------
-Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size)
-{
-   Integer retval = -1;
-
-   Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size*8) - 1) / 2);
-   Integer i, i1, i2, i3, ist, iERowCount, iError = 0, il, il1, il2;
-   Integer j, k, k1, kl, iLeRowCount, rowCountIf, iPivot;
-   Real dPivot, din, dsum, tolerance;
-   Real work;
-
-   const Real epsilon = 1.0e-8;
-
-   rowCountIf = 0;
-   j = 1;
-
-   for (k = 1; k <= rowCount; ++k)
-   {
-      iLeRowCount = k - 1;
-      tolerance = abs(epsilon * sum1[j-1]);
-      for (i = k; i <= rowCount; ++i)
-      {
-         dsum = 0.0;
-         if(k != 1)
-         {
-            for (il = 1; il <= iLeRowCount; ++il)
-            {
-               kl = k-il;
-               il1 = (kl-1) * rowCount - (kl-1) * kl / 2;
-               dsum = dsum + sum1[il1 + k - 1] * sum1[il1 + i - 1];
-            }
-         }
-         dsum = sum1[j-1] - dsum;
-         if (i > k)
-            sum1[j -1] = dsum * dPivot;
-         else if (dsum > tolerance)
-         {
-            dPivot = sqrt(dsum);
-            sum1[j-1] = dPivot;
-            dPivot = 1.0/dPivot;
-         }
-         else if (iError < 0)
-         {
-            iError = k-1;
-            dPivot = GmatMathUtil::Sqrt(dsum);
-            sum1[j-1] = dPivot;
-            dPivot = 1.0 / dPivot;
-         }
-         else if (dsum < 0.0)
-         {
-            retval = 1;
-            break;            // Throw here?
-         }
-
-         j = j + 1;
-      }
-      j = j + rowCountIf;
-   }
-
-   if (retval == -1)
-   {
-      // Invert R
-      j = (rowCount - 1) * rowCount + (3 - rowCount) * rowCount/2;
-
-      sum1[j-1] = 1.0 / sum1[j-1];
-      iPivot = j;
-
-      for (i = 2; i <= rowCount; ++i)
-      {
-         j = iPivot - rowCountIf;
-         iPivot = j - i;
-         din = 1.0 / sum1[iPivot-1];
-         sum1[iPivot-1] = din;
-
-         i1 = rowCount + 2 - i;
-         i2 = i - 1;
-         i3 = i1 - 1;
-         il1 = (i3 - 1) * rowCount - (i3 - 1) * i3/2;
-         for (k1 = 1; k1 <= i2; ++k1)
-         {
-            k = rowCount + 1 - k1;
-            j = j - 1;
-            work = 0.0;
-            for (il = i1; il <= k; ++il)
-            {
-               il2 = (il - 1) * rowCount - (il - 1) * il/2 + k;
-               work = work + sum1[il1+il-1] * sum1[il2-1];
-            }
-            sum1[j-1] = -din * work;
-         }
-      }
-
-      // Inverse(A) = INV(R) * TRN(INV(R));
-      il = 1;
-      for (i = 1; i <= rowCount; ++i)
-      {
-         il1 = (i - 1) * rowCount - (i - 1) * i/2;
-         for (j = i; j <= rowCount; ++j)
-         {
-            il2 = (j - 1) * rowCount - (j - 1) * j/2;
-            work = 0.0;
-            for (k = j; k <= rowCount; ++k)
-               work = work + sum1[il1+k-1] * sum1[il2+k-1];
-
-            sum1[il-1] = work;
-            il = il + 1;
-         }
-         il = il + rowCountIf;
-      }
-      retval = 0;
-   }
-
-   return retval;
-}
+//------------------------------------------------------------------------------// Integer SchurInvert(Real *sum1, Integer array_size)//------------------------------------------------------------------------------/** * Matrix inversion routine using the Schur identity * * This method is a port of the inversion code from GTDS, as ported by Angel * Wang of Thinking Systems and then integrated into GMAT by D. Conway. * * @param sum1 The matrix to be inverted, packed in upper triangular form * @param array_size The size of the sum1 array * * @return 0 on success, anything else indicates a problem *///------------------------------------------------------------------------------Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size){   #ifdef DEBUG_SCHUR      MessageInterface::ShowMessage("Performing Schur inversion\n   ");      MessageInterface::ShowMessage("array_size = %d\n", array_size);      MessageInterface::ShowMessage("Packed array:   [");      for (UnsignedInt i = 0; i < array_size; ++i)      {         if (i > 0)            MessageInterface::ShowMessage(", ");         MessageInterface::ShowMessage("%.15le", sum1[i]);      }      MessageInterface::ShowMessage("]\n");   #endif   Integer retval = -1;   // Check to see if the upper left element is invertible   if ((array_size > 0) && (sum1[0] != 0.0))   {      Real *delta = new Real[array_size];      Integer ij = 0, now = ij + 1;      Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size*8)-1)/2);      sum1[0] = 1.0/ sum1[0];      if (rowCount > 1)      {         Integer i, i1, j, j1, jl, jn, l, l1, lPlus1, n, nn, nMinus1;         Integer rowCountMinus1 = rowCount - 1;         // Recursively invert the n X n matrix knowing the inverse of the         // (n-1) X (n-1) matrix until the inverted matrix is found         for (n = 2; n <=rowCount; ++n)         {            nMinus1 = n-1;            l1 = 0;            // Compute delta working arrays            for (l = 1; l <= nMinus1; ++l)            {               j1 = 0;               delta[l-1] = 0.0;               for (j = 1; j <= l; ++j)               {                  jl = j1 + l-1;                  jn = j1 + n-1;                  delta[l-1] = delta[l-1] + (sum1[jl] * sum1[jn]);                  j1 +=  rowCount - j;               }               if (l != nMinus1)               {                  lPlus1 = l + 1;                  for (j = lPlus1; j <= nMinus1; ++j)                  {                     jn = j1 + n-1;                     jl = l1 + j-1;                     delta[l-1] += (sum1[jl] * sum1[jn]);                     j1 += rowCount - j;                  }                  l1 += rowCount - l;               }            }            j1 = n;            nn = rowCountMinus1 + n;            // Compute W            for (j = 1; j <= nMinus1; ++j)            {               sum1[nn-1] -= (delta[j-1] * sum1[j1-1]);               j1 += rowCount - j;            }            // Check if observation is '0'; if so, throw an exception            now = n + ij;            if (now > rowCount)               if (ij != 0)                  break;            if (sum1[nn-1] == 0.0)               continue;            sum1[nn-1] = 1.0 / sum1[nn-1];            j1 = n;            // Compute Y            for (j=1; j <= nMinus1; ++j)            {               sum1[j1-1] = -delta[j-1] * sum1[nn-1];               j1 += rowCount - j;            }            // Compute X            i1 = n;            for (i=1; i <= nMinus1; ++i)            {               j1 = i;               for (j=1; j <= i; ++j)               {                  sum1[j1-1] -= (sum1[i1-1] * delta[j-1]);                  j1 += rowCount - j;               }               i1 += rowCount - i;            }            rowCountMinus1 += rowCount - n;         }      }      delete [] delta;      retval = 0;   }   else   {      if (array_size == 0)         throw SolverException("Schur inversion cannot proceed; the size of "               "the array being inverted is zero");      if (sum1[0] == 0.0)         throw SolverException("Schur inversion cannot proceed; the upper "               "left element of the array being inverted is zero");   }   return retval;}//------------------------------------------------------------------------------// Integer CholeskyInvert(Real* SUM1, Integer array_size)//------------------------------------------------------------------------------/** * Matrix inversion routine using Cholesky decomposition * * This method is a port of the inversion code from GEODYN, as ported by Angel * Wang of Thinking Systems and then integrated into GMAT by D. Conway. * * @param sum1 The matrix to be inverted, packed in upper triangular form * @param array_size The size of the sum1 array * * @return 0 on success, anything else indicates a problem *///------------------------------------------------------------------------------Integer BatchEstimator::CholeskyInvert(Real* sum1, Integer array_size){   Integer retval = -1;   Integer rowCount = (Integer)((GmatMathUtil::Sqrt(1 + array_size*8) - 1) / 2);   Integer i, i1, i2, i3, ist, iERowCount, iError = 0, il, il1, il2;   Integer j, k, k1, kl, iLeRowCount, rowCountIf, iPivot;   Real dPivot, din, dsum, tolerance;   Real work;   const Real epsilon = 1.0e-8;   rowCountIf = 0;   j = 1;   for (k = 1; k <= rowCount; ++k)   {      iLeRowCount = k - 1;      tolerance = abs(epsilon * sum1[j-1]);      for (i = k; i <= rowCount; ++i)      {         dsum = 0.0;         if(k != 1)         {            for (il = 1; il <= iLeRowCount; ++il)            {               kl = k-il;               il1 = (kl-1) * rowCount - (kl-1) * kl / 2;               dsum = dsum + sum1[il1 + k - 1] * sum1[il1 + i - 1];            }         }         dsum = sum1[j-1] - dsum;         if (i > k)            sum1[j -1] = dsum * dPivot;         else if (dsum > tolerance)         {            dPivot = sqrt(dsum);            sum1[j-1] = dPivot;            dPivot = 1.0/dPivot;         }         else if (iError < 0)         {            iError = k-1;            dPivot = GmatMathUtil::Sqrt(dsum);            sum1[j-1] = dPivot;            dPivot = 1.0 / dPivot;         }         else if (dsum < 0.0)         {            retval = 1;            break;            // Throw here?         }         j = j + 1;      }      j = j + rowCountIf;   }   if (retval == -1)   {      // Invert R      j = (rowCount - 1) * rowCount + (3 - rowCount) * rowCount/2;      sum1[j-1] = 1.0 / sum1[j-1];      iPivot = j;      for (i = 2; i <= rowCount; ++i)      {         j = iPivot - rowCountIf;         iPivot = j - i;         din = 1.0 / sum1[iPivot-1];         sum1[iPivot-1] = din;         i1 = rowCount + 2 - i;         i2 = i - 1;         i3 = i1 - 1;         il1 = (i3 - 1) * rowCount - (i3 - 1) * i3/2;         for (k1 = 1; k1 <= i2; ++k1)         {            k = rowCount + 1 - k1;            j = j - 1;            work = 0.0;            for (il = i1; il <= k; ++il)            {               il2 = (il - 1) * rowCount - (il - 1) * il/2 + k;               work = work + sum1[il1+il-1] * sum1[il2-1];            }            sum1[j-1] = -din * work;         }      }      // Inverse(A) = INV(R) * TRN(INV(R));      il = 1;      for (i = 1; i <= rowCount; ++i)      {         il1 = (i - 1) * rowCount - (i - 1) * i/2;         for (j = i; j <= rowCount; ++j)         {            il2 = (j - 1) * rowCount - (j - 1) * j/2;            work = 0.0;            for (k = j; k <= rowCount; ++k)               work = work + sum1[il1+k-1] * sum1[il2+k-1];            sum1[il-1] = work;            il = il + 1;         }         il = il + rowCountIf;      }      retval = 0;   }   return retval;}

@@ -188,6 +188,10 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 //------------------------------------------------------------------------------
 bool MeasurementManager::SetPropagator(PropSetup* ps)
 {
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("Setting the propagator in the measurement "
+            "manager to %p\n", ps);
+   #endif
    thePropagator = ps;
    return (thePropagator != NULL);
 }
@@ -205,10 +209,10 @@ bool MeasurementManager::SetPropagator(PropSetup* ps)
 //------------------------------------------------------------------------------
 bool MeasurementManager::Initialize()
 {
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
-         "Entered MeasurementManager::Initialize() method\n");
-#endif
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
+            "Entered MeasurementManager::Initialize() method\n");
+   #endif
 
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
@@ -263,10 +267,7 @@ bool MeasurementManager::Initialize()
          #endif
 
          SetStreamObject(newStream);
-         if (newStream->OpenStream(true) == false)
-         {
-            MessageInterface::ShowMessage("Stream failed to open\n");
-         }
+
          // Associate the adapters with the stream
          for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
          {
@@ -429,10 +430,10 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
 //------------------------------------------------------------------------------
 bool MeasurementManager::ProcessingComplete()
 {
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
-         "Entered MeasurementManager::ProcessingComplete() method\n");
-#endif
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
+            "Entered MeasurementManager::ProcessingComplete() method\n");
+   #endif
 
    bool retval = true;
 
@@ -549,11 +550,16 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
             od = &(*currentObs);
 
          measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
+MessageInterface::ShowMessage("Calculating adapter based measurement...");
          if (measurements[j].isFeasible)
          {
+MessageInterface::ShowMessage("Calculated feasible measurement\n");
             ++successCount;
             eventCount += measurements[j].eventCount;
          }
+else
+MessageInterface::ShowMessage("NOT feasible\n");
+
       }
    }
    else
@@ -1574,28 +1580,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #endif
 
       }
-//MessageInterface::ShowMessage("Using %d adapters\n", adapters.size());
       // Now do the same thing for the TrackingDataAdapters
       for (UnsignedInt i = 0; i < adapters.size(); ++i)
       {
-//         if (withEvents)
-//         {
-//           if (measurements[j].isFeasible)
-//                 measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
-//         }
-//         else
-//         {
-            std::vector<RampTableData>* rt = NULL;
-            measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-            retval = measurements[i].isFeasible;
-//         }
-
-//         if (measurements[j].isFeasible)
-//         {
-//           if (!withEvents)
-//              eventCount += measurements[j].eventCount;
-//           retval = true;
-//         }
+         std::vector<RampTableData>* rt = NULL;
+         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         retval = measurements[i].isFeasible;
       }
    }
    else
@@ -1700,7 +1690,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
    }
 
    #ifdef DEBUG_FLOW
-      MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(%s,%s)\n", (forSimulation?"true":"false"), (withEvents?"true":"false"));
+      MessageInterface::ShowMessage(" Returning %s from bool MeasurementManager"
+            "::CalculateMeasurements(%s,%s)\n", (retval ? "true" : "false"),
+            (forSimulation?"true":"false"), (withEvents?"true":"false"));
    #endif
 
    return retval;
@@ -2100,7 +2092,7 @@ Integer MeasurementManager::FindModelForObservation()
    #endif
    Integer retval = 0;
 
-   Gmat::MeasurementType type =  currentObs->type;
+   Integer type =  currentObs->type;
 
    #ifdef DEBUG_MODEL_MAPPING
        MessageInterface::ShowMessage("   Current observation type: %d\n", type);

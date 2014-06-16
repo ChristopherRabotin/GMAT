@@ -471,7 +471,7 @@ ObservationData* GmatObType::ReadObservation()
 bool GmatObType::Close()
 {
    #ifdef DEBUG_FILE_WRITE
-      MessageInterface::ShowMessage("GmatObType::Close() Executing\n");
+      MessageInterface::ShowMessage("GmatObType::Close() Executing for %p\n", this);
    #endif
    bool retval = false;
 

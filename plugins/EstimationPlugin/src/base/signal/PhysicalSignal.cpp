@@ -221,9 +221,10 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
                signalIsFeasible = false;
          }
          #ifdef DEBUG_FEASIBILITY
-            MessageInterface::ShowMessage("Obs vector = [%s] so %s\n",
-                  theData.rangeVecObs.ToString().c_str(),
-                  (signalIsFeasible ? "feasible" : "infeasible"));
+            MessageInterface::ShowMessage("Obs vector = [%.3lf %.3lf %.3lf] "
+                  "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
+                  theData.rangeVecObs(2), (signalIsFeasible ? "feasible" :
+                  "infeasible"));
          #endif
       }
       else
