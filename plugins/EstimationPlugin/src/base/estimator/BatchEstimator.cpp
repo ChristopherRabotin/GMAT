@@ -272,7 +272,6 @@ Gmat::ParameterType BatchEstimator::GetParameterType(const Integer id) const
 }
 
 
-
 //------------------------------------------------------------------------------
 //  std::string GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
@@ -874,14 +873,15 @@ void BatchEstimator::CompleteInitialization()
       currentEpoch         = gs->GetEpoch();
 
       // Tell the measManager to complete its initialization
-      bool measOK = measManager.Initialize();
+      bool measOK = measManager.SetPropagator(propagator);
+      measOK = measOK && measManager.Initialize();
       if (!measOK)
          throw SolverException(
                "BatchEstimator::CompleteInitialization - error initializing "
                "MeasurementManager.\n");
 
       // Now load up the observations
-      measManager.PrepareForProcessing();
+      measManager.PrepareForProcessing(false);
       UnsignedInt numRec = measManager.LoadObservations();					// made changes by TUAN NGUYEN
 	  if (numRec == 0)														// made changes by TUAN NGUYEN
          throw EstimatorException("No observation data is used for estimation\n");	// made changes by TUAN NGUYEN
@@ -1614,6 +1614,8 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor) const
 
    return ss.str();
 }
+
+
 //------------------------------------------------------------------------------
 // Integer TestForConvergence(std::string &reason)
 //------------------------------------------------------------------------------
@@ -1911,7 +1913,6 @@ void BatchEstimator::WriteHeader()
 	        << "   " << GetName() << ".OLSEMultiplicativeConstant = " << constMult << "\n"
 			<< "   " << GetName() << ".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
 
-
    /// 4. Write notations used in report file:
    textFile << "Notations Used In Report File: \n" 
             << "   N    : Not Edited \n"                                
@@ -1920,7 +1921,6 @@ void BatchEstimator::WriteHeader()
             << "   BXY  : Blocked.  X = Path Index.  Y = Count Index (Doppler) \n"
             << "   IRMS : Edited by Initial RMS Sigma Filter \n"
             << "   OLSE : Edited by Outer-Loop Sigma Editor \n\n";
-
 
    /// 5. Write report header
    if (textFileMode == "Normal")
@@ -2130,7 +2130,6 @@ bool BatchEstimator::DataFilter()
 
    return retVal;
 }
-
 
 
 //------------------------------------------------------------------------------

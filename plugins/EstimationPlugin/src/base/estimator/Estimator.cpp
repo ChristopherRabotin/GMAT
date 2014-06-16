@@ -1073,6 +1073,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          if (propagator != NULL)
             delete propagator;
          propagator = (PropSetup*)obj->Clone();
+         measManager.SetPropagator(propagator);
          return true;
       }
    }

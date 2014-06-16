@@ -689,6 +689,8 @@ void RunSimulator::PrepareToSimulate()
 
    // Prep the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();
+
+   PropSetup *thePropagator = theSimulator->GetPropagator();
    if (measman->PrepareForProcessing(true) == false)
       throw CommandException(
             "Measurement Manager was unable to prepare for processing");

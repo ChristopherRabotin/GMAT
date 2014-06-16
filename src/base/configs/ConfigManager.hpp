@@ -44,7 +44,7 @@
 #include "CoordinateSystem.hpp"
 #include "CalculatedPoint.hpp"
 
-class MeasurementModel;
+class MeasurementModelBase;
 class CoreMeasurement;
 class DataFile;
 class ObType;
@@ -86,7 +86,7 @@ public:
    void                SetSolarSystemInUse(SolarSystem *ss);
    bool                SetSolarSystemInUse(const std::string &name);
 
-   void                AddMeasurementModel(MeasurementModel *mModel);
+   void                AddMeasurementModel(MeasurementModelBase *mModel);
    void                AddMeasurement(CoreMeasurement *meas);
    void                AddDataFile(DataFile *meas);
    void                AddObType(ObType *meas);
@@ -135,7 +135,7 @@ public:
    Function*           GetFunction(const std::string &name);
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    CalculatedPoint*    GetCalculatedPoint(const std::string &name);
-   MeasurementModel*   GetMeasurementModel(const std::string &name);
+   MeasurementModelBase* GetMeasurementModel(const std::string &name);
    TrackingSystem*     GetTrackingSystem(const std::string &name);
    TrackingData*       GetTrackingData(const std::string &name);
 

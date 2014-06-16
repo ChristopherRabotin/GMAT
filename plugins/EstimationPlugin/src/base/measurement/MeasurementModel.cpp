@@ -97,7 +97,7 @@ const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
  */
 //------------------------------------------------------------------------------
 MeasurementModel::MeasurementModel(const std::string &nomme) :
-   GmatBase                (Gmat::MEASUREMENT_MODEL, "MeasurementModel", nomme),
+   MeasurementModelBase    (nomme, "MeasurementModel"),
    measurementType         ("NoTypeSet"),
    measurement             (NULL),
    theData                 (NULL),
@@ -139,7 +139,7 @@ MeasurementModel::~MeasurementModel()
  */
 //------------------------------------------------------------------------------
 MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
-   GmatBase                (mm),
+   MeasurementModelBase    (mm),
    observationStreamName   (mm.observationStreamName),
    rampTableStreamName     (mm.rampTableStreamName),			// made changes by TUAN NGUYEN
    participantNames        (mm.participantNames),
@@ -194,7 +194,7 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
 
    if (&mm != this)
    {
-      GmatBase::operator=(mm);
+      MeasurementModelBase::operator=(mm);
       observationStreamName   = mm.observationStreamName;
 	  rampTableStreamName     = mm.rampTableStreamName;				// made changes by TUAN NGUYEN
       participantNames        = mm.participantNames;
@@ -267,7 +267,7 @@ bool MeasurementModel::Initialize()
 
    bool retval = false;
 
-   if (GmatBase::Initialize())
+   if (MeasurementModelBase::Initialize())
    {
       if (measurement != NULL)
       {
@@ -377,7 +377,7 @@ Integer MeasurementModel::GetParameterID(const std::string & str) const
    // Check the GmatBase parameters
    for (Integer i = 0; i < GmatBaseParamCount; i++)
    {
-      if (str == GmatBase::PARAMETER_LABEL[i])
+      if (str == MeasurementModelBase::PARAMETER_LABEL[i])
          return i;
    }
 
@@ -388,7 +388,7 @@ Integer MeasurementModel::GetParameterID(const std::string & str) const
       return measurement->GetParameterID(str) + MeasurementModelParamCount;
    }
 
-   return GmatBase::GetParameterID(str);
+   return MeasurementModelBase::GetParameterID(str);
 }
 
 
@@ -415,7 +415,7 @@ std::string MeasurementModel::GetParameterText(const Integer id) const
       return measurement->GetParameterText(newId);
    }
 
-   return GmatBase::GetParameterText(id);
+   return MeasurementModelBase::GetParameterText(id);
 }
 
 
@@ -440,7 +440,7 @@ std::string MeasurementModel::GetParameterTypeString(const Integer id) const
    }
 
 
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -464,7 +464,7 @@ std::string MeasurementModel::GetParameterUnit(const Integer id) const
       return measurement->GetParameterUnit(newId);
    }
 
-   return GmatBase::GetParameterUnit(id);
+   return MeasurementModelBase::GetParameterUnit(id);
 }
 
 
@@ -492,7 +492,7 @@ Gmat::ParameterType MeasurementModel::GetParameterType(const Integer id) const
       return measurement->GetParameterType(newId);
    }
 
-   return GmatBase::GetParameterType(id);
+   return MeasurementModelBase::GetParameterType(id);
 }
 
 
@@ -549,7 +549,7 @@ bool MeasurementModel::IsParameterReadOnly(const Integer id) const
       return measurement->IsParameterReadOnly(newId);
    }
 
-   return GmatBase::IsParameterReadOnly(id);
+   return MeasurementModelBase::IsParameterReadOnly(id);
 }
 
 
@@ -602,7 +602,7 @@ Real MeasurementModel::GetRealParameter(const Integer id) const
       return measurement->GetRealParameter(newId);
    }
 
-   return GmatBase::GetRealParameter(id);
+   return MeasurementModelBase::GetRealParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -679,7 +679,7 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
 //	  return residualMax;
 //   }
 
-   return GmatBase::SetRealParameter(id, value);
+   return MeasurementModelBase::SetRealParameter(id, value);
 }
 
 
@@ -796,7 +796,7 @@ Real MeasurementModel::GetRealParameter(const std::string & label,
 Real MeasurementModel::GetRealParameter(const Integer id, const Integer row,
       const Integer col) const
 {
-   return GmatBase::GetRealParameter(id, row, col);
+   return MeasurementModelBase::GetRealParameter(id, row, col);
 }
 
 
@@ -859,7 +859,7 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
       }
    }
 
-   return GmatBase::SetRealParameter(id, value, index);
+   return MeasurementModelBase::SetRealParameter(id, value, index);
 }
 
 
@@ -881,7 +881,7 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
 Real MeasurementModel::SetRealParameter(const Integer id, const Real value,
       const Integer row, const Integer col)
 {
-   return GmatBase::SetRealParameter(id, value, row, col);
+   return MeasurementModelBase::SetRealParameter(id, value, row, col);
 }
 
 //------------------------------------------------------------------------------
@@ -924,7 +924,7 @@ Real MeasurementModel::GetRealParameter(const Integer id, const Integer index) c
       if ((index >=0) && (index < noiseSigma.GetSize()))
          return noiseSigma[0];
 
-   return GmatBase::GetRealParameter(id, index);
+   return MeasurementModelBase::GetRealParameter(id, index);
 }
 
 // made changes by TUAN NGUYEN
@@ -935,7 +935,7 @@ std::string MeasurementModel::GetOnOffParameter(const Integer id) const
 	if (id == ETminusTAICorrection)
 	   return (useETminusTAICorrection ? "On" : "Off");
 
-	return GmatBase::GetOnOffParameter(id);
+	return MeasurementModelBase::GetOnOffParameter(id);
 }
 
 // made changes by TUAN NGUYEN
@@ -980,7 +980,7 @@ bool MeasurementModel::SetOnOffParameter(const Integer id, const std::string &va
 	  return false;
    }
 
-   return GmatBase::SetOnOffParameter(id, value);
+   return MeasurementModelBase::SetOnOffParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -999,7 +999,7 @@ std::string MeasurementModel::GetStringParameter(const Integer id) const
    if (id == MeasurementType)
       return measurementType;
 
-   return GmatBase::GetStringParameter(id);
+   return MeasurementModelBase::GetStringParameter(id);
 }
 
 
@@ -1100,7 +1100,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
       return true;
    }
 
-   return GmatBase::SetStringParameter(id, value);
+   return MeasurementModelBase::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
@@ -1160,7 +1160,7 @@ std::string MeasurementModel::GetStringParameter(const Integer id,
    if (id == RampTables)							// made changes by TUAN NGUYEN
       return rampTableStreamName[index];			// made changes by TUAN NGUYEN
 
-   return GmatBase::GetStringParameter(id, index);
+   return MeasurementModelBase::GetStringParameter(id, index);
 }
 
 //------------------------------------------------------------------------------
@@ -1293,7 +1293,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
          return true;																// made changes by TUAN NGUYEN
       }																				// made changes by TUAN NGUYEN
    default:
-      return GmatBase::SetStringParameter(id, value, index);
+      return MeasurementModelBase::SetStringParameter(id, value, index);
    }
 }
 
@@ -1338,7 +1338,7 @@ const StringArray& MeasurementModel::GetStringArrayParameter(
       return rampTableStreamName;												// made changes by TUAN NGUYEN
    }
 
-   return GmatBase::GetStringArrayParameter(id);
+   return MeasurementModelBase::GetStringArrayParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1371,7 +1371,7 @@ const StringArray& MeasurementModel::GetStringArrayParameter(
 const StringArray& MeasurementModel::GetStringArrayParameter(const Integer id,
       const Integer index) const
 {
-   return GmatBase::GetStringArrayParameter(id, index);
+   return MeasurementModelBase::GetStringArrayParameter(id, index);
 }
 
 
@@ -1387,7 +1387,7 @@ const StringArray& MeasurementModel::GetStringArrayParameter(const Integer id,
 const StringArray& MeasurementModel::GetStringArrayParameter(
       const std::string &label, const Integer index) const
 {
-   return GmatBase::GetStringArrayParameter(label, index);
+   return MeasurementModelBase::GetStringArrayParameter(label, index);
 }
 
 
@@ -1410,7 +1410,7 @@ const Rvector& MeasurementModel::GetRvectorParameter(const Integer id) const
    if (id == NoiseSigma)
       return noiseSigma;
 
-   return GmatBase::GetRvectorParameter(id);
+   return MeasurementModelBase::GetRvectorParameter(id);
 }
 
 
@@ -1441,7 +1441,7 @@ const Rvector& MeasurementModel::SetRvectorParameter(const Integer id,
       return noiseSigma;
    }
 
-   return GmatBase::SetRvectorParameter(id, value);
+   return MeasurementModelBase::SetRvectorParameter(id, value);
 }
 
 
@@ -1500,7 +1500,7 @@ bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo MeasurementModel rename code needs to be implemented
-   return GmatBase::RenameRefObject(type, oldName, newName);
+   return MeasurementModelBase::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -1519,7 +1519,7 @@ bool MeasurementModel::RenameRefObject(const Gmat::ObjectType type,
 bool MeasurementModel::SetRefObjectName(const Gmat::ObjectType type,
       const std::string & name)
 {
-   return GmatBase::SetRefObjectName(type, name);
+   return MeasurementModelBase::SetRefObjectName(type, name);
 }
 
 
@@ -1534,7 +1534,7 @@ bool MeasurementModel::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const ObjectTypeArray & MeasurementModel::GetRefObjectTypeArray()
 {
-   return GmatBase::GetRefObjectTypeArray();
+   return MeasurementModelBase::GetRefObjectTypeArray();
 }
 
 
@@ -1575,7 +1575,7 @@ const StringArray& MeasurementModel::GetRefObjectNameArray(
       }
    }
    else
-      refObjectList = GmatBase::GetRefObjectNameArray(type);
+      refObjectList = MeasurementModelBase::GetRefObjectNameArray(type);
 
    return refObjectList;
 }
@@ -1595,7 +1595,7 @@ const StringArray& MeasurementModel::GetRefObjectNameArray(
 std::string MeasurementModel::GetRefObjectName(
       const Gmat::ObjectType type) const
 {
-   return GmatBase::GetRefObjectName(type);
+   return MeasurementModelBase::GetRefObjectName(type);
 }
 
 
@@ -1616,7 +1616,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::CORE_MEASUREMENT)
       return measurement;
-   return GmatBase::GetRefObject(type, name);
+   return MeasurementModelBase::GetRefObject(type, name);
 }
 
 
@@ -1637,7 +1637,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
       const std::string & name, const Integer index)
 {
-   return GmatBase::GetRefObject(type, name, index);
+   return MeasurementModelBase::GetRefObject(type, name, index);
 }
 
 
@@ -1654,7 +1654,7 @@ GmatBase* MeasurementModel::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 GmatBase* MeasurementModel::GetOwnedObject(Integer whichOne)
 {
-   return GmatBase::GetOwnedObject(whichOne);
+   return MeasurementModelBase::GetOwnedObject(whichOne);
 }
 
 
@@ -1724,7 +1724,7 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
    }
 
-   return GmatBase::SetRefObject(obj, type, name);
+   return MeasurementModelBase::SetRefObject(obj, type, name);
 }
 
 
@@ -1741,7 +1741,7 @@ Integer MeasurementModel::GetOwnedObjectCount()
 {
    ownedObjectCount = 0;
 
-   return GmatBase::GetOwnedObjectCount();
+   return MeasurementModelBase::GetOwnedObjectCount();
 }
 
 
@@ -1759,7 +1759,7 @@ Integer MeasurementModel::GetOwnedObjectCount()
 ObjectArray& MeasurementModel::GetRefObjectArray(const std::string & typeString)
 {
    return GetRefObjectArray(GetObjectType(typeString));				// made changes by TUAN NGUYEN for Bug 12 in ticket GMT-4314
-//   return GmatBase::GetRefObjectArray(typeString);
+//   return MeasurementModelBase::GetRefObjectArray(typeString);
 }
 
 
@@ -1806,7 +1806,7 @@ bool MeasurementModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       return true;
    }
 
-   return GmatBase::SetRefObject(obj, type, name, index);
+   return MeasurementModelBase::SetRefObject(obj, type, name, index);
 }
 
 
@@ -1826,7 +1826,7 @@ ObjectArray& MeasurementModel::GetRefObjectArray(const Gmat::ObjectType type)
    if (Gmat::SPACEOBJECT)								// made changes by TUAN NGUYEN  for Bug 12 in ticket GMT-4314
 	   return participants;								// made changes by TUAN NGUYEN
    
-   return GmatBase::GetRefObjectArray(type);
+   return MeasurementModelBase::GetRefObjectArray(type);
 }
 
 
@@ -1847,7 +1847,7 @@ ObjectArray& MeasurementModel::GetRefObjectArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool MeasurementModel::IsOwnedObject(Integer id) const
 {
-   return GmatBase::IsOwnedObject(id);
+   return MeasurementModelBase::IsOwnedObject(id);
 }
 
 
@@ -2150,7 +2150,7 @@ Integer MeasurementModel::HasParameterCovariances(Integer parameterId)
       return 1;
    }
 
-   return GmatBase::HasParameterCovariances(parameterId);
+   return MeasurementModelBase::HasParameterCovariances(parameterId);
 }
 
 
@@ -2211,7 +2211,7 @@ bool MeasurementModel::SetEventData(Event *locatedEvent)
 //      return covariance;
 //   }
 //
-//   return GmatBase::GetParameterCovariances(parameterId);
+//   return MeasurementModelBase::GetParameterCovariances(parameterId);
 //}
 
 
