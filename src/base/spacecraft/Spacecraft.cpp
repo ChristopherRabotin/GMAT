@@ -46,9 +46,6 @@
 // Do we want to write anomaly type?
 //#define __WRITE_ANOMALY_TYPE__
 
-// Uncomment the macro to use old element map(single map) 
-//#define __USE_OLD_ELEMENT_MAP__
-
 
 //#define DEBUG_SPACECRAFT
 //#define DEBUG_SPACECRAFT_SET
@@ -417,27 +414,10 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    representations.push_back("BrouwerMeanShort");     // Mod by YK
    representations.push_back("BrouwerMeanLong");      // Mod by YK
    
-   // Do not fill the map in order to use new multimap for labels with types (LOJ: 2014.01.30)
-   //=======================================================
-   #ifndef __USE_OLD_ELEMENT_MAP__
-   //=======================================================
-   
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
-      ("==> Spacecraft constructor using state element labels mulimap\n");
+      ("Spacecraft constructor using state element labels mulimap\n");
    #endif
-   
-   //=======================================================
-   #else
-   //=======================================================
-   
-   // initialize possible input state types to be any type
-   for (unsigned int ii = 0; ii < representations.size(); ii++)
-      possibleInputTypes.push_back(representations.at(ii));
-   
-   //=======================================================
-   #endif
-   //=======================================================
    
    parameterCount = SpacecraftParamCount;
 
@@ -459,7 +439,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
        "attitude = new CSFixed("")", this);
    #endif
    
-   BuildElementLabelMap();
+   // Build element labels and units
    BuildStateElementLabelsAndUnits();
    
    // Initialize the STM to the identity matrix
@@ -608,10 +588,10 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 
    // set cloned hardware
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
-
-   BuildElementLabelMap();
+   
+   // Build element labels and units
    BuildStateElementLabelsAndUnits();
-
+   
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(copy) <%p>'%s' exiting\n", this, GetName().c_str());
@@ -722,12 +702,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
-      #endif
+   #endif
    CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
-
-   BuildElementLabelMap();
+   
+   // Build element labels and units
    BuildStateElementLabelsAndUnits();
-
+   
    orbitSTM = a.orbitSTM;
    orbitAMatrix = a.orbitAMatrix;
 
@@ -879,8 +859,6 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
     state[4] = s5;
     state[5] = s6;
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -2136,6 +2114,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       // first check the multiple reps
       Integer sz = EndMultipleReps - CART_X;
       for (Integer ii = 0; ii < sz; ii++)
+      {
          if (str == MULT_REP_STRINGS[ii])
          {
             #ifdef DEBUG_GET_REAL
@@ -2145,61 +2124,10 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
             #endif
             return ii + CART_X;
          }
-
-      
-      #if 0
-      //========================================================================
-      // Is this code block necessary? (LOJ)
-      // Element ID is already handled in above block using MULT_REP_STRINGS
-      // Added SemilatusRectum (LOJ:2014.04.25)
-      Integer retval = -1;
-      if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "IncomingRadPer" || str == "OutgoingRadPer" || str == "RMAG" ||
-          str == "SemilatusRectum" || str == "Delaunayl" ||
-          str == "PlanetodeticRMAG" || str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
-         retval =  ELEMENT1_ID;
-      
-      else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
-               str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
-               str == "Delaunayg" || str == "PlanetodeticLON" || str == "IncomingC3Energy" ||
-               str == "OutgoingC3Energy" || str == "BrouwerShortECC" || str == "BrouwerLongECC")
-         retval =  ELEMENT2_ID;
-
-      else if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
-               str == "PEX" || str == "EquinoctialK" || str == "ModEquinoctialG" ||
-               str == "Delaunayh" || str == "PlanetodeticLAT" || str == "IncomingRHA" ||
-               str == "OutgoingRHA" || str == "BrouwerShortINC" || str == "BrouwerLongINC")
-         retval =  ELEMENT3_ID;
-
-      else if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
-               str == "PNY" || str == "EquinoctialP" || str == "ModEquinoctialH" ||
-               str == "DelaunayL" || str == "PlanetodeticVMAG" || str == "IncomingDHA" ||
-               str == "OutgoingDHA" || str == "BrouwerShortRAAN" || str == "BrouwerLongRAAN")
-         retval =  ELEMENT4_ID;
-
-      else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
-               str == "RAV" || str == "PNX" || str == "EquinoctialQ" ||
-               str == "ModEquinoctialH" || str == "DelaunayG" || str == "PlanetodeticVMAG" ||
-               str == "IncomingBVAZI" || str == "OutgoingBVAZI" || str == "BrouwerShortAOP" || str == "BrouwerLongAOP")
-         retval =  ELEMENT5_ID;
-
-      else if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
-               str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG" ||
-               str == "DelaunayH" || str == "PlanetodeticHFPA" || str == "BrouwerShortMA" || str == "BrouwerLongMA")
-         retval =  ELEMENT6_ID;
-      
-      #ifdef DEBUG_GET_REAL
-      MessageInterface::ShowMessage(
-      "In SC::GetParameterID, after checking for elements, id = %d\n",
-      retval);
-      #endif
-      
-      if (retval != -1) return retval;
-      
-      #endif
-      //========================================================================
+      }
       
       
+      // Check for element label
       for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
       {
          if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
@@ -5944,12 +5872,7 @@ void Spacecraft::UpdateElementLabels()
  */
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
-{
-   // Use pre-built maps for labels and units (LOJ: 2014.01.29)
-   //=======================================================
-   #ifndef __USE_OLD_ELEMENT_MAP__
-   //=======================================================
-   
+{   
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage("==> Spacecraft::UpdateElementLabels() using state labels multimap\n");
    #endif
@@ -5973,287 +5896,6 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
          ("*** INTERNAL ERROR *** The state element units map has not been built for \"" +
           displayStateType + "\"\n");
    }
-   
-   
-   //=======================================================
-   #else
-   //=======================================================
-
-   
-   if (displayStateType == "Cartesian")
-   {
-      stateElementLabel[0] = "X";
-      stateElementLabel[1] = "Y";
-      stateElementLabel[2] = "Z";
-      stateElementLabel[3] = "VX";
-      stateElementLabel[4] = "VY";
-      stateElementLabel[5] = "VZ";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km";
-      stateElementUnits[2] = "km";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "km/s";
-      stateElementUnits[5] = "km/s";
-
-      return;
-   }
-
-   if (displayStateType == "Keplerian")
-   {
-      stateElementLabel[0] = "SMA";
-      stateElementLabel[1] = "ECC";
-      stateElementLabel[2] = "INC";
-      stateElementLabel[3] = "RAAN";
-      stateElementLabel[4] = "AOP";
-      stateElementLabel[5] = anomalyType;
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "ModifiedKeplerian")
-   {
-      stateElementLabel[0] = "RadPer";
-      stateElementLabel[1] = "RadApo";
-      stateElementLabel[2] = "INC";
-      stateElementLabel[3] = "RAAN";
-      stateElementLabel[4] = "AOP";
-      stateElementLabel[5] = anomalyType;
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "SphericalAZFPA")
-   {
-      stateElementLabel[0] = "RMAG";
-      stateElementLabel[1] = "RA";
-      stateElementLabel[2] = "DEC";
-      stateElementLabel[3] = "VMAG";
-      stateElementLabel[4] = "AZI";
-      stateElementLabel[5] = "FPA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "SphericalRADEC")
-   {
-      stateElementLabel[0] = "RMAG";
-      stateElementLabel[1] = "RA";
-      stateElementLabel[2] = "DEC";
-      stateElementLabel[3] = "VMAG";
-      stateElementLabel[4] = "RAV";
-      stateElementLabel[5] = "DECV";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "Equinoctial")
-   {
-      stateElementLabel[0] = "SMA";
-      stateElementLabel[1] = "EquinoctialH";
-      stateElementLabel[2] = "EquinoctialK";
-      stateElementLabel[3] = "EquinoctialP";
-      stateElementLabel[4] = "EquinoctialQ";
-      stateElementLabel[5] = "MLONG";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "";
-      stateElementUnits[3] = "";
-      stateElementUnits[4] = "";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   // Modified by M.H.
-   if (displayStateType == "ModifiedEquinoctial")
-   {
-      stateElementLabel[0] = "SemilatusRectum";
-      stateElementLabel[1] = "ModEquinoctialF";
-      stateElementLabel[2] = "ModEquinoctialG";
-      stateElementLabel[3] = "ModEquinoctialH";
-      stateElementLabel[4] = "ModEquinoctialK";
-      stateElementLabel[5] = "TLONG";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "";
-      stateElementUnits[3] = "";
-      stateElementUnits[4] = "";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   // Alternate Equinoctial by HYKim 
-   if (displayStateType == "AlternateEquinoctial")
-   {
-      stateElementLabel[0] = "SMA";
-      stateElementLabel[1] = "EquinoctialH";
-      stateElementLabel[2] = "EquinoctialK";
-      stateElementLabel[3] = "AltEquinoctialP";
-      stateElementLabel[4] = "AltEquinoctialQ";
-      stateElementLabel[5] = "MLONG";
-      
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "";
-      stateElementUnits[3] = "";
-      stateElementUnits[4] = "";
-      stateElementUnits[5] = "deg";
-      
-      return;
-   }
-   
-   // Modified by M.H.
-   if (displayStateType == "Delaunay")
-   {
-      stateElementLabel[0] = "Delaunayl";
-      stateElementLabel[1] = "Delaunayg";
-      stateElementLabel[2] = "Delaunayh";
-      stateElementLabel[3] = "DelaunayL";
-      stateElementLabel[4] = "DelaunayG";
-      stateElementLabel[5] = "DelaunayH";
-
-      stateElementUnits[0] = "deg";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km^2/sec";
-      stateElementUnits[4] = "km^2/sec";
-      stateElementUnits[5] = "km^2/sec";
-
-      return;
-   }
-   
-   // Modified by M.H.
-   if (displayStateType == "Planetodetic")
-   {
-      stateElementLabel[0] = "PlanetodeticRMAG";
-      stateElementLabel[1] = "PlanetodeticLON";
-      stateElementLabel[2] = "PlanetodeticLAT";
-      stateElementLabel[3] = "PlanetodeticVMAG";
-      stateElementLabel[4] = "PlanetodeticAZI";
-      stateElementLabel[5] = "PlanetodeticHFPA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km/sec";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   // mod by YK
-   if (displayStateType == "IncomingAsymptote")
-   {
-      stateElementLabel[0] = "IncomingRadPer";
-      stateElementLabel[1] = "IncomingC3Energy";
-      stateElementLabel[2] = "IncomingRHA";
-      stateElementLabel[3] = "IncomingDHA";
-      stateElementLabel[4] = "IncomingBVAZI";
-      stateElementLabel[5] = "TA";
-      
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km^2/sec^2";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   if (displayStateType == "OutgoingAsymptote")
-   {
-      stateElementLabel[0] = "OutgoingRadPer";
-      stateElementLabel[1] = "OutgoingC3Energy";
-      stateElementLabel[2] = "OutgoingRHA";
-      stateElementLabel[3] = "OutgoingDHA";
-      stateElementLabel[4] = "OutgoingBVAZI";
-      stateElementLabel[5] = "TA";
-      
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km^2/sec^2";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   if (displayStateType == "BrouwerMeanShort")
-   {
-      stateElementLabel[0] = "BrouwerShortSMA";
-      stateElementLabel[1] = "BrouwerShortECC";
-      stateElementLabel[2] = "BrouwerShortINC";
-      stateElementLabel[3] = "BrouwerShortRAAN";
-      stateElementLabel[4] = "BrouwerShortAOP";
-      stateElementLabel[5] = "BrouwerShortMA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   if (displayStateType == "BrouwerMeanLong")
-   {
-      stateElementLabel[0] = "BrouwerLongSMA";
-      stateElementLabel[1] = "BrouwerLongECC";
-      stateElementLabel[2] = "BrouwerLongINC";
-      stateElementLabel[3] = "BrouwerLongRAAN";
-      stateElementLabel[4] = "BrouwerLongAOP";
-      stateElementLabel[5] = "BrouwerLongMA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   //=======================================================
-   #endif
-   //=======================================================
 }
 
 
@@ -6408,24 +6050,15 @@ void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st
       csState = StateConversionUtil::Convert(st, rep, "Cartesian",
                 originMu, originFlattening, originEqRadius, anomalyType);
    }
-
+   
    #ifdef DEBUG_STATE_INTERFACE
-      MessageInterface::ShowMessage(
-         "Spacecraft::SetStateFromRepresentation: state has been converted\n");
-   #endif
-
-   // Moved up so that more validation can be done before doing the state conversion (LOJ: 2014.04.17)
-   // if (internalCoordSystem == NULL)
-   //    throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
-   // if (coordinateSystem == NULL)
-   //    throw SpaceObjectException(" The spacecraft coordinate system is not set");
-
-   #ifdef DEBUG_STATE_INTERFACE
+   MessageInterface::ShowMessage
+      ("Spacecraft::SetStateFromRepresentation: state has been converted\n");
    MessageInterface::ShowMessage
       ("   Now convert to internal CS, internalCoordSystem=<%p>, coordinateSystem=<%p>\n",
        internalCoordSystem, coordinateSystem);
    #endif
-
+   
    // Then convert to the internal CS
    if (internalCoordSystem != coordinateSystem)
    {
@@ -6595,36 +6228,6 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
             #endif
             // leave it as OutgoingAsymptote
          }
-         // RadPer is no longer shared with IncomingAsymptote or OutgoingAsymtote
-         // so commented out (LOJ: 2014.04.28)
-         // else if ( (stateType == "IncomingAsymptote") && (rep == "ModifiedKeplerian") &&
-         //           (label == "RadPer") )
-         // {
-         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         //       MessageInterface::ShowMessage
-         //          (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
-         //    #endif
-         //    // leave it as IncomingAsymptote
-         // }
-         // else if ( (stateType == "OutgoingAsymptote") && (rep == "ModifiedKeplerian") &&
-         //           (label == "RadPer") )
-         // {
-         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         //       MessageInterface::ShowMessage
-         //          (" ************ In SC::SetElement, leaving stateType as OutgoingAsymptote\n");
-         //    #endif
-         //    // leave it as OutgoingAsymptote
-         // }
-         // C3Energy is no longer shared with IncomingAsymptote or OutgoingAsymtote
-         // else if ( (stateType == "IncomingAsymptote") && (rep == "OutgoingAsymptote") &&
-         //           (label == "C3Energy") )
-         // {
-         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         //       MessageInterface::ShowMessage
-         //          (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
-         //    #endif
-         //    // leave it as IncomingAsymptote
-         // }
          else
          {
             #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
@@ -6805,46 +6408,44 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       return ELEMENT6_ID;
    }
    
-   //@todo Can we use multimap to find out the element id? (LOJ: 2014.04.28)
-   // Modified by M.H. and YK
-   if (label == "X" || label == "SMA" || label == "RadPer" || label == "IncomingRadPer" ||
-       label == "OutgoingRadPer" || label == "RMAG" || label == "SemilatusRectum" ||
-       label == "Delaunayl" || label == "PlanetodeticRMAG" || label == "BrouwerShortSMA"  ||
-       label == "BrouwerLongSMA")
-      retval = ELEMENT1_ID;
    
-   else if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA" ||
-            label == "PEY" || label == "EquinoctialH" || label == "ModEquinoctialF" ||
-            label == "Delaunayg" || label == "PlanetodeticLON" || label == "IncomingC3Energy" ||
-            label == "OutgoingC3Energy" || label == "BrouwerShortECC" || label == "BrouwerLongECC" )
-      retval = ELEMENT2_ID;
-
-   else if (label == "Z" || label == "INC" || label == "DEC" || label == "PEX" ||
-            label == "EquinoctialK" || label == "ModEquinoctialG" || label == "Delaunayh" ||
-            label == "PlanetodeticLAT" || label == "OutgoingRHA" || label == "IncomingRHA" ||
-            label == "BrouwerShortINC" || label == "BrouwerLongINC")
-      retval = ELEMENT3_ID;
-
-   else if (label == "VX" || label == "RAAN" || label == "VMAG" || label == "PNY" ||
-            label == "EquinoctialP" || label == "ModEquinoctialH" || label == "AltEquinoctialP" ||
-            label == "DelaunayL" || label == "PlanetodeticVMAG" ||  label == "IncomingDHA" ||
-            label == "OutgoingDHA" || label == "BrouwerShortRAAN" || label == "BrouwerLongRAAN")
-      retval = ELEMENT4_ID;
-
-   else if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV" ||
-            label == "PNX" || label == "EquinoctialQ" || label == "ModEquinoctialK" ||
-            label == "AltEquinoctialQ" || label == "DelaunayG" || label == "PlanetodeticAZI" ||
-            label == "IncomingBVAZI" || label == "OutgoingBVAZI" || label == "BrouwerShortAOP" ||
-            label == "BrouwerLongAOP")
-      retval = ELEMENT5_ID;
-
-   else if (label == "VZ" || StateConversionUtil::IsValidAnomalyType(label) ||
-            label == "FPA" || label == "DECV" || label == "MLONG" || label == "TLONG" ||
-            label == "DelaunayH" || label == "PlanetodeticHFPA" || label == "BrouwerShortMA" ||
-            label == "BrouwerLongMA")
-      retval = ELEMENT6_ID;
-
-   rep = elementLabelMap[label];
+   // Use multimap to find out the element id
+   #ifdef DEBUG_LOOK_UP_LABEL
+   MessageInterface::ShowMessage("   LookUpLabel() using stateElementLabelsMap\n");
+   #endif
+   
+   std::map<std::string, StringArray>::iterator iter;
+   bool done = false;
+   for (iter = stateElementLabelsMap.begin(); iter != stateElementLabelsMap.end(); ++iter)
+   {
+      StringArray labels = (*iter).second;
+      for (UnsignedInt i = 0; i < labels.size(); i++)
+      {
+         #ifdef DEBUG_LOOK_UP_LABEL_MORE
+         MessageInterface::ShowMessage("   => labels[%d] = %s\n", i, labels[i].c_str());
+         #endif
+         if (labels[i] == label)
+         {
+            std::string stateType = (*iter).first;
+            // Handle shared labels with default type
+            // If label not found in the defaultStateTypeMap or
+            // label found in the defaultStateTypeMap and the type is default type
+            // then set label id and rep
+            if ((defaultStateTypeMap.find(label) == defaultStateTypeMap.end()) ||
+                ((defaultStateTypeMap.find(label) != defaultStateTypeMap.end()) &&
+                 (stateType == defaultStateTypeMap[label])))
+            {
+               // Add ELEMENT1_ID to return relative ID from ELEMENT1_ID in the SC_Param_ID
+               retval = i + ELEMENT1_ID;
+               rep = (*iter).first;
+               done = true;
+               break;
+            }
+         }
+      }
+      if (done)
+         break;
+   }
    
    #ifdef DEBUG_LOOK_UP_LABEL
       MessageInterface::ShowMessage("Spacecraft::LookUpLabel(%s..) gives rep %s with retval = %d\n",
@@ -6854,107 +6455,6 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
    return retval;
 }
 
-//------------------------------------------------------------------------------
-// void BuildElementLabelMap()
-//------------------------------------------------------------------------------
-/**
- * Set the mapping between elements and representations.
- */
-//------------------------------------------------------------------------------
-void Spacecraft::BuildElementLabelMap()
-{
-   if (elementLabelMap.size() == 0)
-   {
-      elementLabelMap["X"]  = "Cartesian";
-      elementLabelMap["Y"]  = "Cartesian";
-      elementLabelMap["Z"]  = "Cartesian";
-      elementLabelMap["VX"] = "Cartesian";
-      elementLabelMap["VY"] = "Cartesian";
-      elementLabelMap["VZ"] = "Cartesian";
-
-      elementLabelMap["SMA"]  = "Keplerian";
-      elementLabelMap["ECC"]  = "Keplerian";
-      elementLabelMap["INC"]  = "Keplerian";
-      elementLabelMap["RAAN"] = "Keplerian";
-      elementLabelMap["AOP"]  = "Keplerian";
-      elementLabelMap["TA"]   = "Keplerian";
-      elementLabelMap["EA"]   = "Keplerian";
-      elementLabelMap["MA"]   = "Keplerian";
-      elementLabelMap["HA"]   = "Keplerian";
-
-      elementLabelMap["RadPer"] = "ModifiedKeplerian";
-      elementLabelMap["RadApo"] = "ModifiedKeplerian";
-
-      elementLabelMap["RMAG"] = "SphericalAZFPA";
-      elementLabelMap["RA"]   = "SphericalAZFPA";
-      elementLabelMap["DEC"]  = "SphericalAZFPA";
-      elementLabelMap["VMAG"] = "SphericalAZFPA";
-      elementLabelMap["AZI"]  = "SphericalAZFPA";
-      elementLabelMap["FPA"]  = "SphericalAZFPA";
-
-      elementLabelMap["RAV"]  = "SphericalRADEC";
-      elementLabelMap["DECV"] = "SphericalRADEC";
-
-      elementLabelMap["EquinoctialH"] = "Equinoctial";
-      elementLabelMap["EquinoctialK"] = "Equinoctial";
-      elementLabelMap["EquinoctialP"] = "Equinoctial";
-      elementLabelMap["EquinoctialQ"] = "Equinoctial";
-      elementLabelMap["MLONG"]        = "Equinoctial";
-
-      // Modified by M.H.
-      elementLabelMap["SemilatusRectum"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialF"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialG"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialH"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialK"] = "ModifiedEquinoctial";
-      elementLabelMap["TLONG"]           = "ModifiedEquinoctial";
-      
-      // Modified by HYKim
-      elementLabelMap["AltEquinoctialP"] = "AlternateEquinoctial";
-      elementLabelMap["AltEquinoctialQ"] = "AlternateEquinoctial";
-      
-      // Modified by M.H.
-      elementLabelMap["Delaunayl"] = "Delaunay";
-      elementLabelMap["Delaunayg"] = "Delaunay";
-      elementLabelMap["Delaunayh"] = "Delaunay";
-      elementLabelMap["DelaunayL"] = "Delaunay";
-      elementLabelMap["DelaunayG"] = "Delaunay";
-      elementLabelMap["DelaunayH"] = "Delaunay";
-      
-      elementLabelMap["PlanetodeticRMAG"] = "Planetodetic";
-      elementLabelMap["PlanetodeticLON"]  = "Planetodetic";
-      elementLabelMap["PlanetodeticLAT"]  = "Planetodetic";
-      elementLabelMap["PlanetodeticVMAG"] = "Planetodetic";
-      elementLabelMap["PlanetodeticAZI"]  = "Planetodetic";
-      elementLabelMap["PlanetodeticHFPA"] = "Planetodetic";
-      
-      elementLabelMap["IncomingRadPer"]   = "IncomingAsymptote";
-      elementLabelMap["IncomingC3Energy"] = "IncomingAsymptote";
-      elementLabelMap["IncomingRHA"]      = "IncomingAsymptote";
-      elementLabelMap["IncomingDHA"]      = "IncomingAsymptote";
-      elementLabelMap["IncomingBVAZI"]    = "IncomingAsymptote";
-      
-      elementLabelMap["OutgoingRadPer"]   = "OutgoingAsymptote";
-      elementLabelMap["OutgoingC3Energy"] = "OutgoingAsymptote";
-      elementLabelMap["OutgoingRHA"]      = "OutgoingAsymptote";
-      elementLabelMap["OutgoingDHA"]      = "OutgoingAsymptote";
-      elementLabelMap["OutgoingBVAZI"]    = "OutgoingAsymptote";
-      
-      elementLabelMap["BrouwerShortSMA"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortECC"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortINC"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortRAAN"] = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortAOP"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortMA"]   = "BrouwerMeanShort";
-      
-      elementLabelMap["BrouwerLongSMA"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongECC"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongINC"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongRAAN"] = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongAOP"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongMA"]   = "BrouwerMeanLong";
-   }
-}
 
 //-------------------------------------------------------------------------
 // bool HasDynamicParameterSTM(Integer parameterId)
@@ -7153,10 +6653,6 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    #endif
    
    
-   //=======================================================
-   #ifndef __USE_OLD_ELEMENT_MAP__
-   //=======================================================
-
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
       ("==> Spacecraft::SetPossibleInputTypes() using state labels multimap\n");
@@ -7286,198 +6782,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
                possibleInputTypes.push_back(tempType);
          }
       }
-   }
-   
-   
-   //=======================================================
-   #else
-   //=======================================================
-   
-   
-   if (std::find(possibleInputTypes.begin(), possibleInputTypes.end(), rep) ==
-         possibleInputTypes.end())
-   {
-      #ifdef DEBUG_SC_INPUT_TYPES
-      MessageInterface::ShowMessage
-         ("**** ERROR The label '%s' is not allowed in the the rep '%s', so throwing exception\n",
-          label.c_str(), rep.c_str());
-      #endif
-      std::string errmsg = "Error: you have set orbital state elements not contained in the same state type.  ";
-      errmsg += "This is only allowed after the BeginMissionSequence command.\n";
-      throw SpaceObjectException(errmsg);
-   }
-  
-   // determine the possible types
-
-   // When there is only one possible type, reset the array to that one
-   
-   // Modified by M.H. and YK
-   // mod. by YK. "RadPer" is removed becuase hyperbolic asymptotes uses "RadPer".
-   // EquinoctialH, EquinoctialK, and MLONG are no longer unique, those are state elements of
-   // Equinoctial and AlternateEquinoctial, so removed (LOJ: 2014.01.29)
-   // RadPer is now associated with ModKeplerian only (LOJ: 2014.04.29)
-   if ((label == "X")                || (label == "Y")                || (label == "Z")                ||
-       (label == "VX")               || (label == "VY")               || (label == "VZ")               ||
-       (label == "ECC")              || (label == "RadApo")           || (label == "AZI")              ||
-       (label == "FPA")              || (label == "RAV")              || (label == "DECV")             ||
-       (label == "EquinoctialP")     || (label == "RadPer")           ||
-       (label == "EquinoctialQ")     || (label == "SemilatusRectum")  || (label == "ModEquinoctialF")  ||
-       (label == "ModEquinoctialG")  || (label == "ModEquinoctialH")  || (label == "ModEquinoctialK")  ||
-       (label == "TLONG")            || (label == "AltEquinoctialP")  || (label == "AltEquinoctialQ")  ||
-       (label == "Delaunayl")        || (label == "Delaunayg")        || (label == "Delaunayh")        ||
-       (label == "DelaunayL")        || (label == "DelaunayG")        || (label == "DelaunayH")        ||
-       (label == "PlanetodeticRMAG") || (label == "PlanetodeticLON")  || (label == "PlanetodeticLAT")  ||
-       (label == "PlanetodeticVMAG") || (label == "PlanetodeticAZI")  || (label == "PlanetodeticHFPA") ||
-       (label == "IncomingRHA")      || (label == "IncomingDHA")      || (label == "IncomingBVAZI")    ||
-       (label == "OutgoingRHA")      || (label == "OutgoingDHA")      || (label == "OutgoingBVAZI")    ||
-       (label == "BrouwerShortSMA")  || (label == "BrouwerShortECC")  || (label == "BrouwerShortINC")  ||
-       (label == "BrouwerShortRAAN") || (label == "BrouwerShortAOP")  || (label == "BrouwerShortMA")   ||
-       (label == "BrouwerLongSMA")   || (label == "BrouwerLongECC")   || (label == "BrouwerLongINC")   ||
-       (label == "BrouwerLongRAAN")  || (label == "BrouwerLongAOP")   || (label == "BrouwerLongMA"))
-   {
-      #ifdef DEBUG_SC_INPUT_TYPES
-      MessageInterface::ShowMessage
-         ("   The label '%s' is unique, so adding the rep '%s' to possibleInputTypes\n",
-          label.c_str(), rep.c_str());
-      #endif
-      possibleInputTypes.clear();
-      possibleInputTypes.push_back(rep);
-   }
-   
-   // Remove impossible types from the array
-   
-   // 1) It could be Keplerian, Equinoctial, or AlternateEquinoctial
-   else if (label == "SMA")
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 2) It could be Keplerian or ModifiedKeplerian
-   else if ((label == "INC") || (label == "RAAN") || (label == "AOP") ||
-            (label == "EA")   || (label == "MA")  || //mod by YK, TA is removed because TA can be used in Incoming/OutoingAsymptote.
-            (label == "HA"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 3) It could be SphericalAZFPA or SphericalRADEC
-   else if ((label == "RMAG") || (label == "RA") || (label == "DEC") || (label == "VMAG"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 4) It could be ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
-   // RadPer is now associated with ModKeplerian only (LOJ: 2014.04.29)
-   // else if ((label == "RadPer"))
-   // {
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   // }
-   // 4) HyperbolicRadPer could be IncomingAsymptote, or OutgoingAsymptote
-   // HyperbolicRadPer is no longer used. (LOJ: 2014.05.08)
-   // else if ((label == "HyperbolicRadPer"))
-   // {
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   // }
-   // 5) It could be Keplerian, ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
-   else if ((label == "TA"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 6) It could be IncomingAsymptote or OutgoingAsymptote (mod by YK)
-   // C3Energy is no longer shared with IncomingAsymptote and OutgoingAsymptote
-   // else if ((label == "C3Energy"))
-   // {
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   // }
-   // 7) It could be Equinoctial or AlternateEquinoctial
-   else if ((label == "EquinoctialH") || (label == "EquinoctialK") || (label == "MLONG"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   
-   //=======================================================
-   #endif
-   //=======================================================
-
+   }   
    
    if (possibleInputTypes.size() < 1)
    {
@@ -8059,5 +7364,19 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    allElementLabelsMultiMap.insert(std::make_pair("BrouwerLongRAAN", "BrouwerMeanLong"));
    allElementLabelsMultiMap.insert(std::make_pair("BrouwerLongAOP",  "BrouwerMeanLong"));
    allElementLabelsMultiMap.insert(std::make_pair("BrouwerLongMA",   "BrouwerMeanLong"));
+   
+   // Build default state type map for shared labels
+   defaultStateTypeMap["AOP"]          = "Keplerian";
+   defaultStateTypeMap["DEC"]          = "SphericalAZFPA";
+   defaultStateTypeMap["EquinoctialH"] = "Equinoctial";
+   defaultStateTypeMap["EquinoctialK"] = "Equinoctial";
+   defaultStateTypeMap["INC"]          = "Keplerian";
+   defaultStateTypeMap["MLONG"]        = "Equinoctial";
+   defaultStateTypeMap["RA"]           = "SphericalAZFPA";
+   defaultStateTypeMap["RAAN"]         = "Keplerian";
+   defaultStateTypeMap["RMAG"]         = "SphericalAZFPA";
+   defaultStateTypeMap["SMA"]          = "Keplerian";
+   defaultStateTypeMap["TA"]           = "Keplerian";
+   defaultStateTypeMap["VMAG"]         = "SphericalAZFPA";
 }
 
