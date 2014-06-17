@@ -421,9 +421,9 @@ protected:
    static const Integer ATTITUDE_ID_OFFSET;
    static const Real    UNSET_ELEMENT_VALUE;
    
-   std::map <std::string, std::string> elementLabelMap;
    std::map <std::string, std::string> attribCommentLineMap;
    std::map <std::string, std::string> inlineAttribCommentMap;
+   std::map<std::string, std::string> defaultStateTypeMap;
    std::map <std::string, StringArray> stateElementLabelsMap;
    std::map <std::string, StringArray> stateElementUnitsMap;
    std::multimap <std::string, std::string> allElementLabelsMultiMap;
@@ -565,7 +565,6 @@ protected:
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
-   void              BuildElementLabelMap();
    void              RecomputeStateAtEpoch(const GmatEpoch &toEpoch);
 
 private:
