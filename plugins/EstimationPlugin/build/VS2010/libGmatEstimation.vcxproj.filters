@@ -49,6 +49,21 @@
     <Filter Include="Source Files\measurement\Troposphere">
       <UniqueIdentifier>{a1e61c86-4e6b-4ab5-8f95-6dbea26388b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\adapter">
+      <UniqueIdentifier>{737f08b0-e351-48d3-963e-71ed107ed4a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\measurementmodel">
+      <UniqueIdentifier>{d71bf45b-5cdc-4822-b1c6-cbedf6c8efdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\reporter">
+      <UniqueIdentifier>{f8293e7a-1040-443e-a8e4-39ab24b25827}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\signal">
+      <UniqueIdentifier>{71ee05b1-5a1c-4c05-b721-4fc0fb0b6668}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\trackingfile">
+      <UniqueIdentifier>{404d12fd-af03-4d42-aa71-609df48dfc47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\include\estimation_defs.hpp">
@@ -291,6 +306,39 @@
     <ClInclude Include="..\..\src\base\measurement\RandomNumber.hpp">
       <Filter>Source Files\measurement</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurementmodel\MeasureModel.hpp">
+      <Filter>Source Files\measurementmodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\PhysicalSignal.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\SignalBase.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\SignalData.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\signal\SinglePointSignal.hpp">
+      <Filter>Source Files\signal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\reporter\ProgressReporter.hpp">
+      <Filter>Source Files\reporter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingfile\TFSMagicNumbers.hpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\trackingfile\TrackingFileSet.hpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\MeasurementModelBase.hpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -519,6 +567,39 @@
       <Filter>Source Files\measurementfile</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\RandomNumber.cpp">
+      <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurementmodel\MeasureModel.cpp">
+      <Filter>Source Files\measurementmodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\PhysicalSignal.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\SignalBase.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\SignalData.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\signal\SinglePointSignal.cpp">
+      <Filter>Source Files\signal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\reporter\ProgressReporter.cpp">
+      <Filter>Source Files\reporter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingfile\TFSMagicNumbers.cpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\trackingfile\TrackingFileSet.cpp">
+      <Filter>Source Files\trackingfile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\MeasurementModelBase.cpp">
       <Filter>Source Files\measurement</Filter>
     </ClCompile>
   </ItemGroup>
