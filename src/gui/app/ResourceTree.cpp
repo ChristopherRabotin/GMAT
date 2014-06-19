@@ -4362,7 +4362,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    try
    {
       fm->SetAbsPathname(FileManager::OUTPUT_PATH, currOutPath.c_str());
-      fm->SetAbsPathname(FileManager::EPHEM_PATH, currOutPath.c_str());
+      // Changed to use VEHICLE_EPHEM_PATH (LOJ: 2014.06.18)
+      //fm->SetAbsPathname(FileManager::EPHEM_PATH, currOutPath.c_str());
+      fm->SetAbsPathname(FileManager::VEHICLE_EPHEM_PATH, currOutPath.c_str());
    }
    catch (UtilityException &ue)
    {

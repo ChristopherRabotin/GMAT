@@ -187,7 +187,7 @@ void VisualModelCanvas::OnPaint(wxPaintEvent &event)
    glEnable(GL_LIGHT0);
    
    // Draw the model
-   if (currentSpacecraft->modelID == -1)
+   if (currentSpacecraft->GetModelId() == -1)
    {
       GlColorType *red = (GlColorType*)&GmatColor::RED,
          *yellow = (GlColorType*)&GmatColor::YELLOW;
@@ -376,7 +376,7 @@ void VisualModelCanvas::Rotate(bool useDegrees, float xAngle, float yAngle, floa
 {
    if (needToLoadModel)
       LoadModel();
-   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
+   if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
       loadedModel->SetBaseRotation(useDegrees, xAngle, yAngle, zAngle);
    Refresh(false);
 }
@@ -396,7 +396,7 @@ void VisualModelCanvas::Translate(float x, float y, float z)
 {
    if (needToLoadModel)
       LoadModel();
-   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
+   if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
       loadedModel->SetBaseOffset(x,y,z);
    Refresh(false);
 }
@@ -417,7 +417,7 @@ void VisualModelCanvas::Scale(float xScale, float yScale, float zScale)
 {
    if (needToLoadModel)
       LoadModel();
-   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
+   if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
       loadedModel->SetBaseScale(xScale, yScale, zScale);
    Refresh(false);
 }
@@ -441,10 +441,10 @@ void VisualModelCanvas::RecenterModel(float *offset)
 
    #ifdef DEBUG_RECENTER
    MessageInterface::ShowMessage
-      ("   modelID=%d, isLoaded=%d\n", currentSpacecraft->modelID, loadedModel->isLoaded);
+      ("   modelID=%d, isLoaded=%d\n", currentSpacecraft->GetModelId(), loadedModel->isLoaded);
    #endif
    
-   if (currentSpacecraft->modelID != -1 && loadedModel->IsLoaded())
+   if (currentSpacecraft->GetModelId() != -1 && loadedModel->IsLoaded())
    {
       vector_type bsphere_center = loadedModel->GetBSphereCenter();
       float x = -bsphere_center.x;
@@ -531,8 +531,8 @@ void VisualModelCanvas::LoadModel()
    #endif
    ModelManager *mm = ModelManager::Instance();
    std::string mP = modelPath.c_str();
-   currentSpacecraft->modelID = mm->LoadModel(mP);
-   loadedModel = mm->GetModel(currentSpacecraft->modelID);
+   currentSpacecraft->SetModelId(mm->LoadModel(mP));
+   loadedModel = mm->GetModel(currentSpacecraft->GetModelId());
    needToLoadModel = false;
    #ifdef DEBUG_LOAD_MODEL
    MessageInterface::ShowMessage

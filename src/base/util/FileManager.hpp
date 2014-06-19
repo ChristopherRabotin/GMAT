@@ -42,17 +42,19 @@ public:
       // file path
       BEGIN_OF_PATH = 0,
       OUTPUT_PATH,
-      DE_PATH,
-      SPK_PATH,
+      TIME_PATH,
+      PLANETARY_COEFF_PATH,
+      PLANETARY_EPHEM_DE_PATH,
+      PLANETARY_EPHEM_SPK_PATH,
+      VEHICLE_EPHEM_PATH,
+      VEHICLE_EPHEM_SPK_PATH,
+      VEHICLE_EPHEM_CCSDS_PATH,
       EARTH_POT_PATH,
       LUNA_POT_PATH,
       VENUS_POT_PATH,
       MARS_POT_PATH,
-      PLANETARY_COEFF_PATH,
-      TIME_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
       MEASUREMENT_PATH,
-      EPHEM_PATH,
       GUI_CONFIG_PATH,
       SPLASH_PATH,
       ICON_PATH,
@@ -108,11 +110,15 @@ public:
    bool        SetGmatWorkingDirectory(const std::string &newDir = "");
    
    /// System's current working directory of the process
-   std::string GetWorkingDirectory();
-   bool        SetWorkingDirectory(const std::string &newDir = "");
+   std::string GetCurrentWorkingDirectory();
+   bool        SetCurrentWorkingDirectory(const std::string &newDir = "");
    
    /// Finds file path using search order
-   std::string FindPath(const std::string &fileName, const FileType type, bool forInput);
+   std::string FindPath(const std::string &fileName, const FileType type,
+                        bool forInput, bool writeWarning = false);
+   std::string FindPath(const std::string &fileName, const std::string &typeName,
+                        bool forInput, bool writeWarning = false);
+   std::string FindMainIconFile();
    
    std::string GetPathSeparator();
    bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);

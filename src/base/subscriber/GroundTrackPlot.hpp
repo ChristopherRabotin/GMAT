@@ -99,6 +99,7 @@ protected:
    std::string centralBodyName;
    std::string footPrints;
    std::string textureMapFileName;
+   std::string textureMapFullPath;
    FootPrintOption footPrintOption;
    
 public:
@@ -130,6 +131,7 @@ public:
    static const std::string* GetFootPrintOptionList();
    
 private:
+   void SetTextureMapFileName(const std::string &name, const std::string &whichMap);
    
    static const std::string FOOT_PRINT_OPTION_TEXT[FootPrintOptionCount];
 };

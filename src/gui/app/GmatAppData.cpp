@@ -38,6 +38,7 @@
 #endif
 
 //#define DEBUG_SET_ICON
+//#define DEBUG_GUI_CONFIG
 
 GmatAppData* GmatAppData::theGmatAppData = NULL;
 
@@ -120,9 +121,18 @@ ResourceTree* GmatAppData::GetResourceTree()
 //------------------------------------------------------------------------------
 wxConfigBase* GmatAppData::GetPersonalizationConfig()
 {
+   #ifdef DEBUG_GUI_CONFIG
+   MessageInterface::ShowMessage
+      ("GmatAppData::GetPersonalizationConfig() entered, thePersonalizationConfig = <%p>\n",
+       thePersonalizationConfig);
+   #endif
+   
    if (thePersonalizationConfig == NULL)
    {
 	  std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
+     #ifdef DEBUG_GUI_CONFIG
+     MessageInterface::ShowMessage("   pfile = '%s'\n", pfile.c_str());
+     #endif
 	  // fix crash for invalid filename
 	  if (!FileManager::Instance()->DoesDirectoryExist(pfile))
 	  {
@@ -130,9 +140,15 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
                                  pfile.c_str() );
 		  pfile = "";
 	  }
-      thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, pfile.c_str(),
+     thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, pfile.c_str(),
               wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
    }
+   
+   #ifdef DEBUG_GUI_CONFIG
+   MessageInterface::ShowMessage
+      ("GmatAppData::GetPersonalizationConfig() returning <%p>\n",
+       thePersonalizationConfig);
+   #endif
    return thePersonalizationConfig;
 }
 
@@ -281,13 +297,59 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
       ("GmatAppData::SetIcon() entered, called from '%s' named '%s'\n",
        calledFrom.c_str(), topWindow->GetName().c_str());
    #endif
-   
+
+   static bool writeWarning = true;
    bool retval = true;
+   FileManager *fm = FileManager::Instance();
    
+   //===========================================================================
+   #ifndef __USE_OLD_FILEPATH_IMP__
+   //===========================================================================
+   
+   // Get icon file path from the FileManager
+   if (!theIconFileSet)
+   {
+      #ifdef DEBUG_SET_ICON
+      MessageInterface::ShowMessage
+         ("   The icon file is not set, so get it from the FileManager\n");
+      #endif
+      theIconFile = fm->FindMainIconFile();
+      theIconFileSet = true;
+   }
+   
+   #ifdef DEBUG_SET_ICON
+   MessageInterface::ShowMessage("   theIconFile = '%s'\n", theIconFile.c_str());
+   #endif
+   
+   if (theIconFile != "")
+   {
+      #if defined __WXMSW__
+         topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_ICO));
+      #elif defined __WXGTK__
+         topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_XPM));
+      #elif defined __WXMAC__
+         topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_PICT_RESOURCE));
+      #endif
+   }
+   else
+   {
+      // Write warning only once
+      if (writeWarning)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The GMAT main icon file '%s' not found\n",
+             fm->GetFilename(FileManager::MAIN_ICON_FILE).c_str());
+         writeWarning = false;
+      }
+   }
+   
+   //===========================================================================
+   #else
+   //===========================================================================
+
    if (theIconFile == "")
    {
       // Set icon if icon file is in the start up file
-      FileManager *fm = FileManager::Instance();
       theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
       #ifdef DEBUG_SET_ICON
       MessageInterface::ShowMessage("   theIconFile = '%s'\n", theIconFile.c_str());
@@ -347,12 +409,36 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
           calledFrom.c_str(), topWindow->GetName().c_str(), e.GetFullMessage().c_str());
       retval = false;
    }
+   #endif
+   //===========================================================================
    
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage("GmatAppData::SetIcon() returning %d\n", retval);
    #endif
    
    return retval;
+}
+
+//------------------------------------------------------------------------------
+// void ResetIconFile()
+//------------------------------------------------------------------------------
+/**
+ * Resets icon file and set flag.  This method is usually called from the Moderator
+ * when new script is read.
+ */
+//------------------------------------------------------------------------------
+void GmatAppData::ResetIconFile()
+{
+   #ifdef DEBUG_SET_ICON
+   MessageInterface::ShowMessage("GmatAppData::ResetIconFile() entered\n");
+   #endif
+   
+   theIconFileSet = false;
+   theIconFile = "";
+   
+   #ifdef DEBUG_SET_ICON
+   MessageInterface::ShowMessage("GmatAppData::ResetIconFile() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -406,6 +492,7 @@ GmatAppData::GmatAppData()
    theMessageTextCtrl = NULL;
    theTempScriptName = "$gmattempscript$.script";
    thePersonalizationConfig = NULL;
+   theIconFileSet = false;
    
    #ifdef __USE_EDITOR__
    thePageSetupDialogData = NULL;

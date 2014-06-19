@@ -242,7 +242,7 @@ bool CallMatlabFunction::Initialize()
       
       // Change directory to working directory where GMAT application is so that
       // relative path specified in the startup file works. (LOJ: 2012.09.24)
-      std::string workingDir = fm->GetWorkingDirectory();
+      std::string workingDir = fm->GetCurrentWorkingDirectory();
       #ifdef DEBUG_CALL_FUNCTION_INIT
       MessageInterface::ShowMessage("   Changing working dir to '%s'\n", workingDir.c_str());
       #endif

@@ -238,7 +238,7 @@ bool GmatApp::OnInit()
          // save current working directory... moderator may have changed it in
          // ReadStartupFile
          // but we need old one when reading command line arguments
-         bool pclo = ProcessCommandLineOptions();
+//         bool pclo = ProcessCommandLineOptions();
 //         GmatFileUtil::SetWorkingDirectory(wd);
 //         if (buildScript && (!GmatFileUtil::DoesFileExist(scriptToRun)) &&
 //             (GmatFileUtil::DoesFileExist(cur_dir+'/'+scriptToRun)))
@@ -775,7 +775,8 @@ void GmatApp::BuildAndRunScript(bool runScript)
    }
    else
    {
-      WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
+      if (!builtOk)
+         WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
    }
    
    wxSafeYield();

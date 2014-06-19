@@ -149,6 +149,7 @@ public:
    virtual void NotifyRunCompleted();
    virtual void UpdateView(Integer type = 7);
    virtual void CloseCurrentProject();
+   virtual void ResetIconFile();
    
    void UpdateResourceTree();
    void UpdateMissionTree();

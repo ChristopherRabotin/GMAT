@@ -164,6 +164,7 @@ public:
    virtual void UpdateView(Integer type = 7);
    virtual void CloseCurrentProject();
    virtual void StartMatlabServer();
+   virtual void ResetIconFile();
    
    Interface* GetMatlabInterface();
    bool OpenMatlabEngine();

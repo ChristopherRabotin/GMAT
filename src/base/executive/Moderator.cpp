@@ -77,7 +77,7 @@
 
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
-//#define DEBUG_INTERPRET 2
+//#define DEBUG_INTERPRET 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
@@ -6841,6 +6841,18 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
+      
+      // Set GMAT working directory (for GMT-4408 LOJ: 2014.06.11)
+      // GMAT working directory has script file
+      std::string path = GmatFileUtil::ParsePathName(filename);
+      
+      MessageInterface::ShowMessage
+         ("Setting '%s' as GMAT working directory\n", path.c_str());
+      
+      theFileManager->SetGmatWorkingDirectory(path);
+      if (theUiInterpreter != NULL)
+         theUiInterpreter->ResetIconFile();
+      
       isGoodScript = theScriptInterpreter->Interpret(filename);
       foundBeginMissionSeq = theScriptInterpreter->FoundBeginMissionSequence();
       
@@ -6889,10 +6901,13 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       
       if (isGoodScript)
       {
+         #if 0
          #if DEBUG_INTERPRET
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          #endif
+         #endif
+         MessageInterface::ShowMessage("Successfully interpreted the script\n");
          
          isRunReady = true;
       }
@@ -6984,7 +6999,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       MessageInterface::ShowMessage(GetScript());
       #endif
       
-      #if DEBUG_INTERPRET > 0
+      #if DEBUG_INTERPRET > 1
       GmatCommand *cmd = GetFirstCommand();
       MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
       MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", isGoodScript);

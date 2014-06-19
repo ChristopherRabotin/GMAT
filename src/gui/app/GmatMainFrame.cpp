@@ -167,6 +167,7 @@
 //#define DEBUG_PENDING_EVENTS
 //#define DEBUG_DOCK_UNDOCK
 //#define DEBUG_CONFIG_DATA
+//#define DEBUG_CONFIG_FILE
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_REPOSITION_CHILDREN
 //#define DEBUG_SCREEN_SHOT
@@ -580,6 +581,10 @@ GmatMainFrame::~GmatMainFrame()
    GetScreenPosition(&windowX, &windowY);
    GetSize(&windowW, &windowH);
    #ifdef DEBUG_CONFIG_FILE
+   // Question: How can I get local file name? ex) '../data/gui_config/MyGmat.ini'
+   MessageInterface::ShowMessage
+      ("GmatMainFrame destructor writing window size and location to personalization "
+       "file.\n   current path = '%s'\n", pConfig->GetPath().c_str());
    MessageInterface::ShowMessage
       ("   Final screen pos,  X = %4d, Y = %4d\n", windowX, windowY);
    MessageInterface::ShowMessage

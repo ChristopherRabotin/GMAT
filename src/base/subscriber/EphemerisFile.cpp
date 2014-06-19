@@ -552,7 +552,9 @@ std::string EphemerisFile::GetFileName()
    try
    {
       FileManager *fm = FileManager::Instance();
-      oututPath = fm->GetPathname(FileManager::EPHEM_PATH);
+      // Changed to use VEHICLE_EPHEM_PATH
+      // oututPath = fm->GetPathname(FileManager::EPHEM_PATH);
+      oututPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_PATH);
       
       if (fileName == "")
       {

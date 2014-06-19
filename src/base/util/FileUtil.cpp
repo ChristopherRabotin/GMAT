@@ -154,13 +154,13 @@ std::string GmatFileUtil::ConvertToOsFileName(const std::string &fileName)
 
 
 //------------------------------------------------------------------------------
-// std::string GetWorkingDirectory()
+// std::string GetCurrentWorkingDirectory()
 //------------------------------------------------------------------------------
 /*
  * @return  The current working directory, generally the application path.
  */
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::GetWorkingDirectory()
+std::string GmatFileUtil::GetCurrentWorkingDirectory()
 {
    std::string currDir;
    
@@ -172,7 +172,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
       currDir = buffer;
    else
       MessageInterface::ShowMessage
-         ("*** WARNING *** GmatFileUtil::GetWorkingDirectory() \n"
+         ("*** WARNING *** GmatFileUtil::GetCurrentWorkingDirectory() \n"
           "Cannot get current directory, so jsut returning empty directory\n");
    
 #else
@@ -193,7 +193,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
 
 
 //------------------------------------------------------------------------------
-// bool SetWorkingDirectory(const std::string &newDir)
+// bool SetCurrentWorkingDirectory(const std::string &newDir)
 //------------------------------------------------------------------------------
 /*
  * Sets current working directory to newDir
@@ -201,7 +201,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
  * @return  true if current working is successfully set to newDir, false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatFileUtil::SetWorkingDirectory(const std::string &newDir)
+bool GmatFileUtil::SetCurrentWorkingDirectory(const std::string &newDir)
 {
 #ifdef _MSC_VER  // if Microsoft Visual C++
    if (SetCurrentDirectory(newDir.c_str()) > 0)
@@ -571,6 +571,18 @@ bool GmatFileUtil::IsPathAbsolute(const std::string &fullPath)
    }
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasNoPath(const std::string &fullPath)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::HasNoPath(const std::string &fullPath)
+{
+   if (IsPathRelative(fullPath) || IsPathAbsolute(fullPath))
+      return false;
+   else
+      return true;
 }
 
 

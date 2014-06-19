@@ -346,6 +346,9 @@ private:
    // method to set default colors
    void           SetDefaultSpacePointColors(SpacePoint *sp);
    
+   // method to set solar system body texture map file
+   void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
+   
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data
    static const Gmat::PosVelSource    PLANET_POS_VEL_SOURCE;

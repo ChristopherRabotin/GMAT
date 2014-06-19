@@ -73,7 +73,7 @@
 //#define DEBUG_CB_CARTOGRAPHIC
 //#define DEBUG_CB_DESTRUCT
 //#define DEBUG_CB_EPOCH
-
+//#define DEBUG_TEXTURE_FILE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -130,6 +130,7 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "RotationConstant",
    "RotationRate",
    "TextureMapFileName",
+   "TextureMapFullPath",
 };
 
 const Gmat::ParameterType
@@ -172,7 +173,8 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::REAL_TYPE,     //"SpinAxisDECRate", 
    Gmat::REAL_TYPE,     //"RotationConstant", 
    Gmat::REAL_TYPE,     //"RotationRate", 
-   Gmat::STRING_TYPE,   //"TextureMapFileName"
+   Gmat::FILENAME_TYPE, //"TextureMapFileName"
+   Gmat::FILENAME_TYPE, //"TextureMapFullPath"
 };
 
 const Real    CelestialBody::dDot                       = 1.0;
@@ -234,6 +236,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    naifIdSet          (false),
    naifName           (name),
    textureMapFileName ("GenericCelestialBody.jpg"),
+   textureMapFullPath ("GenericCelestialBody.jpg"),
    msgWritten         (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
@@ -249,12 +252,18 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
       models[i].push_back("None");
 
    // try to find the texture map file
-   if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
-   {
-      std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
-      textureMapFileName = textureLoc + textureMapFileName;
-   }
-
+   // if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+   // {
+   //    std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+   //    textureMapFileName = textureLoc + textureMapFileName;
+   // }
+   
+   // Use FileManager::FindPath() (LOJ: 2014.06.18)
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage("1 Calling SetTextureFileName()\n");
+   #endif
+   SetTextureFileName(textureMapFileName);
+   
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
    #ifdef __USE_SPICE__
       kernelReader = NULL;
@@ -329,6 +338,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    naifIdSet          (false),
    naifName           (name),
    textureMapFileName ("GenericCelestialBody.jpg"),
+   textureMapFullPath ("GenericCelestialBody.jpg"),
    msgWritten         (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
@@ -340,13 +350,20 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
 
    mass        = mu / GmatPhysicalConstants::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    polarRadius = (1.0 - flattening) * equatorialRadius;
-
+   
    // try to find the texture map file
-   if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
-   {
-      std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
-      textureMapFileName = textureLoc + textureMapFileName;
-   }
+   // if (textureMapFileName != "" && !GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+   // {
+   //    std::string textureLoc = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+   //    textureMapFileName = textureLoc + textureMapFileName;
+   // }
+   
+   // Use FileManager::FindPath() (LOJ: 2014.06.18)
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage("2 Calling SetTextureFileName()\n");
+   #endif
+   SetTextureFileName(textureMapFileName);
+   
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
@@ -407,7 +424,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    default_mu                    (cBody.default_mu),
    default_posVelSrc             (cBody.default_posVelSrc),
    default_centralBodyName       (cBody.default_centralBodyName),
-   default_orbitSpiceKernelNames      (cBody.default_orbitSpiceKernelNames),
+   default_orbitSpiceKernelNames (cBody.default_orbitSpiceKernelNames),
    default_rotationSrc           (cBody.default_rotationSrc), 
    default_twoBodyEpoch          (cBody.default_twoBodyEpoch),
    default_twoBodyKepler         (cBody.default_twoBodyKepler),
@@ -439,6 +456,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    naifIdSet           (cBody.naifIdSet),
    naifName            (cBody.naifName),
    textureMapFileName  (cBody.textureMapFileName),
+   textureMapFullPath  (cBody.textureMapFullPath),
    msgWritten          (cBody.msgWritten)
 {
    state                  = cBody.state;
@@ -585,6 +603,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    naifIdSet           = cBody.naifIdSet;
    naifName            = cBody.naifName;
    textureMapFileName  = cBody.textureMapFileName;
+   textureMapFullPath  = cBody.textureMapFullPath;
    msgWritten          = cBody.msgWritten;
    
    for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
@@ -3213,6 +3232,12 @@ Integer CelestialBody::SetIntegerParameter(const Integer id,
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetStringParameter(const Integer id) const
 {
+   #ifdef DEBUG_GET_STRING
+   MessageInterface::ShowMessage
+      ("CelestialBody::GetStringParameter() '%s' entered, id = %d, textureMapFileName = '%s'\n",
+       GetName().c_str(), id, textureMapFileName.c_str());
+   #endif
+   
    if (id == BODY_TYPE)             return Gmat::BODY_TYPE_STRINGS[bodyType];
    if (id == POS_VEL_SOURCE)        return Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
 
@@ -3230,7 +3255,8 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
    if (id == ORIENTATION_DATE_FORMAT)  return orientationDateFormat;
    
    if (id == TEXTURE_MAP_FILE_NAME)    return textureMapFileName;
-
+   if (id == TEXTURE_MAP_FULL_PATH)    return textureMapFullPath;
+   
    return SpacePoint::GetStringParameter(id);
 }
 
@@ -3449,30 +3475,48 @@ bool CelestialBody::SetStringParameter(const Integer id,
 
    if (id == TEXTURE_MAP_FILE_NAME)
    {
+      // Find find from the FileManager (LOJ: 2014.06.18)
       textureMapFileName = value;
-      if (!GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      #ifdef DEBUG_TEXTURE_FILE
+      MessageInterface::ShowMessage
+         ("3 Calling SetTextureFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
+      #endif
+      SetTextureFileName(textureMapFileName);
+      
+      // Question: Do we want to throw an exception during the setting?
+      #if 0
+      if (textureMapFullPath == "")
       {
-         std::string oldTextureFile = textureMapFileName;
-         std::string textureLoc     = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
-         textureMapFileName         = textureLoc + textureMapFileName;
-         if (oldTextureFile != "")
-         {
-            if (GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
-            {
-               MessageInterface::ShowMessage
-                  ("*** WARNING *** The texture file '%s' does not exist, \n"
-                   "    so using the texture file '%s' using the path specified in the startup file.\n",
-                   oldTextureFile.c_str(), textureMapFileName.c_str(), instanceName.c_str());
-            }
-            else
-            {
-               std::string errmsg = "Texture map \"";
-               errmsg += oldTextureFile + "\" specified for body \"";
-               errmsg += instanceName + "\" cannot be found.\n";
-               throw SolarSystemException(errmsg);
-            }
-         }
+         std::string errmsg = "Texture map \"";
+         errmsg += textureMapFileName + "\" specified for body \"";
+         errmsg += instanceName + "\" cannot be found.\n";
+         throw SolarSystemException(errmsg);
       }
+      #endif
+      
+      // if (!GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      // {
+      //    std::string oldTextureFile = textureMapFileName;
+      //    std::string textureLoc     = (FileManager::Instance())->GetFullPathname("TEXTURE_PATH");
+      //    textureMapFileName         = textureLoc + textureMapFileName;
+      //    if (oldTextureFile != "")
+      //    {
+      //       if (GmatFileUtil::DoesFileExist(textureMapFileName.c_str()))
+      //       {
+      //          MessageInterface::ShowMessage
+      //             ("*** WARNING *** The texture file '%s' does not exist, \n"
+      //              "    so using the texture file '%s' using the path specified in the startup file.\n",
+      //              oldTextureFile.c_str(), textureMapFileName.c_str(), instanceName.c_str());
+      //       }
+      //       else
+      //       {
+      //          std::string errmsg = "Texture map \"";
+      //          errmsg += oldTextureFile + "\" specified for body \"";
+      //          errmsg += instanceName + "\" cannot be found.\n";
+      //          throw SolarSystemException(errmsg);
+      //       }
+      //    }
+      // }
       return true;
    }
 
@@ -3985,6 +4029,9 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
+   if (id == TEXTURE_MAP_FULL_PATH)
+      return true;
+   
    return SpacePoint::IsParameterReadOnly(id);
 }
 
@@ -4790,8 +4837,11 @@ bool CelestialBody::SetUpSPICE()
             if (spkName.find("/") == spkName.npos &&
                 spkName.find("\\") == spkName.npos)
             {
+               // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+               //std::string spkPath =
+               //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
                std::string spkPath =
-                  FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+                  FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
                spkName = spkPath + spkName;
                try
                {
@@ -4883,6 +4933,29 @@ bool CelestialBody::NeedsOnlyMainSPK()
 {
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// void SetTextureFileName(const std::string &filename)
+//------------------------------------------------------------------------------
+void CelestialBody::SetTextureFileName(const std::string &filename)
+{
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("\nCelestialBody::SetTextureFileName() entered\n   filename = '%s'\n", filename.c_str());
+   #endif
+   
+   textureMapFullPath =
+      FileManager::Instance()->FindPath(textureMapFileName, "TEXTURE_PATH", true, false);
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("   For %s:\n   textureMapFileName = '%s'\n   textureMapFullPath = '%s'\n",
+       GetName().c_str(), textureMapFileName.c_str(), textureMapFullPath.c_str());
+   MessageInterface::ShowMessage("CelestialBody::SetTextureFileName() leaving\n");
+   #endif
+}
+
 
 //------------------------------------------------------------------------------
 // private methods

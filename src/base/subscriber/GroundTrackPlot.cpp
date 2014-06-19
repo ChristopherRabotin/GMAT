@@ -85,7 +85,9 @@ GroundTrackPlot::GroundTrackPlot(const std::string &name)
    
    // Set default texture map file from the startup file through the FileManager
    FileManager *fm = FileManager::Instance();
-   textureMapFileName = fm->GetFullPathname("EARTH_TEXTURE_FILE");
+   //textureMapFileName = fm->GetFullPathname("EARTH_TEXTURE_FILE");
+   // Find file name and full path (LOJ: 2014.06.18)
+   SetTextureMapFileName("", "EARTH_TEXTURE_FILE");
    
    footPrintOption = FP_NONE;
    
@@ -109,6 +111,7 @@ GroundTrackPlot::GroundTrackPlot(const GroundTrackPlot &plot)
    centralBodyName    = plot.centralBodyName;
    footPrints         = plot.footPrints;
    textureMapFileName = plot.textureMapFileName;
+   textureMapFullPath = plot.textureMapFullPath;
    footPrintOption    = plot.footPrintOption;
 }
 
@@ -131,6 +134,7 @@ GroundTrackPlot& GroundTrackPlot::operator=(const GroundTrackPlot& plot)
    centralBodyName    = plot.centralBodyName;
    footPrints         = plot.footPrints;
    textureMapFileName = plot.textureMapFileName;
+   textureMapFullPath = plot.textureMapFullPath;
    footPrintOption    = plot.footPrintOption;
    
    return *this;
@@ -299,8 +303,11 @@ bool GroundTrackPlot::Initialize()
             ("   calling PlotInterface::SetGlDrawingOption()\n");
          #endif
          
+         // Pass textureMapFullPath instead of textureMapFileName
+         // PlotInterface::SetGl2dDrawingOption(instanceName, centralBodyName,
+         //                                     textureMapFileName, (Integer)footPrintOption);
          PlotInterface::SetGl2dDrawingOption(instanceName, centralBodyName,
-                                             textureMapFileName, (Integer)footPrintOption);
+                                             textureMapFullPath, (Integer)footPrintOption);
          
          //--------------------------------------------------------
          // set viewpoint info
@@ -587,6 +594,7 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
       // we want to create local body fixed coord system instead in Initialize()
       break;
    case CENTRAL_BODY:
+   {
       if (centralBodyName != value)
       {
          centralBodyName = value;
@@ -594,18 +602,26 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
          mViewCoordSysName = value + "Fixed";
          
          // Get default texture map file for the new body
-         FileManager *fm = FileManager::Instance();
-         std::string mapFile = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
-         textureMapFileName = fm->GetFullPathname(mapFile);
+         //FileManager *fm = FileManager::Instance();
+         std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+         // Get path from the FileManager (LOJ: 2014.06.18)
+         //textureMapFileName = fm->GetFullPathname(mapFileType);
+         SetTextureMapFileName("", mapFileType);
          #if DBGLVL_PARAM_STRING
          MessageInterface::ShowMessage
             ("   this = <%p>, textureMapFile changed to '%s'\n", this, textureMapFileName.c_str());
          #endif
       }
       return true;
+   }
    case TEXTURE_MAP:
+   {
       textureMapFileName = value;
+      // Get path from the FileManager (LOJ: 2014.06.18)
+      std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+      SetTextureMapFileName(value, mapFileType);
       return true;
+   }
    case SHOW_FOOT_PRINTS:
       {
          bool itemFound = false;
@@ -1093,3 +1109,33 @@ const StringArray& GroundTrackPlot::GetPropertyEnumStrings(const std::string &la
    return GetPropertyEnumStrings(GetParameterID(label));
 }
 
+//---------------------------------------------------------------------------
+// void SetTextureMapFileName(const std::string &name, const std::string &whichMap)
+//---------------------------------------------------------------------------
+void GroundTrackPlot::SetTextureMapFileName(const std::string &name,
+                                            const std::string &whichMap)
+{
+   #ifdef DEBUG_TEXTURE_MAP
+   MessageInterface::ShowMessage
+      ("GroundTrackPlot::SetTextureMapFileName() entered, name = '%s', whichMap = '%s'\n",
+       name.c_str(), whichMap.c_str());
+   #endif
+   
+   static bool writeWarning = true;
+   FileManager *fm = FileManager::Instance();
+   
+   textureMapFileName = name;
+   if (name == "")
+      textureMapFileName = fm->GetFilename(whichMap);
+   
+   textureMapFullPath = fm->FindPath(textureMapFileName, whichMap, true, writeWarning);
+   
+   if (name != "")
+      writeWarning = false;
+   
+   #ifdef DEBUG_TEXTURE_MAP
+   MessageInterface::ShowMessage
+      ("GroundTrackPlot::SetTextureMapFileName() leaving\n   textureMapFileName = '%s'\n   "
+       "textureMapFullPath = '%s'\n", textureMapFileName.c_str(), textureMapFullPath.c_str());
+   #endif
+}

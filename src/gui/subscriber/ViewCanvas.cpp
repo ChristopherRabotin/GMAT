@@ -1660,7 +1660,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
-      ("ViewCanvas::BindTexture() '%s' entered, objName='%s', textureFile = '%s'\n",
+      ("ViewCanvas::BindTexture() '%s' entered, objName='%s'\n   textureFile = '%s'\n",
        mPlotName.c_str(), objName.c_str(), textureFile.c_str());
    #endif
    
@@ -1673,7 +1673,11 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          {
             std::string oldTextureFile = textureFile;
             CelestialBody *body = (CelestialBody*) obj;
-            textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFileName"));
+            textureFile = body->GetStringParameter(body->GetParameterID("TextureMapFullPath"));
+            #if DEBUG_TEXTURE
+            MessageInterface::ShowMessage
+               ("   texture fullpath from the body = '%s'\n", textureFile.c_str());
+            #endif
             if (oldTextureFile != "")
             {
                MessageInterface::ShowMessage
@@ -1692,7 +1696,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
                {
                   MessageInterface::ShowMessage
                      ("*** WARNING *** The texture file '%s' does not exist, \n"
-                      "    so using the texture file '%s' using the path specified in the startup file.\n",
+                      "    so using the file '%s' \n    from the path specified in the startup file.\n",
                       oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
                }
             }
@@ -2041,7 +2045,13 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
    // Add this here to see if it works on Linux loading spacecraft 3ds model (LOJ: 2012.08.01)
    wxPaintDC dc(this);
    if (!SetGLContext("in ViewCanvas::LoadSpacecraftModels()"))
+   {
+      #if DEBUG_LOAD_MODEL
+      MessageInterface::ShowMessage
+         ("ViewCanvas::LoadSpacecraftModels() '%s' returning false, SetGLContext() failed\n");
+      #endif
       return false;
+   }
    
    if (mGlInitialized)
    {
@@ -2077,24 +2087,31 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
 					}
 					else
 					{
+                  std::string modelFullPath = sat->GetModelFileFullPath();
                   #ifdef DEBUG_LOAD_MODEL
 						MessageInterface::ShowMessage
-							("   Loading model file from the spacecraft <%p>'%s'\n   modelFile='%s', "
-							 "modelID=%d\n",  sat, sat->GetName().c_str(), sat->modelFile.c_str(),
-							 sat->modelID);
+							("   Loading model file from the spacecraft <%p>'%s'\n   modelFile = '%s', "
+							 "modelID = %d\n",  sat, sat->GetName().c_str(), modelFullPath.c_str(),
+							 sat->GetModelId());
 				      #endif
                   
-						if (sat->modelFile != "" && sat->modelID == -1)
+                  // If fullpaht is blank, try with model file name
+                  if (modelFullPath == "")
+                  {
+                     modelFullPath = sat->GetModelFile();
+                  }
+                  
+						if (modelFullPath != "" && sat->GetModelId() == -1)
 						{
-							wxString modelPath(sat->modelFile.c_str());
-							if (GmatFileUtil::DoesFileExist(modelPath.c_str()))
+							if (GmatFileUtil::DoesFileExist(modelFullPath))
 							{                        
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage("   Calling mm->LoadModel(), mm=<%p>\n", mm);
                         #endif
-                        std::string mP = modelPath.c_str();
-                        sat->modelID = mm->LoadModel(mP);
+                        
+                        sat->SetModelId(mm->LoadModel(modelFullPath));
                         numModelLoaded++;
+                        
                         #ifdef DEBUG_LOAD_MODEL
 								MessageInterface::ShowMessage
 									("   Successfully loaded model '%s', numModelLoaded = %d\n", modelPath.c_str(),
@@ -2106,9 +2123,9 @@ bool ViewCanvas::LoadSpacecraftModels(bool writeWarning)
                         if (writeWarning)
                         {
                            MessageInterface::ShowMessage
-                              ("*** WARNING *** Cannot load the model file for spacecraft '%s'. "
+                              ("*** WARNING *** Cannot load the model file for spacecraft '%s'.\n    "
                                "The file '%s' does not exist.\n", sat->GetName().c_str(),
-                               modelPath.c_str());
+                               modelFullPath.c_str());
                         }
 							}
 						}

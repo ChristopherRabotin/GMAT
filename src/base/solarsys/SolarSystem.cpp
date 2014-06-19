@@ -49,6 +49,7 @@
 //#define DEBUG_PLANETARY_SPK
 //#define DEBUG_SS_GET
 //#define DEBUG_DEFAULT_COLORS
+//#define DEBUG_TEXTURE_FILE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -355,7 +356,7 @@ SolarSystem::SolarSystem(std::string withName) :
 
    FileManager *fm = FileManager::Instance();
    std::string upperCaseName;
-   std::string filename, textureFile;
+   std::string fileType, textureFile;
 
    // create and add the default bodies
    // Assume only one Star for now : )
@@ -389,19 +390,27 @@ SolarSystem::SolarSystem(std::string withName) :
    //         newPlanet->AddValidModelName(Gmat::SHAPE_MODEL,"Other");
    // Set the orientation parameters for the body
    theSun->SetOrientationParameters(STAR_ORIENTATION_PARAMETERS);
-   // find and set the texture map
-   upperCaseName = GmatStringUtil::ToUpper(SUN_NAME);
-   filename      = upperCaseName + "_TEXTURE_FILE";
-   try
-   {
-      textureFile   = fm->GetFullPathname(filename);
-   }
-   catch (UtilityException &)
-   {
-      MessageInterface::ShowMessage("Texture map file is missing or unknown for default body %s\n",
-                                    SUN_NAME.c_str());
-   }
-   theSun->SetStringParameter(theSun->GetParameterID("TextureMapFileName"), textureFile);
+   
+   // Set texture map file for the Sun (LOJ: 2014.06.19)
+   SetTextureMapFile(theSun, SUN_NAME);
+   
+   //==================== OLD CODE
+   // // find and set the texture map
+   // upperCaseName = GmatStringUtil::ToUpper(SUN_NAME);
+   // fileType      = upperCaseName + "_TEXTURE_FILE";
+   // try
+   // {
+   //    textureFile   = fm->GetFullPathname(fileType);
+   // }
+   // catch (UtilityException &)
+   // {
+   //    MessageInterface::ShowMessage("Texture map file is missing or unknown for default body %s\n",
+   //                                  SUN_NAME.c_str());
+   // }
+   // theSun->SetStringParameter(theSun->GetParameterID("TextureMapFileName"), textureFile);
+   //==================== OLD CODE
+
+   
    // add the body to the default SolarSystem
    AddBody(theSun);
 
@@ -457,19 +466,28 @@ SolarSystem::SolarSystem(std::string withName) :
       // Set the orientation parameters for the body (Neptune is a special case - handled in the Planet class
       newPlanet->SetOrientationParameters(PLANET_ORIENTATION_PARAMETERS[ii]);
       newPlanet->SetIntegerParameter(newPlanet->GetParameterID("NAIFId"),PLANET_NAIF_IDS[ii]);
-      // find and set the texture map
-      upperCaseName = GmatStringUtil::ToUpper(PLANET_NAMES[ii]);
-      filename      = upperCaseName + "_TEXTURE_FILE";
-      try
-      {
-         textureFile   = fm->GetFullPathname(filename);
-      }
-      catch (UtilityException &)
-      {
-         MessageInterface::ShowMessage("Texture map file is missing or unknown for default body %s\n",
-                                       (PLANET_NAMES[ii]).c_str());
-      }
-      newPlanet->SetStringParameter(newPlanet->GetParameterID("TextureMapFileName"), textureFile);
+      
+      // Set texture map file for the Planets (LOJ: 2014.06.19)
+      SetTextureMapFile(newPlanet, PLANET_NAMES[ii]);
+      
+      
+      //==================== OLD CODE
+      // // find and set the texture map
+      // upperCaseName = GmatStringUtil::ToUpper(PLANET_NAMES[ii]);
+      // fileType      = upperCaseName + "_TEXTURE_FILE";      
+      // try
+      // {
+      //    textureFile   = fm->GetFullPathname(fileType);
+      // }
+      // catch (UtilityException &)
+      // {
+      //    MessageInterface::ShowMessage("Texture map file is missing or unknown for default body %s\n",
+      //                                  (PLANET_NAMES[ii]).c_str());
+      // }
+      // newPlanet->SetStringParameter(newPlanet->GetParameterID("TextureMapFileName"), textureFile);
+      //==================== OLD CODE
+      
+      
       // add the body to the default SolarSystem
       AddBody(newPlanet);
    }
@@ -527,19 +545,27 @@ SolarSystem::SolarSystem(std::string withName) :
       // Set the orientation parameters for the body (Neptune is a special case - handled in the Planet class
       newMoon->SetOrientationParameters(PLANET_ORIENTATION_PARAMETERS[ii]);
       newMoon->SetIntegerParameter(newMoon->GetParameterID("NAIFId"),MOON_NAIF_IDS[ii]);
-      // find and set the texture map
-      upperCaseName = GmatStringUtil::ToUpper(MOON_NAMES[ii]);
-      filename      = upperCaseName + "_TEXTURE_FILE";
-      try
-      {
-         textureFile   = fm->GetFullPathname(filename);
-      }
-      catch (UtilityException &)
-      {
-         MessageInterface::ShowMessage("Texture map file is missing or unknown for default body %s\n",
-                                       (MOON_NAMES[ii]).c_str());
-      }
-      newMoon->SetStringParameter(newMoon->GetParameterID("TextureMapFileName"), textureFile);
+      
+      // Set texture map file for the moon (LOJ: 2014.06.19)
+      SetTextureMapFile(newMoon, MOON_NAMES[ii]);
+      
+      //==================== OLD CODE
+      // // find and set the texture map
+      // upperCaseName = GmatStringUtil::ToUpper(MOON_NAMES[ii]);
+      // fileType      = upperCaseName + "_TEXTURE_FILE";
+      // try
+      // {
+      //    textureFile   = fm->GetFullPathname(fileType);
+      // }
+      // catch (UtilityException &)
+      // {
+      //    MessageInterface::ShowMessage("Texture map file is missing or unknown for default body %s\n",
+      //                                  (MOON_NAMES[ii]).c_str());
+      // }
+      // newMoon->SetStringParameter(newMoon->GetParameterID("TextureMapFileName"), textureFile);
+      //==================== OLD CODE
+
+      
       // add the body to the default SolarSystem
       AddBody(newMoon);
    }
@@ -921,38 +947,35 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
       //initialize file names
 //      thePlanetarySourceNames.push_back("N/A");  // TwoBodyPropagation has no file associated with it // 2012/01.14 - wcs - disallowed for now
 
-     thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
-	  try
-	  {
-		  std::string pathname = fm->GetFullPathname("DE421_FILE");
-	     thePlanetarySourceNames.push_back(pathname);
-	  }
-	  catch (UtilityException e)
-	  {
-		  // skip the setting DE421 when it is not defined in gmat_startup file
-		  MessageInterface::ShowMessage("DE421 file location is not defined in gmat_startup file\n");
-	  }
-
-	  try
-	  {
-		  std::string pathname = fm->GetFullPathname("DE424_FILE");
-	     thePlanetarySourceNames.push_back(pathname);
-	  }
-	  catch (UtilityException e)
-	  {
-		  // skip the settting DE424 when it is not defined in gmat_startup file
-		  MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");
-	  }
-
+      
+      // Changed to use FileManager::FindPath() based on the new design (LOJ: 2014.06.19)
+      std::string fullpath = fm->FindPath("", "DE405_FILE", true, false);
+      if (fullpath != "")
+         thePlanetarySourceNames.push_back(fullpath);
+      else
+         MessageInterface::ShowMessage("DE405 file location is not defined in gmat_startup file\n");
+      
+      fullpath = fm->FindPath("", "DE421_FILE", true, false);
+      if (fullpath != "")
+         thePlanetarySourceNames.push_back(fullpath);
+      else
+         MessageInterface::ShowMessage("DE421 file location is not defined in gmat_startup file\n");
+      
+      fullpath = fm->FindPath("", "DE424_FILE", true, false);
+      if (fullpath != "")
+         thePlanetarySourceNames.push_back(fullpath);
+      else
+         MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");
+      
       if (spiceAvailable)
       {
-         std::string spkFullPath = fm->GetFullPathname("PLANETARY_SPK_FILE");
+         std::string spkFullPath = fm->FindPath("", "PLANETARY_SPK_FILE", true, false);
          if (!(GmatStringUtil::IsBlank(spkFullPath)))
          {
             SetSPKFile(spkFullPath);
             thePlanetarySourceNames.push_back(theSPKFilename);
          }
-         std::string lskFullPath = fm->GetFullPathname("LSK_FILE");
+         std::string lskFullPath = fm->FindPath("", "LSK_FILE", true, false);
          if (!(GmatStringUtil::IsBlank(lskFullPath)))
          {
             SetLSKFile(lskFullPath);
@@ -960,6 +983,49 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
          else
             throw SolarSystemException("Unable to obtain Leap Second Kernel (LSK) full path name.  Please set LSK_FILE in start-up file.\n");
       }
+      
+      
+      //==================== OLD CODE
+      //thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
+      // try
+      // {
+      //    std::string pathname = fm->GetFullPathname("DE421_FILE");
+      //    thePlanetarySourceNames.push_back(pathname);
+      // }
+      // catch (UtilityException e)
+      // {
+      //    // skip the setting DE421 when it is not defined in gmat_startup file
+      //    MessageInterface::ShowMessage("DE421 file location is not defined in gmat_startup file\n");
+      // }
+      
+      // try
+      // {
+      //    std::string pathname = fm->GetFullPathname("DE424_FILE");
+      //    thePlanetarySourceNames.push_back(pathname);
+      // }
+      // catch (UtilityException e)
+      // {
+      //    // skip the settting DE424 when it is not defined in gmat_startup file
+      //    MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");
+      // }
+      
+      // if (spiceAvailable)
+      // {
+      //    std::string spkFullPath = fm->GetFullPathname("PLANETARY_SPK_FILE");
+      //    if (!(GmatStringUtil::IsBlank(spkFullPath)))
+      //    {
+      //       SetSPKFile(spkFullPath);
+      //       thePlanetarySourceNames.push_back(theSPKFilename);
+      //    }
+      //    std::string lskFullPath = fm->GetFullPathname("LSK_FILE");
+      //    if (!(GmatStringUtil::IsBlank(lskFullPath)))
+      //    {
+      //       SetLSKFile(lskFullPath);
+      //    }
+      //    else
+      //       throw SolarSystemException("Unable to obtain Leap Second Kernel (LSK) full path name.  Please set LSK_FILE in start-up file.\n");
+      // }
+      //==================== OLD CODE
    }
    // Set planetary ephemeris source
    #ifdef DEBUG_SS_PLANETARY_FILE
@@ -1489,8 +1555,11 @@ void SolarSystem::LoadSpiceKernels()
       if (spkName.find("/") == spkName.npos &&
           spkName.find("\\") == spkName.npos)
       {
+         // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+         // std::string spkPath =
+         //    FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
          std::string spkPath =
-            FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+            FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
          spkName = spkPath + spkName;
          try
          {
@@ -1513,7 +1582,7 @@ void SolarSystem::LoadSpiceKernels()
          if (theSPKFilename.size() > 1 && theSPKFilename[0] == '.')
          {
             FileManager *fm = FileManager::Instance();
-            //std::string absSpkFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            //std::string absSpkFile = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
             std::string absSpkFile = fm->GetBinDirectory() + fm->GetPathSeparator() + theSPKFilename;
             
             MessageInterface::ShowMessage
@@ -3585,7 +3654,7 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
       if (fileName.size() > 1 && fileName[0] == '.')
       {
          FileManager *fm = FileManager::Instance();
-         std::string absDeFile = fm->GetWorkingDirectory() + fm->GetPathSeparator() + fileName;
+         std::string absDeFile = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + fileName;
          
          MessageInterface::ShowMessage
             ("Error opening the DE file \"%s\", so trying with abs path \"%s\"", fileName.c_str(),
@@ -3689,3 +3758,46 @@ void SolarSystem::SetDefaultSpacePointColors(SpacePoint *sp)
        sp->GetOrbitColorString().c_str(), sp->GetTargetColorString().c_str());
    #endif
 }
+
+//------------------------------------------------------------------------------
+// void SetTextureMapFile(SpacePoint *sp, const std::string &bodyName)
+//------------------------------------------------------------------------------
+/**
+ * Sets default texture map file for the celetial body.
+ */
+//------------------------------------------------------------------------------
+void SolarSystem::SetTextureMapFile(SpacePoint *sp, const std::string &bodyName)
+{
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetTextureMapFile() entered, bodyName = '%s'\n", bodyName.c_str());
+   #endif
+   
+   std::string upperCaseName = GmatStringUtil::ToUpper(bodyName);
+   std::string fileType      = upperCaseName + "_TEXTURE_FILE";
+   std::string fileName;
+   
+   try
+   {
+      fileName = FileManager::Instance()->GetFilename(fileType);
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::ShowMessage
+         ("Texture map file is missing or unknown for default body %s\n", bodyName.c_str());
+   }
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage("In SolarSystem, texture fileName = '%s'\n", fileName.c_str());
+   #endif
+   
+   if (fileName != "")
+      sp->SetStringParameter(sp->GetParameterID("TextureMapFileName"), fileName);
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetTextureMapFile() leaving, bodyName = '%s', texture fileName = '%s'\n",
+       bodyName.c_str(), fileName.c_str());
+   #endif
+}
+

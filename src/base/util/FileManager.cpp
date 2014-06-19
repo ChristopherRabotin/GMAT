@@ -43,6 +43,7 @@
 //#define DEBUG_FILE_MANAGER
 //#define DEBUG_FUNCTION_PATH
 //#define DEBUG_ADD_FILETYPE
+//#define DEBUG_ABS_PATH
 //#define DEBUG_FILE_PATH
 //#define DEBUG_SET_PATH
 //#define DEBUG_READ_STARTUP_FILE
@@ -53,6 +54,7 @@
 //#define DEBUG_STARTUP_WITH_ABSOLUTE_PATH
 //#define DEBUG_BIN_DIR
 //#define DEBUG_FIND_PATH
+//#define DEBUG_REFRESH_FILES
 
 //---------------------------------
 // static data
@@ -63,17 +65,19 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    // file path
    "BEGIN_OF_PATH",
    "OUTPUT_PATH",
-   "DE_PATH",
-   "SPK_PATH",
+   "TIME_PATH",
+   "PLANETARY_COEFF_PATH",
+   "PLANETARY_EPHEM_DE_PATH",
+   "PLANETARY_EPHEM_SPK_PATH",
+   "VEHICLE_EPHEM_PATH",
+   "VEHICLE_EPHEM_SPK_PATH",
+   "VEHICLE_EPHEM_CCSDS_PATH",
    "EARTH_POT_PATH",
    "LUNA_POT_PATH",
    "VENUS_POT_PATH",
    "MARS_POT_PATH",
-   "PLANETARY_COEFF_PATH",
-   "TIME_PATH",
    "TEXTURE_PATH",
    "MEASUREMENT_PATH",
-   "EPHEM_PATH",
    "GUI_CONFIG_PATH",
    "SPLASH_PATH",
    "ICON_PATH",
@@ -89,8 +93,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "DE405_FILE",
    "DE421_FILE",						// made change by TUAN NGUYEN
    "DE424_FILE",						// made change by TUAN NGUYEN
-   "IAUSOFA_FILE",						// made change by TUAN NGUYEN
-   "ICRF_FILE",							// made change by TUAN NGUYEN
+   "IAUSOFA_FILE",					// made change by TUAN NGUYEN
+   "ICRF_FILE",						// made change by TUAN NGUYEN
    "PLANETARY_SPK_FILE",
    "JGM2_FILE",
    "JGM3_FILE",
@@ -277,33 +281,72 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
 
 
 //------------------------------------------------------------------------------
-// std::string GetWorkingDirectory()
+// std::string GetCurrentWorkingDirectory()
 //------------------------------------------------------------------------------
 /**
  * @return System's current working directory of the process
  */
 //------------------------------------------------------------------------------
-std::string FileManager::GetWorkingDirectory()
+std::string FileManager::GetCurrentWorkingDirectory()
 {
-   return GmatFileUtil::GetWorkingDirectory();
+   return GmatFileUtil::GetCurrentWorkingDirectory();
 }
 
 
 //------------------------------------------------------------------------------
-// bool SetWorkingDirectory(const std::string &newDir = "")
+// bool SetCurrentWorkingDirectory(const std::string &newDir = "")
 //------------------------------------------------------------------------------
 /**
  *  Sets system's current working directory of the process.
  */
 //------------------------------------------------------------------------------
-bool FileManager::SetWorkingDirectory(const std::string &newDir)
+bool FileManager::SetCurrentWorkingDirectory(const std::string &newDir)
 {
-   return GmatFileUtil::SetWorkingDirectory(newDir);
+   return GmatFileUtil::SetCurrentWorkingDirectory(newDir);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string FindPath(const std::string &fileName, const FileType type, bool forInput)
+// std::string FindPath(const std::string &fileName, const FileType type,
+//                      bool forInput, bool writeWarning = false)
+//------------------------------------------------------------------------------
+/**
+ * Finds path for requested fileName using the file path search order.
+ * This method calls FindPath() taking type name.
+ *
+ * @return path found using search order
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::FindPath(const std::string &fileName, const FileType type,
+                                  bool forInput, bool writeWarning)
+{
+   #ifdef DEBUG_FIND_PATH
+   MessageInterface::ShowMessage
+      ("FileManager::FindPath() entered, fileName = '%s', type = %d, forInput = %d\n",
+       fileName.c_str(), type, forInput);
+   #endif
+   
+   std::string typeName;
+   if (type >=0 && type < FileTypeCount)
+   {
+      typeName = FILE_TYPE_STRING[type];
+   }
+   else
+   {
+      std::stringstream ss("");
+      ss << "*** INTERNAL ERROR *** FileManager::FindPath() enum type: " << type
+         << " is out of bounds\n";
+      
+      throw UtilityException(ss.str());
+   }
+   
+   return FindPath(fileName, typeName, forInput, writeWarning);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string FindPath(const std::string &fileName, const std::string &typeName,
+//                      bool forInput, bool writeWarning = false)
 //------------------------------------------------------------------------------
 /**
  * Finds path for requested fileName using the following file path search order.
@@ -316,24 +359,60 @@ bool FileManager::SetWorkingDirectory(const std::string &newDir)
  *       if no absolute path found or filename has no path
  *    3) Application directory
  *
- * It returns blank if path not found for input file
+ * It returns blank if filename is blank
+ * It returns blank if path not found for input file.
+ * If input fileName is blank, it uses default filename using the type
  *
+ * @param  fileName     The requested filename to be searched
+ *                      Enter blank name if default name to be used for the type
+ * @param  typeName     The type name of the input file
+ * @param  forInput     True if filename is for input
+ * @param  writeWarning True if warning shuld be written when no paht found
+ *
+ * @return path found using search order
  */
 //------------------------------------------------------------------------------
-std::string FileManager::FindPath(const std::string &fileName, const FileType type, bool forInput)
-{
+std::string FileManager::FindPath(const std::string &fileName, const std::string &typeName,
+                                  bool forInput, bool writeWarning)
+{   
    #ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
-      ("FileManager::FindPath() entered, fileName = '%s', type = %d, forInput = %d\n", fileName.c_str(),
-       type, forInput);
+      ("FileManager::FindPath() entered\n   fileName = '%s'\n   typeName = '%s', forInput = %d\n",
+       fileName.c_str(), typeName.c_str(), forInput);
    #endif
    
-   std::string fullname = GmatFileUtil::ConvertToOsFileName(fileName);
+   std::string fullname = fileName;
+   
+   // If input filename is blank, get default name using type
+   try
+   {
+      if (fileName == "")
+         fullname = GetFilename(typeName);
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_FIND_PATH
+      MessageInterface::ShowMessage(be.GetFullMessage());
+      #endif
+   }
+   
+   // Cannot handle blank, return blank
+   if (fullname == "")
+   {
+      #ifdef DEBUG_FIND_PATH
+      MessageInterface::ShowMessage
+         ("FileManager::FindPath() cannot find default filename for type '%s', "
+          "so just returning blank\n", typeName.c_str());
+      #endif
+      return "";
+   }
+   
+   fullname = GmatFileUtil::ConvertToOsFileName(fullname);
    std::string path = GmatFileUtil::ParsePathName(fullname);
    std::string file = GmatFileUtil::ParseFileName(fullname);
-   std::string gmatPath = mGmatWorkingDir;
-   std::string defaultPath = GetPathname(type);
-   std::string tempPath;
+   std::string gmatPath = GmatFileUtil::ConvertToOsFileName(mGmatWorkingDir);
+   std::string defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(typeName));
+   std::string tempPath1, tempPath2;
    std::string pathToReturn;
    
    #ifdef DEBUG_FIND_PATH
@@ -350,11 +429,20 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
       #endif
       
       if (GmatFileUtil::DoesFileExist(fullname))
+      {
          pathToReturn = fullname;
+      }
       else
       {
          if (forInput)
+         {
             pathToReturn = "";
+            if (writeWarning)
+            {
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The input file '%s' does not exist\n", fullname.c_str());
+            }
+         }
          else // for output
          {
             if (GmatFileUtil::DoesFileExist(defaultPath))
@@ -373,33 +461,56 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
       if (forInput)
       {
          // First search in GMAT working directory
-         tempPath = gmatPath + fullname;
+         tempPath1 = gmatPath + fullname;
          
          #ifdef DEBUG_FIND_PATH
-         MessageInterface::ShowMessage("   first search Path = '%s'\n", tempPath.c_str());
+         MessageInterface::ShowMessage("   => first search Path = '%s'\n", tempPath1.c_str());
          #endif
          
-         if (GmatFileUtil::DoesFileExist(tempPath))
-            pathToReturn = tempPath;
+         if (GmatFileUtil::DoesFileExist(tempPath1))
+         {
+            pathToReturn = tempPath1;
+         }
          else
          {
             #ifdef DEBUG_FIND_PATH
             MessageInterface::ShowMessage
-               ("   '%s' does not exist, so search in default path '%s'\n",
-                tempPath.c_str());
+               ("   '%s' does not exist, so search in default path\n", tempPath1.c_str());
+            MessageInterface::ShowMessage
+               ("   BinDirectory            = '%s'\n", mAbsBinDir.c_str());
+             MessageInterface::ShowMessage
+               ("   CurrentWorkingDirectory = '%s'\n", GetCurrentWorkingDirectory().c_str());
             #endif
             
-            tempPath = defaultPath + fullname;
+            if (GmatFileUtil::IsPathRelative(fullname))
+               tempPath2 = mAbsBinDir + fullname;
+            else
+               tempPath2 = defaultPath + fullname;
             
             #ifdef DEBUG_FIND_PATH
             MessageInterface::ShowMessage
-               ("   next search path = '%s' \n", tempPath.c_str());
+               ("   => next search path = '%s' \n", tempPath2.c_str());
             #endif
             
-            if (GmatFileUtil::DoesFileExist(tempPath))
-               pathToReturn = tempPath;
+            if (writeWarning)
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The input file '%s' does not exist in GMAT "
+                   "working directory\n   '%s', so trying default path from the "
+                   "startup file\n   '%s'\n", fullname.c_str(), tempPath1.c_str(),
+                   tempPath2.c_str());
+            
+            if (GmatFileUtil::DoesFileExist(tempPath2))
+            {
+               pathToReturn = tempPath2;
+            }
             else
+            {
                pathToReturn = "";
+               if (writeWarning)
+                  MessageInterface::ShowMessage
+                     ("*** WARNING *** The input file '%s' does not exist in default "
+                      "path from the startup file '%s'\n", fullname.c_str(), tempPath2.c_str());
+            }
          }
       }
       else // for output
@@ -426,12 +537,30 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
       }
    }
    
+   // Convert to absolute path before returning
+   if (GmatFileUtil::IsPathRelative(pathToReturn))
+      pathToReturn = ConvertToAbsPath(pathToReturn, false);
+   
    #ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
       ("FileManager::FindPath() returning '%s'\n", pathToReturn.c_str());
    #endif
    
    return pathToReturn;
+} // FindPath()
+
+
+//------------------------------------------------------------------------------
+// std::string FindMainIconFile()
+//------------------------------------------------------------------------------
+std::string FileManager::FindMainIconFile()
+{
+   static bool writeWarning = true;
+   
+   std::string fullpath = FindPath("", MAIN_ICON_FILE, true, writeWarning);
+   writeWarning = false;
+   
+   return fullpath;
 }
 
 
@@ -594,7 +723,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    SetBinDirectory();
    
    // get current path and application path
-   std::string currPath = GmatFileUtil::GetWorkingDirectory();
+   std::string currPath = GmatFileUtil::GetCurrentWorkingDirectory();
    std::string appFullPath = GmatFileUtil::GetApplicationPath();
 
    #ifdef DEBUG_READ_STARTUP_FILE
@@ -629,7 +758,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
          tmpStartupFilePath = newPath;
          
          // set current directory to new path
-         if (SetWorkingDirectory(appPath))
+         if (SetCurrentWorkingDirectory(appPath))
          {
             MessageInterface::ShowMessage
                ("GMAT working directory set to '%s'\n", appPath.c_str());
@@ -823,15 +952,15 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    } // end While()
    
    // Since we set all output to ./ as default, we don't need this (LOJ: 2011.03.17)
-   // Set EPHEM_PATH to OUTPUT_PATH from the startup file if not set
+   // Set VEHICLE_EPHEM_CCSDS_PATH to OUTPUT_PATH from the startup file if not set
    // so that ./output directory is not required when writing the ephemeris file.
-//    if (mPathMap["EPHEM_PATH"] == "./output/" &&
+//    if (mPathMap["VEHICLE_EPHEM_CCSDS_PATH"] == "./output/" &&
 //        mPathMap["OUTPUT_PATH"] != "./files/output/")
 //    {
-//       mPathMap["EPHEM_PATH"] = mPathMap["OUTPUT_PATH"];
+//       mPathMap["VEHICLE_EPHEM_CCSDS_PATH"] = mPathMap["OUTPUT_PATH"];
 //       #ifdef DEBUG_READ_STARTUP_FILE
 //       MessageInterface::ShowMessage
-//          ("==> EPHEM_PATH set to '%s'\n", mPathMap["EPHEM_PATH"].c_str());
+//          ("==> VEHICLE_EPHEM_CCSDS_PATH set to '%s'\n", mPathMap["VEHICLE_EPHEM_CCSDS_PATH"].c_str());
 //       #endif
 //    }
    
@@ -1059,18 +1188,18 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    mPathWrittenOuts.push_back("MEASUREMENT_PATH");
    
    //---------------------------------------------
-   // write the EPHEM_PATH next if set
+   // write the VEHICLE_EPHEM_CCSDS_PATH next if set
    //---------------------------------------------
-   if (mPathMap["EPHEM_PATH"] != "./output/")
+   if (mPathMap["VEHICLE_EPHEM_CCSDS_PATH"] != "./output/")
    {
       #ifdef DEBUG_WRITE_STARTUP_FILE
-      MessageInterface::ShowMessage("   .....Writing EPHEM_PATH path\n");
+      MessageInterface::ShowMessage("   .....Writing VEHICLE_EPHEM_CCSDS_PATH path\n");
       #endif
-      outStream << std::setw(22) << "EPHEM_PATH" << " = "
-                << mPathMap["EPHEM_PATH"];
+      outStream << std::setw(22) << "VEHICLE_EPHEM_CCSDS_PATH" << " = "
+                << mPathMap["VEHICLE_EPHEM_CCSDS_PATH"];
       outStream << "\n#---------------------------------------------"
             "--------------\n";
-      mPathWrittenOuts.push_back("EPHEM_PATH");
+      mPathWrittenOuts.push_back("VEHICLE_EPHEM_CCSDS_PATH");
    }
    
    //---------------------------------------------
@@ -1143,9 +1272,9 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    mPathWrittenOuts.push_back("DATA_PATH");
    
    //---------------------------------------------
-   // write any relative path used in SPK_PATH
+   // write any relative path used in PLANETARY_EPHEM_SPK_PATH
    //---------------------------------------------
-   std::string spkPath = mPathMap["SPK_PATH"];
+   std::string spkPath = mPathMap["PLANETARY_EPHEM_SPK_PATH"];
    if (spkPath.find("_PATH") != spkPath.npos)
    {
       std::string relPath = GmatFileUtil::ParseFirstPathName(spkPath, false);
@@ -1162,28 +1291,28 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    }
    
    //---------------------------------------------
-   // write the SPK_PATH and SPK file next
+   // write the PLANETARY_EPHEM_SPK_PATH and SPK file next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
    MessageInterface::ShowMessage("   .....Writing SPK path\n");
    #endif
-   outStream << std::setw(22) << "SPK_PATH" << " = "
-             << mPathMap["SPK_PATH"] << "\n";
-   WriteFiles(outStream, "SPK");
+   outStream << std::setw(22) << "PLANETARY_EPHEM_SPK_PATH" << " = "
+             << mPathMap["PLANETARY_EPHEM_SPK_PATH"] << "\n";
+   WriteFiles(outStream, "PLANETARY SPK");
    outStream << "#-----------------------------------------------------------\n";
-   mPathWrittenOuts.push_back("SPK_PATH");
+   mPathWrittenOuts.push_back("PLANETARY_EPHEM_SPK_PATH");
    
    //---------------------------------------------
-   // write the DE_PATH and DE file next
+   // write the PLANETARY_EPHEM_DE_PATH and DE file next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
    MessageInterface::ShowMessage("   .....Writing DE path\n");
    #endif
-   outStream << std::setw(22) << "DE_PATH" << " = "
-             << mPathMap["DE_PATH"] << "\n";
+   outStream << std::setw(22) << "PLANETARY_EPHEM_DE_PATH" << " = "
+             << mPathMap["PLANETARY_EPHEM_DE_PATH"] << "\n";
    WriteFiles(outStream, "DE405");
    outStream << "#-----------------------------------------------------------\n";
-   mPathWrittenOuts.push_back("DE_PATH");
+   mPathWrittenOuts.push_back("PLANETARY_EPHEM_DE_PATH");
    
    //---------------------------------------------
    // write the PLANETARY_COEFF_PATH and files next
@@ -1298,6 +1427,17 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    outStream << "#-----------------------------------------------------------\n";
    mPathWrittenOuts.push_back("STAR_PATH");
 
+   //---------------------------------------------
+   // write the VEHICLE_EPHEM_SPK_PATH and files next
+   //---------------------------------------------
+   #ifdef DEBUG_WRITE_STARTUP_FILE
+   MessageInterface::ShowMessage("   .....Writing MODEL_PATH path\n");
+   #endif
+   outStream << std::setw(22) << "VEHICLE_EPHEM_SPK_PATH" << " = "
+             << mPathMap["VEHICLE_EPHEM_SPK_PATH"] << "\n";
+   outStream << "#-----------------------------------------------------------\n";
+   mPathWrittenOuts.push_back("VEHICLE_EPHEM_SPK_PATH");
+   
    //---------------------------------------------
    // write the MODEL_PATH and files next
    //---------------------------------------------
@@ -1511,6 +1651,11 @@ std::string FileManager::GetFilename(const FileType type)
 //------------------------------------------------------------------------------
 std::string FileManager::GetFilename(const std::string &typeName)
 {
+   #ifdef DEBUG_GET_FILENAME
+   MessageInterface::ShowMessage
+      ("FileManager::GetFilename() entered, typeName = '%s'\n", typeName.c_str());
+   #endif
+   
    bool nameFound = false;
    std::string name;
    if (mFileMap.find(typeName) != mFileMap.end())
@@ -1522,6 +1667,10 @@ std::string FileManager::GetFilename(const std::string &typeName)
    if (nameFound)
    {
       name = GmatFileUtil::ParseFileName(name);
+      #ifdef DEBUG_GET_FILENAME
+      MessageInterface::ShowMessage
+         ("FileManager::GetFilename() returning '%s'\n", name.c_str());
+      #endif
       return name;
    }
    
@@ -1609,7 +1758,7 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
    std::string fileType = GmatStringUtil::ToUpper(typeName);
    std::string absPath;
 
-   #ifdef DEBUG_FILE_MANAGER
+   #ifdef DEBUG_ABS_PATH
    MessageInterface::ShowMessage
       ("FileManager::GetAbsPathname() typeName='%s', fileType='%s'\n",
        typeName.c_str(), fileType.c_str());
@@ -1622,7 +1771,7 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
       {
          absPath = ConvertToAbsPath(fileType);
                   
-         #ifdef DEBUG_FILE_MANAGER
+         #ifdef DEBUG_ABS_PATH
          MessageInterface::ShowMessage
             ("FileManager::GetAbsPathname() with _PATH returning '%s'\n", absPath.c_str());
          #endif
@@ -1641,7 +1790,7 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
          absPath = mFileMap[typeName]->mFile;
       }
 
-      #ifdef DEBUG_FILE_MANAGER
+      #ifdef DEBUG_ABS_PATH
       MessageInterface::ShowMessage
          ("FileManager::GetAbsPathname() without _PATH returning '%s'\n", absPath.c_str());
       #endif
@@ -1748,19 +1897,13 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
          }
       }
    }
+     
+   // Convert path to absolute by prepending bin dir (LOJ: 2014.06.18)
+   if (absPath != "" && absPath[0] == '.')
+      absPath = mAbsBinDir + absPath;
    
-   //=================================================================
-   // This is causing some problem in regression test
-   #if 0
-   // If first path is relative path such as ../ or ./
-   // replace it with working directory (LOJ: 2014.02.24)
-   if (absPath.size() > 1)
-   {
-      if (absPath[0] == '.')
-         absPath = GetWorkingDirectory() + GetPathSeparator() + absPath;
-   }
-   #endif
-   //=================================================================
+   // Conver to OS path name
+   absPath = GmatFileUtil::ConvertToOsFileName(absPath);
    
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage
@@ -2470,27 +2613,35 @@ void FileManager::RefreshFiles()
    AddFileType("LOG_FILE", "OUTPUT_PATH/GmatLog.txt");
    AddFileType("REPORT_FILE", "OUTPUT_PATH/GmatReport.txt");
    AddFileType("MEASUREMENT_PATH", "OUTPUT_PATH");
-   AddFileType("EPHEM_PATH", "OUTPUT_PATH");
+   AddFileType("VEHICLE_EPHEM_CCSDS_PATH", "OUTPUT_PATH");
    AddFileType("SCREENSHOT_FILE", "OUTPUT_PATH");
-   AddFileType("EPHEM_PATH", "OUTPUT_PATH");
    
    
    // Should we add default input paths and files?
    // Yes, for now in case of startup file doesn't specify all the required
    // input path and files (LOJ: 2011.03.21)
+   // Currently #define __FM_ADD_DEFAULT_INPUT__ was commented out
 #ifdef __FM_ADD_DEFAULT_INPUT__
 
+   #ifdef DEBUG_REFRESH_FILES
+   MessageInterface::ShowMessage
+      ("FileManager::RefreshFiles() creatng default input paths and files\n");
+   #endif
+   
    //-------------------------------------------------------
    // create default input paths and files
    //-------------------------------------------------------
    
-   // de files
-   AddFileType("DE_PATH", "DATA_PATH/planetary_ephem/de/");
-   AddFileType("DE405_FILE", "DE_PATH/leDE1941.405");
+   // planetary de files
+   AddFileType("PLANETARY_EPHEM_DE_PATH", "DATA_PATH/planetary_ephem/de/");
+   AddFileType("DE405_FILE", "PLANETARY_EPHEM_DE_PATH/leDE1941.405");
 
-   // spk files
-   AddFileType("SPK_PATH", "DATA_PATH/planetary_ephem/spk/");
-   AddFileType("PLANETARY_SPK_FILE", "SPK_PATH/de421.bsp");
+   // planetary spk files
+   AddFileType("PLANETARY_EPHEM_SPK_PATH", "DATA_PATH/planetary_ephem/spk/");
+   AddFileType("PLANETARY_SPK_FILE", "PLANETARY_EPHEM_SPK_PATH/de421.bsp");
+
+   // vehicle spk files
+   AddFileType("VEHICLE_EPHEM_SPK_PATH", "DATA_PATH/vehicle/ephem/spk/");
 
    // earth gravity files
    AddFileType("EARTH_POT_PATH", "DATA_PATH/gravity/earth/");
@@ -2618,12 +2769,12 @@ FileManager::FileManager(const std::string &appName)
    // Set directories
    SetBinDirectory(appName);
    SetGmatWorkingDirectory(mAbsBinDir);
-   SetWorkingDirectory(mAbsBinDir);
+   SetCurrentWorkingDirectory(mAbsBinDir);
    
    // Set platform dependent data
    mIsOsWindows = GmatFileUtil::IsOsWindows();
    mPathSeparator = GetPathSeparator();
-   mStartupFileDir = GmatFileUtil::GetWorkingDirectory() + mPathSeparator;
+   mStartupFileDir = GmatFileUtil::GetCurrentWorkingDirectory() + mPathSeparator;
    
    // Set GMAT startup file
    mStartupFileName = "gmat_startup_file.txt";

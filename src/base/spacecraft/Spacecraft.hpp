@@ -47,7 +47,12 @@ public:
    virtual void         SetSolarSystem(SolarSystem *ss);
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
-
+   
+   std::string          GetModelFile();
+   std::string          GetModelFileFullPath();
+   int                  GetModelId();
+   void                 SetModelId(int id);
+   
    void                 SetState(const Rvector6 &cartState);
    void                 SetState(const std::string &elementType, Real *instate);
    void                 SetState(const Real s1, const Real s2, const Real s3,
@@ -72,11 +77,6 @@ public:
                         GetEulerAngleSequence() const;
    
    Rvector3             GetSPADSRPArea(const Real ep, const Rvector3 &sunVector);
-
-   // The ID of the model that the spacecraft uses, and the filename as well
-   std::string          modelFile;
-   int                  modelID;
-
    
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;
@@ -434,7 +434,14 @@ protected:
    StringArray       stateElementUnits;
    /// Possible state representations
    StringArray       representations;
-
+   
+   // The ID of the model that the spacecraft uses, and the filename as well
+   std::string          modelFile;   
+   int                  modelID;
+   
+   /// Model file path
+   std::string          modelFileFullPath;
+   
    /// Epoch string, specifying the text form of the epoch
    std::string       scEpochStr;
    Real              dryMass;

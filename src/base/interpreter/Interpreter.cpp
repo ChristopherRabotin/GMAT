@@ -786,6 +786,19 @@ void Interpreter::UpdateView(Integer type)
 void Interpreter::CloseCurrentProject()
 {}
 
+
+//------------------------------------------------------------------------------
+// void ResetIconFile()
+//------------------------------------------------------------------------------
+/*
+ * Some GMAT UiInterpreters need to reset icon file.  This method is
+ * overridden to perform run complete actions for those interpreters.
+ */
+//------------------------------------------------------------------------------
+void Interpreter::ResetIconFile()
+{} 
+
+
 //------------------------------------------------------------------------------
 // void StartMatlabServer()
 //------------------------------------------------------------------------------

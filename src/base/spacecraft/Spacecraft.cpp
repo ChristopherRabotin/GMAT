@@ -75,6 +75,7 @@
 //#define DEBUG_SC_ATTITUDE_DATA
 //#define DEBUG_MULTIMAP
 //#define DEBUG_SPAD_DATA
+//#define DEBUG_FILEPATH
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -125,7 +126,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::OBJECT_TYPE,      // Attitude
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
-      Gmat::STRING_TYPE,      // SPADSRPFile
+      //Gmat::STRING_TYPE,      // SPADSRPFile
+      Gmat::FILENAME_TYPE,      // SPADSRPFile
       Gmat::REAL_TYPE,        // SPADSRPScaleFactor
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
@@ -135,7 +137,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
-      Gmat::STRING_TYPE,      // Model File
+      //Gmat::STRING_TYPE,      // Model File
+      Gmat::FILENAME_TYPE,      // Model File
       Gmat::REAL_TYPE,        // Model Offset X
       Gmat::REAL_TYPE,        // Model Offset Y
       Gmat::REAL_TYPE,        // Model Offset Z
@@ -309,6 +312,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    SpaceObject          (Gmat::SPACECRAFT, typeStr, name),
    modelFile            (""),
    modelID              (NO_MODEL),
+   modelFileFullPath    (""),
    dryMass              (850.0),
    coeffDrag            (2.2),
    dragArea             (15.0),
@@ -456,7 +460,17 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    covariance(3,3) = covariance(4,4) = covariance(5,5) = 1.0e6;
    
    // Load default model file
-   modelFile = FileManager::Instance()->GetFullPathname("SPACECRAFT_MODEL_FILE");
+   // Find file name and full path (LOJ: 2014.06.17)
+   //modelFile = FileManager::Instance()->GetFullPathname("SPACECRAFT_MODEL_FILE");
+   modelFile = FileManager::Instance()->GetFilename("SPACECRAFT_MODEL_FILE");
+   modelFileFullPath = FileManager::Instance()->FindPath(modelFile, "SPACECRAFT_MODEL_FILE", true, false);
+   
+   #ifdef DEBUG_FILEPATH
+   MessageInterface::ShowMessage
+      ("modelFile = '%s', modelFileFullPath = '%s'\n", modelFile.c_str(),
+       modelFileFullPath.c_str());
+   #endif
+   
    modelScale = 3.0;
    modelID = NO_MODEL;
    
@@ -513,6 +527,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    SpaceObject          (a),
    modelFile            (a.modelFile),
    modelID              (a.modelID),
+   modelFileFullPath    (a.modelFileFullPath),
    scEpochStr           (a.scEpochStr),
    dryMass              (a.dryMass),
    coeffDrag            (a.coeffDrag),
@@ -629,6 +644,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    modelFile            = a.modelFile;
    modelID              = a.modelID;
+   modelFileFullPath    = a.modelFileFullPath;
    scEpochStr           = a.scEpochStr;
    dryMass              = a.dryMass;
    coeffDrag            = a.coeffDrag;
@@ -771,6 +787,39 @@ CoordinateSystem* Spacecraft::GetInternalCoordSystem()
    return internalCoordSystem;
 }
 
+
+//---------------------------------------------------------------------------
+// std::string GetModelFile()
+//---------------------------------------------------------------------------
+std::string Spacecraft::GetModelFile()
+{
+   return modelFile;
+}
+
+//---------------------------------------------------------------------------
+// std::string GetModelFileFullPath()
+//---------------------------------------------------------------------------
+std::string Spacecraft::GetModelFileFullPath()
+{
+   return modelFileFullPath;
+}
+
+//---------------------------------------------------------------------------
+// int GetModelId()
+//---------------------------------------------------------------------------
+int Spacecraft::GetModelId()
+{
+   return modelID;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetModelId(int id)
+//---------------------------------------------------------------------------
+void Spacecraft::SetModelId(int id)
+{
+   modelID = id;
+}
 
 //---------------------------------------------------------------------------
 //  void SetState(const Rvector6 &cartState)
@@ -3457,9 +3506,21 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == MODEL_FILE)
    {
-        modelFile = value;
+      modelFile = value;
+      modelFileFullPath = FileManager::Instance()->FindPath(value, "SPACECRAFT_MODEL_FILE", true, false);
+      if (modelFileFullPath == "")
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The model file '%s' does not exist for the spacecraft '%s'\n",
+             modelFile.c_str(), GetName().c_str());
+         //Question: Do we want to use model file from the startup file?
+         #if 0
+         MessageInterface::ShowMessage("So using model file from the startup file.\n");
+         modelFileFullPath = FileManager::Instance()->FindPath("", "SPACECRAFT_MODEL_FILE", true, false);
+         #endif
+      }
    }
-
+   
    #ifdef DEBUG_SC_SET_STRING
    MessageInterface::ShowMessage
       ("Spacecraft::SetStringParameter() returning true\n");

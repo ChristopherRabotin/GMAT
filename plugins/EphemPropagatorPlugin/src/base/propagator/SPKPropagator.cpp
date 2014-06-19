@@ -622,8 +622,10 @@ bool SPKPropagator::Initialize()
             if (spices.size() == 0)
                throw PropagatorException("Spice (SPK) propagator requires at "
                      "least one orbit SPICE kernel,");
-
-            std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
+            
+            // Changed to use VEHICLE_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+            //std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
+            std::string ephemPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
             for (UnsignedInt j = 0; j < spices.size(); ++j)
             {
                fullPath = spices[j];

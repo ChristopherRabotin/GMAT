@@ -90,6 +90,7 @@ public:
    
    wxConfigBase* GetPersonalizationConfig();
    
+   void ResetIconFile();
    void SetIconFile();
    wxString GetIconFile();
    
@@ -119,6 +120,7 @@ private:
    wxString      theTempScriptName;
    wxConfigBase  *thePersonalizationConfig;
    wxString      theIconFile;
+   bool          theIconFileSet;
    
    #ifdef __USE_STC_EDITOR__
    wxPageSetupDialogData *thePageSetupDialogData;
