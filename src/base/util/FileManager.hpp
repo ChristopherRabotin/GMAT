@@ -115,9 +115,9 @@ public:
    
    /// Finds file path using search order
    std::string FindPath(const std::string &fileName, const FileType type,
-                        bool forInput, bool writeWarning = false);
+                        bool forInput, bool writeWarning = false, bool writeInfo = false);
    std::string FindPath(const std::string &fileName, const std::string &typeName,
-                        bool forInput, bool writeWarning = false);
+                        bool forInput, bool writeWarning = false, bool writeInfo = false);
    std::string FindMainIconFile();
    
    std::string GetPathSeparator();

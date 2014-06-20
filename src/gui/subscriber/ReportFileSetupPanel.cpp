@@ -332,16 +332,10 @@ void ReportFileSetupPanel::LoadData()
    try
    {
       // load file name data from core engine
-      //Note: Do not use GetStringParameter() since filename may be empty.
-      //      GetPathAndFileName() constructs filename if name is empty
-      // We don't want to write name with path unless user specified the path
-      // in the script, so check for the empty name first (LOJ: 2010.11.10)
+      // if name is empty, use default file name
       std::string filename = reportFile->GetStringParameter("Filename");
       if (filename == "")
-      {
-         std::string fullname = reportFile->GetPathAndFileName();
          filename = reportFile->GetDefaultFileName();
-      }
       
       Integer id;
       

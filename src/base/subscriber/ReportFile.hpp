@@ -38,7 +38,7 @@ class GMAT_API ReportFile : public Subscriber
 {
 public:
    ReportFile(const std::string &typeName, const std::string &name,
-              const std::string &fileName = "", 
+              const std::string &fname = "", 
               Parameter *firstParam = NULL);
    
    virtual ~ReportFile(void);
@@ -48,7 +48,7 @@ public:
    
    // methods for this class
    std::string          GetDefaultFileName();
-   std::string          GetPathAndFileName();
+   std::string          GetFullPathFileName();
    Integer              GetNumParameters();
    bool                 AddParameter(const std::string &paramName, Integer index);
    bool                 WriteData(WrapperArray dataArray);
@@ -72,8 +72,9 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterCommandModeSettable(const Integer id) const;
-
+   
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
@@ -127,11 +128,11 @@ protected:
    /// Name of the output path
    std::string          outputPath;
    /// Name of the report file
-   std::string          filename;
+   std::string          fileName;
    /// Default file name of the report file when it is not set
    std::string          defFileName;
    /// Full file name with path
-   std::string          fullPathName;
+   std::string          fullPathFileName;
    /// Precision for output of real data
    Integer              precision;  
    /// Width of column
@@ -159,7 +160,7 @@ protected:
    bool                 initial;
    bool                 initialFromReport;
    
-   virtual bool         OpenReportFile(void);
+   virtual bool         OpenReportFile();
    void                 ClearParameters();
    void                 WriteHeaders();
    Integer              WriteMatrix(StringArray *output, Integer param,
@@ -175,6 +176,7 @@ protected:
    enum
    {
       FILENAME = SubscriberParamCount,
+      FULLPATH_FILENAME,
       PRECISION,
       ADD,
       WRITE_HEADERS,
@@ -186,7 +188,9 @@ protected:
    };
 
 private:
-
+   
+   void                 SetFullPathFileName(bool writeInfo = false);
+   
    static const std::string
       PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
    static const Gmat::ParameterType
