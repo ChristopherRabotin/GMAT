@@ -39,9 +39,9 @@ public:
    // The following is predefined file paths/types.
    enum FileType
    {
-      // file path
+      // File path
       BEGIN_OF_PATH = 0,
-      OUTPUT_PATH,
+      // Input path
       TIME_PATH,
       PLANETARY_COEFF_PATH,
       PLANETARY_EPHEM_DE_PATH,
@@ -60,15 +60,18 @@ public:
       ICON_PATH,
       STAR_PATH,
       MODEL_PATH,
+      // Output path
+      OUTPUT_PATH,
       END_OF_PATH,
       
-      // general file name
+      // General file name
       LOG_FILE,
       REPORT_FILE,
+      EPHEM_OUTPUT_FILE,
       SPLASH_FILE,
       TIME_COEFF_FILE,
       
-      // specific file name
+      // Specific file name
       //    Notes: Don't add general planet potential files here. They are handled
       //    when gmat_startup_file are read by following naming convention.
       DE405_FILE,

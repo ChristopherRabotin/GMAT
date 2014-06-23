@@ -1070,16 +1070,17 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       
       fileName = value;
       
-      // If file extension is blank, append .txt
-      if (GmatFileUtil::ParseFileExtension(fileName) == "")
-      {
-         if (fileName != "")
-         {
-            fileName = fileName + ".txt";
-            MessageInterface::ShowMessage
-               ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
-         }
-      }
+      // Moved to SetFullPathFileName() - (LOJ: 2014.06.23)
+      // // If file extension is blank, append .txt
+      // if (GmatFileUtil::ParseFileExtension(fileName) == "")
+      // {
+      //    if (fileName != "")
+      //    {
+      //       fileName = fileName + ".txt";
+      //       MessageInterface::ShowMessage
+      //          ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
+      //    }
+      // }
       
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
@@ -1806,6 +1807,16 @@ void ReportFile::SetFullPathFileName(bool writeInfo)
    {
       defFileName = instanceName + ".txt";
       fileName = defFileName;
+   }
+   else
+   {
+      // If file extension is blank, append .txt
+      if (GmatFileUtil::ParseFileExtension(fileName) == "")
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Appended .txt to file name '%s'\n", fileName.c_str());
+         fileName = fileName + ".txt";
+      }
    }
    
    std::string fullname = fm->FindPath(fileName, "REPORT_FILE", false, false, writeInfo);

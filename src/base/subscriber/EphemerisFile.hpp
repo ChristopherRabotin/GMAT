@@ -39,7 +39,7 @@ public:
    EphemerisFile& operator=(const EphemerisFile&);
    
    // methods for this class
-   std::string          GetFileName();
+   void                 SetProperFileExtension();
    virtual void         ValidateParameters(bool forInitialization);
    
    // methods inherited from Subscriber
@@ -114,9 +114,9 @@ protected:
    StateArray  stateArray;
    
    /// ephemeris output path from the startup file
-   std::string oututPath;
+   std::string outputPath;
    /// ephmeris full file name including the path
-   std::string filePath;
+   std::string fullPathFileName;
    std::string spacecraftName;
    std::string fileName;
    std::string fileFormat;
@@ -130,6 +130,7 @@ protected:
    std::string outCoordSystemName;
    std::string outputFormat;
    bool writeEphemeris;
+   bool usingDefaultFileName;
    /// for propagator change
    std::string prevPropName;
    std::string currPropName;
@@ -225,6 +226,9 @@ protected:
    static StringArray interpolatorTypeList;
    /// Avilable output format list
    static StringArray outputFormatList;
+   
+   // File path
+   void SetFullPathFileName(bool writeInfo);
    
    // Initialization
    void         InitializeData(bool saveEpochInfo = false);
@@ -360,6 +364,7 @@ protected:
    {
       SPACECRAFT = SubscriberParamCount,
       FILENAME,
+      FULLPATH_FILENAME,
       FILE_FORMAT,
       EPOCH_FORMAT,
       INITIAL_EPOCH,

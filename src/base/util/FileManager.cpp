@@ -64,9 +64,9 @@
 const std::string
 FileManager::FILE_TYPE_STRING[FileTypeCount] =
 {
-   // file path
+   // File path
    "BEGIN_OF_PATH",
-   "OUTPUT_PATH",
+   // Input path
    "TIME_PATH",
    "PLANETARY_COEFF_PATH",
    "PLANETARY_EPHEM_DE_PATH",
@@ -85,13 +85,18 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "ICON_PATH",
    "STAR_PATH",
    "MODEL_PATH",
+   // Output path
+   "OUTPUT_PATH",
    "END_OF_PATH",
-   // file name
+   
+   // General file name
    "LOG_FILE",
    "REPORT_FILE",
+   "EPHEM_OUTPUT_FILE",
    "SPLASH_FILE",
    "TIME_COEFF_FILE",
-   // specific file name
+   
+   // Specific file name
    "DE405_FILE",
    "DE421_FILE",						// made change by TUAN NGUYEN
    "DE424_FILE",						// made change by TUAN NGUYEN
@@ -482,7 +487,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                ("   '%s' does not exist, so search in default path\n", tempPath1.c_str());
             MessageInterface::ShowMessage
                ("   BinDirectory            = '%s'\n", mAbsBinDir.c_str());
-             MessageInterface::ShowMessage
+            MessageInterface::ShowMessage
                ("   CurrentWorkingDirectory = '%s'\n", GetCurrentWorkingDirectory().c_str());
             #endif
             
@@ -525,6 +530,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             MessageInterface::ShowMessage("   The output filename has relative path\n");
             #endif
             
+            // Check GMAT working (script) directory
             std::string tempPath = gmatPath + fullname;
             std::string outPath1 = GmatFileUtil::ParsePathName(tempPath);
             
@@ -2661,6 +2667,7 @@ void FileManager::RefreshFiles()
    AddFileType("OUTPUT_PATH", defOutPath);
    AddFileType("LOG_FILE", "OUTPUT_PATH/GmatLog.txt");
    AddFileType("REPORT_FILE", "OUTPUT_PATH/ReportFile.txt");
+   AddFileType("EPHEM_OUTPUT_FILE", "OUTPUT_PATH/EphemerisFile.eph");
    AddFileType("MEASUREMENT_PATH", "OUTPUT_PATH");
    AddFileType("VEHICLE_EPHEM_CCSDS_PATH", "OUTPUT_PATH");
    AddFileType("SCREENSHOT_FILE", "OUTPUT_PATH");
