@@ -27,6 +27,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BURNPANEL_SAVE
+//#define DEBUG_BURNPANEL_CREATE
 
 //------------------------------
 // public methods
