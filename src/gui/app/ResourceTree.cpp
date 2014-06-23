@@ -791,6 +791,9 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::THRUSTER:
       theGuiManager->UpdateThruster();
       break;
+   case GmatTree::POWER_SYSTEM:
+      theGuiManager->UpdatePowerSystem();
+      break;
    case GmatTree::HARDWARE:
       theGuiManager->UpdateSensor();
       break;
@@ -1292,6 +1295,12 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    {
       itemType = GmatTree::THRUSTER;
       itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;
+   }
+   else if (obj->IsOfType("PowerSystem"))
+   {
+      itemType = GmatTree::POWER_SYSTEM;
+//      itemIcon = GmatTree::RESOURCE_ICON_POWER_SYSTEM;   // TBD - need Solar and Nuclear?
+      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;         // temporary
    }
    // Burn
    else if (obj->IsOfType("ImpulsiveBurn"))
@@ -2906,7 +2915,6 @@ void ResourceTree::OnAddThruster(wxCommandEvent &event)
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void OnAddFormation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -3149,8 +3157,17 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddHardware(wxCommandEvent &event)
 {
+   bool isPowerSystem = false;
+   GmatTree::ItemType itsType = GmatTree::HARDWARE;
+
    // Look up the plugin type based on the ID built with menu that selected it
+   // NOTE: treating PowerSystems as plugins here as well
    std::string selected = pluginMap[event.GetId()];
+   if (selected.find("PowerSystem") != std::string::npos)
+   {
+      isPowerSystem = true;
+      itsType       = GmatTree::POWER_SYSTEM;
+   }
 
    // The rest is like the other tree additions
    wxTreeItemId item = GetSelection();
@@ -3166,10 +3183,14 @@ void ResourceTree::OnAddHardware(wxCommandEvent &event)
       
       wxString name = newName.c_str();
       AppendItem(item, name, iconToUse, -1,
-                 new GmatTreeItemData(name, GmatTree::HARDWARE));
+                 new GmatTreeItemData(name, itsType));
       Expand(item);
-      SelectItem(GetLastChild(item));      
-      theGuiManager->UpdateSensor();
+      SelectItem(GetLastChild(item));
+
+      if (isPowerSystem)
+         theGuiManager->UpdatePowerSystem();
+      else
+         theGuiManager->UpdateSensor();
    }
 }
 
@@ -5058,7 +5079,7 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
          // Drop the ones that are already there for now
          std::string hardwareType = (*i);
          if ((hardwareType != "FuelTank") &&
-             (hardwareType != "Thruster"))
+             (hardwareType != "Thruster") )
          {
             // Save the ID and type name for event handling
             pluginMap[POPUP_ADD_HARDWARE + newId] = hardwareType;
@@ -5309,6 +5330,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
       break;
    case GmatTree::FUELTANK:
    case GmatTree::THRUSTER:
+   case GmatTree::POWER_SYSTEM:
    case GmatTree::HARDWARE:
    case GmatTree::SENSOR:
       objType = Gmat::HARDWARE;
@@ -5399,6 +5421,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
       
    case GmatTree::FUELTANK:
    case GmatTree::THRUSTER:
+   case GmatTree::POWER_SYSTEM:
    case GmatTree::HARDWARE:
       return mHardwareItem;
       

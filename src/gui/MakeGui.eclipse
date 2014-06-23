@@ -232,6 +232,7 @@ OBJECTS = \
     function/FunctionSetupPanel.o \
     function/MatlabFunctionSetupPanel.o \
     hardware/BurnThrusterPanel.o \
+    hardware/PowerSystemConfigPanel.o \
     hardware/ThrusterCoefficientDialog.o \
     hardware/ThrusterConfigPanel.o \
     mission/DecoratedTree.o \
@@ -273,6 +274,7 @@ OBJECTS = \
     spacecraft/OrbitPanel.o \
     spacecraft/OrbitDesignerDialog.o \
     spacecraft/OrbitSummaryDialog.o \
+    spacecraft/PowerSystemPanel.o \
     spacecraft/SpacecraftPanel.o \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \

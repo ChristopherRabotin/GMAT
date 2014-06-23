@@ -118,7 +118,8 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
    "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
    "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
-   "RFHardware",    "Antenna",          "UnknownObject"
+   "RFHardware",    "Antenna",          "PowerSystem",      "SolarPowerSystem", "NuclearPowerSystem",
+   "UnknownObject"
 };
 /**
  * Build the list of automatic global settings
@@ -143,7 +144,8 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,
+   false,     false,     false,     false,     false,
+   false
 };
 
 

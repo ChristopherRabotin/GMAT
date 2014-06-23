@@ -27,6 +27,7 @@
 #include "GmatState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
+#include "PowerSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "TimeSystemConverter.hpp"
@@ -257,6 +258,7 @@ protected:
       SRP_AREA_ID,
       FUEL_TANK_ID,
       THRUSTER_ID,
+      POWER_SYSTEM_ID,
       TOTAL_MASS_ID,
       SPACECRAFT_ID,
       ATTITUDE,
@@ -508,10 +510,14 @@ protected:
    StringArray       tankNames;
    /// Thruster names
    StringArray       thrusterNames;
+   /// Name of the PowerSystem
+   std::string       powerSystemName;
    /// Pointers to the fuel tanks
    ObjectArray       tanks;
    /// Pointers to the spacecraft thrusters
    ObjectArray       thrusters;
+   /// Pointer to the PowerSystem
+   PowerSystem       *powerSystem;
    /// Dry mass plus fuel masses, a calculated parameter
    Real              totalMass;
 
@@ -549,12 +555,14 @@ protected:
    Real              UpdateTotalMass() const;
    bool              ApplyTotalMass(Real newMass);
    void              DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
-                                        bool deleteThrusters, bool otherHardware);
+                                        bool deleteThrusters, bool deletePowerSystem,
+                                        bool otherHardware);
    void              CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                       const ObjectArray &thrs);
+                                       const ObjectArray &thrs, PowerSystem *pwr);
    void              AttachTanksToThrusters();
    bool              SetHardware(GmatBase *obj, StringArray &hwNames,
                                  ObjectArray &hwArray);
+   bool              SetPowerSystem(GmatBase *obj, std::string &psName);
    virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                         std::stringstream &stream);
 
