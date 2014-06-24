@@ -116,6 +116,27 @@ GmatBase* PhysicalSignal::Clone() const
 
 
 //------------------------------------------------------------------------------
+// void InitializeSignal()
+//------------------------------------------------------------------------------
+/**
+ * Validates that everything needed is in place for the signal processing
+ *
+ * This method checks that all of the reference objects and object clones are
+ * in place, and that they are initialized and ready to do the work required for
+ * the signal computations.
+ */
+//------------------------------------------------------------------------------
+void PhysicalSignal::InitializeSignal()
+{
+   if (!physicalSignalInitialized)
+   {
+      SignalBase::InitializeSignal();
+      physicalSignalInitialized = true;
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // bool ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 //------------------------------------------------------------------------------
 /**
@@ -271,6 +292,7 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       // if epoctAtReceive was true, transmitter moved and we need its epoch,
       // if false, we need the receiver epoch
       GmatEpoch nextEpoch = (epochAtReceive ? theData.tTime : theData.rTime);
+
       // This transmitter is the receiver for the next node
       bool nextFixed = (epochAtReceive ? true : false);
 
@@ -291,27 +313,6 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
    }
 
    return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// void InitializeSignal()
-//------------------------------------------------------------------------------
-/**
- * Validates that everything needed is in place for the signal processing
- *
- * This method checks that all of the reference objects and object clones are
- * in place, and that they are initialized and ready to do the work required for
- * the signal computations.
- */
-//------------------------------------------------------------------------------
-void PhysicalSignal::InitializeSignal()
-{
-   if (!physicalSignalInitialized)
-   {
-      SignalBase::InitializeSignal();
-      physicalSignalInitialized = true;
-   }
 }
 
 
@@ -534,9 +535,6 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("      Starting: dEpoch = %.12le, dR = "
                "%.3lf, dT = %.12le\n", deltaE, deltaR, deltaT);
-      #endif
-
-      #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("Initial x Positions: %s  %.3lf -->  "
                "%s  %.3lf\n", theData.tNode->GetName().c_str(), theData.tLoc(0),
                theData.rNode->GetName().c_str(), theData.rLoc(0));

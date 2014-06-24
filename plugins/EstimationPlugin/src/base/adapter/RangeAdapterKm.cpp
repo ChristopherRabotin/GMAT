@@ -226,6 +226,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // first signal path
             if ((i == 0) && (current->next == NULL))
                cMeasurement.epoch = current->rTime;
+
             current = current->next;
          }
          #ifdef DEBUG_RANGE

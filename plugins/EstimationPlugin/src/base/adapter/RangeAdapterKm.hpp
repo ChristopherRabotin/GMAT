@@ -66,6 +66,8 @@ public:
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
 
+protected:
+
 };
 
 #endif /* RangeAdapterKm_hpp */
