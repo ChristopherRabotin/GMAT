@@ -60,6 +60,7 @@ public:
       ICON_PATH,
       STAR_PATH,
       MODEL_PATH,
+      SPAD_PATH,
       // Output path
       OUTPUT_PATH,
       END_OF_PATH,
@@ -96,6 +97,7 @@ public:
       STAR_FILE,
       CONSTELLATION_FILE,
       SPACECRAFT_MODEL_FILE,
+      SPAD_SRP_FILE,
       HELP_FILE,
       FileTypeCount,
    };
@@ -119,7 +121,7 @@ public:
    /// Finds file path using search order
    std::string FindPath(const std::string &fileName, const FileType type,
                         bool forInput, bool writeWarning = false, bool writeInfo = false);
-   std::string FindPath(const std::string &fileName, const std::string &typeName,
+   std::string FindPath(const std::string &fileName, const std::string &fileType,
                         bool forInput, bool writeWarning = false, bool writeInfo = false);
    std::string FindMainIconFile();
    

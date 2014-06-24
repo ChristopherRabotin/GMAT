@@ -145,6 +145,8 @@ protected:
    bool                 leftJustify;
    /// Fill right field with 0
    bool                 zeroFill;
+   /// Using default file name indicator
+   bool                 usingDefaultFileName;
    
    /// output data stream
    std::ofstream        dstream;
@@ -188,9 +190,7 @@ protected:
    };
 
 private:
-   
-   void                 SetFullPathFileName(bool writeInfo = false);
-   
+      
    static const std::string
       PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
    static const Gmat::ParameterType

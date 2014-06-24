@@ -237,16 +237,16 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    // if (fileName == "")
    //    fileName = name + ".eph";
    
-   // If fileName is blank, give default name (LOJ: 2014.06.20)
-   if (fileName == "")
-   {
-      #ifdef DEBUG_FILE_PATH
-      MessageInterface::ShowMessage
-         ("EphemerisFile::EphemerisFile() '%s' calling SetFullPathFileName()\n",
-          GetName().c_str());
-      #endif
-      SetFullPathFileName(false);
-   }
+   // Get full path file name (LOJ: 2014.06.24)
+   // The new GmatBase static method GetFullPathFileName() now handles empty file name
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("EphemerisFile::EphemerisFile() '%s' calling GmatBase::GetFullPathFileName()\n",
+       GetName().c_str());
+   #endif
+   
+   fullPathFileName =
+      GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE", false, ".eph");
    
    // Available enumeration type list, since it is static data, clear it first
    fileFormatList.clear();
@@ -567,7 +567,7 @@ void EphemerisFile::SetProperFileExtension()
    #endif
    
    
-   // File path is handled in SetFullPathFileName() so commented out (LOJ: 2014.06.23)
+   // File path is handled in GetFullPathFileName() so commented out (LOJ: 2014.06.23)
    // try
    // {
    //    FileManager *fm = FileManager::Instance();
@@ -1472,7 +1472,8 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
       }
       
       fileName = value;
-      SetFullPathFileName(true);
+      fullPathFileName =
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE", false, ".eph", false, true);
       
       // fullPathFileName = fileName;
       
@@ -1695,42 +1696,6 @@ const StringArray& EphemerisFile::GetRefObjectNameArray(const Gmat::ObjectType t
 //--------------------------------------
 // protected methods
 //--------------------------------------
-
-//------------------------------------------------------------------------------
-// void SetFullPathFileName(bool writeInfo = false)
-//------------------------------------------------------------------------------
-/**
- * Sets full path file name and default file name if fileName is blank
- */
-//------------------------------------------------------------------------------
-void EphemerisFile::SetFullPathFileName(bool writeInfo)
-{
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("\nEphemerisFile::SetFullPathFileName() entered, fileName='%s', writeInfo=%d\n",
-       fileName.c_str(), writeInfo);
-   #endif
-   
-   FileManager *fm = FileManager::Instance();
-   if (fileName == "")
-   {
-      fileName = instanceName + ".eph";
-   }
-   
-   std::string fullname = fm->FindPath(fileName, "EPHEM_OUTPUT_FILE", false, false, writeInfo);
-   
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("   fullPathFileName from FileManger = '%s'\n", fullname.c_str());
-   #endif
-   
-   fullPathFileName = fullname;
-   
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("EphemerisFile::SetFullPathFileName() leaving\n");
-   #endif
-}
 
 //------------------------------------------------------------------------------
 // void InitializeData(bool saveEpochInfo = true)
@@ -2026,9 +1991,11 @@ bool EphemerisFile::OpenTextEphemerisFile()
       ("EphemerisFile::OpenTextEphemerisFile() entered, fileName = %s\n", fileName.c_str());
    #endif
    
-   // If default file name is used, write warning about file location
+   // If default file name is used, write informatinal message about the file location (LOJ: 2014.06.24)
    if (usingDefaultFileName)
-      SetFullPathFileName(true);
+      MessageInterface::ShowMessage
+         ("*** The output file '%s' will be written as \n                    '%s'\n",
+          fileName.c_str(), fullPathFileName.c_str());
    
    //fileName = SetProperFileExtension();
    SetProperFileExtension();

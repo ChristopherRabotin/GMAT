@@ -85,6 +85,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "ICON_PATH",
    "STAR_PATH",
    "MODEL_PATH",
+   "SPAD_SRP_PATH",
    // Output path
    "OUTPUT_PATH",
    "END_OF_PATH",
@@ -353,7 +354,7 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
 
 
 //------------------------------------------------------------------------------
-// std::string FindPath(const std::string &fileName, const std::string &typeName,
+// std::string FindPath(const std::string &fileName, const std::string &fileType,
 //                      bool forInput, bool writeWarning = false, bool writeInfo = false)
 //------------------------------------------------------------------------------
 /**
@@ -373,20 +374,21 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
  *
  * @param  fileName     The requested filename to be searched
  *                      Enter blank name if default name to be used for the type
- * @param  typeName     The type name of the input file
- * @param  forInput     True if filename is for input
- * @param  writeWarning True if warning shuld be written when no paht found
+ * @param  fileType     The file type name of the input file
+ * @param  forInput     Set to true if filename is for input
+ * @param  writeWarning Set to true if warning should be written when no path found
+ * @param  writeInfo    Set to true if information should be written for output path
  *
- * @return path found using search order
+ * @return full path name using search order
  */
 //------------------------------------------------------------------------------
-std::string FileManager::FindPath(const std::string &fileName, const std::string &typeName,
+std::string FileManager::FindPath(const std::string &fileName, const std::string &fileType,
                                   bool forInput, bool writeWarning, bool writeInfo)
 {   
    #ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
-      ("FileManager::FindPath() entered\n   fileName = '%s'\n   typeName = '%s', forInput = %d, "
-       "writeWarning = %d, writeInfo = %d\n", fileName.c_str(), typeName.c_str(), forInput,
+      ("FileManager::FindPath() entered\n   fileName = '%s'\n   fileType = '%s', forInput = %d, "
+       "writeWarning = %d, writeInfo = %d\n", fileName.c_str(), fileType.c_str(), forInput,
        writeWarning, writeInfo);
    #endif
    
@@ -396,7 +398,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    try
    {
       if (fileName == "")
-         fullname = GetFilename(typeName);
+         fullname = GetFilename(fileType);
    }
    catch (BaseException &be)
    {
@@ -411,7 +413,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       #ifdef DEBUG_FIND_PATH
       MessageInterface::ShowMessage
          ("FileManager::FindPath() cannot find default filename for type '%s', "
-          "so just returning blank\n", typeName.c_str());
+          "so just returning blank\n", fileType.c_str());
       #endif
       return "";
    }
@@ -420,7 +422,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    std::string pathOnly = GmatFileUtil::ParsePathName(fullname);
    std::string fileOnly = GmatFileUtil::ParseFileName(fullname);
    std::string gmatPath = GmatFileUtil::ConvertToOsFileName(mGmatWorkingDir);
-   std::string defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(typeName));
+   std::string defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(fileType));
    std::string tempPath1, tempPath2;
    std::string pathToReturn;
    
@@ -575,18 +577,25 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             else
                pathToReturn = mAbsBinDir + fullname;
          }
-
-         if (writeInfo)
-         {
-            // Write message where output goes
-            MessageInterface::ShowMessage
-               ("*** The output file '%s' will be written as \n                    '%s'\n",
-                fullname.c_str(), pathToReturn.c_str());
-         }
       }
    }
    
-    
+   if (writeInfo)
+   {
+      std::string ioType = "output";
+      std::string rwType = "written as";
+      if (forInput)
+      {
+         ioType = "input";
+         rwType = "read from";
+      }
+      
+      // Write message where output goes or input from
+      MessageInterface::ShowMessage
+         ("*** The %s file '%s' will be %s \n                    '%s'\n",
+          ioType.c_str(), fullname.c_str(), rwType.c_str(), pathToReturn.c_str());
+   }
+   
    // Do we need this?
    // #ifdef DEBUG_FIND_PATH
    // MessageInterface::ShowMessage

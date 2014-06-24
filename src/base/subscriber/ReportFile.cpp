@@ -101,6 +101,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    headerReset     (false),
    leftJustify     (true),
    zeroFill        (false),
+   usingDefaultFileName (true),
    lastUsedProvider(-1),
    mLastReportTime (0.0),
    usedByReport    (false),
@@ -124,10 +125,11 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    {
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
-         ("ReportFile::ReportFile() '%s' calling SetFullPathFileName()\n",
+         ("ReportFile::ReportFile() '%s' calling GetFullPathFileName()\n",
           GetName().c_str());
       #endif
-      SetFullPathFileName(false);
+      fullPathFileName =
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt");
    }
    
    #ifdef DEBUG_REPORTFILE
@@ -171,6 +173,7 @@ ReportFile::ReportFile(const ReportFile &rf) :
    headerReset     (rf.headerReset),
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
+   usingDefaultFileName (rf.usingDefaultFileName),
    lastUsedProvider(-1),
    mLastReportTime (rf.mLastReportTime),
    usedByReport    (rf.usedByReport),
@@ -217,6 +220,7 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    headerReset = rf.headerReset;
    leftJustify = rf.leftJustify;
    zeroFill = rf.zeroFill;
+   usingDefaultFileName = rf.usingDefaultFileName;
    mParams = rf.mParams; 
    mNumParams = rf.mNumParams;
    mParamNames = rf.mParamNames;
@@ -543,15 +547,15 @@ bool ReportFile::Initialize()
    // @tbd Do we need to reconstruct fullPathFileName in Initialize()?
    // #ifdef DEBUG_FILE_PATH
    // MessageInterface::ShowMessage
-   //    ("ReportFile::Initialize() '%s' calling SetFullPathFileName()\n",
+   //    ("ReportFile::Initialize() '%s' calling GetFullPathFileName()\n",
    //     GetName().c_str());
    // #endif
-   // SetFullPathFileName(false);
+   // GetFullPathFileName(false);
    
    // delete old file on initialization
    // Use member data fullPathFileName (LOJ: 2014.06.19)
-   //if (GmatFileUtil::DoesFileExist(SetFullPathFileName()))
-	//   remove(SetFullPathFileName().c_str());
+   //if (GmatFileUtil::DoesFileExist(GetFullPathFileName()))
+	//   remove(GetFullPathFileName().c_str());
    if (GmatFileUtil::DoesFileExist(fullPathFileName))
 	   remove(fullPathFileName.c_str());
    
@@ -595,6 +599,12 @@ bool ReportFile::Initialize()
       isInitialized = true;
       initialFromReport = true;
    }
+   
+   // If default file name is used, write informatinal message about the file location (LOJ: 2014.06.24)
+   if (usingDefaultFileName)
+      MessageInterface::ShowMessage
+         ("*** The output file '%s' will be written as \n                    '%s'\n",
+          fileName.c_str(), fullPathFileName.c_str());
    
    return true;
 }
@@ -1068,9 +1078,10 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       //    throw se;
       // }
       
+      usingDefaultFileName = false;
       fileName = value;
       
-      // Moved to SetFullPathFileName() - (LOJ: 2014.06.23)
+      // Moved to GetFullPathFileName() - (LOJ: 2014.06.23)
       // // If file extension is blank, append .txt
       // if (GmatFileUtil::ParseFileExtension(fileName) == "")
       // {
@@ -1084,10 +1095,13 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
-         ("ReportFile::SetStringParameter() '%s' calling SetFullPathFileName()\n",
+         ("ReportFile::SetStringParameter() '%s' calling GetFullPathFileName()\n",
           GetName().c_str());
       #endif
-      SetFullPathFileName(false);
+      
+      fullPathFileName =
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt",
+                                       false, true);
       
       // Close the stream if it is open
       if (dstream.is_open())
@@ -1396,18 +1410,23 @@ const StringArray& ReportFile::GetWrapperObjectNameArray(bool completeSet)
 bool ReportFile::OpenReportFile()
 {
    //@tbd Do we need to reconstruct fullPathFileName here?
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("ReportFile::OpenReportFile() '%s' calling SetFullPathFileName()\n",
-       GetName().c_str());
-   #endif
-   SetFullPathFileName(true);
+   // #ifdef DEBUG_FILE_PATH
+   // MessageInterface::ShowMessage
+   //    ("ReportFile::OpenReportFile() '%s' calling GetFullPathFileName()\n",
+   //     GetName().c_str());
+   // #endif
+   
+   // fullPathFileName =
+   //    GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false,
+   //                                  ".txt", false, true);
    
    // If file name is blank, use default file name (LOJ: 2009.10.02)
    // if (fileName == "")
    //    fileName = defFileName;
-   if (fullPathFileName == "")
-      fullPathFileName = defFileName;
+   // fullPathFileName will not be blank for output after changed to use
+   // GmatBase::GetFullPathFileName() (LOJ: 2014.06.24)
+   // if (fullPathFileName == "")
+   //    fullPathFileName = defFileName;
    
    #ifdef DEBUG_REPORTFILE_OPEN
    MessageInterface::ShowMessage
@@ -1786,87 +1805,4 @@ bool ReportFile::IsNotANumber(Real rval)
    #endif
    return false;
 }
-
-//------------------------------------------------------------------------------
-// void SetFullPathFileName(bool writeInfo = false)
-//------------------------------------------------------------------------------
-/**
- * Sets full path file name and default file name if fileName is blank
- */
-//------------------------------------------------------------------------------
-void ReportFile::SetFullPathFileName(bool writeInfo)
-{
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("\nReportFile::SetFullPathFileName() entered, fileName='%s', writeInfo=%d\n",
-       fileName.c_str(), writeInfo);
-   #endif
-   
-   FileManager *fm = FileManager::Instance();
-   if (fileName == "")
-   {
-      defFileName = instanceName + ".txt";
-      fileName = defFileName;
-   }
-   else
-   {
-      // If file extension is blank, append .txt
-      if (GmatFileUtil::ParseFileExtension(fileName) == "")
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** Appended .txt to file name '%s'\n", fileName.c_str());
-         fileName = fileName + ".txt";
-      }
-   }
-   
-   std::string fullname = fm->FindPath(fileName, "REPORT_FILE", false, false, writeInfo);
-   
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("   fullPathFileName from FileManger = '%s'\n", fullname.c_str());
-   #endif
-   
-   //===================== OLD CODE
-   // try
-   // {
-   //    FileManager *fm = FileManager::Instance();
-   //    outputPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-      
-   //    #ifdef DEBUG_REPORTFILE_OPEN
-   //    MessageInterface::ShowMessage("   outputPath='%s'\n", outputPath.c_str());
-   //    #endif
-      
-   //    if (fileName == "")
-   //    {
-   //       defFileName = instanceName + ".txt";
-   //       fileName = defFileName;
-   //       fullname = outputPath + fileName;
-   //    }
-   //    else
-   //    {
-   //       // add output path if there is no path
-   //       if (fileName.find("/") == fileName.npos &&
-   //           fileName.find("\\") == fileName.npos)
-   //       {
-   //          fullname = outputPath + fileName;
-   //       }
-   //    }
-   // }
-   // catch (GmatBaseException &e)
-   // {
-   //    if (fileName == "")
-   //       fullname = instanceName + ".txt";
-      
-   //    MessageInterface::ShowMessage(e.GetFullMessage());
-   // }
-   //===================== OLD CODE
-   
-   fullPathFileName = fullname;
-   
-   #ifdef DEBUG_FILE_PATH
-   MessageInterface::ShowMessage
-      ("ReportFile::SetFullPathFileName() leaving\n");
-   #endif
-}
-
 

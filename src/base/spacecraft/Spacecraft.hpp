@@ -266,6 +266,7 @@ protected:
 
       // SPAD SRP parameters
       SPAD_SRP_FILE,
+      SPAD_SRP_FILE_FULL_PATH, // read-only
       SPAD_SRP_SCALE_FACTOR,
 
       // Hidden parameters used by the PSM
@@ -281,7 +282,7 @@ protected:
       ADD_HARDWARE,
       // The filename used for the spacecraft's model 
       MODEL_FILE,
-
+      MODEL_FILE_FULL_PATH, // read-only
       // The Offset, rotation, and scale values for the spacecraft's model
       MODEL_OFFSET_X,
       MODEL_OFFSET_Y,
@@ -536,6 +537,8 @@ protected:
 
    /// The name of the SPAD SRP file
    std::string       spadSRPFile;
+   /// SPAD SRP full path file name
+   std::string       spadSrpFileFullPath;
    /// the scale factor to use for the SSPAD SRP data
    Real              spadSRPScaleFactor;
    /// the SPADFileReader

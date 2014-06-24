@@ -40,7 +40,8 @@
 #include "GmatGlobal.hpp"  // for GetDataPrecision(), IsWritingGmatKeyword()
 #include <sstream>         // for StringStream
 #include "StringUtil.hpp"
-
+#include "FileManager.hpp" // for FindPath()
+#include "FileUtil.hpp"    // for ParseFileName()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
@@ -3779,6 +3780,70 @@ Integer GmatBase::GetTimePrecision()
    return GmatGlobal::Instance()->GetTimePrecision();
 }
 
+//------------------------------------------------------------------------------
+// static std::string GmatBase::GetFullPathFileName(std::string &outFileName,
+//        const std::string &objName, const std::string &fileName,
+//        const std::string &fileType, bool forInput, const std::string &fileExt = "",
+//        bool writeWarning = false, bool writeInfo = false)
+//------------------------------------------------------------------------------
+/**
+ * Static method for getting full path file name for given file name and file type.
+ * This method calls FileManager::FindPath() so it is call-through function.
+ *
+ * @param  outFileName  The file name without path to be returned.  This file name
+ *                      is built only if input file name is blank
+ * @param  inFileName   The requested file name
+ *                      Enter blank name if default name to be used for the file type
+ * @param  typeName     The file type name of the input file
+ * @param  forInput     Set to true if filename is for input
+ * @param  fileExt      File extension to be used for default filename
+ * @param  writeWarning Set to true if warning should be written when no path found
+ * @param  writeInfo    Set to true if information should be written for output path
+ *
+ * @return full path name using search order
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatBase::GetFullPathFileName(std::string &outFileName,
+                                          const std::string &objName,
+                                          const std::string &inFileName,
+                                          const std::string &fileType, bool forInput,
+                                          const std::string &fileExt, bool writeWarning,
+                                          bool writeInfo)
+{
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("\nGmatBase::SetFullPathFileName() entered, objName='%s', inFileName='%s', fileType='%s', "
+       "forInput=%d, fileExt='%s', writeWarning=%d, writeInfo=%d\n", objName.c_str(),
+       inFileName.c_str(), fileType.c_str(),fileExt.c_str(), forInput, writeWarning, writeInfo);
+   #endif
+   
+   std::string fname = inFileName;
+   
+   // If file is for output and input file name is blank, build outFileName
+   if (!forInput && fname == "")
+   {
+         fname = objName + fileExt;
+         outFileName = fname;
+   }
+   
+   std::string fullPath =
+      FileManager::Instance()->FindPath(fname, fileType, forInput, writeWarning, writeInfo);
+   
+   // If file is for input and input file name is blank, build outFileName
+   if (forInput && fname == "")
+   {
+      outFileName = GmatFileUtil::ParseFileName(fullPath);
+   }
+   
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("GmatBase::SetFullPathFileName() returning outFileName='%s', fullPath='%s'\n",
+       outFileName.c_str(), fullPath.c_str());
+   #endif
+   
+   return fullPath;
+}
 
 // todo: comments
 Integer GmatBase::GetPropItemID(const std::string &whichItem)

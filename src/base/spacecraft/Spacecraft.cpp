@@ -126,8 +126,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::OBJECT_TYPE,      // Attitude
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
-      //Gmat::STRING_TYPE,      // SPADSRPFile
-      Gmat::FILENAME_TYPE,      // SPADSRPFile
+      Gmat::FILENAME_TYPE,    // SPADSRPFile
+      Gmat::FILENAME_TYPE,    // SPADSRPFileFullPath
       Gmat::REAL_TYPE,        // SPADSRPScaleFactor
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
@@ -137,8 +137,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
-      //Gmat::STRING_TYPE,      // Model File
-      Gmat::FILENAME_TYPE,      // Model File
+      Gmat::FILENAME_TYPE,    // Model File
+      Gmat::FILENAME_TYPE,    // ModelFileFullPath
       Gmat::REAL_TYPE,        // Model Offset X
       Gmat::REAL_TYPE,        // Model Offset Y
       Gmat::REAL_TYPE,        // Model Offset Z
@@ -182,6 +182,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "OrbitSTM",
       "OrbitAMatrix",
       "SPADSRPFile",
+      "SPADSRPFileFullPath",
       "SPADSRPScaleFactor",
       "CartesianX",
       "CartesianY",
@@ -192,6 +193,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "MassFlow",
       "AddHardware",
       "ModelFile",
+      "ModelFileFullPath",
       "ModelOffsetX",
       "ModelOffsetY",
       "ModelOffsetZ",
@@ -349,6 +351,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    orbitSTM             (6,6),
    orbitAMatrix         (6,6),
    spadSRPFile          (""),
+   spadSrpFileFullPath  (""),
    spadSRPScaleFactor   (1.0),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
@@ -462,8 +465,12 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    // Load default model file
    // Find file name and full path (LOJ: 2014.06.17)
    //modelFile = FileManager::Instance()->GetFullPathname("SPACECRAFT_MODEL_FILE");
-   modelFile = FileManager::Instance()->GetFilename("SPACECRAFT_MODEL_FILE");
-   modelFileFullPath = FileManager::Instance()->FindPath(modelFile, "SPACECRAFT_MODEL_FILE", true, false);
+   
+   // modelFile = FileManager::Instance()->GetFilename("SPACECRAFT_MODEL_FILE");
+   // modelFileFullPath = FileManager::Instance()->FindPath(modelFile, "SPACECRAFT_MODEL_FILE", true, false);
+   
+   // Use GmatBase::GetFullPathFileName() (LOJ: 2014.06.24)
+   modelFileFullPath = GmatBase::GetFullPathFileName(modelFile, GetName(), modelFile, "SPACECRAFT_MODEL_FILE", true);
    
    #ifdef DEBUG_FILEPATH
    MessageInterface::ShowMessage
@@ -568,6 +575,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    orbitSTM             (a.orbitSTM),
    orbitAMatrix         (a.orbitAMatrix),
    spadSRPFile          (a.spadSRPFile),
+   spadSrpFileFullPath  (a.spadSrpFileFullPath),
    spadSRPScaleFactor   (a.spadSRPScaleFactor),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
@@ -728,6 +736,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    orbitAMatrix = a.orbitAMatrix;
 
    spadSRPFile        = a.spadSRPFile;
+   spadSrpFileFullPath = a.spadSrpFileFullPath;
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
@@ -1115,7 +1124,9 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
 {
    if (spadSRPReader == NULL)
    {
-      if (spadSRPFile == "")
+      // Changed to use full path spad file (LOJ: 2014.06.24)
+      //if (spadSRPFile == "")
+      if (spadSrpFileFullPath == "")
       {
          std::string errmsg = "SPAD data requested for Spacecraft ";
          errmsg            += instanceName + " but no SPAD file ";
@@ -1125,7 +1136,8 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
       else
       {
          spadSRPReader = new SPADFileReader();
-         spadSRPReader->SetFile(spadSRPFile);
+         //spadSRPReader->SetFile(spadSRPFile);
+         spadSRPReader->SetFile(spadSrpFileFullPath);
          spadSRPReader->Initialize();
       }
    }
@@ -2308,9 +2320,12 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
 
    // NAIF ID for the spacecraft reference frame is not read-only for spacecraft
    if (id == NAIF_ID_REFERENCE_FRAME)  return false;
-
+   
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
-
+   
+   if (id == MODEL_FILE_FULL_PATH || SPAD_SRP_FILE_FULL_PATH)
+      return true;
+   
    return SpaceObject::IsParameterReadOnly(id);
 }
 
@@ -3133,9 +3148,15 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 
     if (id == SPAD_SRP_FILE)
        return spadSRPFile;
-
+    
+    if (id == SPAD_SRP_FILE_FULL_PATH)
+       return spadSrpFileFullPath;
+    
     if (id == MODEL_FILE)
        return modelFile;
+    
+    if (id == MODEL_FILE_FULL_PATH)
+       return modelFileFullPath;
 
     return SpaceObject::GetStringParameter(id);
 }
@@ -3503,21 +3524,28 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          spadSRPReader = NULL;
       }
       spadSRPFile = value;
+      
+      // Use FileManager::FindPath() for full path file name (2014.06.24)
+      spadSrpFileFullPath = FileManager::Instance()->FindPath(value, "SPAD_SRP_FILE", true, false, true);
+      // Write warning or throw an exception?
+      if (spadSrpFileFullPath == "")
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The SPAD SRP file '%s' does not exist for the spacecraft '%s'\n",
+             spadSRPFile.c_str(), GetName().c_str());
+      }
    }
    else if (id == MODEL_FILE)
    {
       modelFile = value;
-      modelFileFullPath = FileManager::Instance()->FindPath(value, "SPACECRAFT_MODEL_FILE", true, false);
+      
+      // Use FileManager::FindPath() for full path file name (2014.06.24)
+      modelFileFullPath = FileManager::Instance()->FindPath(value, "SPACECRAFT_MODEL_FILE", true, false, true);
       if (modelFileFullPath == "")
       {
          MessageInterface::ShowMessage
             ("*** WARNING *** The model file '%s' does not exist for the spacecraft '%s'\n",
              modelFile.c_str(), GetName().c_str());
-         //Question: Do we want to use model file from the startup file?
-         #if 0
-         MessageInterface::ShowMessage("So using model file from the startup file.\n");
-         modelFileFullPath = FileManager::Instance()->FindPath("", "SPACECRAFT_MODEL_FILE", true, false);
-         #endif
       }
    }
    

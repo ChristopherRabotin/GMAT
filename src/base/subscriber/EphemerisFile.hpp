@@ -226,10 +226,7 @@ protected:
    static StringArray interpolatorTypeList;
    /// Avilable output format list
    static StringArray outputFormatList;
-   
-   // File path
-   void SetFullPathFileName(bool writeInfo);
-   
+      
    // Initialization
    void         InitializeData(bool saveEpochInfo = false);
    void         CreateInterpolator();
