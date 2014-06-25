@@ -59,6 +59,8 @@
 
 //#define DEBUG_SPAD_DATA
 //#define DEBUG_SPAD_ACCEL
+//#define DEBUG_SHADOW_STATE
+//#define DEBUG_SHADOW_STATE_2
 
 //#define IGNORE_SHADOWS
 
@@ -132,6 +134,7 @@ const Real SolarRadiationPressure::NOMINAL_SUN_UPPER_BOUND   = 165.0e6;
 SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    PhysicalModel       (Gmat::PHYSICAL_MODEL, "SolarRadiationPressure", name),   
    theSun              (NULL),
+   shadowState         (NULL),
    useAnalytic         (true),
    shadowModel         (CONICAL_MODEL),
    vectorModel         (SUN_PARALLEL),
@@ -158,6 +161,8 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("SolarRadiationPressure");
+
+   shadowState = new ShadowState();
 }
 
 //------------------------------------------------------------------------------
@@ -170,6 +175,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
 SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp) :
    PhysicalModel       (srp),  
    theSun              (NULL),
+   shadowState         (NULL),
    useAnalytic         (srp.useAnalytic),
    shadowModel         (srp.shadowModel),
    vectorModel         (srp.vectorModel),
@@ -197,6 +203,8 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    areaID              (srp.areaID)
 {
    parameterCount = SRPParamCount;
+
+   shadowState = new ShadowState();
 }
 
 //------------------------------------------------------------------------------
@@ -239,7 +247,15 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       massID        = srp.massID;
       crID          = srp.crID;
       areaID        = srp.areaID;
-   }
+
+      if (shadowState)
+      {
+         delete shadowState;
+         shadowState        = NULL;
+      }
+
+      shadowState           = new ShadowState();
+}
    
    return *this;
 }
@@ -257,6 +273,8 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
         delete [] cbSunVector;
     if (forceVector)
         delete [] forceVector;
+    if (shadowState)
+       delete shadowState;
 }
 
 //------------------------------------------------------------------------------
@@ -632,7 +650,7 @@ bool SolarRadiationPressure::Initialize()
    if (solarSystem) 
    {
       theSun    = solarSystem->GetBody(SolarSystem::SUN_NAME);
-      sunRadius = theSun->GetEquatorialRadius();;
+      sunRadius = theSun->GetEquatorialRadius();
       
       if (!theSun)
          throw ODEModelException("Solar system does not contain the Sun for SRP force.");
@@ -642,7 +660,7 @@ bool SolarRadiationPressure::Initialize()
          body = forceOrigin;
       else
          body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
-   
+
       #ifdef DEBUG_SRP_ORIGIN
          MessageInterface::ShowMessage("SRP body is %s\n", 
             body->GetName().c_str());
@@ -858,7 +876,24 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            FindShadowState(inSunlight, inShadow, &state[i6]);
+
+            std::string shModel = "DualCone";
+            if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+#ifdef DEBUG_SHADOW_STATE
+            MessageInterface::ShowMessage("before FSS, sunRadius= %12.10f, psunrad = %12.10f\n",
+                  sunRadius, psunrad);
+            MessageInterface::ShowMessage("   state       = %12.10f %12.10f %12.10f\n",
+                  state[i6], state[i6+1], state[i6+2]);
+            MessageInterface::ShowMessage("   cbSunVector = %12.10f %12.10f %12.10f\n",
+                  cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+            MessageInterface::ShowMessage("   sunSat      = %12.10f %12.10f %12.10f\n",
+                  sunSat[0], sunSat[1], sunSat[2]);
+            MessageInterface::ShowMessage("   forceVector = %12.10f %12.10f %12.10f\n",
+                  forceVector[0], forceVector[1], forceVector[2]);
+#endif
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  sunRadius, bodyRadius, psunrad);
          }
          else
          {
@@ -1005,7 +1040,12 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            FindShadowState(inSunlight, inShadow, &state[i6]);
+            std::string shModel = "DualCone";
+            if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  sunRadius, bodyRadius, psunrad);
+//            FindShadowState(inSunlight, inShadow, &state[i6]);
          }
          else
          {
@@ -1173,7 +1213,12 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            FindShadowState(inSunlight, inShadow, &state[i6]);
+            std::string shModel = "DualCone";
+            if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  sunRadius, bodyRadius, psunrad);
+//            FindShadowState(inSunlight, inShadow, &state[i6]);
          }
          else
          {
@@ -1395,7 +1440,12 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
    if (!bodyIsTheSun)
    {
       psunrad = asin(sunRadius / sunDistance);
-      FindShadowState(inSunlight, inShadow, state);
+      std::string shModel = "DualCone";
+      if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+      percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+            shModel, state, cbSunVector, sunSat, forceVector,
+            sunRadius, bodyRadius, psunrad);
+//      FindShadowState(inSunlight, inShadow, state);
    }
    else
    {
@@ -1461,134 +1511,134 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
 }
 
 
-//------------------------------------------------------------------------------
-// void FindShadowState(bool &lit, bool &dark, Real *state)
-//------------------------------------------------------------------------------
-/**
- * Determines lighting conditions at the input location
- * 
- * @param <lit>   Indicates if the spoacecraft is in full sunlight
- * @param <dark>  Indicates if the spacecarft is in umbra
- * @param <state> Current spacecraft state
- * 
- * \todo: Currently implemented for one spacecraft, state vector arranges as
- * (x, y, z)
- */
-//------------------------------------------------------------------------------
-void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
-{
-    Real mag = sqrt(cbSunVector[0]*cbSunVector[0] + 
-                      cbSunVector[1]*cbSunVector[1] + 
-                      cbSunVector[2]*cbSunVector[2]);
-
-    Real unitsun[3];
-    unitsun[0] = cbSunVector[0] / mag;
-    unitsun[1] = cbSunVector[1] / mag;
-    unitsun[2] = cbSunVector[2] / mag;
-
-    double rdotsun = state[0]*unitsun[0] + 
-                     state[1]*unitsun[1] + 
-                     state[2]*unitsun[2];
-
-    if (rdotsun > 0.0) // Sunny side of central body is always fully lit
-    {    
-        lit = true;
-        dark = false;
-        percentSun = 1.0;
-        return;
-    }
-
-    if (shadowModel == CYLINDRICAL_MODEL) 
-    {
-        // In this model, the spacecraft is in darkness if it is within 
-        // bodyRadius of the sun-body line; otherwise it is lit
-        Real rperp[3];
-        rperp[0] = state[0] - rdotsun * unitsun[0];
-        rperp[1] = state[1] - rdotsun * unitsun[1];
-        rperp[2] = state[2] - rdotsun * unitsun[2];
-
-        mag = sqrt(rperp[0]*rperp[0] + rperp[1]*rperp[1] + rperp[2]*rperp[2]);
-        if (mag < bodyRadius) 
-        {
-            percentSun = 0.0;
-            lit = false;
-            dark = true;
-        }
-        else 
-        {
-            percentSun = 1.0;
-            lit = true;
-            dark = false;
-        }
-    }
-    else if (shadowModel == CONICAL_MODEL) 
-    {
-        Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
-
-        // Montenbruck and Gill, eq. 3.79
-        s0 = -state[0]*unitsun[0] - state[1]*unitsun[1] - state[2]*unitsun[2];
-        s2 = state[0]*state[0] + state[1]*state[1] + state[2]*state[2];
-
-        // Montenbruck and Gill, eq. 3.80
-        lsc = sqrt(s2 - s0*s0);
-
-        // Montenbruck and Gill, eq. 3.81
-        sinf1 = (sunRadius + bodyRadius) / mag;
-        sinf2 = (sunRadius - bodyRadius) / mag;
-
-        // Appropriate l1 and l2 temporarily
-        l1 = sinf1 * sinf1;
-        l2 = sinf2 * sinf2;
-        tanf1 = sqrt(l1 / (1.0 - l1));
-        tanf2 = sqrt(l2 / (1.0 - l2));
-        
-        // Montenbruck and Gill, eq. 3.82
-        c1 = s0 + bodyRadius / sinf1;
-        c2 = bodyRadius / sinf2 - s0;       // Different sign from M&G
-
-        // Montenbruck and Gill, eq. 3.83
-        l1 = c1 * tanf1;
-        l2 = c2 * tanf2;
-
-        if (lsc > l1) 
-        {
-            // Outside of the penumbral cone
-            lit = true;
-            dark = false;
-            percentSun = 1.0;
-            return;
-        }
-        else 
-        {
-            lit = false;
-            if (lsc < fabs(l2)) 
-            {
-                // Inside umbral cone
-                if (c2 >= 0.0) 
-                { 
-                    // no annular ring
-                    percentSun = 0.0;
-                    dark = true;
-                }
-                else 
-                {
-                    // annular eclipse
-                    pcbrad = asin(bodyRadius / sqrt(s2));
-                    percentSun = (psunrad*psunrad - pcbrad*pcbrad) / 
-                                 (psunrad*psunrad);
-                    dark = false;
-                }
-                
-                return;
-            }
-            // In penumbra
-            pcbrad = asin(bodyRadius / sqrt(s2));
-            percentSun = ShadowFunction(state);
-            lit = false;
-            dark = false;
-        }
-    }
-}
+////------------------------------------------------------------------------------
+//// void FindShadowState(bool &lit, bool &dark, Real *state)
+////------------------------------------------------------------------------------
+///**
+// * Determines lighting conditions at the input location
+// *
+// * @param <lit>   Indicates if the spoacecraft is in full sunlight
+// * @param <dark>  Indicates if the spacecarft is in umbra
+// * @param <state> Current spacecraft state
+// *
+// * \todo: Currently implemented for one spacecraft, state vector arranges as
+// * (x, y, z)
+// */
+////------------------------------------------------------------------------------
+//void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
+//{
+//    Real mag = sqrt(cbSunVector[0]*cbSunVector[0] +
+//                      cbSunVector[1]*cbSunVector[1] +
+//                      cbSunVector[2]*cbSunVector[2]);
+//
+//    Real unitsun[3];
+//    unitsun[0] = cbSunVector[0] / mag;
+//    unitsun[1] = cbSunVector[1] / mag;
+//    unitsun[2] = cbSunVector[2] / mag;
+//
+//    double rdotsun = state[0]*unitsun[0] +
+//                     state[1]*unitsun[1] +
+//                     state[2]*unitsun[2];
+//
+//    if (rdotsun > 0.0) // Sunny side of central body is always fully lit
+//    {
+//        lit = true;
+//        dark = false;
+//        percentSun = 1.0;
+//        return;
+//    }
+//
+//    if (shadowModel == CYLINDRICAL_MODEL)
+//    {
+//        // In this model, the spacecraft is in darkness if it is within
+//        // bodyRadius of the sun-body line; otherwise it is lit
+//        Real rperp[3];
+//        rperp[0] = state[0] - rdotsun * unitsun[0];
+//        rperp[1] = state[1] - rdotsun * unitsun[1];
+//        rperp[2] = state[2] - rdotsun * unitsun[2];
+//
+//        mag = sqrt(rperp[0]*rperp[0] + rperp[1]*rperp[1] + rperp[2]*rperp[2]);
+//        if (mag < bodyRadius)
+//        {
+//            percentSun = 0.0;
+//            lit = false;
+//            dark = true;
+//        }
+//        else
+//        {
+//            percentSun = 1.0;
+//            lit = true;
+//            dark = false;
+//        }
+//    }
+//    else if (shadowModel == CONICAL_MODEL)
+//    {
+//        Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
+//
+//        // Montenbruck and Gill, eq. 3.79
+//        s0 = -state[0]*unitsun[0] - state[1]*unitsun[1] - state[2]*unitsun[2];
+//        s2 = state[0]*state[0] + state[1]*state[1] + state[2]*state[2];
+//
+//        // Montenbruck and Gill, eq. 3.80
+//        lsc = sqrt(s2 - s0*s0);
+//
+//        // Montenbruck and Gill, eq. 3.81
+//        sinf1 = (sunRadius + bodyRadius) / mag;
+//        sinf2 = (sunRadius - bodyRadius) / mag;
+//
+//        // Appropriate l1 and l2 temporarily
+//        l1 = sinf1 * sinf1;
+//        l2 = sinf2 * sinf2;
+//        tanf1 = sqrt(l1 / (1.0 - l1));
+//        tanf2 = sqrt(l2 / (1.0 - l2));
+//
+//        // Montenbruck and Gill, eq. 3.82
+//        c1 = s0 + bodyRadius / sinf1;
+//        c2 = bodyRadius / sinf2 - s0;       // Different sign from M&G
+//
+//        // Montenbruck and Gill, eq. 3.83
+//        l1 = c1 * tanf1;
+//        l2 = c2 * tanf2;
+//
+//        if (lsc > l1)
+//        {
+//            // Outside of the penumbral cone
+//            lit = true;
+//            dark = false;
+//            percentSun = 1.0;
+//            return;
+//        }
+//        else
+//        {
+//            lit = false;
+//            if (lsc < fabs(l2))
+//            {
+//                // Inside umbral cone
+//                if (c2 >= 0.0)
+//                {
+//                    // no annular ring
+//                    percentSun = 0.0;
+//                    dark = true;
+//                }
+//                else
+//                {
+//                    // annular eclipse
+//                    pcbrad = asin(bodyRadius / sqrt(s2));
+//                    percentSun = (psunrad*psunrad - pcbrad*pcbrad) /
+//                                 (psunrad*psunrad);
+//                    dark = false;
+//                }
+//
+//                return;
+//            }
+//            // In penumbra
+//            pcbrad = asin(bodyRadius / sqrt(s2));
+//            percentSun = ShadowFunction(state);
+//            lit = false;
+//            dark = false;
+//        }
+//    }
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1608,41 +1658,41 @@ bool SolarRadiationPressure::IsUnique(const std::string& forBody)
 }
 
 
-//------------------------------------------------------------------------------
-// Real ShadowFunction(Real * state)
-//------------------------------------------------------------------------------
-/**
- * Calculates %lit when in penumbra.
- * 
- * @param <state> The current spacecraft state
- * 
- * @return the multiplier used when the satellite is partially lit
- */
-//------------------------------------------------------------------------------
-Real SolarRadiationPressure::ShadowFunction(Real * state)
-{
-    Real mag = sqrt(state[0]*state[0] + 
-                      state[1]*state[1] + 
-                      state[2]*state[2]);
-    
-    // Montenbruck and Gill, eq. 3.87
-    Real c = acos((state[0]*forceVector[0] + 
-                     state[1]*forceVector[1] + 
-                     state[2]*forceVector[2]) / mag);
-
-    Real a2 = psunrad*psunrad;
-    Real b2 = pcbrad*pcbrad;
-
-    // Montenbruck and Gill, eq. 3.93
-    Real x = (c*c + a2 - b2) / (2.0 * c);
-    Real y = sqrt(a2 - x*x);
-
-    // Montenbruck and Gill, eq. 3.92
-    Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
-
-    // Montenbruck and Gill, eq. 3.94
-    return 1.0 - area / (M_PI * a2);
-}
+////------------------------------------------------------------------------------
+//// Real ShadowFunction(Real * state)
+////------------------------------------------------------------------------------
+///**
+// * Calculates %lit when in penumbra.
+// *
+// * @param <state> The current spacecraft state
+// *
+// * @return the multiplier used when the satellite is partially lit
+// */
+////------------------------------------------------------------------------------
+//Real SolarRadiationPressure::ShadowFunction(Real * state)
+//{
+//    Real mag = sqrt(state[0]*state[0] +
+//                      state[1]*state[1] +
+//                      state[2]*state[2]);
+//
+//    // Montenbruck and Gill, eq. 3.87
+//    Real c = acos((state[0]*forceVector[0] +
+//                     state[1]*forceVector[1] +
+//                     state[2]*forceVector[2]) / mag);
+//
+//    Real a2 = psunrad*psunrad;
+//    Real b2 = pcbrad*pcbrad;
+//
+//    // Montenbruck and Gill, eq. 3.93
+//    Real x = (c*c + a2 - b2) / (2.0 * c);
+//    Real y = sqrt(a2 - x*x);
+//
+//    // Montenbruck and Gill, eq. 3.92
+//    Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
+//
+//    // Montenbruck and Gill, eq. 3.94
+//    return 1.0 - area / (M_PI * a2);
+//}
 
 //---------------------------------------------------------------------------
 // Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
