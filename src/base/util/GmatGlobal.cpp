@@ -370,6 +370,22 @@ void GmatGlobal::SetWriteParameterInfo(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// bool IsWritingFilePathInfo()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsWritingFilePathInfo()
+{
+   return isWritingFilePathInfo;
+}
+
+//------------------------------------------------------------------------------
+// void SetWriteFilePathInfo(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetWriteFilePathInfo(bool flag)
+{
+   isWritingFilePathInfo = flag;
+}
+
+//------------------------------------------------------------------------------
 // bool IsWritingGmatKeyword()
 //------------------------------------------------------------------------------
 bool GmatGlobal::IsWritingGmatKeyword()
@@ -788,6 +804,7 @@ GmatGlobal::GmatGlobal()
    isEventLocationAvailable = false;
    isMissionTreeDebugOn = false;
    isWritingParameterInfo = false;
+   isWritingFilePathInfo = false;
    isWritingGmatKeyword = true;
    runMode = NORMAL;
    guiMode = NORMAL_GUI;

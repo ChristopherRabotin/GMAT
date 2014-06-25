@@ -306,7 +306,8 @@ bool GravityField::Initialize()
             MessageInterface::ShowMessage("Now getting HarmonicGravity with filename = %s, a = %12.10f, mu = %12.10f\n",
                   filename.c_str(), a, mu);
          #endif
-         gravityModel = GetGravityFile(filename,a,mu);
+         //gravityModel = GetGravityFile(filename,a,mu);
+         gravityModel = GetGravityFile(filenameFullPath,a,mu);
          if (!gravityModel)
          {
             std::string errmsg = "Gravity file ";
@@ -1222,6 +1223,8 @@ void GravityField::Calculate (Real dt, Real state[6],
 }
 
 //------------------------------------------------------------------------------
+// HarmonicGravity* GetGravityFile(const std::string &filename,
+//                                 const Real &radius, const Real &mukm)
 //------------------------------------------------------------------------------
 HarmonicGravity* GravityField::GetGravityFile(const std::string &filename,
                                               const Real &radius, const Real &mukm)

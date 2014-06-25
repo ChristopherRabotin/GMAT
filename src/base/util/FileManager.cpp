@@ -580,10 +580,11 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       }
    }
    
-   if (writeInfo)
+   // Write information about file location if file path debug mode is on
+   if (mWriteFilePathInfo == "ON" && writeInfo)
    {
       std::string ioType = "output";
-      std::string rwType = "written as";
+      std::string rwType = "written to";
       if (forInput)
       {
          ioType = "input";
@@ -992,6 +993,14 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             GmatGlobal::Instance()->SetWriteParameterInfo(true);
          }
       }
+      else if (type == "DEBUG_FILE_PATH")
+      {
+         if (name == "ON")
+         {
+            mWriteFilePathInfo = name;
+            GmatGlobal::Instance()->SetWriteFilePathInfo(true);
+         }
+      }
       else if (type == "WRITE_GMAT_KEYWORD")
       {
          if (name == "OFF")
@@ -1184,19 +1193,35 @@ void FileManager::WriteStartupFile(const std::string &fileName)
       outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
+   // write DEBUG_FILE_PATH if not blank
+   //---------------------------------------------
+   if (mWriteFilePathInfo != "")
+   {
+      #ifdef DEBUG_WRITE_STARTUP_FILE
+      MessageInterface::ShowMessage("   .....Writing FILE_PATH_INFO\n");
+      #endif
+      outStream << std::setw(22) << "DEBUG_FILE_PATH" << " = " << mWriteFilePathInfo << "\n";
+   }
+   
+   if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
+       mDebugMatlab != "" || mDebugMissionTree != "" || mWriteParameterInfo != "" ||
+       mWriteFilePathInfo != "")
+      outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
    // write WRITE_GMAT_KEYWORD if not blank
    //---------------------------------------------
    if (mWriteGmatKeyword != "")
    {
       #ifdef DEBUG_WRITE_STARTUP_FILE
-      MessageInterface::ShowMessage("   .....Writing PARAMETER_INFO\n");
+      MessageInterface::ShowMessage("   .....Writing GMAT_KEYWORD_INFO\n");
       #endif
       outStream << std::setw(22) << "WRITE_GMAT_KEYWORD" << " = " << mWriteGmatKeyword << "\n";
    }
    
    if (mRunMode != "" || mPlotMode != "" || mMatlabMode != "" ||
        mDebugMatlab != "" || mDebugMissionTree != "" || mWriteParameterInfo != "" ||
-       mWriteGmatKeyword != "" )
+       mWriteFilePathInfo != "" || mWriteGmatKeyword != "" )
       outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
@@ -2646,6 +2671,7 @@ void FileManager::RefreshFiles()
    mDebugMatlab = "";
    mDebugMissionTree = "";
    mWriteParameterInfo = "";
+   mWriteFilePathInfo = "";
    mWriteGmatKeyword = "";
    mPathMap.clear();
    mGmatFunctionPaths.clear();

@@ -202,6 +202,7 @@ private:
    std::string mDebugMatlab;
    std::string mDebugMissionTree;
    std::string mWriteParameterInfo;
+   std::string mWriteFilePathInfo;
    std::string mWriteGmatKeyword;
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;

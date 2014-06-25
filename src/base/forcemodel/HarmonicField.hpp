@@ -166,7 +166,9 @@ protected:
    Real                    r,s,t,u;
    /// The name of the potential file
    std::string             filename;
-
+   /// The full path file name of the potential file
+   std::string             filenameFullPath;
+   
    /// has the file been read?
    bool                    fileRead;
    bool                    usingDefaultFile;

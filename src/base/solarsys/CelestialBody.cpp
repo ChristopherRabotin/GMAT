@@ -149,7 +149,7 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::INTEGER_TYPE,  //"BodyNumber",
    Gmat::INTEGER_TYPE,  //"RefBodyNumber",
    Gmat::BOOLEAN_TYPE,  //"UsePotentialFileFlag",
-   Gmat::STRING_TYPE,   //"PotentialFileName",
+   Gmat::FILENAME_TYPE, //"PotentialFileName",
    Gmat::RVECTOR_TYPE,  //"AngularVelocity",
    Gmat::REAL_TYPE,     //"HourAngle",
    Gmat::STRING_TYPE,   //"AtmosphereModelName",
@@ -214,6 +214,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    theSourceFile      (NULL),
    usePotentialFile   (false),
    potentialFileName  (""),
+   potentialFileNameFullPath (""),
    hourAngle          (0.0),
    atmModel           (NULL),
    atmModelType       ("None"),
@@ -258,7 +259,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    //    textureMapFileName = textureLoc + textureMapFileName;
    // }
    
-   // Use FileManager::FindPath() (LOJ: 2014.06.18)
+   // Call SetTextureFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage("1 Calling SetTextureFileName()\n");
    #endif
@@ -316,6 +317,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    theSourceFile      (NULL),
    usePotentialFile   (false),
    potentialFileName  (""),
+   potentialFileNameFullPath (""),
    hourAngle          (0.0),
    atmModel           (NULL),
    atmModelType       ("None"),
@@ -358,7 +360,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    //    textureMapFileName = textureLoc + textureMapFileName;
    // }
    
-   // Use FileManager::FindPath() (LOJ: 2014.06.18)
+   // Call SetTextureFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage("2 Calling SetTextureFileName()\n");
    #endif
@@ -415,6 +417,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    theSourceFile       (cBody.theSourceFile), // ????????????????
    usePotentialFile    (cBody.usePotentialFile),
    potentialFileName   (cBody.potentialFileName),
+   potentialFileNameFullPath (cBody.potentialFileNameFullPath),
    hourAngle           (cBody.hourAngle),
    atmModel            (NULL),
    atmModelType        (cBody.atmModelType),
@@ -536,6 +539,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    #endif
    usePotentialFile    = cBody.usePotentialFile;
    potentialFileName   = cBody.potentialFileName;
+   potentialFileNameFullPath = cBody.potentialFileNameFullPath;
    angularVelocity     = cBody.angularVelocity;
    hourAngle           = cBody.hourAngle;
    atmModelType        = cBody.atmModelType;
@@ -1175,7 +1179,8 @@ Real CelestialBody::GetGravitationalConstant()
          {
             MessageInterface::LogMessage
                ("For body %s, using mu (%.18f) from file \"%s\"\n",
-                instanceName.c_str(), mu, potentialFileName.c_str());
+                //instanceName.c_str(), mu, potentialFileName.c_str());
+                instanceName.c_str(), mu, potentialFileNameFullPath.c_str());
             
             isFirstTimeMu = false;
          }
@@ -1187,7 +1192,7 @@ Real CelestialBody::GetGravitationalConstant()
       {
          MessageInterface::LogMessage
             ("For body %s, not using potential file, so using default mu (%.18f)\n",
-             instanceName.c_str(), mu, potentialFileName.c_str());
+             instanceName.c_str(), mu);
          
          isFirstTimeMu = false;
       }
@@ -1226,7 +1231,8 @@ Real CelestialBody::GetEquatorialRadius()
                MessageInterface::ShowMessage
                   ("For body %s, cannot read file \"%s\", so using default eq. radius"
                    " (%.18f)\n", instanceName.c_str(),
-                   potentialFileName.c_str(), default_equatorialRadius);
+                   //potentialFileName.c_str(), default_equatorialRadius);
+                   potentialFileNameFullPath.c_str(), default_equatorialRadius);
                
                isFirstTimeRadius = false;
             }
@@ -1240,7 +1246,8 @@ Real CelestialBody::GetEquatorialRadius()
          {
             MessageInterface::ShowMessage
                ("For body %s, using eq. radius (%.18f) from file \"%s\"\n",
-                instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+                //instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+                instanceName.c_str(), equatorialRadius, potentialFileNameFullPath.c_str());
          
             isFirstTimeRadius = false;
          }
@@ -1252,7 +1259,7 @@ Real CelestialBody::GetEquatorialRadius()
       {
          MessageInterface::LogMessage
             ("For body %s, not using potential file, so using default eq. radius (%.18f)\n",
-             instanceName.c_str(), equatorialRadius, potentialFileName.c_str());
+             instanceName.c_str(), equatorialRadius);
          
          isFirstTimeRadius = false;
       }
@@ -3373,13 +3380,21 @@ bool CelestialBody::SetStringParameter(const Integer id,
    }
    if (id == POTENTIAL_FILE_NAME)
    {
-      if (!(GmatFileUtil::DoesFileExist(value)))
+      // Changed to use GmatBase::GetFullPathFileName()
+      std::string potFile = GmatStringUtil::ToUpper(instanceName) + "_POT_FILE";
+      potentialFileNameFullPath =
+         GmatBase::GetFullPathFileName(potentialFileName, GetName(), value, potFile, true,
+                                       "", false, true);
+      MessageInterface::ShowMessage("==> potentialFileNameFullPath = '%s'\n", potentialFileNameFullPath.c_str());
+      // if (!(GmatFileUtil::DoesFileExist(value)))
+      if (potentialFileNameFullPath == "")
       {
          SolarSystemException sse;
          sse.SetDetails(errorMessageFormat.c_str(),
                         value.c_str(), "PotentialFileName", "File must exist");
          throw sse;
       }
+      
       potentialFileName = value;
       return true;
    }
@@ -4352,7 +4367,10 @@ bool CelestialBody::DeterminePotentialFileNameFromStartup()
    {
       FileManager *fm = FileManager::Instance();
       std::string potfile = GmatStringUtil::ToUpper(instanceName) + "_POT_FILE";
-      std::string filename = fm->GetFullPathname(potfile);
+      
+      // Use FileManager::FindPath() for potential file (LOJ: 2014.06.25)
+      //std::string filename = fm->GetFullPathname(potfile);
+      std::string filename = fm->FindPath("", potfile, true);
       
       #if DEBUG_CELESTIAL_BODY
       MessageInterface::ShowMessage
@@ -4385,17 +4403,20 @@ bool CelestialBody::DeterminePotentialFileNameFromStartup()
 bool CelestialBody::ReadPotentialFile()
 {
    if (potentialFileRead) return true;
-   if (potentialFileName == "") return false;
+   //if (potentialFileName == "") return false;
+   if (potentialFileNameFullPath == "") return false;
    
    Integer fileDeg, fileOrd;
    try
    {
-      if (!GravityFileUtil::GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
-                                    equatorialRadius))
+      //if (!GravityFileUtil::GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
+      if (!GravityFileUtil::GetFileInfo(potentialFileNameFullPath, fileDeg, fileOrd, mu,
+                                        equatorialRadius))
       {
          throw SolarSystemException
             ("Error reading mu and equatorial radius of " + instanceName
-             + " from "+ potentialFileName);
+             //+ " from "+ potentialFileName);
+             + " from "+ potentialFileNameFullPath);
       }
    }
    catch (BaseException &e)

@@ -434,6 +434,8 @@ protected:
    bool                     usePotentialFile;
    /// file name of the potential file to use
    std::string              potentialFileName;
+   /// full path file name of the potential file
+   std::string              potentialFileNameFullPath;
    /// angular velocity
    Rvector3                 angularVelocity;
    /// the hour angle 

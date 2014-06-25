@@ -2860,8 +2860,16 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
       obj->SetBody("Earth");
       obj->SetBodyName("Earth");
       
+      std::string potFile = GetFileName("JGM2_FILE");
+      #ifdef DEBUG_DEFAULT_PM
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultPhysicalModel() "
+          "calling %s->SetStringParameter(PotentialFile, %s)\n", obj->GetName().c_str(),
+          potFile.c_str());
+      #endif
+      
       if (type == "GravityField")
-         obj->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
+         obj->SetStringParameter("PotentialFile", potFile);
       
       // Manage it if it is a named PhysicalModel
       try
@@ -6282,7 +6290,9 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
 //------------------------------------------------------------------------------
 std::string Moderator::GetFileName(const std::string &fileType)
 {
-   return theFileManager->GetFullPathname(fileType);
+   // Changed to use FileManager::GetFileName() (LOJ: 2014.06.25)
+   //return theFileManager->GetFullPathname(fileType);
+   return theFileManager->GetFilename(fileType);
 }
 
 
@@ -6846,8 +6856,9 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       // GMAT working directory has script file
       std::string path = GmatFileUtil::ParsePathName(filename);
       
-      MessageInterface::ShowMessage
-         ("Setting '%s' as GMAT working directory\n", path.c_str());
+      if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+         MessageInterface::ShowMessage
+            ("*** Setting '%s' as GMAT working directory\n", path.c_str());
       
       theFileManager->SetGmatWorkingDirectory(path);
       if (theUiInterpreter != NULL)
