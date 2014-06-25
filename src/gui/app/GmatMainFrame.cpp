@@ -47,6 +47,7 @@
 #include "GmatBaseSetupPanel.hpp"
 #include "SpacecraftPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
+#include "PowerSystemConfigPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagatePanel.hpp"
@@ -3977,6 +3978,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       break;
    case GmatTree::THRUSTER:
       sizer->Add(new ThrusterConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::POWER_SYSTEM:
+      sizer->Add(new PowerSystemConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::HARDWARE:
       sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);

@@ -440,7 +440,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		MessageInterface::ShowMessage
 			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
 			"File to display=%s\n", theHelpController,
-			s);
+			s.c_str());
 		#endif
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
@@ -465,7 +465,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		#ifdef DEBUG_GMATPANEL
 		  MessageInterface::ShowMessage
 			 ("GmatPanel::OnHelp() Web Page=<%s>\n",
-			  s);
+			  s.c_str());
 		#endif
 
 		// if path is relative, try to append it to gmat root 

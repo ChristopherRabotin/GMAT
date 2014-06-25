@@ -53,6 +53,7 @@
 #include "CelestialBody.hpp"
 #include "Rvector6.hpp"
 #include "gmatdefs.hpp"
+#include "ShadowState.hpp"
 
 /** 
  * Solar radiation pressure model -- currently incomplete
@@ -155,6 +156,8 @@ protected:
             
    /// Pointer to the source of planetary ephemerides
    CelestialBody *theSun;
+   /// Pointer to the ShadowState
+   ShadowState   *shadowState;
 
    /// Flag used to indicate using an analytic model to locate the Sun
    bool useAnalytic;
@@ -226,8 +229,8 @@ protected:
    Integer areaID;
 
 
-   void     FindShadowState(bool &lit, bool &dark, Real *state);
-   Real     ShadowFunction(Real *state);
+//   void     FindShadowState(bool &lit, bool &dark, Real *state);
+//   Real     ShadowFunction(Real *state);
    Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
                                     Real *state, Real *cbSun);
 

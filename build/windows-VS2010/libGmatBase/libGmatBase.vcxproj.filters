@@ -1344,6 +1344,18 @@
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2644,6 +2656,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp">
       <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

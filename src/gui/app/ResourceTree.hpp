@@ -266,7 +266,7 @@ protected:
       POPUP_ADD_FORMATION,
       POPUP_ADD_CONSTELLATION,
 
-      POPUP_ADD_HARDWARE,
+      POPUP_ADD_HARDWARE,  // includes PowerSystem
       POPUP_ADD_THRUSTER,
       POPUP_ADD_FUELTANK,
 

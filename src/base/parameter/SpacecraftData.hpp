@@ -75,6 +75,11 @@ protected:
       C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14, C15, C16,
       K1, K2, K3, K4, K5, K6, K7, K8, K9, K10, K11, K12, K13, K14, K15, K16,
       THRUST_DIRECTION1, THRUST_DIRECTION2, THRUST_DIRECTION3,
+
+      // for Spacecraft-owned PowerSystem
+      TOTAL_POWER_AVAILABLE,
+      REQUIRED_BUS_POWER,
+      THRUST_POWER_AVAILABLE,
    };
    
    enum

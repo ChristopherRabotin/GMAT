@@ -134,6 +134,14 @@ Real SpacecraftData::GetReal(Integer item)
    case GRAVITATIONAL_ACCEL:
       return GetOwnedObjectProperty(Gmat::THRUSTER, "GravitationalAccel");
       
+   // for Spacecraft owned PowerSystem
+   case TOTAL_POWER_AVAILABLE:
+      return GetOwnedObjectProperty(Gmat::POWER_SYSTEM, "TotalPowerAvailable");
+   case REQUIRED_BUS_POWER:
+      return GetOwnedObjectProperty(Gmat::POWER_SYSTEM, "RequiredBusPower");
+   case THRUST_POWER_AVAILABLE:
+      return GetOwnedObjectProperty(Gmat::POWER_SYSTEM, "ThrustPowerAvailable");
+
    // Thrust Coefficients
    case C1:
       return GetOwnedObjectProperty(Gmat::THRUSTER, "C1");

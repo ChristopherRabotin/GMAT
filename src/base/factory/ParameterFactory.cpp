@@ -507,6 +507,14 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
        ofType == "ThrustDirection3")
       return new ThrustDirections(ofType, withName);
    
+   // PowerSystem parameters
+   if (ofType == "TotalPowerAvailable")
+      return new TotalPowerAvailable(withName);
+   if (ofType == "RequiredBusPower")
+      return new RequiredBusPower(withName);
+   if (ofType == "ThrustPowerAvailable")
+      return new ThrustPowerAvailable(withName);
+
    // add others here
    
    MessageInterface::ShowMessage
@@ -807,7 +815,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ThrustDirection1");
       creatables.push_back("ThrustDirection2");
       creatables.push_back("ThrustDirection3");
-   }
+
+      creatables.push_back("TotalPowerAvailable");
+      creatables.push_back("RequiredBusPower");
+      creatables.push_back("ThrustPowerAvailable");
+}
 }
 
 

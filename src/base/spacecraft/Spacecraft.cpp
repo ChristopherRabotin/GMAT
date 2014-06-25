@@ -76,6 +76,8 @@
 //#define DEBUG_MULTIMAP
 //#define DEBUG_SPAD_DATA
 //#define DEBUG_FILEPATH
+//#define DEBUG_DELETE_OWNED_OBJ
+//#define DEBUG_POWER_SYSTEM
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -121,6 +123,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // SRPArea
       Gmat::OBJECTARRAY_TYPE, // Tanks
       Gmat::OBJECTARRAY_TYPE, // Thrusters
+      Gmat::OBJECT_TYPE,      // PowerSystem
       Gmat::REAL_TYPE,        // TotalMass
       Gmat::STRING_TYPE,      // Id
       Gmat::OBJECT_TYPE,      // Attitude
@@ -176,6 +179,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "SRPArea",
       "Tanks",
       "Thrusters",
+      "PowerSystem",
       "TotalMass",
       "Id",
       "Attitude",
@@ -344,6 +348,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    spacecraftId         ("SatId"),
    attitudeModel        ("CoordinateSystemFixed"),
    attitude             (NULL),
+   powerSystemName      (""),
+   powerSystem          (NULL),
    totalMass            (850.0),
    initialDisplay       (false),
    csSet                (false),
@@ -506,7 +512,7 @@ Spacecraft::~Spacecraft()
    // Delete the attached hardware (it was set as clones in the ObjectInitializer)
    // It is not anymore setting the clone (LOJ: 2009.07.24)
    //@see ObjectInitializer::BuildAssociations()
-   DeleteOwnedObjects(true, true, true, true);
+   DeleteOwnedObjects(true, true, true, true, true);
 
    if (spadSRPReader)  delete spadSRPReader;
    if (spadBFCS)       delete spadBFCS;
@@ -568,6 +574,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spacecraftId         (a.spacecraftId),
    attitudeModel        (a.attitudeModel),
    coordConverter       (a.coordConverter),
+   powerSystemName      (a.powerSystemName),
+   powerSystem          (NULL),
    totalMass            (a.totalMass),
    initialDisplay       (false),
    csSet                (a.csSet),
@@ -610,7 +618,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //   hardwareList      = a.hardwareList;
 
    // set cloned hardware
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
    
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -679,6 +687,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    internalCoordSystem  = a.internalCoordSystem; // need to copy
    coordinateSystem     = a.coordinateSystem;    // need to copy
    coordConverter       = a.coordConverter;
+   powerSystemName      = a.powerSystemName;
    totalMass            = a.totalMass;
    initialDisplay       = false;
    csSet                = a.csSet;
@@ -720,14 +729,14 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to delete all owned objects\n");
       #endif
-   DeleteOwnedObjects(true, true, true, true);
+   DeleteOwnedObjects(true, true, true, true, true);
 
    // then cloned owned objects
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
    #endif
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
    
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -765,6 +774,7 @@ void Spacecraft::SetSolarSystem(SolarSystem *ss)
        GetName().c_str(), ss);
    #endif
    solarSystem = ss;
+   if (powerSystem) powerSystem->SetSolarSystem(ss);
 }
 
 
@@ -1275,6 +1285,8 @@ bool Spacecraft::RenameRefObject(const Gmat::ObjectType type,
             break;
          }
       }
+      if (powerSystemName == oldName)
+         powerSystemName = newName;
    }
    
    if (attitude)
@@ -1535,6 +1547,13 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
       // Add Spacecraft CS name
       fullList.push_back(coordSysName);
 
+      #ifdef DEBUG_POWER_SYSTEM
+            MessageInterface::ShowMessage("Pushing back powerSystemName (\"%s\") to fullList ......\n",
+                  powerSystemName.c_str());
+      #endif
+      // Add Spacecraft Power System name
+      fullList.push_back(powerSystemName);  // need to check power system for ref object names
+
       // Add Tank names
       fullList.insert(fullList.end(), tankNames.begin(), tankNames.end());
 
@@ -1630,6 +1649,17 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
          return tankNames;
       if (type == Gmat::THRUSTER)
          return thrusterNames;
+
+      if (type == Gmat::POWER_SYSTEM)
+      {
+         #ifdef DEBUG_POWER_SYSTEM
+               MessageInterface::ShowMessage("Pushing back powerSystemName (\"%s\") to POWER SYSTEM list ......\n",
+                     powerSystemName.c_str());
+         #endif
+         // Add Spacecraft Power System name
+         fullList.push_back(powerSystemName);  // need to check power system for ref object names
+         return fullList;
+      }
 
       if (type == Gmat::HARDWARE)
       {
@@ -1757,6 +1787,10 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
                 return *i;
           }
 
+      case Gmat::POWER_SYSTEM:
+         if (powerSystem && (powerSystemName == name))
+            return powerSystem;
+
       case Gmat::FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin();
               i < tanks.end(); ++i)
@@ -1804,6 +1838,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       ("Entering SC::SetRefObject <%p>'%s', obj=<%p><%s>'%s'\n", this, GetName().c_str(),
        obj, obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage("=-=-=-=-=-= at start of SetRefObject, powerSystem = <%p>\n", powerSystem);
    #endif
 
    if (obj == NULL)
@@ -1827,7 +1862,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
 
    // now work on hardware
-   if (type == Gmat::HARDWARE || type == Gmat::FUEL_TANK || type == Gmat::THRUSTER)
+   if (type == Gmat::HARDWARE || type == Gmat::FUEL_TANK || type == Gmat::THRUSTER ||
+       type == Gmat::POWER_SYSTEM)
    {
       #ifdef DEBUG_SC_REF_OBJECT
       MessageInterface::ShowMessage
@@ -1876,6 +1912,12 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          return retval;
       }
+
+      #ifdef DEBUG_POWER_SYSTEM
+         MessageInterface::ShowMessage("=-=-=-=-=-= NOW, checking for powerSystem = <%p>\n", powerSystem);
+      #endif
+      if (obj->IsOfType("PowerSystem"))
+         return SetPowerSystem(obj, powerSystemName);
 
       // set on hardware
       if (obj->GetType() == Gmat::HARDWARE)
@@ -2095,6 +2137,9 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    MessageInterface::ShowMessage
       ("Exiting SC::SetRefObject, Calling SpaceObject::SetRefObject()\n");
    #endif
+   #ifdef DEBUG_POWER_SYSTEM
+      MessageInterface::ShowMessage("=-=-=-=-=-= EXITING SetRefObject, powerSystem = <%p>\n", powerSystem);
+   #endif
 
    return SpaceObject::SetRefObject(obj, type, name);
 }
@@ -2119,6 +2164,12 @@ ObjectArray& Spacecraft::GetRefObjectArray(const Gmat::ObjectType type)
       return tanks;
    if (type == Gmat::THRUSTER)
       return thrusters;
+   if (type == Gmat::POWER_SYSTEM)
+   {
+      static ObjectArray powerSysList;
+      powerSysList.push_back(powerSystem);
+      return powerSysList;
+   }
    return SpaceObject::GetRefObjectArray(type);
 }
 
@@ -2142,6 +2193,12 @@ ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
       return tanks;
    if ((typeString == "Thruster") || (typeString == "Thrusters"))
       return thrusters;
+   if ((typeString == "PowerSystem") || (typeString == "PowerSystems"))
+   {
+      static ObjectArray powerSysList;
+      powerSysList.push_back(powerSystem);
+      return powerSysList;
+   }
    return SpaceObject::GetRefObjectArray(typeString);
 }
 
@@ -3158,6 +3215,9 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     if (id == MODEL_FILE_FULL_PATH)
        return modelFileFullPath;
 
+    if (id == POWER_SYSTEM_ID)
+       return powerSystemName;
+
     return SpaceObject::GetStringParameter(id);
 }
 
@@ -3515,6 +3575,14 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       {
          thrusterNames.push_back(value);
       }
+   }
+   else if (id == POWER_SYSTEM_ID)
+   {
+      #ifdef DEBUG_POWER_SYSTEM
+            MessageInterface::ShowMessage("powerSystemName being set to %s......\n",
+                  value.c_str());
+      #endif
+      powerSystemName = value;
    }
    else if (id == SPAD_SRP_FILE)
    {
@@ -3901,21 +3969,31 @@ bool Spacecraft::TakeAction(const std::string &action,
    }
 
    if ((action == "RemoveHardware") || (action == "RemoveTank") ||
-       (action == "RemoveThruster"))
+       (action == "RemoveThruster") || (action == "RemovePowerSystem"))
    {
-      bool removeTank = true, removeThruster = true, removeAll = false;
+      bool removeTank     = true, removeThruster = true;
+      bool removePowerSys = true, removeAll      = false;
       if (action == "RemoveTank")
          removeThruster = false;
       if (action == "RemoveThruster")
          removeTank = false;
+      if (action == "RemovePowerSystem")
+         removePowerSys = true;
       if (actionData == "")
          removeAll = true;
+
+      if (removePowerSys)
+      {
+         DeleteOwnedObjects(false, false, false, true, false);
+         powerSystem = NULL;
+//         powerSystemName = "";   // Is this correct?
+      }
 
       if (removeThruster)
       {
          if (removeAll)
          {
-            DeleteOwnedObjects(false, false, true, false);
+            DeleteOwnedObjects(false, false, true, false, false);
             thrusters.clear();
             thrusterNames.clear();
          }
@@ -3945,7 +4023,7 @@ bool Spacecraft::TakeAction(const std::string &action,
       {
          if (removeAll)
          {
-            DeleteOwnedObjects(false, true, true, false);
+            DeleteOwnedObjects(false, true, true, false, false);
             tanks.clear();
             tankNames.clear();
          }
@@ -4202,6 +4280,8 @@ Gmat::ObjectType Spacecraft::GetPropertyObjectType(const Integer id) const
       return Gmat::FUEL_TANK;
    case THRUSTER_ID:
       return Gmat::THRUSTER;
+   case POWER_SYSTEM_ID:
+      return Gmat::POWER_SYSTEM;
    default:
       return SpaceObject::GetPropertyObjectType(id);
    }
@@ -4402,6 +4482,8 @@ bool Spacecraft::Initialize()
          //       thrusters[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          thrusters[i]->Initialize();
       }
+
+      if (powerSystem) powerSystem->Initialize();
 
       isInitialized = true;
       retval = true;
@@ -4899,6 +4981,17 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
    {
       Gmat::ObjectType objType = obj->GetType();
 
+      // updates for PowerSystem
+      if (objType == Gmat::POWER_SYSTEM)
+      {
+         if (powerSystem && (obj->GetName() == powerSystemName))
+         {
+            powerSystem->operator=((*(PowerSystem*) obj));
+            if (isInitialized)
+               isInitialized = powerSystem->IsInitialized();
+         }
+      }
+
       // updates for fueltank
       if (objType == Gmat::FUEL_TANK)
       {
@@ -5001,6 +5094,11 @@ void Spacecraft::UpdateClonedObjectParameter(GmatBase *obj,
          for (UnsignedInt i = 0; i < thrusters.size(); ++i)
             if (obj->GetName() == thrusters[i]->GetName())
                theClone = thrusters[i];
+
+      // updates for Power System
+      if (objType == Gmat::POWER_SYSTEM)
+         if (powerSystem && (obj->GetName() == powerSystemName))
+            theClone = powerSystem;
 
       // updates for other hardware
       if (objType == Gmat::HARDWARE)
@@ -5177,21 +5275,24 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
 
 
 //------------------------------------------------------------------------------
-// void DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks, bool deleteThrusters)
+// void DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks, bool deleteThrusters,
+//                         bool deletePowerSystem, bool otherHardware)
 //------------------------------------------------------------------------------
 /*
- * Deletes owned objects, such as attitude, tanks, and thrusters
+ * Deletes owned objects, such as attitude, tanks, and thrusters, and power system(s)
  */
 //------------------------------------------------------------------------------
-void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
-                                    bool deleteThrusters, bool otherHardware)
+void Spacecraft::DeleteOwnedObjects(bool deleteAttitude,  bool deleteTanks,
+                                    bool deleteThrusters, bool deletePowerSystem,
+                                    bool otherHardware)
 {
    #ifdef DEBUG_DELETE_OWNED_OBJ
    MessageInterface::ShowMessage
       ("Spacecraft::DeleteOwnedObjects() <%p>'%s' entered, deleteAttitude=%d, "
-       "deleteTanks=%d, deleteThrusters=%d, otherHardware=%d\n", this,
-       GetName().c_str(), deleteAttitude, deleteTanks, deleteThrusters,
+       "deleteTanks=%d, deleteThrusters=%d, deletePowerSystem =%d, otherHardware=%d\n", this,
+       GetName().c_str(), deleteAttitude, deleteTanks, deleteThrusters, deletePowerSystem,
        otherHardware);
+   MessageInterface::ShowMessage(" **** Entering DeleteOwnedObjects,  powerSystem is <%p>\n", powerSystem);
    #endif
 
    // delete attitude
@@ -5207,6 +5308,25 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
          delete attitude;
          attitude = NULL;
          ownedObjectCount--;
+         #ifdef DEBUG_SC_OWNED_OBJECT
+         MessageInterface::ShowMessage
+            ("Spacecraft::DeleteOwnedObjects() <%p>'%s' deleted attitude, ownedObjectCount=%d\n",
+             this, GetName().c_str(), ownedObjectCount);
+         #endif
+      }
+   }
+   // delete power system
+   if (deletePowerSystem)
+   {
+      if (powerSystem)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (powerSystem, "powerSystem", "Spacecraft::DeleteOwnedObjects()",
+             "deleting powerSystem of " + GetName(), this);
+         #endif
+         delete powerSystem;
+         powerSystem = NULL;
          #ifdef DEBUG_SC_OWNED_OBJECT
          MessageInterface::ShowMessage
             ("Spacecraft::DeleteOwnedObjects() <%p>'%s' ownedObjectCount=%d\n",
@@ -5266,24 +5386,26 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
       ("Spacecraft::DeleteOwnedObjects() <%p>'%s' leaving, tanks.size()=%d, "
        "thrusters.size()=%d, hardwareLise.size()=%d\n", this, GetName().c_str(),
        tanks.size(), thrusters.size(), hardwareList.size());
+   MessageInterface::ShowMessage(" **** Exiting DeleteOwnedObjects,  powerSystem is <%p>\n", powerSystem);
    #endif
 }
 
 
 //------------------------------------------------------------------------------
-// void CloneOwnedObjects(Attitude *att, const ObjectArray &tnks, const ObjectArray &thrs)
+// void CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
+//                        const ObjectArray &thrs, PowerSystem *pwrSys)
 //------------------------------------------------------------------------------
 /*
  * Clones input tanks and thrusters set as attached hardware.
  */
 //------------------------------------------------------------------------------
 void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                   const ObjectArray &thrs)
+                                   const ObjectArray &thrs, PowerSystem *pwrSys)
 {
    #ifdef DEBUG_OBJ_CLONE
    MessageInterface::ShowMessage
-      ("Spacecraft::CloneOwnedObjects() <%p>'%s' entered, att=<%p>, tank count = %d,"
-       " thruster count = %d\n", this, GetName().c_str(), att, tnks.size(), thrs.size());
+      ("Spacecraft::CloneOwnedObjects() <%p>'%s' entered, att=<%p>, powerSystem <%p>, tank count = %d,"
+       " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
    #endif
 
 
@@ -5321,6 +5443,25 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
          (attitude, "cloned attitude", "Spacecraft::CloneOwnedObjects()",
           "attitude = (Attitude*) att->Clone()", this);
       #endif
+   }
+
+   // handle power system
+   if (pwrSys)
+   {
+      GmatBase *clonedPwrSys = pwrSys->Clone();
+      if (clonedPwrSys)
+      {
+         #ifdef DEBUG_SC_OWNED_OBJECT
+         MessageInterface::ShowMessage
+            ("Spacecraft::CloneOwnedObjects() cloning power system <%p>", pwrSys);
+         #endif
+         if (powerSystem) delete powerSystem;
+         powerSystem = NULL;
+         powerSystem = (PowerSystem*) clonedPwrSys;
+         powerSystem->SetSolarSystem(solarSystem);
+         powerSystem->SetSpacecraft(this);
+         powerSystemName = powerSystem->GetName();
+      }
    }
 
    // handle tanks
@@ -5378,6 +5519,11 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
       #endif
       AttachTanksToThrusters();
    }
+   #ifdef DEBUG_OBJ_CLONE
+   MessageInterface::ShowMessage
+      ("Spacecraft::CloneOwnedObjects() <%p>'%s' EXITING, att=<%p>, powerSystem <%p>, tank count = %d,"
+       " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
+   #endif
 }
 
 
@@ -5590,6 +5736,41 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool SetPowerSystem(GmatBase *obj, std::string &psName)
+//------------------------------------------------------------------------------
+bool Spacecraft::SetPowerSystem(GmatBase *obj, std::string &psName)
+{
+   #ifdef DEBUG_POWER_SYSTEM
+      MessageInterface::ShowMessage("Entering SetPowerSystem with obj <%p> and name %s\n",
+            obj, psName.c_str());
+   #endif
+   if (powerSystem != (PowerSystem*) obj)
+   {
+      if (powerSystemName == psName)
+      {
+         if (powerSystem) delete powerSystem;
+         powerSystem = (PowerSystem*) obj->Clone();
+         powerSystem->SetSolarSystem(solarSystem);
+         powerSystem->SetSpacecraft(this);
+      }
+      else
+      {
+         #ifdef DEBUG_SC_REF_OBJECT
+         MessageInterface::ShowMessage
+            ("   The name '%s' not found in list\n", psName.c_str());
+         #endif
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_SC_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("   The same %s <%p> found in pointer list\n", psName.c_str());
+      #endif
+   }
+   return true;    // or false?
+}
 
 //------------------------------------------------------------------------------
 // const std::string&  GetGeneratingString(Gmat::WriteMode mode,
@@ -5737,6 +5918,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = SRP_AREA_ID;
    parmOrder[parmIndex++] = FUEL_TANK_ID;
    parmOrder[parmIndex++] = THRUSTER_ID;
+   parmOrder[parmIndex++] = POWER_SYSTEM_ID;
    parmOrder[parmIndex++] = ORBIT_STM;
    parmOrder[parmIndex++] = ORBIT_A_MATRIX;
    parmOrder[parmIndex++] = ELEMENT1UNIT_ID;

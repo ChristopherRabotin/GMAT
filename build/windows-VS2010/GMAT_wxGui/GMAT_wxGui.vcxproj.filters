@@ -528,6 +528,12 @@
     <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
       <Filter>Source Files\view</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -994,6 +1000,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
       <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp">
+      <Filter>Source Files\hardware</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

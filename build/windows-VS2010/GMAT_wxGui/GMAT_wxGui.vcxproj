@@ -267,6 +267,7 @@
     <ClCompile Include="..\..\..\src\gui\function\FunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
@@ -308,6 +309,7 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
@@ -470,6 +472,7 @@
     <ClInclude Include="..\..\..\src\gui\function\FunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\include\ddesetup.hpp" />
@@ -514,6 +517,7 @@
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />

@@ -1536,7 +1536,7 @@ const StringArray& Moderator::GetListOfObjects(const std::string &typeName,
 //------------------------------------------------------------------------------
 GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 {
-   #if DEBUG_CONFIG
+   #ifdef DEBUG_CONFIG
    MessageInterface::ShowMessage
       ("Moderator::GetConfiguredObject() entered: name=%s\n", name.c_str());
    #endif
@@ -1553,7 +1553,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    {
       newName = name.substr(0, index);
       
-      #if DEBUG_CONFIG
+      #ifdef DEBUG_CONFIG
       MessageInterface::ShowMessage
          ("Moderator::GetConfiguredObject() entered: newName=%s\n", newName.c_str());
       #endif
@@ -1573,7 +1573,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
          obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
    }
    
-   #if DEBUG_CONFIG
+   #ifdef DEBUG_CONFIG
    if (obj)
    {
       MessageInterface::ShowMessage
@@ -6721,6 +6721,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    SetSolarSystemAndObjectMap(theSolarSystemInUse, objectMapInUse, false,
                               "RunMission()");
    
+
    return status;
 } // RunMission()
 
@@ -8082,6 +8083,11 @@ void Moderator::CreateDefaultParameters()
    // can handle it (LOJ: 2012.06.11)
    //if (GmatGlobal::Instance()->IsWritingParameterInfo())
    //{
+      // PowerSystem Parameters
+      CreateParameter("TotalPowerAvailable", "DefaultSC.DefaultSolarPowerSystem.TotalPowerAvailable");
+      CreateParameter("RequiredBusPower", "DefaultSC.DefaultSolarPowerSystem.RequiredBusPower");
+      CreateParameter("ThrustPowerAvailable", "DefaultSC.DefaultSolarPowerSystem.ThrustPowerAvailable");
+
       // FuelTank Parameters
       CreateParameter("FuelMass", "DefaultSC.DefaultFuelTank.FuelMass");
       CreateParameter("Volume", "DefaultSC.DefaultFuelTank.Volume");

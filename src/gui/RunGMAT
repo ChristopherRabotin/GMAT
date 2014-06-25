@@ -1,5 +1,10 @@
 #!/bin/bash
 # Sets up the environment for GMAT, then runs the executable.
+#
+#  Copyright (c) 2002-2014 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+#
 # This assumes that the user has set the MATLAB_APP_PATH in her/his gmat_startup_file.txt file and that
 # the gmat_startup_file.txt resides in the bin folder where the GMAT.app bundle resides.
 # MATLAB_APP_PATH should point to the MATLAB app in the directory where MATLAB has been installed, e.g.

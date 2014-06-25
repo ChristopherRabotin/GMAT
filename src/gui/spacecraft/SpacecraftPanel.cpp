@@ -174,6 +174,13 @@ void SpacecraftPanel::Create()
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   ThrusterPanel created\n");
    #endif
+
+   thePwrSysPanel = new PowerSystemPanel
+      (this, spacecraftNotebook, currentSpacecraft);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   PwrSysPanel created\n");
+   #endif
+
    #ifdef __USE_SPICE__
       theSpicePanel = new SpicePanel
          (this, spacecraftNotebook, currentSpacecraft);
@@ -192,6 +199,7 @@ void SpacecraftPanel::Create()
    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
 //   spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
    spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
+   spacecraftNotebook->AddPage( thePwrSysPanel, wxT("Power System") );
    #ifdef __USE_SPICE__
       spacecraftNotebook->AddPage( theSpicePanel, wxT("SPICE") );
    #endif
@@ -224,6 +232,7 @@ void SpacecraftPanel::LoadData()
       theAttitudePanel->LoadData();
       theBallisticMassPanel->LoadData();
       theTankPanel->LoadData();
+      thePwrSysPanel->LoadData();
       #ifdef __USE_SPICE__
          theSpicePanel->LoadData();
       #endif
@@ -309,6 +318,9 @@ void SpacecraftPanel::SaveData()
    if (theThrusterPanel->IsDataChanged())
       theThrusterPanel->SaveData();
    
+   if (thePwrSysPanel->IsDataChanged())
+      thePwrSysPanel->SaveData();
+
    // copy the current info into theSpacecraft
    theSpacecraft->Copy(currentSpacecraft);
    #ifdef DEBUG_SPACECRAFT_CLONE_AND_COPY
@@ -334,6 +346,7 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
    theTankPanel->LoadData();
    theThrusterPanel->LoadData();
    theAttitudePanel->LoadData();
+   thePwrSysPanel->LoadData();
    #ifdef __USE_SPICE__
       theSpicePanel->LoadData();
    #endif

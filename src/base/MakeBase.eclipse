@@ -328,6 +328,9 @@ OBJECTS = \
     hardware/FuelTank.o \
     hardware/HardwareException.o \
     hardware/Hardware.o \
+    hardware/NuclearPowerSystem.o \
+    hardware/PowerSystem.o \
+    hardware/SolarPowerSystem.o \
     hardware/Thruster.o \
     interface/InterfaceException.o \
     interface/Interface.o \
@@ -479,6 +482,7 @@ OBJECTS = \
     solarsys/PlanetaryEphemException.o \
     solarsys/PlanetaryEphem.o \
     solarsys/Planet.o \
+    solarsys/ShadowState.o \
     solarsys/SlpFile.o \
     solarsys/SolarFluxFileReader.o \
     solarsys/SolarSystemException.o \

@@ -19,6 +19,7 @@
  *              FuelDensity,
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
  *              K1-K16, ThrustDirections
+ *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------
 #ifndef HardwareParameters_hpp
@@ -274,6 +275,72 @@ public:
 protected:
    Integer mThrustDirectionId;
    
+};
+
+class GMAT_API TotalPowerAvailable : public HardwareReal
+{
+public:
+
+   TotalPowerAvailable(const std::string &name = "",
+                       GmatBase *obj = NULL);
+   TotalPowerAvailable(const TotalPowerAvailable &copy);
+   TotalPowerAvailable& operator=(const TotalPowerAvailable &right);
+   virtual ~TotalPowerAvailable();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+   Integer mTotalPowerId;
+
+};
+
+class GMAT_API RequiredBusPower : public HardwareReal
+{
+public:
+
+   RequiredBusPower(const std::string &name = "",
+                    GmatBase *obj = NULL);
+   RequiredBusPower(const RequiredBusPower &copy);
+   RequiredBusPower& operator=(const RequiredBusPower &right);
+   virtual ~RequiredBusPower();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+   Integer mRequiredBusPowerId;
+
+};
+
+class GMAT_API ThrustPowerAvailable : public HardwareReal
+{
+public:
+
+   ThrustPowerAvailable(const std::string &name = "",
+                        GmatBase *obj = NULL);
+   ThrustPowerAvailable(const ThrustPowerAvailable &copy);
+   ThrustPowerAvailable& operator=(const ThrustPowerAvailable &right);
+   virtual ~ThrustPowerAvailable();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   virtual void SetReal(Real val);
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone() const;
+
+protected:
+   Integer mThrustPowerId;
+
 };
 
 #endif //HardwareParameters_hpp
