@@ -28,11 +28,15 @@
 //#include "SinglePointSignal.hpp"
 #include "ObservationData.hpp"
 
+#include "PropSetup.hpp"
+#include "ODEModel.hpp"
+#include "Propagator.hpp"
 #include "MessageInterface.hpp"
 #include "TextParser.hpp"
 #include <sstream>
 
-//#define DEBUG_INITIALIZATION
+#define DEBUG_INITIALIZATION
+#define DEBUG_LIGHTTIME
 
 //------------------------------------------------------------------------------
 // Static data
@@ -64,9 +68,9 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const std::string &name) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
-   propagator        (NULL),
    feasible          (false),
    withLighttime     (true),
+   propsNeedInit     (false),          // Only need init if one is set
    navLog            (NULL),
    logLevel          (0),              // Default to everything
    isPhysical        (true),
@@ -84,6 +88,10 @@ MeasureModel::MeasureModel(const std::string &name) :
 //------------------------------------------------------------------------------
 MeasureModel::~MeasureModel()
 {
+   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
+         i != propMap.end(); ++i)
+      if (i->second != NULL)
+         delete i->second;
 }
 
 
@@ -98,9 +106,9 @@ MeasureModel::~MeasureModel()
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const MeasureModel& mm) :
    GmatBase          (mm),
-   propagator        (NULL),
    feasible          (false),
    withLighttime     (mm.withLighttime),
+   propsNeedInit     (false),
    navLog            (mm.navLog),
    logLevel          (mm.logLevel),
    isPhysical        (mm.isPhysical),
@@ -127,14 +135,24 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
-      if (propagator)
-         propagator = NULL;
       feasible = false;
       withLighttime = mm.withLighttime;
       navLog = mm.navLog;
       logLevel = mm.logLevel;
       isPhysical = mm.isPhysical;
       solarsys = mm.solarsys;
+
+      for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
+            i != propMap.end(); ++i)
+      {
+         if (i->second != NULL)
+         {
+            delete i->second;
+            i->second = NULL;
+         }
+      }
+      propMap.clear();
+      propsNeedInit = false;
    }
 
    return *this;
@@ -640,6 +658,13 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
+      // Put the object into the map
+      if (propMap.find((SpacePoint*)obj) == propMap.end())
+      {
+         // Save a place for the propagator clone for this object
+         propMap[(SpacePoint*)obj] = NULL;
+      }
+
       if (find(candidates.begin(), candidates.end(), obj) ==
             candidates.end())
       {
@@ -673,11 +698,31 @@ void MeasureModel::SetPropagator(PropSetup* ps)
       MessageInterface::ShowMessage("Setting propagator to %p in "
             "MeasureModel\n", ps);
    #endif
-   propagator = ps;
 
-   if (propagator)
-      for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
-         signalPaths[i]->SetPropagator(propagator);
+   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
+         i != propMap.end(); ++i)
+   {
+      SpacePoint *obj = i->first;
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("   Mapping a propagator for %s...",
+               obj->GetName().c_str());
+      #endif
+      if (obj->IsOfType(Gmat::SPACEOBJECT))
+      {
+         // Clone the propagator for each SpaceObject
+         PropSetup *propagator = (PropSetup*)ps->Clone();
+         if (propagator)
+         {
+            propMap[obj] = propagator;
+            propsNeedInit = true;
+            for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+               signalPaths[i]->SetPropagator(propagator, obj);
+         }
+      }
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("set to %p\n", propMap[obj]);
+      #endif
+   }
 }
 
 
@@ -802,8 +847,9 @@ bool MeasureModel::Initialize()
                         throw MeasurementException("Failed to set the transmit "
                               "participant");
                      else
-                        if (obj->IsOfType(Gmat::SPACEOBJECT) && propagator)
-                           sb->SetPropagator(propagator, obj);
+                        if (obj->IsOfType(Gmat::SPACEOBJECT) &&
+                              propMap[(SpacePoint*)obj])
+                           sb->SetPropagator(propMap[(SpacePoint*)obj], obj);
 
                      obj = participants[i]->at(j+1);
                      if (sb->SetRefObject(obj, obj->GetType(),
@@ -811,8 +857,9 @@ bool MeasureModel::Initialize()
                         throw MeasurementException("Failed to set the receive "
                               "participant\n");
                      else
-                        if (obj->IsOfType(Gmat::SPACEOBJECT) && propagator)
-                           sb->SetPropagator(propagator, obj);
+                        if (obj->IsOfType(Gmat::SPACEOBJECT) &&
+                              propMap[(SpacePoint*)obj])
+                           sb->SetPropagator(propMap[(SpacePoint*)obj], obj);
 
                      if (!sb->Initialize())
                      {
@@ -947,18 +994,83 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    bool retval = false;
    feasible = true;
 
+   if (propsNeedInit)
+      PrepareToPropagate();
+
    /// @todo Clean up the assumption that epoch is at the end
    // For now, measurement epochs occur at the end of the signal path (the last
    // receiver)
    bool epochIsAtEnd = true;
 
+   // Find the measurement epoch needed for the computation
+   GmatEpoch forEpoch;
+   if (forObservation)
+      forEpoch = forObservation->epoch;
+   else // Grab epoch from the first SpaceObject in the participant data
+   {
+      for (UnsignedInt i = 0; i < candidates.size(); ++i)
+      {
+         if (candidates[i]->IsOfType(Gmat::SPACEOBJECT))
+         {
+            forEpoch = ((SpaceObject*)candidates[i])->GetEpoch();
+            break;
+         }
+      }
+   }
+
+   // Synchronize the propagators to the measurement epoch by propagating each
+   // spacecraft that is off epoch to that epoch
+   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
+         i != propMap.end(); ++i)
+   {
+      if (i->first->IsOfType(Gmat::SPACEOBJECT) && (i->second != NULL))
+      {
+         GmatEpoch satTime = ((SpaceObject*)i->first)->GetEpoch();
+         Real dt = (forEpoch - satTime) * GmatTimeConstants::SECS_PER_DAY;
+
+         #ifdef DEBUG_EXECUTION
+            MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
+                  "dt = %le\n", forEpoch, satTime, dt);
+         #endif
+
+         // Make sure the propagators are set to the spacecraft data
+         Propagator *prop = i->second->GetPropagator();
+         prop->UpdateFromSpaceObject();
+
+         if (dt != 0.0)
+         {
+            retval = prop->Step(dt);
+            if (retval == false)
+               MessageInterface::ShowMessage("MeasureModel Failed to step\n");
+         }
+      }
+   }
+
+   // Calculate the measurement data ("C" value data) for the signal paths
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
-      GmatEpoch forEpoch = 0.0;
-      if (forObservation)
-         forEpoch = forObservation->epoch;
-
       SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
+
+      SignalData *sd = &(startSignal->GetSignalData());
+      // Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
+      // data to the state known in the PropSetup for the starting Signal
+      sd->tTime = sd->rTime = forEpoch;
+      if (sd->tNode->IsOfType(Gmat::SPACECRAFT))
+      {
+         const Real* propState =
+               propMap[sd->tNode]->GetPropagator()->AccessOutState();
+         Rvector6 state(propState);
+         sd->tLoc = state.GetR();
+         sd->tVel = state.GetV();
+      }
+      if (sd->rNode->IsOfType(Gmat::SPACECRAFT))
+      {
+         const Real* propState =
+               propMap[sd->rNode]->GetPropagator()->AccessOutState();
+         Rvector6 state(propState);
+         sd->rLoc = state.GetR();
+         sd->rVel = state.GetV();
+      }
 
       #ifdef DEBUG_EXECUTION
          MessageInterface::ShowMessage("***************************************"
@@ -1053,4 +1165,70 @@ const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
 void MeasureModel::UsesLightTime(const bool tf)
 {
    withLighttime = tf;
+}
+
+
+//------------------------------------------------------------------------------
+// void PrepareToPropagate()
+//------------------------------------------------------------------------------
+/**
+ * Prepares the propagators used in light time solution computations
+ */
+//------------------------------------------------------------------------------
+void MeasureModel::PrepareToPropagate()
+{
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("Called SignalBase::PrepareToPropagate()\n");
+   #endif
+
+   // Set propagators for spacecraft and formations only
+   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
+         i != propMap.end(); ++i)
+   {
+      PropSetup *tProp = i->second;
+      if ((i->first->IsOfType(Gmat::SPACEOBJECT)) && (tProp != NULL))
+      {
+         Propagator *prop = tProp->GetPropagator();
+         ODEModel *ode = tProp->GetODEModel();
+         PropagationStateManager *psm = tProp->GetPropStateManager();
+
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("Integrator for %s has address "
+                  "<%p>\n", i->first->GetName().c_str(), prop);
+            MessageInterface::ShowMessage("ODEModel has address <%p>\n",
+                  ode);
+            MessageInterface::ShowMessage("PropSetup:\n***********************"
+                  "*************************************************\n%s\n"
+                  "***********************************************************"
+                  "*************\n",
+                  tProp->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         #endif
+
+         ObjectArray objects;
+         objects.push_back(i->first);
+
+         psm->SetObject(i->first);
+         psm->SetProperty("CartesianState");
+         psm->BuildState();
+         psm->MapObjectsToVector();
+
+         ode->SetState(psm->GetState());
+         ode->SetSolarSystem(solarsys);
+
+         prop->SetPhysicalModel(ode);
+         prop->Initialize();
+
+         ode->SetPropStateManager(psm);
+         if (ode->BuildModelFromMap() == false)
+            throw MeasurementException("Unable to assemble the ODE model for " +
+                  tProp->GetName());
+         prop->Update(true);
+
+         if (ode->SetupSpacecraftData(&objects, 0) <= 0)
+            throw MeasurementException("Propagate::Initialize -- "
+                  "ODE model for Signal cannot set spacecraft parameters");
+      }
+   }
+
+   propsNeedInit = false;
 }

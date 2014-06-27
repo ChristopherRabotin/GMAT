@@ -157,6 +157,10 @@ protected:
    std::vector<StringArray*> participantLists;
    /// Participant pointers.  This list is 1:1 with participantList
    std::vector<ObjectArray*> participants;
+
+   /// @todo: Extend this code to support multiple propagators
+   /// Mapping of participants to (cloned) propagators
+   std::map<SpacePoint*,PropSetup*> propMap;
    /// Collection of the potential participants
    ObjectArray candidates;
    /// The list of Signals, path by path
@@ -165,13 +169,15 @@ protected:
    std::vector<SignalData*> theData;
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
-   /// @todo: Extend this code to support multiple propagators
-   /// The propagator used for light time solutions
-   PropSetup *propagator;
+//   /// @todo: Extend this code to support multiple propagators
+//   /// The propagator used for light time solutions
+//   PropSetup *propagator;
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
    /// Flag used to control light time solution generation
    bool withLighttime;
+   /// Flag used to indicate that teh propagators need initialization
+   bool propsNeedInit;
 
    /// The reporter for status information
    ProgressReporter *navLog;
@@ -197,7 +203,7 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[MeasurementParamCount -
                                                    GmatBaseParamCount];
 
-//   StringArray* DecomposePathString(const std::string &value);
+   void PrepareToPropagate();
 };
 
 #endif /* MeasureModel_hpp */

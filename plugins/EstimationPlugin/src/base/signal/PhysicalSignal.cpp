@@ -27,6 +27,7 @@
 
 
 //#define DEBUG_EXECUTION
+//#define DEBUG_LIGHTTIME
 //#define SHOW_DATA
 
 
@@ -142,6 +143,26 @@ void PhysicalSignal::InitializeSignal()
 /**
  * Models the signal
  *
+ * The call here requires that the raw data in the measurement data is set
+ * correctly when the call is made.  Specifically, the call into this method
+ * Requires the following setup prior to the call (a t prefix refers to the
+ * signal transmitting participant; r to the signal receiving participant):
+ *
+ *    theData.tTime: For Spacecraft, set to the epoch matching the state known
+ *                   in the associated propagator.  For groundstations, set to
+ *                   the epoch of the receiver.  Station to station signals are
+ *                   not supported (unless this piece is changed)
+ *
+ *    theData.rTime: For Spacecraft, set to the epoch matching the state known
+ *                   in the associated propagator.  For groundstations, set to
+ *                   the epoch of the receiver.  Station to station signals are
+ *                   not supported (unless this piece is changed)
+ *
+ * The data needed in theData.tLoc, theData.tVel, theData.rLoc, and theData.rVel
+ * are populated during execution of this method.
+ *
+ * @param atEpoch The base epoch of the signal.  This is the epoch at the node
+ *                selected by epochAtReceive.
  * @param epochAtReceive true if the receive node is fixed in time, false if the
  *                       transmit node is fixed
  *
@@ -156,43 +177,14 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", atEpoch,
             epochAtReceive ? "with fixed Receiver" : "with fixed Transmitter");
-   #endif
 
-   #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Modeling %s -> %s\n",
             theData.transmitParticipant.c_str(),
             theData.receiveParticipant.c_str());
-   #endif
 
-   bool foundSat = false;
-   if (theData.tNode->IsOfType(Gmat::SPACECRAFT))
-   {
-      theData.tTime = theData.tNode->GetRealParameter(satEpochID);
-      foundSat = true;
-   }
-
-   if (theData.rNode->IsOfType(Gmat::SPACECRAFT))
-   {
-      theData.rTime = theData.rNode->GetRealParameter(satEpochID);
-      foundSat = true;
-      if (!theData.tNode->IsOfType(Gmat::SPACECRAFT))
-         theData.tTime = theData.rTime;
-   }
-   else
-      theData.rTime = theData.tTime;
-
-   if (satEpoch == 0.0)
-      satEpoch = (epochAtReceive ? theData.rTime : theData.tTime);
-
-   #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("tTime = %.12lf, rTime = %.12lf satEpoch = "
             "%.12lf\n", theData.tTime, theData.rTime, satEpoch);
    #endif
-
-   if (!foundSat)
-         throw MeasurementException("Error in CoreMeasurement::"
-               "CalculateRangeVectorInertial; neither participant is a "
-               "spacecraft.");
 
    if (!isInitialized)
    {
@@ -209,7 +201,7 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       #endif
 
       // First make sure we start at the desired epoch
-      MoveToEpoch(satEpoch, epochAtReceive);
+      MoveToEpoch(satEpoch, epochAtReceive, true);
       CalculateRangeVectorInertial();
 
       if (includeLightTime)
@@ -288,7 +280,6 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
          navLog->WriteData(data.str());
       }
 
-      /// @todo: check ordering here!
       // if epoctAtReceive was true, transmitter moved and we need its epoch,
       // if false, we need the receiver epoch
       GmatEpoch nextEpoch = (epochAtReceive ? theData.tTime : theData.rTime);
@@ -301,12 +292,20 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       if (epochAtReceive)
       {
          if (previous)
+         {
+            /// @todo: If there is a transponder delay, apply it here, moving
+            /// nextEpoch back by the delay time
             nodePassed = previous->ModelSignal(nextEpoch, nextFixed);
+         }
       }
       else
       {
          if (next)
+         {
+            /// @todo: If there is a transponder delay, apply it here, moving
+            /// nextEpoch ahead by the delay time
             nodePassed = next->ModelSignal(nextEpoch, nextFixed);
+         }
       }
 
       retval = nodePassed;
@@ -513,7 +512,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
    if (includeLightTime)
    {
       // First make sure we start at the desired epoch
-      MoveToEpoch(atEpoch, epochAtReceive);
+      MoveToEpoch(atEpoch, epochAtReceive, true);
 
       // Then compute the initial data
       Rvector3 displacement = theData.rLoc - theData.tLoc;
@@ -548,8 +547,9 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
                   loopCount);
          #endif
          MoveToEpoch(atEpoch + deltaT / GmatTimeConstants::SECS_PER_DAY,
-               epochAtReceive, false);
-         deltaE = (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
+               !epochAtReceive, false);
+         deltaE = (epochAtReceive ? -1.0 : 1.0) *
+               (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
          displacement = theData.rLoc - theData.tLoc;
 
          #ifdef DEBUG_LIGHTTIME
@@ -563,7 +563,8 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
                      (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
          #ifdef DEBUG_LIGHTTIME
             MessageInterface::ShowMessage("      ===> dEpoch = %.12le, dR = "
-                  "%.3lf, dT = %.12le\n", deltaE, deltaR, deltaT);
+                  "%.3lf, dT = %.12le, trigger = %le\n", deltaE, deltaR, deltaT,
+                  deltaE-deltaT);
          #endif
          ++loopCount;
       }

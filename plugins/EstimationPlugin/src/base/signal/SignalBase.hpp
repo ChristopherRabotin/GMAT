@@ -169,7 +169,6 @@ protected:
 
    void                       SetPrevious(SignalBase *prev);
    virtual void               InitializeSignal();
-   virtual void               PrepareToPropagate();
 
    // Some useful methods
    // Coordinate System methods based on methods in GeometricMeasurement

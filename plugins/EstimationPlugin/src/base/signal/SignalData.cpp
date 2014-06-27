@@ -56,10 +56,10 @@ SignalData::SignalData() :
 //------------------------------------------------------------------------------
 SignalData::~SignalData()
 {
-   if (tPropagator != NULL)
-      delete tPropagator;
-   if (rPropagator != NULL)
-      delete rPropagator;
+//   if (tPropagator != NULL)
+//      delete tPropagator;
+//   if (rPropagator != NULL)
+//      delete rPropagator;
 }
 
 
@@ -79,8 +79,8 @@ SignalData::SignalData(const SignalData& sd) :
    tMovable             (sd.tMovable),
    rNode                (sd.rNode),
    rMovable             (sd.rMovable),
-   tPropagator          (NULL),
-   rPropagator          (NULL),
+   tPropagator          (sd.tPropagator),
+   rPropagator          (sd.rPropagator),
    stationParticipant   (sd.stationParticipant),
    tTime                (sd.tTime),
    rTime                (sd.rTime),
@@ -127,15 +127,8 @@ SignalData& SignalData::operator=(const SignalData& sd)
       tMovable             = sd.tMovable;
       rNode                = sd.rNode;
       rMovable             = sd.rMovable;
-
-      if (tPropagator != NULL)
-         delete tPropagator;
-      tPropagator          = NULL;
-
-      if (rPropagator != NULL)
-         delete rPropagator;
-      rPropagator          = NULL;
-
+      tPropagator          = sd.tPropagator;
+      rPropagator          = sd.rPropagator;
       tTime                = sd.tTime;
       rTime                = sd.rTime;
       stationParticipant   = sd.stationParticipant;
