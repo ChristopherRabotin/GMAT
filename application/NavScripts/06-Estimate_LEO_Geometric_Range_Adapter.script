@@ -13,6 +13,7 @@ GMAT ODSat.VX = -0.34697109;
 GMAT ODSat.VY = 7.092177415;
 GMAT ODSat.VZ = 2.14549075;
 GMAT ODSat.Id = ODSatID;
+ODSat.Covariance.CartesianState = [1e12 1e12 1e12 1e6 1e6 1e6];
 
 %----- Create the ground station
 Create GroundStation Maui;
@@ -31,13 +32,14 @@ GMAT ODProp_ForceModel.PointMasses = {Earth};
 Create Propagator ODProp;
 GMAT ODProp.FM = ODProp_ForceModel;
 GMAT ODProp.Type = PrinceDormand78;
+ODProp.MinStep = 0;
 
 %----- The data file
 Create TrackingFileSet simData
 %simData.AddTrackingConfig = {{Maui, ODSat, Maui}, 'Range'}
 %simData.AddTrackingConfig = {{ODSat, Maui}, {Maui, ODSat, Maui}, 'Range'}
 simData.AddTrackingConfig = { { ODSat, Maui }, 'Range'}
-simData.Filename = ODSatMauiOneWayRange.gmd
+simData.Filename = REFACT_ODSatMauiOneWayRangeNoLT.gmd
 
 %------ Create the estimator
 Create BatchEstimatorInv BatchEst;
@@ -50,7 +52,7 @@ GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'};
 GMAT BatchEst.AbsoluteTol = 1e-005;
 GMAT BatchEst.RelativeTol = 1e-006;
 GMAT BatchEst.Propagator = ODProp;
-GMAT BatchEst.ShowAllResiduals = On;
+BatchEst.OLSEInitialRMSSigma = 1.0e15;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
 
 %----------------------------------------
