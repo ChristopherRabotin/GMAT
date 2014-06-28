@@ -16,3 +16,5 @@ Release
 *.user
 /.settings/
 /KARI/
+/GmatAtGoddard.StarPath.djc.pui
+/GmatAtGoddard.prj
