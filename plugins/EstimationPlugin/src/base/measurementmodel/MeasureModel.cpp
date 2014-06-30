@@ -35,8 +35,8 @@
 #include "TextParser.hpp"
 #include <sstream>
 
-#define DEBUG_INITIALIZATION
-#define DEBUG_LIGHTTIME
+//#define DEBUG_INITIALIZATION
+//#define DEBUG_LIGHTTIME
 
 //------------------------------------------------------------------------------
 // Static data
