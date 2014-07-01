@@ -306,12 +306,15 @@ bool GravityField::Initialize()
             MessageInterface::ShowMessage("Now getting HarmonicGravity with filename = %s, a = %12.10f, mu = %12.10f\n",
                   filename.c_str(), a, mu);
          #endif
+
+         // Changed to open filenameFullPath (LOJ: 2014.06.26)
          //gravityModel = GetGravityFile(filename,a,mu);
          gravityModel = GetGravityFile(filenameFullPath,a,mu);
          if (!gravityModel)
          {
             std::string errmsg = "Gravity file ";
-            errmsg += filename + " cannot be opened or read.\n";
+            //errmsg += filename + " cannot be opened or read.\n";
+            errmsg += filenameFullPath + " cannot be opened or read.\n";
             throw ODEModelException(errmsg);
          }
          else

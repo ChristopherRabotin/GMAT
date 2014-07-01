@@ -380,7 +380,8 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    refBody                 (NULL),
    attitudeConstraintType  ("OrbitNormal"),
    // Additional CCSDS-AEM fields here
-   aemFile                 ("")
+   aemFile                 (""),
+   aemFileFullPath         ("")
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -471,7 +472,8 @@ Attitude::Attitude(const Attitude& att) :
    bodyAlignmentVector     (att.bodyAlignmentVector),
    bodyConstraintVector    (att.bodyConstraintVector),
    // Additional CCSDS-AEM fields here
-   aemFile                 (att.aemFile)
+   aemFile                 (att.aemFile),
+   aemFileFullPath         (att.aemFileFullPath)
 {
 #ifdef DEBUG_ATTITUDE_INIT
    MessageInterface::ShowMessage("New attitude created by copying attitude <%p> of type %s\n",
@@ -547,6 +549,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    bodyConstraintVector    = att.bodyConstraintVector;
    // Additional CCSDS-AEM fields here
    aemFile                 = att.aemFile;
+   aemFileFullPath         = att.aemFileFullPath;
 
    return *this;
 }
@@ -3110,10 +3113,18 @@ bool Attitude::SetStringParameter(const Integer     id,
    }
    if (id == AEM_FILE_NAME)
    {
-      aemFile = value;
+      if (value != aemFile)
+      {
+         // Get full path from the static GmatBase::GetFullPathFileName() (LOJ: 2014.06.26)
+         std::string aemFileNoPath;
+         aemFileFullPath =
+            GmatBase::GetFullPathFileName(aemFileNoPath, GetName(), value,
+                         "VEHICLE_EPHEM_CCSDS_PATH", true, "", true, true);
+         aemFile = value;
+      }
       return true;
    }
-
+   
    return GmatBase::SetStringParameter(id, value);
 }
 

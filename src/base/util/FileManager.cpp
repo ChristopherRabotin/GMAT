@@ -66,6 +66,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
 {
    // File path
    "BEGIN_OF_PATH",
+   "ROOT_PATH",
+   
    // Input path
    "TIME_PATH",
    "PLANETARY_COEFF_PATH",
@@ -78,6 +80,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "LUNA_POT_PATH",
    "VENUS_POT_PATH",
    "MARS_POT_PATH",
+   "OTHER_POT_PATH",
    "TEXTURE_PATH",
    "MEASUREMENT_PATH",
    "GUI_CONFIG_PATH",
@@ -85,7 +88,9 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "ICON_PATH",
    "STAR_PATH",
    "MODEL_PATH",
-   "SPAD_SRP_PATH",
+   "SPAD_PATH",
+   "ATMOSPHERE_PATH",
+   
    // Output path
    "OUTPUT_PATH",
    "END_OF_PATH",
@@ -422,7 +427,31 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    std::string pathOnly = GmatFileUtil::ParsePathName(fullname);
    std::string fileOnly = GmatFileUtil::ParseFileName(fullname);
    std::string gmatPath = GmatFileUtil::ConvertToOsFileName(mGmatWorkingDir);
-   std::string defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(fileType));
+   
+   // Get default path for file type
+   std::string defaultPath;
+   try
+   {
+      defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(fileType));
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_FIND_PATH
+      MessageInterface::ShowMessage("*** WARNING *** %s\n", be.GetFullMessage().c_str());
+      #endif
+      // If *_POT_PATH, try OTHER_POT_PATH
+      std::string::size_type potLoc = fileType.find("_POT_PATH");
+      if (potLoc != fileType.npos)
+      {
+         #ifdef DEBUG_FIND_PATH
+         MessageInterface::ShowMessage("Trying OTHER_POT_PATH\n");
+         #endif
+         std::string oldPot = fileType.substr(0, potLoc+1);
+         std::string newPotPath = GmatStringUtil::Replace(fileType, oldPot, "OTHER_");
+         defaultPath = GmatFileUtil::ConvertToOsFileName(GetPathname(newPotPath));
+      }
+   }
+   
    std::string tempPath1, tempPath2;
    std::string pathToReturn;
    

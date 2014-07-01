@@ -89,7 +89,8 @@ private:
       wxString gravOrder;
       wxString magfDegree;
       wxString magfOrder;
-      wxString potFilename;
+      wxString potFile;
+      wxString potFileFullPath;
       PointMassForce *pmf;
       GravityField *gravf;
       DragForce *dragf;
@@ -104,11 +105,11 @@ private:
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
             gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; 
-            magfOrder = "0"; potFilename = ""; pmf = pf; gravf = gf; 
+            magfOrder = "0"; potFile = ""; potFileFullPath = ""; pmf = pf; gravf = gf; 
             dragf = df; srpf = NULL; useSrp = false; relativisticCorrection = false;
          }
       
-      ForceType& operator= (const ForceType& right)
+         ForceType& operator= (const ForceType& right)
          {
             if (this == &right)
                return *this;
@@ -117,8 +118,8 @@ private:
             dragType = right.dragType; magfType = right.magfType; 
             gravDegree = right.gravDegree; gravOrder = right.gravOrder;
             magfDegree = right.magfDegree; magfOrder = right.magfOrder;
-            potFilename = right.potFilename; pmf = right.pmf;
-            gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
+            potFile = right.potFile; potFileFullPath = right.potFileFullPath;
+            pmf = right.pmf; gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
             useSrp = right.useSrp; relativisticCorrection = right.relativisticCorrection;
             return *this;
          }

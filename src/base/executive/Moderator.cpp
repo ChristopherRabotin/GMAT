@@ -6286,13 +6286,23 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFileName(const std::string &fileType)
+// std::string GetFileName(const std::string &fileType, bool getFullPath = false,
+//                         bool forInput = true)
 //------------------------------------------------------------------------------
-std::string Moderator::GetFileName(const std::string &fileType)
+std::string Moderator::GetFileName(const std::string &fileType, bool getFullPath,
+                                   bool forInput)
 {
-   // Changed to use FileManager::GetFileName() (LOJ: 2014.06.25)
-   //return theFileManager->GetFullPathname(fileType);
-   return theFileManager->GetFilename(fileType);
+   // Now we can get full path or just file name (LOJ: 2014.06.30)
+   if (getFullPath)
+   {
+      return theFileManager->FindPath("", fileType, forInput, false, true);
+   }
+   else
+   {
+      // Changed to use FileManager::GetFileName() (LOJ: 2014.06.30)
+      //return theFileManager->GetFullPathname(fileType);
+      return theFileManager->GetFilename(fileType);
+   }
 }
 
 

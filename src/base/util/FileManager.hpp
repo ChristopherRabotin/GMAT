@@ -41,6 +41,8 @@ public:
    {
       // File path
       BEGIN_OF_PATH = 0,
+      ROOT_PATH,
+      
       // Input path
       TIME_PATH,
       PLANETARY_COEFF_PATH,
@@ -53,6 +55,7 @@ public:
       LUNA_POT_PATH,
       VENUS_POT_PATH,
       MARS_POT_PATH,
+      OTHER_POT_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
       MEASUREMENT_PATH,
       GUI_CONFIG_PATH,
@@ -61,6 +64,8 @@ public:
       STAR_PATH,
       MODEL_PATH,
       SPAD_PATH,
+      ATMOSPHERE_PATH,
+      
       // Output path
       OUTPUT_PATH,
       END_OF_PATH,

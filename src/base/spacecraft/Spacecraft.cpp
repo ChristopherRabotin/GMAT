@@ -750,7 +750,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
 
-//   orbitSpiceKernelNames = a.orbitSpiceKernelNames;
    includeCartesianState = a.includeCartesianState;
 
 

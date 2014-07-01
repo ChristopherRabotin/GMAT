@@ -704,11 +704,13 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFileName(const std::string &fileType)
+// std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+//                         bool forInput = true)
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::GetFileName(const std::string &fileType)
+std::string GuiInterpreter::GetFileName(const std::string &fileType, bool getFullpath,
+                                        bool forInput)
 {
-   return theModerator->GetFileName(fileType);
+   return theModerator->GetFileName(fileType, getFullpath, forInput);
 }
 
 

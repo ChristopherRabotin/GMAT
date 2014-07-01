@@ -1582,12 +1582,26 @@ void SolarSystem::LoadSpiceKernels()
          if (theSPKFilename.size() > 1 && theSPKFilename[0] == '.')
          {
             FileManager *fm = FileManager::Instance();
-            //std::string absSpkFile = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
-            std::string absSpkFile = fm->GetBinDirectory() + fm->GetPathSeparator() + theSPKFilename;
             
-            MessageInterface::ShowMessage
-               ("Error opening the SPK file \"%s\", so trying with abs path \"%s\"", theSPKFilename.c_str(),
-                absSpkFile.c_str());
+            // Changed to use FileManager::FindPath()
+            
+            // //std::string absSpkFile = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            // std::string absSpkFile = fm->GetBinDirectory() + fm->GetPathSeparator() + theSPKFilename;
+            // MessageInterface::ShowMessage
+            //    ("Error opening the SPK file \"%s\", so trying with abs path \"%s\"", theSPKFilename.c_str(),
+            //     absSpkFile.c_str());
+            
+            std::string absSpkFile =
+               fm->FindPath(theSPKFilename, "PLANETARY_EPHEM_SPK_PATH", true, false, true);
+            
+            if (absSpkFile == "")
+            {
+               MessageInterface::ShowMessage("ERROR loading kernel %s\n", absSpkFile.c_str());
+               SolarSystemException sse;
+               sse.SetDetails("Error loading the SPICE Planetary Ephemeris (SPK) Kernel \"%s\" or \"%s\"",
+                              theSPKFilename.c_str(), absSpkFile.c_str());
+               throw sse;
+            }
             
             try
             {

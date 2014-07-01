@@ -140,6 +140,7 @@ protected:
       DEGREE,
       ORDER,
       FILENAME,
+      POT_FILE_FULLPATH,
       INPUT_COORD_SYSTEM,
       FIXED_COORD_SYSTEM,
       TARGET_COORD_SYSTEM,

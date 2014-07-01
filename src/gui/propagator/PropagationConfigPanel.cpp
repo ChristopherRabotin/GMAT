@@ -858,6 +858,10 @@ void PropagationConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::PopulateForces()
 {
+   #ifdef DEBUG_PROP_PANEL_LOAD
+   MessageInterface::ShowMessage("PropagationConfigPanel::PopulateForces() entered\n");
+   #endif
+   
    try
    {
       if (theForceModel != NULL)
@@ -932,11 +936,11 @@ void PropagationConfigPanel::PopulateForces()
             {
                theGravForce = (GravityField*)force;
                wxString potFilename =
-                     theGravForce->GetStringParameter("PotentialFile").c_str();
-
+                  theGravForce->GetStringParameter("PotentialFile").c_str();
+               
 //               currentBodyId = FindPrimaryBody(wxBodyName);
 //               primaryBodyList[currentBodyId]->bodyName = wxBodyName;
-//               primaryBodyList[currentBodyId]->potFilename = potFilename;
+//               primaryBodyList[currentBodyId]->potFile = potFilename;
                if (primaryBodyData == NULL)
                {
                   #ifdef DEBUG_PROP_PANEL_GRAV
@@ -945,18 +949,23 @@ void PropagationConfigPanel::PopulateForces()
                   #endif
                   primaryBodyData = new ForceType(wxBodyName);
                }
-
+               
                primaryBody = wxBodyName;
 
                primaryBodyData->bodyName = wxBodyName;
-               primaryBodyData->potFilename = potFilename;
-
+               primaryBodyData->potFile = potFilename;
+               primaryBodyData->potFileFullPath = theGravForce->GetStringParameter("PotentialFileFullPath").c_str();
+               
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage
                   ("   Getting gravity model type for %s, potFilename=%s\n",
                    wxBodyName.c_str(), potFilename.c_str());
                #endif
-
+               
+               // Use full path potential file from the base as per new file path design (LOJ: 2014.06.30)
+               
+               //==========================================================
+               #if 0
                std::ifstream inStream(potFilename.c_str());
                if (!inStream)
                {
@@ -967,11 +976,11 @@ void PropagationConfigPanel::PopulateForces()
                   #endif
                   FileManager *fm = FileManager::Instance();
                   std::string gravPath = fm->GetPathname(pathType);
-//                  primaryBodyList[currentBodyId]->potFilename = (gravPath + potFilename.c_str()).c_str();
-                  primaryBodyData->potFilename = (gravPath + potFilename.c_str()).c_str();
+                  //primaryBodyList[currentBodyId]->potFile = (gravPath + potFilename.c_str()).c_str();
+                  primaryBodyData->potFile = (gravPath + potFilename.c_str()).c_str();
                   #ifdef DEBUG_PROP_PANEL_GRAV
                      MessageInterface::ShowMessage("   Could not open %s, so full path = %s\n",
-                                                   potFilename.c_str(), (primaryBodyData->potFilename).c_str());
+                                                   potFilename.c_str(), (primaryBodyData->potFile).c_str());
                   #endif
                }
                else
@@ -981,11 +990,15 @@ void PropagationConfigPanel::PopulateForces()
                   #endif
                   inStream.close();
                }
+               #endif
+               //==========================================================
+               
                GmatGrav::GravityModelType bodyGravModelType =
-//               GravityFileUtil::GetModelType((primaryBodyList[currentBodyId]->potFilename).c_str(), wxBodyName.c_str());
-               GravityFileUtil::GetModelType((primaryBodyData->potFilename).c_str(), wxBodyName.c_str());
+//               GravityFileUtil::GetModelType((primaryBodyList[currentBodyId]->potFile).c_str(), wxBodyName.c_str());
+                  // GravityFileUtil::GetModelType((primaryBodyData->potFile).c_str(), wxBodyName.c_str());
+                  GravityFileUtil::GetModelType((primaryBodyData->potFileFullPath).c_str(), wxBodyName.c_str());
                primaryBodyData->gravType                    = (GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
-                  
+               
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage("   Getting the gravity force\n");
                #endif
@@ -1013,8 +1026,8 @@ void PropagationConfigPanel::PopulateForces()
                   }
                }
 
-//               if (primaryBodyList[currentBodyId]->potFilename == "")
-               if (primaryBodyData->potFilename == "")
+//               if (primaryBodyList[currentBodyId]->potFile == "")
+               if (primaryBodyData->potFile == "")
                {
                   MessageInterface::PopupMessage
                      (Gmat::WARNING_, "Cannot find Potential File for %s.\n",
@@ -1108,10 +1121,15 @@ void PropagationConfigPanel::PopulateForces()
             }
          }
       }
-
+      #ifdef DEBUG_PROP_PANEL_LOAD
+      MessageInterface::ShowMessage("PropagationConfigPanel::PopulateForces() leaving\n");
+      #endif
    }
    catch (BaseException &e)
    {
+      #ifdef DEBUG_PROP_PANEL_LOAD
+      MessageInterface::ShowMessage("PropagationConfigPanel::PopulateForces() caught an exception\n");
+      #endif
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
@@ -1162,11 +1180,11 @@ void PropagationConfigPanel::SaveData()
             }
             //loj: 2007.10.26
             // Do we need to check empty potential file?
-            // Fow now allow to use default coefficients from the body.
+            // For now allow to use default coefficients from the body.
 //            else if (primaryBodyList[i]->gravType == "Other" &&
-//                     primaryBodyList[i]->potFilename == "")
+//                     primaryBodyList[i]->potFile == "")
             else if (primaryBodyData->gravType == "Other" &&
-                     primaryBodyData->potFilename == "")
+                     primaryBodyData->potFile == "")
             {
                MessageInterface::PopupMessage
                   (Gmat::WARNING_, "Please select a potential file for %s\n",
@@ -1293,8 +1311,8 @@ void PropagationConfigPanel::SaveData()
                theGravForce->SetSolarSystem(theSolarSystem);
                theGravForce->SetStringParameter("BodyName", bodyName);
 //               theGravForce->SetStringParameter("PotentialFile",
-////                     primaryBodyList[i]->potFilename.c_str());
-//                     primaryBodyData->potFilename.c_str());
+////                     primaryBodyList[i]->potFile.c_str());
+//                     primaryBodyData->potFile.c_str());
 
                if (deg != -999)
                {
@@ -1698,8 +1716,8 @@ Integer PropagationConfigPanel::FindPrimaryBody(const wxString &bodyName,
       std::string potFileType = theFileMap[gravType].c_str();
       wxString wxPotFileName = theGuiInterpreter->GetFileName(potFileType).c_str();
       //MessageInterface::ShowMessage("===> potFile=%s\n", potFileType.c_str());
-//      primaryBodyList.back()->potFilename = wxPotFileName;
-      primaryBodyData->potFilename = wxPotFileName;
+//      primaryBodyList.back()->potFile = wxPotFileName;
+      primaryBodyData->potFile = wxPotFileName;
    }
 
    #ifdef DEBUG_PROP_PANEL_FIND_BODY
@@ -2230,8 +2248,8 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
    potFileTextCtrl->Enable(false);
    gravityDegreeTextCtrl->Enable(true);
    gravityOrderTextCtrl->Enable(true);
-//   potFileTextCtrl->SetValue(primaryBodyList[currentBodyId]->potFilename);
-   potFileTextCtrl->SetValue(primaryBodyData->potFilename);
+//   potFileTextCtrl->SetValue(primaryBodyList[currentBodyId]->potFile);
+   potFileTextCtrl->SetValue(primaryBodyData->potFile);
 
    if (gravType == "None")
    {
@@ -2976,13 +2994,15 @@ bool PropagationConfigPanel::SavePotFile()
                #ifdef DEBUG_PROP_PANEL_SAVE
                   MessageInterface::ShowMessage
                     ("SavePotFile() Saving Body:%s, potFile=%s\n",
-//                          primaryBodyList[i]->bodyName.c_str(), primaryBodyList[i]->potFilename.c_str());
+//                          primaryBodyList[i]->bodyName.c_str(), primaryBodyList[i]->potFile.c_str());
                      primaryBodyData->bodyName.c_str(),
-                     primaryBodyData->potFilename.c_str());
+                     primaryBodyData->potFile.c_str());
                #endif
 
-//               inputString = primaryBodyList[i]->potFilename.c_str();
-               inputString = primaryBodyData->potFilename.c_str();
+//               inputString = primaryBodyList[i]->potFile.c_str();
+               // Use full path pot file for checking for existence (LOJ: 2014.06.30)
+               //inputString = primaryBodyData->potFile.c_str();
+               inputString = primaryBodyData->potFileFullPath.c_str();
                std::ifstream filename(inputString.c_str());
 
 //               // Check if the file doesn't exist then stop
@@ -3007,8 +3027,8 @@ bool PropagationConfigPanel::SavePotFile()
                if (update)
                {
                   theGravForce->SetStringParameter("PotentialFile",
-//                        primaryBodyList[i]->potFilename.c_str());
-                        primaryBodyData->potFilename.c_str());
+//                        primaryBodyList[i]->potFile.c_str());
+                        primaryBodyData->potFile.c_str());
                   retval = true;
                   isPotFileChanged = false;
                }
@@ -3242,9 +3262,11 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
 
          try
          {
-//            primaryBodyList[currentBodyId]->potFilename =
-            primaryBodyData->potFilename =
+//            primaryBodyList[currentBodyId]->potFile =
+            primaryBodyData->potFile =
                theGuiInterpreter->GetFileName(fileType).c_str();
+            primaryBodyData->potFileFullPath =
+               theGuiInterpreter->GetFileName(fileType, true).c_str();
          }
          catch (BaseException &e)
          {
@@ -3255,17 +3277,17 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
       }
       else if (gravTypeName == "Other")
       {
-//         primaryBodyList[currentBodyId]->potFilename = potFileTextCtrl->GetValue();
-         primaryBodyData->potFilename = potFileTextCtrl->GetValue();
+//         primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
+         primaryBodyData->potFile = potFileTextCtrl->GetValue();
       }
 
       #ifdef DEBUG_PROP_PANEL_GRAV
       MessageInterface::ShowMessage
          ("OnGravityModelComboBox() bodyName=%s, potFile=%s\n",
 //          primaryBodyList[currentBodyId]->bodyName.c_str(),
-//          primaryBodyList[currentBodyId]->potFilename.c_str());
+//          primaryBodyList[currentBodyId]->potFile.c_str());
           primaryBodyData->bodyName.c_str(),
-          primaryBodyData->potFilename.c_str());
+          primaryBodyData->potFile.c_str());
       #endif
 
 //      DisplayGravityFieldData(primaryBodyList[currentBodyId]->bodyName);
@@ -3678,8 +3700,8 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       GmatGrav::GravityModelType bodyGravModelType = GravityFileUtil::GetModelType(filename.c_str(), (primaryBodyData->bodyName).c_str());
       primaryBodyData->gravType                  = (GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
       
-//      primaryBodyList[currentBodyId]->potFilename = filename;
-      primaryBodyData->potFilename = filename;
+//      primaryBodyList[currentBodyId]->potFile = filename;
+      primaryBodyData->potFile = filename;
 
 //      if (primaryBodyList[currentBodyId]->bodyName == "Earth")
 //         primaryBodyList[currentBodyId]->gravType = earthGravModelArray[E_OTHER];
@@ -3870,8 +3892,8 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == potFileTextCtrl)
    {
-//      primaryBodyList[currentBodyId]->potFilename = potFileTextCtrl->GetValue();
-      primaryBodyData->potFilename = potFileTextCtrl->GetValue();
+//      primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
+      primaryBodyData->potFile = potFileTextCtrl->GetValue();
       isPotFileChanged = true;
       // Do not set to true if only text changed
       //isForceModelChanged = true;
@@ -3989,14 +4011,16 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
 //            ("   id=%d, body=%s, gravType=%s, dragType=%s, magfType=%s\n   potFile=%s\n"
 //             "   gravf=%p, dragf=%p, srpf=%p\n", i, primaryBodyList[i]->bodyName.c_str(),
 //             primaryBodyList[i]->gravType.c_str(), primaryBodyList[i]->dragType.c_str(),
-//             primaryBodyList[i]->magfType.c_str(), primaryBodyList[i]->potFilename.c_str(),
+//             primaryBodyList[i]->magfType.c_str(), primaryBodyList[i]->potFile.c_str(),
 //             primaryBodyList[i]->gravf, primaryBodyList[i]->dragf,
 //             primaryBodyList[i]->srpf);
          MessageInterface::ShowMessage
             ("   id=%d, body=%s, gravType=%s, dragType=%s, magfType=%s\n   potFile=%s\n"
-             "   gravf=%p, dragf=%p, srpf=%p\n", 0, primaryBodyData->bodyName.c_str(),
+             "   porFileFullPath=%s\n   gravf=%p, dragf=%p, srpf=%p\n", 0,
+             primaryBodyData->bodyName.c_str(),
              primaryBodyData->gravType.c_str(), primaryBodyData->dragType.c_str(),
-             primaryBodyData->magfType.c_str(), primaryBodyData->potFilename.c_str(),
+             primaryBodyData->magfType.c_str(), primaryBodyData->potFile.c_str(),
+             primaryBodyData->potFileFullPath.c_str(),
              primaryBodyData->gravf, primaryBodyData->dragf,
              primaryBodyData->srpf);
       }

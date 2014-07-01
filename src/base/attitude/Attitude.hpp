@@ -415,7 +415,8 @@ protected:
 
    /// Additional data for CCSDS-AEM
    std::string           aemFile;
-
+   std::string           aemFileFullPath;
+   
    //------------------------------------------------------------------------------
    //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
    //------------------------------------------------------------------------------

@@ -260,6 +260,9 @@ protected:
    // Reporting parameters
    /// Name of the targeter text file.  An empty string turns the file off.
    std::string          solverTextFile;
+   /// Full path targeter text file
+   std::string          solverTextFileFullPath;
+   
    /// Used to indicate if data should append to the text file
    Integer              instanceNumber;
    /// The solver text file

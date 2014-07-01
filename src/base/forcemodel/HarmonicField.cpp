@@ -71,7 +71,7 @@
 using namespace GmatMathUtil;
 
 //#define DEBUG_HARMONIC_FIELD
-#define DEBUG_HARMONIC_FIELD_FILENAME
+//#define DEBUG_HARMONIC_FIELD_FILENAME
 
 //---------------------------------
 // static data
@@ -84,6 +84,7 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - GravityBaseParamCount] =
    "Degree",
    "Order",
    "PotentialFile",
+   "PotentialFileFullPath",
    "InputCoordinateSystem",
    "FixedCoordinateSystem",
    "TargetCoordinateSystem",
@@ -97,6 +98,7 @@ HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - GravityBaseParamCount] =
    Gmat::INTEGER_TYPE,   // "Degree",
    Gmat::INTEGER_TYPE,   // "Order",
    Gmat::FILENAME_TYPE,  // "PotentialFile",
+   Gmat::FILENAME_TYPE,  // "potentialFileFullPath",
    Gmat::STRING_TYPE,    // "InputCoordinateSystem",
    Gmat::STRING_TYPE,    // "FixedCoordinateSystem",
    Gmat::STRING_TYPE,    // "TargetCoordinateSystem",
@@ -146,7 +148,6 @@ eop                     (NULL)
    
    FileManager *fm = FileManager::Instance();
    potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
-   
 }
 
 
@@ -633,29 +634,29 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
    {
-      //return filename;
-      std::string::size_type index = filename.find_last_of("/\\");
-      std::string fnameToReturn;
-      // if path not found, just write filename
-      if (index == filename.npos)
-         //return filename;
-         fnameToReturn = filename;
-      else
-      {
-         // if actual pathname is the same as the default path, write only name part
-         std::string actualPath = filename.substr(0, index+1);
-         std::string fname = filename;
-         if (potPath == actualPath)
-            fname = filename.substr(index+1);
-         
-         //return fname;
-         fnameToReturn = fname;
-      }
+      // Just return filename since filenameFullPath has path info (LOJ: 2014.06.30)
+      return filename;
       
-      MessageInterface::ShowMessage
-         ("==> HarmonicField::GetStringParameter(FILE_NAME) returning '%s'\n", fnameToReturn.c_str());
-      return fnameToReturn;
+      // //return filename;
+      // std::string::size_type index = filename.find_last_of("/\\");
+      
+      // // if path not found, just write filename
+      // if (index == filename.npos)
+      //    return filename;
+      // else
+      // {
+      //    // if actual pathname is the same as the default path, write only name part
+      //    std::string actualPath = filename.substr(0, index+1);
+      //    std::string fname = filename;
+      //    if (potPath == actualPath)
+      //       fname = filename.substr(index+1);
+         
+      //    return fname;
+      // }
    }
+   
+   if (id == POT_FILE_FULLPATH)
+      return filenameFullPath;
    
    if (id == INPUT_COORD_SYSTEM)  return inputCSName;
    if (id == FIXED_COORD_SYSTEM)  return fixedCSName;
@@ -749,8 +750,8 @@ bool HarmonicField::SetStringParameter(const Integer id,
          }
          catch (BaseException &ex)
          {
-//            MessageInterface::ShowMessage("**** WARNING ****: %s\n",
-//                  ex.GetFullMessage().c_str());
+            //MessageInterface::ShowMessage("**** WARNING ****: %s\n",
+            //      ex.GetFullMessage().c_str());
             ; // ignore this for now - GMT-2873
          }
          
@@ -1013,6 +1014,9 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
    
    if ((id == DEGREE) || (id == ORDER) || (id == FILENAME))
       return false;
+   
+   if (id == POT_FILE_FULLPATH)
+      return true;
    
    return true;
 }

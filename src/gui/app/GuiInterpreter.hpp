@@ -104,7 +104,8 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   std::string GetFileName(const std::string &fileType);
+   std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+                           bool forInput = true);
    
    // StopCondition
    GmatBase* CreateStopCondition(const std::string &type,
