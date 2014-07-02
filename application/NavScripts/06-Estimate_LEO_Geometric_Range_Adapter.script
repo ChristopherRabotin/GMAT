@@ -6,7 +6,7 @@ GMAT ODSat.DateFormat = UTCGregorian;
 GMAT ODSat.Epoch = '01 Jan 2000 11:59:28.000';
 GMAT ODSat.CoordinateSystem = EarthMJ2000Eq;
 GMAT ODSat.DisplayStateType = Cartesian;
-GMAT ODSat.X = 6648.937;
+GMAT ODSat.X = 6648.938;
 GMAT ODSat.Y = -335.169;
 GMAT ODSat.Z = 2789.137;
 GMAT ODSat.VX = -0.34697109;
@@ -36,10 +36,8 @@ ODProp.MinStep = 0;
 
 %----- The data file
 Create TrackingFileSet simData
-%simData.AddTrackingConfig = {{Maui, ODSat, Maui}, 'Range'}
-%simData.AddTrackingConfig = {{ODSat, Maui}, {Maui, ODSat, Maui}, 'Range'}
 simData.AddTrackingConfig = { { ODSat, Maui }, 'Range'}
-simData.Filename = REFACT_ODSatMauiOneWayRangeNoLT.gmd
+simData.Filename = ODSatMauiOneWayRange_Adapter.gmd
 
 %------ Create the estimator
 Create BatchEstimatorInv BatchEst;
@@ -48,7 +46,6 @@ GMAT BatchEst.ReportFile = 'BatchEstimatorInvBatchEst.data';
 GMAT BatchEst.MaximumIterations = 15;
 GMAT BatchEst.Measurements = {simData};
 GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'};
-%GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState', 'RangeMeasurement.Bias'};
 GMAT BatchEst.AbsoluteTol = 1e-005;
 GMAT BatchEst.RelativeTol = 1e-006;
 GMAT BatchEst.Propagator = ODProp;

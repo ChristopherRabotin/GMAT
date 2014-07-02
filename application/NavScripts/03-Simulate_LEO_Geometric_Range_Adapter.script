@@ -27,7 +27,7 @@ GMAT Maui.Z  = -3691.38;
 %----- The data file
 Create TrackingFileSet simData
 simData.AddTrackingConfig = {{ODSat, Maui}, 'Range'}
-simData.Filename = ODSatMauiOneWayRange.gmd
+simData.Filename = ODSatMauiOneWayRange_Adapter.gmd
 
 %----- The propagator
 Create ForceModel ODProp_ForceModel;
