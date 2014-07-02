@@ -76,7 +76,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -106,7 +106,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -138,6 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp" />
+    <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp" />
     <ClInclude Include="..\..\src\base\command\RunEstimator.hpp" />
     <ClInclude Include="..\..\src\base\command\RunSimulator.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimator.hpp" />
@@ -184,6 +186,7 @@
     <ClInclude Include="..\..\src\base\measurementfile\ObType.hpp" />
     <ClInclude Include="..\..\src\base\measurementfile\RampTableData.hpp" />
     <ClInclude Include="..\..\src\base\measurementfile\RampTableType.hpp" />
+    <ClInclude Include="..\..\src\base\measurementmodel\MeasureModel.hpp" />
     <ClInclude Include="..\..\src\base\measurement\AveragedDoppler.hpp" />
     <ClInclude Include="..\..\src\base\measurement\CoreMeasurement.hpp" />
     <ClInclude Include="..\..\src\base\measurement\DSNTwoWayDoppler.hpp" />
@@ -200,6 +203,7 @@
     <ClInclude Include="..\..\src\base\measurement\MeasurementException.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementManager.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementModel.hpp" />
+    <ClInclude Include="..\..\src\base\measurement\MeasurementModelBase.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MediaCorrection.hpp" />
     <ClInclude Include="..\..\src\base\measurement\OpticalAngles.hpp" />
     <ClInclude Include="..\..\src\base\measurement\OpticalAzEl.hpp" />
@@ -212,6 +216,13 @@
     <ClInclude Include="..\..\src\base\measurement\TwoWayRange.hpp" />
     <ClInclude Include="..\..\src\base\measurement\USNTwoWayRange.hpp" />
     <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp" />
+    <ClInclude Include="..\..\src\base\reporter\ProgressReporter.hpp" />
+    <ClInclude Include="..\..\src\base\signal\PhysicalSignal.hpp" />
+    <ClInclude Include="..\..\src\base\signal\SignalBase.hpp" />
+    <ClInclude Include="..\..\src\base\signal\SignalData.hpp" />
+    <ClInclude Include="..\..\src\base\signal\SinglePointSignal.hpp" />
+    <ClInclude Include="..\..\src\base\trackingfile\TFSMagicNumbers.hpp" />
+    <ClInclude Include="..\..\src\base\trackingfile\TrackingFileSet.hpp" />
     <ClInclude Include="..\..\src\base\trackingsystem\DSNTrackingSystem.hpp" />
     <ClInclude Include="..\..\src\base\trackingsystem\OpticalTrackingSystem.hpp" />
     <ClInclude Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.hpp" />
@@ -220,6 +231,8 @@
     <ClInclude Include="..\..\src\base\trackingsystem\USNTrackingSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp" />
+    <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp" />
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp" />
     <ClCompile Include="..\..\src\base\command\RunSimulator.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimator.cpp" />
@@ -265,6 +278,7 @@
     <ClCompile Include="..\..\src\base\measurementfile\ObType.cpp" />
     <ClCompile Include="..\..\src\base\measurementfile\RampTableData.cpp" />
     <ClCompile Include="..\..\src\base\measurementfile\RampTableType.cpp" />
+    <ClCompile Include="..\..\src\base\measurementmodel\MeasureModel.cpp" />
     <ClCompile Include="..\..\src\base\measurement\AveragedDoppler.cpp" />
     <ClCompile Include="..\..\src\base\measurement\CoreMeasurement.cpp" />
     <ClCompile Include="..\..\src\base\measurement\DSNTwoWayDoppler.cpp" />
@@ -279,6 +293,7 @@
     <ClCompile Include="..\..\src\base\measurement\MeasurementData.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementManager.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementModel.cpp" />
+    <ClCompile Include="..\..\src\base\measurement\MeasurementModelBase.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MediaCorrection.cpp" />
     <ClCompile Include="..\..\src\base\measurement\OpticalAngles.cpp" />
     <ClCompile Include="..\..\src\base\measurement\OpticalAzEl.cpp" />
@@ -291,6 +306,13 @@
     <ClCompile Include="..\..\src\base\measurement\TwoWayRange.cpp" />
     <ClCompile Include="..\..\src\base\measurement\USNTwoWayRange.cpp" />
     <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp" />
+    <ClCompile Include="..\..\src\base\reporter\ProgressReporter.cpp" />
+    <ClCompile Include="..\..\src\base\signal\PhysicalSignal.cpp" />
+    <ClCompile Include="..\..\src\base\signal\SignalBase.cpp" />
+    <ClCompile Include="..\..\src\base\signal\SignalData.cpp" />
+    <ClCompile Include="..\..\src\base\signal\SinglePointSignal.cpp" />
+    <ClCompile Include="..\..\src\base\trackingfile\TFSMagicNumbers.cpp" />
+    <ClCompile Include="..\..\src\base\trackingfile\TrackingFileSet.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\DSNTrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\OpticalTrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.cpp" />

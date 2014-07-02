@@ -661,7 +661,7 @@ void BatchEstimatorInv::Estimate()
    if (iterationsTaken == 0)
 	   bestResidualRMS = newResidualRMS;
    else
-	   bestResidualRMS = min(bestResidualRMS,newResidualRMS);
+	   bestResidualRMS = GmatMathUtil::Min(bestResidualRMS,newResidualRMS);
 
    // Solve normal equation
    #ifdef DEBUG_VERBOSE

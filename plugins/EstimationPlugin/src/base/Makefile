@@ -88,6 +88,7 @@ prep:
 	rm -rf $(TARGET)
 
 HEADERS = -Iinclude \
+          -Iadapter \
           -Icommand \
           -Iestimator \
           -Ievent \
@@ -97,6 +98,10 @@ HEADERS = -Iinclude \
           -Imeasurement \
           -Imeasurement/Ionosphere \
           -Imeasurement/Troposphere \
+          -Imeasurementmodel \
+          -Ireporter \
+          -Isignal \
+          -Itrackingfile \
           -Itrackingsystem \
           $(DATAFILE_INCLUDES) \
           -I$(GMAT_Code_Location)/base/include \
@@ -144,6 +149,8 @@ C_OBJECTS = \
 
 CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
+    adapter/TrackingDataAdapter.o \
+    adapter/RangeAdapterKm.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
     estimator/Estimator.o \
@@ -180,6 +187,7 @@ CPP_OBJECTS = \
     measurement/MediaCorrection.o \
     measurement/MeasurementData.o \
     measurement/MeasurementManager.o \
+    measurement/MeasurementModelBase.o \
     measurement/MeasurementModel.o \
     measurement/PhysicalMeasurement.o \
     measurement/SnTwoWayRange.o \
@@ -196,11 +204,19 @@ CPP_OBJECTS = \
     measurement/Troposphere/Troposphere.o \
     $(IONOSPHERE_CPP_OBJECTS) \
     $(DATAFILE_OBJECTS) \
+    measurementmodel/MeasureModel.o \
+    reporter/ProgressReporter.o \
+    signal/SignalBase.o \
+    signal/SignalData.o \
+    signal/PhysicalSignal.o \
+    trackingfile/TFSMagicNumbers.o \
+    trackingfile/TrackingFileSet.o \
     trackingsystem/TrackingSystem.o \
     trackingsystem/DSNTrackingSystem.o \
     trackingsystem/OpticalTrackingSystem.o \
     trackingsystem/TDRSSTrackingSystem.o \
     trackingsystem/USNTrackingSystem.o
+
 
 #    measurementfile/DataFileAdapter.o \
 

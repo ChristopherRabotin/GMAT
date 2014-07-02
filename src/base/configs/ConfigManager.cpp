@@ -597,7 +597,7 @@ void ConfigManager::AddCalculatedPoint(CalculatedPoint *cp)
  * @param mModel Pointer to the MeasurementModel instance.
  */
 //------------------------------------------------------------------------------
-void ConfigManager::AddMeasurementModel(MeasurementModel *mModel)
+void ConfigManager::AddMeasurementModel(MeasurementModelBase *mModel)
 {
    if (mModel == NULL)
       throw ConfigManagerException("Cannot add NULL MeasurementModel object");
@@ -2275,24 +2275,24 @@ CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// MeasurementModel* GetMeasurementModel(const std::string &name)
+// MeasurementModelBase* GetMeasurementModel(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Retrieves a MeasurementModel from the configuration
+ * Retrieves a measurement model from the configuration
  *
  * @param name The name of the MeasurementModel
  *
  * @return A pointer to the MeasurementModel, or NULL if it was not found
  */
 //------------------------------------------------------------------------------
-MeasurementModel* ConfigManager::GetMeasurementModel(const std::string &name)
+MeasurementModelBase* ConfigManager::GetMeasurementModel(const std::string &name)
 {
-   MeasurementModel *mm = NULL;
+   MeasurementModelBase *mm = NULL;
    if (mapping.find(name) != mapping.end())
    {
       if (mapping[name]->IsOfType(Gmat::MEASUREMENT_MODEL))
       {
-         mm = (MeasurementModel *)mapping[name];
+         mm = (MeasurementModelBase *)mapping[name];
       }
    }
    return mm;

@@ -24,6 +24,7 @@
 
 #include "estimation_defs.hpp"
 #include "GmatBase.hpp"
+#include "MeasurementModelBase.hpp"
 #include "EstimationDefs.hpp"
 #include "MeasurementData.hpp"
 #include "CoreMeasurement.hpp"
@@ -36,7 +37,7 @@
  * Container class that wraps CoreMeasurement objects for use in estimation and
  * simulation
  */
-class ESTIMATION_API MeasurementModel : public GmatBase
+class ESTIMATION_API MeasurementModel : public MeasurementModelBase
 {
 public:
    MeasurementModel(const std::string &nomme = "");

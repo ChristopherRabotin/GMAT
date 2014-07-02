@@ -25,6 +25,7 @@
 #include "GmatConstants.hpp"
 #include "FileManager.hpp"
 #include "MeasurementException.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 
@@ -32,6 +33,7 @@
 //#define DEBUG_FILE_WRITE
 //#define DEBUG_FILE_READ
 //#define DEBUG_FILE_ACCESS
+//#define DEBUG_SIGNAL_READ
 
 //-----------------------------------------------------------------------------
 // GmatObType(const std::string withName)
@@ -386,6 +388,11 @@ ObservationData* GmatObType::ReadObservation()
    theLine >> type;
    currentObs.type = (Gmat::MeasurementType)type;
 
+   // Signal based measurements have types that start at 9000; smaller IDs are
+   // the old code.
+   /// @todo Once ported to signal measurements, remove the code from here:
+   if (type < 9000)
+   {
    switch (currentObs.type)
    {
       case Gmat::GEOMETRIC_RANGE:
@@ -418,41 +425,19 @@ ObservationData* GmatObType::ReadObservation()
          dataSize = 0;
          break;
    }
-
-   // Set measurement unit:
-   switch (currentObs.type)
+   }
+   else
+   /// @todo to here, and clean up
    {
-      case Gmat::GEOMETRIC_RANGE:
-	  case Gmat::USN_TWOWAYRANGE:
-		 currentObs.unit = "km";
-		 break;
-      case Gmat::GEOMETRIC_RANGE_RATE:
-      case Gmat::USN_TWOWAYRANGERATE:
-		 currentObs.unit = "km/s";
-		 break;
-      case Gmat::DSN_TWOWAYRANGE:
-		 currentObs.unit = "RU";
-		 break;
-      case Gmat::DSN_TWOWAYDOPPLER:
-		 currentObs.unit = "Hz";
-		 break;
-
-      case Gmat::TDRSS_TWOWAYRANGE:
-		 currentObs.unit = "km";
-		 break;
-      case Gmat::TDRSS_TWOWAYRANGERATE:
-		 currentObs.unit = "km";
-		 break;
-
-      case Gmat::GEOMETRIC_AZ_EL:
-      case Gmat::GEOMETRIC_RA_DEC:
-      case Gmat::OPTICAL_AZEL:
-      case Gmat::OPTICAL_RADEC:
-		 currentObs.unit = "rad";
-         break;
-
-      default:
-         break;
+      #ifdef DEBUG_FILE_READ
+         MessageInterface::ShowMessage("   Processing measurement type %d\n",
+               type);
+      #endif
+      if (!ProcessSignals(str, participantSize, dataSize))
+      {
+         MessageInterface::ShowMessage("Signal based measurement of type %d "
+               "not processed successfully for line %s\n", type, str.c_str());
+   }
    }
 
    for (Integer i = 0; i < participantSize; ++i)
@@ -479,6 +464,7 @@ ObservationData* GmatObType::ReadObservation()
 */
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentObs.epoch, currentObs.typeName.c_str(), currentObs.type);
+            currentObs.typeName.c_str(), currentObs.type);
       for (Integer i = 0; i < participantSize; ++i)
 		  MessageInterface::ShowMessage("%s    ", currentObs.participantIDs.at(i).c_str());
 
@@ -488,7 +474,6 @@ ObservationData* GmatObType::ReadObservation()
 	  MessageInterface::ShowMessage("\n");
       MessageInterface::ShowMessage("GmatObType::ReadObservation() End\n");
    #endif
-
 
    return &currentObs;
 }
@@ -508,7 +493,7 @@ ObservationData* GmatObType::ReadObservation()
 bool GmatObType::Close()
 {
    #ifdef DEBUG_FILE_WRITE
-      MessageInterface::ShowMessage("GmatObType::Close() Executing\n");
+      MessageInterface::ShowMessage("GmatObType::Close() Executing for %p\n", this);
    #endif
    bool retval = false;
 
@@ -538,6 +523,88 @@ bool GmatObType::Finalize()
       MessageInterface::ShowMessage("GmatObType::Finalize() Executing\n");
    #endif
    bool retval = true;
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool ProcessSignals(const std::string str, Integer& participantSize,
+//       Integer& dataSize)
+//------------------------------------------------------------------------------
+/**
+ * Parses a measurement file line and counts participants and data elements
+ *
+ * @param str The data line from the tracking data file
+ * @param participantSize The counter for participants from the line
+ * @param dataSize The counter for data entries on the line
+ *
+ * @return true if the line was successfully parsed, false if not
+ */
+//------------------------------------------------------------------------------
+bool GmatObType::ProcessSignals(const std::string str, Integer& participantSize,
+      Integer& dataSize)
+{
+   bool retval = false;
+
+   participantSize = 0;
+   dataSize = 0;
+
+   std::stringstream temp(str);
+   std::string field;
+
+   // First 3 fields are already handled
+   for (Integer i = 0; i < 3; ++i)
+   {
+      temp >> field;
+      #ifdef DEBUG_SIGNAL_READ
+         MessageInterface::ShowMessage("   +++ field:  %s\n", field.c_str());
+      #endif
+   }
+
+   // Next set of fields are participants
+   while (temp.eof() == false)
+   {
+      temp >> field;
+      if (GmatStringUtil::IsValidNumber(field, true) == true)
+      {
+         #ifdef DEBUG_SIGNAL_READ
+            MessageInterface::ShowMessage("   +++ Measurement:  %s\n",
+                  field.c_str());
+         #endif
+         ++dataSize;    // Track first data entry!
+         break;
+      }
+
+      #ifdef DEBUG_SIGNAL_READ
+         MessageInterface::ShowMessage("   +++ Participant:  %s\n",
+               field.c_str());
+      #endif
+      ++participantSize;
+   }
+
+   // Then the data
+   while (temp.eof() == false)
+   {
+      temp >> field;
+
+      if (GmatStringUtil::IsValidNumber(field, true) == false)
+         throw MeasurementException("Data line \"" + str + "\" is improperly "
+               "formatted for a GMAT measurement data (gmd) file");
+
+      #ifdef DEBUG_SIGNAL_READ
+         MessageInterface::ShowMessage("   +++ Measurement:  %s\n",
+               field.c_str());
+      #endif
+      ++dataSize;
+   }
+
+   #ifdef DEBUG_SIGNAL_READ
+      MessageInterface::ShowMessage("   ---> %d participants and %d data "
+            "entries\n", participantSize, dataSize);
+   #endif
+
+   if ((participantSize > 0) && (dataSize > 0))
+      retval = true;
 
    return retval;
 }

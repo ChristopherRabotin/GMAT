@@ -54,7 +54,7 @@ class Event;
 class EventLocator;
 class Interface;
 
-class MeasurementModel;
+class MeasurementModelBase;
 class CoreMeasurement;
 class DataFile;
 class ObType;
@@ -120,7 +120,7 @@ public:
                                            const std::string &withName = "");
    virtual Attitude*        CreateAttitude(const std::string &ofType,
                                            const std::string &withName = "");
-   virtual MeasurementModel*
+   virtual MeasurementModelBase*
                             CreateMeasurementModel(const std::string &ofType,
                                            const std::string &withName = "");
    virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,

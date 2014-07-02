@@ -240,8 +240,9 @@ public:
    PropSetup* GetPropSetup(const std::string &name);
    
    // MeasurementModel
-   MeasurementModel* CreateMeasurementModel(const std::string &name);
-   MeasurementModel* GetMeasurementModel(const std::string &name);
+   MeasurementModelBase* CreateMeasurementModel(const std::string &type,
+         const std::string &name);
+   MeasurementModelBase* GetMeasurementModel(const std::string &name);
    
    // TrackingSystem
    TrackingSystem* CreateTrackingSystem(const std::string &type,

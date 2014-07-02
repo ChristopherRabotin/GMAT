@@ -52,7 +52,8 @@ public:
 // Explicitly public so that this class acts like a struct
 public:
    /// The type of measurement in this record
-   Gmat::MeasurementType   type;
+//   Gmat::MeasurementType   type;
+   Integer           type;
    /// String value for type of measurement in this record
    std::string       typeName;
    /// Unique ID for associated model.  This number can change from run to run.

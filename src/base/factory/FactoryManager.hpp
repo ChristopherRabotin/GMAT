@@ -48,7 +48,7 @@
 #include "MathNode.hpp"
 #include "Attitude.hpp"
 
-class MeasurementModel;
+class MeasurementModelBase;
 class CoreMeasurement;
 class DataFile;
 class ObType;
@@ -139,7 +139,8 @@ public:
                                          const std::string &withName = "");
    CoordinateSystem*      CreateCoordinateSystem(const std::string &withName = "");
 
-   MeasurementModel*      CreateMeasurementModel(const std::string &withName);
+   MeasurementModelBase*  CreateMeasurementModel(const std::string &ofType,
+                                                 const std::string &withName);
    DataFile*              CreateDataFile(const std::string &ofType,
                                          const std::string &withName);
    TrackingSystem*        CreateTrackingSystem(const std::string &ofType,
