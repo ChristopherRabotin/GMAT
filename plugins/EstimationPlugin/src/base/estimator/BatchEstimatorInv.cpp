@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
 #include <sstream>
+#include "StringUtil.hpp"
 
 
 //#define DEBUG_ACCUMULATION
@@ -170,11 +171,11 @@ void BatchEstimatorInv::Accumulate()
    Real temp;
    TimeConverterUtil::Convert("A1ModJulian", currentObs->epoch,"","UTCGregorian", temp, times, 1); 
    if (textFileMode == "Normal")
-      sprintf(&s[0],"%4d  %5d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
+      sprintf(&s[0],"%4d  %8d   %s   ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str());
    else
    {
       Real timeTAI = TimeConverterUtil::Convert(currentObs->epoch,currentObs->epochSystem,TimeConverterUtil::TAIMJD); 
-	  sprintf(&s[0],"%4d  %5d   %s  %.12lf        ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
+	  sprintf(&s[0],"%4d  %8d   %s  %.12lf        ", iterationsTaken, measManager.GetCurrentRecordNumber(), times.c_str(), timeTAI);
    }
    sLine << s;
 
@@ -194,13 +195,16 @@ void BatchEstimatorInv::Accumulate()
    {
 	  // Count number of records removed by measurement model unmatched 
       numRemovedRecords["U"]++;
-	  std::string ss = measManager.GetObsDataObject()->removedReason = "U";
 	  measManager.GetObsDataObject()->inUsed = false;
-	  ss = ss + "    ";
-	  ss = ss.substr(0,4);
-	  sLine << ss << "     ";
+	  measManager.GetObsDataObject()->removedReason = "U";
+	  sLine << GmatStringUtil::GetAlignmentString(measManager.GetObsDataObject()->removedReason, 10, GmatStringUtil::LEFT);
 
-      sprintf(&s[0],"%18.6lf   N/A                     N/A               N/A                   N/A                  N/A                      N/A", currentObs->value[0]);
+	  //std::string ss = measManager.GetObsDataObject()->removedReason = "U";
+	  //ss = ss + "    ";
+	  //ss = ss.substr(0,4);
+	  //sLine << ss << "     ";
+
+      sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
 	  sLine << s;
 
 
@@ -211,11 +215,11 @@ void BatchEstimatorInv::Accumulate()
 		    sLine << "                      N/A";
 
          if (currentObs->typeName == "DSNTwoWayRange")
-	        sprintf(&s[0],"            %d   %.15le   %.15le                      N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+	        sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	     else if (currentObs->typeName == "DSNTwoWayDoppler")
 		    sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
 	     else
-		    sprintf(&s[0],"            N/A                      N/A                    N/A                      N/A");
+		    sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
          sLine << s;
 	  }
 	  sLine << "\n";
@@ -231,11 +235,12 @@ void BatchEstimatorInv::Accumulate()
 			numRemovedRecords["B"]++;
 		 else
 		    numRemovedRecords[ss]++;
-		 ss = ss + "    ";
-		 ss = ss.substr(0,4);
-		 sLine << ss << "     ";
+		 //ss = ss + "    ";
+		 //ss = ss.substr(0,4);
+		 //sLine << ss << "     ";
+		 sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
 
-		 sprintf(&s[0],"%18.6lf                  N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value[0], calculatedMeas->feasibilityValue);
+		 sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->feasibilityValue);
 		 sLine << s;
 
 	     if (textFileMode != "Normal")
@@ -245,11 +250,11 @@ void BatchEstimatorInv::Accumulate()
 			   sLine << "                      N/A";
 
             if (currentObs->typeName == "DSNTwoWayRange")
-	           sprintf(&s[0],"            %d   %.15le   %.15le                      N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+	           sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	        else if (currentObs->typeName == "DSNTwoWayDoppler")
 		       sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
 	        else
-		       sprintf(&s[0],"            N/A                      N/A                    N/A                      N/A");
+		       sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
             sLine << s;
 		 }
 		 sLine << "\n";
@@ -258,6 +263,15 @@ void BatchEstimatorInv::Accumulate()
       {
          // Currently assuming uniqueness; modify if more than 1 possible here
          // Case: ((modelsToAccess.size() > 0) && (measManager.Calculate(modelsToAccess[0], true) >= 1))
+
+		 // It has to make correction for observation value before running data filter
+		 if ((iterationsTaken == 0)&&(currentObs->typeName == "DSNTwoWayRange"))
+		 {
+			// value correction is only applied for DSNTwoWayRange and it is only performed at the first time
+			for (UnsignedInt index = 0; index < currentObs->value.size(); ++index)
+		       measManager.GetObsDataObject()->value[index] = ObservationDataCorrection(calculatedMeas->value[index], currentObs->value[index], currentObs->rangeModulo);
+		 }
+
 	     bool isReUsed = DataFilter();
       
          #ifdef DEBUG_ACCUMULATION
@@ -266,15 +280,18 @@ void BatchEstimatorInv::Accumulate()
       
          if (measManager.GetObsDataObject()->inUsed == false)
 		 {
-			// Write report for this observation data for case data record is removed
-			std::string ss = currentObs->removedReason;
+			// Specify reamoved reason and count number of removed records
+			 std::string ss = measManager.GetObsDataObject()->removedReason;			//currentObs->removedReason;
 		    if (ss.substr(0,1) == "B")
 			   numRemovedRecords["B"]++;
 		    else
 		       numRemovedRecords[ss]++;
-            ss = ss + "    ";
-		    ss = ss.substr(0,4);
-		    sLine << ss << "     ";
+
+			// Write report for this observation data for case data record is removed
+			//ss = ss + "    ";
+		    //ss = ss.substr(0,4);
+		    //sLine << ss << "     ";
+			sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
 
 			Real ocDiff = currentObs->value[0]-calculatedMeas->value[0];
 			Real weight;
@@ -282,7 +299,7 @@ void BatchEstimatorInv::Accumulate()
                weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
             else
                weight = 1.0;
-			sprintf(&s[0],"%18.6lf   %18.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+			sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			sLine << s;
 
 			if (textFileMode != "Normal")
@@ -292,15 +309,17 @@ void BatchEstimatorInv::Accumulate()
 			      sLine << "                      N/A";
 
 	           if (currentObs->typeName == "DSNTwoWayRange")
-	              sprintf(&s[0],"            %d   %.15le   %.15le                      N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+	              sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	           else if (currentObs->typeName == "DSNTwoWayDoppler")
 		          sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
 	           else
-		          sprintf(&s[0],"            N/A                      N/A                    N/A                      N/A");
+		          sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
                sLine << s;
 			}
 			sLine << "\n";
 
+
+			// Reset value for removed reason for all reuseable data records
 			if (isReUsed)
 			{
 			   measManager.GetObsDataObject()->inUsed = true;
@@ -406,7 +425,6 @@ void BatchEstimatorInv::Accumulate()
             {
 			   // Caluclate residual O-C
                ocDiff = currentObs->value[k] - calculatedMeas->value[k];
-
                #ifdef DEBUG_O_MINUS_C
 		       Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
                                       TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD,
@@ -421,11 +439,11 @@ void BatchEstimatorInv::Accumulate()
                #endif
 
                measurementEpochs.push_back(currentEpoch);
-		       OData.push_back(currentObs->value[k]);						// made changes by TUAN NGUYEN
+			   OData.push_back(currentObs->value[k]);						// made changes by TUAN NGUYEN
 		       CData.push_back(calculatedMeas->value[k]);					// made changes by TUAN NGUYEN
                measurementResiduals.push_back(ocDiff);
                measurementResidualID.push_back(calculatedMeas->uniqueID);
-
+			   
 			   // Calculate weight
                Real weight = 1.0;
                if (currentObs->noiseCovariance == NULL)
@@ -468,13 +486,14 @@ void BatchEstimatorInv::Accumulate()
 
 			   
 			   // Write report for this observation data for case data record is removed
-			   std::string ss = currentObs->removedReason + "    ";
-			   ss = ss.substr(0,4);
-	           sLine << ss << "     ";
+			   std::string ss = currentObs->removedReason;
+			   //ss = ss.substr(0,4);
+	           //sLine << ss << "     ";
+			   sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
 
-			   sprintf(&s[0],"%18.6lf   %18.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+			   sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
 			   sLine << s;
-
+			   
 			   if (textFileMode != "Normal")
 			   {
                   // fill out N/A for partial derivative
@@ -487,14 +506,15 @@ void BatchEstimatorInv::Accumulate()
 			      }
 
 		          if (currentObs->typeName == "DSNTwoWayRange")
-	                 sprintf(&s[0],"            %d   %.15le   %.15le                      N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
+	                 sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
 	              else if (currentObs->typeName == "DSNTwoWayDoppler")
 		             sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
 	              else
-		             sprintf(&s[0],"            N/A                      N/A                    N/A                      N/A");
+		             sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
                   sLine << s;
 			   }
 			   sLine << "\n";
+
 	        }
 
             #ifdef DEBUG_ACCUMULATION_RESULTS
@@ -543,7 +563,7 @@ void BatchEstimatorInv::Accumulate()
 
    }  // end of if (modelsToAccess.size() == 0)
 
-
+   
    linesBuff = sLine.str();
    WriteToTextFile(currentState);
 
@@ -624,6 +644,9 @@ void BatchEstimatorInv::Estimate()
    if (iterationsTaken == 0)									// made changes by TUAN NGUYEN
       initialEstimationState = (*estimationState);				// made changes by TUAN NGUYEN
    oldEstimationState = (*estimationState);
+   // Convert previous state from GMAT internal coordinate system to participants' coordinate system
+   GetEstimationState(previousSolveForState);					// made changes by TUAN NGUYEN
+
 
    // Specify previous, current, and the best weighted RMS:
    // Calculate RMSOLD:
@@ -808,6 +831,9 @@ void BatchEstimatorInv::Estimate()
       dx.push_back(delta);
       (*estimationState)[i] += delta;
    }
+   // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
+   GetEstimationState(currentSolveForState);					// made changes by TUAN NGUYEN
+
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");
       for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -863,7 +889,7 @@ void BatchEstimatorInv::Estimate()
 Real BatchEstimatorInv::ObservationDataCorrection(Real cValue, Real oValue, Real moduloConstant)
 {
 	Real delta = cValue - oValue;
-	int N = (int) (delta/moduloConstant + ((delta >= 0)?1:-1)*0.5);
+	int N = (int)(delta/moduloConstant + 0.5);
 
 	return (oValue + N*moduloConstant);
 }

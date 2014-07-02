@@ -311,6 +311,7 @@ Integer BatchEstimator::SetIntegerParameter(const Integer id, const Integer valu
 	  }
 
 	  maxConsDivergences = value;
+	  return value;
    }
 
    return Estimator::SetIntegerParameter(id, value);
@@ -884,8 +885,10 @@ void BatchEstimator::CompleteInitialization()
       measManager.PrepareForProcessing();
       UnsignedInt numRec = measManager.LoadObservations();					// made changes by TUAN NGUYEN
 	  if (numRec == 0)														// made changes by TUAN NGUYEN
+	  {
          throw EstimatorException("No observation data is used for estimation\n");	// made changes by TUAN NGUYEN
-
+	  }
+	  
 ///// Check for more generic approach
 	  measManager.LoadRampTables();											// made changes by TUAN NGUYEN
 
@@ -948,8 +951,12 @@ void BatchEstimator::CompleteInitialization()
    esm.MapObjectsToVector();
 
 //   converged   = false;
-   estimationStatus = UNKNOWN;
+   estimationStatus = UNKNOWN;					// made changes by TUAN NGUYEN
+   // Convert estimation state from GMAT internal coordinate system to participants' coordinate system
+   GetEstimationState(aprioriSolveForState);	// made changes by TUAN NGUYEN
+
    isInitialized = true;
+   numDivIterations = 0;						// It need to reset it's value when starting estimatimation calculation
 
    WriteToTextFile();
    ReportProgress();
@@ -1081,21 +1088,25 @@ void BatchEstimator::CalculateData()
    // Tell the measurement manager to calculate the simulation data
 //   measManager.CalculateMeasurements();
 
+   //if (measManager.CalculateMeasurements() == false)
+   //{
+   //   // No measurements were possible
+   //   bool endOfDataSet = measManager.AdvanceObservation();
+   //   if (endOfDataSet)										// made changes by TUAN NGUYEN
+   //      currentState = ESTIMATING;							// made changes by TUAN NGUYEN
+	  //else													// made changes by TUAN NGUYEN
+	  //{														// made changes by TUAN NGUYEN
+   //      nextMeasurementEpoch = measManager.GetEpoch();
+   //      FindTimeStep();
+	  //   if (currentEpoch <= nextMeasurementEpoch)
+   //         currentState = PROPAGATING;
+   //      else
+   //         currentState = ESTIMATING;
+	  //}														// made changes by TUAN NGUYEN
+   //}
    if (measManager.CalculateMeasurements() == false)
    {
-      // No measurements were possible
-      bool endOfDataSet = measManager.AdvanceObservation();
-      if (endOfDataSet)										// made changes by TUAN NGUYEN
-         currentState = ESTIMATING;							// made changes by TUAN NGUYEN
-	  else													// made changes by TUAN NGUYEN
-	  {														// made changes by TUAN NGUYEN
-         nextMeasurementEpoch = measManager.GetEpoch();
-         FindTimeStep();
-	     if (currentEpoch <= nextMeasurementEpoch)
-            currentState = PROPAGATING;
-         else
-            currentState = ESTIMATING;
-	  }														// made changes by TUAN NGUYEN
+	   currentState = ACCUMULATING;
    }
    else if (measManager.GetEventCount() > 0)
    {
@@ -1175,7 +1186,7 @@ void BatchEstimator::CheckCompletion()
    convergenceReason = "";
 //   converged = TestForConvergence(convergenceReason);
    estimationStatus = TestForConvergence(convergenceReason);
-
+   
    #ifdef RUN_SINGLE_PASS
       converged = true;
    #endif
@@ -1186,7 +1197,7 @@ void BatchEstimator::CheckCompletion()
 	   (estimationStatus == RELATIVETOL_CONVERGED) ||
 	   (estimationStatus == ABS_AND_REL_TOL_CONVERGED) ||
 	   (estimationStatus == MAX_CONSECUTIVE_DIVERGED) ||
-	   (iterationsTaken >= maxIterations))
+	   (estimationStatus == MAX_ITERATIONS_DIVERGED))
    {
       currentState = FINISHED;
    }
@@ -1201,10 +1212,12 @@ void BatchEstimator::CheckCompletion()
       esm.MapObjectsToSTM();
       currentEpoch = estimationEpoch;
       measManager.Reset();											// set current observation data to be the first one in observation data table				// made changes by TUAN NGUYEN
-	  if (measManager.GetObsDataObject()->inUsed == false)			// if the first observation data is not in used, then go to the next in-used data record	// made changes by TUAN NGUYEN
-	  {
-		 measManager.AdvanceObservation();							// made changes by TUAN NGUYEN
-	  }
+	  // Note that: all unused data records will be handled in BatchEstimatorInv::Accumulate() function
+	  // Therefore, there is no prblem when passing those records to Accumulate() 
+	  //if (measManager.GetObsDataObject()->inUsed == false)			// if the first observation data is not in used, then go to the next in-used data record	// made changes by TUAN NGUYEN
+	  //{
+	  //   measManager.AdvanceObservation();							// made changes by TUAN NGUYEN
+	  //}
       nextMeasurementEpoch = measManager.GetEpoch();
 
       // Need to reset STM and covariances
@@ -1344,14 +1357,17 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   Estimation Epoch (" << estEpochFormat
                            << "): " << estEpoch << "\n";
                else
-                  progress << "   Estimation Epoch (A.1 modified Julian): "
-                           << estimationEpoch << "\n";
+			   {
+                  char s[100];
+				  sprintf(&s[0], "%22.12lf", estimationEpoch);
+                  progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+			   }
 
 			   GetEstimationState(outputEstimationState);						// made changes by TUAN NGUYEN
                
 			   for (UnsignedInt i = 0; i < map->size(); ++i)
                {
-                  progress << "   " << GetElementFullName((*map)[i]) << " = "
+                  progress << "   " << GetElementFullName((*map)[i], false) << " = "
                            //<< (*map)[i]->objectName << "."
                            //<< (*map)[i]->elementName << "."
                            //<< (*map)[i]->subelement << " = "
@@ -1405,14 +1421,15 @@ std::string BatchEstimator::GetProgressString()
                      << "------------------------\n"
                      << "Iteration " << iterationsTaken
                      << "\n\nCurrent estimated state:\n";
-            progress << "   Estimation Epoch: "
-                     << estimationEpoch << "\n";
+			char s[100];
+			sprintf(&s[0], "%22.12lf", estimationEpoch);
+            progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
 
 			GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
-               progress << "   " << GetElementFullName((*map)[i]) << " = "
+               progress << "   " << GetElementFullName((*map)[i], false) << " = "
                         //<< (*map)[i]->objectName << "."
                         //<< (*map)[i]->elementName << "."
                         //<< (*map)[i]->subelement << " = "
@@ -1443,6 +1460,9 @@ std::string BatchEstimator::GetProgressString()
 			case MAX_CONSECUTIVE_DIVERGED:
 			   progress << "This iteration is diverged due to maximum consecutive diverged criteria\n";
 			   break;
+			case MAX_ITERATIONS_DIVERGED:
+			   progress << "This iteration is diverged due to maximum iterations\n";
+			   break;
 			case CONVERGING:
 			   progress << "This iteration is converging\n";
 			   break;
@@ -1467,29 +1487,33 @@ std::string BatchEstimator::GetProgressString()
 				progress << "converged!\n";
 				break;
 			case MAX_CONSECUTIVE_DIVERGED:
+			case MAX_ITERATIONS_DIVERGED:
 			case CONVERGING:
 			case DIVERGING:
-				progress << "did not converge\n";
+				progress << "did not converge!\n";
 				break;
 			case UNKNOWN:
 				break;
 			};
             //         << (converged ? "converged!" : "did not converge") << "\n"
-			progress   << convergenceReason << "\n"
-                     << "\nFinal Estimated State:\n\n";
+			progress   << "   " << convergenceReason << "\n"
+                     << "Final Estimated State:\n\n";
 
             if (estEpochFormat != "FromParticipants")
                progress << "   Estimation Epoch (" << estEpochFormat
-                        << "): " << estEpoch << "\n\n";
+                        << "): " << estEpoch << "\n";
             else
-               progress << "   Estimation Epoch (A.1 modified Julian): "
-                        << estimationEpoch << "\n\n";
+			{
+			   char s[100];
+			   sprintf(&s[0],"%22.12lf", estimationEpoch);
+               progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+			}
 
 			GetEstimationState(outputEstimationState);							// made changes by TUAN NGUYEN
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
-               progress << "   " << GetElementFullName((*map)[i]) << " = "
+               progress << "   " << GetElementFullName((*map)[i], false) << " = "
                         //<< (*map)[i]->objectName << "."
                         //<< (*map)[i]->elementName << "."
                         //<< (*map)[i]->subelement << " = "
@@ -1550,13 +1574,20 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
-std::string BatchEstimator::GetElementFullName(ListItem* infor) const
+#include "Spacecraft.hpp"
+std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalCS) const
 {
    std::stringstream ss;
    
    ss << infor->objectName << ".";
    if (infor->elementName == "CartesianState")
    {
+	   //MessageInterface::ShowMessage("<<<<  Object name <%s>  coordinate system <%s>\n", infor->object->GetName().c_str(), ((Spacecraft*)(infor->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, "")->GetName().c_str());
+      if (isInternalCS)
+		 ss << "EarthMJ2000Eq" << ".";
+	  else
+	     ss << ((Spacecraft*)(infor->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, "")->GetName() << ".";
+
 	  switch(infor->subelement)
 	  {
 	  case 1:
@@ -1644,7 +1675,7 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
 {
    Integer retval = UNKNOWN;
    std::stringstream why;
-
+   
    // AbsoluteTol test
    if (newResidualRMS <= absoluteTolerance)
    {
@@ -1673,6 +1704,13 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
    if (retval != UNKNOWN)
       return retval;
 
+   if (iterationsTaken == (maxIterations-1))
+   {
+      retval = MAX_ITERATIONS_DIVERGED;
+	  why << "Number of iterations reaches it's maximum setting value (" << maxIterations << ")\n";
+	  reason = why.str();
+      return retval;
+   }
 
    if (iterationsTaken >= 1)
    {
@@ -1681,7 +1719,11 @@ Integer BatchEstimator::TestForConvergence(std::string &reason)
 	  {
 		 numDivIterations++;
 		 if (numDivIterations >= maxConsDivergences)
+		 {
+			why << "Number of consecutive divergences reaches it's maximum setting value (" << maxConsDivergences << ")\n";
+			reason = why.str();
 		    retval = MAX_CONSECUTIVE_DIVERGED;
+		 }
 		 else
 		    retval = DIVERGING;
 	  }
@@ -1776,18 +1818,18 @@ void BatchEstimator::WriteConclusion()
          textFile << "converged!\n";
          break;
       case MAX_CONSECUTIVE_DIVERGED:
+	  case MAX_ITERATIONS_DIVERGED:
       case CONVERGING:
       case DIVERGING:
-         textFile << "did not converge\n";
+         textFile << "did not converge!\n";
          break;
       case UNKNOWN:
          break;
    };
 
-
    /// 2. Write convergence reason
    textFile.precision(15);
-   textFile << convergenceReason << "\n\n"
+   textFile << "   " << convergenceReason << "\n"
             << "Final Estimated State:\n";
 
    if (estEpochFormat != "FromParticipants")
@@ -1819,7 +1861,7 @@ void BatchEstimator::WriteConclusion()
          //textFile << (*map)[i]->objectName << "."
          //         << (*map)[i]->elementName << "."
          //         << (*map)[i]->subelement;
-		 textFile << GetElementFullName((*map)[i]);
+		 textFile << GetElementFullName((*map)[i], false);
 	  }
 	  textFile << " = " << outputEstimationState[i] << "\n";
    }
@@ -1897,7 +1939,7 @@ void BatchEstimator::WriteHeader()
          //textFile << (*map)[i]->objectName << "."
          //         << (*map)[i]->elementName << "."
          //         << (*map)[i]->subelement;
-		 textFile << GetElementFullName((*map)[i]);
+		 textFile << GetElementFullName((*map)[i], false);
 	  }
 	  textFile << " = " << outputEstimationState[i] << "\n";
    }
@@ -1924,14 +1966,14 @@ void BatchEstimator::WriteHeader()
 
    /// 5. Write report header
    if (textFileMode == "Normal")
-      textFile << "Iter   RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants        Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
    else
    {
-      textFile << "Iter   RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants        Edit                Obs (O)              Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants        Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
 	  for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
 		 textFile << "                         ";
-	  textFile << "     Uplink-Band         Uplink-Frequency           Range-Modulo         Doppler-Interval\n";
+	  textFile << "   Uplink-Band         Uplink-Frequency             Range-Modulo         Doppler-Interval\n";
    }
    textFile.flush();
 
@@ -1945,90 +1987,111 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 
    if (sState == ESTIMATING)
    {
-   /// 1. Write state summary
-   // Convert state to participants' coordinate system:
-   GetEstimationState(outputEstimationState);
-   // Write state to report file
-   textFile << "\n";
-   textFile << "Iteration " << iterationsTaken << ": State Information \n"
-	        << "   State Component                                               Apriori State           Previous State            Current State          Current-Apriori         Current-Privous\n";
+      /// 1. Write state summary
+      // Convert state to participants' coordinate system:
+      GetEstimationState(outputEstimationState);
+      // Write state to report file
+	  Integer max_len = 15;
+      for (int i = 0; i < map->size(); ++i) 
+      {
+	     std::stringstream ss;
+	     if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+             ((*map)[i]->elementName == "Bias"))
+	     {
+		    MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+		    StringArray sa = mm->GetStringArrayParameter("Participants");
+		    ss << mm->GetStringParameter("Type") << " ";
+		    for( UnsignedInt j=0; j < sa.size(); ++j)
+			   ss << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+		    ss << (*map)[i]->subelement;
+	     }
+	     else
+		    ss << GetElementFullName((*map)[i], false);
+		 max_len = max(max_len, ss.str().length());
+	  }
 
-   textFile.precision(8);
-   for (int i = 0; i < map->size(); ++i) 
-   {
-	  textFile << "   ";
-	  std::stringstream ss;
-	  if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-          ((*map)[i]->elementName == "Bias"))
-	  {
-		 MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-		 StringArray sa = mm->GetStringArrayParameter("Participants");
-		 ss << mm->GetStringParameter("Type") << " ";
-		 for( UnsignedInt j=0; j < sa.size(); ++j)
-			ss << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-		 ss << (*map)[i]->subelement;
-	  }
-	  else
-	  {
-         //textFile << (*map)[i]->objectName << "."
-         //         << (*map)[i]->elementName << "."
-         //         << (*map)[i]->subelement;
-		 ss << GetElementFullName((*map)[i]);
-	  }
+      textFile << "\n";
+      textFile << "Iteration " << iterationsTaken << ": State Information \n"
+		       << "   " << GmatStringUtil::GetAlignmentString("State Component", max_len, GmatStringUtil::LEFT)                                                
+			   << "               Apriori State              Previous State               Current State             Current-Apriori            Current-Previous\n";
+
+      textFile.precision(8);
+      for (int i = 0; i < map->size(); ++i) 
+      {
+	     textFile << "   ";
+	     std::stringstream ss;
+	     if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+             ((*map)[i]->elementName == "Bias"))
+	     {
+		    MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+		    StringArray sa = mm->GetStringArrayParameter("Participants");
+		    ss << mm->GetStringParameter("Type") << " ";
+		    for( UnsignedInt j=0; j < sa.size(); ++j)
+			   ss << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+		    ss << (*map)[i]->subelement;
+	     }
+	     else
+	     {
+            //textFile << (*map)[i]->objectName << "."
+            //         << (*map)[i]->elementName << "."
+            //         << (*map)[i]->subelement;
+		    ss << GetElementFullName((*map)[i], false);
+	     }
 	  
-	  textFile << GmatStringUtil::GetAlignmentString(ss.str(), 50, GmatStringUtil::LEFT);
-      textFile << "     "
-		       << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(initialEstimationState[i]), 20, GmatStringUtil::RIGHT) << "     "			    // Apriori state
-		       << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(oldEstimationState[i]), 20, GmatStringUtil::RIGHT) << "     "					// initial state
-			   << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString((*estimationState)[i]), 20, GmatStringUtil::RIGHT) << "     "					// updated state
-			   << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString((*estimationState)[i] - initialEstimationState[i]), 20, GmatStringUtil::RIGHT)  << "    "	// Apriori - Current state
-			   << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(dx[i]), 20, GmatStringUtil::RIGHT)  << "\n";									// Previous - Current state
-   }
-   textFile << "\n";
+	     textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 3, GmatStringUtil::LEFT);
+         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriSolveForState[i]), 25, GmatStringUtil::RIGHT) << "   "			    // Apriori state
+		          << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousSolveForState[i]), 25, GmatStringUtil::RIGHT) << "   "				// initial state
+			      << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i]), 25, GmatStringUtil::RIGHT) << "   "				// updated state
+			      << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i]), 25, GmatStringUtil::RIGHT)  << "   "	// Apriori - Current state
+				  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i]), 25, GmatStringUtil::RIGHT) << "\n";	// Previous - Current state
+      }
+      textFile << "\n";
 
 
-   /// 2. Write statistics
-   textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
-	        << "   Total Number Of Records : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
-			<< "   Records Removed Due To :\n"
-			<< "      . No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"
-			<< "      . Out of Ramped Table Range : " << numRemovedRecords["R"] << "\n"
-			<< "      . Signal Blocked : " << numRemovedRecords["B"] << "\n"
-			<< "      . Sigma Editing : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n"
-			<< "   Records Used For Estimation : " << measurementResiduals.size() << "\n";
-   textFile.precision(12);
-   textFile << "   WeightedRMS Residuals : " << newResidualRMS << "\n"
-            << "   PredictedRMS Residuals : " << predictedRMS << "\n";
+      /// 2. Write statistics
+      textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
+	           << "   Total Number Of Records : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
+			   << "   Records Removed Due To :\n"
+			   << "      No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"
+			   << "      Out of Ramped Table Range : " << numRemovedRecords["R"] << "\n"
+			   << "      Signal Blocked : " << numRemovedRecords["B"] << "\n"
+			   << "      Sigma Editing : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n"
+		   	   << "   Records Used For Estimation : " << measurementResiduals.size() << "\n";
+      textFile.precision(12);
+      textFile << "   WeightedRMS Residuals : " << newResidualRMS << "\n"
+               << "   PredictedRMS Residuals : " << predictedRMS << "\n";
    }
 
    if ((sState == CHECKINGRUN)||(sState == FINISHED))
    {
-   textFile << "   DC Status : ";
-   switch(estimationStatus)
-   {
-   case ABSOLUTETOL_CONVERGED:
-	  textFile << "Absolute Tolerance Converged\n";
-	  break;
-   case RELATIVETOL_CONVERGED:
-	  textFile << "Relative Tolerance Converged\n";
-	  break;
-   case ABS_AND_REL_TOL_CONVERGED:
-	  textFile << "Absolute and Relative Tolerance Converged\n";
-	  break;
-   case MAX_CONSECUTIVE_DIVERGED:
-	  textFile << "Maximum Consecutive Diverged\n";
-	  break;
-   case CONVERGING:
-      textFile << "Converging\n";
-	  break;
-   case DIVERGING:
-      textFile << "Diverging\n";
-	  break;
-   case UNKNOWN:
-      textFile << "Unknown\n";
-	  break;
-   }
-   textFile << "\n";
+      textFile << "   DC Status : ";
+      switch(estimationStatus)
+      {
+      case ABSOLUTETOL_CONVERGED:
+	     textFile << "Absolute Tolerance Converged\n";
+	     break;
+      case RELATIVETOL_CONVERGED:
+	     textFile << "Relative Tolerance Converged\n";
+	     break;
+      case ABS_AND_REL_TOL_CONVERGED:
+	     textFile << "Absolute and Relative Tolerance Converged\n";
+	     break;
+      case MAX_CONSECUTIVE_DIVERGED:
+	     textFile << "Maximum Consecutive Diverged\n";
+	     break;
+      case MAX_ITERATIONS_DIVERGED:
+	     textFile << "Maximum Iterations Diverged\n";
+	     break;
+      case CONVERGING:
+         textFile << "Converging\n";
+	     break;
+      case DIVERGING:
+         textFile << "Diverging\n";
+	     break;
+      case UNKNOWN:
+         textFile << "Unknown\n";
+	     break;
+      }
    }
 
    textFile.flush();
