@@ -842,6 +842,12 @@ bool TrackingDataAdapter::Initialize()
    cMeasurement.typeName = modelType;
    cMeasurement.uniqueID = modelID;
 
+   cMeasurement.covariance = new Covariance;
+
+   // Default to a 1x1 identity covariance
+   cMeasurement.covariance->SetDimension(1);
+   (*(cMeasurement.covariance))(0,0) = 1.0;
+
    if (navLog != NULL)
       logLevel = navLog->GetLogLevel("Adapter");
    else

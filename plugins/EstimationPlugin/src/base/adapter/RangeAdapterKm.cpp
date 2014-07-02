@@ -24,6 +24,7 @@
 
 
 //#define DEBUG_ADAPTER_EXECUTION
+//#define DEBUG_ADAPTER_DERIVATIVES
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -286,14 +287,52 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
             "for " + instanceName + " before the measurement was set");
 
    Integer parmId = GetParmIdFromEstID(id, obj);
+
    // Perform the calculations
-   #ifdef DEBUG_DERIVATIVES
+   #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
-            "Derivatives(%s, %d) called; parm ID is %d\n",
-            obj->GetName().c_str(), id, parmId);
+            "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
+            obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
 
-   theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, parmId);
+   const std::vector<RealArray> *derivativeData =
+         &(calcData->CalculateMeasurementDerivatives(obj, id)); // parmId));
+
+   #ifdef DEBUG_ADAPTER_DERIVATIVES
+      MessageInterface::ShowMessage("   Derivatives: [");
+      for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage("]\n                [");
+         for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
+         {
+            if (j > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
+         }
+      }
+      MessageInterface::ShowMessage("]\n");
+   #endif
+
+   // Now assemble the derivative data into the requested derivative
+   UnsignedInt size = derivativeData->at(0).size();
+
+   theDataDerivatives.clear();
+   for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
+   {
+      RealArray oneRow;
+      oneRow.assign(size, 0.0);
+      theDataDerivatives.push_back(oneRow);
+
+      if (derivativeData->at(i).size() != size)
+         throw MeasurementException("Derivative data size is a different size "
+               "than expected");
+
+      for (UnsignedInt j = 0; j < size; ++j)
+      {
+         theDataDerivatives[i][j] = (derivativeData->at(i))[j];
+      }
+   }
 
    return theDataDerivatives;
 }
