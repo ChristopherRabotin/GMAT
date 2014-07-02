@@ -465,6 +465,7 @@ ObservationData* GmatObType::ReadObservation()
    {
       theLine >> value;
       currentObs.value.push_back(value);
+	  currentObs.value_orig.push_back(value);
    }
 /*
    Covariance *noise = new Covariance();

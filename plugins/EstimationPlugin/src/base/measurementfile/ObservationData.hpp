@@ -71,8 +71,12 @@ public:
    GmatEpoch         epoch;
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
-   /// The observed value.  Array to handle more than one value, like AZ_EL
+   /// The observed value with correction.  Array to handle more than one value, like AZ_EL
    RealArray         value;
+
+   /// The original observed value								// made changes by TUAN NGUYEN
+   RealArray         value_orig;								// made changes by TUAN NGUYEN
+
    /// Measurement unit											// made changes by TUAN NGUYEN
    std::string		 unit;										// made changes by TUAN NGUYEN
    /// The associated noise covariance matrix
