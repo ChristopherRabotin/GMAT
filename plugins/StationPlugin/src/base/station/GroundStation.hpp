@@ -114,13 +114,15 @@ public:
 
 //   virtual Integer         GetEstimationParameterID(const std::string &param);
 //   virtual Integer         SetEstimationParameter(const std::string &param);
-   virtual bool            IsEstimationParameterValid(const Integer id);
-   virtual Integer         GetEstimationParameterSize(const Integer id);
-   virtual Real*           GetEstimationParameterValue(const Integer id);
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
 
-   virtual bool            IsValidID(const std::string &id);
+   virtual bool         IsValidID(const std::string &id);
 
 
+   Real*                IsValidElevationAngle(const Rvector6 &state_sez,
+                                              const Real minElevationEngle);
 //   bool                    IsValidElevationAngle();
 //   RealArray               CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
 //   RealArray               CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
@@ -147,6 +149,8 @@ protected:
 
    /// Parameters needed for verifying measurement feasibility
    Real minElevationAngle;					// unit: degree
+   /// Visibility vector
+   Real az_el_visible[3];
 
 	
 public:
@@ -155,10 +159,10 @@ public:
    {
       STATION_ID = BodyFixedPointParamCount,
       ADD_HARDWARE,								// made changes by Tuan Nguyen
-  	  TEMPERATURE,					// temperature (in K) at ground station. It is used for Troposphere correction
-	  PRESSURE,						// pressure (in hPa) at ground station. It is used for Troposphere correction
-	  HUMIDITY,						// humidity (in %) at ground station. It is used for Troposphere correction
-	  MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying maesurement feasibility 
+      TEMPERATURE,					// temperature (in K) at ground station. It is used for Troposphere correction
+      PRESSURE,						// pressure (in hPa) at ground station. It is used for Troposphere correction
+      HUMIDITY,						// humidity (in %) at ground station. It is used for Troposphere correction
+      MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying measurement feasibility
       GroundStationParamCount,
    };
 
