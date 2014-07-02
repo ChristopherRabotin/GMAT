@@ -73,8 +73,8 @@ public:
 ///// TBD: Determine if there is a more generic way to add these
    void         SetFrequencyBand(Integer frequencyBand, Integer index=0);		// made changes by TUAN NGUYEN
    Integer      GetFrequencyBand(Integer index=0);								// made changes by TUAN NGUYEN
-   void         SetRangeModulo(Real rangeMod);									// made changes by TUAN NGUYEN
-   Real         GetRangeModulo();												// made changes by TUAN NGUYEN
+   //void         SetRangeModulo(Real rangeMod);									// made changes by TUAN NGUYEN
+   //Real         GetRangeModulo();												// made changes by TUAN NGUYEN
    void         SetObsValue(const RealArray& value);							// made changes by TUAN NGUYEN 
    RealArray    GetObsValue();													// made changes by TUAN NGUYEN
 
@@ -96,8 +96,8 @@ protected:
    Integer                    freqBand;																	// made changes by TUAN NGUYEN
    /// Frequency band for E path																		// made changes by TUAN NGUYEN
    Integer                    freqBandE;																// made changes by TUAN NGUYEN
-   /// Range modulo																						// made changes by TUAN NGUYEN
-   Real                       rangeModulo;																// made changes by TUAN NGUYEN
+//   /// Range modulo																						// made changes by TUAN NGUYEN
+//   Real                       rangeModulo;																// made changes by TUAN NGUYEN
    /// Observation value																				// made changes by TUAN NGUYEN
    RealArray                  obsValue;																	// made changes by TUAN NGUYEN
    /// Observation data object containing an observation data record									// made changes by TUAN NGUYEN

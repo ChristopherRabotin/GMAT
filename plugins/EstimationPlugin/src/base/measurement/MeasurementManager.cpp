@@ -23,13 +23,14 @@
 #include "MeasurementException.hpp"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
-
+#include <sstream>
 #include "DataFileAdapter.hpp"
 
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_FILE_WRITE
 //#define DEBUG_FLOW
+//#define DEBUG_CALCULATE_MEASUREMENTS
 //#define DEBUG_GET_ACTIVE_EVENTS
 //#define DEBUG_LOAD_OBSERVATIONS
 //#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
@@ -584,7 +585,7 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::vector<UnsignedInt>         startIndexes;			// made changes by TUAN NGUYEN
    std::vector<UnsignedInt>         endIndexes;				// made changes by TUAN NGUYEN
    observations.clear();
-
+   
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
       startIndexes.push_back(obsTable.size());				// made changes by TUAN NGUYEN
@@ -621,6 +622,7 @@ UnsignedInt MeasurementManager::LoadObservations()
             }
          }
       #else
+		 
          if (streamList[i]->IsOpen())
          {
 			UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
@@ -637,12 +639,6 @@ UnsignedInt MeasurementManager::LoadObservations()
 			   od = streamList[i]->ReadObservation();
 			   ++numRec;
 
-			   if (epoch1 == 0.0)
-			   {
-			      epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-			      epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-			   }
-
 			   // End of file
 			   if (od == NULL)
 			   {
@@ -650,7 +646,14 @@ UnsignedInt MeasurementManager::LoadObservations()
                   break;
 			   }
 
-		       // Data thinning filter
+			   // Get start epoch and end epoch when od != NULL
+			   if (epoch1 == 0.0)
+			   {
+			      epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+			      epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+			   }
+
+			   // Data thinning filter
 			   acc = acc + thinningRatio;
 			   if (acc < 1.0)
                {
@@ -732,7 +735,7 @@ UnsignedInt MeasurementManager::LoadObservations()
 
 			   ++count;
                od_old = *od;
-			}
+			}// endwhile(true)	
 
 			MessageInterface::ShowMessage("Number of thown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
             MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
@@ -743,10 +746,10 @@ UnsignedInt MeasurementManager::LoadObservations()
 			MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
             MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
 
-         }
+         } // endif (streamList[i]->IsOpen())
+		 
       #endif
-	  }
-	  
+	  } // endif ((streamFormat == "GMAT_OD")
 
 	  // made changes by TUAN NGUYEN : fix bug GMT-4394
 	  if (obsTable.size() == 0)
@@ -758,8 +761,8 @@ UnsignedInt MeasurementManager::LoadObservations()
 	     else
 		    throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
 	  }
+	  
    }
-
 
 
    // Sort observation data by epoch due to observations table is required to have an epoch ascending order
@@ -790,12 +793,11 @@ UnsignedInt MeasurementManager::LoadObservations()
 		 completed = true;
 
    }
-
+   
    #ifdef DEBUG_LOAD_OBSERVATIONS
    for (UnsignedInt i = 0; i < observations.size(); ++i)
 	   MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
    #endif
-
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
@@ -1031,11 +1033,15 @@ bool MeasurementManager::AdvanceObservation()
    if (currentObs != observations.end())
    {
       ++currentObs;
-      while ((currentObs != observations.end())&&
-		     (!currentObs->inUsed))					// made changes by TUAN NGUYEN
-      {												// made changes by TUAN NGUYEN
-            ++currentObs;							// made changes by TUAN NGUYEN
-      }												// made changes by TUAN NGUYEN
+
+	  // This change intends to use all observation data no matter it is either in used or not. 
+	  // When they come into BatchEstimatorInv::Accumulate() function, all unused data will be 
+	  // writen to report file as unused data.  
+      //while ((currentObs != observations.end())&&		// made changes by TUAN NGUYEN
+		    // (!currentObs->inUsed))					// made changes by TUAN NGUYEN
+      //{												// made changes by TUAN NGUYEN
+      //      ++currentObs;								// made changes by TUAN NGUYEN
+      //}												// made changes by TUAN NGUYEN
    }
 
 
@@ -1279,7 +1285,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
    {  // This section is used for simulation only:
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
-         #ifdef DEBUG_FLOW
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
 	        MessageInterface::ShowMessage(" Measurement models[%d] name = '%s'    measurement type = '%s'\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
          #endif
 
@@ -1293,15 +1299,27 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 		 
 		 if (withEvents)
 		 {  
-         #ifdef DEBUG_FLOW
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
 	        MessageInterface::ShowMessage(" Simulation: measurement with events\n");
          #endif
 			if (measurements[j].isFeasible)
-	            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);		// made changes by TUAN NGUYEN
+			{
+	           measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);		// made changes by TUAN NGUYEN
+			   if (measurements[j].unfeasibleReason == "R")											// made changes by TUAN NGUYEN
+			   {
+				  Real a1Time = measurements[j].epoch;
+				  Real taiTime;
+				  std::string tais;
+				  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
+				  char s[1000];
+				  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epoches.\n", models[j]->GetName().c_str(), taiTime);
+			      throw MeasurementException(s); 
+			   }
+			}
 		 }
 		 else
 		 {
-         #ifdef DEBUG_FLOW
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
 	        MessageInterface::ShowMessage(" Simulation: measurement without events\n");
          #endif
 			measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);			// made changes by TUAN NGUYEN
@@ -1324,12 +1342,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
    {  // This section is used for estimation only:
       if (od == NULL)
 	  {
-         #ifdef DEBUG_FLOW
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
 	        MessageInterface::ShowMessage("    observation data is NULL\n");
          #endif
          return retval;					// no calculation measurement value whenever no observation data is available
 	  }
-      #ifdef DEBUG_FLOW
+      #ifdef DEBUG_CALCULATE_MEASUREMENTS
 	  else
 		  MessageInterface::ShowMessage("    %s observation data: %.12lf  %s  %d  %s  %s   %.12lf\n", od->dataFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(),od->value[0]);
       #endif
