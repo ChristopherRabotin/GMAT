@@ -66,6 +66,9 @@ private:
    Integer           dataPrecision;
    /// The most recently accessed observation data set
    ObservationData   currentObs;
+
+   bool ProcessSignals(const std::string str, Integer& participantSize,
+         Integer& dataSize);
 };
 
 #endif /* GMATOBTYPE_HPP_ */
