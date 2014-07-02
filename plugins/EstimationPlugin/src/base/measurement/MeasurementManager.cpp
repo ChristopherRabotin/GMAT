@@ -878,14 +878,15 @@ UnsignedInt MeasurementManager::LoadObservations()
                }
 
 			   // Invalid measurement value filter
-			   if (od->value[0] == -1.0)		// throw away this observation data if it is invalid	// made changes by TUAN NGUYEN
-			   {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-				  ++filter1Num;
-				  continue;
-			   }
+            if (od->value.size() > 0)
+               if (od->value[0] == -1.0)		// throw away this observation data if it is invalid	// made changes by TUAN NGUYEN
+               {
+                     #ifdef DEBUG_LOAD_OBSERVATIONS
+                 MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                     #endif
+                 ++filter1Num;
+                 continue;
+               }
 
 			   // Duplication or time order filter
 			   if (od_old.epoch >= od->epoch)
