@@ -23,6 +23,7 @@ GMAT Maui.Id = MauiID;
 GMAT Maui.X  = -4450.8;
 GMAT Maui.Y  =  2676.1;
 GMAT Maui.Z  = -3691.38;
+GMAT Maui.MinimumElevationAngle = 12;
 
 %----- The data file
 Create TrackingFileSet simData
