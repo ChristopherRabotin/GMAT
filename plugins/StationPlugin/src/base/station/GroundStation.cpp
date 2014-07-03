@@ -38,7 +38,7 @@
 //#define DEBUG_INIT
 //#define DEBUG_HARDWARE
 //#define TEST_GROUNDSTATION
-#define DEBUG_AZEL_CONSTRAINT
+//#define DEBUG_AZEL_CONSTRAINT
 
 //---------------------------------
 // static data
@@ -1162,50 +1162,59 @@ bool GroundStation::IsValidID(const std::string &id)
 }
 
 
-Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez, const Real minElevationEngle )
+//------------------------------------------------------------------------------
+// Real* IsValidElevationAngle(const Rvector6 &state_sez)
+//------------------------------------------------------------------------------
+/**
+ * Performs the elevation angle check at a groundstation
+ *
+ * @param state_sez The outgoing topocentric vector in the direction tested
+ *
+ * @return a vector of el, az, and the elevation above the minimum
+ */
+//------------------------------------------------------------------------------
+Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez)
 {
+   // Get topocentric range and rangerate
+   Rvector3 rho_sez = state_sez.GetR();
+   Rvector3 rhodot_sez = state_sez.GetV();
 
- // Get topocentric range and rangerate
-    Rvector3 rho_sez = state_sez.GetR();
-    Rvector3 rhodot_sez = state_sez.GetV();
+   // Compute satellite elevation
+   Real rho_sez_mag = rho_sez.GetMagnitude();
+   az_el_visible[0] = GmatMathUtil::ATan2(rho_sez[2],rho_sez_mag) *
+         GmatMathConstants::DEG_PER_RAD;
 
-    // Compute satellite elevation
-    Real rho_sez_mag = rho_sez.GetMagnitude();
-    az_el_visible[1] = rho_sez[3]/rho_sez_mag;
-    
-    // c=cos s=sin compute azimuth, protect against 90 deg elevation
-    Real c_rho = rho_sez[2]/sqrt(GmatMathUtil::Pow(rho_sez[1],2) + GmatMathUtil::Pow(rho_sez[2],2));
-    Real s_rho = -rho_sez[1]/sqrt(GmatMathUtil::Pow(rho_sez[1],2) + GmatMathUtil::Pow(rho_sez[2],2));
-    Real c_rhodot = rhodot_sez[2]/sqrt(GmatMathUtil::Pow(rhodot_sez[1],2) + GmatMathUtil::Pow(rhodot_sez[2],2));
-    Real s_rhodot = -rhodot_sez[1]/sqrt(GmatMathUtil::Pow(rhodot_sez[1],2) + GmatMathUtil::Pow(rhodot_sez[2],2));
+   // c=cos s=sin compute azimuth, protect against 90 deg elevation
+   Real c_rho =  rho_sez[1]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
+         GmatMathUtil::Pow(rho_sez[1],2));
+   Real s_rho = -rho_sez[0]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
+         GmatMathUtil::Pow(rho_sez[1],2));
+   Real c_rhodot =  rhodot_sez[1]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
+         GmatMathUtil::Pow(rhodot_sez[1],2));
+   Real s_rhodot = -rhodot_sez[0]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
+         GmatMathUtil::Pow(rhodot_sez[1],2));
 
-    //compute az    
-    if ((az_el_visible[1]*GmatMathConstants::DEG_PER_RAD) != 90) 
-    {
-       az_el_visible[0] = GmatMathUtil::ATan2(s_rho,c_rho);
-    }
-    else if ((az_el_visible[1]*GmatMathConstants::DEG_PER_RAD) == 90)
-    {
-       az_el_visible[0] = GmatMathUtil::ATan2(s_rhodot,c_rhodot);
-    }
-    
-    if (az_el_visible[1] > minElevationEngle)
-    {
-        az_el_visible[2]=1;
-    }
-    else if (az_el_visible[1] < minElevationEngle)
-    {
-        az_el_visible[2]=0;
-    }
-    else if (az_el_visible[1]==minElevationEngle)
-    {
-        az_el_visible[2]=-1;
-    }
-    #ifdef DEBUG_AZEL_CONSTRAINT
-        MessageInterface::ShowMessage(" Satellite az=%f degs, satellite el=%f degs. Is visible=%f ", az_el_visible[2], az_el_visible[1],az_el_visible[2]);   
-    #endif 
-    return az_el_visible;
+   // Compute azimuth
+   if (az_el_visible[0] != 90)
+   {
+      az_el_visible[1] = GmatMathUtil::ATan2(s_rho,c_rho) *
+            GmatMathConstants::DEG_PER_RAD;
+   }
+   else if (az_el_visible[0] == 90)
+   {
+      az_el_visible[1] = GmatMathUtil::ATan2(s_rhodot,c_rhodot)*
+          GmatMathConstants::DEG_PER_RAD;
+   }
 
+   az_el_visible[2] = az_el_visible[0] - minElevationAngle;
+
+   #ifdef DEBUG_AZEL_CONSTRAINT
+      MessageInterface::ShowMessage("Satellite az = %9.4lf degs, "
+            "satellite el = %8.4lf degs. Is visible = %8.4lf\n",
+            az_el_visible[1], az_el_visible[0], az_el_visible[2]);
+   #endif
+
+   return az_el_visible;
 }
 
 /*

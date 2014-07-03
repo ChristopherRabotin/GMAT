@@ -121,8 +121,7 @@ public:
    virtual bool         IsValidID(const std::string &id);
 
 
-   Real*                IsValidElevationAngle(const Rvector6 &state_sez,
-                                              const Real minElevationEngle);
+   virtual Real*                IsValidElevationAngle(const Rvector6 &state_sez);
 //   bool                    IsValidElevationAngle();
 //   RealArray               CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
 //   RealArray               CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);

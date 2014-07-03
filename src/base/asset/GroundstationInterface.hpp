@@ -38,6 +38,8 @@ public:
 
    GroundstationInterface(const GroundstationInterface& gsi);
    GroundstationInterface& operator=(const GroundstationInterface& gsi);
+
+   virtual Real* IsValidElevationAngle(const Rvector6 &state_sez) = 0;
 };
 
 #endif
