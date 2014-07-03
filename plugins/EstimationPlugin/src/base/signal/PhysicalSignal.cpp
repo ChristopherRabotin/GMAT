@@ -22,6 +22,7 @@
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
 #include "PropSetup.hpp"
+#include "GroundstationInterface.hpp"
 
 #include <sstream>                  // For stringstream
 
@@ -218,21 +219,25 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       // Perform feasibility check
       if (theData.stationParticipant)
       {
-         /// @todo Replace with elevation constraint test
+         const Real* elData;
          if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
          {
-            if (theData.rangeVecObs[2] > 0)
-               signalIsFeasible = true;
-            else
-               signalIsFeasible = false;
+            Rvector6 state_sez(theData.rangeVecObs,
+                  theData.rangeRateVecObs);
+            elData = ((GroundstationInterface*)(theData.tNode))->
+                  IsValidElevationAngle(state_sez);
          }
+
          if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
          {
-            if (-theData.rangeVecObs[2] > 0)
-               signalIsFeasible = true;
-            else
-               signalIsFeasible = false;
+            Rvector6 state_sez(-theData.rangeVecObs,
+                  -theData.rangeRateVecObs);
+            elData = ((GroundstationInterface*)(theData.rNode))->
+                  IsValidElevationAngle(state_sez);
          }
+
+         signalIsFeasible = (elData[2] >= 1);
+
          #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("Obs vector = [%.3lf %.3lf %.3lf] "
                   "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
