@@ -56,7 +56,7 @@ const std::string MeasurementModel::PARAMETER_TEXT[] =
    "NoiseSigma",
    "Frequency",
 ///// TBD: Do we want something more generic here?
-   "RangeModuloConstant",
+//   "RangeModuloConstant",
    "RelativityCorrection",			// made changes by TUAN NGUYEN
    "ETminusTAICorrection",			// made changes by TUAN NGUYEN
 //   "ResidualMax",					// made changes by TUAN NGUYEN
@@ -72,7 +72,7 @@ const Gmat::ParameterType MeasurementModel::PARAMETER_TYPE[] =
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE,
+//   Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
    Gmat::ON_OFF_TYPE,				// made changes by TUAN NGUYEN
 //   Gmat::REAL_TYPE,					// made changes by TUAN NGUYEN
@@ -587,10 +587,10 @@ Real MeasurementModel::GetRealParameter(const Integer id) const
          if (measurement->IsOfType("PhysicalMeasurement"))
             return ((PhysicalMeasurement*)measurement)->GetConstantFrequency();
 
-   if (id == RangeModuloConstant)											// made changes by TUAN NGUYEN
-      if (measurement != NULL)												// made changes by TUAN NGUYEN
-         if (measurement->IsOfType("PhysicalMeasurement"))					// made changes by TUAN NGUYEN
-            return ((PhysicalMeasurement*)measurement)->GetRangeModulo();	// made changes by TUAN NGUYEN
+   //if (id == RangeModuloConstant)											// made changes by TUAN NGUYEN
+   //   if (measurement != NULL)												// made changes by TUAN NGUYEN
+   //      if (measurement->IsOfType("PhysicalMeasurement"))					// made changes by TUAN NGUYEN
+   //         return ((PhysicalMeasurement*)measurement)->GetRangeModulo();	// made changes by TUAN NGUYEN
 
 //   if (id == ResidualMaxLimit)												// made changes by TUAN NGUYEN
 //      return residualMax;													// made changes by TUAN NGUYEN
@@ -641,20 +641,20 @@ Real MeasurementModel::SetRealParameter(const Integer id, const Real value)
       return measurement->SetRealParameter(newId, value);
    }
 
-   if (id == RangeModuloConstant)														// made changes by TUAN NGUYEN
-   {																					// made changes by TUAN NGUYEN
-      if (measurement != NULL)															// made changes by TUAN NGUYEN
-      {																					// made changes by TUAN NGUYEN
-         if (measurement->IsOfType("PhysicalMeasurement"))								// made changes by TUAN NGUYEN
-         {																				// made changes by TUAN NGUYEN
-            if (value > 0.0)															// made changes by TUAN NGUYEN
-            {																			// made changes by TUAN NGUYEN
-               ((PhysicalMeasurement*)measurement)->SetRangeModulo(value);				// made changes by TUAN NGUYEN
-            }																			// made changes by TUAN NGUYEN
-            return ((PhysicalMeasurement*)measurement)->GetRangeModulo();				// made changes by TUAN NGUYEN
-         }																				// made changes by TUAN NGUYEN
-      }																					// made changes by TUAN NGUYEN
-   }																					// made changes by TUAN NGUYEN
+   //if (id == RangeModuloConstant)														// made changes by TUAN NGUYEN
+   //{																					// made changes by TUAN NGUYEN
+   //   if (measurement != NULL)															// made changes by TUAN NGUYEN
+   //   {																					// made changes by TUAN NGUYEN
+   //      if (measurement->IsOfType("PhysicalMeasurement"))								// made changes by TUAN NGUYEN
+   //      {																				// made changes by TUAN NGUYEN
+   //         if (value > 0.0)															// made changes by TUAN NGUYEN
+   //         {																			// made changes by TUAN NGUYEN
+   //            ((PhysicalMeasurement*)measurement)->SetRangeModulo(value);				// made changes by TUAN NGUYEN
+   //         }																			// made changes by TUAN NGUYEN
+   //         return ((PhysicalMeasurement*)measurement)->GetRangeModulo();				// made changes by TUAN NGUYEN
+   //      }																				// made changes by TUAN NGUYEN
+   //   }																					// made changes by TUAN NGUYEN
+   //}																					// made changes by TUAN NGUYEN
 
    if (id == Frequency)
    {
@@ -1927,7 +1927,7 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
    #ifdef DEBUG_MEASUREMENT_CALCULATION
       MessageInterface::ShowMessage(" Entered MeasurementModel<%p>::CalculateMeasurement(withEvents = %s, forObservation = %p, rampTB = %p, withNoise = %s)\n", this, (withEvents?"true":"false"), forObservation, rampTB,(withNoise?"true":"false"));
    #endif
-
+   
    // Handle the physical model settings for physical model classes only
    if (measurement->IsOfType("PhysicalMeasurement"))
    {
@@ -1944,7 +1944,7 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
 	  {																								// made changes by TUAN NGUYEN	
          ((PhysicalMeasurement*)measurement)->SetConstantFrequency(forObservation->uplinkFreq);		// made changes by TUAN NGUYEN
          ((PhysicalMeasurement*)measurement)->SetFrequencyBand(forObservation->uplinkBand);			// made changes by TUAN NGUYEN
-         ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);			// made changes by TUAN NGUYEN 
+//         ((PhysicalMeasurement*)measurement)->SetRangeModulo(forObservation->rangeModulo);			// made changes by TUAN NGUYEN 
 	  }
 	  else if (forObservation->dataFormat == "GMAT_ODDoppler")										// made changes by TUAN NGUYEN
 	  {																								// made changes by TUAN NGUYEN	
@@ -1958,14 +1958,14 @@ const MeasurementData& MeasurementModel::CalculateMeasurement(bool withEvents,
       }
    }
 
-   
    // Specifying the value of calculated measurement C:
    if (withNoise)
-	  measurement->SetNoise(&noiseSigma);														// made changes by TUAN NGUYEN
+	  measurement->SetNoise(&noiseSigma);															// made changes by TUAN NGUYEN
+   
    measurement->CalculateMeasurement(withEvents);
+   
    if (withNoise)
       measurement->SetNoise(NULL);																	// made changes by TUAN NGUYEN
-   
 
    // Add in the Biases if the measurement was feasible
    if (theData->isFeasible)

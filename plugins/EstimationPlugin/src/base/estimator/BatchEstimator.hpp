@@ -123,6 +123,7 @@ protected:
 //   bool        converged;								// made changes by TUAN NGUYEN
    /// Estimation status								// made changes by TUAN NGUYEN
    Integer                 estimationStatus;			// made changes by TUAN NGUYEN
+
    // String to show reason of convergence
    std::string convergenceReason;
    /// Buffer of the participants for the outer batch loop
@@ -183,7 +184,7 @@ private:
    void                   WriteHeader();
    void                   WriteSummary(Solver::SolverState sState);
    void                   WriteConclusion();
-   std::string            GetElementFullName(ListItem* infor) const;
+   std::string            GetElementFullName(ListItem* infor, bool isInternalCS) const;
 
 };
 

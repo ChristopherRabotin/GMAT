@@ -44,6 +44,27 @@
 //#define CHECK_PARTICIPANT_LOCATIONS
 //#define DEBUG_CURRENT_MEASUREMENT
 
+
+//------------------------------------------------------------------------------
+// Static data initialization
+//------------------------------------------------------------------------------
+
+const std::string DSNTwoWayRange::PARAMETER_TEXT[] =
+{
+   "RangeModuloConstant",
+};
+
+
+const Gmat::ParameterType DSNTwoWayRange::PARAMETER_TYPE[] =
+{
+   Gmat::REAL_TYPE,
+};
+
+//------------------------------------------------------------------------------
+// Public methods
+//------------------------------------------------------------------------------
+
+
 //------------------------------------------------------------------------------
 // DSNTwoWayRange(const std::string nomme)
 //------------------------------------------------------------------------------
@@ -54,7 +75,8 @@
  */
 //------------------------------------------------------------------------------
 DSNTwoWayRange::DSNTwoWayRange(const std::string nomme) :
-   TwoWayRange          ("DSNTwoWayRange", nomme)
+   TwoWayRange          ("DSNTwoWayRange", nomme),
+   rangeModulo          (1.0e18)
 {
    objectTypeNames.push_back("DSNTwoWayRange");
 
@@ -101,7 +123,8 @@ DSNTwoWayRange::~DSNTwoWayRange()
 //------------------------------------------------------------------------------
 DSNTwoWayRange::DSNTwoWayRange(const DSNTwoWayRange& dsn) :
    TwoWayRange       (dsn),
-   freqMap           (dsn.freqMap)
+   freqMap           (dsn.freqMap),
+   rangeModulo       (dsn.rangeModulo)
 {
    currentMeasurement.value.push_back(0.0);
    currentMeasurement.typeName = "DSNTwoWayRange";
@@ -141,6 +164,7 @@ DSNTwoWayRange& DSNTwoWayRange::operator=(const DSNTwoWayRange& dsn)
 
       covariance = dsn.covariance;
       freqMap    = dsn.freqMap;
+	  rangeModulo = dsn.rangeModulo;
    }
 
    return *this;
@@ -160,6 +184,217 @@ DSNTwoWayRange& DSNTwoWayRange::operator=(const DSNTwoWayRange& dsn)
 GmatBase* DSNTwoWayRange::Clone() const
 {
    return new DSNTwoWayRange(*this);
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter handling code
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//  Integer  GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter ID, given the input parameter string.
+ *
+ * @param str string for the requested parameter.
+ *
+ * @return ID for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+Integer DSNTwoWayRange::GetParameterID(const std::string & str) const
+{
+   for (Integer i = TwoWayRangeParamCount; i < DSNTwoWayRangeParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - TwoWayRangeParamCount])
+         return i;
+   }
+
+   return TwoWayRange::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter text, given the input parameter ID.
+ *
+ * @param id Id for the requested parameter text.
+ *
+ * @return parameter text for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string DSNTwoWayRange::GetParameterText(const Integer id) const
+{
+   if (id >= TwoWayRangeParamCount && id < DSNTwoWayRangeParamCount)
+      return PARAMETER_TEXT[id - TwoWayRangeParamCount];
+
+   return TwoWayRange::GetParameterText(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  Gmat::ParameterType GetParameterType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the enumerated type of the object.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return The enumeration for the type of the parameter, or
+ *         UNKNOWN_PARAMETER_TYPE.
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType DSNTwoWayRange::GetParameterType(const Integer id) const
+{
+   if (id >= TwoWayRangeParamCount && id < DSNTwoWayRangeParamCount)
+      return PARAMETER_TYPE[id - TwoWayRangeParamCount];
+
+   return TwoWayRange::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string  GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the parameter type string, given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return parameter type string of the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string DSNTwoWayRange::GetParameterTypeString(const Integer id) const
+{
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
+//---------------------------------------------------------------------------
+//  std::string GetParameterUnit(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve the unit for the parameter.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return unit for the requested parameter.
+ */
+//------------------------------------------------------------------------------
+std::string DSNTwoWayRange::GetParameterUnit(const Integer id) const
+{
+   if (id == RangeModuloConstant)
+      return "RU";
+
+   return TwoWayRange::GetParameterUnit(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterCount() const
+//------------------------------------------------------------------------------
+/**
+ * Override the default method and retrieve the total number of parameters that
+ * are scriptable for the MeasurementModel plus the CoreMeasurement object.
+ *
+ * @return The total number of scriptable parameters from the composite object
+ *
+ * @note Anyone that derives a class off of MeasurementModel will need to
+ *       rework this method to accommodate any new parameters added to the
+ *       derived class
+ */
+//------------------------------------------------------------------------------
+Integer DSNTwoWayRange::GetParameterCount() const
+{
+   return DSNTwoWayRangeParamCount - GmatBaseParamCount;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+* Get value of a real parameter
+* 
+* @param id		index number of parameter
+*
+* @return		value of the parameter
+*/
+//------------------------------------------------------------------------------
+Real DSNTwoWayRange::GetRealParameter(const Integer id) const
+{
+   if (id == RangeModuloConstant)
+      return rangeModulo;
+
+   return TwoWayRange::GetRealParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+* Set value for a real parameter
+* 
+* @param id		index number of parameter
+* @param value	value which is used to set to the parameter 
+*
+* @return		the value which is set to the parameter
+*/
+//------------------------------------------------------------------------------
+Real DSNTwoWayRange::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == RangeModuloConstant)
+   {
+      if (value <= 0)
+	  {
+         std::stringstream ss;
+		 ss << "Error: RangeModuloConstant parameter has an invalid value (" << value << "). It's value has to be a positive real number\n";
+	     throw MeasurementException(ss.str());
+	  }
+	  else
+         rangeModulo = value;
+	  return value;
+   }
+
+   return TwoWayRange::SetRealParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string& value) const
+//------------------------------------------------------------------------------
+/**
+* Get value of a real parameter
+* 
+* @param label	name of parameter
+*
+* @return		value of the parameter
+*/
+//------------------------------------------------------------------------------
+Real DSNTwoWayRange::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std::string& lable, const Real value)
+//------------------------------------------------------------------------------
+/**
+* Set value for a real parameter
+* 
+* @param lable	name of parameter
+* @param value	value which is used to set to the parameter 
+*
+* @return		the value which is set to the parameter
+*/
+//------------------------------------------------------------------------------
+Real DSNTwoWayRange::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
 }
 
 
@@ -296,7 +531,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s of Participant %d\n", objPtr->GetParameterText(parameterID).c_str(), objNumber);
 		 
          MessageInterface::ShowMessage("   freq = %15lf, F = %15lf, F/c = "
-                  "%15lf\n", frequency, GetFrequencyFactor(frequency), fFactor);
+                  "%15lf\n", frequency, GetFrequencyFactorRatio(frequency)*frequency, fFactor);
       #endif
       
       if (objNumber == 1) // participant number 1, either a GroundStation or a Spacecraft
@@ -551,6 +786,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
  * @return true if the measurement was calculated, false if not
  */
 //------------------------------------------------------------------------------
+//#define USE_EARTHMJ2000EQ_CS
 bool DSNTwoWayRange::Evaluate(bool withEvents)
 {
    bool retval = false;
@@ -700,8 +936,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  t2T = downlinkLeg.GetEventData((GmatBase*) participants[1]).epoch;                    // transmit time at spacecraft for downlink leg
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	  MessageInterface::ShowMessage("Debug downlinkLeg <'%s',%p>: r1 = (%lf  %lf  %lf)\ n", downlinkLeg.GetName().c_str(), &downlinkLeg, r1[0], r1[1], r1[2]);
-	  MessageInterface::ShowMessage("                             r2 = (%lf  %lf  %lf)\ n", r2[0], r2[1], r2[2]);
+	  MessageInterface::ShowMessage("Debug downlinkLeg <'%s',%p>: r1 = (%lf  %lf  %lf)\n", downlinkLeg.GetName().c_str(), &downlinkLeg, r1[0], r1[1], r1[2]);
+	  MessageInterface::ShowMessage("                             r2 = (%lf  %lf  %lf)\n", r2[0], r2[1], r2[2]);
       #endif
 
 	  Rvector3 ssb2cb_t3R = cb1->GetMJ2000Position(t3R) - ssb->GetMJ2000Position(t3R);		// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t3R
@@ -712,6 +948,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+	  Rvector3 dis = (cb1->GetMJ2000Position(t3R) - ssb->GetMJ2000Position(t3R)) - (cb1->GetMJ2000Position(t2T) - ssb->GetMJ2000Position(t2T));
+			 MessageInterface::ShowMessage("%s moving vector from t2T to t3R: %s\n", cbName1.c_str(), dis.ToString());
 	     Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
 	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
@@ -725,14 +963,22 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(1,0), mt(1,1), mt(1,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(2,0), mt(2,1), mt(2,2));
       #endif
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 downlinkVector = r2 - r1;
+#else
       Rvector3 downlinkVector = r2B - r1B;		// rVector = r2 - r1;
+#endif
       downlinkRange = downlinkVector.GetMagnitude();
 
       // Calculate ET-TAI at t3R:
 	  Real ettaiT3 = downlinkLeg.ETminusTAI(t3R, (GmatBase*)participants[0]);
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+	     #ifdef USE_EARTHMJ2000EQ_CS
+	     MessageInterface::ShowMessage("   Downlink range without relativity correction = r2-r1:  %.12lf km\n", downlinkRange);
+         #else
          MessageInterface::ShowMessage("   Downlink range without relativity correction = r2B-r1B:  %.12lf km\n", downlinkRange);
+         #endif
 		 MessageInterface::ShowMessage("   Relativity correction for downlink leg    = %.12lf km\n", downlinkLeg.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("   Downlink range with relativity correction = %.12lf km\n", downlinkRange + downlinkLeg.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("   (ET-TAI) at t3R = %.12le s\n", ettaiT3);
@@ -761,7 +1007,11 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector downRRateVec = p2V - p1V /* - r12_j2k_vel*/;
+#else
       Rvector downRRateVec = p2VB - p1VB /* - r12_j2k_vel*/;
+#endif
       Rvector3 rangeUnit = downlinkVector.GetUnitVector();
       downlinkRangeRate = downRRateVec * rangeUnit;
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
@@ -800,14 +1050,22 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(1,0), mt1(1,1), mt1(1,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(2,0), mt1(2,1), mt1(2,2));
       #endif
+#ifdef USE_EARTHMJ2000EQ_CS
+      Rvector3 uplinkVector = r4 - r3;
+#else
       Rvector3 uplinkVector = r4B - r3B;
+#endif
       uplinkRange = uplinkVector.GetMagnitude();
 
 	  // Calculate ET-TAI at t1T:
 	  Real ettaiT1 = downlinkLeg.ETminusTAI(t1T, (GmatBase*)participants[0]);
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+	     #ifdef USE_EARTHMJ2000EQ_CS
+	     MessageInterface::ShowMessage("   Uplink range without relativity correction = r4-r3:  %.12lf km\n", uplinkRange);
+         #else
          MessageInterface::ShowMessage("   Uplink range without relativity correction = r4B-r3B:  %.12lf km\n", uplinkRange);
+         #endif
 		 MessageInterface::ShowMessage("   Relativity correction for uplink leg    = %.12lf km\n", uplinkLeg.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("   Uplink range without relativity correction = %.12lf km\n", uplinkRange + uplinkLeg.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("   (ET-TAI) at t1T = %.12le s\n", ettaiT1);
@@ -829,7 +1087,11 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector upRRateVec = p4V - p3V /* - r12_j2k_vel*/ ;
+#else
       Rvector upRRateVec = p4VB - p3VB /* - r12_j2k_vel*/ ;
+#endif
       rangeUnit = uplinkVector.GetUnitVector();
       uplinkRangeRate = upRRateVec * rangeUnit;
 
@@ -1173,18 +1435,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          #endif
 
 		 realRangeFull = realTravelTime*freqConversionFactor;											// unit: range unit
-		 // Add noise to calculated measurement
-		 if (noiseSigma != NULL)
-		 {
-		    RandomNumber* rn = RandomNumber::Instance();
-			Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
-			while (val <= 0.0)
-			   val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
-			realRangeFull = val;
-		 }
-
-		 // Get range
-	     realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
 	  }
 	  else
 	  {
@@ -1210,32 +1460,32 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 			else
 			   return false;
 		 }
-
-		 // Add noise to calculated measurement
-		 if (noiseSigma != NULL)
-		 {
-		    RandomNumber* rn = RandomNumber::Instance();
-			Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
-			while (val <= 0.0)
-			   val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
-			realRangeFull = val;
-		 }
-
-		 // Get range
-		 realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
 	  }
 
+	  // Add noise to calculated measurement
+	  if (noiseSigma != NULL)
+      {
+         Real v_sign = ((realRangeFull < 0.0)?-1.0:1.0);
+		 RandomNumber* rn = RandomNumber::Instance();
+		 Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+		 while (val*v_sign <= 0.0)
+			val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+		 realRangeFull = val;
+      }
+	  // Get range
+	  realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
 	  
-	  if (obsData != NULL)
-	  {
-	     if (GmatMathUtil::Abs(realRange - obsValue[0]) > rangeModulo/2)
-	     {
-		    if (realRange > obsValue[0])
-			   realRange = realRange - rangeModulo;
-		    else
-			   realRange = realRange + rangeModulo;
-		 }
-	  }
+
+	  //if (obsData != NULL)
+	  //{
+	  //   if (GmatMathUtil::Abs(realRange - obsValue[0]) > rangeModulo/2)
+	  //   {
+		 //   if (realRange > obsValue[0])
+			//   realRange = realRange - rangeModulo;
+		 //   else
+			//   realRange = realRange + rangeModulo;
+		 //}
+	  //}
 	  
 
 	  #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
@@ -1252,7 +1502,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
 	  // 20. Set value for currentMeasurement
-      currentMeasurement.value[0] = realRange;
+      // currentMeasurement.value[0] = realRange;
+	  currentMeasurement.value[0] = realRangeFull;
 	  currentMeasurement.uplinkFreq = frequency;
 	  currentMeasurement.uplinkBand = freqBand;
 	  currentMeasurement.rangeModulo = rangeModulo;
@@ -1445,7 +1696,8 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    Real value1;
    Real interval_len;
 
-   Real basedFreqFactor = GetFrequencyFactor((*rampTB)[end_interval].rampFrequency);
+   Real basedFreq = (*rampTB)[end_interval].rampFrequency;
+   Real basedFreqFactor = GetFrequencyFactor(basedFreq);
    Real value = 0.0;
    Real dt = delta_t;
    Integer i = end_interval;

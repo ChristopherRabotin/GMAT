@@ -175,7 +175,7 @@ protected:
    /// Weight, Observation data, calculated data					// made changes by TUAN NGUYEN
    //std::fstream reportFile;											// made changes by TUAN NGUYEN
    RealArray Weight;												// made changes by TUAN NGUYEN
-   RealArray OData;													// made changes by TUAN NGUYEN
+   RealArray OData;		// correction value of observation data		// made changes by TUAN NGUYEN
    RealArray CData;													// made changes by TUAN NGUYEN
 
    /// The indices for the MeasurementModels with observations at current epoch
@@ -185,10 +185,18 @@ protected:
    Rmatrix                 *stm;
    /// The estimation state covariance matrix
    Covariance              *stateCovariance;
-   /// The estimated state
+   /// The estimated state in GMAT internal coordinate system
    GmatState               *estimationState;
-   /// The previous estimated state									// made changes by TUAN NGUYEN
-   GmatState               oldEstimationState;						// made changes by TUAN NGUYEN
+   /// The previous estimated state	 in GMAT internal coordinate system					// made changes by TUAN NGUYEN
+   GmatState               oldEstimationState;											// made changes by TUAN NGUYEN
+   
+   /// Apriori state (solve-for) presenting in participants' cooridnate systems			// made changes by TUAN NGUYEN
+   GmatState aprioriSolveForState;														// made changes by TUAN NGUYEN
+   /// The previous state (solve-for) presenting in participants' coordinate systems	// made changes by TUAN NGUYEN
+   GmatState previousSolveForState;														// made changes by TUAN NGUYEN
+   /// The current state (solve-for) presenting in participants' coordinate systems		// made changes by TUAN NGUYEN
+   GmatState currentSolveForState;														// made changes by TUAN NGUYEN
+
 
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
@@ -310,6 +318,7 @@ protected:
       RELATIVETOL_CONVERGED,
       ABS_AND_REL_TOL_CONVERGED,
       MAX_CONSECUTIVE_DIVERGED,
+	  MAX_ITERATIONS_DIVERGED,
       CONVERGING,
       DIVERGING,
    };

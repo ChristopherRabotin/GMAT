@@ -305,7 +305,8 @@ bool GmatODType::AddMeasurement(MeasurementData *md)
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      sprintf(databuffer, "%18.6lf", md->value[k]);
+	  Real dsnRange = GmatMathUtil::Mod(md->value[k],md->rangeModulo);			// value of observation has to be mod(fullrange, M) 
+	  sprintf(databuffer, "%18.6lf", dsnRange);
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
@@ -438,6 +439,7 @@ ObservationData* GmatODType::ReadObservation()
    {
       theLine >> value;
       currentObs.value.push_back(value);
+	  currentObs.value_orig.push_back(value);
 	  if (value == -1.0)
 		  break;
    }

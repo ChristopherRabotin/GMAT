@@ -393,38 +393,38 @@ ObservationData* GmatObType::ReadObservation()
    /// @todo Once ported to signal measurements, remove the code from here:
    if (type < 9000)
    {
-      switch (currentObs.type)
-      {
-         case Gmat::GEOMETRIC_RANGE:
-         case Gmat::GEOMETRIC_RANGE_RATE:
-         case Gmat::USN_TWOWAYRANGE:
-         case Gmat::USN_TWOWAYRANGERATE:
-         case Gmat::DSN_TWOWAYRANGE:
-         case Gmat::DSN_TWOWAYDOPPLER:
-            participantSize = 2;
-            dataSize = 1;
-            break;
+   switch (currentObs.type)
+   {
+      case Gmat::GEOMETRIC_RANGE:
+      case Gmat::GEOMETRIC_RANGE_RATE:
+      case Gmat::USN_TWOWAYRANGE:
+      case Gmat::USN_TWOWAYRANGERATE:
+      case Gmat::DSN_TWOWAYRANGE:
+      case Gmat::DSN_TWOWAYDOPPLER:
+         participantSize = 2;
+         dataSize = 1;
+         break;
 
-         case Gmat::TDRSS_TWOWAYRANGE:
-         case Gmat::TDRSS_TWOWAYRANGERATE:
-            participantSize = 3;
-            dataSize = 1;
-            break;
+      case Gmat::TDRSS_TWOWAYRANGE:
+      case Gmat::TDRSS_TWOWAYRANGERATE:
+         participantSize = 3;
+         dataSize = 1;
+         break;
 
-         case Gmat::GEOMETRIC_AZ_EL:
-         case Gmat::GEOMETRIC_RA_DEC:
-         case Gmat::OPTICAL_AZEL:
-         case Gmat::OPTICAL_RADEC:
-            participantSize = 2;
-            dataSize = 2;
-            defaultNoiseCovariance = 0.1;
-            break;
+      case Gmat::GEOMETRIC_AZ_EL:
+      case Gmat::GEOMETRIC_RA_DEC:
+      case Gmat::OPTICAL_AZEL:
+      case Gmat::OPTICAL_RADEC:
+         participantSize = 2;
+         dataSize = 2;
+         defaultNoiseCovariance = 0.1;
+         break;
 
-         default:
-            participantSize = 0;
-            dataSize = 0;
-            break;
-      }
+      default:
+         participantSize = 0;
+         dataSize = 0;
+         break;
+   }
    }
    else
    /// @todo to here, and clean up
@@ -437,7 +437,7 @@ ObservationData* GmatObType::ReadObservation()
       {
          MessageInterface::ShowMessage("Signal based measurement of type %d "
                "not processed successfully for line %s\n", type, str.c_str());
-      }
+   }
    }
 
    for (Integer i = 0; i < participantSize; ++i)
@@ -450,6 +450,7 @@ ObservationData* GmatObType::ReadObservation()
    {
       theLine >> value;
       currentObs.value.push_back(value);
+	  currentObs.value_orig.push_back(value);
    }
 /*
    Covariance *noise = new Covariance();

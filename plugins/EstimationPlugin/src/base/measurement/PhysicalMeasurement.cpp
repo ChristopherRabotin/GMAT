@@ -56,7 +56,7 @@ PhysicalMeasurement::PhysicalMeasurement(const std::string &type,
    frequency            (0.0),						// made changes by TUAN NGUYEN
    freqBand             (0),						// made changes by TUAN NGUYEN
 ///// TBD: Determine if there is a more generic way to add these
-   rangeModulo          (1.0e6),					// made changes by TUAN NGUYEN
+//   rangeModulo          (1.0e6),					// made changes by TUAN NGUYEN
    rampTB               (NULL),						// made changes by TUAN NGUYEN
    obsData              (NULL),						// made changes by TUAN NGUYEN
    useRelativityCorrection (false),					// made changes by TUAN NGUYEN
@@ -103,7 +103,7 @@ PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
    CoreMeasurement      (pm),
    frequency            (pm.frequency),
    freqBand             (pm.freqBand),						// made changes by TUAN NGUYEN
-   rangeModulo          (pm.rangeModulo),					// made changes by TUAN NGUYEN
+//   rangeModulo          (pm.rangeModulo),					// made changes by TUAN NGUYEN
    rampTB               (pm.rampTB),						// made changes by TUAN NGUYEN
    obsData              (pm.obsData),						// made changes by TUAN NGUYEN
    useRelativityCorrection (pm.useRelativityCorrection),	// made changes by TUAN NGUYEN
@@ -143,7 +143,7 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
 
       frequency = pm.frequency;
 	  freqBand  = pm.freqBand;					// made changes by TUAN NGUYEN
-	  rangeModulo = pm.rangeModulo;				// made changes by TUAN NGUYEN
+//	  rangeModulo = pm.rangeModulo;				// made changes by TUAN NGUYEN
 	  rampTB      = pm.rampTB;					// made changes by TUAN NGUYEN
 	  obsData     = pm.obsData;					// made changes by TUAN NGUYEN
 	  useRelativityCorrection = pm.useRelativityCorrection; // made changes by TUAN NGUYEN
@@ -227,19 +227,19 @@ Integer PhysicalMeasurement::GetFrequencyBand(Integer index)
    return ((index == 0) ? freqBand : freqBandE);
 }
 
-// made changes by TUAN NGUYEN
-void PhysicalMeasurement::SetRangeModulo(Real rangeMod)
-{
-	rangeModulo = rangeMod;
-}
-
-
-// made changes by TUAN NGUYEN
-Real PhysicalMeasurement::GetRangeModulo()
-{
-	return rangeModulo;
-}
-
+//// made changes by TUAN NGUYEN
+//void PhysicalMeasurement::SetRangeModulo(Real rangeMod)
+//{
+//	rangeModulo = rangeMod;
+//}
+//
+//
+//// made changes by TUAN NGUYEN
+//Real PhysicalMeasurement::GetRangeModulo()
+//{
+//	return rangeModulo;
+//}
+//
 // made changes by TUAN NGUYEN
 void PhysicalMeasurement::SetObsValue(const RealArray& value)
 {
@@ -721,6 +721,7 @@ void PhysicalMeasurement::GetRangeDerivative(Event &ev, const Rmatrix &stmInv,
  * @param wrtV Flag indicating if derivative with respect to velocity is desired
  */
 //------------------------------------------------------------------------------
+//#define USE_EARTHMJ2000EQ_CS
 void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
       const Rmatrix &stmInv, Rmatrix &deriv, bool wrtP1, Integer p1Index,
       Integer p2Index, bool wrtR, bool wrtV)
@@ -738,8 +739,10 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    EventData p1Data = ev.GetEventData(participants[p1Index]);
    EventData p2Data = ev.GetEventData(participants[p2Index]);
    
+#ifdef USE_EARTHMJ2000EQ_CS
+   rangeVec = p2Data.position - p1Data.position;												// made changes by TUAN NGUYEN
+#else
    /// Calculate range vector in Solar System Barycenter coordinate system:
-   // rangeVec = p2Data.position - p1Data.position;												// made changes by TUAN NGUYEN
    CelestialBody* cb1 = (CelestialBody*)p1Data.cs_origin;										// made changes by TUAN NGUYEN
    CelestialBody* cb2 = (CelestialBody*)p2Data.cs_origin;										// made changes by TUAN NGUYEN
    Real t1 = p1Data.epoch;																		// made changes by TUAN NGUYEN
@@ -752,6 +755,7 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    Rvector3 p1B = BE1 + p1Data.position;														// made changes by TUAN NGUYEN
    Rvector3 p2B = BE2 + p2Data.position;														// made changes by TUAN NGUYEN
    rangeVec = p2B - p1B;																		// made changes by TUAN NGUYEN
+#endif
 
    // Be sure to use the correct rotation matrices, etc
    EventData dataToUse = (wrtP1 ? p1Data : p2Data);

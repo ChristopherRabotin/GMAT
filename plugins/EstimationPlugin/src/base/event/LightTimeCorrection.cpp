@@ -34,7 +34,7 @@
 //#define DEBUG_ITERATION
 //#define DEBUG_CALCULATE_RANGE
 
-#define MAX_NUM_ITERATION			5
+#define MAX_NUM_ITERATION			10		//5
 
 
 //-----------------------------------------------------------------------------
@@ -190,7 +190,8 @@ Real LightTimeCorrection::Evaluate()
 
    // Located if magnitude of the event function is smaller than tolerance
    ++numIter;
-   if ((GmatMathUtil::Abs(vals) < GmatMathUtil::Max(tolerance, tolerance1*range))||(numIter > MAX_NUM_ITERATION))
+//   if ((GmatMathUtil::Abs(vals) < GmatMathUtil::Max(tolerance, tolerance1*range))||(numIter > MAX_NUM_ITERATION))
+   if ((GmatMathUtil::Abs(vals) < tolerance)||(numIter > MAX_NUM_ITERATION))
    {
       status = LOCATED;
 	  numIter = 0;
@@ -326,6 +327,7 @@ void LightTimeCorrection::FixState()
  * @return The range (unit: km)
  */
 //-----------------------------------------------------------------------------
+//#define USE_EARTHMJ2000EQ_CS
 Real LightTimeCorrection::CalculateRange()
 {
    #ifdef DEBUG_LIGHTTIME
@@ -389,8 +391,12 @@ Real LightTimeCorrection::CalculateRange()
 		 MessageInterface::ShowMessage("  ssb2cb2 (%.12lf  %.12lf  %.12lf)km\n", ssb2cb2.GetElement(0), ssb2cb2.GetElement(1), ssb2cb2.GetElement(2));
       #endif
       
+#ifdef USE_EARTHMJ2000EQ_CS
+      rangeVec = r2 - r1;																			// made changes by TUAN NGUYEN
+#else
       rangeVec = r2B - r1B;																			// made changes by TUAN NGUYEN
-	  
+#endif
+
       precisionRange = rangeVec.GetMagnitude();														// made changes by TUAN NGUYEN
 
 	  relativityCorrection = 0.0;																	// made changes by TUAN NGUYEN

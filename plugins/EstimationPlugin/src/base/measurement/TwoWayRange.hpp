@@ -87,6 +87,13 @@ protected:
 
    virtual void         InitializeMeasurement();
    virtual void         SetHardwareDelays(bool loadEvents = true);
+
+   /// Enumeration defining the TwoWayRange's scriptable parameters
+   enum
+   {
+       TwoWayRangeParamCount = PhysicalMeasurementParamCount,
+   };
+
 };
 
 #endif /* TwoWayRange_hpp */

@@ -58,6 +58,7 @@ GMAT BatchEst.AbsoluteTol = 1e-005;
 GMAT BatchEst.RelativeTol = 1e-006;
 GMAT BatchEst.Propagator = ODProp;
 BatchEst.OLSEInitialRMSSigma = 1.0e15;
+BatchEst.OLSEMultiplicativeConstant = 100;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
 
 %----------------------------------------

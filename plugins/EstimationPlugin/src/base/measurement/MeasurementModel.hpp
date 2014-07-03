@@ -262,7 +262,7 @@ protected:
        Bias,
        NoiseSigma,
        Frequency,
-	   RangeModuloConstant,									// made changes by TUAN NGUYEN
+//	   RangeModuloConstant,									// made changes by TUAN NGUYEN
 	   RelativityCorrection,								// made changes by TUAN NGUYEN
 	   ETminusTAICorrection,								// made changes by TUAN NGUYEN
 //	   ResidualMaxLimit,									// made changes by TUAN NGUYEN

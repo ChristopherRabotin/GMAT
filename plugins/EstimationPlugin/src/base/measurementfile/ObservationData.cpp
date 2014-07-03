@@ -86,6 +86,7 @@ ObservationData::ObservationData(const ObservationData& od):
    epoch                   (od.epoch),
    participantIDs          (od.participantIDs),
    value                   (od.value),
+   value_orig              (od.value_orig),				// made changes by TUAN NGUYEN
    unit					   (od.unit),					// made changes by TUAN NGUYEN
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
@@ -125,6 +126,7 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       epoch                   = od.epoch;
       participantIDs          = od.participantIDs;
       value                   = od.value;
+	  value_orig              = od.value_orig;      // made changes by TUAN NGUYEN
 	  unit                    = od.unit;			// made changes by TUAN NGUYEN
       noiseCovariance         = od.noiseCovariance;
       extraDataDescriptions   = od.extraDataDescriptions;
@@ -158,6 +160,7 @@ void ObservationData::Clear()
    epoch                   = 0.0;
    participantIDs.clear();
    value.clear();
+   value_orig.clear();								// made changes by TUAN NGUYEN
    extraDataDescriptions.clear();
    extraTypes.clear();
    extraData.clear();

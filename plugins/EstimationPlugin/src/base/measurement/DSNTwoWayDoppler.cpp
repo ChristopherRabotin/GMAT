@@ -473,6 +473,7 @@ const std::vector<RealArray>& DSNTwoWayDoppler::CalculateMeasurementDerivatives(
  *         or is infeasible
  */
 //------------------------------------------------------------------------------
+//#define USE_EARTHMJ2000EQ_CS
 bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 {
    bool retval = false;
@@ -627,7 +628,12 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 	  r1SB = ssb2cb_t3RS + r1S;													// position of station at reception time t3R in SSB coordinate system
 	  r2SB = ssb2cb_t2TS + r2S;													// position of spacecraft at transmit time t2T in SSB coordinate system
 
+# ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 downlinkVectorS = r2S - r1S;										// down link vector in EarthMJ2000Eq coordinate system
+#else
       Rvector3 downlinkVectorS = r2SB - r1SB;									// down link vector in SSB coordinate system
+#endif
+
       Real downlinkRangeS = downlinkVectorS.GetMagnitude();						// down link range (unit: km)
 
 	  // Calculate ET-TAI at t3RS:
@@ -645,7 +651,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtS(0,0), mtS(0,1), mtS(0,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtS(1,0), mtS(1,1), mtS(1,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtS(2,0), mtS(2,1), mtS(2,2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Downlink vector in EarthMJ2000Eq coordinate system:   downlinkVectorS = r2S - r1S = (%.12lf,  %.12lf,  %.12lf) km\n", downlinkVectorS(0), downlinkVectorS(1), downlinkVectorS(2));
+#else
 		 MessageInterface::ShowMessage("     Downlink vector in SSB inertial coordinate system:   downlinkVectorS = r2SB - r1SB = (%.12lf,  %.12lf,  %.12lf) km\n", downlinkVectorS(0), downlinkVectorS(1), downlinkVectorS(2));
+#endif
          MessageInterface::ShowMessage("     Downlink range without relativity correction: %.12lf km\n",downlinkRangeS);
 		 MessageInterface::ShowMessage("     Relativity correction for downlink leg      : %.12lf km\n", downlinkLegS.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Downlink range with relativity correction   : %.12lf km\n", downlinkLegS.GetRelativityCorrection() + downlinkRangeS);
@@ -666,7 +676,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 downRRateVecS = p2VS - p1VS;
+#else
       Rvector3 downRRateVecS = p2VSB - p1VSB /* - r12_j2k_vel*/;
+#endif
       Rvector3 rangeUnit = downlinkVectorS.GetUnitVector();
       downlinkRangeRate[0] = downRRateVecS * rangeUnit;
 
@@ -676,7 +690,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Spacecraft %s velocity in %sMJ2000 coordinate system     :  p2VS  = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), p2VS(0), p2VS(1), p2VS(2));
          MessageInterface::ShowMessage("     Station %s velocity in SSB inertial coordinate system    :  p1VSB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[0]->GetName().c_str(), p1VSB(0), p1VSB(1), p1VSB(2));
          MessageInterface::ShowMessage("     Spacecraft %s velocity in SSB inertial coordinate system :  p2VSB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), p2VSB(0), p2VSB(1), p2VSB(2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in EarthMJ2000Eq coordinate system:  downRRateVecS = (%.12lf,  %.12lf,  %.12lf)km/s\n", downRRateVecS(0), downRRateVecS(1), downRRateVecS(2));
+#else
 		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in SSB inertial coordinate system:  downRRateVecS = (%.12lf,  %.12lf,  %.12lf)km/s\n", downRRateVecS(0), downRRateVecS(1), downRRateVecS(2));
+#endif
          MessageInterface::ShowMessage("     Downlink range Rate:  downlinkRangeRateS = %.12lf km/s\n", downlinkRangeRate[0]);
 
          //MessageInterface::ShowMessage("  .Downlink Range Rate:  %.12lf km/s\n", downlinkRangeRate[0]);
@@ -698,7 +716,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 	  r3SB = ssb2cb_t1TS + r3S;													// position of station at transmit time t1T in SSB coordinate system
 	  r4SB = ssb2cb_t2TS + r4S;													// position of spacecraft at reception time t2R in SSB coordinate system
 
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 uplinkVectorS = r4S - r3S;
+#else
       Rvector3 uplinkVectorS = r4SB - r3SB;
+#endif
 	  Real uplinkRangeS = uplinkVectorS.GetMagnitude();
 	  
 	  // Calculate ET-TAI at t1TS:
@@ -716,7 +738,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtS1(0,0), mtS1(0,1), mtS1(0,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtS1(1,0), mtS1(1,1), mtS1(1,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtS1(2,0), mtS1(2,1), mtS1(2,2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Uplink vector in EarthMJ2000Eq coordinate system:   uplinkVectorS = r4S - r3S = (%.12lf,  %.12lf,  %.12lf) km\n", uplinkVectorS(0), uplinkVectorS(1), uplinkVectorS(2));
+#else
 		 MessageInterface::ShowMessage("     Uplink vector in SSB inertial coordinate system:   uplinkVectorS = r4SB - r3SB = (%.12lf,  %.12lf,  %.12lf) km\n", uplinkVectorS(0), uplinkVectorS(1), uplinkVectorS(2));
+#endif
          MessageInterface::ShowMessage("     Uplink range without ralativity correction: %.12lf km\n", uplinkRangeS);
 		 MessageInterface::ShowMessage("     Relativity correction for uplink leg      : %.12lf km\n", uplinkLegS.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Uplink range with relativity correction   : %.12lf km\n", uplinkLegS.GetRelativityCorrection() + uplinkRangeS);
@@ -737,7 +763,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 upRRateVecS = p4VS - p3VS;
+#else
       Rvector3 upRRateVecS = p4VSB - p3VSB /* - r12_j2k_vel*/ ;
+#endif
       rangeUnit = uplinkVectorS.GetUnitVector();
       uplinkRangeRate[0] = upRRateVecS * rangeUnit;
 
@@ -747,7 +777,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Spacecraft %s velocity in %sMJ2000 coordinate system    :  p4VS  = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), p4VS(0), p4VS(1), p4VS(2));
 		 MessageInterface::ShowMessage("     Station %s velocity in SSB inertial coordinate system   :  p3VSB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[0]->GetName().c_str(), p3VSB(0), p3VSB(1), p3VSB(2));
          MessageInterface::ShowMessage("     Spacecraft %s velocity in SSB inertial coordinate system:  p4VSB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), p4VSB(0), p4VSB(1), p4VSB(2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in EarthMJ2000Eq coordinate system:  upRRateVecS = (%.12lf,  %.12lf,  %.12lf)km/s\n", upRRateVecS(0), upRRateVecS(1), upRRateVecS(2));
+#else
 		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in SSB inertial coordinate system:  upRRateVecS = (%.12lf,  %.12lf,  %.12lf)km/s\n", upRRateVecS(0), upRRateVecS(1), upRRateVecS(2));
+#endif
          MessageInterface::ShowMessage("     Uplink range rate:  uplinkRangeRateS = %.12lf km/s\n", uplinkRangeRate[0]);
       #endif
 
@@ -780,7 +814,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 	  r1EB = ssb2cb_t3RE + r1E;													// position of station at reception time t3R in SSB coordinate system
 	  r2EB = ssb2cb_t2TE + r2E;													// position of spacecraft at transmit time t2T in SSB coordinate system
 
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 downlinkVectorE = r2E - r1E;
+#else
       Rvector3 downlinkVectorE = r2EB - r1EB;									// down link vector in SSB coordinate system
+#endif
       Real downlinkRangeE = downlinkVectorE.GetMagnitude();						// down link range (unit: km)
 
 	  // Calculate ET-TAI at t3RE:
@@ -798,7 +836,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtE(0,0), mtE(0,1), mtE(0,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtE(1,0), mtE(1,1), mtE(1,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtE(2,0), mtE(2,1), mtE(2,2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Downlink vector in EarthMJ2000Eq coordinate system:   downlinkVectorE = r2E - r1E = (%.12lf,  %.12lf,  %.12lf) km\n", downlinkVectorE(0), downlinkVectorE(1), downlinkVectorE(2));
+#else
 		 MessageInterface::ShowMessage("     Downlink vector in SSB inertial coordinate system:   downlinkVectorE = r2EB - r1EB = (%.12lf,  %.12lf,  %.12lf) km\n", downlinkVectorE(0), downlinkVectorE(1), downlinkVectorE(2));
+#endif
          MessageInterface::ShowMessage("     Downlink range without relativity correction: %.12lf km\n",downlinkRangeE);
 		 MessageInterface::ShowMessage("     Relativity correction for downlink leg      : %.12lf km\n", downlinkLegE.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Downlink range with relativity correction   : %.12lf km\n", downlinkLegE.GetRelativityCorrection() + downlinkRangeE);
@@ -820,7 +862,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 downRRateVecE = p2VE - p1VE;
+#else
       Rvector3 downRRateVecE = p2VEB - p1VEB /* - r12_j2k_vel*/;
+#endif
       rangeUnit = downlinkVectorE.GetUnitVector();
       downlinkRangeRate[1] = downRRateVecE * rangeUnit;
 
@@ -830,7 +876,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Spacecraft %s velocity in %sMJ2000 coordiante system    :  p2VE  = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), p2VE(0), p2VE(1), p2VE(2));
 		 MessageInterface::ShowMessage("     Station %s velocity in SSB inertial coordiante system   :  p1VEB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[0]->GetName().c_str(), p1VEB(0), p1VEB(1), p1VEB(2));
          MessageInterface::ShowMessage("     Spacecraft %s velocity in SSB inertial coordiante system:  p2VEB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), p2VEB(0), p2VEB(1), p2VEB(2));
-		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in FK5:  downRRateVecE = (%.12lf,  %.12lf,  %.12lf)km/s\n", downRRateVecE(0), downRRateVecE(1), downRRateVecE(2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in EarthMJ2000Eq coordinate system:  downRRateVecE = (%.12lf,  %.12lf,  %.12lf)km/s\n", downRRateVecE(0), downRRateVecE(1), downRRateVecE(2));
+#else
+		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in SSB inertial coordinate system:  downRRateVecE = (%.12lf,  %.12lf,  %.12lf)km/s\n", downRRateVecE(0), downRRateVecE(1), downRRateVecE(2));
+#endif
          MessageInterface::ShowMessage("     Downlink range Rate:  downlinkRangeRateE = %.12lf km/s\n", downlinkRangeRate[1]);
       #endif
 
@@ -850,7 +900,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 	  r3EB = ssb2cb_t1TE + r3E;													// position of station at transmit time t1T in SSB inertial coordinate system
 	  r4EB = ssb2cb_t2TE + r4E;													// position of spacecraft at reception time t2R in SSB inertial coordinate system
 
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 uplinkVectorE = r4E - r3E;
+#else
       Rvector3 uplinkVectorE = r4EB - r3EB;
+#endif
 	  Real uplinkRangeE = uplinkVectorE.GetMagnitude();
 	  
 	  // Calculate ET-TAI at t1TE:
@@ -868,7 +922,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtE1(0,0), mtE1(0,1), mtE1(0,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtE1(1,0), mtE1(1,1), mtE1(1,2));
 		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mtE1(2,0), mtE1(2,1), mtE1(2,2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Uplink vector in EarthMJ2000Eq coordinate system:   uplinkVectorE = r4E - r3E = (%.12lf,  %.12lf,  %.12lf) km\n", uplinkVectorE(0), uplinkVectorE(1), uplinkVectorE(2));
+#else
 		 MessageInterface::ShowMessage("     Uplink vector in SSB inertial coordinate system:   uplinkVectorE = r4EB - r3EB = (%.12lf,  %.12lf,  %.12lf) km\n", uplinkVectorE(0), uplinkVectorE(1), uplinkVectorE(2));
+#endif
          MessageInterface::ShowMessage("     Uplink range without ralativity correction: %.12lf km\n", uplinkRangeE);
 		 MessageInterface::ShowMessage("     Relativity correction for uplink leg      : %.12lf km\n", uplinkLegE.GetRelativityCorrection());
 		 MessageInterface::ShowMessage("     Uplink range with relativity correction   : %.12lf km\n", uplinkLegE.GetRelativityCorrection() + uplinkRangeE);
@@ -889,7 +947,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
+#ifdef USE_EARTHMJ2000EQ_CS
+	  Rvector3 upRRateVecE = p4VE - p3VE;
+#else
       Rvector3 upRRateVecE = p4VEB - p3VEB /* - r12_j2k_vel*/ ;
+#endif
       rangeUnit = uplinkVectorE.GetUnitVector();
       uplinkRangeRate[1] = upRRateVecE * rangeUnit;
 
@@ -899,7 +961,11 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("     Spacecraft %s velocity in %sMJ2000 coordinate system    :  p4VE  = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), p4VE(0), p4VE(1), p4VE(2));
          MessageInterface::ShowMessage("     Station %s velocity in SSB inertial coordinate system   :  p3VEB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[0]->GetName().c_str(), p3VEB(0), p3VEB(1), p3VEB(2));
          MessageInterface::ShowMessage("     Spacecraft %s velocity in SSB inertial coordinate system:  p4VEB = (%.12lf,  %.12lf,  %.12lf)km/s\n", participants[1]->GetName().c_str(), p4VEB(0), p4VEB(1), p4VEB(2));
+#ifdef USE_EARTHMJ2000EQ_CS
+		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in EarthMJ2000Eq coordinate system:  upRRateVecE = (%.12lf,  %.12lf,  %.12lf)km/s\n", upRRateVecE(0), upRRateVecE(1), upRRateVecE(2));
+#else
 		 MessageInterface::ShowMessage("     Spacecraft velocity w/r/t Station in SSB inertial coordinate system:  upRRateVecE = (%.12lf,  %.12lf,  %.12lf)km/s\n", upRRateVecE(0), upRRateVecE(1), upRRateVecE(2));
+#endif
          MessageInterface::ShowMessage("     Uplink range rate:  uplinkRangeRateE = %.12lf km/s\n", uplinkRangeRate[1]);
       #endif
 
@@ -1412,9 +1478,13 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 	  // Add noise to calculated measurement
 	  if (noiseSigma != NULL)
 	  {
+		  #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
+		  MessageInterface::ShowMessage("Generate noise and it to measurement\n"); 
+          #endif
+		  Real v_sign = ((currentMeasurement.value[0] < 0.0)?-1.0:1.0);
 		  RandomNumber* rn = RandomNumber::Instance();
 		  Real val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
-		  while (val <= 0.0)
+		  while (val*v_sign <= 0.0)
 			 val = rn->Gaussian(currentMeasurement.value[0], noiseSigma->GetElement(0));
 		  currentMeasurement.value[0] = val;
 	  }
