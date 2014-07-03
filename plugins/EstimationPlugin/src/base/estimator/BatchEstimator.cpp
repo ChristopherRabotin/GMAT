@@ -2008,7 +2008,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 	     }
 	     else
 		    ss << GetElementFullName((*map)[i], false);
-		 max_len = max(max_len, ss.str().length());
+		 max_len = GmatMathUtil::Max(max_len, ss.str().length());
 	  }
 
       textFile << "\n";
