@@ -43,8 +43,10 @@ protected:
 
    static const Integer MAX_TABLE_SIZE;
 
-   /// name of data file (It contains the path to the file)
+   /// name of data file
    std::string      iauFileName;
+   /// full path name of iau file (It contains the path to the file)
+   std::string      iauFileNameFullPath;
    /// a table containing values of independent variables
    Real*            independence;
    /// a table containing dependent vectors

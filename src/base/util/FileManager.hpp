@@ -128,7 +128,7 @@ public:
                         bool forInput, bool writeWarning = false, bool writeInfo = false);
    std::string FindPath(const std::string &fileName, const std::string &fileType,
                         bool forInput, bool writeWarning = false, bool writeInfo = false);
-   std::string FindMainIconFile();
+   std::string FindMainIconFile(bool writeInfo = true);
    
    std::string GetPathSeparator();
    bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);

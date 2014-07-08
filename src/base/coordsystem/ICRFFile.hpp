@@ -42,9 +42,11 @@ public:
 protected:
    static const Integer MAX_TABLE_SIZE;
 
-   /// name of data file (It contains the path to the file)
+   /// name of data file
    std::string          icrfFileName;
-
+   /// full path name of icrf file (It contains the path to the file)
+   std::string          icrfFileNameFullPath;
+   
    /// a table containing values of independent variable
    Real*                independence;
    /// a table containing dependent vectors

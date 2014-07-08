@@ -477,7 +477,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
          if (forInput)
          {
             pathToReturn = "";
-            if (writeWarning)
+            if (writeWarning && gmatPath != "")
             {
                MessageInterface::ShowMessage
                   ("*** WARNING *** The input file '%s' does not exist\n", fullname.c_str());
@@ -500,8 +500,12 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       
       if (forInput)
       {
-         // First search in GMAT working directory
-         tempPath1 = gmatPath + fullname;
+         // First search in GMAT working directory.
+         // If GMAT directory is blank give some dummy name so that it can be failed to search
+         if (gmatPath == "")
+            tempPath1 = "__000_gmat_working_dir_is_blank_000__" + fullname;
+         else
+            tempPath1 = gmatPath + fullname;
          
          #ifdef DEBUG_FIND_INPUT_PATH
          MessageInterface::ShowMessage("   => first search Path = '%s'\n", tempPath1.c_str());
@@ -532,7 +536,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                ("   => next search path = '%s' \n", tempPath2.c_str());
             #endif
             
-            if (writeWarning)
+            if (writeWarning && gmatPath != "")
                MessageInterface::ShowMessage
                   ("*** WARNING *** The input file '%s' does not exist in GMAT "
                    "working directory\n   '%s', so trying default path from the "
@@ -546,7 +550,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             else
             {
                pathToReturn = "";
-               if (writeWarning)
+               if (writeWarning && gmatPath != "")
                   MessageInterface::ShowMessage
                      ("*** WARNING *** The input file '%s' does not exist in default "
                       "path from the startup file '%s'\n", fullname.c_str(), tempPath2.c_str());
@@ -621,19 +625,14 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       }
       
       // Write message where output goes or input from
-      MessageInterface::ShowMessage
-         ("*** The %s file '%s' will be %s \n                    '%s'\n",
-          ioType.c_str(), fullname.c_str(), rwType.c_str(), pathToReturn.c_str());
+      if (pathToReturn != "")
+         MessageInterface::ShowMessage
+            ("*** The %s file '%s' will be %s \n                    '%s'\n",
+             ioType.c_str(), fullname.c_str(), rwType.c_str(), pathToReturn.c_str());
+      else
+         MessageInterface::ShowMessage
+            ("*** The %s file '%s' cannot be located\n", ioType.c_str(), fullname.c_str());
    }
-   
-   // Do we need this?
-   // #ifdef DEBUG_FIND_PATH
-   // MessageInterface::ShowMessage
-   //    ("   Before converting to abs = '%s'\n", pathToReturn.c_str());
-   // #endif
-   // // Convert to absolute path before returning
-   // if (GmatFileUtil::IsPathRelative(pathToReturn))
-   //    pathToReturn = ConvertToAbsPath(pathToReturn, false);
    
    #ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
@@ -645,14 +644,15 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
 
 
 //------------------------------------------------------------------------------
-// std::string FindMainIconFile()
+// std::string FindMainIconFile(bool writeInfo = true)
 //------------------------------------------------------------------------------
-std::string FileManager::FindMainIconFile()
+std::string FileManager::FindMainIconFile(bool writeInfo)
 {
    static bool writeWarning = true;
    
-   std::string fullpath = FindPath("", MAIN_ICON_FILE, true, writeWarning);
-   writeWarning = false;
+   std::string fullpath = FindPath("", MAIN_ICON_FILE, true, writeWarning, writeInfo);
+   if (mGmatWorkingDir != "")
+      writeWarning = false;
    
    return fullpath;
 }
@@ -2888,7 +2888,7 @@ FileManager::FileManager(const std::string &appName)
    
    // Set directories
    SetBinDirectory(appName);
-   SetGmatWorkingDirectory(mAbsBinDir);
+   //SetGmatWorkingDirectory(mAbsBinDir);
    SetCurrentWorkingDirectory(mAbsBinDir);
    
    // Set platform dependent data

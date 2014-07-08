@@ -20,7 +20,7 @@
 
 #include "GmatBaseSetupPanel.hpp"
 #include "MessageInterface.hpp"
-#include "FileManager.hpp"         // for GetPathname()
+#include "FileManager.hpp"         // for GetAbsPathname()
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 #include <wx/config.h>

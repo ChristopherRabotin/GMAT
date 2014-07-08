@@ -81,7 +81,7 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
    
    if (!isTextEditable)
       theText->SetMaxLength(320000);
-   //theText->SetFont( GmatAppData::GetFont());
+   theText->SetFont( GmatAppData::Instance()->GetFont());
    
    // add items to middle sizer
    theMiddleSizer = new wxBoxSizer(wxVERTICAL);
