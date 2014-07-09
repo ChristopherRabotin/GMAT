@@ -270,8 +270,7 @@ std::string FileManager::GetGmatWorkingDirectory()
 // bool SetGmatWorkingDirectory(const std::string &newDir = "")
 //------------------------------------------------------------------------------
 /**
- * Sets GMAT working directory.  This is the directory where script is passed
- * to GMAT from the command line.
+ * Sets GMAT working directory.  This is the directory where script resides.
  */
 //------------------------------------------------------------------------------
 bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
@@ -284,7 +283,13 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
    else
    {
       if (DoesDirectoryExist(newDir))
+      {
          mGmatWorkingDir = newDir;
+         // Add GMAT working directory to MATLAB search path so that this directory
+         // will have higher priority in search path for the new file path implementation.
+         // (LOJ: 2014.07.09)
+         AddMatlabFunctionPath(newDir);
+      }
       else
          return false;
    }
@@ -321,7 +326,8 @@ bool FileManager::SetCurrentWorkingDirectory(const std::string &newDir)
 
 //------------------------------------------------------------------------------
 // std::string FindPath(const std::string &fileName, const FileType type,
-//                      bool forInput, bool writeWarning = false, bool writeInfo = false)
+//                      bool forInput, bool writeWarning = false, bool writeInfo = false,
+//                      const std::string &objName)
 //------------------------------------------------------------------------------
 /**
  * Finds path for requested fileName using the file path search order.
@@ -331,7 +337,8 @@ bool FileManager::SetCurrentWorkingDirectory(const std::string &newDir)
  */
 //------------------------------------------------------------------------------
 std::string FileManager::FindPath(const std::string &fileName, const FileType type,
-                                  bool forInput, bool writeWarning, bool writeInfo)
+                                  bool forInput, bool writeWarning, bool writeInfo,
+                                  const std::string &objName)
 {
    #ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
@@ -354,13 +361,14 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
       throw UtilityException(ss.str());
    }
    
-   return FindPath(fileName, typeName, forInput, writeWarning, writeInfo);
+   return FindPath(fileName, typeName, forInput, writeWarning, writeInfo, objName);
 }
 
 
 //------------------------------------------------------------------------------
 // std::string FindPath(const std::string &fileName, const std::string &fileType,
-//                      bool forInput, bool writeWarning = false, bool writeInfo = false)
+//                      bool forInput, bool writeWarning = false, bool writeInfo = false,
+//                      const std::string &objName = "")
 //------------------------------------------------------------------------------
 /**
  * Finds path for requested fileName using the following file path search order.
@@ -383,18 +391,20 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
  * @param  forInput     Set to true if filename is for input
  * @param  writeWarning Set to true if warning should be written when no path found
  * @param  writeInfo    Set to true if information should be written for output path
+ * @param  objName      The name of the calling object to be written to informational message
  *
  * @return full path name using search order
  */
 //------------------------------------------------------------------------------
 std::string FileManager::FindPath(const std::string &fileName, const std::string &fileType,
-                                  bool forInput, bool writeWarning, bool writeInfo)
+                                  bool forInput, bool writeWarning, bool writeInfo,
+                                  const std::string &objName)
 {   
    #ifdef DEBUG_FIND_PATH
    MessageInterface::ShowMessage
       ("FileManager::FindPath() entered\n   fileName = '%s'\n   fileType = '%s', forInput = %d, "
-       "writeWarning = %d, writeInfo = %d\n", fileName.c_str(), fileType.c_str(), forInput,
-       writeWarning, writeInfo);
+       "writeWarning = %d, writeInfo = %d, objName = '%s'\n", fileName.c_str(), fileType.c_str(),
+       forInput, writeWarning, writeInfo, objName.c_str());
    #endif
    
    std::string fullname = fileName;
@@ -474,6 +484,9 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       }
       else
       {
+         #ifdef DEBUG_FIND_PATH
+         MessageInterface::ShowMessage("   The file does not exist\n");
+         #endif
          if (forInput)
          {
             pathToReturn = "";
@@ -617,21 +630,32 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    if (mWriteFilePathInfo == "ON" && writeInfo)
    {
       std::string ioType = "output";
+      std::string fType = "";
       std::string rwType = "written to";
+      std::string oName = "";
+      
+      if (fileType.find("_FILE") != fileType.npos)
+         fType = fileType + " ";
+      
       if (forInput)
       {
          ioType = "input";
          rwType = "read from";
       }
+
+      if (objName != "")
+         oName = " for the object '" + objName + "'";
       
       // Write message where output goes or input from
       if (pathToReturn != "")
          MessageInterface::ShowMessage
-            ("*** The %s file '%s' will be %s \n                    '%s'\n",
-             ioType.c_str(), fullname.c_str(), rwType.c_str(), pathToReturn.c_str());
+            ("*** The %s %sfile '%s'%s will be %s \n                    '%s'\n",
+             ioType.c_str(), fType.c_str(), fullname.c_str(), oName.c_str(),
+             rwType.c_str(), pathToReturn.c_str());
       else
          MessageInterface::ShowMessage
-            ("*** The %s file '%s' cannot be located\n", ioType.c_str(), fullname.c_str());
+            ("*** The %s %sfile '%s' cannot be located\n", ioType.c_str(),
+             fType.c_str(), fullname.c_str());
    }
    
    #ifdef DEBUG_FIND_PATH
@@ -1789,7 +1813,7 @@ std::string FileManager::GetFilename(const std::string &typeName)
       MessageInterface::ShowMessage
          ("FileManager::GetFilename() returning '%s'\n", name.c_str());
       #endif
-      return name;
+      return name;
    }
    
    throw UtilityException("FileManager::GetFilename() file type: " + typeName +
@@ -2237,7 +2261,7 @@ void FileManager::ClearMatlabFunctionPath()
 
 
 //------------------------------------------------------------------------------
-// void  AddMatlabFunctionPath(const std::string &pat, bool addFront)
+// void  AddMatlabFunctionPath(const std::string &path, bool addFront = true)
 //------------------------------------------------------------------------------
 /*
  * If new path it adds to the MatlabFunction path list.
@@ -2245,7 +2269,7 @@ void FileManager::ClearMatlabFunctionPath()
  * addFront flag.
  *
  * @param  path  path name to be added
- * @param  addFront  if set to true, it adds to the front, else adds to the back (true)
+ * @param  addFront  if set to true, it adds to the front, else adds to the back [true]
  */
 //------------------------------------------------------------------------------
 void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
@@ -2304,7 +2328,20 @@ void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
 //------------------------------------------------------------------------------
 std::string FileManager::GetMatlabFunctionPath(const std::string &name)
 {
-   return GetFunctionPath(MATLAB_FUNCTION, mMatlabFunctionPaths, name);
+   std::string path = GetFunctionPath(MATLAB_FUNCTION, mMatlabFunctionPaths, name);
+   
+   // Write informational message if debug is turned on from the startup file
+   if (mWriteFilePathInfo == "ON")
+   {
+      if (path == "")
+         MessageInterface::ShowMessage
+            ("*** Using MATLAB built-in function '%s'\n", name.c_str());
+      else
+         MessageInterface::ShowMessage
+            ("*** Using MATLAB function '%s' from '%s'\n", name.c_str(), path.c_str());
+   }
+   
+   return path;
 }
 
 

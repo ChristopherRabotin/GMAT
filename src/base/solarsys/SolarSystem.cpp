@@ -392,7 +392,9 @@ SolarSystem::SolarSystem(std::string withName) :
    theSun->SetOrientationParameters(STAR_ORIENTATION_PARAMETERS);
    
    // Set texture map file for the Sun (LOJ: 2014.06.19)
-   SetTextureMapFile(theSun, SUN_NAME);
+   // The texture map file for celestial body is set in the constructor,
+   // so commented out (LOJ: 2014.07.08)
+   //SetTextureMapFile(theSun, SUN_NAME);
    
    //==================== OLD CODE
    // // find and set the texture map
@@ -468,7 +470,9 @@ SolarSystem::SolarSystem(std::string withName) :
       newPlanet->SetIntegerParameter(newPlanet->GetParameterID("NAIFId"),PLANET_NAIF_IDS[ii]);
       
       // Set texture map file for the Planets (LOJ: 2014.06.19)
-      SetTextureMapFile(newPlanet, PLANET_NAMES[ii]);
+      // The texture map file for celestial body is set in the constructor,
+      // so commented out (LOJ: 2014.07.08)
+      //SetTextureMapFile(newPlanet, PLANET_NAMES[ii]);
       
       
       //==================== OLD CODE
@@ -547,7 +551,9 @@ SolarSystem::SolarSystem(std::string withName) :
       newMoon->SetIntegerParameter(newMoon->GetParameterID("NAIFId"),MOON_NAIF_IDS[ii]);
       
       // Set texture map file for the moon (LOJ: 2014.06.19)
-      SetTextureMapFile(newMoon, MOON_NAMES[ii]);
+      // The texture map file for celestial body is set in the constructor,
+      // so commented out (LOJ: 2014.07.08)
+      //SetTextureMapFile(newMoon, MOON_NAMES[ii]);
       
       //==================== OLD CODE
       // // find and set the texture map

@@ -1685,21 +1685,31 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
                    "    so using the texture file '%s' from the body '%s'.\n",
                    oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
             }
-            // If texture file does not exist, try with default path from the startup file
-            if (!GmatFileUtil::DoesFileExist(textureFile.c_str()))
+            
+            FileManager *fm = FileManager::Instance();
+            // Changed to use FileManager::FindPath() (LOJ: 2014.07.08)
+            std::string textureLoc = fm->FindPath(textureFile, "TEXTURE_PATH", true, false, false);
+            if (textureLoc == "")
             {
-               oldTextureFile = textureFile;
-               FileManager *fm = FileManager::Instance();
-               std::string textureLoc = fm->GetFullPathname("TEXTURE_PATH");
-               textureFile = textureLoc + textureFile;
-               if (oldTextureFile != "")
-               {
-                  MessageInterface::ShowMessage
-                     ("*** WARNING *** The texture file '%s' does not exist, \n"
-                      "    so using the file '%s' \n    from the path specified in the startup file.\n",
-                      oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
-               }
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The texture file '%s' does not exist\n", textureFile.c_str());
             }
+            
+            // // If texture file does not exist, try with default path from the startup file
+            // if (!GmatFileUtil::DoesFileExist(textureFile.c_str()))
+            // {
+            //    oldTextureFile = textureFile;
+            //    FileManager *fm = FileManager::Instance();
+            //    std::string textureLoc = fm->GetFullPathname("TEXTURE_PATH");
+            //    textureFile = textureLoc + textureFile;
+            //    if (oldTextureFile != "")
+            //    {
+            //       MessageInterface::ShowMessage
+            //          ("*** WARNING *** The texture file '%s' does not exist, \n"
+            //           "    so using the file '%s' \n    from the path specified in the startup file.\n",
+            //           oldTextureFile.c_str(), textureFile.c_str(), body->GetName().c_str());
+            //    }
+            // }
          }
       }
       else if (obj->IsOfType(Gmat::SPACECRAFT) ||

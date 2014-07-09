@@ -87,7 +87,7 @@ GroundTrackPlot::GroundTrackPlot(const std::string &name)
    FileManager *fm = FileManager::Instance();
    //textureMapFileName = fm->GetFullPathname("EARTH_TEXTURE_FILE");
    // Find file name and full path (LOJ: 2014.06.18)
-   SetTextureMapFileName("", "EARTH_TEXTURE_FILE");
+   SetTextureMapFileName("", "EARTH_TEXTURE_FILE", false, false);
    
    footPrintOption = FP_NONE;
    
@@ -176,6 +176,9 @@ GroundTrackPlot::~GroundTrackPlot()
 //------------------------------------------------------------------------------
 bool GroundTrackPlot::Validate()
 {
+   // Validate texture map file (LOJ: 2014.07.08)
+   std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";   
+   SetTextureMapFileName(textureMapFileName, mapFileType, true, true);
    return true;
 }
 
@@ -606,20 +609,21 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
          std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
          // Get path from the FileManager (LOJ: 2014.06.18)
          //textureMapFileName = fm->GetFullPathname(mapFileType);
-         SetTextureMapFileName("", mapFileType);
-         #if DBGLVL_PARAM_STRING
+         SetTextureMapFileName("", mapFileType, false, false);
+         //#if DBGLVL_PARAM_STRING
          MessageInterface::ShowMessage
-            ("   this = <%p>, textureMapFile changed to '%s'\n", this, textureMapFileName.c_str());
-         #endif
+            ("   ==> this = <%p>'%s', textureMapFile changed to '%s'\n", this,
+             GetName().c_str(), textureMapFileName.c_str());
+         //#endif
       }
       return true;
    }
    case TEXTURE_MAP:
    {
       textureMapFileName = value;
-      // Get path from the FileManager (LOJ: 2014.06.18)
-      std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
-      SetTextureMapFileName(value, mapFileType);
+      // // Get path from the FileManager (LOJ: 2014.06.18)
+      // std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+      // SetTextureMapFileName(value, mapFileType, false);
       return true;
    }
    case SHOW_FOOT_PRINTS:
@@ -1110,28 +1114,29 @@ const StringArray& GroundTrackPlot::GetPropertyEnumStrings(const std::string &la
 }
 
 //---------------------------------------------------------------------------
-// void SetTextureMapFileName(const std::string &name, const std::string &whichMap)
+// void SetTextureMapFileName(const std::string &mapName, const std::string &whichMap,
+//                            bool writeWarning, bool writeInfo)
 //---------------------------------------------------------------------------
-void GroundTrackPlot::SetTextureMapFileName(const std::string &name,
-                                            const std::string &whichMap)
+void GroundTrackPlot::SetTextureMapFileName(const std::string &mapName,
+                                            const std::string &whichMap,
+                                            bool writeWarning,
+                                            bool writeInfo)
 {
    #ifdef DEBUG_TEXTURE_MAP
    MessageInterface::ShowMessage
-      ("GroundTrackPlot::SetTextureMapFileName() entered, name = '%s', whichMap = '%s'\n",
-       name.c_str(), whichMap.c_str());
+      ("GroundTrackPlot::SetTextureMapFileName() '%s' entered\n   mapName = '%s'\n   "
+       "whichMap = '%s', writeWarning = %d, writeInfo = %d\n", GetName().c_str(),
+       mapName.c_str(), whichMap.c_str(), writeWarning, writeInfo);
    #endif
    
-   static bool writeWarning = true;
    FileManager *fm = FileManager::Instance();
    
-   textureMapFileName = name;
-   if (name == "")
+   textureMapFileName = mapName;
+   if (mapName == "")
       textureMapFileName = fm->GetFilename(whichMap);
    
-   textureMapFullPath = fm->FindPath(textureMapFileName, whichMap, true, writeWarning);
-   
-   if (name != "")
-      writeWarning = false;
+   textureMapFullPath =
+      fm->FindPath(textureMapFileName, whichMap, true, writeWarning, writeInfo, GetName());
    
    #ifdef DEBUG_TEXTURE_MAP
    MessageInterface::ShowMessage

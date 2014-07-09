@@ -3496,7 +3496,7 @@ bool CelestialBody::SetStringParameter(const Integer id,
       MessageInterface::ShowMessage
          ("3 Calling SetTextureFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
       #endif
-      SetTextureFileName(textureMapFileName);
+      SetTextureFileName(textureMapFileName, true);
       
       // Question: Do we want to throw an exception during the setting?
       #if 0
@@ -4957,22 +4957,35 @@ bool CelestialBody::NeedsOnlyMainSPK()
 
 
 //------------------------------------------------------------------------------
-// void SetTextureFileName(const std::string &filename)
+// void SetTextureFileName(const std::string &filename, bool writeInfo)
 //------------------------------------------------------------------------------
-void CelestialBody::SetTextureFileName(const std::string &filename)
+void CelestialBody::SetTextureFileName(const std::string &filename, bool writeInfo)
 {
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage
-      ("\nCelestialBody::SetTextureFileName() entered\n   filename = '%s'\n", filename.c_str());
+      ("\nCelestialBody::SetTextureFileName() '%s' entered\n   filename = '%s'\n   "
+       "writeInfo = %d\n", GetName().c_str(), filename.c_str(), writeInfo);
    #endif
    
+   std::string whichMap = GmatStringUtil::ToUpper(GetName()) + "_TEXTURE_FILE";   
    textureMapFullPath =
-      FileManager::Instance()->FindPath(textureMapFileName, "TEXTURE_PATH", true, false);
+      FileManager::Instance()->FindPath(filename, whichMap,
+                                        true, false, writeInfo, GetName());
+   
+   if (textureMapFullPath == "")
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** There is no default texture map file specified for %s, "
+          "so using 'GenericCelestialBody.jpg'\n", whichMap.c_str());
+      textureMapFullPath =
+         FileManager::Instance()->FindPath(filename, "TEXTURE_PATH",
+                                           true, false, true, GetName());
+   }
    
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage
-      ("   For %s:\n   textureMapFileName = '%s'\n   textureMapFullPath = '%s'\n",
-       GetName().c_str(), textureMapFileName.c_str(), textureMapFullPath.c_str());
+      ("   textureMapFileName = '%s'\n   textureMapFullPath = '%s'\n",
+       textureMapFileName.c_str(), textureMapFullPath.c_str());
    MessageInterface::ShowMessage("CelestialBody::SetTextureFileName() leaving\n");
    #endif
 }

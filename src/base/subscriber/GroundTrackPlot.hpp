@@ -131,7 +131,8 @@ public:
    static const std::string* GetFootPrintOptionList();
    
 private:
-   void SetTextureMapFileName(const std::string &name, const std::string &whichMap);
+   void SetTextureMapFileName(const std::string &mapName, const std::string &whichMap,
+                              bool writeWarning, bool writeInfo);
    
    static const std::string FOOT_PRINT_OPTION_TEXT[FootPrintOptionCount];
 };

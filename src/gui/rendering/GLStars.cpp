@@ -82,7 +82,7 @@ GLStars* GLStars::Instance()
 //------------------------------------------------------------------------------
 void GLStars::ReadTextStars()
 {
-   wxString buffer, TxtFilename;
+   wxString buffer, starFileName;
    Real RightAscension;
    Real Declination;
    Real VisualMag;
@@ -98,14 +98,16 @@ void GLStars::ReadTextStars()
    const GLfloat RangeFactor = 0.0;
    
    FileManager *fm = FileManager::Instance();
-   TxtFilename = (fm->GetFullPathname("STAR_FILE")).c_str();
+   // Changed to use FileManager::FindPath() (LOJ: 2014.07.08)
+   //starFileName = (fm->GetFullPathname("STAR_FILE")).c_str();
+   starFileName = (fm->FindPath("", "STAR_FILE", true, false, true)).c_str();
    
    // Try opening the file
    wxTextFile StarsFile;
-   if (!StarsFile.Open(TxtFilename))
+   if (!StarsFile.Open(starFileName))
    {
       wxString msg = "Could not open Star Catalog at ";
-      msg.Append(TxtFilename);
+      msg.Append(starFileName);
       MessageInterface::LogMessage(msg + "\n");
       return;
    }
@@ -241,7 +243,7 @@ void GLStars::GetStarValues(wxString buffer, Real *RightAscension, Real *Declina
 //------------------------------------------------------------------------------
 void GLStars::ReadTextConstellations()
 {
-   wxString buffer, TxtFilename;
+   wxString buffer, constFileName;
    Real RightAscension1, RightAscension2, Declination1, Declination2;
    Real sinRA, cosRA, cosDec;
    Real DegToRad = M_PI / 180.0;
@@ -250,14 +252,16 @@ void GLStars::ReadTextConstellations()
    int i;
    
    FileManager *fm = FileManager::Instance();
-   TxtFilename = (fm->GetFullPathname("CONSTELLATION_FILE")).c_str();
+   // Changed to use FileManager::FindPath() (LOJ: 2014.07.08)
+   //constFileName = (fm->GetFullPathname("CONSTELLATION_FILE")).c_str();
+   constFileName = (fm->FindPath("", "CONSTELLATION_FILE", true, false, true)).c_str();
    
    // Attempt to open the constellation file
    wxTextFile ConstellationFile;
-   if (!ConstellationFile.Open(TxtFilename))
+   if (!ConstellationFile.Open(constFileName))
    {
       wxString msg = "Could not open Constellation File at ";
-      msg.Append(TxtFilename);
+      msg.Append(constFileName);
       MessageInterface::LogMessage(msg + "\n");
       return;
    }

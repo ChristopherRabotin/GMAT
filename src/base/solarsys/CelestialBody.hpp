@@ -568,7 +568,7 @@ protected:
    virtual bool     SetUpSPICE();
    virtual bool     NeedsOnlyMainSPK();
    
-   void SetTextureFileName(const std::string &filename);
+   void SetTextureFileName(const std::string &filename, bool writeInfo = false);
    
 private:
 
