@@ -6,7 +6,7 @@ GMAT ODSat.DateFormat = UTCGregorian;
 GMAT ODSat.Epoch = '01 Jan 2000 11:59:28.000';
 GMAT ODSat.CoordinateSystem = EarthMJ2000Eq;
 GMAT ODSat.DisplayStateType = Cartesian;
-GMAT ODSat.X = 6648.837;
+GMAT ODSat.X = 6648.927;
 GMAT ODSat.Y = -335.169;
 GMAT ODSat.Z = 2789.137;
 GMAT ODSat.VX = -0.34697109;
@@ -38,19 +38,22 @@ GMAT ODProp_ForceModel.PointMasses = {Earth};
 Create Propagator ODProp;
 GMAT ODProp.FM = ODProp_ForceModel;
 GMAT ODProp.Type = PrinceDormand78;
+ODProp.MinStep = 0.0;
 
 %------ Create the estimator
 Create BatchEstimatorInv BatchEst;
 GMAT BatchEst.ShowProgress = true;
-GMAT BatchEst.ReportFile = 'BatchEstimatorInvBatchEst.data';
+GMAT BatchEst.ReportStyle = 'Normal';
+GMAT BatchEst.ReportFile = 'AdapterEstimator.data';
 GMAT BatchEst.MaximumIterations = 15;
 GMAT BatchEst.Measurements = {simData};
-GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'};
+GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState', simData.Bias};
 GMAT BatchEst.AbsoluteTol = 1e-005;
 GMAT BatchEst.RelativeTol = 1e-006;
 GMAT BatchEst.Propagator = ODProp;
-BatchEst.OLSEInitialRMSSigma = 1.0e15;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
+GMAT BatchEst.OLSEInitialRMSSigma = 3e45;
+BatchEst.OLSEMultiplicativeConstant = 4
 
 %------ Run the measurement simulator
 BeginMissionSequence
