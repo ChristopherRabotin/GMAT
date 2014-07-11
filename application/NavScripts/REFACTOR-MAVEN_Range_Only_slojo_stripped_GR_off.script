@@ -1,0 +1,426 @@
+Create CoordinateSystem SunMJ2000Eq;
+GMAT SunMJ2000Eq.Origin = Sun;
+GMAT SunMJ2000Eq.Axes = MJ2000Eq;
+GMAT SolarSystem.EphemerisSource = 'DE421';
+%-------------------------------------------- 
+%---------- Spacecraft
+%--------------------------------------------
+Create Spacecraft MAVEN;
+MAVEN.DateFormat = UTCGregorian;
+GMAT MAVEN.Epoch = '27 Feb 2014 23:58:52.815';
+GMAT MAVEN.CoordinateSystem = SunMJ2000Eq;
+GMAT MAVEN.DisplayStateType = Cartesian;
+GMAT MAVEN.X = -158686841.8     
+GMAT MAVEN.Y = 42672314.29 
+GMAT MAVEN.Z = 24599545.62 
+GMAT MAVEN.VX = -13.64583438
+GMAT MAVEN.VY = -23.81785930
+GMAT MAVEN.VZ = -10.45295803
+
+
+Create Array GTDS[6] JPL[6]
+%Final converged GTDS state
+GTDS(1) = -.1586868330034385e+09 
+GTDS(2) =  .4267226880720434e+08 
+GTDS(3) = .2459952151129339e+08
+GTDS(4) = -.1364589576746440e+02 
+GTDS(5) = -.2381769242225410e+02 
+GTDS(6) = -.1045299852327070e+02
+
+
+JPL(1) = -.1586868330034385e+09 
+JPL(2) =  .4267226880720434e+08 
+JPL(3) = .2459952151129339e+08
+JPL(4) = -.1364589576746440e+02 
+JPL(5) = -.2381769242225410e+02 
+JPL(6) = -.1045299852327070e+02
+%                                       A PRIORI ELEMENTS       FINAL ELEMENTS            TOTAL CHANGES         STANDARD DEVIATIONS
+%  
+%  X                           (KM)      -.1586868418000000D+09  -.1586868330034385D+09      .87966D+01              .58846D+02        
+%  Y                           (KM)       .4267231429000000D+08   .4267226880720434D+08     -.45483D+02              .27070D+03        
+%  Z                           (KM)       .2459954562000000D+08   .2459952151129339D+08     -.24109D+02              .21026D+03        
+%  DX                      (KM/SEC)      -.1364583438000000D+02  -.1364589576746440D+02     -.61387D-04              .50689D-04        
+%  DY                      (KM/SEC)      -.2381785930000000D+02  -.2381769242225410D+02      .16688D-03              .14093D-04        
+%  DZ                      (KM/SEC)      -.1045295803000000D+02  -.1045299852327070D+02     -.40493D-04              .44191D-03   
+% 
+%  
+ 
+GMAT MAVEN.DryMass = 2452.7;     %Kg
+GMAT MAVEN.Cd = 2.2;
+GMAT MAVEN.Cr = 1.0556;
+GMAT MAVEN.DragArea = 15;
+GMAT MAVEN.SRPArea = 25.8;      %m^2
+MAVEN.Id = 'S202'; %'S234';
+MAVEN.AddHardware = {Transponder1, Antenna2};
+
+Create Spacecraft MAVENCopy;
+MAVENCopy = MAVEN
+%----------------------------------------
+%---------- GroundStations
+%----------------------------------------
+Create GroundStation DS14;
+GMAT DS14.CentralBody = Earth;
+GMAT DS14.StateType = Cartesian;
+GMAT DS14.HorizonReference = Sphere;
+GMAT DS14.Location1 = -2353.62142;     % unit: km
+GMAT DS14.Location2 = -4641.34147;     % unit: km
+GMAT DS14.Location3 = 3677.05232;      % unit: km
+GMAT DS14.Id = 'D14'; %'D14';
+GMAT DS14.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS14.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS15;
+GMAT DS15.CentralBody = Earth;
+GMAT DS15.StateType = Cartesian;
+GMAT DS15.HorizonReference = Sphere;
+GMAT DS15.Location1 = -2353.53896;     % unit: km
+GMAT DS15.Location2 = -4641.64943;     % unit: km
+GMAT DS15.Location3 = 3676.66998;      % unit: km
+GMAT DS15.Id = 'D15'; %'D15';
+GMAT DS15.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS15.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS24;
+GMAT DS24.CentralBody = Earth;
+GMAT DS24.StateType = Cartesian;
+GMAT DS24.HorizonReference = Sphere;
+GMAT DS24.Location1 = -2354.90671;     % unit: km
+GMAT DS24.Location2 = -4646.84008;     % unit: km
+GMAT DS24.Location3 = 3669.24232;      % unit: km
+GMAT DS24.Id = 'D24'; %'D24';
+GMAT DS24.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS24.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS25;
+GMAT DS25.CentralBody = Earth;
+GMAT DS25.StateType = Cartesian;
+GMAT DS25.HorizonReference = Sphere;
+GMAT DS25.Location1 = -2355.02201;     % unit: km
+GMAT DS25.Location2 = -4646.95320;     % unit: km
+GMAT DS25.Location3 = 3669.04057;      % unit: km
+GMAT DS25.Id = 'D25'; %'D25';
+GMAT DS25.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS25.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS26;
+GMAT DS26.CentralBody = Earth;
+GMAT DS26.StateType = Cartesian;
+GMAT DS26.HorizonReference = Sphere;
+GMAT DS26.Location1 = -2354.89080;     % unit: km
+GMAT DS26.Location2 = -4647.16632;     % unit: km
+GMAT DS26.Location3 = 3668.87175;      % unit: km
+GMAT DS26.Id = 'D26'; %'D26';
+GMAT DS26.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS26.MinimumElevationAngle = 7.00000;
+
+
+Create GroundStation DS26D;
+GMAT DS26D.CentralBody = Earth;
+GMAT DS26D.StateType = Cartesian;
+GMAT DS26D.HorizonReference = Sphere;
+GMAT DS26D.Location1 = -2354.89080;     % unit: km
+GMAT DS26D.Location2 = -4647.16632;     % unit: km
+GMAT DS26D.Location3 = 3668.87175;      % unit: km
+GMAT DS26D.Id = 'D26D'; 
+GMAT DS26D.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS26D.MinimumElevationAngle = 7.00000;
+
+
+Create GroundStation DS34;
+GMAT DS34.CentralBody = Earth;
+GMAT DS34.StateType = Cartesian;
+GMAT DS34.HorizonReference = Sphere;
+GMAT DS34.Location1 = -4461.14709;     % unit: km
+GMAT DS34.Location2 = 2682.43924;      % unit: km
+GMAT DS34.Location3 = -3674.39313;     % unit: km
+GMAT DS34.Id = 'D34'; %'D34';
+GMAT DS34.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS34.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS43; %DSN Canberra
+DS43.CentralBody = Earth;
+DS43.StateType = Cartesian;
+DS43.HorizonReference = Sphere;
+DS43.Location1 = -4460.89492;     % unit: km
+DS43.Location2 = 2682.36151;      % unit: km
+DS43.Location3 = -3674.74815;     % unit: km
+DS43.Id = 'D43';	%'D43';
+DS43.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS43.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS45;
+GMAT DS45.CentralBody = Earth;
+GMAT DS45.StateType = Cartesian;
+GMAT DS45.HorizonReference = Sphere;
+GMAT DS45.Location1 = -4460.93558;     % unit: km
+GMAT DS45.Location2 = 2682.76566;      % unit: km
+GMAT DS45.Location3 = -3674.38098;     % unit: km
+GMAT DS45.Id = 'D45'; %'D45';
+GMAT DS45.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS45.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS54;
+GMAT DS54.CentralBody = Earth;
+GMAT DS54.StateType = Cartesian;
+GMAT DS54.HorizonReference = Sphere;
+GMAT DS54.Location1 = 4849.43449;     % unit: km
+GMAT DS54.Location2 = -360.72390;     % unit: km
+GMAT DS54.Location3 = 4114.61884;     % unit: km
+GMAT DS54.Id = 'D54'; %'D54';
+GMAT DS54.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS54.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS55;
+GMAT DS55.CentralBody = Earth;
+GMAT DS55.StateType = Cartesian;
+GMAT DS55.HorizonReference = Sphere;
+GMAT DS55.Location1 = 4849.52526;     % unit: km
+GMAT DS55.Location2 = -360.60609;     % unit: km
+GMAT DS55.Location3 = 4114.49508;     % unit: km
+GMAT DS55.Id = 'D55'; %'D55';
+GMAT DS55.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS55.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS63;
+GMAT DS63.CentralBody = Earth;
+GMAT DS63.StateType = Cartesian;
+GMAT DS63.HorizonReference = Sphere;
+GMAT DS63.Location1 = 4849.09252;     % unit: km
+GMAT DS63.Location2 = -360.18035;     % unit: km
+GMAT DS63.Location3 = 4115.10925;     % unit: km
+GMAT DS63.Id = 'D63'; %'D63';
+GMAT DS63.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS63.MinimumElevationAngle = 7.00000;
+
+Create GroundStation DS65;
+GMAT DS65.CentralBody = Earth;
+GMAT DS65.StateType = Cartesian;
+GMAT DS65.HorizonReference = Sphere;
+GMAT DS65.Location1 = 4849.33963;     % unit: km
+GMAT DS65.Location2 = -360.42766;     % unit: km
+GMAT DS65.Location3 = 4114.75073;     % unit: km
+GMAT DS65.Id = 'D65'; %'D65';
+GMAT DS65.AddHardware = {Transmitter1, Receiver1, Antenna1};
+DS65.MinimumElevationAngle = 7.00000;
+
+
+
+
+Create GroundStation GDS;  %DSN Goldstone
+GDS.CentralBody = Earth;
+GDS.StateType = Cartesian;
+GDS.HorizonReference = Ellipsoid;
+GDS.Location1 = -2353621.251e-3;
+GDS.Location2 = -4641341.542e-3;
+GDS.Location3 = 3677052.370e-3;
+GDS.Id = 'GDS';
+GDS.AddHardware = {Transmitter1, Receiver1, Antenna1};
+GDS.MinimumElevationAngle = 7.00000;
+
+Create GroundStation MAD;  %DSN Madrid
+MAD.CentralBody = Earth;
+MAD.StateType = Cartesian;
+MAD.HorizonReference = Ellipsoid;
+MAD.Location1 = 4849519.988e-3;
+MAD.Location2 = -0360641.653e-3;
+MAD.Location3 = 4114504.590e-3;
+MAD.Id = 'MAD';
+MAD.AddHardware = {Transmitter1, Receiver1, Antenna1};
+MAD.MinimumElevationAngle = 7.00000;
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+Create ForceModel ODProp_ForceModel;
+GMAT ODProp_ForceModel.CentralBody = Sun;
+%GMAT ODProp_ForceModel.PrimaryBodies = {Sun};									
+%GMAT ODProp_ForceModel.PointMasses = {Sun, Earth, Luna, Venus, Mars, Jupiter};
+GMAT ODProp_ForceModel.PointMasses = {Sun};
+
+GMAT ODProp_ForceModel.Drag = None;
+
+GMAT ODProp_ForceModel.RelativisticCorrection = Off;
+GMAT ODProp_ForceModel.ErrorControl = RSSStep;
+%GMAT ODProp_ForceModel.GravityField.Earth.Degree = 8;
+%GMAT ODProp_ForceModel.GravityField.Earth.Order = 8;
+%GMAT ODProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+%GMAT ODProp_ForceModel.GravityField.Earth.EarthTideModel = 'None';
+
+GMAT ODProp_ForceModel.SRP = Off;
+% GMAT ODProp_ForceModel.SRP = On;
+% GMAT ODProp_ForceModel.SRP.Flux = 1370.052;
+% GMAT ODProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator ODProp;
+ODProp.FM = ODProp_ForceModel;
+ODProp.Type = RungeKutta89;
+ODProp.InitialStepSize = 60;
+ODProp.Accuracy = 1e-12;
+ODProp.MinStep = 0;
+ODProp.MaxStep = 86400;
+ODProp.MaxStepAttempts = 50;
+
+
+%---------------------------------------
+%--------- Tracking File Sets 
+%---------------------------------------
+
+% Settings in parentheses are a possible way to add thos settings
+Create TrackingFileSet RangeData
+RangeData.AddTrackingConfig = {{D15, MAVEN, D15}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D25, MAVEN, D25}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D26D, MAVEN, D26D}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D34, MAVEN, D34}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D43, MAVEN, D43}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D45, MAVEN, D45}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D55, MAVEN, D55}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07); 
+RangeData.AddTrackingConfig = {{D65, MAVEN, D65}, 'Range'}, (Bias=[ 0 ],NoiseSigma=[ 35.3657958406294 ],RangeModuloConstant=3.3554432e+07);
+RangeData.Filename = MAVEN_rng_matches_slojo.gmd
+RangeData.UseLighttime = true;
+RangeData.RelativityCorrection = Off;
+RangeData.ETminusTAICorrection = Off;
+% Alternatively, we could do this is the settings apply to all tracking configs:                                                                                                       
+%RangeData.Bias=[ 0 ]
+%RangeData.NoiseSigma=[ 35.3657958406294 ]
+%RangeData.RangeModuloConstant=3.3554432e+07
+
+
+Create TrackingFileSet DopplerData
+DopplerData.AddTrackingConfig = {{D15, MAVEN, D15}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D25, MAVEN, D25}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D26D, MAVEN, D26D}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D34, MAVEN, D34}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D43, MAVEN, D43}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D45, MAVEN, D45}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D55, MAVEN, D55}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]); 
+DopplerData.AddTrackingConfig = {{D65, MAVEN, D65}, 'Doppler'}, (Bias=[ 0 ],NoiseSigma = [   0.0281721962689796 ]);
+DopplerData.Filename = MAVEN_tcp.gmd
+DopplerData.UseLighttime = true;
+
+
+%----------------------------------------
+%---------- Communications Hardware
+%----------------------------------------
+
+Create Antenna Antenna1;
+
+Create Transmitter Transmitter1;
+GMAT Transmitter1.PrimaryAntenna = Antenna1;
+GMAT Transmitter1.Frequency = 2067.5; %% MHz
+
+Create Receiver Receiver1;
+GMAT Receiver1.PrimaryAntenna = Antenna1;
+
+Create Transponder Transponder1;
+GMAT Transponder1.PrimaryAntenna = Antenna2;
+GMAT Transponder1.HardwareDelay =0% 1.86582412290038e-06  %0.0;
+GMAT Transponder1.TurnAroundRatio = '240/221' 
+
+Create Antenna Antenna2;
+
+
+Create BatchEstimatorInv bat
+bat.Propagator = ODProp;
+% "Range only," so commented this part out:
+%bat.Measurements = {RangeData, DopplerData} 
+bat.Measurements = {RangeData} 
+bat.AddSolveFor = {MAVEN.CartesianState}
+bat.MaximumIterations = 15;  %15;
+bat.EstimationEpochFormat = 'FromParticipants';  %'TAIModJulian
+bat.OLSEInitialRMSSigma = 3000e70;
+bat.OLSEMultiplicativeConstant = 3;
+bat.OLSEAdditiveConstant = 1e70;
+bat.ReportFile = 'Maven_Working_File.report';
+bat.ReportStyle = 'Verbose';
+bat.ShowProgress = true;
+bat.AbsoluteTol = 0.001;
+bat.RelativeTol = 0.0001;
+%GMAT bat.ReuseableBadRecordTypes = {'OLSE', 'OLSEInitialSigma', 'ResidualMax'};
+%GMAT bat.ReuseableBadRecordTypes = {'OLSE'};
+%GMAT bat.ReuseableBadRecordTypes = {};
+%GMAT bat.ReuseableBadRecordTypes = {'OLSE', 'OLSEInitialRMSSigma'};
+GMAT bat.ShowAllResiduals = On;
+%GMAT bat.EpochFormat = 'TAIModJulian';
+%GMAT bat.StartEpoch = '26716.50061342593';
+%GMAT bat.EndEpoch = '26728.50034722222';
+%GMAT bat.EstimationEpochFormat = 'FromParticipants';  %'TAIModJulian
+%GMAT bat.UsePrioriEstimate = Off;
+
+% 28 Feb 2014 00:00:18.000  (TAIModJulian = 26716.50061342593)
+% 11 Mar 2014 23:59:55.000  (TAIModJulian = 26728.50034722222)
+
+%----------------------------------------
+%---------- Plots and Reports
+%----------------------------------------
+
+Create XYPlot XYPlot1;
+GMAT XYPlot1.SolverIterations = Current;
+GMAT XYPlot1.UpperLeft = [ 0 0 ];
+GMAT XYPlot1.Size = [ 0 0 ];
+GMAT XYPlot1.RelativeZOrder = 0;
+GMAT XYPlot1.Maximized = false;
+GMAT XYPlot1.XVariable = MAVEN.A1ModJulian;
+GMAT XYPlot1.YVariables = {MAVEN.EarthMJ2000Eq.X};
+GMAT XYPlot1.ShowGrid = true;
+GMAT XYPlot1.ShowPlot = true;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+Create Variable PosError_GMAT_GTDS VelError_GMAT_GTDS PosError_GMAT_JPL VelError_GMAT_JPL PosError_GTDS_JPL VelError_GTDS_JPL
+
+Create ReportFile Ephem
+Ephem.Add = {MAVEN.TAIModJulian, MAVEN.SunMJ2000Eq.X, MAVEN.SunMJ2000Eq.Y, MAVEN.SunMJ2000Eq.Z, MAVEN.SunMJ2000Eq.VX, MAVEN.SunMJ2000Eq.VY, MAVEN.SunMJ2000Eq.VZ};
+Ephem.Filename = 'Ephem.report';
+
+Create ReportFile rf
+rf.Filename = MAVEN.report
+rf.WriteHeaders = true
+
+Create ReportFile rftemp
+rftemp.Filename = MAVEN_temp.report
+rftemp.WriteHeaders = true
+
+%----- Run the Estimator
+BeginMissionSequence
+ %GTDS = JPL
+%Report rf bat.SolverState bat.SolverStatus
+RunEstimator bat
+
+% PosError = sqrt (  (MAVEN.SunMJ2000Eq.X - MAVENCopy.SunMJ2000Eq.X)^2 + (MAVEN.SunMJ2000Eq.Y - MAVENCopy.SunMJ2000Eq.Y)^2 + (MAVEN.SunMJ2000Eq.Z - GTDS(1))^2 )
+% VelError = sqrt (  (MAVEN.SunMJ2000Eq.VX - MAVENCopy.SunMJ2000Eq.VX)^2  + (MAVEN.SunMJ2000Eq.VY - MAVENCopy.SunMJ2000Eq.VY)^2  + (MAVEN.SunMJ2000Eq.VZ - MAVENCopy.SunMJ2000Eq.VZ)^2 )
+% 
+PosError_GMAT_GTDS = sqrt (  (MAVEN.SunMJ2000Eq.X - GTDS(1))^2 + (MAVEN.SunMJ2000Eq.Y - GTDS(2))^2 + (MAVEN.SunMJ2000Eq.Z - GTDS(3))^2 )
+VelError_GMAT_GTDS = sqrt (  (MAVEN.SunMJ2000Eq.VX - GTDS(4))^2  + (MAVEN.SunMJ2000Eq.VY - GTDS(5))^2  + (MAVEN.SunMJ2000Eq.VZ - GTDS(6))^2 )
+
+PosError_GMAT_JPL = sqrt (  (MAVEN.SunMJ2000Eq.X - JPL(1))^2 + (MAVEN.SunMJ2000Eq.Y - JPL(2))^2 + (MAVEN.SunMJ2000Eq.Z - JPL(3))^2 )
+VelError_GMAT_JPL = sqrt (  (MAVEN.SunMJ2000Eq.VX - JPL(4))^2  + (MAVEN.SunMJ2000Eq.VY - JPL(5))^2  + (MAVEN.SunMJ2000Eq.VZ - JPL(6))^2 )
+
+PosError_GTDS_JPL = sqrt (  (GTDS(1) - JPL(1))^2 + (GTDS(2) - JPL(2))^2 + (GTDS(3) - JPL(3))^2 )
+VelError_GTDS_JPL = sqrt (  (GTDS(4) - JPL(4))^2  + (GTDS(5) - JPL(5))^2  + (GTDS(6) - JPL(6))^2 )
+
+
+Report rftemp MAVENCopy.TAIModJulian MAVENCopy.SunMJ2000Eq.X MAVENCopy.SunMJ2000Eq.Y MAVENCopy.SunMJ2000Eq.Z MAVENCopy.SunMJ2000Eq.VX MAVENCopy.SunMJ2000Eq.VY MAVENCopy.SunMJ2000Eq.VZ;
+Report rftemp MAVEN.TAIModJulian MAVEN.SunMJ2000Eq.X MAVEN.SunMJ2000Eq.Y MAVEN.SunMJ2000Eq.Z MAVEN.SunMJ2000Eq.VX MAVEN.SunMJ2000Eq.VY MAVEN.SunMJ2000Eq.VZ;
+
+Report rf PosError_GMAT_GTDS VelError_GMAT_GTDS
+%Report rf PosError_GMAT_JPL VelError_GMAT_JPL
+%Report rf PosError_GTDS_JPL VelError_GTDS_JPL
+
+%Report rf bat.SolverState bat.SolverStatus
+
+Report rf DS65.EarthFixed.X  DS65.EarthFixed.Y DS65.EarthFixed.Z
+DS65.Epoch.UTCGregorian = '28 Feb 2014 00:02:42.000'
+Report rf DS65.EarthMJ2000Eq.X  DS65.EarthMJ2000Eq.Y DS65.EarthMJ2000Eq.Z
+Report rf DS65.SunMJ2000Eq.X  DS65.SunMJ2000Eq.Y DS65.SunMJ2000Eq.Z
+
+
+PosError_GTDS_JPL = sqrt (  (DS65.EarthMJ2000Eq.X - -4364.092146065700000)^2 + (DS65.EarthMJ2000Eq.Y - 2133.032138113180000)^2 + (DS65.EarthMJ2000Eq.Z - 4120.928319992470000)^2 )
+
+
+Report rf PosError_GTDS_JPL
