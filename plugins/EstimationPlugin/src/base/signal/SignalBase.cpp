@@ -725,8 +725,8 @@ void SignalBase::CalculateRangeVectorObs()
    CalculateRangeVectorInertial();
 
    // compute the positions of the participants in their own frames
-   theData.tLocTcs = R_Transmitter_j2k * theData.tLoc;
-   theData.rLocRcs = R_Receiver_j2k * theData.rLoc;
+   theData.tLocTcs = theData.tJ2kRotation * theData.tLoc;
+   theData.rLocRcs = theData.rJ2kRotation * theData.rLoc;
 
    // @todo: handle this for arbitrary participants; currently rotates if there
    // are any GS's in the participant list
@@ -764,8 +764,8 @@ void SignalBase::CalculateRangeRateVectorObs()
 
    // need p1Loc, p2Loc, and r12_j2k, as well as rotation matrices
    CalculateRangeVectorObs();
-   theData.tVelTcs = R_Transmitter_j2k * theData.tVel;
-   theData.rVelRcs = R_Receiver_j2k * theData.rVel;
+   theData.tVelTcs = theData.tJ2kRotation * theData.tVel;
+   theData.rVelRcs = theData.rJ2kRotation * theData.rVel;
    if (theData.stationParticipant)
    {
       theData.rangeRateVecObs = // Receiver terms
@@ -781,6 +781,132 @@ void SignalBase::CalculateRangeRateVectorObs()
    else // Rs are I33, RDots are 033
       theData.rangeRateVecObs = theData.rVelRcs - theData.j2kOriginVel -
             theData.tVelTcs;
+}
+
+
+//------------------------------------------------------------------------------
+// void GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
+//       Rvector &deriv)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the range derivative of a signal in a measurement
+ *
+ * @param forObj Pointer for teh participants that hold the w.r.t field
+ * @param wrtR Flag indicating if derivative with respect to position is desired
+ * @param wrtV Flag indicating if derivative with respect to velocity is desired
+ * @param deriv The structure that gets filled with derivative data
+ */
+//------------------------------------------------------------------------------
+void SignalBase::GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
+      Rvector &deriv)
+{
+   Rmatrix derivMatrix;
+   if (wrtR && wrtV)
+      derivMatrix.SetSize(6,6);
+   else
+      derivMatrix.SetSize(3,3);
+
+   GetRangeVectorDerivative(forObj, wrtR, wrtV, derivMatrix);
+
+   Rvector3 rangeVec = theData.rangeVecInertial;
+   Rvector3 temp;
+   Rmatrix33 mPart;
+   Rvector3 unitRange = rangeVec / rangeVec.GetMagnitude();
+
+   if (wrtR)
+   {
+      for (Integer i = 0; i < 3; ++i)
+         for (Integer j = 0; j < 3; ++j)
+            mPart(i,j) = derivMatrix(i,j);
+
+      temp = unitRange * mPart;
+      for (Integer i = 0; i < 3; ++i)
+         deriv[i] = temp(i);
+   }
+   if (wrtV)
+   {
+      Integer offset = (wrtR ? 3 : 0);
+      for (Integer i = 0; i < 3; ++i)
+         for (Integer j = 0; j < 3; ++j)
+            mPart(i,j) = derivMatrix(i+offset, j+offset);
+
+      temp = unitRange * mPart;
+      for (Integer i = 0; i < 3; ++i)
+         deriv[i+offset] = temp(i);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void GetRangeVectorDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
+//       Rmatrix& derivMatrix)
+//------------------------------------------------------------------------------
+/**
+ * Calculates the range vector derivative of a signal in a measurement
+ *
+ * @param forObj Pointer for the participants that hold the w.r.t field
+ * @param usingData SignalData for the signal being evaluated
+ * @param wrtR Flag indicating if derivative with respect to position is desired
+ * @param wrtV Flag indicating if derivative with respect to velocity is desired
+ * @param derivMatrix The structure that gets filled with derivative data
+ */
+//------------------------------------------------------------------------------
+void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
+      bool wrtV, Rmatrix& derivMatrix)
+{
+   bool forTransmitter = true;
+   if (theData.rNode == forObj)
+      forTransmitter = false;
+   else
+   {
+      if (theData.tNode != forObj)
+         throw MeasurementException("Range vector derivative requested, but "
+               "neither participant is the \"for\" object");
+   }
+
+   // For now ignoring the barycenter piece -- we'll add it once core code works
+   Rvector3 rangeVec = theData.rangeVecInertial;      // Check sign?
+
+   Rmatrix phi = (forTransmitter ? theData.tSTM : theData.rSTM);
+
+   // Check: Not using old STM inverse approach -- STMs computed from initial
+   // (measurement epoch based) state, so STM inverse is identity
+   Rmatrix33 A, B;
+   for (Integer i = 0; i < 3; ++i)
+   {
+      for (Integer j = 0; j < 3; ++j)
+      {
+         if (wrtR)
+            A(i,j) = phi(i,j);
+         if(wrtV)
+            B(i,j) = phi(i,j+3);
+      }
+   }
+   Real sign = (forTransmitter ? -1.0 : 1.0);
+
+   Rmatrix33 temp;
+   Rmatrix33 body2FK5_matrix = (forTransmitter ? theData.tJ2kRotation :
+         theData.rJ2kRotation);
+
+   if (wrtR)
+   {
+      // temp = dataToUse.rInertial2obj * A;
+      temp = body2FK5_matrix * A;    // made change by TUAN NGUYEN
+
+      for (Integer i = 0; i < 3; ++i)
+         for (Integer j = 0; j < 3; ++j)
+            derivMatrix(i,j) = sign * temp(i,j);
+   }
+   if (wrtV)
+   {
+      // temp = dataToUse.rInertial2obj * B;
+     temp = body2FK5_matrix * B;    // made change by TUAN NGUYEN
+
+      Integer offset = (wrtR ? 3 : 0);
+      for (Integer i = 0; i < 3; ++i)
+         for (Integer j = 0; j < 3; ++j)
+            derivMatrix(i+offset,j+offset) = sign * temp(i,j);
+   }
 }
 
 
@@ -809,7 +935,7 @@ void SignalBase::UpdateRotationMatrix(Real atEpoch, const std::string& whichOne)
          R_j2k_Receiver = converter.GetLastRotationMatrix();
          //               RDot_j2k_2 = converter.GetLastRotationDotMatrix();
          converter.Convert(itsEpoch,dummyIn,j2k,dummyOut,rcs);
-         R_Receiver_j2k    = converter.GetLastRotationMatrix();
+         theData.rJ2kRotation    = converter.GetLastRotationMatrix();
       }
       if ((whichOne == "All") || (whichOne == "j2k_1"))
       {
@@ -817,7 +943,7 @@ void SignalBase::UpdateRotationMatrix(Real atEpoch, const std::string& whichOne)
          R_j2k_Transmitter    = converter.GetLastRotationMatrix();
          //               RDot_j2k_1 = converter.GetLastRotationDotMatrix();
          converter.Convert(itsEpoch,dummyIn,j2k,dummyOut,tcs);
-         R_Transmitter_j2k    = converter.GetLastRotationMatrix();
+         theData.tJ2kRotation    = converter.GetLastRotationMatrix();
       }
       if ((whichOne == "All") || (whichOne == "o_2"))
       {
@@ -885,13 +1011,19 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
    #ifdef DEBUG_LIGHTTIME
       MessageInterface::ShowMessage("Called MoveToEpoch(%.12lf, %s%s)\n",
             theEpoch,
-            (epochAtReceive ? "Epoch at Receive" :  "Epoch at Transmit"),
+            (epochAtReceive ? "Epoch at Receive" : "Epoch at Transmit"),
             (moveAll ? ", Moving all participants" : ""));
    #endif
 
    if (epochAtReceive || moveAll)
    {
       Real dt = (theEpoch - theData.rTime) * GmatTimeConstants::SECS_PER_DAY;
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("   dt = (%.12lf - %.12lf) => %.12le\n",
+               theEpoch, theData.rTime, dt);
+      #endif
+
       if (dt != 0.0)
          StepParticipant(dt, false);
       else
@@ -971,6 +1103,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    bool retval = false;
 
    Propagator *prop = NULL;
+
    if (forTransmitter)
    {
       if (theData.tNode->IsOfType(Gmat::SPACEOBJECT))
@@ -997,6 +1130,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    }
 
    Rvector6 state;
+   Rmatrix66 stm;
    if (prop)      // Handle spacecraft
    {
       #ifdef DEBUG_LIGHTTIME
@@ -1011,13 +1145,22 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
 
       retval = prop->Step(stepToTake);
       if (retval == false)
-         MessageInterface::ShowMessage("Failed to step\n");
+         MessageInterface::ShowMessage("Failed to step %s by %le secs\n",
+               (forTransmitter ? theData.transmitParticipant.c_str() :
+                theData.receiveParticipant.c_str()), stepToTake);
 
       state.Set(outState);
+      for (UnsignedInt i = 0; i < 6; ++i)
+         for (UnsignedInt j = 0; j < 6; ++j)
+            stm(i,j) = outState[6 + i*6 + j];
 
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("   ---> After %.12lf : %.12lf\n",
                prop->GetStepTaken(), state(0));
+      #endif
+
+      #ifdef DEBUG_DERIVATIVES
+         MessageInterface::ShowMessage("   STM = %s\n", stm.ToString().c_str());
       #endif
    }
    else           // Handle ground stations and other analytic props
@@ -1035,6 +1178,9 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
          state = theData.rNode->GetMJ2000State(theData.rTime +
                stepToTake / GmatTimeConstants::SECS_PER_DAY);
       }
+
+      /// @note: Ground station STM data is not yet implemented.  We may need
+      /// these values -- to estimate station locations, for example.
    }
 
    if (forTransmitter)

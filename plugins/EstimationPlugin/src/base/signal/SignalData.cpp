@@ -41,6 +41,10 @@ SignalData::SignalData() :
    stationParticipant   (false),
    tTime                (21545.0),
    rTime                (21545.0),
+   tSTM                 (true),
+   rSTM                 (true),
+   tJ2kRotation         (true),
+   rJ2kRotation         (true),
    solveLightTime       (true),
    next                 (NULL)
 {
@@ -56,10 +60,6 @@ SignalData::SignalData() :
 //------------------------------------------------------------------------------
 SignalData::~SignalData()
 {
-//   if (tPropagator != NULL)
-//      delete tPropagator;
-//   if (rPropagator != NULL)
-//      delete rPropagator;
 }
 
 
@@ -97,6 +97,10 @@ SignalData::SignalData(const SignalData& sd) :
    rangeVecInertial     (sd.rangeVecInertial),
    rangeVecObs          (sd.rangeVecObs),
    rangeRateVecObs      (sd.rangeRateVecObs),
+   tSTM                 (sd.tSTM),
+   rSTM                 (sd.rSTM),
+   tJ2kRotation         (sd.tJ2kRotation),
+   rJ2kRotation         (sd.rJ2kRotation),
    correctionIDs        (sd.correctionIDs),
    corrections          (sd.corrections),
    useCorrection        (sd.useCorrection),
@@ -145,6 +149,10 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rangeVecInertial     = sd.rangeVecInertial;
       rangeVecObs          = sd.rangeVecObs;
       rangeRateVecObs      = sd.rangeRateVecObs;
+      tSTM                 = sd.tSTM;
+      rSTM                 = sd.rSTM;
+      tJ2kRotation         = sd.tJ2kRotation;
+      rJ2kRotation         = sd.rJ2kRotation;
       correctionIDs        = sd.correctionIDs;
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;

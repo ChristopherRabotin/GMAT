@@ -24,6 +24,8 @@
 #include "estimation_defs.hpp"
 #include "gmatdefs.hpp"
 #include "Rvector3.hpp"
+#include "Rmatrix33.hpp"
+#include "Rmatrix66.hpp"
 
 // Forward references
 class SpacePoint;
@@ -91,6 +93,17 @@ public:
    Rvector3 rangeVecObs;
    /// The range rate vector from transmit to receive node in obs coordinates
    Rvector3 rangeRateVecObs;
+
+   // State Transition Matrices for derivatives of light time measurements
+   /// The STM at the transmitter
+   Rmatrix66 tSTM;
+   /// The STM at the receiver
+   Rmatrix66 rSTM;
+
+   /// Rotation matrix from J2K to transmitter coordinate system
+   Rmatrix33 tJ2kRotation;
+   /// Rotation matrix from J2K to receiver coordinate system
+   Rmatrix33 rJ2kRotation;
 
    /// Correction identifiers
    StringArray correctionIDs;

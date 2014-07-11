@@ -14,7 +14,7 @@
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Jan 9, 2014
 /**
- * Class used to model instantaneous signals
+ * Class used to model signals between two participants
  */
 //------------------------------------------------------------------------------
 
@@ -30,6 +30,7 @@
 //#define DEBUG_EXECUTION
 //#define DEBUG_LIGHTTIME
 //#define SHOW_DATA
+//#define DEBUG_DERIVATIVES
 
 
 //------------------------------------------------------------------------------
@@ -300,6 +301,8 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
          {
             /// @todo: If there is a transponder delay, apply it here, moving
             /// nextEpoch back by the delay time
+
+
             nodePassed = previous->ModelSignal(nextEpoch, nextFixed);
          }
       }
@@ -388,63 +391,27 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
       if (objPtr->GetParameterText(parameterID) == "Position")
       {
-         CalculateRangeVectorInertial();
-         Rvector3 tmp, result;
-         Rvector3 rangeUnit = theData.rangeVecInertial.GetUnitVector();
+         Rvector3 result;
+         GetRangeDerivative(objPtr, true, false, result);
 
-         //if (theData.stationParticipant)
-         // Not sure if this piece is the right way to do this
-         if (objPtr->IsOfType(Gmat::GROUND_STATION))
-         {
-            for (UnsignedInt i = 0; i < 3; ++i)
-               tmp[i] = - rangeUnit[i];
-
-            // for a Ground Station, need to rotate to the F1 frame
-            result = tmp * (theData.tNode->IsOfType(Gmat::GROUND_STATION) ?
-                  R_j2k_Transmitter : R_j2k_Receiver);
-            for (UnsignedInt jj = 0; jj < 3; jj++)
-               theDataDerivatives[0][jj] += result[jj];
-         }
-         else
-         {
-            // for a spacecraft participant 1, we don't need the rotation matrices (I33)
-            for (UnsignedInt i = 0; i < 3; ++i)
-               theDataDerivatives[0][i] += -rangeUnit[i];
-         }
+         for (UnsignedInt jj = 0; jj < 3; ++jj)
+            theDataDerivatives[0][jj] = result[jj];
       }
       else if (objPtr->GetParameterText(parameterID) == "Velocity")
       {
-         for (UnsignedInt i = 0; i < 3; ++i)
-            theDataDerivatives[0][i] += 0.0;
+         Rvector3 result;
+         GetRangeDerivative(objPtr, false, true, result);
+
+         for (UnsignedInt jj = 0; jj < 3; ++jj)
+            theDataDerivatives[0][jj] = result[jj];
       }
       else if (objPtr->GetParameterText(parameterID) == "CartesianX")
       {
-         CalculateRangeVectorInertial();
-         Rvector3 tmp, result;
-         Rvector3 rangeUnit = theData.rangeVecInertial.GetUnitVector();
+         Rvector6 result;
+         GetRangeDerivative(objPtr, true, true, result);
 
-         //if (theData.stationParticipant)
-         // Not sure if this piece is the right way to do this
-         if (objPtr->IsOfType(Gmat::GROUND_STATION))
-         {
-            for (UnsignedInt i = 0; i < 3; ++i)
-               tmp[i] = - rangeUnit[i];
-
-            // for a Ground Station, need to rotate to the F1 frame
-            result = tmp * (theData.tNode->IsOfType(Gmat::GROUND_STATION) ?
-                  R_j2k_Transmitter : R_j2k_Receiver);
-            for (UnsignedInt jj = 0; jj < 3; jj++)
-               theDataDerivatives[0][jj] += result[jj];
-         }
-         else
-         {
-            // for a spacecraft participant 1, we don't need the rotation matrices (I33)
-            for (UnsignedInt i = 0; i < 3; ++i)
-               theDataDerivatives[0][i] += - rangeUnit[i];
-         }
-         // velocity all zeroes
-         for (UnsignedInt ii = 3; ii < 6; ii++)
-            theDataDerivatives[0][ii] += 0.0;
+         for (UnsignedInt jj = 0; jj < 6; ++jj)
+            theDataDerivatives[0][jj] = result[jj];
       }
       else if (objPtr->GetParameterText(parameterID) == "Bias")
       {
