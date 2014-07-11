@@ -1209,6 +1209,8 @@ void MeasureModel::PrepareToPropagate()
 
          psm->SetObject(i->first);
          psm->SetProperty("CartesianState");
+         // For now, always propagate the STM.  Toggle off for simulation?
+         psm->SetProperty("STM");
          psm->BuildState();
          psm->MapObjectsToVector();
 
