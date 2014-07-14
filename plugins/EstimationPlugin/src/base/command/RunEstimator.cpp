@@ -606,7 +606,12 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): FINISHED state\n");
          #endif
+
+         // Why is Finalize commented out???  There is no command summary because of this change.
 //         Finalize();					// made changes by TUAN NGUYEN
+         // Adding in for now.
+         BuildCommandSummary(true);
+
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Exit RunEstimator::Execute(): FINISHED state\n");
          #endif

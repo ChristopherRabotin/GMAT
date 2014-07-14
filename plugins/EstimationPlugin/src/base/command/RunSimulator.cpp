@@ -1049,6 +1049,8 @@ void RunSimulator::Finalize()
    commandComplete = true;
    commandRunning  = false;
 
+   BuildCommandSummary(true);
+
 #ifdef DEBUG_SIMULATOR_EXECUTION
    MessageInterface::ShowMessage("Exit RunSimulator::Finalize()\n");
 #endif
