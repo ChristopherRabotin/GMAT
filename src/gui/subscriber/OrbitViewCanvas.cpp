@@ -32,7 +32,6 @@
 #include "ModelManager.hpp"
 #include "GmatAppData.hpp"         // for GetGuiInterpreter()
 #include "GmatMainFrame.hpp"       // for EnableAnimation()
-#include "FileManager.hpp"         // for texture files
 #include "ColorTypes.hpp"          // for namespace GmatColor::
 #include "Rvector3.hpp"            // for Rvector3::GetMagnitude()
 #include "RealUtilities.hpp"
