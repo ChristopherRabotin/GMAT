@@ -26,7 +26,7 @@ SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup \
 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared
+SHARED_LIB_FLAGS = -shared $(LINK_FLAGS)
 # No longer in gcc 4.6:  --out-implib
 endif
 
