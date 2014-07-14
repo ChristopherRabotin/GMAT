@@ -1046,6 +1046,10 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
 
+   // Update the strand data structures
+   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+      signalPaths[i]->LoadParticipantData();
+
    // Calculate the measurement data ("C" value data) for the signal paths
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {

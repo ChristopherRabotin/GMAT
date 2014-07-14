@@ -26,7 +26,7 @@
 #include "PropSetup.hpp"
 #include "Propagator.hpp"
 #include "ODEModel.hpp"
-
+#include "SpaceObject.hpp"
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
@@ -524,6 +524,75 @@ bool SignalBase::Initialize()
 
 
 //------------------------------------------------------------------------------
+// bool LoadParticipantData()
+//------------------------------------------------------------------------------
+/**
+ * Loads the data from participants into theData
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool SignalBase::LoadParticipantData()
+{
+   bool retval = false;
+
+   if ((theData.tNode != false) || (theData.rNode != false))
+   {
+      GmatEpoch theEpoch = 0.0;
+
+      if (theData.tNode && (theData.tNode->IsOfType(Gmat::SPACEOBJECT)))
+      {
+         SpaceObject *node = (SpaceObject*)theData.tNode;
+
+         theEpoch = node->GetEpoch();
+         theData.tTime = theEpoch;
+
+         Rvector6 state = node->GetMJ2000State(theEpoch);
+         theData.tLoc = state.GetR();
+         theData.tVel = state.GetV();
+      }
+
+      if (theData.rNode && (theData.rNode->IsOfType(Gmat::SPACEOBJECT)))
+      {
+         SpaceObject *node = (SpaceObject*)theData.rNode;
+
+         theEpoch = node->GetEpoch();
+         theData.rTime = theEpoch;
+
+         Rvector6 state = node->GetMJ2000State(theEpoch);
+         theData.rLoc = state.GetR();
+         theData.rVel = state.GetV();
+      }
+
+      if (theEpoch > 0.0)
+      {
+         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+         {
+            Rvector6 state = theData.tNode->GetMJ2000State(theEpoch);
+            theData.tTime = theEpoch;
+            theData.tLoc  = state.GetR();
+            theData.tVel  = state.GetV();
+         }
+         if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+         {
+            Rvector6 state = theData.rNode->GetMJ2000State(theEpoch);
+            theData.rTime = theEpoch;
+            theData.rLoc  = state.GetR();
+            theData.rVel  = state.GetV();
+         }
+      }
+
+      retval = (theEpoch > 0.0);
+
+      if (next)
+         retval &= next->LoadParticipantData();
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetPathDescription()
 //------------------------------------------------------------------------------
 /**
@@ -588,6 +657,24 @@ bool SignalBase::IsSignalFeasible()
       retval = retval && next->IsSignalFeasible();
 
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void SignalBase::UsesLighttime(const bool tf)
+//------------------------------------------------------------------------------
+/**
+ * Manages the light time computation flag
+ *
+ * @param tf true to include light time solutions, false to omit them
+ */
+//------------------------------------------------------------------------------
+void SignalBase::UsesLighttime(const bool tf)
+{
+   includeLightTime = tf;
+   if (next)
+      next->UsesLighttime(tf);
+
 }
 
 
@@ -791,7 +878,7 @@ void SignalBase::CalculateRangeRateVectorObs()
 /**
  * Calculates the range derivative of a signal in a measurement
  *
- * @param forObj Pointer for teh participants that hold the w.r.t field
+ * @param forObj Pointer for the participants that hold the w.r.t field
  * @param wrtR Flag indicating if derivative with respect to position is desired
  * @param wrtV Flag indicating if derivative with respect to velocity is desired
  * @param deriv The structure that gets filled with derivative data
@@ -1145,9 +1232,11 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
 
       retval = prop->Step(stepToTake);
       if (retval == false)
+      {
          MessageInterface::ShowMessage("Failed to step %s by %le secs\n",
                (forTransmitter ? theData.transmitParticipant.c_str() :
                 theData.receiveParticipant.c_str()), stepToTake);
+      }
 
       state.Set(outState);
       for (UnsignedInt i = 0; i < 6; ++i)
@@ -1197,22 +1286,4 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    }
 
    return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// void SignalBase::UsesLighttime(const bool tf)
-//------------------------------------------------------------------------------
-/**
- * Manages the light time computation flag
- *
- * @param tf true to include light time solutions, false to omit them
- */
-//------------------------------------------------------------------------------
-void SignalBase::UsesLighttime(const bool tf)
-{
-   includeLightTime = tf;
-   if (next)
-      next->UsesLighttime(tf);
-
 }

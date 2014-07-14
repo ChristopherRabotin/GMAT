@@ -73,6 +73,7 @@ public:
    virtual void         SetPropagator(PropSetup *propagator,
                                       GmatBase *forObj = NULL);
    virtual bool         Initialize();
+   virtual bool         LoadParticipantData();
    virtual bool         ModelSignal(const GmatEpoch atEpoch,
                                     bool EpochAtReceive = true) = 0;
    virtual const std::vector<RealArray>&
