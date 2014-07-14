@@ -556,7 +556,10 @@ bool GmatFileUtil::IsPathAbsolute(const std::string &fullPath)
    {
       if (IsOsWindows())
       {
-         if (fpath.find(":") == 1 && fpath.find("\\") != fpath.npos)
+         if (fpath.find(":") == 1 && (fpath.find("\\") != fpath.npos ||
+                                      fpath.find("/") != fpath.npos))
+            retval = true;
+         else if (fpath.find("//") != fpath.npos || fpath.find("\\\\") != fpath.npos) // network drive
             retval = true;
          else
             retval = false;

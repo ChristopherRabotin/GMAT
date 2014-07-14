@@ -229,7 +229,7 @@ bool FileManager::SetBinDirectory(const std::string &appName, const std::string 
             
             #ifdef DEBUG_BIN_DIR
             MessageInterface::ShowMessage
-               ("FileManager::SetBinDirectory() returning true, mAbsBinDir = '%s'\n",
+               ("FileManager::SetBinDirectory() returning true, bin directory set to '%s'\n",
                 mAbsBinDir.c_str());
             #endif
             return true;
@@ -242,6 +242,13 @@ bool FileManager::SetBinDirectory(const std::string &appName, const std::string 
             #endif
          }
       }
+   }
+   else
+   {
+      #ifdef DEBUG_BIN_DIR
+      MessageInterface::ShowMessage
+         ("   The bin directory already set to '%s'\n", mAbsBinDir.c_str());
+      #endif
    }
    
    #ifdef DEBUG_BIN_DIR
@@ -810,11 +817,14 @@ std::string FileManager::GetFullStartupFilePath()
       ("FileManager::GetFullStartupFilePath() mStartupFileDir='%s', "
        "mStartupFileName='%s'\n", mStartupFileDir.c_str(), mStartupFileName.c_str());
    #endif
-
+   
    if (mStartupFileDir == "")
       return mStartupFileName;
    else
+   {
+      mStartupFileDir = GmatFileUtil::GetCurrentWorkingDirectory() + mPathSeparator;
       return mStartupFileDir + mStartupFileName;
+   }
 }
 
 
@@ -836,14 +846,14 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    #endif
    
    RefreshFiles();
-
+   
    // Set bin directory
    SetBinDirectory();
    
    // get current path and application path
    std::string currPath = GmatFileUtil::GetCurrentWorkingDirectory();
    std::string appFullPath = GmatFileUtil::GetApplicationPath();
-
+   
    #ifdef DEBUG_READ_STARTUP_FILE
    MessageInterface::ShowMessage("   currPath = '%s'\n", currPath.c_str());
    MessageInterface::ShowMessage("   appFullPath = '%s'\n", appFullPath.c_str());
@@ -858,10 +868,19 @@ void FileManager::ReadStartupFile(const std::string &fileName)
 
    if (GmatFileUtil::DoesFileExist(fileName))
    {
+      #ifdef DEBUG_READ_STARTUP_FILE
+      MessageInterface::ShowMessage("   startup file '%s' exist.\n", fileName.c_str());
+      #endif
       tmpStartupFilePath = fileName;
    }
    else
    {
+      #ifdef DEBUG_READ_STARTUP_FILE
+      MessageInterface::ShowMessage
+         ("   startup file '%s' does not exist, \n   so look in bin directory '%s'\n",
+          fileName.c_str(), appFullPath.c_str());
+      #endif
+      
       // Search application directory for startup file
       std::string appPath = GmatFileUtil::ParsePathName(appFullPath);
       std::string newPath = appPath + "gmat_startup_file.txt";
@@ -2923,10 +2942,8 @@ FileManager::FileManager(const std::string &appName)
        MAX_PATH, GmatFile::MAX_PATH_LEN);
    #endif
    
-   // Set directories
+   // Set only bin directory
    SetBinDirectory(appName);
-   //SetGmatWorkingDirectory(mAbsBinDir);
-   SetCurrentWorkingDirectory(mAbsBinDir);
    
    // Set platform dependent data
    mIsOsWindows = GmatFileUtil::IsOsWindows();
