@@ -40,7 +40,6 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
 {
    "AddTrackingConfig",             // TRACKINGCONFIG
    "Filename",                      // FILENAME
-   "Bias",                          // BIAS
    "UseLighttime",                  // USELIGHTTIME
 };
 
