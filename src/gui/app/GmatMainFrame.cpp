@@ -171,7 +171,7 @@
 //#define DBGLVL_MENUBAR 1
 //#define DEBUG_PENDING_EVENTS
 //#define DEBUG_DOCK_UNDOCK
-#define DEBUG_CONFIG_DATA
+//#define DEBUG_CONFIG_DATA
 //#define DEBUG_CONFIG_FILE
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_REPOSITION_CHILDREN
@@ -6241,7 +6241,7 @@ void GmatMainFrame::CompareFiles()
    // Show compare results in view text dialog
    ViewTextDialog *viewDlg =
       new ViewTextDialog(this, _T("CompareFilesResults"), false, wxDefaultPosition,
-                         wxSize(800, 500));
+                         wxSize(800, 600), wxFont(9, wxMODERN, wxNORMAL, wxNORMAL));
    wxTextCtrl *textCtrl = viewDlg->GetTextCtrl();
    viewDlg->Show();
    
