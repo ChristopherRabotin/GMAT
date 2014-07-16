@@ -286,7 +286,7 @@ bool GmatApp::OnInit()
             // Changed to use FileManager::FindPath() (LOJ: 2014.06.26)
             //show the splash screen
             //wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
-            wxString splashFile = fm->FindPath("", "SPLASH_FILE", true, false, true);
+            wxString splashFile = fm->FindPath("", "SPLASH_FILE", true, false, true).c_str();
             
             if (GmatFileUtil::DoesFileExist(splashFile.c_str()))
             {

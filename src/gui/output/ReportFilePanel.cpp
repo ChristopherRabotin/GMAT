@@ -183,7 +183,8 @@ void ReportFilePanel::LoadData()
    if (mFileExists)
    {
       // Append full path filename to title (LOJ: 2014.06.20)
-      wxString newTitle = mReportName + " - " + fullPathFileName;
+      std::string fPath = " - " + fullPathFileName;
+      wxString newTitle = mReportName + fPath.c_str();
       ((wxMDIChildFrame*)(theParent->GetParent()))->SetTitle(newTitle.c_str());
       mFileContentsTextCtrl->LoadFile(fullPathFileName.c_str());
    }
