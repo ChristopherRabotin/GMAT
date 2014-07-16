@@ -43,8 +43,6 @@ public:
 
    virtual bool         Initialize();
 
-   DEFAULT_TO_NO_CLONES
-
    // Preserve interfaces in the older measurement model code
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
@@ -60,11 +58,10 @@ public:
    virtual Integer      HasParameterCovariances(Integer parameterId);
 
    virtual Integer      GetEventCount();
-//   virtual Event*       GetEvent(Integer whichOne);
-//   virtual bool         SetEventData(Event *locatedEvent = NULL);
-
    virtual void         SetCorrection(const std::string& correctionName,
          const std::string& correctionType);
+
+   DEFAULT_TO_NO_CLONES
 
 protected:
 

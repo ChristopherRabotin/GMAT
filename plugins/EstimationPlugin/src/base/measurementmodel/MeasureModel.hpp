@@ -113,37 +113,12 @@ public:
    virtual void SetPropagator(PropSetup* ps);
    virtual bool Initialize();
 
-
-//   Integer              GetModelID();
-//   Integer              GetModelTypeID();
-//   void                 SetModelID(Integer newID);
-
-////   virtual const MeasurementData&
-////                        CalculateMeasurement(bool withEvents = false);
-   // TBD: Do we want something more generic here?
-//   virtual const MeasurementData&
    virtual bool CalculateMeasurement(bool withEvents = false,
                        ObservationData* forObservation = NULL,
                        std::vector<RampTableData>* rampTB = NULL);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);
-//   virtual bool         SetMeasurement(CoreMeasurement *meas);
-//   virtual const MeasurementData&
-//                        GetMeasurement();
-//   virtual bool         WriteMeasurements();
-//   virtual bool         WriteMeasurement(Integer id);
-//
-//   // Covariance handling code
-//   virtual Integer      HasParameterCovariances(Integer parameterId);
-////   virtual Rmatrix*        GetParameterCovariances(Integer parameterId = -1);
-//
-//   virtual Integer      GetEventCount();
-//   virtual Event*       GetEvent(Integer whichOne);
-//   virtual bool         SetEventData(Event *locatedEvent = NULL);
-//
-//   virtual void         SetCorrection(const std::string& correctionName,
-//         const std::string& correctionType);
 
    const std::vector<SignalData*>& GetSignalData();
    bool IsMeasurementFeasible();
@@ -169,9 +144,6 @@ protected:
    std::vector<SignalData*> theData;
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
-//   /// @todo: Extend this code to support multiple propagators
-//   /// The propagator used for light time solutions
-//   PropSetup *propagator;
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
    /// Flag used to control light time solution generation

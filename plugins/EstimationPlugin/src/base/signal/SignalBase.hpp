@@ -74,7 +74,6 @@ public:
                                       GmatBase *forObj = NULL);
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
-   virtual bool         LoadParticipantData();
    virtual bool         ModelSignal(const GmatEpoch atEpoch,
                                     bool EpochAtReceive = true) = 0;
    virtual const std::vector<RealArray>&
@@ -122,12 +121,8 @@ protected:
    Integer                    satEpochID;
    /// Rotation matrix from receiver to J2K (Identity by default)
    Rmatrix33                  R_j2k_Receiver;
-//   /// Rotation matrix from J2K to receiver (Identity by default)
-//   Rmatrix33                  R_Receiver_j2k;
    /// Rotation matrix from transmitter to J2K (Identity by default)
    Rmatrix33                  R_j2k_Transmitter;
-//   /// Rotation matrix from J2K to F1 (Identity by default)
-//   Rmatrix33                  R_Transmitter_j2k;
    /// Rotation matrix from receiver to observation frame (Identity by default)
    Rmatrix33                  R_Obs_Receiver;
    /// Rotation matrix from F1 to observation frame (Identity by default)

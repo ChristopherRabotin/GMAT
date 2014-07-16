@@ -442,7 +442,7 @@ bool SignalBase::Add(SignalBase* signalToAdd)
  * This code is not likely to change when support for multiple propagators is
  * implemented.  Dense output propagators may impact this code, because the
  * current approach involves cloning the propagator, resulting in a reset of the
- * intrernal data.
+ * Internal data.
  *
  * @param propagator The propagator being passed to the signal
  * @param forObj The participant that uses this propagator; if NULL it is set
@@ -517,84 +517,6 @@ bool SignalBase::Initialize()
 
       // Unset the init flag so InitializeSignal will get called
       isInitialized = false;
-   }
-
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// bool LoadParticipantData()
-//------------------------------------------------------------------------------
-/**
- * Loads the data from participants into theData
- *
- * @return true on success, false on failure
- */
-//------------------------------------------------------------------------------
-bool SignalBase::LoadParticipantData()
-{
-   bool retval = false;
-
-   if ((theData.tNode != false) || (theData.rNode != false))
-   {
-      GmatEpoch theEpoch = 0.0;
-
-      if (theData.tNode && (theData.tNode->IsOfType(Gmat::SPACEOBJECT)))
-      {
-         SpaceObject *node = (SpaceObject*)theData.tNode;
-
-         theEpoch = node->GetEpoch();
-         theData.tTime = theEpoch;
-
-//         Rvector6 state = node->GetMJ2000State(theEpoch);
-//         theData.tLoc = state.GetR();
-//         theData.tVel = state.GetV();
-      }
-
-      if (theData.rNode && (theData.rNode->IsOfType(Gmat::SPACEOBJECT)))
-      {
-         SpaceObject *node = (SpaceObject*)theData.rNode;
-
-         theEpoch = node->GetEpoch();
-         theData.rTime = theEpoch;
-
-//         Rvector6 state = node->GetMJ2000State(theEpoch);
-//         theData.rLoc = state.GetR();
-//         theData.rVel = state.GetV();
-      }
-
-      if (theEpoch > 0.0)
-      {
-         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-         {
-//            Rvector6 state = theData.tNode->GetMJ2000State(theEpoch);
-            theData.tTime = theEpoch;
-//            theData.tLoc  = state.GetR();
-//            theData.tVel  = state.GetV();
-         }
-         if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-         {
-//            Rvector6 state = theData.rNode->GetMJ2000State(theEpoch);
-            theData.rTime = theEpoch;
-//            theData.rLoc  = state.GetR();
-//            theData.rVel  = state.GetV();
-         }
-      }
-
-         MessageInterface::ShowMessage("In SignalBase, Loaded Participant "
-               "Data:\n   Transmitter:  %.12lf [%lf %lf %lf %.12lf %.12lf "
-               "%.12lf]\n   Receiver:     %.12lf [%lf %lf %lf %.12lf %.12lf "
-               "%.12lf]\n", theData.tTime, theData.tLoc(0), theData.tLoc(1),
-               theData.tLoc(2), theData.tVel(0), theData.tVel(1),
-               theData.tVel(2), theData.rTime, theData.rLoc(0), theData.rLoc(1),
-               theData.rLoc(2),theData.rVel(0), theData.rVel(1),
-               theData.rVel(2));
-
-      retval = (theEpoch > 0.0);
-
-      if (next)
-         retval &= next->LoadParticipantData();
    }
 
    return retval;
@@ -715,7 +637,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
 // bool IsSignalFeasible()
 //------------------------------------------------------------------------------
 /**
- * Retuns feasibility for the last signal calculated
+ * Returns feasibility for the last signal calculated
  *
  * @return true if the signal is feasible, false if not
  */
@@ -1187,9 +1109,6 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
             (epochAtReceive ? "Epoch at Receive" : "Epoch at Transmit"),
             (moveAll ? ", Moving all participants" : ""));
    #endif
-
-//MessageInterface::ShowMessage("M2E prev = %p next = %p ttime = %.12lf rtime = "
-//      "%.12lf theEpoch = %.12lf\n", previous, next, theData.tTime, theData.rTime, theEpoch);
 
    if (epochAtReceive || moveAll)
    {

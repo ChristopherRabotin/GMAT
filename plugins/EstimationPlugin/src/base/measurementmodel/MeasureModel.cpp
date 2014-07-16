@@ -1058,32 +1058,6 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage("Sync Complete\n");
    #endif
 
-//   // Update the strand data structures
-//   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
-//   {
-//      SignalData *theData = &(signalPaths[i]->GetSignalData());
-//      while (theData != NULL)
-//      {
-//         theData->tTime = forEpoch;
-//         theData->tTime = forEpoch;
-//
-//         theData = theData->next;
-//      }
-//   }
-//
-//   {
-//      signalPaths[i]->LoadParticipantData();
-//
-//         SignalData theData = signalPaths[i]->GetSignalData();
-//         MessageInterface::ShowMessage("In MeasureModel, Participant Data:\n"
-//               "   Transmitter:  %.12lf [%lf %lf %lf %.12lf %.12lf %.12lf]\n"
-//               "   Receiver:     %.12lf [%lf %lf %lf %.12lf %.12lf %.12lf]\n",
-//               theData.tTime, theData.tLoc(0), theData.tLoc(1), theData.tLoc(2),
-//               theData.tVel(0), theData.tVel(1), theData.tVel(2),
-//               theData.rTime, theData.rLoc(0), theData.rLoc(1), theData.rLoc(2),
-//               theData.rVel(0), theData.rVel(1), theData.rVel(2));
-//   }
-
    // Calculate the measurement data ("C" value data) for the signal paths
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
@@ -1152,7 +1126,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("*** Feasible signal detected\n");
    #endif
 
-   return retval; //theData;
+   return retval;
 }
 
 ////------------------------------------------------------------------------------

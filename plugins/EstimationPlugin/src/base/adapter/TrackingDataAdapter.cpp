@@ -339,26 +339,6 @@ std::string TrackingDataAdapter::GetStringParameter(const Integer id,
 bool TrackingDataAdapter::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
-//   if (index < 0)
-//      throw MeasurementException("Index out of bounds when setting string "
-//            "parameter");
-//
-//   if (id == SIGNAL_PATH)
-//   {
-//      if (participantLists.size() == 0)
-//      {
-//         StringArray *partList = new StringArray;
-//         participantLists.push_back(partList);
-//      }
-//      if (participantLists[0]->size() > (UnsignedInt)index)
-//         participantLists[0]->at(index) = value;
-//      else if (participantLists[0]->size() == (UnsignedInt)index)
-//         participantLists[0]->push_back(value);
-//      else throw MeasurementException("Index out of bounds when setting "
-//            "signal path participant " + value);
-//      return true;
-//   }
-
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 

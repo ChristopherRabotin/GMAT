@@ -149,7 +149,7 @@ Integer TFSMagicNumbers::GetMagicNumber(
 
 
 //------------------------------------------------------------------------------
-// StringArray TFSMagicNumbers::GetKnownTypes()
+// StringArray GetKnownTypes()
 //------------------------------------------------------------------------------
 /**
  * Returns list of registered measurement type keywords
@@ -164,7 +164,7 @@ StringArray TFSMagicNumbers::GetKnownTypes()
 
 
 //------------------------------------------------------------------------------
-// Real TFSMagicNumbers::GetMNMultiplier(Integer magicNumber)
+// Real GetMNMultiplier(Integer magicNumber)
 //------------------------------------------------------------------------------
 /**
  * Retrieves the global multiplicative factor used in the model
@@ -208,6 +208,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    lue->type = "Range";
    lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
+
    // Yeah, yeah, the list is empty here, but in case code is cut and pasted...
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);

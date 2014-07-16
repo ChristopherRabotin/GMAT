@@ -149,7 +149,7 @@ protected:
       StringArray types;
    };
 
-   /// Vector of scripted easuremetn configurations
+   /// Vector of scripted measurement configurations
    std::vector<MeasurementDefinition> trackingConfigs;
    /// The collection of measurements in the set
    std::vector<TrackingDataAdapter*> measurements;
@@ -186,7 +186,6 @@ protected:
 
    TrackingDataAdapter *BuildAdapter(const StringArray &strand,
          const std::string &type);
-//   bool BuildDatafiles();
 };
 
 #endif /* TrackingFileSet_hpp */

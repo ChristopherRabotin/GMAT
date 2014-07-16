@@ -87,16 +87,9 @@ public:
 
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
-//   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
-//                                         const std::string &name);
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
-//                                     const std::string &name);
-//   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
-//                                     const std::string &name,
-//                                     const Integer index);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -134,8 +127,6 @@ public:
    virtual Integer      HasParameterCovariances(Integer parameterId);
 
    virtual Integer      GetEventCount();
-//   virtual Event*       GetEvent(Integer whichOne);
-//   virtual bool         SetEventData(Event *locatedEvent = NULL);
 
    virtual void         SetCorrection(const std::string& correctionName,
                                       const std::string& correctionType);

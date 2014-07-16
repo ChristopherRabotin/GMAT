@@ -72,7 +72,7 @@ RangeAdapterKm::RangeAdapterKm(const RangeAdapterKm& rak) :
 // RangeAdapterKm& operator=(const RangeAdapterKm& rak)
 //------------------------------------------------------------------------------
 /**
- * Assignmant operator
+ * Assignment operator
  *
  * @param rak The adapter copied to make this one match it
  *
