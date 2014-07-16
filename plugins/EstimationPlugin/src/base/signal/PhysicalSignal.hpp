@@ -40,7 +40,7 @@ public:
 
    virtual GmatBase* Clone() const;
 
-   virtual void InitializeSignal();
+   virtual void InitializeSignal(bool chainForwards = false);
 
    virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);
    virtual const std::vector<RealArray>&

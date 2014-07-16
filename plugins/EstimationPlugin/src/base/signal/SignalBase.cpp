@@ -547,9 +547,9 @@ bool SignalBase::LoadParticipantData()
          theEpoch = node->GetEpoch();
          theData.tTime = theEpoch;
 
-         Rvector6 state = node->GetMJ2000State(theEpoch);
-         theData.tLoc = state.GetR();
-         theData.tVel = state.GetV();
+//         Rvector6 state = node->GetMJ2000State(theEpoch);
+//         theData.tLoc = state.GetR();
+//         theData.tVel = state.GetV();
       }
 
       if (theData.rNode && (theData.rNode->IsOfType(Gmat::SPACEOBJECT)))
@@ -559,28 +559,37 @@ bool SignalBase::LoadParticipantData()
          theEpoch = node->GetEpoch();
          theData.rTime = theEpoch;
 
-         Rvector6 state = node->GetMJ2000State(theEpoch);
-         theData.rLoc = state.GetR();
-         theData.rVel = state.GetV();
+//         Rvector6 state = node->GetMJ2000State(theEpoch);
+//         theData.rLoc = state.GetR();
+//         theData.rVel = state.GetV();
       }
 
       if (theEpoch > 0.0)
       {
          if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
          {
-            Rvector6 state = theData.tNode->GetMJ2000State(theEpoch);
+//            Rvector6 state = theData.tNode->GetMJ2000State(theEpoch);
             theData.tTime = theEpoch;
-            theData.tLoc  = state.GetR();
-            theData.tVel  = state.GetV();
+//            theData.tLoc  = state.GetR();
+//            theData.tVel  = state.GetV();
          }
          if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
          {
-            Rvector6 state = theData.rNode->GetMJ2000State(theEpoch);
+//            Rvector6 state = theData.rNode->GetMJ2000State(theEpoch);
             theData.rTime = theEpoch;
-            theData.rLoc  = state.GetR();
-            theData.rVel  = state.GetV();
+//            theData.rLoc  = state.GetR();
+//            theData.rVel  = state.GetV();
          }
       }
+
+         MessageInterface::ShowMessage("In SignalBase, Loaded Participant "
+               "Data:\n   Transmitter:  %.12lf [%lf %lf %lf %.12lf %.12lf "
+               "%.12lf]\n   Receiver:     %.12lf [%lf %lf %lf %.12lf %.12lf "
+               "%.12lf]\n", theData.tTime, theData.tLoc(0), theData.tLoc(1),
+               theData.tLoc(2), theData.tVel(0), theData.tVel(1),
+               theData.tVel(2), theData.rTime, theData.rLoc(0), theData.rLoc(1),
+               theData.rLoc(2),theData.rVel(0), theData.rVel(1),
+               theData.rVel(2));
 
       retval = (theEpoch > 0.0);
 
@@ -641,6 +650,68 @@ SignalData& SignalBase::GetSignalData()
 
 
 //------------------------------------------------------------------------------
+// void SetSignalData(const SignalData& newData)
+//------------------------------------------------------------------------------
+/**
+ * Receives signal data from an outside source
+ *
+ * @param newData The new signal data
+ */
+//------------------------------------------------------------------------------
+void SignalBase::SetSignalData(const SignalData& newData)
+{
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("%p: Receiving data to update %s and %s...",
+            this, theData.transmitParticipant.c_str(),
+            theData.receiveParticipant.c_str());
+      Integer count = 0;
+   #endif
+
+   // Pass in the current computed data
+   if (theData.receiveParticipant == newData.receiveParticipant)
+   {
+      theData.rTime = newData.rTime;
+      theData.rLoc  = newData.rLoc;
+      theData.rVel  = newData.rVel;
+      #ifdef DEBUG_LIGHTTIME
+         ++count;
+      #endif
+   }
+   if (theData.receiveParticipant == newData.transmitParticipant)
+   {
+      theData.rTime = newData.tTime;
+      theData.rLoc  = newData.tLoc;
+      theData.rVel  = newData.tVel;
+      #ifdef DEBUG_LIGHTTIME
+         ++count;
+      #endif
+   }
+   if (theData.transmitParticipant == newData.receiveParticipant)
+   {
+      theData.tTime = newData.rTime;
+      theData.tLoc  = newData.rLoc;
+      theData.tVel  = newData.rVel;
+      #ifdef DEBUG_LIGHTTIME
+         ++count;
+      #endif
+   }
+   if (theData.transmitParticipant == newData.transmitParticipant)
+   {
+      theData.tTime = newData.tTime;
+      theData.tLoc  = newData.tLoc;
+      theData.tVel  = newData.tVel;
+      #ifdef DEBUG_LIGHTTIME
+         ++count;
+      #endif
+   }
+
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("%d matching data sets updated; epochs "
+            "%.12lf -> %.12lf\n", count, theData.tTime, theData.rTime);
+   #endif
+}
+
+//------------------------------------------------------------------------------
 // bool IsSignalFeasible()
 //------------------------------------------------------------------------------
 /**
@@ -685,7 +756,7 @@ void SignalBase::UsesLighttime(const bool tf)
  * Prepares the signal for use
  */
 //------------------------------------------------------------------------------
-void SignalBase::InitializeSignal()
+void SignalBase::InitializeSignal(bool chainForwards)
 {
    if (isInitialized)
    {
@@ -756,6 +827,21 @@ void SignalBase::InitializeSignal()
             "   J2000 CS:             %p\n",
             solarSystem, tcs, rcs, ocs, j2k);
    #endif
+
+   if (chainForwards)
+   {
+      if (next)
+      {
+         next->InitializeSignal(chainForwards);
+      }
+   }
+   else
+   {
+      if (previous)
+      {
+         previous->InitializeSignal(chainForwards);
+      }
+   }
 
    isInitialized = true;
 }
@@ -1102,6 +1188,9 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
             (moveAll ? ", Moving all participants" : ""));
    #endif
 
+//MessageInterface::ShowMessage("M2E prev = %p next = %p ttime = %.12lf rtime = "
+//      "%.12lf theEpoch = %.12lf\n", previous, next, theData.tTime, theData.rTime, theEpoch);
+
    if (epochAtReceive || moveAll)
    {
       Real dt = (theEpoch - theData.rTime) * GmatTimeConstants::SECS_PER_DAY;
@@ -1133,6 +1222,12 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
    if (!epochAtReceive || moveAll)
    {
       Real dt = (theEpoch - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("   dt = (%.12lf - %.12lf) => %.12le\n",
+               theEpoch, theData.rTime, dt);
+      #endif
+
       if (dt != 0.0)
          StepParticipant(dt, true);
       else
@@ -1150,13 +1245,17 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
          theData.tVel = state.GetV();
       }
    }
+
+   #ifdef DEBUG_LIGHTTIME
+      MessageInterface::ShowMessage("MoveToEpoch complete\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
 // void SetPrevious(SignalBase* prev)
 //------------------------------------------------------------------------------
 /**
- * Build the backwards link ing the doubly linked list
+ * Build the backwards link for the doubly linked list
  *
  * @param prev Link to the owner of this signal in the list
  */

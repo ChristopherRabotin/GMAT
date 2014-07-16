@@ -157,7 +157,6 @@ SignalData& SignalData::operator=(const SignalData& sd)
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;
       solveLightTime       = sd.solveLightTime;
-      next                 = NULL;
    }
 
    return *this;

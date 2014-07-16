@@ -73,6 +73,7 @@ public:
    virtual void         SetPropagator(PropSetup *propagator,
                                       GmatBase *forObj = NULL);
    virtual bool         Initialize();
+   virtual void         InitializeSignal(bool chainForwards = false);
    virtual bool         LoadParticipantData();
    virtual bool         ModelSignal(const GmatEpoch atEpoch,
                                     bool EpochAtReceive = true) = 0;
@@ -83,6 +84,7 @@ public:
    virtual std::string  GetPathDescription(bool fullList = true);
 
    SignalData&          GetSignalData();
+   void                 SetSignalData(const SignalData& newData);
    bool                 IsSignalFeasible();
    virtual void         UsesLighttime(const bool tf);
 
@@ -169,7 +171,6 @@ protected:
    UnsignedInt                logLevel;
 
    void                       SetPrevious(SignalBase *prev);
-   virtual void               InitializeSignal();
 
    // Some useful methods
    // Coordinate System methods based on methods in GeometricMeasurement

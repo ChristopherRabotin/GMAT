@@ -31,6 +31,7 @@
 //#define DEBUG_LIGHTTIME
 //#define SHOW_DATA
 //#define DEBUG_DERIVATIVES
+//#define DEBUG_TIMING
 
 
 //------------------------------------------------------------------------------
@@ -95,7 +96,6 @@ PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
    if (this != &ps)
    {
       GmatBase::operator=(ps);
-
       physicalSignalInitialized = false;
    }
 
@@ -129,11 +129,11 @@ GmatBase* PhysicalSignal::Clone() const
  * the signal computations.
  */
 //------------------------------------------------------------------------------
-void PhysicalSignal::InitializeSignal()
+void PhysicalSignal::InitializeSignal(bool chainForwards)
 {
    if (!physicalSignalInitialized)
    {
-      SignalBase::InitializeSignal();
+      SignalBase::InitializeSignal(chainForwards);
       physicalSignalInitialized = true;
    }
 }
@@ -193,7 +193,7 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       #ifdef DEBUG_EXECUTION
          MessageInterface::ShowMessage("   Calling signal initialization\n");
       #endif
-      InitializeSignal();
+      InitializeSignal(!epochAtReceive);
    }
 
    if (isInitialized)
@@ -203,7 +203,17 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       #endif
 
       // First make sure we start at the desired epoch
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Moving all participants to start "
+               "epoch %.12lf\n", satEpoch);
+      #endif
+
       MoveToEpoch(satEpoch, epochAtReceive, true);
+
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Move complete\n");
+      #endif
+
       CalculateRangeVectorInertial();
 
       if (includeLightTime)
@@ -216,6 +226,10 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
          CalculateRangeVectorObs();
          CalculateRangeRateVectorObs();
       }
+
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Vector computations complete\n");
+      #endif
 
       // Perform feasibility check
       if (theData.stationParticipant)
@@ -251,6 +265,10 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       {
          signalIsFeasible = true;
       }
+
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Feasibility data computed\n");
+      #endif
 
       // Report raw data
       if (navLog)
@@ -299,20 +317,90 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
       {
          if (previous)
          {
+            previous->SetSignalData(theData);
+//            // Pass in the current computed data
+//            SignalData pd = previous->GetSignalData();
+//            if (pd.receiveParticipant == theData.receiveParticipant)
+//            {
+//MessageInterface::ShowMessage("Setting data for %s\n", pd.receiveParticipant.c_str());
+//               pd.rTime = theData.rTime;
+//               pd.rLoc  = theData.rLoc;
+//               pd.rVel  = theData.rVel;
+//            }
+//            if (pd.receiveParticipant == theData.transmitParticipant)
+//            {
+//MessageInterface::ShowMessage("Setting data for %s\n", pd.receiveParticipant.c_str());
+//               pd.rTime = theData.tTime;
+//               pd.rLoc  = theData.tLoc;
+//               pd.rVel  = theData.tVel;
+//            }
+//            if (pd.transmitParticipant == theData.receiveParticipant)
+//            {
+//MessageInterface::ShowMessage("Setting data for %s\n", pd.transmitParticipant.c_str());
+//               pd.tTime = theData.rTime;
+//               pd.tLoc  = theData.rLoc;
+//               pd.tVel  = theData.rVel;
+//            }
+//            if (pd.transmitParticipant == theData.transmitParticipant)
+//            {
+//MessageInterface::ShowMessage("Setting data for %s\n", pd.transmitParticipant.c_str());
+//               pd.tTime = theData.tTime;
+//               pd.tLoc  = theData.tLoc;
+//               pd.tVel  = theData.tVel;
+//            }
+
+            #ifdef DEBUG_TIMING
+               MessageInterface::ShowMessage("Modeling previous signal\n");
+            #endif
             /// @todo: If there is a transponder delay, apply it here, moving
             /// nextEpoch back by the delay time
-
-
             nodePassed = previous->ModelSignal(nextEpoch, nextFixed);
+            #ifdef DEBUG_TIMING
+               MessageInterface::ShowMessage("Previous signal modeled\n");
+            #endif
          }
       }
       else
       {
          if (next)
          {
+            next->SetSignalData(theData);
+//            // Pass in the current computed data
+//            SignalData pd = next->GetSignalData();
+//            if (pd.receiveParticipant == theData.receiveParticipant)
+//            {
+//               pd.rTime = theData.rTime;
+//               pd.rLoc  = theData.rLoc;
+//               pd.rVel  = theData.rVel;
+//            }
+//            if (pd.receiveParticipant == theData.transmitParticipant)
+//            {
+//               pd.rTime = theData.tTime;
+//               pd.rLoc  = theData.tLoc;
+//               pd.rVel  = theData.tVel;
+//            }
+//            if (pd.transmitParticipant == theData.receiveParticipant)
+//            {
+//               pd.tTime = theData.rTime;
+//               pd.tLoc  = theData.rLoc;
+//               pd.tVel  = theData.rVel;
+//            }
+//            if (pd.transmitParticipant == theData.transmitParticipant)
+//            {
+//               pd.tTime = theData.tTime;
+//               pd.tLoc  = theData.tLoc;
+//               pd.tVel  = theData.tVel;
+//            }
+
+            #ifdef DEBUG_TIMING
+               MessageInterface::ShowMessage("Modeling next signal\n");
+            #endif
             /// @todo: If there is a transponder delay, apply it here, moving
             /// nextEpoch ahead by the delay time
             nodePassed = next->ModelSignal(nextEpoch, nextFixed);
+            #ifdef DEBUG_TIMING
+               MessageInterface::ShowMessage("Next signal modeled\n");
+            #endif
          }
       }
 
@@ -546,6 +634,11 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
    // Build the other data vectors
    CalculateRangeVectorObs();
    CalculateRangeRateVectorObs();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Leaving GenerateLightTimeData\n");
+   #endif
+
 
    return retval;
 }

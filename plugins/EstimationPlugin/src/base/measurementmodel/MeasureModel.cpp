@@ -37,6 +37,7 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
+//#define DEBUG_TIMING
 
 //------------------------------------------------------------------------------
 // Static data
@@ -991,6 +992,10 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
 bool MeasureModel::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB)
 {
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("Calculating signal data in MeasureModel\n");
+   #endif
+
    bool retval = false;
    feasible = true;
 
@@ -1020,6 +1025,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 
    // Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("Synching in MeasureModel\n");
+   #endif
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
    {
@@ -1046,9 +1054,35 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
 
-   // Update the strand data structures
-   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
-      signalPaths[i]->LoadParticipantData();
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("Sync Complete\n");
+   #endif
+
+//   // Update the strand data structures
+//   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+//   {
+//      SignalData *theData = &(signalPaths[i]->GetSignalData());
+//      while (theData != NULL)
+//      {
+//         theData->tTime = forEpoch;
+//         theData->tTime = forEpoch;
+//
+//         theData = theData->next;
+//      }
+//   }
+//
+//   {
+//      signalPaths[i]->LoadParticipantData();
+//
+//         SignalData theData = signalPaths[i]->GetSignalData();
+//         MessageInterface::ShowMessage("In MeasureModel, Participant Data:\n"
+//               "   Transmitter:  %.12lf [%lf %lf %lf %.12lf %.12lf %.12lf]\n"
+//               "   Receiver:     %.12lf [%lf %lf %lf %.12lf %.12lf %.12lf]\n",
+//               theData.tTime, theData.tLoc(0), theData.tLoc(1), theData.tLoc(2),
+//               theData.tVel(0), theData.tVel(1), theData.tVel(2),
+//               theData.rTime, theData.rLoc(0), theData.rLoc(1), theData.rLoc(2),
+//               theData.rVel(0), theData.rVel(1), theData.rVel(2));
+//   }
 
    // Calculate the measurement data ("C" value data) for the signal paths
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
@@ -1058,6 +1092,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       SignalData *sd = &(startSignal->GetSignalData());
       // Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Updating Data\n");
+      #endif
       sd->tTime = sd->rTime = forEpoch;
       if (sd->tNode->IsOfType(Gmat::SPACECRAFT))
       {
@@ -1076,10 +1113,19 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          sd->rVel = state.GetV();
       }
 
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Data Updated\n");
+      #endif
+
       #ifdef DEBUG_EXECUTION
          MessageInterface::ShowMessage("***************************************"
                "***\n*** Starting modeling for path %d\n"
                "******************************************\n", i);
+      #endif
+
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Modeling signals for epoch %.12lf\n",
+               forEpoch);
       #endif
 
       if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
@@ -1087,8 +1133,18 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
+
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("Modeling complete\n");
+      #endif
+
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
    }
+
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("Calc Complete\n");
+   #endif
+
    retval = true;
 
    #ifdef DEBUG_FEASIBILITY
