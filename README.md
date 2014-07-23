@@ -1,11 +1,10 @@
 # README #
-This is the repository used for Thinking Systems' work on the GMAT source code, performed under contract with Goddard Space Flight Center.
+This is the repository used for Thinking Systems' work on the GMAT source code, performed under contract with Goddard Space Flight Center.  It replaces the GMATAtThinkSys repository, and is started from a clean copy of the GMAT source at GSFC on 7/22/2014.
 
 ### What is this repository for? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Ongoing development work at Thinking Systems
+* R2014b code base
 
 ### How do I get set up? ###
 
@@ -24,5 +23,4 @@ This is the repository used for Thinking Systems' work on the GMAT source code, 
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* Questions?  Ask djc@thinksysinc.com
