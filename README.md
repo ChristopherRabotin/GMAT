@@ -8,14 +8,11 @@ This is the repository used for Thinking Systems' work on the GMAT source code, 
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Instructions for setting up and building can be found at the [Working in GMAT Code](https://thinksysinc.atlassian.net/wiki/display/GOATS/Working+in+GMAT+Code) page on the Wiki.
 
 ### Contribution guidelines ###
+
+(To be completed)
 
 * Writing tests
 * Code review
