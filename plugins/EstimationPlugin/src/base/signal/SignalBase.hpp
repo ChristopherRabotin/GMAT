@@ -29,6 +29,7 @@
 #include "CoordinateConverter.hpp"
 #include "ProgressReporter.hpp"
 #include "SignalData.hpp"
+#include "GmatTime.hpp"
 
 class PropSetup;
 
@@ -76,6 +77,8 @@ public:
    virtual void         InitializeSignal(bool chainForwards = false);
    virtual bool         ModelSignal(const GmatEpoch atEpoch,
                                     bool EpochAtReceive = true) = 0;
+   virtual bool         ModelSignal(const GmatTime atEpoch,							// made changes by TUAN NGUYEN
+                                    bool EpochAtReceive = true) = 0;				// made changes by TUAN NGUYEN
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
@@ -116,6 +119,7 @@ protected:
    // Storage buffers
    /// Epoch of most recent calculation
    GmatEpoch                  satEpoch;
+   GmatTime                   satPrecEpoch;								// made changes by TUAN NGUYEN
 
    /// Parameter ID used to retrieve internal epoch data
    Integer                    satEpochID;
@@ -182,6 +186,9 @@ protected:
 
    Integer                    GetParmIdFromEstID(Integer forId, GmatBase *obj);
 
+   void                       MoveToEpoch(const GmatTime theEpoch,					// made changes by TUAN NGUYEN
+                                          bool epochAtReceive,						// made changes by TUAN NGUYEN
+                                          bool moveAll = true);						// made changes by TUAN NGUYEN
    void                       MoveToEpoch(const GmatEpoch theEpoch,
                                           bool epochAtReceive,
                                           bool moveAll = true);

@@ -30,9 +30,9 @@
 //#define DEBUG_EXECUTION
 //#define DEBUG_LIGHTTIME
 //#define SHOW_DATA
+//#define DEBUG_FEASIBILITY
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_TIMING
-
 
 //------------------------------------------------------------------------------
 // PhysicalSignal(const std::string &typeStr, const std::string &name)
@@ -329,6 +329,170 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 }
 
 
+// made changes by TUAN NGUYEN
+bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
+{
+   bool retval = false;
+   satPrecEpoch = atEpoch;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", satPrecEpoch.GetMjd(),
+            epochAtReceive ? "with fixed Receiver" : "with fixed Transmitter");
+
+      MessageInterface::ShowMessage("Modeling %s -> %s\n",
+            theData.transmitParticipant.c_str(),
+            theData.receiveParticipant.c_str());
+
+      MessageInterface::ShowMessage("tPrecTime = %.12lf, rPrecTime = %.12lf satPrecEpoch = "
+            "%.12lf\n", theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd(), satPrecEpoch.GetMjd());
+   #endif
+
+   if (!isInitialized)
+   {
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("   Calling signal initialization\n");
+      #endif
+      InitializeSignal(!epochAtReceive);
+   }
+
+   if (isInitialized)
+   {
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("   Signal initialized; Computing data\n");
+      #endif
+
+      // First make sure we start at the desired epoch
+      MoveToEpoch(satPrecEpoch, epochAtReceive, true);
+      CalculateRangeVectorInertial();
+
+      if (includeLightTime)
+      {
+         GenerateLightTimeData(satPrecEpoch, epochAtReceive);
+      }
+      else
+      {
+         // Build the other data vectors
+         CalculateRangeVectorObs();
+         CalculateRangeRateVectorObs();
+      }
+
+      // Perform feasibility check
+      if (theData.stationParticipant)
+      {
+         const Real* elData;
+		 bool signalIsFeasibleT, signalIsFeasibleR;
+         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+         {
+            Rvector6 state_sez(theData.rangeVecObs,
+                  theData.rangeRateVecObs);
+            elData = ((GroundstationInterface*)(theData.tNode))->
+                  IsValidElevationAngle(state_sez);
+			signalIsFeasibleT = (elData[2] > 0.0);
+
+            #ifdef DEBUG_FEASIBILITY
+            MessageInterface::ShowMessage("At transmit node: Obs vector = [%.3lf %.3lf %.3lf] "
+                  "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
+                  theData.rangeVecObs(2), (signalIsFeasibleT ? "feasible" :
+                  "infeasible"));
+            #endif
+		 }
+		 
+         if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+         {
+            Rvector6 state_sez(-theData.rangeVecObs,
+                  -theData.rangeRateVecObs);
+            elData = ((GroundstationInterface*)(theData.rNode))->
+                  IsValidElevationAngle(state_sez);
+			signalIsFeasibleR = (elData[2] > 0.0);
+            #ifdef DEBUG_FEASIBILITY
+            MessageInterface::ShowMessage("At receive node: Obs vector = [%.3lf %.3lf %.3lf] "
+                  "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
+                  theData.rangeVecObs(2), (signalIsFeasibleR ? "feasible" :
+                  "infeasible"));
+            #endif
+         }
+
+		 signalIsFeasible = signalIsFeasibleT && signalIsFeasibleR;
+      }
+      else
+      ///@todo: Put in test for obstructing bodies; for now, always feasible
+      {
+         signalIsFeasible = true;
+      }
+
+      // Report raw data
+      if (navLog)
+      {
+         std::stringstream data;
+         data.precision(16);
+
+         if (logLevel <= 1)
+         {
+            Real range = theData.rangeVecInertial.GetMagnitude();
+            if (range >= 0.0)
+               data << "   " << GetPathDescription(false)
+                    << " Range at A.1 epoch " << satPrecEpoch.GetMjd()					// made changes by TUAN NGUYEN
+                    << " = " << range << "\n";
+            else
+               data << "   Range not valid\n";
+         }
+
+         if (logLevel == 0)
+         {
+            data.str() = "";
+            data << "      Range vector:         "
+                 << (theData.rangeVecInertial.ToString())
+                 << "      Range vector Obs:     "
+                 << (theData.rangeVecObs.ToString())
+                 << "      RangeRate vector Obs: "
+                 << (theData.rangeRateVecObs.ToString())
+                 << "\n      Transmitter location: "
+                 << (theData.tLoc.ToString())
+                 << "      Receiver location:    "
+                 << (theData.rLoc.ToString());
+         }
+         navLog->WriteData(data.str());
+      }
+
+      // if epoctAtReceive was true, transmitter moved and we need its epoch,
+      // if false, we need the receiver epoch
+      GmatTime nextPrecEpoch = (epochAtReceive ? theData.tPrecTime : theData.rPrecTime);		// made changes by TUAN NGUYEN
+
+      // This transmitter is the receiver for the next node
+      bool nextFixed = (epochAtReceive ? true : false);
+
+      bool nodePassed = true;
+
+      if (epochAtReceive)
+      {
+         if (previous)
+         {
+            previous->SetSignalData(theData);
+
+            /// @todo: If there is a transponder delay, apply it here, moving
+            /// nextEpoch back by the delay time
+            nodePassed = previous->ModelSignal(nextPrecEpoch, nextFixed);						// made changes by TUAN NGUYEN
+         }
+      }
+      else
+      {
+         if (next)
+         {
+            next->SetSignalData(theData);
+
+            /// @todo: If there is a transponder delay, apply it here, moving
+            /// nextEpoch ahead by the delay time
+            nodePassed = next->ModelSignal(nextPrecEpoch, nextFixed);							// made changes by TUAN NGUYEN
+         }
+      }
+
+      retval = nodePassed;
+   }
+
+   return retval;
+}
+
+
 //------------------------------------------------------------------------------
 // const std::vector<RealArray>& ModelSignalDerivative(GmatBase* obj,
 //       Integer forId)
@@ -348,6 +512,20 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       GmatBase* obj, Integer forId)
 {
+   // Verify valid input
+   if (obj == NULL)
+      throw MeasurementException("Error: a NULL object inputs to PhysicalSignal::ModelSignalDerivative() function\n");
+
+   // Verify initialization
+   if (!isInitialized)
+   {
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("   Calling signal initialization\n");
+      #endif
+      InitializeSignal();
+   }
+
+   // Clear derivative data
    theDataDerivatives.clear();
 
    if (logLevel < 2)
@@ -493,7 +671,8 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
       MoveToEpoch(atEpoch, epochAtReceive, true);
 
       // Then compute the initial data
-      Rvector3 displacement = theData.rLoc - theData.tLoc;
+      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;												// Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)		// made changes by TUAN NGUYEN 
+	  Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());	// Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)		// made changes by TUAN NGUYEN 
       Real deltaR = displacement.GetMagnitude();
       Real deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
             (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
@@ -528,7 +707,8 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
                !epochAtReceive, false);
          deltaE = (epochAtReceive ? -1.0 : 1.0) *
                (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
-         displacement = theData.rLoc - theData.tLoc;
+         rangeGeoInertial = theData.rLoc - theData.tLoc;											// Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)		// made changes by TUAN NGUYEN 
+	     displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());	// Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)		// made changes by TUAN NGUYEN 
 
          #ifdef DEBUG_LIGHTTIME
             MessageInterface::ShowMessage("x Positions: %s  %.3lf -->  %s  "
@@ -557,6 +737,95 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
       MessageInterface::ShowMessage("Leaving GenerateLightTimeData\n");
    #endif
 
+
+   return retval;
+}
+
+
+// made changes by TUAN NGUYEN
+bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
+      const bool epochAtReceive)
+{
+   #ifdef DEBUG_EXECUTION
+	  GmatTime t = atEpoch;
+      MessageInterface::ShowMessage("Called GenerateLightTimeData(%.12lf, "
+            "%s)\n", t.GetMjd(), (epochAtReceive ? "Receiver fixed" :
+            "Transmitter fixed"));
+   #endif
+
+   // It is equivalant to range tolerance = time tolerance * speed of light = (1.0e-12 s)x(299792458.0 m/s) = 0.0002998 m = 0.3 mm 
+   Real timeTolerance = 1.0e-12;																						// made changes by TUAN NGUYEN
+
+   bool retval = false;
+
+   if (includeLightTime)
+   {
+      // First make sure we start at the desired epoch
+      MoveToEpoch(atEpoch, epochAtReceive, true);
+
+      // Then compute the initial data
+      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;												// Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)		// made changes by TUAN NGUYEN 
+	  Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());	// Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)		// made changes by TUAN NGUYEN 
+
+      Real deltaR = displacement.GetMagnitude();
+      Real deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
+            (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("   DeltaT for light travel over "
+               "distance %.3lf km = %le\n", deltaR, deltaT);
+      #endif
+
+      // Here we go; iterating for a light time solution
+      Integer loopCount = 0;
+
+      // Epoch difference, in seconds
+	  Real deltaE = (theData.rPrecTime - theData.tPrecTime).GetTimeInSec();												// made changes by TUAN NGUYEN
+
+      #ifdef DEBUG_LIGHTTIME
+         MessageInterface::ShowMessage("      Starting: dEpoch = %.12le, dR = "
+               "%.3lf, dT = %.12le\n", deltaE, deltaR, deltaT);
+         MessageInterface::ShowMessage("Initial x Positions: %s  %.3lf -->  "
+               "%s  %.3lf\n", theData.tNode->GetName().c_str(), theData.tLoc(0),
+               theData.rNode->GetName().c_str(), theData.rLoc(0));
+      #endif
+
+      // Loop to half microsecond precision or 10 times, whichever comes first
+	  while ((GmatMathUtil::Abs(deltaE - deltaT) > timeTolerance) && (loopCount < 10))									// made changes by TUAN NGUYEN
+      {
+         #ifdef DEBUG_LIGHTTIME
+            MessageInterface::ShowMessage("      Loop iteration %d\n",
+                  loopCount);
+         #endif
+         MoveToEpoch(atEpoch + deltaT / GmatTimeConstants::SECS_PER_DAY,
+               !epochAtReceive, false);
+         deltaE = (epochAtReceive ? -1.0 : 1.0) *
+			 (theData.rPrecTime - theData.tPrecTime).GetTimeInSec();													// made changes by TUAN NGUYEN 
+         rangeGeoInertial = theData.rLoc - theData.tLoc;											// Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)		// made changes by TUAN NGUYEN 
+	     displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());	// Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)		// made changes by TUAN NGUYEN 
+
+         #ifdef DEBUG_LIGHTTIME
+            MessageInterface::ShowMessage("x Positions: %s  %.3lf -->  %s  "
+                  "%.3lf\n", theData.tNode->GetName().c_str(), theData.tLoc(0),
+                  theData.rNode->GetName().c_str(), theData.rLoc(0));
+         #endif
+
+         deltaR = displacement.GetMagnitude();
+         deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
+                     (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
+         #ifdef DEBUG_LIGHTTIME
+            MessageInterface::ShowMessage("      ===> dEpoch = %.12le, dR = "
+                  "%.3lf, dT = %.12le, trigger = %le\n", deltaE, deltaR, deltaT,
+                  deltaE-deltaT);
+         #endif
+         ++loopCount;
+      }
+   }
+
+   // Temporary check on data flow
+   // Build the other data vectors
+   CalculateRangeVectorObs();
+   CalculateRangeRateVectorObs();
 
    return retval;
 }

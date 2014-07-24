@@ -26,6 +26,8 @@
 #include "Rvector3.hpp"
 #include "Rmatrix33.hpp"
 #include "Rmatrix66.hpp"
+#include "Rvector6.hpp"
+#include "GmatTime.hpp"
 
 // Forward references
 class SpacePoint;
@@ -65,14 +67,20 @@ public:
 
    /// Transmitter epoch
    GmatEpoch tTime;
+   GmatTime tPrecTime;													// made changes by TUAN NGUYEN
    /// Receiver epoch
    GmatEpoch rTime;
+   GmatTime rPrecTime;													// made changes by TUAN NGUYEN
    /// MJ2000Eq location of the transmit node
    Rvector3 tLoc;
+   /// SSBMJ2000 state of the transmit node's origin					// made changes by TUAN NGUYEN
+   Rvector6 tOStateSSB;													// made changes by TUAN NGUYEN
    /// Location of the transmit node in its coordinate system
    Rvector3 tLocTcs;
    /// MJ2000Eq location of the receive node
    Rvector3 rLoc;
+   /// SSBMJ2000 state of the receive node's origin						// made changes by TUAN NGUYEN
+   Rvector6 rOStateSSB;													// made changes by TUAN NGUYEN
    /// Location of the receive node in its coordinate system
    Rvector3 rLocRcs;
    /// MJ2000Eq transmitter velocity
@@ -83,12 +91,14 @@ public:
    Rvector3 rVel;
    /// Receiver velocity in its coordinate system
    Rvector3 rVelRcs;
-   /// Displacement of origins for the transmit and receive nodes
+   /// Displacement of origins from the transmit node at time tTime and receive node at time rTime
    Rvector3 j2kOriginSep;
-   /// Relative velocity between the origins of the participants
+   /// Relative velocity of the origin of the receive node at time rTime w.r.t. the origin of the transmit node at time tTime
    Rvector3 j2kOriginVel;
-   /// The Mj2000 equatorial range vector from transmit to receive node
+   /// The SSBMj2000 equatorial range vector from transmit at time tTime to receive node at time rTime
    Rvector3 rangeVecInertial;
+   /// Relative velocity of the receive node at time rTime w.r.t. the transmit node at time tTime
+   Rvector3 rangeRateVecInertial;										// made changes by TUAN NGUYEN
    /// The range vector from transmit to receive node in obs coordinates
    Rvector3 rangeVecObs;
    /// The range rate vector from transmit to receive node in obs coordinates

@@ -43,6 +43,7 @@ public:
    virtual void InitializeSignal(bool chainForwards = false);
 
    virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);
+   virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true);			// made changes by TUAN NGUYEN
    virtual const std::vector<RealArray>&
             ModelSignalDerivative(GmatBase *obj, Integer forId);
 
@@ -51,6 +52,7 @@ protected:
    bool physicalSignalInitialized;
 
    bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);
+   bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive);					// made changes by TUAN NGUYEN
 };
 
 #endif /* PhysicalSignal_hpp */

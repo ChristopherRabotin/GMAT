@@ -85,8 +85,10 @@ SignalData::SignalData(const SignalData& sd) :
    tTime                (sd.tTime),
    rTime                (sd.rTime),
    tLoc                 (sd.tLoc),
+   tOStateSSB           (sd.tOStateSSB),					// made changes by TUAN NGUYEN
    tLocTcs              (sd.tLocTcs),
    rLoc                 (sd.rLoc),
+   rOStateSSB           (sd.rOStateSSB),					// made changes by TUAN NGUYEN
    rLocRcs              (sd.rLocRcs),
    tVel                 (sd.tVel),
    tVelTcs              (sd.tVelTcs),
@@ -95,6 +97,7 @@ SignalData::SignalData(const SignalData& sd) :
    j2kOriginSep         (sd.j2kOriginSep),
    j2kOriginVel         (sd.j2kOriginVel),
    rangeVecInertial     (sd.rangeVecInertial),
+   rangeRateVecInertial (sd.rangeRateVecInertial),			// made changes by TUAN NGUYEN
    rangeVecObs          (sd.rangeVecObs),
    rangeRateVecObs      (sd.rangeRateVecObs),
    tSTM                 (sd.tSTM),
@@ -137,8 +140,10 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rTime                = sd.rTime;
       stationParticipant   = sd.stationParticipant;
       tLoc                 = sd.tLoc;
+	  tOStateSSB           = sd.tOStateSSB;
       tLocTcs              = sd.tLocTcs;
       rLoc                 = sd.rLoc;
+	  rOStateSSB           = sd.rOStateSSB;
       rLocRcs              = sd.rLocRcs;
       tVel                 = sd.tVel;
       tVelTcs              = sd.tVelTcs;
@@ -147,6 +152,7 @@ SignalData& SignalData::operator=(const SignalData& sd)
       j2kOriginSep         = sd.j2kOriginSep;
       j2kOriginVel         = sd.j2kOriginVel;
       rangeVecInertial     = sd.rangeVecInertial;
+	  rangeRateVecInertial = sd.rangeRateVecInertial;
       rangeVecObs          = sd.rangeVecObs;
       rangeRateVecObs      = sd.rangeRateVecObs;
       tSTM                 = sd.tSTM;
@@ -157,6 +163,7 @@ SignalData& SignalData::operator=(const SignalData& sd)
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;
       solveLightTime       = sd.solveLightTime;
+      next                 = NULL;
    }
 
    return *this;
