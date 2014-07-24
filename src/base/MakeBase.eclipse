@@ -532,6 +532,7 @@ OBJECTS = \
     util/FileUtil.o \
     util/Frozen.o \
     util/GmatGlobal.o \
+    util/GmatTime.o \
     util/GravityFileUtil.o \
     util/GregorianDate.o \
     util/LatLonHgt.o \
