@@ -540,6 +540,7 @@
     <ClCompile Include="..\..\..\src\base\util\FileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Frozen.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
@@ -970,6 +971,7 @@
     <ClInclude Include="..\..\..\src\base\util\Frozen.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatConstants.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />

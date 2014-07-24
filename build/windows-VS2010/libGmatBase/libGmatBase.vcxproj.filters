@@ -1335,6 +1335,9 @@
     <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2626,6 +2629,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp">
+      <Filter>Source Files\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
