@@ -38,6 +38,9 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
 //#define DEBUG_TIMING
+//#define DEBUG_FEASIBILITY
+//#define DEBUG_EXECUTION
+#define USE_PRECISION_TIME
 
 //------------------------------------------------------------------------------
 // Static data
@@ -131,7 +134,7 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
 //------------------------------------------------------------------------------
 MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
 {
-   if (this == &mm)
+   if (this != &mm)
    {
       GmatBase::operator=(mm);
 
@@ -354,12 +357,16 @@ std::string MeasureModel::GetStringParameter(const Integer id,
 bool MeasureModel::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
+   //if ((index < 0) || (index > (Integer)participantLists.size()))
+   //   throw MeasurementException("Index out of bounds when setting string "
+   //         "parameter");
+
+   if (id == SIGNAL_PATH)
+   {
    if ((index < 0) || (index > (Integer)participantLists.size()))
       throw MeasurementException("Index out of bounds when setting string "
             "parameter");
 
-   if (id == SIGNAL_PATH)
-   {
       if ((Integer)participantLists.size() == index)
       {
          StringArray *partList = new StringArray;
@@ -1008,7 +1015,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    bool epochIsAtEnd = true;
 
    // Find the measurement epoch needed for the computation
+#ifdef USE_PRECISION_TIME
+   GmatTime forEpoch;
+#else
    GmatEpoch forEpoch;
+#endif
    if (forObservation)
       forEpoch = forObservation->epoch;
    else // Grab epoch from the first SpaceObject in the participant data
@@ -1034,11 +1045,20 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       if (i->first->IsOfType(Gmat::SPACEOBJECT) && (i->second != NULL))
       {
          GmatEpoch satTime = ((SpaceObject*)i->first)->GetEpoch();
+#ifdef USE_PRECISION_TIME
+		 Real dt = (forEpoch - satTime).GetTimeInSec();
+#else
          Real dt = (forEpoch - satTime) * GmatTimeConstants::SECS_PER_DAY;
+#endif
 
          #ifdef DEBUG_EXECUTION
+#ifdef USE_PRECISION_TIME
+            MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
+                  "dt = %le\n", forEpoch.GetMjd(), satTime, dt);
+#else
             MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
                   "dt = %le\n", forEpoch, satTime, dt);
+#endif
          #endif
 
          // Make sure the propagators are set to the spacecraft data
@@ -1066,10 +1086,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       SignalData *sd = &(startSignal->GetSignalData());
       // Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
-      #ifdef DEBUG_TIMING
-         MessageInterface::ShowMessage("Updating Data\n");
-      #endif
+#ifdef USE_PRECISION_TIME
+	  sd->tPrecTime = sd->rPrecTime = forEpoch;							// made changes by TUAN NGUYEN
+#else
       sd->tTime = sd->rTime = forEpoch;
+#endif
       if (sd->tNode->IsOfType(Gmat::SPACECRAFT))
       {
          const Real* propState =
