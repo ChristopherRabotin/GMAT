@@ -1179,33 +1179,37 @@ Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez)
    Rvector3 rho_sez = state_sez.GetR();
    Rvector3 rhodot_sez = state_sez.GetV();
 
-   // Compute satellite elevation
-   Real rho_sez_mag = rho_sez.GetMagnitude();
-   az_el_visible[0] = GmatMathUtil::ATan2(rho_sez[2],rho_sez_mag) *
-         GmatMathConstants::DEG_PER_RAD;
+   //// Compute satellite elevation
+   //Real rho_sez_mag = rho_sez.GetMagnitude();
+   //az_el_visible[0] = GmatMathUtil::ATan2(rho_sez[2],rho_sez_mag) *
+   //      GmatMathConstants::DEG_PER_RAD;
 
-   // c=cos s=sin compute azimuth, protect against 90 deg elevation
-   Real c_rho =  rho_sez[1]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
-         GmatMathUtil::Pow(rho_sez[1],2));
-   Real s_rho = -rho_sez[0]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
-         GmatMathUtil::Pow(rho_sez[1],2));
-   Real c_rhodot =  rhodot_sez[1]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
-         GmatMathUtil::Pow(rhodot_sez[1],2));
-   Real s_rhodot = -rhodot_sez[0]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
-         GmatMathUtil::Pow(rhodot_sez[1],2));
+   //// c=cos s=sin compute azimuth, protect against 90 deg elevation
+   //Real c_rho =  rho_sez[1]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
+   //      GmatMathUtil::Pow(rho_sez[1],2));
+   //Real s_rho = -rho_sez[0]/sqrt(GmatMathUtil::Pow(rho_sez[0],2) +
+   //      GmatMathUtil::Pow(rho_sez[1],2));
+   //Real c_rhodot =  rhodot_sez[1]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
+   //      GmatMathUtil::Pow(rhodot_sez[1],2));
+   //Real s_rhodot = -rhodot_sez[0]/sqrt(GmatMathUtil::Pow(rhodot_sez[0],2) +
+   //      GmatMathUtil::Pow(rhodot_sez[1],2));
 
-   // Compute azimuth
-   if (az_el_visible[0] != 90)
-   {
-      az_el_visible[1] = GmatMathUtil::ATan2(s_rho,c_rho) *
-            GmatMathConstants::DEG_PER_RAD;
-   }
-   else if (az_el_visible[0] == 90)
-   {
-      az_el_visible[1] = GmatMathUtil::ATan2(s_rhodot,c_rhodot)*
-          GmatMathConstants::DEG_PER_RAD;
-   }
+   //// Compute azimuth
+   //if (az_el_visible[0] != 90)
+   //{
+   //   az_el_visible[1] = GmatMathUtil::ATan2(s_rho,c_rho) *
+   //         GmatMathConstants::DEG_PER_RAD;
+   //}
+   //else if (az_el_visible[0] == 90)
+   //{
+   //   az_el_visible[1] = GmatMathUtil::ATan2(s_rhodot,c_rhodot)*
+   //       GmatMathConstants::DEG_PER_RAD;
+   //}
 
+   Rvector3 rho_sez_unit = rho_sez.GetUnitVector();
+   Rvector3 rhodot_sez_unit = rhodot_sez.GetUnitVector();
+   az_el_visible[0] = asin(rho_sez_unit[2])*GmatMathConstants::DEG_PER_RAD;
+   az_el_visible[1] = asin(rhodot_sez_unit[2])*GmatMathConstants::DEG_PER_RAD;
    az_el_visible[2] = az_el_visible[0] - minElevationAngle;
 
    #ifdef DEBUG_AZEL_CONSTRAINT
