@@ -25,6 +25,7 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
+#define USE_PRECISION_TIME
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -226,7 +227,11 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // Set measurement epoch to the epoch of the last receiver in the
             // first signal path
             if ((i == 0) && (current->next == NULL))
+#ifdef USE_PRECISION_TIME
+			   cMeasurement.epoch = current->rPrecTime.GetMjd();
+#else
                cMeasurement.epoch = current->rTime;
+#endif
 
             current = current->next;
          }

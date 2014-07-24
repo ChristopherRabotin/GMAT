@@ -273,10 +273,10 @@ std::string TrackingDataAdapter::GetStringParameter(const Integer id) const
 bool TrackingDataAdapter::SetStringParameter(const Integer id,
       const std::string& value)
 {
-   // Make sure the measurement model has been set
-   if (!calcData)
-      throw MeasurementException("Unable to set parameter data on the "
-            "measurement because the associated model has not yet been set.");
+   //// Make sure the measurement model has been set
+   //if (!calcData)
+   //   throw MeasurementException("Unable to set parameter data on the "
+   //         "measurement because the associated model has not yet been set.");
 
    if (id == SIGNAL_PATH)
    {
@@ -284,6 +284,11 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
       if (partList->size() > 0)
       {
          participantLists.push_back(partList);
+
+        // Make sure the measurement model has been set
+        if (!calcData)
+           throw MeasurementException("Unable to set parameter data on the "
+            "measurement because the associated model has not yet been set.");
 
          // Pass the ordered participant lists to the measurement model
          Integer whichOne = participantLists.size() - 1;
