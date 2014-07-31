@@ -46,9 +46,6 @@
 // Do we want to write anomaly type?
 //#define __WRITE_ANOMALY_TYPE__
 
-// Uncomment the macro to use old element map(single map) 
-//#define __USE_OLD_ELEMENT_MAP__
-
 
 //#define DEBUG_SPACECRAFT
 //#define DEBUG_SPACECRAFT_SET
@@ -78,6 +75,9 @@
 //#define DEBUG_SC_ATTITUDE_DATA
 //#define DEBUG_MULTIMAP
 //#define DEBUG_SPAD_DATA
+//#define DEBUG_FILEPATH
+//#define DEBUG_DELETE_OWNED_OBJ
+//#define DEBUG_POWER_SYSTEM
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -123,12 +123,14 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // SRPArea
       Gmat::OBJECTARRAY_TYPE, // Tanks
       Gmat::OBJECTARRAY_TYPE, // Thrusters
+      Gmat::OBJECT_TYPE,      // PowerSystem
       Gmat::REAL_TYPE,        // TotalMass
       Gmat::STRING_TYPE,      // Id
       Gmat::OBJECT_TYPE,      // Attitude
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
-      Gmat::STRING_TYPE,      // SPADSRPFile
+      Gmat::FILENAME_TYPE,    // SPADSRPFile
+      Gmat::FILENAME_TYPE,    // SPADSRPFileFullPath
       Gmat::REAL_TYPE,        // SPADSRPScaleFactor
       Gmat::REAL_TYPE,        // CartesianX
       Gmat::REAL_TYPE,        // CartesianY
@@ -138,7 +140,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
-      Gmat::STRING_TYPE,      // Model File
+      Gmat::FILENAME_TYPE,    // Model File
+      Gmat::FILENAME_TYPE,    // ModelFileFullPath
       Gmat::REAL_TYPE,        // Model Offset X
       Gmat::REAL_TYPE,        // Model Offset Y
       Gmat::REAL_TYPE,        // Model Offset Z
@@ -176,12 +179,14 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "SRPArea",
       "Tanks",
       "Thrusters",
+      "PowerSystem",
       "TotalMass",
       "Id",
       "Attitude",
       "OrbitSTM",
       "OrbitAMatrix",
       "SPADSRPFile",
+      "SPADSRPFileFullPath",
       "SPADSRPScaleFactor",
       "CartesianX",
       "CartesianY",
@@ -192,6 +197,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "MassFlow",
       "AddHardware",
       "ModelFile",
+      "ModelFileFullPath",
       "ModelOffsetX",
       "ModelOffsetY",
       "ModelOffsetZ",
@@ -312,6 +318,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    SpaceObject          (Gmat::SPACECRAFT, typeStr, name),
    modelFile            (""),
    modelID              (NO_MODEL),
+   modelFileFullPath    (""),
    dryMass              (850.0),
    coeffDrag            (2.2),
    dragArea             (15.0),
@@ -341,6 +348,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    spacecraftId         ("SatId"),
    attitudeModel        ("CoordinateSystemFixed"),
    attitude             (NULL),
+   powerSystemName      (""),
+   powerSystem          (NULL),
    totalMass            (850.0),
    initialDisplay       (false),
    csSet                (false),
@@ -348,6 +357,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    orbitSTM             (6,6),
    orbitAMatrix         (6,6),
    spadSRPFile          (""),
+   spadSrpFileFullPath  (""),
    spadSRPScaleFactor   (1.0),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
@@ -417,27 +427,10 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    representations.push_back("BrouwerMeanShort");     // Mod by YK
    representations.push_back("BrouwerMeanLong");      // Mod by YK
    
-   // Do not fill the map in order to use new multimap for labels with types (LOJ: 2014.01.30)
-   //=======================================================
-   #ifndef __USE_OLD_ELEMENT_MAP__
-   //=======================================================
-   
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
-      ("==> Spacecraft constructor using state element labels mulimap\n");
+      ("Spacecraft constructor using state element labels mulimap\n");
    #endif
-   
-   //=======================================================
-   #else
-   //=======================================================
-   
-   // initialize possible input state types to be any type
-   for (unsigned int ii = 0; ii < representations.size(); ii++)
-      possibleInputTypes.push_back(representations.at(ii));
-   
-   //=======================================================
-   #endif
-   //=======================================================
    
    parameterCount = SpacecraftParamCount;
 
@@ -459,7 +452,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
        "attitude = new CSFixed("")", this);
    #endif
    
-   BuildElementLabelMap();
+   // Build element labels and units
    BuildStateElementLabelsAndUnits();
    
    // Initialize the STM to the identity matrix
@@ -476,7 +469,21 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    covariance(3,3) = covariance(4,4) = covariance(5,5) = 1.0e6;
    
    // Load default model file
-   modelFile = FileManager::Instance()->GetFullPathname("SPACECRAFT_MODEL_FILE");
+   // Find file name and full path (LOJ: 2014.06.17)
+   //modelFile = FileManager::Instance()->GetFullPathname("SPACECRAFT_MODEL_FILE");
+   
+   // modelFile = FileManager::Instance()->GetFilename("SPACECRAFT_MODEL_FILE");
+   // modelFileFullPath = FileManager::Instance()->FindPath(modelFile, "SPACECRAFT_MODEL_FILE", true, false);
+   
+   // Use GmatBase::GetFullPathFileName() (LOJ: 2014.06.24)
+   modelFileFullPath = GmatBase::GetFullPathFileName(modelFile, GetName(), modelFile, "SPACECRAFT_MODEL_FILE", true);
+   
+   #ifdef DEBUG_FILEPATH
+   MessageInterface::ShowMessage
+      ("modelFile = '%s', modelFileFullPath = '%s'\n", modelFile.c_str(),
+       modelFileFullPath.c_str());
+   #endif
+   
    modelScale = 3.0;
    modelID = NO_MODEL;
    
@@ -505,7 +512,7 @@ Spacecraft::~Spacecraft()
    // Delete the attached hardware (it was set as clones in the ObjectInitializer)
    // It is not anymore setting the clone (LOJ: 2009.07.24)
    //@see ObjectInitializer::BuildAssociations()
-   DeleteOwnedObjects(true, true, true, true);
+   DeleteOwnedObjects(true, true, true, true, true);
 
    if (spadSRPReader)  delete spadSRPReader;
    if (spadBFCS)       delete spadBFCS;
@@ -533,6 +540,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    SpaceObject          (a),
    modelFile            (a.modelFile),
    modelID              (a.modelID),
+   modelFileFullPath    (a.modelFileFullPath),
    scEpochStr           (a.scEpochStr),
    dryMass              (a.dryMass),
    coeffDrag            (a.coeffDrag),
@@ -566,6 +574,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spacecraftId         (a.spacecraftId),
    attitudeModel        (a.attitudeModel),
    coordConverter       (a.coordConverter),
+   powerSystemName      (a.powerSystemName),
+   powerSystem          (NULL),
    totalMass            (a.totalMass),
    initialDisplay       (false),
    csSet                (a.csSet),
@@ -573,6 +583,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    orbitSTM             (a.orbitSTM),
    orbitAMatrix         (a.orbitAMatrix),
    spadSRPFile          (a.spadSRPFile),
+   spadSrpFileFullPath  (a.spadSrpFileFullPath),
    spadSRPScaleFactor   (a.spadSRPScaleFactor),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
@@ -607,11 +618,11 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //   hardwareList      = a.hardwareList;
 
    // set cloned hardware
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
-
-   BuildElementLabelMap();
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
+   
+   // Build element labels and units
    BuildStateElementLabelsAndUnits();
-
+   
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(copy) <%p>'%s' exiting\n", this, GetName().c_str());
@@ -649,6 +660,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    modelFile            = a.modelFile;
    modelID              = a.modelID;
+   modelFileFullPath    = a.modelFileFullPath;
    scEpochStr           = a.scEpochStr;
    dryMass              = a.dryMass;
    coeffDrag            = a.coeffDrag;
@@ -675,6 +687,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    internalCoordSystem  = a.internalCoordSystem; // need to copy
    coordinateSystem     = a.coordinateSystem;    // need to copy
    coordConverter       = a.coordConverter;
+   powerSystemName      = a.powerSystemName;
    totalMass            = a.totalMass;
    initialDisplay       = false;
    csSet                = a.csSet;
@@ -716,27 +729,27 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to delete all owned objects\n");
       #endif
-   DeleteOwnedObjects(true, true, true, true);
+   DeleteOwnedObjects(true, true, true, true, true);
 
    // then cloned owned objects
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
-      #endif
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
-
-   BuildElementLabelMap();
+   #endif
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
+   
+   // Build element labels and units
    BuildStateElementLabelsAndUnits();
-
+   
    orbitSTM = a.orbitSTM;
    orbitAMatrix = a.orbitAMatrix;
 
    spadSRPFile        = a.spadSRPFile;
+   spadSrpFileFullPath = a.spadSrpFileFullPath;
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
 
-//   orbitSpiceKernelNames = a.orbitSpiceKernelNames;
    includeCartesianState = a.includeCartesianState;
 
 
@@ -760,6 +773,7 @@ void Spacecraft::SetSolarSystem(SolarSystem *ss)
        GetName().c_str(), ss);
    #endif
    solarSystem = ss;
+   if (powerSystem) powerSystem->SetSolarSystem(ss);
 }
 
 
@@ -791,6 +805,39 @@ CoordinateSystem* Spacecraft::GetInternalCoordSystem()
    return internalCoordSystem;
 }
 
+
+//---------------------------------------------------------------------------
+// std::string GetModelFile()
+//---------------------------------------------------------------------------
+std::string Spacecraft::GetModelFile()
+{
+   return modelFile;
+}
+
+//---------------------------------------------------------------------------
+// std::string GetModelFileFullPath()
+//---------------------------------------------------------------------------
+std::string Spacecraft::GetModelFileFullPath()
+{
+   return modelFileFullPath;
+}
+
+//---------------------------------------------------------------------------
+// int GetModelId()
+//---------------------------------------------------------------------------
+int Spacecraft::GetModelId()
+{
+   return modelID;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetModelId(int id)
+//---------------------------------------------------------------------------
+void Spacecraft::SetModelId(int id)
+{
+   modelID = id;
+}
 
 //---------------------------------------------------------------------------
 //  void SetState(const Rvector6 &cartState)
@@ -879,8 +926,6 @@ void Spacecraft::SetState(const Real s1, const Real s2, const Real s3,
     state[4] = s5;
     state[5] = s6;
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -1088,7 +1133,9 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
 {
    if (spadSRPReader == NULL)
    {
-      if (spadSRPFile == "")
+      // Changed to use full path spad file (LOJ: 2014.06.24)
+      //if (spadSRPFile == "")
+      if (spadSrpFileFullPath == "")
       {
          std::string errmsg = "SPAD data requested for Spacecraft ";
          errmsg            += instanceName + " but no SPAD file ";
@@ -1098,7 +1145,8 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
       else
       {
          spadSRPReader = new SPADFileReader();
-         spadSRPReader->SetFile(spadSRPFile);
+         //spadSRPReader->SetFile(spadSRPFile);
+         spadSRPReader->SetFile(spadSrpFileFullPath);
          spadSRPReader->Initialize();
       }
    }
@@ -1236,6 +1284,8 @@ bool Spacecraft::RenameRefObject(const Gmat::ObjectType type,
             break;
          }
       }
+      if (powerSystemName == oldName)
+         powerSystemName = newName;
    }
    
    if (attitude)
@@ -1496,6 +1546,13 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
       // Add Spacecraft CS name
       fullList.push_back(coordSysName);
 
+      #ifdef DEBUG_POWER_SYSTEM
+            MessageInterface::ShowMessage("Pushing back powerSystemName (\"%s\") to fullList ......\n",
+                  powerSystemName.c_str());
+      #endif
+      // Add Spacecraft Power System name
+      fullList.push_back(powerSystemName);  // need to check power system for ref object names
+
       // Add Tank names
       fullList.insert(fullList.end(), tankNames.begin(), tankNames.end());
 
@@ -1591,6 +1648,17 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
          return tankNames;
       if (type == Gmat::THRUSTER)
          return thrusterNames;
+
+      if (type == Gmat::POWER_SYSTEM)
+      {
+         #ifdef DEBUG_POWER_SYSTEM
+               MessageInterface::ShowMessage("Pushing back powerSystemName (\"%s\") to POWER SYSTEM list ......\n",
+                     powerSystemName.c_str());
+         #endif
+         // Add Spacecraft Power System name
+         fullList.push_back(powerSystemName);  // need to check power system for ref object names
+         return fullList;
+      }
 
       if (type == Gmat::HARDWARE)
       {
@@ -1718,6 +1786,10 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
                 return *i;
           }
 
+      case Gmat::POWER_SYSTEM:
+         if (powerSystem && (powerSystemName == name))
+            return powerSystem;
+
       case Gmat::FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin();
               i < tanks.end(); ++i)
@@ -1765,6 +1837,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       ("Entering SC::SetRefObject <%p>'%s', obj=<%p><%s>'%s'\n", this, GetName().c_str(),
        obj, obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage("=-=-=-=-=-= at start of SetRefObject, powerSystem = <%p>\n", powerSystem);
    #endif
 
    if (obj == NULL)
@@ -1788,7 +1861,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
 
    // now work on hardware
-   if (type == Gmat::HARDWARE || type == Gmat::FUEL_TANK || type == Gmat::THRUSTER)
+   if (type == Gmat::HARDWARE || type == Gmat::FUEL_TANK || type == Gmat::THRUSTER ||
+       type == Gmat::POWER_SYSTEM)
    {
       #ifdef DEBUG_SC_REF_OBJECT
       MessageInterface::ShowMessage
@@ -1837,6 +1911,12 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          return retval;
       }
+
+      #ifdef DEBUG_POWER_SYSTEM
+         MessageInterface::ShowMessage("=-=-=-=-=-= NOW, checking for powerSystem = <%p>\n", powerSystem);
+      #endif
+      if (obj->IsOfType("PowerSystem"))
+         return SetPowerSystem(obj, powerSystemName);
 
       // set on hardware
       if (obj->GetType() == Gmat::HARDWARE)
@@ -2056,6 +2136,9 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    MessageInterface::ShowMessage
       ("Exiting SC::SetRefObject, Calling SpaceObject::SetRefObject()\n");
    #endif
+   #ifdef DEBUG_POWER_SYSTEM
+      MessageInterface::ShowMessage("=-=-=-=-=-= EXITING SetRefObject, powerSystem = <%p>\n", powerSystem);
+   #endif
 
    return SpaceObject::SetRefObject(obj, type, name);
 }
@@ -2080,6 +2163,12 @@ ObjectArray& Spacecraft::GetRefObjectArray(const Gmat::ObjectType type)
       return tanks;
    if (type == Gmat::THRUSTER)
       return thrusters;
+   if (type == Gmat::POWER_SYSTEM)
+   {
+      static ObjectArray powerSysList;
+      powerSysList.push_back(powerSystem);
+      return powerSysList;
+   }
    return SpaceObject::GetRefObjectArray(type);
 }
 
@@ -2103,6 +2192,12 @@ ObjectArray& Spacecraft::GetRefObjectArray(const std::string& typeString)
       return tanks;
    if ((typeString == "Thruster") || (typeString == "Thrusters"))
       return thrusters;
+   if ((typeString == "PowerSystem") || (typeString == "PowerSystems"))
+   {
+      static ObjectArray powerSysList;
+      powerSysList.push_back(powerSystem);
+      return powerSysList;
+   }
    return SpaceObject::GetRefObjectArray(typeString);
 }
 
@@ -2136,6 +2231,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
       // first check the multiple reps
       Integer sz = EndMultipleReps - CART_X;
       for (Integer ii = 0; ii < sz; ii++)
+      {
          if (str == MULT_REP_STRINGS[ii])
          {
             #ifdef DEBUG_GET_REAL
@@ -2145,61 +2241,10 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
             #endif
             return ii + CART_X;
          }
-
-      
-      #if 0
-      //========================================================================
-      // Is this code block necessary? (LOJ)
-      // Element ID is already handled in above block using MULT_REP_STRINGS
-      // Added SemilatusRectum (LOJ:2014.04.25)
-      Integer retval = -1;
-      if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
-          str == "IncomingRadPer" || str == "OutgoingRadPer" || str == "RMAG" ||
-          str == "SemilatusRectum" || str == "Delaunayl" ||
-          str == "PlanetodeticRMAG" || str == "BrouwerShortSMA" || str == "BrouwerLongSMA")
-         retval =  ELEMENT1_ID;
-      
-      else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
-               str == "RA" || str == "PEY" || str == "EquinoctialH" || str == "ModEquinoctialF" ||
-               str == "Delaunayg" || str == "PlanetodeticLON" || str == "IncomingC3Energy" ||
-               str == "OutgoingC3Energy" || str == "BrouwerShortECC" || str == "BrouwerLongECC")
-         retval =  ELEMENT2_ID;
-
-      else if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
-               str == "PEX" || str == "EquinoctialK" || str == "ModEquinoctialG" ||
-               str == "Delaunayh" || str == "PlanetodeticLAT" || str == "IncomingRHA" ||
-               str == "OutgoingRHA" || str == "BrouwerShortINC" || str == "BrouwerLongINC")
-         retval =  ELEMENT3_ID;
-
-      else if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
-               str == "PNY" || str == "EquinoctialP" || str == "ModEquinoctialH" ||
-               str == "DelaunayL" || str == "PlanetodeticVMAG" || str == "IncomingDHA" ||
-               str == "OutgoingDHA" || str == "BrouwerShortRAAN" || str == "BrouwerLongRAAN")
-         retval =  ELEMENT4_ID;
-
-      else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
-               str == "RAV" || str == "PNX" || str == "EquinoctialQ" ||
-               str == "ModEquinoctialH" || str == "DelaunayG" || str == "PlanetodeticVMAG" ||
-               str == "IncomingBVAZI" || str == "OutgoingBVAZI" || str == "BrouwerShortAOP" || str == "BrouwerLongAOP")
-         retval =  ELEMENT5_ID;
-
-      else if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
-               str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG" ||
-               str == "DelaunayH" || str == "PlanetodeticHFPA" || str == "BrouwerShortMA" || str == "BrouwerLongMA")
-         retval =  ELEMENT6_ID;
-      
-      #ifdef DEBUG_GET_REAL
-      MessageInterface::ShowMessage(
-      "In SC::GetParameterID, after checking for elements, id = %d\n",
-      retval);
-      #endif
-      
-      if (retval != -1) return retval;
-      
-      #endif
-      //========================================================================
+      }
       
       
+      // Check for element label
       for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
       {
          if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
@@ -2331,9 +2376,12 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
 
    // NAIF ID for the spacecraft reference frame is not read-only for spacecraft
    if (id == NAIF_ID_REFERENCE_FRAME)  return false;
-
+   
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
-
+   
+   if (id == MODEL_FILE_FULL_PATH || SPAD_SRP_FILE_FULL_PATH)
+      return true;
+   
    return SpaceObject::IsParameterReadOnly(id);
 }
 
@@ -3156,9 +3204,18 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 
     if (id == SPAD_SRP_FILE)
        return spadSRPFile;
-
+    
+    if (id == SPAD_SRP_FILE_FULL_PATH)
+       return spadSrpFileFullPath;
+    
     if (id == MODEL_FILE)
        return modelFile;
+    
+    if (id == MODEL_FILE_FULL_PATH)
+       return modelFileFullPath;
+
+    if (id == POWER_SYSTEM_ID)
+       return powerSystemName;
 
     return SpaceObject::GetStringParameter(id);
 }
@@ -3518,6 +3575,14 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          thrusterNames.push_back(value);
       }
    }
+   else if (id == POWER_SYSTEM_ID)
+   {
+      #ifdef DEBUG_POWER_SYSTEM
+            MessageInterface::ShowMessage("powerSystemName being set to %s......\n",
+                  value.c_str());
+      #endif
+      powerSystemName = value;
+   }
    else if (id == SPAD_SRP_FILE)
    {
       if (value != spadSRPFile)
@@ -3526,12 +3591,31 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          spadSRPReader = NULL;
       }
       spadSRPFile = value;
+      
+      // Use FileManager::FindPath() for full path file name (2014.06.24)
+      spadSrpFileFullPath = FileManager::Instance()->FindPath(value, "SPAD_SRP_FILE", true, false, true);
+      // Write warning or throw an exception?
+      if (spadSrpFileFullPath == "")
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The SPAD SRP file '%s' does not exist for the spacecraft '%s'\n",
+             spadSRPFile.c_str(), GetName().c_str());
+      }
    }
    else if (id == MODEL_FILE)
    {
-        modelFile = value;
+      modelFile = value;
+      
+      // Use FileManager::FindPath() for full path file name (2014.06.24)
+      modelFileFullPath = FileManager::Instance()->FindPath(value, "SPACECRAFT_MODEL_FILE", true, false, true);
+      if (modelFileFullPath == "")
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The model file '%s' does not exist for the spacecraft '%s'\n",
+             modelFile.c_str(), GetName().c_str());
+      }
    }
-
+   
    #ifdef DEBUG_SC_SET_STRING
    MessageInterface::ShowMessage
       ("Spacecraft::SetStringParameter() returning true\n");
@@ -3884,21 +3968,31 @@ bool Spacecraft::TakeAction(const std::string &action,
    }
 
    if ((action == "RemoveHardware") || (action == "RemoveTank") ||
-       (action == "RemoveThruster"))
+       (action == "RemoveThruster") || (action == "RemovePowerSystem"))
    {
-      bool removeTank = true, removeThruster = true, removeAll = false;
+      bool removeTank     = true, removeThruster = true;
+      bool removePowerSys = true, removeAll      = false;
       if (action == "RemoveTank")
          removeThruster = false;
       if (action == "RemoveThruster")
          removeTank = false;
+      if (action == "RemovePowerSystem")
+         removePowerSys = true;
       if (actionData == "")
          removeAll = true;
+
+      if (removePowerSys)
+      {
+         DeleteOwnedObjects(false, false, false, true, false);
+         powerSystem = NULL;
+//         powerSystemName = "";   // Is this correct?
+      }
 
       if (removeThruster)
       {
          if (removeAll)
          {
-            DeleteOwnedObjects(false, false, true, false);
+            DeleteOwnedObjects(false, false, true, false, false);
             thrusters.clear();
             thrusterNames.clear();
          }
@@ -3928,7 +4022,7 @@ bool Spacecraft::TakeAction(const std::string &action,
       {
          if (removeAll)
          {
-            DeleteOwnedObjects(false, true, true, false);
+            DeleteOwnedObjects(false, true, true, false, false);
             tanks.clear();
             tankNames.clear();
          }
@@ -4185,6 +4279,8 @@ Gmat::ObjectType Spacecraft::GetPropertyObjectType(const Integer id) const
       return Gmat::FUEL_TANK;
    case THRUSTER_ID:
       return Gmat::THRUSTER;
+   case POWER_SYSTEM_ID:
+      return Gmat::POWER_SYSTEM;
    default:
       return SpaceObject::GetPropertyObjectType(id);
    }
@@ -4385,6 +4481,8 @@ bool Spacecraft::Initialize()
          //       thrusters[i]->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          thrusters[i]->Initialize();
       }
+
+      if (powerSystem) powerSystem->Initialize();
 
       isInitialized = true;
       retval = true;
@@ -4882,6 +4980,17 @@ void Spacecraft::UpdateClonedObject(GmatBase *obj)
    {
       Gmat::ObjectType objType = obj->GetType();
 
+      // updates for PowerSystem
+      if (objType == Gmat::POWER_SYSTEM)
+      {
+         if (powerSystem && (obj->GetName() == powerSystemName))
+         {
+            powerSystem->operator=((*(PowerSystem*) obj));
+            if (isInitialized)
+               isInitialized = powerSystem->IsInitialized();
+         }
+      }
+
       // updates for fueltank
       if (objType == Gmat::FUEL_TANK)
       {
@@ -4984,6 +5093,11 @@ void Spacecraft::UpdateClonedObjectParameter(GmatBase *obj,
          for (UnsignedInt i = 0; i < thrusters.size(); ++i)
             if (obj->GetName() == thrusters[i]->GetName())
                theClone = thrusters[i];
+
+      // updates for Power System
+      if (objType == Gmat::POWER_SYSTEM)
+         if (powerSystem && (obj->GetName() == powerSystemName))
+            theClone = powerSystem;
 
       // updates for other hardware
       if (objType == Gmat::HARDWARE)
@@ -5160,21 +5274,24 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
 
 
 //------------------------------------------------------------------------------
-// void DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks, bool deleteThrusters)
+// void DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks, bool deleteThrusters,
+//                         bool deletePowerSystem, bool otherHardware)
 //------------------------------------------------------------------------------
 /*
- * Deletes owned objects, such as attitude, tanks, and thrusters
+ * Deletes owned objects, such as attitude, tanks, and thrusters, and power system(s)
  */
 //------------------------------------------------------------------------------
-void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
-                                    bool deleteThrusters, bool otherHardware)
+void Spacecraft::DeleteOwnedObjects(bool deleteAttitude,  bool deleteTanks,
+                                    bool deleteThrusters, bool deletePowerSystem,
+                                    bool otherHardware)
 {
    #ifdef DEBUG_DELETE_OWNED_OBJ
    MessageInterface::ShowMessage
       ("Spacecraft::DeleteOwnedObjects() <%p>'%s' entered, deleteAttitude=%d, "
-       "deleteTanks=%d, deleteThrusters=%d, otherHardware=%d\n", this,
-       GetName().c_str(), deleteAttitude, deleteTanks, deleteThrusters,
+       "deleteTanks=%d, deleteThrusters=%d, deletePowerSystem =%d, otherHardware=%d\n", this,
+       GetName().c_str(), deleteAttitude, deleteTanks, deleteThrusters, deletePowerSystem,
        otherHardware);
+   MessageInterface::ShowMessage(" **** Entering DeleteOwnedObjects,  powerSystem is <%p>\n", powerSystem);
    #endif
 
    // delete attitude
@@ -5190,6 +5307,25 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
          delete attitude;
          attitude = NULL;
          ownedObjectCount--;
+         #ifdef DEBUG_SC_OWNED_OBJECT
+         MessageInterface::ShowMessage
+            ("Spacecraft::DeleteOwnedObjects() <%p>'%s' deleted attitude, ownedObjectCount=%d\n",
+             this, GetName().c_str(), ownedObjectCount);
+         #endif
+      }
+   }
+   // delete power system
+   if (deletePowerSystem)
+   {
+      if (powerSystem)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            (powerSystem, "powerSystem", "Spacecraft::DeleteOwnedObjects()",
+             "deleting powerSystem of " + GetName(), this);
+         #endif
+         delete powerSystem;
+         powerSystem = NULL;
          #ifdef DEBUG_SC_OWNED_OBJECT
          MessageInterface::ShowMessage
             ("Spacecraft::DeleteOwnedObjects() <%p>'%s' ownedObjectCount=%d\n",
@@ -5249,24 +5385,26 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
       ("Spacecraft::DeleteOwnedObjects() <%p>'%s' leaving, tanks.size()=%d, "
        "thrusters.size()=%d, hardwareLise.size()=%d\n", this, GetName().c_str(),
        tanks.size(), thrusters.size(), hardwareList.size());
+   MessageInterface::ShowMessage(" **** Exiting DeleteOwnedObjects,  powerSystem is <%p>\n", powerSystem);
    #endif
 }
 
 
 //------------------------------------------------------------------------------
-// void CloneOwnedObjects(Attitude *att, const ObjectArray &tnks, const ObjectArray &thrs)
+// void CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
+//                        const ObjectArray &thrs, PowerSystem *pwrSys)
 //------------------------------------------------------------------------------
 /*
  * Clones input tanks and thrusters set as attached hardware.
  */
 //------------------------------------------------------------------------------
 void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                   const ObjectArray &thrs)
+                                   const ObjectArray &thrs, PowerSystem *pwrSys)
 {
    #ifdef DEBUG_OBJ_CLONE
    MessageInterface::ShowMessage
-      ("Spacecraft::CloneOwnedObjects() <%p>'%s' entered, att=<%p>, tank count = %d,"
-       " thruster count = %d\n", this, GetName().c_str(), att, tnks.size(), thrs.size());
+      ("Spacecraft::CloneOwnedObjects() <%p>'%s' entered, att=<%p>, powerSystem <%p>, tank count = %d,"
+       " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
    #endif
 
 
@@ -5304,6 +5442,25 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
          (attitude, "cloned attitude", "Spacecraft::CloneOwnedObjects()",
           "attitude = (Attitude*) att->Clone()", this);
       #endif
+   }
+
+   // handle power system
+   if (pwrSys)
+   {
+      GmatBase *clonedPwrSys = pwrSys->Clone();
+      if (clonedPwrSys)
+      {
+         #ifdef DEBUG_SC_OWNED_OBJECT
+         MessageInterface::ShowMessage
+            ("Spacecraft::CloneOwnedObjects() cloning power system <%p>", pwrSys);
+         #endif
+         if (powerSystem) delete powerSystem;
+         powerSystem = NULL;
+         powerSystem = (PowerSystem*) clonedPwrSys;
+         powerSystem->SetSolarSystem(solarSystem);
+         powerSystem->SetSpacecraft(this);
+         powerSystemName = powerSystem->GetName();
+      }
    }
 
    // handle tanks
@@ -5361,6 +5518,11 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
       #endif
       AttachTanksToThrusters();
    }
+   #ifdef DEBUG_OBJ_CLONE
+   MessageInterface::ShowMessage
+      ("Spacecraft::CloneOwnedObjects() <%p>'%s' EXITING, att=<%p>, powerSystem <%p>, tank count = %d,"
+       " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
+   #endif
 }
 
 
@@ -5573,6 +5735,41 @@ bool Spacecraft::SetHardware(GmatBase *obj, StringArray &hwNames,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool SetPowerSystem(GmatBase *obj, std::string &psName)
+//------------------------------------------------------------------------------
+bool Spacecraft::SetPowerSystem(GmatBase *obj, std::string &psName)
+{
+   #ifdef DEBUG_POWER_SYSTEM
+      MessageInterface::ShowMessage("Entering SetPowerSystem with obj <%p> and name %s\n",
+            obj, psName.c_str());
+   #endif
+   if (powerSystem != (PowerSystem*) obj)
+   {
+      if (powerSystemName == psName)
+      {
+         if (powerSystem) delete powerSystem;
+         powerSystem = (PowerSystem*) obj->Clone();
+         powerSystem->SetSolarSystem(solarSystem);
+         powerSystem->SetSpacecraft(this);
+      }
+      else
+      {
+         #ifdef DEBUG_SC_REF_OBJECT
+         MessageInterface::ShowMessage
+            ("   The name '%s' not found in list\n", psName.c_str());
+         #endif
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_SC_REF_OBJECT
+      MessageInterface::ShowMessage
+         ("   The same %s <%p> found in pointer list\n", psName.c_str());
+      #endif
+   }
+   return true;    // or false?
+}
 
 //------------------------------------------------------------------------------
 // const std::string&  GetGeneratingString(Gmat::WriteMode mode,
@@ -5720,6 +5917,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = SRP_AREA_ID;
    parmOrder[parmIndex++] = FUEL_TANK_ID;
    parmOrder[parmIndex++] = THRUSTER_ID;
+   parmOrder[parmIndex++] = POWER_SYSTEM_ID;
    parmOrder[parmIndex++] = ORBIT_STM;
    parmOrder[parmIndex++] = ORBIT_A_MATRIX;
    parmOrder[parmIndex++] = ELEMENT1UNIT_ID;
@@ -5944,12 +6142,7 @@ void Spacecraft::UpdateElementLabels()
  */
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
-{
-   // Use pre-built maps for labels and units (LOJ: 2014.01.29)
-   //=======================================================
-   #ifndef __USE_OLD_ELEMENT_MAP__
-   //=======================================================
-   
+{   
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage("==> Spacecraft::UpdateElementLabels() using state labels multimap\n");
    #endif
@@ -5973,287 +6166,6 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
          ("*** INTERNAL ERROR *** The state element units map has not been built for \"" +
           displayStateType + "\"\n");
    }
-   
-   
-   //=======================================================
-   #else
-   //=======================================================
-
-   
-   if (displayStateType == "Cartesian")
-   {
-      stateElementLabel[0] = "X";
-      stateElementLabel[1] = "Y";
-      stateElementLabel[2] = "Z";
-      stateElementLabel[3] = "VX";
-      stateElementLabel[4] = "VY";
-      stateElementLabel[5] = "VZ";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km";
-      stateElementUnits[2] = "km";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "km/s";
-      stateElementUnits[5] = "km/s";
-
-      return;
-   }
-
-   if (displayStateType == "Keplerian")
-   {
-      stateElementLabel[0] = "SMA";
-      stateElementLabel[1] = "ECC";
-      stateElementLabel[2] = "INC";
-      stateElementLabel[3] = "RAAN";
-      stateElementLabel[4] = "AOP";
-      stateElementLabel[5] = anomalyType;
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "ModifiedKeplerian")
-   {
-      stateElementLabel[0] = "RadPer";
-      stateElementLabel[1] = "RadApo";
-      stateElementLabel[2] = "INC";
-      stateElementLabel[3] = "RAAN";
-      stateElementLabel[4] = "AOP";
-      stateElementLabel[5] = anomalyType;
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "SphericalAZFPA")
-   {
-      stateElementLabel[0] = "RMAG";
-      stateElementLabel[1] = "RA";
-      stateElementLabel[2] = "DEC";
-      stateElementLabel[3] = "VMAG";
-      stateElementLabel[4] = "AZI";
-      stateElementLabel[5] = "FPA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "SphericalRADEC")
-   {
-      stateElementLabel[0] = "RMAG";
-      stateElementLabel[1] = "RA";
-      stateElementLabel[2] = "DEC";
-      stateElementLabel[3] = "VMAG";
-      stateElementLabel[4] = "RAV";
-      stateElementLabel[5] = "DECV";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km/s";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   if (displayStateType == "Equinoctial")
-   {
-      stateElementLabel[0] = "SMA";
-      stateElementLabel[1] = "EquinoctialH";
-      stateElementLabel[2] = "EquinoctialK";
-      stateElementLabel[3] = "EquinoctialP";
-      stateElementLabel[4] = "EquinoctialQ";
-      stateElementLabel[5] = "MLONG";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "";
-      stateElementUnits[3] = "";
-      stateElementUnits[4] = "";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-
-   // Modified by M.H.
-   if (displayStateType == "ModifiedEquinoctial")
-   {
-      stateElementLabel[0] = "SemilatusRectum";
-      stateElementLabel[1] = "ModEquinoctialF";
-      stateElementLabel[2] = "ModEquinoctialG";
-      stateElementLabel[3] = "ModEquinoctialH";
-      stateElementLabel[4] = "ModEquinoctialK";
-      stateElementLabel[5] = "TLONG";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "";
-      stateElementUnits[3] = "";
-      stateElementUnits[4] = "";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   // Alternate Equinoctial by HYKim 
-   if (displayStateType == "AlternateEquinoctial")
-   {
-      stateElementLabel[0] = "SMA";
-      stateElementLabel[1] = "EquinoctialH";
-      stateElementLabel[2] = "EquinoctialK";
-      stateElementLabel[3] = "AltEquinoctialP";
-      stateElementLabel[4] = "AltEquinoctialQ";
-      stateElementLabel[5] = "MLONG";
-      
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "";
-      stateElementUnits[3] = "";
-      stateElementUnits[4] = "";
-      stateElementUnits[5] = "deg";
-      
-      return;
-   }
-   
-   // Modified by M.H.
-   if (displayStateType == "Delaunay")
-   {
-      stateElementLabel[0] = "Delaunayl";
-      stateElementLabel[1] = "Delaunayg";
-      stateElementLabel[2] = "Delaunayh";
-      stateElementLabel[3] = "DelaunayL";
-      stateElementLabel[4] = "DelaunayG";
-      stateElementLabel[5] = "DelaunayH";
-
-      stateElementUnits[0] = "deg";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km^2/sec";
-      stateElementUnits[4] = "km^2/sec";
-      stateElementUnits[5] = "km^2/sec";
-
-      return;
-   }
-   
-   // Modified by M.H.
-   if (displayStateType == "Planetodetic")
-   {
-      stateElementLabel[0] = "PlanetodeticRMAG";
-      stateElementLabel[1] = "PlanetodeticLON";
-      stateElementLabel[2] = "PlanetodeticLAT";
-      stateElementLabel[3] = "PlanetodeticVMAG";
-      stateElementLabel[4] = "PlanetodeticAZI";
-      stateElementLabel[5] = "PlanetodeticHFPA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "deg";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "km/sec";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   // mod by YK
-   if (displayStateType == "IncomingAsymptote")
-   {
-      stateElementLabel[0] = "IncomingRadPer";
-      stateElementLabel[1] = "IncomingC3Energy";
-      stateElementLabel[2] = "IncomingRHA";
-      stateElementLabel[3] = "IncomingDHA";
-      stateElementLabel[4] = "IncomingBVAZI";
-      stateElementLabel[5] = "TA";
-      
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km^2/sec^2";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   if (displayStateType == "OutgoingAsymptote")
-   {
-      stateElementLabel[0] = "OutgoingRadPer";
-      stateElementLabel[1] = "OutgoingC3Energy";
-      stateElementLabel[2] = "OutgoingRHA";
-      stateElementLabel[3] = "OutgoingDHA";
-      stateElementLabel[4] = "OutgoingBVAZI";
-      stateElementLabel[5] = "TA";
-      
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "km^2/sec^2";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   if (displayStateType == "BrouwerMeanShort")
-   {
-      stateElementLabel[0] = "BrouwerShortSMA";
-      stateElementLabel[1] = "BrouwerShortECC";
-      stateElementLabel[2] = "BrouwerShortINC";
-      stateElementLabel[3] = "BrouwerShortRAAN";
-      stateElementLabel[4] = "BrouwerShortAOP";
-      stateElementLabel[5] = "BrouwerShortMA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   if (displayStateType == "BrouwerMeanLong")
-   {
-      stateElementLabel[0] = "BrouwerLongSMA";
-      stateElementLabel[1] = "BrouwerLongECC";
-      stateElementLabel[2] = "BrouwerLongINC";
-      stateElementLabel[3] = "BrouwerLongRAAN";
-      stateElementLabel[4] = "BrouwerLongAOP";
-      stateElementLabel[5] = "BrouwerLongMA";
-
-      stateElementUnits[0] = "km";
-      stateElementUnits[1] = "";
-      stateElementUnits[2] = "deg";
-      stateElementUnits[3] = "deg";
-      stateElementUnits[4] = "deg";
-      stateElementUnits[5] = "deg";
-
-      return;
-   }
-   
-   //=======================================================
-   #endif
-   //=======================================================
 }
 
 
@@ -6408,24 +6320,15 @@ void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st
       csState = StateConversionUtil::Convert(st, rep, "Cartesian",
                 originMu, originFlattening, originEqRadius, anomalyType);
    }
-
+   
    #ifdef DEBUG_STATE_INTERFACE
-      MessageInterface::ShowMessage(
-         "Spacecraft::SetStateFromRepresentation: state has been converted\n");
-   #endif
-
-   // Moved up so that more validation can be done before doing the state conversion (LOJ: 2014.04.17)
-   // if (internalCoordSystem == NULL)
-   //    throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
-   // if (coordinateSystem == NULL)
-   //    throw SpaceObjectException(" The spacecraft coordinate system is not set");
-
-   #ifdef DEBUG_STATE_INTERFACE
+   MessageInterface::ShowMessage
+      ("Spacecraft::SetStateFromRepresentation: state has been converted\n");
    MessageInterface::ShowMessage
       ("   Now convert to internal CS, internalCoordSystem=<%p>, coordinateSystem=<%p>\n",
        internalCoordSystem, coordinateSystem);
    #endif
-
+   
    // Then convert to the internal CS
    if (internalCoordSystem != coordinateSystem)
    {
@@ -6595,36 +6498,6 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
             #endif
             // leave it as OutgoingAsymptote
          }
-         // RadPer is no longer shared with IncomingAsymptote or OutgoingAsymtote
-         // so commented out (LOJ: 2014.04.28)
-         // else if ( (stateType == "IncomingAsymptote") && (rep == "ModifiedKeplerian") &&
-         //           (label == "RadPer") )
-         // {
-         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         //       MessageInterface::ShowMessage
-         //          (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
-         //    #endif
-         //    // leave it as IncomingAsymptote
-         // }
-         // else if ( (stateType == "OutgoingAsymptote") && (rep == "ModifiedKeplerian") &&
-         //           (label == "RadPer") )
-         // {
-         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         //       MessageInterface::ShowMessage
-         //          (" ************ In SC::SetElement, leaving stateType as OutgoingAsymptote\n");
-         //    #endif
-         //    // leave it as OutgoingAsymptote
-         // }
-         // C3Energy is no longer shared with IncomingAsymptote or OutgoingAsymtote
-         // else if ( (stateType == "IncomingAsymptote") && (rep == "OutgoingAsymptote") &&
-         //           (label == "C3Energy") )
-         // {
-         //    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
-         //       MessageInterface::ShowMessage
-         //          (" ************ In SC::SetElement, leaving stateType as IncomingAsymptote\n");
-         //    #endif
-         //    // leave it as IncomingAsymptote
-         // }
          else
          {
             #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
@@ -6805,46 +6678,44 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       return ELEMENT6_ID;
    }
    
-   //@todo Can we use multimap to find out the element id? (LOJ: 2014.04.28)
-   // Modified by M.H. and YK
-   if (label == "X" || label == "SMA" || label == "RadPer" || label == "IncomingRadPer" ||
-       label == "OutgoingRadPer" || label == "RMAG" || label == "SemilatusRectum" ||
-       label == "Delaunayl" || label == "PlanetodeticRMAG" || label == "BrouwerShortSMA"  ||
-       label == "BrouwerLongSMA")
-      retval = ELEMENT1_ID;
    
-   else if (label == "Y" || label == "ECC" || label == "RadApo" || label == "RA" ||
-            label == "PEY" || label == "EquinoctialH" || label == "ModEquinoctialF" ||
-            label == "Delaunayg" || label == "PlanetodeticLON" || label == "IncomingC3Energy" ||
-            label == "OutgoingC3Energy" || label == "BrouwerShortECC" || label == "BrouwerLongECC" )
-      retval = ELEMENT2_ID;
-
-   else if (label == "Z" || label == "INC" || label == "DEC" || label == "PEX" ||
-            label == "EquinoctialK" || label == "ModEquinoctialG" || label == "Delaunayh" ||
-            label == "PlanetodeticLAT" || label == "OutgoingRHA" || label == "IncomingRHA" ||
-            label == "BrouwerShortINC" || label == "BrouwerLongINC")
-      retval = ELEMENT3_ID;
-
-   else if (label == "VX" || label == "RAAN" || label == "VMAG" || label == "PNY" ||
-            label == "EquinoctialP" || label == "ModEquinoctialH" || label == "AltEquinoctialP" ||
-            label == "DelaunayL" || label == "PlanetodeticVMAG" ||  label == "IncomingDHA" ||
-            label == "OutgoingDHA" || label == "BrouwerShortRAAN" || label == "BrouwerLongRAAN")
-      retval = ELEMENT4_ID;
-
-   else if (label == "VY" || label == "AOP" || label == "AZI" || label == "RAV" ||
-            label == "PNX" || label == "EquinoctialQ" || label == "ModEquinoctialK" ||
-            label == "AltEquinoctialQ" || label == "DelaunayG" || label == "PlanetodeticAZI" ||
-            label == "IncomingBVAZI" || label == "OutgoingBVAZI" || label == "BrouwerShortAOP" ||
-            label == "BrouwerLongAOP")
-      retval = ELEMENT5_ID;
-
-   else if (label == "VZ" || StateConversionUtil::IsValidAnomalyType(label) ||
-            label == "FPA" || label == "DECV" || label == "MLONG" || label == "TLONG" ||
-            label == "DelaunayH" || label == "PlanetodeticHFPA" || label == "BrouwerShortMA" ||
-            label == "BrouwerLongMA")
-      retval = ELEMENT6_ID;
-
-   rep = elementLabelMap[label];
+   // Use multimap to find out the element id
+   #ifdef DEBUG_LOOK_UP_LABEL
+   MessageInterface::ShowMessage("   LookUpLabel() using stateElementLabelsMap\n");
+   #endif
+   
+   std::map<std::string, StringArray>::iterator iter;
+   bool done = false;
+   for (iter = stateElementLabelsMap.begin(); iter != stateElementLabelsMap.end(); ++iter)
+   {
+      StringArray labels = (*iter).second;
+      for (UnsignedInt i = 0; i < labels.size(); i++)
+      {
+         #ifdef DEBUG_LOOK_UP_LABEL_MORE
+         MessageInterface::ShowMessage("   => labels[%d] = %s\n", i, labels[i].c_str());
+         #endif
+         if (labels[i] == label)
+         {
+            std::string stateType = (*iter).first;
+            // Handle shared labels with default type
+            // If label not found in the defaultStateTypeMap or
+            // label found in the defaultStateTypeMap and the type is default type
+            // then set label id and rep
+            if ((defaultStateTypeMap.find(label) == defaultStateTypeMap.end()) ||
+                ((defaultStateTypeMap.find(label) != defaultStateTypeMap.end()) &&
+                 (stateType == defaultStateTypeMap[label])))
+            {
+               // Add ELEMENT1_ID to return relative ID from ELEMENT1_ID in the SC_Param_ID
+               retval = i + ELEMENT1_ID;
+               rep = (*iter).first;
+               done = true;
+               break;
+            }
+         }
+      }
+      if (done)
+         break;
+   }
    
    #ifdef DEBUG_LOOK_UP_LABEL
       MessageInterface::ShowMessage("Spacecraft::LookUpLabel(%s..) gives rep %s with retval = %d\n",
@@ -6854,107 +6725,6 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
    return retval;
 }
 
-//------------------------------------------------------------------------------
-// void BuildElementLabelMap()
-//------------------------------------------------------------------------------
-/**
- * Set the mapping between elements and representations.
- */
-//------------------------------------------------------------------------------
-void Spacecraft::BuildElementLabelMap()
-{
-   if (elementLabelMap.size() == 0)
-   {
-      elementLabelMap["X"]  = "Cartesian";
-      elementLabelMap["Y"]  = "Cartesian";
-      elementLabelMap["Z"]  = "Cartesian";
-      elementLabelMap["VX"] = "Cartesian";
-      elementLabelMap["VY"] = "Cartesian";
-      elementLabelMap["VZ"] = "Cartesian";
-
-      elementLabelMap["SMA"]  = "Keplerian";
-      elementLabelMap["ECC"]  = "Keplerian";
-      elementLabelMap["INC"]  = "Keplerian";
-      elementLabelMap["RAAN"] = "Keplerian";
-      elementLabelMap["AOP"]  = "Keplerian";
-      elementLabelMap["TA"]   = "Keplerian";
-      elementLabelMap["EA"]   = "Keplerian";
-      elementLabelMap["MA"]   = "Keplerian";
-      elementLabelMap["HA"]   = "Keplerian";
-
-      elementLabelMap["RadPer"] = "ModifiedKeplerian";
-      elementLabelMap["RadApo"] = "ModifiedKeplerian";
-
-      elementLabelMap["RMAG"] = "SphericalAZFPA";
-      elementLabelMap["RA"]   = "SphericalAZFPA";
-      elementLabelMap["DEC"]  = "SphericalAZFPA";
-      elementLabelMap["VMAG"] = "SphericalAZFPA";
-      elementLabelMap["AZI"]  = "SphericalAZFPA";
-      elementLabelMap["FPA"]  = "SphericalAZFPA";
-
-      elementLabelMap["RAV"]  = "SphericalRADEC";
-      elementLabelMap["DECV"] = "SphericalRADEC";
-
-      elementLabelMap["EquinoctialH"] = "Equinoctial";
-      elementLabelMap["EquinoctialK"] = "Equinoctial";
-      elementLabelMap["EquinoctialP"] = "Equinoctial";
-      elementLabelMap["EquinoctialQ"] = "Equinoctial";
-      elementLabelMap["MLONG"]        = "Equinoctial";
-
-      // Modified by M.H.
-      elementLabelMap["SemilatusRectum"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialF"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialG"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialH"] = "ModifiedEquinoctial";
-      elementLabelMap["ModEquinoctialK"] = "ModifiedEquinoctial";
-      elementLabelMap["TLONG"]           = "ModifiedEquinoctial";
-      
-      // Modified by HYKim
-      elementLabelMap["AltEquinoctialP"] = "AlternateEquinoctial";
-      elementLabelMap["AltEquinoctialQ"] = "AlternateEquinoctial";
-      
-      // Modified by M.H.
-      elementLabelMap["Delaunayl"] = "Delaunay";
-      elementLabelMap["Delaunayg"] = "Delaunay";
-      elementLabelMap["Delaunayh"] = "Delaunay";
-      elementLabelMap["DelaunayL"] = "Delaunay";
-      elementLabelMap["DelaunayG"] = "Delaunay";
-      elementLabelMap["DelaunayH"] = "Delaunay";
-      
-      elementLabelMap["PlanetodeticRMAG"] = "Planetodetic";
-      elementLabelMap["PlanetodeticLON"]  = "Planetodetic";
-      elementLabelMap["PlanetodeticLAT"]  = "Planetodetic";
-      elementLabelMap["PlanetodeticVMAG"] = "Planetodetic";
-      elementLabelMap["PlanetodeticAZI"]  = "Planetodetic";
-      elementLabelMap["PlanetodeticHFPA"] = "Planetodetic";
-      
-      elementLabelMap["IncomingRadPer"]   = "IncomingAsymptote";
-      elementLabelMap["IncomingC3Energy"] = "IncomingAsymptote";
-      elementLabelMap["IncomingRHA"]      = "IncomingAsymptote";
-      elementLabelMap["IncomingDHA"]      = "IncomingAsymptote";
-      elementLabelMap["IncomingBVAZI"]    = "IncomingAsymptote";
-      
-      elementLabelMap["OutgoingRadPer"]   = "OutgoingAsymptote";
-      elementLabelMap["OutgoingC3Energy"] = "OutgoingAsymptote";
-      elementLabelMap["OutgoingRHA"]      = "OutgoingAsymptote";
-      elementLabelMap["OutgoingDHA"]      = "OutgoingAsymptote";
-      elementLabelMap["OutgoingBVAZI"]    = "OutgoingAsymptote";
-      
-      elementLabelMap["BrouwerShortSMA"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortECC"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortINC"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortRAAN"] = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortAOP"]  = "BrouwerMeanShort";
-      elementLabelMap["BrouwerShortMA"]   = "BrouwerMeanShort";
-      
-      elementLabelMap["BrouwerLongSMA"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongECC"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongINC"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongRAAN"] = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongAOP"]  = "BrouwerMeanLong";
-      elementLabelMap["BrouwerLongMA"]   = "BrouwerMeanLong";
-   }
-}
 
 //-------------------------------------------------------------------------
 // bool HasDynamicParameterSTM(Integer parameterId)
@@ -7153,10 +6923,6 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    #endif
    
    
-   //=======================================================
-   #ifndef __USE_OLD_ELEMENT_MAP__
-   //=======================================================
-
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
       ("==> Spacecraft::SetPossibleInputTypes() using state labels multimap\n");
@@ -7286,198 +7052,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
                possibleInputTypes.push_back(tempType);
          }
       }
-   }
-   
-   
-   //=======================================================
-   #else
-   //=======================================================
-   
-   
-   if (std::find(possibleInputTypes.begin(), possibleInputTypes.end(), rep) ==
-         possibleInputTypes.end())
-   {
-      #ifdef DEBUG_SC_INPUT_TYPES
-      MessageInterface::ShowMessage
-         ("**** ERROR The label '%s' is not allowed in the the rep '%s', so throwing exception\n",
-          label.c_str(), rep.c_str());
-      #endif
-      std::string errmsg = "Error: you have set orbital state elements not contained in the same state type.  ";
-      errmsg += "This is only allowed after the BeginMissionSequence command.\n";
-      throw SpaceObjectException(errmsg);
-   }
-  
-   // determine the possible types
-
-   // When there is only one possible type, reset the array to that one
-   
-   // Modified by M.H. and YK
-   // mod. by YK. "RadPer" is removed becuase hyperbolic asymptotes uses "RadPer".
-   // EquinoctialH, EquinoctialK, and MLONG are no longer unique, those are state elements of
-   // Equinoctial and AlternateEquinoctial, so removed (LOJ: 2014.01.29)
-   // RadPer is now associated with ModKeplerian only (LOJ: 2014.04.29)
-   if ((label == "X")                || (label == "Y")                || (label == "Z")                ||
-       (label == "VX")               || (label == "VY")               || (label == "VZ")               ||
-       (label == "ECC")              || (label == "RadApo")           || (label == "AZI")              ||
-       (label == "FPA")              || (label == "RAV")              || (label == "DECV")             ||
-       (label == "EquinoctialP")     || (label == "RadPer")           ||
-       (label == "EquinoctialQ")     || (label == "SemilatusRectum")  || (label == "ModEquinoctialF")  ||
-       (label == "ModEquinoctialG")  || (label == "ModEquinoctialH")  || (label == "ModEquinoctialK")  ||
-       (label == "TLONG")            || (label == "AltEquinoctialP")  || (label == "AltEquinoctialQ")  ||
-       (label == "Delaunayl")        || (label == "Delaunayg")        || (label == "Delaunayh")        ||
-       (label == "DelaunayL")        || (label == "DelaunayG")        || (label == "DelaunayH")        ||
-       (label == "PlanetodeticRMAG") || (label == "PlanetodeticLON")  || (label == "PlanetodeticLAT")  ||
-       (label == "PlanetodeticVMAG") || (label == "PlanetodeticAZI")  || (label == "PlanetodeticHFPA") ||
-       (label == "IncomingRHA")      || (label == "IncomingDHA")      || (label == "IncomingBVAZI")    ||
-       (label == "OutgoingRHA")      || (label == "OutgoingDHA")      || (label == "OutgoingBVAZI")    ||
-       (label == "BrouwerShortSMA")  || (label == "BrouwerShortECC")  || (label == "BrouwerShortINC")  ||
-       (label == "BrouwerShortRAAN") || (label == "BrouwerShortAOP")  || (label == "BrouwerShortMA")   ||
-       (label == "BrouwerLongSMA")   || (label == "BrouwerLongECC")   || (label == "BrouwerLongINC")   ||
-       (label == "BrouwerLongRAAN")  || (label == "BrouwerLongAOP")   || (label == "BrouwerLongMA"))
-   {
-      #ifdef DEBUG_SC_INPUT_TYPES
-      MessageInterface::ShowMessage
-         ("   The label '%s' is unique, so adding the rep '%s' to possibleInputTypes\n",
-          label.c_str(), rep.c_str());
-      #endif
-      possibleInputTypes.clear();
-      possibleInputTypes.push_back(rep);
-   }
-   
-   // Remove impossible types from the array
-   
-   // 1) It could be Keplerian, Equinoctial, or AlternateEquinoctial
-   else if (label == "SMA")
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 2) It could be Keplerian or ModifiedKeplerian
-   else if ((label == "INC") || (label == "RAAN") || (label == "AOP") ||
-            (label == "EA")   || (label == "MA")  || //mod by YK, TA is removed because TA can be used in Incoming/OutoingAsymptote.
-            (label == "HA"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 3) It could be SphericalAZFPA or SphericalRADEC
-   else if ((label == "RMAG") || (label == "RA") || (label == "DEC") || (label == "VMAG"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "IncomingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "OutgoingAsymptote"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 4) It could be ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
-   // RadPer is now associated with ModKeplerian only (LOJ: 2014.04.29)
-   // else if ((label == "RadPer"))
-   // {
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   // }
-   // 4) HyperbolicRadPer could be IncomingAsymptote, or OutgoingAsymptote
-   // HyperbolicRadPer is no longer used. (LOJ: 2014.05.08)
-   // else if ((label == "HyperbolicRadPer"))
-   // {
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   // }
-   // 5) It could be Keplerian, ModifiedKeplerian, IncomingAsymptote, or OutgoingAsymptote (mod by YK)
-   else if ((label == "TA"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   // 6) It could be IncomingAsymptote or OutgoingAsymptote (mod by YK)
-   // C3Energy is no longer shared with IncomingAsymptote and OutgoingAsymptote
-   // else if ((label == "C3Energy"))
-   // {
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Equinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "AlternateEquinoctial"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-   //    possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   // }
-   // 7) It could be Equinoctial or AlternateEquinoctial
-   else if ((label == "EquinoctialH") || (label == "EquinoctialK") || (label == "MLONG"))
-   {
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Cartesian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Keplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedKeplerian"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalAZFPA"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "SphericalRADEC"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "ModifiedEquinoctial"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Delaunay"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "Planetodetic"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanShort"), possibleInputTypes.end());
-      possibleInputTypes.erase(std::remove(possibleInputTypes.begin(), possibleInputTypes.end(), "BrouwerMeanLong"), possibleInputTypes.end());
-   }
-   
-   //=======================================================
-   #endif
-   //=======================================================
-
+   }   
    
    if (possibleInputTypes.size() < 1)
    {
@@ -8059,5 +7634,19 @@ void Spacecraft::BuildStateElementLabelsAndUnits()
    allElementLabelsMultiMap.insert(std::make_pair("BrouwerLongRAAN", "BrouwerMeanLong"));
    allElementLabelsMultiMap.insert(std::make_pair("BrouwerLongAOP",  "BrouwerMeanLong"));
    allElementLabelsMultiMap.insert(std::make_pair("BrouwerLongMA",   "BrouwerMeanLong"));
+   
+   // Build default state type map for shared labels
+   defaultStateTypeMap["AOP"]          = "Keplerian";
+   defaultStateTypeMap["DEC"]          = "SphericalAZFPA";
+   defaultStateTypeMap["EquinoctialH"] = "Equinoctial";
+   defaultStateTypeMap["EquinoctialK"] = "Equinoctial";
+   defaultStateTypeMap["INC"]          = "Keplerian";
+   defaultStateTypeMap["MLONG"]        = "Equinoctial";
+   defaultStateTypeMap["RA"]           = "SphericalAZFPA";
+   defaultStateTypeMap["RAAN"]         = "Keplerian";
+   defaultStateTypeMap["RMAG"]         = "SphericalAZFPA";
+   defaultStateTypeMap["SMA"]          = "Keplerian";
+   defaultStateTypeMap["TA"]           = "Keplerian";
+   defaultStateTypeMap["VMAG"]         = "SphericalAZFPA";
 }
 

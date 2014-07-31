@@ -30,7 +30,7 @@ class GMAT_API TextEphemFile : public ReportFile
 {
 public:
    TextEphemFile(const std::string &type, const std::string &name,
-                 const std::string &fileName = "", 
+                 const std::string &fname = "", 
                  Parameter *firstVarParam = NULL);
    
    virtual ~TextEphemFile(void);

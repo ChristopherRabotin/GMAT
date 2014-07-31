@@ -588,8 +588,11 @@ bool SPKPropagator::Initialize()
       j2ET = j2000_c();   // CSPICE method to return Julian date of J2000 (TDB)
 
       FileManager *fm = FileManager::Instance();
-      std::string fullPath = fm->GetFullPathname(FileManager::PLANETARY_SPK_FILE);
 
+      // Changed to use FileManager::FindPath() (LOJ: 2014.06.26)
+      //std::string fullPath = fm->GetFullPathname(FileManager::PLANETARY_SPK_FILE);
+      std::string fullPath = fm->FindPath("", "PLANETARY_SPK_FILE", true, false, true);
+      
       if (skr->IsLoaded(fullPath) == false)
          skr->LoadKernel(fullPath);
 
@@ -622,23 +625,40 @@ bool SPKPropagator::Initialize()
             if (spices.size() == 0)
                throw PropagatorException("Spice (SPK) propagator requires at "
                      "least one orbit SPICE kernel,");
-
-            std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
+            
+            // Changed to use VEHICLE_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+            //std::string ephemPath = fm->GetPathname(FileManager::EPHEM_PATH);
+            //std::string ephemPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
+            std::string spiceFile;
             for (UnsignedInt j = 0; j < spices.size(); ++j)
             {
-               fullPath = spices[j];
-
-               // Check to see if this name includes path information
-               // If no path designation slash character is found, add the default path
-               if ((fullPath.find('/') == std::string::npos) &&
-                   (fullPath.find('\\') == std::string::npos))
-               {
-                  fullPath = ephemPath + fullPath;
-               }
+               //fullPath = spices[j];
+               spiceFile = spices[j];
+               
+               // Changed to use FileManager::FindPath() and throw an exception
+               // for empty fullPath (LOJ: 2014.06.26)
+               
+               // // Check to see if this name includes path information
+               // // If no path designation slash character is found, add the default path
+               // if ((fullPath.find('/') == std::string::npos) &&
+               //     (fullPath.find('\\') == std::string::npos))
+               // {
+               //    fullPath = ephemPath + fullPath;
+               // }
+               
+               fullPath = fm->FindPath(spiceFile, "VEHICLE_EPHEM_SPK_PATH", true, false, true);
+               
                #ifdef DEBUG_INITIALIZATION
-                  MessageInterface::ShowMessage("Checking for kernel %s\n",
-                        fullPath.c_str());
+               MessageInterface::ShowMessage
+                  ("Checking for kernel spiceFile = '%s', fullPath = '%s'\n",
+                   spiceFile.c_str(), fullPath.c_str());
                #endif
+               
+               if (fullPath == "")
+               {
+                  throw PropagatorException("The Spice (SPK) file " + spiceFile + " does not exist");
+               }
+               
                if (skr->IsLoaded(fullPath) == false)
                   skr->LoadKernel(fullPath);
 

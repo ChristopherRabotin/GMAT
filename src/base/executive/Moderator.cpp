@@ -77,7 +77,7 @@
 
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
-//#define DEBUG_INTERPRET 2
+//#define DEBUG_INTERPRET 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
@@ -1536,7 +1536,7 @@ const StringArray& Moderator::GetListOfObjects(const std::string &typeName,
 //------------------------------------------------------------------------------
 GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 {
-   #if DEBUG_CONFIG
+   #ifdef DEBUG_CONFIG
    MessageInterface::ShowMessage
       ("Moderator::GetConfiguredObject() entered: name=%s\n", name.c_str());
    #endif
@@ -1553,7 +1553,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    {
       newName = name.substr(0, index);
       
-      #if DEBUG_CONFIG
+      #ifdef DEBUG_CONFIG
       MessageInterface::ShowMessage
          ("Moderator::GetConfiguredObject() entered: newName=%s\n", newName.c_str());
       #endif
@@ -1573,7 +1573,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
          obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
    }
    
-   #if DEBUG_CONFIG
+   #ifdef DEBUG_CONFIG
    if (obj)
    {
       MessageInterface::ShowMessage
@@ -2860,8 +2860,16 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
       obj->SetBody("Earth");
       obj->SetBodyName("Earth");
       
+      std::string potFile = GetFileName("JGM2_FILE");
+      #ifdef DEBUG_DEFAULT_PM
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultPhysicalModel() "
+          "calling %s->SetStringParameter(PotentialFile, %s)\n", obj->GetName().c_str(),
+          potFile.c_str());
+      #endif
+      
       if (type == "GravityField")
-         obj->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
+         obj->SetStringParameter("PotentialFile", potFile);
       
       // Manage it if it is a named PhysicalModel
       try
@@ -6278,11 +6286,23 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFileName(const std::string &fileType)
+// std::string GetFileName(const std::string &fileType, bool getFullPath = false,
+//                         bool forInput = true)
 //------------------------------------------------------------------------------
-std::string Moderator::GetFileName(const std::string &fileType)
+std::string Moderator::GetFileName(const std::string &fileType, bool getFullPath,
+                                   bool forInput)
 {
-   return theFileManager->GetFullPathname(fileType);
+   // Now we can get full path or just file name (LOJ: 2014.06.30)
+   if (getFullPath)
+   {
+      return theFileManager->FindPath("", fileType, forInput, false, true);
+   }
+   else
+   {
+      // Changed to use FileManager::GetFileName() (LOJ: 2014.06.30)
+      //return theFileManager->GetFullPathname(fileType);
+      return theFileManager->GetFilename(fileType);
+   }
 }
 
 
@@ -6711,6 +6731,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    SetSolarSystemAndObjectMap(theSolarSystemInUse, objectMapInUse, false,
                               "RunMission()");
    
+
    return status;
 } // RunMission()
 
@@ -6841,6 +6862,19 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
+      
+      // Set GMAT working directory (for GMT-4408 LOJ: 2014.06.11)
+      // GMAT working directory has script file
+      std::string path = GmatFileUtil::ParsePathName(filename);
+      
+      if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+         MessageInterface::ShowMessage
+            ("*** Setting '%s' as GMAT working directory\n", path.c_str());
+      
+      theFileManager->SetGmatWorkingDirectory(path);
+      if (theUiInterpreter != NULL)
+         theUiInterpreter->ResetIconFile();
+      
       isGoodScript = theScriptInterpreter->Interpret(filename);
       foundBeginMissionSeq = theScriptInterpreter->FoundBeginMissionSequence();
       
@@ -6889,10 +6923,13 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       
       if (isGoodScript)
       {
+         #if 0
          #if DEBUG_INTERPRET
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          #endif
+         #endif
+         MessageInterface::ShowMessage("Successfully interpreted the script\n");
          
          isRunReady = true;
       }
@@ -6984,7 +7021,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       MessageInterface::ShowMessage(GetScript());
       #endif
       
-      #if DEBUG_INTERPRET > 0
+      #if DEBUG_INTERPRET > 1
       GmatCommand *cmd = GetFirstCommand();
       MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
       MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", isGoodScript);
@@ -8056,6 +8093,11 @@ void Moderator::CreateDefaultParameters()
    // can handle it (LOJ: 2012.06.11)
    //if (GmatGlobal::Instance()->IsWritingParameterInfo())
    //{
+      // PowerSystem Parameters
+      CreateParameter("TotalPowerAvailable", "DefaultSC.DefaultSolarPowerSystem.TotalPowerAvailable");
+      CreateParameter("RequiredBusPower", "DefaultSC.DefaultSolarPowerSystem.RequiredBusPower");
+      CreateParameter("ThrustPowerAvailable", "DefaultSC.DefaultSolarPowerSystem.ThrustPowerAvailable");
+
       // FuelTank Parameters
       CreateParameter("FuelMass", "DefaultSC.DefaultFuelTank.FuelMass");
       CreateParameter("Volume", "DefaultSC.DefaultFuelTank.Volume");

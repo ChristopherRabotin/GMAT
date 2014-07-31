@@ -370,8 +370,8 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   // This will eventually replace Get*FileName() above (loj: 7/7/05)
-   std::string GetFileName(const std::string &fileType);
+   std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+                           bool forInput = true);
    
    // Mission
    bool LoadDefaultMission();

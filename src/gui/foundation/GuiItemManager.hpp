@@ -85,6 +85,7 @@ public:
    void UpdateFunction(bool updateObjectArray = true);
    void UpdateFuelTank(bool updateObjectArray = true);
    void UpdateThruster(bool updateObjectArray = true);
+   void UpdatePowerSystem(bool updateObjectArray = true);
    void UpdateSensor(bool updateObjectArray = true);
    void UpdateParameter(bool updateObjectArray = true);
    void UpdatePropagator(bool updateObjectArray = true);
@@ -117,6 +118,7 @@ public:
    int GetNumThruster() { return theNumThruster; }
    int GetNumSensor() { return theNumSensor; }
    int GetNumAntenna() { return theNumAntenna; }
+   int GetNumPowerSystem() { return theNumPowerSystem; }
    int GetNumConfigBody() { return theNumCelesBody; }
    int GetNumCoordSystem() { return theNumCoordSys; }
    int GetNumFunction() { return theNumFunction; }
@@ -217,6 +219,8 @@ public:
                                  const wxSize &size);
    wxComboBox* GetAntennaComboBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size);
+   wxComboBox* GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
+                                      const wxSize &size);
    
    wxComboBox* GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
@@ -398,6 +402,7 @@ private:
    void UpdateThrusterList();
    void UpdateSensorList();
    void UpdateAntennaList();
+   void UpdatePowerSystemList();
    void UpdateFunctionList();
    void UpdateSubscriberList();
    void UpdateXyPlotList();
@@ -451,6 +456,7 @@ private:
    std::vector<wxComboBox*> mThrusterCBList;
    std::vector<wxComboBox*> mSensorCBList;
    std::vector<wxComboBox*> mAntennaCBList;
+   std::vector<wxComboBox*> mPowerSystemCBList;
    std::vector<wxComboBox*> mSubscriberCBList;
    std::vector<wxComboBox*> mReportFileCBList;
    std::vector<wxComboBox*> mSolverCBList;
@@ -468,6 +474,7 @@ private:
    std::vector<wxArrayString*> mThrusterExcList;
    std::vector<wxArrayString*> mSensorExcList;
    std::vector<wxArrayString*> mAntennaExcList;
+   std::vector<wxArrayString*> mPowerSystemExcList;
    std::vector<wxArrayString*> mSubscriberExcList;
    std::vector<wxArrayString*> mReportFileExcList;
    std::vector<wxArrayString*> mXyPlotExcList;
@@ -516,6 +523,7 @@ private:
    int theNumThruster;
    int theNumSensor;
    int theNumAntenna;
+   int theNumPowerSystem;
    
    // Function
    int theNumFunction;
@@ -591,6 +599,7 @@ private:
    wxArrayString theThrusterList;
    wxArrayString theSensorList;
    wxArrayString theAntennaList;
+   wxArrayString thePowerSystemList;
    
    // Parameter
    wxArrayString thePlottableParamList;

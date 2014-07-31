@@ -104,7 +104,8 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   std::string GetFileName(const std::string &fileType);
+   std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+                           bool forInput = true);
    
    // StopCondition
    GmatBase* CreateStopCondition(const std::string &type,
@@ -149,6 +150,7 @@ public:
    virtual void NotifyRunCompleted();
    virtual void UpdateView(Integer type = 7);
    virtual void CloseCurrentProject();
+   virtual void ResetIconFile();
    
    void UpdateResourceTree();
    void UpdateMissionTree();

@@ -224,6 +224,7 @@ namespace GmatTree
       HARDWARE,
       FUELTANK,
       THRUSTER,
+      POWER_SYSTEM,
       SENSOR,
       
       FORMATION,

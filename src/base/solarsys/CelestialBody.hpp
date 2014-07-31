@@ -378,6 +378,7 @@ protected:
       ROTATION_RATE,
       //
       TEXTURE_MAP_FILE_NAME,
+      TEXTURE_MAP_FULL_PATH,
       // @todo - add Shape Models, etc.
       CelestialBodyParamCount
    };
@@ -433,6 +434,8 @@ protected:
    bool                     usePotentialFile;
    /// file name of the potential file to use
    std::string              potentialFileName;
+   /// full path file name of the potential file
+   std::string              potentialFileNameFullPath;
    /// angular velocity
    Rvector3                 angularVelocity;
    /// the hour angle 
@@ -534,8 +537,10 @@ protected:
    bool                   naifIdSet;
    /// name to use when requesting data from an SPK kernel
    std::string            naifName;
-   /// Name of the texture map file to use when plotting
+   /// Name of the texture map file
    std::string            textureMapFileName;
+   /// Full path of the texture map file to use when plotting
+   std::string            textureMapFullPath;
    /// has message about possible needed SPKs been written
    bool                   msgWritten;
    /// date and time of start of source file
@@ -562,6 +567,8 @@ protected:
    virtual Rvector6 KeplersProblem(const A1Mjd &forTime);
    virtual bool     SetUpSPICE();
    virtual bool     NeedsOnlyMainSPK();
+   
+   void SetTextureFileName(const std::string &filename, bool writeInfo = false);
    
 private:
 

@@ -47,6 +47,7 @@
 #include "GmatBaseSetupPanel.hpp"
 #include "SpacecraftPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
+#include "PowerSystemConfigPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagatePanel.hpp"
@@ -134,6 +135,10 @@
 #include "bitmaps/animation_options.xpm"
 #endif
 
+// Comment it out if we want to show compare results in GmatMdiChildFrame,
+// otherwise it will show in ViewTextDialog
+//#define __SHOW_COMPARE_RESULT_IN_CHILD_FRAME__
+
 // If we want to use child best size define this
 #define __USE_CHILD_BEST_SIZE__
 
@@ -167,6 +172,7 @@
 //#define DEBUG_PENDING_EVENTS
 //#define DEBUG_DOCK_UNDOCK
 //#define DEBUG_CONFIG_DATA
+//#define DEBUG_CONFIG_FILE
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_REPOSITION_CHILDREN
 //#define DEBUG_SCREEN_SHOT
@@ -580,6 +586,10 @@ GmatMainFrame::~GmatMainFrame()
    GetScreenPosition(&windowX, &windowY);
    GetSize(&windowW, &windowH);
    #ifdef DEBUG_CONFIG_FILE
+   // Question: How can I get local file name using pConfig? ex) '../data/gui_config/MyGmat.ini'
+   MessageInterface::ShowMessage
+      ("GmatMainFrame destructor writing window size and location to personalization "
+       "file.\n   current path = '%s'\n", pConfig->GetPath().c_str());
    MessageInterface::ShowMessage
       ("   Final screen pos,  X = %4d, Y = %4d\n", windowX, windowY);
    MessageInterface::ShowMessage
@@ -3973,6 +3983,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::THRUSTER:
       sizer->Add(new ThrusterConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::POWER_SYSTEM:
+      sizer->Add(new PowerSystemConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::HARDWARE:
       sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
@@ -6193,32 +6206,52 @@ void GmatMainFrame::CompareFiles()
        "numFilesToCompare=%d\n", basePrefix.c_str(), compStrings[0].c_str(),
        numDirsToCompare, numFilesToCompare);
    #endif
+
+   
+   //=================================================================
+   #ifdef __SHOW_COMPARE_RESULT_IN_CHILD_FRAME__
+   //=================================================================
+   // Show compare results in GmatMdiChildFrame
    
    wxTextCtrl *textCtrl = NULL;
-   wxString dir1 = compDirs[0];
-   
    GmatMdiChildFrame *textFrame = GetChild("CompareReport");
    
    if (textFrame == NULL)
    {
       GmatTreeItemData *compareItem =
          new GmatTreeItemData("CompareReport", GmatTree::OUTPUT_COMPARE_REPORT);
-
+      
       textFrame = CreateChild(compareItem);
    }
-
+   
    textCtrl = textFrame->GetScriptTextCtrl();
    textCtrl->SetMaxLength(320000); // make long enough
    textFrame->Show();
-   wxString msg;
-   msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);
-   textCtrl->AppendText(msg);
-
-   //loj: Why Do I need to do this to show whole TextCtrl?
+   
+   //loj: Why Do I need to do this to show contents as it fills in whole window?
    // textFrame->Layout() didn't work.
    int w, h;
    textFrame->GetSize(&w, &h);
    textFrame->SetSize(w+1, h+1);
+   
+   //=================================================================
+   #else
+   //=================================================================
+   
+   // Show compare results in view text dialog
+   ViewTextDialog *viewDlg =
+      new ViewTextDialog(this, _T("CompareFilesResults"), false, wxDefaultPosition,
+                         wxSize(800, 600), wxFont(9, wxMODERN, wxNORMAL, wxNORMAL));
+   wxTextCtrl *textCtrl = viewDlg->GetTextCtrl();
+   viewDlg->Show();
+   
+   //=================================================================
+   #endif
+   //=================================================================
+   
+   wxString msg;
+   msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);
+   textCtrl->AppendText(msg);
    
    // Get files in the base directory
    wxDir dir(baseDir);
@@ -6384,6 +6417,8 @@ void GmatMainFrame::CompareFiles()
       for (int i = 0; i < numLines; i++)
          MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).c_str());
       #endif
+      
+      textCtrl->SetInsertionPointEnd();
       
       if (saveCompareResults)
          textCtrl->SaveFile(saveFileName);

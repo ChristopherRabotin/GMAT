@@ -66,9 +66,8 @@ Rvector::Rvector(int size)
 Rvector::Rvector(int size, Real a1, ...)
   : ArrayTemplate<Real> (size)
 {
-    int i; //,a;
+    int i;
     va_list ap;
-    //a = 0;
 
     elementD[0] = a1;
     va_start(ap, a1);
@@ -76,7 +75,7 @@ Rvector::Rvector(int size, Real a1, ...)
     {
         elementD[i] = va_arg(ap, Real);
     }
- 
+
     va_end(ap);
 }
 
@@ -105,10 +104,15 @@ Rvector::~Rvector()
 //------------------------------------------------------------------------------
 void Rvector::Set(int numElem, Real a1, ...)
 {
-   int i; //,a;
+   int i;
    va_list ap;
-   //a = 0;
-
+   
+   // Set size if not sized otherwise check the size
+   if (!IsSized())
+      SetSize(numElem);
+   else if (GetSize() < numElem)
+      throw  ArrayTemplateExceptions::IllegalSize();
+   
    elementD[0] = a1;
    va_start(ap, a1);
    for (i = 1; i < numElem; i++)

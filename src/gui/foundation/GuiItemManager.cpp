@@ -58,6 +58,7 @@
 //#define DBGLVL_GUI_ITEM_CS 2
 //#define DBGLVL_GUI_ITEM_GS 2
 //#define DBGLVL_GUI_ITEM_HW 2
+//#define DBGLVL_GUI_ITEM_POWER_SYSTEM 2
 //#define DBGLVL_GUI_ITEM_BURN 2
 //#define DBGLVL_GUI_ITEM_SUBS 2
 //#define DBGLVL_GUI_ITEM_SOLVER 2
@@ -783,6 +784,9 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
       case Gmat::THRUSTER:
          UpdateFuelTank(true);
          UpdateThruster(true);
+      case Gmat::POWER_SYSTEM:
+         UpdatePowerSystem(true);
+         break;
       case Gmat::SENSOR:
          UpdateSensor(true);
          break;
@@ -886,6 +890,11 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
    MessageInterface::ShowMessage("======> after UpdateThruster()\n");
    #endif
    
+   UpdatePowerSystem(false);
+   #if DBGLVL_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("======> after UpdatePowerSystem()\n");
+   #endif
+
    UpdateGroundStation(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("======> after UpdateGroundStation()\n");
@@ -1145,6 +1154,24 @@ void GuiItemManager::UpdateThruster(bool updateObjectArray)
    #endif
    
    UpdateThrusterList();
+   if (updateObjectArray)
+      RefreshAllObjectArray();
+}
+
+//------------------------------------------------------------------------------
+//  void UpdatePowerSystem(bool updateObjectArray = true)
+//------------------------------------------------------------------------------
+/**
+ * Updates Power System gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdatePowerSystem(bool updateObjectArray)
+{
+   #if DBGLVL_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> UpdatePowerSystem\n");
+   #endif
+
+   UpdatePowerSystemList();
    if (updateObjectArray)
       RefreshAllObjectArray();
 }
@@ -1672,6 +1699,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mThrusterCBList.end())
          mThrusterCBList.erase(pos);
    }
+   else if (type == "PowerSystem")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mPowerSystemCBList.begin(), mPowerSystemCBList.end(), cb);
+
+      if (pos != mPowerSystemCBList.end())
+         mPowerSystemCBList.erase(pos);
+   }
    else if (type == "Sensor")
    {
       std::vector<wxComboBox*>::iterator pos =
@@ -1763,6 +1798,7 @@ wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
    {
       StringArray tanks = obj->GetStringArrayParameter("Tanks");
       StringArray thrusters = obj->GetStringArrayParameter("Thrusters");
+      std::string pwrSystem = obj->GetStringParameter("PowerSystem");
       
       // Add Tanks
       for (unsigned int i = 0; i < tanks.size(); i++)
@@ -1771,6 +1807,10 @@ wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
       // Add Thrusters
       for (unsigned int i = 0; i < thrusters.size(); i++)
          hardwareList.Add(thrusters[i].c_str());
+
+      // Add Power System
+      if (pwrSystem != "")
+         hardwareList.Add(pwrSystem.c_str());
    }
    
    return hardwareList;
@@ -2530,6 +2570,37 @@ wxComboBox* GuiItemManager::GetAntennaComboBox(wxWindow *parent, wxWindowID id,
    mAntennaCBList.push_back(antennaComboBox);
    
    return antennaComboBox;
+}
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
+//                                    const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Antenna combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
+                                                   const wxSize &size)
+{
+   wxComboBox *powerSystemComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     thePowerSystemList, wxCB_READONLY);
+
+   if (theNumPowerSystem == 0)
+      powerSystemComboBox->Append("No Power Systems Available");
+   else
+      powerSystemComboBox->Insert("", 0);
+
+   // show first Power System
+   powerSystemComboBox->SetSelection(0);
+
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mPowerSystemCBList.push_back(powerSystemComboBox);
+
+   return powerSystemComboBox;
 }
 
 
@@ -5763,8 +5834,8 @@ void GuiItemManager::UpdateAntennaList()
    
    #if DBGLVL_GUI_ITEM_HW
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSensorList() numAntenna=%d, numAntenna=%d\n", ,
-       numSensor, numAntenna);
+      ("GuiItemManager::UpdateAntennaList() numAntenna=%d\n",
+       numAntenna);
    #endif
    
    theNumAntenna = 0;
@@ -5813,6 +5884,80 @@ void GuiItemManager::UpdateAntennaList()
    
 } // end UpdateAntennaList()
 
+//------------------------------------------------------------------------------
+// void UpdatePowerSystemList()
+//------------------------------------------------------------------------------
+/**
+ * Updates configured Power System list.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdatePowerSystemList()
+{
+   StringArray powerSystems =
+      theGuiInterpreter->GetListOfObjects(Gmat::POWER_SYSTEM);
+   int numPowerSystems = powerSystems.size();
+
+   #if DBGLVL_GUI_ITEM_POWER_SYSTEM
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePowerSystemList() numPowerSystems=%d\n",
+            numPowerSystems);
+   #endif
+
+   theNumPowerSystem = 0;
+   thePowerSystemList.Clear();
+
+   for (int i=0; i<numPowerSystems; i++)
+   {
+      thePowerSystemList.Add(powerSystems[i].c_str());
+
+      #if DBGLVL_GUI_ITEM_POWER_SYSTEM > 1
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdatePowerSystemList() " + powerSystems[i] + "\n");
+      #endif
+   }
+
+   theNumPowerSystem = thePowerSystemList.GetCount();
+   #if DBGLVL_GUI_ITEM_POWER_SYSTEM > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePowerSystemList() number of registered ComboBoxes = %d\n",
+            (Integer) mPowerSystemCBList.size());
+   #endif
+
+   //-------------------------------------------------------
+   // update registered PowerSystem ComboBox
+   //-------------------------------------------------------
+   int sel;
+   wxString selStr;
+   for (std::vector<wxComboBox*>::iterator pos = mPowerSystemCBList.begin();
+        pos != mPowerSystemCBList.end(); ++pos)
+   {
+      sel = (*pos)->GetSelection();
+      selStr = (*pos)->GetValue();
+
+      if (theNumPowerSystem > 0)
+      {
+         (*pos)->Clear();
+         (*pos)->Append(thePowerSystemList);
+
+         // Insert first item as "No Power System Selected"
+         if (thePowerSystemList[0] != selStr)
+         {
+            (*pos)->Insert("No Power System Selected", 0);
+            (*pos)->SetSelection(0);
+         }
+         else
+         {
+            (*pos)->SetSelection(sel);
+         }
+      }
+   }
+
+   #if DBGLVL_GUI_ITEM_HW > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePowerSystemList() exiting\n");
+   #endif
+} // end UpdatePowerSystemList()
+
 
 //------------------------------------------------------------------------------
 // void UpdateSensorList()
@@ -5832,7 +5977,7 @@ void GuiItemManager::UpdateSensorList()
    
    #if DBGLVL_GUI_ITEM_HW
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSensorList() numSensor=%d, numAntenna=%d\n", ,
+      ("GuiItemManager::UpdateSensorList() numSensor=%d, numAntenna=%d\n",
        numSensor, numAntenna);
    #endif
    
@@ -6729,6 +6874,7 @@ GuiItemManager::GuiItemManager()
    theNumThruster = 0;
    theNumSensor = 0;
    theNumAntenna = 0;
+   theNumPowerSystem = 0;
    theNumFunction = 0;
    theNumSubscriber = 0;
    theNumReportFile = 0;

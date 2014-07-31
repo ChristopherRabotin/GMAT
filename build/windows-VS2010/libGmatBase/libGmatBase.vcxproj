@@ -329,6 +329,9 @@
     <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\HardwareException.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\Thruster.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\Interface.cpp" />
@@ -484,6 +487,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\Planet.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
@@ -750,6 +754,9 @@
     <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\HardwareException.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\Thruster.hpp" />
     <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp" />
@@ -908,6 +915,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />

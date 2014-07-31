@@ -435,7 +435,13 @@ public:
    static Integer          GetDataPrecision();
    /// Method for getting time precision
    static Integer          GetTimePrecision();
-
+   /// Method for getting full path file name
+   static std::string      GetFullPathFileName(std::string &outFileName,
+                              const std::string &objName,
+                              const std::string &inFileName,
+                              const std::string &fileType, bool forInput,
+                              const std::string &fileExt = "",
+                              bool writeWarning = false, bool writeInfo = false);
    virtual Integer         GetPropItemID(const std::string &whichItem);
    virtual Integer         SetPropItem(const std::string &propItem);
    virtual StringArray     GetDefaultPropItems();

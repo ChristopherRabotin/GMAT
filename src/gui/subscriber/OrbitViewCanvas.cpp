@@ -32,7 +32,6 @@
 #include "ModelManager.hpp"
 #include "GmatAppData.hpp"         // for GetGuiInterpreter()
 #include "GmatMainFrame.hpp"       // for EnableAnimation()
-#include "FileManager.hpp"         // for texture files
 #include "ColorTypes.hpp"          // for namespace GmatColor::
 #include "Rvector3.hpp"            // for Rvector3::GetMagnitude()
 #include "RealUtilities.hpp"
@@ -1996,10 +1995,11 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
          #if DEBUG_DRAW
          MessageInterface::ShowMessage
             ("   Drawing spacecraft '%s' with modelId: %d, mModelsAreLoaded=%d\n",
-             objName.c_str(), sat->modelID, mModelsAreLoaded);
+             objName.c_str(), sat->GetModelId(), mModelsAreLoaded);
          #endif
          
-         if (sat->modelID != -1)
+         //if (sat->modelID != -1)
+         if (sat->GetModelId() != -1)
          {
             DrawSpacecraft3dModel(sat, objId, frame);
          }
@@ -2568,7 +2568,8 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    #endif
    
    ModelManager *mm = ModelManager::Instance();
-   ModelObject *scModel = mm->GetModel(sc->modelID);
+   //ModelObject *scModel = mm->GetModel(sc->modelID);
+   ModelObject *scModel = mm->GetModel(sc->GetModelId());
    
    float RTD = (float)GmatMathConstants::DEG_PER_RAD;
    
@@ -2589,7 +2590,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    #ifdef DEBUG_SC_ATTITUDE
    MessageInterface::ShowMessage
       ("DrawSpacecraft3dModel(), '%s', model=<%p>, modelId=%d, EARad=%s",
-       sc->GetName().c_str(), model, sc->modelID,  EARad.ToString().c_str());
+       sc->GetName().c_str(), model, sc->GetModelId(),  EARad.ToString().c_str());
    #endif
    
    float EAng1Deg = float(EARad(0)) * RTD;

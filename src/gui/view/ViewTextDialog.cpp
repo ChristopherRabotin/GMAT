@@ -38,17 +38,17 @@ END_EVENT_TABLE()
 /**
  * Constructor
  *
- * @param parent		Parent wxWindow for the dialog.
- * @param title			Title for the dialog.
- * @param isEditable	Is text in dialog editable or read-only
- * @param pos			window position
- * @param size			window size
- * @param style			window style
+ * @param parent		 Parent wxWindow for the dialog.
+ * @param title       Title for the dialog.
+ * @param isEditable	 Is text in dialog editable or read-only
+ * @param pos			 window position
+ * @param size			 window size
+ * @param style	    window style
  */
 //------------------------------------------------------------------------------
 ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
                                bool isEditable, const wxPoint &pos,
-                               const wxSize &size, long style)
+                               const wxSize &size, const wxFont &font, long style)
    : wxDialog(parent, -1, title, pos, size, style, title)
 {
    isTextEditable = isEditable;
@@ -81,7 +81,8 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
    
    if (!isTextEditable)
       theText->SetMaxLength(320000);
-   //theText->SetFont( GmatAppData::GetFont());
+   //theText->SetFont( GmatAppData::Instance()->GetFont());
+   theText->SetFont(font);
    
    // add items to middle sizer
    theMiddleSizer = new wxBoxSizer(wxVERTICAL);

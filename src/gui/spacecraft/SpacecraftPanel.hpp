@@ -31,6 +31,7 @@
 #include "TankPanel.hpp"
 #include "AttitudePanel.hpp"
 #include "ThrusterPanel.hpp"
+#include "PowerSystemPanel.hpp"
 #include "SpicePanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "VisualModelPanel.hpp"
@@ -86,12 +87,13 @@ private:
    wxPanel *sensors;
    
    BallisticsMassPanel *theBallisticMassPanel;
-   OrbitPanel *theOrbitPanel;
-   TankPanel *theTankPanel;
-   ThrusterPanel *theThrusterPanel;
-   AttitudePanel *theAttitudePanel;
-   VisualModelPanel *theVisualModelPanel;
-   SpicePanel    *theSpicePanel;
+   OrbitPanel          *theOrbitPanel;
+   TankPanel           *theTankPanel;
+   ThrusterPanel       *theThrusterPanel;
+   AttitudePanel       *theAttitudePanel;
+   VisualModelPanel    *theVisualModelPanel;
+   SpicePanel          *theSpicePanel;
+   PowerSystemPanel    *thePwrSysPanel;
    
    // IDs for the controls and the menu commands
    enum

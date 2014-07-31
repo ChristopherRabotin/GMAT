@@ -40,12 +40,13 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// ReportFilePanel(wxWindow *parent)
+// ReportFilePanel(wxWindow *parent, wxString reportName)
 //------------------------------------------------------------------------------
 /**
  * Constructs ReportFilePanel object.
  *
  * @param <parent> parent window.
+ * @param <reportName> report object name
  *
  */
 //------------------------------------------------------------------------------
@@ -167,19 +168,26 @@ void ReportFilePanel::Show()
 //------------------------------------------------------------------------------
 void ReportFilePanel::LoadData()
 {
-   std::string filename = theReport->GetStringParameter("Filename");
+   //std::string fullPathFileName = theReport->GetStringParameter("Filename");
+   std::string fullPathFileName = theReport->GetStringParameter("FullPathFileName");
    
    wxFile *file = new wxFile();
-   bool mFileExists = file->Exists(filename.c_str());
+   bool mFileExists = file->Exists(fullPathFileName.c_str());
    
    #ifdef DEBUG_REPORT_FILE_PANEL
    MessageInterface::ShowMessage
-      ("===> %p, ReportFilePanel::LoadData() filename=%s, mFileExists=%d\n",
-       theReport, filename.c_str(), mFileExists);
+      ("===> %p, ReportFilePanel::LoadData() mReportName='%s', fullPathFileName='%s', mFileExists=%d\n",
+       theReport, mReportName.c_str(), fullPathFileName.c_str(), mFileExists);
    #endif
    
    if (mFileExists)
-      mFileContentsTextCtrl->LoadFile(filename.c_str());
+   {
+      // Append full path filename to title (LOJ: 2014.06.20)
+      std::string fPath = " - " + fullPathFileName;
+      wxString newTitle = mReportName + fPath.c_str();
+      ((wxMDIChildFrame*)(theParent->GetParent()))->SetTitle(newTitle.c_str());
+      mFileContentsTextCtrl->LoadFile(fullPathFileName.c_str());
+   }
    else
       mFileContentsTextCtrl->SetValue("");
    

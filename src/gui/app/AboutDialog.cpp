@@ -65,16 +65,25 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    #ifdef DEBUG_ICONFILE
    MessageInterface::ShowMessage("AboutDialog::AboutDialog() entered\n");
    #endif
+   
+   // Write info message once per GMAT session
+   static bool writeInfo = true;
    wxBitmap bitmap;
    wxBitmapButton *aboutButton;
    
+   // Use FileManager::FindPath() for GMATAboutIcon file (LOJ: 2014.07.02)
+   
    // if icon file available, use it
    FileManager *fm = FileManager::Instance();
-   std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.png");
+   //std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.png");
+   std::string iconFile = fm->FindPath("GMATAboutIcon.png", "ICON_PATH", true, false, writeInfo);
+   writeInfo = false;
+   
    #ifdef DEBUG_ICONFILE
    MessageInterface::ShowMessage("   About iconFile='%s'\n", iconFile.c_str());
    #endif
-   if (fm->DoesFileExist(iconFile))
+   //if (fm->DoesFileExist(iconFile))
+   if (iconFile != "")
    {
       //bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_JPEG);
       bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_PNG);

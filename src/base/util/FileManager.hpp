@@ -39,34 +39,45 @@ public:
    // The following is predefined file paths/types.
    enum FileType
    {
-      // file path
+      // File path
       BEGIN_OF_PATH = 0,
-      OUTPUT_PATH,
-      DE_PATH,
-      SPK_PATH,
+      ROOT_PATH,
+      
+      // Input path
+      TIME_PATH,
+      PLANETARY_COEFF_PATH,
+      PLANETARY_EPHEM_DE_PATH,
+      PLANETARY_EPHEM_SPK_PATH,
+      VEHICLE_EPHEM_PATH,
+      VEHICLE_EPHEM_SPK_PATH,
+      VEHICLE_EPHEM_CCSDS_PATH,
       EARTH_POT_PATH,
       LUNA_POT_PATH,
       VENUS_POT_PATH,
       MARS_POT_PATH,
-      PLANETARY_COEFF_PATH,
-      TIME_PATH,
+      OTHER_POT_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
       MEASUREMENT_PATH,
-      EPHEM_PATH,
       GUI_CONFIG_PATH,
       SPLASH_PATH,
       ICON_PATH,
       STAR_PATH,
       MODEL_PATH,
+      SPAD_PATH,
+      ATMOSPHERE_PATH,
+      
+      // Output path
+      OUTPUT_PATH,
       END_OF_PATH,
       
-      // general file name
+      // General file name
       LOG_FILE,
       REPORT_FILE,
+      EPHEM_OUTPUT_FILE,
       SPLASH_FILE,
       TIME_COEFF_FILE,
       
-      // specific file name
+      // Specific file name
       //    Notes: Don't add general planet potential files here. They are handled
       //    when gmat_startup_file are read by following naming convention.
       DE405_FILE,
@@ -91,19 +102,38 @@ public:
       STAR_FILE,
       CONSTELLATION_FILE,
       SPACECRAFT_MODEL_FILE,
+      SPAD_SRP_FILE,
       HELP_FILE,
       FileTypeCount,
    };
    
-   static FileManager* Instance();
+   static FileManager* Instance(const std::string &appName = "GMAT.exe");
    ~FileManager();
    
-   std::string GetBinDirectory();
-   bool        SetBinDirectory(const std::string &newBin = "");
+   /// GMAT application directory
+   std::string GetBinDirectory(const std::string &appName = "GMAT.exe");
+   bool        SetBinDirectory(const std::string &appName = "GMAT.exe",
+                               const std::string &newBin = "");
+   
+   /// GMAT working directory
+   std::string GetGmatWorkingDirectory();
+   bool        SetGmatWorkingDirectory(const std::string &newDir = "");
+   
+   /// System's current working directory of the process
+   std::string GetCurrentWorkingDirectory();
+   bool        SetCurrentWorkingDirectory(const std::string &newDir = "");
+   
+   /// Finds file path using search order
+   std::string FindPath(const std::string &fileName, const FileType type,
+                        bool forInput, bool writeWarning = false, bool writeInfo = false,
+                        const std::string &objName = "");
+   std::string FindPath(const std::string &fileName, const std::string &fileType,
+                        bool forInput, bool writeWarning = false, bool writeInfo = false,
+                        const std::string &objName = "");
+   std::string FindMainIconFile(bool writeInfo = true);
    
    std::string GetPathSeparator();
-   std::string GetWorkingDirectory();
-   bool DoesDirectoryExist(const std::string &dirPath);
+   bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);
    bool DoesFileExist(const std::string &filename);
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
@@ -167,7 +197,9 @@ private:
          { mPath = path; mFile = file; }
    };
    
+   bool        mIsOsWindows;
    std::string mAbsBinDir;
+   std::string mGmatWorkingDir;
    std::string mPathSeparator;
    std::string mStartupFileDir;
    std::string mStartupFileName;
@@ -177,6 +209,7 @@ private:
    std::string mDebugMatlab;
    std::string mDebugMissionTree;
    std::string mWriteParameterInfo;
+   std::string mWriteFilePathInfo;
    std::string mWriteGmatKeyword;
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
@@ -205,7 +238,7 @@ private:
    static FileManager *theInstance;
    static const std::string FILE_TYPE_STRING[FileTypeCount];
    
-   FileManager();
+   FileManager(const std::string &appName = "GMAT.exe");
    
    void SetPathsAbsolute();
 };

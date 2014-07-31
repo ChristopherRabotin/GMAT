@@ -28,7 +28,7 @@
 	<key>CFBundleIconFile</key>
 	<string>gmat.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>GMAT-R2013b</string>
+	<string>GMAT-R2014a</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
@@ -48,6 +48,6 @@
 	<key>LSRequiresCarbon</key>
 	<false/>
 	<key>NSHumanReadableCopyright</key>
-	<string>See GMAT documentation for licensing info</string>
+	<string>Copyright (c) 2002-2014 United States Government as represented by the Administrator of The National Aeronautics and Space Administration. All Other Rights Reserved.</string>
 </dict>
 </plist>

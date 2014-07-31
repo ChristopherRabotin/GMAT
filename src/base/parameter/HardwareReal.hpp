@@ -31,7 +31,8 @@ public:
    
    HardwareReal(const std::string &name, const std::string &typeStr, 
                 Gmat::ObjectType ownerType, Gmat::ObjectType ownedObjType,
-                GmatBase *obj, const std::string &desc, const std::string &unit);
+                GmatBase *obj, const std::string &desc, const std::string &unit,
+                bool isSettable = true);
    HardwareReal(const HardwareReal &copy);
    HardwareReal& operator=(const HardwareReal &right);
    virtual ~HardwareReal();

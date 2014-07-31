@@ -805,7 +805,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report",
@@ -870,7 +870,7 @@ void OutputTree::OnCompareNumericLines(wxCommandEvent &event)
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report|eph|txt",
@@ -950,7 +950,7 @@ void OutputTree::OnCompareNumericColumns(wxCommandEvent &event)
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report|eph|txt",

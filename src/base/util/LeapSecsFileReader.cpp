@@ -74,21 +74,21 @@ LeapSecsFileReader::~LeapSecsFileReader()
 //------------------------------------------------------------------------------
 bool LeapSecsFileReader::Initialize()
 {
+   std::ifstream instream;
    try
    {
       if (!isInitialized)
       {
-         std::ifstream instream;
-
          instream.open(withFileName.c_str());
-
-         if (instream == NULL)
+         
+         //if (instream == NULL)
+         if (!instream.is_open())
          {
             std::string errMsg = "Unable to locate leap second file "
-                                 + withFileName + "\n";
+               + withFileName + "\n";
             throw UtilityException(errMsg);
          }
-
+         
          bool    isOK           = true;
          Integer numLinesParsed = 0;
          while (!instream.eof())
@@ -101,7 +101,16 @@ bool LeapSecsFileReader::Initialize()
                numLinesParsed++;
             }
          }
-
+         
+         // Why personalization data written to this file?
+         // Try closing before throwing an exception (LOJ: 2014.06.18)
+         // Moved from below 
+         #ifdef DEBUG_LEAP_SECOND_FILE
+         MessageInterface::ShowMessage
+            ("LeapSecsFileReader::Initialize() 1 Closing leap second file\n");
+         #endif
+         instream.close();
+         
          if (!isOK)
          {
             std::string errMsg = "Unable to read leap second file "
@@ -114,11 +123,20 @@ bool LeapSecsFileReader::Initialize()
                                  + withFileName + " - file contains no data\n";
             throw UtilityException(errMsg);
          }
-         instream.close();
+         //instream.close();
       }
    }
    catch (...)
    {
+      if (instream.is_open())
+      {
+         #ifdef DEBUG_LEAP_SECOND_FILE
+         MessageInterface::ShowMessage
+            ("LeapSecsFileReader::Initialize() 2 Closing leap second file\n");
+         #endif
+         instream.close();
+      }
+      
       //MessageInterface::PopupMessage(Gmat::WARNING_,
       //                               "Unknown Error in LeapSecondFileReader");
       // re-throw the exception

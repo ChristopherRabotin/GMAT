@@ -780,7 +780,9 @@ std::string SpiceInterface::FindKernel(const std::string &withName)
       // directory specified for planetary SPK
       if (withName.find("/") == withName.npos)
       {
-         std::string spkPath = fm->GetPathname(FileManager::SPK_PATH);
+         // Changed to use VEHICLE_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+         //std::string spkPath = fm->GetPathname(FileManager::SPK_PATH);
+         std::string spkPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
          fullName = spkPath + fullName;
          if (!(GmatFileUtil::DoesFileExist(fullName)))
             fileFound = false;
@@ -790,7 +792,7 @@ std::string SpiceInterface::FindKernel(const std::string &withName)
          // Try to find it with the absolute path
          if (fullName.size() > 1 && fullName[0] == '.')
          {
-            fullName = fm->GetWorkingDirectory() + fm->GetPathSeparator() + fullName;
+            fullName = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + fullName;
             if (!(GmatFileUtil::DoesFileExist(fullName)))
                fileFound = false;
          }

@@ -203,6 +203,10 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
+      POWER_SYSTEM,        // for PowerSystems
+      SOLAR_POWER_SYSTEM,
+      NUCLEAR_POWER_SYSTEM,
+
       UNKNOWN_OBJECT
    };
 

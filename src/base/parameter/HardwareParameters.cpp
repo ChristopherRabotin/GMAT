@@ -19,6 +19,7 @@
  *              FuelDensity
  *    Thruster: DutyCycle, ThrustScaleFactor, GravitationalAccel, C1-C16,
  *              K1-K16, ThrustDirections
+ *    PowerSystem: TotalPowerAvailable, RequiredBusPower, ThrustPowerAvailable
  */
 //------------------------------------------------------------------------------
 
@@ -1151,5 +1152,264 @@ GmatBase* ThrustDirections::Clone(void) const
 {
    return new ThrustDirections(*this);
 }
+
+//==============================================================================
+//                              TotalPowerAvailable
+//==============================================================================
+/**
+ * Implements TotalPowerAvailable class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// TotalPowerAvailable(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+TotalPowerAvailable::TotalPowerAvailable(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "TotalPowerAvailable", Gmat::SPACECRAFT,
+                  Gmat::POWER_SYSTEM, obj, "Total Power Available", "", false)
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// TotalPowerAvailable(const TotalPowerAvailable &copy)
+//------------------------------------------------------------------------------
+TotalPowerAvailable::TotalPowerAvailable(const TotalPowerAvailable &copy)
+   : HardwareReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// TotalPowerAvailable& operator=(const TotalPowerAvailable &right)
+//------------------------------------------------------------------------------
+TotalPowerAvailable& TotalPowerAvailable::operator=(const TotalPowerAvailable &right)
+{
+   if (this != &right)
+      HardwareReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~TotalPowerAvailable()
+//------------------------------------------------------------------------------
+TotalPowerAvailable::~TotalPowerAvailable()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool TotalPowerAvailable::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(TOTAL_POWER_AVAILABLE);
+
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void TotalPowerAvailable::SetReal(Real val)
+{
+   SpacecraftData::SetReal(TOTAL_POWER_AVAILABLE, val);
+   RealVar::SetReal(val);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* TotalPowerAvailable::Clone() const
+//------------------------------------------------------------------------------
+GmatBase* TotalPowerAvailable::Clone() const
+{
+   return new TotalPowerAvailable(*this);
+}
+
+//==============================================================================
+//                              RequiredBusPower
+//==============================================================================
+/**
+ * Implements RequiredBusPower class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// RequiredBusPower(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+RequiredBusPower::RequiredBusPower(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "RequiredBusPower", Gmat::SPACECRAFT,
+                  Gmat::POWER_SYSTEM, obj, "Required Bus Power", "", false)
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// RequiredBusPower(const RequiredBusPower &copy)
+//------------------------------------------------------------------------------
+RequiredBusPower::RequiredBusPower(const RequiredBusPower &copy)
+   : HardwareReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// RequiredBusPower& operator=(const RequiredBusPower &right)
+//------------------------------------------------------------------------------
+RequiredBusPower& RequiredBusPower::operator=(const RequiredBusPower &right)
+{
+   if (this != &right)
+      HardwareReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~RequiredBusPower()
+//------------------------------------------------------------------------------
+RequiredBusPower::~RequiredBusPower()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool RequiredBusPower::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(REQUIRED_BUS_POWER);
+
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void RequiredBusPower::SetReal(Real val)
+{
+   SpacecraftData::SetReal(REQUIRED_BUS_POWER, val);
+   RealVar::SetReal(val);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* RequiredBusPower::Clone() const
+//------------------------------------------------------------------------------
+GmatBase* RequiredBusPower::Clone() const
+{
+   return new RequiredBusPower(*this);
+}
+
+//==============================================================================
+//                              ThrustPowerAvailable
+//==============================================================================
+/**
+ * Implements ThrustPowerAvailable class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// ThrustPowerAvailable(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+ThrustPowerAvailable::ThrustPowerAvailable(const std::string &name, GmatBase *obj)
+   : HardwareReal(name, "ThrustPowerAvailable", Gmat::SPACECRAFT,
+                  Gmat::POWER_SYSTEM, obj, "Thrust Power Available", "", false)
+{
+   #ifdef USE_PREDEFINED_COLORS
+      mColor = GmatColor::RED32;
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// ThrustPowerAvailable(const ThrustPowerAvailable &copy)
+//------------------------------------------------------------------------------
+ThrustPowerAvailable::ThrustPowerAvailable(const ThrustPowerAvailable &copy)
+   : HardwareReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// ThrustPowerAvailable& operator=(const ThrustPowerAvailable &right)
+//------------------------------------------------------------------------------
+ThrustPowerAvailable& ThrustPowerAvailable::operator=(const ThrustPowerAvailable &right)
+{
+   if (this != &right)
+      HardwareReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~ThrustPowerAvailable()
+//------------------------------------------------------------------------------
+ThrustPowerAvailable::~ThrustPowerAvailable()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool ThrustPowerAvailable::Evaluate()
+{
+   mRealValue = SpacecraftData::GetReal(THRUST_POWER_AVAILABLE);
+
+   if (mRealValue == GmatBase::REAL_PARAMETER_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetReal(Real val)
+//------------------------------------------------------------------------------
+/**
+ * Sets value to the owner of the parameter.
+ */
+//------------------------------------------------------------------------------
+void ThrustPowerAvailable::SetReal(Real val)
+{
+   SpacecraftData::SetReal(THRUST_POWER_AVAILABLE, val);
+   RealVar::SetReal(val);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* ThrustPowerAvailable::Clone() const
+//------------------------------------------------------------------------------
+GmatBase* ThrustPowerAvailable::Clone() const
+{
+   return new ThrustPowerAvailable(*this);
+}
+
 
 

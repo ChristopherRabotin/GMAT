@@ -57,19 +57,19 @@ static const Real TIME_TOL = 1.0e-8;
 
 //------------------------------------------------------------------------------
 // TextEphemFile(const std::string &type, const std::string &name,
-//               const std::string &fileName)
+//               const std::string &fname)
 //------------------------------------------------------------------------------
 TextEphemFile::TextEphemFile(const std::string &type, const std::string &name,
-                             const std::string &fileName, Parameter *firstVarParam) :
-   ReportFile(type, name, fileName, firstVarParam)
+                             const std::string &fname, Parameter *firstVarParam) :
+   ReportFile(type, name, fname, firstVarParam)
 {
    // create Interpolator
    mInterpolator = new CubicSplineInterpolator("InternalInterpolator", 6);
    
    // rename data file name
-   //filename = fileName + ".tempdata$$$";
-   filename = fileName + ".data";
-   mHeaderFileName = fileName;
+   //fileName = fname + ".tempdata$$$";
+   fileName = fname + ".data";
+   mHeaderFileName = fname;
    mEpochFormat = "";
    mCoordSysName = "";
    mIntervalInSec = 0.0;
@@ -857,15 +857,15 @@ void TextEphemFile::WriteEphemHeader()
    // Open data file
    #if DEBUG_EPHEMFILE_DATA
    MessageInterface::ShowMessage
-      ("TextEphemFile::WriteEphemHeader() filename=%s\n", filename.c_str());
+      ("TextEphemFile::WriteEphemHeader() fileName=%s\n", fileName.c_str());
    #endif
    
-   std::ifstream dataStream(filename.c_str());
+   std::ifstream dataStream(fileName.c_str());
    if (!dataStream.is_open())
    {
       MessageInterface::ShowMessage
          ("*** ERROR *** TextEphemFile::WriteEphemHeader() Fail to open %s\n",
-          filename.c_str());
+          fileName.c_str());
       headerStream.close();
       return;
    }
@@ -886,10 +886,10 @@ void TextEphemFile::WriteEphemHeader()
 //    // It doesn't work!!!
 //    #ifdef __WINDOWS__
 //    // Delete data file
-//    if (system(("rm " + filename).c_str()) == 0)
-//       MessageInterface::ShowMessage("==> Sucessfully removed file:%s\n", filename.c_str());
+//    if (system(("rm " + fileName).c_str()) == 0)
+//       MessageInterface::ShowMessage("==> Sucessfully removed file:%s\n", fileName.c_str());
 //    else
-//       MessageInterface::ShowMessage("==> Removing file:%s was Unsuccessful\n", filename.c_str());
+//       MessageInterface::ShowMessage("==> Removing file:%s was Unsuccessful\n", fileName.c_str());
 //    #endif
 }
 

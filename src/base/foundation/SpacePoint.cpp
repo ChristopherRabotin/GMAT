@@ -184,7 +184,9 @@ targetColorStr     ("")
    
    /// derived classes must override this, as necessary, to point to
    /// the correct path
-   theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+   //theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+   // Use VEHICLE_EPHEM_SPK_PATH. SPK_PATH was renamed to PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+   theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
    SaveAllAsDefault();
 }
 
@@ -1834,17 +1836,45 @@ std::string SpacePoint::ParseKernelName(const std::string &kernel)
 void SpacePoint::ValidateKernel(const std::string &kName, const std::string label,
                                 const std::string ofType)
 {
-#ifdef DEBUG_KERNEL_VALIDATE
+   #ifdef DEBUG_KERNEL_VALIDATE
    MessageInterface::ShowMessage("ValidateKernel with kName = \"%s\", and ofType = \"%s\"\n",
          kName.c_str(), ofType.c_str());
    MessageInterface::ShowMessage("   and label = %s\n", label.c_str());
-#endif
-
+   #endif
+   
    std::string fullSpkName = kName;
+   
+   // User FileManager::FindPath() to use search order (LOJ: 2014.06.17)
+   static bool writeWarning = true;
+   std::string tempSpkName =
+      FileManager::Instance()->FindPath(kName, FileManager::PLANETARY_EPHEM_SPK_PATH, true, writeWarning);
+   writeWarning = false;
+   
+   #ifdef DEBUG_KERNEL_VALIDATE
+   MessageInterface::ShowMessage("   tempSpkName = '%s'\n", tempSpkName.c_str());
+   #endif
+   
+   if (tempSpkName == "")
+   {
+      GmatBaseException gbe;
+      gbe.SetDetails(errorMessageFormat.c_str(),
+                     fullSpkName.c_str(), label.c_str(), "File must exist");
+      throw gbe;
+   }
+   else
+      fullSpkName = tempSpkName;
+   
+   
    #ifdef DEBUG_KERNEL_VALIDATE
       MessageInterface::ShowMessage(" ................. kName = \"%s\"\n",
             fullSpkName.c_str());
    #endif
+
+   //======================================================================
+   // This section will be removed when file path testing completes
+   //======================================================================
+   #if 0
+   //======================================================================
    if (!(GmatFileUtil::DoesFileExist(kName)))
    {
       // try again with path name from startup file
@@ -1870,6 +1900,10 @@ void SpacePoint::ValidateKernel(const std::string &kName, const std::string labe
          }
       }
    }
+   //======================================================================
+   #endif
+   //======================================================================
+   
    #ifdef __USE_SPICE__
       if (!SpiceInterface::IsValidKernel(fullSpkName, ofType))
       {

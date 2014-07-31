@@ -122,6 +122,11 @@ protected:
    // array of Frame kernel names
    StringArray fk;
 
+   // array of full path kernel names
+   StringArray ckFullPath;
+   StringArray sclkFullPath;
+   StringArray fkFullPath;
+
    // static text and types for parameters
    static const std::string PARAMETER_TEXT[SpiceAttitudeParamCount - AttitudeParamCount];
 

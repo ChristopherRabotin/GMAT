@@ -27,6 +27,7 @@
 #include "GmatState.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
+#include "PowerSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "TimeSystemConverter.hpp"
@@ -47,7 +48,12 @@ public:
    virtual void         SetSolarSystem(SolarSystem *ss);
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
-
+   
+   std::string          GetModelFile();
+   std::string          GetModelFileFullPath();
+   int                  GetModelId();
+   void                 SetModelId(int id);
+   
    void                 SetState(const Rvector6 &cartState);
    void                 SetState(const std::string &elementType, Real *instate);
    void                 SetState(const Real s1, const Real s2, const Real s3,
@@ -72,11 +78,6 @@ public:
                         GetEulerAngleSequence() const;
    
    Rvector3             GetSPADSRPArea(const Real ep, const Rvector3 &sunVector);
-
-   // The ID of the model that the spacecraft uses, and the filename as well
-   std::string          modelFile;
-   int                  modelID;
-
    
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;
@@ -257,6 +258,7 @@ protected:
       SRP_AREA_ID,
       FUEL_TANK_ID,
       THRUSTER_ID,
+      POWER_SYSTEM_ID,
       TOTAL_MASS_ID,
       SPACECRAFT_ID,
       ATTITUDE,
@@ -266,6 +268,7 @@ protected:
 
       // SPAD SRP parameters
       SPAD_SRP_FILE,
+      SPAD_SRP_FILE_FULL_PATH, // read-only
       SPAD_SRP_SCALE_FACTOR,
 
       // Hidden parameters used by the PSM
@@ -281,7 +284,7 @@ protected:
       ADD_HARDWARE,
       // The filename used for the spacecraft's model 
       MODEL_FILE,
-
+      MODEL_FILE_FULL_PATH, // read-only
       // The Offset, rotation, and scale values for the spacecraft's model
       MODEL_OFFSET_X,
       MODEL_OFFSET_Y,
@@ -421,9 +424,9 @@ protected:
    static const Integer ATTITUDE_ID_OFFSET;
    static const Real    UNSET_ELEMENT_VALUE;
    
-   std::map <std::string, std::string> elementLabelMap;
    std::map <std::string, std::string> attribCommentLineMap;
    std::map <std::string, std::string> inlineAttribCommentMap;
+   std::map<std::string, std::string> defaultStateTypeMap;
    std::map <std::string, StringArray> stateElementLabelsMap;
    std::map <std::string, StringArray> stateElementUnitsMap;
    std::multimap <std::string, std::string> allElementLabelsMultiMap;
@@ -434,7 +437,14 @@ protected:
    StringArray       stateElementUnits;
    /// Possible state representations
    StringArray       representations;
-
+   
+   // The ID of the model that the spacecraft uses, and the filename as well
+   std::string          modelFile;   
+   int                  modelID;
+   
+   /// Model file path
+   std::string          modelFileFullPath;
+   
    /// Epoch string, specifying the text form of the epoch
    std::string       scEpochStr;
    Real              dryMass;
@@ -508,10 +518,14 @@ protected:
    StringArray       tankNames;
    /// Thruster names
    StringArray       thrusterNames;
+   /// Name of the PowerSystem
+   std::string       powerSystemName;
    /// Pointers to the fuel tanks
    ObjectArray       tanks;
    /// Pointers to the spacecraft thrusters
    ObjectArray       thrusters;
+   /// Pointer to the PowerSystem
+   PowerSystem       *powerSystem;
    /// Dry mass plus fuel masses, a calculated parameter
    Real              totalMass;
 
@@ -529,6 +543,8 @@ protected:
 
    /// The name of the SPAD SRP file
    std::string       spadSRPFile;
+   /// SPAD SRP full path file name
+   std::string       spadSrpFileFullPath;
    /// the scale factor to use for the SSPAD SRP data
    Real              spadSRPScaleFactor;
    /// the SPADFileReader
@@ -549,12 +565,14 @@ protected:
    Real              UpdateTotalMass() const;
    bool              ApplyTotalMass(Real newMass);
    void              DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
-                                        bool deleteThrusters, bool otherHardware);
+                                        bool deleteThrusters, bool deletePowerSystem,
+                                        bool otherHardware);
    void              CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                       const ObjectArray &thrs);
+                                       const ObjectArray &thrs, PowerSystem *pwr);
    void              AttachTanksToThrusters();
    bool              SetHardware(GmatBase *obj, StringArray &hwNames,
                                  ObjectArray &hwArray);
+   bool              SetPowerSystem(GmatBase *obj, std::string &psName);
    virtual void      WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                         std::stringstream &stream);
 
@@ -565,7 +583,6 @@ protected:
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
-   void              BuildElementLabelMap();
    void              RecomputeStateAtEpoch(const GmatEpoch &toEpoch);
 
 private:
