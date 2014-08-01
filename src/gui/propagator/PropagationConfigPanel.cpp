@@ -3279,6 +3279,8 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
       {
 //         primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
          primaryBodyData->potFile = potFileTextCtrl->GetValue();
+         // Added to fix GMT-4651 (LOJ: 2014.07.31)
+         primaryBodyData->potFileFullPath = potFileTextCtrl->GetValue(); 
       }
 
       #ifdef DEBUG_PROP_PANEL_GRAV
@@ -3702,7 +3704,9 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       
 //      primaryBodyList[currentBodyId]->potFile = filename;
       primaryBodyData->potFile = filename;
-
+      // Added to fix GMT-4651 (LOJ: 2014.07.31)
+      primaryBodyData->potFileFullPath = filename; 
+      
 //      if (primaryBodyList[currentBodyId]->bodyName == "Earth")
 //         primaryBodyList[currentBodyId]->gravType = earthGravModelArray[E_OTHER];
 //      else if (primaryBodyList[currentBodyId]->bodyName == "Luna")
@@ -3894,6 +3898,8 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
    {
 //      primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
       primaryBodyData->potFile = potFileTextCtrl->GetValue();
+      // Added to fix GMT-4651 (LOJ: 2014.07.31)
+      primaryBodyData->potFileFullPath = potFileTextCtrl->GetValue(); 
       isPotFileChanged = true;
       // Do not set to true if only text changed
       //isForceModelChanged = true;
