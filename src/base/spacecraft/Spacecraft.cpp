@@ -2362,7 +2362,10 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
    {
       return true;
    }
-
+   
+   if (id == MODEL_FILE_FULL_PATH || id == SPAD_SRP_FILE_FULL_PATH)
+      return true;
+   
    if ((id > MODEL_FILE) && (id < MODEL_MAX))
    {
       if (modelFile == "")
@@ -2378,9 +2381,6 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
    if (id == NAIF_ID_REFERENCE_FRAME)  return false;
    
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
-   
-   if (id == MODEL_FILE_FULL_PATH || SPAD_SRP_FILE_FULL_PATH)
-      return true;
    
    return SpaceObject::IsParameterReadOnly(id);
 }
@@ -2416,7 +2416,7 @@ bool Spacecraft::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Spacecraft::IsParameterCommandModeSettable(const Integer id) const
 {
-   if (id == MODEL_FILE)
+   if (id == MODEL_FILE || id == MODEL_FILE_FULL_PATH)
       return false;
 
    if ((id == ORBIT_SPICE_KERNEL_NAME)    ||
@@ -6083,6 +6083,16 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             MessageInterface::ShowMessage
                ("*** INTERNAL ERROR *** attitude is NULL\n");
          }
+      }
+      else
+      {
+         #ifdef DEBUG_WRITE_PARAMETERS
+         MessageInterface::ShowMessage
+            ("==> parmOrder[%d] = %d, '%s' is not handled\n",
+             i, parmOrder[i], GetParameterText(parmOrder[i]).c_str());
+         MessageInterface::ShowMessage
+            ("==> It is %Read-Only\n", IsParameterReadOnly(parmOrder[i]) ? "" : "NOT ");
+         #endif
       }
    }
    
