@@ -82,6 +82,10 @@ public:
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
+   /// This function is used to add media correction to measurement model
+   virtual void         AddCorrection(const std::string& modelName,					// made changes by TUAN NGUYEN
+	                          const std::string& mediaCorrectionType) = 0;			// made changes by TUAN NGUYEN
+
 
    virtual std::string  GetPathDescription(bool fullList = true);
 
