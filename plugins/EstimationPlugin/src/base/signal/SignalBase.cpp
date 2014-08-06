@@ -825,13 +825,17 @@ void SignalBase::CalculateRangeVectorInertial()
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
 
 #ifdef USE_PRECISION_TIME
-   theData.j2kOriginSep = (origin2->GetMJ2000PrecPosition(theData.rPrecTime) - ssb->GetMJ2000PrecPosition(theData.rPrecTime)) -
-                          (origin1->GetMJ2000PrecPosition(theData.tPrecTime) - ssb->GetMJ2000PrecPosition(theData.tPrecTime));
+   theData.tOStateSSB = origin1->GetMJ2000PrecState(theData.tPrecTime) - ssb->GetMJ2000PrecState(theData.tPrecTime);
+   theData.rOStateSSB = origin2->GetMJ2000PrecState(theData.rPrecTime) - ssb->GetMJ2000PrecState(theData.rPrecTime);
+   theData.j2kOriginSep = (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());
+   theData.j2kOriginVel = (theData.rOStateSSB.GetV() - theData.tOStateSSB.GetV());
 //   theData.j2kOriginSep        = origin2->GetMJ2000PrecPosition(theData.rPrecTime) -
 //                                 origin1->GetMJ2000PrecPosition(theData.tPrecTime);
 #else
-   theData.j2kOriginSep = (origin2->GetMJ2000Position(theData.rTime) - ssb->GetMJ2000Position(theData.rTime)) -
-                          (origin1->GetMJ2000Position(theData.tTime) - ssb->GetMJ2000Position(theData.tTime));
+   theData.tOStateSSB = origin1->GetMJ2000PrecState(theData.tTime) - ssb->GetMJ2000PrecState(theData.tTime);
+   theData.rOStateSSB = origin2->GetMJ2000PrecState(theData.rTime) - ssb->GetMJ2000PrecState(theData.rTime);
+   theData.j2kOriginSep = (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());
+   theData.j2kOriginVel = (theData.rOStateSSB.GetV() - theData.tOStateSSB.GetV());
 //   theData.j2kOriginSep        = origin2->GetMJ2000Position(theData.rTime) -
 //                                 origin1->GetMJ2000Position(theData.tTime);
 #endif
