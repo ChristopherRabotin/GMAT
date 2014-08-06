@@ -948,8 +948,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	  Rvector3 dis = (cb1->GetMJ2000Position(t3R) - ssb->GetMJ2000Position(t3R)) - (cb1->GetMJ2000Position(t2T) - ssb->GetMJ2000Position(t2T));
-			 MessageInterface::ShowMessage("%s moving vector from t2T to t3R: %s\n", cbName1.c_str(), dis.ToString());
 	     Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
 	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
@@ -1311,8 +1309,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  {
 	   	 currentMeasurement.isFeasible = false;
 	   	 currentMeasurement.value[0] = 0;
-	   	 MessageInterface::ShowMessage("The transponder is unfeasible to receive uplink signal.\n");
-	   	 throw GmatBaseException("The transponder is unfeasible to receive uplink signal.\n");
+	   	 throw MeasurementException("The transponder is unfeasible to receive uplink signal.\n");
 	  }
 
 
@@ -1325,7 +1322,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #endif
 
 
-	  // 13. Doppler shift the transponder output frequency by the downlinkRangeRate:
+	  // 13. Doppler shift the transponder output frequency:
 	  Real downlinkDSFreq = (1 - downlinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*downlinkFreq;
 
 	  #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
@@ -1343,7 +1340,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  {
 	   	 currentMeasurement.isFeasible = false;
 	   	 currentMeasurement.value[0] = 0;
-		 MessageInterface::ShowMessage("The receiver is unfeasible to receive downlink signal.\n");
 	   	 throw MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
 	  }
 
@@ -1374,7 +1370,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  downlinkTime = downlinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
 	  // 17.2. Calculate ET-TAI correction
 	  Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);												// made change by TUAN NGUYEN
-	  // 17.3 Calcukate travel time
+	  // 17.3 Calculate travel time
 	  Real realTravelTime = uplinkTime + downlinkTime + ettaiCorrection + receiveDelay + transmitDelay + targetDelay;		// unit: second		// made change by TUAN NGUYEN
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
