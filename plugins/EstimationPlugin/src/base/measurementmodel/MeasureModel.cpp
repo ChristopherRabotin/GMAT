@@ -40,6 +40,7 @@
 //#define DEBUG_TIMING
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
+#define DEBUG_CALCULATE_MEASUREMENT
 #define USE_PRECISION_TIME
 
 //------------------------------------------------------------------------------
@@ -92,10 +93,36 @@ MeasureModel::MeasureModel(const std::string &name) :
 //------------------------------------------------------------------------------
 MeasureModel::~MeasureModel()
 {
+   // Delete all objects in propMap:
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
       if (i->second != NULL)
          delete i->second;
+
+   // Delete all object in participantLists:
+   for (UnsignedInt i = 0 ; i < participantLists.size(); ++i)
+   {
+      if (participantLists[i] != NULL)
+	     delete participantLists[i];
+   }
+
+   // Delete all object in participants:
+   for (UnsignedInt i = 0 ; i < participants.size(); ++i)
+   {
+      if (participants[i] != NULL)
+	  {
+	     delete participants[i];		// It does not need to delete all objects in object array participants[i]
+	  }
+   }
+
+   // Delete all object in signalPaths:
+   for (UnsignedInt i = 0 ; i < signalPaths.size(); ++i)
+   {
+      if (signalPaths[i] != NULL)
+	  {
+	     delete signalPaths[i];		// It deletes all legs in signal path ith
+	  }
+   }
 }
 
 
@@ -116,7 +143,9 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
    navLog            (mm.navLog),
    logLevel          (mm.logLevel),
    isPhysical        (mm.isPhysical),
-   solarsys          (mm.solarsys)
+   solarsys          (mm.solarsys),
+   correctionTypeList(mm.correctionTypeList),					// made changes by TUAN NGUYEN
+   correctionModelList(mm.correctionModelList)					// made changes by TUAN NGUYEN
 {
 }
 
@@ -145,6 +174,8 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       logLevel = mm.logLevel;
       isPhysical = mm.isPhysical;
       solarsys = mm.solarsys;
+	  correctionTypeList  = mm.correctionTypeList;					// made changes by TUAN NGUYEN
+	  correctionModelList = mm.correctionModelList;					// made changes by TUAN NGUYEN
 
       for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
             i != propMap.end(); ++i)
@@ -363,8 +394,8 @@ bool MeasureModel::SetStringParameter(const Integer id,
 
    if (id == SIGNAL_PATH)
    {
-   if ((index < 0) || (index > (Integer)participantLists.size()))
-      throw MeasurementException("Index out of bounds when setting string "
+      if ((index < 0) || (index > (Integer)participantLists.size()))
+         throw MeasurementException("Index out of bounds when setting string "
             "parameter");
 
       if ((Integer)participantLists.size() == index)
@@ -745,6 +776,10 @@ void MeasureModel::SetPropagator(PropSetup* ps)
 //------------------------------------------------------------------------------
 bool MeasureModel::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("MeasurementModel::Initialize()\n");
+   #endif
+
    bool retval = false;
 
    if (GmatBase::Initialize())
@@ -815,8 +850,8 @@ bool MeasureModel::Initialize()
                   if (isPhysical)
                   {
                      sb = new PhysicalSignal("");
-                     if (navLog)
-                        sb->SetProgressReporter(navLog);
+                     //if (navLog)										// made changes by TUAN NGUYEN
+                     //   sb->SetProgressReporter(navLog);				// made changes by TUAN NGUYEN
                   }
                   else
                   {
@@ -830,6 +865,8 @@ bool MeasureModel::Initialize()
 
                   if (sb)
                   {
+                     if (navLog)										// made changes by TUAN NGUYEN
+                        sb->SetProgressReporter(navLog);				// made changes by TUAN NGUYEN
                      sb->SetSolarSystem(solarsys);
                      sb->UsesLighttime(withLighttime);
                      if (sb->SetTransmitParticipantName(
@@ -885,8 +922,14 @@ bool MeasureModel::Initialize()
                         head->Add(sb);
                   }
                }
-               retval = true;
+               //retval = true;															// made changes by TUAN NGUYEN
             }
+
+			// Add new types of measurement corrections to signal path					// made changes by TUAN NGUYEN
+			for(UnsignedInt i = 0; i < correctionTypeList.size(); ++i)					// made changes by TUAN NGUYEN
+			   AddCorrection(correctionModelList[i], correctionTypeList[i]);			// made changes by TUAN NGUYEN
+
+			retval = true;																// made changes by TUAN NGUYEN
          }
          else
             throw MeasurementException("Cannot configure the measurement "
@@ -1006,6 +1049,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    bool retval = false;
    feasible = true;
 
+   // 1. Prepare the propagators
    if (propsNeedInit)
       PrepareToPropagate();
 
@@ -1014,7 +1058,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    // receiver)
    bool epochIsAtEnd = true;
 
-   // Find the measurement epoch needed for the computation
+   // 2. Find the measurement epoch needed for the computation
 #ifdef USE_PRECISION_TIME
    GmatTime forEpoch;
 #else
@@ -1034,7 +1078,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
 
-   // Synchronize the propagators to the measurement epoch by propagating each
+   // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
       MessageInterface::ShowMessage("Synching in MeasureModel\n");
@@ -1074,17 +1118,42 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
 
-   #ifdef DEBUG_TIMING
-      MessageInterface::ShowMessage("Sync Complete\n");
-   #endif
 
-   // Calculate the measurement data ("C" value data) for the signal paths
+   // 4.Calculate the measurement data ("C" value data) for all signal paths
+   #ifdef DEBUG_CALCULATE_MEASUREMENT
+	  MessageInterface::ShowMessage("*************************************************************\n");
+
+      #ifdef USE_PRECISION_TIME
+      MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch.GetMjd());
+      #else
+	  MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch);
+      #endif
+	  
+	  MessageInterface::ShowMessage("*************************************************************\n");
+   #endif
+   
+   
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
-      SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
+      #ifdef DEBUG_CALCULATE_MEASUREMENT
+	   MessageInterface::ShowMessage("#### Calculate Measurement Data for Path: ");
+		 SignalBase* s = signalPaths[i];
+		 SignalData* sdata; 
+		 while (s != NULL)
+		 {
+			 // Display leg shown in SignalBase s:
+			 sdata = &(s->GetSignalData());
+			 MessageInterface::ShowMessage("<%s -> %s>  ", sdata->tNode->GetName().c_str(), sdata->rNode->GetName().c_str());
+			 s = s->GetNext();
+		 }
+		 MessageInterface::ShowMessage("\n\n");
+	  #endif
 
+      // 4.1. Get the start signal:
+      SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
       SignalData *sd = &(startSignal->GetSignalData());
-      // Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
+
+      // 4.2. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
 #ifdef USE_PRECISION_TIME
 	  sd->tPrecTime = sd->rPrecTime = forEpoch;							// made changes by TUAN NGUYEN
@@ -1108,43 +1177,67 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          sd->rVel = state.GetV();
       }
 
-      #ifdef DEBUG_TIMING
-         MessageInterface::ShowMessage("Data Updated\n");
-      #endif
-
-      #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("***************************************"
-               "***\n*** Starting modeling for path %d\n"
-               "******************************************\n", i);
-      #endif
-
-      #ifdef DEBUG_TIMING
-         MessageInterface::ShowMessage("Modeling signals for epoch %.12lf\n",
-               forEpoch);
-      #endif
-
+	  // 4.3. Compute C-value:
       if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
       {
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
 
-      #ifdef DEBUG_TIMING
-         MessageInterface::ShowMessage("Modeling complete\n");
+	  // 4.4. Verify feasibility:
+      #ifdef DEBUG_CALCULATE_MEASUREMENT
+	     SignalData *current = theData[i];
+  		 Real lightTimeRange = 0.0;
+		 Real tropoCorrection = 0.0;
+		 Real ionoCorrection = 0.0;
+		 Real relCorrection = 0.0;
+		 Real ettaiCorrection = 0.0;
+	     while (current != NULL)
+		 {
+			lightTimeRange += current->rangeVecInertial.GetMagnitude();
+			// accumulate all range corrections
+			for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+			{
+			   if (current->useCorrection[j])
+			   {
+			      if (current->correctionIDs[j] == "Troposphere")
+				     tropoCorrection += current->corrections[j];
+			      else if (current->correctionIDs[j] == "Ionosphere")
+				     ionoCorrection += current->corrections[j];
+			      else if (current->correctionIDs[j] == "Relativity")
+				     relCorrection += current->corrections[j];
+			      else if (current->correctionIDs[j] == "ET-TAI")
+				     ettaiCorrection += current->corrections[j];
+			   }
+			}
+		    current = current->next;
+		 }
+		 Real realRange = lightTimeRange + relCorrection + ettaiCorrection + tropoCorrection + ionoCorrection;
+		 MessageInterface::ShowMessage("#### Summary of %d th path:\n", i);
+	     if (signalPaths[i]->IsSignalFeasible())
+			 MessageInterface::ShowMessage("   .This path is feasible\n");
+		 else
+			 MessageInterface::ShowMessage("   .This path is unfeasible\n");
+		 MessageInterface::ShowMessage("   .Light time range      : %.12lf km\n", lightTimeRange);
+		 MessageInterface::ShowMessage("   .Relativity Correction : %.12lf km\n", relCorrection);
+		 MessageInterface::ShowMessage("   .ET-TAI correction     : %.12lf km\n", ettaiCorrection);
+		 MessageInterface::ShowMessage("   .Troposphere correction: %.12lf km\n", tropoCorrection);
+		 MessageInterface::ShowMessage("   .Ionosphere correction : %.12lf km\n", ionoCorrection);
+		 MessageInterface::ShowMessage("   .Real range            : %.12lf km\n", realRange);
+		 MessageInterface::ShowMessage("####################################################\n\n");
       #endif
-
+	  
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
    }
 
-   #ifdef DEBUG_TIMING
-      MessageInterface::ShowMessage("Calc Complete\n");
-   #endif
-
    retval = true;
 
-   #ifdef DEBUG_FEASIBILITY
+   #ifdef DEBUG_CALCULATE_MEASUREMENT
       if (feasible)
-         MessageInterface::ShowMessage("*** Feasible signal detected\n");
+         MessageInterface::ShowMessage("**** All paths in this measurement are feasible\n");
+	  else
+		 MessageInterface::ShowMessage("**** Some paths in this measurement are unfeasible\n\n");
+	  MessageInterface::ShowMessage("**** Calculation for this measurement is completed ****\n\n");
    #endif
 
    return retval;
@@ -1289,3 +1382,62 @@ void MeasureModel::PrepareToPropagate()
 
    propsNeedInit = false;
 }
+
+
+//------------------------------------------------------------------------------
+// void SetCorrection(const std::string correctionName,
+//       const std::string correctionType)
+//------------------------------------------------------------------------------
+/**
+ * Passes a correction name into the owned CoreMeasurement
+ *
+ * @param correctionName The name of the correction
+ * @param correctionType The type of correction
+ *
+ */
+//------------------------------------------------------------------------------
+void MeasureModel::SetCorrection(const std::string& correctionName,
+      const std::string& correctionType)
+{
+   // Add new measurement correction type to correctionTypeList
+   // Update correction model into correctionModelList as needed
+   UnsignedInt i = 0;
+   for (; i < correctionTypeList.size(); ++i)
+   {
+      if (correctionType == correctionTypeList[i])
+	     break;
+   }
+   if (i == correctionTypeList.size())
+   {
+	  correctionTypeList.push_back(correctionType);
+	  correctionModelList.push_back(correctionName);
+   }
+   else
+	  correctionModelList[i] = correctionName;
+}
+
+
+//------------------------------------------------------------------------------
+// void AddCorrection(const std::string correctionName,
+//       const std::string correctionType)
+//------------------------------------------------------------------------------
+/**
+ * Add a type of measurement correction to measurement signal path
+ *
+ * @param correctionName The name of the correction
+ * @param correctionType The type of correction
+ *
+ */
+//------------------------------------------------------------------------------
+void MeasureModel::AddCorrection(const std::string& correctionName,
+      const std::string& correctionType)
+{
+   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   {
+	  signalPaths[i]->AddCorrection(correctionName, correctionType);
+   }
+}
+
+
+
+
