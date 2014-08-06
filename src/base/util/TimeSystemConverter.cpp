@@ -636,6 +636,23 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
    return jules;
 }
 
+//---------------------------------------------------------------------------
+// void Convert(const char *fromType, Real fromMjd,
+//              const char *fromStr, const char *toType,
+//              Real &toMjd, std::string &toStr, Integer format = 1)
+//---------------------------------------------------------------------------
+/*
+ * @see Convert(const std::string &fromType, Real fromMjd, ...)
+ */
+//---------------------------------------------------------------------------
+void TimeConverterUtil::Convert(const char *fromType, Real fromMjd, 
+                                const char *fromStr,
+                                const char *toType, Real &toMjd,
+                                std::string &toStr, Integer format)
+{
+   return Convert(std::string(fromType), fromMjd, std::string(fromStr),
+                  std::string(toType), toMjd, toStr, format);
+}
 
 //---------------------------------------------------------------------------
 // void Convert(const std::string &fromType, Real fromMjd,

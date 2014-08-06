@@ -847,7 +847,6 @@ std::string Array::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
-
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
@@ -901,6 +900,14 @@ bool Array::SetStringParameter(const Integer id, const std::string &value)
    default:
       return Parameter::SetStringParameter(id, value);
    }
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool Array::SetStringParameter(const std::string &label, const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 

@@ -194,6 +194,23 @@ bool UserInputValidator::CheckFileName(const std::string &str,
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool CheckReal(Real &rvalue, const char *str,
+//                const std::string &field, const std::string &expRange,
+//                bool onlyMsg, bool checkRange, bool positive bool zeroOk)
+//------------------------------------------------------------------------------
+/*
+ * @see CheckReal(Real &rvalue, const std::string &str, ...)
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckReal(Real &rvalue, const char *str,
+                          const std::string &field, const std::string &expRange,
+                          bool onlyMsg, bool checkRange, bool positive, bool zeroOk)
+{
+   return CheckReal(rvalue, std::string(str), field, expRange,
+                    onlyMsg, checkRange, positive, zeroOk);
+}
+
 
 //------------------------------------------------------------------------------
 // bool CheckReal(Real &rvalue, const std::string &str,
@@ -269,6 +286,23 @@ bool UserInputValidator::CheckReal(Real &rvalue, const std::string &str,
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool CheckInteger(Integer &ivalue, const std::string &str,
+//                   const std::string &field, const std::string &expRange,
+//                   bool onlyMsg = false, bool positive, bool zeroOk)
+//------------------------------------------------------------------------------
+/*
+ * @see CheckInteger(Integer &ivalue, const std::string &str, ...)
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckInteger(Integer &ivalue, const char *str,
+                                      const std::string &field,
+                                      const std::string &expRange, bool onlyMsg,
+                                      bool checkRange, bool positive, bool zeroOk)
+{
+   return CheckInteger(ivalue, std::string(str), field, expRange, onlyMsg,
+                       checkRange, positive, zeroOk);
+}
 
 //------------------------------------------------------------------------------
 // bool CheckInteger(Integer &ivalue, const std::string &str,
@@ -380,6 +414,38 @@ bool UserInputValidator::CheckIntegerRange(Integer &ivalue, const std::string &s
    
    SetErrorFlag();
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckVariable(const char *varName, ObjectTypeArray ownerTypes,
+//                    const std::string &field, const std::string &expRange,
+//                    bool allowNumber  = true, bool allowNonPlottable = false,
+//                    bool allowWholeArray = false)
+//------------------------------------------------------------------------------
+/*
+ * Checks if input variable is a Number, Variable, Array element, or parameter of
+ * input owner type.
+ *
+ * @param  varName     Input variable name to be checked
+ * @param  ownerTypes  Input owner array of types if Parameter (such as Gmat::SPACECRAFT),
+ *                     if type is UNKNOWN_OBJECT, it doesn't check for type
+ * @param  field       Field name should be used in the error message
+ * @param  expRange    Expected value range to be used in the error message
+ * @param  allowNumber true if varName can be a Real number [true]
+ * @param  allowNonPlottable  true if varName can be a non-plottable [false]
+ * @param  allowWholeArray    true if varName can be an whole array [false]
+ *
+ * @return true if varName is valid
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckVariable(const char *varName, ObjectTypeArray ownerTypes,
+                                       const std::string &field, const std::string &expRange,
+                                       bool allowNumber, bool allowNonPlottable,
+                                       bool allowObjectProperty, bool allowWholeArray)
+{
+   return CheckVariable(std::string(varName), ownerTypes, field, expRange, allowNumber,
+                        allowNonPlottable, allowObjectProperty, allowWholeArray);
 }
 
 

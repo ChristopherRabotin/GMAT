@@ -229,13 +229,13 @@ void TextEphemFileDialog::LoadData()
       
       // set default ephemeris  file using spacecraft name
       wxString fname = scName + "_Ephem.txt";
-      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
+      mEphemFileTextCtrl->SetValue(mEphemDirectory + fname);
       
       theOkButton->Enable();
    }
    else
    {
-      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() +
+      mEphemFileTextCtrl->SetValue(mEphemDirectory +
                                    wxString("/TextEphemHeader.txt"));
       
       theOkButton->Disable();

@@ -47,6 +47,7 @@ public:
    char* GetCallbackResults();
    
    char* GetRunState();
+   char* GetGmatObject(const char *name);
    char* GetGmatObject(const std::string &name);
    char* GetParameter(const std::string &name);
    

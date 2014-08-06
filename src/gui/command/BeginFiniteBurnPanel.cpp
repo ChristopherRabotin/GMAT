@@ -158,7 +158,7 @@ void BeginFiniteBurnPanel::Create()
    // create burn label
    wxStaticText *burnLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT(GUI_ACCEL_KEY"Burn"), wxDefaultPosition, wxSize(50, -1));
+                       GUI_ACCEL_KEY"Burn", wxDefaultPosition, wxSize(50, -1));
    
    #ifdef DEBUG_BEGINFBPANEL_CREATE
    MessageInterface::ShowMessage
@@ -177,13 +177,13 @@ void BeginFiniteBurnPanel::Create()
    
    wxStaticText *satLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT(GUI_ACCEL_KEY"Spacecraft"), wxDefaultPosition, wxSize(60,-1));
+                       GUI_ACCEL_KEY"Spacecraft", wxDefaultPosition, wxSize(60,-1));
    mSatTextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1));
    mSatTextCtrl->SetToolTip(pConfig->Read(_T("SpacecraftHint")));
    
    wxButton *selectSatButton =
-      new wxButton(this, ID_BUTTON, wxT("E"GUI_ACCEL_KEY"dit"), wxDefaultPosition, wxDefaultSize);
+      new wxButton(this, ID_BUTTON, "E"GUI_ACCEL_KEY"dit", wxDefaultPosition, wxDefaultSize);
    selectSatButton->SetToolTip(pConfig->Read(_T("SelectSpacecraftHint")));
    
    //----------------------------------------------------------------------

@@ -87,7 +87,8 @@ public:
    // method to add a body to the solar system
    bool                 AddBody(CelestialBody* cb);
    // method to return a body of the solar system, given its name
-   CelestialBody*       GetBody(std::string withName);
+   CelestialBody*       GetBody(const char *withName);
+   CelestialBody*       GetBody(const std::string &withName);
    // method to remove a body from the solar system
    bool                 DeleteBody(const std::string &withName);
    /// method to add a special point to the Solar System
@@ -329,7 +330,7 @@ private:
    Real         default_ephemUpdateInterval;
    
    /// method to find a body in the solar system, given its name
-   CelestialBody* FindBody(std::string withName);
+   CelestialBody* FindBody(const std::string &withName);
    // WARNING: The J200Body must be set identically for all objects in a GMAT run;
    // not doing so will give incorrect results.
    // In addition, the setting of a body other than Earth as the J2000Body has

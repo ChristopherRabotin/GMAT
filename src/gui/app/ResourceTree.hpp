@@ -123,8 +123,11 @@ protected:
    //void InitializeIcons();
    
    // objects
+   GmatBase* CreateObject(const std::string &objType, const char *objName,
+                          bool createDefault = false);
    GmatBase* CreateObject(const std::string &objType, const std::string &objName,
                           bool createDefault = false);
+   GmatBase* GetObject(const char *name);
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
    

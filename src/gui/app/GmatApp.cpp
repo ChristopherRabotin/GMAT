@@ -576,8 +576,9 @@ bool GmatApp::ProcessCommandLineOptions()
          "-x, \t--exit        \t\tExit GMAT after running the specified script\n"
          "    \t              \t\t[has no effect if no script is specified]\n";
    
-   wxString commandLineOptions = wxT(gmatHelp.c_str());
-
+   //wxString commandLineOptions = wxT(gmatHelp.c_str());
+   wxString commandLineOptions = wxString(gmatHelp.c_str());
+   
    #ifdef DEBUG_CMD_LINE
    MessageInterface::PutMessage("argc = %d\n", argc);
    #endif
@@ -642,9 +643,9 @@ bool GmatApp::ProcessCommandLineOptions()
             if (find(commands.begin(), commands.end(), "SendMessage") == commands.end())
             {
                wxBusyCursor bc;
-               wxLogError(wxT("GMAT was started as a NITS client, but the "
+               wxLogError("GMAT was started as a NITS client, but the "
                   "NITS plugin was not loaded.\n"
-                  "The error occurred during the initialization.  GMAT will exit."));
+                  "The error occurred during the initialization.  GMAT will exit.");
                wxLog::FlushActive();
                retval = false;
             }

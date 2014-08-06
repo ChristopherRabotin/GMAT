@@ -873,6 +873,22 @@ const StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
    return theModerator->GetListOfObjects(type);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfObjects(const char *typeName)
+//------------------------------------------------------------------------------
+/**
+ * Returns names of all configured items of given object type name.
+ *
+ * @param  typeName  object type name
+ *
+ * @return array of configured item names; return empty array if none
+ */
+//------------------------------------------------------------------------------
+const StringArray& Interpreter::GetListOfObjects(const char *typeName)
+{
+   return theModerator->GetListOfObjects(std::string(typeName));
+}
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetListOfObjects(const std::string &typeName)
@@ -911,6 +927,15 @@ const StringArray& Interpreter::GetListOfViewableCommands()
 const StringArray& Interpreter::GetListOfViewableSubtypesOf(Gmat::ObjectType type)
 {
    return theModerator->GetListOfViewableItems(type);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetConfiguredObject(const char *name)
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::GetConfiguredObject(const char *name)
+{
+   return theModerator->GetConfiguredObject(std::string(name));
 }
 
 
@@ -1759,6 +1784,23 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* FindObject(const char *name, const std::string &ofType = "")
+//------------------------------------------------------------------------------
+/**
+ * Finds the object from the current object map.
+ * (old method: Calls the Moderator to find a configured object.)
+ *
+ * @param  name    Name of the object.
+ * @param  ofType  Type of object required; leave blank for no checking
+ *
+ * @return  object pointer found
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::FindObject(const char *name, const std::string &ofType)
+{
+   return FindObject(std::string(name), ofType);
+}
 
 //------------------------------------------------------------------------------
 // GmatBase* FindObject(const std::string &name, const std::string &ofType = "")
@@ -9517,6 +9559,17 @@ void Interpreter::SetObjectInBranchCommand(GmatCommand *brCmd,
    }
 }
 
+//------------------------------------------------------------------------------
+// bool IsObjectType(const char *type)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if input string is one of Object type that can be created.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::IsObjectType(const char *type)
+{
+   return IsObjectType(std::string(type));
+}
 
 //------------------------------------------------------------------------------
 // bool IsObjectType(const std::string &type)
@@ -9555,6 +9608,17 @@ bool Interpreter::IsObjectType(const std::string &type)
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool IsCommandType(const char *type)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if input string is one of Command type that can be created.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::IsCommandType(const char *type)
+{
+   return IsCommandType(std::string(type));
+}
 
 //------------------------------------------------------------------------------
 // bool IsCommandType(const std::string &type)

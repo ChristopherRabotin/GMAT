@@ -183,7 +183,7 @@ void PropagatePanel::Create()
       propModeList[0] = "None";
 
    mPropModeComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(propModeList[0].c_str()), 
+      new wxComboBox(this, ID_COMBOBOX, wxString(propModeList[0].c_str()), 
          wxDefaultPosition, wxSize(150,-1), mPropModeCount, propModeList,
          wxCB_DROPDOWN|wxCB_READONLY);
    
@@ -988,7 +988,7 @@ void PropagatePanel::LoadData()
    
    for (Integer i=0; i<mPropCount; i++)
    {
-      mTempProp[i].propName = wxT(propNames[i].c_str());
+      mTempProp[i].propName = wxString(propNames[i].c_str());
       
       // Get the list of spacecraft and formations
       soList = thePropCmd->GetStringArrayParameter(scId, i);
@@ -1083,9 +1083,9 @@ void PropagatePanel::LoadData()
       if (stopCond != NULL)
       {
          mTempStopCond[i].stopCondPtr = stopCond;
-         mTempStopCond[i].name = wxT(stopCond->GetName().c_str());
+         mTempStopCond[i].name = wxString(stopCond->GetName().c_str());
          mTempStopCond[i].varName = 
-            wxT(stopCond->GetStringParameter("StopVar").c_str());
+            wxString(stopCond->GetStringParameter("StopVar").c_str());
          mTempStopCond[i].goalStr = 
             stopCond->GetStringParameter("Goal").c_str();
          wxString str = FormatStopCondDesc(mTempStopCond[i].varName,

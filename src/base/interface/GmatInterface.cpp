@@ -409,6 +409,12 @@ char* GmatInterface::GetParameter(const std::string &name)
 }
 
 
+char* GmatInterface::GetGmatObject(const char *name)
+{
+   return GmatInterface::GetGmatObject(std::string(name));
+}
+
+
 //------------------------------------------------------------------------------
 // char* GetGmatObject(const std::string &name)
 //------------------------------------------------------------------------------

@@ -40,10 +40,19 @@ public:
    bool CheckFileName(const std::string &str, const std::string &field,
                       bool onlyMsg = false);
    
+   bool CheckReal(Real &rvalue, const char *str,
+                  const std::string &field, const std::string &expRange,
+                  bool onlyMsg = false, bool checkRange = false, 
+                  bool positive = false, bool zeroOk = false);
    bool CheckReal(Real &rvalue, const std::string &str,
                   const std::string &field, const std::string &expRange,
                   bool onlyMsg = false, bool checkRange = false, 
                   bool positive = false, bool zeroOk = false);
+   
+   bool CheckInteger(Integer &ivalue, const char *str,
+                     const std::string &field, const std::string &expRange,
+                     bool onlyMsg = false, bool checkRange = false,
+                     bool positive = false, bool zeroOk = false);
    
    bool CheckInteger(Integer &ivalue, const std::string &str,
                      const std::string &field, const std::string &expRange,
@@ -56,6 +65,11 @@ public:
                           bool checkLower = true, bool checkUpper = true,
                           bool includeLower = false,
                           bool includeUpper = false);
+   
+   bool CheckVariable(const char *varName, ObjectTypeArray ownerTypes,
+                      const std::string &field, const std::string &expRange,
+                      bool allowNumber = true, bool allowNonPlottable = false,
+                      bool allowObjectProperty = false, bool allowWholeArray = false);
    
    bool CheckVariable(const std::string &varName, ObjectTypeArray ownerTypes,
                       const std::string &field, const std::string &expRange,

@@ -148,7 +148,7 @@ void ReportPanel::Create()
    //-------------------------------------------------------
    // put in the order
    //-------------------------------------------------------
-   wxFlexGridSizer *panelSizer = new wxFlexGridSizer(2, 1);
+   wxFlexGridSizer *panelSizer = new wxFlexGridSizer(2, 1, 0, 0);
    panelSizer->Add(reportFileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    panelSizer->Add(20, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
    panelSizer->Add(selectedSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);

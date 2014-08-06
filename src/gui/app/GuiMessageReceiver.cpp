@@ -280,15 +280,15 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::stri
       switch (msgType)
       {
       case Gmat::ERROR_:
-         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+         (void)wxMessageBox(wxString(msg.c_str()),
                             wxT("GMAT Error"));
          break;
       case Gmat::WARNING_:
-         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+         (void)wxMessageBox(wxString(msg.c_str()),
                             wxT("GMAT Warning"));
          break;
       case Gmat::INFO_:
-         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+         (void)wxMessageBox(wxString(msg.c_str()),
                             wxT("Information"));
          break;
       default:
@@ -369,15 +369,15 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg
       switch (msgType)
       {
       case Gmat::ERROR_:
-         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+         (void)wxMessageBox(wxString(msgBuffer),
                             wxT("GMAT Error"));
          break;
       case Gmat::WARNING_:
-         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+         (void)wxMessageBox(wxString(msgBuffer),
                             wxT("GMAT Warning"));
          break;
       case Gmat::INFO_:
-         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+         (void)wxMessageBox(wxString(msgBuffer),
                             wxT("Information"));
          break;
       default:

@@ -1697,6 +1697,19 @@ bool CoordinateSystem::SetStringParameter(const Integer id,
 
 
 //------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const std::string &label, const std::string &value)
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::SetStringParameter(const std::string &label,
+                                          const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
+//------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 /**
@@ -1973,6 +1986,19 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
    return CoordinateBase::GetRefObjectNameArray(type);
 }
 
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const char *name)
+//------------------------------------------------------------------------------
+/**
+ * @see SetRefObject(GmatBase *obj, const Gmat::ObjectType type, const std::string &name)
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                    const char *name)
+{
+   return SetRefObject(obj, type, std::string(name));
+}
 
 //------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,

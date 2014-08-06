@@ -110,6 +110,7 @@ public:
    virtual void         SetupSummary(const std::string &csName,
                                      bool entireMission = false,
                                      bool physicsOnly = false);
+   virtual void         SetSummaryName(const char *sumName);
    virtual void         SetSummaryName(const std::string &sumName);
    virtual std::string  GetSummaryName();
    virtual void         SetSolarSystem(SolarSystem *ss);
@@ -148,6 +149,8 @@ public:
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual std::string GetStringParameter(const std::string &label,
                                           const Integer index) const;
+   virtual bool        SetStringParameter(const std::string &label, 
+                                          const char *value);
    virtual bool        SetStringParameter(const std::string &label, 
                                           const std::string &value);
    virtual bool        SetStringParameter(const std::string &label, 

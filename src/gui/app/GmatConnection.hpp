@@ -37,11 +37,13 @@ public:
    GmatConnection();
    ~GmatConnection();
    
-   virtual wxChar* OnRequest(const wxString& topic, const wxString& item,
+   //virtual wxChar* OnRequest(const wxString& topic, const wxString& item,
+   virtual char*   OnRequest(const wxString& topic, const wxString& item,
                              int *size, wxIPCFormat format);
    virtual bool    OnExecute(const wxString& topic, wxChar *data, int size,
                              wxIPCFormat format);
-   virtual bool    OnPoke(const wxString& topic, const wxString& item, wxChar *data,
+   //virtual bool    OnPoke(const wxString& topic, const wxString& item, wxChar *data,
+   virtual bool    OnPoke(const wxString& topic, const wxString& item, char *data,
                           int size, wxIPCFormat format);
    virtual bool    OnStartAdvise(const wxString& topic, const wxString& item);
    virtual bool    OnDisconnect();

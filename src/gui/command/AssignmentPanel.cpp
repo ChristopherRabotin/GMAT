@@ -87,7 +87,7 @@ void AssignmentPanel::Create()
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 0, 0);
    
    wxStaticText *mLhsLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Left-Hand Side") );
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Left-Hand Side" );
    mLhsTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0);
@@ -98,7 +98,7 @@ void AssignmentPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *mRhsLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Right-Hand Side") );
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Right-Hand Side" );
    mRhsTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(400,-1), 0);

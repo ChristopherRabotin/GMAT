@@ -445,7 +445,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
 		sHTML = s+".html";
-		s = pConfig->Read(_T(s+"Keyword"),_T(sHTML));
+		s = pConfig->Read(s+"Keyword", sHTML);
 
 		if (!theHelpController->DisplaySection(s)) 
 			theHelpController->DisplayContents();
@@ -461,7 +461,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		#endif
 
 		// open separate window to show help
-		s = pConfig->Read(_T(s),_T(msgBuffer));
+      s = pConfig->Read(s, wxString(&msgBuffer[0]));
 		#ifdef DEBUG_GMATPANEL
 		  MessageInterface::ShowMessage
 			 ("GmatPanel::OnHelp() Web Page=<%s>\n",

@@ -4094,11 +4094,11 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Object type and list
    //-----------------------------------------------------------------
    wxStaticText *objectTypeStaticText =
-      new wxStaticText(parent, -1, wxT("Object "GUI_ACCEL_KEY"Type"),
+      new wxStaticText(parent, -1, "Object "GUI_ACCEL_KEY"Type",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    *entireObjCheckBox =
-      new wxCheckBox(parent, entireObjCheckBoxId, wxT("Select "GUI_ACCEL_KEY"Entire Object"));
+      new wxCheckBox(parent, entireObjCheckBoxId, "Select "GUI_ACCEL_KEY"Entire Object");
    (*entireObjCheckBox)->SetToolTip(pConfig->Read(_T("SelectEntireObjectHint")));
 
    if (showObjectOption == 0)
@@ -4142,7 +4142,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    (*objectTypeComboBox)->SetValue(objectType);
    
    wxStaticText *objectStaticText =
-      new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Object List"),
+      new wxStaticText(parent, -1, GUI_ACCEL_KEY"Object List",
                        wxDefaultPosition, wxDefaultSize, 0);   
    
    if (objectType == "Spacecraft")
@@ -4206,7 +4206,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Spacecraft attached hardware list
    //-----------------------------------------------------------------
    *hardwareStaticText =
-      new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Attached Hardware List"),
+      new wxStaticText(parent, -1, GUI_ACCEL_KEY"Attached Hardware List",
                        wxDefaultPosition, wxDefaultSize, 0);
    *hardwareListBox =
       GetAttachedHardwareListBox(parent, hardwareListBoxId, wxSize(170, 63), "");
@@ -4224,8 +4224,8 @@ wxSizer* GuiItemManager::CreateParameterSizer
    wxFlexGridSizer *arrayIndexSizer = new wxFlexGridSizer(3);
    if (showArrayElement)
    {
-      *rowStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Row [xx]"));
-      *colStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Col [xx]"));
+      *rowStaticText = new wxStaticText(parent, -1, GUI_ACCEL_KEY"Row [xx]");
+      *colStaticText = new wxStaticText(parent, -1, GUI_ACCEL_KEY"Col [xx]");
       
       *rowTextCtrl =
          new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
@@ -4276,7 +4276,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    else
    {
       wxStaticText *propertyStaticText =
-         new wxStaticText(parent, -1, wxT("Object "GUI_ACCEL_KEY"Properties"),
+         new wxStaticText(parent, -1, "Object "GUI_ACCEL_KEY"Properties",
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *propertyListBox = 
@@ -4285,7 +4285,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*propertyListBox)->SetToolTip(pConfig->Read(_T("ObjectPropertiesHint")));
       
       *coordSysLabel =
-         new wxStaticText(parent, -1, wxT("Coordinate "GUI_ACCEL_KEY"System"),
+         new wxStaticText(parent, -1, "Coordinate "GUI_ACCEL_KEY"System",
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *coordSysComboBox =
@@ -4320,23 +4320,23 @@ wxSizer* GuiItemManager::CreateParameterSizer
    #endif
    
    *upButton = new wxButton
-      (parent, addButtonId, wxT(GUI_ACCEL_KEY"UP"), wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, GUI_ACCEL_KEY"UP", wxDefaultPosition, buttonSize, 0);
    (*upButton)->SetToolTip(pConfig->Read(_T("MoveUpHint"),"Move Up"));
    if (!allowMultiSelect)
       (*upButton)->Disable();
    
    *downButton = new wxButton
-      (parent, addButtonId, wxT(GUI_ACCEL_KEY"DN"), wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, GUI_ACCEL_KEY"DN", wxDefaultPosition, buttonSize, 0);
    (*downButton)->SetToolTip(pConfig->Read(_T("MoveDownHint"),"Move Down"));
    if (!allowMultiSelect)
       (*downButton)->Disable();
    
    *addButton = new wxButton
-      (parent, addButtonId, wxT("-"GUI_ACCEL_KEY">"), wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, "-"GUI_ACCEL_KEY">", wxDefaultPosition, buttonSize, 0);
    (*addButton)->SetToolTip(pConfig->Read(_T("AddSelectedHint"),"Add Selected Item(s)"));
    
    *removeButton = new wxButton
-      (parent, removeButtonId, wxT(GUI_ACCEL_KEY"<-"), wxDefaultPosition, buttonSize, 0);
+      (parent, removeButtonId, GUI_ACCEL_KEY"<-", wxDefaultPosition, buttonSize, 0);
    (*removeButton)->SetToolTip(pConfig->Read(_T("RemoveSelectedHint"),"Remove Selected Item"));
    
    *addAllButton = new wxButton
@@ -4346,7 +4346,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*addAllButton)->Disable();
    
    *removeAllButton = new wxButton
-      (parent, removeAllButtonId, wxT("<"GUI_ACCEL_KEY"="), wxDefaultPosition, buttonSize, 0);
+      (parent, removeAllButtonId, "<"GUI_ACCEL_KEY"=", wxDefaultPosition, buttonSize, 0);
    (*removeAllButton)->SetToolTip(pConfig->Read(_T("RemoveAllHint"),"Remove All Items"));
    
    //----- arrowButtonsBoxSizer
@@ -4364,7 +4364,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Selected values
    //-----------------------------------------------------------------
    wxStaticText *selectedLabel =
-      new wxStaticText(parent, -1, wxT("Selected "GUI_ACCEL_KEY"Value(s)"),
+      new wxStaticText(parent, -1, "Selected "GUI_ACCEL_KEY"Value(s)",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    wxArrayString emptyList;

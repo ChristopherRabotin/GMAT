@@ -101,6 +101,8 @@ public:
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const char *name);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                          const std::string &name);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
@@ -141,6 +143,8 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual bool         SetStringParameter(const Integer id,

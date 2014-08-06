@@ -828,6 +828,12 @@ std::string FileManager::GetFullStartupFilePath()
 }
 
 
+void FileManager::ReadStartupFile(const char *fileName)
+{
+   ReadStartupFile(std::string(fileName));
+}
+
+
 //------------------------------------------------------------------------------
 // void ReadStartupFile(const std::string &fileName = "")
 //------------------------------------------------------------------------------
@@ -1132,6 +1138,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    #endif
 }
 
+void FileManager::WriteStartupFile(const char *fileName)
+{
+   WriteStartupFile(std::string(fileName));
+}
 
 //------------------------------------------------------------------------------
 // void WriteStartupFile(const std::string &fileName = "")
@@ -2074,6 +2084,23 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    return absPath;
 }
 
+//------------------------------------------------------------------------------
+// void SetAbsPathname(const FileType type, const char *newpath)
+//------------------------------------------------------------------------------
+/**
+ * Sets absoulute pathname for the type.
+ *
+ * @param <type> file type of which path to be set.
+ * @param <newpath> new pathname.
+ *
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetAbsPathname(const FileType type, const char *newpath)
+{
+   SetAbsPathname(type, std::string(newpath));
+}
+
 
 //------------------------------------------------------------------------------
 // void SetAbsPathname(const FileType type, const std::string &newpath)
@@ -2103,6 +2130,22 @@ void FileManager::SetAbsPathname(const FileType type, const std::string &newpath
    }
 }
 
+//------------------------------------------------------------------------------
+// void SetAbsPathname(const std::string &type, const char *newpath)
+//------------------------------------------------------------------------------
+/**
+ * Sets absolute pathname for the type.
+ *
+ * @param <type> type name of which path to be set.
+ * @param <newpath> new pathname.
+ *
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetAbsPathname(const std::string &type, const char *newpath)
+{
+   SetAbsPathname(type, std::string(newpath));
+}
 
 //------------------------------------------------------------------------------
 // void SetAbsPathname(const std::string &type, const std::string &newpath)
@@ -2159,6 +2202,12 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
 void FileManager::ClearGmatFunctionPath()
 {
    mGmatFunctionPaths.clear();
+}
+
+
+void FileManager::AddGmatFunctionPath(const char *path, bool addFront)
+{
+   return AddGmatFunctionPath(std::string(path), addFront);
 }
 
 
@@ -2234,6 +2283,12 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
 }
 
 
+std::string FileManager::GetGmatFunctionPath(const char *funcName)
+{
+   return GetFunctionPath(GMAT_FUNCTION, mGmatFunctionPaths, std::string(funcName));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetGmatFunctionPath(const std::string &funcName)
 //------------------------------------------------------------------------------
@@ -2276,6 +2331,12 @@ const StringArray& FileManager::GetAllGmatFunctionPaths()
 void FileManager::ClearMatlabFunctionPath()
 {
    mMatlabFunctionPaths.clear();
+}
+
+
+void FileManager::AddMatlabFunctionPath(const char *path, bool addFront)
+{
+   return AddMatlabFunctionPath(std::string(path), addFront);
 }
 
 
@@ -2330,6 +2391,12 @@ void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
       ++pos;
    }
    #endif
+}
+
+
+std::string FileManager::GetMatlabFunctionPath(const char *name)
+{
+   return GetMatlabFunctionPath(std::string(name));
 }
 
 

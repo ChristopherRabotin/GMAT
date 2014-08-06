@@ -356,9 +356,20 @@ Gmat::ObjectType GmatBase::GetType() const
    return type;
 }
 
+//---------------------------------------------------------------------------
+//  bool SetName(const char *who, const std::string &oldName = "")
+//---------------------------------------------------------------------------
+/**
+ * @see SetName(const std::string &who, const std::string &oldName)
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetName(const char *who, const std::string &oldName)
+{
+   return SetName(std::string(who), oldName);
+}
 
 //---------------------------------------------------------------------------
-//  bool SetName(std::string &who, const std;:string &oldName = "")
+//  bool SetName(const std::string &who, const std::string &oldName = "")
 //---------------------------------------------------------------------------
 /**
 * Set the name for this instance.
@@ -625,6 +636,25 @@ const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
    // Changed to return empty array (LOJ: 2010.05.13)
    refObjectNames.clear();
    return refObjectNames;
+}
+
+//---------------------------------------------------------------------------
+//  bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+//---------------------------------------------------------------------------
+/**
+ * Sets the name of the reference object.  (Derived classes should implement
+ * this as needed.)
+ *
+ * @param <type> type of the reference object.
+ * @param <name> name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
+                                const char *name)
+{
+   return SetRefObjectName(type, std::string(name));
 }
 
 //---------------------------------------------------------------------------
@@ -2209,6 +2239,23 @@ std::string GmatBase::GetStringParameter(const Integer id) const
                            instanceName + "\"");
 }
 
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
 
 //---------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)
@@ -2255,6 +2302,28 @@ std::string GmatBase::GetStringParameter(const Integer id,
    throw GmatBaseException("Cannot get string parameter with ID " +
                            idString.str() + " and index " + indexString.str() +
                            " on " + typeName + " named \"" + instanceName + "\"");
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new string for this parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free
+ *              version to add the value to the end of the array.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetStringParameter(const Integer id, const char *value,
+                                  const Integer index)
+{
+   return SetStringParameter(id, std::string(value), index);
 }
 
 
@@ -3107,6 +3176,25 @@ std::string GmatBase::GetStringParameter(const std::string &label) const
 {
    Integer id = GetParameterID(label);
    return GetStringParameter(id);
+}
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetStringParameter(const std::string &label,
+                                  const char *value)
+{
+   Integer id = GetParameterID(label);
+   return SetStringParameter(id, std::string(value));
 }
 
 //---------------------------------------------------------------------------

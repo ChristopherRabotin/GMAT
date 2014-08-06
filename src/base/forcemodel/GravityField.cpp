@@ -967,6 +967,22 @@ std::string GravityField::GetStringParameter(const std::string &label) const
 }
 
 //------------------------------------------------------------------------------
+// std::string SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to set a parameter value
+ *
+ * @param    label    string ID for the requested parameter
+ * @param    value    The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool GravityField::SetStringParameter(const std::string &label,
+                                      const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
+//------------------------------------------------------------------------------
 // std::string SetStringParameter(const std::string &label, const std::string value)
 //------------------------------------------------------------------------------
 /**

@@ -141,6 +141,10 @@ namespace TimeConverterUtil
    
    std::string GMAT_API ConvertMjdToGregorian(const Real mjd, Integer format = 1);   
    Real GMAT_API ConvertGregorianToMjd(const std::string &greg);
+   
+   void GMAT_API Convert(const char *fromType, Real fromMjd,
+                         const char *fromStr, const char *toType,
+                         Real &toMjd, std::string &toStr, Integer format = 1);
    void GMAT_API Convert(const std::string &fromType, Real fromMjd,
                          const std::string &fromStr, const std::string &toType,
                          Real &toMjd, std::string &toStr, Integer format = 1);

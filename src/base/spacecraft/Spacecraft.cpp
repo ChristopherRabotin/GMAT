@@ -1705,6 +1705,13 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
    return SpaceObject::GetRefObjectNameArray(type);
 }
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+//------------------------------------------------------------------------------
+bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const char *name)
+{
+   return SetRefObjectName(type, std::string(name));
+}
 
 // DJC: Not sure if we need this yet...
 //------------------------------------------------------------------------------
@@ -3622,6 +3629,24 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    #endif
 
    return true;
+}
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::SetStringParameter(const std::string &label,
+                                    const char *value)
+{
+   return SetStringParameter(label, std::string(value));
 }
 
 //---------------------------------------------------------------------------

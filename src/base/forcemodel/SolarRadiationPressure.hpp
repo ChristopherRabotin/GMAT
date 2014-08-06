@@ -106,6 +106,8 @@ public:
    virtual bool                SetStringParameter(const Integer id,
                                                   const std::string &value);
    virtual bool                SetStringParameter(const std::string &label,
+                                                  const char *value);
+   virtual bool                SetStringParameter(const std::string &label,
                                                   const std::string &value);
    virtual const StringArray&
                                GetPropertyEnumStrings(const Integer id) const;

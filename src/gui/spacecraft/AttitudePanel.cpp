@@ -267,20 +267,20 @@ void AttitudePanel::Create()
    unsigned int modelSz = modelArray.size();
    attitudeModelArray = new wxString[modelSz];
    for (x = 0; x < modelSz; ++x)
-      attitudeModelArray[x] = wxT(modelArray[x].c_str());
+      attitudeModelArray[x] = wxString(modelArray[x].c_str());
    
    config1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Model"),
+      new wxStaticText( this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"Model",
                         wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    config1ComboBox = 
-      new wxComboBox( this, ID_CB_MODEL, wxT(attitudeModelArray[0]), 
+      new wxComboBox( this, ID_CB_MODEL, attitudeModelArray[0], 
          wxDefaultPosition, wxDefaultSize, modelSz, attitudeModelArray, 
          wxCB_DROPDOWN|wxCB_READONLY );
    config1ComboBox->SetToolTip(pConfig->Read(_T("AttitudeModelHint")));
 
    // Coordinate System
    config2StaticText =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Coordinate System"),
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Coordinate System",
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    coordSysComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_COORDSYS,
       wxDefaultSize);
@@ -297,16 +297,16 @@ void AttitudePanel::Create()
       eulerSequenceArray[i] = eulerSeqArray[i].c_str();
 
    config4StaticText =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Euler Angle Sequence"),
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Euler Angle Sequence",
                         wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
-   config4ComboBox = new wxComboBox( this, ID_CB_SEQ, wxT(eulerSequenceArray[0]),
+   config4ComboBox = new wxComboBox( this, ID_CB_SEQ, eulerSequenceArray[0],
                       wxDefaultPosition, wxDefaultSize, 12,
                       eulerSequenceArray, wxCB_DROPDOWN|wxCB_READONLY );
    config4ComboBox->SetToolTip(pConfig->Read(_T("EulerAngleSequenceHint")));
 
    // State Type
    stateTypeStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"State Type"),
+      new wxStaticText( this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"State Type",
                         wxDefaultPosition, wxDefaultSize, 0);
 
    for (ii = 0; ii < AttStateTypeCount; ii++)
@@ -317,7 +317,7 @@ void AttitudePanel::Create()
       stateArray[ii] = stateTypeArray[ii].c_str();
    
    stateTypeComboBox = 
-      new wxComboBox( this, ID_CB_STATE, wxT(stateArray[STARTUP_STATE_TYPE_SELECTION]),
+      new wxComboBox( this, ID_CB_STATE, stateArray[STARTUP_STATE_TYPE_SELECTION],
          wxDefaultPosition, wxSize(180,20), AttStateTypeCount, stateArray,
          wxCB_DROPDOWN|wxCB_READONLY );
    stateTypeComboBox->SetToolTip(pConfig->Read(_T("StateTypeHint")));
@@ -375,7 +375,7 @@ void AttitudePanel::Create()
 
    // Rate State Type
    stateRateTypeStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"Rate State Type"),
+      new wxStaticText( this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"Rate State Type",
                         wxDefaultPosition, wxDefaultSize, 0);
 
    for (ii = 0; ii < AttStateRateTypeCount; ii++)
@@ -387,7 +387,7 @@ void AttitudePanel::Create()
 
    stateRateTypeComboBox =
       new wxComboBox( this, ID_CB_STATE_RATE, 
-         wxT(stateRateArray[STARTUP_RATE_STATE_TYPE_SELECTION]), wxDefaultPosition, 
+         stateRateArray[STARTUP_RATE_STATE_TYPE_SELECTION], wxDefaultPosition, 
          wxSize(180,20), AttStateRateTypeCount, stateRateArray,
          wxCB_DROPDOWN|wxCB_READONLY );                  
    stateRateTypeComboBox->SetToolTip(pConfig->Read(_T("RateStateTypeHint")));
@@ -544,7 +544,7 @@ void AttitudePanel::Create()
 
    // Reference Body must be a Celestial Body
    attRefBodyLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Attitude Reference Body"),
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Attitude Reference Body",
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    referenceBodyComboBox =  theGuiManager->GetCelestialBodyComboBox(this, ID_CB_REFERENCE_BODY,
       wxDefaultSize);
@@ -554,20 +554,21 @@ void AttitudePanel::Create()
    unsigned int constraintTypesSz = constraintTypes.size();
    constraintArray = new wxString[constraintTypesSz];
    for (x = 0; x < constraintTypesSz; ++x)
-      constraintArray[x] = wxT(constraintTypes[x].c_str());
+      constraintArray[x] = wxString(constraintTypes[x].c_str());
 
    constraintTypeLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Attitude Constraint Type"),
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Attitude Constraint Type",
          wxDefaultPosition, wxSize(staticTextWidth,20), 0); // wxDefaultSize, 0);
    constraintTypeComboBox =
-         new wxComboBox( this, ID_CB_CONSTRAINT_TYPE, wxT(constraintArray[0]),
+         new wxComboBox( this, ID_CB_CONSTRAINT_TYPE, constraintArray[0],
             wxDefaultPosition, wxDefaultSize, constraintTypesSz, constraintArray,
             wxCB_DROPDOWN|wxCB_READONLY );
    constraintTypeComboBox->SetToolTip(pConfig->Read(_T("AttitudeConstraintTypeHint")));
    
    // Now create CCSDS-AEM widgets
    aemFileLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Attitude "GUI_ACCEL_KEY"File Name"), wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, "Attitude "GUI_ACCEL_KEY"File Name",
+                       wxDefaultPosition, wxDefaultSize, 0);
    aemFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL_AEM_FILE, wxT(""),
                      wxDefaultPosition, wxSize(300, -1),  0);
@@ -618,7 +619,7 @@ void AttitudePanel::Create()
    
    // Create 3x5 flex grid sizer for ProcessingSpinner angles and rates
    // 1st column: Labels, 2nd column: Values, 3rd column: units
-   wxFlexGridSizer *precSpinAnglesRatesSizer = new wxFlexGridSizer(3,5);
+   wxFlexGridSizer *precSpinAnglesRatesSizer = new wxFlexGridSizer(3,5,0,0);
    precSpinAnglesRatesSizer->Add(initPrecAngleLabel, 0, wxALIGN_LEFT|wxALL, bsize );
    precSpinAnglesRatesSizer->Add(initPrecAngleTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
    precSpinAnglesRatesSizer->Add(initPrecAngleUnits, 0, wxALIGN_LEFT|wxALL, bsize );
@@ -869,14 +870,14 @@ void AttitudePanel::LoadData()
       attRateStateType = 
          theAttitude->GetStringParameter("AttitudeRateDisplayStateType");
       attitudeModel    = theAttitude->GetAttitudeModelName();
-      config1ComboBox->SetValue(wxT(attitudeModel.c_str()));
+      config1ComboBox->SetValue(wxString(attitudeModel.c_str()));
       
       eulerSequence  = theAttitude->GetStringParameter("EulerAngleSequence");
       seq            = Attitude::ExtractEulerSequence(eulerSequence);
-      config4ComboBox->SetValue(wxT(eulerSequence.c_str()));
+      config4ComboBox->SetValue(wxString(eulerSequence.c_str()));
    
       attCoordSystem = theAttitude->GetStringParameter("AttitudeCoordinateSystem");
-      coordSysComboBox->SetValue(wxT(attCoordSystem.c_str()));
+      coordSysComboBox->SetValue(wxString(attCoordSystem.c_str()));
       if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
                      GetConfiguredObject(attCoordSystem);
       
@@ -2324,7 +2325,7 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
    // first, validate the state
    if (!ValidateState("Both"))
    {
-      coordSysComboBox->SetValue(wxT(attCoordSystem.c_str()));
+      coordSysComboBox->SetValue(wxString(attCoordSystem.c_str()));
       MessageInterface::PopupMessage(Gmat::ERROR_, +
          "Please enter valid value(s) before changing the Reference Coordinate System\n");
          return;
@@ -2467,7 +2468,7 @@ void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
    if (newStateType == attStateType) return;
    if (!ValidateState("State", true))
    {
-      stateTypeComboBox->SetValue(wxT(attStateType.c_str()));
+      stateTypeComboBox->SetValue(wxString(attStateType.c_str()));
       MessageInterface::PopupMessage(Gmat::ERROR_, +
          "Please enter valid value(s) before changing the Attitude State Type\n");
      return;
@@ -2522,7 +2523,7 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
       
    if (!ValidateState("Both", true))
    {
-      stateRateTypeComboBox->SetValue(wxT(attRateStateType.c_str()));
+      stateRateTypeComboBox->SetValue(wxString(attRateStateType.c_str()));
       MessageInterface::PopupMessage(Gmat::ERROR_, +
          "Please enter valid value(s) before changing the Attitude Rate State Type\n");
      return;
@@ -2607,9 +2608,9 @@ bool AttitudePanel::DisplayEulerAngles()
       attUnits2->Show(true);
       attUnits3->Show(true);
 
-      st1StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"1"));
-      st2StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"2"));
-      st3StaticText->SetLabel(wxT("Euler Angle "GUI_ACCEL_KEY"3"));
+      st1StaticText->SetLabel("Euler Angle "GUI_ACCEL_KEY"1");
+      st2StaticText->SetLabel("Euler Angle "GUI_ACCEL_KEY"2");
+      st3StaticText->SetLabel("Euler Angle "GUI_ACCEL_KEY"3");
    
       st1TextCtrl->SetValue(*eulerAngles[0]);
       st2TextCtrl->SetValue(*eulerAngles[1]);
@@ -2685,10 +2686,10 @@ bool AttitudePanel::DisplayQuaternion()
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
 
-      st1StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"1"));
-      st2StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"2"));
-      st3StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"3"));
-      st4StaticText->SetLabel(wxT("q"GUI_ACCEL_KEY"4"));  // Dunn changed 4 to c
+      st1StaticText->SetLabel("q"GUI_ACCEL_KEY"1");
+      st2StaticText->SetLabel("q"GUI_ACCEL_KEY"2");
+      st3StaticText->SetLabel("q"GUI_ACCEL_KEY"3");
+      st4StaticText->SetLabel("q"GUI_ACCEL_KEY"4");  // Dunn changed 4 to c
    
       st1TextCtrl->SetValue(*quaternion[0]);
       st2TextCtrl->SetValue(*quaternion[1]);
@@ -2862,9 +2863,9 @@ bool AttitudePanel::DisplayMRPs()
       st9TextCtrl->Show(false);
       st10TextCtrl->Show(false);
 
-      st1StaticText->SetLabel(wxT("MRP "GUI_ACCEL_KEY"1"));
-      st2StaticText->SetLabel(wxT("MRP "GUI_ACCEL_KEY"2"));
-      st3StaticText->SetLabel(wxT("MRP "GUI_ACCEL_KEY"3"));
+      st1StaticText->SetLabel("MRP "GUI_ACCEL_KEY"1");
+      st2StaticText->SetLabel("MRP "GUI_ACCEL_KEY"2");
+      st3StaticText->SetLabel("MRP "GUI_ACCEL_KEY"3");
 
       st1TextCtrl->SetValue(*MRPs[0]);
       st2TextCtrl->SetValue(*MRPs[1]);
@@ -2913,9 +2914,9 @@ bool AttitudePanel::DisplayEulerAngleRates()
       stateRateTypeComboBox->
          SetValue(wxT("EulerAngleRates"));
       attRateStateType = "EulerAngleRates";
-      str1StaticText->SetLabel(wxT("Euler Angle Rate "GUI_ACCEL_KEY"1"));
-      str2StaticText->SetLabel(wxT("Euler Angle Rate "GUI_ACCEL_KEY"2"));
-      str3StaticText->SetLabel(wxT("Euler Angle Rate "GUI_ACCEL_KEY"3"));
+      str1StaticText->SetLabel("Euler Angle Rate "GUI_ACCEL_KEY"1");
+      str2StaticText->SetLabel("Euler Angle Rate "GUI_ACCEL_KEY"2");
+      str3StaticText->SetLabel("Euler Angle Rate "GUI_ACCEL_KEY"3");
 
       str1TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngleRate1Hint")));
       str2TextCtrl->SetToolTip(pConfig->Read(_T("EulerAngleRate2Hint")));
@@ -2959,9 +2960,9 @@ bool AttitudePanel::DisplayAngularVelocity()
       stateRateTypeComboBox->
          SetValue(wxT("AngularVelocity"));
       attRateStateType = "AngularVelocity";
-      str1StaticText->SetLabel(wxT("Angular Velocity "GUI_ACCEL_KEY"X"));
-      str2StaticText->SetLabel(wxT("Angular Velocity "GUI_ACCEL_KEY"Y"));
-      str3StaticText->SetLabel(wxT("Angular Velocity "GUI_ACCEL_KEY"Z"));
+      str1StaticText->SetLabel("Angular Velocity "GUI_ACCEL_KEY"X");
+      str2StaticText->SetLabel("Angular Velocity "GUI_ACCEL_KEY"Y");
+      str3StaticText->SetLabel("Angular Velocity "GUI_ACCEL_KEY"Z");
 
       str1TextCtrl->SetToolTip(pConfig->Read(_T("AngularVelocity1Hint")));
       str2TextCtrl->SetToolTip(pConfig->Read(_T("AngularVelocity2Hint")));
@@ -3171,9 +3172,9 @@ void AttitudePanel::LoadNadirPointingData()
       bodyConstraintVectorZTextCtrl->SetValue(ToString(theAttitude->GetRealParameter("BodyConstraintVectorZ")));
 
       std::string referenceBody      = theAttitude->GetStringParameter("AttitudeReferenceBody");
-      referenceBodyComboBox->SetValue(wxT(referenceBody.c_str()));
+      referenceBodyComboBox->SetValue(wxString(referenceBody.c_str()));
       std::string theConstraintType  = theAttitude->GetStringParameter("AttitudeConstraintType");
-      constraintTypeComboBox->SetValue(wxT(theConstraintType.c_str()));
+      constraintTypeComboBox->SetValue(wxString(theConstraintType.c_str()));
 
       nadirPointingDataLoaded = true;
    }
@@ -3325,8 +3326,8 @@ void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
       {
          wxString str = aemFileTextCtrl->GetValue();
          aemFile      = str.c_str();
-         std::ifstream filename(str.c_str());
-
+         std::ifstream filename(std::string(str.c_str()));
+         
          // Check if the file doesn't exist then stop
          if (!filename)
          {

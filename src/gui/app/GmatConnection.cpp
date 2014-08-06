@@ -72,10 +72,10 @@ GmatConnection::~GmatConnection()
  * @return Object or parameter value string.
  */
 //------------------------------------------------------------------------------
-wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
-                                  const wxString& item,
-                                  int * WXUNUSED(size),
-                                  wxIPCFormat WXUNUSED(format))
+char* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
+                                const wxString& item,
+                                int * WXUNUSED(size),
+                                wxIPCFormat WXUNUSED(format))
 {
    #ifdef DEBUG_CONNECTION_REQUEST
    MessageInterface::ShowMessage
@@ -127,7 +127,8 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
       data = GmatInterface::Instance()->GetParameter(std::string(item.c_str()));
    }
    
-   return _T(data);
+   //return _T(data);
+   return data;
 }
 
 
@@ -153,7 +154,8 @@ bool GmatConnection::OnExecute(const wxString& WXUNUSED(topic),
 //------------------------------------------------------------------------------
 bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
                             const wxString& item,
-                            wxChar *data,
+                            //wxChar *data,
+                            char *data,
                             int WXUNUSED(size),
                             wxIPCFormat WXUNUSED(format))
 {

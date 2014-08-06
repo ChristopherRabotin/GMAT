@@ -83,7 +83,7 @@ void CoordSysCreateDialog::Create()
    // wxStaticText
    nameStaticText =
       new wxStaticText( this, ID_TEXT,
-                        wxT("Coordinate System "GUI_ACCEL_KEY"Name"),
+                        "Coordinate System "GUI_ACCEL_KEY"Name",
                         wxDefaultPosition, wxDefaultSize, 0 );
    
    // wxTextCtrl

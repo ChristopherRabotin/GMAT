@@ -2870,9 +2870,9 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       if (GmatGlobal::Instance()->IsBatchMode())
       {
          int answer =
-            wxMessageBox(wxT("GMAT is running script folder.\n"
-                             "Are you sure you want to stop the batch run?"),
-                         wxT("Please confirm"), wxYES_NO);
+            wxMessageBox("GMAT is running script folder.\n"
+                         "Are you sure you want to stop the batch run?",
+                         "Please confirm", wxYES_NO);
          
          if (answer == wxYES)
          {
@@ -2890,9 +2890,9 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       else
       {
          int answer =
-            wxMessageBox(wxT("GMAT is still running the mission.\n"
-                             "Are you sure you want to stop the mission and close GMAT?"),
-                         wxT("Please confirm"), wxYES_NO);
+            wxMessageBox("GMAT is still running the mission.\n"
+                         "Are you sure you want to stop the mission and close GMAT?",
+                         "Please confirm", wxYES_NO);
          
          if (answer == wxYES)
          {
@@ -2917,9 +2917,9 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    if (IsAnimationRunning())
    {
       int answer =
-         wxMessageBox(wxT("GMAT is running the animation.\n"
-                          "Are you sure you want to stop the animation and close GMAT?"),
-                      wxT("Please confirm"), wxYES_NO);
+         wxMessageBox("GMAT is running the animation.\n"
+                      "Are you sure you want to stop the animation and close GMAT?",
+                      "Please confirm", wxYES_NO);
       
       if (answer == wxYES)
       {
@@ -3151,12 +3151,12 @@ bool GmatMainFrame::SaveScriptAs()
    
    bool scriptSaved = true;
    std::string oldScriptName = mScriptFilename;
-
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
-         _T("Script files (*.script, *.m)|*.script;*.m|"\
-            "Text files (*.txt, *.text)|*.txt;*.text|"\
-            "All files (*.*)|*.*"), wxSAVE);
-
+   
+   wxFileDialog dialog(this, "Choose a file", "", "",
+                       "Script files (*.script, *.m)|*.script;*.m|"
+                       "Text files (*.txt, *.text)|*.txt;*.text|"
+                       "All files (*.*)|*.*", wxFD_SAVE);
+   
    if (dialog.ShowModal() == wxID_OK)
    {
       mScriptFilename = dialog.GetPath().c_str();
@@ -5253,6 +5253,22 @@ void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 
 
 //------------------------------------------------------------------------------
+// bool SetScriptFileName(const char *filename)
+//------------------------------------------------------------------------------
+/*
+ * Sets current script file name.
+ *
+ * @param  filename  The script file name
+ * @return true if script file name set to new one, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::SetScriptFileName(const char *filename)
+{
+   return SetScriptFileName(std::string(filename));
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetScriptFileName(const std::string &filename)
 //------------------------------------------------------------------------------
 /*
@@ -6037,8 +6053,8 @@ bool GmatMainFrame::GetConfigurationData(const std::string &forItem, Integer &x,
       return isPresetSizeUsed;
    }
    // Compute the location and size for the item
-   std::stringstream upperLeft(treeUpperLeft.c_str());
-   std::stringstream size(treeSize.c_str());
+   std::stringstream upperLeft(std::string(treeUpperLeft.c_str()));
+   std::stringstream size(std::string(treeSize.c_str()));
    upperLeft >> positionX >> positionY;
    size      >> width     >> height;
 

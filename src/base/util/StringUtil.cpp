@@ -1838,6 +1838,19 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool ToReal(const char *str, Real *value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToReal(const std::string &str, Real &value)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToReal(const char *str, Real *value, bool trimParens,
+                            bool allowOverflow)
+{
+   return ToReal(std::string(str), *value, trimParens, allowOverflow);
+}
+
 
 //------------------------------------------------------------------------------
 // bool ToReal(const std::string &str, Real *value, bool trimParens = false)
@@ -1847,11 +1860,23 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens,
-	bool allowOverflow)
+                            bool allowOverflow)
 {
    return ToReal(str, *value, trimParens, allowOverflow);
 }
 
+//------------------------------------------------------------------------------
+// bool ToReal(const char *str, Real &value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToReal(const std::string &str, Real &value, ...)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToReal(const char *str, Real &value, bool trimParens,
+                            bool allowOverflow)
+{
+   return ToReal(std::string(str), value, trimParens, allowOverflow);
+}
 
 //------------------------------------------------------------------------------
 // bool ToReal(const std::string &str, Real &value, bool trimParens = false)
@@ -1868,7 +1893,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens,
-	bool allowOverflow)
+                            bool allowOverflow)
 {
    #ifdef DEBUG_TOREAL
    MessageInterface::ShowMessage
@@ -1896,6 +1921,18 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trim
    return ToInteger(str, *value, trimParens, allowOverflow);
 }
 
+//------------------------------------------------------------------------------
+// bool ToInteger(const char *str, Integer &value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToInteger(const std::string &str, Integer &value, ...)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToInteger(const char *str, Integer &value, bool trimParens,
+                               bool allowOverflow)
+{
+   return ToInteger(std::string(str), value, trimParens, allowOverflow);
+}
 
 //------------------------------------------------------------------------------
 // bool ToInteger(const std::string &str, Integer &value, bool trimParens = false)
@@ -1919,7 +1956,7 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trim
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trimParens,
-	bool allowOverflow)
+                               bool allowOverflow)
 {
    std::string str2 = Trim(str, BOTH);
    if (trimParens)
@@ -2194,6 +2231,13 @@ RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow
    return realArray;
 }
 
+//------------------------------------------------------------------------------
+// IntegerArray ToIntegerArray(const char *str, bool allowOverflow)
+//------------------------------------------------------------------------------
+IntegerArray GmatStringUtil::ToIntegerArray(const char *str, bool allowOverflow)
+{
+   return ToIntegerArray(std::string(str), allowOverflow);
+}
 
 //------------------------------------------------------------------------------
 // IntegerArray ToIntegerArray(const std::string &str)
@@ -4814,6 +4858,19 @@ bool GmatStringUtil::IsValidNumber(const std::string &str, bool allowOverflow)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool IsValidName(const char *str, bool ignoreBracket = false,
+//                  bool blankNameIsOk = false)
+//------------------------------------------------------------------------------
+/*
+ * @see IsValidName(const std::string &str, ...)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidName(const char *str, bool ignoreBracket,
+                                 bool blankNameIsOk)
+{
+   return IsValidName(std::string(str), ignoreBracket, blankNameIsOk);
+}
 
 //------------------------------------------------------------------------------
 // bool IsValidName(const std::string &str, bool ignoreBracket = false,
@@ -5338,4 +5395,59 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 }
 
 
+std::wstring GmatStringUtil::StringToWideString(const std::string &str)
+{
+   // Convert an ASCII string to a Unicode String
+   // Method 1:
+   std::wstring wstrTo;
+   wchar_t *wszTo = new wchar_t[str.length() + 1];
+   wszTo[str.size()] = L'\0';
+   MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, wszTo, (int)str.length());
+   wstrTo = wszTo;
+   delete[] wszTo;
+   return wstrTo;
+   
+   // Method 2:
+   // int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+   // std::wstring wstr(size_needed, 0);
+   // MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
+   // return wstr;
+
+   // Method 3:
+   // int len;
+   // int slength = (int)s.length() + 1;
+   // len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
+   // wchar_t* buf = new wchar_t[len];
+   // MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+   // std::wstring wstr(buf);
+   // delete[] buf;
+   // return wstr;
+}
+
+
+std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
+{
+   // Convert a Unicode string to an ASCII string
+   // Method 1:
+   std::string strTo;
+   char *szTo = new char[wstr.length() + 1];
+   szTo[wstr.size()] = '\0';
+   WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, szTo, (int)wstr.length(), NULL, NULL);
+   strTo = szTo;
+   delete[] szTo;
+   return strTo;
+   
+   // Method 2:
+   // int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+   // std::string strTo(size_needed, 0);
+   // WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+   // return strTo;
+}
+
+
+std::string GmatStringUtil::WideStringToString(const wchar_t *wchar)
+{
+   std::wstring wstr(wchar);
+   return WideStringToString(wstr);
+}
 

@@ -137,7 +137,7 @@ void FiniteBurnSetupPanel::Create()
       
       // Thrusters
       wxStaticText *thrusterLabel = new wxStaticText(this, ID_TEXT,
-         wxT(GUI_ACCEL_KEY"Thruster"), wxDefaultPosition, wxDefaultSize, 0);
+         GUI_ACCEL_KEY"Thruster", wxDefaultPosition, wxDefaultSize, 0);
       mThrusterComboBox =
          theGuiManager->GetThrusterComboBox(this, ID_COMBOBOX, wxSize(150,-1));
       mThrusterComboBox->SetToolTip(pConfig->Read(_T("ThrusterHint")));

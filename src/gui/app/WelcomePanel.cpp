@@ -60,8 +60,10 @@ END_EVENT_TABLE()
 WelcomePanel::WelcomePanel(wxFrame *frame, const wxString& title,
       int x, int y, int w, int h)
 : wxFrame(frame, -1, title, wxPoint(x, y), wxSize(w, h),
-      (wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX)) | wxFRAME_FLOAT_ON_PARENT)
-{           
+          // wxRESIZE_BOX is no longer in wxWidgets-3.0
+          //(wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX)) | wxFRAME_FLOAT_ON_PARENT)
+          (wxDEFAULT_FRAME_STYLE & ~ (wxRESIZE_BORDER | wxMAXIMIZE_BOX)) | wxFRAME_FLOAT_ON_PARENT)
+{
    SetBackgroundColour(wxNullColour);
    Create();
    CenterOnScreen(wxBOTH);
@@ -424,7 +426,7 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
          if (linkIcons.size() > 0)
          {
             aIconNTextSizer = new wxFlexGridSizer(2, 20, 20);
-            std::string fullPath = fm->GetFullPathname("ICON_PATH") + linkIcons[i].c_str();
+            std::string fullPath = fm->GetFullPathname("ICON_PATH") + std::string(linkIcons[i].c_str());
             #ifdef DEBUG_FILL_GROUP
             MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
             #endif
@@ -534,8 +536,8 @@ void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
    
    if (GmatFileUtil::DoesDirectoryExist(sampleFullPath + "/", false))
    {
-      wxString samplePath = sampleFullPath.c_str();
-      wxFileDialog dialog(this, _T("Choose a file"), _T(samplePath), _T(""), _T("*.*"));
+      wxString samplePath = wxString(sampleFullPath.c_str());
+      wxFileDialog dialog(this, _T("Choose a file"), samplePath, _T(""), _T("*.*"));
       if (dialog.ShowModal() == wxID_OK)
       {
          wxString scriptfile;

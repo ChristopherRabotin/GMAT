@@ -109,7 +109,7 @@ void ShowSummaryDialog::Create()
 
    // label for coordinate system
    wxStaticText *coordSysStaticText = new wxStaticText( this, ID_CS_TEXT,
-      wxT(GUI_ACCEL_KEY"Coordinate System"), wxDefaultPosition, wxDefaultSize, 0 );
+      GUI_ACCEL_KEY"Coordinate System", wxDefaultPosition, wxDefaultSize, 0 );
    coordSysComboBox =theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
 
@@ -279,7 +279,7 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
    StringArray coordSystemNames;
    wxArrayString csNames = coordSysComboBox->GetStrings();
    for (Integer ii = 0; ii < (Integer) csNames.GetCount(); ii++)
-      coordSystemNames.push_back((csNames.Item(ii)).c_str());
+      coordSystemNames.push_back(std::string((csNames.Item(ii)).c_str()));
    sz = (Integer) coordSystemNames.size();
 
    coordSysComboBox->Clear();

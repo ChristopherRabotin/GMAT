@@ -224,7 +224,8 @@ public:
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
    void OnCloseAll(wxCommandEvent &event);
    void OnCloseActive(wxCommandEvent &event);
-
+   
+   bool SetScriptFileName(const char *filename);
    bool SetScriptFileName(const std::string &filename);
    bool IsActiveScriptModified();
    void RefreshActiveScript(const wxString &filename, bool reloadFile = true);

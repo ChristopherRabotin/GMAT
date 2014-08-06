@@ -541,7 +541,28 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-//  Real SetStringParameter(const Integer id, const Real value,
+//  Real SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a specific std::string element in an array.
+ *
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> Index for the element
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::SetStringParameter(const Integer id, const char *value,
+                                    const Integer index)
+{
+   return SetStringParameter(id, std::string(value), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const std::string &value,
 //                          const Integer index)
 //------------------------------------------------------------------------------
 /**

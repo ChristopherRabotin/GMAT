@@ -38,10 +38,12 @@ public:
    void Finalize();
    
    //----- running object
+   GmatBase* GetRunningObject(const char *name);
    GmatBase* GetRunningObject(const std::string &name);
    
    //----- factory
    const StringArray& GetListOfAllFactoryItems();
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const char *qualifier);
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier = "");
    const StringArray& GetListOfAllFactoryItemsExcept(const ObjectTypeArray &types);
    std::string GetStringOfAllFactoryItems(Gmat::ObjectType type);
@@ -50,9 +52,12 @@ public:
    //----- configuration
    std::string GetNewName(const std::string &name, Integer startCount);
    GmatBase* AddClone(const std::string &name, std::string &newName);
+   bool RenameObject(Gmat::ObjectType type, const char *oldName,
+                     const char *newName);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);
    bool RemoveObject(Gmat::ObjectType type, const std::string &name);
+   bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const char *name);
    bool RemoveObjectIfNotUsed(Gmat::ObjectType type, const std::string &name);
    bool HasConfigurationChanged(Integer sandboxNum = 1);
    void ConfigurationChanged(GmatBase *obj, bool tf);
@@ -61,6 +66,10 @@ public:
                                   Integer sandboxNum = 1);
    
    // General Object
+   GmatBase* CreateObject(const char *type, const std::string &name,
+                          Integer manage = 1, bool createDefault = false);
+   GmatBase* CreateObject(const char *type, const char *name,
+                          Integer manage = 1, bool createDefault = false);
    GmatBase* CreateObject(const std::string &type, const std::string &name,
                           Integer manage = 1, bool createDefault = false);
    
@@ -72,6 +81,7 @@ public:
    
    // Parameter
    bool IsParameter(const std::string &type);
+   Parameter* GetParameter(const char *name);
    Parameter* GetParameter(const std::string &name);
    virtual Parameter* CreateParameter(const std::string &type,
                                       const std::string &name,
@@ -112,6 +122,9 @@ public:
                                  const std::string &name);
    
    // Command
+   GmatCommand* CreateDefaultCommand(const char *type,
+                                     const std::string &name = "",
+                                     GmatCommand *refCmd = NULL);
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "",
                                      GmatCommand *refCmd = NULL);
@@ -137,6 +150,8 @@ public:
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
    
    // Script
+   bool InterpretScript(const char *filename, bool readBack = false,
+                        const char *newPath = "");
    bool InterpretScript(const std::string &filename, bool readBack = false,
                         const std::string &newPath = "");
    bool SaveScript(const std::string &filename,

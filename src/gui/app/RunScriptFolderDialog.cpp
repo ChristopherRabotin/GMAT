@@ -167,8 +167,8 @@ void RunScriptFolderDialog::Create()
       new wxStaticText(this, ID_TEXT, wxT("Current GMAT output directory:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *currOutDir2 =
-      new wxStaticText(this, ID_TEXT, wxT("(ReportFile will use this path if "
-                                          "it doesn't contain path)"),
+      new wxStaticText(this, ID_TEXT, "(ReportFile will use this path if "
+                       "it doesn't contain path)",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mCurrOutDirTextCtrl =

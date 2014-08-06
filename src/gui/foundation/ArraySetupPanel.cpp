@@ -274,7 +274,7 @@ void ArraySetupPanel::LoadData()
       }
       catch (BaseException &e)
       {
-         wxLogError(wxT(e.GetFullMessage().c_str()));
+         wxLogError(wxString(e.GetFullMessage().c_str()));
          wxLog::FlushActive();
       }
    }
@@ -435,6 +435,14 @@ void ArraySetupPanel::UpdateCellValue()
    }   
 }
 
+//------------------------------------------------------------------------------
+// bool CheckCellValue(Real &rval, int row, int col, const char *str)
+//------------------------------------------------------------------------------
+bool ArraySetupPanel::CheckCellValue(Real &rval, int row, int col,
+                                     const char *str)
+{
+   return CheckCellValue(rval, row, col, std::string(str));
+}
 
 //------------------------------------------------------------------------------
 // bool CheckCellValue(Real &rval, int row, int col, const std::string &str)

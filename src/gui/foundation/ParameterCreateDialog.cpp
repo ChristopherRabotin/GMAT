@@ -198,22 +198,22 @@ void ParameterCreateDialog::Create()
    wxPanel *strPanel = new wxPanel(notebook);
    //wxStaticText
    wxStaticText *varNameStaticText =
-      new wxStaticText(varPanel, ID_TEXT, wxT("Variable "GUI_ACCEL_KEY"Name"),
+      new wxStaticText(varPanel, ID_TEXT, "Variable "GUI_ACCEL_KEY"Name",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *expStaticText =
-      new wxStaticText(varPanel, ID_TEXT, wxT("Variable "GUI_ACCEL_KEY"Value"),
+      new wxStaticText(varPanel, ID_TEXT, "Variable "GUI_ACCEL_KEY"Value",
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *varEqualSignStaticText =
       new wxStaticText(varPanel, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrNameStaticText =
-      new wxStaticText(arrPanel, ID_TEXT, wxT("Array "GUI_ACCEL_KEY"Name"),
+      new wxStaticText(arrPanel, ID_TEXT, "Array "GUI_ACCEL_KEY"Name",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1RowStaticText =
-      new wxStaticText(arrPanel, ID_TEXT, wxT(GUI_ACCEL_KEY"Row"),
+      new wxStaticText(arrPanel, ID_TEXT, GUI_ACCEL_KEY"Row",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1ColStaticText =
-      new wxStaticText(arrPanel, ID_TEXT, wxT(GUI_ACCEL_KEY"Column"),
+      new wxStaticText(arrPanel, ID_TEXT, GUI_ACCEL_KEY"Column",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrEqualSignStaticText =
       new wxStaticText(arrPanel, ID_TEXT, wxT("="),
@@ -222,16 +222,16 @@ void ParameterCreateDialog::Create()
       new wxStaticText(arrPanel, ID_TEXT, wxT(" X"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringNameLabel =
-      new wxStaticText(strPanel, ID_TEXT, wxT("String "GUI_ACCEL_KEY"Name"),
+      new wxStaticText(strPanel, ID_TEXT, "String "GUI_ACCEL_KEY"Name",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringEqualSignStaticText =
       new wxStaticText(strPanel, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringValueLabel =
-      new wxStaticText(strPanel, ID_TEXT, wxT("String "GUI_ACCEL_KEY"Value"),
+      new wxStaticText(strPanel, ID_TEXT, "String "GUI_ACCEL_KEY"Value",
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *configStringLabel =
-      new wxStaticText(strPanel, ID_TEXT, wxT(GUI_ACCEL_KEY"Strings"),
+      new wxStaticText(strPanel, ID_TEXT, GUI_ACCEL_KEY"Strings",
                         wxDefaultPosition, wxDefaultSize, 0);
    
    // wxTextCtrl
@@ -280,7 +280,7 @@ void ParameterCreateDialog::Create()
    mStringValueTextCtrl->SetToolTip(pConfig->Read(_T("StringValueHint")));
    
    // wxButton
-   mCreateVariableButton = new wxButton(varPanel, ID_CREATE_BUTTON, wxT(CreateLabel.c_str()),
+   mCreateVariableButton = new wxButton(varPanel, ID_CREATE_BUTTON, wxString(CreateLabel.c_str()),
                                         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    mCreateVariableButton->SetToolTip(pConfig->Read(_T("CreateVariableHint")));
    mCreateVariableButton->Disable();
@@ -288,7 +288,7 @@ void ParameterCreateDialog::Create()
                                      wxDefaultPosition, wxDefaultSize, 0);
    mSelectButton->SetToolTip(pConfig->Read(_T("SelectHint")));
 
-   mCreateArrayButton = new wxButton(arrPanel, ID_CREATE_BUTTON, wxT(CreateLabel.c_str()),
+   mCreateArrayButton = new wxButton(arrPanel, ID_CREATE_BUTTON, wxString(CreateLabel.c_str()),
                                      wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    mCreateArrayButton->SetToolTip(pConfig->Read(_T("CreateArrayHint")));
    mCreateArrayButton->Disable();
@@ -297,7 +297,7 @@ void ParameterCreateDialog::Create()
    mEditArrayButton->Disable();
    mEditArrayButton->SetToolTip(pConfig->Read(_T("EditArrayHint")));
 
-   mCreateStringButton = new wxButton(strPanel, ID_CREATE_BUTTON, wxT(CreateLabel.c_str()),
+   mCreateStringButton = new wxButton(strPanel, ID_CREATE_BUTTON, wxString(CreateLabel.c_str()),
                                       wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    mCreateStringButton->SetToolTip(pConfig->Read(_T("CreateStringHint")));
    mCreateStringButton->Disable();
@@ -905,7 +905,7 @@ void ParameterCreateDialog::OnHelp(wxCommandEvent &event)
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
 		sHTML = objLink+".html";
-		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(sHTML));
+		objLink = pConfig->Read(objLink+"Keyword", sHTML);
 
 		if (!theHelpController->DisplaySection(objLink)) 
 			theHelpController->DisplayContents();
@@ -913,17 +913,17 @@ void ParameterCreateDialog::OnHelp(wxCommandEvent &event)
 	else
 	{
 	   // get base help link if available
-       baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
+      baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
 	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
-   
+      
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage
 		  ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
 		   objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
 	   #endif
-   
+      
 	   // open separate window to show help
-	   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
+	   objLink = pConfig->Read(objLink, wxString(&msgBuffer[0]));
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
 	   #endif

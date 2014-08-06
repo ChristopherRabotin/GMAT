@@ -83,6 +83,8 @@ public:
    inline std::string   GetName() const;
    virtual bool         SetName(const std::string &who,
                                 const std::string &oldName = "");
+   virtual bool         SetName(const char *who,
+                                const std::string &oldName = "");
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
@@ -122,6 +124,8 @@ public:
                         GetRefObjectTypeArray();
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const char *name);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                          const std::string &name);
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
@@ -268,9 +272,14 @@ public:
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value,
+                                           const Integer index);
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
@@ -341,6 +350,8 @@ public:
                                             const Rmatrix &value);
 
    virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const std::string &label,

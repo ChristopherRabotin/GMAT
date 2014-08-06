@@ -4626,7 +4626,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
 int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
                                  const wxString &msg, const wxString &caption)
 {
-   newName = wxGetTextFromUser(wxT(msg), wxT(caption), oldName, this);
+   newName = wxGetTextFromUser(msg, caption, oldName, this);
    
    // @note
    // There is no way of kwowing whether user entered blank and clicked OK

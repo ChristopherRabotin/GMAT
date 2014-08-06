@@ -63,7 +63,8 @@ protected:
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
    
-   bool DoesFileExist(std::string scriptFilename);
+   bool DoesFileExist(const char *scriptFilename);
+   bool DoesFileExist(const std::string &scriptFilename);
    void MakeScriptActive(wxCommandEvent &event, bool isScriptModified);
    void RefreshScriptActiveStatus(bool isActive);
    void SaveScript();

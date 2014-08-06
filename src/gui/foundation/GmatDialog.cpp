@@ -249,7 +249,7 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
 		sHTML = objLink+".html";
-		objLink = pConfig->Read(_T(objLink+"Keyword"),_T(sHTML));
+		objLink = pConfig->Read(objLink+"Keyword", sHTML);
 
 		if (!theHelpController->DisplaySection(objLink)) 
 			theHelpController->DisplayContents();
@@ -257,22 +257,22 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 	else
 	{
 	   // get base help link if available
-       baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
+      baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
 	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
-   
+      
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage
 		  ("   objLink = '%s', baseHelpLink = '%s'\n   helpLink = '%s'\n",
 		   objLink.c_str(), baseHelpLink.c_str(), msgBuffer);
 	   #endif
-   
+      
 	   // open separate window to show help
-	   objLink = pConfig->Read(_T(objLink), _T(msgBuffer));
+	   objLink = pConfig->Read(objLink, wxString(&msgBuffer[0]));
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage("   actual help Link = '%s'\n", objLink.c_str());
 	   #endif
-
-       // if path is relative, try to append it to gmat root 
+      
+      // if path is relative, try to append it to gmat root 
 	   if (GmatFileUtil::IsPathRelative(objLink.c_str()))
 	   {
 			FileManager *fm = FileManager::Instance();

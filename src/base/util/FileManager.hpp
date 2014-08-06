@@ -141,7 +141,9 @@ public:
    std::string GetStartupFileDir();
    std::string GetStartupFileName();
    std::string GetFullStartupFilePath();
+   void ReadStartupFile(const char *fileName = "");
    void ReadStartupFile(const std::string &fileName = "");
+   void WriteStartupFile(const char *fileName = "");
    void WriteStartupFile(const std::string &fileName = "");
    
    std::string GetRootPath();
@@ -164,16 +166,22 @@ public:
    
    std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true);
    
+   void SetAbsPathname(const FileType type, const char *newpath);
    void SetAbsPathname(const FileType type, const std::string &newpath);
+   void SetAbsPathname(const std::string &type, const char *newpath);
    void SetAbsPathname(const std::string &type, const std::string &newpath);
    
    void ClearGmatFunctionPath();
+   void AddGmatFunctionPath(const char *path, bool addFront = true);
    void AddGmatFunctionPath(const std::string &path, bool addFront = true);
-   std::string GetGmatFunctionPath(const std::string &name);
+   std::string GetGmatFunctionPath(const char *funcName);
+   std::string GetGmatFunctionPath(const std::string &funcName);
    const StringArray& GetAllGmatFunctionPaths();
    
    void ClearMatlabFunctionPath();
+   void AddMatlabFunctionPath(const char* path, bool addFront = true);
    void AddMatlabFunctionPath(const std::string &path, bool addFront = true);
+   std::string GetMatlabFunctionPath(const char* name);
    std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
    
