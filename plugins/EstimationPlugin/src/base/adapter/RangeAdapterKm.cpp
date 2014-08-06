@@ -25,6 +25,7 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
+#define DEBUG_RANGE_CALCULATION
 #define USE_PRECISION_TIME
 
 //------------------------------------------------------------------------------
@@ -196,9 +197,9 @@ bool RangeAdapterKm::Initialize()
 const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB)
 {
-   #ifdef DEBUG_RANGE
+   #ifdef DEBUG_RANGE_CALCULATION
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement(%s, "
-            "%p, %p) called\n", (withEvents ? "true" : "false"), forObservation,
+            "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
             rampTB);
    #endif
 
@@ -218,12 +219,18 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          SignalData *current = data[i];
          while (current != NULL)
          {
+			// Add light time range:
+			// accumulate light time range
             Rvector3 signalVec = current->rangeVecInertial;
-            #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("   RangeAdapterKm: Adding %.3lf "
-                     "to %.3lf\n", signalVec.GetMagnitude(), values[i]);
-            #endif
-            values[i] += signalVec.GetMagnitude();
+			values[i] += signalVec.GetMagnitude();
+
+			// accumulate all range corrections
+			for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+			{
+			   if (current->useCorrection[j])
+				  values[i] += current->corrections[j];
+			}
+		    
             // Set measurement epoch to the epoch of the last receiver in the
             // first signal path
             if ((i == 0) && (current->next == NULL))
@@ -235,8 +242,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 
             current = current->next;
          }
-         #ifdef DEBUG_RANGE
-            MessageInterface::ShowMessage("Path %d has range sum %15lf\n", i,
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("Path %d has range sum %.12lf\n", i,
                   values[i]);
          #endif
       }
@@ -248,6 +255,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          cMeasurement.value[i] = values[i] * multiplier;
 
       cMeasurement.isFeasible = calcData->IsMeasurementFeasible();
+
 
       #ifdef DEBUG_ADAPTER_EXECUTION
          MessageInterface::ShowMessage("Computed measurement\n   Type:  %d\n   "
@@ -440,4 +448,5 @@ Integer RangeAdapterKm::GetEventCount()
 void RangeAdapterKm::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
+	TrackingDataAdapter::SetCorrection(correctionName, correctionType);				// made changes by TUAN NGUYEN
 }
