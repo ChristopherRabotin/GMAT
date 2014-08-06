@@ -124,6 +124,12 @@ public:
    bool IsMeasurementFeasible();
    virtual void UsesLightTime(const bool tf);
 
+   /// Set measurement (relativity, ET-TAI, ionosphere, or troposphere) correction to measurement model		// made changes by TUAN NGUYEN
+   virtual void SetCorrection(const std::string& correctionName,											// made changes by TUAN NGUYEN
+      const std::string& correctionType);																	// made changes by TUAN NGUYEN
+   virtual void AddCorrection(const std::string& correctionName,											// made changes by TUAN NGUYEN
+      const std::string& correctionType);																	// made changes by TUAN NGUYEN
+
    // Measurement Model Settings
    virtual bool SetProgressReporter(ProgressReporter* reporter);
 
@@ -141,15 +147,19 @@ protected:
    /// The list of Signals, path by path
    std::vector<SignalBase*> signalPaths;
    /// Measurement data from the Signals
-   std::vector<SignalData*> theData;
+   std::vector<SignalData*> theData;			// theData[i] points to theData of the head of signalPaths[i]
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
    /// Flag used to control light time solution generation
    bool withLighttime;
-   /// Flag used to indicate that teh propagators need initialization
+   /// Flag used to indicate that the propagators need initialization
    bool propsNeedInit;
+   /// A list of measurement correction types						// made changes by TUAN NGUYEN
+   StringArray correctionTypeList;									// made changes by TUAN NGUYEN
+   /// A list of measurement correction models						// made changes by TUAN NGUYEN
+   StringArray correctionModelList;									// made changes by TUAN NGUYEN
 
    /// The reporter for status information
    ProgressReporter *navLog;
