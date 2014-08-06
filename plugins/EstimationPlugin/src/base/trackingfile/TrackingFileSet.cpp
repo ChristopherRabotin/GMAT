@@ -36,20 +36,30 @@
 
 /// Strings describing the BatchEstimator parameters
 const std::string TrackingFileSet::PARAMETER_TEXT[
-                             TrackingFileSetParamCount - GmatBaseParamCount] =
+                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =		// made changes by TUAN NGUYEN
 {
    "AddTrackingConfig",             // TRACKINGCONFIG
    "Filename",                      // FILENAME
+   "RampedTable",					// RAMPED_TABLE					// made changes by TUAN NGUYEN
    "UseLighttime",                  // USELIGHTTIME
+   "UseRelativityCorrection",		// USE_RELATIVITY				// made changes by TUAN NGUYEN
+   "UseETminusTAI",					// USE_ETMINUSTAI				// made changes by TUAN NGUYEN
+   "TroposphereModel",				// TROPOSPHERE_MODEL			// made changes by TUAN NGUYEN
+   "IonosphereModel",				// IONOSPHERE_MODEL				// made changes by TUAN NGUYEN
 };
 
 /// Types of the BatchEstimator parameters
 const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
-                             TrackingFileSetParamCount - GmatBaseParamCount] =
+                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =		// made changes by TUAN NGUYEN
 {
    Gmat::STRINGARRAY_TYPE,          // TRACKINGCONFIG
    Gmat::STRINGARRAY_TYPE,          // FILENAME, but it's a list of names...
+   Gmat::STRINGARRAY_TYPE,          // RAMPED_TABLE, but it's a list of names...
    Gmat::BOOLEAN_TYPE,              // USELIGHTTIME
+   Gmat::BOOLEAN_TYPE,				// USE_RELATIVITY				// made changes by TUAN NGUYEN
+   Gmat::BOOLEAN_TYPE,				// USE_ETMINUSTAI				// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,				// TROPOSPHERE_MODEL			// made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,				// IONOSPHERE_MODEL				// made changes by TUAN NGUYEN
 };
 
 
@@ -66,7 +76,11 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    MeasurementModelBase (name, "TrackingFileSet"),
    useLighttime         (false),    // Default to true once implemented
    solarsystem          (NULL),
-   thePropagator        (NULL)
+   thePropagator        (NULL),
+   useRelativityCorrection	(false),				// made changes by TUAN NGUYEN
+   useETminusTAICorrection	(false),				// made changes by TUAN NGUYEN
+   troposphereModel	    ("None"),					// made changes by TUAN NGUYEN
+   ionosphereModel	    ("None")					// made changes by TUAN NGUYEN
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -99,11 +113,16 @@ TrackingFileSet::~TrackingFileSet()
 TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    MeasurementModelBase (tfs),
    filenames            (tfs.filenames),
+   rampedTablenames     (tfs.rampedTablenames),				// made changes by TUAN NGUYEN
    useLighttime         (tfs.useLighttime),
    solarsystem          (tfs.solarsystem),
    thePropagator        (tfs.thePropagator),
    references           (tfs.references),
-   datafiles            (tfs.datafiles)
+   datafiles            (tfs.datafiles),
+   useRelativityCorrection	(tfs.useRelativityCorrection),	// made changes by TUAN NGUYEN
+   useETminusTAICorrection	(tfs.useETminusTAICorrection),	// made changes by TUAN NGUYEN
+   troposphereModel		(tfs.troposphereModel),				// made changes by TUAN NGUYEN
+   ionosphereModel		(tfs.ionosphereModel)				// made changes by TUAN NGUYEN
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
@@ -134,11 +153,16 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
          trackingConfigs.push_back(tfs.trackingConfigs[i]);
 
       filenames = tfs.filenames;
+	  rampedTablenames = tfs.rampedTablenames;					// made changes by TUAN NGUYEN
       useLighttime = tfs.useLighttime;
       solarsystem = tfs.solarsystem;
       thePropagator = tfs.thePropagator;
       references = tfs.references;
       datafiles = tfs.datafiles;
+	  useRelativityCorrection = tfs.useRelativityCorrection;	// made changes by TUAN NGUYEN
+	  useETminusTAICorrection = tfs.useETminusTAICorrection;	// made changes by TUAN NGUYEN
+	  troposphereModel    = tfs.troposphereModel;				// made changes by TUAN NGUYEN
+	  ionosphereModel     = tfs.ionosphereModel;				// made changes by TUAN NGUYEN
 
       isInitialized = false;
    }
@@ -175,8 +199,8 @@ GmatBase* TrackingFileSet::Clone() const
 //------------------------------------------------------------------------------
 std::string TrackingFileSet::GetParameterText(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < TrackingFileSetParamCount)
-      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   if (id >= MeasurementModelBaseParamCount && id < TrackingFileSetParamCount)
+      return PARAMETER_TEXT[id - MeasurementModelBaseParamCount];
    return MeasurementModelBase::GetParameterText(id);
 }
 
@@ -194,9 +218,9 @@ std::string TrackingFileSet::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer TrackingFileSet::GetParameterID(const std::string& str) const
 {
-   for (Integer i = GmatBaseParamCount; i < TrackingFileSetParamCount; i++)
+   for (Integer i = MeasurementModelBaseParamCount; i < TrackingFileSetParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      if (str == PARAMETER_TEXT[i - MeasurementModelBaseParamCount])
          return i;
    }
 
@@ -217,8 +241,8 @@ Integer TrackingFileSet::GetParameterID(const std::string& str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType TrackingFileSet::GetParameterType(const Integer id) const
 {
-   if (id >= GmatBaseParamCount && id < TrackingFileSetParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   if (id >= MeasurementModelBaseParamCount && id < TrackingFileSetParamCount)
+      return PARAMETER_TYPE[id - MeasurementModelBaseParamCount];
 
    return MeasurementModelBase::GetParameterType(id);
 }
@@ -254,6 +278,12 @@ std::string TrackingFileSet::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string TrackingFileSet::GetStringParameter(const Integer id) const
 {
+   if (id == TROPOSPHERE_MODEL)
+      return troposphereModel;
+
+   if (id == IONOSPHERE_MODEL)
+      return ionosphereModel;
+
    return MeasurementModelBase::GetStringParameter(id);
 }
 
@@ -273,6 +303,18 @@ std::string TrackingFileSet::GetStringParameter(const Integer id) const
 bool TrackingFileSet::SetStringParameter(const Integer id,
       const std::string& value)
 {
+   if (id == TROPOSPHERE_MODEL)
+   {
+	  troposphereModel = value;
+	  return true;
+   }
+
+   if (id == IONOSPHERE_MODEL)
+   {
+	  ionosphereModel = value;
+	  return true;
+   }
+
    if (id == FILENAME)
    {
       if (find(filenames.begin(), filenames.end(), value) == filenames.end())
@@ -282,6 +324,16 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       }
       return false;
    }
+
+   if (id == RAMPED_TABLENAME)																			// made changes by TUAN NGUYEN
+   {																									// made changes by TUAN NGUYEN
+      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())		// made changes by TUAN NGUYEN
+      {																									// made changes by TUAN NGUYEN
+         rampedTablenames.push_back(value);																// made changes by TUAN NGUYEN
+         return true;																					// made changes by TUAN NGUYEN
+      }																									// made changes by TUAN NGUYEN
+      return false;																						// made changes by TUAN NGUYEN
+   }																									// made changes by TUAN NGUYEN
 
    return MeasurementModelBase::SetStringParameter(id, value);
 }
@@ -319,6 +371,15 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
          throw MeasurementException("Index out of bounds when trying to access "
                "a tracking data file name");
    }
+
+   if (id == RAMPED_TABLENAME)														// made changes by TUAN NGUYEN
+   {																				// made changes by TUAN NGUYEN
+      if (((Integer)rampedTablenames.size() > index) && (index >= 0))				// made changes by TUAN NGUYEN
+         return rampedTablenames[index];											// made changes by TUAN NGUYEN
+      else																			// made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to access "	// made changes by TUAN NGUYEN
+               "a ramped table file name");											// made changes by TUAN NGUYEN
+   }																				// made changes by TUAN NGUYEN
 
    return MeasurementModelBase::GetStringParameter(id, index);
 }
@@ -424,6 +485,27 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return true;
    }
 
+   if (id == RAMPED_TABLENAME)														// made changes by TUAN NGUYEN
+   {																				// made changes by TUAN NGUYEN
+      if (((Integer)rampedTablenames.size() > index) && (index >= 0))				// made changes by TUAN NGUYEN
+         rampedTablenames[index] = value;											// made changes by TUAN NGUYEN
+      else if ((Integer)rampedTablenames.size() == index)							// made changes by TUAN NGUYEN
+      {																				// made changes by TUAN NGUYEN
+         rampedTablenames.push_back(value);											// made changes by TUAN NGUYEN
+      }																				// made changes by TUAN NGUYEN
+      else																			// made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to "			// made changes by TUAN NGUYEN
+               "set a ramped table file name");										// made changes by TUAN NGUYEN
+
+      #ifdef DEBUG_INITIALIZATION													// made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("%d members in config:\n",					// made changes by TUAN NGUYEN
+               rampedTablenames.size());											// made changes by TUAN NGUYEN
+         for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)					// made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("   %s\n", rampedTablenames[i].c_str());	// made changes by TUAN NGUYEN
+      #endif																		// made changes by TUAN NGUYEN
+      return true;																	// made changes by TUAN NGUYEN
+   }																				// made changes by TUAN NGUYEN
+
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
@@ -458,6 +540,9 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
 
    if (id == FILENAME)
       return filenames;
+
+   if (id == RAMPED_TABLENAME)								// made changes by TUAN NGUYEN
+      return rampedTablenames;								// made changes by TUAN NGUYEN
 
    return MeasurementModelBase::GetStringArrayParameter(id);
 }
@@ -614,6 +699,12 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
 //------------------------------------------------------------------------------
 bool TrackingFileSet::GetBooleanParameter(const Integer id) const
 {
+   if (id == USE_RELATIVITY)
+      return useRelativityCorrection;
+
+   if (id == USE_ETMINUSTAI)
+      return useETminusTAICorrection;
+
    if (id == USELIGHTTIME)
       return useLighttime;
 
@@ -635,6 +726,18 @@ bool TrackingFileSet::GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool TrackingFileSet::SetBooleanParameter(const Integer id, const bool value)
 {
+   if (id == USE_RELATIVITY)
+   {
+      useRelativityCorrection = value;
+      return useRelativityCorrection;
+   }
+
+   if (id == USE_ETMINUSTAI)
+   {
+      useETminusTAICorrection = value;
+      return useETminusTAICorrection;
+   }
+
    if (id == USELIGHTTIME)
    {
       useLighttime = value;
@@ -897,6 +1000,16 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
             break;
          }
       }
+
+      for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)				// made changes by TUAN NGUYEN
+      {																		// made changes by TUAN NGUYEN
+         if (rampedTablenames[i] == oldName)								// made changes by TUAN NGUYEN
+         {																	// made changes by TUAN NGUYEN
+            rampedTablenames[i] = newName;									// made changes by TUAN NGUYEN
+            retval = true;													// made changes by TUAN NGUYEN
+            break;															// made changes by TUAN NGUYEN
+         }																	// made changes by TUAN NGUYEN
+      }																		// made changes by TUAN NGUYEN
    }
 
    if ((type == Gmat::SPACE_POINT) || (type == Gmat::UNKNOWN_OBJECT))
@@ -1218,6 +1331,18 @@ bool TrackingFileSet::Initialize()
          measurements[i]->SetSolarSystem(solarsystem);
          if (thePropagator)
             measurements[i]->SetPropagator(thePropagator);
+
+		 // Set measurement corrections to TrackingDataAdapter							// made changes by TUAN NGUYEN
+		 if (useRelativityCorrection)													// made changes by TUAN NGUYEN
+			measurements[i]->SetCorrection("Moyer","Relativity");						// made changes by TUAN NGUYEN
+		 if (useETminusTAICorrection)													// made changes by TUAN NGUYEN
+			measurements[i]->SetCorrection("Moyer","ET-TAI");							// made changes by TUAN NGUYEN
+		 if (troposphereModel != "")													// made changes by TUAN NGUYEN
+			measurements[i]->SetCorrection(troposphereModel,"TroposphereModel");		// made changes by TUAN NGUYEN
+		 if (ionosphereModel != "")														// made changes by TUAN NGUYEN
+			measurements[i]->SetCorrection(ionosphereModel,"IonosphereModel");			// made changes by TUAN NGUYEN
+
+		 // Initialize TrackingDataAdapter
          retval = retval && measurements[i]->Initialize();
       }
 
@@ -1274,13 +1399,22 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    /// @todo: Check to see if this code works for multi-strand measurements.
    ///        Original code assumed a single strand, so it may need modification
    ///        here and wrapping in an outer loop.  Hence the indentation.
+
+   // 1. Set value for designators map:
       for (UnsignedInt i = 0; i < strand.size(); ++i)
       {
-         designator.str() = "";
+         //designator.str() = "";												// made changes by TUAN NGUYEN
+         // Search for a referent object with the same name of node strand[i]
+		 UnsignedInt j = 0;														// made changes by TUAN NGUYEN
+         for (; j < references.size(); ++j)										// made changes by TUAN NGUYEN
+		 {																		// made changes by TUAN NGUYEN
+            if (references[j]->GetName() == strand[i])							// made changes by TUAN NGUYEN
+			   break;															// made changes by TUAN NGUYEN
+		 }																		// made changes by TUAN NGUYEN
 
-         for (UnsignedInt j = 0; j < references.size(); ++j)
-            if (references[j]->GetName() == strand[i])
-            {
+		 // If found then add value to designators map
+		 if (j < references.size())												// made changes by TUAN NGUYEN
+         {																		// made changes by TUAN NGUYEN
                Gmat::ObjectType pType = references[j]->GetType();
 
                switch(pType)
@@ -1310,11 +1444,12 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
                            "the tracking file set strand mapping code");
                      break;  // No effect, but it avoids a warning message
                }
-            }
+         }																		// made changes by TUAN NGUYEN
       }
 
    // And now build the node list
    /// @todo: Check as described above.
+   // 2. Add all spacecraft and station IDs to currentStrand
       currentStrand.clear();
       for (UnsignedInt i = 0; i < strand.size(); ++i)
       {
@@ -1322,7 +1457,9 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       }
       nodelist.push_back(currentStrand);
 
+
    /// @todo Move this into a Factory so that plugin adapters work
+   // 3. Create TrackingDataAdapter for a given measurement type
    if (type == "Range")
    {
       retval = new RangeAdapterKm(instanceName + type);
