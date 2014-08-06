@@ -30,6 +30,7 @@
 
 // Temporary to get Adapters hooked up
 #include "GmatObType.hpp"
+#include "RampTableType.hpp"						// made changes by TUAN NGUYEN
 
 
 //#define DEBUG_INITIALIZATION
@@ -287,6 +288,45 @@ bool MeasurementManager::Initialize()
                      " failed to open in simulation mode");
          }
       }
+
+	  // And the ramped table stream objects													// made changes by TUAN NGUYEN
+      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");	// made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)									// made changes by TUAN NGUYEN
+      {																							// made changes by TUAN NGUYEN
+         std::stringstream fn;																	// made changes by TUAN NGUYEN
+         fn << trackingSets[i]->GetName() << "RampedTable" << i;								// made changes by TUAN NGUYEN
+         DataFile *newStream = new DataFile(fn.str());											// made changes by TUAN NGUYEN
+         newStream->SetStringParameter("Filename", filenames[i]);								// made changes by TUAN NGUYEN
+         RampTableType *rpt = new RampTableType();												// made changes by TUAN NGUYEN
+         newStream->SetStream(rpt);																// made changes by TUAN NGUYEN
+
+         #ifdef DEBUG_INITIALIZATION															// made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",					// made changes by TUAN NGUYEN
+                  (newStream->IsInitialized() ? "initialized" :									// made changes by TUAN NGUYEN
+                  "not initialized"), newStream->GetName().c_str(), newStream);					// made changes by TUAN NGUYEN
+         #endif																					// made changes by TUAN NGUYEN
+
+		 SetRampTableDataStreamObject(newStream);												// made changes by TUAN NGUYEN
+
+         // Associate the adapters with the stream												// made changes by TUAN NGUYEN
+         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)									// made changes by TUAN NGUYEN
+         {																						// made changes by TUAN NGUYEN
+            #ifdef DEBUG_INITIALIZATION															// made changes by TUAN NGUYEN
+               MessageInterface::ShowMessage("Associating %d with %s\n",						// made changes by TUAN NGUYEN
+                     (*setAdapters)[j]->GetModelID(),											// made changes by TUAN NGUYEN
+                     newStream->GetName().c_str());												// made changes by TUAN NGUYEN
+            #endif																				// made changes by TUAN NGUYEN
+            idToRampTableStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;				// made changes by TUAN NGUYEN
+         }																						// made changes by TUAN NGUYEN
+
+         if (inSimulationMode)																	// made changes by TUAN NGUYEN
+         {																						// made changes by TUAN NGUYEN
+            if (newStream->OpenStream(inSimulationMode) == false)								// made changes by TUAN NGUYEN
+               throw MeasurementException("The stream " + filenames[i] +						// made changes by TUAN NGUYEN
+                     " failed to open in simulation mode");										// made changes by TUAN NGUYEN
+         }																						// made changes by TUAN NGUYEN
+      }																							// made changes by TUAN NGUYEN
+
    }
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
