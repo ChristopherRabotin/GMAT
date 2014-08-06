@@ -99,11 +99,12 @@ Integer TFSMagicNumbers::GetMagicNumber(
          if (find(uniqueNodes.begin(), uniqueNodes.end(), nodelist[i][j]) ==
                uniqueNodes.end())
          {
-            ++nodeCount;
+            // ++nodeCount;							// made changes by TUAN NGUYEN
             uniqueNodes.push_back(nodelist[i][j]);
          }
       }
    }
+   nodeCount = uniqueNodes.size();					// made changes by TUAN NGUYEN
 
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
    {
@@ -136,10 +137,11 @@ Integer TFSMagicNumbers::GetMagicNumber(
       }
    }
 
-   // Build the factor map
-   factorMap.clear();
-   for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
-      factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;
+   // This code is moved to default constructor fucntion
+   //// Build the factor map													// made changes by TUAN NGUYEN
+   //factorMap.clear();															// made changes by TUAN NGUYEN
+   //for (UnsignedInt i = 0; i < lookupTable.size(); ++i)						// made changes by TUAN NGUYEN
+   //   factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;	// made changes by TUAN NGUYEN
 
    if (retval == -1)
       retval = arbitraryMagicNumber;
@@ -255,6 +257,13 @@ TFSMagicNumbers::TFSMagicNumbers() :
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
+
+   
+   // Build the factor map														// made changes by TUAN NGUYEN
+   factorMap.clear();															// made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < lookupTable.size(); ++i)							// made changes by TUAN NGUYEN
+      factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;		// made changes by TUAN NGUYEN
+
 }
 
 
