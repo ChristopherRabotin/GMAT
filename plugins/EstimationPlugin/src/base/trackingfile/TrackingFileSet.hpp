@@ -155,8 +155,19 @@ protected:
    std::vector<TrackingDataAdapter*> measurements;
    /// Name of the associate tracking data file
    StringArray filenames;
+   /// Name of the associate ramped table						// made changes by TUAN NGUYEN
+   StringArray rampedTablenames;								// made changes by TUAN NGUYEN
    /// Flag for the inclusion of light time solution
    bool useLighttime;
+
+   /// Flag for the inclusion of relativity correction			// made changes by TUAN NGUYEN
+   bool useRelativityCorrection;								// made changes by TUAN NGUYEN
+   /// Flag for the inclusion of ET-TAI correction				// made changes by TUAN NGUYEN
+   bool useETminusTAICorrection;								// made changes by TUAN NGUYEN
+   /// Name of troposphere model								// made changes by TUAN NGUYEN
+   std::string troposphereModel;								// made changes by TUAN NGUYEN
+   /// Name of ionosphere model									// made changes by TUAN NGUYEN
+   std::string ionosphereModel;									// made changes by TUAN NGUYEN
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -171,18 +182,23 @@ protected:
    /// Parameter IDs for the TrackingFileSets
    enum
    {
-      TRACKINGCONFIG = GmatBaseParamCount,
+      TRACKINGCONFIG = MeasurementModelBaseParamCount,		// made changes by TUAN NGUYEN
       FILENAME,
+	  RAMPED_TABLENAME,										// made changes by TUAN NGUYEN
       USELIGHTTIME,
+	  USE_RELATIVITY,										// made changes by TUAN NGUYEN
+	  USE_ETMINUSTAI,										// made changes by TUAN NGUYEN
+	  TROPOSPHERE_MODEL,									// made changes by TUAN NGUYEN
+	  IONOSPHERE_MODEL,										// made changes by TUAN NGUYEN
       TrackingFileSetParamCount,
    };
 
    /// Strings describing the BatchEstimator parameters
    static const std::string PARAMETER_TEXT[TrackingFileSetParamCount -
-                                           GmatBaseParamCount];
+                                           MeasurementModelBaseParamCount];				// made changes by TUAN NGUYEN
    /// Types of the BatchEstimator parameters
    static const Gmat::ParameterType PARAMETER_TYPE[TrackingFileSetParamCount -
-                                                   GmatBaseParamCount];
+                                                   MeasurementModelBaseParamCount];		// made changes by TUAN NGUYEN
 
    TrackingDataAdapter *BuildAdapter(const StringArray &strand,
          const std::string &type);
