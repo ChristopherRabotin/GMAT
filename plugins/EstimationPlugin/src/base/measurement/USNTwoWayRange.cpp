@@ -860,8 +860,12 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 	   		)
 	   	 )
       {
-         if ((troposphere != NULL)||(ionosphere != NULL))
-            throw MeasurementException("Error: missing transmiter, transponder, or receiver in order to compute media correction\n");
+         #ifdef IONOSPHERE
+            if ((troposphere != NULL)||(ionosphere != NULL))
+         #else
+            if (troposphere != NULL)
+         #endif
+               throw MeasurementException("Error: missing transmiter, transponder, or receiver in order to compute media correction\n");
 
          Real realRange = (uplinkRange + downlinkRange)/2;
 		 #ifdef DEBUG_RANGE_CALC_WITH_EVENTS

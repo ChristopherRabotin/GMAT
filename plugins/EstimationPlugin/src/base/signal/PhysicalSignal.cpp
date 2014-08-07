@@ -56,7 +56,9 @@ PhysicalSignal::PhysicalSignal(const std::string &typeStr,
    SignalBase                 (typeStr, name),
    physicalSignalInitialized  (false),
    troposphere                (NULL),
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    ionosphere                 (NULL),
+#endif
    useRelativity              (false)									// made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -80,8 +82,11 @@ PhysicalSignal::~PhysicalSignal()
 
    if (troposphere != NULL)
       delete troposphere;
+
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if (ionosphere != NULL)
       delete troposphere;
+#endif
 }
 
 
@@ -107,10 +112,11 @@ PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
       delete troposphere;
    troposphere = (Troposphere*)(ps.troposphere->Clone());
 
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if (ionosphere !=NULL)
       delete ionosphere;
    ionosphere = (Ionosphere*)(ps.ionosphere->Clone());
-
+#endif
 }
 
 
@@ -141,9 +147,11 @@ PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
          delete troposphere;
 	  troposphere = (Troposphere*)(ps.troposphere->Clone());
 
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
 	  if (ionosphere !=NULL)
          delete ionosphere;
 	  ionosphere = (Ionosphere*)(ps.ionosphere->Clone());
+#endif
    }
 
    return *this;
@@ -340,7 +348,11 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 
 	  // 4.2 Specify media correction 
 	  Real mediaCorrection = 0.0;																							// unit: km
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
 	  if ((troposphere !=NULL)||(ionosphere !=NULL))
+#else
+	  if (troposphere != NULL)
+#endif
 	  {
 	     if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
 	     {  
@@ -625,7 +637,11 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 
 	  // 4.2 Specify media correction 
 	  Real mediaCorrection = 0.0;																							// unit: km
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
 	  if ((troposphere !=NULL)||(ionosphere !=NULL))
+#else
+	  if (troposphere != NULL)
+#endif
 	  {
 	     if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
 	     {  
