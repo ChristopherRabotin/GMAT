@@ -2294,26 +2294,26 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
                    (parametersSetOnce ? "true" : "false"));
             #endif
 
-               // ... Mass ...
-               parm = sat->GetRealParameter(satIds[2]);
-               if (parm <= 0)
-                  throw ODEModelException("Mass parameter unphysical on object " +
-                     sat->GetName());
-               pm->SetSatelliteParameter(i, satIds[2], parm);
+            // ... Mass ...
+            parm = sat->GetRealParameter(satIds[2]);
+            if (parm <= 0)
+               throw ODEModelException("Mass parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[2], parm);
 
-               // ... Drag area ...
-               parm = sat->GetRealParameter(satIds[4]);
-               if (parm < 0)
-                  throw ODEModelException("Drag Area parameter unphysical on object " +
-                     sat->GetName());
-               pm->SetSatelliteParameter(i, satIds[4], parm);
+            // ... Drag area ...
+            parm = sat->GetRealParameter(satIds[4]);
+            if (parm < 0)
+               throw ODEModelException("Drag Area parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[4], parm);
 
-               // ... SRP area ...
-               parm = sat->GetRealParameter(satIds[5]);
-               if (parm < 0)
-                  throw ODEModelException("SRP Area parameter unphysical on object " +
-                     sat->GetName());
-               pm->SetSatelliteParameter(i, satIds[5], parm);
+            // ... SRP area ...
+            parm = sat->GetRealParameter(satIds[5]);
+            if (parm < 0)
+               throw ODEModelException("SRP Area parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[5], parm);
          }
          else if (sat->GetType() == Gmat::FORMATION)
          {
