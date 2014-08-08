@@ -25,8 +25,8 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
-#define DEBUG_RANGE_CALCULATION
-#define USE_PRECISION_TIME
+//#define DEBUG_RANGE_CALCULATION
+//#define USE_PRECISION_TIME
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)

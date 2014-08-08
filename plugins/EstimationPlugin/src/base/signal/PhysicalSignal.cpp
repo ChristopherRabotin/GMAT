@@ -39,7 +39,7 @@
 //#define DEBUG_IONOSPHERE_MEDIA_CORRECTION
 //#define DEBUG_TROPOSPHERE_MEDIA_CORRECTION
 //#define DEBUG_RELATIVITY_CORRECTION
-#define DEBUG_RANGE_CALCULATION
+//#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
 // PhysicalSignal(const std::string &typeStr, const std::string &name)
@@ -59,7 +59,9 @@ PhysicalSignal::PhysicalSignal(const std::string &typeStr,
 #ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    ionosphere                 (NULL),
 #endif
-   useRelativity              (false)									// made changes by TUAN NGUYEN
+   useRelativity              (false),								// made changes by TUAN NGUYEN
+   relCorrection              (0.0),
+   useETTAI                   (false)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("PhysicalSignal:: default construction\n");
@@ -102,7 +104,9 @@ PhysicalSignal::~PhysicalSignal()
 PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
    SignalBase                 (ps),
    physicalSignalInitialized  (false),
-   useRelativity              (ps.useRelativity)					// made changes by TUAN NGUYEN
+   useRelativity              (ps.useRelativity),					// made changes by TUAN NGUYEN
+   relCorrection              (ps.relCorrection),
+   useETTAI                   (ps.useETTAI)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: copy construction\n");
@@ -141,7 +145,10 @@ PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
    {
       GmatBase::operator=(ps);
       physicalSignalInitialized = false;
-	  useRelativity             = ps.useRelativity;
+      useRelativity             = ps.useRelativity;
+
+      relCorrection             = ps.relCorrection;
+      useETTAI                  = ps.useETTAI;
 
 	  if (troposphere !=NULL)
          delete troposphere;
