@@ -4026,9 +4026,9 @@ bool ODEModel::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// bool SetStringParameter(const char *label, const char *value)
+// bool SetStringParameter(const std::string &label, const char *value)
 //------------------------------------------------------------------------------
-bool ODEModel::SetStringParameter(const char *label, const char *value)
+bool ODEModel::SetStringParameter(const std::string &label, const char *value)
 {
    return SetStringParameter(GetParameterID(label), std::string(value));
 }

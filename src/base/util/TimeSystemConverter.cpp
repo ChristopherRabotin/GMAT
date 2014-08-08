@@ -655,6 +655,24 @@ void TimeConverterUtil::Convert(const char *fromType, Real fromMjd,
 }
 
 //---------------------------------------------------------------------------
+// void Convert(const char *fromType, Real fromMjd,
+//              const std::string &fromStr, const std::string &toType,
+//              Real &toMjd, std::string &toStr, Integer format = 1)
+//---------------------------------------------------------------------------
+/*
+ * @see Convert(const std::string &fromType, Real fromMjd, ...)
+ */
+//---------------------------------------------------------------------------
+void TimeConverterUtil::Convert(const char *fromType, Real fromMjd, 
+                                const std::string &fromStr,
+                                const std::string &toType, Real &toMjd,
+                                std::string &toStr, Integer format)
+{
+   return Convert(std::string(fromType), fromMjd, fromStr, toType, toMjd,
+                  toStr, format);
+}
+
+//---------------------------------------------------------------------------
 // void Convert(const std::string &fromType, Real fromMjd,
 //              const std::string &fromStr, const std::string &toType,
 //              Real &toMjd, std::string &toStr, Integer format = 1)

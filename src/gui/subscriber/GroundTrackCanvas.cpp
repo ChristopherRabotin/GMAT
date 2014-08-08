@@ -1205,7 +1205,9 @@ void GroundTrackCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       // We are not drawing trajectory other than spacecraft.
       // Just settinig color here for label
       //*sIntColor = mObjectOrbitColorMap[objName].GetIntColor(); //LOJ: 2013.11.25
-      *sIntColor = mObjectOrbitColorMap[objName.c_str()];
+      // Changed to use WX_TO_STD_STRING macro for wx3.0 (LOJ: 2014.08.07)
+      //*sIntColor = mObjectOrbitColorMap[objName.c_str()];
+      *sIntColor = mObjectOrbitColorMap[objName.WX_TO_STD_STRING];
       
       #if DEBUG_ORBIT_LINES > 1
       MessageInterface::ShowMessage

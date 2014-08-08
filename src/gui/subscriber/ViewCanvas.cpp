@@ -15,6 +15,7 @@
  */
 //------------------------------------------------------------------------------
 #include "ViewCanvas.hpp"
+#include "gmatwxdefs.hpp"          // for WX_TO_STD_STRING, STD_TO_WX_STRING macros
 #include "MdiGlPlotData.hpp"       // for GmatPlot::MAX_SCS
 #include "Spacecraft.hpp"
 #include "ModelManager.hpp"
@@ -2449,9 +2450,9 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             //LOJ: 2013.11.25
             // Set orbit or target color
             if (mIsSolving)
-               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.c_str()];
+               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.WX_TO_STD_STRING];
             else
-               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.c_str()];
+               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.WX_TO_STD_STRING];
             
             Rvector6 objMjEqState;
             try
@@ -3127,12 +3128,13 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   //glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.WX_TO_STD_STRING.c_str());
    
    if (label3 != "")
    {
       glRasterPos2i(xpos, 50);
-      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.c_str());
+      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.WX_TO_STD_STRING.c_str());
    }
    
    if (showCS)
@@ -3140,7 +3142,7 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
       // Prepend space before coordinate system name (Bug 2318 fix)
       wxString viewCsName = "  " + mViewCoordSysName;
       glRasterPos2i(xpos, ypos+20);
-      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.c_str());
+      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.WX_TO_STD_STRING.c_str());
    }
    
    glEnable(GL_LIGHTING);
@@ -3169,7 +3171,7 @@ void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
+   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.WX_TO_STD_STRING.c_str());
    
    SetupProjection();
 }

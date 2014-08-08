@@ -16,7 +16,7 @@
 #include "TsPlotXYCanvas.hpp"
 #include <sstream>
 #include <algorithm>
-
+#include "gmatwxdefs.hpp"          // for STD_TO_WX_STRING macro
 #include "MessageInterface.hpp"
 
 //#define DEBUG_INTERFACE
@@ -227,7 +227,7 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
       // Draw the title
       dc.SetFont(titleFont);
       wxString label;
-      wxString title = _T(plotTitle.c_str());
+      wxString title = STD_TO_WX_STRING(plotTitle.c_str());
       dc.GetTextExtent(title, &w, &h);
       int xloc = xCenter - w / 2;
       int yloc = (top - h) / 2;
@@ -238,14 +238,14 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
    {
       // Add x-axis label
       dc.SetFont(axisFont);
-      wxString title = _T(xLabel.c_str());
+      wxString title = STD_TO_WX_STRING(xLabel.c_str());
       dc.GetTextExtent(title, &w, &h);
       int xloc = xCenter - w / 2;
       int yloc = ht - bottom / 2;
       dc.DrawText(title, xloc, yloc);
 
       // Add y-axis label
-      title = _T(yLabel.c_str());
+      title = STD_TO_WX_STRING(yLabel.c_str());
       dc.GetTextExtent(title, &w, &h);
       xloc = h / 2;
       yloc = yCenter + w / 2;

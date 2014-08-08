@@ -808,11 +808,7 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
 //      wxT("3DS and POV files (*.3ds;*.pov)|*.3ds;*.pov"), wxOPEN);
    wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
                            wxT("3DS files (*.3ds)|*.3ds"),
-                           #ifdef __USE_WX28__
-                           wxOPEN);
-                           #else
-                           wxFD_OPEN);
-                           #endif
+                           gmatFD_OPEN);
 
    // If it succeeded...
    if (fileDialog.ShowModal() == wxID_OK)

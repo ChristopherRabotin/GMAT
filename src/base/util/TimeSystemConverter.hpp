@@ -145,6 +145,9 @@ namespace TimeConverterUtil
    void GMAT_API Convert(const char *fromType, Real fromMjd,
                          const char *fromStr, const char *toType,
                          Real &toMjd, std::string &toStr, Integer format = 1);
+   void GMAT_API Convert(const char *fromType, Real fromMjd,
+                         const std::string &fromStr, const std::string &toType,
+                         Real &toMjd, std::string &toStr, Integer format = 1);
    void GMAT_API Convert(const std::string &fromType, Real fromMjd,
                          const std::string &fromStr, const std::string &toType,
                          Real &toMjd, std::string &toStr, Integer format = 1);

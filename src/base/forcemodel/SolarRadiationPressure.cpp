@@ -621,9 +621,9 @@ bool SolarRadiationPressure::SetStringParameter(const Integer id,
 }
 
 //------------------------------------------------------------------------------
-// bool SetStringParameter(const char *label, const char *value)
+// bool SetStringParameter(const std::string &label, const char *value)
 //------------------------------------------------------------------------------
-bool SolarRadiationPressure::SetStringParameter(const char *label,
+bool SolarRadiationPressure::SetStringParameter(const std::string &label,
                                                 const char *value)
 {
    return SetStringParameter(GetParameterID(label), std::string(value));

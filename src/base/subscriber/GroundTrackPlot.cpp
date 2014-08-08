@@ -668,6 +668,14 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
    return OrbitPlot::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool GroundTrackPlot::SetStringParameter(const std::string &label,
+                                         const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)

@@ -736,6 +736,18 @@ bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk)
 
 
 //------------------------------------------------------------------------------
+// bool GmatFileUtil::IsSameFileName(const char *fname1, const char *fname2)
+//------------------------------------------------------------------------------
+/*
+ * @return  true  If two file names are same, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsSameFileName(const char *fname1, const char *fname2)
+{
+   return IsSameFileName(std::string(fname1), std::string(fname2));
+}
+
+//------------------------------------------------------------------------------
 // bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &fname2)
 //------------------------------------------------------------------------------
 /*

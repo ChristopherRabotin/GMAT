@@ -296,7 +296,7 @@ void CelestialBodyPropertiesPanel::Create()
    textureString = "";
    
    // mu
-   muStaticText      = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Mu"),
+   muStaticText      = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Mu"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    muTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_MU, wxT(""),
                        wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -304,7 +304,7 @@ void CelestialBodyPropertiesPanel::Create()
    muUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km^3/sec^2"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    // eq. radius
-   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxT("Equatorial "GUI_ACCEL_KEY"Radius"),
+   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxString("Equatorial "GUI_ACCEL_KEY"Radius"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    eqRadTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_EQRAD, wxT(""),
                           wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -312,7 +312,7 @@ void CelestialBodyPropertiesPanel::Create()
    eqRadUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    // flattening
-   flatStaticText      = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Flattening"),
+   flatStaticText      = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Flattening"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    flatTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_FLAT, wxT(""),
                          wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -320,7 +320,7 @@ void CelestialBodyPropertiesPanel::Create()
    flatUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT(""), // unitless
                          wxDefaultPosition, wxSize(-1,-1), 0);
    // texture map
-   textureStaticText = new wxStaticText(this, ID_TEXT, wxT("Te"GUI_ACCEL_KEY"xture Map File"),
+   textureStaticText = new wxStaticText(this, ID_TEXT, wxString("Te"GUI_ACCEL_KEY"xture Map File"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    textureTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_TEXTURE, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0);

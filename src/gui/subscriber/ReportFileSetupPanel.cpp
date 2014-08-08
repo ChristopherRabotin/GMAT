@@ -339,7 +339,8 @@ void ReportFileSetupPanel::LoadData()
       
       Integer id;
       
-      mFileTextCtrl->SetValue(wxT(filename.c_str()));
+      //mFileTextCtrl->SetValue(wxT(filename.c_str()));
+      mFileTextCtrl->SetValue(STD_TO_WX_STRING(filename.c_str()));
       
       #if DEBUG_REPORTFILE_PANEL_LOAD
       MessageInterface::ShowMessage
@@ -510,7 +511,7 @@ void ReportFileSetupPanel::SaveData()
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "Appended .txt to file name '%s'\n", filename.c_str());
          filename = filename + ".txt";
-         mFileTextCtrl->SetValue(wxT(filename.c_str()));
+         mFileTextCtrl->SetValue(STD_TO_WX_STRING(filename.c_str()));
       }
       
       id = clonedObj->GetParameterID("Filename");

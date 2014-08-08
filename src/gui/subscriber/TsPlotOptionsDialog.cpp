@@ -15,6 +15,7 @@
  
 
 #include "TsPlotOptionsDialog.hpp"
+#include "gmatwxdefs.hpp"          // for WX_TO_STD_STRING, STD_TO_WX_STRING macros
 #include <sstream>
 
 BEGIN_EVENT_TABLE(TsPlotOptionsDialog, wxDialog)
@@ -267,32 +268,32 @@ void TsPlotOptionsDialog::UpdateLabels()
 
 std::string TsPlotOptionsDialog::GetPlotTitle()
 {
-   return plotTitle->GetValue().c_str();
+   return plotTitle->GetValue().WX_TO_STD_STRING;
 }
 
 std::string TsPlotOptionsDialog::GetXLabel()
 {
-   return xAxisLabel->GetValue().c_str();
+   return xAxisLabel->GetValue().WX_TO_STD_STRING;
 }
 
 std::string TsPlotOptionsDialog::GetYLabel()
 {
-   return yAxisLabel->GetValue().c_str();
+   return yAxisLabel->GetValue().WX_TO_STD_STRING;
 }
 
 void TsPlotOptionsDialog::SetPlotTitle(const std::string &str)
 {
-   plotTitle->SetValue(str.c_str());
+   plotTitle->SetValue(STD_TO_WX_STRING(str.c_str()));
 }
 
 void TsPlotOptionsDialog::SetXLabel(const std::string &str)
 {
-   xAxisLabel->SetValue(str.c_str());
+   xAxisLabel->SetValue(STD_TO_WX_STRING(str.c_str()));
 }
 
 void TsPlotOptionsDialog::SetYLabel(const std::string &str)
 {
-   yAxisLabel->SetValue(str.c_str());
+   yAxisLabel->SetValue(STD_TO_WX_STRING(str.c_str()));
 }
 
 int TsPlotOptionsDialog::GetWidth()

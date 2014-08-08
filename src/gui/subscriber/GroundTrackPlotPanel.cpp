@@ -357,9 +357,10 @@ void GroundTrackPlotPanel::Create()
       new wxStaticText(this, -1, wxT("Solver Iterations"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
+   // Changed to use emptyList (LOJ: 2014.08.07)
    mSolverIterComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxSize(200, -1), NULL, wxCB_READONLY);
+                     wxSize(200, -1), emptyList, wxCB_READONLY);
    
    // Get Solver Iteration option list from the Subscriber
    const std::string *solverIterList = Subscriber::GetSolverIterOptionList();

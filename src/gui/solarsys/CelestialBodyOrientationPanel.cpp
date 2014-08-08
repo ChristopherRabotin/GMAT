@@ -367,7 +367,7 @@ void CelestialBodyOrientationPanel::Create()
 //                                           wxDefaultPosition, wxSize(-1,-1), 0);
    
    // orientation data
-   spinAxisRAConstantStaticText  = new wxStaticText(this, ID_TEXT,wxT("Spin Axis R"GUI_ACCEL_KEY"A Constant"),
+   spinAxisRAConstantStaticText  = new wxStaticText(this, ID_TEXT,wxString("Spin Axis R"GUI_ACCEL_KEY"A Constant"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    spinAxisRAConstantTextCtrl    = new wxTextCtrl(this, ID_TEXT_CTRL_SPIN_AXIS_RA_CONSTANT, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -375,7 +375,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisRAConstantUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg"),
                                        wxDefaultPosition, wxSize(-1,-1), 0);
 
-   spinAxisRARateStaticText      = new wxStaticText(this, ID_TEXT,wxT("Spin Axis RA "GUI_ACCEL_KEY"Rate"),
+   spinAxisRARateStaticText      = new wxStaticText(this, ID_TEXT,wxString("Spin Axis RA "GUI_ACCEL_KEY"Rate"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    spinAxisRARateTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_SPIN_AXIS_RA_RATE, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -383,7 +383,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisRARateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/century"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
 
-   spinAxisDECConstantStaticText = new wxStaticText(this, ID_TEXT,wxT("Spin Axis "GUI_ACCEL_KEY"DEC Constant"),
+   spinAxisDECConstantStaticText = new wxStaticText(this, ID_TEXT,wxString("Spin Axis "GUI_ACCEL_KEY"DEC Constant"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    spinAxisDECConstantTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_SPIN_AXIS_DEC_CONSTANT, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -391,7 +391,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisDECConstantUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg"),
                                         wxDefaultPosition, wxSize(-1,-1), 0);
 
-   spinAxisDECRateStaticText     = new wxStaticText(this, ID_TEXT,wxT("Spin Axis DEC "GUI_ACCEL_KEY"Rate"),
+   spinAxisDECRateStaticText     = new wxStaticText(this, ID_TEXT,wxString("Spin Axis DEC "GUI_ACCEL_KEY"Rate"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    spinAxisDECRateTextCtrl       = new wxTextCtrl(this, ID_TEXT_CTRL_SPIN_AXIS_DEC_RATE, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -399,7 +399,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisDECRateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/century"),
                                     wxDefaultPosition, wxSize(-1,-1), 0);
 
-   rotationConstantStaticText    = new wxStaticText(this, ID_TEXT,wxT("R"GUI_ACCEL_KEY"otation Constant"),
+   rotationConstantStaticText    = new wxStaticText(this, ID_TEXT,wxString("R"GUI_ACCEL_KEY"otation Constant"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    rotationConstantTextCtrl      = new wxTextCtrl(this, ID_TEXT_CTRL_ROTATION_CONSTANT, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -407,7 +407,7 @@ void CelestialBodyOrientationPanel::Create()
    rotationConstantUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg"),
                                      wxDefaultPosition, wxSize(-1,-1), 0);
 
-   rotationRateStaticText    = new wxStaticText(this, ID_TEXT,wxT("Rotation "GUI_ACCEL_KEY"Rate"),
+   rotationRateStaticText    = new wxStaticText(this, ID_TEXT,wxString("Rotation "GUI_ACCEL_KEY"Rate"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    rotationRateTextCtrl      = new wxTextCtrl(this, ID_TEXT_CTRL_ROTATION_RATE, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -449,7 +449,7 @@ void CelestialBodyOrientationPanel::Create()
    if (isEarth)
    {
       // add nutation update interval for Earth
-      nutationUpdateIntervalStaticText =  new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Nutation Update Interval"),
+      nutationUpdateIntervalStaticText =  new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Nutation Update Interval"),
                                           wxDefaultPosition, wxSize(-1,-1), 0);
       nutationUpdateIntervalTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_NUTATION_UPDATE_INTERVAL, wxT(""),
                                           wxDefaultPosition, wxSize(60,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -470,10 +470,10 @@ void CelestialBodyOrientationPanel::Create()
       unsigned int ephemListSz = sourceArray.size();
       sourceArrayWX            = new wxString[ephemListSz];
       for (unsigned int jj = 0; jj < ephemListSz; jj++)
-         sourceArrayWX[jj] = wxT(sourceArray[jj].c_str());
-      rotationDataSourceStaticText = new wxStaticText(this, ID_TEXT, wxT("Rotation Data "GUI_ACCEL_KEY"Source"),
+         sourceArrayWX[jj] = wxString(sourceArray[jj].c_str());
+      rotationDataSourceStaticText = new wxStaticText(this, ID_TEXT, wxString("Rotation Data "GUI_ACCEL_KEY"Source"),
                                      wxDefaultPosition, wxSize(-1,-1), 0);
-      rotationDataSourceComboBox   = new wxComboBox(this, ID_COMBO_BOX_ROTATION_DATA_SOURCE, wxT(sourceArrayWX[0]),
+      rotationDataSourceComboBox   = new wxComboBox(this, ID_COMBO_BOX_ROTATION_DATA_SOURCE, sourceArrayWX[0],
                                      wxDefaultPosition, wxDefaultSize, ephemListSz, sourceArrayWX,
                                      wxCB_DROPDOWN|wxCB_READONLY);
       rotationDataSourceComboBox->SetToolTip(pConfig->Read(_T("RotationDataSourceHint")));

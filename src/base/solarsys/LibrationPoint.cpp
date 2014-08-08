@@ -547,8 +547,22 @@ std::string LibrationPoint::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
+
 //------------------------------------------------------------------------------
-//  std::string  SetStringParameter(const Integer id, const std::string value)
+//  std::string  SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string &value)
+ */
+//------------------------------------------------------------------------------
+bool LibrationPoint::SetStringParameter(const Integer id, 
+                                        const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
+//------------------------------------------------------------------------------
+//  std::string  SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 /**
  * This method sets the string parameter value, given the input

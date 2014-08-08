@@ -17,6 +17,7 @@
 #include "TsPlotCanvas.hpp"
 #include "MessageInterface.hpp"
 #include "TsPlotOptionsDialog.hpp"
+#include "gmatwxdefs.hpp"          // for STD_TO_WX_STRING macro
 
 #include <wx/dcmemory.h>
 #include <wx/dcprint.h>
@@ -264,7 +265,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       }
       if (event.Dragging())
       {
+         #ifdef __USE_WX28__
          int logfun = dc.GetLogicalFunction();
+         #else
+         wxRasterOperationMode logfun = dc.GetLogicalFunction();
+         #endif
+         
          dc.SetLogicalFunction(wxINVERT);
          if (zooming)
          {
@@ -335,7 +341,11 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          if (zooming)
          {
             // First clear the rubberband, in case no zoom is made
+            #ifdef __USE_WX28__
             int logfun = dc.GetLogicalFunction();
+            #else
+            wxRasterOperationMode logfun = dc.GetLogicalFunction();
+            #endif
             dc.SetLogicalFunction(wxINVERT);
             dc.DrawLine(mouseRect.x, mouseRect.y, mouseRect.x, oldY);
             dc.DrawLine(mouseRect.x, mouseRect.y, oldX, mouseRect.y);
@@ -728,8 +738,9 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 
    for (j = 0; j < labelCount; ++j)
    {
-	  dc.SetTextForeground(data[j]->GetColour(0));
-      label = _T(names[j].c_str());
+      dc.SetTextForeground(data[j]->GetColour(0));
+      //label = _T(names[j].c_str());
+      label = STD_TO_WX_STRING(names[j].c_str());
       xloc = legendRect.x + markerReserve + 6;
       yloc = legendRect.y + (h+1)*j + 4;
       dc.DrawText(label, xloc, yloc);

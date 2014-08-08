@@ -16,6 +16,7 @@
  * Implements MdiChildXyFrame class for xy plot.
  */
 //------------------------------------------------------------------------------
+#include "gmatwxdefs.hpp"          // for WX_TO_STD_STRING macro
 #include "gmatwxrcs.hpp"
 #include "MdiChildTsFrame.hpp"
 #include "Subscriber.hpp"
@@ -132,8 +133,8 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                        wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
    
-   frame->SetLabel(xAxisTitle.c_str(), TsPlotCanvas::X_LABEL);
-   frame->SetLabel(yAxisTitle.c_str(), TsPlotCanvas::Y_LABEL);
+   frame->SetLabel(xAxisTitle.WX_TO_STD_STRING, TsPlotCanvas::X_LABEL);
+   frame->SetLabel(yAxisTitle.WX_TO_STD_STRING, TsPlotCanvas::Y_LABEL);
 
    mXyPlot = frame;
    
@@ -200,8 +201,10 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
    double startTime;
    
    if (filename != "")
-   {       
-      inStream.open(filename.c_str());
+   {
+      // Changed to use WX_TO_STD_STRING macro for wx3.0 (LOJ: 2014.08.07)
+      //inStream.open(filename.c_str());
+      inStream.open(filename.WX_TO_STD_STRING);
       if (inStream.is_open())
       {
          TsPlotCurve *xCurve = new TsPlotCurve();
@@ -278,7 +281,7 @@ void MdiChildTsFrame::SetPlotTitle(const wxString &title)
    mPlotTitle = title;
    
    if (mXyPlot)
-      mXyPlot->SetLabel(title.c_str(), TsPlotCanvas::PLOT_TITLE);
+      mXyPlot->SetLabel(title.WX_TO_STD_STRING, TsPlotCanvas::PLOT_TITLE);
 }
 
 
@@ -343,7 +346,7 @@ void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, const wxString &curveTitl
       #endif
          
       mXyPlot->AddData(curve, penColor);
-      mXyPlot->SetDataName(curveTitle.c_str());
+      mXyPlot->SetDataName(curveTitle.WX_TO_STD_STRING);
       
       #ifdef DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage
@@ -879,7 +882,7 @@ void MdiChildTsFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
       if ( !newTitle )
          return;
       
-      mXyPlot->SetLabel(newTitle.c_str(), TsPlotCanvas::PLOT_TITLE);
+      mXyPlot->SetLabel(newTitle.WX_TO_STD_STRING, TsPlotCanvas::PLOT_TITLE);
    }
 }
 

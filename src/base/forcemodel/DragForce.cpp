@@ -1764,6 +1764,16 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
    return PhysicalModel::SetStringParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool DragForce::SetStringParameter(const std::string &label,
+                                   const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
