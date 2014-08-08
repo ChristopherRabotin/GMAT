@@ -40,8 +40,8 @@
 //#define DEBUG_TIMING
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
-#define DEBUG_CALCULATE_MEASUREMENT
-#define USE_PRECISION_TIME
+//#define DEBUG_CALCULATE_MEASUREMENT
+//#define USE_PRECISION_TIME
 
 //------------------------------------------------------------------------------
 // Static data
