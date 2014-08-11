@@ -25,8 +25,7 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
-#define DEBUG_RANGE_CALCULATION
-#define USE_PRECISION_TIME
+//#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -206,7 +205,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
    if (!calcData)
       throw MeasurementException("Measurement data was requested for " +
             instanceName + " before the measurement was set");
-
+   
    // Fire the measurement model to build the collection of signal data
    if (calcData->CalculateMeasurement(withLighttime))
    {
@@ -224,13 +223,13 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             Rvector3 signalVec = current->rangeVecInertial;
 			values[i] += signalVec.GetMagnitude();
 
-			// accumulate all range corrections
+            // accumulate all range corrections
 			for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
 			{
 			   if (current->useCorrection[j])
 				  values[i] += current->corrections[j];
 			}
-		    
+
             // Set measurement epoch to the epoch of the last receiver in the
             // first signal path
             if ((i == 0) && (current->next == NULL))
@@ -248,12 +247,12 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          #endif
       }
 
-      if (cMeasurement.value.size() == 0)
+	  if (cMeasurement.value.size() == 0)
          for (UnsignedInt i = 0; i < values.size(); ++i)
             cMeasurement.value.push_back(0.0);
       for (UnsignedInt i = 0; i < values.size(); ++i)
          cMeasurement.value[i] = values[i] * multiplier;
-
+	  
       cMeasurement.isFeasible = calcData->IsMeasurementFeasible();
 
 
@@ -274,6 +273,12 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                (cMeasurement.isFeasible ? "true" : "false"));
       #endif
    }
+
+   #ifdef DEBUG_RANGE_CALCULATION
+      MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement(%s, "
+            "<%p>, <%p>) exit\n", (withEvents ? "true" : "false"), forObservation,
+            rampTB);
+   #endif
 
    return cMeasurement;
 }
