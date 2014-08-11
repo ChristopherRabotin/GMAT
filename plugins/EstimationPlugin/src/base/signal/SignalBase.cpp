@@ -31,7 +31,6 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
-#define USE_PRECISION_TIME
 
 //---------------------------------
 // static data
@@ -65,7 +64,11 @@ SignalBase::SignalBase(const std::string &typeStr,
    rcs                  (NULL),
    ocs                  (NULL),
    j2k                  (NULL),
+#ifdef USE_PRECISION_TIME
+   satPrecEpoch         (21545.0),				// made changes by TUAN NGUYEN
+#else
    satEpoch             (21545.0),
+#endif
    satEpochID           (-1),
    signalIsFeasible     (false),       // Not feasible until calculated!
    includeLightTime     (true),
@@ -109,7 +112,11 @@ SignalBase::SignalBase(const SignalBase& sb) :
    rcs                  (NULL),
    ocs                  (NULL),
    j2k                  (NULL),
+#ifdef USE_PRECISION_TIME
+   satPrecEpoch         (21545.0),		// made changes by TUAN NGUYEN
+#else
    satEpoch             (21545.0),
+#endif
    satEpochID           (-1),
    signalIsFeasible     (false),       // Never feasible until calculated!
    includeLightTime     (sb.includeLightTime),
@@ -145,7 +152,11 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       rcs                 = NULL;
       ocs                 = NULL;
       j2k                 = NULL;
+#ifdef USE_PRECISION_TIME
+	  satPrecEpoch        = 21545.0;				// made changes by TUAN NGUYEN
+#else
       satEpoch            = 21545.0;
+#endif
       satEpochID          = -1;
       signalIsFeasible    = false;     // Never feasible until calculated!
       includeLightTime    = sb.includeLightTime;
@@ -507,9 +518,26 @@ bool SignalBase::Initialize()
 
       if (theData.tNode && theData.rNode)
       {
+		 // 1. Set value for theData.stationParticipant
          theData.stationParticipant =
                ((theData.tNode->IsOfType(Gmat::GROUND_STATION)) ||
                 (theData.rNode->IsOfType(Gmat::GROUND_STATION)));
+
+         #ifdef USE_PRECISION_TIME
+		 // 2. Update theData.tPrecTime and theData.rPrecTime
+         theData.tPrecTime = theData.tNode->GetEpoch();					// made changes by TUAN NGUYEN
+         theData.rPrecTime = theData.rNode->GetEpoch();					// made changes by TUAN NGUYEN
+		 // Initially, ground station epoch is set the same at epoch for spacecraft
+		 if (theData.tNode->IsOfType(Gmat::GROUND_STATION))				// made changes by TUAN NGUYEN
+			theData.tPrecTime = theData.rPrecTime;						// made changes by TUAN NGUYEN
+		 else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))		// made changes by TUAN NGUYEN
+			theData.rPrecTime = theData.tPrecTime;						// made changes by TUAN NGUYEN
+         #else
+		 // 2. Update theData.tTime and theData.rTime
+         theData.tTime = theData.tNode->GetEpoch();						// made changes by TUAN NGUYEN
+         theData.rTime = theData.rNode->GetEpoch();						// made changes by TUAN NGUYEN
+         #endif
+
          retval = true;
       }
 
@@ -584,7 +612,7 @@ SignalData& SignalBase::GetSignalData()
 void SignalBase::SetSignalData(const SignalData& newData)
 {
    #ifdef DEBUG_LIGHTTIME
-      MessageInterface::ShowMessage("%p: Receiving data to update %s and %s...",
+      MessageInterface::ShowMessage("<%p>: Receiving data to update %s and %s...",
             this, theData.transmitParticipant.c_str(),
             theData.receiveParticipant.c_str());
       Integer count = 0;
@@ -593,7 +621,11 @@ void SignalBase::SetSignalData(const SignalData& newData)
    // Pass in the current computed data
    if (theData.receiveParticipant == newData.receiveParticipant)
    {
+#ifdef USE_PRECISION_TIME
+      theData.rPrecTime = newData.rPrecTime;							// made changes by TUAN NGUYEN
+#else
       theData.rTime = newData.rTime;
+#endif
       theData.rLoc  = newData.rLoc;
       theData.rVel  = newData.rVel;
       #ifdef DEBUG_LIGHTTIME
@@ -602,7 +634,11 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
    if (theData.receiveParticipant == newData.transmitParticipant)
    {
+#ifdef USE_PRECISION_TIME
+      theData.rPrecTime = newData.tPrecTime;							// made changes by TUAN NGUYEN
+#else
       theData.rTime = newData.tTime;
+#endif
       theData.rLoc  = newData.tLoc;
       theData.rVel  = newData.tVel;
       #ifdef DEBUG_LIGHTTIME
@@ -611,7 +647,11 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
    if (theData.transmitParticipant == newData.receiveParticipant)
    {
+#ifdef USE_PRECISION_TIME
+      theData.tPrecTime = newData.rPrecTime;							// made changes by TUAN NGUYEN
+#else
       theData.tTime = newData.rTime;
+#endif
       theData.tLoc  = newData.rLoc;
       theData.tVel  = newData.rVel;
       #ifdef DEBUG_LIGHTTIME
@@ -620,7 +660,11 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
    if (theData.transmitParticipant == newData.transmitParticipant)
    {
+#ifdef USE_PRECISION_TIME
+      theData.tPrecTime = newData.tPrecTime;							// made changes by TUAN NGUYEN
+#else
       theData.tTime = newData.tTime;
+#endif
       theData.tLoc  = newData.tLoc;
       theData.tVel  = newData.tVel;
       #ifdef DEBUG_LIGHTTIME
@@ -629,8 +673,13 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
 
    #ifdef DEBUG_LIGHTTIME
+      #ifdef USE_PRECISION_TIME
+      MessageInterface::ShowMessage("%d matching data sets updated; epochs "						// made changes by TUAN NGUYEN
+            "%.12lf -> %.12lf\n", count, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());	// made changes by TUAN NGUYEN
+      #else
       MessageInterface::ShowMessage("%d matching data sets updated; epochs "
             "%.12lf -> %.12lf\n", count, theData.tTime, theData.rTime);
+      #endif
    #endif
 }
 
@@ -689,6 +738,7 @@ void SignalBase::InitializeSignal(bool chainForwards)
    SpaceObject *spObj  = NULL;
    SpacePoint  *origin = NULL;
    CelestialBody *earth = solarSystem->GetBody("Earth");
+
 #ifdef USE_PRECISION_TIME
    GmatTime gsPrecEpoch = theData.tPrecTime;						// made changes by TUAN NGUYEN
 #else
@@ -840,7 +890,9 @@ void SignalBase::CalculateRangeVectorInertial()
 //                                 origin1->GetMJ2000Position(theData.tTime);
 #endif
    
-   theData.rangeVecInertial = theData.rLoc - theData.j2kOriginSep -
+//   theData.rangeVecInertial = theData.rLoc - theData.j2kOriginSep -
+//         theData.tLoc;													// GMAT MathSpec Eq. 6.12
+   theData.rangeVecInertial = theData.rLoc + theData.j2kOriginSep -
          theData.tLoc;													// GMAT MathSpec Eq. 6.12
 
    #ifdef DEBUG_LIGHTTIME
@@ -1182,7 +1234,7 @@ Integer SignalBase::GetParmIdFromEstID(Integer forId, GmatBase *obj)
    return forId - obj->GetType() * 250;
 }
 
-
+#ifndef USE_PRECISION_TIME 
 //------------------------------------------------------------------------------
 // void MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive, bool moveAll)
 //------------------------------------------------------------------------------
@@ -1274,7 +1326,7 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
    #endif
 }
 
-
+#else
 // made changes by TUAN NGUYEN
 void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       bool moveAll)
@@ -1348,6 +1400,7 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       }
    }
 }
+#endif
 
 //------------------------------------------------------------------------------
 // void SetPrevious(SignalBase* prev)

@@ -75,10 +75,15 @@ public:
                                       GmatBase *forObj = NULL);
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
-   virtual bool         ModelSignal(const GmatEpoch atEpoch,
-                                    bool EpochAtReceive = true) = 0;
+
+#ifdef USE_PRECISION_TIME
    virtual bool         ModelSignal(const GmatTime atEpoch,							// made changes by TUAN NGUYEN
                                     bool EpochAtReceive = true) = 0;				// made changes by TUAN NGUYEN
+#else
+   virtual bool         ModelSignal(const GmatEpoch atEpoch,
+                                    bool EpochAtReceive = true) = 0;
+#endif
+
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
@@ -121,10 +126,14 @@ protected:
    CoordinateSystem           *j2k;
 
    // Storage buffers
+
+#ifdef USE_PRECISION_TIME
+   /// Epoch of most recent calculation
+   GmatTime                   satPrecEpoch;								// made changes by TUAN NGUYEN
+#else
    /// Epoch of most recent calculation
    GmatEpoch                  satEpoch;
-   GmatTime                   satPrecEpoch;								// made changes by TUAN NGUYEN
-
+#endif
    /// Parameter ID used to retrieve internal epoch data
    Integer                    satEpochID;
    /// Rotation matrix from receiver to J2K (Identity by default)
@@ -189,13 +198,15 @@ protected:
          Rmatrix& derivMatrix);
 
    Integer                    GetParmIdFromEstID(Integer forId, GmatBase *obj);
-
+#ifdef USE_PRECISION_TIME
    void                       MoveToEpoch(const GmatTime theEpoch,					// made changes by TUAN NGUYEN
                                           bool epochAtReceive,						// made changes by TUAN NGUYEN
                                           bool moveAll = true);						// made changes by TUAN NGUYEN
+#else
    void                       MoveToEpoch(const GmatEpoch theEpoch,
                                           bool epochAtReceive,
                                           bool moveAll = true);
+#endif
    bool                       StepParticipant(Real stepToTake,
                                               bool forTransmitter);
 };
