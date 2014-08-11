@@ -336,7 +336,6 @@ Real LightTimeCorrection::CalculateRange()
 
    Real range = 0.0;
    Rvector3 r1, r2, rangeVec;
-//   Rvector3 v2;
 
    GmatEpoch t1 = -1.0, t2 = -1.0;
    
@@ -403,15 +402,9 @@ Real LightTimeCorrection::CalculateRange()
 	  if (useRelativityCorrection)																	// made changes by TUAN NGUYEN
 	     relativityCorrection = RelativityCorrection(r1B, r2B, t1, t2);								// made changes by TUAN NGUYEN
 
-	  //etminustaiCorrection = 0.0;
-	  //if (this->useETMinusTAICorrection)															// made changes by TUAN NGUYEN
-		 //etminustaiCorrection = ETminusTAICorrection(t2, cb2)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;	// made changes by TUAN NGUYEN
-
-	  //range = precisionRange + relativityCorrection + etminustaiCorrection;					// relativity and Et-TAI corrections were added into the range		// made changes by TUAN NGUYEN
 	  range = precisionRange + relativityCorrection;												// made changes by TUAN NGUYEN
 
 	  #ifdef DEBUG_CALCULATE_RANGE
-//	     MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km     ET-TAI correction = %.12le km\n", GetName().c_str(), precisionRange, relativityCorrection, etminustaiCorrection);
 		 MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km\n", GetName().c_str(), precisionRange, relativityCorrection);
       #endif
 
@@ -530,12 +523,10 @@ Real LightTimeCorrection::RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real 
 		if (planet == sun)
 		{
 			correction = term1*GmatMathUtil::Ln((r1Mag + r2Mag + r12Mag + term1)/(r1Mag + r2Mag - r12Mag + term1));
-//			MessageInterface::ShowMessage("Relatibity correction Sun: %.12le\n", correction);
 		}
 		else
 		{
 			correction = term1*GmatMathUtil::Ln((r1Mag + r2Mag + r12Mag)/(r1Mag + r2Mag - r12Mag));
-//			MessageInterface::ShowMessage("Relatibity correction Planet : %.12le\n", correction);
 		}
 		relCorr += correction;
 	}
@@ -560,32 +551,9 @@ Real LightTimeCorrection::GetLightTripRange()
 }
 
 
-
-//Real LightTimeCorrection::ETminusTAICorrection(Real tA1MJD, GmatBase* participant)
-//{
-//	Real correction = ETminusTAI(tA1MJD, participant) - EstimatedETminusTAI(tA1MJD);
-//
-//	return correction;
-//}
-//
-//Real LightTimeCorrection::EstimatedETminusTAI(Real tA1MJD)
-//{
-//   Real M = (tA1MJD - 21544.50037076831)*86400;			// number of seconds pass J2000
-//   Real E = M + 0.01671*sin(M);
-//   Real ET_TAI = 32.184 + 1.657e-3*sin(E);
-//
-//   return ET_TAI;
-//}
-
-/// Calculate ET - TAI at a ground station on Earth:										// made changes by TUAN NGUYEN
+/// Calculate ET - TAI at a ground station on Earth or a spacecraft:							// made changes by TUAN NGUYEN
 Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 {
-   //Real tTAI = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, tA1MJD);
-
-   //// Step 1: calculate initial guessed ET-TAI
-   //Real old_ETminusTAI = EstimatedETminusTAI(tA1MJD);
-   //Real t_ET_old = tTAI + old_ETminusTAI;
-
    // Step 2:
    // Specify celestial bodies and special celestial points:
    CelestialBody* sun = solarSystem->GetBody("Sun");
@@ -622,13 +590,13 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 
    Rvector3 lunaPos = luna->GetMJ2000Position(tA1MJD);
    Rvector3 lunaVel = luna->GetMJ2000Velocity(tA1MJD);
-//   MessageInterface::ShowMessage("SSB state: %lf  %lf  %lf  %lf  %lf  %lf\n", ssbPos[0], ssbPos[1], ssbPos[2], ssbVel[0], ssbVel[1], ssbVel[2]);
-//   MessageInterface::ShowMessage("Earth state: %lf  %lf  %lf  %lf  %lf  %lf\n", earthPos[0], earthPos[1], earthPos[2], earthVel[0], earthVel[1], earthVel[2]);
-//   MessageInterface::ShowMessage("Moon state: %lf  %lf  %lf  %lf  %lf  %lf\n", lunaPos[0], lunaPos[1], lunaPos[2], lunaVel[0], lunaVel[1], lunaVel[2]);
-//   MessageInterface::ShowMessage("Earth-Moon bary center state: %lf  %lf  %lf  %lf  %lf  %lf\n", emPos[0], emPos[1], emPos[2], emVel[0], emVel[1], emVel[2]);
 
    // Step 3:
-   Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD);
+   // Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD);																// made changes by TUAN NGUYEN
+   // Note that: position vector participant->GetMJ2000Position(tA1MJD) is pointing from j2kBody to participant (not from SSB nor Earth)		// made changes by TUAN NGUYEN
+   SpacePoint* j2kBody = ((SpacePoint*)participant)->GetJ2000Body();																						// made changes by TUAN NGUYEN
+   Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD) + j2kBody->GetMJ2000Position(tA1MJD) - earth->GetMJ2000Position(tA1MJD);		// made changes by TUAN NGUYEN
+   Rvector3 Earth2GS_Vel = ((SpacePoint*)participant)->GetMJ2000Velocity(tA1MJD) + j2kBody->GetMJ2000Velocity(tA1MJD) - earth->GetMJ2000Velocity(tA1MJD);	// made changes by TUAN NGUYEN
 
 
    // Step 4:
@@ -661,17 +629,13 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 
    //(muMars  / (c^2 * (muSun + muMars) )) * (Mars_wrt_Sun_Vel'*Mars_wrt_Sun_Pos);  % is this Mars term correct?
    
+   if (participant->IsOfType(Gmat::SPACECRAFT))
+   {
+	   // Compute PSat in Eq 2-24 Moyer:
+	   Real Psat = 2*(Earth2GS_Vel/c)*(Earth2GS/c);
+	   ET_TAI = ET_TAI + Psat;
+   }
+
    return ET_TAI;
-/*
-   // Step 5:
-   Real t_ET = tTAI + ETminusTAI;
-
-   // Step 6:
-   Real delta_t = t_ET - t_ET_old;
-
-   // Step 7:
-
-   return delta;
-*/
 }
 
