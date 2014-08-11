@@ -39,8 +39,13 @@ SignalData::SignalData() :
    tPropagator          (NULL),
    rPropagator          (NULL),
    stationParticipant   (false),
+#ifdef USE_PRECISION_TIME
+   tPrecTime            (21545.0),						// made changes by TUAN NGUYEN
+   rPrecTime            (21545.0),						// made changes by TUAN NGUYEN
+#else
    tTime                (21545.0),
    rTime                (21545.0),
+#endif
    tSTM                 (true),
    rSTM                 (true),
    tJ2kRotation         (true),
@@ -82,8 +87,13 @@ SignalData::SignalData(const SignalData& sd) :
    tPropagator          (sd.tPropagator),
    rPropagator          (sd.rPropagator),
    stationParticipant   (sd.stationParticipant),
+#ifdef USE_PRECISION_TIME
+   tPrecTime            (sd.tPrecTime),						// made changes by TUAN NGUYEN
+   rPrecTime            (sd.rPrecTime),						// made changes by TUAN NGUYEN
+#else
    tTime                (sd.tTime),
    rTime                (sd.rTime),
+#endif
    tLoc                 (sd.tLoc),
    tOStateSSB           (sd.tOStateSSB),					// made changes by TUAN NGUYEN
    tLocTcs              (sd.tLocTcs),
@@ -136,8 +146,13 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rMovable             = sd.rMovable;
       tPropagator          = sd.tPropagator;
       rPropagator          = sd.rPropagator;
+#ifdef USE_PRECISION_TIME
+      tPrecTime            = sd.tPrecTime;					// made changes by TUAN NGUYEN
+      rPrecTime            = sd.rPrecTime;					// made changes by TUAN NGUYEN
+#else
       tTime                = sd.tTime;
       rTime                = sd.rTime;
+#endif
       stationParticipant   = sd.stationParticipant;
       tLoc                 = sd.tLoc;
 	  tOStateSSB           = sd.tOStateSSB;

@@ -33,6 +33,7 @@
 class SpacePoint;
 class PropSetup;
 
+#define USE_PRECISION_TIME
 
 /**
  * The SignalData class is a structure for communicating signal data information
@@ -65,12 +66,17 @@ public:
    /// Flag indicating if one of the participants is a ground station
    bool stationParticipant;
 
+#ifdef USE_PRECISION_TIME
+   /// Transmitter epoch
+   GmatTime tPrecTime;													// made changes by TUAN NGUYEN
+   GmatTime rPrecTime;													// made changes by TUAN NGUYEN
+#else
    /// Transmitter epoch
    GmatEpoch tTime;
-   GmatTime tPrecTime;													// made changes by TUAN NGUYEN
    /// Receiver epoch
    GmatEpoch rTime;
-   GmatTime rPrecTime;													// made changes by TUAN NGUYEN
+#endif
+
    /// MJ2000Eq location of the transmit node
    Rvector3 tLoc;
    /// SSBMJ2000 state of the transmit node's origin					// made changes by TUAN NGUYEN
