@@ -169,16 +169,16 @@ protected:
    /// Parameter IDs for the BatchEstimators
    enum
    {
-      SIGNAL_PATH  = MeasurementModelBaseParamCount,									// made changes by TUAN NGUYEN
+      SIGNAL_PATH  = MeasurementModelBaseParamCount,                           // made changes by TUAN NGUYEN
       AdapterParamCount,
    };
 
    /// Strings describing the BatchEstimator parameters
    static const std::string PARAMETER_TEXT[AdapterParamCount -
-                                           MeasurementModelBaseParamCount];				// made changes by TUAN NGUYEN
+                                           MeasurementModelBaseParamCount];            // made changes by TUAN NGUYEN
    /// Types of the BatchEstimator parameters
    static const Gmat::ParameterType PARAMETER_TYPE[AdapterParamCount -
-                                                   MeasurementModelBaseParamCount];		// made changes by TUAN NGUYEN
+                                                   MeasurementModelBaseParamCount];      // made changes by TUAN NGUYEN
 
    StringArray*         DecomposePathString(const std::string &value);
 };

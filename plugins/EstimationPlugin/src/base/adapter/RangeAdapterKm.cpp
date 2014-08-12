@@ -218,23 +218,23 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          SignalData *current = data[i];
          while (current != NULL)
          {
-			// Add light time range:
-			// accumulate light time range
+         // Add light time range:
+         // accumulate light time range
             Rvector3 signalVec = current->rangeVecInertial;
-			values[i] += signalVec.GetMagnitude();
+         values[i] += signalVec.GetMagnitude();
 
             // accumulate all range corrections
-			for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
-			{
-			   if (current->useCorrection[j])
-				  values[i] += current->corrections[j];
-			}
+         for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+         {
+            if (current->useCorrection[j])
+              values[i] += current->corrections[j];
+         }
 
             // Set measurement epoch to the epoch of the last receiver in the
             // first signal path
             if ((i == 0) && (current->next == NULL))
 #ifdef USE_PRECISION_TIME
-			   cMeasurement.epoch = current->rPrecTime.GetMjd();
+            cMeasurement.epoch = current->rPrecTime.GetMjd();
 #else
                cMeasurement.epoch = current->rTime;
 #endif
@@ -247,12 +247,12 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          #endif
       }
 
-	  if (cMeasurement.value.size() == 0)
+     if (cMeasurement.value.size() == 0)
          for (UnsignedInt i = 0; i < values.size(); ++i)
             cMeasurement.value.push_back(0.0);
       for (UnsignedInt i = 0; i < values.size(); ++i)
          cMeasurement.value[i] = values[i] * multiplier;
-	  
+     
       cMeasurement.isFeasible = calcData->IsMeasurementFeasible();
 
 
@@ -453,5 +453,5 @@ Integer RangeAdapterKm::GetEventCount()
 void RangeAdapterKm::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-	TrackingDataAdapter::SetCorrection(correctionName, correctionType);				// made changes by TUAN NGUYEN
+   TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
 }

@@ -863,7 +863,7 @@ bool TrackingDataAdapter::Initialize()
 void TrackingDataAdapter::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-	calcData->SetCorrection(correctionName, correctionType);						// made changes by TUAN NGUYEN
+   calcData->SetCorrection(correctionName, correctionType);                  // made changes by TUAN NGUYEN
 }
 
 
