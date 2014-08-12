@@ -40,8 +40,7 @@
 //#define DEBUG_TIMING
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
-#define DEBUG_CALCULATE_MEASUREMENT
-#define USE_PRECISION_TIME
+//#define DEBUG_CALCULATE_MEASUREMENT
 
 //------------------------------------------------------------------------------
 // Static data
@@ -794,7 +793,7 @@ bool MeasureModel::Initialize()
       }
       else
          logLevel = 32767;
-
+      
       if (participantLists.size() > 0)
       {
          std::string theMissing = "";
@@ -1048,11 +1047,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 
    bool retval = false;
    feasible = true;
-
+   
    // 1. Prepare the propagators
    if (propsNeedInit)
       PrepareToPropagate();
-
+   
    /// @todo Clean up the assumption that epoch is at the end
    // For now, measurement epochs occur at the end of the signal path (the last
    // receiver)
@@ -1077,7 +1076,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          }
       }
    }
-
+   
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
@@ -1118,7 +1117,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
 
-
+   
    // 4.Calculate the measurement data ("C" value data) for all signal paths
    #ifdef DEBUG_CALCULATE_MEASUREMENT
 	  MessageInterface::ShowMessage("*************************************************************\n");
@@ -1148,11 +1147,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 		 }
 		 MessageInterface::ShowMessage("\n\n");
 	  #endif
-
+      
       // 4.1. Get the start signal:
       SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
       SignalData *sd = &(startSignal->GetSignalData());
-
+	  
       // 4.2. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
 #ifdef USE_PRECISION_TIME
@@ -1176,14 +1175,14 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          sd->rLoc = state.GetR();
          sd->rVel = state.GetV();
       }
-
+	  
 	  // 4.3. Compute C-value:
       if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
       {
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
-
+	  
 	  // 4.4. Verify feasibility:
       #ifdef DEBUG_CALCULATE_MEASUREMENT
 	     SignalData *current = theData[i];
@@ -1229,7 +1228,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 	  
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
    }
-
+   
    retval = true;
 
    #ifdef DEBUG_CALCULATE_MEASUREMENT
