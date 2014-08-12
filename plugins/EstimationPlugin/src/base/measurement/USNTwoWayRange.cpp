@@ -36,8 +36,8 @@
 #include "SpacePoint.hpp"
 #include "RandomNumber.hpp"
 
-#define DEBUG_RANGE_CALC_WITH_EVENTS
-#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
+//#define DEBUG_RANGE_CALC_WITH_EVENTS
+//#define VIEW_PARTICIPANT_STATES_WITH_EVENTS
 //#define DEBUG_RANGE_CALC
 //#define VIEW_PARTICIPANT_STATES
 //#define CHECK_PARTICIPANT_LOCATIONS
@@ -950,10 +950,8 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
       #endif
 
-	  // r3 and r4 are location of station and spacecraft in participant's central body inertial coordinate system for uplink leg
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2R - ssb2cb_t1T) due to
-	  //       the origin of local inertial coordinate system moving during time period from t1T to t2R
-	  RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3, r4 + (ssb2cb_t2R - ssb2cb_t1T), t1T);
+	  // In uplink leg, r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system
+	  RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);
 
 	  Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
       Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
@@ -1021,10 +1019,8 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
       #endif
-	  // r1 and r2 are location of station and spacecraft in central body inertial coordinate system for downlink leg
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2T - ssb2cb_t3R) due to
-	  //       the origin of local inertial coordinate system moving during time period from t2T to t3R
-	  RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1, r2 +(ssb2cb_t2T - ssb2cb_t3R), t3R);
+	  // In down link leg, r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system
+	  RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);
 
 	  Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
 	  Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
