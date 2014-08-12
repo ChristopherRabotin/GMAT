@@ -6290,12 +6290,12 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
 //                         bool forInput = true)
 //------------------------------------------------------------------------------
 std::string Moderator::GetFileName(const std::string &fileType, bool getFullPath,
-                                   bool forInput)
+                                   bool forInput, bool writeWarning, bool writeInfo)
 {
    // Now we can get full path or just file name (LOJ: 2014.06.30)
    if (getFullPath)
    {
-      return theFileManager->FindPath("", fileType, forInput, false, true);
+      return theFileManager->FindPath("", fileType, forInput, writeWarning, writeInfo);
    }
    else
    {

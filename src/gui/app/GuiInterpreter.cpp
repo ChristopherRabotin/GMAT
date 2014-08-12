@@ -705,12 +705,13 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 
 //------------------------------------------------------------------------------
 // std::string GetFileName(const std::string &fileType, bool getFullpath = false,
-//                         bool forInput = true)
+//                         bool forInput = true, bool writeWarning = false,
+//                         bool writeInfo = false)
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetFileName(const std::string &fileType, bool getFullpath,
-                                        bool forInput)
+                                        bool forInput, bool writeWarning, bool writeInfo)
 {
-   return theModerator->GetFileName(fileType, getFullpath, forInput);
+   return theModerator->GetFileName(fileType, getFullpath, forInput, writeWarning, writeInfo);
 }
 
 

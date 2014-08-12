@@ -311,7 +311,7 @@ private:
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
-   void DisplayGravityFieldData(const wxString& bodyName);
+   void DisplayGravityFieldData(const wxString& bodyName, bool textValueChanged = false);
    void DisplayAtmosphereModelData();
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
