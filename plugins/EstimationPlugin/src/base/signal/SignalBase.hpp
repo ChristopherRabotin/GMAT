@@ -77,19 +77,19 @@ public:
    virtual void         InitializeSignal(bool chainForwards = false);
 
 #ifdef USE_PRECISION_TIME
-   virtual bool         ModelSignal(const GmatTime atEpoch,							// made changes by TUAN NGUYEN
-                                    bool EpochAtReceive = true) = 0;				// made changes by TUAN NGUYEN
+   virtual bool         ModelSignal(const GmatTime atEpoch,                     // made changes by TUAN NGUYEN
+                                    bool EpochAtReceive = true) = 0;            // made changes by TUAN NGUYEN
 #else
    virtual bool         ModelSignal(const GmatEpoch atEpoch,
-                                    bool EpochAtReceive = true) = 0;
+                                    bool EpochAtReceive = true) = 0;            // This function will bw removed and replaced by ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true)
 #endif
 
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
    /// This function is used to add media correction to measurement model
-   virtual void         AddCorrection(const std::string& modelName,					// made changes by TUAN NGUYEN
-	                          const std::string& mediaCorrectionType) = 0;			// made changes by TUAN NGUYEN
+   virtual void         AddCorrection(const std::string& modelName,               // made changes by TUAN NGUYEN
+                             const std::string& mediaCorrectionType) = 0;         // made changes by TUAN NGUYEN
 
 
    virtual std::string  GetPathDescription(bool fullList = true);
@@ -129,10 +129,10 @@ protected:
 
 #ifdef USE_PRECISION_TIME
    /// Epoch of most recent calculation
-   GmatTime                   satPrecEpoch;								// made changes by TUAN NGUYEN
+   GmatTime                   satPrecEpoch;                        // made changes by TUAN NGUYEN
 #else
    /// Epoch of most recent calculation
-   GmatEpoch                  satEpoch;
+   GmatEpoch                  satEpoch;                            // This variable will be removed and replaced by variable satPrecEpoch
 #endif
    /// Parameter ID used to retrieve internal epoch data
    Integer                    satEpochID;
@@ -199,11 +199,11 @@ protected:
 
    Integer                    GetParmIdFromEstID(Integer forId, GmatBase *obj);
 #ifdef USE_PRECISION_TIME
-   void                       MoveToEpoch(const GmatTime theEpoch,					// made changes by TUAN NGUYEN
-                                          bool epochAtReceive,						// made changes by TUAN NGUYEN
-                                          bool moveAll = true);						// made changes by TUAN NGUYEN
+   void                       MoveToEpoch(const GmatTime theEpoch,               // made changes by TUAN NGUYEN
+                                          bool epochAtReceive,                   // made changes by TUAN NGUYEN
+                                          bool moveAll = true);                  // made changes by TUAN NGUYEN
 #else
-   void                       MoveToEpoch(const GmatEpoch theEpoch,
+   void                       MoveToEpoch(const GmatEpoch theEpoch,              // This function will be removed and replaced by MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive, bool moveAll = true)
                                           bool epochAtReceive,
                                           bool moveAll = true);
 #endif

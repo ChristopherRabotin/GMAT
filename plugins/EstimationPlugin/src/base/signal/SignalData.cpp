@@ -40,8 +40,8 @@ SignalData::SignalData() :
    rPropagator          (NULL),
    stationParticipant   (false),
 #ifdef USE_PRECISION_TIME
-   tPrecTime            (21545.0),						// made changes by TUAN NGUYEN
-   rPrecTime            (21545.0),						// made changes by TUAN NGUYEN
+   tPrecTime            (21545.0),                  // made changes by TUAN NGUYEN
+   rPrecTime            (21545.0),                  // made changes by TUAN NGUYEN
 #else
    tTime                (21545.0),
    rTime                (21545.0),
@@ -88,17 +88,17 @@ SignalData::SignalData(const SignalData& sd) :
    rPropagator          (sd.rPropagator),
    stationParticipant   (sd.stationParticipant),
 #ifdef USE_PRECISION_TIME
-   tPrecTime            (sd.tPrecTime),						// made changes by TUAN NGUYEN
-   rPrecTime            (sd.rPrecTime),						// made changes by TUAN NGUYEN
+   tPrecTime            (sd.tPrecTime),                  // made changes by TUAN NGUYEN
+   rPrecTime            (sd.rPrecTime),                  // made changes by TUAN NGUYEN
 #else
    tTime                (sd.tTime),
    rTime                (sd.rTime),
 #endif
    tLoc                 (sd.tLoc),
-   tOStateSSB           (sd.tOStateSSB),					// made changes by TUAN NGUYEN
+   tOStateSSB           (sd.tOStateSSB),                // made changes by TUAN NGUYEN
    tLocTcs              (sd.tLocTcs),
    rLoc                 (sd.rLoc),
-   rOStateSSB           (sd.rOStateSSB),					// made changes by TUAN NGUYEN
+   rOStateSSB           (sd.rOStateSSB),                // made changes by TUAN NGUYEN
    rLocRcs              (sd.rLocRcs),
    tVel                 (sd.tVel),
    tVelTcs              (sd.tVelTcs),
@@ -107,7 +107,7 @@ SignalData::SignalData(const SignalData& sd) :
    j2kOriginSep         (sd.j2kOriginSep),
    j2kOriginVel         (sd.j2kOriginVel),
    rangeVecInertial     (sd.rangeVecInertial),
-   rangeRateVecInertial (sd.rangeRateVecInertial),			// made changes by TUAN NGUYEN
+   rangeRateVecInertial (sd.rangeRateVecInertial),      // made changes by TUAN NGUYEN
    rangeVecObs          (sd.rangeVecObs),
    rangeRateVecObs      (sd.rangeRateVecObs),
    tSTM                 (sd.tSTM),
@@ -147,18 +147,18 @@ SignalData& SignalData::operator=(const SignalData& sd)
       tPropagator          = sd.tPropagator;
       rPropagator          = sd.rPropagator;
 #ifdef USE_PRECISION_TIME
-      tPrecTime            = sd.tPrecTime;					// made changes by TUAN NGUYEN
-      rPrecTime            = sd.rPrecTime;					// made changes by TUAN NGUYEN
+      tPrecTime            = sd.tPrecTime;               // made changes by TUAN NGUYEN
+      rPrecTime            = sd.rPrecTime;               // made changes by TUAN NGUYEN
 #else
       tTime                = sd.tTime;
       rTime                = sd.rTime;
 #endif
       stationParticipant   = sd.stationParticipant;
       tLoc                 = sd.tLoc;
-	  tOStateSSB           = sd.tOStateSSB;
+      tOStateSSB           = sd.tOStateSSB;              // made changes by TUAN NGUYEN
       tLocTcs              = sd.tLocTcs;
       rLoc                 = sd.rLoc;
-	  rOStateSSB           = sd.rOStateSSB;
+      rOStateSSB           = sd.rOStateSSB;              // made changes by TUAN NGUYEN
       rLocRcs              = sd.rLocRcs;
       tVel                 = sd.tVel;
       tVelTcs              = sd.tVelTcs;
@@ -167,7 +167,7 @@ SignalData& SignalData::operator=(const SignalData& sd)
       j2kOriginSep         = sd.j2kOriginSep;
       j2kOriginVel         = sd.j2kOriginVel;
       rangeVecInertial     = sd.rangeVecInertial;
-	  rangeRateVecInertial = sd.rangeRateVecInertial;
+      rangeRateVecInertial = sd.rangeRateVecInertial;
       rangeVecObs          = sd.rangeVecObs;
       rangeRateVecObs      = sd.rangeRateVecObs;
       tSTM                 = sd.tSTM;

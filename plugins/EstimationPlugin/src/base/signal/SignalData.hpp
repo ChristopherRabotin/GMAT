@@ -68,25 +68,25 @@ public:
 
 #ifdef USE_PRECISION_TIME
    /// Transmitter epoch
-   GmatTime tPrecTime;													// made changes by TUAN NGUYEN
-   GmatTime rPrecTime;													// made changes by TUAN NGUYEN
+   GmatTime tPrecTime;                                       // made changes by TUAN NGUYEN
+   GmatTime rPrecTime;                                       // made changes by TUAN NGUYEN
 #else
    /// Transmitter epoch
-   GmatEpoch tTime;
+   GmatEpoch tTime;                                // tTime will be removed and replaced by tPrecTime
    /// Receiver epoch
-   GmatEpoch rTime;
+   GmatEpoch rTime;                                // rTime will be removed and replaced by rPrecTime
 #endif
 
    /// MJ2000Eq location of the transmit node
    Rvector3 tLoc;
-   /// SSBMJ2000 state of the transmit node's origin					// made changes by TUAN NGUYEN
-   Rvector6 tOStateSSB;													// made changes by TUAN NGUYEN
+   /// SSBMJ2000 state of the transmit node's origin                  // made changes by TUAN NGUYEN
+   Rvector6 tOStateSSB;                                               // made changes by TUAN NGUYEN
    /// Location of the transmit node in its coordinate system
    Rvector3 tLocTcs;
    /// MJ2000Eq location of the receive node
    Rvector3 rLoc;
-   /// SSBMJ2000 state of the receive node's origin						// made changes by TUAN NGUYEN
-   Rvector6 rOStateSSB;													// made changes by TUAN NGUYEN
+   /// SSBMJ2000 state of the receive node's origin                  // made changes by TUAN NGUYEN
+   Rvector6 rOStateSSB;                                              // made changes by TUAN NGUYEN
    /// Location of the receive node in its coordinate system
    Rvector3 rLocRcs;
    /// MJ2000Eq transmitter velocity
@@ -104,7 +104,7 @@ public:
    /// The SSBMj2000 equatorial range vector from transmit at time tTime to receive node at time rTime
    Rvector3 rangeVecInertial;
    /// Relative velocity of the receive node at time rTime w.r.t. the transmit node at time tTime
-   Rvector3 rangeRateVecInertial;										// made changes by TUAN NGUYEN
+   Rvector3 rangeRateVecInertial;                                   // made changes by TUAN NGUYEN
    /// The range vector from transmit to receive node in obs coordinates
    Rvector3 rangeVecObs;
    /// The range rate vector from transmit to receive node in obs coordinates

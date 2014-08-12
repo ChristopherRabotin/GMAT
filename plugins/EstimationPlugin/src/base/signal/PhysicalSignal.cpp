@@ -237,6 +237,7 @@ void PhysicalSignal::InitializeSignal(bool chainForwards)
  */
 //------------------------------------------------------------------------------
 #ifndef USE_PRECISION_TIME
+// This function will be removed and replaced by bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 {
    bool retval = false;
