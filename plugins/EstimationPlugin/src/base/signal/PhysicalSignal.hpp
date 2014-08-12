@@ -57,8 +57,12 @@ public:
 
    virtual void InitializeSignal(bool chainForwards = false);
 
-   virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);
+#ifdef USE_PRECISION_TIME
    virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true);			// made changes by TUAN NGUYEN
+#else
+   virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);
+#endif
+   
    virtual const std::vector<RealArray>&
                 ModelSignalDerivative(GmatBase *obj, Integer forId);
 
@@ -75,13 +79,19 @@ protected:
    Ionosphere* ionosphere;
    /// Flag indicating to use relativity correction											// made changes by TUAN NGUYEN
    bool useRelativity;																		// made changes by TUAN NGUYEN
-   /// Relativity correction (unit: km)														// made changes by TUAN NGUYEN
+   /// Correction (unit: km)																// made changes by TUAN NGUYEN
    Real relCorrection;																		// made changes by TUAN NGUYEN
+   Real ettaiCorrection;
+   Real mediaCorrection;
+
    /// Flag indicating to use Et-TAI correction												// made changes by TUAN NGUYEN
    bool useETTAI;																			// made changes by TUAN NGUYEN
 
-   bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);
+#ifdef USE_PRECISION_TIME
    bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive);					// made changes by TUAN NGUYEN
+#else
+   bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);
+#endif
 
    /// This function is used to compute relativity correction								// made changes by TUAN NGUYEN
    Real RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, Real t2);					// made changes by TUAN NGUYEN
