@@ -56,7 +56,9 @@ PhysicalSignal::PhysicalSignal(const std::string &typeStr,
    SignalBase                 (typeStr, name),
    physicalSignalInitialized  (false),
    troposphere                (NULL),
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    ionosphere                 (NULL),
+#endif
    useRelativity              (false),				// made changes by TUAN NGUYEN
    useETTAI	                  (false)				// made changes by TUAN NGUYEN
 {
@@ -81,8 +83,11 @@ PhysicalSignal::~PhysicalSignal()
 
    if (troposphere != NULL)
       delete troposphere;
+
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if (ionosphere != NULL)
       delete troposphere;
+#endif
 }
 
 
@@ -98,7 +103,9 @@ PhysicalSignal::~PhysicalSignal()
 PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
    SignalBase                 (ps),
    physicalSignalInitialized  (false),
-   useRelativity              (ps.useRelativity)					// made changes by TUAN NGUYEN
+   useRelativity              (ps.useRelativity),					// made changes by TUAN NGUYEN
+   relCorrection              (ps.relCorrection),
+   useETTAI                   (ps.useETTAI)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: copy construction\n");
@@ -108,10 +115,11 @@ PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
       delete troposphere;
    troposphere = (Troposphere*)(ps.troposphere->Clone());
 
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if (ionosphere !=NULL)
       delete ionosphere;
    ionosphere = (Ionosphere*)(ps.ionosphere->Clone());
-
+#endif
 }
 
 
@@ -138,13 +146,18 @@ PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
       physicalSignalInitialized = false;
 	  useRelativity             = ps.useRelativity;
 
+      relCorrection             = ps.relCorrection;
+      useETTAI                  = ps.useETTAI;
+
 	  if (troposphere !=NULL)
          delete troposphere;
 	  troposphere = (Troposphere*)(ps.troposphere->Clone());
 
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
 	  if (ionosphere !=NULL)
          delete ionosphere;
 	  ionosphere = (Ionosphere*)(ps.ionosphere->Clone());
+#endif
    }
 
    return *this;
@@ -343,7 +356,11 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 	  Real freq = 1.0e9;							//(unit: Hz)
 
 	  // 4.2 Specify media correction 
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
 	  if ((troposphere !=NULL)||(ionosphere !=NULL))
+#else
+	  if (troposphere != NULL)
+#endif
 	  {
 	     if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
 	     {  
@@ -628,7 +645,11 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 	  Real freq = 1.0e9;				// (unit: Hz)
 
 	  // 4.2 Specify media correction 
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
 	  if ((troposphere !=NULL)||(ionosphere !=NULL))
+#else
+	  if (troposphere != NULL)
+#endif
 	  {
 	     if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
 	     {  
@@ -1539,24 +1560,7 @@ RealArray PhysicalSignal::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvect
       mediaCorrection[0] = tropoCorrection[0];
       mediaCorrection[1] = tropoCorrection[1];
       mediaCorrection[2] = tropoCorrection[2];
-      
-      #ifdef DEBUG_MEASUREMENT_CORRECTION
-	     Rvector3 r = r2-r1;
-         MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r[0], r[1], r[2]);
-         MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", tropoCorrection[0], tropoCorrection[1], tropoCorrection[2]);
-      #endif
-
-      #ifdef IONOSPHERE
-      // 2. Run Ionosphere correction:
-      ionoCorrection = IonosphereCorrection(freq, r1, r2, epoch);
-      
-      // 3. Combine effects:
-      mediaCorrection[0] += ionoCorrection[0];
-      mediaCorrection[1] += ionoCorrection[1];
-      mediaCorrection[2] += ionoCorrection[2];
-      #endif
    }
-   
    // Update value of theData.corrections and theData.useCorrection
 	UnsignedInt i = 0;
 	for (; i < theData.correctionIDs.size(); ++i)
@@ -1567,13 +1571,35 @@ RealArray PhysicalSignal::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvect
 	theData.corrections[i] = mediaCorrection[0]*GmatMathConstants::M_TO_KM;
    theData.useCorrection[i] = (troposphere != NULL);
 
-   for (i = 0; i < theData.correctionIDs.size(); ++i)
-	{
-      if (theData.correctionIDs[i] == "Ionosphere")
-			break;
-	}
-	theData.corrections[i] = ionoCorrection[0]*GmatMathConstants::M_TO_KM;
-   theData.useCorrection[i] = (ionosphere != NULL);
+
+   #ifdef DEBUG_MEASUREMENT_CORRECTION
+	   Rvector3 r = r2-r1;
+      MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r[0], r[1], r[2]);
+      MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", tropoCorrection[0], tropoCorrection[1], tropoCorrection[2]);
+   #endif
+
+   #ifdef IONOSPHERE
+      // 2. Run Ionosphere correction:
+      if (elevationAngle > 0.0)
+      {
+         ionoCorrection = IonosphereCorrection(freq, r1, r2, epoch);
+      
+         // 3. Combine effects:
+         mediaCorrection[0] += ionoCorrection[0];
+         mediaCorrection[1] += ionoCorrection[1];
+         mediaCorrection[2] += ionoCorrection[2];
+      }
+
+      for (i = 0; i < theData.correctionIDs.size(); ++i)
+	   {
+         if (theData.correctionIDs[i] == "Ionosphere")
+		      break;
+	   }
+	   theData.corrections[i] = ionoCorrection[0]*GmatMathConstants::M_TO_KM;
+      theData.useCorrection[i] = (ionosphere != NULL);
+      
+   #endif
+   
    
    return mediaCorrection;
 }

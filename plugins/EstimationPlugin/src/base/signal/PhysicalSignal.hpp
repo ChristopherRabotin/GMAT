@@ -75,8 +75,10 @@ protected:
    bool physicalSignalInitialized;
    /// Troposphere model object
    Troposphere* troposphere;
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    /// Ionosphere model object
    Ionosphere* ionosphere;
+#endif
    /// Flag indicating to use relativity correction											// made changes by TUAN NGUYEN
    bool useRelativity;																		// made changes by TUAN NGUYEN
    /// Correction (unit: km)																// made changes by TUAN NGUYEN
