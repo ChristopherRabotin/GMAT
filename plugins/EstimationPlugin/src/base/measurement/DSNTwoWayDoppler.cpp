@@ -1139,10 +1139,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       #endif
 
       // 12.1. Calculate media correction for uplink leg:
-	  // r3S and r4S are location of station and spacecraft in participant's central body inertial coordinate system for uplink leg	for S path	// made change by TUAN NGUYEN
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2RS - ssb2cb_t1TS) due to												// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t1TS to t2RS										// made change by TUAN NGUYEN
-	  RealArray uplinkCorrectionS = CalculateMediaCorrection(uplinkFreqS, r3S, r4S + (ssb2cb_t2RS - ssb2cb_t1TS), t1TS);						// made change by TUAN NGUYEN
+	  // r3SB and r4SB are location of station and spacecraft in SSB inertial coordinate system for uplink leg	for S path	// made change by TUAN NGUYEN
+	  RealArray uplinkCorrectionS = CalculateMediaCorrection(uplinkFreqS, r3SB, r4SB, t1TS);						// made change by TUAN NGUYEN
 	  
 	  Real uplinkRangeCorrectionS = uplinkCorrectionS[0]*GmatMathConstants::M_TO_KM + uplinkLegS.GetRelativityCorrection();
 	  Real uplinkRealRangeS = uplinkRangeS + uplinkRangeCorrectionS;
@@ -1197,12 +1195,9 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("       Downlink frequency = Turn around ratio x Uplink Doppler shift frequency              = %.12le Mhz\n", downlinkFreqS);
 		 MessageInterface::ShowMessage("       Downlink Doppler shift frequency = (1 - downlink range rate / c)x Downlink frequency = %.12le MHz\n", downlinkDSFreqS);
       #endif
- 	  // r1S and r2S are location of station and spacecraft in central body inertial coordinate system for downlink leg	for S path		// made change by TUAN NGUYEN
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2TS - ssb2cb_t3RS) due to										// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t2TS to t3RS								// made change by TUAN NGUYEN
-	  RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1S, r2S +(ssb2cb_t2TS - ssb2cb_t3RS), t3RS);			// made change by TUAN NGUYEN
+ 	  // r1SB and r2SB are location of station and spacecraft in central body inertial coordinate system for downlink leg	for S path		// made change by TUAN NGUYEN
+	  RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1SB, r2SB, t3RS);			// made change by TUAN NGUYEN
 
-//	  RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1S, r2S, t3RS);			// made change by TUAN NGUYEN:  where r1S and r2S are location of station and spacecraft in local inertial coordinate system for downlink leg for S path
 	  Real downlinkRangeCorrectionS = downlinkCorrectionS[0]*GmatMathConstants::M_TO_KM + downlinkLegS.GetRelativityCorrection();
 	  Real downlinkRealRangeS = downlinkRangeS + downlinkRangeCorrectionS;
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
@@ -1219,10 +1214,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("4.2.1. Media correction for uplink leg:\n");
       #endif
 	  // 13.1. Calculate media correction for uplink leg:
-	  // r3E and r4E are location of station and spacecraft in participant's central body inertial coordinate system for uplink leg	for E path	// made change by TUAN NGUYEN
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2RE - ssb2cb_t1TE) due to												// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t1TE to t2RE										// made change by TUAN NGUYEN
-	  RealArray uplinkCorrectionE = CalculateMediaCorrection(uplinkFreqE, r3E, r4E + (ssb2cb_t2RE - ssb2cb_t1TE), t1TE);						// made change by TUAN NGUYEN
+	  // r3EB and r4EB are location of station and spacecraft in SSB inertial coordinate system for uplink leg	for E path	// made change by TUAN NGUYEN
+	  RealArray uplinkCorrectionE = CalculateMediaCorrection(uplinkFreqE, r3EB, r4EB, t1TE);						// made change by TUAN NGUYEN
 
 	  Real uplinkRangeCorrectionE = uplinkCorrectionE[0]*GmatMathConstants::M_TO_KM + uplinkLegE.GetRelativityCorrection();
       Real uplinkRealRangeE = uplinkRangeE + uplinkRangeCorrectionE;
@@ -1278,10 +1271,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("       Downlink Doppler shift frequency = (1 - downlink range rate / c)x Downlink frequency = %.12le MHz\n", downlinkDSFreqE);
       #endif
 
-	  // r1E and r2E are location of station and spacecraft in central body inertial coordinate system for downlink leg	for E path		// made change by TUAN NGUYEN
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2TE - ssb2cb_t3RE) due to										// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t2TE to t3RE								// made change by TUAN NGUYEN
-	  RealArray downlinkCorrectionE = CalculateMediaCorrection(downlinkDSFreqE, r1E, r2E +(ssb2cb_t2TE - ssb2cb_t3RE), t3RE);			// made change by TUAN NGUYEN
+	  // r1EB and r2EB are location of station and spacecraft in SSB inertial coordinate system for downlink leg	for E path		// made change by TUAN NGUYEN
+	  RealArray downlinkCorrectionE = CalculateMediaCorrection(downlinkDSFreqE, r1EB, r2EB, t3RE);			// made change by TUAN NGUYEN
 
 	  Real downlinkRangeCorrectionE = downlinkCorrectionE[0]*GmatMathConstants::M_TO_KM + downlinkLegE.GetRelativityCorrection();
       Real downlinkRealRangeE = downlinkRangeE + downlinkRangeCorrectionE;
