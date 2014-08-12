@@ -115,7 +115,8 @@ public:
    
    // Getting file names
    std::string GetFileName(const std::string &fileType, bool getFullpath = false,
-                           bool forInput = true);
+                           bool forInput = true, bool writeWarning = false,
+                           bool writeInfo = false);
    
    // StopCondition
    GmatBase* CreateStopCondition(const std::string &type,
