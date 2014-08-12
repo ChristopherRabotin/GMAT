@@ -1195,10 +1195,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  Real uplinkFreq;
 	  if (obsData == NULL)																											// made changes by TUAN NGUYEN
 	  {
-//		  MessageInterface::ShowMessage("obsData = NULL  ******\n"); 
 		 if (rampTB == NULL)
 		 {
-//			 MessageInterface::ShowMessage("rampTB = NULL  ++++\n");
             // Get uplink frequency from GMAT script when ramp table is not used
             Signal* uplinkSignal = gsTransmitter->GetSignal();
             uplinkFreq = uplinkSignal->GetValue();		// unit: MHz
@@ -1214,13 +1212,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 }
 		 else
 		 {
-//			 MessageInterface::ShowMessage("rampTB != NULL  ++++\n");
 			// Get uplink frequency at a given time from ramped frequency table
 			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
 			uplinkFreq = frequency/1.0e6;							// unit MHz
 
-//			// Get uplink band based on definition of frequency range
-//			freqBand = FrequencyBand(frequency);
 			// Get frequency band from ramp table at given time
 			freqBand = GetUplinkBandFromRampTable(t1T);
 
@@ -1232,10 +1227,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 	  }
 	  else
 	  {
-//		  MessageInterface::ShowMessage("obsData != NULL  ******\n");
 		 if (rampTB == NULL)
 		 {
-//			 MessageInterface::ShowMessage("rampTB = NULL  ++++\n");
 			// Get uplink frequency at a given time from observation data
             frequency = obsData->uplinkFreq;			            // unit: Hz	
 
@@ -1245,7 +1238,6 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 }
 		 else
 		 {
-//			 MessageInterface::ShowMessage("rampTB != NULL  ++++\n");
 			// Get uplink frequency at a given time from ramped frequency table
 			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
 
@@ -1272,11 +1264,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 		 MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
       #endif
 
-	  // r3 and r4 are location of station and spacecraft in participant's central body inertial coordinate system for uplink leg		// made change by TUAN NGUYEN
-//	  RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3, r4, t1T);													// made change by TUAN NGUYEN
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2R - ssb2cb_t1T) due to										// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t1T to t2R									// made change by TUAN NGUYEN
-	  RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3, r4 + (ssb2cb_t2R - ssb2cb_t1T), t1T);						// made change by TUAN NGUYEN
+	  // r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system for uplink leg		// made change by TUAN NGUYEN
+	  RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);						// made change by TUAN NGUYEN
 
 	  Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
       Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
@@ -1348,11 +1337,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
       #endif
-	  // r1 and r2 are location of station and spacecraft in central body inertial coordinate system for downlink leg					// made change by TUAN NGUYEN
-//    RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1, r2, t3R);												// made change by TUAN NGUYEN
-	  // Note: the change of spacecraft position with amount of (ssb2cb_t2T - ssb2cb_t3R) due to										// made change by TUAN NGUYEN
-	  //       the origin of local inertial coordinate system moving during time period from t2T to t3R									// made change by TUAN NGUYEN
-	  RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1, r2 +(ssb2cb_t2T - ssb2cb_t3R), t3R);					// made change by TUAN NGUYEN
+	  // r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system for downlink leg					// made change by TUAN NGUYEN
+	  RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);					// made change by TUAN NGUYEN
 
 	  Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
 	  Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
