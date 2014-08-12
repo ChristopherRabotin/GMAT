@@ -35,6 +35,7 @@
 #include <wx/splash.h>
 #include <wx/image.h>
 #include <wx/config.h>
+#include <wx/log.h>
 
 #include "MessageInterface.hpp"
 #include "PlotInterface.hpp"
@@ -278,8 +279,11 @@ bool GmatApp::OnInit()
             return false;
          
          
+         wxLogLevel logLevel = wxLog::GetLogLevel();
+         wxLog::SetLogLevel(0);
+         
          if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI)
-         {
+         {            
             // Initializes all available image handlers.
             ::wxInitAllImageHandlers();
             
@@ -290,6 +294,11 @@ bool GmatApp::OnInit()
             
             if (GmatFileUtil::DoesFileExist(splashFile.c_str()))
             {
+               //wxLog::EnableLogging(false);
+               //wxLogNull noLog;
+               //wxLogLevel logLevel = wxLog::GetLogLevel();
+               //wxLog::SetLogLevel(0);
+               
                std::string ext = GmatFileUtil::ParseFileExtension(splashFile.c_str());
                std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
                wxBitmap *bitmap = NULL;
@@ -313,7 +322,7 @@ bool GmatApp::OnInit()
                   MessageInterface::ShowMessage
                     ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
                }
-                  // Changed to time out in 4 sec (LOJ: 2009.10.07)
+               // Changed to time out in 4 sec (LOJ: 2009.10.07)
                if (bitmap != NULL)
                {
                   long splashStyle;
@@ -329,6 +338,8 @@ bool GmatApp::OnInit()
                                         splashStyle);
                    splash->SetShape(region);
                }
+               //wxLog::EnableLogging(true);
+               //wxLog::SetLogLevel(logLevel);
             }
             else
             {
@@ -348,6 +359,8 @@ bool GmatApp::OnInit()
                               _T("GMAT - General Mission Analysis Tool"),
                               position, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+         
+         wxLog::SetLogLevel(logLevel);
          
          WriteMessage("GMAT GUI successfully launched.\n", "");
          
