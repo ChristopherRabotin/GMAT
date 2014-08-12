@@ -36,30 +36,30 @@
 
 /// Strings describing the BatchEstimator parameters
 const std::string TrackingFileSet::PARAMETER_TEXT[
-                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =		// made changes by TUAN NGUYEN
+                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =      // made changes by TUAN NGUYEN
 {
    "AddTrackingConfig",             // TRACKINGCONFIG
    "Filename",                      // FILENAME
-   "RampedTable",					// RAMPED_TABLE					// made changes by TUAN NGUYEN
+   "RampedTable",                   // RAMPED_TABLE               // made changes by TUAN NGUYEN
    "UseLighttime",                  // USELIGHTTIME
-   "UseRelativityCorrection",		// USE_RELATIVITY				// made changes by TUAN NGUYEN
-   "UseETminusTAI",					// USE_ETMINUSTAI				// made changes by TUAN NGUYEN
-   "TroposphereModel",				// TROPOSPHERE_MODEL			// made changes by TUAN NGUYEN
-   "IonosphereModel",				// IONOSPHERE_MODEL				// made changes by TUAN NGUYEN
+   "UseRelativityCorrection",       // USE_RELATIVITY             // made changes by TUAN NGUYEN
+   "UseETminusTAI",                 // USE_ETMINUSTAI             // made changes by TUAN NGUYEN
+   "TroposphereModel",              // TROPOSPHERE_MODEL          // made changes by TUAN NGUYEN
+   "IonosphereModel",               // IONOSPHERE_MODEL           // made changes by TUAN NGUYEN
 };
 
 /// Types of the BatchEstimator parameters
 const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
-                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =		// made changes by TUAN NGUYEN
+                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =      // made changes by TUAN NGUYEN
 {
    Gmat::STRINGARRAY_TYPE,          // TRACKINGCONFIG
    Gmat::STRINGARRAY_TYPE,          // FILENAME, but it's a list of names...
    Gmat::STRINGARRAY_TYPE,          // RAMPED_TABLE, but it's a list of names...
    Gmat::BOOLEAN_TYPE,              // USELIGHTTIME
-   Gmat::BOOLEAN_TYPE,				// USE_RELATIVITY				// made changes by TUAN NGUYEN
-   Gmat::BOOLEAN_TYPE,				// USE_ETMINUSTAI				// made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,				// TROPOSPHERE_MODEL			// made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,				// IONOSPHERE_MODEL				// made changes by TUAN NGUYEN
+   Gmat::BOOLEAN_TYPE,              // USE_RELATIVITY            // made changes by TUAN NGUYEN
+   Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI            // made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,               // TROPOSPHERE_MODEL         // made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,               // IONOSPHERE_MODEL          // made changes by TUAN NGUYEN
 };
 
 
@@ -77,10 +77,10 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    useLighttime         (false),    // Default to true once implemented
    solarsystem          (NULL),
    thePropagator        (NULL),
-   useRelativityCorrection	(false),				// made changes by TUAN NGUYEN
-   useETminusTAICorrection	(false),				// made changes by TUAN NGUYEN
-   troposphereModel	    ("None"),					// made changes by TUAN NGUYEN
-   ionosphereModel	    ("None")					// made changes by TUAN NGUYEN
+   useRelativityCorrection   (false),            // made changes by TUAN NGUYEN
+   useETminusTAICorrection   (false),            // made changes by TUAN NGUYEN
+   troposphereModel          ("None"),           // made changes by TUAN NGUYEN
+   ionosphereModel           ("None")            // made changes by TUAN NGUYEN
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -113,16 +113,16 @@ TrackingFileSet::~TrackingFileSet()
 TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    MeasurementModelBase (tfs),
    filenames            (tfs.filenames),
-   rampedTablenames     (tfs.rampedTablenames),				// made changes by TUAN NGUYEN
+   rampedTablenames     (tfs.rampedTablenames),               // made changes by TUAN NGUYEN
    useLighttime         (tfs.useLighttime),
    solarsystem          (tfs.solarsystem),
    thePropagator        (tfs.thePropagator),
    references           (tfs.references),
    datafiles            (tfs.datafiles),
-   useRelativityCorrection	(tfs.useRelativityCorrection),	// made changes by TUAN NGUYEN
-   useETminusTAICorrection	(tfs.useETminusTAICorrection),	// made changes by TUAN NGUYEN
-   troposphereModel		(tfs.troposphereModel),				// made changes by TUAN NGUYEN
-   ionosphereModel		(tfs.ionosphereModel)				// made changes by TUAN NGUYEN
+   useRelativityCorrection   (tfs.useRelativityCorrection),   // made changes by TUAN NGUYEN
+   useETminusTAICorrection   (tfs.useETminusTAICorrection),   // made changes by TUAN NGUYEN
+   troposphereModel          (tfs.troposphereModel),          // made changes by TUAN NGUYEN
+   ionosphereModel           (tfs.ionosphereModel)            // made changes by TUAN NGUYEN
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
@@ -153,16 +153,16 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
          trackingConfigs.push_back(tfs.trackingConfigs[i]);
 
       filenames = tfs.filenames;
-	  rampedTablenames = tfs.rampedTablenames;					// made changes by TUAN NGUYEN
+      rampedTablenames = tfs.rampedTablenames;                  // made changes by TUAN NGUYEN
       useLighttime = tfs.useLighttime;
       solarsystem = tfs.solarsystem;
       thePropagator = tfs.thePropagator;
       references = tfs.references;
       datafiles = tfs.datafiles;
-	  useRelativityCorrection = tfs.useRelativityCorrection;	// made changes by TUAN NGUYEN
-	  useETminusTAICorrection = tfs.useETminusTAICorrection;	// made changes by TUAN NGUYEN
-	  troposphereModel    = tfs.troposphereModel;				// made changes by TUAN NGUYEN
-	  ionosphereModel     = tfs.ionosphereModel;				// made changes by TUAN NGUYEN
+      useRelativityCorrection = tfs.useRelativityCorrection;   // made changes by TUAN NGUYEN
+      useETminusTAICorrection = tfs.useETminusTAICorrection;   // made changes by TUAN NGUYEN
+      troposphereModel        = tfs.troposphereModel;          // made changes by TUAN NGUYEN
+      ionosphereModel         = tfs.ionosphereModel;           // made changes by TUAN NGUYEN
 
       isInitialized = false;
    }
@@ -305,14 +305,14 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 {
    if (id == TROPOSPHERE_MODEL)
    {
-	  troposphereModel = value;
-	  return true;
+      troposphereModel = value;
+      return true;
    }
 
    if (id == IONOSPHERE_MODEL)
    {
-	  ionosphereModel = value;
-	  return true;
+      ionosphereModel = value;
+      return true;
    }
 
    if (id == FILENAME)
@@ -325,15 +325,15 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return false;
    }
 
-   if (id == RAMPED_TABLENAME)																			// made changes by TUAN NGUYEN
-   {																									// made changes by TUAN NGUYEN
-      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())		// made changes by TUAN NGUYEN
-      {																									// made changes by TUAN NGUYEN
-         rampedTablenames.push_back(value);																// made changes by TUAN NGUYEN
-         return true;																					// made changes by TUAN NGUYEN
-      }																									// made changes by TUAN NGUYEN
-      return false;																						// made changes by TUAN NGUYEN
-   }																									// made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)                                                                          // made changes by TUAN NGUYEN
+   {                                                                                                    // made changes by TUAN NGUYEN
+      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())      // made changes by TUAN NGUYEN
+      {                                                                                                 // made changes by TUAN NGUYEN
+         rampedTablenames.push_back(value);                                                             // made changes by TUAN NGUYEN
+         return true;                                                                                   // made changes by TUAN NGUYEN
+      }                                                                                                 // made changes by TUAN NGUYEN
+      return false;                                                                                     // made changes by TUAN NGUYEN
+   }                                                                                                    // made changes by TUAN NGUYEN
 
    return MeasurementModelBase::SetStringParameter(id, value);
 }
@@ -372,14 +372,14 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
                "a tracking data file name");
    }
 
-   if (id == RAMPED_TABLENAME)														// made changes by TUAN NGUYEN
-   {																				// made changes by TUAN NGUYEN
-      if (((Integer)rampedTablenames.size() > index) && (index >= 0))				// made changes by TUAN NGUYEN
-         return rampedTablenames[index];											// made changes by TUAN NGUYEN
-      else																			// made changes by TUAN NGUYEN
-         throw MeasurementException("Index out of bounds when trying to access "	// made changes by TUAN NGUYEN
-               "a ramped table file name");											// made changes by TUAN NGUYEN
-   }																				// made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)                                                     // made changes by TUAN NGUYEN
+   {                                                                               // made changes by TUAN NGUYEN
+      if (((Integer)rampedTablenames.size() > index) && (index >= 0))              // made changes by TUAN NGUYEN
+         return rampedTablenames[index];                                           // made changes by TUAN NGUYEN
+      else                                                                         // made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to access "   // made changes by TUAN NGUYEN
+               "a ramped table file name");                                        // made changes by TUAN NGUYEN
+   }                                                                               // made changes by TUAN NGUYEN
 
    return MeasurementModelBase::GetStringParameter(id, index);
 }
@@ -485,26 +485,26 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return true;
    }
 
-   if (id == RAMPED_TABLENAME)														// made changes by TUAN NGUYEN
-   {																				// made changes by TUAN NGUYEN
-      if (((Integer)rampedTablenames.size() > index) && (index >= 0))				// made changes by TUAN NGUYEN
-         rampedTablenames[index] = value;											// made changes by TUAN NGUYEN
-      else if ((Integer)rampedTablenames.size() == index)							// made changes by TUAN NGUYEN
-      {																				// made changes by TUAN NGUYEN
-         rampedTablenames.push_back(value);											// made changes by TUAN NGUYEN
-      }																				// made changes by TUAN NGUYEN
-      else																			// made changes by TUAN NGUYEN
-         throw MeasurementException("Index out of bounds when trying to "			// made changes by TUAN NGUYEN
-               "set a ramped table file name");										// made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)                                                       // made changes by TUAN NGUYEN
+   {                                                                                 // made changes by TUAN NGUYEN
+      if (((Integer)rampedTablenames.size() > index) && (index >= 0))                // made changes by TUAN NGUYEN
+         rampedTablenames[index] = value;                                            // made changes by TUAN NGUYEN
+      else if ((Integer)rampedTablenames.size() == index)                            // made changes by TUAN NGUYEN
+      {                                                                              // made changes by TUAN NGUYEN
+         rampedTablenames.push_back(value);                                          // made changes by TUAN NGUYEN
+      }                                                                              // made changes by TUAN NGUYEN
+      else                                                                           // made changes by TUAN NGUYEN
+         throw MeasurementException("Index out of bounds when trying to "            // made changes by TUAN NGUYEN
+               "set a ramped table file name");                                      // made changes by TUAN NGUYEN
 
-      #ifdef DEBUG_INITIALIZATION													// made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage("%d members in config:\n",					// made changes by TUAN NGUYEN
-               rampedTablenames.size());											// made changes by TUAN NGUYEN
-         for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)					// made changes by TUAN NGUYEN
-            MessageInterface::ShowMessage("   %s\n", rampedTablenames[i].c_str());	// made changes by TUAN NGUYEN
-      #endif																		// made changes by TUAN NGUYEN
-      return true;																	// made changes by TUAN NGUYEN
-   }																				// made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZATION                                                    // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("%d members in config:\n",                    // made changes by TUAN NGUYEN
+               rampedTablenames.size());                                             // made changes by TUAN NGUYEN
+         for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)                   // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("   %s\n", rampedTablenames[i].c_str());   // made changes by TUAN NGUYEN
+      #endif                                                                         // made changes by TUAN NGUYEN
+      return true;                                                                   // made changes by TUAN NGUYEN
+   }                                                                                 // made changes by TUAN NGUYEN
 
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
@@ -541,8 +541,8 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
    if (id == FILENAME)
       return filenames;
 
-   if (id == RAMPED_TABLENAME)								// made changes by TUAN NGUYEN
-      return rampedTablenames;								// made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)                        // made changes by TUAN NGUYEN
+      return rampedTablenames;                        // made changes by TUAN NGUYEN
 
    return MeasurementModelBase::GetStringArrayParameter(id);
 }
@@ -1001,15 +1001,15 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
          }
       }
 
-      for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)				// made changes by TUAN NGUYEN
-      {																		// made changes by TUAN NGUYEN
-         if (rampedTablenames[i] == oldName)								// made changes by TUAN NGUYEN
-         {																	// made changes by TUAN NGUYEN
-            rampedTablenames[i] = newName;									// made changes by TUAN NGUYEN
-            retval = true;													// made changes by TUAN NGUYEN
-            break;															// made changes by TUAN NGUYEN
-         }																	// made changes by TUAN NGUYEN
-      }																		// made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)            // made changes by TUAN NGUYEN
+      {                                                                    // made changes by TUAN NGUYEN
+         if (rampedTablenames[i] == oldName)                               // made changes by TUAN NGUYEN
+         {                                                                 // made changes by TUAN NGUYEN
+            rampedTablenames[i] = newName;                                 // made changes by TUAN NGUYEN
+            retval = true;                                                 // made changes by TUAN NGUYEN
+            break;                                                         // made changes by TUAN NGUYEN
+         }                                                                 // made changes by TUAN NGUYEN
+      }                                                                    // made changes by TUAN NGUYEN
    }
 
    if ((type == Gmat::SPACE_POINT) || (type == Gmat::UNKNOWN_OBJECT))
@@ -1332,17 +1332,17 @@ bool TrackingFileSet::Initialize()
          if (thePropagator)
             measurements[i]->SetPropagator(thePropagator);
 
-		 // Set measurement corrections to TrackingDataAdapter							// made changes by TUAN NGUYEN
-		 if (useRelativityCorrection)													// made changes by TUAN NGUYEN
-			measurements[i]->SetCorrection("Moyer","Relativity");						// made changes by TUAN NGUYEN
-		 if (useETminusTAICorrection)													// made changes by TUAN NGUYEN
-			measurements[i]->SetCorrection("Moyer","ET-TAI");							// made changes by TUAN NGUYEN
-		 if (troposphereModel != "")													// made changes by TUAN NGUYEN
-			measurements[i]->SetCorrection(troposphereModel,"TroposphereModel");		// made changes by TUAN NGUYEN
-		 if (ionosphereModel != "")														// made changes by TUAN NGUYEN
-			measurements[i]->SetCorrection(ionosphereModel,"IonosphereModel");			// made changes by TUAN NGUYEN
+         // Set measurement corrections to TrackingDataAdapter                     // made changes by TUAN NGUYEN
+         if (useRelativityCorrection)                                              // made changes by TUAN NGUYEN
+            measurements[i]->SetCorrection("Moyer","Relativity");                  // made changes by TUAN NGUYEN
+         if (useETminusTAICorrection)                                              // made changes by TUAN NGUYEN
+            measurements[i]->SetCorrection("Moyer","ET-TAI");                      // made changes by TUAN NGUYEN
+         if (troposphereModel != "")                                               // made changes by TUAN NGUYEN
+            measurements[i]->SetCorrection(troposphereModel,"TroposphereModel");   // made changes by TUAN NGUYEN
+         if (ionosphereModel != "")                                                // made changes by TUAN NGUYEN
+            measurements[i]->SetCorrection(ionosphereModel,"IonosphereModel");     // made changes by TUAN NGUYEN
 
-		 // Initialize TrackingDataAdapter
+         // Initialize TrackingDataAdapter
          retval = retval && measurements[i]->Initialize();
       }
 
@@ -1401,61 +1401,61 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    ///        here and wrapping in an outer loop.  Hence the indentation.
 
    // 1. Set value for designators map:
-      for (UnsignedInt i = 0; i < strand.size(); ++i)
-      {
-         //designator.str() = "";												// made changes by TUAN NGUYEN
-         // Search for a referent object with the same name of node strand[i]
-		 UnsignedInt j = 0;														// made changes by TUAN NGUYEN
-         for (; j < references.size(); ++j)										// made changes by TUAN NGUYEN
-		 {																		// made changes by TUAN NGUYEN
-            if (references[j]->GetName() == strand[i])							// made changes by TUAN NGUYEN
-			   break;															// made changes by TUAN NGUYEN
-		 }																		// made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < strand.size(); ++i)
+   {
+      //designator.str() = "";                                          // made changes by TUAN NGUYEN
+      // Search for a referent object with the same name of node strand[i]
+      UnsignedInt j = 0;                                                // made changes by TUAN NGUYEN
+      for (; j < references.size(); ++j)                                // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         if (references[j]->GetName() == strand[i])                     // made changes by TUAN NGUYEN
+            break;                                                      // made changes by TUAN NGUYEN
+      }                                                                 // made changes by TUAN NGUYEN
 
-		 // If found then add value to designators map
-		 if (j < references.size())												// made changes by TUAN NGUYEN
-         {																		// made changes by TUAN NGUYEN
-               Gmat::ObjectType pType = references[j]->GetType();
+      // If found then add value to designators map
+      if (j < references.size())                                        // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         Gmat::ObjectType pType = references[j]->GetType();
 
-               switch(pType)
+         switch(pType)
+         {
+            case Gmat::SPACECRAFT:
+               if (designators.find(strand[i]) == designators.end())
                {
-                  case Gmat::SPACECRAFT:
-                     if (designators.find(strand[i]) == designators.end())
-                     {
-                        ++sCount;
-                        designator.str("");
-                        designator << "S" << sCount;
-                        designators[strand[i]] = designator.str();
-                     }
-                     break;
-
-                  case Gmat::GROUND_STATION:
-                     if (designators.find(strand[i]) == designators.end())
-                     {
-                        ++tCount;
-                        designator.str("");
-                        designator << "T" << tCount;
-                        designators[strand[i]] = designator.str();
-                     }
-                     break;
-
-                  default:
-                     throw MeasurementException("Object type not recognized in "
-                           "the tracking file set strand mapping code");
-                     break;  // No effect, but it avoids a warning message
+                  ++sCount;
+                  designator.str("");
+                  designator << "S" << sCount;
+                  designators[strand[i]] = designator.str();
                }
-         }																		// made changes by TUAN NGUYEN
-      }
+               break;
+
+            case Gmat::GROUND_STATION:
+               if (designators.find(strand[i]) == designators.end())
+               {
+                  ++tCount;
+                  designator.str("");
+                  designator << "T" << tCount;
+                  designators[strand[i]] = designator.str();
+               }
+               break;
+
+            default:
+               throw MeasurementException("Object type not recognized in "
+                           "the tracking file set strand mapping code");
+               break;  // No effect, but it avoids a warning message
+         }
+      }                                                                 // made changes by TUAN NGUYEN
+   }
 
    // And now build the node list
    /// @todo: Check as described above.
    // 2. Add all spacecraft and station IDs to currentStrand
-      currentStrand.clear();
-      for (UnsignedInt i = 0; i < strand.size(); ++i)
-      {
-         currentStrand.push_back(designators[strand[i]]);
-      }
-      nodelist.push_back(currentStrand);
+   currentStrand.clear();
+   for (UnsignedInt i = 0; i < strand.size(); ++i)
+   {
+      currentStrand.push_back(designators[strand[i]]);
+   }
+   nodelist.push_back(currentStrand);
 
 
    /// @todo Move this into a Factory so that plugin adapters work
