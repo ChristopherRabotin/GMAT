@@ -339,6 +339,9 @@
     <ClInclude Include="..\..\src\base\measurement\MeasurementModelBase.hpp">
       <Filter>Source Files\measurement</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -601,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\measurement\MeasurementModelBase.cpp">
       <Filter>Source Files\measurement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
