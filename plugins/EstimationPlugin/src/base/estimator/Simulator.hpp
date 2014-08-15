@@ -78,9 +78,9 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   virtual std::string  GetOnOffParameter(const Integer id) const;						// made changes by TUAN NGUYEN
-   virtual bool         SetOnOffParameter(const Integer id,								// made changes by TUAN NGUYEN
-                                         const std::string &value);						// made changes by TUAN NGUYEN
+   virtual std::string  GetOnOffParameter(const Integer id) const;                   // made changes by TUAN NGUYEN
+   virtual bool         SetOnOffParameter(const Integer id,                          // made changes by TUAN NGUYEN
+                                         const std::string &value);                  // made changes by TUAN NGUYEN
 
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
@@ -133,7 +133,7 @@ protected:
       FINAL_EPOCH_FORMAT,
       FINAL_EPOCH,
       MEASUREMENT_TIME_STEP,
-	  ADD_NOISE,
+      ADD_NOISE,
       SimulatorParamCount
    };
    /// Script strings associated with the parameters
