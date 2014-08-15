@@ -1177,12 +1177,20 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
      
       // 4.3. Compute C-value:
+      // 4.3.1 Compute Light Time range, relativity correction, and ET-TAI correction (backward or forward direction that depends on where measurement time is get):
       if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
       {
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
-     
+      // 4.3.2 Compute media correction (in forward direction of signal)
+      SignalBase* leg = signalPaths[i];
+      while(leg != NULL)
+      {
+         leg->MediaCorrectionCalculation(rampTB);
+         leg = leg->GetNext();
+      }
+
       // 4.4. Verify feasibility:
       #ifdef DEBUG_CALCULATE_MEASUREMENT
          SignalData *current = theData[i];
