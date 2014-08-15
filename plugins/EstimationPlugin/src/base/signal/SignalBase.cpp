@@ -601,6 +601,21 @@ SignalData& SignalBase::GetSignalData()
 
 
 //------------------------------------------------------------------------------
+// SignalData* GetSignalDataObject()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the reference to the SignalData object of the signal
+ *
+ * @return The data set
+ */
+//------------------------------------------------------------------------------
+SignalData* SignalBase::GetSignalDataObject()
+{
+   return &theData;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetSignalData(const SignalData& newData)
 //------------------------------------------------------------------------------
 /**

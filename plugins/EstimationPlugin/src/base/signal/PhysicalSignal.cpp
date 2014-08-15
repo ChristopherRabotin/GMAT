@@ -24,6 +24,10 @@
 #include "PropSetup.hpp"
 #include "GroundstationInterface.hpp"
 #include "Barycenter.hpp"                        // made changes by TUAN NGUYEN
+#include "Spacecraft.hpp"                        // made changes by TUAN NGUYEN
+#include "Transmitter.hpp"                       // made changes by TUAN NGUYEN
+#include "Transponder.hpp"                       // made changes by TUAN NGUYEN
+#include "Receiver.hpp"                          // made changes by TUAN NGUYEN
 
 #include <sstream>                  // For stringstream
 
@@ -244,7 +248,7 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
    satEpoch = atEpoch;
    relCorrection = 0.0;
    ettaiCorrection = 0.0;                                                                     // unit: km
-   mediaCorrection = 0.0;                                                                     // unit: km
+   //mediaCorrection = 0.0;                                                                     // unit: km
    
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", atEpoch,
@@ -348,37 +352,7 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
          theData.corrections[i] = ettaiCorrection;                                                         // unit: km
       }
      
-      // 4. Compute Media correction for this signal leg
-      // 4.1. Specify frequency 
-      Real freq = 1.0e9;                     //(unit: Hz)
-
-      // 4.2 Specify media correction 
-#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
-      if ((troposphere !=NULL)||(ionosphere !=NULL))
-#else
-      if (troposphere != NULL)
-#endif
-      {
-         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-         {  
-            Rvector3 r1B = theData.tLoc + theData.tOStateSSB.GetR();      // location of ground station in Solar System Barycenter
-            Rvector3 r2B = theData.rLoc + theData.rOStateSSB.GetR();      // location of spacecraft in Solar System Barycenter
-            Real epoch = theData.tTime;                              // transmit time at ground station 
-            RealArray correction = CalculateMediaCorrection(freq/1.0e6, r1B, r2B, epoch);                           // unit: m
-            mediaCorrection = correction[0]*GmatMathConstants::M_TO_KM;                                          // unit: km
-         }
-         else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-         {
-            Rvector3 r1B = theData.rLoc + theData.rOStateSSB.GetR();      // location of ground station in Solar System Barycenter
-            Rvector3 r2B = theData.tLoc + theData.tOStateSSB.GetR();      // location of spacecraft in Solar System Barycenter
-            Real epoch = theData.rTime;                              // receive time at ground station 
-            RealArray correction = CalculateMediaCorrection(freq/1.0e6, r1B, r2B, epoch);                           // unit: m
-            mediaCorrection = correction[0]*GmatMathConstants::M_TO_KM;                                          // unit: km
-         }
-      }
-
-     
-      // 5. Perform feasibility check
+      // 4. Perform feasibility check
       if (theData.stationParticipant)
       {
          const Real* elData;
@@ -440,12 +414,12 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
             MessageInterface::ShowMessage("      . Light time solution range = %.12lf km\n", lightTimeRange);
          }
          MessageInterface::ShowMessage("      . Relativity correction = %.12lf km\n", relCorrection);
-         MessageInterface::ShowMessage("      . Media correction      = %.12lf km\n", mediaCorrection);
+         //MessageInterface::ShowMessage("      . Media correction      = %.12lf km\n", mediaCorrection);
          MessageInterface::ShowMessage("      . ET-TAI correction     = %.12lf km\n", ettaiCorrection);
          MessageInterface::ShowMessage("      . Feasibility           = %s\n", (signalIsFeasible?"true":"false"));
       #endif
       
-      // 6. Report raw data
+      // 5. Report raw data
       if (navLog)
       {
          std::stringstream data;
@@ -479,7 +453,7 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
          navLog->WriteData(data.str());
       }
       
-      // 7. Run ModelSignal for the next leg in signal path:
+      // 6. Run ModelSignal for the next leg in signal path:
       // if epoctAtReceive was true, transmitter moved and we need its epoch,
       // if false, we need the receiver epoch
       GmatEpoch nextEpoch = (epochAtReceive ? theData.tTime : theData.rTime);
@@ -529,7 +503,7 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
    satPrecEpoch = atEpoch;
    relCorrection = 0.0;
    ettaiCorrection = 0.0;                                                                     // unit: km
-   mediaCorrection = 0.0;                                                                     // unit: km
+   //mediaCorrection = 0.0;                                                                     // unit: km
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", satPrecEpoch.GetMjd(),
@@ -631,37 +605,8 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
          }
          theData.corrections[i] = ettaiCorrection;                                                         // unit: km
       }
-     
-      // 4. Compute Media correction for this signal leg
-      // 4.1. Specify frequency 
-      Real freq = 1.0e9;            // (unit: Hz)
-
-      // 4.2 Specify media correction 
-#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
-      if ((troposphere !=NULL)||(ionosphere !=NULL))
-#else
-      if (troposphere != NULL)
-#endif
-      {
-         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-         {  
-            Rvector3 r1B = theData.tLoc + theData.tOStateSSB.GetR();      // location of ground station in Solar System Barycenter
-            Rvector3 r2B = theData.rLoc + theData.rOStateSSB.GetR();      // location of spacecraft in Solar System Barycenter
-            Real epoch = theData.tPrecTime.GetMjd();                  // transmit time at ground station 
-            RealArray correction = CalculateMediaCorrection(freq/1.0e6, r1B, r2B, epoch);
-            mediaCorrection = correction[0]*GmatMathConstants::M_TO_KM;                                          // unit: km
-         }
-         else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-         {
-            Rvector3 r1B = theData.rLoc + theData.rOStateSSB.GetR();      // location of ground station in Solar System Barycenter
-            Rvector3 r2B = theData.tLoc + theData.tOStateSSB.GetR();      // location of spacecraft in Solar System Barycenter
-            Real epoch = theData.rPrecTime.GetMjd();                  // receive time at ground station 
-            RealArray correction = CalculateMediaCorrection(freq/1.0e6, r1B, r2B, epoch);
-            mediaCorrection = correction[0]*GmatMathConstants::M_TO_KM;                                          // unit: km
-         }
-      }
-     
-      // 5. Perform feasibility check
+          
+      // 4. Perform feasibility check
       if (theData.stationParticipant)
       {
          const Real* elData;
@@ -713,13 +658,13 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             MessageInterface::ShowMessage("      . Light time solution range = %.12lf km\n", lightTimeRange);
          }
          MessageInterface::ShowMessage("      . Relativity correction = %.12lf km\n", relCorrection);
-         MessageInterface::ShowMessage("      . Media correction      = %.12lf km\n", mediaCorrection);
+         //MessageInterface::ShowMessage("      . Media correction      = %.12lf km\n", mediaCorrection);
          MessageInterface::ShowMessage("      . ET-TAI correction     = %.12lf km\n", ettaiCorrection);
          MessageInterface::ShowMessage("      . Feasibility           = %s\n\n", (signalIsFeasible?"true":"false"));
       #endif
 
       
-      // 6. Report raw data
+      // 5. Report raw data
       if (navLog)
       {
          std::stringstream data;
@@ -753,7 +698,7 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
          navLog->WriteData(data.str());
       }
      
-      // 7. Run ModelSignal for the next leg in signal path:
+      // 6. Run ModelSignal for the next leg in signal path:
       // if epoctAtReceive was true, transmitter moved and we need its epoch,
       // if false, we need the receiver epoch
       GmatTime nextPrecEpoch = (epochAtReceive ? theData.tPrecTime : theData.rPrecTime);      // made changes by TUAN NGUYEN
@@ -1153,6 +1098,184 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
 }
 #endif
 
+
+// made changes by TUAN NGUYEN
+bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* rampTB)
+{
+   bool retval = false;
+   mediaCorrection = 0.0;                                                               // unit: km
+   Real frequency = 0.0;                                                                // unit: MHz
+   Real dsFrequency = 0.0;                                                              // unit: MHz
+
+   // 1. Get frequency from theData.tNode
+   if (theData.tNode == NULL)
+   {
+      std::stringstream ss;
+      ss << "Error: Transmit participant of leg " << GetName() << " is NULL";
+      throw MeasurementException(ss.str());
+   }
+
+   if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      // Get frequency from ground station
+      if (rampTB)
+      {
+         // @todo: Get frequency from ramped table if it is used
+      }
+      else
+      {
+         // Get frequency from ground station' transmitter
+         ObjectArray hardwareList = ((GroundstationInterface*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transmitter"))
+            {
+               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+               break;
+            }
+         }
+         
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Ground station " << theData.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+            throw MeasurementException(ss.str());
+         }
+      }
+   }
+   else
+   {
+      // Get frequency from spacecraft's transmitter or transponder
+      ObjectArray hardwareList = ((Spacecraft*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Transmitter"))
+         {
+            frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+            break;
+         }
+         if (hardwareList[i]->IsOfType("Transponder"))
+         {
+            frequency = ((Transponder*)hardwareList[i])->GetSignal(1)->GetValue();    // unit: MHz 
+            break;
+         }
+      }
+
+      if (i == hardwareList.size())
+      {
+         std::stringstream ss;
+         ss << "Error: Ground station " << theData.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+         throw MeasurementException(ss.str());
+      }
+   }
+
+   // 2. Compute range rate from transmit participant to receive participant 
+   // (range rate equals the projection of range rate vector to range vector)
+   Real rangeRate = theData.rangeVecInertial.GetUnitVector() * theData.rangeRateVecInertial;                            // unit: km/s
+
+   // 3. Compute doppler shift frequency at receiver
+   dsFrequency = frequency*(1 - rangeRate/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM));   // unt: Mhz
+
+   // 4. Set receive frequency to receiver
+   if (theData.rNode == NULL)
+   {
+      std::stringstream ss;
+      ss << "Error: Receive participant of leg " << GetName() << " is NULL";
+      throw MeasurementException(ss.str());
+   }
+
+   if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      // Set doppler shift frequency to ground station' receiver
+      ObjectArray hardwareList = ((GroundstationInterface*)theData.rNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Receiver"))
+         {
+            Signal* inputSignal = ((Receiver*)hardwareList[i])->GetSignal();
+            inputSignal->SetValue(dsFrequency);                               // unit: MHz 
+            ((Receiver*)hardwareList[i])->SetSignal(inputSignal);
+            break;
+         }
+      }
+         
+      if (i == hardwareList.size())
+      {
+            std::stringstream ss;
+            ss << "Error: Ground station " << theData.rNode->GetName() << " does not have a receiver to receive signal\n";
+            throw MeasurementException(ss.str());
+      }
+
+      // Note that: there is no next leg when the receive participant is a ground station 
+      if (next)
+         throw MeasurementException("Error: ground station is in middle of signal path\n");
+   }
+   else
+   {
+      // Set doppler shift frequency to spacecraft's transponder
+      ObjectArray hardwareList = ((Spacecraft*)theData.rNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Transponder"))
+         {
+            Signal* inputSignal = ((Transponder*)hardwareList[i])->GetSignal(0);
+            inputSignal->SetValue(dsFrequency);                               // unit: Mhz
+            ((Transponder*)hardwareList[i])->SetSignal(inputSignal, 0);       // This function force to calculate transmit frequency of the transponder
+            break;
+         }
+      }
+
+      if (i == hardwareList.size())
+      {
+         std::stringstream ss;
+         ss << "Error: Spacecraft " << theData.rNode->GetName() << " does not have a transponder to pass signal\n";
+         throw MeasurementException(ss.str());
+      }
+   }
+
+
+   // 5. Computer media correction
+   Rvector3 r1B = theData.tLoc + theData.tOStateSSB.GetR();
+   Rvector3 r2B = theData.rLoc + theData.rOStateSSB.GetR();
+   if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+      MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd());
+   else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+      MediaCorrection(dsFrequency, r2B, r1B, theData.rPrecTime.GetMjd());
+   else
+      MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd());
+
+#ifdef DEBUG_RANGE_CALCULATION
+   MessageInterface::ShowMessage("   Media correction for leg from %s to %s:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   UnsignedInt i;
+   for(i = 0; i < theData.correctionIDs.size(); ++i)
+   {
+      if (theData.correctionIDs[i] == "Troposphere")
+         break;
+   }
+   if (theData.useCorrection[i])
+      MessageInterface::ShowMessage("     .Troposphere correction : %.12lf\n", theData.corrections[i]);
+   for(i = 0; i < theData.correctionIDs.size(); ++i)
+   {
+      if (theData.correctionIDs[i] == "Ionosphere")
+         break;
+   }
+   if (theData.useCorrection[i])
+      MessageInterface::ShowMessage("     .Ionosphere correction : %.12lf\n", theData.corrections[i]);
+
+#endif
+
+   // 6. Repeat for next physical signal object
+   if (next)
+      retval = (retval && next->MediaCorrectionCalculation(rampTB));
+
+   return retval;
+}
+
+      
 //----------------------------------------------------------------------
 // void AddCorrection(const std::string& modelName, 
 //                    const std::string& correctionType)
@@ -1506,7 +1629,7 @@ Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
 
 
 //------------------------------------------------------------------------
-// RealArray CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
+// RealArray MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
 //------------------------------------------------------------------------
 /**
  * This function is used to calculate media corrections.
@@ -1517,11 +1640,12 @@ Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
  * @param epoch   The time at which signal is transmitted from or received at ground station
  */
 //------------------------------------------------------------------------
-RealArray PhysicalSignal::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
+RealArray PhysicalSignal::MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
 {
    #ifdef DEBUG_MEASUREMENT_CORRECTION
-      MessageInterface::ShowMessage("start PhysicalMeasurement::CalculateMediaCorrection()\n");
+      MessageInterface::ShowMessage("start PhysicalMeasurement::MediaCorrection()\n");
    #endif
+   Real epsilon = 1.0e-8;
 
    RealArray tropoCorrection;
    tropoCorrection.push_back(0.0);
@@ -1543,9 +1667,15 @@ RealArray PhysicalSignal::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvect
    Rvector3 rangeVector = r2 - r1;                                         // vector pointing from ground station to spacecraft
    Real elevationAngle = asin((R_Obs_j2k*(rangeVector.GetUnitVector())).GetElement(2)); 
    
-   if (elevationAngle > 0.0)
+   if (elevationAngle > epsilon)
    {
       tropoCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
+      #ifdef DEBUG_MEASUREMENT_CORRECTION
+         Rvector3 r = r2-r1;
+         MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r[0], r[1], r[2]);
+         MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", tropoCorrection[0], tropoCorrection[1], tropoCorrection[2]);
+      #endif
+      
       mediaCorrection[0] = tropoCorrection[0];
       mediaCorrection[1] = tropoCorrection[1];
       mediaCorrection[2] = tropoCorrection[2];
@@ -1560,18 +1690,15 @@ RealArray PhysicalSignal::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvect
    theData.corrections[i] = mediaCorrection[0]*GmatMathConstants::M_TO_KM;
    theData.useCorrection[i] = (troposphere != NULL);
 
-
-   #ifdef DEBUG_MEASUREMENT_CORRECTION
-      Rvector3 r = r2-r1;
-      MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r[0], r[1], r[2]);
-      MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", tropoCorrection[0], tropoCorrection[1], tropoCorrection[2]);
-   #endif
-
    #ifdef IONOSPHERE
       // 2. Run Ionosphere correction:
-      if (elevationAngle > 0.0)
+      if (elevationAngle > epsilon)
       {
          ionoCorrection = IonosphereCorrection(freq, r1, r2, epoch);
+         #ifdef DEBUG_MEASUREMENT_CORRECTION
+            MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,  r1 = ('%.8lf   %.8lf   %.8lf')km,   r2 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r1[0], r1[1], r1[2], r2[0], r2[1], r2[2]);
+            MessageInterface::ShowMessage(" IonoshereCorrection = (%lf m,  %lf arcsec,   %le s)\n", ionoCorrection[0], ionoCorrection[1], ionoCorrection[2]);
+         #endif
       
          // 3. Combine effects:
          mediaCorrection[0] += ionoCorrection[0];
@@ -1590,6 +1717,10 @@ RealArray PhysicalSignal::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvect
    #endif
    
    
+   #ifdef DEBUG_MEASUREMENT_CORRECTION
+      MessageInterface::ShowMessage("exit PhysicalMeasurement::MediaCorrection()\n");
+   #endif
+
    return mediaCorrection;
 }
 

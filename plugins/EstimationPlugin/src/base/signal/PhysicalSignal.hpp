@@ -102,9 +102,10 @@ protected:
    Real ETminusTAI(Real tA1MJD, SpacePoint* participant);                          // made changes by TUAN NGUYEN
 
    /// These functions are used to compute midia correction
+   virtual bool MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);      // made changes by TUAN NGUYEN
    RealArray TroposphereCorrection(Real freq, Real distance, Real elevationAngle);          // made changes by TUAN NGUYEN
    RealArray IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);         // made changes by TUAN NGUYEN
-   RealArray CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);     // made changes by TUAN NGUYEN
+   RealArray MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);              // made changes by TUAN NGUYEN
 
 };
 
