@@ -44,8 +44,8 @@
 //-----------------------------------------------------------------------------
 RampTableType::RampTableType(const std::string withName) :
    ObType   ("GMAT_RampTable", withName),
-   epochPrecision		(16),
-   dataPrecision		(6)
+   epochPrecision      (16),
+   dataPrecision       (6)
 {
    #ifdef DEBUG_RAMPTABLETYPE_CREATION_INITIALIZATION
       MessageInterface::ShowMessage("Creating a GMAT_RampTable object type\n");
@@ -75,9 +75,9 @@ RampTableType::~RampTableType()
  */
 //-----------------------------------------------------------------------------
 RampTableType::RampTableType(const RampTableType& rtt) :
-   ObType				(rtt),
-   epochPrecision		(rtt.epochPrecision),
-   dataPrecision		(rtt.dataPrecision)
+   ObType            (rtt),
+   epochPrecision    (rtt.epochPrecision),
+   dataPrecision     (rtt.dataPrecision)
 {
    #ifdef DEBUG_RAMPTABLETYPE_CREATION_INITIALIZATION
       MessageInterface::ShowMessage("Copying a GMAT_RampTable object type\n");
@@ -231,19 +231,19 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
                fullPath.c_str(), mode);
       #endif
       try
-	  {
+      {
          theStream.open(fullPath.c_str(), mode);
-  	  } catch(...)
-	  {
-		  throw MeasurementException("Error: "+ GetName() +" cannot open '" + fullPath +"' due to this file had been used by another DataFile object\n");
-	  }
+      } catch(...)
+      {
+         throw MeasurementException("Error: "+ GetName() +" cannot open '" + fullPath +"' due to this file had been used by another DataFile object\n");
+      }
    }
 
    retval = theStream.is_open();
 
    if (retval == false)
    {
-	  throw MeasurementException("GMAT cann't open ramp table file "+streamName+"\n");
+      throw MeasurementException("GMAT cann't open ramp table file "+streamName+"\n");
    }
    return retval;
 }
@@ -309,7 +309,7 @@ RampTableData* RampTableType::ReadRampTableData()
    currentRecord.dataFormat = "GMAT_RampTable";
 
    // Record format of frequency ramp table: 
-   // Epoch   StationID   SpacecraftID    Uplink Band	    Ramp Type	  Ramp Frequency     Ramp Rate
+   // Epoch   StationID   SpacecraftID    Uplink Band       Ramp Type     Ramp Frequency     Ramp Rate
    // Real    string      string          Integer           Integer      Real               Real
    Real value; 
 
@@ -364,9 +364,9 @@ RampTableData* RampTableType::ReadRampTableData()
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentRecord.epoch, currentRecord.typeName.c_str(), currentRecord.type);
       for (Integer i = 0; i < participantSize; ++i)
-		  MessageInterface::ShowMessage("%s    ", currentRecord.participantIDs.at(i).c_str());
+         MessageInterface::ShowMessage("%s    ", currentRecord.participantIDs.at(i).c_str());
 
-	  MessageInterface::ShowMessage(" %d    %d    %.12le    %.12le\n",currentRecord.uplinkBand, currentRecord.rampType, currentRecord.rampFrequency, currentRecord.rampRate);
+      MessageInterface::ShowMessage(" %d    %d    %.12le    %.12le\n",currentRecord.uplinkBand, currentRecord.rampType, currentRecord.rampFrequency, currentRecord.rampRate);
       MessageInterface::ShowMessage("RampTableType::ReadRampTableData() End\n");
    #endif
 

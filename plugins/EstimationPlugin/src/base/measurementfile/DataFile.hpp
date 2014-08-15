@@ -98,8 +98,8 @@ public:
    virtual ObservationData*
                         ReadObservation();
 ///// TBD: Determine if there is a more generic way to add these
-   virtual RampTableData*							// made changes by TUAN NGUYEN
-	                    ReadRampTableData();		// made changes by TUAN NGUYEN
+   virtual RampTableData*                        // made changes by TUAN NGUYEN
+                        ReadRampTableData();     // made changes by TUAN NGUYEN
 
    virtual bool         CloseStream();
 
@@ -117,31 +117,31 @@ protected:
    std::string    obsType;
 
    /// Data thinning ratio
-   Real thinningRatio;						// data thinning ratio specify the ratio between the selected data records and total all records
+   Real thinningRatio;                     // data thinning ratio specify the ratio between the selected data records and total all records
    /// List of station IDs
-   StringArray selectedStationIDs;			// list of stationIDs included in data file
+   StringArray selectedStationIDs;         // list of stationIDs included in data file
 
    /// Range of epoch is specified by start epoch and end epoch and format used by epoch
-   std::string         epochFormat;							// made changes by TUAN NGUYEN
-   std::string         startEpoch;							// made changes by TUAN NGUYEN
-   std::string         endEpoch;							// made changes by TUAN NGUYEN
-   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
-   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
-   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
-   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
+   std::string         epochFormat;                       // made changes by TUAN NGUYEN
+   std::string         startEpoch;                        // made changes by TUAN NGUYEN
+   std::string         endEpoch;                          // made changes by TUAN NGUYEN
+   /// Start epoch for the estimation                     // made changes by TUAN NGUYEN
+   GmatEpoch           estimationStart;                   // made changes by TUAN NGUYEN
+   /// End epoch for the end of the estimation            // made changes by TUAN NGUYEN
+   GmatEpoch           estimationEnd;                     // made changes by TUAN NGUYEN
 
 
    /// Class parameter ID enumeration
    enum
    {
-       StreamName = GmatBaseParamCount,
-       ObsType,
-	   DataThinningRatio,
-	   SelectedStationIDs,
-	   EpochFormat,
-	   StartEpoch,
-	   EndEpoch,
-       DataFileParamCount
+      StreamName = GmatBaseParamCount,
+      ObsType,
+      DataThinningRatio,
+      SelectedStationIDs,
+      EpochFormat,
+      StartEpoch,
+      EndEpoch,
+      DataFileParamCount
    };
 
    // Start with the parameter IDs and associates strings
