@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 Signal::Signal()
 {
-	epoch = 0;
-	value = 0;
+   epoch = 0;
+   value = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -52,8 +52,8 @@ Signal::~Signal()
  */
 //-----------------------------------------------------------------------------
 Signal::Signal(const Signal & sig) :
-	epoch		(sig.epoch),
-	value		(sig.value)
+   epoch      (sig.epoch),
+   value      (sig.value)
 {
 }
 
@@ -73,8 +73,8 @@ Signal & Signal::operator=(const Signal & sig)
 {
    if (this != &sig)
    {
-   	epoch = sig.epoch;
-   	value = sig.value;
+      epoch = sig.epoch;
+      value = sig.value;
    }
 
    return *this;
@@ -91,7 +91,7 @@ Signal & Signal::operator=(const Signal & sig)
 //------------------------------------------------------------------------------
 void Signal::SetEpoch(GmatEpoch ep)
 {
-	epoch = ep;
+   epoch = ep;
 }
 
 //------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ void Signal::SetEpoch(GmatEpoch ep)
 //------------------------------------------------------------------------------
 GmatEpoch Signal::GetEpoch()
 {
-	return epoch;
+   return epoch;
 }
 
 
@@ -116,8 +116,8 @@ GmatEpoch Signal::GetEpoch()
 //------------------------------------------------------------------------------
 bool Signal::SetValue(Real v)
 {
-	value = v;
-	return true;
+   value = v;
+   return true;
 }
 
 
@@ -130,5 +130,5 @@ bool Signal::SetValue(Real v)
 //------------------------------------------------------------------------------
 Real Signal::GetValue()
 {
-	return value;
+   return value;
 }
