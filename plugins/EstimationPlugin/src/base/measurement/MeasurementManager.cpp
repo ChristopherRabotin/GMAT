@@ -39,9 +39,9 @@
 //#define DEBUG_CALCULATE_MEASUREMENTS
 //#define DEBUG_GET_ACTIVE_EVENTS
 //#define DEBUG_LOAD_OBSERVATIONS
-#define DEBUG_RAMP_TABLE                                // made changes by TUAN NGUYEN
-#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-#define DEBUG_INITIALIZE
+//#define DEBUG_RAMP_TABLE                                // made changes by TUAN NGUYEN
+//#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+//#define DEBUG_INITIALIZE
 //#define DEBUG_MODEL_MAPPING
 //#define DEBUG_CALCULATE
 //#define DEBUG_ADVANCE_OBSERVATION                     // made changes by TUAN NGUYEN

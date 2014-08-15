@@ -1102,6 +1102,9 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
 // made changes by TUAN NGUYEN
 bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* rampTB)
 {
+   if ((troposphere == NULL)&&(ionosphere == NULL))
+      return true;
+
    bool retval = false;
    mediaCorrection = 0.0;                                                               // unit: km
    Real frequency = 0.0;                                                                // unit: MHz
