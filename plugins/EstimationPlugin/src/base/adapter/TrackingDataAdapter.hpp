@@ -25,6 +25,8 @@
 #include "MeasureModel.hpp"
 #include "MeasurementData.hpp"
 #include "ProgressReporter.hpp"
+#include "RampTableData.hpp"                         // made changes by TUAN NGUYEN
+#include "ObservationData.hpp"                       // made changes by TUAN NGUYEN
 
 // Forward reference
 class SolarSystem;
@@ -166,21 +168,38 @@ protected:
    /// Propagator used for light time solutions, when needed
    PropSetup *thePropagator;
 
+
+   /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path
+   Real                       frequency;      // Its unit is Hz (not MHz)                                // made changes by TUAN NGUYEN
+   /// Frequency band   (In DSNDoppler, it is used for S path)                                           // made changes by TUAN NGUYEN
+   Integer                    freqBand;                                                                  // made changes by TUAN NGUYEN
+   /// Constant frequency value used in a physical measurement when needed for E path in DSNDoppler      // made changes by TUAN NGUYEN
+   Real                       frequencyE;      // Its unit is Hz (not MHz)                               // made changes by TUAN NGUYEN
+   /// Frequency band for E path in DSNDoppler                                                           // made changes by TUAN NGUYEN
+   Integer                    freqBandE;                                                                 // made changes by TUAN NGUYEN
+   /// Observation data object containing an observation data record                                     // made changes by TUAN NGUYEN
+   ObservationData*           obsData;                                                                   // made changes by TUAN NGUYEN
+   /// Ramped frequency table used to calculate ramped frequency measurements                            // made changes by TUAN NGUYEN
+   std::vector<RampTableData>* rampTB;                                                                   // made changes by TUAN NGUYEN
+
+
    /// Parameter IDs for the BatchEstimators
    enum
    {
-      SIGNAL_PATH  = MeasurementModelBaseParamCount,                           // made changes by TUAN NGUYEN
+      SIGNAL_PATH  = MeasurementModelBaseParamCount,                                                     // made changes by TUAN NGUYEN
       AdapterParamCount,
    };
 
    /// Strings describing the BatchEstimator parameters
    static const std::string PARAMETER_TEXT[AdapterParamCount -
-                                           MeasurementModelBaseParamCount];            // made changes by TUAN NGUYEN
+                                           MeasurementModelBaseParamCount];                              // made changes by TUAN NGUYEN
    /// Types of the BatchEstimator parameters
    static const Gmat::ParameterType PARAMETER_TYPE[AdapterParamCount -
-                                                   MeasurementModelBaseParamCount];      // made changes by TUAN NGUYEN
+                                                   MeasurementModelBaseParamCount];                      // made changes by TUAN NGUYEN
 
    StringArray*         DecomposePathString(const std::string &value);
+   Real                 GetFrequencyFactor(Real frequency);                                              // made changes by TUAN NGUYEN
+   Real                 IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);                    // made changes by TUAN NGUYEN
 };
 
 #endif /* TrackingDataAdapter_hpp */
