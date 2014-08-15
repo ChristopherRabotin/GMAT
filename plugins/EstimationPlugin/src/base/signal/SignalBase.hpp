@@ -30,6 +30,7 @@
 #include "ProgressReporter.hpp"
 #include "SignalData.hpp"
 #include "GmatTime.hpp"
+#include "RampTableData.hpp"                              // made changes by TUAN NGUYEN
 
 class PropSetup;
 
@@ -91,10 +92,11 @@ public:
    virtual void         AddCorrection(const std::string& modelName,               // made changes by TUAN NGUYEN
                              const std::string& mediaCorrectionType) = 0;         // made changes by TUAN NGUYEN
 
-
+   virtual bool         MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL) = 0; // made changes by TUAN NGUYEN
    virtual std::string  GetPathDescription(bool fullList = true);
 
    SignalData&          GetSignalData();
+   SignalData*          GetSignalDataObject();                                    // made changes by TUAN NGUYEN
    void                 SetSignalData(const SignalData& newData);
    bool                 IsSignalFeasible();
    virtual void         UsesLighttime(const bool tf);
