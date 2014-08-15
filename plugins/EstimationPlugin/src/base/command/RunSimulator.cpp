@@ -274,6 +274,9 @@ const std::string& RunSimulator::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 bool RunSimulator::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start RunSimulator::Initialize()\n");
+#endif
    bool retval = false;
 
    // First set the simulator object
@@ -316,27 +319,27 @@ bool RunSimulator::Initialize()
    }
 
 ///// Check for generic approach here   
-   // Set the ramp table data streams for the measurement manager				// made changes by TUAN NGUYEN
-   streamList = measman->GetRampTableDataStreamList();							// made changes by TUAN NGUYEN
-   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)						// made changes by TUAN NGUYEN
-   {																			// made changes by TUAN NGUYEN
-      GmatBase *obj = FindObject(streamList[ms]);								// made changes by TUAN NGUYEN
-      if (obj != NULL)															// made changes by TUAN NGUYEN
-      {																			// made changes by TUAN NGUYEN
-         if (obj->IsOfType(Gmat::DATASTREAM))									// made changes by TUAN NGUYEN
-         {																		// made changes by TUAN NGUYEN
-            DataFile *df = (DataFile*)obj;										// made changes by TUAN NGUYEN
-            measman->SetRampTableDataStreamObject(df);							// made changes by TUAN NGUYEN
-         }																		// made changes by TUAN NGUYEN
-		 else
-			MessageInterface::ShowMessage(" Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
-      }																			// made changes by TUAN NGUYEN
-      else																		// made changes by TUAN NGUYEN
-	  {
-         throw CommandException("Error: Did not find the object named " +				// made changes by TUAN NGUYEN
-               streamList[ms]);													// made changes by TUAN NGUYEN
-	  }
-   }																			// made changes by TUAN NGUYEN
+   // Set the ramp table data streams for the measurement manager            // made changes by TUAN NGUYEN
+   streamList = measman->GetRampTableDataStreamList();                       // made changes by TUAN NGUYEN
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)                    // made changes by TUAN NGUYEN
+   {                                                                         // made changes by TUAN NGUYEN
+      GmatBase *obj = FindObject(streamList[ms]);                            // made changes by TUAN NGUYEN
+      if (obj != NULL)                                                       // made changes by TUAN NGUYEN
+      {                                                                      // made changes by TUAN NGUYEN
+         if (obj->IsOfType(Gmat::DATASTREAM))                                // made changes by TUAN NGUYEN
+         {                                                                   // made changes by TUAN NGUYEN
+            DataFile *df = (DataFile*)obj;                                   // made changes by TUAN NGUYEN
+            measman->SetRampTableDataStreamObject(df);                       // made changes by TUAN NGUYEN
+         }                                                                   // made changes by TUAN NGUYEN
+         else
+            MessageInterface::ShowMessage(" Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
+      }                                                                      // made changes by TUAN NGUYEN
+      else                                                                   // made changes by TUAN NGUYEN
+      {
+         throw CommandException("Error: Did not find the object named " +    // made changes by TUAN NGUYEN
+               streamList[ms]);                                              // made changes by TUAN NGUYEN
+      }
+   }                                                                         // made changes by TUAN NGUYEN
 
    // Find the event manager and store its pointer
    if (triggerManagers == NULL)
@@ -432,6 +435,7 @@ bool RunSimulator::Initialize()
       if (retval == false)
          MessageInterface::ShowMessage("RunSimulator command failed to "
                "initialize; RunSolver::Initialize() call failed.\n");
+      MessageInterface::ShowMessage("Exit RunSimulator::Initialize()\n");
    #endif
 
    return retval;
@@ -482,7 +486,7 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
 bool RunSimulator::Execute()
 {
    #ifdef DEBUG_SIMULATOR_EXECUTION
-	  MessageInterface::ShowMessage("\nEntered RunSimulator::Execute()\n");
+     MessageInterface::ShowMessage("\nEntered RunSimulator::Execute()\n");
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());
    #endif
@@ -696,7 +700,7 @@ void RunSimulator::PrepareToSimulate()
             "Measurement Manager was unable to prepare for processing");
 
    PrepareToPropagate();  // ?? Test return value here?
-   measman->LoadRampTables();											// made changes by TUAN NGUYEN
+   // measman->LoadRampTables();                     // This command is moved to Simulator::CompleteInitialization()            // made changes by TUAN NGUYEN
 
    theSimulator->UpdateCurrentEpoch(baseEpoch[0]);
    commandRunning  = true;
