@@ -1310,9 +1310,9 @@ void PropagationConfigPanel::SaveData()
 //               theGravForce = new GravityField("", bodyName);
                theGravForce->SetSolarSystem(theSolarSystem);
                theGravForce->SetStringParameter("BodyName", bodyName);
-//               theGravForce->SetStringParameter("PotentialFile",
-////                     primaryBodyList[i]->potFile.c_str());
-//                     primaryBodyData->potFile.c_str());
+               theGravForce->SetStringParameter("PotentialFile",
+//                     primaryBodyList[i]->potFile.c_str());
+                    primaryBodyData->potFile.c_str());
 
                if (deg != -999)
                {
@@ -1375,8 +1375,7 @@ void PropagationConfigPanel::SaveData()
 //                  bodyName = primaryBodyList[i]->bodyName.c_str();
                   bodyName = primaryBodyData->bodyName.c_str();
 //                  theDragForce = new DragForce(primaryBodyList[i]->dragType.c_str());
-                  theDragForce = new DragForce(
-                        primaryBodyData->dragType.c_str());
+                  theDragForce = new DragForce(primaryBodyData->dragType.c_str());
                   theCelestialBody = theSolarSystem->GetBody(bodyName);
                   theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
 
