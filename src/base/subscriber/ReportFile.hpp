@@ -108,7 +108,7 @@ public:
    virtual std::string  GetOnOffParameter(const std::string &label) const;
    virtual bool         SetOnOffParameter(const std::string &label, 
                                           const std::string &value);
-   
+
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -147,6 +147,10 @@ protected:
    bool                 zeroFill;
    /// Using default file name indicator
    bool                 usingDefaultFileName;
+   /// fixed width columns
+   bool                 fixedWidth;
+   /// delimiter
+   char                 delimiter;
    
    /// output data stream
    std::ofstream        dstream;
@@ -184,6 +188,8 @@ protected:
       WRITE_HEADERS,
       LEFT_JUSTIFY,
       ZERO_FILL,
+	  FIXED_WIDTH,
+	  DELIMITER,
       COL_WIDTH,
       WRITE_REPORT,
       ReportFileParamCount  /// Count of the parameters for this class
