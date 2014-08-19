@@ -90,8 +90,8 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
 {
    #ifdef DEBUG_COORD_PANEL
    MessageInterface::ShowMessage
-      ("CoordPanel::EnableOptions() axis=(%p)%s\n", axis,
-       typeComboBox->GetStringSelection().c_str());
+      ("CoordPanel::EnableOptions() ENTERED ----------------------\n"
+       "axis=(%p)%s\n", axis, typeComboBox->GetStringSelection().c_str());
    #endif
    
    // save epoch value locally
@@ -103,8 +103,7 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    if (typeStr == "")
       typeStr = "MJ2000Eq";
    #ifdef DEBUG_COORD_PANEL
-   MessageInterface::ShowMessage
-      ("CoordPanel::EnableOptions() typeStr=%s\n", typeStr.c_str());
+   MessageInterface::ShowMessage("typeStr=%s\n", typeStr.c_str());
    #endif
 
    if (axis == NULL)
@@ -123,10 +122,8 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       return;
    }
    #ifdef DEBUG_COORD_PANEL
-   MessageInterface::ShowMessage
-      ("CoordPanel::EnableOptions() tmpAxis=<%p>\n", tmpAxis);
-   MessageInterface::ShowMessage
-      ("CoordPanel::EnableOptions() mEnableAll=%s\n", (mEnableAll? "true" : "false"));
+   MessageInterface::ShowMessage("tmpAxis = <%p>\n", tmpAxis);
+   MessageInterface::ShowMessage("mEnableAll = %s\n", (mEnableAll? "true" : "false"));
    #endif
    
    if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
@@ -156,8 +153,7 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
 
       #ifdef DEBUG_COORD_PANEL
       MessageInterface::ShowMessage
-         ("CoordPanel::EnableOptions() about to set epoch value to %12.10f (string = %s)\n",
-               epoch, epochValue.c_str());
+         ("About to set epoch value to %12.10f (string = %s)\n", epoch, epochValue.c_str());
       #endif
       // set the text ctrl
       epochTextCtrl->SetValue(epochValue);
@@ -177,7 +173,12 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       mShowUpdate = false;
    else
       mShowUpdate = true; 
-
+   
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("Calling SetDefaultEpochRefAxis() or SetDefaultAlignmentConstraintAxis()\n");
+   #endif
+   
    if (typeStr == "ObjectReferenced")
       SetDefaultObjectRefAxis();
    else if ((typeStr == "TOEEq") || (typeStr == "TOEEc"))
@@ -188,6 +189,11 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       SetDefaultEpochRefAxis();
    else if (typeStr == "LocalAlignedConstrained")
       SetDefaultAlignmentConstraintAxis();
+   
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("mShowAlignmentConstraint = %d, mShowXyz = %d\n",mShowAlignmentConstraint, mShowXyz);
+   #endif
    
    if (mEnableAll)
    {
@@ -251,19 +257,47 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
          secondaryStaticText->Enable(mShowSecondaryBody);
          secondaryComboBox->Enable(mShowSecondaryBody);
          epochStaticText->Enable(mShowEpoch);
+         #ifdef DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage("Calling epochTextCtrl->Enable(mShowEpoch)\n");
+         #endif
          epochTextCtrl->Enable(mShowEpoch);
+
+         // Mod by LOJ (2014.08.01)
+         // epochTextCtrl->Clear() causes crash on static link build so
+         // changed epochTextCtrl->Clear() to epochTextCtrl->ChangeValue().
+         // wxTextCtrl::Clear() Clears the text in the control.
+         // Note that this function WILL generate a wxEVT_COMMAND_TEXT_UPDATED event.
+         // if (!mShowEpoch)
+         //    epochTextCtrl->Clear();
+         // wxTextCtrl::SetValue() is deprecated and should not be used in new code.
+         // Please use the ChangeValue function instead.
+         // wxTextCtrl::ChangeValue() Sets the text value and marks the control as
+         // not-modified (which means that IsModified would return false immediately
+         // after the call to ChangeValue).
+         // Note that this function WILL NOT generate the wxEVT_COMMAND_TEXT_UPDATED event.
+         // This is the only difference with SetValue.
          if (!mShowEpoch)
-            epochTextCtrl->Clear();
+            epochTextCtrl->ChangeValue("");
+         #ifdef DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage("Calling xStaticText->Enable(mShowXyz)\n");
+         #endif
          xStaticText->Enable(mShowXyz);
          xComboBox->Enable(mShowXyz);
          yStaticText->Enable(mShowXyz);
          yComboBox->Enable(mShowXyz);
          zStaticText->Enable(mShowXyz);
          zComboBox->Enable(mShowXyz);
-
+         
+         #ifdef DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage("Calling EnableAlignmentConstraint(false)\n");
+         #endif
          // Hide and disable the alignment and constraint widgets
          EnableAlignmentConstraint(false);
       }
+      
+      #ifdef DEBUG_COORD_PANEL
+      MessageInterface::ShowMessage("Disabling some items for GSE, GSM, BodySpinSun\n");
+      #endif
       
       // disable some items
       if (typeStr == "GSE" || typeStr == "GSM")

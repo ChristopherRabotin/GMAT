@@ -2283,17 +2283,35 @@
     <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\factory</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -4358,17 +4376,35 @@
     <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\factory</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
       <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

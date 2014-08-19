@@ -140,11 +140,14 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
       //if (!FileManager::Instance()->DoesDirectoryExist(pfile))
       if (pfile == "")
       {
-         //@todo - Show actual cross-platform home directory in the message
-         MessageInterface::PopupMessage
-            ( Gmat::WARNING_, "Invalid personalization file specified: '%s',\n"
-              "   so creating local configuration file 'GMAT.ini' in the user's home directory.",
-              pfile.c_str() );
+         // Show actual cross-platform home directory in the message
+         if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+         {
+            MessageInterface::ShowMessage
+               ( "*** WARNING *** Invalid personalization file specified: '%s',\n"
+                 "   so creating local configuration file 'GMAT.ini' in the user's home directory.",
+                 pfile.c_str() );
+         }
          
          // Make blank pfile so that default local configureation file can be written
          // to user's home directory 
@@ -411,7 +414,8 @@ void GmatAppData::SetIconFile()
    // Set icon file from the search path (LOJ: 2014.07.02)
    FileManager *fm = FileManager::Instance();
    //theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-   theIconFile = fm->FindMainIconFile(true).c_str();
+   bool writePathInfo = GmatGlobal::Instance()->IsWritingFilePathInfo();
+   theIconFile = fm->FindMainIconFile(writePathInfo).c_str();
    
    if (theIconFile != "")
       theIconFileSet = true;
