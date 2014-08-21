@@ -347,7 +347,7 @@ GmatBase* GuiInterpreter::CreateObject(const std::string &type,
    
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    continueOnError = false;
-   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false);
+   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false, false);
    
    if (obj == NULL)
    {
@@ -705,12 +705,13 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 
 //------------------------------------------------------------------------------
 // std::string GetFileName(const std::string &fileType, bool getFullpath = false,
-//                         bool forInput = true)
+//                         bool forInput = true, bool writeWarning = false,
+//                         bool writeInfo = false)
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::GetFileName(const std::string &fileType, bool getFullpath,
-                                        bool forInput)
+                                        bool forInput, bool writeWarning, bool writeInfo)
 {
-   return theModerator->GetFileName(fileType, getFullpath, forInput);
+   return theModerator->GetFileName(fileType, getFullpath, forInput, writeWarning, writeInfo);
 }
 
 
