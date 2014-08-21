@@ -65,7 +65,6 @@ PLUGIN                 = ../plugins/proprietary/libMsise86
 PLUGIN                 = ../plugins/proprietary/libNewParameters
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ../plugins/proprietary/libSNOptimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
