@@ -51,13 +51,13 @@ PLUGIN                 = ../plugins/libDataInterface
 PLUGIN                 = ../plugins/libProductionPropagators
 
 # Alpha plugins
-#PLUGIN                = ./libCInterface
-#PLUGIN                = ../plugins/libEventLocator
-#PLUGIN                = ../plugins/libExtraPropagators
-#PLUGIN                = ../plugins/libGmatEstimation
-#PLUGIN                = ../plugins/libGeometricMeasurements
-#PLUGIN                = ../plugins/libGmatFunction
-#PLUGIN                = ../plugins/libSaveCommand
+PLUGIN                = ./libCInterface
+PLUGIN                = ../plugins/libEventLocator
+PLUGIN                = ../plugins/libExtraPropagators
+PLUGIN                = ../plugins/libGmatEstimation
+PLUGIN                = ../plugins/libGeometricMeasurements
+PLUGIN                = ../plugins/libGmatFunction
+PLUGIN                = ../plugins/libSaveCommand
 
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
@@ -65,6 +65,7 @@ PLUGIN                 = ../plugins/proprietary/libMsise86
 PLUGIN                 = ../plugins/proprietary/libNewParameters
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ../plugins/proprietary/libSNOptimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
