@@ -622,10 +622,10 @@ void ResourceTree::UpdateRecentFiles(wxString filename)
    {
       aFilename = files[i];
       aKey = wxString::Format(wxT("%d"), (int) i);
-
       pConfig->Write(aKey, aFilename.c_str());
       //pConfig->Write((GmatFileUtil::ParseFileName(aFilename.c_str())).c_str(), aFilename.c_str());
    }
+   pConfig->Flush(false);
 
    theMainFrame->UpdateRecentMenu(files);
 
