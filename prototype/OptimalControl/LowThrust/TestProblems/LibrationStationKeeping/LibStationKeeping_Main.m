@@ -10,9 +10,9 @@ global iGfun jGvar traj igrid
 
 %  set cost function properties
 traj                    = Trajectory();
-traj.pathFunctionName   = 'HohmannTransferPathFunction';
-traj.pointFunctionName  = 'HohmannTransferPointFunction';
-traj.plotFunctionName   = 'HohmannTransferPlotFunction';
+traj.pathFunctionName   = 'LibStationKeeping_PathFunction';
+traj.pointFunctionName  = 'LibStationKeeping_PointFunction';
+traj.plotFunctionName   = 'LibStationKeeping_PlotFunction';
 traj.showPlot           = true();
 traj.plotUpdateRate     = 3;
 traj.costLowerBound     = -Inf;
@@ -67,8 +67,8 @@ phase1.stateUpperBound           = [ 10  10  10  10  10  10 1.400]';
 phase1.numControls               = 3;
 phase1.controlUpperBound         = [1 1 1]';
 phase1.controlLowerBound         = [-1 -1 -1]';
-phase1.algConstraintLowerBound   = [0 0]';
-phase1.algConstraintUpperBound   = [1 0]';
+phase1.algConstraintLowerBound   = [0]';
+phase1.algConstraintUpperBound   = [1]';
 phase1.eventConstraintLowerBound = [1.085 0 ]';
 phase1.eventConstraintUpperBound = [1.085 0 ]';
 

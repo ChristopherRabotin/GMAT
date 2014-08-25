@@ -1,5 +1,9 @@
 %  Report data about the problem
-function WriteSetupReport(obj)
+function WriteSetupReport(obj,includeSolution)
+
+if nargin < 2
+    includeSolution = false();
+end
 
 % number of phases
 disp(' -----------------------------------------------------------');
@@ -65,14 +69,31 @@ for phaseIdx = 1:obj.numPhases;
         '    Control Parameters    :',...
         obj.phaseList{phaseIdx}.numControlParams);
     disp(str)
-    str = sprintf('%s %5i',' Decision Parameters : ',...
+    str = sprintf('%s %4i',' Decision Parameters : ',...
         obj.phaseList{phaseIdx}.numDecisionParams);
     disp(str)
+    
+    %%  Write out constraint data   
+    disp('  ')
+    if includeSolution
+    conStatus = obj.phaseList{1}.CheckConstraintVariances();
+    str = sprintf('%s %3i %s  %3i',' Number of Defect Violations  : ',...
+        conStatus.numdefectViolations);
+    disp(str)
+    str = sprintf('%s %3i %s  %3i',' Number of Path Violations    : ',...
+        conStatus.numEventViolations);
+    disp(str)
+    str = sprintf('%s %3i',       ' Number of Event Violations   : ',...
+        conStatus.numPathViolations);
+    disp(str)
+
+    end
     
     %  Write space between sections if not the last section
     if phaseIdx ~= obj.numPhases
         disp(' -----------------------------------------------------------')
     end
+    
 end
 disp(' -----------------------------------------------------------');
 disp(' -----------------------------------------------------------');

@@ -13,7 +13,7 @@ traj                    = Trajectory();
 traj.pathFunctionName   = 'BrachistichronePathFunction';
 traj.pointFunctionName  = 'BrachistichronePointFunction';
 traj.plotFunctionName   = 'BrachistichronePlotFunction';
-traj.showPlot           = true();
+traj.showPlot           = false();
 traj.plotUpdateRate     = 2;
 traj.costLowerBound     = -Inf;
 traj.costUpperBound     = Inf;
@@ -23,7 +23,7 @@ traj.costUpperBound     = Inf;
 %==========================================================================
 
 %  Set mesh properities
-phase1                         = Phase;
+phase1                         = RadauPhase;
 phase1.meshIntervalFractions   = [-1; 1];
 phase1.meshIntervalNumPoints   = 25;
 

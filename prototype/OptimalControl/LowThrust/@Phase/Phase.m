@@ -4,18 +4,8 @@ classdef Phase < handle
     
     properties (SetAccess = 'public')
         
-        %%  Scale Factors
-        positionScaleFactor
-        timeScaleFactor
-        massScaleFactor
-        controlScaleFactor
         
         %%  Bounds during phase
-        positionUpperBound
-        positionLowerBound
-        velocityUpperBound
-        velocityLowerBound
-        massLowerBound
         controlUpperBound
         controlLowerBound
         stateUpperBound
@@ -53,7 +43,7 @@ classdef Phase < handle
         numControls
         
         decisionVector
-        timeVector 
+        timeVector
         
         %% User functions
         pathFunctionName
@@ -76,13 +66,13 @@ classdef Phase < handle
         
         %OptimizationVector = DecisionVector;
         numTimeParams = 2;  % For orthogonal methods
-        radauPoints
-        radauWeights
-        radauDiffMatrix
-        numRadauPoints
         
-        %  Cost and constraint related parameters
+        %  These do not go here
+        meshPoints
+        numMeshPoints
+        numCollocationPoints
         
+        %  Cost and constraint related parameters        
         numStatePoints
         numControlPoints
         numStateParams
@@ -149,16 +139,14 @@ classdef Phase < handle
         %  Initialize the phase
         function obj = Initialize(obj)
             
-            %  Compute the radau properties for defined mesh properties
+            %  Compute the properties for defined mesh properties
             ValidatePhaseConfig(obj);
-            obj = ConfigureRadauProperties(obj);
+            obj = GetTranscriptionProperties(obj);
             
             %  Compute bookkeeping properties of the discretization
             %  TODO:  NumStatePoints and numControl Points should come from
             %  transcription helper class
-            obj.numStatePoints = obj.numRadauPoints + 1;
-            obj.numControlPoints = obj.numRadauPoints;
-            obj.numStateParams   = obj.numStates*(obj.numStatePoints );
+            obj.numStateParams   = obj.numStates*(obj.numStatePoints);
             obj.numControlParams = obj.numControls*(obj.numControlPoints);
             obj.numDecisionParams = obj.numStateParams + ...
                 obj.numControlParams + obj.numStaticParams + ...
@@ -183,6 +171,7 @@ classdef Phase < handle
             obj.ComputePathFunctions();
             obj.PreparePointFunction();
             obj.PointFunction.Initialize();
+            
             obj = SetConstraintChunkIndeces(obj);
             obj = SetConstraintBounds(obj);
             obj = SetDecisionVectorBounds(obj);
@@ -193,7 +182,6 @@ classdef Phase < handle
             %  Set start and end indeces of different state paramter types.
             %  These describe where different chunks of the decision vector
             %  begin and end.
-            obj.numTimeParams = 2;  % TODO: Hard coded for Radau!
             obj.stateStartIdx = 1;
             obj.stateEndIdx  = obj.stateStartIdx + obj.numStateParams -1;
             obj.controlStartIdx = obj.stateEndIdx + 1;
@@ -208,8 +196,9 @@ classdef Phase < handle
             %  Set start and end indeces of different constraint paramter types.
             %  These describe where different chunks of the contstraint vector
             %  begin and end.
-            obj.numDefectConstraints = obj.numStates*obj.numRadauPoints;
-            obj.numPathConstraints = obj.numRadauPoints*...
+            obj.numDefectConstraints = obj.numStates*...
+                obj.numCollocationPoints;
+            obj.numPathConstraints = obj.numCollocationPoints*...
                 obj.PathFunction.numAlgFunctions;
             obj.numEventConstraints = obj.PointFunction.numEventFunctions;
             obj.defectStartIdx = 1;
@@ -227,29 +216,29 @@ classdef Phase < handle
         %  MERGE
         function obj = SetDecisionVectorBounds(obj)
             
-            p1RadauPoints = obj.numRadauPoints+1;
+           % numPoints = obj.numStatePoints;
             %  Dimension the vectors
             obj.decisionVecLowerBound = zeros(obj.numDecisionParams,1);
             obj.decisionVecUpperBound = zeros(obj.numDecisionParams,1);
             
             %  Fill in the state vector portion of the bounds
             for i = 1:obj.numStates
-                obj.decisionVecLowerBound((i-1)*p1RadauPoints+1) = ...
+                obj.decisionVecLowerBound((i-1)*obj.numStatePoints+1) = ...
                     obj.initialStateLowerBound(i);
-                obj.decisionVecLowerBound(((i-1)*p1RadauPoints+2):...
-                    (i*p1RadauPoints-1)) = obj.stateLowerBound(i);
-                obj.decisionVecLowerBound(i*p1RadauPoints) = ...
+                obj.decisionVecLowerBound(((i-1)*obj.numStatePoints+2):...
+                    (i*obj.numStatePoints-1)) = obj.stateLowerBound(i);
+                obj.decisionVecLowerBound(i*obj.numStatePoints) = ...
                     obj.finalStateLowerBound(i);
-                obj.decisionVecUpperBound((i-1)*p1RadauPoints+1) = ...
+                obj.decisionVecUpperBound((i-1)*obj.numStatePoints+1) = ...
                     obj.initialStateUppperBound(i);
-                obj.decisionVecUpperBound(((i-1)*p1RadauPoints+2):...
-                    (i*p1RadauPoints-1)) = obj.stateUpperBound(i);
-                obj.decisionVecUpperBound(i*p1RadauPoints) = ...
+                obj.decisionVecUpperBound(((i-1)*obj.numStatePoints+2):...
+                    (i*obj.numStatePoints-1)) = obj.stateUpperBound(i);
+                obj.decisionVecUpperBound(i*obj.numStatePoints) = ...
                     obj.finalStateUpperBound(i);
             end
             
             %  Fill in the control vector portion of the bounds
-            cnt = obj.numStates*p1RadauPoints+1;
+            cnt = obj.numStates*obj.numStatePoints+1;
             for i = 1:obj.numControls
                 obj.decisionVecLowerBound(cnt:cnt+obj.numRadauPoints-1) = ...
                     obj.controlLowerBound(i);
@@ -275,12 +264,6 @@ classdef Phase < handle
             obj = SetDefectConstraintBounds(obj);
             obj = SetPathConstraintBounds(obj);
             obj = SetEventConstraintBounds(obj);
-            % TODO:  concatenate constraint types as we add them
-            %             obj.allConLowerBound = [obj.defectConLowerBound;...
-            %                 obj.pathConLowerBound; obj.eventConLowerBound];
-            %             obj.allConUpperBound = [obj.defectConUpperBound;...
-            %                 obj.pathConUpperBound; obj.eventConUpperBound];
-            %             obj.numConstraints = length(obj.allConLowerBound);
             
             dStartIdx = obj.defectStartIdx;
             dEndIdx = obj.defectEndIdx;
@@ -337,7 +320,7 @@ classdef Phase < handle
             obj.eventConLowerBound = obj.eventConstraintLowerBound;
             obj.eventConUpperBound = obj.eventConstraintUpperBound;
         end
-               
+        
         %  Compute the initial guess
         function obj = SetInitialGuess(obj)
             
@@ -376,18 +359,7 @@ classdef Phase < handle
             end
             
         end
-        
-        %  Compute Radau points, weights, and differentiation matrix
-        function obj = ConfigureRadauProperties(obj)
-            
-            %  Compute Radau points, weights, and differentiation matrix
-            [obj.radauPoints,obj.radauWeights,obj.radauDiffMatrix]...
-                = lgrPS(obj.meshIntervalFractions, ...
-                obj.meshIntervalNumPoints);
-            obj.numRadauPoints = length(obj.radauWeights);
-            
-        end
-        
+              
         %  Validate that the mesh properties are set acceptably
         function ValidateMeshProperties(obj)
             
@@ -499,14 +471,7 @@ classdef Phase < handle
                 throw(ME);
             end
         end
-        
-        %  Returns the time decision variables in [2x1] matrix form
-        function  timeMat = GetTimeMatrix(obj)
-            timeMat = reshape(obj.DecVector.decisionVector...
-                (obj.timeStartIdx:obj.timeEndIdx),...
-                obj.numTimeParams,1);
-        end
-        
+            
         %  Validates user configuration of the phase
         function obj = ValidatePhaseConfig(obj)
             if length(obj.meshIntervalFractions) ~= ...
@@ -549,7 +514,7 @@ classdef Phase < handle
             %  Loop over the number of defect constraints
             rhsMatrix = defectConstraintsLHS*0;
             algIdx    = 1;
-            obj.costFuncIntegral = 0; 
+            obj.costFuncIntegral = 0;
             
             %algArray = zeros(obj.numPathConstraints,1);
             %  Initialize integral array if there are integral functions
@@ -557,7 +522,7 @@ classdef Phase < handle
                 intArray = zeros(obj.PathFunction.numAlgFunctions,1);
             end
             
-            for pointIdx = 1:obj.numRadauPoints % TODO: numMeshPoints
+            for pointIdx = 1:obj.numMeshPoints 
                 
                 %  Prepare then evaluate the path function
                 obj.PreparePathFunction(pointIdx);
@@ -591,7 +556,7 @@ classdef Phase < handle
                 end
                 
             end
-            timeMat     = GetTimeMatrix(obj);
+            timeMat     = GetMeshPoints(obj);
             finalTime   = obj.DecVector.GetLastTime();
             initialTime = obj.DecVector.GetFirstTime();
             
@@ -693,14 +658,71 @@ classdef Phase < handle
                 obj.DecVector.GetFirstTime();
             obj.PointFunction.finalTime = ...
                 obj.DecVector.GetLastTime();
-  
+            
         end
         
-        %  Configure the time vector
-        function ComputeTimeVector(obj)
-           initialTime = obj.DecVector.GetFirstTime();
-           obj.timeVector = (obj.DecVector.GetLastTime() - initialTime)*...
-               (obj.radauPoints + 1)/2 + initialTime;
+        %  Evaluate constraint feasiblity
+        function Status = CheckConstraintVariances(obj)
+            
+            %  Evaluate constraints initialize items
+            constraintVec   = GetContraintVector(obj);
+            if isa(constraintVec,'gradient')
+                constraintVec = constraintVec.x;
+            end
+            numEventViolations  = 0;
+            numdefectViolations = 0;
+            numPathViolations   = 0;
+            eventViolation  = false();
+            defectViolation = false();
+            pathViolation   = false();
+            tol = 1e-5;  %  TODO.  Don't hard code this
+            
+            %  Check point (event) constraints for violation        
+            if obj.PointFunction.hasEventFunctions;
+                for conIdx = obj.eventStartIdx:obj.eventEndIdx
+                    if constraintVec(conIdx) <= ...
+                            obj.allConLowerBound(conIdx) - tol|| ...
+                        constraintVec(conIdx) >= ...
+                            obj.allConUpperBound(conIdx) + tol;
+                        eventViolation = true();
+                        numEventViolations = numEventViolations + 1;
+                    end
+                end
+            end
+            
+            %  Check point (event) constraints for violation        
+            if obj.PathFunction.hasDynFunctions;
+                for conIdx = obj.defectStartIdx:obj.defectEndIdx
+                    if constraintVec(conIdx) <= ...
+                            obj.allConLowerBound(conIdx) - tol || ...
+                        constraintVec(conIdx) >= ...
+                            obj.allConUpperBound(conIdx) + tol;
+                        defectViolation = true();
+                        numPathViolations = numPathViolations + 1;
+                    end
+                end
+            end
+            
+            %  Check path constraints for violation        
+            if obj.PathFunction.hasAlgFunctions;
+                for conIdx = obj.pathStartIdx:obj.pathEndIdx
+                    if constraintVec(conIdx) <= ...
+                            obj.allConLowerBound(conIdx) - tol|| ...
+                        constraintVec(conIdx) >= ...
+                            obj.allConUpperBound(conIdx) + tol;
+                        pathViolation = true();
+                        numdefectViolations = numdefectViolations + 1;
+                    end
+                end
+            end          
+            
+            Status.numEventViolations  = numEventViolations;
+            Status.numdefectViolations = numdefectViolations;
+            Status.numPathViolations   = numPathViolations;
+            Status.eventViolation      = eventViolation;
+            Status.defectViolation     = defectViolation;
+            Status.pathViolation       = pathViolation;
+            
         end
         
     end
@@ -711,12 +733,12 @@ end
 %         function [sparsityPattern] = GetSparsityPattern_Defect_State(obj)
 %             sparsityPattern = abs(sign(obj.radauDiffMatrix));
 %         end
-%         
+%
 %         %  Compute sparsity pattern of defects contraints
 %         function [sparsityPattern] = GetSparsityPattern_Defect_Control(obj)
 %             sparsityPattern = eye(obj.numRadauPoints);
 %         end
-%         
+%
 %         %  Compute sparsity pattern of defects contraints
 %         function [sparsityPattern] = GetSparsityPattern_Defect_Time(obj)
 %             sparsityPattern = ones(obj.numRadauPoints,2);

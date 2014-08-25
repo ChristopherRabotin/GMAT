@@ -12,7 +12,7 @@ global igrid iGfun jGvar traj
 traj                           = Trajectory();
 traj.pathFunctionName          = 'HyperSensitivePathFunctionMultiPhase';   
 traj.plotFunctionName          = 'HyperSensitivePlotFunctionMultiPhase'; 
-traj.showPlot                  = true();
+traj.showPlot                  = false();
 traj.plotUpdateRate            = 2;
 traj.costLowerBound            = 0;
 traj.costUpperBound            = Inf;
@@ -22,7 +22,7 @@ traj.costUpperBound            = Inf;
 %==========================================================================
 
 %  Set Time Properties
-phase1                         = Phase();
+phase1                         = RadauPhase();
 phase1.meshIntervalFractions   = [ -1 -.5 1];
 phase1.meshIntervalNumPoints   = [10 10 ]';
 phase1.initialTimeLowerBound   = 0;
@@ -52,7 +52,7 @@ phase1.controlLowerBound       = -50;
 %==========================================================================
 
 %  Set Time Properties
-phase2                         = Phase();
+phase2                         = RadauPhase();
 phase2.meshIntervalFractions   = [ -1 -.5 1];
 phase2.meshIntervalNumPoints   = [10 20]';
 phase2.initialTimeLowerBound   = 25;

@@ -1,10 +1,5 @@
 %% =====  Intializations
 ClearAll
-close all
-clear mex
-clear classes
-clear all
-clc; clearvars; 
 global igrid iGfun jGvar traj 
 
 %% =====  Define the phase and trajectory properties
@@ -13,12 +8,12 @@ global igrid iGfun jGvar traj
 traj                           = Trajectory();
 traj.pathFunctionName          = 'HyperSensitivePathFunction';   
 traj.plotFunctionName          = 'HyperSensitivePlotFunction'; 
-traj.showPlot                  = true();
+traj.showPlot                  = false();
 traj.costLowerBound            = 0;
 traj.costUpperBound            = Inf;
 
 %  Set Time Properties
-phase1                         = Phase;
+phase1                         = RadauPhase;
 phase1.meshIntervalFractions   = linspace(-1,1,40+1).';
 phase1.meshIntervalNumPoints   = 4*ones(40,1);
 phase1.meshIntervalFractions   = [ -1 -0.5 0 0.5  1];                

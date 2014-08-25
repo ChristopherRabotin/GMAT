@@ -23,7 +23,7 @@ traj.costUpperBound     = Inf;
 %==========================================================================
 
 %  Set Time Properties
-phase1                           = Phase();
+phase1                           = RadauPhase();
 phase1.meshIntervalFractions     = [-1; 1];
 phase1.meshIntervalNumPoints     = 20*ones(1,1);
 phase1.initialEpoch              = 0;

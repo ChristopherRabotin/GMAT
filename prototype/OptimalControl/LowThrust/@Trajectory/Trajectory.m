@@ -303,23 +303,6 @@ classdef Trajectory < handle
             end
         end
         
-        %  Report data about the problem
-        function WriteSolutionReport(obj)
-            
-            phaseIdx = 1;
-            
-            %  Write out states that have active bound constraints
-            decVector = obj.phaseList{phaseIdx}.DecVector.decisionVector;
-            if isa(decVector,'gradient')
-                decVector = decVector.x;
-            end
-            upperBounds = obj.phaseList{phaseIdx}.decisionVecUpperBound;
-            upperBounds = obj.phaseList{phaseIdx}.decisionVecUpperBound;
-            
-            %  Write out info on functions that have active constraints
-            
-        end
-        
         function [z,F,xmul,Fmul] = Optimize(obj)
             
             % SNOPT Required Globals
@@ -376,6 +359,7 @@ classdef Trajectory < handle
             obj.isOptimizing = false();
             obj.isFinished   = true();
             obj.PlotUserFunction();
+            obj.WriteSetupReport(1);
             
         end
         
