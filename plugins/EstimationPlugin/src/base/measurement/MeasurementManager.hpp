@@ -59,8 +59,8 @@ public:
    bool                    ProcessingComplete();
    bool                    Finalize();
 
-// bool                    CalculateMeasurements(bool withEvents = false);							// made changes for Bug 8 in ticket GMT-4314
-   bool                    CalculateMeasurements(bool forSimulation = false, bool withEvents = false, bool addNoise = false);	// made changes for Bug 8 in ticket GMT-4314
+// bool                    CalculateMeasurements(bool withEvents = false);                     // made changes for Bug 8 in ticket GMT-4314
+   bool                    CalculateMeasurements(bool forSimulation = false, bool withEvents = false, bool addNoise = false);   // made changes for Bug 8 in ticket GMT-4314
    const std::vector<RealArray>&
                            CalculateDerivatives(GmatBase *obj, Integer wrt,
                                                 Integer forMeasurement);
@@ -88,29 +88,29 @@ public:
    bool                    WriteMeasurement(const Integer measurementToWrite);
 
 ///// TBD: Do we want something more generic here?
-   const StringArray&      GetRampTableDataStreamList();						// made changes by TUAN NGUYEN
-   void                    SetRampTableDataStreamObject(DataFile *newStream);	// made changes by TUAN NGUYEN
+   const StringArray&      GetRampTableDataStreamList();                            // made changes by TUAN NGUYEN
+   void                    SetRampTableDataStreamObject(DataFile *newStream);       // made changes by TUAN NGUYEN
 
    IntegerArray&           GetValidMeasurementList();
 
    // Observation reader methods needed for estimation
-   UnsignedInt             LoadObservations();									// made changes by TUAN NGUYEN
+   UnsignedInt             LoadObservations();                                      // made changes by TUAN NGUYEN
    
 ///// TBD: Do we want something more generic here?
-   // Ramp tables reader method needed for simulator							// made changes by TUAN NGUYEN
-   void					   LoadRampTables();									// made changes by TUAN NGUYEN
+   // Ramp tables reader method needed for simulator                                // made changes by TUAN NGUYEN
+   void                    LoadRampTables();                                        // made changes by TUAN NGUYEN
 
-   const std::vector<MeasurementModel*>& GetAllMeasurementModels();				// made changes by TUAN NGUYEN
-   UnsignedInt             GetCurrentRecordNumber();							// made changes by TUAN NGUYEN
+   const std::vector<MeasurementModel*>& GetAllMeasurementModels();                 // made changes by TUAN NGUYEN
+   UnsignedInt             GetCurrentRecordNumber();                                // made changes by TUAN NGUYEN
    
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);
-   ObservationData*        GetObsDataObject(const Integer observationToGet = -1);	// made changes by TUAN NGUYEN
-   bool                    AdvanceObservation();								// made changes by TUAN NGUYEN		for Bug 8 in ticket GMT-4314
+   ObservationData*        GetObsDataObject(const Integer observationToGet = -1);   // made changes by TUAN NGUYEN
+   bool                    AdvanceObservation();                                    // made changes by TUAN NGUYEN      for Bug 8 in ticket GMT-4314
    void                    Reset();
    
-   std::vector<ObservationData>* GetObservationDataList();						// made changes by TUAN NGUYEN
+   std::vector<ObservationData>* GetObservationDataList();                          // made changes by TUAN NGUYEN
 
 protected:
    /// List of the managed measurement models
@@ -155,15 +155,15 @@ protected:
 
 
 ///// TBD: Do we want something more generic here?
-   /// ramp table data stream names												// made changes by TUAN NGUYEN
-   StringArray                      rampTableDataStreamNames;					// made changes by TUAN NGUYEN
-   /// Ramp table data stream objects											// made changes by TUAN NGUYEN
-   std::vector<DataFile*>           rampTableDataStreamList;					// made changes by TUAN NGUYEN
-   /// Maping between unique IDs and the associated data files					// made changes by TUAN NGUYEN
-   std::map<Integer,DataFile*>      idToRampTableStreamMap;						// made changes by TUAN NGUYEN
-   /// Association between name of DataFile objects and frequency ramp tables	// made changes by TUAN NGUYEN
-   std::map<std::string,std::vector<RampTableData> >								// made changes by TUAN NGUYEN
-	                                rampTables;									// made changes by TUAN NGUYEN
+   /// ramp table data stream names                                             // made changes by TUAN NGUYEN
+   StringArray                      rampTableDataStreamNames;                   // made changes by TUAN NGUYEN
+   /// Ramp table data stream objects                                           // made changes by TUAN NGUYEN
+   std::vector<DataFile*>           rampTableDataStreamList;                    // made changes by TUAN NGUYEN
+   /// Maping between unique IDs and the associated data files                  // made changes by TUAN NGUYEN
+   std::map<Integer,DataFile*>      idToRampTableStreamMap;                     // made changes by TUAN NGUYEN
+   /// Association between name of DataFile objects and frequency ramp tables   // made changes by TUAN NGUYEN
+   std::map<std::string,std::vector<RampTableData> >                            // made changes by TUAN NGUYEN
+                                    rampTables;                                 // made changes by TUAN NGUYEN
 
 
    /// Temporary element used to manage events that are ready for processing
