@@ -62,8 +62,13 @@ public:
          const std::string& correctionType);
 
    DEFAULT_TO_NO_CLONES
-
 protected:
+   /// Parameter IDs for the RangeAdapterKm
+   enum
+   {
+      RangeAdapterKmParamCount = AdapterParamCount,                                  // made changes by TUAN NGUYEN
+   };
+
 
 };
 

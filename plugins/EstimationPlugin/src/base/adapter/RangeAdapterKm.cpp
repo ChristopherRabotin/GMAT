@@ -25,7 +25,7 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
-//#define DEBUG_RANGE_CALCULATION
+#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -196,7 +196,7 @@ bool RangeAdapterKm::Initialize()
 const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB)
 {
-   #ifdef DEBUG_RANGE_CALCULATION
+   #ifdef DEBUG_ADAPTER_EXECUTION
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement(%s, "
             "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
             rampTB);
@@ -207,47 +207,82 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime))
+   //if (calcData->CalculateMeasurement(withLighttime))                         // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))   // made changes by TUAN NGUYEN
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
 
       RealArray values;
       for (UnsignedInt i = 0; i < data.size(); ++i)
       {
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("===================================================================\n");
+            MessageInterface::ShowMessage("====         Range Calculation for Signal Path %dth    ====\n", i);
+            MessageInterface::ShowMessage("===================================================================\n");
+         #endif
+
+         // Calculate C-value for signal path ith:
          values.push_back(0.0);
          SignalData *current = data[i];
          while (current != NULL)
          {
-         // Add light time range:
-         // accumulate light time range
+            // accumulate all light time range for signal path ith 
             Rvector3 signalVec = current->rangeVecInertial;
-         values[i] += signalVec.GetMagnitude();
+            values[i] += signalVec.GetMagnitude();
 
-            // accumulate all range corrections
-         for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
-         {
-            if (current->useCorrection[j])
-              values[i] += current->corrections[j];
-         }
+            // accumulate all range corrections for signal path ith
+            for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+            {
+               if (current->useCorrection[j])
+                  values[i] += current->corrections[j];
+            }
+
+            // accumulate all hardware delays for signal path ith                          // made changes by TUAN NGUYEN
+            values[i] += ((current->tDelay + current->rDelay)*                             // made changes by TUAN NGUYEN
+               GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);   // made changes by TUAN NGUYEN
 
             // Set measurement epoch to the epoch of the last receiver in the
             // first signal path
             if ((i == 0) && (current->next == NULL))
 #ifdef USE_PRECISION_TIME
-            cMeasurement.epoch = current->rPrecTime.GetMjd();
+               // cMeasurement.epoch = current->rPrecTime.GetMjd();                                                     // made changes by TUAN NGUYEN
+               if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;   // made changes by TUAN NGUYEN
+               else                                                                                                     // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = current->tPrecTime.GetMjd() - current->tDelay/GmatTimeConstants::SECS_PER_DAY;   // made changes by TUAN NGUYEN
 #else
-               cMeasurement.epoch = current->rTime;
+               //cMeasurement.epoch = current->rTime;                                                                   // made changes by TUAN NGUYEN
+               if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;                // made changes by TUAN NGUYEN
+               else                                                                                                     // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = current->tTime - current->tDelay/GmatTimeConstants::SECS_PER_DAY;                // made changes by TUAN NGUYEN
 #endif
 
             current = current->next;
          }
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Path %d has range sum %.12lf\n", i,
-                  values[i]);
+            MessageInterface::ShowMessage("===================================================================\n");
+            MessageInterface::ShowMessage("====  Result for path %dth =======\n", i);
+            MessageInterface::ShowMessage("      . Noise adding option = %s\n", (addNoise?"true":"false"));
+            MessageInterface::ShowMessage("      . Real range w/o adding noise for path %dth: %.12lf km \n", i, values[i]);
+         #endif
+
+         // Add noise to measurement value                                              // made changes by TUAN NGUYEN
+         if (addNoise)                                                                  // made changes by TUAN NGUYEN
+         {                                                                              // made changes by TUAN NGUYEN
+            // @todo: Add noise here                                                    // made changes by TUAN NGUYEN
+         }                                                                              // made changes by TUAN NGUYEN
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("      . Real range with noise adding for path %dth: %.12lf km \n", i, values[i]);
+            MessageInterface::ShowMessage("      . Multiplier = %.12lf\n", multiplier);
+            MessageInterface::ShowMessage("      . C-value: %.12lf km \n", values[i]*multiplier);
+            MessageInterface::ShowMessage("      . Measurement is %s\n", (calcData->IsMeasurementFeasible()?"feasible":"unfeasible"));
+            MessageInterface::ShowMessage("===================================================================\n\n\n\n");
          #endif
       }
-
-     if (cMeasurement.value.size() == 0)
+      
+      // Set value for measurement data object
+      if (cMeasurement.value.size() == 0)
          for (UnsignedInt i = 0; i < values.size(); ++i)
             cMeasurement.value.push_back(0.0);
       for (UnsignedInt i = 0; i < values.size(); ++i)
@@ -274,7 +309,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       #endif
    }
 
-   #ifdef DEBUG_RANGE_CALCULATION
+   #ifdef DEBUG_ADAPTER_EXECUTION
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement(%s, "
             "<%p>, <%p>) exit\n", (withEvents ? "true" : "false"), forObservation,
             rampTB);
