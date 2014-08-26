@@ -130,6 +130,12 @@ public:
    /// Flag for light time solution
    bool solveLightTime;
 
+   /// Hardware delay associated with transmit participant           // made changes by TUAN NGUYEN
+   Real tDelay;                                                      // made changes by TUAN NGUYEN
+   /// Hardware delay associated with receive participant            // made changes by TUAN NGUYEN
+   Real rDelay;                                                      // made changes by TUAN NGUYEN
+
+
    /// Linked list so separate signal paths are clear
    SignalData *next;
 };

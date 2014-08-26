@@ -50,6 +50,8 @@ SignalData::SignalData() :
    rSTM                 (true),
    tJ2kRotation         (true),
    rJ2kRotation         (true),
+   tDelay               (0.0),                      // made changes by TUAN NGUYEN
+   rDelay               (0.0),                      // made changes by TUAN NGUYEN
    solveLightTime       (true),
    next                 (NULL)
 {
@@ -117,6 +119,8 @@ SignalData::SignalData(const SignalData& sd) :
    correctionIDs        (sd.correctionIDs),
    corrections          (sd.corrections),
    useCorrection        (sd.useCorrection),
+   tDelay               (sd.tDelay),                    // made changes by TUAN NGUYEN
+   rDelay               (sd.rDelay),                    // made changes by TUAN NGUYEN
    solveLightTime       (sd.solveLightTime),
    next                 (NULL)
 {
@@ -177,6 +181,8 @@ SignalData& SignalData::operator=(const SignalData& sd)
       correctionIDs        = sd.correctionIDs;
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;
+      tDelay               = sd.tDelay;                  // made changes by TUAN NGUYEN
+      rDelay               = sd.rDelay;                  // made changes by TUAN NGUYEN
       solveLightTime       = sd.solveLightTime;
       next                 = NULL;
    }
