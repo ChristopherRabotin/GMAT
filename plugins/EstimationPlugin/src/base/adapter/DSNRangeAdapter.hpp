@@ -37,6 +37,15 @@ public:
 
    virtual GmatBase*    Clone() const;
 
+
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -64,6 +73,23 @@ public:
    DEFAULT_TO_NO_CLONES
 
 protected:
+   /// Range modulo constant
+   Real            rangeModulo;
+
+
+   /// Parameter IDs for the DSNRangeAdapter
+   enum
+   {
+      RangeModuloConstant = RangeAdapterKmParamCount,        // made changes by TUAN NGUYEN
+      DSNRangeAdapterParamCount,                           // made changes by TUAN NGUYEN
+   };
+
+   /// Strings describing the DSNRangeAdapter parameters
+   static const std::string PARAMETER_TEXT[DSNRangeAdapterParamCount -
+                                           RangeAdapterKmParamCount];                              // made changes by TUAN NGUYEN
+   /// Types of the DSNRangeAdapter parameters
+   static const Gmat::ParameterType PARAMETER_TYPE[DSNRangeAdapterParamCount -
+                                                   RangeAdapterKmParamCount];                      // made changes by TUAN NGUYEN
 
 };
 

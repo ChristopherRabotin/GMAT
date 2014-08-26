@@ -28,6 +28,25 @@
 //#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
+// Static data
+//------------------------------------------------------------------------------
+const std::string
+DSNRangeAdapter::PARAMETER_TEXT[DSNRangeAdapterParamCount - RangeAdapterKmParamCount] =
+{
+   "RangeModuloConstant",                   // made changes by TUAN NGUYEN
+};
+
+
+const Gmat::ParameterType
+DSNRangeAdapter::PARAMETER_TYPE[DSNRangeAdapterParamCount - RangeAdapterKmParamCount] =
+{
+   Gmat::REAL_TYPE,                        // made changes by TUAN NGUYEN
+};
+
+
+
+
+//------------------------------------------------------------------------------
 // DSNRangeAdapter(const std::string& name)
 //------------------------------------------------------------------------------
 /**
@@ -37,7 +56,8 @@
  */
 //------------------------------------------------------------------------------
 DSNRangeAdapter::DSNRangeAdapter(const std::string& name) :
-   RangeAdapterKm      (name)
+   RangeAdapterKm      (name),
+   rangeModulo         (1.0e18)
 {
    typeName = "DSNRange";              // change type name from "RangeKm" to "DSNRange"
 }
@@ -65,7 +85,8 @@ DSNRangeAdapter::~DSNRangeAdapter()
  */
 //------------------------------------------------------------------------------
 DSNRangeAdapter::DSNRangeAdapter(const DSNRangeAdapter& dsnr) :
-   RangeAdapterKm      (dsnr)
+   RangeAdapterKm      (dsnr),
+   rangeModulo         (dsnr.rangeModulo)
 {
 }
 
@@ -86,6 +107,8 @@ DSNRangeAdapter& DSNRangeAdapter::operator=(const DSNRangeAdapter& dsnr)
    if (this != &dsnr)
    {
       RangeAdapterKm::operator=(dsnr);
+
+      rangeModulo = dsnr.rangeModulo;
    }
 
    return *this;
@@ -105,6 +128,90 @@ GmatBase* DSNRangeAdapter::Clone() const
 {
    return new DSNRangeAdapter(*this);
 }
+
+
+
+//------------------------------------------------------------------------------
+// std::string GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of a real parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Real DSNRangeAdapter::GetRealParameter(const Integer id) const
+{
+   if (id == RangeModuloConstant)
+      return rangeModulo;
+
+   return RangeAdapterKm::GetRealParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a real parameter
+ *
+ * @param id The ID for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Real DSNRangeAdapter::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == rangeModulo)
+   {
+      if (value <= 0)
+         throw MeasurementException("Error: uplink frequency has a nonpositive value\n");
+
+      rangeModulo = value;
+      return rangeModulo;
+   }
+
+   return RangeAdapterKm::SetRealParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of a real parameter
+ *
+ * @param label The name for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Real DSNRangeAdapter::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a real parameter
+ *
+ * @param label The name for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Real DSNRangeAdapter::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 
 //------------------------------------------------------------------------------
