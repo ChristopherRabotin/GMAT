@@ -80,7 +80,7 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    useRelativityCorrection   (false),            // made changes by TUAN NGUYEN
    useETminusTAICorrection   (false),            // made changes by TUAN NGUYEN
    troposphereModel          ("None"),           // made changes by TUAN NGUYEN
-   ionosphereModel           ("None")            // made changes by TUAN NGUYEN
+   ionosphereModel           ("None")           // made changes by TUAN NGUYEN
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -122,7 +122,7 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useRelativityCorrection   (tfs.useRelativityCorrection),   // made changes by TUAN NGUYEN
    useETminusTAICorrection   (tfs.useETminusTAICorrection),   // made changes by TUAN NGUYEN
    troposphereModel          (tfs.troposphereModel),          // made changes by TUAN NGUYEN
-   ionosphereModel           (tfs.ionosphereModel)            // made changes by TUAN NGUYEN
+   ionosphereModel           (tfs.ionosphereModel)           // made changes by TUAN NGUYEN
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
@@ -1284,6 +1284,8 @@ bool TrackingFileSet::Initialize()
             }
 
             tda->SetStringParameter("SignalPath", theStrand);
+
+            // Push tracking data apadter to measurement model list
             measurements.push_back(tda);
          }
       }
@@ -1342,6 +1344,10 @@ bool TrackingFileSet::Initialize()
          if (ionosphereModel != "")                                                // made changes by TUAN NGUYEN
             measurements[i]->SetCorrection(ionosphereModel,"IonosphereModel");     // made changes by TUAN NGUYEN
 
+         // Set ramped frequency tables to tacking data adapter                           // made changes by TUAN NGUYEN
+         for (UnsignedInt k = 0; k < rampedTablenames.size(); ++k)                        // made changes by TUAN NGUYEN
+            measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);    // made changes by TUAN NGUYEN
+         
          // Initialize TrackingDataAdapter
          retval = retval && measurements[i]->Initialize();
       }
