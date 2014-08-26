@@ -98,7 +98,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
    maxConsDivergences         (3),                     // made changes by TUAN NGUYEN
-   inversionType              ("")
+   inversionType              ("Internal")   // ("")   // made changes by TUAN NGUYEN
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
