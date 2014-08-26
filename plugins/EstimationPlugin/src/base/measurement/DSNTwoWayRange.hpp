@@ -44,7 +44,7 @@ public:
    virtual Integer      GetParameterID(const std::string & str) const;
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType 
-	                    GetParameterType(const Integer id) const;
+                        GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual std::string  GetParameterUnit(const Integer id) const;
    virtual Integer      GetParameterCount() const;
@@ -70,21 +70,21 @@ protected:
    /// Range rate of the downlink
    Real                 downlinkRangeRate;
 
-   /// Range modulo																					// made changes by TUAN NGUYEN
-   Real                 rangeModulo;																// made changes by TUAN NGUYEN
+   /// Range modulo                                                                 // made changes by TUAN NGUYEN
+   Real                 rangeModulo;                                                // made changes by TUAN NGUYEN
 
    virtual bool                  Evaluate(bool withEvents = false);
    Real                          GetFrequencyFactor(Real frequency = 0.0);
 
    // This function is different from  PhysicalMeasurement::IntegralRampedFrequency(Real t0, Real delta_t)
    // The difference is this function using frequency factor in its calculation instead of frequency  
-   virtual Real                  IntegralRampedFrequency(Real t0, Real delta_t, Integer& err);				// made changes by TUAN NGUYEN
+   virtual Real                  IntegralRampedFrequency(Real t0, Real delta_t, Integer& err);            // made changes by TUAN NGUYEN
 
 
    /// Enumeration defining the DSNTwoWayRange's scriptable parameters
    enum
    {
-       RangeModuloConstant = TwoWayRangeParamCount,				// by setting this way, RangeModuloConstant parameter is only used in DSNTwoWayRange
+       RangeModuloConstant = TwoWayRangeParamCount,            // by setting this way, RangeModuloConstant parameter is only used in DSNTwoWayRange
        DSNTwoWayRangeParamCount
    };
 
@@ -99,7 +99,7 @@ protected:
                                TwoWayRangeParamCount];
 
 // private:
-//   Real GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);		// made changes by TUAN NGUYEN
+//   Real GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);      // made changes by TUAN NGUYEN
 };
 
 #endif /* DSNTwoWayRange_hpp */
