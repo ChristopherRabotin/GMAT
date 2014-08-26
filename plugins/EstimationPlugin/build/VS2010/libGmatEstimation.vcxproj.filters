@@ -156,9 +156,6 @@
     <ClInclude Include="..\..\src\base\hardware\Transmitter.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
-      <Filter>Source Files\hardware</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\hardware\Antenna.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
@@ -341,6 +338,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp">
       <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
+      <Filter>Source Files\hardware</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
