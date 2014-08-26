@@ -25,7 +25,7 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
-#define DEBUG_RANGE_CALCULATION
+//#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
