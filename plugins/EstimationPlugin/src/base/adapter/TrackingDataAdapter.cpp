@@ -32,6 +32,14 @@ const std::string
 TrackingDataAdapter::PARAMETER_TEXT[AdapterParamCount - MeasurementModelBaseParamCount] =
 {
    "SignalPath",
+   "ObservationData",              // made changes by TUAN NGUYEN
+   "RampTables",                   // made changes by TUAN NGUYEN
+   "Type",                         // made changes by TUAN NGUYEN
+   "Bias",                         // made changes by TUAN NGUYEN
+   "NoiseSigma",                   // made changes by TUAN NGUYEN
+   "AddNoise",                     // made changes by TUAN NGUYEN
+   "UplinkFrequency",              // made changes by TUAN NGUYEN
+   "UplinkBand",                   // made changes by TUAN NGUYEN
 };
 
 
@@ -39,6 +47,14 @@ const Gmat::ParameterType
 TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - MeasurementModelBaseParamCount] =
 {
    Gmat::OBJECTARRAY_TYPE,
+   Gmat::OBJECTARRAY_TYPE,          // made changes by TUAN NGUYEN
+   Gmat::OBJECTARRAY_TYPE,          // made changes by TUAN NGUYEN
+   Gmat::OBJECT_TYPE,               // made changes by TUAN NGUYEN
+   Gmat::RVECTOR_TYPE,              // made changes by TUAN NGUYEN
+   Gmat::RVECTOR_TYPE,              // made changes by TUAN NGUYEN
+   Gmat::BOOLEAN_TYPE,              // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,                 // made changes by TUAN NGUYEN
+   Gmat::INTEGER_TYPE,              // made changes by TUAN NGUYEN
 };
 
 
@@ -66,11 +82,12 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    multiplier           (1.0),
    withLighttime        (false),
    thePropagator        (NULL),
-   frequency            (1.0e9),           // made changes by TUAN NGUYEN
-   frequencyE           (1.0e9),           // made changes by TUAN NGUYEN
+   uplinkFreq           (1.0e9),           // made changes by TUAN NGUYEN
    freqBand             (0),               // made changes by TUAN NGUYEN
-   freqBandE            (0),               // made changes by TUAN NGUYEN
+//   uplinkFreqE          (1.0e9),           // made changes by TUAN NGUYEN      // This code will be moved to DSNDopplerAdapter
+//   freqBandE            (0),               // made changes by TUAN NGUYEN      // This code will be moved to DSNDopplerAdapter
    obsData              (NULL),            // made changes by TUAN NGUYEN
+   addNoise             (false),           // made changes by TUAN NGUYEN
    rampTB               (NULL)             // made changes by TUAN NGUYEN
 {
 }
@@ -112,12 +129,14 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    multiplier           (ma.multiplier),
    withLighttime        (ma.withLighttime),
    thePropagator        (NULL),
-   frequency            (ma.frequency),          // made changes by TUAN NGUYEN
-   frequencyE           (ma.frequencyE),         // made changes by TUAN NGUYEN
-   freqBand             (ma.freqBand),           // made changes by TUAN NGUYEN
-   freqBandE            (ma.freqBandE),          // made changes by TUAN NGUYEN
-   obsData              (NULL),                  // made changes by TUAN NGUYEN
-   rampTB               (NULL)                   // made changes by TUAN NGUYEN
+   uplinkFreq           (ma.uplinkFreq),          // made changes by TUAN NGUYEN
+   freqBand             (ma.freqBand),            // made changes by TUAN NGUYEN
+   //uplinkFreqE          (ma.uplinkFreqE),         // made changes by TUAN NGUYEN       // This code will be moved to DSNDopplerAdapter
+   //freqBandE            (ma.freqBandE),           // made changes by TUAN NGUYEN       // This code will be moved to DSNDopplerAdapter
+   obsData              (NULL),                   // made changes by TUAN NGUYEN
+   addNoise             (ma.addNoise),            // made changes by TUAN NGUYEN
+   rampTB               (NULL),                   // made changes by TUAN NGUYEN
+   rampTableNames       (ma.rampTableNames)       // made changes by TUAN NGUYEN
 {
 }
 
@@ -149,12 +168,14 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       multiplier         = ma.multiplier;
       withLighttime      = ma.withLighttime;
 
-      frequency          = ma.frequency;        // made changes by TUAN NGUYEN
-      frequencyE         = ma.frequencyE;       // made changes by TUAN NGUYEN
-      freqBand           = ma.freqBand;         // made changes by TUAN NGUYEN
-      freqBandE          = ma.freqBandE;        // made changes by TUAN NGUYEN
-      obsData            = NULL;                // made changes by TUAN NGUYEN
-      rampTB             = NULL;                // made changes by TUAN NGUYEN
+      uplinkFreq         = ma.uplinkFreq;        // made changes by TUAN NGUYEN
+      freqBand           = ma.freqBand;          // made changes by TUAN NGUYEN
+      //uplinkFreqE        = ma.uplinkFreqE;       // made changes by TUAN NGUYEN              // This code will be moved to DSNDopplerAdapter
+      //freqBandE          = ma.freqBandE;         // made changes by TUAN NGUYEN              // This code will be moved to DSNDopplerAdapter
+      obsData            = NULL;                 // made changes by TUAN NGUYEN
+      addNoise           = ma.addNoise;          // made changes by TUAN NGUYEN
+      rampTB             = NULL;                 // made changes by TUAN NGUYEN
+      rampTableNames = ma.rampTableNames;        // made changes by TUAN NGUYEN
 
       calcData = (MeasureModel*)ma.calcData->Clone();
 
@@ -261,6 +282,203 @@ std::string TrackingDataAdapter::GetParameterTypeString(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// std::string GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of an integer parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Integer TrackingDataAdapter::GetIntegerParameter(const Integer id) const
+{
+   if (id == UPLINK_BAND)
+      return freqBand;
+
+   return MeasurementModelBase::GetIntegerParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer parameter
+ *
+ * @param id The ID for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Integer TrackingDataAdapter::SetIntegerParameter(const Integer id, const Integer value)
+{
+   if (id == UPLINK_BAND)
+   {
+      if (value <= 0)
+         throw MeasurementException("Error: uplink frequency band has invalid value\n");
+
+      freqBand = value;
+      return freqBand;
+   }
+
+   return MeasurementModelBase::SetRealParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of an integer parameter
+ *
+ * @param label The name for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Integer TrackingDataAdapter::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer parameter
+ *
+ * @param label The name for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Integer TrackingDataAdapter::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of a real parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::GetRealParameter(const Integer id) const
+{
+   if (id == UPLINK_FREQUENCY)
+      return uplinkFreq;
+
+   return MeasurementModelBase::GetRealParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a real parameter
+ *
+ * @param id The ID for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == UPLINK_FREQUENCY)
+   {
+      if (value < 0)
+         throw MeasurementException("Error: uplink frequency has a negative value\n");
+
+      uplinkFreq = value;
+      return uplinkFreq;
+   }
+
+   return MeasurementModelBase::SetRealParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of a real parameter
+ *
+ * @param label The name for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a real parameter
+ *
+ * @param label The name for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
+
+bool TrackingDataAdapter::GetBooleanParameter(const Integer id) const
+{
+   if (id == ADD_NOISE)
+      return addNoise;
+
+   return MeasurementModelBase::GetBooleanParameter(id);
+}
+
+
+bool TrackingDataAdapter::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == ADD_NOISE)
+   {
+      addNoise = value;
+      return value;
+   }
+
+   return MeasurementModelBase::SetBooleanParameter(id, value);
+}
+
+
+bool TrackingDataAdapter::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+
+bool TrackingDataAdapter::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -342,6 +560,18 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
 std::string TrackingDataAdapter::GetStringParameter(const Integer id,
       const Integer index) const
 {
+   if (id == RAMPTABLES)
+   {
+      if ((0 <= index)&&(index < rampTableNames.size()))
+         return rampTableNames[index];
+      else
+      {
+         std::stringstream ss;
+         ss << "Error: index (" << index << ") is out of bound (" << rampTableNames.size() << ")\n";
+         throw MeasurementException(ss.str());
+      }
+   }
+
    return MeasurementModelBase::GetStringParameter(id, index);
 }
 
@@ -363,6 +593,18 @@ std::string TrackingDataAdapter::GetStringParameter(const Integer id,
 bool TrackingDataAdapter::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
+   if (id == RAMPTABLES)
+   {
+      if (value == "")
+         throw MeasurementException("Error: Name of ramped frequency table is an empty string\n");
+
+      if ((0 <= index)&&(index < rampTableNames.size()))
+         rampTableNames[index] = value;
+      else
+         rampTableNames.push_back(value);
+      return true;
+   }
+
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
@@ -380,6 +622,8 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
 const StringArray& TrackingDataAdapter::GetStringArrayParameter(
       const Integer id) const
 {
+   if (id == RAMPTABLES)                                  // made changes by TUAN NGUYEN
+      return rampTableNames;                              // made changes by TUAN NGUYEN
 
    return MeasurementModelBase::GetStringArrayParameter(id);
 }
