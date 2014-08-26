@@ -40,7 +40,7 @@
 //#define DEBUG_TIMING
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
-//#define DEBUG_CALCULATE_MEASUREMENT
+#define DEBUG_CALCULATE_MEASUREMENT
 
 //------------------------------------------------------------------------------
 // Static data
@@ -77,6 +77,7 @@ MeasureModel::MeasureModel(const std::string &name) :
    propsNeedInit     (false),          // Only need init if one is set
    navLog            (NULL),
    logLevel          (0),              // Default to everything
+   epochIsAtEnd      (true),                                   // made changes by TUAN NGUYEN
    isPhysical        (true),
    solarsys          (NULL)
 {
@@ -143,6 +144,7 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
    logLevel          (mm.logLevel),
    isPhysical        (mm.isPhysical),
    solarsys          (mm.solarsys),
+   epochIsAtEnd      (mm.epochIsAtEnd),                     // made changes by TUAN NGUYEN
    correctionTypeList(mm.correctionTypeList),               // made changes by TUAN NGUYEN
    correctionModelList(mm.correctionModelList)              // made changes by TUAN NGUYEN
 {
@@ -173,6 +175,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       logLevel = mm.logLevel;
       isPhysical = mm.isPhysical;
       solarsys = mm.solarsys;
+      epochIsAtEnd        = mm.epochIsAtEnd;                     // made changes by TUAN NGUYEN
       correctionTypeList  = mm.correctionTypeList;               // made changes by TUAN NGUYEN
       correctionModelList = mm.correctionModelList;              // made changes by TUAN NGUYEN
 
@@ -1041,27 +1044,36 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
 bool MeasureModel::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB)
 {
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage(" Enter MeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
+   #endif
+
    #ifdef DEBUG_TIMING
-      MessageInterface::ShowMessage("Calculating signal data in MeasureModel\n");
+      MessageInterface::ShowMessage("Calculating Signal Data in MeasureModel\n");
    #endif
 
    bool retval = false;
    feasible = true;
    
    // 1. Prepare the propagators
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("1. Prepare the propagators\n");
+   #endif
    if (propsNeedInit)
       PrepareToPropagate();
    
-   /// @todo Clean up the assumption that epoch is at the end
-   // For now, measurement epochs occur at the end of the signal path (the last
-   // receiver)
-   bool epochIsAtEnd = true;
+   ///// Clean up the assumption that epoch is at the end
+   //bool epochIsAtEnd = true;
 
    // 2. Find the measurement epoch needed for the computation
+   #ifdef DEBUG_TIMING
+      MessageInterface::ShowMessage("2. Find the measurement epoch needed for the computation\n");
+   #endif
+
 #ifdef USE_PRECISION_TIME
-   GmatTime forEpoch;
+   GmatTime forEpoch; //, forEpoch1;
 #else
-   GmatEpoch forEpoch;
+   GmatEpoch forEpoch; //, forEpoch1;
 #endif
    if (forObservation)
       forEpoch = forObservation->epoch;
@@ -1080,8 +1092,13 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
-      MessageInterface::ShowMessage("Synching in MeasureModel\n");
+      #ifdef USE_PRECISION_TIME
+      MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch.GetMjd());
+      #else
+      MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch);
+      #endif
    #endif
+
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
    {
@@ -1116,8 +1133,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          }
       }
    }
-
-   
+ 
    // 4.Calculate the measurement data ("C" value data) for all signal paths
    #ifdef DEBUG_CALCULATE_MEASUREMENT
       MessageInterface::ShowMessage("*************************************************************\n");
@@ -1131,11 +1147,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage("*************************************************************\n");
    #endif
    
-   
+   SignalBase *leg, *lastleg, *firstleg;
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
       #ifdef DEBUG_CALCULATE_MEASUREMENT
-         MessageInterface::ShowMessage("#### Calculate Measurement Data for Path: ");
+         MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d:  ", i);
          SignalBase* s = signalPaths[i];
          SignalData* sdata; 
          while (s != NULL)
@@ -1148,17 +1164,40 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("\n\n");
       #endif
       
-      // 4.1. Get the start signal:
+      // 4.1. Initialize all signal legs in this path:
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.1. Initialize all signal legs in signal path %d:\n", i);
+      #endif
+      leg = signalPaths[i];
+      leg->InitializeSignal(epochIsAtEnd);
+
+      // 4.2. Compute hardware delay (in forward direction of signal path). It has to be specified before running ModelSignal 
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.2. Calculate hardware delays in signal path %d:\n", i);
+      #endif
+      leg = firstleg = lastleg = signalPaths[i];
+      while(leg != NULL)
+      {
+         leg->HardwareDelayCalculation();                  // caluclate hardware delay for signal leg
+         leg = leg->GetNext();
+         if (leg != NULL)
+            lastleg = leg;
+      }
+
+      // 4.3. Get the start signal:
       SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
       SignalData *sd = &(startSignal->GetSignalData());
-     
-      // 4.2. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.4. Get the start signal leg for signal path %d:\n", i);
+      #endif
+      
+      // 4.4. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
-#ifdef USE_PRECISION_TIME
-      sd->tPrecTime = sd->rPrecTime = forEpoch;                     // made changes by TUAN NGUYEN
-#else
-      sd->tTime = sd->rTime = forEpoch;
-#endif
+      #ifdef USE_PRECISION_TIME
+         sd->tPrecTime = sd->rPrecTime = forEpoch;
+      #else
+         sd->tTime = sd->rTime = forEpoch;
+      #endif
       if (sd->tNode->IsOfType(Gmat::SPACECRAFT))
       {
          const Real* propState =
@@ -1176,32 +1215,46 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          sd->rVel = state.GetV();
       }
      
-      // 4.3. Compute C-value:
-      // 4.3.1 Compute Light Time range, relativity correction, and ET-TAI correction (backward or forward direction that depends on where measurement time is get):
+      // 4.5. Compute C-value:
+      // 4.5.1. Compute Light Time range, relativity correction, and ET-TAI correction (backward or forward direction that depends on where measurement time is get):
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.5. Compute C-value:\n");
+         MessageInterface::ShowMessage("4.5.1 Calculate range, relativity correction, and ET-TAI correction for signal path %d:\n", i);
+      #endif
+      //if (epochIsAtEnd)
+      //   forEpoch1 = forEpoch - lastleg->GetSignalData().rDelay/GmatTimeConstants::SECS_PER_DAY;
+      //else
+      //   forEpoch1 = forEpoch + firstleg->GetSignalData().tDelay/GmatTimeConstants::SECS_PER_DAY;
+
       if (startSignal->ModelSignal(forEpoch, epochIsAtEnd) == false)
       {
          throw MeasurementException("Signal modeling failed in model " +
                instanceName);
       }
-      // 4.3.2 Compute media correction (in forward direction of signal)
+      // 4.5.2. Compute media correction and hardware delay (in forward direction of signal path)
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.5.2 Calculate media correction for signal path %d:\n", i);
+      #endif
       SignalBase* leg = signalPaths[i];
       while(leg != NULL)
       {
-         leg->MediaCorrectionCalculation(rampTB);
+         leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
          leg = leg->GetNext();
       }
 
-      // 4.4. Verify feasibility:
       #ifdef DEBUG_CALCULATE_MEASUREMENT
-         SignalData *current = theData[i];
-         Real lightTimeRange = 0.0;
-         Real tropoCorrection = 0.0;
-         Real ionoCorrection = 0.0;
-         Real relCorrection = 0.0;
-         Real ettaiCorrection = 0.0;
+         SignalData *current  = theData[i];
+         Real lightTimeRange  = 0.0;                      // unit: km
+         Real tropoCorrection = 0.0;                      // unit: km
+         Real ionoCorrection  = 0.0;                      // unit: km
+         Real relCorrection   = 0.0;                      // unit: km
+         Real ettaiCorrection = 0.0;                      // unit: km
+         Real delayCorrection = 0.0;                      // unit: km
          while (current != NULL)
          {
+            // accumulate all light time correction
             lightTimeRange += current->rangeVecInertial.GetMagnitude();
+
             // accumulate all range corrections
             for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
             {
@@ -1217,24 +1270,34 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
                      ettaiCorrection += current->corrections[j];
                }
             }
+
+            // accumulate all range correction associate with hardware delay
+            delayCorrection += (current->tDelay + current->rDelay)*(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
+
             current = current->next;
          }
-         Real realRange = lightTimeRange + relCorrection + ettaiCorrection + tropoCorrection + ionoCorrection;
-         MessageInterface::ShowMessage("#### Summary of %d th path:\n", i);
+         Real realRange = lightTimeRange + relCorrection + ettaiCorrection + tropoCorrection + ionoCorrection + delayCorrection;
+
+         MessageInterface::ShowMessage("*** Summary of path %d ******************\n", i);
          if (signalPaths[i]->IsSignalFeasible())
             MessageInterface::ShowMessage("   .This path is feasible\n");
          else
             MessageInterface::ShowMessage("   .This path is unfeasible\n");
 
-         MessageInterface::ShowMessage("   .Light time range      : %.12lf km\n", lightTimeRange);
-         MessageInterface::ShowMessage("   .Relativity Correction : %.12lf km\n", relCorrection);
-         MessageInterface::ShowMessage("   .ET-TAI correction     : %.12lf km\n", ettaiCorrection);
-         MessageInterface::ShowMessage("   .Troposphere correction: %.12lf km\n", tropoCorrection);
-         MessageInterface::ShowMessage("   .Ionosphere correction : %.12lf km\n", ionoCorrection);
-         MessageInterface::ShowMessage("   .Real range            : %.12lf km\n", realRange);
-         MessageInterface::ShowMessage("####################################################\n\n");
+         MessageInterface::ShowMessage("   .Light time range         : %.12lf km\n", lightTimeRange);
+         MessageInterface::ShowMessage("   .Relativity Correction    : %.12lf km\n", relCorrection);
+         MessageInterface::ShowMessage("   .ET-TAI correction        : %.12lf km\n", ettaiCorrection);
+         MessageInterface::ShowMessage("   .Troposphere correction   : %.12lf km\n", tropoCorrection);
+         MessageInterface::ShowMessage("   .Ionosphere correction    : %.12lf km\n", ionoCorrection);
+         MessageInterface::ShowMessage("   .Hardware delay correction: %.12lf km\n", delayCorrection);
+         MessageInterface::ShowMessage("   .Real range               : %.12lf km\n", realRange);
+         MessageInterface::ShowMessage("******************************************************************\n\n");
       #endif
-     
+
+      // 4.5.3. Verify feasibility:
+      #ifdef DEBUG_TIMING
+         MessageInterface::ShowMessage("4.3. Specify feasibility for signal path %d:\n", i);
+      #endif
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
    }
    
@@ -1244,9 +1307,13 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       if (feasible)
          MessageInterface::ShowMessage("**** All paths in this measurement are feasible\n");
       else
-         MessageInterface::ShowMessage("**** Some paths in this measurement are unfeasible\n\n");
+         MessageInterface::ShowMessage("**** Some paths in this measurement are unfeasible\n");
 
       MessageInterface::ShowMessage("**** Calculation for this measurement is completed ****\n\n");
+   #endif
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage(" Exit MeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
    #endif
 
    return retval;
@@ -1449,5 +1516,15 @@ void MeasureModel::AddCorrection(const std::string& correctionName,
 }
 
 
+void MeasureModel::SetTimeTagFlag(const bool flag)
+{
+   epochIsAtEnd = flag;
+}
+
+
+bool MeasureModel::GetTimeTagFlag()
+{
+   return epochIsAtEnd;
+}
 
 
