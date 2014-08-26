@@ -35,7 +35,7 @@
 //#define DEBUG_EXECUTION
 //#define DEBUG_LIGHTTIME
 //#define SHOW_DATA
-#define DEBUG_FEASIBILITY
+//#define DEBUG_FEASIBILITY
 //#define DEBUG_DERIVATIVES
 //#define DEBUG_TIMING
 //#define DEBUG_CONSTRUCTION
@@ -43,7 +43,7 @@
 //#define DEBUG_IONOSPHERE_MEDIA_CORRECTION
 //#define DEBUG_TROPOSPHERE_MEDIA_CORRECTION
 //#define DEBUG_RELATIVITY_CORRECTION
-#define DEBUG_RANGE_CALCULATION
+//#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
 // PhysicalSignal(const std::string &typeStr, const std::string &name)
