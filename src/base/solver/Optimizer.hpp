@@ -110,9 +110,12 @@ protected:
       EQUALITY_CONSTRAINT_NAMES,
       INEQUALITY_CONSTRAINT_NAMES,
       PLOT_COST_FUNCTION,
+      SOURCE_TYPE,
       OptimizerParamCount
    };
    
+   /// type of external interface used
+   std::string         sourceType;
    /// Flag that is toggled when a Minimize command registers itself
    bool              objectiveDefined;
    /// name of the objective function

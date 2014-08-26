@@ -967,10 +967,12 @@ bool SolverBranchCommand::NeedsServerStartup()
       throw CommandException("The Solver pointer is not set in command\n" +
                GetGeneratingString());
    
-   if (theSolver->IsSolverInternal())
-      return false;
+   //if (theSolver->IsSolverInternal())
+   //   return false;
+   if (theSolver->NeedsServerStartup())
+      return true;
    
-   return true;
+   return false;
 }
 
 //------------------------------------------------------------------------------
