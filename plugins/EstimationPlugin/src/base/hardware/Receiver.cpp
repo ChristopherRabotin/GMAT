@@ -373,7 +373,7 @@ Real Receiver::SetRealParameter(const Integer id, const Real value)
 //            bandwidth = value;
 //         return bandwidth;
 
-      case HARDWARE_DELAY:
+//      case HARDWARE_DELAY:
       case CENTER_FREQUENCY:
       case BANDWIDTH:
          MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
