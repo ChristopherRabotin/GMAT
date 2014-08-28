@@ -41,6 +41,7 @@ Optimizer::PARAMETER_TEXT[OptimizerParamCount -SolverParamCount] =
    "EqualityConstraintNames",
    "InequalityConstraintNames",
    "PlotCost",
+   "SourceType",
 };
 
 const Gmat::ParameterType
@@ -51,6 +52,7 @@ Optimizer::PARAMETER_TYPE[OptimizerParamCount - SolverParamCount] =
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 const Integer Optimizer::EQ_CONST_START   = 1000;
@@ -62,6 +64,7 @@ const Integer Optimizer::INEQ_CONST_START = 2000;
 
 Optimizer::Optimizer(std::string typeName, std::string name) :
    Solver                  (typeName, name),
+   sourceType              ("None"),
    objectiveDefined        (false),
    objectiveFnName         (""),
    cost                    (0.0),   // valid value?
@@ -83,6 +86,7 @@ Optimizer::~Optimizer()
 
 Optimizer::Optimizer(const Optimizer &opt) :
    Solver                  (opt),
+   sourceType              (opt.sourceType),
    objectiveDefined        (false),
    objectiveFnName         (""),
    cost                    (opt.cost), 
@@ -105,11 +109,12 @@ Optimizer::Optimizer(const Optimizer &opt) :
 Optimizer& 
     Optimizer::operator=(const Optimizer& opt)
 {
-    if (&opt == this)
-        return *this;
-
+   if (&opt == this)
+      return *this;
+   
    Solver::operator=(opt);
    
+   sourceType       = opt.sourceType;
    objectiveFnName  = opt.objectiveFnName;
    cost             = opt.cost;
    tolerance        = opt.tolerance;
@@ -137,7 +142,10 @@ bool Optimizer::IsParameterReadOnly(const Integer id) const
        (id == INEQUALITY_CONSTRAINT_NAMES) ||
        (id == PLOT_COST_FUNCTION))
       return true;
-      
+
+   if (id == SOURCE_TYPE)
+      return true;
+   
    return Solver::IsParameterReadOnly(id);
 }
 
@@ -612,7 +620,9 @@ std::string Optimizer::GetStringParameter(const Integer id) const
 {
     if (id == OBJECTIVE_FUNCTION)
         return objectiveFnName;
-        
+    if (id == SOURCE_TYPE)
+       return sourceType;
+    
     return Solver::GetStringParameter(id);
 }
 
