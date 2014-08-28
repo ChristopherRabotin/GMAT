@@ -47,6 +47,7 @@ protected:
    wxArrayString mObjectTypeList;
    wxArrayString mReportWxStrings;
    
+   wxComboBox *delimiterComboBox;
    wxTextCtrl *colWidthTextCtrl;
    wxTextCtrl *precisionTextCtrl;
    wxTextCtrl *mFileTextCtrl;   
@@ -54,6 +55,7 @@ protected:
    wxCheckBox *showHeaderCheckBox;
    wxCheckBox *leftJustifyCheckBox;
    wxCheckBox *zeroFillCheckBox;   
+   wxCheckBox *fixedWidthCheckBox;   
    wxComboBox *mSolverIterComboBox;   
    wxListBox  *mSelectedListBox;
    wxButton   *mBrowseButton; 

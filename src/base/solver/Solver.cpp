@@ -101,7 +101,9 @@ Solver::STYLE_TEXT[MaxStyle - NORMAL_STYLE] =
 //------------------------------------------------------------------------------
 Solver::Solver(const std::string &type, const std::string &name) :
    GmatBase                (Gmat::SOLVER, type, name),
-   isInternal              (true),   
+   isInternal              (true),
+   requiresVariables       (true),
+   needsServerStartup      (false),
    currentState            (INITIALIZING),
    nestedState             (INITIALIZING),
    textFileMode            ("Normal"),
@@ -170,6 +172,8 @@ Solver::~Solver()
 Solver::Solver(const Solver &sol) :
    GmatBase                (sol),
    isInternal              (sol.isInternal),   
+   requiresVariables       (sol.requiresVariables),
+   needsServerStartup      (sol.needsServerStartup),
    currentState            (sol.currentState),
    nestedState             (sol.currentState),
    textFileMode            (sol.textFileMode),
@@ -248,7 +252,10 @@ Solver& Solver::operator=(const Solver &sol)
    //variableMinimum.clear();
    //variableMaximum.clear();
    //variableMaximumStep.clear();
-   
+
+   isInternal            = sol.isInternal;
+   requiresVariables     = sol.requiresVariables;
+   needsServerStartup    = sol.needsServerStartup;
    currentState          = sol.currentState;
    nestedState           = sol.currentState;
    textFileMode          = sol.textFileMode;
@@ -904,6 +911,10 @@ Integer Solver::SetIntegerParameter(const Integer id,
    
    if (id == RegisteredVariables)
    {
+      #ifdef DEBUG_SET_INTEGER
+      MessageInterface::ShowMessage
+         ("Solver::SetIntegerParameter() setting %d to registeredVariableCount\n", value);
+      #endif
       registeredVariableCount = value;
       return registeredVariableCount;
    }

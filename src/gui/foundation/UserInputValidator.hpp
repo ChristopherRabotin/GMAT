@@ -40,6 +40,10 @@ public:
    bool CheckFileName(const std::string &str, const std::string &field,
                       bool onlyMsg = false);
    
+   bool CheckLength(const std::string &str, const std::string &field,
+                    const std::string &expLength,
+                    const Integer min, const Integer max);
+
    bool CheckReal(Real &rvalue, const char *str,
                   const std::string &field, const std::string &expRange,
                   bool onlyMsg = false, bool checkRange = false, 

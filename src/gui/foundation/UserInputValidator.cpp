@@ -194,6 +194,29 @@ bool UserInputValidator::CheckFileName(const std::string &str,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool CheckLength(const wxString &str, const std::string &field, ...)
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckLength(const std::string &str, const std::string &field,
+                                     const std::string &expLength,
+                                     const Integer min, const Integer max)
+{
+   Integer len = str.length();
+   // We don't want allow blank file name so pass false
+   if ((len < min) || (len > max))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
+          expLength.c_str());
+      
+      return false;
+   }
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // bool CheckReal(Real &rvalue, const char *str,
 //                const std::string &field, const std::string &expRange,

@@ -442,7 +442,7 @@ GmatBase* GuiInterpreter::CreateObject(const std::string &type,
    
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    continueOnError = false;
-   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false);
+   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false, false);
    
    if (obj == NULL)
    {

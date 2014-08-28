@@ -61,6 +61,8 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
    "WriteHeaders",
    "LeftJustify",
    "ZeroFill",
+   "FixedWidth",
+   "Delimiter",
    "ColumnWidth",
    "WriteReport",
 };
@@ -75,6 +77,8 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
    Gmat::BOOLEAN_TYPE,       //"WriteHeaders",
    Gmat::ON_OFF_TYPE,        //"LeftJustify",
    Gmat::ON_OFF_TYPE,        //"ZeroFill",
+   Gmat::BOOLEAN_TYPE,       //"FixedWidth",
+   Gmat::STRING_TYPE,        //"Delimiter",
    Gmat::INTEGER_TYPE,       //"ColumnWidth",
    Gmat::BOOLEAN_TYPE,       //"WriteReport",
 };
@@ -102,6 +106,8 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    leftJustify     (true),
    zeroFill        (false),
    usingDefaultFileName (true),
+   fixedWidth      (true),
+   delimiter       (' '),
    lastUsedProvider(-1),
    mLastReportTime (0.0),
    usedByReport    (false),
@@ -174,6 +180,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
    usingDefaultFileName (rf.usingDefaultFileName),
+   fixedWidth      (rf.fixedWidth),
+   delimiter       (rf.delimiter),
    lastUsedProvider(-1),
    mLastReportTime (rf.mLastReportTime),
    usedByReport    (rf.usedByReport),
@@ -221,6 +229,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    leftJustify = rf.leftJustify;
    zeroFill = rf.zeroFill;
    usingDefaultFileName = rf.usingDefaultFileName;
+   fixedWidth = rf.fixedWidth;
+   delimiter = rf.delimiter;
    mParams = rf.mParams; 
    mNumParams = rf.mNumParams;
    mParamNames = rf.mParamNames;
@@ -482,13 +492,14 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    
    if (leftJustify)
       dstream.setf(std::ios::left);
-   
+
    // write to datastream
    for (UnsignedInt row=0; row < maxRow; row++)
    {
       for (int param=0; param < numData; param++)
       {
-         dstream.width(colWidths[param]);
+		  if (fixedWidth)
+			dstream.width(colWidths[param]);
          
          #if DBGLVL_WRITE_DATA > 1
          MessageInterface::ShowMessage
@@ -497,10 +508,20 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
          #endif
          
          UnsignedInt numRow = output[param].size();
-         if (numRow >= row+1)
-            dstream << output[param][row];
-         else if (numRow < maxRow)
-            dstream << "  ";
+		 if (fixedWidth)
+		 {
+			 if (numRow >= row+1)
+				dstream << output[param][row];
+			 else if (numRow < maxRow)
+				dstream << "  ";
+		 }
+		 else
+		 {
+			 if (numRow >= row+1)
+				dstream << output[param][row];
+			 if (param < (numData-1))
+				dstream << delimiter;
+		 }
       }
       dstream << std::endl;
       
@@ -897,6 +918,8 @@ bool ReportFile::GetBooleanParameter(const Integer id) const
       return active;
    case WRITE_HEADERS:
       return writeHeaders;
+   case FIXED_WIDTH:
+      return fixedWidth;
    default:
       return Subscriber::GetBooleanParameter(id);
    }
@@ -927,6 +950,9 @@ bool ReportFile::SetBooleanParameter(const Integer id, const bool value)
       writeHeaders = value;
       headerReset  = value;
       return value;
+   case FIXED_WIDTH:
+      fixedWidth = value;
+      return fixedWidth;
    default:
       return Subscriber::SetBooleanParameter(id, value);
    }
@@ -1033,6 +1059,10 @@ std::string ReportFile::GetStringParameter(const Integer id) const
    {
       return fullPathFileName;
    }
+   else if (id == DELIMITER)
+   {
+      return std::string(1,delimiter);
+   }
    
    return Subscriber::GetStringParameter(id);
 }
@@ -1120,6 +1150,19 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
             "ReportFile '%s'\n", value.c_str(), instanceName.c_str());
       #endif
       return AddParameter(value, mNumParams);
+   }
+   else if (id == DELIMITER)
+   {
+      #ifdef DEBUG_REPORTFILE_SET
+         MessageInterface::ShowMessage(
+            "ReportFile::SetStringParameter() Adding parameter '%s' to "
+            "ReportFile '%s'\n", value.c_str(), instanceName.c_str());
+      #endif
+	  if (value.length() > 0)
+		delimiter = value[0];
+	  else
+		delimiter = ' ';
+      return true;
    }
    
    return Subscriber::SetStringParameter(id, value);
@@ -1509,13 +1552,17 @@ void ReportFile::WriteHeaders()
           MessageInterface::ShowMessage("   column %d: width = %d\n", i, width);
           #endif
           
-          dstream.width(width + 3); // sets minimum field width
-          dstream.fill(' ');
+		  if (fixedWidth)
+			dstream.width(width + 3); // sets minimum field width
+	
+          dstream.fill(delimiter);
           
           if (leftJustify)
              dstream.setf(std::ios::left);
           
           dstream << mParamNames[i];
+		  if ((!fixedWidth) && (i < (mNumParams-1)))
+			  dstream << delimiter;
       }
       
       dstream << std::endl;

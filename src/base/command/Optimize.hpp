@@ -49,6 +49,7 @@ public:
    // Method to execute a callback from an external function
    virtual bool        ExecuteCallback();
    virtual bool        PutCallbackData(std::string &data);
+   virtual bool        PutCallbackRealData(RealArray &data);
    virtual std::string GetCallbackResults();
    virtual GmatBase*   Clone() const;
    const std::string&  GetGeneratingString(Gmat::WriteMode mode,
@@ -105,7 +106,8 @@ protected:
    
    StringArray         callbackResults;
    std::string         callbackData;
-    
+   RealArray           callbackRealData;
+   
    bool                optimizerInDebugMode;
 
    Integer             minimizeCount;

@@ -1310,9 +1310,9 @@ void PropagationConfigPanel::SaveData()
 //               theGravForce = new GravityField("", bodyName);
                theGravForce->SetSolarSystem(theSolarSystem);
                theGravForce->SetStringParameter("BodyName", bodyName);
-//               theGravForce->SetStringParameter("PotentialFile",
-////                     primaryBodyList[i]->potFile.c_str());
-//                     primaryBodyData->potFile.c_str());
+               theGravForce->SetStringParameter("PotentialFile",
+//                     primaryBodyList[i]->potFile.c_str());
+                    primaryBodyData->potFile.c_str());
 
                if (deg != -999)
                {

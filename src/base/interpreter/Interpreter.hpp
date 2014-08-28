@@ -111,7 +111,7 @@ public:
    GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
    GmatBase* CreateObject(const std::string &type, const std::string &name,
                           Integer manage = 1, bool createDefault = false,
-                          bool includeLineOnError = true);
+                          bool includeLineOnError = true, bool showWarning = true);
    
    void SetConfiguredObjectMap();
    void SetSolarSystemInUse(SolarSystem *ss);
@@ -316,10 +316,11 @@ protected:
    bool ParseVariableExpression(Parameter *var, const std::string &exp);
    
    // for error handling
-   void HandleError(const BaseException &e, bool writeLine = true, bool warning = false);
+   void HandleError(const BaseException &e, bool writeLine = true, bool isWarning = false,
+                    bool showWarning = true);
    void HandleErrorMessage(const BaseException &e, const std::string &lineNumber,
                            const std::string &line, bool writeLine = true,
-                           bool warning = false);
+                           bool isWarning = false, bool showWarning = true);
    
    // for branch command checking
    bool IsBranchCommand(const std::string &str);

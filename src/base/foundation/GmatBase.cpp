@@ -1204,6 +1204,14 @@ bool GmatBase::PutCallbackData(std::string &data)
 }
 
 //---------------------------------------------------------------------------
+// bool PutCallbackRealData(RealArray &data)
+//---------------------------------------------------------------------------
+bool GmatBase::PutCallbackRealData(RealArray &data)
+{
+   return false;
+}
+
+//---------------------------------------------------------------------------
 // std::string GetCallbackResults()
 //---------------------------------------------------------------------------
 std::string GmatBase::GetCallbackResults()

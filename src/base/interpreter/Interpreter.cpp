@@ -968,14 +968,14 @@ GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
 GmatBase* Interpreter::CreateObject(const std::string &type,
                                     const std::string &name,
                                     Integer manage, bool createDefault,
-                                    bool includeLineOnError)
+                                    bool includeLineOnError, bool showWarning)
 {
    #ifdef DEBUG_CREATE_OBJECT
    MessageInterface::ShowMessage
       ("Interpreter::CreateObject() type=<%s>, name=<%s>, manage=%d, createDefault=%d, "
-       "includeLineOnError=%d\n   continueOnError=%d, inCommandMode=%d, currentFunction=<%p>\n",
-       type.c_str(), name.c_str(), manage, createDefault, includeLineOnError, continueOnError,
-       inCommandMode, currentFunction);
+       "includeLineOnError=%d, showWarning=%d\n   continueOnError=%d, inCommandMode=%d, "
+       "currentFunction=<%p>\n", type.c_str(), name.c_str(), manage, createDefault,
+       includeLineOnError, showWarning, continueOnError, inCommandMode, currentFunction);
    #endif
    
    debugMsg = "In CreateObject()";
@@ -1046,7 +1046,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
                InterpreterException ex("");
                ex.SetDetails("%s object named \"%s\" already exists",
                              type.c_str(), name.c_str());
-               HandleError(ex, true, true);
+               HandleError(ex, true, true, showWarning);
                return obj;
             }
 //         }
@@ -7945,9 +7945,10 @@ AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
 
 
 //------------------------------------------------------------------------------
-// void HandleError(const BaseException &e, bool writeLine, bool warning ...)
+// void HandleError(const BaseException &e, bool writeLine, bool isWarning ...)
 //------------------------------------------------------------------------------
-void Interpreter::HandleError(const BaseException &e, bool writeLine, bool warning)
+void Interpreter::HandleError(const BaseException &e, bool writeLine, bool isWarning,
+                              bool showWarning)
 {
    if (writeLine)
    {
@@ -7964,11 +7965,11 @@ void Interpreter::HandleError(const BaseException &e, bool writeLine, bool warni
       lineNumber = GmatStringUtil::ToString(lineNum);
       currentLine = theReadWriter->GetCurrentLine();
       
-      HandleErrorMessage(e, lineNumber, currentLine, writeLine, warning);
+      HandleErrorMessage(e, lineNumber, currentLine, writeLine, isWarning, showWarning);
    }
    else
    {
-      HandleErrorMessage(e, "", "", writeLine, warning);
+      HandleErrorMessage(e, "", "", writeLine, isWarning, showWarning);
    }
 }
 
@@ -7979,11 +7980,11 @@ void Interpreter::HandleError(const BaseException &e, bool writeLine, bool warni
 void Interpreter::HandleErrorMessage(const BaseException &e,
                                      const std::string &lineNumber,
                                      const std::string &line,
-                                     bool writeLine, bool warning)
+                                     bool writeLine, bool isWarning, bool showWarning)
 {
    std::string currMsg = "";
    std::string msgKind = "**** ERROR **** ";
-   if (warning)
+   if (isWarning)
       msgKind = "*** WARNING *** ";
    
    // Added function name in the message (loj: 2008.08.29)
@@ -8020,8 +8021,11 @@ void Interpreter::HandleErrorMessage(const BaseException &e,
    }
    else
    {
-      if (warning)
-         MessageInterface::ShowMessage(msg);
+      if (isWarning)
+      {
+         if (showWarning)
+            MessageInterface::ShowMessage(msg);
+      }
       else
       {
          // remove duplicate exception message
