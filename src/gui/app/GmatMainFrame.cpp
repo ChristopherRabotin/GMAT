@@ -2348,10 +2348,12 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       }
       else
       {
+         // Convert wxString to std::string first (LOJ: 2014.09.03)
+         std::string fname = filename.WX_TO_STD_STRING;
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
-             "Please fix all errors listed in message window.\n", filename.c_str());
-
+             "Please fix all errors listed in message window.\n", fname.c_str());
+         
          // Clear command sequence before resource (loj: 2008.07.10)
          theGuiInterpreter->ClearCommandSeq();
          theGuiInterpreter->ClearResource();

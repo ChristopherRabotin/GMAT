@@ -5395,6 +5395,13 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 }
 
 
+//------------------------------------------------------------------------------
+// std::wstring StringToWideString(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Converts narrow string (std::string) to wide string (std::wstring).
+ */
+//------------------------------------------------------------------------------
 std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 {
    // Convert an ASCII string to a Unicode String
@@ -5425,6 +5432,13 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string WideStringToString(const std::wstring &wstr)
+//------------------------------------------------------------------------------
+/**
+ * Converts wide string (std::wstring) to narrow string (std::string).
+ */
+//------------------------------------------------------------------------------
 std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
 {
    // Convert a Unicode string to an ASCII string
@@ -5445,6 +5459,13 @@ std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string WideStringToString(const wchar_t *wchar)
+//------------------------------------------------------------------------------
+/**
+ * Converts wide string (wchar_t*) to narrow string (std::string).
+ */
+//------------------------------------------------------------------------------
 std::string GmatStringUtil::WideStringToString(const wchar_t *wchar)
 {
    std::wstring wstr(wchar);
