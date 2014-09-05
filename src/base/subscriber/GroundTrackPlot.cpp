@@ -31,6 +31,7 @@
 //#define DBGLVL_OBJ 1
 //#define DBGLVL_INIT 2
 //#define DBGLVL_UPDATE 1
+//#define DEBUG_TEXTURE_MAP
 
 //---------------------------------
 // static data
@@ -604,17 +605,19 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
          // Since ground track data uses body fixed coordinates, name it here
          mViewCoordSysName = value + "Fixed";
          
-         // Get default texture map file for the new body
-         //FileManager *fm = FileManager::Instance();
-         std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
-         // Get path from the FileManager (LOJ: 2014.06.18)
-         //textureMapFileName = fm->GetFullPathname(mapFileType);
-         SetTextureMapFileName("", mapFileType, false, false);
-         //#if DBGLVL_PARAM_STRING
-         MessageInterface::ShowMessage
-            ("   ==> this = <%p>'%s', textureMapFile changed to '%s'\n", this,
-             GetName().c_str(), textureMapFileName.c_str());
-         //#endif
+         // Just set central body name here. The default texturemap will be set
+         // on the celestial body (Fix for GMT-4693 LOJ: 2014.08.27)
+         // // Get default texture map file for the new body
+         // //FileManager *fm = FileManager::Instance();
+         // std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+         // // Get path from the FileManager (LOJ: 2014.06.18)
+         // //textureMapFileName = fm->GetFullPathname(mapFileType);
+         // SetTextureMapFileName("", mapFileType, false, false);
+         // #if DBGLVL_PARAM_STRING
+         // MessageInterface::ShowMessage
+         //    ("   ==> this = <%p>'%s', textureMapFile changed to '%s'\n", this,
+         //     GetName().c_str(), textureMapFileName.c_str());
+         // #endif
       }
       return true;
    }
@@ -1143,8 +1146,17 @@ void GroundTrackPlot::SetTextureMapFileName(const std::string &mapName,
    if (mapName == "")
       textureMapFileName = fm->GetFilename(whichMap);
    
-   textureMapFullPath =
-      fm->FindPath(textureMapFileName, whichMap, true, writeWarning, writeInfo, GetName());
+   try
+   {
+      textureMapFullPath =
+         fm->FindPath(textureMapFileName, whichMap, true, writeWarning, writeInfo, GetName());
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_TEXTURE_MAP
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+      #endif
+   }
    
    #ifdef DEBUG_TEXTURE_MAP
    MessageInterface::ShowMessage

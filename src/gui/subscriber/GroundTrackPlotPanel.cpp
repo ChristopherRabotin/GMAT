@@ -37,6 +37,7 @@
 //#define DEBUG_PANEL_LOAD 1
 //#define DEBUG_PANEL_SAVE 1
 //#define DEBUG_PANEL_CHECKBOX 1
+//#define DEBUG_CENTRAL_BODY_CHANGE
 //#define DEBUG_PANEL_SHOW 1
 
 //------------------------------
@@ -518,8 +519,9 @@ void GroundTrackPlotPanel::SaveData()
 {
    #if DEBUG_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("GroundTrackPlotPanel::SaveData() entered, mHasObjectListChanged=%d, "
-       "mHasIntegerDataChanged=%d, mHasTextureMapChanged=%d\n", mHasObjectListChanged,
+      ("GroundTrackPlotPanel::SaveData() entered,mHasCentralBodyChanged=%d, "
+       " mHasObjectListChanged=%d\n   mHasIntegerDataChanged=%d, "
+       "mHasTextureMapChanged=%d\n", mHasCentralBodyChanged, mHasObjectListChanged,
        mHasIntegerDataChanged, mHasTextureMapChanged);
    #endif
    
@@ -793,6 +795,10 @@ void GroundTrackPlotPanel::OnComboBoxChange(wxCommandEvent& event)
          theGuiInterpreter->GetConfiguredObject(mCentralBodyComboBox->GetValue().c_str());
       Integer id = body->GetParameterID("TextureMapFileName");
       wxString bodyTexture = body->GetStringParameter(id).c_str();
+      #ifdef DEBUG_CENTRAL_BODY
+      MessageInterface::ShowMessage
+         ("OnComboBoxChange(), bodyTexture = '%s'\n", bodyTexture.c_str());
+      #endif
       mTextureMapTextCtrl->SetValue(bodyTexture);
       mTextureMapTextCtrl->SetInsertionPointEnd();
    }
