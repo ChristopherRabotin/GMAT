@@ -993,7 +993,7 @@ Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
 }
 
 //------------------------------------------------------------------------------
-// Integer GetFrequencyBand(Real frequency)
+// Integer FrequencyBand(Real frequency)
 //------------------------------------------------------------------------------
 /**
  * Get frequency band corresponding to a given frequency
