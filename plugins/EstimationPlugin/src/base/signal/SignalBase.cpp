@@ -31,6 +31,7 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
+//#define DEBUG_MOVETOEPOCH
 
 //---------------------------------
 // static data
@@ -1387,6 +1388,9 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
          theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -         // made changes by TUAN NGUYEN
                             ssb->GetMJ2000PrecState(theData.rPrecTime);                         // made changes by TUAN NGUYEN
       }
+      #ifdef DEBUG_MOVETOEPOCH
+      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2]);
+      #endif
    }
 
    // 2. Propagate transmit node at time theEpoch and update it's SignalData
@@ -1417,6 +1421,9 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
          theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) -         // made changes by TUAN NGUYEN
                             ssb->GetMJ2000PrecState(theData.tPrecTime);                         // made changes by TUAN NGUYEN
       }
+      #ifdef DEBUG_MOVETOEPOCH
+      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2]);
+      #endif
    }
 }
 #endif
