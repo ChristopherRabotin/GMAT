@@ -1528,3 +1528,157 @@ bool MeasureModel::GetTimeTagFlag()
 }
 
 
+// made changes by TUAN NGUYEN
+#include "GroundstationInterface.hpp"
+#include "Transmitter.hpp"
+Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
+{
+   // 1. Specify the first signal leg
+   PhysicalSignal* fleg = (PhysicalSignal*)signalPaths[pathIndex];
+   SignalData sd = fleg->GetSignalData();
+
+
+   // 2. Get frequency from sd.tNode
+   if (sd.tNode == NULL)
+   {
+      std::stringstream ss;
+      ss << "Error: Transmit participant of leg " << GetName() << " is NULL";
+      throw MeasurementException(ss.str());
+   }
+
+   Real frequency;                                                                     // unit: Mhz
+   if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      // Get frequency from ground station's transmiter or from ramped frequency table
+      if (rampTB)
+      {
+         // Get frequency from ramped table if it is used
+         GmatTime t1 = sd.tPrecTime - sd.tDelay/GmatTimeConstants::SECS_PER_DAY;
+         frequency = fleg->GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;       // unit: Mhz
+      }
+      else
+      {
+         // Get frequency from ground station' transmitter
+         ObjectArray hardwareList = ((GroundstationInterface*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transmitter"))
+            {
+               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();   // unit: MHz 
+               break;
+            }
+         }
+         
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+            throw MeasurementException(ss.str());
+         }
+      }
+   }
+   else
+   {
+      // Get frequency from spacecraft's transmitter or transponder
+      ObjectArray hardwareList = ((Spacecraft*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Transmitter"))
+         {
+            frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+            break;
+         }
+      }
+
+      if (i == hardwareList.size())
+      {
+         std::stringstream ss;
+         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+         throw MeasurementException(ss.str());
+      }
+   }
+
+   return frequency;
+}
+
+
+// made changes by TUAN NGUYEN
+Integer MeasureModel::GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
+{
+   // 1. Specify the first signal leg
+   PhysicalSignal* fleg = (PhysicalSignal*)signalPaths[pathIndex];
+   SignalData sd = fleg->GetSignalData();
+
+   // 2. Get frequency from sd.tNode
+   if (sd.tNode == NULL)
+   {
+      std::stringstream ss;
+      ss << "Error: Transmit participant of leg " << GetName() << " is NULL";
+      throw MeasurementException(ss.str());
+   }
+
+   Real freqBand;
+   Real frequency;
+   if (sd.tNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      // Get frequency from ground station's transmiter or from ramped frequency table
+      if (rampTB)
+      {
+         // Get frequency from ramped table if it is used
+         GmatTime t1 = sd.tPrecTime - sd.tDelay/GmatTimeConstants::SECS_PER_DAY;
+         freqBand = fleg->GetFrequencyBandFromRampTable(t1.GetMjd(), rampTB);
+      }
+      else
+      {
+         // Get frequency from ground station' transmitter
+         ObjectArray hardwareList = ((GroundstationInterface*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+         UnsignedInt i;
+         for (i = 0; i < hardwareList.size(); ++i)
+         {
+            if (hardwareList[i]->IsOfType("Transmitter"))
+            {
+               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();   // unit: MHz
+               freqBand = fleg->FrequencyBand(frequency*1.0e6);
+               break;
+            }
+         }
+         
+         if (i == hardwareList.size())
+         {
+            std::stringstream ss;
+            ss << "Error: Ground station " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+            throw MeasurementException(ss.str());
+         }
+      }
+   }
+   else
+   {
+      // Get frequency from spacecraft's transmitter or transponder
+      ObjectArray hardwareList = ((Spacecraft*)sd.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Transmitter"))
+         {
+            frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+            freqBand = fleg->FrequencyBand(frequency*1.0e6);
+            break;
+         }
+      }
+
+      if (i == hardwareList.size())
+      {
+         std::stringstream ss;
+         ss << "Error: Spacecraft " << sd.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+         throw MeasurementException(ss.str());
+      }
+   }
+
+   return freqBand;
+}
+
+
+
+

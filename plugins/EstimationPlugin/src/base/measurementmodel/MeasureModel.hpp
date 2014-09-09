@@ -134,6 +134,10 @@ public:
    /// Get flag to indicate measurement time tag                                                             // made changes by TUAN NGUYEN
    bool GetTimeTagFlag();                                                                                    // made changes by TUAN NGUYEN
 
+   /// Get uplink frequency and uplink band for a given signal path
+   Real    GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);                    // made changes by TUAN NGUYEN
+   Integer GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);                // made changes by TUAN NGUYEN
+
    // Measurement Model Settings
    virtual bool SetProgressReporter(ProgressReporter* reporter);
 
@@ -154,6 +158,7 @@ protected:
    std::vector<SignalData*> theData;         // theData[i] points to theData of the head of signalPaths[i]
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
+
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
    /// Flag used to control light time solution generation
