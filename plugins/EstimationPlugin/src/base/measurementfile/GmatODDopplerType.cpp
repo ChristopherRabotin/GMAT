@@ -292,8 +292,8 @@ bool GmatODDopplerType::AddMeasurement(MeasurementData *md)
    bool retval = false;
 
    std::stringstream dataLine;
-   char databuffer[20];
-   char epochbuffer[20];
+   char databuffer[200];
+   char epochbuffer[200];
 
    Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
          TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epoch,
