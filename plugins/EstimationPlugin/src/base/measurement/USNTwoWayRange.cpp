@@ -845,20 +845,249 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("   Delay between transmiting signal and receiving signal at transponder:  t2T - t2R = %.12le s\n", (t2T-t2R)*86400);
       #endif
       
+      // 5. Calculate ET-TAI correction
+      Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);
 
-      // 5. Get sensors used in USN 2-ways range
+
+      RealArray uplinkCorrection, downlinkCorrection;
+      Real uplinkRangeCorrection, downlinkRangeCorrection, realRange;
+      uplinkRangeCorrection = downlinkRangeCorrection = 0.0;
+      for (int i= 0; i < 3; ++i)
+      {
+         uplinkCorrection.push_back(0.0);
+         downlinkCorrection.push_back(0.0);
+      }
+      
+      // 6. Get sensors used in USN 2-ways range
       ObjectArray objList1;
       ObjectArray objList2;
       ObjectArray objList3;
       //         objList1 := all transmitters in participantHardware list
       //         objList2 := all receivers in participantHardware list
       //         objList3 := all transponders in participantHardware list
-      if (participantHardware.empty()||
-            ((!participantHardware.empty())&&
+      if (!(participantHardware.empty()||
+             ((!participantHardware.empty())&&
               participantHardware[0].empty()&&
               participantHardware[1].empty()
-            )
-          )
+             )
+           )
+         )
+      {
+
+         for(std::vector<Hardware*>::iterator hw = participantHardware[0].begin();
+            hw != this->participantHardware[0].end(); ++hw)
+         {
+            if ((*hw) != NULL)
+            {
+               if ((*hw)->GetTypeName() == "Transmitter")
+                  objList1.push_back(*hw);
+               if ((*hw)->GetTypeName() == "Receiver")
+                  objList2.push_back(*hw);
+            }
+            else
+               MessageInterface::ShowMessage(" sensor = NULL\n");
+         }
+
+         for(std::vector<Hardware*>::iterator hw = participantHardware[1].begin();
+            hw != this->participantHardware[1].end(); ++hw)
+         {
+            if ((*hw) != NULL)
+            {
+               if ((*hw)->GetTypeName() == "Transponder")
+                  objList3.push_back(*hw);
+            }
+            else
+               MessageInterface::ShowMessage(" sensor = NULL\n");
+         }
+
+         if (objList1.size() != 1)
+            throw MeasurementException(((objList1.size() == 0)?"Error: The first participant does not have a transmitter to send signal.\n":"Error: The first participant has more than one transmitter.\n"));
+         if (objList2.size() != 1)
+            throw MeasurementException(((objList2.size() == 0)?"Error: The first participant does not have a receiver to receive signal.\n":"Error: The first participant has more than one receiver.\n"));
+         if (objList3.size() != 1)
+            throw MeasurementException((objList3.size() == 0)?"Error: The second participant does not have a transponder to transpond signal.\n":"Error: The second participant has more than one transponder.\n");
+
+         Transmitter*    gsTransmitter    = (Transmitter*)objList1[0];
+         Receiver*       gsReceiver       = (Receiver*)objList2[0];
+         Transponder*    scTransponder    = (Transponder*)objList3[0];
+         if (gsTransmitter == NULL)
+            throw MeasurementException("Transmitter is NULL object.\n");
+         if (gsReceiver == NULL)
+            throw MeasurementException("Receiver is NULL object.\n");
+         if (scTransponder == NULL)
+            throw MeasurementException("Transponder is NULL object.\n");
+
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("5. Sensors, delays, and signals:\n");
+            MessageInterface::ShowMessage("   List of sensors: %s, %s, %s\n",
+               gsTransmitter->GetName().c_str(), gsReceiver->GetName().c_str(),
+               scTransponder->GetName().c_str());
+         #endif
+
+
+         // 7. Get transponder delays: (Note that: USN 2-way range only needs transponder delay for calculation)
+         targetDelay = scTransponder->GetDelay();
+
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("   Transponder delay = %le s\n", scTransponder->GetDelay());
+         #endif
+     
+
+         // 8. Get frequency from transmitter of ground station (participants[0])
+         Real uplinkFreq;
+         if (obsData == NULL)                                                                                 // made changes by TUAN NGUYEN
+         {
+            if (rampTB == NULL)
+            {
+               // Get uplink frequency from GMAT script when ramp table is not used
+               Signal* uplinkSignal = gsTransmitter->GetSignal();
+               uplinkFreq = uplinkSignal->GetValue();                  // unit: MHz
+               frequency = uplinkFreq*1.0e6;                           // unit: Hz
+
+               // Get uplink band based on definition of frequency range
+               freqBand = FrequencyBand(frequency);
+
+               // Range modulo constant is specified by GMAT script
+               #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+                  MessageInterface::ShowMessage("   Uplink frequency is gotten from GMAT script...\n"); 
+               #endif
+            }
+            else
+            {
+               // Get uplink frequency at a given time from ramped frequency table
+               frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+               uplinkFreq = frequency/1.0e6;                          // unit MHz
+
+               // Get frequency band from ramp table at given time
+               freqBand = GetUplinkBandFromRampTable(t1T);
+
+               // Range modulo constant is specified by GMAT script
+               #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+                  MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
+               #endif
+            }
+         }
+         else
+         {
+            if (rampTB == NULL)
+            {
+               // Get uplink frequency at a given time from observation data
+               frequency = obsData->uplinkFreq;                       // unit: Hz   
+
+               #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+                  MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
+               #endif
+            }
+            else
+            {
+               // Get uplink frequency at a given time from ramped frequency table
+               frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+
+               #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+                  MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
+               #endif
+            }
+
+            uplinkFreq = frequency/1.0e6;                            // unit: MHz
+            freqBand = obsData->uplinkBand;
+            obsValue = obsData->value;                               // unit: range unit
+
+            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+               MessageInterface::ShowMessage("   Uplink band, range modulo constant, and observation value are gotten from observation data...\n"); 
+            #endif
+         }
+
+         // 9. Calculate media correction for uplink leg:
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS   
+            MessageInterface::ShowMessage("6. Media correction for uplink leg\n");
+            MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
+         #endif
+
+         // In uplink leg, r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system
+         uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);
+
+         uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
+         Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("   Uplink media correction           = %.12lf m\n",uplinkCorrection[0]);
+            MessageInterface::ShowMessage("   Uplink relativity correction      = %.12lf km\n",uplinkLeg.GetRelativityCorrection());
+            MessageInterface::ShowMessage("   Uplink total range correction     = %.12lf km\n",uplinkRangeCorrection);
+            MessageInterface::ShowMessage("   Uplink precision light time range = %.12lf km\n",uplinkRange);
+            MessageInterface::ShowMessage("   Uplink real range                 = %.12lf km\n",uplinkRealRange);
+         #endif
+
+
+         // 10. Doppler shift the frequency from the transmitter using uplinkRangeRate:
+         Real uplinkDSFreq = (1 - uplinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*uplinkFreq;
+
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("7. Transponder input and output frequencies\n");
+            MessageInterface::ShowMessage("   Uplink Doppler shift frequency = %.12lf MHz\n", uplinkDSFreq);
+         #endif
+
+         // 11.Set frequency for the input signal of transponder
+         Signal* inputSignal = scTransponder->GetSignal(0);
+         inputSignal->SetValue(uplinkDSFreq);
+         scTransponder->SetSignal(inputSignal, 0);
+
+         // 12. Check the transponder feasibility to receive the input signal:
+         if (scTransponder->IsFeasible(0) == false)
+         {
+            currentMeasurement.isFeasible = false;
+            currentMeasurement.value[0] = 0;
+            throw MeasurementException("The transponder is unfeasible to receive uplink signal.\n");
+         }
+
+         // 13. Get frequency of transponder output signal
+         Signal* outputSignal = scTransponder->GetSignal(1);
+         Real downlinkFreq = outputSignal->GetValue();
+
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("    Downlink frequency = %.12lf Mhz\n", downlinkFreq);
+         #endif
+
+         // 14. Doppler shift the transponder output frequency:
+         Real downlinkDSFreq = (1 - downlinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*downlinkFreq;
+
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("    Downlink Doppler shift frequency = %.12lf MHz\n", downlinkDSFreq);
+         #endif
+
+         // 15. Set frequency on receiver
+         Signal* downlinkSignal = gsReceiver->GetSignal();
+         downlinkSignal->SetValue(downlinkDSFreq);
+
+         // 16. Check the receiver feasibility to receive the downlink signal
+         if (gsReceiver->IsFeasible() == false)
+         {
+            currentMeasurement.isFeasible = false;
+            currentMeasurement.value[0] = 0;
+            throw MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
+         }
+
+         // 17. Calculate media correction for downlink leg:
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
+         #endif
+         // In down link leg, r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system
+         downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);
+
+         downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
+         Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("   Downlink media correction           = %.12lf m\n",downlinkCorrection[0]);
+            MessageInterface::ShowMessage("   Downlink relativity correction      = %.12lf km\n",downlinkLeg.GetRelativityCorrection());
+            MessageInterface::ShowMessage("   Downlink total range correction     = %.12lf km\n",downlinkRangeCorrection);
+            MessageInterface::ShowMessage("   Downlink precision light time range = %.12lf km\n",downlinkRange);
+            MessageInterface::ShowMessage("   Downlink real range                 = %.12lf km\n",downlinkRealRange);
+         #endif
+
+         // 18. Calculate real range
+         realRange = uplinkRealRange + downlinkRealRange +
+            (targetDelay + ettaiCorrection)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
+
+      }
+      else
       {
          #ifdef IONOSPHERE
             if ((troposphere != NULL)||(ionosphere != NULL))
@@ -867,243 +1096,13 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
          #endif
                throw MeasurementException("Error: missing transmiter, transponder, or receiver in order to compute media correction\n");
 
-         Real realRange = (uplinkRange + downlinkRange)/2;
-         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("   Range = %.12lf km\n", realRange);
-         #endif
-
-         // Set value for currentMeasurement
-         currentMeasurement.value[0] = realRange;
-         // @todo: verify feasibility for uplink and downlink
-         currentMeasurement.isFeasible = true;
-
-         return true;
+         // No hardware useage in this case. It will have no media correction and hardware delay
+         // light time correction, relativity correction, and ET-TAI correction is still added
+         realRange = uplinkRange + downlinkRange + ettaiCorrection*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
       }
 
-      for(std::vector<Hardware*>::iterator hw = participantHardware[0].begin();
-            hw != this->participantHardware[0].end(); ++hw)
-      {
-         if ((*hw) != NULL)
-         {
-            if ((*hw)->GetTypeName() == "Transmitter")
-               objList1.push_back(*hw);
-            if ((*hw)->GetTypeName() == "Receiver")
-               objList2.push_back(*hw);
-         }
-         else
-            MessageInterface::ShowMessage(" sensor = NULL\n");
-      }
 
-      for(std::vector<Hardware*>::iterator hw = participantHardware[1].begin();
-            hw != this->participantHardware[1].end(); ++hw)
-      {
-         if ((*hw) != NULL)
-         {
-            if ((*hw)->GetTypeName() == "Transponder")
-               objList3.push_back(*hw);
-         }
-         else
-            MessageInterface::ShowMessage(" sensor = NULL\n");
-      }
-
-      if (objList1.size() != 1)
-         throw MeasurementException(((objList1.size() == 0)?"Error: The first participant does not have a transmitter to send signal.\n":"Error: The first participant has more than one transmitter.\n"));
-      if (objList2.size() != 1)
-         throw MeasurementException(((objList2.size() == 0)?"Error: The first participant does not have a receiver to receive signal.\n":"Error: The first participant has more than one receiver.\n"));
-      if (objList3.size() != 1)
-         throw MeasurementException((objList3.size() == 0)?"Error: The second participant does not have a transponder to transpond signal.\n":"Error: The second participant has more than one transponder.\n");
-
-      Transmitter*    gsTransmitter    = (Transmitter*)objList1[0];
-      Receiver*       gsReceiver       = (Receiver*)objList2[0];
-      Transponder*    scTransponder    = (Transponder*)objList3[0];
-      if (gsTransmitter == NULL)
-         throw MeasurementException("Transmitter is NULL object.\n");
-      if (gsReceiver == NULL)
-         throw MeasurementException("Receiver is NULL object.\n");
-      if (scTransponder == NULL)
-         throw MeasurementException("Transponder is NULL object.\n");
-
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("5. Sensors, delays, and signals:\n");
-         MessageInterface::ShowMessage("   List of sensors: %s, %s, %s\n",
-               gsTransmitter->GetName().c_str(), gsReceiver->GetName().c_str(),
-               scTransponder->GetName().c_str());
-      #endif
-
-
-      // 6. Get transponder delays: (Note that: USN 2-way range only needs transponder delay for calculation)
-      targetDelay = scTransponder->GetDelay();
-
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("   Transponder delay = %le s\n", scTransponder->GetDelay());
-      #endif
-     
-
-      //// 7. Get frequency from transmitter of ground station (participants[0])
-      //Signal* uplinkSignal = gsTransmitter->GetSignal();
-      //Real uplinkFreq = uplinkSignal->GetValue();
-
-      //#ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-      //   MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
-      //#endif
-
-      // 7. Get frequency from transmitter of ground station (participants[0])
-      Real uplinkFreq;
-      if (obsData == NULL)                                                                                 // made changes by TUAN NGUYEN
-      {
-         if (rampTB == NULL)
-         {
-            // Get uplink frequency from GMAT script when ramp table is not used
-            Signal* uplinkSignal = gsTransmitter->GetSignal();
-            uplinkFreq = uplinkSignal->GetValue();                  // unit: MHz
-            frequency = uplinkFreq*1.0e6;                           // unit: Hz
-
-            // Get uplink band based on definition of frequency range
-            freqBand = FrequencyBand(frequency);
-
-            // Range modulo constant is specified by GMAT script
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-               MessageInterface::ShowMessage("   Uplink frequency is gotten from GMAT script...\n"); 
-            #endif
-         }
-         else
-         {
-            // Get uplink frequency at a given time from ramped frequency table
-            frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
-            uplinkFreq = frequency/1.0e6;                          // unit MHz
-
-            // Get frequency band from ramp table at given time
-            freqBand = GetUplinkBandFromRampTable(t1T);
-
-            // Range modulo constant is specified by GMAT script
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-               MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
-            #endif
-         }
-      }
-      else
-      {
-         if (rampTB == NULL)
-         {
-            // Get uplink frequency at a given time from observation data
-            frequency = obsData->uplinkFreq;                       // unit: Hz   
-
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-            MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
-            #endif
-         }
-         else
-         {
-            // Get uplink frequency at a given time from ramped frequency table
-            frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
-
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-               MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
-            #endif
-         }
-
-         uplinkFreq = frequency/1.0e6;                            // unit: MHz
-         freqBand = obsData->uplinkBand;
-         obsValue = obsData->value;                               // unit: range unit
-
-         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-            MessageInterface::ShowMessage("   Uplink band, range modulo constant, and observation value are gotten from observation data...\n"); 
-         #endif
-
-      }
-
-      // 8. Calculate media correction for uplink leg:
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS   
-         MessageInterface::ShowMessage("6. Media correction for uplink leg\n");
-         MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
-      #endif
-
-      // In uplink leg, r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system
-      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);
-
-      Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
-      Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("   Uplink media correction           = %.12lf m\n",uplinkCorrection[0]);
-         MessageInterface::ShowMessage("   Uplink relativity correction      = %.12lf km\n",uplinkLeg.GetRelativityCorrection());
-         MessageInterface::ShowMessage("   Uplink total range correction     = %.12lf km\n",uplinkRangeCorrection);
-         MessageInterface::ShowMessage("   Uplink precision light time range = %.12lf km\n",uplinkRange);
-         MessageInterface::ShowMessage("   Uplink real range                 = %.12lf km\n",uplinkRealRange);
-      #endif
-
-
-      // 9. Doppler shift the frequency from the transmitter using uplinkRangeRate:
-      Real uplinkDSFreq = (1 - uplinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*uplinkFreq;
-
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("7. Transponder input and output frequencies\n");
-         MessageInterface::ShowMessage("   Uplink Doppler shift frequency = %.12lf MHz\n", uplinkDSFreq);
-      #endif
-
-      // 10.Set frequency for the input signal of transponder
-      Signal* inputSignal = scTransponder->GetSignal(0);
-      inputSignal->SetValue(uplinkDSFreq);
-      scTransponder->SetSignal(inputSignal, 0);
-
-
-      // 11. Check the transponder feasibility to receive the input signal:
-      if (scTransponder->IsFeasible(0) == false)
-      {
-          currentMeasurement.isFeasible = false;
-          currentMeasurement.value[0] = 0;
-          throw MeasurementException("The transponder is unfeasible to receive uplink signal.\n");
-      }
-
-      // 12. Get frequency of transponder output signal
-      Signal* outputSignal = scTransponder->GetSignal(1);
-      Real downlinkFreq = outputSignal->GetValue();
-
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("    Downlink frequency = %.12lf Mhz\n", downlinkFreq);
-      #endif
-
-      // 13. Doppler shift the transponder output frequency:
-      Real downlinkDSFreq = (1 - downlinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*downlinkFreq;
-
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("    Downlink Doppler shift frequency = %.12lf MHz\n", downlinkDSFreq);
-      #endif
-
-      // 14. Set frequency on receiver
-      Signal* downlinkSignal = gsReceiver->GetSignal();
-      downlinkSignal->SetValue(downlinkDSFreq);
-
-      // 15. Check the receiver feasibility to receive the downlink signal
-      if (gsReceiver->IsFeasible() == false)
-      {
-         currentMeasurement.isFeasible = false;
-         currentMeasurement.value[0] = 0;
-         throw MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
-      }
-
-      // 16. Calculate media correction for downlink leg:
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
-      #endif
-      // In down link leg, r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system
-      RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);
-
-      Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
-      Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
-      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("   Downlink media correction           = %.12lf m\n",downlinkCorrection[0]);
-         MessageInterface::ShowMessage("   Downlink relativity correction      = %.12lf km\n",downlinkLeg.GetRelativityCorrection());
-         MessageInterface::ShowMessage("   Downlink total range correction     = %.12lf km\n",downlinkRangeCorrection);
-         MessageInterface::ShowMessage("   Downlink precision light time range = %.12lf km\n",downlinkRange);
-         MessageInterface::ShowMessage("   Downlink real range                 = %.12lf km\n",downlinkRealRange);
-      #endif
-
-
-      // 17. Calculate ET-TAI correction
-      Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);
-
-
-      //18. Verify uplink leg light path not to be blocked by station's central body
+      //19. Verify uplink leg light path not to be blocked by station's central body
       UpdateRotationMatrix(t1T, "R_o_j2k");
       Rvector3 outState = (R_o_j2k * (r4B - r3B)).GetUnitVector();
       currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
@@ -1139,12 +1138,8 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       }
 
 
-      // 19. Calculate real range
-      Real realRange = uplinkRealRange + downlinkRealRange +
-            (targetDelay + ettaiCorrection)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
-      
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-         MessageInterface::ShowMessage("9. Calculated half range:\n");
+         MessageInterface::ShowMessage("5. Calculated half range:\n");
          MessageInterface::ShowMessage("   Media correction                    = %.12lf km\n", (uplinkCorrection[0] + downlinkCorrection[0])/2);
          MessageInterface::ShowMessage("   Relativity correction               = %.12lf km\n", (uplinkLeg.GetRelativityCorrection() + downlinkLeg.GetRelativityCorrection())/2);
          MessageInterface::ShowMessage("   Total range correction              = %.12lf km\n", (uplinkRangeCorrection + downlinkRangeCorrection)/2);
