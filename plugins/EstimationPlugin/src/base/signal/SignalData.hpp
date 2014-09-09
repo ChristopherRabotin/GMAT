@@ -110,6 +110,11 @@ public:
    /// The range rate vector from transmit to receive node in obs coordinates
    Rvector3 rangeRateVecObs;
 
+   /// feasibility
+   bool        feasibility;            // Flag indicate signal is feasible          // made changes by TUAN NGUYEN
+   std::string feasibilityReason;      // reason why signal is unfeasible           // made changes by TUAN NGUYEN
+   Real        feasibilityValue;       // Contain elevation angle                   // made changes by TUAN NGUYEN
+
    // State Transition Matrices for derivatives of light time measurements
    /// The STM at the transmitter
    Rmatrix66 tSTM;

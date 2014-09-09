@@ -53,6 +53,9 @@ SignalData::SignalData() :
    tDelay               (0.0),                      // made changes by TUAN NGUYEN
    rDelay               (0.0),                      // made changes by TUAN NGUYEN
    solveLightTime       (true),
+   feasibility          (true),                     // made changes by TUAN NGUYEN
+   feasibilityReason    ("N"),                      // made changes by TUAN NGUYEN
+   feasibilityValue     (90.0),                     // made changes by TUAN NGUYEN
    next                 (NULL)
 {
 }
@@ -122,6 +125,9 @@ SignalData::SignalData(const SignalData& sd) :
    tDelay               (sd.tDelay),                    // made changes by TUAN NGUYEN
    rDelay               (sd.rDelay),                    // made changes by TUAN NGUYEN
    solveLightTime       (sd.solveLightTime),
+   feasibility          (sd.feasibility),               // made changes by TUAN NGUYEN
+   feasibilityReason    (sd.feasibilityReason),         // made changes by TUAN NGUYEN
+   feasibilityValue     (sd.feasibilityValue),          // made changes by TUAN NGUYEN
    next                 (NULL)
 {
 }
@@ -184,6 +190,9 @@ SignalData& SignalData::operator=(const SignalData& sd)
       tDelay               = sd.tDelay;                  // made changes by TUAN NGUYEN
       rDelay               = sd.rDelay;                  // made changes by TUAN NGUYEN
       solveLightTime       = sd.solveLightTime;
+      feasibility          = sd.feasibility;             // made changes by TUAN NGUYEN
+      feasibilityReason    = sd.feasibilityReason;       // made changes by TUAN NGUYEN
+      feasibilityValue     = sd.feasibilityValue;        // made changes by TUAN NGUYEN
       next                 = NULL;
    }
 
