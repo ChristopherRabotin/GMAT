@@ -19,8 +19,10 @@
 //------------------------------------------------------------------------------
 
 #include "RangeAdapterKm.hpp"
+#include "RandomNumber.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>
 
 
 //#define DEBUG_ADAPTER_EXECUTION
@@ -103,6 +105,84 @@ RangeAdapterKm& RangeAdapterKm::operator=(const RangeAdapterKm& rak)
 GmatBase* RangeAdapterKm::Clone() const
 {
    return new RangeAdapterKm(*this);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Returns the script name for the parameter
+ *
+ * @param id The id of the parameter
+ *
+ * @return The script name
+ */
+//------------------------------------------------------------------------------
+std::string RangeAdapterKm::GetParameterText(const Integer id) const
+{
+   if (id >= AdapterParamCount && id < RangeAdapterKmParamCount)
+      return PARAMETER_TEXT[id - AdapterParamCount];
+   return TrackingDataAdapter::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string& str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID for a scriptable parameter
+ *
+ * @param str The string used for the parameter
+ *
+ * @return The parameter ID
+ */
+//------------------------------------------------------------------------------
+Integer RangeAdapterKm::GetParameterID(const std::string& str) const
+{
+   for (Integer i = AdapterParamCount; i < RangeAdapterKmParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - AdapterParamCount])
+         return i;
+   }
+   return TrackingDataAdapter::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the type for a specified parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The parameter's type
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType RangeAdapterKm::GetParameterType(const Integer id) const
+{
+   if (id >= AdapterParamCount && id < RangeAdapterKmParamCount)
+      return PARAMETER_TYPE[id - AdapterParamCount];
+
+   return TrackingDataAdapter::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a text description for a parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The description string
+ */
+//------------------------------------------------------------------------------
+std::string RangeAdapterKm::GetParameterTypeString(const Integer id) const
+{
+   return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -207,25 +287,48 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   //if (calcData->CalculateMeasurement(withLighttime))                         // made changes by TUAN NGUYEN
    if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))   // made changes by TUAN NGUYEN
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
+      std::string unfeasibilityReason;
+      Real        unfeasibilityValue;
+
+      // set to default
+      cMeasurement.isFeasible = true;
+      cMeasurement.unfeasibleReason = "N";
+      cMeasurement.feasibilityValue = 90.0;
 
       RealArray values;
       for (UnsignedInt i = 0; i < data.size(); ++i)
       {
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("===================================================================\n");
-            MessageInterface::ShowMessage("====         Range Calculation for Signal Path %dth    ====\n", i);
-            MessageInterface::ShowMessage("===================================================================\n");
-         #endif
-
          // Calculate C-value for signal path ith:
          values.push_back(0.0);
          SignalData *current = data[i];
+         SignalData *first = current;
+         UnsignedInt legIndex = 0;
+         
          while (current != NULL)
          {
+            ++legIndex;
+            // Set feasibility value
+            if (current->feasibilityReason == "N")
+            {
+               if (current->stationParticipant)
+                  cMeasurement.feasibilityValue = current->feasibilityValue;
+            }
+            else if (current->feasibilityReason == "B")
+            {
+               std::stringstream ss;
+               ss << "B" << legIndex;
+               current->feasibilityReason = ss.str();
+               if (cMeasurement.unfeasibleReason == "N")
+               {
+                  cMeasurement.unfeasibleReason = current->feasibilityReason; 
+                  cMeasurement.isFeasible = false;
+                  cMeasurement.feasibilityValue = current->feasibilityValue;
+               }
+            }
+
             // accumulate all light time range for signal path ith 
             Rvector3 signalVec = current->rangeVecInertial;
             values[i] += signalVec.GetMagnitude();
@@ -235,62 +338,127 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             {
                if (current->useCorrection[j])
                   values[i] += current->corrections[j];
-            }
+            }// for j loop
 
             // accumulate all hardware delays for signal path ith                          // made changes by TUAN NGUYEN
             values[i] += ((current->tDelay + current->rDelay)*                             // made changes by TUAN NGUYEN
                GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);   // made changes by TUAN NGUYEN
 
-            // Set measurement epoch to the epoch of the last receiver in the
-            // first signal path
-            if ((i == 0) && (current->next == NULL))
+            // Get measurement epoch in the first signal path. It will apply for all other paths
+            if (i == 0)
+            {
 #ifdef USE_PRECISION_TIME
                // cMeasurement.epoch = current->rPrecTime.GetMjd();                                                     // made changes by TUAN NGUYEN
                if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
-                  cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;   // made changes by TUAN NGUYEN
+               {
+                  // Measurement epoch will be at the end of signal path when time tag is at the receiver
+                  if (current->next == NULL)                                                                            // made changes by TUAN NGUYEN
+                     cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;// made changes by TUAN NGUYEN
+               }
                else                                                                                                     // made changes by TUAN NGUYEN
-                  cMeasurement.epoch = current->tPrecTime.GetMjd() - current->tDelay/GmatTimeConstants::SECS_PER_DAY;   // made changes by TUAN NGUYEN
+               {
+                  // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
+                  cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;       // made changes by TUAN NGUYEN
+               }
 #else
                //cMeasurement.epoch = current->rTime;                                                                   // made changes by TUAN NGUYEN
                if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
-                  cMeasurement.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;                // made changes by TUAN NGUYEN
+               {
+                  // Measurement epoch will be at the end of signal path when time tag is at the receiver
+                  if (current->next == NULL)                                                                            // made changes by TUAN NGUYEN
+                     cMeasurement.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;             // made changes by TUAN NGUYEN
+               }
                else                                                                                                     // made changes by TUAN NGUYEN
-                  cMeasurement.epoch = current->tTime - current->tDelay/GmatTimeConstants::SECS_PER_DAY;                // made changes by TUAN NGUYEN
+               {
+                  // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
+                  cMeasurement.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;                    // made changes by TUAN NGUYEN
+               }
 #endif
+            }
 
             current = current->next;
-         }
+         }// while loop
+
+      }// for i loop
+      
+      //// Set feasibility value
+      //cMeasurement.isFeasible = calcData->IsMeasurementFeasible();
+      //if (cMeasurement.isFeasible)
+      //{
+      //   cMeasurement.feasibilityValue = 0.0;
+      //   cMeasurement.unfeasibleReason = "N";
+      //}
+      //else
+      //{
+      //   cMeasurement.unfeasibleReason = "N";
+      //}
+
+      //@Todo: Add bias here
+
+      // Specify noise sigma value
+      Real nsigma = 0.0;
+      if ((measurementType == "Range")||(measurementType == "DSNRange"))
+         nsigma = noiseSigma[0];
+      else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))
+         nsigma = noiseSigma[1];
+
+      // Set measurement values
+      cMeasurement.value.clear();
+      for (UnsignedInt i = 0; i < values.size(); ++i)
+         cMeasurement.value.push_back(0.0);
+
+      for (UnsignedInt i = 0; i < values.size(); ++i)
+      {
+         Real measVal = values[i];
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("===================================================================\n");
-            MessageInterface::ShowMessage("====  Result for path %dth =======\n", i);
-            MessageInterface::ShowMessage("      . Noise adding option = %s\n", (addNoise?"true":"false"));
-            MessageInterface::ShowMessage("      . Real range w/o adding noise for path %dth: %.12lf km \n", i, values[i]);
+            MessageInterface::ShowMessage("====  RangeAdapterKm: Range Calculation for Measurement Data %dth  \n", i);
+            MessageInterface::ShowMessage("===================================================================\n");
+            MessageInterface::ShowMessage("      . Measurement type : <%s>  nsigma = %lf\n", measurementType.c_str(), nsigma);
+            MessageInterface::ShowMessage("      . Noise adding option: %s\n", (addNoise?"true":"false"));
+            MessageInterface::ShowMessage("      . Real range for path %dth: %.12lf km \n", i, values[i]);
+         #endif
+
+         // No action to use multiplier in RangeAdapterKm due to it calculates full range fo signal path
+         // multiplier will be used in any class derived from RangeAdapterKm
+
+         //// Multiplier factor
+         //if (GetMultiplierFactor() != -1.0)                             // made changes by TUAN NGUYEN
+         //{
+         //   measVal = measVal * GetMultiplierFactor();                  // made changes by TUAN NGUYEN
+         //   #ifdef DEBUG_RANGE_CALCULATION
+         //   MessageInterface::ShowMessage("      . Multiplier factor      : %.12lf\n", GetMultiplierFactor());
+         //   MessageInterface::ShowMessage("      . Real range * mutiplier : %.12lf km\n", measVal);
+         //   #endif
+         //}
+
+         //@Todo: write code to add bias to measuement value here
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
          #endif
 
          // Add noise to measurement value                                              // made changes by TUAN NGUYEN
          if (addNoise)                                                                  // made changes by TUAN NGUYEN
          {                                                                              // made changes by TUAN NGUYEN
-            // @todo: Add noise here                                                    // made changes by TUAN NGUYEN
+            // Add noise here                                                           // made changes by TUAN NGUYEN
+            RandomNumber* rn = RandomNumber::Instance();                                // made changes by TUAN NGUYEN
+            Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
+            while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
+               val = rn->Gaussian(measVal, nsigma);                                     // made changes by TUAN NGUYEN
+            measVal = val;                                                              // made changes by TUAN NGUYEN
          }                                                                              // made changes by TUAN NGUYEN
+         cMeasurement.value[i] = measVal;                                               // made changes by TUAN NGUYEN
+
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . Real range with noise adding for path %dth: %.12lf km \n", i, values[i]);
-            MessageInterface::ShowMessage("      . Multiplier = %.12lf\n", multiplier);
-            MessageInterface::ShowMessage("      . C-value: %.12lf km \n", values[i]*multiplier);
-            MessageInterface::ShowMessage("      . Measurement is %s\n", (calcData->IsMeasurementFeasible()?"feasible":"unfeasible"));
-            MessageInterface::ShowMessage("===================================================================\n\n\n\n");
+            MessageInterface::ShowMessage("      . C-value (with noise)   : %.12lf km\n", cMeasurement.value[i]);
+            MessageInterface::ShowMessage("      . Measurement epoch A1Mjd: %.12lf\n", cMeasurement.epoch); 
+            MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
+            MessageInterface::ShowMessage("      . Feasibility reason     : %s\n", cMeasurement.unfeasibleReason.c_str());
+            MessageInterface::ShowMessage("      . Elevation angle        : %.12lf degree\n", cMeasurement.feasibilityValue);
+            MessageInterface::ShowMessage("===================================================================\n");
          #endif
+
       }
-      
-      // Set value for measurement data object
-      if (cMeasurement.value.size() == 0)
-         for (UnsignedInt i = 0; i < values.size(); ++i)
-            cMeasurement.value.push_back(0.0);
-      for (UnsignedInt i = 0; i < values.size(); ++i)
-         cMeasurement.value[i] = values[i] * multiplier;
-     
-      cMeasurement.isFeasible = calcData->IsMeasurementFeasible();
-
-
       #ifdef DEBUG_ADAPTER_EXECUTION
          MessageInterface::ShowMessage("Computed measurement\n   Type:  %d\n   "
                "Type:  %s\n   UID:   %d\n   Epoch:%.12lf\n   Participants:\n",
