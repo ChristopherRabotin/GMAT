@@ -34,9 +34,10 @@ TrackingDataAdapter::PARAMETER_TEXT[AdapterParamCount - MeasurementModelBasePara
    "SignalPath",
    "ObservationData",              // made changes by TUAN NGUYEN
    "RampTables",                   // made changes by TUAN NGUYEN
-   "Type",                         // made changes by TUAN NGUYEN
+   "MeasurementType",              // made changes by TUAN NGUYEN
    "Bias",                         // made changes by TUAN NGUYEN
    "NoiseSigma",                   // made changes by TUAN NGUYEN
+   "ErrorModel",                   // made changes by TUAN NGUYEN
    "AddNoise",                     // made changes by TUAN NGUYEN
    "UplinkFrequency",              // made changes by TUAN NGUYEN
    "UplinkBand",                   // made changes by TUAN NGUYEN
@@ -47,14 +48,15 @@ const Gmat::ParameterType
 TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - MeasurementModelBaseParamCount] =
 {
    Gmat::OBJECTARRAY_TYPE,
-   Gmat::OBJECTARRAY_TYPE,          // made changes by TUAN NGUYEN
-   Gmat::OBJECTARRAY_TYPE,          // made changes by TUAN NGUYEN
-   Gmat::OBJECT_TYPE,               // made changes by TUAN NGUYEN
-   Gmat::RVECTOR_TYPE,              // made changes by TUAN NGUYEN
-   Gmat::RVECTOR_TYPE,              // made changes by TUAN NGUYEN
-   Gmat::BOOLEAN_TYPE,              // made changes by TUAN NGUYEN
-   Gmat::REAL_TYPE,                 // made changes by TUAN NGUYEN
-   Gmat::INTEGER_TYPE,              // made changes by TUAN NGUYEN
+   Gmat::OBJECTARRAY_TYPE,          // OBS_DATA          // made changes by TUAN NGUYEN
+   Gmat::OBJECTARRAY_TYPE,          // RAMPED_TABLE      // made changes by TUAN NGUYEN
+   Gmat::STRING_TYPE,               // MEASUREMENT_TYPE  // made changes by TUAN NGUYEN
+   Gmat::RVECTOR_TYPE,              // BIAS              // made changes by TUAN NGUYEN
+   Gmat::RVECTOR_TYPE,              // NOISE_SIGMA       // made changes by TUAN NGUYEN
+   Gmat::STRINGARRAY_TYPE,          // ERROR_MODEL       // made changes by TUAN NGUYEN
+   Gmat::BOOLEAN_TYPE,              // ADD_NOISE         // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,                 // UPLINK_FREQUENCY  // made changes by TUAN NGUYEN
+   Gmat::INTEGER_TYPE,              // UPLINK_BAND       // made changes by TUAN NGUYEN
 };
 
 
@@ -72,6 +74,7 @@ TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - MeasurementModelBasePara
 TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
       const std::string &name) :
    MeasurementModelBase (name, typeStr),
+   measurementType      (""),              // made changes by TUAN NGUYEN
    calcData             (NULL),
    navLog               (NULL),
    logLevel             (0),
@@ -90,6 +93,10 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    addNoise             (false),           // made changes by TUAN NGUYEN
    rampTB               (NULL)             // made changes by TUAN NGUYEN
 {
+   noiseSigma.push_back(1.0);           // noiseSigma[0] = 1.0 is default value for range's noise sigma
+   noiseSigma.push_back(1.0);           // noiseSigma[1] = 1.0 is default value for doppler's noise sigma
+   errorModel.push_back("RandomConstant");    // errorModel[0] = "RandomConstant" is default value for range's error model
+   errorModel.push_back("RandomConstant");    // errorModel[1] = "RandomConstant" is default value for doppler's error model
 }
 
 
@@ -118,6 +125,7 @@ TrackingDataAdapter::~TrackingDataAdapter()
 //------------------------------------------------------------------------------
 TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    MeasurementModelBase (ma),
+   measurementType      (ma.measurementType),     // made changes by TUAN NGUYEN
    participantLists     (ma.participantLists),
    calcData             (NULL),
    navLog               (ma.navLog),
@@ -133,9 +141,11 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    freqBand             (ma.freqBand),            // made changes by TUAN NGUYEN
    //uplinkFreqE          (ma.uplinkFreqE),         // made changes by TUAN NGUYEN       // This code will be moved to DSNDopplerAdapter
    //freqBandE            (ma.freqBandE),           // made changes by TUAN NGUYEN       // This code will be moved to DSNDopplerAdapter
-   obsData              (NULL),                   // made changes by TUAN NGUYEN
+   obsData              (ma.obsData),             // made changes by TUAN NGUYEN
+   noiseSigma           (ma.noiseSigma),          // made changes by TUAN NGUYEN
+   errorModel           (ma.errorModel),          // made changes by TUAN NGUYEN
    addNoise             (ma.addNoise),            // made changes by TUAN NGUYEN
-   rampTB               (NULL),                   // made changes by TUAN NGUYEN
+   rampTB               (ma.rampTB),              // made changes by TUAN NGUYEN
    rampTableNames       (ma.rampTableNames)       // made changes by TUAN NGUYEN
 {
 }
@@ -159,6 +169,7 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
    {
       MeasurementModelBase::operator=(ma);
 
+      measurementType    = ma.measurementType;    // made changes by TUAN NGUYEN
       navLog             = ma.navLog;
       logLevel           = ma.logLevel;
       solarsys           = ma.solarsys;
@@ -172,10 +183,12 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       freqBand           = ma.freqBand;          // made changes by TUAN NGUYEN
       //uplinkFreqE        = ma.uplinkFreqE;       // made changes by TUAN NGUYEN              // This code will be moved to DSNDopplerAdapter
       //freqBandE          = ma.freqBandE;         // made changes by TUAN NGUYEN              // This code will be moved to DSNDopplerAdapter
-      obsData            = NULL;                 // made changes by TUAN NGUYEN
+      obsData            = ma.obsData;           // made changes by TUAN NGUYEN
+      noiseSigma         = ma.noiseSigma;        // made changes by TUAN NGUYEN
+      errorModel         = ma.errorModel;        // made changes by TUAN NGUYEN
       addNoise           = ma.addNoise;          // made changes by TUAN NGUYEN
-      rampTB             = NULL;                 // made changes by TUAN NGUYEN
-      rampTableNames = ma.rampTableNames;        // made changes by TUAN NGUYEN
+      rampTB             = ma.rampTB;            // made changes by TUAN NGUYEN
+      rampTableNames     = ma.rampTableNames;    // made changes by TUAN NGUYEN
 
       calcData = (MeasureModel*)ma.calcData->Clone();
 
@@ -411,6 +424,61 @@ Real TrackingDataAdapter::SetRealParameter(const Integer id, const Real value)
 
 
 //------------------------------------------------------------------------------
+// std::string GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the value of an element in a real parameter
+ *
+ * @param id      The ID for the parameter
+ * @param index   The index of an element in a real array
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::GetRealParameter(const Integer id, const Integer index) const
+{
+   if (id == NOISE_SIGMA)
+   {
+      if ((index < 0)||(index >= noiseSigma.size()))
+         throw MeasurementException("Error: Index of NoiseSigma is out of bound.\n");
+      return noiseSigma[index];
+   }
+
+   return MeasurementModelBase::GetRealParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRealParameter(const Integer id, const Real value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an element in a real array parameter
+ *
+ * @param id      The ID for the parameter
+ * @param value   The value for the parameter
+ * @oaram index   The index of an element in a real array
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::SetRealParameter(const Integer id, const Real value, const Integer index)
+{
+   if (id == NOISE_SIGMA)
+   {
+      if ((index < 0)||(index >= noiseSigma.size()))
+         throw MeasurementException("Error: Index of NoiseSigma is out of bound.\n");
+      if (value <= 0.0)
+         throw MeasurementException("Error: NoiseSigma has invalid value. It should be a positive number.\n");
+
+      noiseSigma[index] = value;
+      return noiseSigma[index];
+   }
+
+   return MeasurementModelBase::SetRealParameter(id, value, index);
+}
+
+   
+//------------------------------------------------------------------------------
 // std::string GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 /**
@@ -442,6 +510,43 @@ Real TrackingDataAdapter::GetRealParameter(const std::string &label) const
 Real TrackingDataAdapter::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string & label,
+//       const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * This method calls the base class method.  It is provided for overload
+ * compatibility.  See the base class description for a full description.
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::GetRealParameter(const std::string & label,
+      const Integer index) const
+{
+   return GetRealParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std::string & label, const Real value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a Real parameter in an array.
+ *
+ * @param label The text label for the parameter that is to be set
+ * @param value The new value for the parameter
+ * @param index The index of the parameter
+ *
+ * @return The parameter value.
+ */
+//------------------------------------------------------------------------------
+Real TrackingDataAdapter::SetRealParameter(const std::string & label,
+      const Real value, const Integer index)
+{
+   return SetRealParameter(GetParameterID(label), value, index);
 }
 
 
@@ -491,6 +596,9 @@ bool TrackingDataAdapter::SetBooleanParameter(const std::string &label, const bo
 //------------------------------------------------------------------------------
 std::string TrackingDataAdapter::GetStringParameter(const Integer id) const
 {
+   if (id == MEASUREMENT_TYPE)
+      return measurementType;
+
    return MeasurementModelBase::GetStringParameter(id);
 }
 
@@ -510,6 +618,12 @@ std::string TrackingDataAdapter::GetStringParameter(const Integer id) const
 bool TrackingDataAdapter::SetStringParameter(const Integer id,
       const std::string& value)
 {
+   if (id == MEASUREMENT_TYPE)
+   {
+      measurementType = value;
+      return true;
+   }
+
    //// Make sure the measurement model has been set
    //if (!calcData)
    //   throw MeasurementException("Unable to set parameter data on the "
@@ -572,6 +686,18 @@ std::string TrackingDataAdapter::GetStringParameter(const Integer id,
       }
    }
 
+   if (id == ERROR_MODEL)
+   {
+      if ((0 <= index)&&(index < errorModel.size()))
+         return errorModel[index];
+      else
+      {
+         std::stringstream ss;
+         ss << "Error: index (" << index << ") is out of bound (" << errorModel.size() << ")\n";
+         throw MeasurementException(ss.str());
+      }
+   }
+
    return MeasurementModelBase::GetStringParameter(id, index);
 }
 
@@ -605,8 +731,25 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
       return true;
    }
 
+   if (id == ERROR_MODEL)
+   {
+      if (value == "")
+         throw MeasurementException("Error: value set to ErrorModel is an empty string\n");
+
+      if ((0 <= index)&&(index < errorModel.size()))
+         errorModel[index] = value;
+      else
+      {
+         std::stringstream ss;
+         ss << "Error: index (" << index << ") is out of bound (" << errorModel.size() << ")\n";
+         throw MeasurementException(ss.str());
+      }
+      return true;
+   }
+
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
@@ -1270,6 +1413,20 @@ StringArray* TrackingDataAdapter::DecomposePathString(const std::string &value)
    }
 
    return partList;
+}
+
+
+// made changes by TUAN NGUYEN
+void TrackingDataAdapter::SetMultiplierFactor(Real mult)
+{
+   multiplier = mult;
+}
+
+
+// made changes by TUAN NGUYEN
+Real TrackingDataAdapter::GetMultiplierFactor()
+{
+   return multiplier;
 }
 
 
