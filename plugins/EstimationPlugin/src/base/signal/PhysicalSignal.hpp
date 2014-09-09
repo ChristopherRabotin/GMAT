@@ -70,6 +70,14 @@ public:
    virtual void AddCorrection(const std::string& modelName,                           // made changes by TUAN NGUYEN
                              const std::string& mediaCorrectionType);                 // made changes by TUAN NGUYEN
 
+   /// This function is used to get frequency at a given time from ramped frequency table          // made changes by TUAN NGUYEN
+   Real           GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);           // made changes by TUAN NGUYEN
+   /// This function is used to get frequency band at a given time from ramped frequency table     // made changes by TUAN NGUYEN
+   Integer        GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB);       // made changes by TUAN NGUYEN
+   /// This function is used to specify frequency band based range of each band                    // made changes by TUAN NGUYEN
+   Integer        FrequencyBand(Real frequency);                                                   // made changes by TUAN NGUYEN
+
+
 protected:
    /// Flag indicating the initialization state of the new signal elements
    bool physicalSignalInitialized;
@@ -109,9 +117,6 @@ protected:
 
    /// This function is used to calculate total hardware delay                               // made changes by TUAN NGUYEN
    virtual bool   HardwareDelayCalculation();                                                // made changes by TUAN NGUYEN
-
-   // This function is used to get frequency at a given time from ramped frequency table     // made changes by TUAN NGUYEN
-   Real           GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);     // made changes by TUAN NGUYEN
 
 };
 

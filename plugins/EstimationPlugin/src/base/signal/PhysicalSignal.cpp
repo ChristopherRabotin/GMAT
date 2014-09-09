@@ -363,6 +363,10 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.tNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasibleT = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasibleT;
+            if (!theData.feasibility)
+               theData.feasibilityReason = "B";
+            theData.feasibilityValue = elData[0];
 
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At transmit node: Obs vector = [%.3lf %.3lf %.3lf] "
@@ -380,6 +384,11 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.rNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasibleR = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasibleR;
+            if (!theData.feasibility)
+               theData.feasibilityReason = "B";
+            theData.feasibilityValue = elData[0];
+
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At receive node: Obs vector = [%.3lf %.3lf %.3lf] "
                   "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
@@ -546,8 +555,9 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
    #endif
 
    #ifdef DEBUG_RANGE_CALCULATION 
+      GmatTime tm = atEpoch;
       MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-      MessageInterface::ShowMessage("   ++++   Range, relativity correction, and ET-TAI correction calculation for leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+      MessageInterface::ShowMessage("   ++++   Range, relativity correction, and ET-TAI correction calculation for leg from %s to %s at measurement time %.12lf A1Mjd:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str(), tm.GetMjd());
       MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
    #endif
    
@@ -649,6 +659,9 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.tNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasible = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasible;                                                 // made changes by TUAN NGUYEN
+            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked  // made changes by TUAN NGUYEN
+            theData.feasibilityValue = elData[0];                                                   // made changes by TUAN NGUYEN
 
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At transmit node: Obs vector = [%.12lf,  %.12lf,  %.12lf]km "
@@ -665,6 +678,10 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.rNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasible = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasible;                                                 // made changes by TUAN NGUYEN
+            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked  // made changes by TUAN NGUYEN
+            theData.feasibilityValue = elData[0];                                                   // made changes by TUAN NGUYEN
+
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At receive node: Obs vector = [%.12lf,  %.12lf,  %.12lf]km "
                   "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
@@ -1298,7 +1315,8 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       if (rampTB)
       {
          // Get frequency from ramped table if it is used
-         frequency = GetFrequencyFromRampTable(theData.tPrecTime.GetMjd(), rampTB)/1.0e6;      // unit: Mhz
+         GmatTime t1 = theData.tPrecTime - theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
+         frequency = GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;                     // unit: Mhz
       }
       else
       {
@@ -2125,4 +2143,80 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
 
    return f;
 }
+
+
+//------------------------------------------------------------------------------------------------
+// Real PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------------------------
+/**
+* This function is used to get frequency band at a given epoch from ramped frequency table
+*
+* @param t        Epoch (in A1Mjd) at which frequency needed to spicify
+* @param rampTB   Table containing information about ramped frequency
+*
+* return          band index of frequency
+* Assumptions: ramp table had been sorted by epoch
+*/
+//------------------------------------------------------------------------------------------------
+Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB)
+{
+   if (rampTB == NULL)
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   if ((*rampTB).size() == 0)
+      throw MeasurementException("Error: No data is in ramp table\n");
+
+   if (t <= (*rampTB)[0].epoch)
+      return (*rampTB)[0].uplinkBand;
+   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+      return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+
+   // search for interval which contains time t:
+   Real upBand = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t < (*rampTB)[i].epoch)
+      {
+         upBand = (*rampTB)[i-1].uplinkBand;
+         break;
+      }
+   }
+
+   return upBand;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer FrequencyBand(Real frequency)
+//------------------------------------------------------------------------------
+/**
+ * Get frequency band corresponding to a given frequency
+ *
+ * @param frequency   frequency in Hz
+ *
+ * @return an integer corresponding to frequency band
+ */
+//------------------------------------------------------------------------------
+Integer PhysicalSignal::FrequencyBand(Real frequency)
+{
+   Integer freqBand = 0;
+
+   // S-band
+   if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
+      freqBand = 1;               // 1 for S-band
+
+   // X-band (Band values from Wikipedia; check them!
+   if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
+      freqBand = 2;               // 2 for X-band
+
+   if (freqBand == 0)
+   {
+      std::stringstream strs;
+      strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency <<" Hz\n";
+      throw MeasurementException(strs.str());
+   }
+
+   return freqBand;
+}
+
+
 
