@@ -130,6 +130,84 @@ GmatBase* DSNRangeAdapter::Clone() const
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Returns the script name for the parameter
+ *
+ * @param id The id of the parameter
+ *
+ * @return The script name
+ */
+//------------------------------------------------------------------------------
+std::string DSNRangeAdapter::GetParameterText(const Integer id) const
+{
+   if (id >= RangeAdapterKmParamCount && id < DSNRangeAdapterParamCount)
+      return PARAMETER_TEXT[id - RangeAdapterKmParamCount];
+   return RangeAdapterKm::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string& str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID for a scriptable parameter
+ *
+ * @param str The string used for the parameter
+ *
+ * @return The parameter ID
+ */
+//------------------------------------------------------------------------------
+Integer DSNRangeAdapter::GetParameterID(const std::string& str) const
+{
+   for (Integer i = RangeAdapterKmParamCount; i < DSNRangeAdapterParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - RangeAdapterKmParamCount])
+         return i;
+   }
+   return RangeAdapterKm::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the type for a specified parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The parameter's type
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType DSNRangeAdapter::GetParameterType(const Integer id) const
+{
+   if (id >= RangeAdapterKmParamCount && id < DSNRangeAdapterParamCount)
+      return PARAMETER_TYPE[id - RangeAdapterKmParamCount];
+
+   return RangeAdapterKm::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a text description for a parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The description string
+ */
+//------------------------------------------------------------------------------
+std::string DSNRangeAdapter::GetParameterTypeString(const Integer id) const
+{
+   return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
 
 //------------------------------------------------------------------------------
 // std::string GetRealParameter(const Integer id) const
@@ -144,7 +222,7 @@ GmatBase* DSNRangeAdapter::Clone() const
 //------------------------------------------------------------------------------
 Real DSNRangeAdapter::GetRealParameter(const Integer id) const
 {
-   if (id == RangeModuloConstant)
+   if (id == RANGE_MODULO_CONSTANT)
       return rangeModulo;
 
    return RangeAdapterKm::GetRealParameter(id);
@@ -165,10 +243,10 @@ Real DSNRangeAdapter::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real DSNRangeAdapter::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == rangeModulo)
+   if (id == RANGE_MODULO_CONSTANT)
    {
-      if (value <= 0)
-         throw MeasurementException("Error: uplink frequency has a nonpositive value\n");
+      if (value <= 0.0)
+         throw MeasurementException("Error: range modulo constant has a nonpositive value\n");
 
       rangeModulo = value;
       return rangeModulo;
@@ -282,24 +360,86 @@ bool DSNRangeAdapter::Initialize()
  */
 //------------------------------------------------------------------------------
 const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTable)
 {
    #ifdef DEBUG_RANGE_CALCULATION
       MessageInterface::ShowMessage("DSNRangeAdapter::CalculateMeasurement(%s, "
             "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
-            rampTB);
+            rampTable);
    #endif
 
+   // Set ramp table and observation data for adapter before doing something
+   rampTB = rampTable;
+   obsData = forObservation;
+   
    // Compute range in km
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
 
-   // Convert range from km to RU and store in cMeasurement here:
+   // Convert range from km to RU and store in cMeasurement:
+   for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
+   {
+      // 1. Specify uplink frequency
+      // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
+      uplinkFreq = calcData->GetUplinkFrequency(0, rampTB);
+      freqBand = calcData->GetUplinkFrequencyBand(0, rampTB);
+      
+      // 2. Specify multiplier (at time t1)
+      multiplier = GetFrequencyFactor(uplinkFreq*1.0e6);
+      
+      // 3. Convert range from km to RU in cMeasurement.value[0]
+      Integer errnum = 0;
+      Real lightspeed = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;                  // unit: km/s
+      Real realTravelTime = cMeasurement.value[i]/lightspeed;                                                     // unit: seconds
+      
+      if (rampTB != NULL)
+      {
+         // ramped frequency
+         try
+         {
+            cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: range unit
+         } catch (MeasurementException exp)
+         {
+            cMeasurement.value[i] = 0.0;               // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
+            cMeasurement.isFeasible = false;
+            cMeasurement.unfeasibleReason = "R";
+            if ((errnum == 2)||(errnum == 3))
+               throw exp;
+         }
+      }
+      else
+      {
+         // constant frequency
+         cMeasurement.value[i] = multiplier*realTravelTime;
+      }
+      
+      cMeasurement.uplinkFreq = uplinkFreq;
+      cMeasurement.uplinkBand = freqBand;
+      cMeasurement.rangeModulo = rangeModulo;
 
+
+      #ifdef DEBUG_RANGE_CALCULATION
+         MessageInterface::ShowMessage("===================================================================\n");
+         MessageInterface::ShowMessage("====  DSNRangeAdapter: Range Calculation for Measurement Data %dth  \n", i);
+         MessageInterface::ShowMessage("===================================================================\n");
+         MessageInterface::ShowMessage("      . Measurement type       : <%s>\n", measurementType.c_str());
+         MessageInterface::ShowMessage("      . Noise adding option    : %s\n", (addNoise?"true":"false"));
+         MessageInterface::ShowMessage("      . Range modulo constant  : %.12lf RU\n", rangeModulo);
+         MessageInterface::ShowMessage("      . Real travel time       : %.12lf seconds\n", realTravelTime);
+         MessageInterface::ShowMessage("      . Multiplier factor      : %.12lf\n", GetMultiplierFactor());
+         MessageInterface::ShowMessage("      . C-value (with noise)   : %.12lf RU\n", cMeasurement.value[i]);
+         MessageInterface::ShowMessage("      . Measurement epoch A1Mjd: %.12lf\n", cMeasurement.epoch); 
+         MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
+         MessageInterface::ShowMessage("      . Feasibility reason     : %s\n", cMeasurement.unfeasibleReason.c_str());
+         MessageInterface::ShowMessage("      . Elevation angle        : %.12lf degree\n", cMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("===================================================================\n");
+      #endif
+
+   }
 
    #ifdef DEBUG_RANGE_CALCULATION
       MessageInterface::ShowMessage("DSNRangeAdapter::CalculateMeasurement(%s, "
             "<%p>, <%p>) exit\n", (withEvents ? "true" : "false"), forObservation,
-            rampTB);
+            rampTable);
    #endif
 
    return cMeasurement;
