@@ -141,6 +141,7 @@
     <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp" />
     <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp" />
+    <ClInclude Include="..\..\src\base\adapter\USNRangeAdapter.hpp" />
     <ClInclude Include="..\..\src\base\command\RunEstimator.hpp" />
     <ClInclude Include="..\..\src\base\command\RunSimulator.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimator.hpp" />
@@ -235,6 +236,7 @@
     <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp" />
     <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp" />
+    <ClCompile Include="..\..\src\base\adapter\USNRangeAdapter.cpp" />
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp" />
     <ClCompile Include="..\..\src\base\command\RunSimulator.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimator.cpp" />

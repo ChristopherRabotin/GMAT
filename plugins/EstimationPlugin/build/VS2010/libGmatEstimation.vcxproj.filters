@@ -342,6 +342,9 @@
     <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\USNRangeAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -606,6 +609,9 @@
       <Filter>Source Files\measurement</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\USNRangeAdapter.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>
