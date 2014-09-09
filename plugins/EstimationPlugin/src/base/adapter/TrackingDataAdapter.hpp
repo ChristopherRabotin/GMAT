@@ -70,9 +70,19 @@ public:
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value,
+                                         const Integer index);
 
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
@@ -160,6 +170,10 @@ public:
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
    virtual void         UsesLightTime(const bool tf);
 
+   // Multiplier Factor                                                // made changes by TUAN NGUYEN
+   virtual void         SetMultiplierFactor(Real mult);                // made changes by TUAN NGUYEN
+   virtual Real         GetMultiplierFactor();                         // made changes by TUAN NGUYEN
+
 protected:
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
@@ -208,7 +222,12 @@ protected:
    StringArray                rampTableNames;                                                            // made changes by TUAN NGUYEN
    /// Add noise to measurement (used only for simulation)                                               // made changes by TUAN NGUYEN
    bool                       addNoise;                                                                  // made changes by TUAN NGUYEN
-
+   /// Noise sigma
+   RealArray                  noiseSigma;      // noiseSigma[0]: noise sigma for Range, noiseSigma[1]: noise sigma for Doppler 
+   /// Error model
+   StringArray                errorModel;      // errorModel[0]: error model for Range, errorModel[1]: error model for Doppler
+   /// Measurement type
+   std::string                measurementType;  // it's value could be "Range", "DSNRange", "USNRange", "GeoRange", "Doppler", "DSNDoppler", "USNDopple", "GeoRange", etc
 
 
    /// Parameter IDs for the TrackingDataAdapter
@@ -220,6 +239,7 @@ protected:
       MEASUREMENT_TYPE,                                   // made changes by TUAN NGUYEN
       BIAS,                                               // made changes by TUAN NGUYEN
       NOISE_SIGMA,                                        // made changes by TUAN NGUYEN
+      ERROR_MODEL,                                        // made changes by TUAN NGUYEN
       ADD_NOISE,                                          // made changes by TUAN NGUYEN
       UPLINK_FREQUENCY,                                   // made changes by TUAN NGUYEN
       UPLINK_BAND,                                        // made changes by TUAN NGUYEN
