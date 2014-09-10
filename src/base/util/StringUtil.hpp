@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,7 +55,7 @@ namespace GmatStringUtil
    GMAT_API std::string ToLower(const std::string &str, bool firstLetterOnly = false);
    GMAT_API std::string Capitalize(const std::string &str);
    GMAT_API std::string Replace(const std::string &str, const std::string &from,
-                           const std::string &to);
+                           const std::string &to, std::string::size_type startIndex = 0);
    GMAT_API std::string ReplaceName(const std::string &str, const std::string &from,
                            const std::string &to);
    GMAT_API std::string ReplaceNumber(const std::string &str, const std::string &from,
@@ -162,7 +162,6 @@ namespace GmatStringUtil
    GMAT_API bool IsParenPartOfArray(const std::string &str);
    GMAT_API bool IsThereEqualSign(const std::string &str);
    GMAT_API bool IsThereMathSymbol(const std::string &str);
-   GMAT_API bool IsThereScientificNotation(const std::string &str);
    GMAT_API bool HasNoBrackets(const std::string &str, bool parensForArraysAllowed = true);
    GMAT_API bool IsSingleItem(const std::string &str);
    GMAT_API bool StartsWith(const std::string &str, const std::string &value);
@@ -181,6 +180,7 @@ namespace GmatStringUtil
    GMAT_API bool IsMathOperator(const char &ch);
    
    GMAT_API Integer NumberOfOccurrences(const std::string &str, const char c);
+   GMAT_API Integer NumberOfScientificNotation(const std::string &str);
    
    GMAT_API StringArray GetVarNames(const std::string &str);
    GMAT_API void WriteStringArray(const StringArray &strArray,

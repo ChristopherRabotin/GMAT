@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,8 +43,10 @@ protected:
 
    static const Integer MAX_TABLE_SIZE;
 
-   /// name of data file (It contains the path to the file)
+   /// name of data file
    std::string      iauFileName;
+   /// full path name of iau file (It contains the path to the file)
+   std::string      iauFileNameFullPath;
    /// a table containing values of independent variables
    Real*            independence;
    /// a table containing dependent vectors

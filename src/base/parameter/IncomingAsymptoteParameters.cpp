@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 /**
  * Declares Incoming Asymptote related parameter classes.
- * IncAsym_RHA, IncAsym_DHA, IncAsym_BVAZI, IncAsym_State
+ * IncAsymRadPer, IncAsymC3Energy, IncAsymRHA, IncAsymDHA, IncAsymBVAZI, IncAsymState
  */
 //------------------------------------------------------------------------------
 
@@ -25,14 +25,207 @@
 
 
 //==============================================================================
+//                              IncAsymRadPer
+//==============================================================================
+IncAsymRadPer::IncAsymRadPer(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "IncomingRadPer", obj, "Hyperbolic Incoming Asymptote Radius at Periapsis", "Km",
+               GmatParam::ORIGIN, INCASYM_RADPER, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   SetRequiresCelestialBodyCSOrigin(true);
+}
+
+//------------------------------------------------------------------------------
+// IncAsymRadPer(const IncAsymRadPer &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+IncAsymRadPer::IncAsymRadPer(const IncAsymRadPer &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const IncAsymRadPer& operator=(const IncAsymRadPer &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+IncAsymRadPer& IncAsymRadPer::operator=(const IncAsymRadPer &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~IncAsymRadPer()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+IncAsymRadPer::~IncAsymRadPer()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool IncAsymRadPer::Evaluate()
+{
+   mRealValue = OrbitData::GetIncAsymReal(INCASYM_RADPER);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* IncAsymRadPer::Clone(void) const
+{
+   return new IncAsymRadPer(*this);
+}
+
+
+
+//==============================================================================
+//                              IncAsymC3Energy
+//==============================================================================
+IncAsymC3Energy::IncAsymC3Energy(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "IncomingC3Energy", obj, "Hyperbolic Incoming Asymptote C3Energy Energy", "Km^2/s^2",
+               GmatParam::ORIGIN, INCASYM_C3_ENERGY, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+   SetRequiresCelestialBodyCSOrigin(true);
+}
+
+//------------------------------------------------------------------------------
+// IncAsymC3Energy(const IncAsymC3Energy &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+IncAsymC3Energy::IncAsymC3Energy(const IncAsymC3Energy &copy)
+   : OrbitReal(copy)
+{
+}
+
+//------------------------------------------------------------------------------
+// const IncAsymC3Energy& operator=(const IncAsymC3Energy &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+IncAsymC3Energy& IncAsymC3Energy::operator=(const IncAsymC3Energy &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+//------------------------------------------------------------------------------
+// ~IncAsymC3Energy()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+IncAsymC3Energy::~IncAsymC3Energy()
+{
+}
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool IncAsymC3Energy::Evaluate()
+{
+   mRealValue = OrbitData::GetIncAsymReal(INCASYM_C3_ENERGY);    
+   
+   if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* IncAsymC3Energy::Clone(void) const
+{
+   return new IncAsymC3Energy(*this);
+}
+
+
+
+//==============================================================================
 //                              IncAsymRHA
 //==============================================================================
 IncAsymRHA::IncAsymRHA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "IncomingRHA", obj, "RA of Incoming Asymptote", "Deg",
+   : OrbitReal(name, "IncomingRHA", obj, "RA of Hyperbolic Incoming Asymptote", "Deg",
                GmatParam::COORD_SYS, INCASYM_RHA, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
@@ -52,7 +245,6 @@ IncAsymRHA::IncAsymRHA(const IncAsymRHA &copy)
 {
 }
 
-
 //------------------------------------------------------------------------------
 // const IncAsymRHA& operator=(const IncAsymRHA &right)
 //------------------------------------------------------------------------------
@@ -70,7 +262,6 @@ IncAsymRHA& IncAsymRHA::operator=(const IncAsymRHA &right)
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
 // ~IncAsymRHA()
 //------------------------------------------------------------------------------
@@ -81,7 +272,6 @@ IncAsymRHA& IncAsymRHA::operator=(const IncAsymRHA &right)
 IncAsymRHA::~IncAsymRHA()
 {
 }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -106,7 +296,6 @@ bool IncAsymRHA::Evaluate()
       return true;
 }
 
-
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -124,19 +313,20 @@ GmatBase* IncAsymRHA::Clone(void) const
 }
 
 
+
 //==============================================================================
 //                              IncAsymDHA
 //==============================================================================
 IncAsymDHA::IncAsymDHA(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "IncomingDHA", obj, "DEC of Incoming Asymptote", "Deg",
+   : OrbitReal(name, "IncomingDHA", obj, "DEC of Hyperbolic Incoming Asymptote", "Deg",
                GmatParam::COORD_SYS, INCASYM_DHA, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
-
 
 //------------------------------------------------------------------------------
 // IncAsymDHA(const IncAsymDHA &copy)
@@ -151,7 +341,6 @@ IncAsymDHA::IncAsymDHA(const IncAsymDHA &copy)
    : OrbitReal(copy)
 {
 }
-
 
 //------------------------------------------------------------------------------
 // const IncAsymDHA& operator=(const IncAsymDHA &right)
@@ -170,7 +359,6 @@ IncAsymDHA& IncAsymDHA::operator=(const IncAsymDHA &right)
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
 // ~IncAsymDHA()
 //------------------------------------------------------------------------------
@@ -181,7 +369,6 @@ IncAsymDHA& IncAsymDHA::operator=(const IncAsymDHA &right)
 IncAsymDHA::~IncAsymDHA()
 {
 }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -206,7 +393,6 @@ bool IncAsymDHA::Evaluate()
       return true;
 }
 
-
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -224,19 +410,20 @@ GmatBase* IncAsymDHA::Clone(void) const
 }
 
 
+
 //==============================================================================
 //                              IncAsymBVAZI
 //==============================================================================
 IncAsymBVAZI::IncAsymBVAZI(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "IncomingBVAZI", obj, "B-vector AZI at Infinity of Incoming Asymptote", "Deg",
+   : OrbitReal(name, "IncomingBVAZI", obj, "B-vector AZI at Infinity of Hyperbolic Incoming Asymptote", "Deg",
                GmatParam::COORD_SYS, INCASYM_BVAZI, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsAngleParam = true;
    mCycleType = GmatParam::ZERO_360;
 }
-
 
 //------------------------------------------------------------------------------
 // IncAsymBVAZI(const IncAsymBVAZI &copy)
@@ -251,7 +438,6 @@ IncAsymBVAZI::IncAsymBVAZI(const IncAsymBVAZI &copy)
    : OrbitReal(copy)
 {
 }
-
 
 //------------------------------------------------------------------------------
 // const IncAsymBVAZI& operator=(const IncAsymBVAZI &right)
@@ -270,7 +456,6 @@ IncAsymBVAZI& IncAsymBVAZI::operator=(const IncAsymBVAZI &right)
    return *this;
 }
 
-
 //------------------------------------------------------------------------------
 // ~IncAsymBVAZI()
 //------------------------------------------------------------------------------
@@ -281,7 +466,6 @@ IncAsymBVAZI& IncAsymBVAZI::operator=(const IncAsymBVAZI &right)
 IncAsymBVAZI::~IncAsymBVAZI()
 {
 }
-
 
 //-------------------------------------
 // Inherited methods from Parameter
@@ -306,7 +490,6 @@ bool IncAsymBVAZI::Evaluate()
       return true;
 }
 
-
 //-------------------------------------
 // methods inherited from GmatBase
 //-------------------------------------
@@ -323,18 +506,17 @@ GmatBase* IncAsymBVAZI::Clone(void) const
    return new IncAsymBVAZI(*this);
 }
 
-
-
 //------------------------------------------------------------------------------
 // IncAsymState::IncAsymState(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 IncAsymState::IncAsymState(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "IncomingAsymptote", obj, "Incoming Asymptote State Vector",
+   : OrbitRvec6(name, "IncomingAsymptote", obj, "Hyperbolic Incoming Asymptote State Vector",
                 "", GmatParam::COORD_SYS)
 {
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

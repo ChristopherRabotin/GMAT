@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -101,7 +101,9 @@ Solver::STYLE_TEXT[MaxStyle - NORMAL_STYLE] =
 //------------------------------------------------------------------------------
 Solver::Solver(const std::string &type, const std::string &name) :
    GmatBase                (Gmat::SOLVER, type, name),
-   isInternal              (true),   
+   isInternal              (true),
+   requiresVariables       (true),
+   needsServerStartup      (false),
    currentState            (INITIALIZING),
    nestedState             (INITIALIZING),
    textFileMode            ("Normal"),
@@ -138,6 +140,7 @@ Solver::Solver(const std::string &type, const std::string &name) :
    solverTextFile  = type;
    solverTextFile += instanceName;
    solverTextFile += ".data";
+   solverTextFileFullPath = "";
 }
 
 
@@ -169,6 +172,8 @@ Solver::~Solver()
 Solver::Solver(const Solver &sol) :
    GmatBase                (sol),
    isInternal              (sol.isInternal),   
+   requiresVariables       (sol.requiresVariables),
+   needsServerStartup      (sol.needsServerStartup),
    currentState            (sol.currentState),
    nestedState             (sol.currentState),
    textFileMode            (sol.textFileMode),
@@ -185,6 +190,7 @@ Solver::Solver(const Solver &sol) :
    //variableMaximumStep     (NULL),
    pertNumber              (sol.pertNumber),
    solverTextFile          (sol.solverTextFile),
+   solverTextFileFullPath  (sol.solverTextFileFullPath),
    instanceNumber          (sol.instanceNumber),
    registeredVariableCount (sol.registeredVariableCount),
    registeredComponentCount(sol.registeredComponentCount),
@@ -238,14 +244,18 @@ Solver& Solver::operator=(const Solver &sol)
    maxIterations            = sol.maxIterations;
    isInitialized            = false;
    solverTextFile           = sol.solverTextFile;
-   
+   solverTextFileFullPath   = sol.solverTextFileFullPath;
+
    variableNames.clear();
    //variable.clear();
    //perturbation.clear();
    //variableMinimum.clear();
    //variableMaximum.clear();
    //variableMaximumStep.clear();
-   
+
+   isInternal            = sol.isInternal;
+   requiresVariables     = sol.requiresVariables;
+   needsServerStartup    = sol.needsServerStartup;
    currentState          = sol.currentState;
    nestedState           = sol.currentState;
    textFileMode          = sol.textFileMode;
@@ -293,20 +303,25 @@ bool Solver::Initialize()
 
    try
    {
-   #ifdef DEBUG_SOLVER_INIT
-      MessageInterface::ShowMessage(
-         "In Solver::Initialize - about to set default values\n");
-   #endif
-      for (Integer i = 0; i < localVariableCount; ++i)
+      #ifdef DEBUG_SOLVER_INIT
+         MessageInterface::ShowMessage(
+            "In Solver::Initialize - about to set default values\n");
+      #endif
+
+      // Only populate the vectors if needed
+      if ((Integer)variable.size() != localVariableCount)
       {
-         variable.push_back(0.0);
-         variableInitialValues.push_back(0.0);
-         variableMinimum.push_back(-9.999e300);
-         variableMaximum.push_back(9.999e300);
-         variableMaximumStep.push_back(9.999e300);
-         perturbation.push_back(1.0e-04);
-         pertDirection.push_back(1.0);
-         unscaledVariable.push_back(0.0);
+         for (Integer i = (Integer)variable.size(); i < localVariableCount; ++i)
+         {
+            variable.push_back(0.0);
+            variableInitialValues.push_back(0.0);
+            variableMinimum.push_back(-9.999e300);
+            variableMaximum.push_back(9.999e300);
+            variableMaximumStep.push_back(9.999e300);
+            perturbation.push_back(1.0e-04);
+            pertDirection.push_back(1.0);
+            unscaledVariable.push_back(0.0);
+         }
       }
    }
    catch(const std::exception &)
@@ -896,6 +911,10 @@ Integer Solver::SetIntegerParameter(const Integer id,
    
    if (id == RegisteredVariables)
    {
+      #ifdef DEBUG_SET_INTEGER
+      MessageInterface::ShowMessage
+         ("Solver::SetIntegerParameter() setting %d to registeredVariableCount\n", value);
+      #endif
       registeredVariableCount = value;
       return registeredVariableCount;
    }
@@ -1429,39 +1448,55 @@ void Solver::OpenSolverTextFile()
    #ifdef DEBUG_SOLVER_INIT
    MessageInterface::ShowMessage
       ("Solver::OpenSolverTextFile() <%p><%s>'%s' entered\n   showProgress=%d, "
-       "solverTextFile='%s', textFileOpen=%d\n", this, GetTypeName().c_str(),
-       GetName().c_str(), showProgress, solverTextFile.c_str(), textFile.is_open());
+       "solverTextFile='%s',  solverTextFileFullPath='%s', textFileOpen=%d\n",
+       this, GetTypeName().c_str(), GetName().c_str(), showProgress, solverTextFile.c_str(),
+       solverTextFileFullPath.c_str(), textFile.is_open());
    #endif
    
    if (!showProgress)
       return;
    
-   FileManager *fm;
-   fm = FileManager::Instance();
-   std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
-   std::string fullSolverTextFile = solverTextFile;
    
-   // Add output path if there is no path (LOJ: 2012.04.19 for GMT-1542 fix)
-   if (solverTextFile.find("/") == solverTextFile.npos &&
-       solverTextFile.find("\\") == solverTextFile.npos)
-      fullSolverTextFile = outPath + solverTextFile;
+   // Used GmatBase::FullPathFileName() (LOJ: 2014.06.30)
+   // Changed to use member data solverTextFileFullPath
+   
+   // FileManager *fm;
+   // fm = FileManager::Instance();
+   // std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+   // std::string fullSolverTextFile = solverTextFile;
+   // // Add output path if there is no path (LOJ: 2012.04.19 for GMT-1542 fix)
+   // if (solverTextFile.find("/") == solverTextFile.npos &&
+   //     solverTextFile.find("\\") == solverTextFile.npos)
+   //    fullSolverTextFile = outPath + solverTextFile;
+   
+   std::string fnNoPath;
+   solverTextFileFullPath =
+      GmatBase::GetFullPathFileName(fnNoPath, GetName(), solverTextFile, "OUTPUT_PATH",
+                                    false, "data", false, true);
    
    if (textFile.is_open())
       textFile.close();
    
    #ifdef DEBUG_SOLVER_INIT
-   MessageInterface::ShowMessage("   fullSolverTextFile='%s'\n", fullSolverTextFile.c_str());
+   MessageInterface::ShowMessage("   solverTextFileFullPath='%s'\n", solverTextFileFullPath.c_str());
    MessageInterface::ShowMessage("   instanceNumber=%d\n", instanceNumber);
    #endif
    
+   // Check for empty full path name
+   if (solverTextFileFullPath == "")
+   {
+      throw SolverException("Error creating targeter text file " +
+                            solverTextFileFullPath + ". The path does not exist.");
+   }
+   
    if (instanceNumber == 1)
-      textFile.open(fullSolverTextFile.c_str());
+      textFile.open(solverTextFileFullPath.c_str());
    else
-      textFile.open(fullSolverTextFile.c_str(), std::ios::app);
+      textFile.open(solverTextFileFullPath.c_str(), std::ios::app);
    
    if (!textFile.is_open())
       throw SolverException("Error opening targeter text file " +
-                            fullSolverTextFile);
+                            solverTextFileFullPath);
    
    textFile.precision(16);
    

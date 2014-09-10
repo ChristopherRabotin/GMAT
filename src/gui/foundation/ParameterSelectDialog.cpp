@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -110,8 +110,10 @@ ParameterSelectDialog::ParameterSelectDialog
 
    // Set initial flag for allowing selecting whole object
    mAllowWholeObject = false;
-   // Set initial flag indicating last CoordinateSystem ComboBox has Fixed CS only
-   mLastCSHasFixedOnly = false;
+//   // Set initial flag indicating last CoordinateSystem ComboBox has Fixed CS only
+//   mLastCSHasFixedOnly = false;
+//   // Set initial flag indicating last CoordinateSystem ComboBox has CS with CB Origin only
+//   mLastCSHasCBOriginOnly = false;
    
    mNumRow = -1;
    mNumCol = -1;
@@ -1552,7 +1554,8 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
       return;
    }
    
-   GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
+   ParameterInfo *pInfo = ParameterInfo::Instance();
+   GmatParam::DepObject depObj = pInfo->GetDepObjectType(property);
    
    #ifdef DEBUG_CS
    MessageInterface::ShowMessage("   depObj=%d\n", depObj);
@@ -1582,41 +1585,61 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
       {
          // Parameter object has not been created at this point,
          // so query ParameterInfo if it requires BodyFixed CS only
-         bool reqFixedCS = ParameterInfo::Instance()->RequiresBodyFixedCS(property);
+         bool reqFixedCS    = pInfo->RequiresBodyFixedCS(property);
+         bool reqCBCSOrigin = pInfo->RequiresCelestialBodyCSOrigin(property);
          #ifdef DEBUG_CS
+//         MessageInterface::ShowMessage
+//            ("   reqFixedCS=%d, reqCBCSOrigin=%d, mLastCSHasFixedOnly=%d, mLastCSHasCBOriginOnly = %d\n   mPreviousCoordSysName='%s', "
+//             "mLastCoordSysName='%s\n", reqFixedCS, reqCBCSOrigin, mLastCSHasFixedOnly,  mLastCSHasCBOriginOnly, mPreviousCoordSysName.c_str(),
+//             mLastCoordSysName.c_str());
          MessageInterface::ShowMessage
-            ("   reqFixedCS=%d, mLastCSHasFixedOnly=%d\n   mPreviousCoordSysName='%s', "
-             "mLastCoordSysName='%s\n", reqFixedCS, mLastCSHasFixedOnly,  mPreviousCoordSysName.c_str(),
+            ("   reqFixedCS=%d, reqCBCSOrigin=%d\n   mPreviousCoordSysName='%s', "
+             "mLastCoordSysName='%s\n", reqFixedCS, reqCBCSOrigin, mPreviousCoordSysName.c_str(),
              mLastCoordSysName.c_str());
          #endif
-         if (reqFixedCS)
+
+         std::string ofAxesType = "";
+         if (reqFixedCS) ofAxesType = "BodyFixedAxes";
+
+         // Get the appropriate list of coordinate systems
+         mCoordSysComboBox->Clear();
+         mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf(ofAxesType, reqCBCSOrigin));
+         // If last coordinate system name used is not in the new list, select first one
+         if (mCoordSysComboBox->FindString(mLastCoordSysName, true) == wxNOT_FOUND)
          {
-            if (!mLastCSHasFixedOnly)
-            {
-               // Planetodetic Parameters should only show BodyFixed coordinate system
-               // So get the list from the GuiItemManager
-               mCoordSysComboBox->Clear();
-               mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
-               // If last coordinate system name used is not in the new list, select first one
-               if (mCoordSysComboBox->FindString(mLastCoordSysName, true) == wxNOT_FOUND)
-               {
-                  mCoordSysComboBox->SetSelection(0);
-                  mLastCoordSysName = mCoordSysComboBox->GetValue();
-               }
-            }
-            mLastCSHasFixedOnly = true;
+            mCoordSysComboBox->SetSelection(0);
+            mLastCoordSysName = mCoordSysComboBox->GetValue();
          }
-         else
-         {
-            if (mLastCSHasFixedOnly)
-            {
-               // Show all coordinate systems
-               mCoordSysComboBox->Clear();
-               mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf(""));
-            }
-            mLastCSHasFixedOnly = false;
-         }
-         
+         // WCS 2014.03.31 added check for reqCBCSOrigin and so modified code to
+         // rebuild the list each time
+//         if (reqFixedCS)
+//         {
+//            if (!mLastCSHasFixedOnly)
+//            {
+//               // Planetodetic Parameters should only show BodyFixed coordinate system
+//               // So get the list from the GuiItemManager
+//               mCoordSysComboBox->Clear();
+//               mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
+//               // If last coordinate system name used is not in the new list, select first one
+//               if (mCoordSysComboBox->FindString(mLastCoordSysName, true) == wxNOT_FOUND)
+//               {
+//                  mCoordSysComboBox->SetSelection(0);
+//                  mLastCoordSysName = mCoordSysComboBox->GetValue();
+//               }
+//            }
+//            mLastCSHasFixedOnly = true;
+//         }
+//         else
+//         {
+//            if (mLastCSHasFixedOnly)
+//            {
+//               // Show all coordinate systems
+//               mCoordSysComboBox->Clear();
+//               mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf(""));
+//            }
+//            mLastCSHasFixedOnly = false;
+//         }
+
          int blankPos = mCoordSysComboBox->FindString("");
          if (blankPos != wxNOT_FOUND)  mCoordSysComboBox->Delete((unsigned int) blankPos);
          if (mLastCoordSysName == "")

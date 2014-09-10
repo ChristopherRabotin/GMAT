@@ -1,9 +1,9 @@
 function [BLmean emag j]=Cart2BLlong(Cart)
 
-tol=1e-7;
-maxiter=50;
-Kep=Cart2Kep2(Cart)
-if Kep(2) >= 0.97
+tol=1e-6;
+maxiter=200;
+Kep=Cart2Kep2(Cart);
+if Kep(2) >= 0.999999
 	
 		disp('Warning: Orbit is nearly parabolic or hyperbolic. So, GMAT cannot calculate mean elements.\n')
 		BLmean=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0];	 
@@ -19,20 +19,42 @@ if Kep(3) > 177
     pseudostate=1;
 end
 
-BLmean=Kep;
+BLmean=Kep
 
-Kep2=BROLYD(BLmean);
-BLmean2=BLmean+(Kep-Kep2); 
-emag=1;
+Kep2=BROLYD(BLmean)
+BLmean2=BLmean+(Kep-Kep2)
+if BLmean2(3) <0
+    BLmean2(3)=0;
+end
+
+emag_old=1;
+emag=0.9;
 j=0;
 while emag > tol
-    BLmean=BLmean2;
+    BLmean=BLmean2
     
-    BLmean2=BLmean+(Kep-Kep2); 
-    Kep2=BROLYD(BLmean2);
-    
-    emag=norm(Cart-Kep2Cart2(Kep2))./norm(Cart);
 
+    Kep2=BROLYD(BLmean)
+    cart=Kep2Cart2(Kep2) 
+    if ~isempty(Kep2)
+        emag=norm(Cart-Kep2Cart2(Kep2))./norm(Cart)
+        
+    else
+        disp('GMAT could not find Brouwer Mean elements, please try another input values')
+        BLmean=[];
+        return 
+    end
+    if emag_old > emag
+        emag_old=emag;
+    else
+        disp('the solution is not converging')
+        break
+    end
+    
+    BLmean2=BLmean+(Kep-Kep2)
+    if BLmean2(3) <0
+        BLmean2(3)=0;
+    end
     if j >= maxiter
         disp('warning : maximum iteration number has been reached');
         break

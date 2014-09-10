@@ -267,6 +267,7 @@
     <ClCompile Include="..\..\..\src\gui\function\FunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\BurnThrusterPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\mission\DecoratedTree.cpp" />
@@ -308,6 +309,7 @@
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\SpicePanel.cpp" />
@@ -352,11 +354,6 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\ViewCanvas.cpp" />
     <ClCompile Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.cpp" />
-    <ClCompile Include="..\..\..\src\gui\view\Editor.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -376,6 +373,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\ViewTextDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp" />
@@ -472,6 +472,7 @@
     <ClInclude Include="..\..\..\src\gui\function\FunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\function\MatlabFunctionSetupPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\BurnThrusterPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterCoefficientDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\hardware\ThrusterConfigPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\include\ddesetup.hpp" />
@@ -516,6 +517,7 @@
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpacecraftPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpaceObjectSelectDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\SpicePanel.hpp" />
@@ -562,11 +564,6 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\TsPlotXYCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\ViewCanvas.hpp" />
     <ClInclude Include="..\..\..\src\gui\subscriber\XyPlotSetupPanel.hpp" />
-    <ClInclude Include="..\..\..\src\gui\view\Editor.hpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -586,6 +583,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\ViewTextDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp" />

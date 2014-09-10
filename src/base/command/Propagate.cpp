@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -3926,7 +3926,7 @@ void Propagate::PrepareToPropagate()
                   state[0], state[1], state[2], state[3], state[4], state[5]);
                MessageInterface::ShowMessage(
                   "Propagator = \n%s\n",
-                  prop[0]->GetGeneratingString(Gmat::SCRIPTING, "   ").c_str());
+                  propagators[0]->GetGeneratingString(Gmat::SCRIPTING, "   ").c_str());
             }
             else
                MessageInterface::ShowMessage("Debugging first step: State not set\n");
@@ -4015,7 +4015,7 @@ void Propagate::PrepareToPropagate()
 //      #ifdef DEBUG_PUBLISH_DATA
 //         MessageInterface::ShowMessage("Unpublished Object Found\n");
 //      #endif
-      publisher->Publish(this, streamID, pubdata, dim+1);
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
 //   }
 //   if (unpublishedObjectExists == true)
 //   {
@@ -4143,7 +4143,7 @@ bool Propagate::Execute()
    #if DEBUG_PROPAGATE_EXE
       MessageInterface::ShowMessage
          ("Propagate::Execute() <%s> entered.\n   initialized = %d, inProgress = %d\n",
-          GetGeneratingString().c_str(), initialized, inProgress);
+          GetGeneratingString().c_str(), isInitialized, inProgress);
    #endif
 
    if (isInitialized == false)
@@ -4315,7 +4315,7 @@ bool Propagate::Execute()
 //                      pubdata[4], pubdata[5], pubdata[6]);
 //            #endif
 //
-//            publisher->Publish(this, streamID, pubdata, dim+1);
+//            publisher->Publish(this, streamID, pubdata, dim+1, direction);
 
             // Set segment orbit color (LOJ: 2013.12.16 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
@@ -4356,7 +4356,7 @@ bool Propagate::Execute()
 
             // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
-            publisher->Publish(this, streamID, pubdata, dim+1);
+            publisher->Publish(this, streamID, pubdata, dim+1, direction);
             CheckForEvents();
          }
          else
@@ -4480,8 +4480,8 @@ bool Propagate::Execute()
                {
                   if (fm[0] != NULL)
                      fm[i]->SetTime(fm[0]->GetTime());
-//                  else
-//                     fm[i]->SetTime(p[0]->GetTime());
+                  else
+                     fm[i]->SetTime(p[0]->GetTime());
                }
       }
 
@@ -5183,7 +5183,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       }
       // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
       publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
-      publisher->Publish(this, streamID, pubdata, dim+1);
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
       
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage

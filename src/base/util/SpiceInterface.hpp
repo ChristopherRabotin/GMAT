@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -102,9 +102,12 @@ protected:
    static const Integer     MAX_EXPLAIN_MESSAGE;
    static const Integer     MAX_LONG_MESSAGE;
    static const Integer     MAX_CHAR_COMMENT;
+   static const std::string FILE_NOT_FOUND;
    
-   /// array of files (kernels) currently loaded
-   static StringArray    loadedKernels;
+   /// map of requested (original) kernel names and the actual name
+   /// (including path, etc. as needed)
+   static std::map<std::string, std::string> loadedKernels;
+
    /// counter of number of instances created
    static Integer        numInstances;
    /// the name (full path) of the leap second kernel to use
@@ -112,6 +115,8 @@ protected:
 
    //   static void InitializeReader();
    static void InitializeInterface();
+
+   static std::string FindKernel(const std::string &withName);
 
 };
 

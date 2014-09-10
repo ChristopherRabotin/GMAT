@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -98,7 +98,7 @@ private:
    std::string mFromAnomalyTypeStr;
    std::string mFromEpochFormat;
    
-   std::string mElements[6];
+   std::string mElementStrs[6];
    std::string mEpochStr;
    std::string mTaiMjdStr;
    std::string mAnomalyType;
@@ -119,7 +119,7 @@ private:
    void SetLabelsUnits(const std::string &stateType);
 
    void DisplayState();
-   void BuildValidStateTypes();
+   void BuildValidStateTypes(const std::string &forCS = "mOutCoord");
    void BuildValidCoordinateSystemList(const std::string &forStateType);
    void BuildState(const Rvector6 &inputState, bool isInternal = false);
    
@@ -128,20 +128,25 @@ private:
    bool IsStateModified();
    void ResetStateFlags(bool discardEdits = false);
    
-   bool CheckState(Rvector6 &state);
-   bool CheckCartesian(Rvector6 &state);
-   bool CheckKeplerian(Rvector6 &state);
-   bool CheckModKeplerian(Rvector6 &state);
-   bool CheckSpherical(Rvector6 &state, const wxString &stateType);
-   bool CheckEquinoctial(Rvector6 &state);
+   bool CheckState(Rvector6 &outState);
+   bool CheckCartesian(Rvector6 &outState);
+   bool CheckKeplerian(Rvector6 &outState);
+   bool CheckModKeplerian(Rvector6 &outState);
+   //bool CheckSpherical(Rvector6 &outState, const wxString &stateType);
+   bool CheckSphericalAZFPA(Rvector6 &outState);
+   bool CheckSphericalRADEC(Rvector6 &outState);
+   bool CheckEquinoctial(Rvector6 &outState);
+   bool CheckModifiedEquinoctial(Rvector6 &outState);
+   bool CheckAlternateEquinoctial(Rvector6 &outState);
+   bool CheckDelaunay(Rvector6 &outState);
+   bool CheckPlanetodetic(Rvector6 &outState);
+   bool CheckOutgoingAsymptote(Rvector6 &outState); // mod by YK
+   bool CheckIncomingAsymptote(Rvector6 &outState);
+   bool CheckBrouwerMeanShort(Rvector6 &outState); 
+   bool CheckBrouwerMeanLong(Rvector6 &outState);
    
-   bool CheckOutgoingAsymptote(Rvector6 &state); // mod by YK
-   bool CheckIncomingAsymptote(Rvector6 &state);
-   bool CheckBrouwerMeanShort(Rvector6 &state); 
-   bool CheckBrouwerMeanLong(Rvector6 &state);
-   
-   bool CheckAnomaly(Rvector6 &state);
-   bool ComputeTrueAnomaly(Rvector6 &state, const std::string &stateType);
+   bool CheckAnomaly();
+   bool ComputeTrueAnomaly(Rvector6 &inState, const std::string &stateType);
    
    Real GetOriginData(GmatBase *fromObject, const std::string &whichData = "mu");
 

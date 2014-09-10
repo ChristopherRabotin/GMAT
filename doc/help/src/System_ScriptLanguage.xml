@@ -308,10 +308,6 @@ data\planetary_ephem/spk\de421.bsp</code></programlisting>
           <listitem>
             <para>percent character (“<literal>%</literal>”) (hex: 25)</para>
           </listitem>
-
-          <listitem>
-            <para>semicolon (“<literal>;</literal>”) (hex: 3B)</para>
-          </listitem>
         </itemizedlist>
 
         <para>Quotes are generally optional, but are mandatory in
@@ -466,7 +462,7 @@ Create Spacecraft aSat</code></programlisting>
         examples.</para>
 
         <programlisting><code>anOrbitView.DrawObject = [true true]             % boolean array
-anOrbitView.OrbitColor = [255 32768]             % integer array
+aSat.OrbitColor = [255 0 0]                      % integer array
 anOrbitView.ViewPointVector = [3e4, 1.2, -14]    % real array
 aSpacecraft.OrbitSpiceKernelName = ...
     {'file1.bsp', 'file2.bsp'}                   % string array</code></programlisting>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -28,6 +28,7 @@
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
 #include "TimeTypes.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 //#define DEBUG_MOON 1
 
@@ -61,6 +62,9 @@ Moon::Moon(std::string name) :
 {
    objectTypeNames.push_back("Moon");
    parameterCount      = MoonParamCount;
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::TAN, GmatColor::DARK_GRAY);
    
    theCentralBodyName  = SolarSystem::EARTH_NAME; // by default, the Moon is Luna 
    bodyType            = Gmat::MOON;

@@ -1,0 +1,9 @@
+Create Spacecraft aSat ;
+GMAT aSat.Attitude = CCSDS-AEM;
+GMAT aSat.AttitudeFileName = '../data/vehicle/ephem/ccsds/CCSDS_BasicEulerFile.aem'
+
+Create Propagator aProp;
+Create OrbitView a3DView
+a3DView.Add = {aSat,Earth}
+BeginMissionSequence;
+Propagate aProp(aSat) {aSat.ElapsedSecs = 3600};

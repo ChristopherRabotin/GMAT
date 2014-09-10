@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,17 +26,18 @@
 struct GlColorType
 {
    // Reverse for intel storage order
-   #if 1
    Byte blue;
    Byte green;
    Byte red;
    Byte alpha;
-   #else
+};
+
+struct GlRgbColorType
+{
    Byte red;
    Byte green;
    Byte blue;
    Byte alpha;
-   #endif
 };
 
 void SetColor(GlColorType color, Byte red, Byte green, Byte blue);

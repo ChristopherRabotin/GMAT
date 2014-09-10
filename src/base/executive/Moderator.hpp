@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -371,8 +371,9 @@ public:
    std::string GetPotentialFileName(const std::string &fileType);
    
    // Getting file names
-   // This will eventually replace Get*FileName() above (loj: 7/7/05)
-   std::string GetFileName(const std::string &fileType);
+   std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+                           bool forInput = true, bool writeWarning = false,
+                           bool writeInfo = false);
    
    // Mission
    bool LoadDefaultMission();

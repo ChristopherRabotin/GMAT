@@ -1,0 +1,23 @@
+Create Spacecraft aSat;
+GMAT aSat.Attitude = NadirPointing;
+GMAT aSat.AttitudeReferenceBody = Earth
+GMAT aSat.AttitudeConstraintType = OrbitNormal
+GMAT aSat.BodyAlignmentVectorX = 0
+GMAT aSat.BodyAlignmentVectorY = 1
+GMAT aSat.BodyAlignmentVectorZ = 0
+GMAT aSat.BodyConstraintVectorX = 1
+GMAT aSat.BodyConstraintVectorX = 0
+GMAT aSat.BodyConstraintVectorX = 0
+
+Create ForceModel Propagator1_ForceModel
+Create Propagator Propagator1
+Propagator1.FM = Propagator1_ForceModel
+Propagator1.MaxStep = 10
+
+Create OrbitView OrbitView1;
+OrbitView1.Add = {aSat, Earth}
+OrbitView1.ViewPointReference = Earth
+OrbitView1.ViewPointVector = [ 30000 0 0 ]
+
+BeginMissionSequence
+Propagate Propagator1(aSat) {aSat.ElapsedSecs = 12000.0}

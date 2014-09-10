@@ -1,4 +1,11 @@
-# $Id: Makefile 7883 2010-04-12 18:24:19Z lindajun $
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2014 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+#
 # Root level makefile 
 #
 # This file calls make on the src folder.

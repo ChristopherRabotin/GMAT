@@ -1,0 +1,22 @@
+Create Spacecraft aSat
+
+Create Propagator aProp
+Create ImpulsiveBurn aDeltaV
+
+Create OrbitView a3DPlot
+a3DPlot.Add = {aSat,Earth};
+
+Create DifferentialCorrector aDC
+%  'Broyden' and 'ModifiedBroyden' often require fewer function evals
+aDC.Algorithm = 'Broyden'  
+
+BeginMissionSequence
+
+Propagate aProp(aSat){aSat.Periapsis}
+
+Target aDC
+	Vary aDC(aDeltaV.Element1 = 0.01)
+	Maneuver aDeltaV(aSat)
+	Propagate aProp(aSat){aSat.Apoapsis}
+	Achieve aDC(aSat.RMAG = 12000)
+EndTarget

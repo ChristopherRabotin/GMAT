@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -322,7 +322,7 @@ void MessageInterface::LogMessage(const char *msg, ...)
       short    size;
       va_list  marker;
       char     *msgBuffer = NULL;
-      std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to log the message.\n");
       
       // msg is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
@@ -346,11 +346,8 @@ void MessageInterface::LogMessage(const char *msg, ...)
       else
       {
          theMessageReceiver->LogMessage(msgStr);
-//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
-//            "the message.\n";
       }
       
-//      theMessageReceiver->LogMessage(std::string(msgBuffer));
       free(msgBuffer);
    }
 }

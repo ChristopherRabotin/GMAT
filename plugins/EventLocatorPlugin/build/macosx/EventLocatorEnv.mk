@@ -54,7 +54,7 @@ endif
 PLATFORM_FLAGS=-fPIC
 
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup -headerpad_max_install_names\
+SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup -headerpad_max_install_names\
                    -L$(GMAT_CODE_LOCATION)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) $(PLATFORM_FLAGS)\
                     $(MAC_CPP_FLAGS) -lgcc_s.1 $(MAC_ARCHITECTURE_FLAGS) -bind_at_load
                

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "FindReplaceDialog.hpp"
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FIND_REPLACE

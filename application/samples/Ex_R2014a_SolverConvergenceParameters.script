@@ -1,0 +1,25 @@
+Create Spacecraft aSat
+Create Propagator aPropagator
+
+Create ImpulsiveBurn aBurn
+
+Create DifferentialCorrector aDC
+Create OrbitView EarthView
+
+EarthView.Add = {Earth,aSat}
+EarthView.ViewScaleFactor = 5
+
+Create ReportFile aReport
+
+BeginMissionSequence
+
+Report aReport aDC.SolverStatus aDC.SolverState
+Target aDC
+
+Vary aDC(aBurn.Element1 = 1.0, {Upper = 3})
+Maneuver aBurn(aSat)
+Propagate aPropagator(aSat,{aSat.Apoapsis})
+Achieve aDC(aSat.RMAG = 42164)
+EndTarget
+
+Report aReport aDC.SolverStatus aDC.SolverState

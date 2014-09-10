@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -302,12 +302,14 @@ bool ParameterWrapper::SetString(const std::string &toValue)
 const Rmatrix& ParameterWrapper::EvaluateArray() const
 {
    if (param == NULL)
-      throw ParameterException(
-      "Cannot return value of Parameter - pointer is NULL\n");
+      throw ParameterException("Cannot return value of Parameter - pointer is NULL\n");
+   
    #ifdef DEBUG_PW
-      MessageInterface::ShowMessage(
-      "In ParameterWrapper::EvaluateArray, value is %.12f\n", param->EvaluateRmatrix());
+   MessageInterface::ShowMessage
+      ("In ParameterWrapper::EvaluateArray, value is %s\n",
+       (param->EvaluateRmatrix()).ToString().c_str());
    #endif
+   
    return param->EvaluateRmatrix();
 }
 
@@ -324,9 +326,53 @@ const Rmatrix& ParameterWrapper::EvaluateArray() const
 bool ParameterWrapper::SetArray(const Rmatrix &toValue)
 {
    if (param == NULL)
-      throw ParameterException(
-      "Cannot set value of Parameter - pointer is NULL\n");
+      throw ParameterException("Cannot set value of Parameter - pointer is NULL\n");
+   
    param->SetRmatrix(toValue);
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
+//  const Rvector& EvaluateRvector() const
+//---------------------------------------------------------------------------
+/**
+ * Method to return the Rvector value of the wrapped object.
+ *
+ * @return Rvector value of the wrapped number object.
+ * 
+ */
+//---------------------------------------------------------------------------
+const Rvector& ParameterWrapper::EvaluateRvector() const
+{
+   if (param == NULL)
+      throw ParameterException("Cannot return value of Parameter - pointer is NULL\n");
+   
+   #ifdef DEBUG_PW
+   MessageInterface::ShowMessage
+      ("In ParameterWrapper::EvaluateRvector, value is %s\n",
+       (param->EvaluateRvector()).ToString().c_str());
+   #endif
+   
+   return param->EvaluateRvector();
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetRvector(const Rvector &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the Real value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ParameterWrapper::SetRvector(const Rvector &toValue)
+{
+   if (param == NULL)
+      throw ParameterException("Cannot set value of Parameter - pointer is NULL\n");
+   
+   param->SetRvector(toValue);
    return true;
 }
 

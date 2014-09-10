@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -78,6 +78,8 @@ public:
    void        AddMetaData(const std::string &line,  bool done = false);
    void        AddMetaData(const StringArray &lines, bool done = false);
    void        FinalizeKernel();
+   // Write bogus data to the file, in order to close it
+   void    WriteDataToClose();
 
 protected:
    /// the name of the spacecraft or body for which the SPK is created

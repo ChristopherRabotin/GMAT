@@ -85,7 +85,7 @@ elseif ( INC == 0 && ECC ~= 0 )
     AOP = AOP + RAAN;
     RAAN = 0;
 %  Retrpgrade Equatorial - added by YK
-elseif ( INC > pi - 1e-6 && ECC > 1e-6 )
+elseif ( INC >= pi -1e-11 && ECC ~= 0 )
     
     RAAN = AOP + RAAN;
     AOP = 0;

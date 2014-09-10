@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -43,6 +43,7 @@ public:
    bool IsSettable(const std::string &type);
    bool IsTimeParameter(const std::string &type);
    bool RequiresBodyFixedCS(const std::string &type);
+   bool RequiresCelestialBodyCSOrigin(const std::string &type);
    bool IsForOwnedObject(const std::string &type);
    bool IsForAttachedObject(const std::string &type);
    
@@ -54,6 +55,7 @@ public:
    void Remove(const std::string &name);
    
    void SetRequiresBodyFixedCS(const std::string &type, bool flag);
+   void SetRequiresCelestialBodyCSOrigin(const std::string &type, bool flag);
    
 protected:
 private:
@@ -68,6 +70,7 @@ private:
    std::map<std::string, bool> mIsSettableMap;
    std::map<std::string, bool> mIsTimeParamMap;
    std::map<std::string, bool> mRequiresBodyFixedCSMap;
+   std::map<std::string, bool> mRequiresCelestialBodyCSOriginMap;
    std::map<std::string, bool> mIsForOwnedObjMap;
    std::map<std::string, bool> mIsForAttachedObjMap;
    StringArray mParamTypes;

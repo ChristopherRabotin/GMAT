@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -86,8 +86,9 @@ public:
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
-   bool                 IsOfType(std::string typeDescription) const;
-
+   bool                 IsOfType(const std::string &typeDescription) const;
+   StringArray          GetTypeNames() const;
+   
    virtual bool         IsInitialized();
 
    void                 SetShowPrefaceComment(bool show = true);
@@ -165,6 +166,7 @@ public:
    virtual bool         ExecuteCallback();
    virtual bool         IsCallbackExecuting();
    virtual bool         PutCallbackData(std::string &data);
+   virtual bool         PutCallbackRealData(RealArray &data);
    virtual std::string  GetCallbackResults();
 
    // required method for all subclasses
@@ -434,7 +436,13 @@ public:
    static Integer          GetDataPrecision();
    /// Method for getting time precision
    static Integer          GetTimePrecision();
-
+   /// Method for getting full path file name
+   static std::string      GetFullPathFileName(std::string &outFileName,
+                              const std::string &objName,
+                              const std::string &inFileName,
+                              const std::string &fileType, bool forInput,
+                              const std::string &fileExt = "",
+                              bool writeWarning = false, bool writeInfo = false);
    virtual Integer         GetPropItemID(const std::string &whichItem);
    virtual Integer         SetPropItem(const std::string &propItem);
    virtual StringArray     GetDefaultPropItems();

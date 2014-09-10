@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -17,8 +17,9 @@
 //
 // Author: Daniel Hunter
 // Created: 2006/6/26
-// Modified:  Dunn Idle (added MRPs)
-// Date:      2010/08/24
+// Modified:
+//   2010/08/24 Dunn Idle - Added MRPs
+//   2014/02/10 Linda Jun - Changed Quaternion to derive from AttitudeRvector
 //
 /**
  * Declares Attitude related parameter classes.
@@ -33,7 +34,7 @@
 
 #include "gmatdefs.hpp"
 #include "AttitudeReal.hpp"
-#include "AttitudeString.hpp"
+#include "AttitudeRvector.hpp"
 
 //------------------------------------------------------------------------------
 //  Direction Cosine Matrix
@@ -302,7 +303,10 @@ protected:
 
 };
 
-class GMAT_API Quaternion : public AttitudeString
+
+// Changed Quaternion to derive from AttitudeRvector
+// (LOJ: 2014.02.10)
+class GMAT_API Quaternion : public AttitudeRvector
 {
 public:
 
@@ -313,7 +317,7 @@ public:
    
    // methods inherited from Parameter
    virtual bool Evaluate();
-   virtual void SetString(const std::string &val);
+   virtual void SetRvector(const Rvector &val);
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -321,6 +325,7 @@ public:
 protected:
 
 };
+
 
 //------------------------------------------------------------------------------
 //  Euler Angles

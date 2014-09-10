@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,7 +21,7 @@
 
 #include "MatlabFunction.hpp"
 #include "FileManager.hpp"       // for GetMatlabFunctionPath()
-#include "FileUtil.hpp"          // for ParseFileName(), GetWorkingDirectory()
+#include "FileUtil.hpp"          // for ParseFileName(), GetCurrentWorkingDirectory()
 #include "StringUtil.hpp"        // for Trim()
 #include "MessageInterface.hpp"
 
@@ -193,7 +193,7 @@ bool MatlabFunction::SetStringParameter(const Integer id, const std::string &val
          if (temp[0] == '.')
          {
             FileManager *fm = FileManager::Instance();
-            std::string currPath = fm->GetWorkingDirectory();
+            std::string currPath = fm->GetCurrentWorkingDirectory();
             
             #ifdef DEBUG_FUNCTION_SET
             MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());

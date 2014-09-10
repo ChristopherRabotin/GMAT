@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,9 @@ public:
    const bool operator==(const CoordinateSystem &coordSys);
    // destructor
    virtual ~CoordinateSystem();
-
+   
+   AxisSystem* GetAxisSystem();
+   
    // virtual methods to check to see how/if an AxisSystem uses 
    // a particular parameter (calls through to its AxisSystem)
    virtual GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem = "FK5") const;
@@ -61,6 +63,10 @@ public:
    virtual bool                           UsesSpacecraft(const std::string &withName = "") const;
    virtual bool                           RequiresCelestialBodyOrigin() const;
    virtual bool                           HasCelestialBodyOrigin() const;
+   // We need these extra methods to manage the case where the origin is a
+   // Spacecraft but we don't need to worry about attitude rates
+   virtual void                           SetAllowWithoutRates(bool allow);
+   virtual bool                           AllowWithoutRates() const;
 
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);
@@ -165,11 +171,15 @@ public:
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
    
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    static CoordinateSystem* CreateLocalCoordinateSystem(
                             const std::string &csName, const std::string &axesType,
                             SpacePoint *origin, SpacePoint *primary,
                             SpacePoint *secondary, SpacePoint *j2000Body,
-                            SolarSystem *solarSystem);
+                            SolarSystem *solarSystem, bool initializeIt = true);
    
 protected:
 

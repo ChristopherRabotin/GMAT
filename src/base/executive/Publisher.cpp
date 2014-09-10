@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -213,15 +213,27 @@ bool Publisher::UnsubscribeAll()
 
 
 //------------------------------------------------------------------------------
-// bool Publish(GmatBase *provider, Real *data, Integer count = false)
+// bool Publish(GmatBase *provider, Integer id, Real *data, Integer count, ...)
 //------------------------------------------------------------------------------
-bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer count)
+/**
+ * This method is called from the propagation enabled command to publish data
+ * so that subscribers can receive data.
+ *
+ * @param provider The command who is calling this method
+ * @param id       The id given by the Publisher
+ * @param dadta    The real type data to publish
+ * @param count    Number of data points to publish
+ * @param propDir  The direction of propagation (1.0 = forward, -1.0 = backward)
+ */
+//------------------------------------------------------------------------------
+bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer count,
+                        Real propDir)
 {
    #if DBGLVL_PUBLISHER_PUBLISH
    MessageInterface::ShowMessage
       ("Publisher::Publish(Real) entered, provider=<%p><%s>, id=%d, "
-       "currProviderId=%d, count=%d\n", provider, provider->GetTypeName().c_str(),
-       id, currProviderId, count);
+       "currProviderId=%d, count=%d, propDir=%s\n", provider, provider->GetTypeName().c_str(),
+       id, currProviderId, count, propDir == 1.0 ? "forward" : "backward");
    MessageInterface::ShowMessage("   providerMap.size()=%d\n", providerMap.size());
    #endif
 
@@ -316,7 +328,13 @@ bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer coun
       (*current)->SetDataLabels((*dataList)[id].labels);
       
       // Set provider
-      (*current)->SetProvider(provider);
+      if (count > 0)
+         (*current)->SetProvider(provider, data[0]);
+      else
+         (*current)->SetProvider(provider);
+      
+      // Set propagation direction
+      (*current)->SetPropagationDirection(propDir);
       
       if (!(*current)->ReceiveData(stream))
          return false;

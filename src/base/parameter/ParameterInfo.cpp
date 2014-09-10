@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -233,6 +233,18 @@ bool ParameterInfo::RequiresBodyFixedCS(const std::string &name)
       return false;
 }
 
+//------------------------------------------------------------------------------
+// bool RequiresCelestialBodyCSOrigin(const std::string &name)
+//------------------------------------------------------------------------------
+bool ParameterInfo::RequiresCelestialBodyCSOrigin(const std::string &name)
+{
+   if (mRequiresCelestialBodyCSOriginMap.find(name) !=
+       mRequiresCelestialBodyCSOriginMap.end())
+      return mRequiresCelestialBodyCSOriginMap[name];
+   else
+      return false;
+}
+
 
 //------------------------------------------------------------------------------
 // bool IsForOwnedObject(const std::string &name)
@@ -355,6 +367,9 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
    // Set Requires BodyFixed CS flag to false
    mRequiresBodyFixedCSMap[type] = false;
    
+   // Set Requires CelestialBody CS Origin flag to false
+   mRequiresCelestialBodyCSOriginMap[type] = false;
+
    // Add owned object dep paramters
    if (depType == GmatParam::OWNED_OBJ)
    {
@@ -394,5 +409,14 @@ void ParameterInfo::Remove(const std::string &name)
 void ParameterInfo::SetRequiresBodyFixedCS(const std::string &type, bool flag)
 {
    mRequiresBodyFixedCSMap[type] = flag;
+}
+
+//------------------------------------------------------------------------------
+// void SetRequiresCelestialBodyCSOrigin(const std::string &type, bool flag)
+//------------------------------------------------------------------------------
+void ParameterInfo::SetRequiresCelestialBodyCSOrigin(const std::string &type,
+                                                     bool flag)
+{
+   mRequiresCelestialBodyCSOriginMap[type] = flag;
 }
 

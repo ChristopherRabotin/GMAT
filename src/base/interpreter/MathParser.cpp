@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -41,7 +41,7 @@
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
-//#define DEBUG_FIND_LOWEST_OPERATOR 1
+//#define DEBUG_FIND_LOWEST_OPERATOR 2
 //#define DEBUG_FIND_OPERATOR 2
 //#define DEBUG_ADD_SUBTRACT 1
 //#define DEBUG_MULT_DIVIDE 1
@@ -479,6 +479,11 @@ std::string MathParser::FindLowestOperator(const std::string &str,
       #endif
       
       opStr = FindOperator(substr, index);
+      
+      #if DEBUG_FIND_LOWEST_OPERATOR
+      MessageInterface::ShowMessage
+         ("FindOperator() returned opStr=<%s>, index=%d\n", opStr.c_str(), index);
+      #endif
       
       if (opStr != "")
          opIndexMap[opStr] = close1 + index + 1;
@@ -1943,7 +1948,7 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
             
             #if DEBUG_FIND_OPERATOR
             MessageInterface::ShowMessage
-               ("FindOperator() returning op=%s, opIndex=%u, unary minus found\n",
+               ("========== FindOperator() returning op=%s, opIndex=%u, unary minus found\n",
                 op.c_str(), opIndex);
             #endif
             
@@ -1983,8 +1988,8 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
-      ("FindOperator() Checking for double operator, index=%u, index1=%u, "
-       "index2=%u\n", index, index1, index2);
+      ("FindOperator() Checking for double operator, str1=<%s>, index=%u, index1=%u, "
+       "index2=%u\n", str1.c_str(), index, index1, index2);
    #endif
    
    // check for double operator such as *-, /-
@@ -1994,10 +1999,17 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex,
       opIndex = index;
    }
    else if ((index > 0 && index != str.npos) &&
-            (str[index-1] == '+' || str[index-1] == '-' ||
-             str[index-1] == '*' || str[index-1] == '/' ||
-             str[index-1] == '^'))
+            // (str[index-1] == '+' || str[index-1] == '-' ||
+            //  str[index-1] == '*' || str[index-1] == '/' ||
+            //  str[index-1] == '^'))
+            (str1[index-1] == '+' || str1[index-1] == '-' ||
+             str1[index-1] == '*' || str1[index-1] == '/' ||
+             str1[index-1] == '^'))
    {
+      #if DEBUG_FIND_OPERATOR
+      MessageInterface::ShowMessage
+         ("   Found double operator <%c> at %d\n", str1[index-1], index-1);
+      #endif
       op = str1.substr(index-1, 1);
       opIndex = index - 1;
    }
@@ -2305,7 +2317,8 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
 {
    #if DEBUG_ADD_SUBTRACT
    MessageInterface::ShowMessage
-      ("MathParser::ParseAddSubtract() str=%s, size=%d\n", str.c_str(), str.size());
+      ("MathParser::ParseAddSubtract() entered, str=%s, str.size()=%d\n",
+       str.c_str(), str.size());
    #endif
    
    //-----------------------------------------------------------------
@@ -2348,7 +2361,7 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    
    #if DEBUG_ADD_SUBTRACT
    MessageInterface::ShowMessage
-      ("after FindLowestOperator() opStr=%s, index=%d\n",
+      ("After FindLowestOperator() opStr=%s, index=%d\n",
        opStr.c_str(), index);
    #endif
    

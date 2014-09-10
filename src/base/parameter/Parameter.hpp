@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -67,7 +67,7 @@ class GMAT_API Parameter : public GmatBase
 public:
 
    Parameter(const std::string &name, const std::string &typeStr,
-             GmatParam::ParameterKey key, GmatBase *obj,
+             GmatParam::ParameterKey key, GmatBase *owner,
              const std::string &desc, const std::string &unit,
              GmatParam::DepObject depObj, Gmat::ObjectType ownerType,
              bool isTimeParam, bool isSettable, bool isPlottable,
@@ -78,13 +78,17 @@ public:
    virtual ~Parameter();
    
    GmatParam::ParameterKey  GetKey() const;
+   GmatBase*                GetOwner() const;
    Gmat::ObjectType         GetOwnerType() const;
    Gmat::ObjectType         GetOwnedObjectType() const;
    Gmat::ParameterType      GetReturnType() const;
    GmatParam::CycleType     GetCycleType() const;
+   std::string              GetParameterClassType() const;
    
    void  SetKey(const GmatParam::ParameterKey &key);
-
+   void  SetOwner(GmatBase *owner);
+   void  SetParameterClassType(const std::string &classType);
+   
    bool  IsSystemParameter() const;
    bool  IsAngleParameter() const;
    bool  IsTimeParameter() const;
@@ -96,11 +100,14 @@ public:
    bool  IsOwnedObjectDependent() const;
    bool  NeedCoordSystem() const;
    bool  NeedExternalClone() const;
+   virtual bool IsOptionalField(const std::string &field) const;
    virtual const std::string GetExternalCloneName(Integer whichOne = 0);
    virtual void SetExternalClone(GmatBase *clone);
    
    virtual bool RequiresBodyFixedCS() const;
+   virtual bool RequiresCelestialBodyCSOrigin() const;
    virtual void SetRequiresBodyFixedCS(bool flag);
+   virtual void SetRequiresCelestialBodyCSOrigin(bool flag);
    
    // Methods needed to provide handling for transient forces (e.g. finite burn)
    virtual bool NeedsForces() const;
@@ -119,6 +126,7 @@ public:
    virtual const std::string& GetString() const;
    
    virtual void               SetReal(Real val);
+   virtual void               SetRvector(const Rvector &val);
    virtual void               SetRvector6(const Rvector6 &val);
    virtual void               SetRmatrix66(const Rmatrix66 &mat);
    virtual void               SetRmatrix33(const Rmatrix33 &mat);
@@ -126,6 +134,7 @@ public:
    virtual void               SetString(const std::string &val);
    
    virtual Real               EvaluateReal();
+   virtual const Rvector&     EvaluateRvector();
    virtual const Rvector6&    EvaluateRvector6();
    virtual const Rmatrix66&   EvaluateRmatrix66();
    virtual const Rmatrix33&   EvaluateRmatrix33();
@@ -190,6 +199,8 @@ protected:
    static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];
    
    GmatParam::ParameterKey  mKey;
+   GmatBase *mOwner;
+   
    std::string   mDesc;
    std::string   mUnit;
    std::string   mExpr;
@@ -197,6 +208,7 @@ protected:
    std::string   mDepObjectName;
    std::string   mCommentLine2;
    std::string   mInitialValue;
+   std::string   mParameterClassType;
    
    Gmat::ObjectType     mOwnerType;
    Gmat::ObjectType     mOwnedObjectType;
@@ -204,7 +216,7 @@ protected:
    GmatParam::DepObject mDepObj;
    GmatParam::CycleType mCycleType;
    UnsignedInt          mColor;
-   
+
    bool mIsAngleParam;
    bool mIsTimeParam;
    bool mIsPlottable;
@@ -216,6 +228,7 @@ protected:
    bool mNeedCoordSystem;
    bool mNeedExternalClone;
    bool mRequiresBodyFixedCS;
+   bool mRequiresCelestialBodyCSOrigin;
    bool mIsCommentFromCreate;
    
    enum

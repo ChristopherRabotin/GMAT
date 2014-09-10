@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,11 +33,16 @@ class GMAT_API Date
 public:
    
     // exception(s)
-    class TimeRangeError : public BaseException
-          { public:  TimeRangeError(const std::string& message =
-           "Date error: date or time out of specified range")
-           : BaseException(message) {}; };
-   
+   class TimeRangeError : public BaseException
+         { public:  TimeRangeError(const std::string& message =
+          "Date error: date or time out of specified range")
+          : BaseException(message) {}; };
+
+   class LeapYearError : public BaseException
+         { public:  LeapYearError(const std::string& message =
+          "Date error: day number is invalid for specified year")
+          : BaseException(message) {}; };
+
     Integer GetYear() const;
     Integer GetMonth() const;
     Integer GetDay() const;

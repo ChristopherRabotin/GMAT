@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="WelcomeToGmat"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -17,8 +17,8 @@
   flight regimes ranging from low Earth orbit to lunar, libration point , and
   deep space missions. GMAT is developed by a team of NASA, private industry,
   public, and private contributors and is used for real-world engineering
-  studies, as a tool for education and public engagement, and starting in
-  Sept. 2013 to fly operational spacecraft.</para>
+  studies, as a tool for education and public engagement, and as of  R2013b released in Nov. 
+  2013, to fly operational spacecraft.</para>
 
   <section>
     <title>Features Overview</title>
@@ -197,37 +197,14 @@
     <title>Platform Support</title>
 
     <para>GMAT has been rigorously tested on the Windows 7 platform and we
-    perform nightly regression tests running almost 11,000 test cases for the
+    perform nightly regression tests running almost 12,000 test cases for the
     script engine and over 4000 test cases for the GUI interface.</para>
 
     <para>While the system is routinely built on Mac and Linux, we consider
-    the software to be in alpha form on those plaforms. For release R2013b, we
+    the software to be in alpha form on those plaforms. For release R2014a, we
     have only addressed issues on Mac and Linux that also occur on the Windows
     7 platform. Part of our planning effort for the next release will be to
     assess the future of GMAT on Mac and Linux.</para>
-  </section>
-
-  <section>
-    <title>Development Status and Usage</title>
-
-    <para>R2013a is a major maintenance release with completely updated
-    documentation and greatly improved quality. GMAT is no longer Beta
-    software. Historically, solutions from GMAT have been verified in other
-    operational systems. However, with release R2013a, the GMAT team will
-    perform final operational certifications testing of the system be
-    completed in the summer of 2013. After completion of operational
-    certification, GMAT will be used for operational support of flight
-    projects.</para>
-
-    <para>GMAT has been used to optimize maneuvers for flight projects such as
-    NASA’s LCROSS and ARTEMIS missions, and the Lunar Reconnaissance Orbiter
-    (LRO). ARTEMIS and LRO flew trajectories optimized in GMAT and verified in
-    the operational ground system. GMAT has been used extensively for launch
-    window verification for OSIRIS-REx. The MMS project has used GMAT for
-    formation maneuver planning and Monte Carlo analysis. GMAT has been used
-    on numerous concept studies from Earth-Sun libration point missions, LEO
-    missions, lunar missions, and interplanetary missions to Venus, Mars,
-    Jupiter, and near-Earth and Trojan asteroids.</para>
   </section>
 
   <section>
@@ -237,9 +214,9 @@
     Flight Center performs project management activities and is involved in
     most phases of the development process including requirements, algorithms,
     design, and testing. The Ground Software Systems Branch performs design,
-    implementation, and integration testing. Commecial particpants contribute
-    to design, implementation, testing and documentation. Commercial
-    participants for R2013b include:</para>
+    implementation, and integration testing. External particpants contribute
+    to design, implementation, testing and documentation. External
+    participants for R2014a include:</para>
 
     <itemizedlist>
       <listitem>
@@ -249,6 +226,22 @@
 
       <listitem>
         <para>a.i. solutions (testing)</para>
+      </listitem>
+      
+      <listitem>
+        <para>Korean Aerospace Research Institute</para>
+      </listitem>
+      
+      <listitem>
+        <para>Chonbuk National University, South Korea</para>
+      </listitem>
+      
+      <listitem>
+        <para>Korea Advanced Institute of Science and Technology</para>
+      </listitem>
+      
+      <listitem>
+        <para>Yonsei University, South Korea</para>
       </listitem>
     </itemizedlist>
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -72,24 +72,9 @@ ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
    SetMenuBar(CreateMainMenu());
 #endif // wxUSE_MENUS
 
-   // Set icon if icon file is in the start up file
-   FileManager *fm = FileManager::Instance();
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #if defined __WXMSW__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-      #elif defined __WXGTK__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAC__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-      #endif
-   }
-   catch (GmatBaseException &)
-   {
-      //MessageInterface::ShowMessage(e.GetMessage());
-   }
-
+   // Set GMAT main icon
+   GmatAppData::Instance()->SetIcon(this, "ViewTextFrame");
+   
    CenterOnScreen(wxBOTH);
 }
 

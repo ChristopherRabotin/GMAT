@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -68,6 +68,11 @@ public:
    virtual bool       RequiresJ2000Body();
    const std::string  GetJ2000BodyName() const;
    SpacePoint*        GetJ2000Body() const;
+
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    bool               SetJ2000BodyName(const std::string &toName);
    void               SetJ2000Body(SpacePoint* toBody);
 
@@ -85,10 +90,12 @@ public:
    UnsignedInt        GetDefaultTargetColor();
    UnsignedInt        GetCurrentOrbitColor();
    UnsignedInt        GetCurrentTargetColor();
+   std::string        GetOrbitColorString();
+   std::string        GetTargetColorString();
    void               SetCurrentOrbitColor(UnsignedInt color);
    void               SetCurrentTargetColor(UnsignedInt color);
    void               SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor);
-   void               SetDefaultColors();
+   void               SetSpacecraftDefaultColors();
    // static method to clear instance count
    static void ClearInstanceCount();
    
