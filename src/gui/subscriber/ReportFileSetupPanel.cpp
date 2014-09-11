@@ -48,6 +48,7 @@ BEGIN_EVENT_TABLE(ReportFileSetupPanel, GmatPanel)
    EVT_TEXT(ID_COMBOBOX, ReportFileSetupPanel::OnTextChange)
    EVT_BUTTON(ID_BUTTON, ReportFileSetupPanel::OnButtonClick)
    EVT_CHECKBOX(ID_CHECKBOX, ReportFileSetupPanel::OnCheckBoxChange)
+   EVT_CHECKBOX(ID_CHECKBOX_FIXEDWIDTH, ReportFileSetupPanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, ReportFileSetupPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
@@ -167,6 +168,11 @@ void ReportFileSetupPanel::ObjectNameChanged(Gmat::ObjectType type,
 void ReportFileSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
    mHasBoolDataChanged = true;
+   if (event.GetId() == ID_CHECKBOX_FIXEDWIDTH)
+   {
+	   delimiterComboBox->Enable(!fixedWidthCheckBox->IsChecked());
+	   colWidthTextCtrl->Enable(fixedWidthCheckBox->IsChecked());
+   }
    EnableUpdate(true);
 }
 
@@ -212,19 +218,19 @@ void ReportFileSetupPanel::Create()
                      wxDefaultPosition, wxDefaultSize, 0);
    
    fixedWidthCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Fixed Width"),
+      new wxCheckBox(this, ID_CHECKBOX_FIXEDWIDTH, wxT("Fixed Width"),
                      wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *delimiterText =
       new wxStaticText(this, -1, wxT("Delimiter"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
-   delimiterComboBox = new wxComboBox(this, ID_COMBOBOX, wxT("SPACE"), 
-                                     wxDefaultPosition, wxSize(35, -1),  0);
-   delimiterComboBox->Append("COMMA");
-   delimiterComboBox->Append("SEMICOLON");
-   delimiterComboBox->Append("SPACE");
-   delimiterComboBox->Append("TAB");
+   delimiterComboBox = new wxComboBox(this, ID_COMBOBOX, wxT("Space"), 
+                                     wxDefaultPosition, wxDefaultSize,  0);
+   delimiterComboBox->Append("Comma");
+   delimiterComboBox->Append("Semicolon");
+   delimiterComboBox->Append("Space");
+   delimiterComboBox->Append("Tab");
    
    // Solver Iteration ComboBox
    wxStaticText *solverIterLabel =
@@ -232,7 +238,7 @@ void ReportFileSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1),
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize,
                      emptyList, wxCB_READONLY);
    
    // Get Solver Iteration option list from the Subscriber
@@ -394,13 +400,13 @@ void ReportFileSetupPanel::LoadData()
       wxString aDelimiter;
       aDelimiter = reportFile->GetStringParameter(id)[0];
 	  if (aDelimiter == " ") 
-		delimiterComboBox->SetValue("SPACE");
+		delimiterComboBox->SetValue("Space");
 	  else if (aDelimiter == "\t") 
-		delimiterComboBox->SetValue("TAB");
+		delimiterComboBox->SetValue("Tab");
 	  else if (aDelimiter == ",") 
-		delimiterComboBox->SetValue("COMMA");
+		delimiterComboBox->SetValue("Comma");
 	  else if (aDelimiter == ";") 
-		delimiterComboBox->SetValue("SEMICOLON");
+		delimiterComboBox->SetValue("Semicolon");
 	  else
 		delimiterComboBox->SetValue(aDelimiter);
       
@@ -421,7 +427,10 @@ void ReportFileSetupPanel::LoadData()
       
       StringArray parameterList = reportFile->GetStringArrayParameter("Add");
       mNumParameters = parameterList.size();
-      
+
+      delimiterComboBox->Enable(!fixedWidthCheckBox->IsChecked());
+	  colWidthTextCtrl->Enable(fixedWidthCheckBox->IsChecked());
+
       #if DEBUG_REPORTFILE_PANEL_LOAD
       MessageInterface::ShowMessage("   mNumParameters=%d\n", mNumParameters);
       #endif
@@ -486,6 +495,7 @@ void ReportFileSetupPanel::SaveData()
    CheckFileName(str, "Filename");
    
    str = delimiterComboBox->GetValue();
+   str = GmatStringUtil::ToUpper(str);
    if (str == "SPACE") 
      str = " ";
    else if (str == "TAB") 
