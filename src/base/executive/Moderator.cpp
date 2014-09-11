@@ -93,7 +93,7 @@
 //#define DEBUG_REMOVE 1
 //#define DEBUG_DEFAULT_MISSION 2
 //#define DEBUG_MULTI_STOP 2
-//#define DEBUG_USER_INTERRUPT 1
+//#define DEBUG_RUN_STATE 1
 //#define DEBUG_LOOKUP_RESOURCE 1
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
@@ -6746,32 +6746,35 @@ Integer Moderator::RunMission(Integer sandboxNum)
  * @param <snadobxNum> sandbox number
  *
  * @return a status code
- *    0 = successful, <0 = error (tbd)
+ *    1: successful,  < 0: error (tbd)
  */
 //------------------------------------------------------------------------------
 Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
-   #if DEBUG_USER_INTERRUPT
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage
       ("Moderator::ChangeRunState(%s) entered\n", state.c_str());
    #endif
    
-   if (state == "Stop")
+   if (state == "Stop" || state == "Pause" || state == "Resume")
    {
-      runState = Gmat::IDLE;
-      GmatGlobal::Instance()->SetRunInterrupted(true);
+      GmatGlobal *gmatGlobal = GmatGlobal::Instance();
+      if (state == "Stop")
+      {
+         runState = Gmat::IDLE;
+         gmatGlobal->SetRunInterrupted(true);
+      }
+      else if (state == "Pause")
+         runState = Gmat::PAUSED;
+      else if (state == "Resume")
+         runState = Gmat::RUNNING;
+      
+      gmatGlobal->SetRunState(runState);
    }
-   
-   else if (state == "Pause")
-      runState = Gmat::PAUSED;
-   
-   else if (state == "Resume")
-      runState = Gmat::RUNNING;
-   
    else
-      ; // no action
+      ; // do nothing
    
-   return 0;
+   return 1;
 }
 
 
@@ -6790,13 +6793,14 @@ Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetUserInterrupt()
 {
-   #if DEBUG_USER_INTERRUPT
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage("Moderator::GetUserInterrupt() entered\n");
    #endif
    
    // give MainFrame input focus
    if (theUiInterpreter != NULL)
       theUiInterpreter->SetInputFocus();
+   
    return runState;
 }
 
@@ -6810,7 +6814,7 @@ Gmat::RunState Moderator::GetUserInterrupt()
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetRunState()
 {
-   #if DEBUG_RUN
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage
       ("Moderator::GetRunsState() isRunReady=%d, endOfInterpreter=%d\n",
        isRunReady, endOfInterpreter);
@@ -6820,12 +6824,43 @@ Gmat::RunState Moderator::GetRunState()
    if (!isRunReady && !endOfInterpreter)
       return Gmat::RUNNING;
    
-   #if DEBUG_RUN
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage
       ("Moderator::GetRunsState() runState=%d\n", runState);
    #endif
-
+   
    return runState;
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetDetailedRunState(Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * @param <snadobxNum> sandbox number (currently not used)
+ *
+ * @return the detailed state of the system including solver state
+ *         (Gmat::IDLE, Gmat::RUNNING, Gmat::PAUSED, Gmat::TARGETING,
+ *          Gmat::OPTIMIZING, etc.)
+ */
+//------------------------------------------------------------------------------
+Gmat::RunState Moderator::GetDetailedRunState(Integer sandboxNum)
+{
+   #if DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDetailedRunsState() isRunReady=%d, endOfInterpreter=%d\n",
+       isRunReady, endOfInterpreter);
+   #endif
+   
+   detailedRunState = thePublisher->GetRunState();
+   GmatGlobal::Instance()->SetDetailedRunState(detailedRunState);
+   
+   #if DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDetailedRunsState() detailedRunState=%d\n", detailedRunState);
+   #endif
+   
+   return detailedRunState;
 }
 
 
@@ -9612,6 +9647,7 @@ Moderator::Moderator()
    theInternalCoordSystem = NULL;
    theInternalSolarSystem = NULL;
    runState = Gmat::IDLE;
+   detailedRunState = Gmat::IDLE;
    objectManageOption = 1;
    
    theMatlabInterface = NULL;

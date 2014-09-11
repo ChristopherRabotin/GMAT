@@ -320,7 +320,7 @@ bool GmatApp::OnInit()
                else
                {
                   MessageInterface::ShowMessage
-                    ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+                     ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.ToStdString().c_str());
                }
                // Changed to time out in 4 sec (LOJ: 2009.10.07)
                if (bitmap != NULL)
