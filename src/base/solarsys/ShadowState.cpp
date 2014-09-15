@@ -242,7 +242,16 @@ Real ShadowState::FindShadowState(bool &lit, bool &dark,
                      bodyRad, s2, GmatMathUtil::Sqrt(s2));
             #endif
 
-            Real pcbrad      = GmatMathUtil::ASin(bodyRad / GmatMathUtil::Sqrt(s2));
+
+            Real sqrtS2 = GmatMathUtil::Sqrt(s2);
+            if (sqrtS2 < bodyRad)
+            {
+               lit        = false;
+               dark       = true;
+               percentSun = 0.0;
+               return percentSun;
+            }
+            Real pcbrad      = GmatMathUtil::ASin(bodyRad / sqrtS2);
 
             lit         = false;
             if (lsc < GmatMathUtil::Abs(l2))
