@@ -1295,9 +1295,6 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
 {
 #ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if ((troposphere == NULL)&&(ionosphere == NULL))
-#else
-   if (troposphere == NULL)
-#endif
       return true;
 #else
    if (troposphere == NULL)
