@@ -9,7 +9,9 @@ x  = stateArray(:,1);
 y  = stateArray(:,2);
 plot(x,y); 
 axis([0 2 -2 0]); grid on;
+xlabel('X Coordinate');ylabel('Y Coordinate')
 drawnow;
 %pause
+
 return
 

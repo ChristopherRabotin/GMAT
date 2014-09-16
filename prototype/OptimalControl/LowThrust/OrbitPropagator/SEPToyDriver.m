@@ -3,7 +3,7 @@
 %  Update spacecraft and tank at integrator stages.
 
 %%  Set up prop epoch
-propDuration    = 0.2*86400;
+propDuration    = 2*86400;
 outputStepSize  = 10;
 
 %%  Define spacecraft orbit properties
@@ -33,11 +33,11 @@ Sat.SolarCoeff2        = -0.11;
 Sat.SolarCoeff3        = -0.12;
 Sat.SolarCoeff4        =  0.11;
 Sat.SolarCoeff5        = -0.02;
-Sat.debugMath          = true();
+Sat.debugMath          = false();
 
 %%  Configure the Thrusters
 aThruster                    = ElectricThruster();
-aThruster.debugMath          = true();
+aThruster.debugMath          = false();
 %  ConstantThrustAndIsp, FixedEfficiency, ThrustMassPolynomial
 aThruster.ThrustModel        = 'ConstantThrustAndIsp';
 aThruster.MaximumUsablePower = 7.4;
@@ -55,7 +55,7 @@ aThruster.MassFlowCoeff5     = -0.004776; %  milligrams/sec
 aThruster.FixedEfficiency    = 0.654321;
 aThruster.GravitationalAccel = 9.82;
 aThruster.Isp                = 3219.12314;
-aThruster.ConstantThrust     = 0.01243;
+aThruster.ConstantThrust     = 5.61243;
 aThruster.ThrustCoordSys     = 2;
 aThruster.ThrustDirection1   = 1;
 aThruster.ThrustDirection2   = 0;
@@ -65,7 +65,7 @@ aThruster.ThrustScaleFactor  = .87;
 
 %% Configure the finite burn object and spacecraft
 aFiniteBurn              = FiniteBurn();
-aFiniteBurn.debugMath    = true();
+aFiniteBurn.debugMath    = false();
 aTank                    = FuelTank();
 aTank.FuelMass           = 567.89;
 aFiniteBurn.SetThrusters({aThruster});
@@ -83,7 +83,7 @@ Force.srpScaleFactor = 1;
 Force.Debug          = 0;
 Force.bodyMu         = 398600.4415;
 Force.RefEpoch       = Sat.Epoch;
-Force.debugMath      = true();
+Force.debugMath      = false();
 
 %%  Configure integrator and propagate
 if Force.STM  && ~Force.UseFiniteBurn

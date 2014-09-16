@@ -10,7 +10,7 @@ classdef UserPointFunction < UserFunction
         finalStateVec
         initialControlVec
         finalControlVec
-        intialTime
+        initialTime
         finalTime
         
         %  Arrays of function values

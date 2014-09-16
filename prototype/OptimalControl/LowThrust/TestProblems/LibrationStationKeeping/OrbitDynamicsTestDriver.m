@@ -7,30 +7,35 @@ function Run()
 global mode 
 
 %% Configure initial state
-A    = 3.9045;
-omXY = 2.0570;
-omZ  = 1.9851;
-k    = -0.3138;
-cnt  = 0;
-AU   = 149597871;
+A     = 3.9045;
+omXY  = 2.0570;
+omZ   = 1.9851;
+k     = -0.3138;
+cnt   = 0;
+AU    = 149597871;
 %  Specific liss properties
-aXY   = 260285.777055646/AU;
-aZ    = 163495.200129871/AU;
+aXY   = 260285.777055646;
+aZ    = 163495.200129871;
 phiXY = pi/2;
 phiZ  = pi/2;
-for time = 0:.01:1*pi
+for time = 0:.01:5*pi
     cnt     =  cnt + 1;
+    t(cnt)  = time;
     x(cnt)  =  aXY*k*cos(omXY*time + phiXY);
-    y(cnt)  =  aXY*k*sin(omXY*time + phiXY);
+    y(cnt)  =  aXY*sin(omXY*time + phiXY);
     z(cnt)  =  aZ*cos(phiZ*time + phiZ);
     vx(cnt) = -aXY*k*omXY*sin(omXY*time + phiXY);
-    vy(cnt) =  aXY*k*omXY*cos(omXY*time + phiXY);
-    vz(cnt) = -aZ*phiZ*sin(phiZ*time + phiZ);
+    vy(cnt) =  aXY*omXY*cos(omXY*time + phiXY);
+    vz(cnt) = -aZ*phiZ*sin(omZ*time + phiZ);
 end
+figure(1)
 plot3(x,y,z);
 view([1 0 0]); axis equal; drawnow;
-y0 = [x(1) y(1) z(1) vx(1) vy(1) vz(1)]'
-return
+y0 = [x(1) y(1) z(1) vx(1) vy(1) vz(1)]';
+view([1 0 0]);
+xlabel('X-Axis'); ylabel('Y-Axis'); zlabel('Z-Axis');
+figure(2);
+plot(t,x,t,y,t,z);
 
 muE  = 398600.4415;
 muS  = 132712440017.99;
@@ -41,7 +46,7 @@ mode = 1;
 if mode == 1
     DU  = AU;
     TU  = 806.810991306733;
-    MU  = mu;
+    MU  = muE + muS;
 else
     DU  = 1;
     TU  = 1;
@@ -49,22 +54,16 @@ else
 end
 
 %  Dimensional Quantities
-circRad     = 6900;
-meanMotion  = sqrt(mu/circRad^3);
-rv0         = [circRad 0 0]';
-vv0         = [0 sqrt(mu/circRad) 0]'*1000;
-m0          = 1250;
-orbitPeriod = 2*pi/meanMotion;
+% circRad     = 6900;
+% meanMotion  = sqrt(mu/circRad^3);
+% rv0         = [circRad 0 0]';
+% vv0         = [0 sqrt(mu/circRad) 0]'*1000;
+ m0          = 1250/MU;
 
-%  Non-Dimensional Quantities
-rv0         = rv0/DU;
-vv0         = vv0/DU*TU;
-m0          = m0/MU;
-X0          = [rv0;vv0;m0];
-orbitPeriod = orbitPeriod/TU;
 odeOpt      = odeset('RelTol',1e-9,'AbsTol',1e-9);
-[tVec,xVec] = ode45(@PathFunction,[0 50], X0,odeOpt );
+[tVec,xVec] = ode45(@PathFunction,[0 pi],[y0; m0],odeOpt );
 
+figure(10)
 plot3(xVec(:,1),xVec(:,2),xVec(:,3));
 view([0 0 1]);
 
@@ -84,7 +83,7 @@ U     = [sqrt3 sqrt3 sqrt3]';
 
 %%  Define constants
 if mode == 1
-    DU  = 6378.1363;
+    DU  = 149597871;;
     TU  = 806.810991306733;
     MU  = 1000;
 else
@@ -95,7 +94,7 @@ end
 
 mu  = 398600.4415*TU^2/DU^3;
 g   = (9.81/1000)*TU*TU/DU;
-T   = (100/1000)*TU*TU/DU/MU;  % kg*km/s^2;
+T   = 0*(100/1000)*TU*TU/DU/MU;  % kg*km/s^2;
 Isp = 300/TU;
 
 mu  = 3.003571e-06;

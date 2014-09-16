@@ -4,15 +4,22 @@ classdef RadauPhase < Phase
     
     properties
         
+    end
+    
+    properties (SetAccess = 'protected')
+        %  Time parameters
+        timeMat
+        finalTime
+        initialTime
+        %  Mesh point and radau transcription details
         radauPoints
         radauWeights
         radauDiffMatrix
         numRadauPoints
-        
     end
     
     methods
-                
+        
         %  Compute Radau points, weights, and differentiation matrix
         function obj = GetTranscriptionProperties(obj)
             
@@ -23,10 +30,10 @@ classdef RadauPhase < Phase
             obj.numRadauPoints = length(obj.radauWeights);
             
             %  Compute the number of mesh points
-            obj.numMeshPoints    = obj.numRadauPoints;
-            obj.numStatePoints   = obj.numRadauPoints + 1;
-            obj.numControlPoints = obj.numRadauPoints;
-            obj.numTimeParams = 2;  % TODO: Hard coded for Radau!
+            obj.numMeshPoints        = obj.numRadauPoints;
+            obj.numStatePoints       = obj.numRadauPoints + 1;
+            obj.numControlPoints     = obj.numRadauPoints;
+            obj.numTimeParams        = 2;
             obj.numCollocationPoints = obj.numControlPoints;
             
         end
@@ -40,12 +47,40 @@ classdef RadauPhase < Phase
         
         %  Configure the time vector
         function ComputeTimeVector(obj)
-            initialTime = obj.DecVector.GetFirstTime();
-            obj.timeVector = (obj.DecVector.GetLastTime() - initialTime)*...
-                (obj.radauPoints + 1)/2 + initialTime;
+            obj.ComputeTimeParameters();
+            obj.timeVector = (obj.finalTime - obj.initialTime)*...
+                (obj.radauPoints + 1)/2 + obj.initialTime;
         end
         
-    end
+        %  Compute the defect constraints
+        function ComputeDefectConstraints(obj,rhsMatrix)
+            if obj.PathFunction.hasDynFunctions
+                stateMat = obj.DecVector.GetStateArray();
+                defectConstraintsLHS = obj.radauDiffMatrix*stateMat;
+                obj.ComputeTimeParameters();
+                defectConstraints = defectConstraintsLHS - ...
+                    (obj.finalTime -obj.initialTime)*0.5*rhsMatrix;
+                defectConstraints = reshape(defectConstraints,...
+                    obj.numDefectConstraints,1);
+                obj.defectConstraintVec = defectConstraints;
+            end
+        end
+        
+        %  Compute the cost function
+        function ComputeCostFunctionIntegral(obj)
+            if obj.PathFunction.hasCostFunction
+                obj.ComputeTimeParameters();
+                obj.costFuncIntegral = ((obj.finalTime -...
+                    obj.initialTime)/2)*obj.costFuncIntegral;
+            end
+        end
+               
+        %  Configure Radau time parametesr
+        function ComputeTimeParameters(obj)
+            obj.timeMat     = GetMeshPoints(obj);
+            obj.finalTime   = obj.DecVector.GetLastTime();
+            obj.initialTime = obj.DecVector.GetFirstTime();
+        end
     
+    end
 end
-

@@ -26,7 +26,7 @@ classdef UserPathFunction < UserFunction
         algFunctions = [];
         dynFunctions = [];
         intFunctions = [];
-        
+                
     end
     
     methods

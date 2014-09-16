@@ -60,22 +60,22 @@ classdef Phase < handle
         decisionVecLowerBound
         decisionVecUpperBound
         
+        phaseNum
+        
     end
     
     properties (SetAccess = 'protected')
-        
-        %OptimizationVector = DecisionVector;
-        numTimeParams = 2;  % For orthogonal methods
         
         %  These do not go here
         meshPoints
         numMeshPoints
         numCollocationPoints
         
-        %  Cost and constraint related parameters        
+        %  Cost and constraint related parameters
         numStatePoints
         numControlPoints
         numStateParams
+        numTimeParams
         numControlParams
         numStaticParams = 0;
         numDecisionParams
@@ -131,7 +131,7 @@ classdef Phase < handle
         
         %  The constructor
         function obj = Phase()
-            obj.DecVector     = DecisionVector;
+            obj.DecVector     = DecisionVector();
             obj.PathFunction  = UserPathFunction();
             obj.PointFunction = UserPointFunction();
         end
@@ -141,19 +141,19 @@ classdef Phase < handle
             
             %  Compute the properties for defined mesh properties
             ValidatePhaseConfig(obj);
+            
+            %  Get properties that are dependent upon the transcription
+            %  being used.  These come from the leaf classes
             obj = GetTranscriptionProperties(obj);
             
             %  Compute bookkeeping properties of the discretization
-            %  TODO:  NumStatePoints and numControl Points should come from
-            %  transcription helper class
-            obj.numStateParams   = obj.numStates*(obj.numStatePoints);
-            obj.numControlParams = obj.numControls*(obj.numControlPoints);
+            obj.numStateParams   = obj.numStates*obj.numStatePoints;
+            obj.numControlParams = obj.numControls*obj.numControlPoints;
             obj.numDecisionParams = obj.numStateParams + ...
                 obj.numControlParams + obj.numStaticParams + ...
                 obj.numTimeParams;
             
             obj = SetStateChunkIndeces(obj);
-            
             
             %  Initialize the decision vector helper class
             numIntegrals = 0;  % TODO:  should not be hard coded
@@ -161,10 +161,15 @@ classdef Phase < handle
                 obj.numControls,numIntegrals,obj.numStaticParams,...
                 obj.numStatePoints,obj.numControlPoints)
             
+            %  Compute and set the initial guess and configure time.  This
+            %  will need to be handled on a transcription bases.
             obj = SetInitialGuess(obj);
+            obj.ComputeTimeVector();
             
-            %  Set the handle for user function on the function data class
-            obj.PathFunction.functionName = obj.pathFunctionName;
+            %  Intialize the user functions
+            obj.PathFunction.phaseNum = obj.phaseNum;
+            obj.PointFunction.phaseNum = obj.phaseNum;
+            obj.PathFunction.functionName  = obj.pathFunctionName;
             obj.PointFunction.functionName = obj.pointFunctionName;
             obj.PreparePathFunction(1);  % Evaluate at first point
             obj.PathFunction.Initialize();
@@ -172,10 +177,11 @@ classdef Phase < handle
             obj.PreparePointFunction();
             obj.PointFunction.Initialize();
             
+            %  Set chunk values and bounds.
             obj = SetConstraintChunkIndeces(obj);
             obj = SetConstraintBounds(obj);
             obj = SetDecisionVectorBounds(obj);
-            obj.ComputeTimeVector();
+            
         end
         
         function obj = SetStateChunkIndeces(obj)
@@ -198,7 +204,7 @@ classdef Phase < handle
             %  begin and end.
             obj.numDefectConstraints = obj.numStates*...
                 obj.numCollocationPoints;
-            obj.numPathConstraints = obj.numCollocationPoints*...
+            obj.numPathConstraints = obj.numMeshPoints*...
                 obj.PathFunction.numAlgFunctions;
             obj.numEventConstraints = obj.PointFunction.numEventFunctions;
             obj.defectStartIdx = 1;
@@ -216,7 +222,7 @@ classdef Phase < handle
         %  MERGE
         function obj = SetDecisionVectorBounds(obj)
             
-           % numPoints = obj.numStatePoints;
+            % numPoints = obj.numStatePoints;
             %  Dimension the vectors
             obj.decisionVecLowerBound = zeros(obj.numDecisionParams,1);
             obj.decisionVecUpperBound = zeros(obj.numDecisionParams,1);
@@ -240,9 +246,9 @@ classdef Phase < handle
             %  Fill in the control vector portion of the bounds
             cnt = obj.numStates*obj.numStatePoints+1;
             for i = 1:obj.numControls
-                obj.decisionVecLowerBound(cnt:cnt+obj.numRadauPoints-1) = ...
+                obj.decisionVecLowerBound(cnt:cnt+obj.numRadauPoints-1)=...
                     obj.controlLowerBound(i);
-                obj.decisionVecUpperBound(cnt:cnt+obj.numRadauPoints-1) = ...
+                obj.decisionVecUpperBound(cnt:cnt+obj.numRadauPoints-1)=...
                     obj.controlUpperBound(i);
                 cnt = cnt+obj.numRadauPoints;
             end
@@ -302,7 +308,7 @@ classdef Phase < handle
                 obj.pathConUpperBound = zeros(numPathCon,1);
                 lowIdx = 1;
                 for conIdx = 1:obj.numRadauPoints
-                    highIdx = lowIdx + obj.PathFunction.numAlgFunctions - 1;
+                    highIdx = lowIdx + obj.PathFunction.numAlgFunctions-1;
                     obj.pathConLowerBound(lowIdx:highIdx,1) = ...
                         obj.algConstraintLowerBound;
                     obj.pathConUpperBound(lowIdx:highIdx,1) = ...
@@ -315,7 +321,7 @@ classdef Phase < handle
             end
         end
         
-        %  MERGE
+        %  Set bounds on event constraints
         function obj = SetEventConstraintBounds(obj)
             obj.eventConLowerBound = obj.eventConstraintLowerBound;
             obj.eventConUpperBound = obj.eventConstraintUpperBound;
@@ -326,40 +332,42 @@ classdef Phase < handle
             
             switch obj.initialGuessMode
                 
-                case {'LinearNoControl','LinearUnityControl'}
+                case {'LinearNoControl','LinearUnityControl','LinearCoast'}
                     
                     % Supply an initial guess
-                    p1RadauPoints = obj.numRadauPoints+1;
-                    xguess  = zeros(length(obj.initialGuessState)*...
-                        p1RadauPoints,1);
-                    uguess  = zeros(obj.numControls*obj.numRadauPoints,1);
+                    xguess = zeros(obj.numStates*obj.numStatePoints,1);
+                    uguess = zeros(obj.numControls*obj.numControlPoints,1);
                     for i=1:obj.numStates
-                        xguess((i-1)*p1RadauPoints+1:...
-                            i*p1RadauPoints)  = ...
+                        xguess((i-1)*obj.numStatePoints+1:...
+                            i*obj.numStatePoints)  = ...
                             linspace(obj.initialGuessState(i),...
-                            obj.finalGuessState(i),p1RadauPoints).';
+                            obj.finalGuessState(i),obj.numStatePoints).';
                     end
                     if strcmp(obj.initialGuessMode,'LinearUnityControl')
                         controlVar = 1;
                     else
                         controlVar = 0;
                     end
-                    for i=1:obj.numControls
-                        uguess((i-1)*obj.numRadauPoints+1:...
-                            i*obj.numRadauPoints)  = ...
-                            linspace(controlVar,controlVar,...
-                            obj.numRadauPoints).';
+                    if strcmp(obj.initialGuessMode,'LinearUnityControl') ...
+                            || strcmp(obj.initialGuessMode,'LinearNoControl')
+                        
+                        
+                        for i=1:obj.numControls
+                            uguess((i-1)*obj.numControlPoints+1:...
+                                i*obj.numControlPoints)  = ...
+                                linspace(controlVar,controlVar,...
+                                obj.numControlPoints).';
+                        end
+                    else
+                        uguess = [];
                     end
-                    
                     obj.DecVector.SetStateVector(xguess);
                     obj.DecVector.SetControlVector(uguess);
                     obj.DecVector.SetTimeVector(...
                         [obj.initialEpoch; obj.finalEpoch]);
-                    
             end
-            
         end
-              
+        
         %  Validate that the mesh properties are set acceptably
         function ValidateMeshProperties(obj)
             
@@ -470,9 +478,14 @@ classdef Phase < handle
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
             end
-        end
             
+            %  Update the time vector accordingly.
+            obj.ComputeTimeVector()
+            
+        end
+        
         %  Validates user configuration of the phase
+        %  TODO:  Radau specific.
         function obj = ValidatePhaseConfig(obj)
             if length(obj.meshIntervalFractions) ~= ...
                     length(obj.meshIntervalNumPoints) + 1
@@ -507,22 +520,12 @@ classdef Phase < handle
         %  Compute defect constraints
         function defectConstraints = ComputePathFunctions(obj)
             
-            stateMat = obj.DecVector.GetStateArray();
-            % TODO: This is Radau specific and should not be.
-            defectConstraintsLHS = obj.radauDiffMatrix*stateMat;
-            
-            %  Loop over the number of defect constraints
-            rhsMatrix = defectConstraintsLHS*0;
+            % stateMat = obj.DecVector.GetStateArray();
             algIdx    = 1;
             obj.costFuncIntegral = 0;
             
-            %algArray = zeros(obj.numPathConstraints,1);
-            %  Initialize integral array if there are integral functions
-            if obj.PathFunction.hasIntFunctions
-                intArray = zeros(obj.PathFunction.numAlgFunctions,1);
-            end
-            
-            for pointIdx = 1:obj.numMeshPoints 
+            %  Loop over the mesh points to compute functions at each point
+            for pointIdx = 1:obj.numMeshPoints
                 
                 %  Prepare then evaluate the path function
                 obj.PreparePathFunction(pointIdx);
@@ -549,41 +552,15 @@ classdef Phase < handle
                     algIdx = algIdx + obj.PathFunction.numAlgFunctions;
                 end
                 
-                %  Handle integral constraints
-                if obj.PathFunction.hasIntFunctions
-                    intArray = intArray + obj.radauWeights(pointIdx)*...
-                        obj.PathFunction.intFunctions;
-                end
-                
-            end
-            timeMat     = GetMeshPoints(obj);
-            finalTime   = obj.DecVector.GetLastTime();
-            initialTime = obj.DecVector.GetFirstTime();
-            
-            %  Set cost function
-            if obj.PathFunction.hasCostFunction
-                obj.costFuncIntegral = ((finalTime-initialTime)/2)*...
-                    obj.costFuncIntegral;
             end
             
             %  Set defect constraints
-            if obj.PathFunction.hasDynFunctions
-                defectConstraints = defectConstraintsLHS - ...
-                    (timeMat(2)-timeMat(1))*0.5*rhsMatrix;
-                defectConstraints = reshape(defectConstraints,...
-                    obj.numDefectConstraints,1);
-                obj.defectConstraintVec = defectConstraints;
-            end
+            obj.ComputeCostFunctionIntegral();
+            obj.ComputeDefectConstraints(rhsMatrix);
             
             %  Set algebraic constraints
             if obj.PathFunction.hasAlgFunctions
                 obj.algConstraintVec = algArray;
-            end
-            
-            %  Configure integral constraint input for point function.
-            if obj.PathFunction.hasIntFunctions
-                intArray = ((finalTime-initialTime)/2)*intArray;
-                obj.intConstraintVec = intArray;
             end
             
         end
@@ -607,7 +584,7 @@ classdef Phase < handle
         
         %  Compute defect constraints
         function costFunction = GetCostFunction(obj)
-            %  Warning.  Call to GetCostFunction must ALWAYS be preceded by
+            %  Warning: Call to GetCostFunction must ALWAYS be preceded by
             %  call to GetContraintVector()
             costFunction = 0;
             if obj.PathFunction.hasCostFunction
@@ -654,7 +631,7 @@ classdef Phase < handle
             obj.PointFunction.initialControlVec = ...
                 obj.DecVector.GetLastControlVector();
             obj.PointFunction.intConstraintVec = obj.intConstraintVec;
-            obj.PointFunction.intialTime = ...
+            obj.PointFunction.initialTime = ...
                 obj.DecVector.GetFirstTime();
             obj.PointFunction.finalTime = ...
                 obj.DecVector.GetLastTime();
@@ -677,12 +654,12 @@ classdef Phase < handle
             pathViolation   = false();
             tol = 1e-5;  %  TODO.  Don't hard code this
             
-            %  Check point (event) constraints for violation        
+            %  Check point (event) constraints for violation
             if obj.PointFunction.hasEventFunctions;
                 for conIdx = obj.eventStartIdx:obj.eventEndIdx
                     if constraintVec(conIdx) <= ...
                             obj.allConLowerBound(conIdx) - tol|| ...
-                        constraintVec(conIdx) >= ...
+                            constraintVec(conIdx) >= ...
                             obj.allConUpperBound(conIdx) + tol;
                         eventViolation = true();
                         numEventViolations = numEventViolations + 1;
@@ -690,12 +667,12 @@ classdef Phase < handle
                 end
             end
             
-            %  Check point (event) constraints for violation        
+            %  Check point (event) constraints for violation
             if obj.PathFunction.hasDynFunctions;
                 for conIdx = obj.defectStartIdx:obj.defectEndIdx
                     if constraintVec(conIdx) <= ...
                             obj.allConLowerBound(conIdx) - tol || ...
-                        constraintVec(conIdx) >= ...
+                            constraintVec(conIdx) >= ...
                             obj.allConUpperBound(conIdx) + tol;
                         defectViolation = true();
                         numPathViolations = numPathViolations + 1;
@@ -703,26 +680,24 @@ classdef Phase < handle
                 end
             end
             
-            %  Check path constraints for violation        
+            %  Check path constraints for violation
             if obj.PathFunction.hasAlgFunctions;
                 for conIdx = obj.pathStartIdx:obj.pathEndIdx
                     if constraintVec(conIdx) <= ...
                             obj.allConLowerBound(conIdx) - tol|| ...
-                        constraintVec(conIdx) >= ...
+                            constraintVec(conIdx) >= ...
                             obj.allConUpperBound(conIdx) + tol;
                         pathViolation = true();
                         numdefectViolations = numdefectViolations + 1;
                     end
                 end
-            end          
-            
+            end
             Status.numEventViolations  = numEventViolations;
             Status.numdefectViolations = numdefectViolations;
             Status.numPathViolations   = numPathViolations;
             Status.eventViolation      = eventViolation;
             Status.defectViolation     = defectViolation;
             Status.pathViolation       = pathViolation;
-            
         end
         
     end

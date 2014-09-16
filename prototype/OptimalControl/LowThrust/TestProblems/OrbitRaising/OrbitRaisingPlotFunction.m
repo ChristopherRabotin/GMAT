@@ -1,9 +1,13 @@
 function OrbitRaisingPlotFunction(traj)
 
 stateArray = traj.phaseList{1}.DecVector.GetStateArray();
-stateArray = stateArray.x;
+
 controlArray = traj.phaseList{1}.DecVector.GetControlArray(); 
-controlArray = controlArray.x;
+
+if isa(stateArray,'gradient')
+    stateArray = stateArray.x;
+    controlArray = controlArray.x;
+end
 
 r      = stateArray(:,1);
 theta  = stateArray(:,2);
@@ -37,5 +41,5 @@ for i = 1:length(uR)
     hold on;
     plot([uStartx(i);uStopx(i)],[uStarty(i);uStopy(i)],'r-','LineWidth',1.2);
 end
-%pause;
+pause;
 drawnow;

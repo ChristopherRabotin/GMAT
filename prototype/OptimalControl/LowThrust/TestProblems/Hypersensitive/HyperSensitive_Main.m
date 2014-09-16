@@ -8,9 +8,10 @@ global igrid iGfun jGvar traj
 traj                           = Trajectory();
 traj.pathFunctionName          = 'HyperSensitivePathFunction';   
 traj.plotFunctionName          = 'HyperSensitivePlotFunction'; 
-traj.showPlot                  = false();
+traj.showPlot                  = true();
 traj.costLowerBound            = 0;
 traj.costUpperBound            = Inf;
+traj.plotUpdateRate            = 3;
 
 %  Set Time Properties
 phase1                         = RadauPhase;
@@ -18,8 +19,8 @@ phase1.meshIntervalFractions   = linspace(-1,1,40+1).';
 phase1.meshIntervalNumPoints   = 4*ones(40,1);
 phase1.meshIntervalFractions   = [ -1 -0.5 0 0.5  1];                
 phase1.meshIntervalNumPoints   = [20 10 10 20]';
-phase1.initialEpoch            = 0;
-phase1.finalEpoch              = 50;
+phase1.initialEpoch            = 5;
+phase1.finalEpoch              = 45;
 phase1.initialTimeLowerBound   = 0;
 phase1.initialTimeUpperBound   = 0;
 phase1.finalTimeLowerBound     = 50;
@@ -28,8 +29,8 @@ phase1.finalTimeUpperBound     = 50;
 %  Set state and control properties
 phase1.numStates               = 1;
 phase1.initialGuessMode        = 'LinearNoControl';
-phase1.initialGuessState       = 1;
-phase1.finalGuessState         = 1;
+phase1.initialGuessState       = .75;
+phase1.finalGuessState         = .33;
 phase1.initialStateLowerBound  = 1;
 phase1.initialStateUppperBound = 1;
 phase1.finalStateLowerBound    = 1;
@@ -47,6 +48,7 @@ phase1.controlLowerBound       = -50;
 traj.phaseList = {phase1};
 
 [z,F,xmul,Fmul] = traj.Optimize();
+return
 
 z = traj.decisionVector.x;
           

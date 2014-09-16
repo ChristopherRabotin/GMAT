@@ -59,11 +59,17 @@ classdef Trajectory < handle
         plotFunctionName = '';
         
         %  Plotting parameters
-        showPlot     = false();
-        isOptimizing = false();
-        isFinished   = false();
-        plotUpdateRate = 5;
-        plotUpdateCounter = 1;
+        showPlot                = false();
+        showDynamicDisplay      = false();
+        isOptimizing            = false();
+        isFinished              = false();
+        dynDisplayUpdateRate    = 5;
+        dynDisplayUpdateCounter = 1
+        plotUpdateRate          = 5;
+        plotUpdateCounter       = 1;
+        
+        %  Debug
+        displayDebugStatus      = 0;
         
     end
     
@@ -86,14 +92,19 @@ classdef Trajectory < handle
             
             %  Initialize phase data
             for phaseIdx = 1:obj.numPhases
+                if obj.displayDebugStatus
+                    disp(['Attempting to Initialize Phase ' num2str(...
+                        phaseIdx)]);
+                end
                 
-                %  Configure user functinos
+                %  Configure user functions
                 obj.phaseList{phaseIdx}.pathFunctionName = ...
                     obj.pathFunctionName;
                 obj.phaseList{phaseIdx}.pointFunctionName = ...
                     obj.pointFunctionName;
                 
                 %  Intialize the current phase
+                obj.phaseList{phaseIdx}.phaseNum = phaseIdx;
                 obj.phaseList{phaseIdx}.Initialize();
                 
                 % Decision vector properties
@@ -108,6 +119,10 @@ classdef Trajectory < handle
                     obj.phaseList{phaseIdx}.numDecisionParams;
                 obj.totalnumConstraints = obj.totalnumConstraints + ...
                     obj.phaseList{phaseIdx}.numConstraints;
+                if obj.displayDebugStatus
+                    disp(['Completed Initialization of Phase ' num2str(...
+                        phaseIdx)]);
+                end
             end
             
             %%  Intialize link data
@@ -132,7 +147,11 @@ classdef Trajectory < handle
             obj = SetInitialGuess(obj);
             obj = SetSparsityPattern(obj);
             obj.WriteSetupReport()
-
+            
+            if obj.displayDebugStatus
+                disp('Completed Initialization of Trajectory');
+            end
+            
         end
         
         %  Configure start and stop indeces for different chunks fo the c
@@ -180,7 +199,7 @@ classdef Trajectory < handle
                 obj.allConUpperBound = [obj.allConUpperBound;...
                     obj.linkageList{linkIdx}.upperBound];
             end
-           
+            
         end
         
         %  Sets upper and lower bounds on the complete decision vector
@@ -274,7 +293,12 @@ classdef Trajectory < handle
             end
             
             %  Handle plotting
-            obj.PlotUserFunction();
+            if obj.showPlot
+               obj.PlotUserFunction();
+            end
+            
+            %  Handle dynamic display
+            obj.UpdateDynamicDisplay();
             
         end
         
@@ -314,8 +338,8 @@ classdef Trajectory < handle
             zmin = obj.decisionVecLowerBound;
             
             % Set the bounds on the NLP constraints
-            Fmin = [-Inf;obj.allConLowerBound];
-            Fmax = [Inf;obj.allConUpperBound];
+            Fmin = [obj.costLowerBound;obj.allConLowerBound];
+            Fmax = [obj.costUpperBound;obj.allConUpperBound];
             z0   = obj.decisionVector;
             
             %% =====  Initialize the optimizer and execute the problem
@@ -351,6 +375,7 @@ classdef Trajectory < handle
             %obj.PlotUserFunction(); %  Plot the guess
             %              load 'c:\temp\initGuess.mat'
             %              z0 = initGuess.x;
+            %obj.PlotUserFunction();
             [z,F,xmul,Fmul,info,xstate,Fstate,ns,...
                 ninf,sinf,mincw,miniw,minrw]...
                 = snsolve(z0,zmin,zmax,zmul,zstate,...
@@ -368,19 +393,47 @@ classdef Trajectory < handle
             
             %  Plot the function if at solution or at rate
             if ~isempty(obj.plotFunctionName)
+                
+                % Show the plot if criteria pass
                 if (obj.showPlot && obj.isOptimizing && ...
                         obj.plotUpdateCounter == 1) ||...
                         (obj.showPlot && obj.isFinished);
                     feval(obj.plotFunctionName,obj);
                 end
                 
-                %  Update rate counter
+                %  Update rate counter, and reset if needed
                 obj.plotUpdateCounter = obj.plotUpdateCounter + 1;
                 if obj.plotUpdateCounter == obj.plotUpdateRate
                     obj.plotUpdateCounter = 1;
                 end
             end
             
+        end
+        
+        function UpdateDynamicDisplay(obj)
+            
+            %             %  Intialize the figure
+            %             figHandle = figure(99999);
+            %             colNames = cell(obj.numPhases*2,1);
+            %             colIdx   = 0;
+            %
+            %             %  Populate initially with zeros
+            %             data     = zeros(3,obj.numPhases*2)
+            %             for phaseIdx = 1:obj.numPhases
+            %                 for pointIdx = 1:2
+            %                     colIdx           = colIdx + 1;
+            %                     if pointIdx == 1;
+            %                         pointStr = ' Start';
+            %                     else
+            %                         pointStr = ' End';
+            %                     end
+            %                     colNames{colIdx} = ['Phase ' ...
+            %                         num2str(phaseIdx) pointStr];
+            %                 end
+            %             end
+            %             uitable(figHandle, 'Data', data, 'ColumnName', colNames, ...
+            %                    'Position', [20 20 700 100]);
+            %
         end
         
     end
@@ -398,7 +451,7 @@ end
 %                     = obj.phaseList{phaseIdx}.GetSparsityPattern_Defect_State();
 %             end
 %         end
-%         
+%
 %         %  Set sparsity pattern for partial of defects w/r/t control
 %         function obj = SetSparsityPattern_Defect_Control(obj)
 %             for phaseIdx = 1:obj.numPhases
@@ -410,7 +463,7 @@ end
 %                     = obj.phaseList{phaseIdx}.GetSparsityPattern_Defect_Control();
 %             end
 %         end
-%         
+%
 %         %  Set sparsity pattern for partial of defects w/r/t time
 %         function obj = SetSparsityPattern_Defect_Time(obj)
 %             for phaseIdx = 1:obj.numPhases
@@ -422,7 +475,7 @@ end
 %                     = obj.phaseList{phaseIdx}.GetSparsityPattern_Defect_Time();
 %             end
 %         end
-%         
+%
 %         %  Set sparsity pattern of the cost function
 %         function obj = SetSparsityPattern_Cost(obj)
 %             obj.sparsityCost      = obj.sparsityPattern(1,:);
