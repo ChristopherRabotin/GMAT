@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,7 +39,7 @@ public:
    bool Unsubscribe(Subscriber *s);
    bool UnsubscribeAll();
    
-   bool Publish(GmatBase *provider, Integer id, Real *data, Integer count);
+   bool Publish(GmatBase *provider, Integer id, Real *data, Integer count, Real propDir = 1.0);
    bool Publish(Integer id, char *data, Integer count = 0);
    bool Publish(Integer id, Integer *data, Integer count);
    

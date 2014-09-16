@@ -31,6 +31,7 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
+//#define DEBUG_MOVETOEPOCH
 
 //---------------------------------
 // static data
@@ -689,7 +690,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
 
    #ifdef DEBUG_LIGHTTIME
       #ifdef USE_PRECISION_TIME
-      MessageInterface::ShowMessage("%d matching data sets updated; epochs "                  // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("%d matching data sets updated; epochs "                        // made changes by TUAN NGUYEN
             "%.12lf -> %.12lf\n", count, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());   // made changes by TUAN NGUYEN
       #else
       MessageInterface::ShowMessage("%d matching data sets updated; epochs "
@@ -745,6 +746,10 @@ void SignalBase::UsesLighttime(const bool tf)
 //------------------------------------------------------------------------------
 void SignalBase::InitializeSignal(bool chainForwards)
 {
+   #ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("SignalBase::InitializeSignal() for leg %s to %s\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   #endif
+
    if (isInitialized)
    {
       return;
@@ -1383,6 +1388,9 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
          theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -         // made changes by TUAN NGUYEN
                             ssb->GetMJ2000PrecState(theData.rPrecTime);                         // made changes by TUAN NGUYEN
       }
+      #ifdef DEBUG_MOVETOEPOCH
+      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2]);
+      #endif
    }
 
    // 2. Propagate transmit node at time theEpoch and update it's SignalData
@@ -1413,6 +1421,9 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
          theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) -         // made changes by TUAN NGUYEN
                             ssb->GetMJ2000PrecState(theData.tPrecTime);                         // made changes by TUAN NGUYEN
       }
+      #ifdef DEBUG_MOVETOEPOCH
+      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2]);
+      #endif
    }
 }
 #endif
@@ -1453,7 +1464,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
             "stepping receiver"));
    #endif
    bool retval = false;
-
+   
    // 1. Get associated propagator for transmiter node (or receiver node) 
    Propagator *prop = NULL;
 
@@ -1482,7 +1493,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       }
    }
 
-
+   
    // 2. Propagate transmiter node (or receiver node) for stepToTake and specify it's state
    Rvector6 state;
    Rmatrix66 stm;
@@ -1550,7 +1561,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
 #endif
    }
 
-
+   
    // 3. Set value for SignalData object associated to transmiter node (or receiver node)
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
    if (forTransmitter)
@@ -1566,7 +1577,6 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) -           // made changes by TUAN NGUYEN
                          ssb->GetMJ2000State(theData.tTime);                           // made changes by TUAN NGUYEN
 #endif
-
    }
    else
    {
@@ -1582,6 +1592,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
                          ssb->GetMJ2000PrecState(theData.rTime);                       // made changes by TUAN NGUYEN
 #endif
    }
-
+   
+   retval = true;
    return retval;
 }

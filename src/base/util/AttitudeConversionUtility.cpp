@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,6 +26,8 @@
 #include "StringUtil.hpp"
 #include "GmatConstants.hpp"
 #include "UtilityException.hpp"
+
+//#define DEBUG_TO_DCM
 
 //------------------------------------------------------------------------------
 //  static data
@@ -113,6 +115,8 @@ Rmatrix33 AttitudeConversionUtility::ToCosineMatrix(const Rvector3 &eulerAngles,
    #ifdef DEBUG_TO_DCM
    MessageInterface::ShowMessage("ENTERING ToDCM(eulerangles) ... %.12f  %.12f  %.12f\n",
    eulerAngles[0], eulerAngles[1], eulerAngles[2]);
+   MessageInterface::ShowMessage("              (eulerSeq)    ... %d  %d  %d\n",
+   seq1, seq2, seq3);
    #endif
    if ((seq1 == 0) | (seq2 == 0) | (seq3 == 0))
       throw UtilityException(

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -28,6 +28,7 @@
 #include "Parameter.hpp"
 #include "Array.hpp"
 #include "ParameterInfo.hpp"
+#include "SpacePoint.hpp"
 #include "Hardware.hpp"
 #include "GmatGlobal.hpp"         // for GetDataPrecision()
 #include "StringUtil.hpp"         // for GmatStringUtil::
@@ -57,6 +58,7 @@
 //#define DBGLVL_GUI_ITEM_CS 2
 //#define DBGLVL_GUI_ITEM_GS 2
 //#define DBGLVL_GUI_ITEM_HW 2
+//#define DBGLVL_GUI_ITEM_POWER_SYSTEM 2
 //#define DBGLVL_GUI_ITEM_BURN 2
 //#define DBGLVL_GUI_ITEM_SUBS 2
 //#define DBGLVL_GUI_ITEM_SOLVER 2
@@ -604,22 +606,11 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       ("   type=<%s>, ownerName=<%s>, depObj=<%s>, numberOfDots=%d\n", varName.c_str(),
        type.c_str(), ownerName.c_str(), depObj.c_str(), numberOfDots);
    #endif
-   
-   // Check for the dependency or owned object
-   if (depObj != "" && theGuiInterpreter->GetConfiguredObject(depObj) == NULL)
-   {
-      mLastErrorMsg = "cannot find owned object named \"";
-      mLastErrorMsg = mLastErrorMsg + depObj.c_str() + "\"";
-      #ifdef DEBUG_GUI_ITEM_VALIDATE
-      MessageInterface::ShowMessage
-         ("GuiItemManager::IsValidVariable() returning -1, cannot find owned object\n");
-      #endif
-      return -1;
-   }
-   
+      
    int validStatus = 0;
    bool checkForParameter = false;
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
+   Parameter *param = NULL;
    
    // If name has a system Parameter type and owner object exist, create
    if (obj == NULL)
@@ -642,7 +633,6 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
             ("   Now checking if Parameter can be created, depType=%d, ownedObjType=%d\n",
              depType, ownedObjType);
          #endif
-         //if (theGuiInterpreter->IsParameter(type))
          if (isParameter)
          {
             if (theGuiInterpreter->GetConfiguredObject(ownerName))
@@ -651,7 +641,8 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
                MessageInterface::ShowMessage
                   ("   Creating system Parameter '%s'\n", varName.c_str());
                #endif
-               Parameter *param = theGuiInterpreter->CreateSystemParameter(varName);
+               //Parameter *param = theGuiInterpreter->CreateSystemParameter(varName);
+               param = theGuiInterpreter->CreateSystemParameter(varName);
                if (param == NULL)
                {
                   #ifdef DEBUG_GUI_ITEM_VALIDATE
@@ -696,6 +687,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    else
    {
       checkForParameter = true;
+      param = (Parameter*)obj;
       #ifdef DEBUG_GUI_ITEM_VALIDATE
       MessageInterface::ShowMessage
          ("   obj<%p><%p>'%s' found\n", obj, obj->GetTypeName().c_str(),
@@ -715,8 +707,36 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    
    // Now check for valid Parameter
    #ifdef DEBUG_GUI_ITEM_VALIDATE
-   MessageInterface::ShowMessage("   Now checking if it is valid Parameter\n");
+   MessageInterface::ShowMessage
+      ("   Now checking if it is valid Parameter, param=<%p>'%s'\n",
+       param, param ? param->GetName().c_str() : "NULL");
    #endif
+   
+   // Check for the dependency or owned object
+   if (depObj != "" && theGuiInterpreter->GetConfiguredObject(depObj) == NULL)
+   {
+      // Since middle field is dependency or owned object name,
+      // check if middle field is optional
+      if (param->IsOptionalField(depObj))
+      {
+         #ifdef DEBUG_GUI_ITEM_VALIDATE
+         MessageInterface::ShowMessage
+            ("   '%s' is optional field so ignored\n", depObj.c_str());
+         #endif
+      }
+      else
+      {
+         mLastErrorMsg = "cannot find owned object named \"";
+         mLastErrorMsg = mLastErrorMsg + depObj.c_str() + "\"";
+         #ifdef DEBUG_GUI_ITEM_VALIDATE
+         MessageInterface::ShowMessage
+            ("GuiItemManager::IsValidVariable() returning -1, cannot find owned object\n");
+         #endif
+         return -1;
+      }
+   }
+   
+   
    validStatus = IsValidParameter(varName, allowedType, allowNonPlottable, allowWholeArray);
    
    #ifdef DEBUG_GUI_ITEM_VALIDATE
@@ -764,6 +784,9 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
       case Gmat::THRUSTER:
          UpdateFuelTank(true);
          UpdateThruster(true);
+      case Gmat::POWER_SYSTEM:
+         UpdatePowerSystem(true);
+         break;
       case Gmat::SENSOR:
          UpdateSensor(true);
          break;
@@ -867,6 +890,11 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
    MessageInterface::ShowMessage("======> after UpdateThruster()\n");
    #endif
    
+   UpdatePowerSystem(false);
+   #if DBGLVL_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("======> after UpdatePowerSystem()\n");
+   #endif
+
    UpdateGroundStation(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("======> after UpdateGroundStation()\n");
@@ -1126,6 +1154,24 @@ void GuiItemManager::UpdateThruster(bool updateObjectArray)
    #endif
    
    UpdateThrusterList();
+   if (updateObjectArray)
+      RefreshAllObjectArray();
+}
+
+//------------------------------------------------------------------------------
+//  void UpdatePowerSystem(bool updateObjectArray = true)
+//------------------------------------------------------------------------------
+/**
+ * Updates Power System gui components.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdatePowerSystem(bool updateObjectArray)
+{
+   #if DBGLVL_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> UpdatePowerSystem\n");
+   #endif
+
+   UpdatePowerSystemList();
    if (updateObjectArray)
       RefreshAllObjectArray();
 }
@@ -1653,6 +1699,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mThrusterCBList.end())
          mThrusterCBList.erase(pos);
    }
+   else if (type == "PowerSystem")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mPowerSystemCBList.begin(), mPowerSystemCBList.end(), cb);
+
+      if (pos != mPowerSystemCBList.end())
+         mPowerSystemCBList.erase(pos);
+   }
    else if (type == "Sensor")
    {
       std::vector<wxComboBox*>::iterator pos =
@@ -1744,6 +1798,7 @@ wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
    {
       StringArray tanks = obj->GetStringArrayParameter("Tanks");
       StringArray thrusters = obj->GetStringArrayParameter("Thrusters");
+      std::string pwrSystem = obj->GetStringParameter("PowerSystem");
       
       // Add Tanks
       for (unsigned int i = 0; i < tanks.size(); i++)
@@ -1752,6 +1807,10 @@ wxArrayString GuiItemManager::GetAttachedHardwareList(const wxString &scName)
       // Add Thrusters
       for (unsigned int i = 0; i < thrusters.size(); i++)
          hardwareList.Add(thrusters[i].c_str());
+
+      // Add Power System
+      if (pwrSystem != "")
+         hardwareList.Add(pwrSystem.c_str());
    }
    
    return hardwareList;
@@ -1916,16 +1975,19 @@ int GuiItemManager::GetNumProperty(const wxString &objType)
 
 
 //------------------------------------------------------------------------------
-// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType)
+// wxArrayString GetCoordSystemWithAxesOf(const std::string &axesType,
+//                                        bool cbOriginOnly = false)
 //------------------------------------------------------------------------------
 /**
  * Constructs array with CoordinateSystem names with given axes type only.
  *
  * @param axesType  Axes type for the coordinate system
  *                  Use blank "" for retrieving all CoordinateSystem
+ * @param cbOriginOnly Include only those CSs with a Celestial Body origin
  */
 //------------------------------------------------------------------------------
-wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType)
+wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesType,
+                              bool cbOriginOnly)
 {
    #ifdef DEBUG_CS_WITH_AXES
    MessageInterface::ShowMessage
@@ -1933,22 +1995,35 @@ wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesTy
    #endif
    
    wxArrayString csList;
+   bool          originOK = true;
+   GmatBase      *cs;
    for (int i=0; i<theNumCoordSys; i++)
    {
-      std::string csName = theCoordSysList[i].c_str();
+      std::string csName     = theCoordSysList[i].c_str();
+      cs                     = theGuiInterpreter->GetConfiguredObject(csName);
+      if (cbOriginOnly)
+      {
+         std::string originName  = cs->GetStringParameter("Origin");
+         SpacePoint* origin      = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(originName);
+         originOK                = origin->IsOfType("CelestialBody");
+      }
+      else
+         originOK = true;
+
       if (axesType == "")
       {
-         csList.Add(csName.c_str());
+         if (originOK)
+            csList.Add(csName.c_str());
       }
       else
       {
          // check for axis type
-         GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
          if (cs)
          {
             GmatBase *axis = cs->GetOwnedObject(0);
             if (axis && axis->IsOfType(axesType))
-               csList.Add(csName.c_str());
+               if (originOK)
+                  csList.Add(csName.c_str());
          }
       }
    }
@@ -2495,6 +2570,37 @@ wxComboBox* GuiItemManager::GetAntennaComboBox(wxWindow *parent, wxWindowID id,
    mAntennaCBList.push_back(antennaComboBox);
    
    return antennaComboBox;
+}
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
+//                                    const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Antenna combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
+                                                   const wxSize &size)
+{
+   wxComboBox *powerSystemComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     thePowerSystemList, wxCB_READONLY);
+
+   if (theNumPowerSystem == 0)
+      powerSystemComboBox->Append("No Power Systems Available");
+   else
+      powerSystemComboBox->Insert("", 0);
+
+   // show first Power System
+   powerSystemComboBox->SetSelection(0);
+
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mPowerSystemCBList.push_back(powerSystemComboBox);
+
+   return powerSystemComboBox;
 }
 
 
@@ -5728,8 +5834,8 @@ void GuiItemManager::UpdateAntennaList()
    
    #if DBGLVL_GUI_ITEM_HW
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSensorList() numAntenna=%d, numAntenna=%d\n", ,
-       numSensor, numAntenna);
+      ("GuiItemManager::UpdateAntennaList() numAntenna=%d\n",
+       numAntenna);
    #endif
    
    theNumAntenna = 0;
@@ -5778,6 +5884,80 @@ void GuiItemManager::UpdateAntennaList()
    
 } // end UpdateAntennaList()
 
+//------------------------------------------------------------------------------
+// void UpdatePowerSystemList()
+//------------------------------------------------------------------------------
+/**
+ * Updates configured Power System list.
+ */
+//------------------------------------------------------------------------------
+void GuiItemManager::UpdatePowerSystemList()
+{
+   StringArray powerSystems =
+      theGuiInterpreter->GetListOfObjects(Gmat::POWER_SYSTEM);
+   int numPowerSystems = powerSystems.size();
+
+   #if DBGLVL_GUI_ITEM_POWER_SYSTEM
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePowerSystemList() numPowerSystems=%d\n",
+            numPowerSystems);
+   #endif
+
+   theNumPowerSystem = 0;
+   thePowerSystemList.Clear();
+
+   for (int i=0; i<numPowerSystems; i++)
+   {
+      thePowerSystemList.Add(powerSystems[i].c_str());
+
+      #if DBGLVL_GUI_ITEM_POWER_SYSTEM > 1
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdatePowerSystemList() " + powerSystems[i] + "\n");
+      #endif
+   }
+
+   theNumPowerSystem = thePowerSystemList.GetCount();
+   #if DBGLVL_GUI_ITEM_POWER_SYSTEM > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePowerSystemList() number of registered ComboBoxes = %d\n",
+            (Integer) mPowerSystemCBList.size());
+   #endif
+
+   //-------------------------------------------------------
+   // update registered PowerSystem ComboBox
+   //-------------------------------------------------------
+   int sel;
+   wxString selStr;
+   for (std::vector<wxComboBox*>::iterator pos = mPowerSystemCBList.begin();
+        pos != mPowerSystemCBList.end(); ++pos)
+   {
+      sel = (*pos)->GetSelection();
+      selStr = (*pos)->GetValue();
+
+      if (theNumPowerSystem > 0)
+      {
+         (*pos)->Clear();
+         (*pos)->Append(thePowerSystemList);
+
+         // Insert first item as "No Power System Selected"
+         if (thePowerSystemList[0] != selStr)
+         {
+            (*pos)->Insert("No Power System Selected", 0);
+            (*pos)->SetSelection(0);
+         }
+         else
+         {
+            (*pos)->SetSelection(sel);
+         }
+      }
+   }
+
+   #if DBGLVL_GUI_ITEM_HW > 1
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdatePowerSystemList() exiting\n");
+   #endif
+} // end UpdatePowerSystemList()
+
 
 //------------------------------------------------------------------------------
 // void UpdateSensorList()
@@ -5797,7 +5977,7 @@ void GuiItemManager::UpdateSensorList()
    
    #if DBGLVL_GUI_ITEM_HW
    MessageInterface::ShowMessage
-      ("GuiItemManager::UpdateSensorList() numSensor=%d, numAntenna=%d\n", ,
+      ("GuiItemManager::UpdateSensorList() numSensor=%d, numAntenna=%d\n",
        numSensor, numAntenna);
    #endif
    
@@ -6694,6 +6874,7 @@ GuiItemManager::GuiItemManager()
    theNumThruster = 0;
    theNumSensor = 0;
    theNumAntenna = 0;
+   theNumPowerSystem = 0;
    theNumFunction = 0;
    theNumSubscriber = 0;
    theNumReportFile = 0;

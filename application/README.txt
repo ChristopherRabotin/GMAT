@@ -10,7 +10,7 @@ missions.
                           License and Copyright
 -----------------------------------------------------------------------
 
-Copyright (c) 2002 - 2011 United States Government as represented by
+Copyright (c) 2002 - 2014 United States Government as represented by
 the Administrator of the National Aeronautics and Space Administration.
 All Other Rights Reserved.
 
@@ -35,7 +35,7 @@ platforms.
                            Running GMAT
 -----------------------------------------------------------------------
 On Windows, click Start, and then point to All Programs. Point to GMAT,
-GMAT R2013b, and then click GMAT R2013b. If you are using the zip-file bundle,
+GMAT R2014a, and then click GMAT R2014a. If you are using the zip-file bundle,
 double-click the bin\GMAT.exe application.
 
 -----------------------------------------------------------------------
@@ -120,22 +120,24 @@ The following plugins are included and have the listed status:
 Official plugins:
 libDataInterface
 libEphemPropagator
-libFormation
-libStation
-libMatlabInterface
 libFminconOptimizer
+libFormation
+libMatlabInterface
+libProductionPropagators
+libStation
 
 Alpha plugins (disabled by default):
 libCInterface
 libEventLocator
 libExtraPropagators
+libGeometricMeasurements
 libGmatEstimation
 libGmatFunction
 libSaveCommand
 
 Internal-only plugins:
-libVF13Optimizer
+libMarsGRAM
+libMsise86
 libNewParameters
 libNRLMsise00
-libMsise86
-libMarsGRAM (alpha)
+libVF13Optimizer

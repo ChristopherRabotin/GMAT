@@ -13,7 +13,7 @@
 // Modification History      : 5/20/2003 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -203,6 +203,10 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
+      POWER_SYSTEM,        // for PowerSystems
+      SOLAR_POWER_SYSTEM,
+      NUCLEAR_POWER_SYSTEM,
+
       GENERIC_OBJECT,      // Used for user defined objects that do not fall 
                            // into any of the above categories, and for 
                            // internal objects that users don't access

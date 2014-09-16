@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -622,10 +622,10 @@ void ResourceTree::UpdateRecentFiles(wxString filename)
    {
       aFilename = files[i];
       aKey = wxString::Format(wxT("%d"), (int) i);
-
       pConfig->Write(aKey, aFilename.c_str());
       //pConfig->Write((GmatFileUtil::ParseFileName(aFilename.c_str())).c_str(), aFilename.c_str());
    }
+   pConfig->Flush(false);
 
    theMainFrame->UpdateRecentMenu(files);
 
@@ -790,6 +790,9 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
       break;
    case GmatTree::THRUSTER:
       theGuiManager->UpdateThruster();
+      break;
+   case GmatTree::POWER_SYSTEM:
+      theGuiManager->UpdatePowerSystem();
       break;
    case GmatTree::HARDWARE:
       theGuiManager->UpdateSensor();
@@ -1292,6 +1295,12 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
    {
       itemType = GmatTree::THRUSTER;
       itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;
+   }
+   else if (obj->IsOfType("PowerSystem"))
+   {
+      itemType = GmatTree::POWER_SYSTEM;
+//      itemIcon = GmatTree::RESOURCE_ICON_POWER_SYSTEM;   // TBD - need Solar and Nuclear?
+      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;         // temporary
    }
    // Burn
    else if (obj->IsOfType("ImpulsiveBurn"))
@@ -2906,7 +2915,6 @@ void ResourceTree::OnAddThruster(wxCommandEvent &event)
    }
 }
 
-
 //------------------------------------------------------------------------------
 // void OnAddFormation(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -3149,8 +3157,17 @@ void ResourceTree::OnAddSqp(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddHardware(wxCommandEvent &event)
 {
+   bool isPowerSystem = false;
+   GmatTree::ItemType itsType = GmatTree::HARDWARE;
+
    // Look up the plugin type based on the ID built with menu that selected it
+   // NOTE: treating PowerSystems as plugins here as well
    std::string selected = pluginMap[event.GetId()];
+   if (selected.find("PowerSystem") != std::string::npos)
+   {
+      isPowerSystem = true;
+      itsType       = GmatTree::POWER_SYSTEM;
+   }
 
    // The rest is like the other tree additions
    wxTreeItemId item = GetSelection();
@@ -3166,10 +3183,14 @@ void ResourceTree::OnAddHardware(wxCommandEvent &event)
       
       wxString name = newName.c_str();
       AppendItem(item, name, iconToUse, -1,
-                 new GmatTreeItemData(name, GmatTree::HARDWARE));
+                 new GmatTreeItemData(name, itsType));
       Expand(item);
-      SelectItem(GetLastChild(item));      
-      theGuiManager->UpdateSensor();
+      SelectItem(GetLastChild(item));
+
+      if (isPowerSystem)
+         theGuiManager->UpdatePowerSystem();
+      else
+         theGuiManager->UpdateSensor();
    }
 }
 
@@ -4362,7 +4383,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    try
    {
       fm->SetAbsPathname(FileManager::OUTPUT_PATH, currOutPath.c_str());
-      fm->SetAbsPathname(FileManager::EPHEM_PATH, currOutPath.c_str());
+      // Changed to use VEHICLE_EPHEM_PATH (LOJ: 2014.06.18)
+      //fm->SetAbsPathname(FileManager::EPHEM_PATH, currOutPath.c_str());
+      fm->SetAbsPathname(FileManager::VEHICLE_EPHEM_PATH, currOutPath.c_str());
    }
    catch (UtilityException &ue)
    {
@@ -4576,12 +4599,25 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    if (mBuildErrorCount > 0)
    {
       scriptNames = "";
-      msg1.Printf("Script errors found in the following %d script(s):\n",
-                  mBuildErrorCount);
-      for (int i = 0; i < mBuildErrorCount; i++)
-         scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
       
-      msg1 = msg1 + scriptNames;
+      // Will this fix allocation error in the MessageInterface
+      if (mBuildErrorCount <= 50)
+      {
+         msg1.Printf("Script errors found in the following %d script(s):\n",
+                     mBuildErrorCount);
+         for (int i = 0; i < mBuildErrorCount; i++)
+            scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
+         
+         msg1 = msg1 + scriptNames;
+      }
+      else
+      {
+         msg1.Printf("%d script error(s) found. Check GmatLog.txt\n", mBuildErrorCount);
+         MessageInterface::ShowMessage
+            ("Script errors found in the following %d script(s):\n", mBuildErrorCount);
+         for (int i = 0; i < mBuildErrorCount; i++)
+            MessageInterface::ShowMessage("%s\n", mFailedScriptsList[i].c_str());
+      }
    }
    
    if (initTimeErrors.GetCount() > 0)
@@ -4672,7 +4708,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       // Log run folder summary report to a separate file
       std::string summaryFile = currOutPath.c_str();
-      summaryFile += "GmatFolderRunSummary.txt";
+      summaryFile += "FolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
       MessageInterface::LogMessage(msg);
@@ -5045,7 +5081,7 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
          // Drop the ones that are already there for now
          std::string hardwareType = (*i);
          if ((hardwareType != "FuelTank") &&
-             (hardwareType != "Thruster"))
+             (hardwareType != "Thruster") )
          {
             // Save the ID and type name for event handling
             pluginMap[POPUP_ADD_HARDWARE + newId] = hardwareType;
@@ -5296,6 +5332,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
       break;
    case GmatTree::FUELTANK:
    case GmatTree::THRUSTER:
+   case GmatTree::POWER_SYSTEM:
    case GmatTree::HARDWARE:
    case GmatTree::SENSOR:
       objType = Gmat::HARDWARE;
@@ -5386,6 +5423,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
       
    case GmatTree::FUELTANK:
    case GmatTree::THRUSTER:
+   case GmatTree::POWER_SYSTEM:
    case GmatTree::HARDWARE:
       return mHardwareItem;
       

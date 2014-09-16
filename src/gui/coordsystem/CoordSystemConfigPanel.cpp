@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -142,7 +142,9 @@ void CoordSystemConfigPanel::LoadData()
       if (axis != NULL)
       {
          mCoordPanel->ShowAxisData(axis);
-         mEpochFormat = wxString(axis->GetEpochFormat().c_str());
+         previousType   = typeComboBox->GetValue().Trim();
+         previousOrigin = originComboBox->GetValue().Trim();
+         mEpochFormat   = wxString(axis->GetEpochFormat().c_str());
       
          if (mEpochFormat == "")
             mEpochFormat = "A1ModJulian";
@@ -171,6 +173,10 @@ void CoordSystemConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::SaveData()
 {
+   #if DEBUG_COORD_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("Entering CoordSystemConfigPanel::SaveData() .....\n");
+   #endif
    canClose = true;
    std::string originName = originComboBox->GetValue().Trim().c_str();
    
@@ -218,35 +224,55 @@ void CoordSystemConfigPanel::SaveData()
       if (mObjRefChanged)
       {
          AxisSystem *oldAxis = (AxisSystem*) theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
-         AxisSystem *axis = mCoordPanel->CreateAxis();
-         #ifdef DEBUG_COORD_PANEL_XYZ
+         wxString theType    = typeComboBox->GetValue().Trim();
+         AxisSystem *axis    = mCoordPanel->CreateAxis();
+         #ifdef DEBUG_COORD_PANEL_SAVE
+            MessageInterface::ShowMessage("CoordSystemConfigPanel:: oldAxis is %s\n",
+                  (oldAxis? "not NULL" : "NULL"));
             MessageInterface::ShowMessage("CoordSystemConfigPanel:: CreateAxis returned %s\n",
                   (axis? "not NULL" : "NULL"));
          #endif
          
          if (axis != NULL)
          {
-            #ifdef DEBUG_COORD_PANEL_XYZ
+            #ifdef DEBUG_COORD_PANEL_SAVE
                MessageInterface::ShowMessage("CoordSystemConfigPanel:: executing axis not equal to NULL part ...\n");
             #endif
-            canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
-            
-            if (canClose)
+
+            try
             {
-               try
+               canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
+
+               if (canClose)
                {
                   // only set these if there was no error creating or initializing the coordinate system
                   theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+                  axis->SetCoordinateSystemName(theCoordSys->GetName());
                   theCoordSys->Initialize();
+                  previousType = theType;
                }
-               catch (BaseException &be)
+               else
                {
                   // reset the CS to have the axis system it started with
-                  theCoordSys->SetRefObject(oldAxis, Gmat::AXIS_SYSTEM, "");
-                  theCoordSys->Initialize();
-                  throw;
+//                  theCoordSys->SetRefObject(oldAxis, Gmat::AXIS_SYSTEM, "");
+//                  theCoordSys->Initialize();
+//                  typeComboBox->SetValue(previousType);
+//                  originComboBox->SetValue(previousOrigin);
+                  canClose = false;
+                  return;
                }
             }
+            catch (BaseException &be)
+            {
+               // reset the CS to have the axis system it started with
+               theCoordSys->SetRefObject(oldAxis, Gmat::AXIS_SYSTEM, "");  // ?? CoordPanel sets back to original
+               theCoordSys->Initialize();                                  // ??
+//               typeComboBox->SetValue(previousType);
+//               originComboBox->SetValue(previousOrigin);
+               canClose = false;
+               throw;
+            }
+
          }
          else
          {
@@ -266,25 +292,50 @@ void CoordSystemConfigPanel::SaveData()
       {
          #if DEBUG_COORD_PANEL_SAVE
          MessageInterface::ShowMessage
-            ("CoordSystemConfigPanel::SaveData() originName = %s\n",
-             originName.c_str());
+            ("CoordSystemConfigPanel::SaveData() originName = %s\n", originName.c_str());
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() previousOrigin = %s\n", previousOrigin.c_str());
          #endif
 
          // set coordinate system origin
          SpacePoint *origin =
             (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
          theCoordSys->SetStringParameter("Origin", originName);
-         theCoordSys->SetOrigin(origin);
-
-         mOriginChanged = false;
-
-         // set Earth as J000Body if NULL
-         if (origin->GetJ2000Body() == NULL)
+         #if DEBUG_COORD_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() About to set origin to %s\n",
+                  originName.c_str());
+         #endif
+//         theCoordSys->SetOrigin(origin);
+         try
          {
-            SpacePoint *j2000body =
-               (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
-            origin->SetJ2000Body(j2000body);
+            theCoordSys->SetRefObject(origin, Gmat::SPACE_POINT, origin->GetName());
+//         // Need to reinitialize the CS here to catch errors with the origin
+         theCoordSys->Initialize();
+            mOriginChanged = false;
+            previousOrigin = originName.c_str();
+
+            // set Earth as J000Body if NULL
+            if (origin->GetJ2000Body() == NULL)
+            {
+               SpacePoint *j2000body =
+                  (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
+               origin->SetJ2000Body(j2000body);
+            }
          }
+         catch (BaseException &be)
+         {
+//            originComboBox->SetValue(previousOrigin);
+            SpacePoint *currentOrigin = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(previousOrigin.c_str());
+            if (currentOrigin)
+            {
+               theCoordSys->SetStringParameter("Origin", previousOrigin.c_str());
+               theCoordSys->SetRefObject(currentOrigin, Gmat::SPACE_POINT, previousOrigin.c_str());
+            }
+            canClose = false;
+            throw;
+         }
+
       }
       ResetFlags();
 

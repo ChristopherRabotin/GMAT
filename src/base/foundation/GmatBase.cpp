@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -40,7 +40,8 @@
 #include "GmatGlobal.hpp"  // for GetDataPrecision(), IsWritingGmatKeyword()
 #include <sstream>         // for StringStream
 #include "StringUtil.hpp"
-
+#include "FileManager.hpp" // for FindPath()
+#include "FileUtil.hpp"    // for ParseFileName()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
@@ -118,7 +119,8 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
    "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
    "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
-   "RFHardware",    "Antenna",          "UnknownObject"
+   "RFHardware",    "Antenna",          "PowerSystem",      "SolarPowerSystem", "NuclearPowerSystem",
+   "UnknownObject"
 };
 /**
  * Build the list of automatic global settings
@@ -143,7 +145,8 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,
+   false,     false,     false,     false,     false,
+   false
 };
 
 
@@ -420,7 +423,7 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType) const
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
       ("   Not the requested type; current types are [");
-   for (ObjectTypeArray::iterator i = objectTypes.begin();
+   for (ObjectTypeArray::const_iterator i = objectTypes.begin();
         i != objectTypes.end(); ++i)
    {
       if (i != objectTypes.begin())
@@ -445,7 +448,7 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType) const
  * @return true is the class was derived from the type, false if not.
  */
 //---------------------------------------------------------------------------
-bool GmatBase::IsOfType(std::string typeDescription) const
+bool GmatBase::IsOfType(const std::string &typeDescription) const
 {
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
@@ -462,16 +465,16 @@ bool GmatBase::IsOfType(std::string typeDescription) const
       #endif
       return true;
    }
-
+   
    #ifdef DEBUG_OBJECT_TYPE_CHECKING
    MessageInterface::ShowMessage
       ("   Not the requested type; current types are [");
-   for (StringArray::iterator i = objectTypeNames.begin();
+   for (StringArray::const_iterator i = objectTypeNames.begin();
         i != objectTypeNames.end(); ++i)
    {
       if (i != objectTypeNames.begin())
          MessageInterface::ShowMessage(", ");
-      MessageInterface::ShowMessage("%s", i->c_str());
+      MessageInterface::ShowMessage("%s", (*i)->c_str());
    }
    MessageInterface::ShowMessage("]\n");
    #endif
@@ -479,6 +482,13 @@ bool GmatBase::IsOfType(std::string typeDescription) const
    return false;
 }
 
+//------------------------------------------------------------------------------
+// StringArray GetTypeNames() const
+//------------------------------------------------------------------------------
+StringArray GmatBase::GetTypeNames() const
+{
+   return objectTypeNames;
+}
 
 //------------------------------------------------------------------------------
 // bool GmatBase::IsInitialized()
@@ -1076,27 +1086,37 @@ bool GmatBase::IsLocal() const
 //------------------------------------------------------------------------------
 bool GmatBase::IsObjectCloaked() const
 {
-   if (!cloaking) return false;
-   
    #ifdef DEBUG_CLOAKING
       MessageInterface::ShowMessage(
-            "Entering GmatBase::IsObjectCloaked for object %s - there are %d parameters\n",
-            instanceName.c_str(), parameterCount);
+         "\nEntering GmatBase::IsObjectCloaked for object <%p>%s\n", this, instanceName.c_str());
    #endif
+      
+   if (!cloaking)
+   {
+      #ifdef DEBUG_CLOAKING
+      MessageInterface::ShowMessage(
+         "Exiting  GmatBase::IsObjectCloaked for object <%p>%s - object is not cloaked\n",
+         this, instanceName.c_str());
+      #endif
+      return false;
+   }
+   
    for (Integer ii = 0; ii < parameterCount; ii++)
       if (!IsParameterCloaked(ii))
       {
          #ifdef DEBUG_CLOAKING
             MessageInterface::ShowMessage(
-                  "in GmatBase::IsObjectCloaked for object %s - parameter %d (%s) is not cloaked\n",
-                  instanceName.c_str(), ii, (GetParameterText(ii)).c_str());
+               "Exiting  GmatBase::IsObjectCloaked for object <%p>%s - parameter %d (%s) is not cloaked\n",
+               this, instanceName.c_str(), ii, (GetParameterText(ii)).c_str());
          #endif
          return false; 
       }
-      #ifdef DEBUG_CLOAKING
-         MessageInterface::ShowMessage(
-               "Exiting GmatBase::IsObjectCloaked returning true, as all parameters are cloaked\n");
-      #endif
+   
+   #ifdef DEBUG_CLOAKING
+      MessageInterface::ShowMessage(
+         "Exiting  GmatBase::IsObjectCloaked for object %s - returning true, as all parameters are cloaked\n",
+         instanceName.c_str());
+   #endif
    return true;
 }
 
@@ -1149,6 +1169,14 @@ bool GmatBase::IsCallbackExecuting()
 // bool PutCallbackData(std::string &data)
 //---------------------------------------------------------------------------
 bool GmatBase::PutCallbackData(std::string &data)
+{
+   return false;
+}
+
+//---------------------------------------------------------------------------
+// bool PutCallbackRealData(RealArray &data)
+//---------------------------------------------------------------------------
+bool GmatBase::PutCallbackRealData(RealArray &data)
 {
    return false;
 }
@@ -3762,6 +3790,70 @@ Integer GmatBase::GetTimePrecision()
    return GmatGlobal::Instance()->GetTimePrecision();
 }
 
+//------------------------------------------------------------------------------
+// static std::string GmatBase::GetFullPathFileName(std::string &outFileName,
+//        const std::string &objName, const std::string &fileName,
+//        const std::string &fileType, bool forInput, const std::string &fileExt = "",
+//        bool writeWarning = false, bool writeInfo = false)
+//------------------------------------------------------------------------------
+/**
+ * Static method for getting full path file name for given file name and file type.
+ * This method calls FileManager::FindPath() so it is call-through function.
+ *
+ * @param  outFileName  The file name without path to be returned.  This file name
+ *                      is built only if input file name is blank
+ * @param  inFileName   The requested file name
+ *                      Enter blank name if default name to be used for the file type
+ * @param  typeName     The file type name of the input file
+ * @param  forInput     Set to true if filename is for input
+ * @param  fileExt      File extension to be used for default filename
+ * @param  writeWarning Set to true if warning should be written when no path found
+ * @param  writeInfo    Set to true if information should be written for output path
+ *
+ * @return full path name using search order
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatBase::GetFullPathFileName(std::string &outFileName,
+                                          const std::string &objName,
+                                          const std::string &inFileName,
+                                          const std::string &fileType, bool forInput,
+                                          const std::string &fileExt, bool writeWarning,
+                                          bool writeInfo)
+{
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("\nGmatBase::SetFullPathFileName() entered, objName='%s', inFileName='%s', fileType='%s', "
+       "forInput=%d, fileExt='%s', writeWarning=%d, writeInfo=%d\n", objName.c_str(),
+       inFileName.c_str(), fileType.c_str(),fileExt.c_str(), forInput, writeWarning, writeInfo);
+   #endif
+   
+   std::string fname = inFileName;
+   
+   // If file is for output and input file name is blank, build outFileName
+   if (!forInput && fname == "")
+   {
+         fname = objName + fileExt;
+         outFileName = fname;
+   }
+   
+   std::string fullPath =
+      FileManager::Instance()->FindPath(fname, fileType, forInput, writeWarning, writeInfo);
+   
+   // If file is for input and input file name is blank, build outFileName
+   if (forInput && fname == "")
+   {
+      outFileName = GmatFileUtil::ParseFileName(fullPath);
+   }
+   
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("GmatBase::SetFullPathFileName() returning outFileName='%s', fullPath='%s'\n",
+       outFileName.c_str(), fullPath.c_str());
+   #endif
+   
+   return fullPath;
+}
 
 // todo: comments
 Integer GmatBase::GetPropItemID(const std::string &whichItem)

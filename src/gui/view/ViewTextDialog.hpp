@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,6 +33,7 @@ public:
                   bool isEditable = false,
                   const wxPoint &pos = wxDefaultPosition,
                   const wxSize &size = wxDefaultSize,
+                  const wxFont &font = *wxNORMAL_FONT,
                   long style = wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
    
    // text manipulation
@@ -53,8 +54,8 @@ protected:
    
    /// The component on the dialog that shows the text.
    wxTextCtrl *theText;
-   wxButton *theOkButton;
-   wxButton *theCancelButton;
+   wxButton   *theOkButton;
+   wxButton   *theCancelButton;
    
    wxBoxSizer *theButtonSizer;
    wxBoxSizer *theMiddleSizer;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1117,22 +1117,30 @@ std::string FminconOptimizer::GetProgressString()
 
          case FINISHED:
             if (converged)
+            {
                progress << "\n*** Optimization Completed in " << iterationsTaken
                         << " passes through the Solver Control Sequence\n"
                         << "*** The Optimizer Converged!";
+
+               status = CONVERGED;
+            }
             else
+            {
                progress << "\n*** Optimization did not converge in "
                         << iterationsTaken
                         << " passes through the Solver Control Sequence";
-                     
+               status = FAILED;
+            }         
             if ((iterationsTaken >= maxIterations) && (converged == false))
+            {
                progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
                         << "!!! WARNING: Optimizer did NOT converge in "
                         << maxIterations << " iterations!"
                         << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                         << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-            
+               status = EXCEEDED_ITERATIONS;
+            }
             progress << "\nFinal Variable values:\n";
             // Iterate through the variables, writing them to the string
             for (current = variableNames.begin(), i = 0;
@@ -1435,7 +1443,7 @@ bool FminconOptimizer::OpenConnection()
    // Get current path and cd (LOJ: 2010.08.11)
    std::string evalStr;
    std::string resStr;
-   std::string currPath = FileManager::Instance()->GetWorkingDirectory();
+   std::string currPath = FileManager::Instance()->GetCurrentWorkingDirectory();
 
    // Shoud I cd to current path before adding relative path?
    RunCdCommand(currPath);

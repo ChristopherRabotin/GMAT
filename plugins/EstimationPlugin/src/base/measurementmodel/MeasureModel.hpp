@@ -129,6 +129,14 @@ public:
       const std::string& correctionType);                                                                    // made changes by TUAN NGUYEN
    virtual void AddCorrection(const std::string& correctionName,                                             // made changes by TUAN NGUYEN
       const std::string& correctionType);                                                                    // made changes by TUAN NGUYEN
+   /// Set flag to indicate measurement time tag is at the end of signal path                                // made changes by TUAN NGUYEN
+   void SetTimeTagFlag(const bool flag);                                                                     // made changes by TUAN NGUYEN
+   /// Get flag to indicate measurement time tag                                                             // made changes by TUAN NGUYEN
+   bool GetTimeTagFlag();                                                                                    // made changes by TUAN NGUYEN
+
+   /// Get uplink frequency and uplink band for a given signal path
+   Real    GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);                    // made changes by TUAN NGUYEN
+   Integer GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);                // made changes by TUAN NGUYEN
 
    // Measurement Model Settings
    virtual bool SetProgressReporter(ProgressReporter* reporter);
@@ -150,16 +158,20 @@ protected:
    std::vector<SignalData*> theData;         // theData[i] points to theData of the head of signalPaths[i]
    /// Most recently calculated measurement derivatives gathered from Signals
    std::vector<RealArray> theDataDerivatives;
+
    /// Flag checking if the last measurement computed as feasible
    bool feasible;
    /// Flag used to control light time solution generation
    bool withLighttime;
    /// Flag used to indicate that the propagators need initialization
    bool propsNeedInit;
-   /// A list of measurement correction types                   // made changes by TUAN NGUYEN
-   StringArray correctionTypeList;                              // made changes by TUAN NGUYEN
-   /// A list of measurement correction models                  // made changes by TUAN NGUYEN
-   StringArray correctionModelList;                             // made changes by TUAN NGUYEN
+   /// A list of measurement correction types                                 // made changes by TUAN NGUYEN
+   StringArray correctionTypeList;                                            // made changes by TUAN NGUYEN
+   /// A list of measurement correction models                                // made changes by TUAN NGUYEN
+   StringArray correctionModelList;                                           // made changes by TUAN NGUYEN
+
+   /// Flag to indicate measurerment time tag to be at the end of signal path // made changes by TUAN NGUYEN
+   bool epochIsAtEnd;                                                         // made changes by TUAN NGUYEN
 
    /// The reporter for status information
    ProgressReporter *navLog;

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,11 +50,10 @@ public:
    Rvector6 GetSphRaDecState();
    Rvector6 GetSphAzFpaState();
    Rvector6 GetEquinState();
-   // Modified by M.H.
    Rvector6 GetModEquinState();
+   Rvector6 GetAltEquinState();
    Rvector6 GetDelaState();
    Rvector6 GetPlanetodeticState();
-   // Modified by YK
    Rvector6 GetIncAsymState();
    Rvector6 GetOutAsymState();
    Rvector6 GetBLshortState();
@@ -94,6 +93,10 @@ public:
    Real GetModEquinReal(Integer item);
    Real GetModEquinReal(const std::string &str);
 
+   // AlternateEquinoctial by HYKim
+   Real GetAltEquinReal(Integer item);
+   Real GetAltEquinReal(const std::string &str);
+   
    Real GetDelaReal(Integer item);
    Real GetDelaReal(const std::string &str);
 
@@ -150,8 +153,9 @@ protected:
    Rvector6 GetCartStateInParameterCS(Integer item, Real rval);
    Rvector6 GetCartStateInParameterOrigin(Integer item, Real rval);
    void SetRealParameters(Integer item, Real rval);
-   void DebugOutputData(CoordinateSystem *paramOwnerCS);
-      
+   void DebugWriteData(CoordinateSystem *paramOwnerCS);
+   void DebugWriteRefObjInfo();
+   
    Rmatrix66 mSTM;
    Rmatrix33 mSTMSubset;
    
@@ -175,65 +179,69 @@ protected:
    // only one CoordinateConverter needed
    static CoordinateConverter mCoordConverter;
    
-   // Assign item ids
-   // Cartesian items
-   enum {CART_X = 0, CART_Y, CART_Z, CART_VX, CART_VY, CART_VZ, CART_STATE, Item1Count};
-   
-   // Keplerian items
-   enum {KEP_SMA = Item1Count, KEP_ECC, KEP_INC, KEP_RAAN, KEP_AOP, KEP_TA, KEP_MA,
-         KEP_EA, KEP_HA, KEP_RADN, KEP_STATE, MODKEP_RADAPO, MODKEP_RADPER, Item2Count};
-   
-   // Spherical RADEC items
-   enum {RADEC_RMAG = Item2Count, RADEC_RA, RADEC_DEC, RADEC_VMAG, RADEC_RAV, RADEC_DECV,
-         Item3Count};
-   
-   // Spherical AZIFPA items
-   enum {AZIFPA_RMAG = Item3Count, AZIFPA_RA, AZIFPA_DEC, AZIFPA_VMAG, AZIFPA_AZI,
-         AZIFPA_FPA, Item4Count};
-   
    // Other orbit items
    // @note - Do not add or remove items from this list without updating OrbitData.
    //         These enums are also used in OrbitData for passing parameter names to
    //         CalculationUtilitis::CalculateKeplerianData().
-   enum {MM = Item4Count, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, C3_ENERGY, ENERGY, Item5Count};
+   enum {MM = 0, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, C3_ENERGY, ENERGY, OtherOrbitCount1};
    
-   enum {SEMILATUS_RECTUM = Item5Count, HMAG, HX, HY, HZ, BETA_ANGLE, HYPERBOLIC_RLA,
-         HYPERBOLIC_DLA, Item6Count};
-   
-   // Equinoctial items
-   enum {EQ_SMA = Item6Count, EQ_H, EQ_K, EQ_P, EQ_Q, EQ_MLONG, Item7Count};
+   // Angular orbit items
+   enum {SEMILATUS_RECTUM = OtherOrbitCount1, HMAG, HX, HY, HZ, BETA_ANGLE, HYPERBOLIC_RLA, HYPERBOLIC_DLA, OtherOrbitCount2};
    
    // Orbit STM items
-   enum {ORBIT_STM = Item7Count, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D,
-         Item8Count};
-   // Modified by M.H.
-   // ModifiedEquinoctial items
-   enum {MOD_EQ_P = Item8Count, MOD_EQ_F, MOD_EQ_G, MOD_EQ_H, MOD_EQ_K, MOD_EQ_TLONG, Item9Count};
+   enum {ORBIT_STM = OtherOrbitCount2, ORBIT_STM_A, ORBIT_STM_B, ORBIT_STM_C, ORBIT_STM_D, OrbitStmCount};
+   
+   // Orbit state type IDs
+   // These IDs are used in GetCartStateInParameterCS(). If new types are added,
+   // proper item Count must be used in the OrbitData.cpp
+   
+   // Cartesian items
+   enum {CART_X = OrbitStmCount, CART_Y, CART_Z, CART_VX, CART_VY, CART_VZ, CART_STATE, CartCount};
+   
+   // Keplerian and modified keplerian items
+   enum {KEP_SMA = CartCount, KEP_ECC, KEP_INC, KEP_RAAN, KEP_AOP, KEP_TA, KEP_MA,
+         KEP_EA, KEP_HA, KEP_RADN, KEP_STATE, MODKEP_RADAPO, MODKEP_RADPER, KepCount};
+   
+   // Spherical RADEC items
+   enum {RADEC_RMAG = KepCount, RADEC_RA, RADEC_DEC, RADEC_VMAG, RADEC_RAV, RADEC_DECV, RaDecCount};
+   
+   // Spherical AZIFPA items
+   enum {AZIFPA_RMAG = RaDecCount, AZIFPA_RA, AZIFPA_DEC, AZIFPA_VMAG, AZIFPA_AZI, AZIFPA_FPA, AziFpaCount};
+   
+   // Equinoctial items
+   enum {EQ_SMA = AziFpaCount, EQ_H, EQ_K, EQ_P, EQ_Q, EQ_MLONG, EquinCount};
+   
+   // Modified by M.H. and HYKim
+   // ModifiedEquinoctial and AlternateEquinoctial items
+   enum {MOD_EQ_P = EquinCount, MOD_EQ_F, MOD_EQ_G, MOD_EQ_H, MOD_EQ_K, MOD_EQ_TLONG, ModEquinCount};
+   
+   // AlternateEquinoctial items
+   enum {ALT_EQ_SMA = ModEquinCount, ALT_EQ_H, ALT_EQ_K, ALT_EQ_P, ALT_EQ_Q, ALT_EQ_MLONG, AltEquinCount};
    
    // Modified by M.H.
    // Delaunay items
-   enum {DEL_DELA_SL = Item9Count, DEL_DELA_SG, DEL_DELA_SH, DEL_DELA_L, DEL_DELA_G, DEL_DELA_H, Item10Count};
+   enum {DEL_DELA_SL = AltEquinCount, DEL_DELA_SG, DEL_DELA_SH, DEL_DELA_L, DEL_DELA_G, DEL_DELA_H, DelaCount};
 
    // Modified by M.H.
    // Planetodetic items
-   enum {PLD_RMAG = Item10Count, PLD_LON, PLD_LAT, PLD_VMAG, PLD_AZI, PLD_HFPA, Item11Count};
+   enum {PLD_RMAG = DelaCount, PLD_LON, PLD_LAT, PLD_VMAG, PLD_AZI, PLD_HFPA, PlanetoCount};
 
    // Modified by YK
    // Incoming Asymptote State
-   enum {INCASYM_RADPER = Item11Count, INCASYM_C3, INCASYM_RHA, INCASYM_DHA, INCASYM_BVAZI, INCASYM_TA, Item12Count};
+   enum {INCASYM_RADPER = PlanetoCount, INCASYM_C3_ENERGY, INCASYM_RHA, INCASYM_DHA, INCASYM_BVAZI, INCASYM_TA, InAsymCount};
    
    // Modified by YK
    // Outgoing Asymptote State
-   enum {OUTASYM_RADPER = Item12Count, OUTASYM_C3, OUTASYM_RHA, OUTASYM_DHA, OUTASYM_BVAZI, OUTASYM_TA, Item13Count};
+   enum {OUTASYM_RADPER = InAsymCount, OUTASYM_C3_ENERGY, OUTASYM_RHA, OUTASYM_DHA, OUTASYM_BVAZI, OUTASYM_TA, OutAsymCount};
    
    // Modified by YK
    // Brouwer-Lyddane Mean-short 
-   enum {BLS_SMA = Item13Count, BLS_ECC, BLS_INC, BLS_RAAN, BLS_AOP, BLS_MA, Item14Count};
+   enum {BLS_SMA = OutAsymCount, BLS_ECC, BLS_INC, BLS_RAAN, BLS_AOP, BLS_MA, BrouwerShortCount};
    
    // Modified by YK
    // Brouwer-Lyddane Mean-long 
-   enum {BLL_SMA = Item14Count, BLL_ECC, BLL_INC, BLL_RAAN, BLL_AOP, BLL_MA, Item15Count};
-
+   enum {BLL_SMA = BrouwerShortCount, BLL_ECC, BLL_INC, BLL_RAAN, BLL_AOP, BLL_MA, BrouwerLongCount};
+   
    enum
    {
       SPACECRAFT = 0,

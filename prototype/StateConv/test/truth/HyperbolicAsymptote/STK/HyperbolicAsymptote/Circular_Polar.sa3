@@ -60,6 +60,7 @@ VO_V100
         DefaultIntervalShow  Yes
         DefaultIntervalColorIndex #f08080
         UseIntervals No
+        UseEllipticCoord No
     End
     Begin PointingCovarianceList
          FixScaleToModel      Yes
@@ -478,172 +479,212 @@ VO_V100
         End
     End
     Begin DynamicDataText
-        Name               "Attitude Quaternions"
+        Name              "Attitude Quaternions"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "Classical Orbit Elements"
+        Name              "Classical Orbit Elements"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "Fixed Position Velocity"
+        Name              "Fixed Position Velocity"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "Euler Angles"
+        Name              "Euler Angles"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "J2000 Position Velocity"
+        Name              "J2000 Position Velocity"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "LLA Position"
+        Name              "LLA Position"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "Beta Angle"
+        Name              "Beta Angle"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     Begin DynamicDataText
-        Name               "Solar AER"
+        Name              "Solar AER"
         Show               No
         ShowTitle          Yes
+        ShowObjName        Yes
         ReportFormat       Horizontal
-        Type               Orthographic
-        AttachX            Min
-        AttachY            Max
-        X                  10.000000
-        Y                  10.000000
-        Z                  0.000000
-        IsPos3D            No
+        Type               ORTHOGRAPHIC
+        AttachX            MIN
+        AttachY            MAX
+        X                  10
+        Y                  10
+        X_v1               10
+        Y_v1               10
         FontIndex          0
         TextColorIndex     #ffff00
         BGEnabled          No
         IsBGTransparent    No
         BGWidth            100
-        BGHeight           100
+        BGHeight           50
+        AutoSizeWidth      Yes
+        AutoSizeHeight     Yes
         BGColorIndex       #ffff00
-        VertTextAlign      Border
+        Version            0
+        VertTextAlign      BOTTOM
+        BGTranslucency     1.00
     End
     ShowGroundMarker          No
     Begin GroundMarker

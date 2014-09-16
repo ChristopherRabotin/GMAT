@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -32,7 +32,6 @@
 #include "ModelManager.hpp"
 #include "GmatAppData.hpp"         // for GetGuiInterpreter()
 #include "GmatMainFrame.hpp"       // for EnableAnimation()
-#include "FileManager.hpp"         // for texture files
 #include "ColorTypes.hpp"          // for namespace GmatColor::
 #include "Rvector3.hpp"            // for Rvector3::GetMagnitude()
 #include "RealUtilities.hpp"
@@ -258,18 +257,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    
    // Spacecraft
    mScCount = 0;
-   
-   // All in ViewCanvas
-   #if 0
-   // Coordinate System
-   pInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
-   mInternalCoordSysName = wxString(pInternalCoordSystem->GetName().c_str());
-   mViewCoordSysName = "";
-   pViewCoordSystem = NULL;
-   // For CoordinateSystem conversion
-   mViewCsIsInternalCs = true;
-   #endif
-      
+    
    #if DEBUG_INIT
    MessageInterface::ShowMessage
       ("   pInternalCoordSystem=<%p>'%s', pViewCoordSystem=<%p>'%s'\n",
@@ -774,7 +762,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
       mViewPointRefObjName = pViewPointRefObj->GetName();
       mVpRefObjId = GetObjectId(mViewPointRefObjName.c_str());
       
-      if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
+      if (mVpRefObjId == UNKNOWN_BODY)
       {
          mUseViewPointRefVector = true;
          MessageInterface::ShowMessage
@@ -800,7 +788,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
    {
       mVpVecObjId = GetObjectId(pViewPointVectorObj->GetName().c_str());
       
-      if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
+      if (mVpVecObjId == UNKNOWN_BODY)
       {
          mUseViewPointVector = true;
          MessageInterface::ShowMessage
@@ -825,7 +813,7 @@ void OrbitViewCanvas::SetGl3dViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
       mViewObjName = pViewDirectionObj->GetName().c_str();
       mVdirObjId = GetObjectId(mViewObjName.c_str());
       
-      if (mVdirObjId == GmatPlot::UNKNOWN_BODY)
+      if (mVdirObjId == UNKNOWN_BODY)
       {
          mUseViewDirectionVector = true;
          MessageInterface::ShowMessage
@@ -1921,16 +1909,16 @@ void OrbitViewCanvas::DrawObjectOrbit()
       objId = GetObjectId(objName);
       mObjLastFrame[objId] = 0;
       
-      int index = objId * MAX_DATA + mLastIndex;
+      int colorIndex = objId * MAX_DATA + mLastIndex;
       
       #if DEBUG_DRAW
       MessageInterface::ShowMessage
-         ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s', index=%d\n",
-          obj, objId, objName.c_str(), index);
+         ("DrawObjectOrbit() obj=%d, objId=%d, objName='%s', colorIndex=%d, mDrawOrbitFlag[%d]=%d\n",
+          obj, objId, objName.c_str(), colorIndex, colorIndex, mDrawOrbitFlag[colorIndex]);
       #endif
       
       // If not showing orbit just draw object, continue to next one
-      if (!mDrawOrbitFlag[index])
+      if (!mDrawOrbitFlag[colorIndex])
       {
          #if DEBUG_DRAW
          MessageInterface::ShowMessage
@@ -2007,10 +1995,11 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
          #if DEBUG_DRAW
          MessageInterface::ShowMessage
             ("   Drawing spacecraft '%s' with modelId: %d, mModelsAreLoaded=%d\n",
-             objName.c_str(), sat->modelID, mModelsAreLoaded);
+             objName.c_str(), sat->GetModelId(), mModelsAreLoaded);
          #endif
          
-         if (sat->modelID != -1)
+         //if (sat->modelID != -1)
+         if (sat->GetModelId() != -1)
          {
             DrawSpacecraft3dModel(sat, objId, frame);
          }
@@ -2059,12 +2048,6 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       
       // Now colors for all other bodies are also saved (LOJ: 2013.11.25)
       *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
-      #if 0
-      if (drawingSpacecraft)
-         *sIntColor = mObjectOrbitColor[objId * MAX_DATA + frame];
-      else
-         *sIntColor = mObjectOrbitColorMap[objName].GetIntColor();
-      #endif
       
       glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
       DrawStringAt(objName, 0, 0, 0, 1);
@@ -2119,7 +2102,7 @@ void OrbitViewCanvas::DrawObject(const wxString &objName, int obj)
    //-------------------------------------------------------
    // draw object with texture on option
    //-------------------------------------------------------
-   if (mTextureIdMap[objName] != GmatPlot::UNINIT_TEXTURE)
+   if (mTextureIdMap[objName] != UNINIT_TEXTURE)
    {
       //glColor4f(1.0, 1.0, 1.0, 1.0);
       glColor3f(1.0, 1.0, 1.0);
@@ -2261,17 +2244,8 @@ void OrbitViewCanvas::DrawOrbitLines(int i, const wxString &objName, int obj,
       int colorIndex = objId * MAX_DATA + i;
       if (mDrawOrbitFlag[colorIndex])
       {
-         if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
-         {
-            // We are drawing a spacecraft orbit.  This includes solver passes.
-            *sIntColor = mObjectOrbitColor[colorIndex];
-         }
-         else
-         {
-            // We are drawing some other trajectory, say for a planet.
-            //*sIntColor = mObjectOrbitColorMap[objName].GetIntColor(); //LOJ: 2013.11.25
-            *sIntColor = mObjectOrbitColorMap[objName.c_str()];
-         }
+         // Now colors for all drawing objects are saved (LOJ: 2014.01.24)
+         *sIntColor = mObjectOrbitColor[colorIndex];
          
          #ifdef DEBUG_ORBIT_LINES
          MessageInterface::ShowMessage
@@ -2594,7 +2568,8 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    #endif
    
    ModelManager *mm = ModelManager::Instance();
-   ModelObject *scModel = mm->GetModel(sc->modelID);
+   //ModelObject *scModel = mm->GetModel(sc->modelID);
+   ModelObject *scModel = mm->GetModel(sc->GetModelId());
    
    float RTD = (float)GmatMathConstants::DEG_PER_RAD;
    
@@ -2615,7 +2590,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    #ifdef DEBUG_SC_ATTITUDE
    MessageInterface::ShowMessage
       ("DrawSpacecraft3dModel(), '%s', model=<%p>, modelId=%d, EARad=%s",
-       sc->GetName().c_str(), model, sc->modelID,  EARad.ToString().c_str());
+       sc->GetName().c_str(), model, sc->GetModelId(),  EARad.ToString().c_str());
    #endif
    
    float EAng1Deg = float(EARad(0)) * RTD;

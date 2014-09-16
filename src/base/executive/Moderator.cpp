@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -77,7 +77,7 @@
 
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
-//#define DEBUG_INTERPRET 2
+//#define DEBUG_INTERPRET 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
@@ -1536,7 +1536,7 @@ const StringArray& Moderator::GetListOfObjects(const std::string &typeName,
 //------------------------------------------------------------------------------
 GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 {
-   #if DEBUG_CONFIG
+   #ifdef DEBUG_CONFIG
    MessageInterface::ShowMessage
       ("Moderator::GetConfiguredObject() entered: name=%s\n", name.c_str());
    #endif
@@ -1553,7 +1553,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    {
       newName = name.substr(0, index);
       
-      #if DEBUG_CONFIG
+      #ifdef DEBUG_CONFIG
       MessageInterface::ShowMessage
          ("Moderator::GetConfiguredObject() entered: newName=%s\n", newName.c_str());
       #endif
@@ -1573,7 +1573,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
          obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
    }
    
-   #if DEBUG_CONFIG
+   #ifdef DEBUG_CONFIG
    if (obj)
    {
       MessageInterface::ShowMessage
@@ -1708,12 +1708,22 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #endif
    bool renamed = theConfigManager->RenameItem(type, oldName, newName);
    
+   std::vector<Gmat::ObjectType> relatedItemType;
+   StringArray relatedOldName;
+   StringArray relatedNewName;
+   bool hasRelatedChange = theConfigManager->RelatedNameChange(relatedItemType,
+         relatedOldName, relatedNewName);
+
    //--------------------------------------------------
    // rename object name used in mission sequence
    //--------------------------------------------------
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameObject() ===> Change Command ref object names\n");
+   MessageInterface::ShowMessage
+      ("Moderator::RenameObject() ===> %s related name change from %s to %s\n",
+       (hasRelatedChange ? "Found" : "Has no"), relatedOldName.c_str(),
+       relatedNewName.c_str());
    #endif
    
    int sandboxIndex = 0; //handles one sandbox for now
@@ -1731,6 +1741,10 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
       #endif
       
       renamed = cmd->RenameRefObject(type, oldName, newName);
+      if (hasRelatedChange)
+         for (UnsignedInt i = 0; i < relatedItemType.size(); ++i)
+            cmd->RenameRefObject(relatedItemType[i], relatedOldName[i],
+                  relatedNewName[i]);
       if (!renamed)
          MessageInterface::ShowMessage
             ("Moderator failed to rename rename '%s' to '%s' in %s command\n",
@@ -1749,6 +1763,11 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
          if (typeName.find("End") == typeName.npos)
          {
             renamed = child->RenameRefObject(type, oldName, newName);
+            if (hasRelatedChange)
+               for (UnsignedInt i = 0; i < relatedItemType.size(); ++i)
+                  child->RenameRefObject(relatedItemType[i], relatedOldName[i],
+                        relatedNewName[i]);
+
             if (!renamed)
                MessageInterface::ShowMessage
                   ("Moderator failed to rename rename '%s' to '%s' in %s command\n",
@@ -2841,8 +2860,16 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
       obj->SetBody("Earth");
       obj->SetBodyName("Earth");
       
+      std::string potFile = GetFileName("JGM2_FILE");
+      #ifdef DEBUG_DEFAULT_PM
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultPhysicalModel() "
+          "calling %s->SetStringParameter(PotentialFile, %s)\n", obj->GetName().c_str(),
+          potFile.c_str());
+      #endif
+      
       if (type == "GravityField")
-         obj->SetStringParameter("PotentialFile", GetFileName("JGM2_FILE"));
+         obj->SetStringParameter("PotentialFile", potFile);
       
       // Manage it if it is a named PhysicalModel
       try
@@ -6261,11 +6288,23 @@ std::string Moderator::GetPotentialFileName(const std::string &fileType)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFileName(const std::string &fileType)
+// std::string GetFileName(const std::string &fileType, bool getFullPath = false,
+//                         bool forInput = true)
 //------------------------------------------------------------------------------
-std::string Moderator::GetFileName(const std::string &fileType)
+std::string Moderator::GetFileName(const std::string &fileType, bool getFullPath,
+                                   bool forInput, bool writeWarning, bool writeInfo)
 {
-   return theFileManager->GetFullPathname(fileType);
+   // Now we can get full path or just file name (LOJ: 2014.06.30)
+   if (getFullPath)
+   {
+      return theFileManager->FindPath("", fileType, forInput, writeWarning, writeInfo);
+   }
+   else
+   {
+      // Changed to use FileManager::GetFileName() (LOJ: 2014.06.30)
+      //return theFileManager->GetFullPathname(fileType);
+      return theFileManager->GetFilename(fileType);
+   }
 }
 
 
@@ -6694,6 +6733,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    SetSolarSystemAndObjectMap(theSolarSystemInUse, objectMapInUse, false,
                               "RunMission()");
    
+
    return status;
 } // RunMission()
 
@@ -6824,6 +6864,19 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    try
    {
       PrepareNextScriptReading();
+      
+      // Set GMAT working directory (for GMT-4408 LOJ: 2014.06.11)
+      // GMAT working directory has script file
+      std::string path = GmatFileUtil::ParsePathName(filename);
+      
+      if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+         MessageInterface::ShowMessage
+            ("*** Setting '%s' as GMAT working directory\n", path.c_str());
+      
+      theFileManager->SetGmatWorkingDirectory(path);
+      if (theUiInterpreter != NULL)
+         theUiInterpreter->ResetIconFile();
+      
       isGoodScript = theScriptInterpreter->Interpret(filename);
       foundBeginMissionSeq = theScriptInterpreter->FoundBeginMissionSequence();
       
@@ -6872,10 +6925,13 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       
       if (isGoodScript)
       {
+         #if 0
          #if DEBUG_INTERPRET
          MessageInterface::ShowMessage
             ("Moderator::InterpretScript() successfully interpreted the script\n");
          #endif
+         #endif
+         MessageInterface::ShowMessage("Successfully interpreted the script\n");
          
          isRunReady = true;
       }
@@ -6967,7 +7023,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       MessageInterface::ShowMessage(GetScript());
       #endif
       
-      #if DEBUG_INTERPRET > 0
+      #if DEBUG_INTERPRET > 1
       GmatCommand *cmd = GetFirstCommand();
       MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
       MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", isGoodScript);
@@ -7816,7 +7872,11 @@ void Moderator::CreateDefaultParameters()
    
    // Modified by M.H.
    // ModEquinoctial parameters
-   CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   // Changed SemiLatusRectum to SemilatusRectum (lowwer case L)
+   //CreateParameter("SemiLatusRectum", "DefaultSC.EarthMJ2000Eq.SemiLatusRectum");
+   //CreateParameter("SemilatusRectum", "DefaultSC.EarthMJ2000Eq.SemilatusRectum");
+   // Changed SemilatusRectum to origin dependent (LOJ: 2014.01.29)
+   CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
    CreateParameter("ModEquinoctialF", "DefaultSC.EarthMJ2000Eq.ModEquinoctialF");
    CreateParameter("ModEquinoctialG", "DefaultSC.EarthMJ2000Eq.ModEquinoctialG");
    CreateParameter("ModEquinoctialH", "DefaultSC.EarthMJ2000Eq.ModEquinoctialH");
@@ -7825,8 +7885,15 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default modequinoctial parameters created\n");
    #endif
-
-   // Delaunay parameters
+   
+   // Alternate Equinoctial parameters by HYKim
+   CreateParameter("AltEquinoctialP", "DefaultSC.EarthMJ2000Eq.AltEquinoctialP");
+   CreateParameter("AltEquinoctialQ", "DefaultSC.EarthMJ2000Eq.AltEquinoctialQ");
+   #if DEBUG_DEFAULT_MISSION > 1
+   MessageInterface::ShowMessage("-->default alternate equinoctial parameters created\n");
+   #endif
+   
+   // Delaunay parameters by M.H.
    CreateParameter("Delaunayl", "DefaultSC.EarthMJ2000Eq.Delaunayl");
    CreateParameter("Delaunayg", "DefaultSC.EarthMJ2000Eq.Delaunayg");
    CreateParameter("Delaunayh", "DefaultSC.EarthMJ2000Eq.Delaunayh");
@@ -7836,8 +7903,8 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default delaunay parameters created\n");
    #endif
-
-   // Planetodetic parameters
+   
+   // Planetodetic parameters by M.H.
    CreateParameter("PlanetodeticRMAG", "DefaultSC.EarthMJ2000Eq.PlanetodeticRMAG");
    CreateParameter("PlanetodeticLON", "DefaultSC.EarthMJ2000Eq.PlanetodeticLON");
    CreateParameter("PlanetodeticLAT", "DefaultSC.EarthMJ2000Eq.PlanetodeticLAT");
@@ -7847,9 +7914,12 @@ void Moderator::CreateDefaultParameters()
    #if DEBUG_DEFAULT_MISSION > 1
    MessageInterface::ShowMessage("-->default planetodetic parameters created\n");
    #endif
-
-   // Modified by YK
-   // IncomingAsymptote parameters
+   
+   // IncomingAsymptote parameters by YK
+   // Added HyperbolicRadPer (LOJ: 2014.04.28)
+   // Changed HyperbolicRadPer to IncomingRadPer and added IncomingC3Energy (LOJ: 2014.05.08)
+   CreateParameter("IncomingRadPer", "DefaultSC.Earth.IncomingRadPer");
+   CreateParameter("IncomingC3Energy", "DefaultSC.Earth.IncomingC3Energy");
    CreateParameter("IncomingRHA", "DefaultSC.EarthMJ2000Eq.IncomingRHA");
    CreateParameter("IncomingDHA", "DefaultSC.EarthMJ2000Eq.IncomingDHA");
    CreateParameter("IncomingBVAZI", "DefaultSC.EarthMJ2000Eq.IncomingBVAZI");
@@ -7857,8 +7927,10 @@ void Moderator::CreateDefaultParameters()
    MessageInterface::ShowMessage("-->default IncomingAsymptote parameters created\n");
    #endif
    
-   // Modified by YK
-   // OutgoingAsymptote parameters
+   // OutgoingAsymptote parameters by YK
+   // Added OutgoingRadPer and OutgoingC3Energy (LOJ: 2014.05.08)
+   CreateParameter("OutgoingRadPer", "DefaultSC.Earth.OutgoingRadPer");
+   CreateParameter("OutgoingC3Energy", "DefaultSC.Earth.OutgoingC3Energy");
    CreateParameter("OutgoingRHA", "DefaultSC.EarthMJ2000Eq.OutgoingRHA");
    CreateParameter("OutgoingDHA", "DefaultSC.EarthMJ2000Eq.OutgoingDHA");
    CreateParameter("OutgoingBVAZI", "DefaultSC.EarthMJ2000Eq.OutgoingBVAZI");
@@ -7924,7 +7996,9 @@ void Moderator::CreateDefaultParameters()
    #endif
    
    // Angular parameters
-   CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
+   // Changed to create SemilatusRectum as part of ModEquinoctial Parameter above
+   // (LOJ: 2014.01.22)
+   //CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
    CreateParameter("HMAG", "DefaultSC.HMAG");
    CreateParameter("HX", "DefaultSC.EarthMJ2000Eq.HX");
    CreateParameter("HY", "DefaultSC.EarthMJ2000Eq.HY");
@@ -8021,6 +8095,11 @@ void Moderator::CreateDefaultParameters()
    // can handle it (LOJ: 2012.06.11)
    //if (GmatGlobal::Instance()->IsWritingParameterInfo())
    //{
+      // PowerSystem Parameters
+      CreateParameter("TotalPowerAvailable", "DefaultSC.DefaultSolarPowerSystem.TotalPowerAvailable");
+      CreateParameter("RequiredBusPower", "DefaultSC.DefaultSolarPowerSystem.RequiredBusPower");
+      CreateParameter("ThrustPowerAvailable", "DefaultSC.DefaultSolarPowerSystem.ThrustPowerAvailable");
+
       // FuelTank Parameters
       CreateParameter("FuelMass", "DefaultSC.DefaultFuelTank.FuelMass");
       CreateParameter("Volume", "DefaultSC.DefaultFuelTank.Volume");

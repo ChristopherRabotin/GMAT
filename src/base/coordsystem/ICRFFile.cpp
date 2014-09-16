@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -67,16 +67,30 @@ void ICRFFile::Initialize()
 
    // Allocate buffer to store ICRF rotation vector table:
    AllocateArrays();
-
+   
+   // Use FileManager::FindPath() for new file path implementation (LOJ: 2014.07.01)
+   
 	// Open IAU2000/2006 data file:
-   FileManager* thefile = FileManager::Instance();
-   std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
-   std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
-   icrfFileName = path+name;
-   FILE* fpt = fopen(icrfFileName.c_str(), "r");
+   // FileManager* thefile = FileManager::Instance();
+   // std::string path = thefile->GetPathname(FileManager::ICRF_FILE);
+   // std::string name = thefile->GetFilename(FileManager::ICRF_FILE);
+   // icrfFileName = path+name;
+   // FILE* fpt = fopen(icrfFileName.c_str(), "r");
+   // if (fpt == NULL)
+	//   throw GmatBaseException("Error: GMAT cann't open '" + icrfFileName + "' file!!!\n");
+   
+   FileManager *fm = FileManager::Instance();
+   icrfFileName = fm->GetFilename(FileManager::ICRF_FILE);
+   icrfFileNameFullPath = fm->FindPath(icrfFileName, FileManager::ICRF_FILE, true, true, true);
+   
+   // Check full path file
+   if (icrfFileNameFullPath == "")
+		throw GmatBaseException("The ICRF file '" + icrfFileName + "' does not exist\n");
+   
+   FILE* fpt = fopen(icrfFileNameFullPath.c_str(), "r");
    if (fpt == NULL)
-	  throw GmatBaseException("Error: GMAT cann't open '" + icrfFileName + "' file!!!\n");
-
+      throw GmatBaseException("Error: GMAT cann't open '" + icrfFileName + "' file!!!\n");
+   
    // Read ICRF Euler rotation vector from data file and store to buffer:
    Real t;
    Real rotationvector[3];
@@ -275,6 +289,7 @@ void ICRFFile::CleanupArrays()
 //------------------------------------------------------------------------------
 ICRFFile::ICRFFile(const std::string &fileName, Integer dim) :
    icrfFileName      (fileName),
+   icrfFileNameFullPath (""),
    independence      (NULL),
    dependences       (NULL),
    dimension         (dim),

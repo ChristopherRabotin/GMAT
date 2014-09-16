@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -49,6 +49,7 @@ public:
    // Method to execute a callback from an external function
    virtual bool        ExecuteCallback();
    virtual bool        PutCallbackData(std::string &data);
+   virtual bool        PutCallbackRealData(RealArray &data);
    virtual std::string GetCallbackResults();
    virtual GmatBase*   Clone() const;
    const std::string&  GetGeneratingString(Gmat::WriteMode mode,
@@ -105,7 +106,8 @@ protected:
    
    StringArray         callbackResults;
    std::string         callbackData;
-    
+   RealArray           callbackRealData;
+   
    bool                optimizerInDebugMode;
 
    Integer             minimizeCount;

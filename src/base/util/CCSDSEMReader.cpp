@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -428,6 +428,8 @@ bool CCSDSEMReader::ParseFile()
    while (!readingMeta && (!ephFile.eof()))
    {
       getline(ephFile,line);
+      // ignore blank lines
+      if (GmatStringUtil::IsBlank(line, true))  continue;
       #ifdef DEBUG_PARSE_EM_FILE
          MessageInterface::ShowMessage("In CCSDSEMReader, line= %s\n", line.c_str());
       #endif
@@ -470,16 +472,28 @@ bool CCSDSEMReader::ParseFile()
          }
          if (keyAllCaps == "CREATION_DATE")
          {
-//            lineStr >> eqSign;
             // get the rest of the line for the creationDate value
             getline(lineStr, sVal);
-            creationDate = sVal;
+            std::string sVal2 = GmatStringUtil::Trim(sVal, GmatStringUtil::BOTH, true, true);
+            try
+            {
+               CCSDSEMSegment::ParseEpoch(sVal2);
+            }
+            catch (UtilityException &ue)
+            {
+               std::string errmsg = "Error reading ephemeris message file \"";
+               errmsg += emFile + "\".  ";
+               errmsg += "CREATION_DATE is invalid.\n";
+               throw UtilityException(errmsg);
+            }
+            creationDate = sVal2;
             nonCommentFound = true;
          }
          else if (keyAllCaps == "ORIGINATOR")
          {
             getline(lineStr, sVal);
-            originator = sVal;
+            std::string sVal2 = GmatStringUtil::Trim(sVal, GmatStringUtil::BOTH, true, true);
+            originator = sVal2;
             nonCommentFound = true;
          }
          else

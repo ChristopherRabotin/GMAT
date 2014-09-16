@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,7 +26,6 @@
 #include "FormationSetupPanel.hpp"
 #include "GmatAppData.hpp"
 #include "ResourceTree.hpp"
-#include "GmatColorPanel.hpp"
 #include "FormationInterface.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
@@ -182,17 +181,11 @@ void FormationSetupPanel::Create()
    //------------------------------------------------------
    GmatStaticBoxSizer *pageBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "");
    pageBoxSizer->Add(flexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   //------------------------------------------------------
-   // Create color panel
-   //------------------------------------------------------    
-   GmatColorPanel *colorPanel = new GmatColorPanel(this, this, mClonedFormation);
-   
+
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   theMiddleSizer->Add(colorPanel, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage("FormationSetupPanel::Create() exits...\n");

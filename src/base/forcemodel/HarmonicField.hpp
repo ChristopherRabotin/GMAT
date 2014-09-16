@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -140,6 +140,7 @@ protected:
       DEGREE,
       ORDER,
       FILENAME,
+      POT_FILE_FULLPATH,
       INPUT_COORD_SYSTEM,
       FIXED_COORD_SYSTEM,
       TARGET_COORD_SYSTEM,
@@ -166,7 +167,9 @@ protected:
    Real                    r,s,t,u;
    /// The name of the potential file
    std::string             filename;
-
+   /// The full path file name of the potential file
+   std::string             filenameFullPath;
+   
    /// has the file been read?
    bool                    fileRead;
    bool                    usingDefaultFile;

@@ -1,10 +1,10 @@
-//$Id:$
+//$Id$
 //------------------------------------------------------------------------------
 //                               CCSDSAttitude
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -129,15 +129,18 @@ bool CCSDSAttitude::Initialize()
    bool isOK = Attitude::Initialize();
    if (!isOK) return false;
 
-   if (aemFile == "")
+   // Changed to use aemFileFullPath (LOJ: 2014.06.26)
+   //if (aemFile == "")
+   if (aemFileFullPath == "")
    {
       std::string errmsg = "Error - AEM file name not set on CCSDS-AEM object.\n";
       throw AttitudeException(errmsg);
    }
-
-   reader->SetFile(aemFile);
+   
+   //reader->SetFile(aemFile);
+   reader->SetFile(aemFileFullPath);
    reader->Initialize();
-
+   
    return true;
 }
 

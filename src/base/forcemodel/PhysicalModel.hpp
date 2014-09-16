@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -181,6 +181,8 @@ public:
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
                                       const std::string parm);
+   virtual void SetSpaceObject(const Integer i, GmatBase *obj);
+
    virtual bool UsesSpacecraftOrigin();
    virtual void ClearSatelliteParameters(const std::string parmName = "");
    virtual bool StateChanged(bool reset = true);

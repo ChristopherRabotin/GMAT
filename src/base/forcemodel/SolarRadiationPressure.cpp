@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,6 +55,12 @@
 //#define DEBUG_SOLAR_RADIATION_PRESSURE
 //#define DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW
 //#define DEBUG_A_MATRIX
+//#define DEBUG_STM_MATRIX
+
+//#define DEBUG_SPAD_DATA
+//#define DEBUG_SPAD_ACCEL
+//#define DEBUG_SHADOW_STATE
+//#define DEBUG_SHADOW_STATE_2
 
 //#define IGNORE_SHADOWS
 
@@ -76,6 +82,7 @@ SolarRadiationPressure::PARAMETER_TEXT[SRPParamCount - PhysicalModelParamCount] 
     "Mass",
     "Flux",
     "Flux_Pressure",
+    "SRPModel",
     "Sun_Distance",
     "Nominal_Sun",
     "PSunRad",
@@ -97,12 +104,21 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] 
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::ENUMERATION_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
 };
+
+const Real SolarRadiationPressure::FLUX_LOWER_BOUND          = 1200.0;
+const Real SolarRadiationPressure::FLUX_UPPER_BOUND          = 1450.0;
+const Real SolarRadiationPressure::FLUX_PRESSURE_LOWER_BOUND = 4.33e-6;
+const Real SolarRadiationPressure::FLUX_PRESSURE_UPPER_BOUND = 4.84e-6;
+const Real SolarRadiationPressure::NOMINAL_SUN_LOWER_BOUND   = 135.0e6;
+const Real SolarRadiationPressure::NOMINAL_SUN_UPPER_BOUND   = 165.0e6;
+
            
 //---------------------------------
 // public
@@ -118,6 +134,7 @@ SolarRadiationPressure::PARAMETER_TYPE[SRPParamCount - PhysicalModelParamCount] 
 SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    PhysicalModel       (Gmat::PHYSICAL_MODEL, "SolarRadiationPressure", name),   
    theSun              (NULL),
+   shadowState         (NULL),
    useAnalytic         (true),
    shadowModel         (CONICAL_MODEL),
    vectorModel         (SUN_PARALLEL),
@@ -128,6 +145,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    hasMoons            (false),
    flux                (1367.0),                  // W/m^2, IERS 1996
    fluxPressure        (flux / GmatPhysicalConstants::c),   // converted to N/m^2
+   srpModel            ("Spherical"),
    sunDistance         (149597870.691),
    nominalSun          (149597870.691),
    bodyIsTheSun        (false),
@@ -143,6 +161,8 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
    objectTypeNames.push_back("SolarRadiationPressure");
+
+   shadowState = new ShadowState();
 }
 
 //------------------------------------------------------------------------------
@@ -155,6 +175,7 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
 SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp) :
    PhysicalModel       (srp),  
    theSun              (NULL),
+   shadowState         (NULL),
    useAnalytic         (srp.useAnalytic),
    shadowModel         (srp.shadowModel),
    vectorModel         (srp.vectorModel),
@@ -168,6 +189,7 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    mass                (srp.mass),
    flux                (srp.flux),           // W/m^2, IERS 1996
    fluxPressure        (srp.fluxPressure),   // converted to N/m^2
+   srpModel            (srp.srpModel),
    sunDistance         (srp.sunDistance),
    nominalSun          (srp.nominalSun),
    bodyIsTheSun        (srp.bodyIsTheSun),
@@ -181,6 +203,8 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    areaID              (srp.areaID)
 {
    parameterCount = SRPParamCount;
+
+   shadowState = new ShadowState();
 }
 
 //------------------------------------------------------------------------------
@@ -207,8 +231,10 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       cr           = srp.cr;
       area         = srp.area;
       mass         = srp.mass;
+      scObjs       = srp.scObjs;
       flux         = srp.flux;           // W/m^2, IERS 1996
       fluxPressure = srp.fluxPressure;   // converted to N/m^2
+      srpModel     = srp.srpModel;
       sunDistance  = srp.sunDistance;
       nominalSun   = srp.nominalSun;
       bodyIsTheSun = srp.bodyIsTheSun;
@@ -221,7 +247,15 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       massID        = srp.massID;
       crID          = srp.crID;
       areaID        = srp.areaID;
-   }
+
+      if (shadowState)
+      {
+         delete shadowState;
+         shadowState        = NULL;
+      }
+
+      shadowState           = new ShadowState();
+}
    
    return *this;
 }
@@ -239,6 +273,8 @@ SolarRadiationPressure::~SolarRadiationPressure(void)
         delete [] cbSunVector;
     if (forceVector)
         delete [] forceVector;
+    if (shadowState)
+       delete shadowState;
 }
 
 //------------------------------------------------------------------------------
@@ -321,7 +357,7 @@ std::string SolarRadiationPressure::GetParameterTypeString(const Integer id) con
 // All read only for now
 bool SolarRadiationPressure::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == FLUX) || (id == NOMINAL_SUN))
+   if ((id == FLUX) || (id == NOMINAL_SUN) || (id == SRP_MODEL))
       return false;
    
    return true;
@@ -400,12 +436,34 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
    }
    if (id == FLUX)
    {
+      if ((value <= FLUX_LOWER_BOUND) || (value >= FLUX_UPPER_BOUND))
+      {
+         std::stringstream errmsg;
+         errmsg << "*** Error *** The value of " << value
+                << " for field " << GetParameterText(id)
+                << " on object \"" << instanceName
+                <<  "\" is not an allowed value.\n"
+                << "The allowed values are: ["
+                << FLUX_LOWER_BOUND << " < Real number < " << FLUX_UPPER_BOUND << "]";
+         throw ODEModelException(errmsg.str());
+      }
       flux = value;
       fluxPressure = flux / GmatPhysicalConstants::c;
       return flux;
    }
    if (id == FLUX_PRESSURE)
    {
+      if ((value <= FLUX_PRESSURE_LOWER_BOUND) || (value >= FLUX_PRESSURE_UPPER_BOUND))
+      {
+         std::stringstream errmsg;
+         errmsg << "*** Error *** The value of " << value
+                << " for field " << GetParameterText(id)
+                << " on object \"" << instanceName
+                <<  "\" is not an allowed value.\n"
+                << "The allowed values are: ["
+                << FLUX_PRESSURE_LOWER_BOUND << " < Real number < " << FLUX_PRESSURE_UPPER_BOUND << "]";
+         throw ODEModelException(errmsg.str());
+      }
       fluxPressure = value;
       flux = fluxPressure * GmatPhysicalConstants::c;
       return fluxPressure;
@@ -417,6 +475,17 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
    }
    if (id == NOMINAL_SUN)
    {
+      if ((value <= NOMINAL_SUN_LOWER_BOUND) || (value >= NOMINAL_SUN_UPPER_BOUND))
+      {
+         std::stringstream errmsg;
+         errmsg << "*** Error *** The value of " << value
+                << " for field " << GetParameterText(id)
+                << " on object \"" << instanceName
+                <<  "\" is not an allowed value.\n"
+                << "The allowed values are: ["
+                << NOMINAL_SUN_LOWER_BOUND << " < Real number < " << NOMINAL_SUN_UPPER_BOUND << "]";
+         throw ODEModelException(errmsg.str());
+      }
       nominalSun = value;
       return nominalSun;
    }
@@ -519,6 +588,45 @@ Integer SolarRadiationPressure::SetIntegerParameter(const Integer id, const Inte
    return PhysicalModel::SetIntegerParameter(id, value);
 }
 
+std::string SolarRadiationPressure::GetStringParameter(const Integer id) const
+{
+   if (id == SRP_MODEL)  return srpModel;
+
+   return PhysicalModel::GetStringParameter(id);
+}
+
+std::string SolarRadiationPressure::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+bool SolarRadiationPressure::SetStringParameter(const Integer id,
+                                                const std::string &value)
+{
+   if (id == SRP_MODEL)
+   {
+      if ((value != "Spherical") && (value != "SPADFile"))
+      {
+         ODEModelException odee("");
+         odee.SetDetails(errorMessageFormat.c_str(),
+                        value.c_str(),
+                        "SrpModel", "\"Spherical\" or \"SPADFile\"");
+         throw odee;
+      }
+      srpModel = value;
+      return true;
+   }
+
+   return PhysicalModel::SetStringParameter(id, value);
+}
+
+bool SolarRadiationPressure::SetStringParameter(const std::string &label,
+                                                const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
 //------------------------------------------------------------------------------
 // bool SolarRadiationPressure::Initialize()
 //------------------------------------------------------------------------------
@@ -542,7 +650,7 @@ bool SolarRadiationPressure::Initialize()
    if (solarSystem) 
    {
       theSun    = solarSystem->GetBody(SolarSystem::SUN_NAME);
-      sunRadius = theSun->GetEquatorialRadius();;
+      sunRadius = theSun->GetEquatorialRadius();
       
       if (!theSun)
          throw ODEModelException("Solar system does not contain the Sun for SRP force.");
@@ -552,7 +660,7 @@ bool SolarRadiationPressure::Initialize()
          body = forceOrigin;
       else
          body = solarSystem->GetBody(SolarSystem::EARTH_NAME);
-   
+
       #ifdef DEBUG_SRP_ORIGIN
          MessageInterface::ShowMessage("SRP body is %s\n", 
             body->GetName().c_str());
@@ -684,6 +792,14 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       throw ODEModelException(msg.str());
    }
 
+   if ((Integer)scObjs.size() != satCount)
+   {
+      std::stringstream msg;
+      msg << "Mismatch between satellite count (" << satCount
+          << ") and object count (" << scObjs.size() << ")";
+      throw ODEModelException(msg.str());
+   }
+
    Real distancefactor = 1.0, mag, sSquared;
    bool inSunlight = true, inShadow = false;
 
@@ -722,6 +838,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
    Integer i6;
    Real sunSat[3];
+   Rvector3 spadArea;
     
    if (fillCartesian)
    {
@@ -759,7 +876,24 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            FindShadowState(inSunlight, inShadow, &state[i6]);
+
+            std::string shModel = "DualCone";
+            if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+#ifdef DEBUG_SHADOW_STATE
+            MessageInterface::ShowMessage("before FSS, sunRadius= %12.10f, psunrad = %12.10f\n",
+                  sunRadius, psunrad);
+            MessageInterface::ShowMessage("   state       = %12.10f %12.10f %12.10f\n",
+                  state[i6], state[i6+1], state[i6+2]);
+            MessageInterface::ShowMessage("   cbSunVector = %12.10f %12.10f %12.10f\n",
+                  cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+            MessageInterface::ShowMessage("   sunSat      = %12.10f %12.10f %12.10f\n",
+                  sunSat[0], sunSat[1], sunSat[2]);
+            MessageInterface::ShowMessage("   forceVector = %12.10f %12.10f %12.10f\n",
+                  forceVector[0], forceVector[1], forceVector[2]);
+#endif
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  sunRadius, bodyRadius, psunrad);
          }
          else
          {
@@ -775,22 +909,82 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!inShadow) 
          {
             // Montenbruck and Gill, eq. 3.75
-            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor / 
+            #ifdef DEBUG_SPAD_DATA
+            MessageInterface::ShowMessage(" \n------> now using spad data for %s\n",
+                  scObjs.at(i)->GetName().c_str());
+            MessageInterface::ShowMessage("   nominalSun     = %12.10f\n", nominalSun);
+            MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
+            MessageInterface::ShowMessage("   state          = %12.10f  %12.10f  %12.10f\n",
+                  state[i6], state[i6+1], state[i6+2]);
+            MessageInterface::ShowMessage("   cbSunVector    = %12.10f  %12.10f  %12.10f\n",
+                  cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+            MessageInterface::ShowMessage("   sunSat    = %12.10f  %12.10f  %12.10f\n",
+                  sunSat[0], sunSat[1], sunSat[2]);
+            MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
+            MessageInterface::ShowMessage("   percentSun     = %12.10f\n", percentSun);
+            MessageInterface::ShowMessage("   fluxPressure   = %12.10f\n", fluxPressure);
+            MessageInterface::ShowMessage("   distancefactor = %12.10f\n", distancefactor);
+            MessageInterface::ShowMessage("   mass           = %12.10f\n", mass[i]);
+            #endif
+            mag = percentSun * fluxPressure * distancefactor /
                                 mass[i];
-
-            if (order == 1) 
+            if (srpModel == "Spherical")
             {
-               deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
-               deriv[i6 + 3] = mag * forceVector[0];
-               deriv[i6 + 4] = mag * forceVector[1];
-               deriv[i6 + 5] = mag * forceVector[2];
+               mag *= cr[i] * area[i];
+               if (order == 1)
+               {
+                  deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
+                  deriv[i6 + 3] = mag * forceVector[0];
+                  deriv[i6 + 4] = mag * forceVector[1];
+                  deriv[i6 + 5] = mag * forceVector[2];
+               }
+               else
+               {
+                  deriv[ i6 ] = mag * forceVector[0];
+                  deriv[i6+1] = mag * forceVector[1];
+                  deriv[i6+2] = mag * forceVector[2];
+                  deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               }
             }
-            else 
+            else  // SPADFile
             {
-               deriv[ i6 ] = mag * forceVector[0];
-               deriv[i6+1] = mag * forceVector[1];
-               deriv[i6+2] = mag * forceVector[2];
-               deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               #ifdef DEBUG_SPAD_DATA
+                  MessageInterface::ShowMessage("in SRP, using SPAD file and mag = %12.16le \n", mag);
+               #endif
+               if (!scObjs.at(i)->IsOfType("Spacecraft"))
+               {
+                  std::stringstream msg;
+                  msg << "Satellite " << scObjs.at(i)->GetName();
+                  msg << " is not of type Spacecraft.  SPAD SRP area cannot ";
+                  msg << "be obtained.\n";
+                  throw ODEModelException(msg.str());
+               }
+               Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);  // need to modify for performance?
+               spadArea = ((Spacecraft*) scObjs.at(i))->GetSPADSRPArea(ep, sunSC);
+               #ifdef DEBUG_SPAD_DATA
+                  MessageInterface::ShowMessage("in SRP, SPAD area from spacecraft (which calls filereader) = %12.10f  %12.10f  %12.10f\n",
+                        spadArea[0],spadArea[1],spadArea[2]);
+               #endif
+               if (order == 1)
+               {
+                  deriv[i6] = deriv[i6 + 1] = deriv[i6 + 2] = 0.0;
+                  deriv[i6 + 3] = mag * spadArea[0];
+                  deriv[i6 + 4] = mag * spadArea[1];
+                  deriv[i6 + 5] = mag * spadArea[2];
+               }
+               else
+               {
+                  deriv[ i6 ] = mag * spadArea[0];
+                  deriv[i6+1] = mag * spadArea[1];
+                  deriv[i6+2] = mag * spadArea[2];
+                  deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
+               }
+               #ifdef DEBUG_SPAD_DATA
+                  MessageInterface::ShowMessage(
+                        "Using SPAD, deriv = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+                        deriv[ i6 ], deriv[ i6+1 ], deriv[ i6+2 ],
+                        deriv[ i6+3 ], deriv[ i6+4 ], deriv[ i6+5 ]);
+               #endif
             }
          }
          else 
@@ -846,7 +1040,12 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            FindShadowState(inSunlight, inShadow, &state[i6]);
+            std::string shModel = "DualCone";
+            if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  sunRadius, bodyRadius, psunrad);
+//            FindShadowState(inSunlight, inShadow, &state[i6]);
          }
          else
          {
@@ -861,21 +1060,99 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             
          if (!inShadow)
          {
-            // All of the common terms for C_s
-            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
-                                (mass[i] * sunDistance);
-            sSquared = sunDistance * sunDistance;
+            if (srpModel == "Spherical")
+            {
+               // All of the common terms for C_s
+               mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
+                                   (mass[i] * sunDistance);
+               sSquared = sunDistance * sunDistance;
 
-            // Math spec terms for SRP C submatrix of the A-matrix
-            aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
-            aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
-            aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
-            aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
-            aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
-            aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
-            aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
-            aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
-            aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+               // Math spec terms for SRP C submatrix of the A-matrix
+               aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
+               aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
+               aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+               aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
+               aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
+               aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+               aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
+               aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
+               aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+            }
+            else // SPADFile
+            {
+               Real     nominalState[3];
+               nominalState[0] = state[associate];
+               nominalState[1] = state[associate+1];
+               nominalState[2] = state[associate+2];
+               Real     posMag = GmatMathUtil::Sqrt(
+                                 nominalState[0] * nominalState[0] +
+                                 nominalState[1] * nominalState[1] +
+                                 nominalState[2] * nominalState[2]);
+               Rvector6 nominalAccel, accelPertX, accelPertY, accelPertZ;
+               Real     theState[3];
+               Real     dx = posMag * 1e-4;  // guesses by SPH
+               Real     dy = posMag * 1e-4;
+               Real     dz = posMag * 1e-4;
+               nominalAccel    = ComputeSPADAcceleration(i, ep, nominalState, cbSunVector);
+               #ifdef DEBUG_SPAD_DATA
+                   MessageInterface::ShowMessage(
+                         "In STM section, using SPAD, nominalAccel = %le  %le  %le  %12.16le  %12.16le  %12.16le\n",
+                         nominalAccel[0], nominalAccel[1], nominalAccel[2],
+                         nominalAccel[3], nominalAccel[4], nominalAccel[5]);
+                   MessageInterface::ShowMessage("    dx  %12.10f,  dy = %12.10f, dz = %12.10f\n", dx, dy, dz);
+                #endif
+               // Compute acceleration perturbed in X
+               theState[0]     = nominalState[0] + dx;
+               theState[1]     = nominalState[1];
+               theState[2]     = nominalState[2];
+               accelPertX      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+               // Compute acceleration perturbed in Y
+               theState[0]     = nominalState[0];
+               theState[1]     = nominalState[1] + dy;
+               theState[2]     = nominalState[2];
+               accelPertY      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+               // Compute acceleration perturbed in Z
+               theState[0]     = nominalState[0];
+               theState[1]     = nominalState[1];
+               theState[2]     = nominalState[2] + dz;
+               accelPertZ      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+               // Fill in aTilde
+               aTilde[18] = (accelPertX[3] - nominalAccel[3]) / dx;
+               aTilde[24] = (accelPertX[4] - nominalAccel[4]) / dx;
+               aTilde[30] = (accelPertX[5] - nominalAccel[5]) / dx;
+               aTilde[19] = (accelPertY[3] - nominalAccel[3]) / dy;
+               aTilde[25] = (accelPertY[4] - nominalAccel[4]) / dy;
+               aTilde[31] = (accelPertY[5] - nominalAccel[5]) / dy;
+               aTilde[20] = (accelPertZ[3] - nominalAccel[3]) / dz;
+               aTilde[26] = (accelPertZ[4] - nominalAccel[4]) / dz;
+               aTilde[32] = (accelPertZ[5] - nominalAccel[5]) / dz;
+               #ifdef DEBUG_SPAD_DATA
+                  MessageInterface::ShowMessage("    accelPertX          = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+                        accelPertX[0], accelPertX[1], accelPertX[2],accelPertX[3],accelPertX[4],accelPertX[5]);
+                  MessageInterface::ShowMessage("    accelPertY          = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+                        accelPertY[0], accelPertY[1], accelPertY[2],accelPertY[3],accelPertY[4],accelPertY[5]);
+                  MessageInterface::ShowMessage("    accelPertZ          = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+                        accelPertZ[0], accelPertZ[1], accelPertZ[2],accelPertZ[3],accelPertZ[4],accelPertZ[5]);
+                  MessageInterface::ShowMessage(
+                        "In STM section, resulting aTilde[18]  = %12.16le\n", aTilde[18]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[19]  = %12.16le\n", aTilde[19]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[20]  = %12.16le\n", aTilde[20]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[24]  = %12.16le\n", aTilde[24]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[25]  = %12.16le\n", aTilde[25]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[26]  = %12.16le\n", aTilde[26]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[30]  = %12.16le\n", aTilde[30]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[31]  = %12.16le\n", aTilde[31]);
+                  MessageInterface::ShowMessage(
+                        "                resulting aTilde[32]  = %12.16le\n", aTilde[32]);
+                #endif
+            }
          }
          else
          {
@@ -936,7 +1213,12 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          if (!bodyIsTheSun)
          {
             psunrad = asin(sunRadius / sunDistance);
-            FindShadowState(inSunlight, inShadow, &state[i6]);
+            std::string shModel = "DualCone";
+            if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+            percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  sunRadius, bodyRadius, psunrad);
+//            FindShadowState(inSunlight, inShadow, &state[i6]);
          }
          else
          {
@@ -952,21 +1234,66 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
          if (!inShadow)
          {
-            // All of the common terms for C_s
-            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
-                                (mass[i] * sunDistance);
-            sSquared = sunDistance * sunDistance;
+            if (srpModel == "Spherical")
+            {
+               // All of the common terms for C_s
+               mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
+                                   (mass[i] * sunDistance);
+               sSquared = sunDistance * sunDistance;
 
-            // Math spec terms for SRP C submatrix of the A-matrix
-            aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
-            aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
-            aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
-            aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
-            aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
-            aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
-            aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
-            aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
-            aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+               // Math spec terms for SRP C submatrix of the A-matrix
+               aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
+               aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
+               aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+               aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
+               aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
+               aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+               aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
+               aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
+               aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+            }
+            else // SPADFile
+            {
+               Real     nominalState[3];
+               nominalState[0] = state[associate];
+               nominalState[1] = state[associate+1];
+               nominalState[2] = state[associate+2];
+               Real     posMag = GmatMathUtil::Sqrt(
+                                 nominalState[0] * nominalState[0] +
+                                 nominalState[1] * nominalState[1] +
+                                 nominalState[2] * nominalState[2]);
+               Rvector6 nominalAccel, accelPertX, accelPertY, accelPertZ;
+               Real     theState[3];
+               Real     dx = posMag * 1e-4;  // guesses by SPH
+               Real     dy = posMag * 1e-4;
+               Real     dz = posMag * 1e-4;
+               nominalAccel    = ComputeSPADAcceleration(i, ep, nominalState, cbSunVector);
+               // Compute acceleration perturbed in X
+               theState[0]     = nominalState[0] + dx;
+               theState[1]     = nominalState[1];
+               theState[2]     = nominalState[2];
+               accelPertX      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+               // Compute acceleration perturbed in Y
+               theState[0]     = nominalState[0];
+               theState[1]     = nominalState[1] + dy;
+               theState[2]     = nominalState[2];
+               accelPertY      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+               // Compute acceleration perturbed in Z
+               theState[0]     = nominalState[0];
+               theState[1]     = nominalState[1];
+               theState[2]     = nominalState[2] + dz;
+               accelPertZ      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+               // Fill in aTilde
+               aTilde[18] = (accelPertX[3] - nominalAccel[3]) / dx;
+               aTilde[24] = (accelPertX[4] - nominalAccel[4]) / dx;
+               aTilde[30] = (accelPertX[5] - nominalAccel[5]) / dx;
+               aTilde[19] = (accelPertY[3] - nominalAccel[3]) / dy;
+               aTilde[25] = (accelPertY[4] - nominalAccel[4]) / dy;
+               aTilde[31] = (accelPertY[5] - nominalAccel[5]) / dy;
+               aTilde[20] = (accelPertZ[3] - nominalAccel[3]) / dz;
+               aTilde[26] = (accelPertZ[4] - nominalAccel[4]) / dz;
+               aTilde[32] = (accelPertZ[5] - nominalAccel[5]) / dz;
+            }
          }
          else
          {
@@ -1113,7 +1440,12 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
    if (!bodyIsTheSun)
    {
       psunrad = asin(sunRadius / sunDistance);
-      FindShadowState(inSunlight, inShadow, state);
+      std::string shModel = "DualCone";
+      if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
+      percentSun = shadowState->FindShadowState(inSunlight, inShadow,
+            shModel, state, cbSunVector, sunSat, forceVector,
+            sunRadius, bodyRadius, psunrad);
+//      FindShadowState(inSunlight, inShadow, state);
    }
    else
    {
@@ -1122,16 +1454,52 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
        percentSun = 1.0;
    }
 
+   Rvector3 spadArea;
    if (!inShadow)
    {
-      // Montenbruck and Gill, eq. 3.75
-      mag = percentSun * cr * fluxPressure * area * distancefactor /
-                          mass;
+      if (srpModel == "Spherical")
+      {
+         // Montenbruck and Gill, eq. 3.75
+         mag = percentSun * cr * fluxPressure * area * distancefactor /
+                             mass;
+         dv[0] = dv[1] = dv[2] = 0.0;
+         dv[3] = mag * forceVector[0];
+         dv[4] = mag * forceVector[1];
+         dv[5] = mag * forceVector[2];
+      }
+      else   // SPADFile
+      {
+         // Montenbruck and Gill, eq. 3.75
+         mag = percentSun * fluxPressure * distancefactor /
+                             mass;
+         #ifdef DEBUG_SPAD_DATA
+         MessageInterface::ShowMessage(" \n------> now using spad data (per SC) for %s\n",
+               sc->GetName().c_str());
+         MessageInterface::ShowMessage("   nominalSun     = %12.10f\n", nominalSun);
+         MessageInterface::ShowMessage("   sunDistance    = %12.10f\n", sunDistance);
+         MessageInterface::ShowMessage("   state          = %12.10f  %12.10f  %12.10f\n",
+               state[0], state[1], state[2]);
+         MessageInterface::ShowMessage("   cbSunVector    = %12.10f  %12.10f  %12.10f\n",
+                cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+         MessageInterface::ShowMessage("   sunSat    = %12.10f  %12.10f  %12.10f\n",
+               sunSat[0], sunSat[1], sunSat[2]);
+         MessageInterface::ShowMessage("   percentSun     = %12.10f\n", percentSun);
+         MessageInterface::ShowMessage("   fluxPressure   = %12.10f\n", fluxPressure);
+         MessageInterface::ShowMessage("   distancefactor = %12.10f\n", distancefactor);
+         MessageInterface::ShowMessage("   mass           = %12.10f\n", mass);
+         #endif
+         Rvector3 sunSC(sunSat[0],sunSat[1],sunSat[2]);
+         spadArea = sc->GetSPADSRPArea(ep,sunSC);
+         #ifdef DEBUG_SPAD_DATA
+            MessageInterface::ShowMessage("in SRP, SPAD area (per SC) from file = %12.10f  %12.10f  %12.10f\n",
+                  spadArea[0],spadArea[1],spadArea[2]);
+         #endif
+         dv[0] = dv[1] = dv[2] = 0.0;
+         dv[3] = mag * spadArea[0];
+         dv[4] = mag * spadArea[1];
+         dv[5] = mag * spadArea[2];
+      }
 
-      dv[0] = dv[1] = dv[2] = 0.0;
-      dv[3] = mag * forceVector[0];
-      dv[4] = mag * forceVector[1];
-      dv[5] = mag * forceVector[2];
    }
    else
    {
@@ -1143,134 +1511,134 @@ Rvector6 SolarRadiationPressure::GetDerivativesForSpacecraft(Spacecraft *sc)
 }
 
 
-//------------------------------------------------------------------------------
-// void FindShadowState(bool &lit, bool &dark, Real *state)
-//------------------------------------------------------------------------------
-/**
- * Determines lighting conditions at the input location
- * 
- * @param <lit>   Indicates if the spoacecraft is in full sunlight
- * @param <dark>  Indicates if the spacecarft is in umbra
- * @param <state> Current spacecraft state
- * 
- * \todo: Currently implemented for one spacecraft, state vector arranges as
- * (x, y, z)
- */
-//------------------------------------------------------------------------------
-void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
-{
-    Real mag = sqrt(cbSunVector[0]*cbSunVector[0] + 
-                      cbSunVector[1]*cbSunVector[1] + 
-                      cbSunVector[2]*cbSunVector[2]);
-
-    Real unitsun[3];
-    unitsun[0] = cbSunVector[0] / mag;
-    unitsun[1] = cbSunVector[1] / mag;
-    unitsun[2] = cbSunVector[2] / mag;
-
-    double rdotsun = state[0]*unitsun[0] + 
-                     state[1]*unitsun[1] + 
-                     state[2]*unitsun[2];
-
-    if (rdotsun > 0.0) // Sunny side of central body is always fully lit
-    {    
-        lit = true;
-        dark = false;
-        percentSun = 1.0;
-        return;
-    }
-
-    if (shadowModel == CYLINDRICAL_MODEL) 
-    {
-        // In this model, the spacecraft is in darkness if it is within 
-        // bodyRadius of the sun-body line; otherwise it is lit
-        Real rperp[3];
-        rperp[0] = state[0] - rdotsun * unitsun[0];
-        rperp[1] = state[1] - rdotsun * unitsun[1];
-        rperp[2] = state[2] - rdotsun * unitsun[2];
-
-        mag = sqrt(rperp[0]*rperp[0] + rperp[1]*rperp[1] + rperp[2]*rperp[2]);
-        if (mag < bodyRadius) 
-        {
-            percentSun = 0.0;
-            lit = false;
-            dark = true;
-        }
-        else 
-        {
-            percentSun = 1.0;
-            lit = true;
-            dark = false;
-        }
-    }
-    else if (shadowModel == CONICAL_MODEL) 
-    {
-        Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
-
-        // Montenbruck and Gill, eq. 3.79
-        s0 = -state[0]*unitsun[0] - state[1]*unitsun[1] - state[2]*unitsun[2];
-        s2 = state[0]*state[0] + state[1]*state[1] + state[2]*state[2];
-
-        // Montenbruck and Gill, eq. 3.80
-        lsc = sqrt(s2 - s0*s0);
-
-        // Montenbruck and Gill, eq. 3.81
-        sinf1 = (sunRadius + bodyRadius) / mag;
-        sinf2 = (sunRadius - bodyRadius) / mag;
-
-        // Appropriate l1 and l2 temporarily
-        l1 = sinf1 * sinf1;
-        l2 = sinf2 * sinf2;
-        tanf1 = sqrt(l1 / (1.0 - l1));
-        tanf2 = sqrt(l2 / (1.0 - l2));
-        
-        // Montenbruck and Gill, eq. 3.82
-        c1 = s0 + bodyRadius / sinf1;
-        c2 = bodyRadius / sinf2 - s0;       // Different sign from M&G
-
-        // Montenbruck and Gill, eq. 3.83
-        l1 = c1 * tanf1;
-        l2 = c2 * tanf2;
-
-        if (lsc > l1) 
-        {
-            // Outside of the penumbral cone
-            lit = true;
-            dark = false;
-            percentSun = 1.0;
-            return;
-        }
-        else 
-        {
-            lit = false;
-            if (lsc < fabs(l2)) 
-            {
-                // Inside umbral cone
-                if (c2 >= 0.0) 
-                { 
-                    // no annular ring
-                    percentSun = 0.0;
-                    dark = true;
-                }
-                else 
-                {
-                    // annular eclipse
-                    pcbrad = asin(bodyRadius / sqrt(s2));
-                    percentSun = (psunrad*psunrad - pcbrad*pcbrad) / 
-                                 (psunrad*psunrad);
-                    dark = false;
-                }
-                
-                return;
-            }
-            // In penumbra
-            pcbrad = asin(bodyRadius / sqrt(s2));
-            percentSun = ShadowFunction(state);
-            lit = false;
-            dark = false;
-        }
-    }
-}
+////------------------------------------------------------------------------------
+//// void FindShadowState(bool &lit, bool &dark, Real *state)
+////------------------------------------------------------------------------------
+///**
+// * Determines lighting conditions at the input location
+// *
+// * @param <lit>   Indicates if the spoacecraft is in full sunlight
+// * @param <dark>  Indicates if the spacecarft is in umbra
+// * @param <state> Current spacecraft state
+// *
+// * \todo: Currently implemented for one spacecraft, state vector arranges as
+// * (x, y, z)
+// */
+////------------------------------------------------------------------------------
+//void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
+//{
+//    Real mag = sqrt(cbSunVector[0]*cbSunVector[0] +
+//                      cbSunVector[1]*cbSunVector[1] +
+//                      cbSunVector[2]*cbSunVector[2]);
+//
+//    Real unitsun[3];
+//    unitsun[0] = cbSunVector[0] / mag;
+//    unitsun[1] = cbSunVector[1] / mag;
+//    unitsun[2] = cbSunVector[2] / mag;
+//
+//    double rdotsun = state[0]*unitsun[0] +
+//                     state[1]*unitsun[1] +
+//                     state[2]*unitsun[2];
+//
+//    if (rdotsun > 0.0) // Sunny side of central body is always fully lit
+//    {
+//        lit = true;
+//        dark = false;
+//        percentSun = 1.0;
+//        return;
+//    }
+//
+//    if (shadowModel == CYLINDRICAL_MODEL)
+//    {
+//        // In this model, the spacecraft is in darkness if it is within
+//        // bodyRadius of the sun-body line; otherwise it is lit
+//        Real rperp[3];
+//        rperp[0] = state[0] - rdotsun * unitsun[0];
+//        rperp[1] = state[1] - rdotsun * unitsun[1];
+//        rperp[2] = state[2] - rdotsun * unitsun[2];
+//
+//        mag = sqrt(rperp[0]*rperp[0] + rperp[1]*rperp[1] + rperp[2]*rperp[2]);
+//        if (mag < bodyRadius)
+//        {
+//            percentSun = 0.0;
+//            lit = false;
+//            dark = true;
+//        }
+//        else
+//        {
+//            percentSun = 1.0;
+//            lit = true;
+//            dark = false;
+//        }
+//    }
+//    else if (shadowModel == CONICAL_MODEL)
+//    {
+//        Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
+//
+//        // Montenbruck and Gill, eq. 3.79
+//        s0 = -state[0]*unitsun[0] - state[1]*unitsun[1] - state[2]*unitsun[2];
+//        s2 = state[0]*state[0] + state[1]*state[1] + state[2]*state[2];
+//
+//        // Montenbruck and Gill, eq. 3.80
+//        lsc = sqrt(s2 - s0*s0);
+//
+//        // Montenbruck and Gill, eq. 3.81
+//        sinf1 = (sunRadius + bodyRadius) / mag;
+//        sinf2 = (sunRadius - bodyRadius) / mag;
+//
+//        // Appropriate l1 and l2 temporarily
+//        l1 = sinf1 * sinf1;
+//        l2 = sinf2 * sinf2;
+//        tanf1 = sqrt(l1 / (1.0 - l1));
+//        tanf2 = sqrt(l2 / (1.0 - l2));
+//
+//        // Montenbruck and Gill, eq. 3.82
+//        c1 = s0 + bodyRadius / sinf1;
+//        c2 = bodyRadius / sinf2 - s0;       // Different sign from M&G
+//
+//        // Montenbruck and Gill, eq. 3.83
+//        l1 = c1 * tanf1;
+//        l2 = c2 * tanf2;
+//
+//        if (lsc > l1)
+//        {
+//            // Outside of the penumbral cone
+//            lit = true;
+//            dark = false;
+//            percentSun = 1.0;
+//            return;
+//        }
+//        else
+//        {
+//            lit = false;
+//            if (lsc < fabs(l2))
+//            {
+//                // Inside umbral cone
+//                if (c2 >= 0.0)
+//                {
+//                    // no annular ring
+//                    percentSun = 0.0;
+//                    dark = true;
+//                }
+//                else
+//                {
+//                    // annular eclipse
+//                    pcbrad = asin(bodyRadius / sqrt(s2));
+//                    percentSun = (psunrad*psunrad - pcbrad*pcbrad) /
+//                                 (psunrad*psunrad);
+//                    dark = false;
+//                }
+//
+//                return;
+//            }
+//            // In penumbra
+//            pcbrad = asin(bodyRadius / sqrt(s2));
+//            percentSun = ShadowFunction(state);
+//            lit = false;
+//            dark = false;
+//        }
+//    }
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1290,42 +1658,133 @@ bool SolarRadiationPressure::IsUnique(const std::string& forBody)
 }
 
 
-//------------------------------------------------------------------------------
-// Real ShadowFunction(Real * state)
-//------------------------------------------------------------------------------
-/**
- * Calculates %lit when in penumbra.
- * 
- * @param <state> The current spacecraft state
- * 
- * @return the multiplier used when the satellite is partially lit
- */
-//------------------------------------------------------------------------------
-Real SolarRadiationPressure::ShadowFunction(Real * state)
+////------------------------------------------------------------------------------
+//// Real ShadowFunction(Real * state)
+////------------------------------------------------------------------------------
+///**
+// * Calculates %lit when in penumbra.
+// *
+// * @param <state> The current spacecraft state
+// *
+// * @return the multiplier used when the satellite is partially lit
+// */
+////------------------------------------------------------------------------------
+//Real SolarRadiationPressure::ShadowFunction(Real * state)
+//{
+//    Real mag = sqrt(state[0]*state[0] +
+//                      state[1]*state[1] +
+//                      state[2]*state[2]);
+//
+//    // Montenbruck and Gill, eq. 3.87
+//    Real c = acos((state[0]*forceVector[0] +
+//                     state[1]*forceVector[1] +
+//                     state[2]*forceVector[2]) / mag);
+//
+//    Real a2 = psunrad*psunrad;
+//    Real b2 = pcbrad*pcbrad;
+//
+//    // Montenbruck and Gill, eq. 3.93
+//    Real x = (c*c + a2 - b2) / (2.0 * c);
+//    Real y = sqrt(a2 - x*x);
+//
+//    // Montenbruck and Gill, eq. 3.92
+//    Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
+//
+//    // Montenbruck and Gill, eq. 3.94
+//    return 1.0 - area / (M_PI * a2);
+//}
+
+//---------------------------------------------------------------------------
+// Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
+//                                  Real *state, Real *cbSun)
+//---------------------------------------------------------------------------
+Rvector6 SolarRadiationPressure::ComputeSPADAcceleration(Integer scID,
+                                 Real ep, Real *state, Real *cbSun)
 {
-    Real mag = sqrt(state[0]*state[0] + 
-                      state[1]*state[1] + 
-                      state[2]*state[2]);
-    
-    // Montenbruck and Gill, eq. 3.87
-    Real c = acos((state[0]*forceVector[0] + 
-                     state[1]*forceVector[1] + 
-                     state[2]*forceVector[2]) / mag);
+   #ifdef DEBUG_SPAD_ACCEL
+      MessageInterface::ShowMessage("Entering ComputeSPADAcceleration with inputs:\n");
+      MessageInterface::ShowMessage("    scID           = %d\n", scID);
+      MessageInterface::ShowMessage("    ep             = %12.16le\n", ep);
+      MessageInterface::ShowMessage("    state          = %12.16le  %12.16le  %12.16le\n",
+            state[0], state[1], state[2]);
+      MessageInterface::ShowMessage("    cbSun          = %12.16le  %12.16le  %12.16le\n",
+            cbSun[0], cbSun[1], cbSun[2]);
+   #endif
+   Rvector6 result;
+   Rvector3 spadArea;
+   Real sunSat[3];
+   sunSat[0] = state[0] - cbSunVector[0];
+   sunSat[1] = state[1] - cbSunVector[1];
+   sunSat[2] = state[2] - cbSunVector[2];
+   Real sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] +
+                           sunSat[2]*sunSat[2]);
+   if (sunDistance == 0.0)
+      sunDistance = 1.0;
 
-    Real a2 = psunrad*psunrad;
-    Real b2 = pcbrad*pcbrad;
+   Real distancefactor = nominalSun / sunDistance;
+   // Convert m/s^2 to km/s^2
+   distancefactor *= distancefactor * GmatMathConstants::M_TO_KM;
 
-    // Montenbruck and Gill, eq. 3.93
-    Real x = (c*c + a2 - b2) / (2.0 * c);
-    Real y = sqrt(a2 - x*x);
+   Real mag = percentSun * fluxPressure * distancefactor / mass[scID];
 
-    // Montenbruck and Gill, eq. 3.92
-    Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
+   #ifdef DEBUG_SPAD_ACCEL
+      MessageInterface::ShowMessage("--- Computed in ComputeSPADAcceleration:\n");
+      MessageInterface::ShowMessage("    sunSat         = %12.16le  %12.16le  %12.16le\n",
+            sunSat[0], sunSat[1], sunSat[2]);
+      MessageInterface::ShowMessage("    sunDistance    = %12.16le\n",
+            sunDistance);
+      MessageInterface::ShowMessage("    percentSun     = %12.16le\n", percentSun);
+      MessageInterface::ShowMessage("    fluxPressure   = %12.16le\n", fluxPressure);
+      MessageInterface::ShowMessage("    distancefactor = %12.16le\n", distancefactor);
+      MessageInterface::ShowMessage("    mass           = %12.16le\n", mass[scID]);
+      MessageInterface::ShowMessage("    mag            = %12.16le\n", mag);
+   #endif
 
-    // Montenbruck and Gill, eq. 3.94
-    return 1.0 - area / (M_PI * a2);
+   Rvector3 sunSC(sunSat[0], sunSat[1], sunSat[2]);  // need to modify for performance?
+   spadArea = ((Spacecraft*) scObjs.at(scID))->GetSPADSRPArea(ep, sunSC);
+   #ifdef DEBUG_SPAD_ACCEL
+      MessageInterface::ShowMessage("    SPAD Area      = %12.16le  %12.16le  %12.16le\n",
+            spadArea[0],spadArea[1],spadArea[2]);
+   #endif
+
+   result[0] = result[1] = result[2] = 0.0;
+   result[3] = mag * spadArea[0];
+   result[4] = mag * spadArea[1];
+   result[5] = mag * spadArea[2];
+
+   #ifdef DEBUG_SPAD_ACCEL
+      MessageInterface::ShowMessage("--- AT END, result = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
+            result[0],result[1],result[2],result[3],result[4],result[5]);
+   #endif
+   return result;
 }
 
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& SolarRadiationPressure::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+   case SRP_MODEL:
+      enumStrings.clear();
+      enumStrings.push_back("Spherical");
+      enumStrings.push_back("SPADFile");
+      return enumStrings;
+   default:
+      return PhysicalModel::GetPropertyEnumStrings(id);
+   }
+}
 
 //------------------------------------------------------------------------------
 // void SetSatelliteParameter(const Integer i, const std::string parmName, 
@@ -1453,8 +1912,29 @@ void SolarRadiationPressure::ClearSatelliteParameters(
       cr.clear();
    if ((parmName == "SRPArea") || (parmName == ""))
       area.clear();
+   if ((parmName == "scObjs")  || (parmName == ""))
+      scObjs.clear();
 }
 
+//------------------------------------------------------------------------------
+// void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft pointers to the force model.
+ *
+ * @param i   ID for the spacecraft
+ * @param obj pointer to the Spacecraft
+ */
+//------------------------------------------------------------------------------
+void SolarRadiationPressure::SetSpaceObject(const Integer i, GmatBase *obj)
+{
+   unsigned parmNumber = (unsigned)(i);
+
+   if (parmNumber < scObjs.size())
+      scObjs[i] = obj;
+   else
+      scObjs.push_back(obj);
+}
 
 //------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)
@@ -1480,9 +1960,12 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
    
    if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
    {
-      MessageInterface::ShowMessage("Warning: The orbit state transition "
-            "matrix does not currently contain SRP contributions from shadow "
-            "partial derivatives.\n");
+      if (srpModel == "Spherical")
+      {
+         MessageInterface::ShowMessage("Warning: The orbit state transition "
+               "matrix does not currently contain SRP contributions from shadow "
+               "partial derivatives when using Spherical SRP.\n");
+      }
       return true;
    }
    

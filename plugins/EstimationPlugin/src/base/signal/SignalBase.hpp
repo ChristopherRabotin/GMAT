@@ -93,6 +93,9 @@ public:
                              const std::string& mediaCorrectionType) = 0;         // made changes by TUAN NGUYEN
 
    virtual bool         MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL) = 0; // made changes by TUAN NGUYEN
+   /// This function is used to calculate total hardware delay                    // made changes by TUAN NGUYEN
+   virtual bool         HardwareDelayCalculation() = 0;                           // made changes by TUAN NGUYEN
+
    virtual std::string  GetPathDescription(bool fullList = true);
 
    SignalData&          GetSignalData();
@@ -101,6 +104,8 @@ public:
    bool                 IsSignalFeasible();
    virtual void         UsesLighttime(const bool tf);
 
+   bool                 StepParticipant(Real stepToTake,
+                                              bool forTransmitter);
 protected:
    /// The next node in the list of signals (NULL at the end of the list)
    SignalBase                 *next;
@@ -209,8 +214,8 @@ protected:
                                           bool epochAtReceive,
                                           bool moveAll = true);
 #endif
-   bool                       StepParticipant(Real stepToTake,
-                                              bool forTransmitter);
+   //bool                       StepParticipant(Real stepToTake,                 // make this function public
+   //                                           bool forTransmitter);
 };
 
 #endif /* SignalBase_hpp */

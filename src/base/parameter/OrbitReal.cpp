@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -130,6 +130,14 @@ OrbitReal::~OrbitReal()
 //-------------------------------------
 // Inherited methods from Parameter
 //-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* GetOwner()
+//------------------------------------------------------------------------------
+GmatBase* OrbitReal::GetOwner()
+{
+   return GetParameterOwner();
+}
 
 //------------------------------------------------------------------------------
 // virtual Real EvaluateReal()
@@ -316,6 +324,9 @@ bool OrbitReal::Initialize()
 {
    RealVar::Initialize();
    
+   //LOJ: 2014.04.16
+   SetParameter(this);
+   
    try
    {
       #if DEBUG_ORBITREAL
@@ -492,6 +503,13 @@ bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       ("OrbitReal::SetRefObject() setting type=%d, name=%s to %s\n",
        type, name.c_str(), this->GetName().c_str());
    #endif
+   
+   // Set owner object for Parameter here (LOJ: 2014.04.05)
+   if (obj)
+   {
+      if (obj->GetName() == mParamOwnerName)
+         SetOwner(obj);
+   }
    
    bool setOK = OrbitData::SetRefObject(obj, type, name);
    // Setting states for SpacePoint parameter owners, other than Spacecraft, is not allowed

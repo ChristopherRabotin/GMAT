@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -153,6 +153,10 @@ protected:
    AtmosphereModel      *internalAtmos;
    /// Array of densities
    Real                 *density;
+   /// Density model: "High", "Low", or "Mean"							// made changes by TUAN NGUYEN   for GMT-4299
+   std::string			densityModel;									// made changes by TUAN NGUYEN   for GMT-4299
+   /// Inputfile containing all setting parameters for MarsGRAM			// made changes by TUAN NGUYEN   for GMT-4299
+   std::string          inputFile;										// made changes by TUAN NGUYEN   for GMT-4299
    /// Array of products of spacecraft properties
    Real                 *prefactor;
    /// Flag used to determine if data has changed for the prefactors

@@ -104,3 +104,64 @@ Cart-Cart2
 
 
 STK_short-BLmean_s
+
+%% highly eccentric and retrograde orbits
+% rp=6378.5;
+% ra=99999;
+% sma=(rp+ra)/2
+% ecc=(ra-rp)/2/sma
+clear
+clc
+rp=1000;
+ecc=0.999998;
+sma=rp/(1-ecc);
+
+% ra=sma*(1+ecc)
+%BLmean_s=[   sma    ecc    6.343333333333334e1    rand(1,3)*360];
+BLmean_s=[  7200 0 0 0 0 0];
+Kep=BROLYD_short(BLmean_s);
+
+Cart=Kep2Cart2(Kep);
+
+[BLmean_s2 emag j]=Cart2BLshort(Cart);
+
+BLmean_s-BLmean_s2
+
+Kep2=BROLYD_short(BLmean_s2);
+
+Cart2=Kep2Cart2(Kep2);
+
+norm(Cart-Cart2)./norm(Cart)
+%%
+disp('long term averaged')
+% BLmean_l=[  sma    ecc    6.052e1    rand(1,3)*360];
+
+BLmean_l=[  7200 0 0 0 0 0];
+Kep3=BROLYD(BLmean_l);
+
+Cart3=Kep2Cart2(Kep3);
+
+BLmean_l2=Cart2BLlong(Cart3);
+
+BLmean_l-BLmean_l2
+
+Kep4=BROLYD(BLmean_l2);
+
+Cart4=Kep2Cart2(Kep4);
+
+norm(Cart3-Cart4)/norm(Cart3)
+%% test prototypes. Case A.1. general elliptic orbit
+
+Cart=[ 7074.332549579282      -3.992328033513578e-013     1295.300325979304      -0.1778556913847675       7.378891568843633       0.9713656991014339];
+Cart=[ 7074.332549579282      1     1295.300325979304      -0.1778556913847675       7.378891568843633       0.9713656991014339];
+
+STK_OSC=[6.678137000000000e+003    3.499999999999997e-001    2.850000000000000e+001    0.000000000000000e+000    9.704955640900000e-015    0.000000000000000e+000];
+
+STK_long=[ 6.659637260077382e+003    3.473326030715827e-001    2.846453224361113e+001    3.599450721824177e+002       3.599700015119411e+002     6.963626331704763e-002];
+STK_short=[  6.659640789813191e+003    3.472942848235042e-001    2.846617054622099e+001    0.000000000000000e+000       0.000000000000000e+000     0.000000000000000e+000];
+
+BLmean=Cart2BLshort(Cart);
+Kep2=BROLYD_short(BLmean);
+Cart2=Kep2Cart2(Kep2);
+
+Cart-Cart2

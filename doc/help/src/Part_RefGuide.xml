@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <part condition="ug" version="5.0" xml:id="RefGuide"
       xmlns="http://docbook.org/ns/docbook"
       xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -91,7 +91,6 @@
       <xi:include href="Command_CallMatlabFunction.xml" />
       <xi:include href="Command_ClearPlot.xml" />
       <xi:include href="Command_EndFiniteBurn.xml" />
-      <xi:include href="Command_Equation.xml" />
       <xi:include href="Command_For.xml" />
       <xi:include href="Command_If.xml" />
       <xi:include href="Command_Maneuver.xml" />
@@ -113,7 +112,9 @@
     <reference xml:id="System">
       <title>System</title>
       <xi:include href="System_CalculationParameters.xml" />
+      <xi:include href="System_Color.xml" />
       <xi:include href="System_CommandLineUsage.xml" />
+      <xi:include href="System_KeyboardShortcuts.xml" />      
       <xi:include href="System_MatlabInterface.xml" />
       <xi:include href="System_ScriptLanguage.xml" />
       <xi:include href="System_StartupFile.xml" />

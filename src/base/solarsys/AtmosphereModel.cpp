@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -93,7 +93,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-   useGeodetic          (false),							// made changes by TUAN NGUYEN
+//   useGeodetic          (false),							// made changes by TUAN NGUYEN
+   useGeodetic          (true),							// made changes by TUAN NGUYEN
    gha                  (0.0),
    ghaEpoch             (0.0)
 {
@@ -1200,4 +1201,10 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    #endif
 
    return geoHeight;
+}
+
+
+std::string AtmosphereModel::GetCentralBodyName()
+{
+   return centralBody;
 }

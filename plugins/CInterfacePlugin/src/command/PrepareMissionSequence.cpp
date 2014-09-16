@@ -1,4 +1,9 @@
-//$Id: PrepareMissionSequence.cpp 8788 2010-11-26 21:36:26Z djcinsb $
+//$Id$
+//
+// Copyright (c) 2002-2014 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
 //------------------------------------------------------------------------------
 //                           PrepareMissionSequence
 //------------------------------------------------------------------------------

@@ -1,4 +1,11 @@
-# $Id: Makefile 9154 2011-03-04 23:07:17Z djcinsb $
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2014 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+#
 # makefile for GMAT's CInterface Plugin
 # This is the src level makefile 
 #

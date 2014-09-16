@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -98,7 +98,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
    maxConsDivergences         (3),                     // made changes by TUAN NGUYEN
-   inversionType              ("")
+   inversionType              ("Internal")   // ("")   // made changes by TUAN NGUYEN
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;

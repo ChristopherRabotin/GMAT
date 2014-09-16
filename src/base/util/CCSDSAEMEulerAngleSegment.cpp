@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -113,6 +113,14 @@ bool CCSDSAEMEulerAngleSegment::Validate(bool checkData)
       errmsg += "Required field EULER_ROT_SEQ is missing.\n";
       throw UtilityException(errmsg);
    }
+   if (interpolationMethod != "LAGRANGE")
+   {
+      std::string errmsg = segError;
+      errmsg += "Interpolation type \"";
+      errmsg += interpolationMethod + "\" is not valid for Attitude type ";
+      errmsg += "EULER_ANGLE.  The only supported value is \"LAGRANGE\".\n";
+      throw UtilityException(errmsg);
+   }
 
    return CCSDSAEMSegment::Validate(checkData);
 }
@@ -173,6 +181,13 @@ Rmatrix33 CCSDSAEMEulerAngleSegment::GetState(Real atEpoch)
    // to the requested time
    Rvector  eulerAngles(3);
    eulerAngles = DetermineState(atEpoch);
+   #ifdef DEBUG_AEM_EULER_GET_STATE
+      MessageInterface::ShowMessage("          eulerAngles (deg) from DetermineState are: %12.10f  %12.10f  %12.10f\n",
+            eulerAngles[0] * GmatMathConstants::DEG_PER_RAD,
+            eulerAngles[1] * GmatMathConstants::DEG_PER_RAD,
+            eulerAngles[2] * GmatMathConstants::DEG_PER_RAD);
+      MessageInterface::ShowMessage("          and euler sequence is: %d   %d   %d\n", euler1, euler2, euler3);
+   #endif
 
    // Conversion method has to have an Rvector3
    Rvector3  theEulerAngles(eulerAngles(0), eulerAngles(1), eulerAngles(2));
@@ -208,6 +223,12 @@ bool CCSDSAEMEulerAngleSegment::AddData(Real epoch, Rvector data)
    newData->epoch = epoch;
    newData->data  = useData;
    dataStore.push_back(newData);
+
+   #ifdef DEBUG_AEM_EULER_DATA
+      MessageInterface::ShowMessage("----> For (Euler Angle) segment number %d, added epoch = "
+            "%12.10f and data = %12.10f  %12.10f  %12.10f\n",
+            segmentNumber, epoch, useData[0], useData[1], useData[2]);
+   #endif
 
    return true;
 }
@@ -249,7 +270,7 @@ bool CCSDSAEMEulerAngleSegment::ValidateEulerAngles(const Rvector &eAngles)
 //      errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
 //      errmsg << "The tolerance on EulerAngle2 singularity is ";
 //      errmsg << GmatAttitudeConstants::EULER_ANGLE_TOLERANCE << ".\n";
-//      throw AttitudeException(errmsg.str());
+//      throw UtilityException(errmsg.str());
       return false;
    }
    // check for a nearly singular attitude, for non-symmetric sequences
@@ -266,7 +287,7 @@ bool CCSDSAEMEulerAngleSegment::ValidateEulerAngles(const Rvector &eAngles)
 //      errmsg << "For a non-symmetric sequence EulerAngle2 != 90.  ";
 //      errmsg << "The tolerance on EulerAngle2 singularity is ";
 //      errmsg << GmatAttitudeConstants::EULER_ANGLE_TOLERANCE << ".\n";
-//      throw AttitudeException(errmsg.str());
+//      throw UtilityException(errmsg.str());
       return false;
    }
 

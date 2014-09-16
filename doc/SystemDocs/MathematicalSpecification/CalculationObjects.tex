@@ -190,16 +190,16 @@ circular and near equatorial orbits.)
    Orbit Type & Numerical Threshold & Description \\
   \hline \\
   %--------------
-  Elliptic Inclined & $e \geq 10^{-11}$, $i \geq 10^{-11}$ & $\Omega$ is the angle between the $x$-axis and the line of nodes. $\omega$ is the angle between the line of nodes and the eccentricity vector, $\nu$ is
+  Elliptic Inclined & $e \geq 10^{-11}$, $10^{-11} \leq i \leq \pi-10^{-11}$ & $\Omega$ is the angle between the $x$-axis and the line of nodes. $\omega$ is the angle between the line of nodes and the eccentricity vector, $\nu$ is
                                                      the angle between the eccentricity vector and the spacecraft position vector.\\
   %--------------
-  Elliptic Equatorial & $e \geq 10^{-11}$, $i < 10^{-11}$ & $\Omega = 0$, $\omega$ is the angle between the $x$-axis and the eccentricity vector, $\nu$ is
+  Elliptic Equatorial & $e \geq 10^{-11}$, $i < 10^{-11} | i > \pi-10^{-11}$ & $\Omega = 0$, $\omega$ is the angle between the $x$-axis and the eccentricity vector, $\nu$ is
                                                      the angle between the eccentricity vector and the spacecraft position vector.\\
   %--------------
-  Circular Inclined & $e < 10^{-11}$, $i \geq 10^{-11}$  & $\Omega$ is the angle between the $x$-axis and the line of nodes, $\omega = 0$, $\nu$ is
+  Circular Inclined & $e < 10^{-11}$, $10^{-11} \leq i \leq \pi-10^{-11}$  & $\Omega$ is the angle between the $x$-axis and the line of nodes, $\omega = 0$, $\nu$ is
                                                      the angle between the line of nodes and the spacecraft position vector.\\
   %--------------
-  Circular Equatorial & $e < 10^{-11}$, $i < 10^{-11}$ & $\Omega = 0$, $\omega = 0$, $\nu$ is the angle between the $x$-axis and the spacecraft position vector. \\
+  Circular Equatorial & $e < 10^{-11}$, $i < 10^{-11} | i > \pi-10^{-11}$ & $\Omega = 0$, $\omega = 0$, $\nu$ is the angle between the $x$-axis and the spacecraft position vector. \\
   \hline\hline \label{Table:KeplerianElementsSpecialCases}
 \end{tabular}
 \end{table*}
@@ -277,7 +277,7 @@ each case is treated differently.
 
 \noindent\textit{Special Case 1:  Non-circular, Inclined Orbit  }
 
-\noindent if $(e \geq 10^{-11})$  and $(i \geq 10^{-11})$, then
+\noindent if $(e \geq 10^{-11})$  and $(10^{-11} \leq i \leq \pi-10^{-11})$, then
 %
 \begin{equation}
     \Omega = \cos^{-1}\left(\frac{n_x}{n}\right)
@@ -303,7 +303,7 @@ $\nu = 2\pi - \nu$
 \noindent\textit{Special Case 2:  Non-circular, Equatorial Orbit
 }
 
-\noindent if $(e \geq 10^{-11})$  and $(i < 10^{-11})$, then
+\noindent if $(e \geq 10^{-11})$  and $(i < 10^{-11}) | (i > \pi-10^{-11})$, then
 %
 \begin{equation}
     \Omega = 0
@@ -326,7 +326,7 @@ $\nu = 2\pi - \nu$
 
 \noindent\textit{Special Case 3:  Circular, Inclined Orbit  }
 
-\noindent if $(e < 10^{-11})$  and $(i \geq 10^{-11})$, then
+\noindent if $(e < 10^{-11})$  and $(10^{-11} \leq i \leq \pi-10^{-11})$, then
 %
 \begin{equation}
     \Omega = \cos^{-1}\left(\frac{n_x}{n}\right)
@@ -346,7 +346,7 @@ Fix quadrant for $\nu$:  if $r_z < 0$, then $\nu = 2\pi - \nu$
 
 \noindent\textit{Special Case 4:  Circular, Equatorial Orbit  }
 
-\noindent if $(e < 10^{-11})$  and $(i < 10^{-11})$, then
+\noindent if $(e < 10^{-11})$  and $(i < 10^{-11}) | (i > \pi-10^{-11})$, then
 %
 \begin{equation}
      \Omega = 0

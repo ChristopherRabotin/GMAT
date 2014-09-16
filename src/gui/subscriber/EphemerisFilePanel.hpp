@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -59,10 +59,12 @@ protected:
    void OnBrowse(wxCommandEvent& event);
    void OnCheck(wxCommandEvent& event);
    
-   void ShowAllCoordSystems(bool show);
-   void ShowCode500Items(bool show);
+   void ShowCoordSystems(const wxString &fileType);
+   void ShowCode500Items(const wxString &fileType);
+   void ShowInterpolatorAndStepSize(const wxString &fileType);
    
    wxComboBox*     spacecraftComboBox;
+   // Only allowed StateType is Cartesian for the 2010 release, per bug 2219
    //wxComboBox*     stateTypeComboBox;
    wxCheckBox*     writeEphemerisCheckBox;
    wxComboBox*     fileFormatComboBox;

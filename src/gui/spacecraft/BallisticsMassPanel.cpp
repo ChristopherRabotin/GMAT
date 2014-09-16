@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,18 +21,22 @@
  * 
  */
 //------------------------------------------------------------------------------
+#include <fstream>
+#include <wx/config.h>
 #include "BallisticsMassPanel.hpp"
 #include "GuiItemManager.hpp"
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "StringUtil.hpp"  // for ToReal()
-#include <wx/config.h>
+#include "bitmaps/OpenFolder.xpm"
 
 //------------------------------
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(BallisticsMassPanel, wxPanel)
-   EVT_TEXT(ID_TEXTCTRL, BallisticsMassPanel::OnTextChange)
+   EVT_TEXT(ID_TEXTCTRL,             BallisticsMassPanel::OnTextChange)
+   EVT_TEXT(ID_SPAD_TEXTCTRL,        BallisticsMassPanel::OnSPADTextChange)
+   EVT_BUTTON(ID_SPAD_BUTTON_BROWSE, BallisticsMassPanel::OnBrowseButton)
 END_EVENT_TABLE()
    
 //------------------------------
@@ -54,8 +58,9 @@ BallisticsMassPanel::BallisticsMassPanel(GmatPanel *scPanel, wxWindow *parent,
    theScPanel = scPanel;
    theSpacecraft = spacecraft;
    
-   canClose = true;
-   dataChanged = false;
+   canClose        = true;
+   dataChanged     = false;
+   spadFileChanged = false;
    
    Create();
 }
@@ -88,6 +93,15 @@ BallisticsMassPanel::~BallisticsMassPanel()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::Create()
 {
+
+   #if __WXMAC__
+   int buttonWidth = 40;
+   #else
+   int buttonWidth = 25;
+   #endif
+
+   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
+
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
@@ -99,8 +113,12 @@ void BallisticsMassPanel::Create()
 
     wxStaticBox *item1 = new wxStaticBox( this, -1, wxT("") );
     wxStaticBoxSizer *item0 = new wxStaticBoxSizer( item1, wxVERTICAL );
-    GmatStaticBoxSizer *optionsSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Options" );
+    GmatStaticBoxSizer *optionsSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Spherical" );
     item0->Add(optionsSizer, 1, wxALIGN_LEFT|wxGROW);
+
+    GmatStaticBoxSizer *spadSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "SPAD File" );
+    item0->Add(spadSizer, 1, wxALIGN_LEFT|wxGROW);
+
     wxFlexGridSizer *item2 = new wxFlexGridSizer( 3, 0, 0 );
     item2->AddGrowableCol(1);
 
@@ -169,7 +187,38 @@ void BallisticsMassPanel::Create()
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( srpAreaUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
+    wxFlexGridSizer *spadFlexSizer = new wxFlexGridSizer( 3, 0, 0 );
+    spadFlexSizer->AddGrowableCol(1);
+
+    wxStaticText *srpFileStaticText = new wxStaticText( this, ID_TEXT,
+                            wxT(GUI_ACCEL_KEY"SPAD SRP File"),
+                            wxDefaultPosition, wxDefaultSize, 0 );
+    spadFlexSizer->Add( srpFileStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+
+    spadSrpFileTextCtrl = new wxTextCtrl( this, ID_SPAD_TEXTCTRL, wxT(""),
+                            wxDefaultPosition, wxSize(300,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    spadSrpFileTextCtrl->SetToolTip(pConfig->Read(_T("SPADSRPFileHint")));
+    spadFlexSizer->Add( spadSrpFileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+    spadBrowseButton =
+       new wxBitmapButton(this, ID_SPAD_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
+                          wxSize(buttonWidth, 20));
+    spadBrowseButton->SetToolTip(pConfig->Read(_T("BrowseSPADSRPFileNameHint")));
+    spadFlexSizer->Add( spadBrowseButton, 0, wxALIGN_LEFT|wxALL, 5 );
+
+    wxStaticText *srpScaleFactorStaticText = new wxStaticText( this, ID_TEXT,
+                            wxT(GUI_ACCEL_KEY"SPAD SRP Scale Factor"),
+                            wxDefaultPosition, wxDefaultSize, 0 );
+    spadFlexSizer->Add( srpScaleFactorStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
+
+    spadSrpScaleFactorTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                            wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    spadSrpScaleFactorTextCtrl->SetToolTip(pConfig->Read(_T("SPADSRPScaleFactorHint")));
+    spadFlexSizer->Add( spadSrpScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, 5 );
+    spadFlexSizer->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
+
+
     optionsSizer->Add( item2, 0, wxALIGN_LEFT|wxALL, 5 );
+    spadSizer->Add( spadFlexSizer, 0, wxALIGN_LEFT|wxALL, 5 );
 
     this->SetAutoLayout( TRUE );  
     this->SetSizer( item0 );
@@ -194,12 +243,17 @@ void BallisticsMassPanel::LoadData()
       Integer dragAreaID     = theSpacecraft->GetParameterID("DragArea");
       Integer reflectCoeffID = theSpacecraft->GetParameterID("Cr");
       Integer srpAreaID      = theSpacecraft->GetParameterID("SRPArea");
+
+      Integer srpFileID        = theSpacecraft->GetParameterID("SPADSRPFile");
+      Integer srpScaleFactorID = theSpacecraft->GetParameterID("SPADSRPScaleFactor");
       
       Real mass         = theSpacecraft->GetRealParameter(dryMassID);
       Real dragCoeff    = theSpacecraft->GetRealParameter(coeffDragID);
       Real dragArea     = theSpacecraft->GetRealParameter(dragAreaID);
       Real reflectCoeff = theSpacecraft->GetRealParameter(reflectCoeffID);
       Real srpArea      = theSpacecraft->GetRealParameter(srpAreaID);
+      std::string srpFile = theSpacecraft->GetStringParameter(srpFileID);
+      Real srpScaleFactor = theSpacecraft->GetRealParameter(srpScaleFactorID);
       
       GuiItemManager *theGuiManager = GuiItemManager::GetInstance();
       
@@ -208,6 +262,8 @@ void BallisticsMassPanel::LoadData()
       dragAreaTextCtrl->SetValue(theGuiManager->ToWxString(dragArea));
       reflectCoeffTextCtrl->SetValue(theGuiManager->ToWxString(reflectCoeff));
       srpAreaTextCtrl->SetValue(theGuiManager->ToWxString(srpArea));
+      spadSrpFileTextCtrl->SetValue(srpFile.c_str());
+      spadSrpScaleFactorTextCtrl->SetValue(theGuiManager->ToWxString(srpScaleFactor));
    }
    catch (BaseException &e)
    {
@@ -237,6 +293,8 @@ void BallisticsMassPanel::SaveData()
       Integer reflectCoeffID = theSpacecraft->GetParameterID("Cr");
       Integer dragAreaID     = theSpacecraft->GetParameterID("DragArea");
       Integer srpAreaID      = theSpacecraft->GetParameterID("SRPArea");
+      Integer srpFileID        = theSpacecraft->GetParameterID("SPADSRPFile");
+      Integer srpScaleFactorID = theSpacecraft->GetParameterID("SPADSRPScaleFactor");
 
       std::string inputString;
     
@@ -312,6 +370,78 @@ void BallisticsMassPanel::SaveData()
             "Real Number >= 0.0");
          canClose = false;
       }
+      // check to see if SPAD SRP scale factor is a real and
+      // greater than or equal to 0.0
+      inputString = spadSrpScaleFactorTextCtrl->GetValue();
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) &&
+          (rvalue >= 0.0))
+         theSpacecraft->SetRealParameter(srpScaleFactorID, rvalue);
+      else
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+            inputString.c_str(),"SPAD SRP Scale Factor",
+            "Real Number >= 0.0");
+         canClose = false;
+      }
+
+      if (spadFileChanged)
+      {
+         try
+         {
+            bool success = true;
+
+            wxString str    = spadSrpFileTextCtrl->GetValue();
+            theSpadSrpFile  = str.c_str();
+            std::ifstream filename(str.c_str());
+
+            // Check if the file doesn't exist then stop
+            if (!filename)
+            {
+               std::string errmsg = "The value \"";
+               errmsg += theSpadSrpFile + "\" for field \"SPADSRPFile\" ";
+               errmsg += "is not an allowed value.  The allowed values are: ";
+               errmsg += "[ File must exist ]\n";
+               MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+               canClose    = false;
+               dataChanged = true;
+               success     = false;
+               theSpadSrpFile     = prevSpadSrpFile;
+               return;
+            }
+            filename.close();
+
+            if (theSpacecraft->SetStringParameter(srpFileID, theSpadSrpFile))
+            {
+               prevSpadSrpFile = str.c_str();
+               success             = true;
+            }
+            else
+            {
+               // if there was an error, set it back to what it was the last time it was saved
+               spadSrpFileTextCtrl->SetValue(prevSpadSrpFile.c_str());
+               theSpadSrpFile         = prevSpadSrpFile;
+               success                = false;
+            }
+            spadFileChanged = false;
+
+
+            if (success)
+            {
+               canClose = true;
+            }
+            else
+            {
+               canClose    = false;
+               dataChanged = true;
+            }
+         }
+         catch (BaseException &ex)
+         {
+            canClose    = false;
+            dataChanged = true;
+            MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
+         }
+      }
 
       if (canClose)
          dataChanged = false;
@@ -339,9 +469,51 @@ void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
 {
    if (dryMassTextCtrl->IsModified()       || dragCoeffTextCtrl->IsModified()   ||
        dragAreaTextCtrl->IsModified()      || srpAreaTextCtrl->IsModified()     ||
+       spadSrpScaleFactorTextCtrl->IsModified()                                 ||
        reflectCoeffTextCtrl->IsModified())
    {
       dataChanged = true;
       theScPanel->EnableUpdate(true);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnSPADTextChange()
+//------------------------------------------------------------------------------
+/**
+ * Activates the Apply button when text is changed
+ */
+//------------------------------------------------------------------------------
+void BallisticsMassPanel::OnSPADTextChange(wxCommandEvent &event)
+{
+   if (spadSrpFileTextCtrl->IsModified())
+   {
+      dataChanged     = true;
+      spadFileChanged = true;
+      theScPanel->EnableUpdate(true);
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnBrowseButton(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void BallisticsMassPanel::OnBrowseButton(wxCommandEvent &event)
+{
+   wxString prevFilename = spadSrpFileTextCtrl->GetValue();
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString filename;
+
+      filename = dialog.GetPath().c_str();
+
+      if (!filename.IsSameAs(prevFilename))
+      {
+         spadSrpFileTextCtrl->SetValue(filename);
+         spadFileChanged = true;
+         dataChanged     = true;
+         theScPanel->EnableUpdate(true);
+      }
    }
 }

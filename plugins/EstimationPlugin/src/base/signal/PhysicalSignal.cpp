@@ -248,7 +248,6 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
    satEpoch = atEpoch;
    relCorrection = 0.0;
    ettaiCorrection = 0.0;                                                                     // unit: km
-   //mediaCorrection = 0.0;                                                                     // unit: km
    
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", atEpoch,
@@ -364,6 +363,10 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.tNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasibleT = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasibleT;
+            if (!theData.feasibility)
+               theData.feasibilityReason = "B";
+            theData.feasibilityValue = elData[0];
 
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At transmit node: Obs vector = [%.3lf %.3lf %.3lf] "
@@ -381,6 +384,11 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.rNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasibleR = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasibleR;
+            if (!theData.feasibility)
+               theData.feasibilityReason = "B";
+            theData.feasibilityValue = elData[0];
+
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At receive node: Obs vector = [%.3lf %.3lf %.3lf] "
                   "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
@@ -414,7 +422,6 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
             MessageInterface::ShowMessage("      . Light time solution range = %.12lf km\n", lightTimeRange);
          }
          MessageInterface::ShowMessage("      . Relativity correction = %.12lf km\n", relCorrection);
-         //MessageInterface::ShowMessage("      . Media correction      = %.12lf km\n", mediaCorrection);
          MessageInterface::ShowMessage("      . ET-TAI correction     = %.12lf km\n", ettaiCorrection);
          MessageInterface::ShowMessage("      . Feasibility           = %s\n", (signalIsFeasible?"true":"false"));
       #endif
@@ -500,10 +507,40 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
 bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 {
    bool retval = false;
-   satPrecEpoch = atEpoch;
+   
+   //satPrecEpoch = atEpoch;                    // made changes by TUAN NGUYEN
+   if (epochAtReceive)                                                                 // made changes by TUAN NGUYEN
+   {                                                                                   // made changes by TUAN NGUYEN
+      // time tag is at the end of signal path                                         // made changes by TUAN NGUYEN
+      if (next == NULL)                                                                // made changes by TUAN NGUYEN
+      {                                                                                // made changes by TUAN NGUYEN
+         // for the last signal leg, rDelay = hardware delay                           // made changes by TUAN NGUYEN
+         satPrecEpoch = atEpoch - theData.rDelay/GmatTimeConstants::SECS_PER_DAY;      // made changes by TUAN NGUYEN
+      }                                                                                // made changes by TUAN NGUYEN
+      else                                                                             // made changes by TUAN NGUYEN
+      {                                                                                // made changes by TUAN NGUYEN
+         // for other leg, rDelay = 1/2 hardware delay                                 // made changes by TUAN NGUYEN
+         satPrecEpoch = atEpoch - 2*theData.rDelay/GmatTimeConstants::SECS_PER_DAY;    // made changes by TUAN NGUYEN
+      }                                                                                // made changes by TUAN NGUYEN
+   }                                                                                   // made changes by TUAN NGUYEN
+   else                                                                                // made changes by TUAN NGUYEN
+   {                                                                                   // made changes by TUAN NGUYEN
+      // time tag is at the beginning of signal path                                   // made changes by TUAN NGUYEN
+      if (previous == NULL)                                                            // made changes by TUAN NGUYEN
+      {                                                                                // made changes by TUAN NGUYEN
+         // for the first signal leg, tDelay = hardware delay                          // made changes by TUAN NGUYEN
+         satPrecEpoch = atEpoch + theData.tDelay/GmatTimeConstants::SECS_PER_DAY;      // made changes by TUAN NGUYEN
+      }                                                                                // made changes by TUAN NGUYEN
+      else                                                                             // made changes by TUAN NGUYEN
+      {                                                                                // made changes by TUAN NGUYEN
+         // for other leg, tDelay = 1/2 hardware delay                                 // made changes by TUAN NGUYEN
+         satPrecEpoch = atEpoch + 2*theData.tDelay/GmatTimeConstants::SECS_PER_DAY;    // made changes by TUAN NGUYEN
+      }                                                                                // made changes by TUAN NGUYEN
+   }                                                                                   // made changes by TUAN NGUYEN
+
+
    relCorrection = 0.0;
-   ettaiCorrection = 0.0;                                                                     // unit: km
-   //mediaCorrection = 0.0;                                                                     // unit: km
+   ettaiCorrection = 0.0;                                                                       // unit: km
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", satPrecEpoch.GetMjd(),
@@ -518,9 +555,10 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
    #endif
 
    #ifdef DEBUG_RANGE_CALCULATION 
-      MessageInterface::ShowMessage("   +++++++++++++++++++++++++++++++++++++++++++++++++++++&&\n");
-      MessageInterface::ShowMessage("   ++++    For leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
-      MessageInterface::ShowMessage("   +++++++++++++++++++++++++++++++++++++++++++++++++++++&&\n");
+      GmatTime tm = atEpoch;
+      MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+      MessageInterface::ShowMessage("   ++++   Range, relativity correction, and ET-TAI correction calculation for leg from %s to %s at measurement time %.12lf A1Mjd:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str(), tm.GetMjd());
+      MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
    #endif
    
    if (!isInitialized)
@@ -541,6 +579,10 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
       MoveToEpoch(satPrecEpoch, epochAtReceive, true);
       CalculateRangeVectorInertial();
       Real geoRange = theData.rangeVecInertial.GetMagnitude();
+
+      // Build the other data vectors
+      CalculateRangeVectorObs();
+      CalculateRangeRateVectorObs();
 
       #ifdef DEBUG_RANGE_CALCULATION 
          MessageInterface::ShowMessage("   1. Compute Range Vector before light time correction for the Leg from <TNode = %s> to <RNode = %s>:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
@@ -564,12 +606,12 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
       {
          GenerateLightTimeData(satPrecEpoch, epochAtReceive);
       }
-      else
-      {
-         // Build the other data vectors
-         CalculateRangeVectorObs();
-         CalculateRangeRateVectorObs();
-      }
+      //else
+      //{
+      //   // Build the other data vectors
+      //   CalculateRangeVectorObs();
+      //   CalculateRangeRateVectorObs();
+      //}
 
       #ifdef DEBUG_RANGE_CALCULATION 
          MessageInterface::ShowMessage("   2. Compute Range Vector after light time correction for the Leg from <TNode = %s> to <RNode = %s>:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
@@ -617,6 +659,9 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.tNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasible = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasible;                                                 // made changes by TUAN NGUYEN
+            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked  // made changes by TUAN NGUYEN
+            theData.feasibilityValue = elData[0];                                                   // made changes by TUAN NGUYEN
 
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At transmit node: Obs vector = [%.12lf,  %.12lf,  %.12lf]km "
@@ -633,6 +678,10 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.rNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasible = (elData[2] > 0.0);
+            theData.feasibility = signalIsFeasible;                                                 // made changes by TUAN NGUYEN
+            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked  // made changes by TUAN NGUYEN
+            theData.feasibilityValue = elData[0];                                                   // made changes by TUAN NGUYEN
+
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At receive node: Obs vector = [%.12lf,  %.12lf,  %.12lf]km "
                   "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
@@ -658,7 +707,6 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             MessageInterface::ShowMessage("      . Light time solution range = %.12lf km\n", lightTimeRange);
          }
          MessageInterface::ShowMessage("      . Relativity correction = %.12lf km\n", relCorrection);
-         //MessageInterface::ShowMessage("      . Media correction      = %.12lf km\n", mediaCorrection);
          MessageInterface::ShowMessage("      . ET-TAI correction     = %.12lf km\n", ettaiCorrection);
          MessageInterface::ShowMessage("      . Feasibility           = %s\n\n", (signalIsFeasible?"true":"false"));
       #endif
@@ -702,6 +750,12 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
       // if epoctAtReceive was true, transmitter moved and we need its epoch,
       // if false, we need the receiver epoch
       GmatTime nextPrecEpoch = (epochAtReceive ? theData.tPrecTime : theData.rPrecTime);      // made changes by TUAN NGUYEN
+      //// Assumption: theData.tDelay and theData.rDelay have to be specified before running ModelSignal() function
+      //GmatTime nextPrecEpoch;
+      //if (epochAtReceive)
+      //   nextPrecEpoch = theData.tPrecTime - theData.tDelay*2/GmatTimeConstants::SECS_PER_DAY;          // go backward
+      //else
+      //   nextPrecEpoch = theData.rPrecTime + theData.rDelay*2/GmatTimeConstants::SECS_PER_DAY;          // go foreward
 
       // This transmitter is the receiver for the next node
       bool nextFixed = (epochAtReceive ? true : false);
@@ -1099,7 +1153,144 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
 #endif
 
 
+bool PhysicalSignal::HardwareDelayCalculation()
+{
+   bool retval = false;
+   Real timeDelay;
+
+   // 1. Get hardware delay from theData.tNode
+   if (theData.tNode == NULL)
+   {
+      std::stringstream ss;
+      ss << "Error: Transmit participant of leg " << GetName() << " is NULL";
+      throw MeasurementException(ss.str());
+   }
+
+   if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      // Get time delay from ground station' transmitter
+      ObjectArray hardwareList = ((GroundstationInterface*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Transmitter"))
+         {
+            timeDelay = ((Transmitter*)hardwareList[i])->GetDelay();           // unit: second 
+            break;
+         }
+      }
+         
+      if (i == hardwareList.size())
+         timeDelay = 0.0;                     // no delay if no hardware is used
+   }
+   else
+   {
+      // Get time delay from spacecraft's transmitter or transponder
+      ObjectArray hardwareList = ((Spacecraft*)theData.tNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Transmitter"))
+         {
+            timeDelay = ((Transmitter*)hardwareList[i])->GetDelay();    // unit: second 
+            break;
+         }
+         if (hardwareList[i]->IsOfType("Transponder"))
+         {
+            timeDelay = ((Transponder*)hardwareList[i])->GetDelay();    // unit: second 
+            break;
+         }
+      }
+
+      if (i == hardwareList.size())
+         timeDelay = 0.0;                   // no delay if no hardware is used
+   }
+
+   if (previous == NULL)
+      theData.tDelay = timeDelay;          // for the first signal leg, it needs to add all delay time of ground station's transmitter 
+   else
+      theData.tDelay = timeDelay/2;        // otherwise, it needs to add only half delay time of spacecraft's transponder
+
+
+   // 2. Get hardware delay from theData.rNode
+   if (theData.rNode == NULL)
+   {
+      std::stringstream ss;
+      ss << "Error: Receive participant of leg " << GetName() << " is NULL";
+      throw MeasurementException(ss.str());
+   }
+
+   if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      // Get time delay from ground station' receiver
+      ObjectArray hardwareList = ((GroundstationInterface*)theData.rNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Receiver"))
+         {
+            timeDelay = ((Receiver*)hardwareList[i])->GetDelay();           // unit: second 
+            break;
+         }
+      }
+         
+      if (i == hardwareList.size())
+         timeDelay = 0.0;                      // no delay if no hardware is used
+   }
+   else
+   {
+      // Get time delay from spacecraft's receiver or transponder
+      ObjectArray hardwareList = ((Spacecraft*)theData.rNode)->GetRefObjectArray(Gmat::HARDWARE);
+      UnsignedInt i;
+      for (i = 0; i < hardwareList.size(); ++i)
+      {
+         if (hardwareList[i]->IsOfType("Receiver"))
+         {
+            timeDelay = ((Receiver*)hardwareList[i])->GetDelay();    // unit: second 
+            break;
+         }
+         if (hardwareList[i]->IsOfType("Transponder"))
+         {
+            timeDelay = ((Transponder*)hardwareList[i])->GetDelay();    // unit: second 
+            break;
+         }
+      }
+
+      if (i == hardwareList.size())
+         timeDelay = 0.0;                      // no delay if no hardware is used
+   }
+
+   if (next == NULL)
+      theData.rDelay = timeDelay;             // for the last signal leg, it needs to add all delay time of ground station's receiver 
+   else
+      theData.rDelay = timeDelay/2;           // otherwise, it needs to add only half delay time of spacecraft's transponder
+
+#ifdef DEBUG_RANGE_CALCULATION 
+   MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+   MessageInterface::ShowMessage("   ++++    Hardware delay calculation for leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+   MessageInterface::ShowMessage("     . %s's %s hardware delay   : %.12le sec\n", theData.tNode->GetName().c_str(), ((previous == NULL)?"":"half of"), theData.tDelay);
+   MessageInterface::ShowMessage("     . %s's %s hardware delay   : %.12le sec\n", theData.rNode->GetName().c_str(), ((next == NULL)?"":"half of"), theData.rDelay);
+   MessageInterface::ShowMessage("     . Total hardware delay for this signal leg: %.12le sec\n\n", theData.tDelay + theData.rDelay);
+#endif
+   retval = true;
+   return retval;
+}
+
+
 // made changes by TUAN NGUYEN
+//---------------------------------------------------------------------------------------------
+// bool MediaCorrectionCalculation(std::vector<RampTableData>* rampTB)
+//---------------------------------------------------------------------------------------------
+/**
+* This function is used to calculate media (troposphere and ionosphere) correction for a given 
+* signal leg
+* 
+* @param rampTB   Table containing the information about ramped frequency
+*
+* return true if calculation is completed
+*/
+//---------------------------------------------------------------------------------------------
 bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* rampTB)
 {
 #ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
@@ -1108,6 +1299,10 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    if (troposphere == NULL)
 #endif
       return true;
+#else
+   if (troposphere == NULL)
+      return true;
+#endif
 
    bool retval = false;
    mediaCorrection = 0.0;                                                               // unit: km
@@ -1124,10 +1319,12 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
 
    if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
    {
-      // Get frequency from ground station
+      // Get frequency from ground station's transmiter or from ramped frequency table
       if (rampTB)
       {
-         // @todo: Get frequency from ramped table if it is used
+         // Get frequency from ramped table if it is used
+         GmatTime t1 = theData.tPrecTime - theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
+         frequency = GetFrequencyFromRampTable(t1.GetMjd(), rampTB)/1.0e6;                     // unit: Mhz
       }
       else
       {
@@ -1138,7 +1335,7 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
          {
             if (hardwareList[i]->IsOfType("Transmitter"))
             {
-               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();    // unit: MHz 
+               frequency = ((Transmitter*)hardwareList[i])->GetSignal()->GetValue();           // unit: MHz 
                break;
             }
          }
@@ -1173,7 +1370,7 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       if (i == hardwareList.size())
       {
          std::stringstream ss;
-         ss << "Error: Ground station " << theData.tNode->GetName() << " does not have a transmitter to transmit signal\n";
+         ss << "Error: Spacecraft " << theData.tNode->GetName() << " does not have a transmitter or transponder to transmit signal\n";
          throw MeasurementException(ss.str());
       }
    }
@@ -1256,7 +1453,10 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       MediaCorrection(frequency, r1B, r2B, theData.tPrecTime.GetMjd());
 
 #ifdef DEBUG_RANGE_CALCULATION
-   MessageInterface::ShowMessage("   Media correction for leg from %s to %s:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+   MessageInterface::ShowMessage("   ++++    Media corrections calculation for leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   MessageInterface::ShowMessage("   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+   MessageInterface::ShowMessage("     .Frequency       : %.12le Mhz\n", frequency);
    UnsignedInt i;
    for(i = 0; i < theData.correctionIDs.size(); ++i)
    {
@@ -1272,12 +1472,15 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    }
    if (theData.useCorrection[i])
       MessageInterface::ShowMessage("     .Ionosphere correction : %.12lf\n", theData.corrections[i]);
+   
+   MessageInterface::ShowMessage("     . Doppler shift frequency: %.12le Mhz\n\n", dsFrequency);
 
 #endif
+   retval = true;
 
-   // 6. Repeat for next physical signal object
-   if (next)
-      retval = (retval && next->MediaCorrectionCalculation(rampTB));
+   //// 6. Repeat for next physical signal object
+   //if (next)
+   //   retval = (retval && next->MediaCorrectionCalculation(rampTB));
 
    return retval;
 }
@@ -1901,4 +2104,127 @@ RealArray PhysicalSignal::IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 
    return ionoCorrection;
 }
 #endif
+
+
+//------------------------------------------------------------------------------------------------
+// Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------------------------
+/**
+* This function is used to get frequency at a given epoch from ramped frequency table
+*
+* @param t        Epoch (in A1Mjd) at which frequency needed to spicify
+* @param rampTB   Table containing information about ramped frequency
+*
+* return          frequency (unit: Hz) 
+* Assumptions: ramp table had been sorted by epoch
+*/
+//------------------------------------------------------------------------------------------------
+Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB)
+{
+   if (rampTB == NULL)
+	   throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   if ((*rampTB).size() == 0)
+	   throw MeasurementException("Error: No data is in Ramp table\n");
+
+   if (t <= (*rampTB)[0].epoch)
+	   return (*rampTB)[0].rampFrequency;
+   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+	   return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+
+   // search for interval which contains time t:
+   UnsignedInt interval_index = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t < (*rampTB)[i].epoch)
+	   {
+         interval_index = i-1;      
+		   break;
+	   }
+   }
+
+   // specify frequency at time t:
+   Real t_start = (*rampTB)[interval_index].epoch;
+   Real f0 = (*rampTB)[interval_index].rampFrequency;
+   Real f_dot = (*rampTB)[interval_index].rampRate;
+	   
+   Real f = f0 + f_dot*(t - t_start);
+
+   return f;
+}
+
+
+//------------------------------------------------------------------------------------------------
+// Real PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB)
+//------------------------------------------------------------------------------------------------
+/**
+* This function is used to get frequency band at a given epoch from ramped frequency table
+*
+* @param t        Epoch (in A1Mjd) at which frequency needed to spicify
+* @param rampTB   Table containing information about ramped frequency
+*
+* return          band index of frequency
+* Assumptions: ramp table had been sorted by epoch
+*/
+//------------------------------------------------------------------------------------------------
+Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB)
+{
+   if (rampTB == NULL)
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   if ((*rampTB).size() == 0)
+      throw MeasurementException("Error: No data is in ramp table\n");
+
+   if (t <= (*rampTB)[0].epoch)
+      return (*rampTB)[0].uplinkBand;
+   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+      return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+
+   // search for interval which contains time t:
+   Real upBand = 0;
+   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   {
+      if (t < (*rampTB)[i].epoch)
+      {
+         upBand = (*rampTB)[i-1].uplinkBand;
+         break;
+      }
+   }
+
+   return upBand;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer FrequencyBand(Real frequency)
+//------------------------------------------------------------------------------
+/**
+ * Get frequency band corresponding to a given frequency
+ *
+ * @param frequency   frequency in Hz
+ *
+ * @return an integer corresponding to frequency band
+ */
+//------------------------------------------------------------------------------
+Integer PhysicalSignal::FrequencyBand(Real frequency)
+{
+   Integer freqBand = 0;
+
+   // S-band
+   if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
+      freqBand = 1;               // 1 for S-band
+
+   // X-band (Band values from Wikipedia; check them!
+   if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
+      freqBand = 2;               // 2 for X-band
+
+   if (freqBand == 0)
+   {
+      std::stringstream strs;
+      strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency <<" Hz\n";
+      throw MeasurementException(strs.str());
+   }
+
+   return freqBand;
+}
+
+
 

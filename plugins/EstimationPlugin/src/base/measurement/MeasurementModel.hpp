@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -30,8 +30,8 @@
 #include "CoreMeasurement.hpp"
 #include "Hardware.hpp"
 ///// TBD: Do we want something more generic here?
-#include "ObservationData.hpp"					// made changes by TUAN NGUYEN
-#include "RampTableData.hpp"					// made changes by TUAN NGUYEN
+#include "ObservationData.hpp"               // made changes by TUAN NGUYEN
+#include "RampTableData.hpp"                 // made changes by TUAN NGUYEN
 
 /**
  * Container class that wraps CoreMeasurement objects for use in estimation and
@@ -87,9 +87,9 @@ public:
                                          const Real value, const Integer row,
                                          const Integer col);
 
-   virtual std::string  GetOnOffParameter(const Integer id) const;						// made changes by TUAN NGUYEN
-   virtual bool         SetOnOffParameter(const Integer id,								// made changes by TUAN NGUYEN
-                                         const std::string &value);						// made changes by TUAN NGUYEN
+   virtual std::string  GetOnOffParameter(const Integer id) const;                   // made changes by TUAN NGUYEN
+   virtual bool         SetOnOffParameter(const Integer id,                          // made changes by TUAN NGUYEN
+                                         const std::string &value);                  // made changes by TUAN NGUYEN
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -162,15 +162,15 @@ public:
    Integer              GetModelTypeID();
    void                 SetModelID(Integer newID);
 
-   virtual ObjectArray&     GetParticipants();																	// made change by TUAN NGUYEN
+   virtual ObjectArray&     GetParticipants();                                                        // made change by TUAN NGUYEN
 
 //   virtual const MeasurementData&
-//                        CalculateMeasurement(bool withEvents = false);										// made changes by TUAN NGUYEN
+//                        CalculateMeasurement(bool withEvents = false);                              // made changes by TUAN NGUYEN
 ///// TBD: Do we want something more generic here?
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
-						     ObservationData* forObservation = NULL, std::vector<RampTableData>* rampTB = NULL, 
-							 bool withNoise = false);																// made changes by TUAN NGUYEN
+                           ObservationData* forObservation = NULL, std::vector<RampTableData>* rampTB = NULL, 
+                           bool withNoise = false);                                                   // made changes by TUAN NGUYEN
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);
@@ -200,8 +200,8 @@ protected:
    StringArray          observationStreamName;
 
 ///// TBD: Do we want something more generic here?
-   /// Name of the frequency ramp table stream that supplied or receives data			// made changes by TUAN NGUYEN
-   StringArray          rampTableStreamName;											// made changes by TUAN NGUYEN
+   /// Name of the frequency ramp table stream that supplied or receives data         // made changes by TUAN NGUYEN
+   StringArray          rampTableStreamName;                                          // made changes by TUAN NGUYEN
 
    /// List of participants used in the contained measurement
    StringArray          participantNames;
@@ -229,7 +229,7 @@ protected:
    /// Noise sigma
    Rvector noiseSigma;
    /// Time constant
-//   Real timeConstant;																	// This parameter does not need		// made changes by TUAN NGUYEN
+//   Real timeConstant;                             // This parameter does not need      // made changes by TUAN NGUYEN
 
    /// Error covariance; the inherited Covariance is used for a priori data
    Covariance measErrorCovariance;
@@ -241,32 +241,32 @@ protected:
    bool measurementNeedsObjects;
 
 ///// TBD: Do we want something more generic here?
-   /// Flag indicate whether Measurement model using relativity correction or not		// made changes by TUAN NGUYEN
-   bool useRelativityCorrection;														// made changes by TUAN NGUYEN
+   /// Flag indicate whether Measurement model using relativity correction or not      // made changes by TUAN NGUYEN
+   bool useRelativityCorrection;                                                       // made changes by TUAN NGUYEN
 
-   /// Flag indicate whether Measurement model using ET-TAI correction or not			// made changes by TUAN NGUYEN
-   bool useETminusTAICorrection;														// made changes by TUAN NGUYEN
+   /// Flag indicate whether Measurement model using ET-TAI correction or not          // made changes by TUAN NGUYEN
+   bool useETminusTAICorrection;                                                       // made changes by TUAN NGUYEN
 
 //   /// Residual maximum
-//   Real residualMax;																	// made changes by TUAN NGUYEN
+//   Real residualMax;                                                                 // made changes by TUAN NGUYEN
 
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
 ///// I don't understand why a name change was needed, but whatever
-//       ObservationData = GmatBaseParamCount,				// made changes by TUAN NGUYEN
-	   ObsData = GmatBaseParamCount,						// made changes by TUAN NGUYEN
-	   RampTables,											// made changes by TUAN NGUYEN
-       MeasurementType,
-       Participants,
-       Bias,
-       NoiseSigma,
-       Frequency,
-//	   RangeModuloConstant,									// made changes by TUAN NGUYEN
-	   RelativityCorrection,								// made changes by TUAN NGUYEN
-	   ETminusTAICorrection,								// made changes by TUAN NGUYEN
-//	   ResidualMaxLimit,									// made changes by TUAN NGUYEN
-       MeasurementModelParamCount
+//       ObservationData = GmatBaseParamCount,            // made changes by TUAN NGUYEN
+      ObsData = GmatBaseParamCount,                       // made changes by TUAN NGUYEN
+      RampTables,                                         // made changes by TUAN NGUYEN
+      MeasurementType,
+      Participants,
+      Bias,
+      NoiseSigma,
+      Frequency,
+//      RangeModuloConstant,                              // made changes by TUAN NGUYEN
+      RelativityCorrection,                               // made changes by TUAN NGUYEN
+      ETminusTAICorrection,                               // made changes by TUAN NGUYEN
+//      ResidualMaxLimit,                                 // made changes by TUAN NGUYEN
+      MeasurementModelParamCount
    };
 
    // Start with the parameter IDs and associates strings

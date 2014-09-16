@@ -44,7 +44,6 @@ GMAT MAVEN.EulerAngleSequence = '321';
 %----------------------------------------
 %---------- Hardware Components
 %----------------------------------------
-
 Create FuelTank MainTank;
 GMAT MainTank.AllowNegativeFuelMass = false;
 GMAT MainTank.FuelMass = 1718;
@@ -54,12 +53,6 @@ GMAT MainTank.RefTemperature = 20;
 GMAT MainTank.Volume = 2;
 GMAT MainTank.FuelDensity = 1000;
 GMAT MainTank.PressureModel = PressureRegulated;
-
-
-
-
-
-
 
 %----------------------------------------
 %---------- ForceModels
@@ -202,8 +195,6 @@ GMAT EarthView.Maximized = false;
 GMAT EarthView.Add = {MAVEN, Earth};
 GMAT EarthView.CoordinateSystem = EarthMJ2000Eq;
 GMAT EarthView.DrawObject = [ true true ];
-GMAT EarthView.OrbitColor = [ 255 32768 ];
-GMAT EarthView.TargetColor = [ 8421440 0 ];
 GMAT EarthView.DataCollectFrequency = 1;
 GMAT EarthView.UpdatePlotFrequency = 50;
 GMAT EarthView.NumPointsToRedraw = 0;
@@ -234,8 +225,6 @@ GMAT SolarSystemView.Maximized = false;
 GMAT SolarSystemView.Add = {MAVEN, Earth, Mars, Sun};
 GMAT SolarSystemView.CoordinateSystem = SunEcliptic;
 GMAT SolarSystemView.DrawObject = [ true true true true ];
-GMAT SolarSystemView.OrbitColor = [ 255 32768 1743054 1743054 ];
-GMAT SolarSystemView.TargetColor = [ 8421440 0 4227327 4227327 ];
 GMAT SolarSystemView.DataCollectFrequency = 1;
 GMAT SolarSystemView.UpdatePlotFrequency = 50;
 GMAT SolarSystemView.NumPointsToRedraw = 0;
@@ -266,8 +255,6 @@ GMAT MarsView.Maximized = false;
 GMAT MarsView.Add = {MAVEN, Mars, Earth};
 GMAT MarsView.CoordinateSystem = MarsInertial;
 GMAT MarsView.DrawObject = [ true true true ];
-GMAT MarsView.OrbitColor = [ 255 1743054 1743054 ];
-GMAT MarsView.TargetColor = [ 8421440 4227327 4227327 ];
 GMAT MarsView.DataCollectFrequency = 1;
 GMAT MarsView.UpdatePlotFrequency = 50;
 GMAT MarsView.NumPointsToRedraw = 0;

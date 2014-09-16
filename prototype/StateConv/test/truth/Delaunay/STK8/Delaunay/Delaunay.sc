@@ -1651,6 +1651,7 @@ Class Satellite
 	EllipticEqPro
 	EllipticEqRetro
 	EllipticIncPro
+	EllipticIncPro_Mars
 	EllipticIncRetro
 	EllipticPolar
 	HyperbolicEqPro

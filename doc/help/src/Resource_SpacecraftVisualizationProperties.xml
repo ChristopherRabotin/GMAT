@@ -32,14 +32,23 @@
     you define a spacecraft model, translate the spacecraft in X,Y, Z
     directions or apply a fixed rotation to the attitude orientation of the
     model. You can also adjust the scale factor of the spacecraft model size.
-    Spacecraft visualization properties can be configured either through
-    GMAT’s GUI or the script interface.</para>
+    GMAT lets you set orbit colors via the spacecraft visualization properties
+    as well. You can set colors to spacecraft orbital trajectories and any
+    perturbing trajectories that are drawn during iterative processes. See
+    <xref linkend="Color"/> documentation for discussion and examples
+    on how to set orbital colors using <guilabel>Spacecraft</guilabel>
+    object's <guilabel>OrbitColor</guilabel> and
+    <guilabel>TargetColor</guilabel> fields. Also see the <xref
+    linkend="SpacecraftVisProp_Fields" xrefstyle="select:title"/> section
+    below to read more about these two fields. The Spacecraft visualization
+    properties can be configured either through GMAT’s GUI or the script
+    interface.</para>
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
-    linkend="OrbitView"/></para>
+    linkend="OrbitView"/>, <xref linkend="Color"/></para>
   </refsection>
 
-  <refsection>
+  <refsection xml:id="SpacecraftVisProp_Fields">
     <title>Fields</title>
 
     <informaltable colsep="0" frame="topbot">
@@ -501,6 +510,136 @@
                 </varlistentry>
               </variablelist></entry>
           </row>
+
+          <row>
+            <entry><guilabel>OrbitColor</guilabel></entry>
+
+            <entry><para>Allows you to set available colors on spacecraft
+            orbits. The spacecraft orbits are drawn using the
+            <guilabel>OrbitView</guilabel> graphics displays. The colors can
+            be identified through a string or an integer array. For example:
+            Setting spacecraft's orbit color to red can be done in following
+            two ways: <literal>DefaultSC.OrbitColor = Red</literal> or
+            <literal>DefaultSC.OrbitColor = [255 0 0]</literal>. This field
+            can be modified in the Mission Sequence as well.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Red</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>TargetColor</guilabel></entry>
+
+            <entry><para>Allows you to set available colors on a spacecraft's
+            perturbing trajectories during iterative processes such as
+            Differential Correction or Optimization. The perturbing
+            trajectories are drawn through the <guilabel>OrbitView</guilabel>
+            resource. The target color can be identified through a string or
+            an integer array. For example: Setting spacecraft's perturbing
+            trajectories to yellow color can be done in following two ways:
+            <literal>DefaultSC.TargetColor = Yellow</literal> or
+            <literal>DefaultSC.TargetColor = [255 255 0]</literal> . This
+            field can be modified in the Mission Sequence as well.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Integer Array or String</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>Any color available from the Orbit Color Picker in
+                    GUI. Valid predefined color name or RGB triplet value
+                    between 0 and 255.</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>Teal</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
         </tbody>
       </tgroup>
     </informaltable>
@@ -516,7 +655,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_SpacecraftVisualizationProperties_GUI_2.png"
+                     fileref="files/images/Resource_SpacecraftVisualizationProperties_GUI_3.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -541,15 +680,18 @@
 
   <refsection>
     <title>Remarks</title>
-	
+
     <refsection>
       <title>Configuring Spacecraft Visualization Properties</title>
 
       <para>GMAT lets you define any spacecraft model but currently GMAT
-      supports only .3ds model format. Several .3ds spacecraft model formats are available <link
-        xlink:href="http://www.nasa.gov/multimedia/3d_resources/models.html">here.</link> You can also download more .3ds models by clicking <link
-        xlink:href="http://www.celestiamotherlode.net/">here.</link> Most of these models are in .3ds
-      format, which can be read by most 3D programs.</para>
+      supports only .3ds model format. Several .3ds spacecraft model formats
+      are available <link
+      xlink:href="http://www.nasa.gov/multimedia/3d_resources/models.html">here.</link>
+      You can also download more .3ds models by clicking <link
+      xlink:href="http://www.celestiamotherlode.net/">here.</link> Most of
+      these models are in .3ds format, which can be read by most 3D
+      programs.</para>
 
       <para>GMAT lets you apply fixed rotation to the attitude orientation of
       the spacecraft model or translate the model in any of the X, Y and Z

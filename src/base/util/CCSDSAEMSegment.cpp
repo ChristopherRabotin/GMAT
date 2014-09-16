@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -205,7 +205,7 @@ bool CCSDSAEMSegment::SetMetaData(const std::string &fieldName,
 //      }
       return true;
    }
-   // We are ignoring this for now; we use SLERP or Lagrange interpolation
+   // We use Linear (SLERP) or Lagrange interpolation
    else if (fieldName == "INTERPOLATION_METHOD")
    {
       interpolationMethod = GmatStringUtil::ToUpper(value);

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -128,7 +128,6 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
       return *this;
    GmatBase::operator=(coordBase);
 
-   MessageInterface::ShowMessage("***> CoordinateBase::operator=() this=<%p>'%s'\n", this, GetName().c_str());
    origin        = coordBase.origin;
    originName    = coordBase.originName;
    j2000Body     = coordBase.j2000Body;
@@ -288,6 +287,10 @@ bool CoordinateBase::RequiresJ2000Body()
  *
  * @param <toName> the J2000 Body name
  *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 void CoordinateBase::SetJ2000BodyName(const std::string &toName)
@@ -303,6 +306,10 @@ void CoordinateBase::SetJ2000BodyName(const std::string &toName)
  *
  * @param <j2000Ptr> pointer to the j2000Body
  *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,6 +42,7 @@ public:
    virtual ~OrbitReal();
    
    // methods inherited from Parameter
+   virtual GmatBase* GetOwner();
    virtual Real EvaluateReal();
    virtual void SetReal(Real val);
    

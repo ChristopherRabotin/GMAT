@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,7 @@
 RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
                  GmatParam::DepObject depObj, bool isSettable)
 {
+   mParameter = NULL;
    mActualParamName = name;
    GmatStringUtil::ParseParameter(name, mParamTypeName, mParamOwnerName, mParamDepName);
    mParamOwnerType = paramOwnerType;
@@ -73,6 +74,7 @@ RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &copy)
 {
+   mParameter = NULL; // This will be set during initialization
    mActualParamName = copy.mActualParamName;
    mParamOwnerName = copy.mParamOwnerName;
    mParamDepName = copy.mParamDepName;
@@ -103,6 +105,7 @@ RefData& RefData::operator= (const RefData& right)
    if (this == &right)
       return *this;
    
+   mParameter = right.mParameter;
    mActualParamName = right.mActualParamName;
    mParamOwnerName = right.mParamOwnerName;
    mParamDepName = right.mParamDepName;
@@ -128,6 +131,24 @@ RefData& RefData::operator= (const RefData& right)
 RefData::~RefData()
 {
    mRefObjList.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void SetParameter(Parameter *param)
+//------------------------------------------------------------------------------
+void RefData::SetParameter(Parameter *param)
+{
+   mParameter = param;
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* GetParameter()
+//------------------------------------------------------------------------------
+Parameter* RefData::GetParameter()
+{
+   return mParameter;
 }
 
 
@@ -200,6 +221,13 @@ GmatBase* RefData::GetSpacecraft()
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetParameterOwner()
+//------------------------------------------------------------------------------
+GmatBase* RefData::GetParameterOwner()
+{
+   return GetRefObject(mParamOwnerType, mParamOwnerName);
+}
 
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -463,7 +491,8 @@ bool RefData::RenameRefObject(const Gmat::ObjectType type,
        type != Gmat::THRUSTER         && type != Gmat::FUEL_TANK         &&
        type != Gmat::BARYCENTER       && type != Gmat::LIBRATION_POINT   &&
        type != Gmat::BODY_FIXED_POINT && type != Gmat::GROUND_STATION    &&
-       type != Gmat::CELESTIAL_BODY   && type != Gmat::SPACE_POINT)
+       type != Gmat::CELESTIAL_BODY   && type != Gmat::SPACE_POINT       &&
+       type != Gmat::ODE_MODEL)
    {
       #if DEBUG_RENAME
       MessageInterface::ShowMessage

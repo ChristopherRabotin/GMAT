@@ -1,4 +1,11 @@
 # $Id$
+#
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2014 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+#
 # Root level makefile 
 #
 # This file is really just a convenience.  In eclipse, it's useful to have a

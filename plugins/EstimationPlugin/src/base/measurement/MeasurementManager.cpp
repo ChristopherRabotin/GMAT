@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,7 +39,7 @@
 //#define DEBUG_CALCULATE_MEASUREMENTS
 //#define DEBUG_GET_ACTIVE_EVENTS
 //#define DEBUG_LOAD_OBSERVATIONS
-//#define DEBUG_RAMP_TABLE                                // made changes by TUAN NGUYEN
+//#define DEBUG_RAMP_TABLE                              // made changes by TUAN NGUYEN
 //#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
 //#define DEBUG_INITIALIZE
 //#define DEBUG_MODEL_MAPPING
@@ -261,10 +261,11 @@ bool MeasurementManager::Initialize()
       //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index with outer loop     // made changes by TUAN NGUYEN
       for (UnsignedInt k = 0; k < filenames.size(); ++k)                            // made changes by TUAN NGUYEN
       {
-         std::stringstream fn;
-         // fn << trackingSets[i]->GetName() << "DataFile" << i;                    // made changes by TUAN NGUYEN
-         fn << trackingSets[i]->GetName() << "DataFile" << k;                       // made changes by TUAN NGUYEN
-         DataFile *newStream = new DataFile(fn.str());
+//         std::stringstream fn;
+//         // fn << trackingSets[i]->GetName() << "DataFile" << i;                    // made changes by TUAN NGUYEN
+//         fn << trackingSets[i]->GetName() << "DataFile" << k;                       // made changes by TUAN NGUYEN
+//         DataFile *newStream = new DataFile(fn.str());
+         DataFile *newStream = new DataFile(filenames[k]);
          // newStream->SetStringParameter("Filename", filenames[i]);                // made changes by TUAN NGUYEN
          newStream->SetStringParameter("Filename", filenames[k]);                   // made changes by TUAN NGUYEN
          GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???
@@ -301,10 +302,12 @@ bool MeasurementManager::Initialize()
       StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");   // made changes by TUAN NGUYEN
       for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)                              // made changes by TUAN NGUYEN
       {                                                                                         // made changes by TUAN NGUYEN
-         std::stringstream fn;                                                                  // made changes by TUAN NGUYEN
-         fn << trackingSets[i]->GetName() << "RampedTable" << k1;                               // made changes by TUAN NGUYEN
-         DataFile *newStream = new DataFile(fn.str());                                          // made changes by TUAN NGUYEN
+//         std::stringstream fn;                                                                  // made changes by TUAN NGUYEN
+//         fn << trackingSets[i]->GetName() << "RampedTable" << k1;                               // made changes by TUAN NGUYEN
+//         DataFile *newStream = new DataFile(fn.str());                                          // made changes by TUAN NGUYEN
+         DataFile *newStream = new DataFile(rampedTablenames[k1]);                              // made changes by TUAN NGUYEN
          newStream->SetStringParameter("Filename", rampedTablenames[k1]);                       // made changes by TUAN NGUYEN
+
 #ifdef DEBUG_RAMP_TABLE
          MessageInterface::ShowMessage("MeasurementManager::Initialize():  Ramp table name = %s\n", rampedTablenames[k1].c_str());
 #endif
@@ -1159,6 +1162,9 @@ void MeasurementManager::LoadRampTables()
                }
 
                rampTables[rampTableDataStreamList[i]->GetName()] = ramp_table;
+               #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+                  MessageInterface::ShowMessage("      ^^^^^^ ramp_table[%s] = <%p>\n", rampTableDataStreamList[i]->GetName().c_str(), &rampTables[rampTableDataStreamList[i]->GetName()]);
+               #endif
             }
          }
       #endif
@@ -1588,13 +1594,13 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)
 {
    #ifdef DEBUG_FLOW
-      MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(%s,%s)\n", (forSimulation?"true":"false"), (withEvents?"true":"false"));
+      MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(simulation = %s, withEvents = %s, addNoise = %s)\n", (forSimulation?"true":"false"), (withEvents?"true":"false"), (addNoise?"true":"false"));
    #endif
    
    // Specify observation data for measurement
    ObservationData* od = NULL;                                                // made changes by TUAN NGUYEN
    if (!observations.empty())                                                 // made changes by TUAN NGUYEN
-      od = &(*currentObs);                                                     // made changes by TUAN NGUYEN
+      od = &(*currentObs);                                                    // made changes by TUAN NGUYEN
 
    bool retval = false;
    eventCount = 0;
@@ -1650,18 +1656,74 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             retval = true;
          }
 
-         #ifdef DEBUG_FLOW
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
             MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[j].isFeasible?"feasible":" not feasible"), measurements[j].value[0]);
          #endif
 
-      }
+      } // for j loop
+
       // Now do the same thing for the TrackingDataAdapters
       for (UnsignedInt i = 0; i < adapters.size(); ++i)
       {
-         std::vector<RampTableData>* rt = NULL;
-         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-         retval = measurements[i].isFeasible;
-      }
+         // Specify ramp table associated with measurement adapters[i]:                   // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                     // made changes by TUAN NGUYEN
+         StringArray sr = adapters[i]->GetStringArrayParameter("RampTables");             // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                           // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                               // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                    // made changes by TUAN NGUYEN
+
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage("******** Ramped table names size = %d\n", sr.size());
+            MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
+            for(int ii=0; ii < rt->size(); ++ii)
+               MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
+         #endif
+         
+         // Set AddNoise to measuement apdater
+         adapters[i]->SetBooleanParameter("AddNoise", addNoise);
+
+         // Run CalculateMeasurement() function 
+//         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+//         retval = measurements[i].isFeasible;
+         if (withEvents)
+         {  
+            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+               MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
+            #endif
+            if (measurements[i].isFeasible)
+            {
+               measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+               if (measurements[i].unfeasibleReason == "R")
+               {
+                  Real a1Time = measurements[i].epoch;
+                  Real taiTime;
+                  std::string tais;
+                  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
+                  char s[1000];
+                  sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epoches.\n", adapters[i]->GetName().c_str(), taiTime);
+                  throw MeasurementException(s); 
+               }
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+               MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
+            #endif
+            measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         }
+
+         if (measurements[i].isFeasible)
+         {
+            if (!withEvents)
+               eventCount += measurements[i].eventCount;
+            retval = true;
+         }
+         
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[i].isFeasible?"feasible":" not feasible"), measurements[i].value[0]);
+         #endif
+      } // for i loop
    }
    else
    {  // This section is used for estimation only:
@@ -1760,7 +1822,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             MessageInterface::ShowMessage("   Measurement %d computed; first "
                   "value: %lf\n", j, measurements[j].value[0]);
          #endif
-      }
+      }// for j loop
    }
 
    #ifdef DEBUG_FLOW

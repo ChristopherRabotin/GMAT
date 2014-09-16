@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -59,8 +59,14 @@ public:
    virtual void                SetOriginName(const std::string &toName);
    virtual void                SetOrigin(SpacePoint *originPtr);
    virtual bool                RequiresJ2000Body();
+
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    virtual void                SetJ2000BodyName(const std::string &toName);
    virtual void                SetJ2000Body(SpacePoint *j2000Ptr);
+
    virtual SolarSystem*        GetSolarSystem() const;
    virtual std::string         GetOriginName() const;
    virtual SpacePoint*         GetOrigin() const;
@@ -118,6 +124,10 @@ public:
    virtual bool                  IsBuiltIn() const;
 
    virtual bool                  RequiresCelestialBodyOrigin() const = 0;
+   // We need these extra methods to manage the case where the origin is a
+   // Spacecraft but we don't need to worry about attitude rates
+   virtual void                  SetAllowWithoutRates(bool allow) = 0;
+   virtual bool                  AllowWithoutRates() const = 0;
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
@@ -177,10 +187,10 @@ protected:
    /// pointer to the solar system
    SolarSystem     *solar;
    /// flag indicating whether or not this CoordinateBase object is a built-in one
-   bool          isBuiltIn;
+   bool            isBuiltIn;
    /// flag indicating whether or not this CS can currently be modified (generally
    /// only set to false for built-in CSs when the script is being interpreted)
-   bool          allowModify;
+   bool            allowModify;
 
    /// Method for setting J2000Body for other reference objects
    void SetJ2000BodyForOtherRefObjects();

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include "ViewTextDialog.hpp"
 #include "FileManager.hpp"
-#include "GmatAppData.hpp"
+#include "GmatAppData.hpp"         // SetIcon(), etc.
 #include "GmatBaseException.hpp"
 #include "MessageInterface.hpp"
 
@@ -38,17 +38,17 @@ END_EVENT_TABLE()
 /**
  * Constructor
  *
- * @param parent		Parent wxWindow for the dialog.
- * @param title			Title for the dialog.
- * @param isEditable	Is text in dialog editable or read-only
- * @param pos			window position
- * @param size			window size
- * @param style			window style
+ * @param parent		 Parent wxWindow for the dialog.
+ * @param title       Title for the dialog.
+ * @param isEditable	 Is text in dialog editable or read-only
+ * @param pos			 window position
+ * @param size			 window size
+ * @param style	    window style
  */
 //------------------------------------------------------------------------------
 ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
                                bool isEditable, const wxPoint &pos,
-                               const wxSize &size, long style)
+                               const wxSize &size, const wxFont &font, long style)
    : wxDialog(parent, -1, title, pos, size, style, title)
 {
    isTextEditable = isEditable;
@@ -81,7 +81,8 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
    
    if (!isTextEditable)
       theText->SetMaxLength(320000);
-   //theText->SetFont( GmatAppData::GetFont());
+   //theText->SetFont( GmatAppData::Instance()->GetFont());
+   theText->SetFont(font);
    
    // add items to middle sizer
    theMiddleSizer = new wxBoxSizer(wxVERTICAL);
@@ -110,23 +111,8 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
    dialogSizer->Fit(this);
    dialogSizer->SetSizeHints(this);
    
-   // Set icon if icon file is in the start up file
-   FileManager *fm = FileManager::Instance();
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #if defined __WXMSW__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-      #elif defined __WXGTK__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAC__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-      #endif
-   }
-   catch (GmatBaseException &)
-   {
-      //MessageInterface::ShowMessage(e.GetMessage());
-   }
+   // Set GMAT main icon
+   GmatAppData::Instance()->SetIcon(this, "ViewTextDialog");
    
    if (!isTextEditable)
       CenterOnScreen(wxBOTH);

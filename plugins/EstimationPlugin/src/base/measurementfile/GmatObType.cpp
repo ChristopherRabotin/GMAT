@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -292,8 +292,8 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    bool retval = false;
 
    std::stringstream dataLine;
-   char databuffer[20];
-   char epochbuffer[20];
+   char databuffer[200];
+   char epochbuffer[200];
 
    Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
          TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epoch,
@@ -307,11 +307,27 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      sprintf(databuffer, "%18.6lf", md->value[k]);
+      if (md->typeName == "DSNRange")                                                      // made changes by TUAN NGUYEN
+         sprintf(databuffer, "%18.6lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));   // made changes by TUAN NGUYEN
+      else                                                                                 // made changes by TUAN NGUYEN
+         sprintf(databuffer, "%18.6lf", md->value[k]);
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
    }
+
+   // extended information:                                                                // made changes by TUAN NGUYEN
+   if (md->typeName == "DSNRange")                                                         // made changes by TUAN NGUYEN
+   {                                                                                       // made changes by TUAN NGUYEN
+      sprintf(databuffer, "    %d    %.15le    %.15le",                                    // made changes by TUAN NGUYEN
+         md->uplinkBand, md->uplinkFreq, md->rangeModulo);	                               // made changes by TUAN NGUYEN
+      dataLine << databuffer;				                                                    // made changes by TUAN NGUYEN
+   }                                                                                       // made changes by TUAN NGUYEN
+   else if (md->typeName == "DSNDoppler")                                                  // made changes by TUAN NGUYEN
+   {                                                                                       // made changes by TUAN NGUYEN
+      dataLine << md->uplinkBand << "    ";                                                // made changes by TUAN NGUYEN
+      dataLine << md->dopplerCountInterval;                                                // made changes by TUAN NGUYEN
+   }                                                                                       // made changes by TUAN NGUYEN
 
    theStream << dataLine.str() << "\n";
 
@@ -319,7 +335,7 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
       MessageInterface::ShowMessage("GmatObType::WriteMeasurement: \"%s\"\n",
             dataLine.str().c_str());
    #endif
-
+   
    // temporary
    retval = true;
 
@@ -452,6 +468,21 @@ ObservationData* GmatObType::ReadObservation()
       currentObs.value.push_back(value);
 	  currentObs.value_orig.push_back(value);
    }
+
+   // read extended infor from data record              // made changes by TUAN NGUYEN
+   if (typeName == "DSNRange")                          // made changes by TUAN NGUYEN
+   {                                                    // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkFreq;                 // made changes by TUAN NGUYEN
+      theLine >> currentObs.rangeModulo;                // made changes by TUAN NGUYEN
+   }                                                    // made changes by TUAN NGUYEN
+   else if (typeName == "DSNDoppler")                   // made changes by TUAN NGUYEN
+   {                                                    // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
+      theLine >> currentObs.dopplerCountInterval;       // made changes by TUAN NGUYEN
+   }                                                    // made changes by TUAN NGUYEN
+
+
 /*
    Covariance *noise = new Covariance();
    noise->SetDimension(dataSize);

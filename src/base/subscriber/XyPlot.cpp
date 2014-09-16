@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -95,7 +95,9 @@ XyPlot::PARAMETER_TYPE[XyPlotParamCount - SubscriberParamCount] =
 XyPlot::XyPlot(const std::string &name, Parameter *xParam,
                Parameter *firstYParam, const std::string &plotTitle,
                const std::string &xAxisTitle, const std::string &yAxisTitle) :
-   Subscriber("XYPlot", name)
+   Subscriber("XYPlot", name),
+   mNumCollected(0),  
+   mUpdatePlotFrequency(10)
 {
    // GmatBase data
    objectTypes.push_back(Gmat::XY_PLOT);
@@ -573,7 +575,7 @@ bool XyPlot::RenameRefObject(const Gmat::ObjectType type,
    if (type != Gmat::PARAMETER && type != Gmat::SPACECRAFT &&
        type != Gmat::COORDINATE_SYSTEM && type != Gmat::BURN &&
        type != Gmat::IMPULSIVE_BURN && type != Gmat::CALCULATED_POINT &&
-       type != Gmat::HARDWARE)
+       type != Gmat::HARDWARE && type != Gmat::ODE_MODEL)
    {
       #if DEBUG_RENAME
       MessageInterface::ShowMessage
