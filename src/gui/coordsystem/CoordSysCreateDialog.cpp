@@ -201,7 +201,7 @@ void CoordSysCreateDialog::SaveData()
    if (mIsTextModified)
    {
       Real epoch;
-      std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
+      std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().WX_TO_STD_STRING;
       #ifdef DEBUG_COORD_DIALOG_SAVE
       MessageInterface::ShowMessage
          ("CoordSysCreateDialog::SaveData() epoch value = %s\n",

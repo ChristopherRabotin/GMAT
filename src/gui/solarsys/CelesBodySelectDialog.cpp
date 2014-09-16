@@ -316,7 +316,7 @@ void CelesBodySelectDialog::LoadData()
       {
          for (Integer j = 0; j < (Integer)mBodyListBox->GetCount(); j++)
          {
-            std::string bName = mBodyListBox->GetString(j).c_str();
+            std::string bName = mBodyListBox->GetString(j).WX_TO_STD_STRING;
             if (strcmp(mBodiesToHide[i].c_str(), bName.c_str()) == 0)
                mBodyListBox->Delete(j);
          }
@@ -327,7 +327,7 @@ void CelesBodySelectDialog::LoadData()
       {
          for (Integer j = 0; j < (Integer)mBodySelectedListBox->GetCount(); j++)
          {
-            std::string bName = mBodySelectedListBox->GetString(j).c_str();
+            std::string bName = mBodySelectedListBox->GetString(j).WX_TO_STD_STRING;
             if (strcmp(mBodiesToHide[i].c_str(), bName.c_str()) == 0)
                mBodySelectedListBox->Delete(j);
          }    

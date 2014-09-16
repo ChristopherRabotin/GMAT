@@ -1940,7 +1940,7 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    {
       MessageInterface::ShowMessage
          ("*** WARNING *** Property list for '%s' is not available at this time.\n",
-          objTypeName.c_str());
+          objTypeName.WX_TO_C_STRING);
       
       #if DBGLVL_GUI_ITEM_PROPERTY
       MessageInterface::ShowMessage
@@ -1999,7 +1999,7 @@ wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesTy
    GmatBase      *cs;
    for (int i=0; i<theNumCoordSys; i++)
    {
-      std::string csName     = theCoordSysList[i].c_str();
+      std::string csName     = theCoordSysList[i].WX_TO_STD_STRING;
       cs                     = theGuiInterpreter->GetConfiguredObject(csName);
       if (cbOriginOnly)
       {
@@ -2249,7 +2249,7 @@ wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID 
       wxArrayString mj2000AxisList;
       for (int i=0; i<theNumCoordSys; i++)
       {
-         std::string csName = theCoordSysList[i].c_str();
+         std::string csName = theCoordSysList[i].WX_TO_STD_STRING;
          // check for axis type
          GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
          if (cs)
@@ -3474,7 +3474,7 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       {
          for (int i=0; i<theNumScProperty; i++)
          {
-            std::string paramName = theScPropertyList[i].c_str();
+            std::string paramName = theScPropertyList[i].WX_TO_STD_STRING;
             add = false;
             #ifdef DEBUG_PROPERTY_LISTBOX
             MessageInterface::ShowMessage
@@ -3506,7 +3506,7 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       {
          for (int i=0; i<theNumScProperty; i++)
          {
-            std::string paramName = theScPropertyList[i].c_str();
+            std::string paramName = theScPropertyList[i].WX_TO_STD_STRING;
             add = false;
             if (theParamInfo->IsPlottable(paramName))
             {
@@ -4483,7 +4483,7 @@ wxArrayString GuiItemManager::BuildSpacePointList(const wxString &spTypeNames)
    #endif
    
    wxArrayString spacePointArray;
-   std::string typeNames = spTypeNames.c_str();
+   std::string typeNames = spTypeNames.WX_TO_STD_STRING;
    StringArray objTypes = GmatStringUtil::SeparateBy(typeNames, "+", false, false, false);
    
    #if DBGLVL_GUI_ITEM_SP > 1
@@ -5610,7 +5610,7 @@ void GuiItemManager::UpdateCoordSystemList()
             (*pos)->Clear();
             for (unsigned int i = 0; i < theCoordSysList.size(); i++)
             {
-               std::string csName = theCoordSysList[i].c_str();
+               std::string csName = theCoordSysList[i].WX_TO_STD_STRING;
                GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName.c_str());
                if (cs)
                {

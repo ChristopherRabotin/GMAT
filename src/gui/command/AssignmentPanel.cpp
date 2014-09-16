@@ -159,8 +159,8 @@ void AssignmentPanel::SaveData()
 		mLhsTextCtrl->SetValue(mLhsTextCtrl->GetValue().Trim(true).Trim(false));
 		mRhsTextCtrl->SetValue(mRhsTextCtrl->GetValue().Trim(true).Trim(false));
    }
-   std::string newLhs = mLhsTextCtrl->GetValue().c_str();
-   std::string newRhs = mRhsTextCtrl->GetValue().c_str();
+   std::string newLhs = mLhsTextCtrl->GetValue().WX_TO_STD_STRING;
+   std::string newRhs = mRhsTextCtrl->GetValue().WX_TO_STD_STRING;
    
    #if DEBUG_ASSIGNMENT_PANEL_SAVE
    MessageInterface::ShowMessage

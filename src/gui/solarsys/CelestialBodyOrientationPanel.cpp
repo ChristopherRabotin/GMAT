@@ -561,7 +561,7 @@ void CelestialBodyOrientationPanel::ResetChangeFlags(bool discardMods)
 //------------------------------------------------------------------------------
 void CelestialBodyOrientationPanel::OnRotationDataSourceComboBoxChange(wxCommandEvent &event)
 {
-   std::string newSrc = (rotationDataSourceComboBox->GetStringSelection()).c_str();
+   std::string newSrc = (rotationDataSourceComboBox->GetStringSelection()).WX_TO_STD_STRING;
    if (newSrc == rotationDataSource) return;
    rotationDataSourceChanged = true;
    dataChanged               = true;

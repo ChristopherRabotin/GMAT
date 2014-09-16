@@ -1542,7 +1542,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       if (epochTextCtrl->IsEnabled())
       {     
          Real epoch, a1mjd;
-         std::string savedEpoch = epochValue.c_str();
+         std::string savedEpoch = epochValue.WX_TO_STD_STRING;
          #ifdef DEBUG_COORD_PANEL_SAVE
             MessageInterface::ShowMessage("In CoordPanel::SaveData, saving current epoch value (%s)\n",
                   savedEpoch.c_str());

@@ -801,7 +801,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    {
       MessageInterface::ShowMessage
          ("OutputTree::OnCompareTextLines() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
+          theSubscriberName.WX_TO_C_STRING);
       return;
    }
    
@@ -866,7 +866,7 @@ void OutputTree::OnCompareNumericLines(wxCommandEvent &event)
    {
       MessageInterface::ShowMessage
          ("OutputTree::OnCompareNumericLines() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
+          theSubscriberName.WX_TO_C_STRING);
       return;
    }
    
@@ -946,7 +946,7 @@ void OutputTree::OnCompareNumericColumns(wxCommandEvent &event)
    {
       MessageInterface::ShowMessage
          ("OutputTree::OnCompareNumericColumns() The ReportFile: %s is NULL.\n",
-          theSubscriberName.c_str());
+          theSubscriberName.WX_TO_C_STRING);
       return;
    }
    

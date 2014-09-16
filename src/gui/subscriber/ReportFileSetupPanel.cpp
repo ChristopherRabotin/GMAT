@@ -605,7 +605,7 @@ void ReportFileSetupPanel::SaveData()
             clonedObj->TakeAction("Clear");
             for (int i=0; i<mNumParameters; i++)
             {
-               std::string selYName = mSelectedListBox->GetString(i).c_str();
+               std::string selYName = mSelectedListBox->GetString(i).WX_TO_STD_STRING;
                clonedObj->SetStringParameter("Add", selYName, i);
             }
          }

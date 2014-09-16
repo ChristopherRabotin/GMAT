@@ -32,6 +32,8 @@
 #include <algorithm>             // Required for GCC 4.3
 #include <sstream>
 #include <cerrno>
+#include <limits.h>
+#include <wchar.h>
 
 //#define DEBUG_STRING_UTIL 1
 //#define DEBUG_TOREAL
@@ -5404,6 +5406,13 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 //------------------------------------------------------------------------------
 std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 {
+#ifdef __MAC__
+   std::wostringstream convStream;
+   convStream << str.c_str();
+   std::wstring wstrTo(convStream.str());
+   return wstrTo;
+#else
+
    // Convert an ASCII string to a Unicode String
    // Method 1:
    std::wstring wstrTo;
@@ -5430,6 +5439,7 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
    // std::wstring wstr(buf);
    // delete[] buf;
    // return wstr;
+#endif
 }
 
 
@@ -5442,6 +5452,12 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
 {
+#ifdef __MAC__
+   std::ostringstream convStream;
+   convStream << wstr.c_str();
+   std::string strTo(convStream.str());
+   return strTo;
+#else
    // Convert a Unicode string to an ASCII string
    // Method 1:
    std::string strTo;
@@ -5452,6 +5468,7 @@ std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
    strTo = szTo;
    delete[] szTo;
    return strTo;
+#endif
    
    // Method 2:
    // int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);

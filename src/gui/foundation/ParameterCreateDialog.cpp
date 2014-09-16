@@ -527,7 +527,7 @@ void ParameterCreateDialog::SaveData()
          }
          else
          {
-            std::string expr = mVarValueTextCtrl->GetValue().c_str();
+            std::string expr = mVarValueTextCtrl->GetValue().WX_TO_STD_STRING;
             Real rval;
             CheckReal(rval, expr, "Expression", "Real Number");
             #ifdef DEBUG_PARAM_CREATE_SAVE
@@ -583,7 +583,7 @@ void ParameterCreateDialog::SaveData()
          }
          else
          {
-            std::string expr = mStringValueTextCtrl->GetValue().c_str();
+            std::string expr = mStringValueTextCtrl->GetValue().WX_TO_STD_STRING;
             mCurrParam->SetStringParameter("Expression", expr);
             ResetControls();
          }
@@ -914,7 +914,7 @@ void ParameterCreateDialog::OnHelp(wxCommandEvent &event)
 	{
 	   // get base help link if available
       baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/latest/html/%s.html"));
-	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.c_str());
+	   sprintf( msgBuffer, baseHelpLink.c_str(), objLink.WX_TO_C_STRING);
       
 	   #ifdef DEBUG_GMAT_DIALOG_HELP
 	   MessageInterface::ShowMessage

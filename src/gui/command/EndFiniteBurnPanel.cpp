@@ -270,7 +270,7 @@ void EndFiniteBurnPanel::SaveData()
    
    // In case user typed in spacecraft names, get value from textbox and
    // parse by blank or comma
-   std::string scNames = satNames.c_str();
+   std::string scNames = satNames.WX_TO_STD_STRING;
    StringTokenizer st(scNames, " ,");
    StringArray scList = st.GetAllTokens();
    #ifdef DEBUG_ENDFBPANEL_SAVE
@@ -304,7 +304,7 @@ void EndFiniteBurnPanel::SaveData()
          desc = "\" are undefined.\n";
       }
       
-      std::string unknownSc = (ToWxString(ToWxArrayString(result))).c_str();
+      std::string unknownSc = (ToWxString(ToWxArrayString(result))).WX_TO_STD_STRING;
       std::string msg = scLabel + unknownSc + desc;
       MessageInterface::PopupMessage(Gmat::ERROR_, msg);
       canClose = false;

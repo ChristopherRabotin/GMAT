@@ -344,7 +344,7 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
             MessageInterface::ShowMessage
                ("*** WARNING *** Error setting icon for window '%s' named '%s'\n   "
                 "Cannot find the icon file '%s'.  This warning message will be writen only once.\n",
-                calledFrom.c_str(), topWindow->GetName().c_str(),
+                calledFrom.c_str(), topWindow->GetName().WX_TO_C_STRING,
                 fm->GetFilename("MAIN_ICON_FILE").c_str());
             writeWarning = false;
          }

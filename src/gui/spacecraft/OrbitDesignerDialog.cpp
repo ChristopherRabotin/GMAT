@@ -2375,7 +2375,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
 
    if (timeParamOneVal)
    {
-      std::string str = time1TextCtrl->GetValue().c_str();
+      std::string str = time1TextCtrl->GetValue().WX_TO_STD_STRING;
       orbitTime.SetEpoch(str);
       if ((epochType == "UTCGregorian") || (epochType == "A1Gregorian") || 
           (epochType == "TAIGregorian") || (epochType == "TTGregorian"))
@@ -2420,7 +2420,7 @@ void OrbitDesignerDialog::OnFindOrbit(wxCommandEvent& event)
          {
             timeOut2TextCtrl->SetValue(time2TextCtrl->GetValue());//TA
             Real lon;
-            std::string s = time2TextCtrl->GetValue().c_str();
+            std::string s = time2TextCtrl->GetValue().WX_TO_STD_STRING;
             GmatStringUtil::ToReal(s, lon);
             std::string start = orbitTime.FindStartTime(true, lon);
             if (orbitTime.IsError())
@@ -2594,7 +2594,7 @@ void OrbitDesignerDialog::OnSummary(wxCommandEvent& event)
       summaryString += "\n";
    }
 
-   OrbitSummaryDialog summaryDlg(this, wxString(summaryString));
+   OrbitSummaryDialog summaryDlg(this, summaryString);
    summaryDlg.ShowModal();
 }
 
@@ -2617,7 +2617,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("7000.0000000000000000"));
    param1TextCtrl->SetToolTip("6478.1363<SMA<8378.1363");
-   std::string in1 = param1TextCtrl->GetValue().c_str();
+   std::string in1 = param1TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT("km"));
@@ -2632,7 +2632,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param2TextCtrl->Disable();
    param2TextCtrl->SetValue(wxT("621.863699999999880"));
    param2TextCtrl->SetToolTip("100<ALT<2000");
-   std::string in2 = param2TextCtrl->GetValue().c_str();
+   std::string in2 = param2TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT("km"));
@@ -2647,7 +2647,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param3TextCtrl->Enable();
    param3TextCtrl->SetValue(wxT("0.0010000000000000"));
    param3TextCtrl->SetToolTip("0<=ECC<1");
-   std::string in3 = param3TextCtrl->GetValue().c_str();
+   std::string in3 = param3TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in3, input3Val);
    units3StaticText->Show(true);
    units3StaticText->SetLabel(wxT(""));
@@ -2662,7 +2662,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param4TextCtrl->Disable();
    param4TextCtrl->SetValue(wxT("97.8739286731882600"));
    param4TextCtrl->SetToolTip("90<INC<110");
-   std::string in4 = param4TextCtrl->GetValue().c_str();
+   std::string in4 = param4TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in4, input4Val);
    units4StaticText->Show(true);
    units4StaticText->SetLabel(wxT("deg"));
@@ -2677,7 +2677,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param5TextCtrl->Disable();
    param5TextCtrl->SetValue(wxT("6993.0000000000000000"));
    param5TextCtrl->SetToolTip("6478.1363<RP<8378.1363");
-   std::string in5 = param5TextCtrl->GetValue().c_str();
+   std::string in5 = param5TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in5, input5Val);
    units5StaticText->Show(true);
    units5StaticText->SetLabel(wxT("km"));
@@ -2692,7 +2692,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param6TextCtrl->Disable();
    param6TextCtrl->SetValue(wxT("7006.9999999999991000"));
    param6TextCtrl->SetToolTip("6478.1363<RA<10278.1363");
-   std::string in6 = param6TextCtrl->GetValue().c_str();
+   std::string in6 = param6TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in6, input6Val);
    units6StaticText->Show(true);
    units6StaticText->SetLabel(wxT("km"));
@@ -2707,7 +2707,7 @@ void OrbitDesignerDialog::DisplaySunSync()
    param7TextCtrl->Disable();
    param7TextCtrl->SetValue(wxT("6999.9929999999995000"));
    param7TextCtrl->SetToolTip("0<P<8378.1363");
-   std::string in7 = param7TextCtrl->GetValue().c_str();
+   std::string in7 = param7TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in7, input7Val);
    units7StaticText->Show(true);
    units7StaticText->SetLabel(wxT("km"));
@@ -2791,7 +2791,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("0.001"));
    param1TextCtrl->SetToolTip("0<=ECC<1");
-   std::string in1 = param1TextCtrl->GetValue().c_str();
+   std::string in1 = param1TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT(""));
@@ -2806,7 +2806,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param2TextCtrl->Enable();
    param2TextCtrl->SetValue(wxT("16"));
    param2TextCtrl->SetToolTip("");
-   std::string in2 = param2TextCtrl->GetValue().c_str();
+   std::string in2 = param2TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT(""));
@@ -2821,7 +2821,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param3TextCtrl->Enable();
    param3TextCtrl->SetValue(wxT("232"));
    param3TextCtrl->SetToolTip("");
-   std::string in3 = param3TextCtrl->GetValue().c_str();
+   std::string in3 = param3TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in3, input3Val);
    units3StaticText->Show(true);
    units3StaticText->SetLabel(wxT(""));
@@ -2836,7 +2836,7 @@ void OrbitDesignerDialog::DisplayRepeatSunSync()
    param4TextCtrl->Enable();
    param4TextCtrl->SetValue(wxT("14.5"));
    param4TextCtrl->SetToolTip("");
-   std::string in4 = param4TextCtrl->GetValue().c_str();
+   std::string in4 = param4TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in4, input4Val);
    units4StaticText->Show(true);
    units4StaticText->SetLabel(wxT(""));
@@ -2931,7 +2931,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("0.00117604"));
    param1TextCtrl->SetToolTip("0<=ECC<1");
-   std::string in1 = param1TextCtrl->GetValue().c_str();
+   std::string in1 = param1TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT(""));
@@ -2946,7 +2946,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param2TextCtrl->Enable();
    param2TextCtrl->SetValue(wxT("98.2"));
    param2TextCtrl->SetToolTip("0<INC<180");
-   std::string in2 = param2TextCtrl->GetValue().c_str();
+   std::string in2 = param2TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT("deg"));
@@ -2961,7 +2961,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param3TextCtrl->Enable();
    param3TextCtrl->SetValue(wxT("232"));
    param3TextCtrl->SetToolTip("");
-   std::string in3 = param3TextCtrl->GetValue().c_str();
+   std::string in3 = param3TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in3, input3Val);
    units3StaticText->Show(true);
    units3StaticText->SetLabel(wxT(""));
@@ -2976,7 +2976,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param4TextCtrl->Enable();
    param4TextCtrl->SetValue(wxT("16"));
    param4TextCtrl->SetToolTip("");
-   std::string in4 = param4TextCtrl->GetValue().c_str();
+   std::string in4 = param4TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in4, input4Val);
    units4StaticText->Show(true);
    units4StaticText->SetLabel(wxT(""));
@@ -2991,7 +2991,7 @@ void OrbitDesignerDialog::DisplayRepeatGroundTrack()
    param5TextCtrl->Enable();
    param5TextCtrl->SetValue(wxT("14.5"));
    param5TextCtrl->SetToolTip("");
-   std::string in5 = param5TextCtrl->GetValue().c_str();
+   std::string in5 = param5TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in5, input5Val);
    units5StaticText->Show(true);
    units5StaticText->SetLabel(wxT(""));
@@ -3100,7 +3100,7 @@ void OrbitDesignerDialog::DisplayGeostationary()
    time2TextCtrl->Disable();
    time2TextCtrl->SetValue(wxT("-79.5390165757071940"));
    time1TextCtrl->SetToolTip("-180<Lon<180");
-   std::string tIn2 = time2TextCtrl->GetValue().c_str();
+   std::string tIn2 = time2TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(tIn2, timeIn2Val);
    timeUnits2StaticText->Show(true);
    timeUnits2StaticText->SetLabel(wxT("deg"));
@@ -3360,7 +3360,7 @@ void OrbitDesignerDialog::DisplayFrozen()
    param1TextCtrl->Enable();
    param1TextCtrl->SetValue(wxT("790"));
    param1TextCtrl->SetToolTip("0<ALT");
-   std::string in1 = param1TextCtrl->GetValue().c_str();
+   std::string in1 = param1TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in1, input1Val);
    units1StaticText->Show(true);
    units1StaticText->SetLabel(wxT("km"));
@@ -3375,7 +3375,7 @@ void OrbitDesignerDialog::DisplayFrozen()
    param2TextCtrl->Enable();
    param2TextCtrl->SetValue(wxT("98.6"));
    param2TextCtrl->SetToolTip("0<=INC<180");
-   std::string in2 = param2TextCtrl->GetValue().c_str();
+   std::string in2 = param2TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(in2, input2Val);
    units2StaticText->Show(true);
    units2StaticText->SetLabel(wxT("deg"));
@@ -3476,7 +3476,7 @@ void OrbitDesignerDialog::DisplayTime()
    time2TextCtrl->Show(true);
    time2TextCtrl->Disable();
    time2TextCtrl->SetValue(wxT("280.4609834242928100"));
-   std::string tIn2 = time2TextCtrl->GetValue().c_str();
+   std::string tIn2 = time2TextCtrl->GetValue().WX_TO_STD_STRING;
    GmatStringUtil::ToReal(tIn2, timeIn2Val);
    time2TextCtrl->SetToolTip("0<=RAAN<360");
    timeUnits2StaticText->Show(true);

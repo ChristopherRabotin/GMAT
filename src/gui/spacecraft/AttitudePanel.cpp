@@ -1408,7 +1408,7 @@ bool AttitudePanel::ValidateState(const std::string which,
             while (ea2 <= -360.0) ea2 += 360.0;
             while (ea2 >=  360.0) ea2 -= 360.0;
             Real ea2Radians = ea2 * GmatMathConstants::RAD_PER_DEG;
-            std::string eseq = config4ComboBox->GetValue().c_str();
+            std::string eseq = config4ComboBox->GetValue().WX_TO_STD_STRING;
             UnsignedIntArray eseqInt = Attitude::ExtractEulerSequence(eseq);
             if (((eseqInt[0] == eseqInt[2]) && GmatMathUtil::Abs(GmatMathUtil::Sin(ea2Radians)) < EULER_ANGLE_TOLERANCE) ||
                 ((eseqInt[0] != eseqInt[2]) && GmatMathUtil::Abs(GmatMathUtil::Cos(ea2Radians)) < EULER_ANGLE_TOLERANCE))
@@ -2320,7 +2320,7 @@ void AttitudePanel::OnCoordinateSystemSelection(wxCommandEvent &event)
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::OnCoordinateSystemSelection() entered\n");
    #endif
-   std::string newCS = coordSysComboBox->GetValue().c_str();
+   std::string newCS = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    if (newCS == attCoordSystem) return;
    // first, validate the state
    if (!ValidateState("Both"))
@@ -2367,7 +2367,7 @@ void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
       MessageInterface::ShowMessage("AttitudePanel::OnAttitudeModelSelection() entered\n");
    #endif
    // if the user changes the attitude model, we will need to create a new one
-    std::string newModel = config1ComboBox->GetValue().c_str();
+    std::string newModel = config1ComboBox->GetValue().WX_TO_STD_STRING;
     if (newModel != attitudeModel)
     {
       modelModified = true;
@@ -2436,7 +2436,7 @@ void AttitudePanel::OnEulerSequenceSelection(wxCommandEvent &event)
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::OnEulerSequenceSelection() entered\n");
    #endif
-   std::string newSeq = config4ComboBox->GetValue().c_str();
+   std::string newSeq = config4ComboBox->GetValue().WX_TO_STD_STRING;
    if (newSeq != eulerSequence)
    {
       seqModified   = true;
@@ -2464,7 +2464,7 @@ void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::OnStateTypeSelection() entered\n");
    #endif
-   std::string newStateType = stateTypeComboBox->GetStringSelection().c_str();
+   std::string newStateType = stateTypeComboBox->GetStringSelection().WX_TO_STD_STRING;
    if (newStateType == attStateType) return;
    if (!ValidateState("State", true))
    {
@@ -2518,7 +2518,7 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
       MessageInterface::ShowMessage("AttitudePanel::OnStateTypeRateSelection() entered\n");
    #endif
    std::string newStateRateType = 
-      stateRateTypeComboBox->GetStringSelection().c_str();
+      stateRateTypeComboBox->GetStringSelection().WX_TO_STD_STRING;
       if (newStateRateType == attRateStateType) return;
       
    if (!ValidateState("Both", true))
@@ -3247,14 +3247,14 @@ void AttitudePanel::SaveNadirPointingData(Attitude *useAttitude)
 
       if (attRefBodyModified)
       {
-         std::string newBody = referenceBodyComboBox->GetValue().c_str();
+         std::string newBody = referenceBodyComboBox->GetValue().WX_TO_STD_STRING;
          useAttitude->SetStringParameter("AttitudeReferenceBody", newBody);
          attRefBodyModified = false;
       }
 
       if (constraintTypeModified)
       {
-         std::string newMode = constraintTypeComboBox->GetValue().c_str();
+         std::string newMode = constraintTypeComboBox->GetValue().WX_TO_STD_STRING;
          useAttitude->SetStringParameter("AttitudeConstraintType", newMode);
          constraintTypeModified = false;
       }
@@ -3326,7 +3326,7 @@ void AttitudePanel::SaveCCSDSAttitudeData(Attitude *useAttitude)
       {
          wxString str = aemFileTextCtrl->GetValue();
          aemFile      = str.c_str();
-         std::ifstream filename(std::string(str.c_str()));
+         std::ifstream filename(str.WX_TO_C_STRING);
          
          // Check if the file doesn't exist then stop
          if (!filename)

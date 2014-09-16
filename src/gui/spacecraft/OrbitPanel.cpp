@@ -347,8 +347,8 @@ void OrbitPanel::SaveData()
    //-----------------------------------------------------------
    if (mIsEpochChanged)
    {
-      std::string newEpoch = epochValue->GetValue().c_str();
-      std::string epochFormat = epochFormatComboBox->GetValue().c_str();
+      std::string newEpoch = (epochValue->GetValue()).WX_TO_STD_STRING;
+      std::string epochFormat = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
       Real fromMjd = -999.999;
       Real a1mjd = -999.999;
       std::string outStr;
@@ -395,7 +395,7 @@ void OrbitPanel::SaveData()
    }
    
    
-   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   std::string stateTypeStr = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    // save the current text values to re-display, to avoid floating point differences
    Rvector6 savedState;
    for (int ii = 0; ii < 6; ii++)
@@ -498,7 +498,7 @@ bool OrbitPanel::RefreshComponents()
    MessageInterface::ShowMessage
       ("OrbitPanel::RefreshComponents called ...\n");
    #endif
-   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   std::string stateTypeStr = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    BuildValidCoordinateSystemList(stateTypeStr);
    return true;
 }
@@ -770,8 +770,8 @@ void OrbitPanel::AddElements(wxWindow *parent)
 //------------------------------------------------------------------------------ 
 void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
-   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   std::string coordSysStr  = mCoordSysComboBox->GetValue().WX_TO_STD_STRING;
+   std::string stateTypeStr = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    
    #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
    MessageInterface::ShowMessage
@@ -785,7 +785,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    if (event.GetEventObject() == epochFormatComboBox)
    {
       mIsEpochChanged = true;
-      std::string toEpochFormat = epochFormatComboBox->GetValue().c_str();    
+      std::string toEpochFormat = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
       
       #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
@@ -1085,7 +1085,7 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
       return;
    
    stateTypeComboBox->SetValue(wxT("Keplerian"));
-   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   std::string stateTypeStr = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
 
    Rvector6 tempState;
    mIsStateTypeChanged = true;
@@ -1326,8 +1326,8 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void OrbitPanel::DisplayState()
 {
-   std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
-   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   std::string coordSysStr  = mCoordSysComboBox->GetValue().WX_TO_STD_STRING;
+   std::string stateTypeStr = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    
    #ifdef DEBUG_ORBIT_PANEL
    MessageInterface::ShowMessage
@@ -1397,8 +1397,8 @@ void OrbitPanel::DisplayState()
    //-----------------------------------------------------------
    if (mIsEpochChanged)
    {
-      std::string newEpoch = epochValue->GetValue().c_str();
-      std::string epochFormat = epochFormatComboBox->GetValue().c_str();
+      std::string newEpoch = epochValue->GetValue().WX_TO_STD_STRING;
+      std::string epochFormat = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
       Real fromMjd = -999.999;
       Real a1mjd = -999.999;
       std::string outStr;
@@ -1626,7 +1626,7 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
    CoordinateSystem *tmpCS = NULL;
    SpacePoint       *origin = NULL;
    std::string      originName;
-   std::string      currentCS = mCoordSysComboBox->GetValue().c_str();
+   std::string      currentCS = mCoordSysComboBox->GetValue().WX_TO_STD_STRING;
    std::string      newCS     = currentCS;
    mCoordSysComboBox->Clear();
 
@@ -1719,7 +1719,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       
    Rvector6 midState;
    
-   std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
+   std::string stateTypeStr = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    
    #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage

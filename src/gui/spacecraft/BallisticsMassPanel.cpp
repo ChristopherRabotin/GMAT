@@ -392,7 +392,7 @@ void BallisticsMassPanel::SaveData()
 
             wxString str    = spadSrpFileTextCtrl->GetValue();
             theSpadSrpFile  = str.c_str();
-            std::ifstream filename(std::string(str.c_str()));
+            std::ifstream filename(str.WX_TO_C_STRING);
 
             // Check if the file doesn't exist then stop
             if (!filename)

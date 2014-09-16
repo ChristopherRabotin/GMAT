@@ -1498,7 +1498,7 @@ void ViewCanvas::ComputeRingBufferIndex()
          MessageInterface::ShowMessage
             ("*** WARNING *** %s: '%s' exceed the maximum data points, now "
              "showing %d most recent data points.\n", utcGregorian.c_str(),
-             mPlotName.c_str(), MAX_DATA);
+             mPlotName.WX_TO_C_STRING, MAX_DATA);
          mWriteWarning = false;
       }
       
@@ -1765,7 +1765,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** ViewCanvas::BindTexture() Cannot load texture "
-                "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
+                "image for '%s' from '%s'\n", objName.WX_TO_C_STRING, textureFile.c_str());
          }
          texId = UNINIT_TEXTURE;
       }
@@ -1777,7 +1777,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
       {
          MessageInterface::ShowMessage
             ("*** WARNING *** ViewCanvas::BindTexture() Cannot bind texture "
-             "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
+             "image for %s.\n%s\n", objName.WX_TO_C_STRING, e.GetFullMessage().c_str());
       }
    }
    

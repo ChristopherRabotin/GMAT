@@ -116,7 +116,8 @@ void WelcomePanel::Create()
       MessageInterface::ShowMessage
          ("   the iconFile '%s' doesnot exist, so creating default\n", iconFile.c_str());
       #endif
-      aboutButton = new wxBitmapButton(this, -1, NULL, wxDefaultPosition,
+      wxBitmap nullMap;
+      aboutButton = new wxBitmapButton(this, -1, nullMap, wxDefaultPosition,
                            wxSize(200,200));
    }
    
@@ -520,7 +521,7 @@ void WelcomePanel::OnOpenHelpLink(wxHyperlinkEvent& event)
 //------------------------------------------------------------------------------
 void WelcomePanel::OnOpenSampleScript(wxHyperlinkEvent& event)
 {
-   std::string sampleDir = event.GetURL().c_str();
+   std::string sampleDir = event.GetURL().WX_TO_STD_STRING;
    std::string appFullPath = GmatFileUtil::GetApplicationPath();
    std::string appDir = GmatFileUtil::ParsePathName(appFullPath, true);
    std::string sampleFullPath = sampleDir;
@@ -596,7 +597,7 @@ wxBitmap WelcomePanel::LoadBitmap( wxString filename, int width, int height )
    else
    {
       MessageInterface::ShowMessage
-         ("*** WARNING *** Can't load image from '%s'\n", filename.c_str());
+         ("*** WARNING *** Can't load image from '%s'\n", filename.WX_TO_C_STRING);
    }
    
    return bitmap;

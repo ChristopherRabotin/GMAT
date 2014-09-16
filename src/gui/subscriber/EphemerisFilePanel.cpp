@@ -71,7 +71,7 @@ EphemerisFilePanel::EphemerisFilePanel(wxWindow *parent, const wxString &name)
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "The object named \"%s\" does not exist\n",
-               name.c_str());
+               name.WX_TO_C_STRING);
    }
 }
 
@@ -902,7 +902,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
 
          try
          {
-            std::string prevFmt = previousEpochFormat.c_str();
+            std::string prevFmt = previousEpochFormat.WX_TO_STD_STRING;
             TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
 
             if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)
@@ -946,7 +946,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
 
          try
          {
-            std::string prevFmt = previousEpochFormat.c_str();
+            std::string prevFmt = previousEpochFormat.WX_TO_STD_STRING;
             TimeConverterUtil::ValidateTimeFormat(prevFmt,oldEpoch, true);
 
             if (previousEpochFormat.Find("ModJulian") == wxNOT_FOUND)

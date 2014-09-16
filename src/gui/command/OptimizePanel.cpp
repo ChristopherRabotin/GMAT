@@ -175,9 +175,9 @@ void OptimizePanel::SaveData()
 {
    try
    {
-      std::string solverName = mSolverComboBox->GetValue().c_str();
-      std::string solverMode = mSolverModeComboBox->GetValue().c_str();
-      std::string exitMode   = mExitModeComboBox->GetValue().c_str();
+      std::string solverName = mSolverComboBox->GetValue().WX_TO_STD_STRING;
+      std::string solverMode = mSolverModeComboBox->GetValue().WX_TO_STD_STRING;
+      std::string exitMode   = mExitModeComboBox->GetValue().WX_TO_STD_STRING;
       
       theCommand->SetStringParameter(theCommand->GetParameterID("SolverName"),
                                      solverName);

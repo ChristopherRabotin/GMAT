@@ -766,7 +766,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
             {
                MessageInterface::ShowMessage
                   ("**** ERROR **** Cannot find object named '%s' in "
-                   "GmatMainFrame::CreateChild\n", item->GetName().c_str());
+                   "GmatMainFrame::CreateChild\n", item->GetName().WX_TO_C_STRING);
                return NULL;
             }
             
@@ -5991,7 +5991,7 @@ void GmatMainFrame::SaveGuiToActiveScript()
       #endif
       
       MessageInterface::ShowMessage
-         ("***** Old script saved to backup file \"%s\"\n", backupFilename.c_str());
+         ("***** Old script saved to backup file \"%s\"\n", backupFilename.WX_TO_C_STRING);
    }
    
    SaveChildPositionsAndSizes();

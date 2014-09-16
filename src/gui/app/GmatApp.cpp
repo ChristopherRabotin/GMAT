@@ -100,8 +100,10 @@ bool GmatApp::OnInit()
    
 #if wxUSE_PRINTING_ARCHITECTURE
    // initialize print data and setup
+#ifndef __WXMAC__
    globalPrintData = new wxPrintData;
    globalPageSetupData = new wxPageSetupDialogData;
+#endif
 #endif // wxUSE_PRINTING_ARCHITECTURE
    
    try
@@ -320,7 +322,8 @@ bool GmatApp::OnInit()
                else
                {
                   MessageInterface::ShowMessage
-                     ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.ToStdString().c_str());
+                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
+//                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
                }
                // Changed to time out in 4 sec (LOJ: 2009.10.07)
                if (bitmap != NULL)
@@ -344,7 +347,8 @@ bool GmatApp::OnInit()
             else
             {
                MessageInterface::ShowMessage
-                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
+//                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
             }
          }
          
@@ -474,10 +478,12 @@ int GmatApp::OnExit()
    
 #if wxUSE_PRINTING_ARCHITECTURE
    // delete global print data and setup
+#ifndef __WXMAC__
    if (globalPrintData)
       delete globalPrintData;
    if (globalPageSetupData)
       delete globalPageSetupData;
+#endif
 #endif // wxUSE_PRINTING_ARCHITECTURE
    
    WriteMessage("GMAT GUI exiting.\n", "");
@@ -601,7 +607,7 @@ bool GmatApp::ProcessCommandLineOptions()
    {
       for (int i = 1; i < argc; ++i)
       {
-         std::string arg = argv[i];
+         std::string arg = argv[i].WX_TO_STD_STRING;
          #ifdef DEBUG_CMD_LINE
          MessageInterface::PutMessage("arg = %s\n", arg.c_str());
          #endif
@@ -897,7 +903,8 @@ void GmatApp::WriteMessage(const std::string &msg1, const std::string &msg2,
 {
    wxDateTime now = wxDateTime::Now();
    wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-   std::string nowStr = wxNowStr.c_str();
+//   std::string nowStr = wxNowStr.c_str();
+   std::string nowStr = wxNowStr.WX_TO_STD_STRING;
    
    MessageInterface::LogMessage(nowStr + msg1 + msg2 + msg3);
 }

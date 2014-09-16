@@ -511,7 +511,7 @@ bool VisualModelCanvas::LoadModel(const wxString &filePath)
    {
       MessageInterface::ShowMessage
          ("*** WARNING *** The model file '%s' does not exist. Please check the path.\n",
-          filePath.c_str());
+          filePath.WX_TO_C_STRING);
       return false;
    }
 }
@@ -530,7 +530,7 @@ void VisualModelCanvas::LoadModel()
       ("VisualModelCanvas::LoadModel() entered, modelPath='%s'\n", modelPath.c_str());
    #endif
    ModelManager *mm = ModelManager::Instance();
-   std::string mP = modelPath.c_str();
+   std::string mP = modelPath.WX_TO_STD_STRING;
    currentSpacecraft->SetModelId(mm->LoadModel(mP));
    loadedModel = mm->GetModel(currentSpacecraft->GetModelId());
    needToLoadModel = false;

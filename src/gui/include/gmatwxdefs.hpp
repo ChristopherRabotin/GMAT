@@ -87,12 +87,14 @@
 #ifdef __USE_WX28__
 #define STD_TO_WX_STRING
 #define WX_TO_STD_STRING c_str()
+#define WX_TO_C_STRING c_str()
 #define gmatwxT wxT
 #define gmatFD_OPEN wxOPEN
 #define gmatFD_SAVE wxSAVE
 #else
 #define STD_TO_WX_STRING wxString
 #define WX_TO_STD_STRING ToStdString()
+#define WX_TO_C_STRING ToStdString().c_str()
 #define gmatwxT
 #define gmatFD_OPEN wxFD_OPEN
 #define gmatFD_SAVE wxFD_SAVE
