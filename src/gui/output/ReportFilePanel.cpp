@@ -73,7 +73,7 @@ ReportFilePanel::ReportFilePanel(wxWindow *parent, wxString reportName)
       // show error message
       MessageInterface::ShowMessage
          ("**** ERROR **** ReportFilePanel:Create() the running ReportFile "
-          "\"%s\" is NULL\n", reportName.c_str());
+          "\"%s\" is NULL\n", reportName.WX_TO_C_STRING);
    }
    
 }

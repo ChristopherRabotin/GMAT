@@ -12,7 +12,7 @@
 # 1 = 64-bit, 0 = 32-bit - BUT set this only if it is not set in the main project Makefile
 #                          OR you are building the GmatConsole separately
 ifndef BUILD_64BIT
-BUILD_64BIT = 0
+BUILD_64BIT = 1
 endif   
  
 USE_SPICE = 1
@@ -26,17 +26,17 @@ PROFILE_BUILD = 0
 
 # ------> TOP DIRECTORY
 # *** EDIT THIS *** - put the top of the GMAT project directory structure here .... make sure not to have trailing blanks!!!
-TOP_DIR = <path-to-your-GMAT-directory>
+TOP_DIR = /Users/wshoan/git/gmat_wx3
 
 # ------> WXWIDGETS
 # *** EDIT THIS *** -  this is where you installed wxWidgets ('sudo make install' of wxMac will put things in /usr/local directories)
 #WX_INSTALLED = /usr/local/bin
 #WX_LIB_LOC = /usr/local/lib
-WX_INSTALLED = /Applications/wxMac-2.8.12/shared
+WX_INSTALLED = /Applications/wxWidgets-3.0.1/build-cocoa-debug
 WX_LIB_LOC = $(WX_INSTALLED)/lib
-WX_LIB = wx_mac_gl-2.8
+WX_LIB = wx_osx_cocoau_gl-3.0
 # WX_VERSION must be in this format
-WX_VERSION = 2_8_12
+WX_VERSION = 3_0_1
 
 # ------> CSPICE
 # *** EDIT THIS *** - this is where you installed the version of CSPICE that you're using ...
@@ -66,7 +66,7 @@ PCRE_LIB_LOC = /Applications/pcre-8.12/.libs
 LINUX_MAC = 1
 MAC_SPECIFIC = 1
 
-WX_28_SYNTAX = 1     # not currently modifiable
+WX_28_SYNTAX = 0     # not currently modifiable
 
 ifeq ($(WX_28_SYNTAX), 1)
 WX_28_DEFINES = -D__USE_WX280__
@@ -75,13 +75,14 @@ WX_28_DEFINES =
 endif
 
 # this will point to the proper script for the Wx version
-INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle_$(WX_VERSION)
+INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle
 
 # flags that depend on whether you are building 32-bit or 64-bit
 ifeq ($(BUILD_64BIT), 1)
 CSPICE_VER = cspice64
-GMAT_BIN_DIR = bin64
-GMAT_LIB_DIR = lib64
+GMAT_BIN_DIR = bin
+# was bin64 and lib64
+GMAT_LIB_DIR = lib
 MAC_ARCHITECTURE_FLAGS = 
 WXCPPFLAGS = 
 WXLINKFLAGS =
@@ -93,11 +94,15 @@ CSPICE_VER = cspice
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 MAC_ARCHITECTURE_FLAGS = -arch i386
-WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
-WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
+%% WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
+%% WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
 F2C_DIR = f2c32
 PROCFLAGS = 
 endif
+
+WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
+WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
+
 
 # flag indicating whether or not to build as a shared library
 SHARED_BASE = 1
@@ -167,9 +172,10 @@ CPP = g++
 C = gcc
 PROFILE_FLAGS = -pg
 
-SOME_OPTIMIZATIONS = -O3 -funroll-loops -fno-rtti 
+SOME_OPTIMIZATIONS = -O3 -funroll-loops
 # No longer used:
 # -ffriend-injection
+# -fno-rtti
 
 ifeq ($(USE_PROFILING), 1)
 OPTIMIZATIONS = $(SOME_OPTIMIZATIONS) $(PROFILE_FLAGS)
@@ -182,7 +188,7 @@ MAC_CPP_FLAGS=-current_version 0.5 -compatibility_version 0.5 -fvisibility=defau
 
 
 # Define macros for linking the Carbon and wx resource files
-REZ = /usr/bin/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r $(MAC_ARCHITECTURE_FLAGS)
+#REZ = /usr/bin/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r $(MAC_ARCHITECTURE_FLAGS)
 SETFILE = /usr/bin/SetFile
 
 # Set options for debugging and profiling
@@ -193,16 +199,21 @@ DEBUG_FLAGS =
 endif
 
 # Build the complete list of flags for the compilers - REMOVED $(CONSOLE_FLAGS)
-CPPFLAGS = $(OPTIMIZATIONS) -Wall $(SHARED_BASE_FLAGS) $(PROCFLAGS) -D__MAC__\
+CPPFLAGS = $(OPTIMIZATIONS) $(SHARED_BASE_FLAGS) $(PROCFLAGS) -D__MAC__\
            $(SPICE_INCLUDE) $(SPICE_DIRECTIVE) $(MAC_ARCHITECTURE_FLAGS)
 F77_FLAGS = $(OPTIMIZATIONS) -Wall
+
+# removed for now -Wall
 
 
 # Link specific flags
 LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
                -framework OpenGL -framework AGL  -headerpad_max_install_names \
                -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
-             -l$(WX_LIB) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
+             -L$(WX_LIB_LOC) -l$(WX_LIB) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
+             
+# removed
+#-l$(WX_LIB)
 
 GUI_CPP_FLAGS = $(WXCPPFLAGS)
 GUI_LINK_FLAGS = $(WXLINKFLAGS)

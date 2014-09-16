@@ -103,7 +103,7 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
    else
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.c_str());
+         (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.WX_TO_C_STRING);
    }
 
 }
@@ -1051,7 +1051,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          {
             if (clb->IsChecked(i))
             {
-               std::string objName =  clb->GetString(i).c_str();
+               std::string objName =  clb->GetString(i).WX_TO_STD_STRING;
                #ifdef DEBUG_SAVE_CONTROL
                MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
                #endif

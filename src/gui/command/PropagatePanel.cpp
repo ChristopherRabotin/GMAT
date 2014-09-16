@@ -443,9 +443,9 @@ void PropagatePanel::UpdateStopCondition(Integer stopRow)
          stopCondGrid->GetCellValue(stopRow, STOPCOND_RIGHT_COL);
    }
 
-   std::string nameStr = mTempStopCond[stopRow].name.c_str();
-   std::string stopStr = mTempStopCond[stopRow].varName.c_str();
-   std::string goalStr = mTempStopCond[stopRow].goalStr.c_str();
+   std::string nameStr = mTempStopCond[stopRow].name.WX_TO_STD_STRING;
+   std::string stopStr = mTempStopCond[stopRow].varName.WX_TO_STD_STRING;
+   std::string goalStr = mTempStopCond[stopRow].goalStr.WX_TO_STD_STRING;
    
    #ifdef DEBUG_PROPAGATE_PANEL_STOPCOND
    MessageInterface::ShowMessage
@@ -480,7 +480,7 @@ void PropagatePanel::UpdateStopCondition(Integer stopRow)
       {
          MessageInterface::ShowMessage
             ("PropagatePanel::UpdateStopCondition() Unable to create "
-             "StopCondition: name=%s\n", mTempStopCond[stopRow].name.c_str());
+             "StopCondition: name=%s\n", mTempStopCond[stopRow].name.WX_TO_C_STRING);
       }
    }
    
@@ -1136,8 +1136,8 @@ void PropagatePanel::SaveData()
 
    for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
-      std::string propagator = propGrid->GetCellValue(i, PROP_NAME_COL).c_str();
-      std::string satNames = propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
+      std::string propagator = propGrid->GetCellValue(i, PROP_NAME_COL).WX_TO_STD_STRING;
+      std::string satNames = propGrid->GetCellValue(i, PROP_SOS_COL).WX_TO_STD_STRING;
       StringArray sats;
 
       if (propagator != "")
@@ -1222,7 +1222,7 @@ void PropagatePanel::SaveData()
       for (UnsignedInt i=0; i<emptyProps.GetCount(); i++)
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Please select a Propagator for "
-             "Spacecraft \"%s\"\n", emptyProps[i].c_str());
+             "Spacecraft \"%s\"\n", emptyProps[i].WX_TO_C_STRING);
       
       canClose = false;
    }
@@ -1233,7 +1233,7 @@ void PropagatePanel::SaveData()
       for (UnsignedInt i=0; i<emptySos.GetCount(); i++)
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Please select Spacecraft for "
-             "Propagator \"%s\"\n", emptySos[i].c_str());
+             "Propagator \"%s\"\n", emptySos[i].WX_TO_C_STRING);
       
       canClose = false;
    }
@@ -1349,7 +1349,7 @@ void PropagatePanel::SaveData()
                
                // saving spacecraft
                std::string spacecraftStr = 
-                  propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
+                  propGrid->GetCellValue(i, PROP_SOS_COL).WX_TO_STD_STRING;
                StringArray parts = 
                   GmatStringUtil::SeparateBy(spacecraftStr, ", ");
                
@@ -1434,9 +1434,9 @@ void PropagatePanel::SaveData()
                UpdateStopCondition(i);
 
                StopCondition *currStop = mTempStopCond[mStopCondCount].stopCondPtr;
-               std::string nameStr = mTempStopCond[i].name.c_str();
-               std::string stopStr = mTempStopCond[i].varName.c_str();
-               std::string goalStr = mTempStopCond[i].goalStr.c_str();
+               std::string nameStr = mTempStopCond[i].name.WX_TO_STD_STRING;
+               std::string stopStr = mTempStopCond[i].varName.WX_TO_STD_STRING;
+               std::string goalStr = mTempStopCond[i].goalStr.WX_TO_STD_STRING;
                
                #ifdef DEBUG_PROPAGATE_PANEL_SAVE
                MessageInterface::ShowMessage

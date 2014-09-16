@@ -176,7 +176,7 @@ void MinimizePanel::SaveData()
    
    if (mVarNameChanged)
    {
-      std::string varName = variableName.c_str();
+      std::string varName = variableName.WX_TO_STD_STRING;
       
       ObjectTypeArray objTypes;
       objTypes.push_back(Gmat::SPACE_POINT);

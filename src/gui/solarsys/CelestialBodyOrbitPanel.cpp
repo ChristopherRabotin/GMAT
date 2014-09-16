@@ -832,7 +832,7 @@ void CelestialBodyOrbitPanel::ResetChangeFlags(bool discardMods)
 //------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnEphemSourceComboBoxChange(wxCommandEvent &event)
 {
-   std::string newEphemSrc = (ephemSourceComboBox->GetStringSelection()).c_str();
+   std::string newEphemSrc = (ephemSourceComboBox->GetStringSelection()).WX_TO_STD_STRING;
    if (newEphemSrc == previousEphemSrc) return;
    ephemSrcChanged = true;
    dataChanged     = true;
@@ -1091,7 +1091,7 @@ void CelestialBodyOrbitPanel::OnNaifIdTextCtrlChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void CelestialBodyOrbitPanel::OnCentralBodyComboBoxChange(wxCommandEvent &event)
 {
-   std::string newCentralBody = (centralBodyComboBox->GetStringSelection()).c_str();
+   std::string newCentralBody = (centralBodyComboBox->GetStringSelection()).WX_TO_STD_STRING;
    if (newCentralBody == centralBody) return;
    cBodyChanged       = true;
    dataChanged        = true;

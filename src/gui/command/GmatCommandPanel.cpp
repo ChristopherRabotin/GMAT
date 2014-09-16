@@ -177,7 +177,7 @@ void GmatCommandPanel::SaveData()
    //-----------------------------------------------------------------
    try
    {
-      std::string cmdStr = commandTextCtrl->GetValue().c_str();
+      std::string cmdStr = commandTextCtrl->GetValue().WX_TO_STD_STRING;
       theCommand->SetGeneratingString(cmdStr);
       theCommand->InterpretAction();
    }

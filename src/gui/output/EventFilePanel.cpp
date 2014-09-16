@@ -71,7 +71,7 @@ EventFilePanel::EventFilePanel(wxWindow *parent, wxString locatorName)
       // show error message
       MessageInterface::ShowMessage
          ("**** ERROR **** EventFilePanel:Create() the running EventLocator "
-          "\"%s\" is NULL\n", locatorName.c_str());
+          "\"%s\" is NULL\n", locatorName.WX_TO_C_STRING);
    }
    
 }

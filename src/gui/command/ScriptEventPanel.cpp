@@ -801,7 +801,7 @@ void ScriptEventPanel::SaveComments()
    // TGG: Fix for GMT-2982 
    // add comment symbols
    wxString comments = mCommentTextCtrl->GetValue();
-   std::string stdCmts = comments.c_str();
+   std::string stdCmts = comments.WX_TO_STD_STRING;
    
    #ifdef DEBUG_COMMENTS
    MessageInterface::ShowMessage

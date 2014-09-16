@@ -141,7 +141,7 @@ bool UserInputValidator::IsValidName(const wxString &name)
    {
       std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, format.c_str(), name.c_str());
+         (Gmat::ERROR_, format.c_str(), name.WX_TO_C_STRING);
       
       SetErrorFlag();
       return false;
@@ -538,7 +538,7 @@ bool UserInputValidator::CheckVariable(const std::string &varName, ObjectTypeArr
    
    if (retval == -1)
    {
-      std::string lastMsg = mGuiManager->GetLastErrorMessage().c_str();
+      std::string lastMsg = mGuiManager->GetLastErrorMessage().WX_TO_STD_STRING;
       lastMsg = " - " + lastMsg;
       MessageInterface::PopupMessage
          (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),

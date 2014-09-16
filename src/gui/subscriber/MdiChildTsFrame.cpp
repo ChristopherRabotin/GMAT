@@ -204,7 +204,7 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
    {
       // Changed to use WX_TO_STD_STRING macro for wx3.0 (LOJ: 2014.08.07)
       //inStream.open(filename.c_str());
-      inStream.open(filename.WX_TO_STD_STRING);
+      inStream.open(filename.WX_TO_C_STRING);
       if (inStream.is_open())
       {
          TsPlotCurve *xCurve = new TsPlotCurve();

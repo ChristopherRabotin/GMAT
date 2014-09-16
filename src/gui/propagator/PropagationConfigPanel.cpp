@@ -928,7 +928,7 @@ void PropagationConfigPanel::PopulateForces()
                      MessageInterface::PopupMessage
                         (Gmat::WARNING_,
                          "Cannot set %s both as Primary body and Point Mass",
-                         pointMassBodyList[last]->bodyName.c_str());
+                         pointMassBodyList[last]->bodyName.WX_TO_C_STRING);
                   }
                }
             }
@@ -1022,7 +1022,7 @@ void PropagationConfigPanel::PopulateForces()
                         (Gmat::WARNING_, "Cannot set %s both as Primary body "
                          "and Point Mass",
 //                         pointMassBodyList[last]->bodyName.c_str());
-                         primaryBodyData->bodyName.c_str());
+                         primaryBodyData->bodyName.WX_TO_C_STRING);
                   }
                }
 
@@ -1031,7 +1031,7 @@ void PropagationConfigPanel::PopulateForces()
                {
                   MessageInterface::PopupMessage
                      (Gmat::WARNING_, "Cannot find Potential File for %s.\n",
-                      wxBodyName.c_str());
+                      wxBodyName.WX_TO_C_STRING);
                }
 
                tempStr = "";
@@ -1090,7 +1090,7 @@ void PropagationConfigPanel::PopulateForces()
                         (Gmat::WARNING_, "Cannot set %s both as Primary body "
                               "and Point Mass",
 //                              pointMassBodyList[last]->bodyName.c_str());
-                              primaryBodyData->bodyName.c_str());
+                              primaryBodyData->bodyName.WX_TO_C_STRING);
                   }
                }
 
@@ -1174,7 +1174,7 @@ void PropagationConfigPanel::SaveData()
                MessageInterface::PopupMessage
                   (Gmat::WARNING_, "Please select Gravity Field Model for %s\n",
    //                     primaryBodyList[i]->bodyName.c_str());
-                        primaryBodyData->bodyName.c_str());
+                        primaryBodyData->bodyName.WX_TO_C_STRING);
                canClose = false;
                return;
             }
@@ -1188,7 +1188,7 @@ void PropagationConfigPanel::SaveData()
             {
                MessageInterface::PopupMessage
                   (Gmat::WARNING_, "Please select a potential file for %s\n",
-                   primaryBodyData->bodyName.c_str());
+                   primaryBodyData->bodyName.WX_TO_C_STRING);
 //               primaryBodyList[i]->bodyName.c_str());
                canClose = false;
                return;
@@ -1713,7 +1713,7 @@ Integer PropagationConfigPanel::FindPrimaryBody(const wxString &bodyName,
    // Set gravity model file
    if (theFileMap.find(gravType) != theFileMap.end())
    {
-      std::string potFileType = theFileMap[gravType].c_str();
+      std::string potFileType = theFileMap[gravType].WX_TO_STD_STRING;
       wxString wxPotFileName = theGuiInterpreter->GetFileName(potFileType).c_str();
       #ifdef DEBUG_PROP_PANEL_FIND_BODY
       MessageInterface::ShowMessage("FindPrimaryBody() potFileType=%s\n", potFileType.c_str());
@@ -1900,7 +1900,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 
    if (integratorChanged)
    {
-      std::string integratorType = integratorTypeArray[propIndex].c_str();
+      std::string integratorType = integratorTypeArray[propIndex].WX_TO_STD_STRING;
       thePropagatorName = integratorType;
       thePropagator = (Propagator*)theGuiInterpreter->GetConfiguredObject(thePropagatorName);
       if (thePropagator == NULL)
@@ -2648,8 +2648,8 @@ bool PropagationConfigPanel::ValidatePropEpochComboBoxes()
             MessageInterface::ShowMessage("Checking user set epoch: %s\n",
                   startEpochValue.c_str());
          #endif
-         std::string prevFmt = spkEpFormat.c_str();
-         std::string prevVal = startEpochValue.c_str();
+         std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
+         std::string prevVal = startEpochValue.WX_TO_STD_STRING;
          TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
 
          if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
@@ -2853,8 +2853,8 @@ bool PropagationConfigPanel::SavePropagatorData()
 
       // Range check the epoch value
 
-      std::string prevFmt = spkEpFormat.c_str();
-      std::string prevVal = startEpochCombobox->GetValue().c_str();
+      std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
+      std::string prevVal = startEpochCombobox->GetValue().WX_TO_STD_STRING;
 
       if (startEpochChoices.Index(prevVal.c_str()) == wxNOT_FOUND)
          TimeConverterUtil::ValidateTimeFormat(prevFmt, prevVal, true);
@@ -3116,7 +3116,7 @@ bool PropagationConfigPanel::SaveAtmosModel()
    {
       MessageInterface::ShowMessage
          ("PropagationConfigPanel::SaveAtmosModel() Drag Force not found "
-          "for body:%s\n", bodyName.c_str());
+          "for body:%s\n", bodyName.WX_TO_C_STRING);
 
       return false;
    }
@@ -3282,7 +3282,7 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
 
       if (gravTypeName != "None" && gravTypeName != "Other")
       {
-         std::string fileType = theFileMap[gravTypeName].c_str();
+         std::string fileType = theFileMap[gravTypeName].WX_TO_STD_STRING;
          #ifdef DEBUG_PROP_PANEL_GRAV
          MessageInterface::ShowMessage("   Found fileType = %s\n", fileType.c_str());
          #endif
@@ -3457,8 +3457,8 @@ void PropagationConfigPanel::OnPropEpochComboBox(wxCommandEvent &)
                Real fromVal;
                Real toVal = -999.999;
 
-               std::string prevFmt = spkEpFormat.c_str();
-               std::string prevVal = spkEpoch.c_str();
+               std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
+               std::string prevVal = spkEpoch.WX_TO_STD_STRING;
                TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
 
                if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
@@ -3534,8 +3534,8 @@ void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
             Real fromVal;
             Real toVal = -999.999;
 
-            std::string prevFmt = spkEpFormat.c_str();
-            std::string prevVal = spkEpoch.c_str();
+            std::string prevFmt = spkEpFormat.WX_TO_STD_STRING;
+            std::string prevVal = spkEpoch.WX_TO_STD_STRING;
             TimeConverterUtil::ValidateTimeFormat(prevFmt,prevVal, true);
 
             if (spkEpFormat.Find("ModJulian") == wxNOT_FOUND)
@@ -4063,10 +4063,10 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
          MessageInterface::ShowMessage
             ("   id=%d, body=%s, gravType=%s, dragType=%s, magfType=%s\n   potFile=%s\n"
              "   potFileFullPath=%s\n   gravf=%p, dragf=%p, srpf=%p\n", 0,
-             primaryBodyData->bodyName.c_str(),
-             primaryBodyData->gravType.c_str(), primaryBodyData->dragType.c_str(),
-             primaryBodyData->magfType.c_str(), primaryBodyData->potFile.c_str(),
-             primaryBodyData->potFileFullPath.c_str(),
+             primaryBodyData->bodyName.WX_TO_C_STRING,
+             primaryBodyData->gravType.WX_TO_C_STRING, primaryBodyData->dragType.WX_TO_C_STRING,
+             primaryBodyData->magfType.WX_TO_C_STRING, primaryBodyData->potFile.WX_TO_C_STRING,
+             primaryBodyData->potFileFullPath.WX_TO_C_STRING,
              primaryBodyData->gravf, primaryBodyData->dragf,
              primaryBodyData->srpf);
       }
@@ -4076,7 +4076,7 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
       for (Integer i=0; i < (Integer)pointMassBodyList.size(); i++)
       {
          MessageInterface::ShowMessage
-            ("   id=%d, body=%s, pmf=%p\n", i, pointMassBodyList[i]->bodyName.c_str(),
+            ("   id=%d, body=%s, pmf=%p\n", i, pointMassBodyList[i]->bodyName.WX_TO_C_STRING,
              pointMassBodyList[i]->pmf);
       }
    }
@@ -4211,7 +4211,7 @@ void PropagationConfigPanel::ParseGRVGravityFile(const wxString& fname)
 
    std::ifstream inFile;
    
-   inFile.open(std::string(fname.c_str()));
+   inFile.open(fname.WX_TO_C_STRING);
    
    if (!inFile)
    {
@@ -4260,7 +4260,7 @@ void PropagationConfigPanel::ParseCOFGravityFile(const wxString& fname)
    Integer       fileOrder = 70, fileDegree = 70;
 
    std::ifstream inFile;
-   inFile.open(std::string(fname.c_str()));
+   inFile.open(fname.WX_TO_C_STRING);
 
    bool done = false;
 

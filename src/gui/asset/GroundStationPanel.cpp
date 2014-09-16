@@ -521,12 +521,12 @@ void GroundStationPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GroundStationPanel::OnStateTypeComboBoxChange(wxCommandEvent &event)
 {
-   std::string sttype       = stateTypeComboBox->GetValue().c_str();
+   std::string sttype       = stateTypeComboBox->GetValue().WX_TO_STD_STRING;
    std::string inputString;
    Real        location1, location2, location3;
    if (sttype != currentStateType)
    {
-      std::string bodyName = centralBodyComboBox->GetValue().c_str();
+      std::string bodyName = centralBodyComboBox->GetValue().WX_TO_STD_STRING;
       // get a pointer to the celestial body
       CelestialBody *body = ss->GetBody(bodyName);
       if (!body)
@@ -588,12 +588,12 @@ void GroundStationPanel::OnStateTypeComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GroundStationPanel::OnHorizonReferenceComboBoxChange(wxCommandEvent &event)
 {
-   std::string horizon       = horizonReferenceComboBox->GetValue().c_str();
+   std::string horizon       = horizonReferenceComboBox->GetValue().WX_TO_STD_STRING;
    std::string inputString;
    Real        location1, location2, location3;
    if (horizon != currentHorizonReference)
    {
-      std::string bodyName = centralBodyComboBox->GetValue().c_str();
+      std::string bodyName = centralBodyComboBox->GetValue().WX_TO_STD_STRING;
       // get a pointer to the celestial body
       CelestialBody *body = ss->GetBody(bodyName);
       if (!body)

@@ -235,7 +235,7 @@ void ReportPanel::SaveData()
    
    canClose = true;
    
-   std::string rfName = mReportFileComboBox->GetValue().c_str();
+   std::string rfName = mReportFileComboBox->GetValue().WX_TO_STD_STRING;
    
    ReportFile *reportFile =
       (ReportFile*)theGuiInterpreter->GetConfiguredObject(rfName);

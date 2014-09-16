@@ -2341,7 +2341,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
       {
          MessageInterface::ShowMessage
             ("ResourceTree::OnRename() Unable to rename %s to %s.\n",
-             oldName.c_str(), newName.c_str());
+             oldName.WX_TO_C_STRING, newName.WX_TO_C_STRING);
       }
    }
    
@@ -2463,7 +2463,7 @@ void ResourceTree::OnClone(wxCommandEvent &event)
    // Disallow clone for Propagator until cloning works for Propagator (GMT-2627)
    if ((selItemData->IsClonable()) && (itemType != GmatTree::PROPAGATOR))
    {
-      const std::string stdName = name.c_str();
+      const std::string stdName = name.WX_TO_STD_STRING;
       std::string cloneName;
       GmatBase *clonedObj = theGuiInterpreter->AddClone(stdName, cloneName);
       
@@ -2575,8 +2575,8 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
       // if label refers to an object reset the object name
       if (itemType == GmatTree::SPACECRAFT)
       {
-         const std::string stdOldLabel = oldLabel.c_str();
-         const std::string stdNewLabel = newLabel.c_str();
+         const std::string stdOldLabel = oldLabel.WX_TO_STD_STRING;
+         const std::string stdNewLabel = newLabel.WX_TO_STD_STRING;
 
          //Spacecraft *theSpacecraft =
          //   theGuiInterpreter->GetSpacecraft(stdOldLabel);
@@ -2807,8 +2807,8 @@ void ResourceTree::OnAddBody(wxCommandEvent &event)
          {
             if (!centralBody.IsEmpty())
             {
-               const std::string newName = name.c_str();
-               const std::string newCentralBody = centralBody.c_str();
+               const std::string newName = name.WX_TO_STD_STRING;
+               const std::string newCentralBody = centralBody.WX_TO_STD_STRING;
                GmatBase *obj = CreateObject("Moon", newName); // ************
                
                if (obj != NULL)
@@ -3520,7 +3520,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
    {
       if (!name.IsEmpty())
       {
-         const std::string newName = name.c_str();
+         const std::string newName = name.WX_TO_STD_STRING;
          GmatBase *obj = CreateObject("MatlabFunction", newName);
          if (obj != NULL)
          {
@@ -3710,7 +3710,7 @@ void ResourceTree::OnAddPlanet(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItemData = (GmatTreeItemData *) GetItemData(item);
    wxString cBodyName = selItemData->GetName();
-   std::string cBody  = cBodyName.c_str();
+   std::string cBody  = cBodyName.WX_TO_STD_STRING;
    wxString name;
    
    //Get name from the user first
@@ -3718,7 +3718,7 @@ void ResourceTree::OnAddPlanet(wxCommandEvent &event)
    {
       if (!name.IsEmpty())
       {
-         const std::string newName = name.c_str();
+         const std::string newName = name.WX_TO_STD_STRING;
          SolarSystem   *ss         = theGuiInterpreter->GetSolarSystemInUse();
          if (ss->IsBodyInUse(newName))
          {
@@ -3764,7 +3764,7 @@ void ResourceTree::OnAddMoon(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItemData = (GmatTreeItemData *) GetItemData(item);
    wxString cBodyName = selItemData->GetName();
-   std::string cBody  = cBodyName.c_str();
+   std::string cBody  = cBodyName.WX_TO_STD_STRING;
    wxString name;
 
    //Get name from the user first
@@ -3772,7 +3772,7 @@ void ResourceTree::OnAddMoon(wxCommandEvent &event)
    {
       if (!name.IsEmpty())
       {
-         const std::string newName = name.c_str();
+         const std::string newName = name.WX_TO_STD_STRING;
          SolarSystem   *ss         = theGuiInterpreter->GetSolarSystemInUse();
          if (ss->IsBodyInUse(newName))
          {
@@ -3819,7 +3819,7 @@ void ResourceTree::OnAddComet(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItemData = (GmatTreeItemData *) GetItemData(item);
    wxString cBodyName = selItemData->GetName();
-   std::string cBody  = cBodyName.c_str();
+   std::string cBody  = cBodyName.WX_TO_STD_STRING;
    wxString name;
    
    //Get name from the user first
@@ -3827,7 +3827,7 @@ void ResourceTree::OnAddComet(wxCommandEvent &event)
    {
       if (!name.IsEmpty())
       {
-         const std::string newName = name.c_str();
+         const std::string newName = name.WX_TO_STD_STRING;
          SolarSystem   *ss         = theGuiInterpreter->GetSolarSystemInUse();
          if (ss->IsBodyInUse(newName))
          {
@@ -3876,7 +3876,7 @@ void ResourceTree::OnAddAsteroid(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItemData = (GmatTreeItemData *) GetItemData(item);
    wxString cBodyName = selItemData->GetName();
-   std::string cBody  = cBodyName.c_str();
+   std::string cBody  = cBodyName.WX_TO_STD_STRING;
    wxString name;
 
    //Get name from the user first
@@ -3884,7 +3884,7 @@ void ResourceTree::OnAddAsteroid(wxCommandEvent &event)
    {
       if (!name.IsEmpty())
       {
-         const std::string newName = name.c_str();
+         const std::string newName = name.WX_TO_STD_STRING;
          SolarSystem   *ss         = theGuiInterpreter->GetSolarSystemInUse();
          if (ss->IsBodyInUse(newName))
          {
@@ -4252,7 +4252,7 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
             if (filename.Last() == 't' || filename.Last() == 'm')
             {
                // read first item to elliminate Matlab/Gmat function
-               std::ifstream ifs(std::string(filepath.c_str()));
+               std::ifstream ifs(filepath.WX_TO_C_STRING);
                std::string item;
                ifs >> item;
                
@@ -4426,7 +4426,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // Write run start time
    wxDateTime now = wxDateTime::Now();
    wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-   std::string nowStr = wxNowStr.c_str();
+   std::string nowStr = wxNowStr.WX_TO_STD_STRING;
 
    MessageInterface::LogMessage(nowStr + "GMAT starting batch run.\n");
 
@@ -4510,7 +4510,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          }
 
          MessageInterface::ShowMessage
-            ("\nStarting script %d of %d: %s\n", count, runCount, filename.c_str());
+            ("\nStarting script %d of %d: %s\n", count, runCount, filename.WX_TO_C_STRING);
 
          MessageInterface::ShowMessage
             ("==> Run Count: %d\n", i+1);
@@ -4563,7 +4563,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          catch(BaseException &e)
          {
             MessageInterface::ShowMessage
-               ("*** Error running: %s\n   %s\n", filename.c_str(),
+               ("*** Error running: %s\n   %s\n", filename.WX_TO_C_STRING,
                 e.GetFullMessage().c_str());
 
             if (compare)
@@ -4572,7 +4572,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          catch (...)
          {
             MessageInterface::ShowMessage
-               ("*** Unknown Error running: %s\n", filename.c_str());
+               ("*** Unknown Error running: %s\n", filename.WX_TO_C_STRING);
          }
       }
 
@@ -4643,7 +4643,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          MessageInterface::ShowMessage
             ("Script errors found in the following %d script(s):\n", mBuildErrorCount);
          for (int i = 0; i < mBuildErrorCount; i++)
-            MessageInterface::ShowMessage("%s\n", mFailedScriptsList[i].c_str());
+            MessageInterface::ShowMessage("%s\n", mFailedScriptsList[i].WX_TO_C_STRING);
       }
    }
    
@@ -4734,7 +4734,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       dlg->ShowModal();
       
       // Log run folder summary report to a separate file
-      std::string summaryFile = currOutPath.c_str();
+      std::string summaryFile = currOutPath.WX_TO_STD_STRING;
       summaryFile += "FolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
@@ -5569,7 +5569,7 @@ int ResourceTree::GetNameFromUser(wxString &newName, const wxString &oldName,
       if (GetObject(newName.c_str()) != NULL)
       {
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, "\"%s\" already exists. Please enter a different name.", newName.c_str());
+            (Gmat::ERROR_, "\"%s\" already exists. Please enter a different name.", newName.WX_TO_C_STRING);
          
          return GetNameFromUser(newName, newName, msg, caption);
       }
@@ -5578,7 +5578,7 @@ int ResourceTree::GetNameFromUser(wxString &newName, const wxString &oldName,
       {
          std::string format = GmatStringUtil::GetInvalidNameMessageFormat();
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, format.c_str(), newName.c_str());
+            (Gmat::WARNING_, format.c_str(), newName.WX_TO_C_STRING);
          
          return GetNameFromUser(newName, newName, msg, caption);
       }

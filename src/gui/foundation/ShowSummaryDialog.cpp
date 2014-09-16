@@ -214,7 +214,7 @@ void ShowSummaryDialog::ResetData()
 //------------------------------------------------------------------------------
 void ShowSummaryDialog::OnComboBoxChange(wxCommandEvent& event)
 {
-   std::string coordSysStr  = coordSysComboBox->GetValue().c_str();
+   std::string coordSysStr  = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    wxString    text         = "Summary not yet available for this panel";
 
    #ifdef DEBUG_CMD_SUMMARY_COMBOBOX
@@ -267,7 +267,7 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
 {
    CoordinateSystem *tmpCS = NULL;
    SpacePoint       *origin = NULL;
-   std::string      currentCS = coordSysComboBox->GetValue().c_str();
+   std::string      currentCS = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    std::string      newCS     = currentCS;
    Integer          sz;
 

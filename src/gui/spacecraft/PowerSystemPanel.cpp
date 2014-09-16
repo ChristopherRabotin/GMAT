@@ -208,7 +208,7 @@ void PowerSystemPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == powerSystemComboBox)
    {
-      std::string pwrSysStr  = powerSystemComboBox->GetValue().c_str();
+      std::string pwrSysStr  = powerSystemComboBox->GetValue().WX_TO_STD_STRING;
       #ifdef DEBUG_POWER_SYSTEM_PANEL_COMBOBOX
       MessageInterface::ShowMessage
          ("PowerSystemPanel::OnComboBoxChange() pwrSysStr=%s\n",

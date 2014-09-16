@@ -604,7 +604,7 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
          paramID = theObject->GetParameterID("Axes");
          theObject->SetStringParameter(paramID, axesComboBox->GetValue().c_str());
 
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -775,11 +775,11 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    }
    else if (event.GetEventObject() == axesComboBox)
    {
-      std::string csName = coordSysComboBox->GetStringSelection().c_str();
+      std::string csName = coordSysComboBox->GetStringSelection().WX_TO_STD_STRING;
 
       if (csName == "Local")
       {
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -842,7 +842,7 @@ void BurnThrusterPanel::UpdateOriginAxes()
       axisLabel->Enable();
       axesComboBox->Enable();
 
-      std::string axisValue = axesComboBox->GetValue().c_str();
+      std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
 
       if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
       {

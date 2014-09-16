@@ -464,7 +464,7 @@ void GroundTrackPlotPanel::LoadData()
          // Put check mark in the object list
          for (int j = 0; j < count; j++)
          {
-            std::string itemName = mObjectCheckListBox->GetString(j).c_str();
+            std::string itemName = mObjectCheckListBox->GetString(j).WX_TO_STD_STRING;
             if (itemName == objName)
             {
                mObjectCheckListBox->Check(j, true);
@@ -554,8 +554,8 @@ void GroundTrackPlotPanel::SaveData()
       if (mHasCentralBodyChanged)
       {
          mHasCentralBodyChanged = false;
-         std::string newCentralBody = mCentralBodyComboBox->GetValue().c_str();
-         std::string newTexture = mTextureMapTextCtrl->GetValue().c_str();
+         std::string newCentralBody = mCentralBodyComboBox->GetValue().WX_TO_STD_STRING;
+         std::string newTexture = mTextureMapTextCtrl->GetValue().WX_TO_STD_STRING;
          mGroundTrackPlot->SetStringParameter("CentralBody", newCentralBody);
          mGroundTrackPlot->SetStringParameter("TextureMap", newTexture);
       }
@@ -571,7 +571,7 @@ void GroundTrackPlotPanel::SaveData()
          {
             if (mObjectCheckListBox->IsChecked(i))
             {
-               std::string objName =  mObjectCheckListBox->GetString(i).c_str();
+               std::string objName =  mObjectCheckListBox->GetString(i).WX_TO_STD_STRING;
                #ifdef DEBUG_PANEL_SAVE
                MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
                #endif

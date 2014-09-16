@@ -615,8 +615,8 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
       // Save epoch format and epoch
       if (isEpochFormatChanged || isEpochChanged || isEpochTextChanged)
       {
-         std::string toEpochFormat  = epochFormatComboBox->GetValue().c_str();
-         std::string toEpochStr     = epochTxtCtrl->GetValue().c_str();
+         std::string toEpochFormat  = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
+         std::string toEpochStr     = epochTxtCtrl->GetValue().WX_TO_STD_STRING;
 
          #ifdef DEBUG_POWERPANEL_SAVE
          MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData(obj) - attempting to set epoch!!\n");
@@ -669,7 +669,7 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
          #endif
          if (isShadowModelChanged)
          {
-            std::string toShadowModel  = shadowModelComboBox->GetValue().c_str();
+            std::string toShadowModel  = shadowModelComboBox->GetValue().WX_TO_STD_STRING;
             paramID = theObject->GetParameterID("ShadowModel");
             theObject->SetStringParameter(paramID, toShadowModel);
          }
@@ -725,7 +725,7 @@ void PowerSystemConfigPanel::OnTextChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
 {
-   std::string toEpochFormat  = epochFormatComboBox->GetValue().c_str();
+   std::string toEpochFormat  = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
 
    #ifdef DEBUG_POWERSYSTEM_PANEL_COMBOBOX
    MessageInterface::ShowMessage
@@ -753,7 +753,7 @@ void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
          // if modified by user, check if epoch is valid first
          if (isEpochTextChanged)
          {
-            std::string theEpochStr = epochTxtCtrl->GetValue().c_str();
+            std::string theEpochStr = epochTxtCtrl->GetValue().WX_TO_STD_STRING;
 
             // Save to TAIModJulian string to avoid keep reading the field
             // and convert to proper format when ComboBox is changed.
@@ -803,7 +803,7 @@ void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
    {
       if (event.GetEventObject() == shadowModelComboBox)
       {
-         std::string toShadowModel  = shadowModelComboBox->GetValue().c_str();
+         std::string toShadowModel  = shadowModelComboBox->GetValue().WX_TO_STD_STRING;
          isShadowModelChanged = true;
       }
    }
