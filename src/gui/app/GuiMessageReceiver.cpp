@@ -161,8 +161,10 @@ void GuiMessageReceiver::ShowMessage(const std::string &msgString)
       appData->GetMessageTextCtrl()->AppendText(wxString(msgString.c_str()));
       // Added since text in the message window are not always scrolled down,
       // such as debug message from the panel or dialog (LOJ: 2009.03.20)
+      // wxWidgets-3.0 does not require page down (LOJ: 2014.09.15)
+      #ifdef __USE_WX28__
       appData->GetMessageTextCtrl()->PageDown();
-      appData->GetMessageTextCtrl()->Update();
+      #endif
    }
    LogMessage(msgString);   
 }
@@ -223,7 +225,13 @@ void GuiMessageReceiver::ShowMessage(const char *msg, ...)
    
    GmatAppData *appData = GmatAppData::Instance();
    if (appData->GetMessageTextCtrl() != NULL)
+   {
       appData->GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
+      // wxWidgets-3.0 does not require page down (LOJ: 2014.09.15)
+      #ifdef __USE_WX28__
+      appData->GetMessageTextCtrl()->PageDown();
+      #endif
+   }
    
    LogMessage(std::string(msgBuffer));
 
