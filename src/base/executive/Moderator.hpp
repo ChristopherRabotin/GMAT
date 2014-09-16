@@ -521,6 +521,10 @@ private:
    // Dynamic library data table
    std::map<std::string, DynamicLibrary*>   userLibraries;
    std::vector<Gmat::PluginResource*>  userResources;
+
+   // Thruster related
+   static bool thrusterDeprecateMsgWritten;
+   static bool fuelTankDeprecateMsgWritten;
 };
 
 #endif // Moderator_hpp

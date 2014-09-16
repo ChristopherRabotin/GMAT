@@ -47,13 +47,22 @@ protected:
    virtual void SaveData();
    virtual void SaveData(GmatBase *theObject);
    
+   void         EnableDataForThrustModel(const std::string &tModel);
+
    // local copy of object for verifying changes before commit/apply
    GmatBase *localObject;
    GmatBase* theObject;
+
+   // Chemical Thruster
    RealArray   cCoefs;
    RealArray   kCoefs;
    StringArray cCoefNames;
    StringArray kCoefNames;
+   // Electric Thruster
+   RealArray   tCoefs;
+   RealArray   mfCoefs;
+   StringArray tCoefNames;
+   StringArray mfCoefNames;
    
    std::string coordSysName;
    std::string tankName;
@@ -61,11 +70,20 @@ protected:
    std::string thrustDir2;
    std::string thrustDir3;
    
+   std::string thrustModel;
+
    bool isCoordSysChanged;
    bool isTankChanged;
    bool isTankEmpty;
+
+   bool isThrustModelChanged;
+
+   // Chemical Thruster
    bool areCCoefsChanged;
    bool areKCoefsChanged;
+   // Electric Thruster
+   bool areTCoefsChanged;
+   bool areMFCoefsChanged;
    
    wxStaticText *originLabel;
    wxStaticText *axisLabel;
@@ -74,10 +92,36 @@ protected:
    wxStaticText *gravityAccelUnit;
    wxStaticText *ispLabel;
    wxStaticText *ispUnit;
+
+   // Electric Thruster Additions
+   wxStaticText  *thrustModelTxt;
+   wxStaticText  *minPowerTxt;
+   wxStaticText  *maxPowerTxt;
+   wxStaticText  *efficiencyTxt;
+   wxStaticText  *ispTxt;
+   wxStaticText  *constantThrustTxt;
+
+   wxStaticText  *minPowerUnits;
+   wxStaticText  *maxPowerUnits;
+   wxStaticText  *efficiencyUnits;
+   wxStaticText  *ispUnits;
+   wxStaticText  *constantThrustUnits;
+
+   wxComboBox    *thrustModelCB;
+
+   wxTextCtrl    *minPowerTxtCtrl;
+   wxTextCtrl    *maxPowerTxtCtrl;
+   wxTextCtrl    *efficiencyTxtCtrl;
+   wxTextCtrl    *ispTxtCtrl;
+   wxTextCtrl    *constantThrustTxtCtrl;
+
+   wxString      *thrustModelArray;
+
+//   wxButton *cCoefButton;
+//   wxButton *kCoefButton;
    
-   wxButton *cCoefButton;
-   wxButton *kCoefButton;
-   
+   wxButton *configButton;
+
    wxComboBox *coordSysComboBox;
    wxComboBox *originComboBox;
    wxComboBox *axesComboBox;
