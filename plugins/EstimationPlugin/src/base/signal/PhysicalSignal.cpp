@@ -1293,8 +1293,13 @@ bool PhysicalSignal::HardwareDelayCalculation()
 //---------------------------------------------------------------------------------------------
 bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* rampTB)
 {
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if ((troposphere == NULL)&&(ionosphere == NULL))
       return true;
+#else
+   if (troposphere == NULL)
+      return true;
+#endif
 
    bool retval = false;
    mediaCorrection = 0.0;                                                               // unit: km
