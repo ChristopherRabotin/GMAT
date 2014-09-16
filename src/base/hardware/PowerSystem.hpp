@@ -34,7 +34,7 @@ class GMAT_API PowerSystem : public Hardware
 {
 public:
 
-   PowerSystem(std::string systemType, std::string nomme);
+   PowerSystem(const std::string &systemType, const std::string &nomme);
    virtual ~PowerSystem();
    PowerSystem(const PowerSystem& copy);
    PowerSystem& operator=(const PowerSystem& copy);

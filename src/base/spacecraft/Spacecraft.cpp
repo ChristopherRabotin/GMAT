@@ -69,6 +69,7 @@
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_SC_OWNED_OBJECT
 //#define DEBUG_MASS_FLOW
+//#define DEBUG_UPDATE_TOTAL_MASS
 //#define DEBUG_SPICE_KERNELS
 //#define DEBUG_HARDWARE
 //#define DEBUG_GEN_STRING
@@ -1185,6 +1186,49 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
 
 
 //------------------------------------------------------------------------------
+//  Real GetPowerGenerated()
+//------------------------------------------------------------------------------
+Real Spacecraft::GetPowerGenerated()
+{
+   if (!powerSystem)
+   {
+      std::string errmsg = "No power system set for spacecraft ";
+      errmsg += instanceName + ".\n";
+      throw SpaceObjectException(errmsg);
+   }
+   return powerSystem->GetPowerGenerated();
+}
+
+//------------------------------------------------------------------------------
+//  Real GetThrustPower()
+//------------------------------------------------------------------------------
+Real Spacecraft::GetThrustPower()
+{
+   if (!powerSystem)
+   {
+      std::string errmsg = "No power system set for spacecraft ";
+      errmsg += instanceName + ".\n";
+      throw SpaceObjectException(errmsg);
+   }
+   return powerSystem->GetThrustPower();
+}
+
+//------------------------------------------------------------------------------
+//  Real GetSpacecraftBusPower()
+//------------------------------------------------------------------------------
+Real Spacecraft::GetSpacecraftBusPower()
+{
+   if (!powerSystem)
+   {
+      std::string errmsg = "No power system set for spacecraft ";
+      errmsg += instanceName + ".\n";
+      throw SpaceObjectException(errmsg);
+   }
+   return powerSystem->GetSpacecraftBusPower();
+}
+
+
+//------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
@@ -1869,6 +1913,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    // now work on hardware
    if (type == Gmat::HARDWARE || type == Gmat::FUEL_TANK || type == Gmat::THRUSTER ||
+       obj->IsOfType(Gmat::THRUSTER) || obj->IsOfType(Gmat::FUEL_TANK) ||
        type == Gmat::POWER_SYSTEM)
    {
       #ifdef DEBUG_SC_REF_OBJECT
@@ -1878,7 +1923,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       #endif
 
       // set fueltank
-      if (objType == "FuelTank")
+//      if (objType == "FuelTank")
+      if (obj->IsOfType("FuelTank"))
       {
          bool retval = SetHardware(obj, tankNames, tanks);
          if (retval)
@@ -1899,7 +1945,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
 
       // set thruster
-      if (objType == "Thruster")
+//      if (objType == "Thruster")
+      if (obj->IsOfType("Thruster"))
       {
          bool retval = SetHardware(obj, thrusterNames, thrusters);
          if (retval)
@@ -3998,11 +4045,20 @@ bool Spacecraft::TakeAction(const std::string &action,
       bool removeTank     = true, removeThruster = true;
       bool removePowerSys = true, removeAll      = false;
       if (action == "RemoveTank")
+      {
+         removePowerSys = false;
          removeThruster = false;
+      }
       if (action == "RemoveThruster")
-         removeTank = false;
+      {
+         removePowerSys = false;
+         removeTank     = false;
+      }
       if (action == "RemovePowerSystem")
-         removePowerSys = true;
+      {
+         removeThruster = false;
+         removeTank     = false;
+      }
       if (actionData == "")
          removeAll = true;
 
@@ -5235,7 +5291,8 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
    Real massChange = newMass - UpdateTotalMass();
 
    #ifdef DEBUG_MASS_FLOW
-      MessageInterface::ShowMessage("Mass change = %.12le; depeting ", massChange);
+      MessageInterface::ShowMessage("newMass = %12le, Mass change = %.12le; depleting \n",
+            newMass, massChange);
    #endif
 
    // Find the active thruster(s)
@@ -5248,10 +5305,19 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
       {
          active.push_back(*i);
          rate = ((Thruster*)(*i))->CalculateMassFlow();
+         #ifdef DEBUG_MASS_FLOW
+            MessageInterface::ShowMessage("Thruster %s returned %12.10f\n",
+                  (*i)->GetName().c_str(), rate);
+         #endif
          flowrate.push_back(rate);
          totalFlow += rate;
       }
    }
+//   if (GmatMathUtil::IsEqual(totalFlow, 0.0))
+//   {
+////      MessageInterface::ShowMessage("Total Flow is zero!!!\n");  // temporary
+//      return true;
+//   }
 
    // Divide the mass flow evenly between the tanks on each active thruster
    Real numberFiring = active.size();
@@ -5270,9 +5336,14 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
    {
       // Change the mass in each attached tank
       ObjectArray usedTanks = active[i]->GetRefObjectArray(Gmat::HARDWARE);
+      // ******
+      if (!GmatMathUtil::IsEqual(totalFlow,0.0))
+      {
       dm = massChange * flowrate[i] / totalFlow;
 
       #ifdef DEBUG_MASS_FLOW
+         MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
+               flowrate[i], totalFlow);
          MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
       #endif
 
@@ -5286,6 +5357,7 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
          (*j)->SetRealParameter("FuelMass",
                (*j)->GetRealParameter("FuelMass") + dmt);
       }
+      } // *****************
       #ifdef DEBUG_MASS_FLOW
                MessageInterface::ShowMessage(" ] ");
       #endif

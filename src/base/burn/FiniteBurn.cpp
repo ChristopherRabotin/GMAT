@@ -24,6 +24,7 @@
 #include "BurnException.hpp"
 #include "StringUtil.hpp"          // for ToString()
 #include "MessageInterface.hpp"
+#include "ElectricThruster.hpp"  // for Min/MaxUsablePower
 
 //#define DEBUG_RENAME
 //#define DEBUG_BURN_ORIGIN
@@ -32,6 +33,8 @@
 //#define DEBUG_FINITEBURN_SET
 //#define DEBUG_FINITEBURN_INIT
 //#define DEBUG_FINITEBURN_OBJECT
+//#define DEBUG_FINITE_BURN_POWER
+//#define DEBUG_MASS_FLOW
 
 //---------------------------------
 // static data
@@ -43,7 +46,8 @@ FiniteBurn::PARAMETER_TEXT[FiniteBurnParamCount - BurnParamCount] =
 {
    "Thrusters",
    "Tanks",
-   "BurnScaleFactor"
+   "BurnScaleFactor",
+   "ThrottleLogicAlgorithm",
 };
 
 /// Types of the parameters used by finite burns.
@@ -53,6 +57,7 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
    Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECTARRAY_TYPE,
    Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 
@@ -70,7 +75,9 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const std::string &nomme) :
-   Burn (Gmat::FINITE_BURN, "FiniteBurn", nomme)
+   Burn (Gmat::FINITE_BURN, "FiniteBurn", nomme),
+   throttleLogicAlgorithm   ("MaximumPowerUsage"),
+   isElectricBurn           (false)       // default is Chemical
 {
    objectTypes.push_back(Gmat::FINITE_BURN);
    objectTypeNames.push_back("FiniteBurn");
@@ -102,8 +109,10 @@ FiniteBurn::~FiniteBurn()
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const FiniteBurn& fb) :
-   Burn              (fb),
-   thrusterNames     (fb.thrusterNames)
+   Burn                   (fb),
+   thrusterNames          (fb.thrusterNames),
+   throttleLogicAlgorithm (fb.throttleLogicAlgorithm),
+   isElectricBurn         (fb.isElectricBurn)
 {
    parameterCount = fb.parameterCount;
 }
@@ -127,7 +136,9 @@ FiniteBurn& FiniteBurn::operator=(const FiniteBurn& fb)
       
    Burn::operator=(fb);
    
-   thrusterNames       = fb.thrusterNames;
+   thrusterNames          = fb.thrusterNames;
+   throttleLogicAlgorithm = fb.throttleLogicAlgorithm;
+   isElectricBurn         = fb.isElectricBurn;
    
    return *this;
 }
@@ -231,6 +242,14 @@ bool FiniteBurn::Fire(Real *burnData, Real epoch)
        frameBasis[2][0], frameBasis[2][1], frameBasis[2][2]);
    #endif
    
+   // If this FiniteBurn uses electric thrusters, we must compute the throttle
+   // logic based on the total power available to the thrusters
+   if (isElectricBurn)
+   {
+      Real availablePower = spacecraft->GetThrustPower();
+      ComputeThrottleLogic(availablePower);
+   }
+
    for (StringArray::iterator i = thrusterNames.begin(); 
         i != thrusterNames.end(); ++i)
    {
@@ -493,6 +512,8 @@ std::string FiniteBurn::GetStringParameter(const Integer id) const
    case BURNORIGIN:
    case BURNAXES:
       return "Deprecated"; // just to ignore
+   case THROTTLE_LOGIC_ALGORITHM:
+      return throttleLogicAlgorithm;
    default:
       break;
    }
@@ -524,6 +545,18 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
    case BURNORIGIN:
    case BURNAXES:
       return true; // just to ignore
+   case THROTTLE_LOGIC_ALGORITHM:
+      if (value != "MaximumPowerUsage")
+      {
+         std::string msg =
+            "The value of \"" + value + "\" for field \"ThrottleLogicAlgorithm\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [\"MaximumPowerUsage\"]. ";   // will need to add list if other options become available
+
+         throw BurnException(msg);
+      }
+      throttleLogicAlgorithm = value;   // @todo add validation
+      return true;
    default:
       break;
    }
@@ -969,8 +1002,12 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
    
    // Get thrusters and tanks associated to spacecraft
    ObjectArray thrusterArray = spacecraft->GetRefObjectArray(Gmat::THRUSTER);
-   ObjectArray tankArray = spacecraft->GetRefObjectArray(Gmat::FUEL_TANK);
+   ObjectArray tankArray     = spacecraft->GetRefObjectArray(Gmat::FUEL_TANK);
    
+   isElectricBurn          = false;  // initially assume Chemical burn
+   bool thrusterTypeSet    = false;
+   bool isElectricThruster = false;
+
    // Look up the thruster(s)
    for (ObjectArray::iterator th = thrusterArray.begin(); 
         th != thrusterArray.end(); ++th)
@@ -981,6 +1018,25 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
          // Only act on thrusters assigned to this burn
          if ((*th)->GetName() == *thName)
          {
+            bool isElectricThruster = (*th)->IsOfType("ElectricThruster");
+            if (!thrusterTypeSet)
+            {
+               if (isElectricThruster)
+                  isElectricBurn = true;
+               thrusterTypeSet = true;
+            }
+            else
+            {
+               if ((isElectricBurn  && !isElectricThruster) ||
+                   (!isElectricBurn &&  isElectricThruster))
+               {
+                  std::string errmsg = "Finite Burn ";
+                  errmsg += instanceName + " has a mix of Chemical and ";
+                  errmsg += "Electric thrusters.  Thrusters specified for a ";
+                  errmsg += "finite burn must all be of the same type.\n";
+                  throw BurnException(errmsg);
+               }
+            }
             Integer paramId = (*th)->GetParameterID("Tank");
             StringArray tankNames = (*th)->GetStringArrayParameter(paramId);
             // Setup the tankNames
@@ -1021,4 +1077,107 @@ bool FiniteBurn::SetThrustersFromSpacecraft()
    return true;
 }
 
+bool FiniteBurn::ComputeThrottleLogic(Real powerAvailable)
+{
+   ElectricThruster *current         = NULL;
+   Integer          numThrusters     = (Integer) thrusterNames.size();
+   Real             powerPerThruster = 0.0;
+   #ifdef DEBUG_FINITE_BURN_POWER
+      MessageInterface::ShowMessage
+         ("  Computing throttle logic, Power Available = %12.10f, numThrusters = %d\n",
+               powerAvailable, numThrusters);
+   #endif
 
+   // Save the pointers since we have to access them again at the end
+   std::vector<ElectricThruster*>  electricThrusters;
+   // Save the minimum usable power for each
+   RealArray                       minUsablePowerPerThruster;
+   Real                            minPower = 0.0;
+
+   // First check for errors in accessing the thrusters, and store the
+   // MinimumUsablePower for each
+//   for (StringArray::iterator i = thrusterNames.begin();
+//        i != thrusterNames.end(); ++i)
+   if (throttleLogicAlgorithm == "MaximumPowerUsage")
+   {
+      for (Integer ii = 0; ii < numThrusters; ii++)
+      {
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage
+               ("  Computing throttle logic, accessing thruster '%s' from spacecraft <%p>'%s'\n",
+                     thrusterNames.at(ii).c_str(),
+                spacecraft, spacecraft->GetName().c_str());
+         #endif
+
+         // Check to make sure there is not an error accessing this thruster
+         current = (ElectricThruster *)spacecraft->GetRefObject(Gmat::THRUSTER, thrusterNames.at(ii));
+         if (!current)
+            throw BurnException("FiniteBurn::Fire requires thruster named \"" +
+                  thrusterNames.at(ii) + "\" on spacecraft " + spacecraft->GetName());
+         electricThrusters.push_back(current);
+         minPower = current->GetRealParameter(current->GetParameterID("MinimumUsablePower"));
+         minUsablePowerPerThruster.push_back(minPower);
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage
+               ("  Computing throttle logic, minPower for thruster %d = %12.10f\n",
+                     ii, minPower);
+         #endif
+     }
+
+      Integer numToFire       = numThrusters;  // start at the last one
+
+      for (Integer ii = numThrusters-1; ii >= 0; ii--)
+      {
+         powerPerThruster = powerAvailable / numToFire;
+         // Compute mean usable power, if we were to fire numToFire thrusters
+         Real meanMinUsablePower = 0.0;
+         for (unsigned int jj = 0; jj < numToFire; jj++)
+            meanMinUsablePower += minUsablePowerPerThruster.at(ii);
+         meanMinUsablePower /= numToFire;
+         // If we can fire numToFire thrusters with the power available, we're done
+         if (powerPerThruster > meanMinUsablePower)
+            break;
+         // Handle the special case where there is not enough power to fire
+         // any thrusters
+         if ((numToFire == 1) && (powerPerThruster < meanMinUsablePower))
+         {
+            numToFire = 0;
+            break;
+         }
+         numToFire--;
+      }
+      #ifdef DEBUG_FINITE_BURN_POWER
+         MessageInterface::ShowMessage("numToFire = %d, powerPerThruster = %12.10f\n",
+               numToFire, powerPerThruster);
+      #endif
+
+      // Divide the power up across thrusters that should fire
+      for (unsigned int nn = 0; nn < numToFire; nn++)
+      {
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage("Setting power on thruster %d to %12.10f\n",
+                  (Integer) nn, powerPerThruster);
+         #endif
+         electricThrusters.at(nn)->SetPower(powerPerThruster);
+      }
+
+      // Set power to zero for all those that cannot fire
+      for (unsigned int nono = numToFire; nono < numThrusters; nono++)
+      {
+         #ifdef DEBUG_FINITE_BURN_POWER
+            MessageInterface::ShowMessage("Setting power on thruster %d to 0.0f\n",
+                  (Integer) nono);
+         #endif
+         electricThrusters.at(nono)->SetPower(0.0);
+      }
+
+      electricThrusters.clear();
+      minUsablePowerPerThruster.clear();
+   }
+   else
+   {
+      throw BurnException("Unknown value for ThrottleLogicAlgorithm\n");
+   }
+
+   return true;
+}

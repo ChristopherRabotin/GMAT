@@ -30,9 +30,9 @@
 #include "DateUtil.hpp"
 #include <sstream>
 
+//#define DEBUG_POWER_SYSTEM
 //#define DEBUG_POWER_SYSTEM_SET
 //#define DEBUG_DATE_FORMAT
-//#define DEBUG_POWER_SYSTEM
 
 //---------------------------------
 // static data
@@ -83,7 +83,7 @@ PowerSystem::PARAMETER_TYPE[PowerSystemParamCount - HardwareParamCount] =
  * @param nomme       name for the power system.
  */
 //------------------------------------------------------------------------------
-PowerSystem::PowerSystem(std::string systemType, std::string nomme) :
+PowerSystem::PowerSystem(const std::string &systemType, const std::string &nomme) :
    Hardware             (Gmat::POWER_SYSTEM, systemType, nomme),
    epochFormat          ("UTCGregorian"),
    initialEpoch         ("01 Jan 2000 11:59:28.000"),
@@ -304,6 +304,11 @@ Real PowerSystem::GetSpacecraftBusPower() const
    // Englander: Eq. 19
    Real busPower = busCoeff1 + (busCoeff2/sunDist) +
                   (busCoeff3/(sunDist*sunDist));
+   #ifdef DEBUG_POWER_SYSTEM
+      MessageInterface::ShowMessage(
+            "In PowerSystem::GetSCBasePower, busPower = %12.10f\n",
+            busPower);
+   #endif
    return busPower;
 }
 
@@ -320,6 +325,11 @@ Real PowerSystem::GetThrustPower() const
    Real powerAvailable = (1-margin /100.00) * (powerGenerated - busPower);
    if (powerAvailable < 0)
        powerAvailable = 0;
+   #ifdef DEBUG_POWER_SYSTEM
+      MessageInterface::ShowMessage(
+            "In PowerSystem::GetThrustPower, powerAvailable = %12.10f\n",
+            powerAvailable);
+   #endif
    return powerAvailable;
 }
 

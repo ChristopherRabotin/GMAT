@@ -3979,10 +3979,12 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::CELESTIAL_BODY_ASTEROID:
       sizer->Add(new CelestialBodyPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::FUELTANK:
+   case GmatTree::FUELTANK_CHEMICAL:
+   case GmatTree::FUELTANK_ELECTRIC:
       sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::THRUSTER:
+   case GmatTree::THRUSTER_CHEMICAL:
+   case GmatTree::THRUSTER_ELECTRIC:
       sizer->Add(new ThrusterConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::POWER_SYSTEM:

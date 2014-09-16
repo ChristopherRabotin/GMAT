@@ -183,8 +183,10 @@ protected:
    void OnAddFormation(wxCommandEvent &event);
    void OnAddGroundStation(wxCommandEvent &event);
    void OnAddSpacecraft(wxCommandEvent &event);
-   void OnAddFuelTank(wxCommandEvent &event);
-   void OnAddThruster(wxCommandEvent &event);
+   void OnAddChemicalFuelTank(wxCommandEvent &event);
+   void OnAddElectricFuelTank(wxCommandEvent &event);
+   void OnAddChemicalThruster(wxCommandEvent &event);
+   void OnAddElectricThruster(wxCommandEvent &event);
    void OnAddReportFile(wxCommandEvent &event);
    void OnAddXyPlot(wxCommandEvent &event);
    //void OnAddOpenGlPlot(wxCommandEvent &event);
@@ -270,8 +272,10 @@ protected:
       POPUP_ADD_CONSTELLATION,
 
       POPUP_ADD_HARDWARE,  // includes PowerSystem
-      POPUP_ADD_THRUSTER,
-      POPUP_ADD_FUELTANK,
+      POPUP_ADD_THRUSTER_CHEMICAL,
+      POPUP_ADD_THRUSTER_ELECTRIC,
+      POPUP_ADD_FUELTANK_CHEMICAL,
+      POPUP_ADD_FUELTANK_ELECTRIC,
 
       POPUP_ADD_PROPAGATOR,
 //      POPUP_ADD_SPK_PROPAGATOR,

@@ -142,9 +142,13 @@
 //---------------------------------
 // static data
 //---------------------------------
-Moderator* Moderator::instance = NULL;
-ScriptInterpreter* Moderator::theUiInterpreter = NULL;
-ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
+Moderator*         Moderator::instance                    = NULL;
+ScriptInterpreter* Moderator::theUiInterpreter            = NULL;
+ScriptInterpreter* Moderator::theScriptInterpreter        = NULL;
+
+bool               Moderator::thrusterDeprecateMsgWritten = false;
+bool               Moderator::fuelTankDeprecateMsgWritten = false;
+
 
 
 //---------------------------------
@@ -1720,10 +1724,10 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameObject() ===> Change Command ref object names\n");
-   MessageInterface::ShowMessage
-      ("Moderator::RenameObject() ===> %s related name change from %s to %s\n",
-       (hasRelatedChange ? "Found" : "Has no"), relatedOldName.c_str(),
-       relatedNewName.c_str());
+//   MessageInterface::ShowMessage
+//      ("Moderator::RenameObject() ===> %s related name change from %s to %s\n",
+//       (hasRelatedChange ? "Found" : "Has no"), relatedOldName.c_str(),
+//       relatedNewName.c_str());
    #endif
    
    int sandboxIndex = 0; //handles one sandbox for now
@@ -2685,6 +2689,24 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
    if (GetHardware(name) == NULL)
    {
       Hardware *obj = theFactoryManager->CreateHardware(type, name);
+      if ((type == "Thruster") && (!thrusterDeprecateMsgWritten))
+      {
+         std::string warnMsg = "*** WARNING *** Type \"Thruster\" is ";
+         warnMsg += "deprecated.  ";
+         warnMsg += "Please use \"ChemicalThruster\" or \"ElectricThruster\" ";
+         warnMsg += "instead.  A ChemicalThruster will be created.\n";
+         MessageInterface::ShowMessage(warnMsg);
+         thrusterDeprecateMsgWritten = true;
+      }
+      if ((type == "FuelTank") && (!fuelTankDeprecateMsgWritten))
+      {
+         std::string warnMsg = "*** WARNING *** Type \"FuelTank\" is ";
+         warnMsg += "deprecated.  ";
+         warnMsg += "Please use \"ChemicalTank\" or \"ElectricTank\" ";
+         warnMsg += "instead.  A ChemicalTank will be created.\n";
+         MessageInterface::ShowMessage(warnMsg);
+         fuelTankDeprecateMsgWritten = true;
+      }
       
       if (obj == NULL)
       {
