@@ -180,8 +180,8 @@ const Integer ResourceTree::MAX_SUN_ORBITERS = 120;
 
 BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, ResourceTree::OnItemRightClick)
-
    EVT_TREE_ITEM_ACTIVATED(-1, ResourceTree::OnItemActivated)
+   EVT_TREE_ITEM_EXPANDED(-1, ResourceTree::OnItemExpanded)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, ResourceTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, ResourceTree::OnEndLabelEdit)
    //EVT_TREE_BEGIN_DRAG(-1, ResourceTree::OnBeginDrag)
@@ -282,8 +282,11 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    
    AddIcons();
    AddDefaultResources();
-   AddUserResources(theGuiInterpreter->GetUserResources());   
-
+   
+   // Now AddDefaultResources() calls UpdateResource() which also adds user objects
+   // so commented out (LOJ: 2014.09.16)
+   //AddUserResources(theGuiInterpreter->GetUserResources());   
+   
    // shortcut keys
    wxAcceleratorEntry entries[3];
    entries[0].Set(wxACCEL_NORMAL,  WXK_NUMPAD_DELETE, POPUP_DELETE);
@@ -292,6 +295,15 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    wxAcceleratorTable accel(3, entries);
    this->SetAcceleratorTable(accel);
 
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    theGuiManager->UpdateAll();
 }
 
@@ -339,7 +351,7 @@ void ResourceTree::ClearResource(bool leaveScripts)
          {
             #ifdef DEBUG_USER_GUI
                MessageInterface::ShowMessage("Clearing %s\n",
-                     GetItemText(cf).c_str());
+                     GetItemText(cf).WX_TO_C_STRING);
             #endif
             DeleteChildren(cf);
          }
@@ -397,6 +409,9 @@ void ResourceTree::UpdateResource(bool restartCounter)
    AddDefaultFormations(mFormationItem, restartCounter);
    AddDefaultGroundStation(mGroundStationItem, restartCounter);
    AddDefaultHardware(mHardwareItem, restartCounter);
+   #ifdef __ENABLE__CONSTELLATIONS__
+   AddDefaultConstellations(constellationItem);
+   #endif
    AddDefaultPropagators(mPropagatorItem, restartCounter);
    AddDefaultLocators(mEventLocatorItem, restartCounter);
    AddDefaultBurns(mBurnItem, restartCounter);
@@ -411,7 +426,11 @@ void ResourceTree::UpdateResource(bool restartCounter)
 
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
-
+   
+   // Why the first item is always selected with WX3?
+   // Add Unselect() (LOJ: 2014.09.16)
+   Unselect();
+   
    #ifdef DEBUG_RESOURCE_TREE_UPDATE
    MessageInterface::ShowMessage("ResourceTree::UpdateResource() exiting\n");
    #endif
@@ -927,7 +946,7 @@ wxTreeItemId ResourceTree::AddObjectToTree(GmatBase *obj, bool showDebug)
    {
       #ifdef DEBUG_ADD_OBJECT
       MessageInterface::ShowMessage
-         ("   Now appending '%s' to node %s\n", name.c_str(), itemId.IsOk() ? "OK" : "Item Not Found");
+         ("   Now appending '%s' to node %s\n", name.WX_TO_C_STRING, itemId.IsOk() ? "OK" : "Item Not Found");
       #endif
       
       AppendItem(itemId, name, itemIcon, -1, new GmatTreeItemData(name, itemType));
@@ -1124,27 +1143,34 @@ void ResourceTree::AddDefaultResources()
       SetItemImage(mFunctionItem, GmatTree::RESOURCE_ICON_OPEN_FOLDER,
                    wxTreeItemIcon_Expanded);
    }
-   AddDefaultBodies(mUniverseItem);
-   AddDefaultSpecialPoints(mSpecialPointsItem);
-   AddDefaultSpacecraft(mSpacecraftItem);
-   AddDefaultFormations(mFormationItem);
-   AddDefaultGroundStation(mGroundStationItem);
-   AddDefaultHardware(mHardwareItem);
 
-   #ifdef __ENABLE__CONSTELLATIONS__
-   AddDefaultConstellations(constellationItem);
-   #endif
-
-   AddDefaultPropagators(mPropagatorItem);
-   AddDefaultSolvers(mSolverItem);
-   AddDefaultSubscribers(mSubscriberItem);
-   AddDefaultInterfaces(interfaceItem);
-   AddDefaultVariables(mVariableItem);
-   AddDefaultFunctions(mFunctionItem);
-   AddDefaultCoordSys(mCoordSysItem);
-
-   AddUserObjects();
-
+   // Changed to call UpdateResource() and commented out adding
+   // default resource (Fix for GMT-4714 LOJ: 2014.09.11)
+   
+   // Add default and user resources
+   UpdateResource(true);
+   
+   // AddDefaultBodies(mUniverseItem);
+   // AddDefaultSpecialPoints(mSpecialPointsItem);
+   // AddDefaultSpacecraft(mSpacecraftItem);
+   // AddDefaultFormations(mFormationItem);
+   // AddDefaultGroundStation(mGroundStationItem);
+   // AddDefaultHardware(mHardwareItem);
+   // #ifdef __ENABLE__CONSTELLATIONS__
+   // AddDefaultConstellations(constellationItem);
+   // #endif
+   // AddDefaultPropagators(mPropagatorItem);
+   // AddDefaultSolvers(mSolverItem);
+   // AddDefaultSubscribers(mSubscriberItem);
+   // AddDefaultInterfaces(interfaceItem);
+   // AddDefaultVariables(mVariableItem);
+   // AddDefaultFunctions(mFunctionItem);
+   // AddDefaultCoordSys(mCoordSysItem);
+   // AddUserObjects();
+   
+   // Set scroll bar to left to show resource nodes (Fix for GMT-4714 LOJ: 2014.09.11)
+   SetScrollPos(wxHORIZONTAL, 0, true);
+   
    theGuiInterpreter->ResetConfigurationChanged(true, false);
 }
 
@@ -1574,7 +1600,7 @@ void ResourceTree::AddDefaultSpacecraft(wxTreeItemId itemId, bool restartCounter
          
          #ifdef DEBUG_ADD_DEFAULT_OBJECTS
          MessageInterface::ShowMessage
-            ("ResourceTree::AddDefaultSpacecraft() objName='%s'\n", objName.c_str());
+            ("ResourceTree::AddDefaultSpacecraft() objName='%s'\n", objName.WX_TO_C_STRING);
          #endif
          
          AppendItem(itemId, objName, itemIcon, -1,
@@ -2124,7 +2150,7 @@ void ResourceTree::AddUserObjects()
 
             #ifdef DEBUG_USER_GUI
             MessageInterface::ShowMessage
-               ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.c_str());
+               ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.WX_TO_C_STRING);
             #endif
             // Changed to use itemType since Rename() will not work on USER_DEFINED_OBJECT tree item
             // which will assign to UNKNOWN_OBJECT (LOJ: 2012.03.20)
@@ -2197,6 +2223,33 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
        item->GetTitle().c_str(), item->GetName().c_str());
    #endif
    theMainFrame->CreateChild(item);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnItemExpanded(wxTreeEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * On tree item expanded
+ *
+ * @param <event> tree event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnItemExpanded(wxTreeEvent &event)
+{
+   #ifdef DEBUG_ITEM_EXPANDED
+   // Get some info about this item
+   wxTreeItemId itemId = event.GetItem();
+   GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
+   MessageInterface::ShowMessage
+      ("ResourceTree::OnItemExpanded() title='%s'\n   name='%s'\n",
+       item->GetTitle().WX_TO_C_STRING, item->GetName().WX_TO_C_STRING);
+   #endif
+   
+   // Why first item is selected when item is expanded for the first time?
+   // Unselect() didn't fix the problem
+   // Well this is the same behavior as with wx-2.8
+   //Unselect();
 }
 
 
@@ -5837,9 +5890,9 @@ void ResourceTree::AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
          MessageInterface::ShowMessage("Node list:\n");
          for (UnsignedInt k = 0; k < mPluginItems.size(); ++k)
             MessageInterface::ShowMessage("   %d: %s %d %s\n", k,
-                  GetItemText(mPluginItems[k]).c_str(),
-                  nodeTypeMap[GetItemText(mPluginItems[k]).c_str()],
-                  nodeSubtypeMap[GetItemText(mPluginItems[k]).c_str()].c_str());
+               GetItemText(mPluginItems[k]).WX_TO_C_STRING,
+               nodeTypeMap[GetItemText(mPluginItems[k]).WX_TO_STD_STRING],
+               nodeSubtypeMap[GetItemText(mPluginItems[k]).WX_TO_STD_STRING].c_str());
       #endif
    }
 }

@@ -161,6 +161,7 @@ protected:
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
+   void OnItemExpanded(wxTreeEvent &event);
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
    void OnRename(wxCommandEvent &event);
