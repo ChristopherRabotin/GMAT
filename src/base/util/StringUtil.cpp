@@ -5406,13 +5406,13 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 //------------------------------------------------------------------------------
 std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 {
-#ifdef __MAC__
+//#ifdef __MAC__
+#ifndef _MSC_VER // if not Microsoft Visual C++
    std::wostringstream convStream;
    convStream << str.c_str();
    std::wstring wstrTo(convStream.str());
    return wstrTo;
 #else
-
    // Convert an ASCII string to a Unicode String
    // Method 1:
    std::wstring wstrTo;
@@ -5452,7 +5452,8 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
 {
-#ifdef __MAC__
+//#ifdef __MAC__
+#ifndef _MSC_VER // if not Microsoft Visual C++
    std::ostringstream convStream;
    convStream << wstr.c_str();
    std::string strTo(convStream.str());
