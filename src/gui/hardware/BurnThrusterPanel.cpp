@@ -129,10 +129,8 @@ void BurnThrusterPanel::Create()
    #endif
 
    #if __WXMAC__
-   int buttonWidth = 40;
    int otherTextWidth = 150;
    #else
-   int buttonWidth = 25;
    int otherTextWidth = 150;
    #endif
 
@@ -557,7 +555,7 @@ void BurnThrusterPanel::LoadData()
       else
       {
          tankName = tanks[0];
-         tankComboBox->SetValue(tankName.c_str());
+         tankComboBox->SetValue(STD_TO_WX_STRING(tankName));
          isTankEmpty = false;
       }
       
@@ -754,13 +752,13 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
       {
          // Origin
          paramID = theObject->GetParameterID("Origin");
-         theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
+         theObject->SetStringParameter(paramID, originComboBox->GetValue().WX_TO_STD_STRING);
          
          // Axes
          paramID = theObject->GetParameterID("Axes");
-         theObject->SetStringParameter(paramID, axesComboBox->GetValue().c_str());
+         theObject->SetStringParameter(paramID, axesComboBox->GetValue().WX_TO_STD_STRING);
 
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -805,7 +803,7 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
          
          if (theObject->TakeAction("ClearTanks", ""))
             if (tankName != "")
-               theObject->SetStringParameter(paramID, tankName.c_str());
+               theObject->SetStringParameter(paramID, tankName);
       }
 
       if (theObject->IsOfType(Gmat::THRUSTER))
@@ -951,7 +949,7 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    else if (event.GetEventObject() == tankComboBox)
    {
       isTankChanged = true;
-      tankName = tankComboBox->GetStringSelection().c_str();
+      tankName = tankComboBox->GetStringSelection().WX_TO_STD_STRING;
       if (tankName == "No Fuel Tank Selected")
          tankName = "";
       
@@ -964,11 +962,11 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    }
    else if (event.GetEventObject() == axesComboBox)
    {
-      std::string csName = coordSysComboBox->GetStringSelection().c_str();
-
+      std::string csName = coordSysComboBox->GetStringSelection().WX_TO_STD_STRING;
+      
       if (csName == "Local")
       {
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -1094,7 +1092,7 @@ void BurnThrusterPanel::UpdateOriginAxes()
       axisLabel->Enable();
       axesComboBox->Enable();
 
-      std::string axisValue = axesComboBox->GetValue().c_str();
+      std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
 
       if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
       {
