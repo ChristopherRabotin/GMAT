@@ -121,7 +121,10 @@ ElectricThruster::ElectricThruster(const std::string &nomme) :
    efficiency      (2.14781),
    isp             (0.0),
    constantThrust  (0.0),
-   powerToUse      (0.0)
+   powerToUse      (0.0),
+   powerToUse2     (0.0),
+   powerToUse3     (0.0),
+   powerToUse4     (0.0)
 {
    objectTypes.push_back(Gmat::ELECTRIC_THRUSTER);
    objectTypeNames.push_back("ElectricThruster");
@@ -198,7 +201,10 @@ ElectricThruster::ElectricThruster(const ElectricThruster& th) :
    efficiency           (th.efficiency),
    isp                  (th.isp),
    constantThrust       (th.constantThrust),
-   powerToUse           (th.powerToUse)
+   powerToUse           (th.powerToUse),
+   powerToUse2          (th.powerToUse2),
+   powerToUse3          (th.powerToUse3),
+   powerToUse4          (th.powerToUse4)
 {
    #ifdef DEBUG_ELECTRIC_THRUSTER_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -206,9 +212,11 @@ ElectricThruster::ElectricThruster(const ElectricThruster& th) :
        this, GetName().c_str(), &th, th.GetName().c_str());
    #endif
 
-   parameterCount  = th.parameterCount;
+   parameterCount      = th.parameterCount;
 
-   thrustModelLabels = th.thrustModelLabels;
+   thrustModelLabels   = th.thrustModelLabels;
+   thrustCoeffUnits    = th.thrustCoeffUnits;
+   mfCoeffUnits        = th.mfCoeffUnits;
 
    memcpy(thrustCoeff,   th.thrustCoeff,   ELECTRIC_COEFF_COUNT * sizeof(Real));
    memcpy(massFlowCoeff, th.massFlowCoeff, ELECTRIC_COEFF_COUNT * sizeof(Real));
@@ -254,8 +262,13 @@ ElectricThruster& ElectricThruster::operator=(const ElectricThruster& th)
    isp                 = th.isp;
    constantThrust      = th.constantThrust;
    powerToUse          = th.powerToUse;
+   powerToUse2         = th.powerToUse2;
+   powerToUse3         = th.powerToUse3;
+   powerToUse4         = th.powerToUse4;
 
-   thrustModelLabels = th.thrustModelLabels;
+   thrustModelLabels   = th.thrustModelLabels;
+   thrustCoeffUnits    = th.thrustCoeffUnits;
+   mfCoeffUnits        = th.mfCoeffUnits;
 
    memcpy(thrustCoeff,   th.thrustCoeff,   ELECTRIC_COEFF_COUNT * sizeof(Real));
    memcpy(massFlowCoeff, th.massFlowCoeff, ELECTRIC_COEFF_COUNT * sizeof(Real));
@@ -795,7 +808,7 @@ bool ElectricThruster::CalculateThrustAndIsp()
       }
       else // FixedEfficiency
       {
-         thrust = (2.0 * efficiency * powerToUse * 0.001) /
+         thrust = (2.0 * efficiency * powerToUse) / //  * 0.001) /
                   (isp * gravityAccel * 0.001);
       }
    }
@@ -891,8 +904,8 @@ Real ElectricThruster::CalculateMassFlow()
 
    #ifdef DEBUG_MASS_FLOW_THRUST_VECTOR
       MessageInterface::ShowMessage(
-            "   Thrust = %15lf, Isp = %15lf, gravity accel = %lf, TSF = %lf, "
-            "dutyCycle = %15lf, MassFlow = %15lf T/Isp =  %lf\n",
+            "   Thrust = %15.10f, Isp = %15.10f, gravity accel = %12.10f, TSF = %12.10f, "
+            "dutyCycle = %15.10f, MassFlow = %15.10f T/Isp =  %12.10f\n",
             thrust, impulse, gravityAccel, thrustScaleFactor, dutyCycle, mDot,
             thrust/impulse);
    #endif

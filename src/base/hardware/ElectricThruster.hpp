@@ -72,8 +72,8 @@ public:
    virtual Real         CalculateMassFlow();
 
 protected:
-   /// Finite burn instances access thruster data directly
-   friend class FiniteBurn;
+//   /// Finite burn instances access thruster data directly
+//   friend class FiniteBurn;
 
    /// labels/strings for the ThrustModel
    static  StringArray        thrustModelLabels;
