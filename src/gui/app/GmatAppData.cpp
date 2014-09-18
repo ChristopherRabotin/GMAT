@@ -273,13 +273,60 @@ void GmatAppData::SetFont(wxFont font)
    theFont = font;
 }
 
-
 //------------------------------------------------------------------------------
 // wxFont GetFont()
 //------------------------------------------------------------------------------
 wxFont GmatAppData::GetFont()
 {
    return theFont;
+}
+
+//------------------------------------------------------------------------------
+// void SetScriptFont(wxFont font)
+//------------------------------------------------------------------------------
+void GmatAppData::SetScriptFont(wxFont font)
+{
+   theScriptFont = font;
+}
+
+//------------------------------------------------------------------------------
+// wxFont GetScriptFont()
+//------------------------------------------------------------------------------
+wxFont GmatAppData::GetScriptFont()
+{
+   return theScriptFont;
+}
+
+//------------------------------------------------------------------------------
+// void SetFontSize(Integer size)
+//------------------------------------------------------------------------------
+void GmatAppData::SetFontSize(Integer size)
+{
+   theFontSize = size;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetFontSize()
+//------------------------------------------------------------------------------
+Integer GmatAppData::GetFontSize()
+{
+   return theFontSize;
+}
+
+//------------------------------------------------------------------------------
+// void SetScriptFontSize(Integer size)
+//------------------------------------------------------------------------------
+void GmatAppData::SetScriptFontSize(Integer size)
+{
+   theScriptFontSize = size;
+}
+
+//------------------------------------------------------------------------------
+// Integer GetScriptFontSize()
+//------------------------------------------------------------------------------
+Integer GmatAppData::GetScriptFontSize()
+{
+   return theScriptFontSize;
 }
 
 
@@ -451,6 +498,8 @@ GmatAppData::GmatAppData()
    theMessageWindow = NULL;
    theCompareWindow = NULL;
    theMessageTextCtrl = NULL;
+   theFontSize = 8;
+   theScriptFontSize = 9;
    theTempScriptName = "$gmattempscript$.script";
    thePersonalizationConfig = NULL;
    theIconFileSet = false;
@@ -460,7 +509,8 @@ GmatAppData::GmatAppData()
    #endif
    
    // Set font
-   theFont = wxFont(10, wxMODERN, wxNORMAL, wxNORMAL);
+   theFont = wxFont(theFontSize, wxMODERN, wxNORMAL, wxNORMAL);
+   theScriptFont = wxFont(theScriptFontSize, wxMODERN, wxNORMAL, wxNORMAL);
    
    // Set the global wx config, read from local directory (GMAT.ini)
    wxFileConfig *pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, "GMAT.ini", 

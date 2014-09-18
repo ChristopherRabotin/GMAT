@@ -307,6 +307,27 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theMainWin = NULL;
    mWelcomePanel = NULL;
    
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   theGuiInterpreter = gmatAppData->GetGuiInterpreter();
+   
+   // Set smaller font point size to match with wx2.8 default font size which is 8
+   // The defalut font size in wx3.0 is 9
+   // The initial font size is set to 8 in GmatAppData (LOJ: 2014.09.18)
+   wxFont currFont = GetFont();
+   // Change to 1 if we want to use GMAT default font size
+   #if 0
+   currFont.SetPointSize(gmatAppData->GetFontSize());
+   #endif
+   gmatAppData->SetFont(currFont);
+   SetFont(currFont);
+   #ifdef DEBUG_FONT
+   MessageInterface::ShowMessage
+      ("In GmatMainFrame() constructor: currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    // set the script name
    mTempScriptName = "$gmattempscript$.script";
    mScriptFilename = mTempScriptName;
@@ -321,8 +342,6 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    viewSubframe = (MdiChildViewFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
    
-   GmatAppData *gmatAppData = GmatAppData::Instance();
-   theGuiInterpreter = gmatAppData->GetGuiInterpreter();
    gmatAppData->SetTempScriptName(mTempScriptName.c_str());
 
    #ifdef DEBUG_MAINFRAME
@@ -346,9 +365,12 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() theMenuBar created: %p\n", theMenuBar);
    #endif
-
+   
+   // Set default font
+   theMenuBar->SetFont(gmatAppData->GetFont());
+   
    SetMenuBar(theMenuBar);
-
+   
    // Disble Edit menu, Edit menu will be enabled in GmatMdiChildFrame if
    // ItemType is GmatTree::SCRIPT_FILE
    int editIndex = theMenuBar->FindMenu("Edit");
@@ -386,6 +408,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 #else
    theToolBar = new GmatToolBar(this, wxTB_FLAT);
 #endif
+   
+   // Set default font
+   theToolBar->SetFont(gmatAppData->GetFont());
+   
    SetToolBar(theToolBar);
 
    // used to store the list of open children
@@ -510,19 +536,24 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    FileManager *fm = FileManager::Instance();
    
    // Set icon if icon file is in the start up file
-   GmatAppData::Instance()->SetIcon(this, "GmatMainFrame");
+   gmatAppData->SetIcon(this, "GmatMainFrame");
    
    // If GUI mode is normal (not minimized), show welcome panel
    if (GmatGlobal::Instance()->GetGuiMode() == GmatGlobal::NORMAL_GUI)
    {
       // show welcome panel
-      wxConfigBase *pConfig = GmatAppData::Instance()->GetPersonalizationConfig();
+      wxConfigBase *pConfig = gmatAppData->GetPersonalizationConfig();
       wxCommandEvent WXUNUSED; 
       wxString showWelcomePanel;
       pConfig->Read("/Main/ShowWelcomeOnStart", &showWelcomePanel, "true");
       if (showWelcomePanel.Lower() == "true")
          OnHelpWelcome(WXUNUSED);
    }
+   
+   // Set current font
+   theNotebook->SetFont(currFont);
+   theMainWin->SetFont(currFont);
+   theMessageWin->SetFont(currFont);
    
    // Create HelpController from CHM file
    std::string helpFileName = fm->GetFullPathname("HELP_FILE");
@@ -816,7 +847,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
    
    // Reposition mdi child windows (LOJ: 2011.02.01 Bug 2320 fix)
    if (newChild != NULL)
-   {
+   {      
       int numChildren = GetNumberOfChildOpen(false, true, true, true);
       #ifdef DEBUG_CHILD_WINDOW
       MessageInterface::ShowMessage
@@ -4132,7 +4163,7 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       #endif
    }
    #endif
-
+      
    // list of open children
    theMdiChildren->Append(newChild);
 
@@ -5820,7 +5851,7 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
          node = node->GetNext();
       }
 
-      gmatAppData->SetFont(newFont);
+      gmatAppData->SetScriptFont(newFont);
    }
 }
 

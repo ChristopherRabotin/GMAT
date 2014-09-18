@@ -81,6 +81,18 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
    AddIcons();
    AddDefaultResources();
    
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("In OutputTree() constructor, currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    theGuiManager->UpdateAll();
 }
 

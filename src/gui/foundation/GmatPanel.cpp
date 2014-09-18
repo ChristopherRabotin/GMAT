@@ -78,6 +78,9 @@ END_EVENT_TABLE()
 GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButton)
    : wxPanel(parent)
 {
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
    theOkButton = NULL;
    theApplyButton = NULL;
    theCancelButton = NULL;
@@ -191,7 +194,7 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showBottomSizer, bool showScriptButt
    #endif
 
    mObject = NULL;
-
+      
    // shortcut keys
    wxAcceleratorEntry entries[3];
    entries[0].Set(wxACCEL_NORMAL,  WXK_F1, ID_BUTTON_HELP);

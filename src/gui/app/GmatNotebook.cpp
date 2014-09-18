@@ -63,7 +63,9 @@ GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
    mMissionPagePanel = NULL;
    mUndockedMissionPanel = NULL;
    mMissionTreeToolBar = NULL;
-
+   
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
    // Create and add Resource, Mission, and Output Tabs
    wxPanel *panel = (wxPanel *)NULL;
    #ifdef DEBUG_NOTEBOOK
@@ -217,7 +219,7 @@ wxPanel *GmatNotebook::CreateResourcePage()
    
    resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
                                    wxDefaultSize, style);
-   
+      
    // set to GmatAppData
    GmatAppData::Instance()->SetResourceTree(resourceTree);
    

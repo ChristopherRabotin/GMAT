@@ -283,6 +283,18 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    // Now this is called from GmatNotebook after MissionTreeToolBar is created
    //AddDefaultMission();
    
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("In MissionTree() constructor, currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    // for auto-testing of MissionTree actions
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    mSaveActions = false;
