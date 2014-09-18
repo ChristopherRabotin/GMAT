@@ -266,6 +266,17 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
    : wxTreeCtrl(parent, id, pos, size, style)
 {
+   // Set GMAT default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("In ResourceTree() constructor, currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    theMainFrame = NULL;
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
@@ -294,16 +305,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    entries[2].Set(wxACCEL_NORMAL, WXK_F2, POPUP_RENAME);
    wxAcceleratorTable accel(3, entries);
    this->SetAcceleratorTable(accel);
-
-   #ifdef DEBUG_FONT
-   wxFont currFont = GetFont();
-   MessageInterface::ShowMessage
-      ("currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
-       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d",
-       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
-       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
-   #endif
-   
+      
    theGuiManager->UpdateAll();
 }
 
@@ -318,9 +320,9 @@ void ResourceTree::SetMainFrame(GmatMainFrame *gmf)
 
 
 //------------------------------------------------------------------------------
-// void ClearResource(bool leaveScripts)
+// void ClearResource(bool leaveScripts, bool onlyChildNodes)
 //------------------------------------------------------------------------------
-void ResourceTree::ClearResource(bool leaveScripts)
+void ResourceTree::ClearResource(bool leaveScripts, bool onlyChildNodes)
 {
    // ag: collapse, so folder icon is closed
    // djc: Under Linux, this crashes so it only applies to Windows
@@ -379,12 +381,13 @@ void ResourceTree::ClearResource(bool leaveScripts)
    AddItemFolder(mSolverItem, mOptimizerItem, "Optimizers",
                  GmatTree::OPTIMIZER_FOLDER);
    
-   AddUserResources(theGuiInterpreter->GetUserResources(), true);
+   //AddUserResources(theGuiInterpreter->GetUserResources(), true);
+   AddUserResources(theGuiInterpreter->GetUserResources(), onlyChildNodes);
 }
 
 
 //------------------------------------------------------------------------------
-// void UpdateResource(bool restartCounter)
+// void UpdateResource(bool restartCounter, bool onlyChildNodes)
 //------------------------------------------------------------------------------
 /**
  * Delete all nodes that are not folders, add default nodes
@@ -392,17 +395,19 @@ void ResourceTree::ClearResource(bool leaveScripts)
  * @param restartCounter  Restarting the counter from zero if true.
  */
 //------------------------------------------------------------------------------
-void ResourceTree::UpdateResource(bool restartCounter)
+void ResourceTree::UpdateResource(bool restartCounter, bool onlyChildNodes)
 {
    #ifdef DEBUG_RESOURCE_TREE_UPDATE
-   MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
+   MessageInterface::ShowMessage
+      ("ResourceTree::UpdateResource() entered, restartCounter = %d, "
+       "onlyChildNodes = %d\n", restartCounter, onlyChildNodes);
    #endif
-
+   
    if (restartCounter)
       theGuiInterpreter->ResetConfigurationChanged();
-
-   ClearResource(true);
-
+   
+   ClearResource(true, onlyChildNodes);
+   
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
    AddDefaultSpacecraft(mSpacecraftItem, restartCounter);
@@ -421,9 +426,9 @@ void ResourceTree::UpdateResource(bool restartCounter)
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctionItem);
    AddDefaultCoordSys(mCoordSysItem);
-
+   
    AddUserObjects();
-
+   
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
    
@@ -1148,7 +1153,7 @@ void ResourceTree::AddDefaultResources()
    // default resource (Fix for GMT-4714 LOJ: 2014.09.11)
    
    // Add default and user resources
-   UpdateResource(true);
+   UpdateResource(true, false);
    
    // AddDefaultBodies(mUniverseItem);
    // AddDefaultSpecialPoints(mSpecialPointsItem);
@@ -2150,7 +2155,7 @@ void ResourceTree::AddUserObjects()
 
             #ifdef DEBUG_USER_GUI
             MessageInterface::ShowMessage
-               ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.WX_TO_C_STRING);
+               ("   => Adding '%s' of type '%s'\n", objName.WX_TO_C_STRING, objTypeName.WX_TO_C_STRING);
             #endif
             // Changed to use itemType since Rename() will not work on USER_DEFINED_OBJECT tree item
             // which will assign to UNKNOWN_OBJECT (LOJ: 2012.03.20)
@@ -2165,7 +2170,7 @@ void ResourceTree::AddUserObjects()
             
             #ifdef DEBUG_USER_GUI
             MessageInterface::ShowMessage
-               ("   => Adding '%s' of type '%s'\n", objName.c_str(), objTypeName.c_str());
+               ("   => Adding '%s' of type '%s'\n", objName.WX_TO_C_STRING, objTypeName.WX_TO_C_STRING);
             #endif
             // Changed to use itemType since Rename() will not work on USER_DEFINED_OBJECT tree item
             // which will assign to UNKNOWN_OBJECT (LOJ: 2012.03.20)
@@ -5006,7 +5011,9 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 
 #if wxUSE_MENUS
    wxMenu menu;
-
+   
+   // How can I change menu text size?
+   
    switch (itemType)
    {
    case GmatTree::GROUND_STATION_FOLDER:
@@ -5847,7 +5854,7 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
 
 //------------------------------------------------------------------------------
 // void AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
-//       bool onlyChildNodes)
+//       bool onlyChildNodes = false)
 //------------------------------------------------------------------------------
 /**
  * Updates the resource tree with new nodes provided by a plugin.
@@ -5860,6 +5867,12 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
 void ResourceTree::AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
       bool onlyChildNodes)
 {
+   #ifdef DEBUG_USER_GUI
+   MessageInterface::ShowMessage
+      ("ResourceTree::AddUserResources() entered, onlyChildNodes = %d:\n",
+       onlyChildNodes);
+   #endif
+   
    mPluginItems.clear();
    nodeTypeMap.clear();
    nodeSubtypeMap.clear();

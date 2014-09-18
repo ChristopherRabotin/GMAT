@@ -40,8 +40,8 @@ public:
                 long style);
    
    void SetMainFrame(GmatMainFrame *gmf);
-   void ClearResource(bool leaveScripts);
-   void UpdateResource(bool resetCounter);
+   void ClearResource(bool leaveScripts, bool onlyChildNodes = true);
+   void UpdateResource(bool resetCounter, bool onlyChildNodes = true);
    void SetActiveScript(const wxString &script);
    void AddScript(wxString path);
    bool AddScriptItem(wxString path);
@@ -157,7 +157,7 @@ protected:
    void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
                                 bool resetCounter = true);
    void AddUserObjects();
-
+   
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
