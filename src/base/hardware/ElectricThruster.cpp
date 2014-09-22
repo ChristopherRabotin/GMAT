@@ -782,8 +782,22 @@ bool ElectricThruster::SetPower(Real allocatedPower)
 //---------------------------------------------------------------------------
 bool ElectricThruster::CalculateThrustAndIsp()
 {
+   #ifdef DEBUG_MASS_FLOW_THRUST_VECTOR
+      MessageInterface::ShowMessage(
+            "Entering ElectricThruster::CalculateThrustAndIsp, power = %12.10f, minUsablePower = %12.10f\n",
+            power, minUsablePower);
+      MessageInterface::ShowMessage("    powerToUse  = %12.10f\n", powerToUse);
+      MessageInterface::ShowMessage("    powerToUse2 = %12.10f\n", powerToUse2);
+      MessageInterface::ShowMessage("    powerToUse3 = %12.10f\n", powerToUse3);
+      MessageInterface::ShowMessage("    powerToUse4 = %12.10f\n", powerToUse4);
+   #endif
    if (!thrusterFiring)
    {
+      #ifdef DEBUG_MASS_FLOW_THRUST_VECTOR
+         MessageInterface::ShowMessage(
+               "In ElectricThruster::CalculateThrustAndIsp, thruster %s NOT FIRING!!\n",
+               instanceName.c_str());
+      #endif
       thrust  = 0.0;
       impulse = 0.0;
    }
@@ -800,7 +814,7 @@ bool ElectricThruster::CalculateThrustAndIsp()
                    (thrustCoeff[3] * powerToUse3) +
                    (thrustCoeff[2] * powerToUse2) +
                    (thrustCoeff[1] * powerToUse)  +
-                   thrustCoeff[0]) / 1.0e6;
+                   thrustCoeff[0]) / 1.0e3; // 1.0e6;
       }
       else if (thrustModel == "ConstantThrustAndIsp")
       {
@@ -864,9 +878,9 @@ Real ElectricThruster::CalculateMassFlow()
       if (powerToUse > maxUsablePower)
          powerToUse = maxUsablePower;
 
-      Real powerToUse2 = powerToUse  * powerToUse;
-      Real powerToUse3 = powerToUse2 * powerToUse;
-      Real powerToUse4 = powerToUse3 * powerToUse;
+      powerToUse2 = powerToUse  * powerToUse;
+      powerToUse3 = powerToUse2 * powerToUse;
+      powerToUse4 = powerToUse3 * powerToUse;
 
       #ifdef DEBUG_MASS_FLOW_THRUST_VECTOR
          MessageInterface::ShowMessage("power = %12.10f, powerToUse = %12.10f\n",
