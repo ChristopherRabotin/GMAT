@@ -370,10 +370,10 @@ void BurnThrusterPanel::Create()
    massBoxSizer->Add(massSizer, 0, wxALIGN_CENTER|wxALL, 0);
    
    // Handle ElectricThruster items
-   GmatStaticBoxSizer *electricBoxSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Config.");
+   GmatStaticBoxSizer *electricBoxSizer = NULL;
    if (theObject->IsOfType("ElectricThruster"))
    {
+      electricBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Config.");
       // Thrust Model
       thrustModelTxt =
          new wxStaticText( this, ID_TEXT, wxT("Thrust "GUI_ACCEL_KEY"Model"),
