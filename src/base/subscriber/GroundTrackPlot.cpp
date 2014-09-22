@@ -85,9 +85,13 @@ GroundTrackPlot::GroundTrackPlot(const std::string &name)
    footPrints = "None";
    
    // Set default texture map file from the startup file through the FileManager
-   FileManager *fm = FileManager::Instance();
+   //FileManager *fm = FileManager::Instance();
    //textureMapFileName = fm->GetFullPathname("EARTH_TEXTURE_FILE");
    // Find file name and full path (LOJ: 2014.06.18)
+   #ifdef DEBUG_TEXTURE_MAP
+   MessageInterface::ShowMessage
+      ("GroundTrackPlot::GroundTrackPlot() calling SetTextureMapFileName()\n");
+   #endif
    SetTextureMapFileName("", "EARTH_TEXTURE_FILE", false, false);
    
    footPrintOption = FP_NONE;
@@ -179,7 +183,11 @@ bool GroundTrackPlot::Validate()
 {
    // Validate texture map file (LOJ: 2014.07.08)
    std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";   
-   SetTextureMapFileName(textureMapFileName, mapFileType, true, true);
+   #ifdef DEBUG_TEXTURE_MAP
+   MessageInterface::ShowMessage
+      ("GroundTrackPlot::Validate() calling SetTextureMapFileName()\n");
+   #endif
+   SetTextureMapFileName(textureMapFileName, mapFileType, false, false);
    return true;
 }
 
@@ -242,21 +250,15 @@ bool GroundTrackPlot::Initialize()
          //===========================================================
          
          #if DBGLVL_INIT > 1
-         //MessageInterface::ShowMessage
-         //   ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
-         //    mScNameArray.size(), mScOrbitColorArray.size());
-         MessageInterface::ShowMessage
-            ("   mObjectNameArray.size=%d, mOrbitColorArray.size=%d\n",
-             mObjectNameArray.size(), mOrbitColorArray.size());
-         
+         MessageInterface::ShowMessage("   mObjectNameArray.size=%d\n", mObjectNameArray.size());
          bool draw, show;
          for (int i=0; i<mObjectCount; i++)
          {
             draw = mDrawOrbitArray[i] ? true : false;
             show = mDrawObjectArray[i] ? true : false;
             MessageInterface::ShowMessage
-               ("   mObjectNameArray[%d]=%s, draw=%d, show=%d, color=%d\n",
-                i, mObjectNameArray[i].c_str(), draw, show, mOrbitColorArray[i]);
+               ("   mObjectNameArray[%d]=%s, draw=%d, show=%d\n",
+                i, mObjectNameArray[i].c_str(), draw, show);
          }
          #endif
          
@@ -304,7 +306,10 @@ bool GroundTrackPlot::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   calling PlotInterface::SetGlDrawingOption()\n");
+            ("   calling PlotInterface::SetGl2dDrawingOption(), name='%s', "
+             "centralBodyName='%s', textureMapFileName='%s'\n   textureMapFullPath='%s'\n",
+             instanceName.c_str(), centralBodyName.c_str(), textureMapFileName.c_str(),
+             textureMapFullPath.c_str());
          #endif
          
          // Pass textureMapFullPath instead of textureMapFileName
@@ -605,28 +610,32 @@ bool GroundTrackPlot::SetStringParameter(const Integer id, const std::string &va
          // Since ground track data uses body fixed coordinates, name it here
          mViewCoordSysName = value + "Fixed";
          
-         // Just set central body name here. The default texturemap will be set
-         // on the celestial body (Fix for GMT-4693 LOJ: 2014.08.27)
-         // // Get default texture map file for the new body
-         // //FileManager *fm = FileManager::Instance();
-         // std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
-         // // Get path from the FileManager (LOJ: 2014.06.18)
-         // //textureMapFileName = fm->GetFullPathname(mapFileType);
-         // SetTextureMapFileName("", mapFileType, false, false);
-         // #if DBGLVL_PARAM_STRING
-         // MessageInterface::ShowMessage
-         //    ("   ==> this = <%p>'%s', textureMapFile changed to '%s'\n", this,
-         //     GetName().c_str(), textureMapFileName.c_str());
-         // #endif
+         // Get default texture map file for the new body
+         std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+         // Get path from the FileManager (LOJ: 2014.06.18)
+         #ifdef DEBUG_TEXTURE_MAP
+         MessageInterface::ShowMessage
+            ("GroundTrackPlot::SetStringParameter(CENTRAL_BODY) calling SetTextureMapFileName()\n");
+         #endif
+         SetTextureMapFileName("", mapFileType, false, false);
+         #if DBGLVL_PARAM_STRING
+         MessageInterface::ShowMessage
+            ("   ==> this = <%p>'%s', textureMapFile changed to '%s'\n", this,
+             GetName().c_str(), textureMapFileName.c_str());
+         #endif
       }
       return true;
    }
    case TEXTURE_MAP:
    {
       textureMapFileName = value;
-      // // Get path from the FileManager (LOJ: 2014.06.18)
-      // std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
-      // SetTextureMapFileName(value, mapFileType, false);
+      // Get path from the FileManager (LOJ: 2014.06.18)
+      std::string mapFileType = GmatStringUtil::ToUpper(centralBodyName) + "_TEXTURE_FILE";
+      #ifdef DEBUG_TEXTURE_MAP
+      MessageInterface::ShowMessage
+         ("GroundTrackPlot::SetStringParameter(TEXTURE_MAP) calling SetTextureMapFileName()\n");
+      #endif
+      SetTextureMapFileName(value, mapFileType, false, false);
       return true;
    }
    case SHOW_FOOT_PRINTS:
@@ -1133,18 +1142,22 @@ void GroundTrackPlot::SetTextureMapFileName(const std::string &mapName,
    #endif
    
    FileManager *fm = FileManager::Instance();
-   
    textureMapFileName = mapName;
-   if (mapName == "")
-      textureMapFileName = fm->GetFilename(whichMap);
+   
+   // Put fm->GetFilename() inside try/catach block so that it can be ignored
+   // (Fix for GMT-4693 LOJ: 2014.09.19)
    
    try
    {
+      if (mapName == "")
+         textureMapFileName = fm->GetFilename(whichMap);
+      
       textureMapFullPath =
          fm->FindPath(textureMapFileName, whichMap, true, writeWarning, writeInfo, GetName());
    }
    catch (BaseException &be)
    {
+      textureMapFullPath = "";
       #ifdef DEBUG_TEXTURE_MAP
       MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
       #endif
