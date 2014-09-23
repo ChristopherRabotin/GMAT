@@ -131,7 +131,7 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
    {
       // Find personalization file from the search path (LOJ: 2014.07.02)
       //std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
-      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, true);
+      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, false);
       #ifdef DEBUG_GUI_CONFIG
       MessageInterface::ShowMessage("   pfile = '%s'\n", pfile.c_str());
       #endif
@@ -369,7 +369,8 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
    #endif
    
    // Write non-existent icon file warning per GMAT session
-   static bool writeWarning = true;
+   // Changed to write no warning (LOJ: 2014.09.19)
+   static bool writeWarning = false;
    FileManager *fm = FileManager::Instance();
    
    if (theIconFile == "")
@@ -460,9 +461,7 @@ void GmatAppData::SetIconFile()
    
    // Set icon file from the search path (LOJ: 2014.07.02)
    FileManager *fm = FileManager::Instance();
-   //theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-   bool writePathInfo = GmatGlobal::Instance()->IsWritingFilePathInfo();
-   theIconFile = fm->FindMainIconFile(writePathInfo).c_str();
+   theIconFile = fm->FindMainIconFile().c_str();
    
    if (theIconFile != "")
       theIconFileSet = true;

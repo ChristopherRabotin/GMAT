@@ -397,7 +397,7 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
  * @param  fileType     The file type name of the input file
  * @param  forInput     Set to true if filename is for input
  * @param  writeWarning Set to true if warning should be written when no path found
- * @param  writeInfo    Set to true if information should be written for output path
+ * @param  writeInfo    Set to true if information should be written for output path (currently not used)
  * @param  objName      The name of the calling object to be written to informational message
  *
  * @return full path name using search order
@@ -415,6 +415,10 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
    #endif
    
    std::string fullname = fileName;
+   bool writeFilePathInfo = GmatGlobal::Instance()->IsWritingFilePathInfo();
+   #ifdef DEBUG_FIND_PATH
+   MessageInterface::ShowMessage("   writeFilePathInfo = %d\n", writeFilePathInfo);
+   #endif
    
    // If input filename is blank, get default name using type
    try
@@ -497,7 +501,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
          if (forInput)
          {
             pathToReturn = "";
-            if (writeWarning && gmatPath != "")
+            if (writeWarning && gmatPath != "" && writeFilePathInfo)
             {
                MessageInterface::ShowMessage
                   ("*** WARNING *** The input file '%s' does not exist\n", fullname.c_str());
@@ -556,7 +560,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                ("   => next search path = '%s' \n", tempPath2.c_str());
             #endif
             
-            if (writeWarning && gmatPath != "")
+            if (writeWarning && gmatPath != "" && writeFilePathInfo)
                MessageInterface::ShowMessage
                   ("*** WARNING *** The input file '%s' does not exist in GMAT "
                    "working directory\n   '%s', so trying default path from the "
@@ -570,7 +574,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             else
             {
                pathToReturn = "";
-               if (writeWarning && gmatPath != "")
+               if (writeWarning && gmatPath != "" && writeFilePathInfo)
                   MessageInterface::ShowMessage
                      ("*** WARNING *** The input file '%s' does not exist in default "
                       "path from the startup file '%s'\n", fullname.c_str(), tempPath2.c_str());
@@ -633,8 +637,10 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       }
    }
    
+   // Write info only if file path debug is on from the startup file (LOJ: 2014.09.22)
    // Write information about file location if file path debug mode is on
-   if (mWriteFilePathInfo == "ON" && writeInfo)
+   //if (mWriteFilePathInfo == "ON" && writeInfo)
+   if (writeFilePathInfo)
    {
       std::string ioType = "output";
       std::string fType = "";

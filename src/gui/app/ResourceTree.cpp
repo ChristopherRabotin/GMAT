@@ -305,7 +305,16 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    entries[2].Set(wxACCEL_NORMAL, WXK_F2, POPUP_RENAME);
    wxAcceleratorTable accel(3, entries);
    this->SetAcceleratorTable(accel);
-      
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d",
+       currFont.GetFaceName().c_str(), currFont.GetNativeFontInfoDesc().c_str(),
+       currFont.GetNativeFontInfoUserDesc().c_str(), currFont.GetPointSize());
+   #endif
+   
    theGuiManager->UpdateAll();
 }
 
