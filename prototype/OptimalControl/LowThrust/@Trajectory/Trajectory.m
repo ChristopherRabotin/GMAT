@@ -52,11 +52,12 @@ classdef Trajectory < handle
         stateStartIdx
         decVecStartIdx
         decVecEndIdx
+        constraintStartIdx
         
         %  User function names
-        pathFunctionName  = '';
-        pointFunctionName = '';
-        plotFunctionName = '';
+        pathFunctionName        = '';
+        pointFunctionName       = '';
+        plotFunctionName        = '';
         
         %  Plotting parameters
         showPlot                = false();
@@ -108,7 +109,7 @@ classdef Trajectory < handle
                 obj.phaseList{phaseIdx}.Initialize();
                 
                 % Decision vector properties
-                obj.numFunctions = obj.numFunctions + ...
+                obj.numFunctions(phaseIdx) = ...
                     obj.phaseList{phaseIdx}.numConstraints;
                 obj.numDecisionParams(phaseIdx) = ...
                     obj.phaseList{phaseIdx}.numDecisionParams;
@@ -139,8 +140,8 @@ classdef Trajectory < handle
             end
             obj.numLinkages = linkIdx;
             
-            %
-            obj.SetStateChunkIndeces();
+            %  
+            obj.SetChunkIndeces();
             obj.SetConstraintBounds();
             obj.SetDecisionVectorBounds();
             obj.InitializeSparsityPattern();
@@ -156,11 +157,13 @@ classdef Trajectory < handle
         
         %  Configure start and stop indeces for different chunks fo the c
         %  complete decision vector
-        function obj = SetStateChunkIndeces(obj)
+        function obj = SetChunkIndeces(obj)
             
-            %Loop over phases and set start and end indeces for different
+            %  Loop over phases and set start and end indeces for different
             %  chunks of the decision vector
             for phaseIdx = 1:obj.numPhases
+                
+                %  State indeces
                 obj.stateStartIdx(phaseIdx) = ...
                     obj.totalnumDecisionParams - ...
                     sum(obj.numDecisionParams(phaseIdx:end)) + 1;
@@ -169,6 +172,11 @@ classdef Trajectory < handle
                 obj.decVecEndIdx(phaseIdx) = ...
                     obj.stateStartIdx(phaseIdx)...
                     + obj.numDecisionParams(phaseIdx) - 1;
+                
+                %  Function indeces
+                obj.constraintStartIdx(phaseIdx) = ...
+                    sum(obj.numFunctions(1:phaseIdx-1)) + 1;
+                
             end
         end
         
@@ -353,6 +361,8 @@ classdef Trajectory < handle
             snseti('Timing level',3);
             % Echo SNOPT Output to MATLAB Command Window
             snscreen on;
+            snset('Major optimality tolerance 1e-5')
+            snset('Major feasibility tolerance 1e-6')
             
             % Set initial guess on basis and Lagrange multipliers to zero
             zmul = zeros(size(z0));
@@ -376,6 +386,8 @@ classdef Trajectory < handle
             %              load 'c:\temp\initGuess.mat'
             %              z0 = initGuess.x;
             %obj.PlotUserFunction();
+%              load 'c:\temp\initGuess.mat';
+%              z0 = z;
             [z,F,xmul,Fmul,info,xstate,Fstate,ns,...
                 ninf,sinf,mincw,miniw,minrw]...
                 = snsolve(z0,zmin,zmax,zmul,zstate,...

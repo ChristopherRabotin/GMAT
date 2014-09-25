@@ -32,13 +32,6 @@ classdef Phase < handle
         initialGuessControl
         
         %%  Phase properties
-        % Row vector that contains the number of control points for
-        % each mesh interval
-        meshIntervalNumPoints
-        %  Row vector that the time fraction each mesh makes of the whole
-        %  phase.  If meshFraction = [1 1 1], then there are three mesh
-        %  intervals, and each one is one third of the phase duration
-        meshIntervalFractions
         numStates
         numControls
         
@@ -102,12 +95,13 @@ classdef Phase < handle
         stateStartIdx
         controlStartIdx
         timeStartIdx
-        defectStartIdx
-        pathStartIdx
-        eventStartIdx
         stateEndIdx
         controlEndIdx
         timeEndIdx
+        %  Constraint bookkeeping
+        defectStartIdx
+        pathStartIdx
+        eventStartIdx
         defectEndIdx
         pathEndIdx
         eventEndIdx

@@ -4,7 +4,7 @@ classdef DecisionVector < handle
     %
     %  This class manages parts of a decision vector allowing you to create
     %   a decision vector, extract parts, or set parts of the vector.
-    %  The decsion vector organized according to Eq. 41 of GPOPS II
+    %  The decsion vector is organized according to Eq. 41 of GPOPS II
     %  journal article.
     %  Z = [V' W' Q' t' s']
     %  where
@@ -35,7 +35,7 @@ classdef DecisionVector < handle
         numStateParams
         numControlParams
         
-        %  Vector Chuncking Ideces
+        %  Vector Chunking Ideces
         stateStartIdx
         stateStopIdx
         controlStartIdx
@@ -63,12 +63,12 @@ classdef DecisionVector < handle
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
             end
-            if  numControls <= 0
-                errorMsg = 'numControls must be > 0';
-                errorLoc  = 'DecisionVector:ConfigureDecisionVector';
-                ME = MException(errorLoc,errorMsg);
-                throw(ME);
-            end
+%             if  numControls <= 0
+%                 errorMsg = 'numControls must be > 0';
+%                 errorLoc  = 'DecisionVector:ConfigureDecisionVector';
+%                 ME = MException(errorLoc,errorMsg);
+%                 throw(ME);
+%             end
             if  numStatePoints <= 0
                 errorMsg = 'numStatePoints must be > 0';
                 errorLoc  = 'DecisionVector:ConfigureDecisionVector';
@@ -82,7 +82,7 @@ classdef DecisionVector < handle
                 throw(ME);
             end
             
-            %  Set optimial control problem sizes
+            %  Set optimal control problem sizes
             obj.numStates         = numStates;
             obj.numControls       = numControls;
             obj.numIntegralParams = numIntegrals;

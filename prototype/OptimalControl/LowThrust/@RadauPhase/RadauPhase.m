@@ -3,10 +3,17 @@ classdef RadauPhase < Phase
     %   Detailed explanation goes here
     
     properties
-        
+        % Row vector that contains the number of control points for
+        % each mesh interval
+        meshIntervalNumPoints
+        %  Row vector that the time fraction each mesh makes of the whole
+        %  phase.  If meshFraction = [1 1 1], then there are three mesh
+        %  intervals, and each one is one third of the phase duration
+        meshIntervalFractions
     end
     
     properties (SetAccess = 'protected')
+              
         %  Time parameters
         timeMat
         finalTime
@@ -74,13 +81,13 @@ classdef RadauPhase < Phase
                     obj.initialTime)/2)*obj.costFuncIntegral;
             end
         end
-               
+        
         %  Configure Radau time parametesr
         function ComputeTimeParameters(obj)
             obj.timeMat     = GetMeshPoints(obj);
             obj.finalTime   = obj.DecVector.GetLastTime();
             obj.initialTime = obj.DecVector.GetFirstTime();
         end
-    
+        
     end
 end

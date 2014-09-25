@@ -19,7 +19,7 @@ Sat.OrbitState = [-6515.97236231483
     -1.1949439525609];
 
 %%  Define the spacecraft power configuration
-Sat.PowerModel         = 'Solar';  % Options: Solar, Nuclear.
+Sat.PowerModel         = 'Nuclear';  % Options: Solar, Nuclear.
 Sat.InitialMaxPower    = 1.2124;  %  kW
 Sat.PowerInitialEpoch  = 21547.00000039794;
 Sat.PowerDecayRate     = 5.123 ;  % Percent per year decay rate
@@ -33,13 +33,13 @@ Sat.SolarCoeff2        = -0.11;
 Sat.SolarCoeff3        = -0.12;
 Sat.SolarCoeff4        =  0.11;
 Sat.SolarCoeff5        = -0.02;
-Sat.debugMath          = true();
+Sat.debugMath          = false();
 
 %%  Configure the Thrusters
 aThruster                    = ElectricThruster();
-aThruster.debugMath          = true();
+aThruster.debugMath          = false();
 %  ConstantThrustAndIsp, FixedEfficiency, ThrustMassPolynomial
-aThruster.ThrustModel        = 'ConstantThrustAndIsp';
+aThruster.ThrustModel        = 'ThrustMassPolynomial';
 aThruster.MaximumUsablePower = 7.4;
 aThruster.MinimumUsablePower = 0.31;
 aThruster.ThrustCoeff1       = 1.92E-06 ;
@@ -65,7 +65,7 @@ aThruster.ThrustScaleFactor  = .87;
 
 %% Configure the finite burn object and spacecraft
 aFiniteBurn              = FiniteBurn();
-aFiniteBurn.debugMath    = true();
+aFiniteBurn.debugMath    = false();
 aTank                    = FuelTank();
 aTank.FuelMass           = 567.89;
 aFiniteBurn.SetThrusters({aThruster});
@@ -83,7 +83,7 @@ Force.srpScaleFactor = 1;
 Force.Debug          = 0;
 Force.bodyMu         = 398600.4415;
 Force.RefEpoch       = Sat.Epoch;
-Force.debugMath      = true();
+Force.debugMath      = false();
 
 %%  Configure integrator and propagate
 if Force.STM  && ~Force.UseFiniteBurn
