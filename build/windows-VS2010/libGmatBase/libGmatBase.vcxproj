@@ -326,6 +326,10 @@
     <ClCompile Include="..\..\..\src\base\function\Function.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionException.cpp" />
     <ClCompile Include="..\..\..\src\base\function\FunctionManager.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\HardwareException.cpp" />
@@ -751,6 +755,10 @@
     <ClInclude Include="..\..\..\src\base\function\Function.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionException.hpp" />
     <ClInclude Include="..\..\..\src\base\function\FunctionManager.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\HardwareException.hpp" />

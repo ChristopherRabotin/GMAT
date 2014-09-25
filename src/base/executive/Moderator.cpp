@@ -93,7 +93,7 @@
 //#define DEBUG_REMOVE 1
 //#define DEBUG_DEFAULT_MISSION 2
 //#define DEBUG_MULTI_STOP 2
-//#define DEBUG_USER_INTERRUPT 1
+//#define DEBUG_RUN_STATE 1
 //#define DEBUG_LOOKUP_RESOURCE 1
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
@@ -142,9 +142,13 @@
 //---------------------------------
 // static data
 //---------------------------------
-Moderator* Moderator::instance = NULL;
-ScriptInterpreter* Moderator::theUiInterpreter = NULL;
-ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
+Moderator*         Moderator::instance                    = NULL;
+ScriptInterpreter* Moderator::theUiInterpreter            = NULL;
+ScriptInterpreter* Moderator::theScriptInterpreter        = NULL;
+
+bool               Moderator::thrusterDeprecateMsgWritten = false;
+bool               Moderator::fuelTankDeprecateMsgWritten = false;
+
 
 
 //---------------------------------
@@ -1720,10 +1724,10 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Moderator::RenameObject() ===> Change Command ref object names\n");
-   MessageInterface::ShowMessage
-      ("Moderator::RenameObject() ===> %s related name change from %s to %s\n",
-       (hasRelatedChange ? "Found" : "Has no"), relatedOldName.c_str(),
-       relatedNewName.c_str());
+//   MessageInterface::ShowMessage
+//      ("Moderator::RenameObject() ===> %s related name change from %s to %s\n",
+//       (hasRelatedChange ? "Found" : "Has no"), relatedOldName.c_str(),
+//       relatedNewName.c_str());
    #endif
    
    int sandboxIndex = 0; //handles one sandbox for now
@@ -2685,6 +2689,24 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
    if (GetHardware(name) == NULL)
    {
       Hardware *obj = theFactoryManager->CreateHardware(type, name);
+      if ((type == "Thruster") && (!thrusterDeprecateMsgWritten))
+      {
+         std::string warnMsg = "*** WARNING *** Type \"Thruster\" is ";
+         warnMsg += "deprecated.  ";
+         warnMsg += "Please use \"ChemicalThruster\" or \"ElectricThruster\" ";
+         warnMsg += "instead.  A ChemicalThruster will be created.\n";
+         MessageInterface::ShowMessage(warnMsg);
+         thrusterDeprecateMsgWritten = true;
+      }
+      if ((type == "FuelTank") && (!fuelTankDeprecateMsgWritten))
+      {
+         std::string warnMsg = "*** WARNING *** Type \"FuelTank\" is ";
+         warnMsg += "deprecated.  ";
+         warnMsg += "Please use \"ChemicalTank\" or \"ElectricTank\" ";
+         warnMsg += "instead.  A ChemicalTank will be created.\n";
+         MessageInterface::ShowMessage(warnMsg);
+         fuelTankDeprecateMsgWritten = true;
+      }
       
       if (obj == NULL)
       {
@@ -6746,32 +6768,35 @@ Integer Moderator::RunMission(Integer sandboxNum)
  * @param <snadobxNum> sandbox number
  *
  * @return a status code
- *    0 = successful, <0 = error (tbd)
+ *    1: successful,  < 0: error (tbd)
  */
 //------------------------------------------------------------------------------
 Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
-   #if DEBUG_USER_INTERRUPT
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage
       ("Moderator::ChangeRunState(%s) entered\n", state.c_str());
    #endif
    
-   if (state == "Stop")
+   if (state == "Stop" || state == "Pause" || state == "Resume")
    {
-      runState = Gmat::IDLE;
-      GmatGlobal::Instance()->SetRunInterrupted(true);
+      GmatGlobal *gmatGlobal = GmatGlobal::Instance();
+      if (state == "Stop")
+      {
+         runState = Gmat::IDLE;
+         gmatGlobal->SetRunInterrupted(true);
+      }
+      else if (state == "Pause")
+         runState = Gmat::PAUSED;
+      else if (state == "Resume")
+         runState = Gmat::RUNNING;
+      
+      gmatGlobal->SetRunState(runState);
    }
-   
-   else if (state == "Pause")
-      runState = Gmat::PAUSED;
-   
-   else if (state == "Resume")
-      runState = Gmat::RUNNING;
-   
    else
-      ; // no action
+      ; // do nothing
    
-   return 0;
+   return 1;
 }
 
 
@@ -6790,13 +6815,14 @@ Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetUserInterrupt()
 {
-   #if DEBUG_USER_INTERRUPT
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage("Moderator::GetUserInterrupt() entered\n");
    #endif
    
    // give MainFrame input focus
    if (theUiInterpreter != NULL)
       theUiInterpreter->SetInputFocus();
+   
    return runState;
 }
 
@@ -6810,7 +6836,7 @@ Gmat::RunState Moderator::GetUserInterrupt()
 //------------------------------------------------------------------------------
 Gmat::RunState Moderator::GetRunState()
 {
-   #if DEBUG_RUN
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage
       ("Moderator::GetRunsState() isRunReady=%d, endOfInterpreter=%d\n",
        isRunReady, endOfInterpreter);
@@ -6820,12 +6846,43 @@ Gmat::RunState Moderator::GetRunState()
    if (!isRunReady && !endOfInterpreter)
       return Gmat::RUNNING;
    
-   #if DEBUG_RUN
+   #if DEBUG_RUN_STATE
    MessageInterface::ShowMessage
       ("Moderator::GetRunsState() runState=%d\n", runState);
    #endif
-
+   
    return runState;
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetDetailedRunState(Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * @param <snadobxNum> sandbox number (currently not used)
+ *
+ * @return the detailed state of the system including solver state
+ *         (Gmat::IDLE, Gmat::RUNNING, Gmat::PAUSED, Gmat::TARGETING,
+ *          Gmat::OPTIMIZING, etc.)
+ */
+//------------------------------------------------------------------------------
+Gmat::RunState Moderator::GetDetailedRunState(Integer sandboxNum)
+{
+   #if DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDetailedRunsState() isRunReady=%d, endOfInterpreter=%d\n",
+       isRunReady, endOfInterpreter);
+   #endif
+   
+   detailedRunState = thePublisher->GetRunState();
+   GmatGlobal::Instance()->SetDetailedRunState(detailedRunState);
+   
+   #if DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("Moderator::GetDetailedRunsState() detailedRunState=%d\n", detailedRunState);
+   #endif
+   
+   return detailedRunState;
 }
 
 
@@ -9612,6 +9669,7 @@ Moderator::Moderator()
    theInternalCoordSystem = NULL;
    theInternalSolarSystem = NULL;
    runState = Gmat::IDLE;
+   detailedRunState = Gmat::IDLE;
    objectManageOption = 1;
    
    theMatlabInterface = NULL;
