@@ -31,7 +31,7 @@ The following files are provided:
     Source code for GMAT R2014a. If you want to run GMAT on
     Linux or Mac, you must build it from source code, using
     either this package, or by checking out the ``R2014a``
-    tag from our repository:
+    branch from our repository:
 	
 	``git clone -b R2014a git://git.code.sf.net/p/gmat/git gmat-git``
     
