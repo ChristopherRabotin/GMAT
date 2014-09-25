@@ -42,7 +42,7 @@
 #include <direct.h>
 #endif
 
-#ifdef __MAC__
+#ifdef __APPLE__
 #include <mach-o/dyld.h>
 #include <unistd.h>                // for getcwd
 #endif
@@ -252,7 +252,7 @@ std::string GmatFileUtil::GetApplicationPath()
    }
    return appPath;
 
-#elif __MAC__
+#elif __APPLE__
    std::string appPath = "./";
    char path[GmatFile::MAX_PATH_LEN];
    char actualPath[GmatFile::MAX_PATH_LEN];
@@ -342,7 +342,7 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
    
    std::string filePath("");
    std::string thePathToUse = fullPath;
-   #ifdef __MAC__
+   #ifdef __APPLE__
       std::string appString = ".app";
       std::string::size_type appLoc = fullPath.rfind(appString);
       if (appLoc != fullPath.npos)

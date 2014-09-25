@@ -32,7 +32,8 @@ ADD_DEFINITIONS("-DEXP_STL")
 if (UNIX)
 	MESSAGE("-- Using a shared base library")
 	IF(APPLE) # mac
-		SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup")
+		#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup")
+		SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -dylib -dynamiclib")
 
 		# snow leopard
 		#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -arch i386")
@@ -120,8 +121,11 @@ SET(BASE_SRCS
     asset/GroundstationInterface.cpp
     attitude/Attitude.cpp
     attitude/AttitudeException.cpp
+    attitude/CCSDSAttitude.cpp
     attitude/CSFixed.cpp
     attitude/Kinematic.cpp
+    attitude/NadirPointing.cpp
+    attitude/PrecessingSpinner.cpp
     attitude/Spinner.cpp
     burn/BurnException.cpp
     burn/Burn.cpp
@@ -282,6 +286,9 @@ SET(BASE_SRCS
     hardware/FuelTank.cpp
     hardware/HardwareException.cpp
     hardware/Hardware.cpp
+    hardware/NuclearPowerSystem.cpp
+    hardware/PowerSystem.cpp
+    hardware/SolarPowerSystem.cpp
     hardware/Thruster.cpp
     interface/InterfaceException.cpp
     interface/Interface.cpp
@@ -334,6 +341,7 @@ SET(BASE_SRCS
     math/Tan.cpp
     math/Tanh.cpp
     math/Transpose.cpp
+    parameter/AlternateEquinoctialParameters.cpp
     parameter/AngularParameters.cpp
     parameter/Array.cpp
     parameter/ArrayWrapper.cpp
@@ -341,16 +349,20 @@ SET(BASE_SRCS
     parameter/AttitudeData.cpp
     parameter/AttitudeParameters.cpp
     parameter/AttitudeReal.cpp
+    parameter/AttitudeRvector.cpp
     parameter/BallisticMassParameters.cpp
     parameter/BallisticMassReal.cpp
     parameter/BooleanWrapper.cpp
     parameter/BplaneData.cpp
     parameter/BplaneParameters.cpp
     parameter/BplaneReal.cpp
+    parameter/BrouwerMeanLongParameters.cpp
+    parameter/BrouwerMeanShortParameters.cpp
     parameter/BurnData.cpp
     parameter/BurnParameters.cpp
     parameter/BurnReal.cpp
     parameter/CartesianParameters.cpp
+    parameter/DelaunayParameters.cpp
     parameter/EnvData.cpp
     parameter/EnvParameters.cpp
     parameter/EnvReal.cpp
@@ -358,7 +370,9 @@ SET(BASE_SRCS
     parameter/ExpressionParser.cpp
     parameter/HardwareReal.cpp
     parameter/HardwareParameters.cpp
+    parameter/IncomingAsymptoteParameters.cpp
     parameter/KeplerianParameters.cpp
+    parameter/ModEquinoctialParameters.cpp
     parameter/NumberWrapper.cpp
     parameter/ObjectWrapper.cpp
     parameter/ObjectPropertyWrapper.cpp
@@ -370,10 +384,12 @@ SET(BASE_SRCS
     parameter/OrbitRmat66.cpp
     parameter/OrbitRvec6.cpp
     parameter/OrbitStmParameters.cpp
+    parameter/OutgoingAsymptoteParameters.cpp
     parameter/ParameterDatabase.cpp
     parameter/ParameterInfo.cpp
     parameter/Parameter.cpp
     parameter/ParameterWrapper.cpp
+    parameter/PlanetodeticParameters.cpp
     parameter/PlanetData.cpp
     parameter/PlanetParameters.cpp
     parameter/PlanetReal.cpp
@@ -382,6 +398,7 @@ SET(BASE_SRCS
     parameter/Rmat33Var.cpp
     parameter/Rmat66Var.cpp
     parameter/Rvec6Var.cpp
+    parameter/RvectorVar.cpp
     parameter/SpacecraftData.cpp
     parameter/SphericalParameters.cpp
     parameter/StringWrapper.cpp
@@ -423,6 +440,7 @@ SET(BASE_SRCS
     solarsys/PlanetaryEphemException.cpp
     solarsys/PlanetaryEphem.cpp
     solarsys/Planet.cpp
+    solarsys/ShadowState.cpp
     solarsys/SlpFile.cpp
     solarsys/SolarFluxFileReader.cpp
     solarsys/SolarSystemException.cpp
@@ -456,11 +474,19 @@ SET(BASE_SRCS
     util/A1Date.cpp
     util/A1Mjd.cpp
     util/AngleUtil.cpp
+    util/AttitudeConversionUtility.cpp
     util/AttitudeUtil.cpp
     util/BaseException.cpp
     util/BodyFixedStateConverter.cpp
 	util/CalculationUtilities.cpp
 	util/Code500EphemerisFile.cpp
+    util/ColorDatabase.cpp
+    util/CCSDSAEMEulerAngleSegment.cpp
+    util/CCSDSAEMQuaternionSegment.cpp
+    util/CCSDSAEMReader.cpp
+    util/CCSDSAEMSegment.cpp
+    util/CCSDSEMReader.cpp
+    util/CCSDSEMSegment.cpp
     util/Date.cpp
     util/DateUtil.cpp
     util/ElapsedTime.cpp
@@ -485,6 +511,7 @@ SET(BASE_SRCS
     util/Rvector.cpp
     util/StringTokenizer.cpp
     util/StringUtil.cpp
+    util/SPADFileReader.cpp
     util/TextParser.cpp
     util/TimeSystemConverter.cpp
     util/TimeTypes.cpp

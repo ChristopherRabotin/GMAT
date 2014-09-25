@@ -2,21 +2,22 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-# CMAKE script file for GMAT CInterface Plugin.
-# This file must be installed in the plugins/CInterfacePlugin/src directory
+# CMAKE script file for GMAT EventLocator Plugin.
+# (Adapted from the CInterface plugin CMake script)
+# This file must be installed in the plugins/EventLocatorPlugin/src directory
 #
-# Author: Josh Fisher
+# Author: Ravi Mathur
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
+MESSAGE("GMAT EventLocator Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET  "libCInterface")
+	SET(PLUGINTARGET  "libEventLocator")
 else()
-	SET(PLUGINTARGET "CInterface")
+	SET(PLUGINTARGET "EventLocator")
 endif()
 
 SET(TargetName ${PLUGINTARGET})
@@ -50,6 +51,7 @@ INCLUDE_DIRECTORIES("../../../src/base/include")
 INCLUDE_DIRECTORIES("../../../src/base/command")
 INCLUDE_DIRECTORIES("../../../src/base/foundation")
 INCLUDE_DIRECTORIES("../../../src/base/util")
+INCLUDE_DIRECTORIES("../../../src/base/asset")
 INCLUDE_DIRECTORIES("../../../src/base/solarsys")
 INCLUDE_DIRECTORIES("../../../src/base/executive")
 INCLUDE_DIRECTORIES("../../../src/base/subscriber")
@@ -66,6 +68,7 @@ INCLUDE_DIRECTORIES("../../../src/base/interpolator")
 INCLUDE_DIRECTORIES("../../../src/base/factory")
 INCLUDE_DIRECTORIES("../../../src/base/burn")
 INCLUDE_DIRECTORIES("../../../src/base/function")
+INCLUDE_DIRECTORIES("../../../src/base/interface")
 INCLUDE_DIRECTORIES("../../../src/base/interpreter")
 INCLUDE_DIRECTORIES("../../../src/base/solver")
 INCLUDE_DIRECTORIES("../../../src/base/math")
@@ -73,17 +76,26 @@ INCLUDE_DIRECTORIES("../../../src/base/configs")
 INCLUDE_DIRECTORIES("../../../src/base/plugin")
 INCLUDE_DIRECTORIES("../../../src/gui/app")
 INCLUDE_DIRECTORIES("../../../src/gui/include")
-INCLUDE_DIRECTORIES("./command")
-INCLUDE_DIRECTORIES("./factory")
-INCLUDE_DIRECTORIES("./include")
-INCLUDE_DIRECTORIES("./plugin")
+INCLUDE_DIRECTORIES("./base/event")
+INCLUDE_DIRECTORIES("./base/factory")
+INCLUDE_DIRECTORIES("./base/include")
+INCLUDE_DIRECTORIES("./base/locator")
+INCLUDE_DIRECTORIES("./base/plugin")
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    command/PrepareMissionSequence.cpp
-	factory/CCommandFactory.cpp
-	plugin/CInterfacePluginFunctions.cpp
+    base/event/Antumbra.cpp
+    base/event/Contact.cpp
+    base/event/Eclipse.cpp
+    base/event/Elevation.cpp
+    base/event/LineOfSight.cpp
+    base/event/Penumbra.cpp
+    base/event/Umbra.cpp
+    base/factory/EventLocatorFactory.cpp
+    base/locator/ContactLocator.cpp
+    base/locator/EclipseLocator.cpp
+    base/plugin/GmatPluginFunctions.cpp
 )
 
 # ====================================================================
@@ -97,7 +109,7 @@ endif()
 
 # ====================================================================
 # add the install targets
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/plugins")
 
 ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
 

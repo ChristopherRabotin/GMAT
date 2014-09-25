@@ -37,13 +37,29 @@ OPTION(PROFILE_BUILD "ProfileBuild" OFF)
 OPTION(64_BIT "64Bit" OFF)
 
 # Optional Plugin Inputs
-OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" OFF)
+OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" OFF)
 OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" OFF)
-OPTION(PLUGIN_ESTIMATION "Estimation Plugin" OFF)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugins" OFF)
 OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" OFF)
-OPTION(PLUGIN_EXTRAPROPAGATOR "ExtraPropagation Plugin" OFF)
+OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" OFF)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
+OPTION(PLUGIN_FORMATION "Formation Plugin" OFF)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" OFF)
 OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" OFF)
-OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plguin" OFF)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" OFF)
+OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" OFF)
+OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" OFF)
+OPTION(PLUGIN_STATION "Station Plugin" OFF)
+
+if(PLUGIN_FMINCONOPTIMIZER OR PLUGIN_MATLABINTERFACE)
+  FIND_PACKAGE(Matlab)
+  if(NOT MATLAB_FOUND)
+    MESSAGE(WARNING "MATLAB not found! Ignoring FminconOptimizer and MatlabInterface plugins.")
+    SET(PLUGIN_FMINCONOPTIMIZER OFF)
+    SET(PLUGIN_MATLABINTERFACE OFF)
+  endif()
+endif()
 
 # Optional Jazz Plugin Inputs
 
@@ -200,12 +216,18 @@ SUBDIRS(../src/console)
 
 # ====================================================================
 # GUI binary
-SUBDIRS(../src/gui)
+#SUBDIRS(../src/gui)
 
 # ====================================================================
 # CInterface Plugin binary
 if (PLUGIN_CINTERFACE)
 	SUBDIRS(../plugins/CInterfacePlugin/src/)
+endif()
+
+# ====================================================================
+# CInterface Plugin binary
+if (PLUGIN_DATAINTERFACE)
+	SUBDIRS(../plugins/DataInterfacePlugin/src/)
 endif()
 
 # ====================================================================
@@ -217,24 +239,65 @@ endif()
 # ====================================================================
 # Estimation Plugin binary
 if (PLUGIN_ESTIMATION)
+	SUBDIRS(../plugins/EstimationPlugin/src/)
 endif()
 
 # ====================================================================
 # EventLocator Plugin binary
 if (PLUGIN_EVENTLOCATOR)
+	SUBDIRS(../plugins/EventLocatorPlugin/src/)
 endif()
 
 # ====================================================================
-# ExtraPropagation Plugin binary
-if (PLUGIN_EXTRAPROPAGATOR)
+# ExtraPropagators Plugin binary
+if (PLUGIN_EXTRAPROPAGATORS)
+	SUBDIRS(../plugins/ExtraPropagatorsPlugin/src/)
+endif()
+
+# ====================================================================
+# FminconOptimizer Plugin binary
+if (PLUGIN_FMINCONOPTIMIZER)
+	SUBDIRS(../plugins/FminconOptimizerPlugin/src/)
+endif()
+
+# ====================================================================
+# Formation Plugin binary
+if (PLUGIN_FORMATION)
+	SUBDIRS(../plugins/FormationPlugin/src/)
+endif()
+
+# ====================================================================
+# GeometricMeasurement Plugin binary
+if (PLUGIN_GEOMETRICMEASUREMENT)
+	SUBDIRS(../plugins/GeometricMeasurementPlugin/src/)
 endif()
 
 # ====================================================================
 # GmatFunction Plugin binary
 if (PLUGIN_GMATFUNCTION)
+	SUBDIRS(../plugins/GmatFunctionPlugin/src/)
 endif()
 
 # ====================================================================
 # MatlabInterface Plugin binary
 if (PLUGIN_MATLABINTERFACE)
+	SUBDIRS(../plugins/MatlabInterfacePlugin/src/)
+endif()
+
+# ====================================================================
+# ProductionPropagators Plugin binary
+if (PLUGIN_PRODUCTIONPROPAGATORS)
+	SUBDIRS(../plugins/ProductionPropagatorPlugin/src/)
+endif()
+
+# ====================================================================
+# SaveCommand Plugin binary
+if (PLUGIN_SAVECOMMAND)
+	SUBDIRS(../plugins/SaveCommandPlugin/src/)
+endif()
+
+# ====================================================================
+# Station Plugin binary
+if (PLUGIN_STATION)
+	SUBDIRS(../plugins/StationPlugin/src/)
 endif()

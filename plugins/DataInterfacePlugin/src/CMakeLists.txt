@@ -2,21 +2,22 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-# CMAKE script file for GMAT CInterface Plugin.
-# This file must be installed in the plugins/CInterfacePlugin/src directory
+# CMAKE script file for GMAT DataInterface Plugin.
+# (Adapted from the CInterface plugin CMake script)
+# This file must be installed in the plugins/DataInterfacePlugin/src directory
 #
-# Author: Josh Fisher
+# Author: Ravi Mathur
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
+MESSAGE("GMAT DataInterface Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET  "libCInterface")
+	SET(PLUGINTARGET  "libDataInterface")
 else()
-	SET(PLUGINTARGET "CInterface")
+	SET(PLUGINTARGET "DataInterface")
 endif()
 
 SET(TargetName ${PLUGINTARGET})
@@ -50,6 +51,7 @@ INCLUDE_DIRECTORIES("../../../src/base/include")
 INCLUDE_DIRECTORIES("../../../src/base/command")
 INCLUDE_DIRECTORIES("../../../src/base/foundation")
 INCLUDE_DIRECTORIES("../../../src/base/util")
+INCLUDE_DIRECTORIES("../../../src/base/asset")
 INCLUDE_DIRECTORIES("../../../src/base/solarsys")
 INCLUDE_DIRECTORIES("../../../src/base/executive")
 INCLUDE_DIRECTORIES("../../../src/base/subscriber")
@@ -66,6 +68,7 @@ INCLUDE_DIRECTORIES("../../../src/base/interpolator")
 INCLUDE_DIRECTORIES("../../../src/base/factory")
 INCLUDE_DIRECTORIES("../../../src/base/burn")
 INCLUDE_DIRECTORIES("../../../src/base/function")
+INCLUDE_DIRECTORIES("../../../src/base/interface")
 INCLUDE_DIRECTORIES("../../../src/base/interpreter")
 INCLUDE_DIRECTORIES("../../../src/base/solver")
 INCLUDE_DIRECTORIES("../../../src/base/math")
@@ -73,17 +76,27 @@ INCLUDE_DIRECTORIES("../../../src/base/configs")
 INCLUDE_DIRECTORIES("../../../src/base/plugin")
 INCLUDE_DIRECTORIES("../../../src/gui/app")
 INCLUDE_DIRECTORIES("../../../src/gui/include")
-INCLUDE_DIRECTORIES("./command")
-INCLUDE_DIRECTORIES("./factory")
-INCLUDE_DIRECTORIES("./include")
-INCLUDE_DIRECTORIES("./plugin")
+INCLUDE_DIRECTORIES("./base/command")
+INCLUDE_DIRECTORIES("./base/datainterface")
+INCLUDE_DIRECTORIES("./base/datareader")
+INCLUDE_DIRECTORIES("./base/factory")
+INCLUDE_DIRECTORIES("./base/include")
+INCLUDE_DIRECTORIES("./base/plugin")
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    command/PrepareMissionSequence.cpp
-	factory/CCommandFactory.cpp
-	plugin/CInterfacePluginFunctions.cpp
+    base/command/Set.cpp
+    base/datainterface/DataInterface.cpp
+    base/datainterface/FileInterface.cpp
+    base/datareader/DataReader.cpp
+    base/datareader/FileReader.cpp
+    base/datareader/TcopsVHFAscii.cpp
+    base/datareader/TcopsVHFData.cpp
+    base/factory/DataInterfaceCommandFactory.cpp
+    base/factory/DataInterfaceFactory.cpp
+    base/factory/ReaderFactory.cpp
+    base/plugin/GmatPluginFunctions.cpp
 )
 
 # ====================================================================
@@ -97,7 +110,7 @@ endif()
 
 # ====================================================================
 # add the install targets
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/plugins")
 
 ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
 

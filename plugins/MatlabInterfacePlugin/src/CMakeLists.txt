@@ -2,21 +2,23 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-# CMAKE script file for GMAT CInterface Plugin.
-# This file must be installed in the plugins/CInterfacePlugin/src directory
+# CMAKE script file for GMAT MatlabInterface Plugin.
+# (Adapted from the CInterface plugin CMake script)
+# (NOTE FROM RAVI: This needs debugging due to need for Matlab Optimization Toolbox)
+# This file must be installed in the plugins/MatlabInterfacePlugin/src directory
 #
-# Author: Josh Fisher
+# Author: Ravi Mathur
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
+MESSAGE("GMAT MatlabInterface Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET  "libCInterface")
+	SET(PLUGINTARGET  "libMatlabInterface")
 else()
-	SET(PLUGINTARGET "CInterface")
+	SET(PLUGINTARGET "MatlabInterface")
 endif()
 
 SET(TargetName ${PLUGINTARGET})
@@ -50,6 +52,7 @@ INCLUDE_DIRECTORIES("../../../src/base/include")
 INCLUDE_DIRECTORIES("../../../src/base/command")
 INCLUDE_DIRECTORIES("../../../src/base/foundation")
 INCLUDE_DIRECTORIES("../../../src/base/util")
+INCLUDE_DIRECTORIES("../../../src/base/asset")
 INCLUDE_DIRECTORIES("../../../src/base/solarsys")
 INCLUDE_DIRECTORIES("../../../src/base/executive")
 INCLUDE_DIRECTORIES("../../../src/base/subscriber")
@@ -66,6 +69,7 @@ INCLUDE_DIRECTORIES("../../../src/base/interpolator")
 INCLUDE_DIRECTORIES("../../../src/base/factory")
 INCLUDE_DIRECTORIES("../../../src/base/burn")
 INCLUDE_DIRECTORIES("../../../src/base/function")
+INCLUDE_DIRECTORIES("../../../src/base/interface")
 INCLUDE_DIRECTORIES("../../../src/base/interpreter")
 INCLUDE_DIRECTORIES("../../../src/base/solver")
 INCLUDE_DIRECTORIES("../../../src/base/math")
@@ -73,17 +77,27 @@ INCLUDE_DIRECTORIES("../../../src/base/configs")
 INCLUDE_DIRECTORIES("../../../src/base/plugin")
 INCLUDE_DIRECTORIES("../../../src/gui/app")
 INCLUDE_DIRECTORIES("../../../src/gui/include")
-INCLUDE_DIRECTORIES("./command")
-INCLUDE_DIRECTORIES("./factory")
-INCLUDE_DIRECTORIES("./include")
-INCLUDE_DIRECTORIES("./plugin")
+INCLUDE_DIRECTORIES("./base/command")
+INCLUDE_DIRECTORIES("./base/factory")
+INCLUDE_DIRECTORIES("./base/function")
+INCLUDE_DIRECTORIES("./base/include")
+INCLUDE_DIRECTORIES("./base/interface")
+INCLUDE_DIRECTORIES("./base/plugin")
+INCLUDE_DIRECTORIES("./base/subscriber")
+INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIRS})
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    command/PrepareMissionSequence.cpp
-	factory/CCommandFactory.cpp
-	plugin/CInterfacePluginFunctions.cpp
+    base/command/CallMatlabFunction.cpp
+    base/factory/CallMatlabFunctionFactory.cpp
+    base/factory/MatlabFunctionFactory.cpp
+    base/factory/MatlabInterfaceFactory.cpp
+    base/factory/MatlabWorkspaceFactory.cpp
+    base/function/MatlabFunction.cpp
+    base/interface/MatlabInterface.cpp
+    base/plugin/GmatPluginFunctions.cpp
+    base/subscriber/MatlabWorkspace.cpp
 )
 
 # ====================================================================
@@ -97,7 +111,7 @@ endif()
 
 # ====================================================================
 # add the install targets
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/plugins")
 
 ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
 
