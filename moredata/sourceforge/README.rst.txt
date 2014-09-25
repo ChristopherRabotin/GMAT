@@ -33,7 +33,7 @@ The following files are provided:
     either this package, or by checking out the ``R2014a``
     tag from our repository:
 	
-	``http://svn.code.sf.net/p/gmat/code/tags/R2014a``
+	``git clone -b R2014a git://git.code.sf.net/p/gmat/git gmat-git``
     
 * ``gmat-datafiles-R2014a.zip``
 
