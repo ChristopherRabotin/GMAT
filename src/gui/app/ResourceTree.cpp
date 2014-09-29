@@ -1947,13 +1947,19 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
    {
       AppendItem(itemId, wxT("Matlab"), GmatTree::RESOURCE_ICON_MATLAB, -1,
                  new GmatTreeItemData(wxT("Matlab"), GmatTree::MATLAB_INTERFACE));
-      #ifdef __ADD_MATLAB_SERVER__
-      // Hide showing Matlab Server from the resource tree (GMT-3320)
-      // @todo It should be called Gmat Server instead of Matlab Server since
-      // GMAT is providing a service to MATLAB. (LOJ: 2013.02.19)
-      AppendItem(itemId, wxT("Matlab Server"), GmatTree::RESOURCE_ICON_MATLAB_SERVER, -1,
-                 new GmatTreeItemData(wxT("Matlab Server"), GmatTree::MATLAB_SERVER));
-      #endif
+
+      // Show MatlabServer if testing mode (LOJ: 2014.09.24)
+      if ((GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING) ||
+          (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS))
+      {
+         //#ifdef __ADD_MATLAB_SERVER__         
+         // Hide showing Matlab Server from the resource tree (GMT-3320)
+         // @todo It should be called Gmat Server instead of Matlab Server since
+         // GMAT is providing a service to MATLAB. (LOJ: 2013.02.19)
+         AppendItem(itemId, wxT("Matlab Server"), GmatTree::RESOURCE_ICON_MATLAB_SERVER, -1,
+                    new GmatTreeItemData(wxT("Matlab Server"), GmatTree::MATLAB_SERVER));
+         //#endif
+      }
    }
    
    StringArray itemNames = theGuiInterpreter->GetListOfObjects(Gmat::INTERFACE);
@@ -5145,20 +5151,29 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          menu.Append(GmatMenu::MENU_MATLAB_CLOSE, wxT("Close"));
          break;
       case GmatTree::MATLAB_SERVER:
-         #ifdef __ADD_MATLAB_SERVER__
-         menu.Append(GmatMenu::MENU_MATLAB_SERVER_START, wxT("Start"));
-         menu.Append(GmatMenu::MENU_MATLAB_SERVER_STOP, wxT("Stop"));
-         if (mMatlabServerStarted)
+         if ((GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING) ||
+             (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS))
          {
-            menu.Enable(GmatMenu::MENU_MATLAB_SERVER_START, false);
-            menu.Enable(GmatMenu::MENU_MATLAB_SERVER_STOP, true);
+            // Show MatlabServer items if testing mode (LOJ: 2014.09.24)
+            if ((GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING) ||
+                (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING_NO_PLOTS))
+            {
+               //#ifdef __ADD_MATLAB_SERVER__
+               menu.Append(GmatMenu::MENU_MATLAB_SERVER_START, wxT("Start"));
+               menu.Append(GmatMenu::MENU_MATLAB_SERVER_STOP, wxT("Stop"));
+               if (mMatlabServerStarted)
+               {
+                  menu.Enable(GmatMenu::MENU_MATLAB_SERVER_START, false);
+                  menu.Enable(GmatMenu::MENU_MATLAB_SERVER_STOP, true);
+               }
+               else
+               {
+                  menu.Enable(GmatMenu::MENU_MATLAB_SERVER_START, true);
+                  menu.Enable(GmatMenu::MENU_MATLAB_SERVER_STOP, false);
+               }
+               //#endif
+            }
          }
-         else
-         {
-            menu.Enable(GmatMenu::MENU_MATLAB_SERVER_START, true);
-            menu.Enable(GmatMenu::MENU_MATLAB_SERVER_STOP, false);
-         }
-         #endif
          break;
       default:
          break;
