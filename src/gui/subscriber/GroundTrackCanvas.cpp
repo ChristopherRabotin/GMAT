@@ -1602,7 +1602,7 @@ void GroundTrackCanvas::DrawImage(const wxString &objName, float lon, float lat,
    #if DEBUG_DRAW_IMAGE
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::DrawImage() entered, objName='%s', lon=%f, lat=%f, "
-       "imagePos=%f, image=<%p>\n", objName.c_str(), lon, lat, imagePos, image);
+       "imagePos=%f, image=<%p>\n", objName.WX_TO_C_STRING, lon, lat, imagePos, image);
    #endif
    
    //=======================================================
@@ -1700,7 +1700,7 @@ void GroundTrackCanvas::DrawSpacecraft(const wxString &objName, int objId, int i
    #if DEBUG_DRAW_IMAGE
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::DrawSpacecraft() entered, objName='%s', objId=%d, "
-       "index=%d\n", objName.c_str(), objId, index);
+       "index=%d\n", objName.WX_TO_C_STRING, objId, index);
    #endif
    
    // Compute current position
@@ -1764,7 +1764,7 @@ void GroundTrackCanvas::DrawGroundStation(const wxString &objName, int objId,
    #if DEBUG_DRAW_IMAGE
    MessageInterface::ShowMessage
       ("GroundTrackCanvas::DrawGroundStation() entered, objName='%s', objId=%d, "
-       "index=%d\n", objName.c_str(), objId, index);
+       "index=%d\n", objName.WX_TO_C_STRING, objId, index);
    #endif
    
    // Compute current position
