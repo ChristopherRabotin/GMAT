@@ -45,6 +45,11 @@
 #include "FileUtil.hpp"
 #include "StringUtil.hpp"          // for ToIntegerArray()
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
+
 //#define DEBUG_GMATAPP
 //#define DEBUG_CMD_LINE
 
@@ -280,9 +285,10 @@ bool GmatApp::OnInit()
          if (!showMainFrame)
             return false;
          
-         
+         #ifdef __IGNORE_PNG_WARNING__
          wxLogLevel logLevel = wxLog::GetLogLevel();
          wxLog::SetLogLevel(0);
+         #endif
          
          if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI)
          {            
@@ -296,11 +302,6 @@ bool GmatApp::OnInit()
             
             if (GmatFileUtil::DoesFileExist(splashFile.c_str()))
             {
-               //wxLog::EnableLogging(false);
-               //wxLogNull noLog;
-               //wxLogLevel logLevel = wxLog::GetLogLevel();
-               //wxLog::SetLogLevel(0);
-               
                std::string ext = GmatFileUtil::ParseFileExtension(splashFile.c_str());
                std::transform(ext.begin(), ext.end(), ext.begin(), ::toupper);
                wxBitmap *bitmap = NULL;
@@ -341,14 +342,11 @@ bool GmatApp::OnInit()
                                         splashStyle);
                    splash->SetShape(region);
                }
-               //wxLog::EnableLogging(true);
-               //wxLog::SetLogLevel(logLevel);
             }
             else
             {
                MessageInterface::ShowMessage
                   ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
-//                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
             }
          }
          
@@ -364,7 +362,9 @@ bool GmatApp::OnInit()
                               position, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
          
+         #ifdef __IGNORE_PNG_WARNING__
          wxLog::SetLogLevel(logLevel);
+         #endif
          
          WriteMessage("GMAT GUI successfully launched.\n", "");
          

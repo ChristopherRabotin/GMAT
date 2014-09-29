@@ -30,6 +30,10 @@
 #include "MessageInterface.hpp"
 #include "AttitudeConversionUtility.hpp"
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
 
 //http://www.opengl.org/resources/features/KilgardTechniques/oglpitfall/
 // When you desire high-quality texture mapping, you will typically specify a
@@ -1599,7 +1603,7 @@ bool ViewCanvas::LoadBodyTextures()
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadBodyTextures() '%s' entered, mObjectCount=%d\n",
-       mPlotName.c_str(), mObjectCount);
+       mPlotName.WX_TO_C_STRING, mObjectCount);
    #endif
    
    //--------------------------------------------------
@@ -1615,7 +1619,7 @@ bool ViewCanvas::LoadBodyTextures()
       
       #if DEBUG_TEXTURE
 		MessageInterface::ShowMessage
-			("   object = '%s', map id = %d\n", mObjectNames[i].c_str(),
+			("   object = '%s', map id = %d\n", mObjectNames[i].WX_TO_C_STRING,
 			 mTextureIdMap[mObjectNames[i]]);
       #endif
 		
@@ -1624,7 +1628,7 @@ bool ViewCanvas::LoadBodyTextures()
          #if DEBUG_TEXTURE > 1
          MessageInterface::ShowMessage
             ("ViewCanvas::LoadBodyTextures() object=<%p>'%s'\n",
-             mObjectArray[i], mObjectNames[i].c_str());
+             mObjectArray[i], mObjectNames[i].WX_TO_C_STRING);
          #endif
          
          mTextureIdMap[mObjectNames[i]] =
@@ -1635,7 +1639,7 @@ bool ViewCanvas::LoadBodyTextures()
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadBodyTextures() '%s' leaving, mObjectCount=%d\n",
-       mPlotName.c_str(), mObjectCount);
+       mPlotName.WX_TO_C_STRING, mObjectCount);
    #endif
    
    return true;   
@@ -1652,6 +1656,11 @@ bool ViewCanvas::LoadBodyTextures()
 //------------------------------------------------------------------------------
 GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
 {
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
+   #endif
+   
    GLuint texId = UNINIT_TEXTURE;
    std::string textureFile;
    
@@ -1662,7 +1671,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::BindTexture() '%s' entered, objName='%s'\n   textureFile = '%s'\n",
-       mPlotName.c_str(), objName.c_str(), textureFile.c_str());
+       mPlotName.WX_TO_C_STRING, objName.WX_TO_C_STRING, textureFile.c_str());
    #endif
    
    try
@@ -1727,7 +1736,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          if (GmatFileUtil::DoesDirectoryExist(iconLoc.c_str(), false))
          {
             if (obj->IsOfType(Gmat::SPACECRAFT))
-                textureFile = iconLoc + "Spacecraft.png";
+               textureFile = iconLoc + "Spacecraft.png";
             else
                textureFile = iconLoc + "rt_GroundStation.png";
          }
@@ -1784,7 +1793,11 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::BindTexture() '%s' leaving, objName='%s', texId=%d\n",
-		 mPlotName.c_str(), objName.c_str(), texId);
+		 mPlotName.WX_TO_C_STRING, objName.WX_TO_C_STRING, texId);
+   #endif
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
    #endif
    
    return texId;
@@ -1807,7 +1820,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
    #if DEBUG_LOAD_IMAGE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadImage() '%s' entered\n   file='%s', objUsingIcon=%d\n",
-       mPlotName.c_str(), fileName.c_str(), objUsingIcon);
+       mPlotName.WX_TO_C_STRING, fileName.c_str(), objUsingIcon);
    #endif
    
    if (fileName == "")
@@ -1917,7 +1930,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
          ("ViewCanvas::LoadImage() '%s' returning true, mipmapsStatus=%d\n",
-          mPlotName.c_str(), mipmapsStatus);
+          mPlotName.WX_TO_C_STRING, mipmapsStatus);
       #endif
       
       return true;
@@ -1927,7 +1940,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
          ("ViewCanvas::LoadImage() '%s' returning false, mipmapsStatus=%d\n",
-          mPlotName.c_str(), mipmapsStatus);
+          mPlotName.WX_TO_C_STRING, mipmapsStatus);
       #endif
       return false;
    }
