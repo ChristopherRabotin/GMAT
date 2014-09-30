@@ -53,6 +53,7 @@
 //#define DEBUG_GMATAPP
 //#define DEBUG_CMD_LINE
 
+
 // In single window mode, don't have any child windows; use
 // main window.
 
@@ -76,12 +77,12 @@ GmatApp::GmatApp()
    GuiPlotReceiver *thePlotReceiver = GuiPlotReceiver::Instance();
    PlotInterface::SetPlotReceiver(thePlotReceiver);
    
-   theModerator = (Moderator *)NULL;
-   scriptToRun = "";
-   showMainFrame = true;
-   buildScript = false;
-   runScript = false;
-   runBatch = false;
+   theModerator      = (Moderator *)NULL;
+   scriptToRun       = "";
+   showMainFrame     = true;
+   buildScript       = false;
+   runScript         = false;
+   runBatch          = false;
    startMatlabServer = false;
 }
 
@@ -105,10 +106,8 @@ bool GmatApp::OnInit()
    
 #if wxUSE_PRINTING_ARCHITECTURE
    // initialize print data and setup
-#ifndef __WXMAC__
    globalPrintData = new wxPrintData;
    globalPageSetupData = new wxPageSetupDialogData;
-#endif
 #endif // wxUSE_PRINTING_ARCHITECTURE
    
    try
@@ -182,6 +181,9 @@ bool GmatApp::OnInit()
          // set default size
          wxSize size = wxSize(800, 600);
          wxPoint position = wxDefaultPosition;
+         #ifdef __WXMAC__
+         position = wxPoint(0,25); // put the main frame in the upper left corner
+         #endif
          
          // for Windows
          #ifdef __WXMSW__
@@ -478,12 +480,10 @@ int GmatApp::OnExit()
    
 #if wxUSE_PRINTING_ARCHITECTURE
    // delete global print data and setup
-#ifndef __WXMAC__
    if (globalPrintData)
       delete globalPrintData;
    if (globalPageSetupData)
       delete globalPageSetupData;
-#endif
 #endif // wxUSE_PRINTING_ARCHITECTURE
    
    WriteMessage("GMAT GUI exiting.\n", "");

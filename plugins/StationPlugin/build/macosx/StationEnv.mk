@@ -8,8 +8,10 @@ DEBUG_BUILD = 0
 # Select the base library
 BASE_LIBRARY = GmatBase
 
-SAMPLE_CPP_FLAGS = -fPIC -arch i386 -fno-rtti
-SAMPLE_LINK_FLAGS = -fPIC -arch i386 -fno-rtti
+SAMPLE_CPP_FLAGS = -fPIC -fno-rtti
+SAMPLE_LINK_FLAGS = -fPIC -fno-rtti
+#removed
+# -arch i386
 
 # Select the base library
 BASE_LIBRARY = GmatBase

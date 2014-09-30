@@ -21,8 +21,11 @@ BASE_LIBRARY = GmatBase
 #BASE_LIB_LOCATION = GMAT.app/Contents/Frameworks/
 BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
 
-EXTRA_PROPAGATOR_CPP_FLAGS = -fPIC -arch i386 -fno-rtti
-EXTRA_PROPAGATOR_LINK_FLAGS = -fPIC -arch i386 -fno-rtti
+EXTRA_PROPAGATOR_CPP_FLAGS = -fPIC -fno-rtti
+EXTRA_PROPAGATOR_LINK_FLAGS = -fPIC -fno-rtti
+
+# removed
+# -arch i386
 
 # Compiler options
 CPP = g++
@@ -40,7 +43,10 @@ ifeq ($(MAC_SPECIFIC), 1)
 SHARED_EXTENSION = .dylib
 SHARED_LIB_FLAGS = -bundle -undefined dynamic_lookup \
                    -L$(GMAT_CODE_LOCATION)/base/lib -l$(BASE_LIBRARY) \
-                    $(MAC_CPP_FLAGS) -arch i386
+                    $(MAC_CPP_FLAGS)
+                    
+# removed
+# -arch i386
                    
 
 else
@@ -70,4 +76,6 @@ endif
 CPP_BASE = $(OPTIMIZATIONS) $(EXTRA_PROPAGATOR_CPP_FLAGS) -Wall \
            $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
-CPPFLAGS = $(CPP_BASE) -arch i386
+CPPFLAGS = $(CPP_BASE)
+# removed
+# -arch i386

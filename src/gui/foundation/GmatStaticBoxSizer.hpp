@@ -25,11 +25,11 @@
 #include "gmatwxdefs.hpp"
 #include <wx/sizer.h>
 
-#ifdef __WXMAC__
-class GmatStaticBoxSizer : public wxBoxSizer
- #else
+//#ifdef __WXMAC__
+//class GmatStaticBoxSizer : public wxBoxSizer
+// #else
  class GmatStaticBoxSizer : public wxStaticBoxSizer
- #endif
+ //#endif
 {
 public:
    
