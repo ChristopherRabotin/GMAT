@@ -364,8 +364,8 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage
       ("GmatAppData::SetIcon() entered, called from '%s' named '%s'\n   "
-       "theIconFile = '%s', theIconFileSet = %d\n", calledFrom.c_str(), topWindow->GetName().c_str(),
-       theIconFile.c_str(), theIconFileSet);
+       "theIconFile = '%s', theIconFileSet = %d\n", calledFrom.c_str(), topWindow->GetName().WX_TO_C_STRING,
+       theIconFile.WX_TO_C_STRING, theIconFileSet);
    #endif
    
    // Write non-existent icon file warning per GMAT session
@@ -381,7 +381,7 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
       
       #ifdef DEBUG_SET_ICON
       if (theIconFile != "")
-         MessageInterface::ShowMessage("   theIconFile = '%s'\n", theIconFile.c_str());
+         MessageInterface::ShowMessage("   theIconFile = '%s'\n", theIconFile.WX_TO_C_STRING);
       #endif
       
       // Write warning message if it is still blank
@@ -391,7 +391,7 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** Error setting icon for window '%s' named '%s'\n   "
-                "Cannot find the icon file '%s'.  This warning message will be writen only once.\n",
+                "Cannot find the icon file '%s'.  This warning message will be written only once.\n",
                 calledFrom.c_str(), topWindow->GetName().WX_TO_C_STRING,
                 fm->GetFilename("MAIN_ICON_FILE").c_str());
             writeWarning = false;
@@ -410,7 +410,10 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
    #elif defined __WXGTK__
       topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_XPM));
    #elif defined __WXMAC__
-      topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_PICT_RESOURCE));
+//      This causes an error with wx3.0 any time a new window is brought up.
+//      Removing the wxBitmap type from the call fixes the issue.
+//      topWindow->SetIcon(wxIcon(theIconFile, wxBITMAP_TYPE_PICT_RESOURCE));
+      topWindow->SetIcon(wxIcon(theIconFile));
    #endif
    
    #ifdef DEBUG_SET_ICON
@@ -468,7 +471,7 @@ void GmatAppData::SetIconFile()
    
    #ifdef DEBUG_SET_ICON
    MessageInterface::ShowMessage
-      ("GmatAppData::SetIconFile() leaving\n   theIconFile = '%s'\n", theIconFile.c_str());
+      ("GmatAppData::SetIconFile() leaving\n   theIconFile = '%s'\n", theIconFile.WX_TO_C_STRING);
    #endif
 }
 
