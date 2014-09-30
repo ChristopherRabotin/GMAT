@@ -206,6 +206,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU (TOOL_STOP, GmatMainFrame::OnStop)
    EVT_MENU (TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseAll)
    EVT_MENU (TOOL_CLOSE_CURRENT, GmatMainFrame::OnCloseActive)
+   EVT_MENU (wxID_EXIT,          GmatMainFrame::OnProjectExit)  // added for Mac Cmd-Q and Quit menu item
 
    EVT_MENU (TOOL_SCREENSHOT, GmatMainFrame::OnScreenshot)
 
@@ -599,7 +600,9 @@ GmatMainFrame::~GmatMainFrame()
        mMatlabServer, theGuiInterpreter);
    #endif
 
-   wxSafeYield();
+   #ifndef __WXMAC__
+   wxSafeYield();  // Mac with wx3.0.1 does not like this
+   #endif
    theGuiInterpreter->CloseMatlabEngine();
    
    if (mMatlabServer)
@@ -1469,7 +1472,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::RemoveChild() name=%s, itemType=%d, deleteChild=%d\n",
-       name.c_str(), itemType, deleteChild);
+       name.WX_TO_C_STRING, itemType, deleteChild);
    #endif
    
    wxNode *node = theMdiChildren->GetFirst();
@@ -1507,7 +1510,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
          #ifdef DEBUG_REMOVE_CHILD
          MessageInterface::ShowMessage
             ("   removing title: %s\n   name: %s, child=<%p>\n",
-             childName.c_str(), name.c_str(), child);
+             childName.WX_TO_C_STRING, name.WX_TO_C_STRING, child);
          #endif
          
          // MdiChildViewFrame::OnPlotClose() and MdiChildTsFrame::OnPlotClose()
@@ -1527,7 +1530,7 @@ bool GmatMainFrame::RemoveChild(const wxString &name, GmatTree::ItemType itemTyp
    if (childRemoved)
    {
       #ifdef DEBUG_REMOVE_CHILD
-      MessageInterface::ShowMessage("   %s removed\n", name.c_str());
+      MessageInterface::ShowMessage("   %s removed\n", name.WX_TO_C_STRING);
       #endif
       
       if (gmatAppData->GetOutputTree() != NULL)
@@ -1570,7 +1573,7 @@ void GmatMainFrame::RemoveOutput(const wxString &name)
 {
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::RemoveOutputIfOpened() entered, name='%s'\n", name.c_str());
+      ("GmatMainFrame::RemoveOutputIfOpened() entered, name='%s'\n", name.WX_TO_C_STRING);
    #endif
    
    if (IsChildOpen(name, GmatTree::OUTPUT_XY_PLOT, false))
@@ -1635,7 +1638,7 @@ void GmatMainFrame::CloseChild(const wxString &name, GmatTree::ItemType itemType
 {
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CloseChild() name='%s', itemType=%d\n", name.c_str(),
+      ("GmatMainFrame::CloseChild() name='%s', itemType=%d\n", name.WX_TO_C_STRING,
        itemType);
    #endif
 
@@ -1649,7 +1652,7 @@ void GmatMainFrame::CloseChild(const wxString &name, GmatTree::ItemType itemType
           (child->GetItemType() == itemType))
       {
          #ifdef DEBUG_REMOVE_CHILD
-         MessageInterface::ShowMessage("   About to close '%s'\n", name.c_str());
+         MessageInterface::ShowMessage("   About to close '%s'\n", name.WX_TO_C_STRING);
          #endif
          wxCloseEvent event;
          child->OnClose(event);
@@ -1687,7 +1690,7 @@ void GmatMainFrame::CloseChild(GmatMdiChildFrame *child)
       wxCloseEvent event;
       child->OnClose(event);
       // Don't yield here, the idle loop needs to wait until after the window events are completed
-      // because these events schedule window deltetion
+      // because these events schedule window deletion
       // wxSafeYield();
    }
 }
@@ -1778,7 +1781,9 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       MessageInterface::ShowMessage("   ==========> node = %p\n", node);
       #endif
       
-      wxSafeYield();
+      #ifndef __WXMAC__
+      wxSafeYield();  // Mac with wx3.0.1 does not like this
+      #endif
       canDelete = false;
       isOutputChild = false;
       GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
@@ -1788,7 +1793,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       type = child->GetItemType();
       
       #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage("   name = %s, type = %d\n", name.c_str(), type);
+      MessageInterface::ShowMessage("   name = %s, type = %d\n", name.WX_TO_C_STRING, type);
       #endif
       
       // If name is in the ignore list, continue
@@ -1856,7 +1861,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       if (canDelete)
       {
          #ifdef DEBUG_MAINFRAME_CLOSE
-         MessageInterface::ShowMessage("   ==> closing child = %s\n", name.c_str());
+         MessageInterface::ShowMessage("   ==> closing child = %s\n", name.WX_TO_C_STRING);
          #endif
          
          // If it can exit without confirm, set dirty flag to false
@@ -1927,14 +1932,16 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          title = child->GetTitle();
          name = child->GetName();
          MessageInterface::ShowMessage
-            ("   next title = '%s'\n   next name  = '%s'\n", title.c_str(), name.c_str());
+            ("   next title = '%s'\n   next name  = '%s'\n", title.WX_TO_C_STRING, name.WX_TO_C_STRING);
       }
       #endif
       
       node = nextNode;
    }
    
-   wxSafeYield();
+   #ifndef __WXMAC__
+   wxSafeYield();  // Mac with wx3.0.1 does not like this
+   #endif
    bool retval = true;
    if (!ignoreNames.IsEmpty())
       retval = false;
@@ -2893,8 +2900,8 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("\nGmatMainFrame::OnClose() entered, mMatlabServer=%p, mRunCompleted=%d\n",
-       mMatlabServer, mRunCompleted);
+      ("\nGmatMainFrame::OnClose() entered, mMatlabServer=%p, mRunCompleted=%d, mAutoExitAfterRun=%d\n",
+       mMatlabServer, mRunCompleted, mAutoExitAfterRun);
    #endif
    
    if (!mRunCompleted)
@@ -3679,7 +3686,9 @@ void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
    #endif
    
    CloseAllChildren(true, true, true, false);
-   wxSafeYield();
+   #ifndef __WXMAC__
+   wxSafeYield();  // Mac with wx3.0.1 does not like this
+   #endif
    
    wxToolBar* toolBar = GetToolBar();
    // Disable screen capture when no children is showing
