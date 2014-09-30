@@ -2,17 +2,17 @@
 # Architecture flags
 # Set to 0 for Windows, 1 for Linux or Mac - needed by Makefile
 LINUX_MAC = 1
-ifeq ($(BUILD_64BIT), 1)
-GMAT_BIN_DIR = bin64
-GMAT_LIB_DIR = lib64
-GMAT_PLUGIN_DIR = plugins64
+#ifeq ($(BUILD_64BIT), 1)
+#GMAT_BIN_DIR = bin64
+#GMAT_LIB_DIR = lib64
+#GMAT_PLUGIN_DIR = plugins64
 MAC_ARCHITECTURE_FLAGS = 
-else
+#else
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
-MAC_ARCHITECTURE_FLAGS = -arch i386
-endif
+#MAC_ARCHITECTURE_FLAGS = -arch i386
+#endif
 
 # Environment settings for the estimation plugin
 GMAT_Code_Location = ../../../../src

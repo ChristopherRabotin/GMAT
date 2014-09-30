@@ -3,19 +3,19 @@
 # Set to 0 for Windows, 1 for Linux or Mac - this is needed by the Makefile
 LINUX_MAC = 1
 
-ifeq ($(BUILD_64BIT), 1)
-#CSPICE_VER = cspice64
-GMAT_BIN_DIR = bin64
-GMAT_LIB_DIR = lib64
-GMAT_PLUGIN_DIR = plugins64
+#ifeq ($(BUILD_64BIT), 1)
+##CSPICE_VER = cspice64
+#GMAT_BIN_DIR = bin64
+#GMAT_LIB_DIR = lib64
+#GMAT_PLUGIN_DIR = plugins64
 MAC_ARCHITECTURE_FLAGS = 
-else
-#CSPICE_VER = cspice
+#else
+##CSPICE_VER = cspice
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
-MAC_ARCHITECTURE_FLAGS = -arch i386
-endif
+#MAC_ARCHITECTURE_FLAGS = -arch i386
+#endif
 
 # Environment settings for the GMAT C Interface plugin
 # location of GMAT base headers and libraries
@@ -61,7 +61,9 @@ PROFILE_FLAGS =
 endif
 
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup -fPIC $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -dynamiclib -undefined dynamic_lookup -fPIC $(MAC_ARCHITECTURE_FLAGS)
+# removed
+# -dylib
 
 # --out-implib
 
