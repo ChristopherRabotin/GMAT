@@ -37,17 +37,29 @@ public:
    GmatConnection();
    ~GmatConnection();
    
-   //virtual wxChar* OnRequest(const wxString& topic, const wxString& item,
-   virtual char*   OnRequest(const wxString& topic, const wxString& item,
-                             int *size, wxIPCFormat format);
-   virtual bool    OnExecute(const wxString& topic, wxChar *data, int size,
-                             wxIPCFormat format);
-   //virtual bool    OnPoke(const wxString& topic, const wxString& item, wxChar *data,
-   virtual bool    OnPoke(const wxString& topic, const wxString& item, char *data,
-                          int size, wxIPCFormat format);
-   virtual bool    OnStartAdvise(const wxString& topic, const wxString& item);
-   virtual bool    OnDisconnect();
+   // If using wxWidgets 3.0 or higher
+   #if wxCHECK_VERSION(3, 0, 0)
    
+   virtual bool         OnExec(const wxString &topic, const wxString &data);
+   virtual bool         OnPoke(const wxString &topic, const wxString &item,
+                               const void *data, size_t size, wxIPCFormat format);
+   virtual const void*  OnRequest(const wxString &topic, const wxString &item,
+                                 size_t *size, wxIPCFormat format);
+   #else
+   
+   virtual bool         OnExecute(const wxString &topic, wxChar *data, int size,
+                                  wxIPCFormat format);
+   virtual bool         OnPoke(const wxString &topic, const wxString &item,
+                               wxChar *data, int size, wxIPCFormat format);
+   virtual wxChar*      OnRequest(const wxString &topic, const wxString &item,
+   #endif
+   
+   virtual bool         OnStartAdvise(const wxString &topic, const wxString &item);
+   virtual bool         OnDisconnect();
+
+protected:
+   char* RunRequest(const wxString &item);
+   bool  RunPoke(const char *itemData);
 };
 
 #endif // GmatConnection_hpp
