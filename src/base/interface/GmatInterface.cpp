@@ -180,19 +180,28 @@ void GmatInterface::RunScript()
 //------------------------------------------------------------------------------
 bool GmatInterface::ExecuteCallback()
 {
+   // Check periodically for user interrupt (LOJ: 2014.09.08)
+   static Integer checkCount = 0;
+   static Integer interruptCheckFrequency = 2;
+   
    #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage("GmatInterface::ExecuteCallback being called ...\n");
    #endif
    if (callbackObj)
    {
+      ++checkCount;
+      if (checkCount == interruptCheckFrequency)
+      {
+         // Request UI to set input focus
+         CheckUserInterrupt();
+         checkCount = 0;
+      }
       callbackObj->ExecuteCallback();
       return true;
    }
    else
    {
-      //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
       MessageInterface::ShowMessage("call back object is NULL, so returning false\n");
-      //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
       return false;
    }
 }
@@ -250,9 +259,6 @@ char* GmatInterface::GetCallbackStatus()
 //------------------------------------------------------------------------------
 // void PutCallbackData(std::string &data)
 //------------------------------------------------------------------------------
-/*
- */
-//------------------------------------------------------------------------------
 void  GmatInterface::PutCallbackData(std::string &data)
 {
    #ifdef DEBUG_TEST_CALLBACK
@@ -264,6 +270,23 @@ void  GmatInterface::PutCallbackData(std::string &data)
       if (!(callbackObj->PutCallbackData(data)))
          throw InterfaceException(
          "GmatInterface::Error setting callback data on callback server");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void PutCallbackRealData(RealArray &data)
+//------------------------------------------------------------------------------
+void GmatInterface::PutCallbackRealData(RealArray &data)
+{
+   #ifdef DEBUG_TEST_CALLBACK
+   MessageInterface::ShowMessage
+      ("GmatInterface::PutCallbackRealData being called with data[0] = %f\n", data[0]);
+   #endif
+   if (callbackObj)
+   {
+      if (!(callbackObj->PutCallbackRealData(data)))
+         throw InterfaceException(
+         "GmatInterface::Error setting callback real data on callback server");
    }
 }
 
@@ -476,7 +499,7 @@ char* GmatInterface::GetGmatObject(const std::string &name)
 // void CheckUserInterrupt()
 //------------------------------------------------------------------------------
 /*
- * Calls Moderator::GetUserInterrupt() to check if user interrupted the
+ * Calls Moderator::SetUserInputFocus() to check if user interrupted the
  * mission sequence.
  */
 //------------------------------------------------------------------------------

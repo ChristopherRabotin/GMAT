@@ -73,7 +73,7 @@ bool SolarPowerSystem::occultationWarningWritten = false;
  * @param nomme Name for the power system.
  */
 //------------------------------------------------------------------------------
-SolarPowerSystem::SolarPowerSystem(std::string nomme) :
+SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    PowerSystem          ("SolarPowerSystem",nomme),
    solarCoeff1          (1.32077),
    solarCoeff2          (-0.10848),
@@ -178,11 +178,11 @@ SolarPowerSystem& SolarPowerSystem::operator=(const SolarPowerSystem& copy)
          shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
       }
       shadowBodies.clear();
-      // copy the list of body pointers
-      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
-      {
-         shadowBodies.push_back((copy.shadowBodies).at(i));
-      }
+//      // copy the list of body pointers - do I want to do this???
+//      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+//      {
+//         shadowBodies.push_back((copy.shadowBodies).at(i));
+//      }
 
       shadowModel = copy.shadowModel;
 
@@ -216,7 +216,7 @@ bool SolarPowerSystem::Initialize()
       MessageInterface::ShowMessage("Calling Initialization on %s\n",
             instanceName.c_str());
       MessageInterface::ShowMessage("number of shadow bodies = %d\n",
-            (Integer) shadowBodies.size());
+            (Integer) shadowBodyNames.size());
    #endif
    PowerSystem::Initialize();
 
@@ -247,6 +247,10 @@ bool SolarPowerSystem::Initialize()
          throw HardwareException(errmsg);
       }
       shadowBodies.push_back(body);
+      #ifdef DEBUG_SOLAR_POWER
+         MessageInterface::ShowMessage("Adding shadow body %s to %s\n",
+               body->GetName().c_str(), instanceName.c_str());
+      #endif
    }
 
    if (!shadowState)
@@ -462,6 +466,9 @@ Real SolarPowerSystem::GetPowerGenerated() const
 
    // Englander Eq. 17
    generatedPower = percentSunAll * basePower * solarScaleFactor;
+   #ifdef DEBUG_SOLAR_POWER
+      MessageInterface::ShowMessage("   generatedPower    = %12.10f\n", generatedPower);
+   #endif
 
    return generatedPower;
 }

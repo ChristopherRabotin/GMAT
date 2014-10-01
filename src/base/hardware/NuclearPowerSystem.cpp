@@ -40,7 +40,7 @@
  * @param nomme Name for the power system.
  */
 //------------------------------------------------------------------------------
-NuclearPowerSystem::NuclearPowerSystem(std::string nomme) :
+NuclearPowerSystem::NuclearPowerSystem(const std::string &nomme) :
 PowerSystem          ("NuclearPowerSystem",nomme)
 {
    objectTypes.push_back(Gmat::NUCLEAR_POWER_SYSTEM);

@@ -22,7 +22,10 @@
 #include "Factory.hpp"
 #include "HardwareFactory.hpp"
 #include "FuelTank.hpp"
-#include "Thruster.hpp"
+#include "ChemicalThruster.hpp"
+#include "ElectricThruster.hpp"
+#include "ChemicalTank.hpp"
+#include "ElectricTank.hpp"
 #include "NuclearPowerSystem.hpp"
 #include "SolarPowerSystem.hpp"
 
@@ -55,10 +58,15 @@
 Hardware* HardwareFactory::CreateHardware(const std::string &ofType,
                                   const std::string &withName)
 {
-   if (ofType == "FuelTank")
-      return new FuelTank(withName);
-   if (ofType == "Thruster")
-      return new Thruster(withName);
+   if ((ofType == "FuelTank") || (ofType == "ChemicalTank"))
+//      return new FuelTank(withName);       // deprecated
+      return new ChemicalTank(withName);
+   if (ofType == "ElectricTank")
+      return new ElectricTank(withName);
+   if ((ofType == "Thruster") || (ofType == "ChemicalThruster"))
+      return new ChemicalThruster(withName);
+   if (ofType == "ElectricThruster")
+      return new ElectricThruster(withName);
    if (ofType == "NuclearPowerSystem")
       return new NuclearPowerSystem(withName);
    if (ofType == "SolarPowerSystem")
@@ -82,8 +90,12 @@ Factory(Gmat::HARDWARE)
 {
    if (creatables.empty())
    {
-      creatables.push_back("FuelTank");
-      creatables.push_back("Thruster");
+      creatables.push_back("FuelTank");       // deprecated
+      creatables.push_back("ChemicalTank");
+      creatables.push_back("ElectricTank");
+      creatables.push_back("Thruster");        // deprecated
+      creatables.push_back("ChemicalThruster");
+      creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
    }
@@ -104,8 +116,12 @@ Factory(createList, Gmat::HARDWARE)
 {
    if (creatables.empty())
    {
-      creatables.push_back("FuelTank");
-      creatables.push_back("Thruster");
+      creatables.push_back("FuelTank");       // deprecated
+      creatables.push_back("ChemicalTank");
+      creatables.push_back("ElectricTank");
+      creatables.push_back("Thruster");        // deprecated
+      creatables.push_back("ChemicalThruster");
+      creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
    }
@@ -126,8 +142,12 @@ Factory(fact)
 {
    if (creatables.empty())
    {
-      creatables.push_back("FuelTank");
-      creatables.push_back("Thruster");
+      creatables.push_back("FuelTank");       // deprecated
+      creatables.push_back("ChemicalTank");
+      creatables.push_back("ElectricTank");
+      creatables.push_back("Thruster");        // deprecated
+      creatables.push_back("ChemicalThruster");
+      creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
    }
@@ -150,8 +170,12 @@ HardwareFactory& HardwareFactory::operator= (const HardwareFactory& fact)
    Factory::operator=(fact);
    if (creatables.empty())
    {
-      creatables.push_back("FuelTank");
-      creatables.push_back("Thruster");
+      creatables.push_back("FuelTank");       // deprecated
+      creatables.push_back("ChemicalTank");
+      creatables.push_back("ElectricTank");
+      creatables.push_back("Thruster");        // deprecated
+      creatables.push_back("ChemicalThruster");
+      creatables.push_back("ElectricThruster");
       creatables.push_back("NuclearPowerSystem");
       creatables.push_back("SolarPowerSystem");
    }

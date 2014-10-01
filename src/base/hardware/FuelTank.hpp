@@ -19,13 +19,13 @@
 // Order 124.
 //
 /**
- * Class definition for the Fuel Tanks.
+ * Class definition for the Fuel Tank base class.
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef FUELTANK_HPP
-#define FUELTANK_HPP
+#ifndef FuelTank_hpp
+#define FuelTank_hpp
 
 #include "Hardware.hpp"
 
@@ -37,7 +37,7 @@ class GMAT_API FuelTank : public Hardware
 {
 public:
 
-   FuelTank(std::string nomme);
+   FuelTank(const std::string &typeStr, const std::string &nomme);
    virtual ~FuelTank();
    FuelTank(const FuelTank& ft);
    FuelTank&            operator=(const FuelTank& ft);
@@ -62,81 +62,81 @@ public:
    virtual bool         GetBooleanParameter(const Integer id) const;
    virtual bool         SetBooleanParameter(const Integer id,
                                             const bool value);
-   virtual std::string  GetStringParameter(const Integer id) const;
-   virtual bool         SetStringParameter(const Integer id,
-                                           const std::string &value);
-   virtual std::string  GetStringParameter(const std::string &label) const;
-   virtual bool         SetStringParameter(const std::string &label,
-                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const Integer id) const;
+//   virtual bool         SetStringParameter(const Integer id,
+//                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const std::string &label) const;
+//   virtual bool         SetStringParameter(const std::string &label,
+//                                           const std::string &value);
    
-   // for enumerated strings
-   virtual const StringArray&
-                        GetPropertyEnumStrings(const Integer id) const;
-   virtual const StringArray&
-                        GetPropertyEnumStrings(const std::string &label) const;
+//   // for enumerated strings
+//   virtual const StringArray&
+//                        GetPropertyEnumStrings(const Integer id) const;
+//   virtual const StringArray&
+//                        GetPropertyEnumStrings(const std::string &label) const;
    
-   // required method for all subclasses
-   virtual GmatBase*    Clone() const;
-   virtual void         Copy(const GmatBase* orig);
+//   // required method for all subclasses
+//   virtual GmatBase*    Clone() const;
+//   virtual void         Copy(const GmatBase* orig);
    
    virtual bool         Initialize();
-   virtual bool         Validate();
+   virtual bool         Validate() = 0;
    
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// Mass of the fuel in the tank
    Real                 fuelMass;
-   /// Tank pressure
-   Real                 pressure;
-   /// Fuel temperature
-   Real                 temperature;
-   /// Reference temperature
-   Real                 refTemperature;
-   /// Tank volume
-   Real                 volume;
-   /// Fuel density
-   Real                 density;
-   /// Flag indicating if the tank is pressure regulated or blow-down
-   bool                 pressureRegulated; // deprecated
+//   /// Tank pressure
+//   Real                 pressure;
+//   /// Fuel temperature
+//   Real                 temperature;
+//   /// Reference temperature
+//   Real                 refTemperature;
+//   /// Tank volume
+//   Real                 volume;
+//   /// Fuel density
+//   Real                 density;
+//   /// Flag indicating if the tank is pressure regulated or blow-down
+//   bool                 pressureRegulated; // deprecated
    /// Flag indicating if negative fuel mass is allowed
    bool                 allowNegativeFuelMass;
-   /// Pressure model used
-   Integer              pressureModel;
+//   /// Pressure model used
+//   Integer              pressureModel;
+//
+//   // Parameters used for internal calculations
+//
+//   /// Pressurant volume, a calculated parameter
+//   Real                 gasVolume;
+//   /// Baseline product of the pressure and temperature
+//   Real                 pvBase;
    
-   // Parameters used for internal calculations
+   virtual void         UpdateTank()         = 0;
+   virtual void         DepleteFuel(Real dm) = 0;
    
-   /// Pressurant volume, a calculated parameter
-   Real                 gasVolume;
-   /// Baseline product of the pressure and temperature
-   Real                 pvBase;
-   
-   virtual void         UpdateTank();
-   virtual void         DepleteFuel(Real dm);
-   
-   /// Pressure model list
-   enum
-   {
-      TPM_PRESSURE_REGULATED,
-      TPM_BLOW_DOWN
-   };
-   
-   /// Availabel pressure model list
-   static StringArray   pressureModelList;
-   //static const std::string pressureModelList[2];
+//   /// Pressure model list
+//   enum
+//   {
+//      TPM_PRESSURE_REGULATED,
+//      TPM_BLOW_DOWN
+//   };
+//
+//   /// Availabel pressure model list
+//   static StringArray   pressureModelList;
+//   //static const std::string pressureModelList[2];
 public:
    /// Published parameters for generic fuel tanks
    enum
    {
       ALLOW_NEGATIVE_FUEL_MASS = HardwareParamCount,
       FUEL_MASS,
-      PRESSURE, 
-      TEMPERATURE,
-      REFERENCE_TEMPERATURE,
-      VOLUME,
-      FUEL_DENSITY,
-      PRESSURE_MODEL,
-      PRESSURE_REGULATED,  // deprecated
+//      PRESSURE,
+//      TEMPERATURE,
+//      REFERENCE_TEMPERATURE,
+//      VOLUME,
+//      FUEL_DENSITY,
+//      PRESSURE_MODEL,
+//      PRESSURE_REGULATED,  // deprecated
       FuelTankParamCount
    };
    
@@ -148,4 +148,4 @@ public:
       PARAMETER_TYPE[FuelTankParamCount - HardwareParamCount];
 };
 
-#endif // FUELTANK_HPP
+#endif // FuelTank_hpp

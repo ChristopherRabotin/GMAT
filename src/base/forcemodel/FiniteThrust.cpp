@@ -78,7 +78,7 @@ FiniteThrust::~FiniteThrust()
 /**
  * Copy constructor for forces from finite burns.
  * 
- * @param ft The oroginal that gets copied.
+ * @param ft The original that gets copied.
  */
 //------------------------------------------------------------------------------
 FiniteThrust::FiniteThrust(const FiniteThrust& ft) :
@@ -507,7 +507,7 @@ bool FiniteThrust::DepletesMass()
 
 
 //------------------------------------------------------------------------------
-// bool IsTransient()
+// void SetPropList(ObjectArray *soList)
 //------------------------------------------------------------------------------
 /**
  * Sets the list of propagated space objects for transient forces.

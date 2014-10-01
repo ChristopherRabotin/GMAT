@@ -1233,8 +1233,37 @@ bool BranchCommand::ExecuteBranch(Integer which)
          current = curcmd;
          // check for user interruption here
          if (GmatGlobal::Instance()->GetRunInterrupted())
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+            MessageInterface::ShowMessage
+               ("Branch command '%s' interrupted by user!", generatingString.c_str());
+            #endif
             throw CommandException
                ("Branch command \"" + generatingString + "\" interrupted!");
+         }
+
+
+         #ifdef __ENABLE_PAUSE_IN_BRANCH_COMMAND__
+         //================================================================
+         // @note: This section is just testing out the run paused by user
+         // while branch command is running. (Still need some work)
+         // Throw exception with "RUN PAUSED" so that Sandbox can handle this
+         // (LOJ: 2014.09.10)
+         Gmat::RunState runState = GmatGlobal::Instance()->GetRunState();
+         #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+         MessageInterface::ShowMessage("   runState = %d\n", runState);
+         #endif
+         
+         if (runState == Gmat::PAUSED)
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+            MessageInterface::ShowMessage
+               ("Branch command '%s' paused!\n", generatingString.c_str());
+            #endif
+            throw CommandException("RUN PAUSED");
+         }
+         //================================================================
+         #endif
          
          // Check for NULL pointer here
          if (current == NULL)
