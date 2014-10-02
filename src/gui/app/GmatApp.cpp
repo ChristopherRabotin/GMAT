@@ -871,14 +871,18 @@ void GmatApp::BuildAndRunScript(bool runScript)
          WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
    }
    
+   #ifndef __WXMAC__
    wxSafeYield();
+   #endif
    // Close GMAT on option
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
    {
       //Set auto exit mode to GmatMainFrame
       theMainFrame->SetAutoExitAfterRun(true);
       theMainFrame->Close();
+      #ifndef __WXMAC__
       wxSafeYield();
+      #endif
       #ifdef __LINUX__
       // Linux needs this to complete shutdown
       MessageInterface::ShowMessage("\n");
