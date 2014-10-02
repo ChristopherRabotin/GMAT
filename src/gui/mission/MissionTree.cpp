@@ -2314,7 +2314,7 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("   currCmd='%s'(%p)\n", currCmd->GetTypeName().c_str(), currCmd);
+      ("   currCmd = '%s'(%p)\n", currCmd->GetTypeName().c_str(), currCmd);
    WriteCommand("   ", "prevCmd = ", prevCmd, ", realPrevCmd = ", realPrevCmd);
    #endif
    
@@ -2332,8 +2332,12 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       return;
    }
    
-   // If previous command is BranchCmmand check to see we need to use matching
+   // If previous command is BranchCmmand check to see if we need to use matching
    // BranchEnd as previous command
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("   Checking to see if it needs to use matching BranchEnd as previous command\n");
+   #endif
    if (prevCmd->IsOfType("BranchCommand"))
    {
       // check if first child is current command
@@ -2356,6 +2360,10 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       GmatCommand *branchCmd = NULL;
       // Get parent branch command if exist
       IsInsideSolverBranch(currId, itemType, solverItemType, branchId, &branchCmd);
+      #if DEBUG_MISSION_TREE_INSERT
+      WriteCommand("   ", "branchCmd = ", branchCmd);
+      #endif
+      
       cmd = CreateCommand(cmdTypeName, branchCmd);
       
       if (cmd != NULL)
@@ -2546,7 +2554,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
 {
    #if DEBUG_MISSION_TREE_DELETE
    MessageInterface::ShowMessage
-      ("MissionTree::Delete() entered, cmdName='%s'\n", cmdName.c_str());
+      ("MissionTree::DeleteCommand() entered, cmdName='%s'\n", cmdName.c_str());
    #endif
    
    // Get selected item
@@ -2574,8 +2582,8 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    
    
    // delete from gui interpreter
-   MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(currId);
-   if (missionItem == NULL)
+   MissionTreeItemData *treeItem = (MissionTreeItemData *)GetItemData(currId);
+   if (treeItem == NULL)
    {
       // write error message
       MessageInterface::ShowMessage
@@ -2584,7 +2592,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
       return;
    }
    
-   GmatCommand *theCmd = missionItem->GetCommand();  
+   GmatCommand *theCmd = treeItem->GetCommand();  
    if (theCmd == NULL)
    {
       // write error message
@@ -2616,7 +2624,8 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    if (tmp)
    {
       #if DEBUG_MISSION_TREE_DELETE
-      MessageInterface::ShowMessage("   About to delete <%p>\n", tmp);
+      MessageInterface::ShowMessage
+         ("   About to delete <%p>'%s'\n", tmp, tmp->GetTypeName().c_str());
       #endif
       delete tmp;
       tmp = NULL;
@@ -2673,7 +2682,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_DELETE
    MessageInterface::ShowMessage
-      ("MissionTree::Delete() leaving, cmdName='%s'\n", cmdName.c_str());
+      ("MissionTree::DeleteCommand() leaving, cmdName='%s'\n", cmdName.c_str());
    #endif
 }
 
@@ -3678,6 +3687,11 @@ void MissionTree::OnRename(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void MissionTree::OnDelete(wxCommandEvent &event)
 {
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("\n==========> MissionTree::OnDelete() entered, event id = %d\n", event.GetId());
+   #endif
+   
    // get selected item
    wxTreeItemId currId = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(currId);
@@ -3699,6 +3713,10 @@ void MissionTree::OnDelete(wxCommandEvent &event)
 
    DeleteCommand(cmdName);
    
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("==========> MissionTree::OnDelete() leaving\n");
+   #endif
 }
 
 
@@ -4770,7 +4788,7 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, GmatCommand *cmd)
    #if DEBUG_MISSION_TREE_FIND
    MessageInterface::ShowMessage
       ("\nMissionTree::FindChild() entered, parentId=<%s>, cmd=<%s>\n",
-       GetItemText(parentId).c_str(), cmd.c_str());
+       GetItemText(parentId).c_str(), cmd->GetName().c_str());
    #endif
    
    int numChildren = GetChildrenCount(parentId);
@@ -4942,7 +4960,7 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
                                        wxTreeItemId &branchId, GmatCommand **branchCmd)
 {
    #if DEBUG_FIND_ITEM_PARENT
-   WriteNode(1, "MissionTree::IsInsideSolverBranch() ", "currId", currId);
+   WriteNode(1, "MissionTree::IsInsideSolverBranch() ", false, "currId", currId);
    #endif
    
    wxTreeItemId parentId = GetItemParent(currId);
@@ -4955,7 +4973,7 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
    while (parentId.IsOk() && GetItemText(parentId) != "")
    {
       #if DEBUG_FIND_ITEM_PARENT > 1
-      WriteNode(1, "   ", "parentId", parentId);
+      WriteNode(1, "   ", false, "parentId", parentId);
       #endif
       
       parentItem = (MissionTreeItemData *)GetItemData(parentId);
@@ -4965,7 +4983,7 @@ bool MissionTree::IsInsideSolverBranch(wxTreeItemId currId, GmatTree::ItemType &
       {
          #if DEBUG_FIND_ITEM_PARENT
          WriteNode(1, "MissionTree::IsInsideSolverBranch() returning true ",
-                   "parentId", parentId);
+                   false, "parentId", parentId);
          #endif
          
          solverItemType = parentType;
@@ -5313,7 +5331,7 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
    if (firstItemId.IsOk())
    {
       #ifdef DEBUG_MISSION_TREE_ACTIONS
-      WriteNode(1, "   ", "firstItemId", firstItemId);
+      WriteNode(1, "   ", false, "firstItemId", firstItemId);
       #endif
    }
    else
@@ -5390,7 +5408,7 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
       
       #ifdef DEBUG_MISSION_TREE_ACTIONS
       wxTreeItemId selId = GetSelection();
-      WriteNode(1, "   ", "GetSelection()", selId);
+      WriteNode(1, "   ", false, "GetSelection()", selId);
       #endif
       
       
