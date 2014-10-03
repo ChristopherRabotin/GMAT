@@ -21,6 +21,7 @@
 #include "GmatStaticBoxSizer.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "TimeSystemConverter.hpp"
+#include "PowerSystem.hpp"
 #include "GmatDefaults.hpp"
 //#include <wx/variant.h>  // ??
 #include <wx/config.h>   // ??
@@ -403,20 +404,24 @@ void PowerSystemConfigPanel::LoadData()
       ("   epochFormatComboBox has loaded its data ...\n");
    #endif
 
+   PowerSystem *thePowerSystem = (PowerSystem*) theObject;
+
    // load the epoch
    std::string epochFormat = theObject->GetStringParameter("EpochFormat");
-   std::string theEpochStr = theObject->GetStringParameter("InitialEpoch");
-
-   epochTxtCtrl->SetValue(theEpochStr.c_str());
+   std::string theEpochStr = thePowerSystem->GetEpochString();
 
    #ifdef DEBUG_POWERPANEL_LOAD
    MessageInterface::ShowMessage
       ("   epochFormat=%s, theEpochStr=%s\n", epochFormat.c_str(), theEpochStr.c_str());
    #endif
 
-   epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
+   epochFormatComboBox->SetValue(epochFormat.c_str());
    fromEpochFormat = epochFormat;
 
+   #ifdef DEBUG_POWERPANEL_LOAD
+   MessageInterface::ShowMessage
+      ("   loaded the epoch format ...\n");
+   #endif
    // Save to TAIModJulian string to avoid keep reading the field
    // and convert to proper format when ComboBox is changed.
    if (epochFormat == "TAIModJulian")
@@ -428,6 +433,11 @@ void PowerSystemConfigPanel::LoadData()
       Real fromMjd = -999.999;
       Real outMjd;
       std::string outStr;
+      #ifdef DEBUG_POWERPANEL_LOAD
+      MessageInterface::ShowMessage
+         ("  about to convert from the epoch format %s to TAIModJulian ...\n",
+               fromEpochFormat.c_str());
+      #endif
       TimeConverterUtil::Convert(fromEpochFormat, fromMjd, theEpochStr,
                                  "TAIModJulian", outMjd, outStr);
       taiMjdStr = outStr;
@@ -437,6 +447,7 @@ void PowerSystemConfigPanel::LoadData()
       #endif
    }
    epochStr = theEpochStr;
+   epochTxtCtrl->SetValue(theEpochStr.c_str());
 
    // Initial Max Power
    Real initPower = theObject->GetRealParameter("InitialMaxPower");
@@ -615,19 +626,51 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
    {
       Integer paramID;
 
+      std::string newEpoch    = epochTxtCtrl->GetValue().c_str();
+      std::string epochFormat = epochFormatComboBox->GetValue().c_str();
+      Real        fromMjd     = -999.999;
+      Real        a1mjd       = -999.999;
+      std::string outStr;
+
+      #ifdef DEBUG_POWERPANEL_SAVE
+      MessageInterface::ShowMessage
+         ("   newEpoch=%s, epochFormat=%s\n", newEpoch.c_str(), epochFormat.c_str());
+      #endif
+
       // Save epoch format and epoch
       if (isEpochFormatChanged || isEpochChanged || isEpochTextChanged)
       {
-         std::string toEpochFormat  = epochFormatComboBox->GetValue().c_str();
-         std::string toEpochStr     = epochTxtCtrl->GetValue().c_str();
-
-         #ifdef DEBUG_POWERPANEL_SAVE
-         MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData(obj) - attempting to set epoch!!\n");
-         #endif
-         paramID = theObject->GetParameterID("EpochFormat");
-         theObject->SetStringParameter(paramID, toEpochFormat);
-         paramID = theObject->GetParameterID("InitialEpoch");
-         theObject->SetStringParameter(paramID, toEpochStr);
+            bool timeOK = CheckTimeFormatAndValue(epochFormat, newEpoch,
+                  "InitialEpoch", true);
+            #ifdef DEBUG_POWERPANEL_SAVE
+            MessageInterface::ShowMessage
+               ("   timeOK = %s\n", (timeOK? "YES!" : "no"));
+            #endif
+            if (timeOK)
+            {
+               #ifdef DEBUG_POWERPANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   About to set format and time on the object ---------\n");
+               #endif
+               paramID = theObject->GetParameterID("EpochFormat");
+               theObject->SetStringParameter(paramID, epochFormat);
+               paramID = theObject->GetParameterID("InitialEpoch");
+               theObject->SetStringParameter(paramID, newEpoch);
+               #ifdef DEBUG_POWERPANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   DONE setting format and time on the object ---------\n");
+               #endif
+               isEpochFormatChanged = false;
+               isEpochChanged       = false;
+               isEpochTextChanged   = false;
+            }
+            else
+            {
+               #ifdef DEBUG_POWERPANEL_SAVE
+                  MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData() setting canClose to false inside (epoch) try\n");
+               #endif
+               canClose = false;
+            }
       }
       // Save Real Data
       if (realDataChanged)
