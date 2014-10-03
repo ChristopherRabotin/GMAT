@@ -249,7 +249,7 @@ void PowerSystemConfigPanel::Create()
       shadowBodiesTxt = new wxStaticText( this, ID_TEXT,
          wxT("Shadow "GUI_ACCEL_KEY"Bodies"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       shadowBodiesTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-         wxDefaultPosition, wxSize(epochWidth,-1), 0 );
+         wxDefaultPosition, wxSize(epochWidth,-1), wxTE_READONLY  );
       shadowBodiesTxtCtrl->SetToolTip(pConfig->Read(_T("ShadowBodiesHint")));
       shadowBodiesButton =
          new wxButton( this, ID_BUTTON_BODIES, wxT("Select"),
@@ -572,10 +572,12 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
       if (isValid)
          isValid = CheckRealRange(str, decayRate, "AnnualDecayRate", 0.0, 100.0, true, true, true, true);
 
+
       str = powerMarginTxtCtrl->GetValue();
       isValid = CheckReal(margin, str, "Margin", "0 <= Real Number <= 100");
       if (isValid)
-         isValid = CheckRealRange(str, decayRate, "Margin", 0.0, 100.0, true, true, true, true);
+         isValid = CheckRealRange(str, margin, "Margin", 0.0, 100.0, true, true, true, true);
+
 
       str = busCoeff1TxtCtrl->GetValue();
       isValid = CheckReal(bus1, str, "BusCoeff1", "Real Number");
@@ -583,6 +585,7 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
       isValid = CheckReal(bus2, str, "BusCoeff2", "Real Number");
       str = busCoeff3TxtCtrl->GetValue();
       isValid = CheckReal(bus3, str, "BusCoeff3", "Real Number");
+
 
       #ifdef DEBUG_POWERPANEL_SAVE
       MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData(obj) - isSolar = %s!!\n",

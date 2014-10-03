@@ -91,6 +91,10 @@ SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    shadowBodyNames.clear();
    shadowBodies.clear();
 
+   defaultShadowBodyNames.clear();
+   defaultShadowBodyNames.push_back("Earth");
+
+
    shadowState    = new ShadowState();
 }
 
@@ -139,6 +143,11 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    {
       shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
    }
+   defaultShadowBodyNames.clear();
+   for (unsigned int j = 0; j < (copy.defaultShadowBodyNames).size(); j++)
+   {
+      defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(j));
+   }
 
    shadowState    = new ShadowState();
 }
@@ -176,6 +185,12 @@ SolarPowerSystem& SolarPowerSystem::operator=(const SolarPowerSystem& copy)
       for (unsigned int i = 0; i < (copy.shadowBodyNames).size(); i++)
       {
          shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
+      }
+      defaultShadowBodyNames.clear();
+      // copy the list of body names
+      for (unsigned int i = 0; i < (copy.defaultShadowBodyNames).size(); i++)
+      {
+         defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(i));
       }
       shadowBodies.clear();
 //      // copy the list of body pointers - do I want to do this???
@@ -231,7 +246,8 @@ bool SolarPowerSystem::Initialize()
    // if no names were added to the ShadowBodies list, add the Default body
    // This will cause "ShadowBodies = {'Earth'} to be written to the script <<
    if (shadowBodyNames.empty())
-      shadowBodyNames.push_back("Earth");
+      shadowBodyNames = defaultShadowBodyNames;
+//      shadowBodyNames.push_back("Earth");
 
    // Set up the list of shadowBodies using current solarSystem
    shadowBodies.clear();
@@ -857,7 +873,12 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(const Integer id) c
 {
    if (id == SHADOW_BODIES)
    {
-      return shadowBodyNames;
+      if (shadowBodyNames.empty())
+      {
+         return defaultShadowBodyNames;
+      }
+      else
+         return shadowBodyNames;
    }
 
    return PowerSystem::GetStringArrayParameter(id);

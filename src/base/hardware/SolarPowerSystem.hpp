@@ -122,6 +122,8 @@ protected:
    std::string         shadowModel;
    /// list of body names
    StringArray         shadowBodyNames;
+   /// list of default body names
+   StringArray         defaultShadowBodyNames;
    /// Array of shadow bodies
    std::vector<CelestialBody*> shadowBodies;
 
