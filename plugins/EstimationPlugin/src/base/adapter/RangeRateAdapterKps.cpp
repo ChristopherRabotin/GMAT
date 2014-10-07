@@ -369,14 +369,14 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    #endif
 
    // Set ramp table and observation data for adapter before doing something
-   rampTB = rampTable;
+//   rampTB = rampTable;
    obsData = forObservation;
 
    // Compute range in km
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
+   cMeasurement =
+         RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, NULL);
 
-
-
+   return cMeasurement;
 }
 
 
