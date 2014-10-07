@@ -341,7 +341,26 @@ TFSMagicNumbers::TFSMagicNumbers() :
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
+   //Two way range-rate
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "RangeRate";
+   // Note that: when multFactor is a non positive number, multiplier factor is a function.
+   lue->multFactor = -1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
 
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
    
    // Build the factor map                                                      // made changes by TUAN NGUYEN
    factorMap.clear();                                                           // made changes by TUAN NGUYEN
