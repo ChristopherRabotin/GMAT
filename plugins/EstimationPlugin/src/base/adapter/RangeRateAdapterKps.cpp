@@ -138,7 +138,7 @@ GmatBase* RangeRateAdapterKps::Clone() const
  * @return The script name
  */
 //------------------------------------------------------------------------------
-std::string RangeRateAdapter::GetParameterText(const Integer id) const
+std::string RangeRateAdapterKps::GetParameterText(const Integer id) const
 {
    if (id >= RangeAdapterKmParamCount && id < RangeRateAdapterParamCount)
       return PARAMETER_TEXT[id - RangeAdapterKmParamCount];
@@ -156,7 +156,7 @@ std::string RangeRateAdapter::GetParameterText(const Integer id) const
  * @return The parameter ID
  */
 //------------------------------------------------------------------------------
-Integer RangeRateAdapter::GetParameterID(const std::string& str) const
+Integer RangeRateAdapterKps::GetParameterID(const std::string& str) const
 {
    for (Integer i = RangeAdapterKmParamCount; i < RangeRateAdapterParamCount; i++)
    {
@@ -179,7 +179,7 @@ Integer RangeRateAdapter::GetParameterID(const std::string& str) const
  * @return The parameter's type
  */
 //------------------------------------------------------------------------------
-Gmat::ParameterType RangeRateAdapter::GetParameterType(const Integer id) const
+Gmat::ParameterType RangeRateAdapterKps::GetParameterType(const Integer id) const
 {
    if (id >= RangeAdapterKmParamCount && id < RangeRateAdapterParamCount)
       return PARAMETER_TYPE[id - RangeAdapterKmParamCount];
@@ -199,7 +199,7 @@ Gmat::ParameterType RangeRateAdapter::GetParameterType(const Integer id) const
  * @return The description string
  */
 //------------------------------------------------------------------------------
-std::string RangeRateAdapter::GetParameterTypeString(const Integer id) const
+std::string RangeRateAdapterKps::GetParameterTypeString(const Integer id) const
 {
    return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
@@ -215,7 +215,7 @@ std::string RangeRateAdapter::GetParameterTypeString(const Integer id) const
  * @return The value of the parameter
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapter::GetRealParameter(const Integer id) const
+Real RangeRateAdapterKps::GetRealParameter(const Integer id) const
 {
    if (id == DOPPLER_INTERVAL)
       return dopplerInterval;
@@ -236,7 +236,7 @@ Real RangeRateAdapter::GetRealParameter(const Integer id) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapter::SetRealParameter(const Integer id, const Real value)
+Real RangeRateAdapterKps::SetRealParameter(const Integer id, const Real value)
 {
    if (id == DOPPLER_INTERVAL)
    {
@@ -261,7 +261,7 @@ Real RangeRateAdapter::SetRealParameter(const Integer id, const Real value)
  * @return The value of the parameter
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapter::GetRealParameter(const std::string &label) const
+Real RangeRateAdapterKps::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
 }
@@ -279,7 +279,7 @@ Real RangeRateAdapter::GetRealParameter(const std::string &label) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapter::SetRealParameter(const std::string &label, const Real value)
+Real RangeRateAdapterKps::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
 }
