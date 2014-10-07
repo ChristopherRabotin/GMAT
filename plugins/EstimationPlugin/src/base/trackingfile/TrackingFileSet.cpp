@@ -28,6 +28,7 @@
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "USNRangeAdapter.hpp"
+#include "RangeRateAdapterKps.hpp"
 
 //#define DEBUG_INITIALIZATION
 
@@ -1673,8 +1674,17 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->UsesLightTime(useLighttime);                         // made changes by TUAN NGUYEN
          retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN
       }
-   }                                                                  // made changes by TUAN NGUYEN
-   else                                                               // made changes by TUAN NGUYEN
+   }                                                                  
+   else if (type == "RangeRate")                                       
+   {                                                                  
+      retval = new RangeRateAdapterKps(instanceName + type);              
+      if (retval)                                                     
+      {
+         retval->UsesLightTime(useLighttime);                         
+         retval->SetStringParameter("MeasurementType", type);       
+      }
+   }                                                                 
+   else                                                               
       throw MeasurementException("Error: '"+ type +"' measurement type was not implemented in this version of EstimationPlugin.\n");    // made changes by TUAN NGUYEN
 
    if (retval)
