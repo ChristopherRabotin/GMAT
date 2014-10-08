@@ -79,6 +79,7 @@ MeasurementManager::MeasurementManager() :
 //------------------------------------------------------------------------------
 MeasurementManager::~MeasurementManager()
 {
+   //MessageInterface::ShowMessage("MeasurementMaganger destruction!!!!!!!!!!!!\n");
 }
 
 //------------------------------------------------------------------------------
@@ -101,6 +102,7 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
 {
    modelNames = mm.modelNames;
 
+   // process MeasurementModel objects
    for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
          i != mm.models.end(); ++i)
    {
@@ -109,8 +111,18 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
                (*i)->GetStringParameter("Type").c_str());
       #endif
       models.push_back((MeasurementModel*)((*i)->Clone()));
-      MeasurementData md;
-      measurements.push_back(md);
+   }
+
+   // made changes by TUAN NGUYEN @ 9/16/2014
+   // process TrackingDataAdapter objects
+   for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
+         i != mm.adapters.end(); ++i)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Cloning %s TrackingDataAdapter\n",
+               (*i)->GetStringParameter("Type").c_str());
+      #endif
+      adapters.push_back((TrackingDataAdapter*)((*i)->Clone()));
    }
 
    for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
@@ -121,8 +133,10 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
                (*i)->GetName().c_str());
       #endif
       trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
-      MeasurementData md;
-      measurements.push_back(md);
+
+      // Note: No measurement data associated with TrackingFileSet object, but TrackingDataAdapter has its owe measurement data
+      // MeasurementData md;                                    // made changes by TUAN NGUYEN
+      // measurements.push_back(md);                            // made changes by TUAN NGUYEN
    }
 }
 
@@ -141,29 +155,41 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 {
    if (&mm != this)
    {
-      thePropagator = mm.thePropagator;
-      anchorEpoch  = mm.anchorEpoch;
-      currentEpoch = mm.currentEpoch;
-      modelNames   = mm.modelNames;
-      eventCount   = mm.eventCount;
-      inSimulationMode  = mm.inSimulationMode;
-      // Clone the measurements and tracking file sets
+      thePropagator    = mm.thePropagator;
+      anchorEpoch      = mm.anchorEpoch;
+      currentEpoch     = mm.currentEpoch;
+      modelNames       = mm.modelNames;
+      eventCount       = mm.eventCount;
+      inSimulationMode = mm.inSimulationMode;
+
+      // Clone the measurements, adapters, and tracking file sets
+      // Clean up first
       for (std::vector<MeasurementModel*>::iterator i = models.begin();
             i != models.end(); ++i)
          delete (*i);
-
       models.clear();
-      measurements.clear();
 
-      for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
-            i != mm.models.end(); ++i)
-         models.push_back((MeasurementModel*)(*i)->Clone());
+      for (std::vector<TrackingDataAdapter*>::iterator i = adapters.begin();
+            i != adapters.end(); ++i)
+         delete (*i);
+      adapters.clear();
 
       for (std::vector<TrackingFileSet*>::iterator i = trackingSets.begin();
             i != trackingSets.end(); ++i)
          delete (*i);
-
       trackingSets.clear();
+
+      measurements.clear();
+
+      // Then clone them
+      for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
+            i != mm.models.end(); ++i)
+         models.push_back((MeasurementModel*)(*i)->Clone());
+
+      for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
+            i != mm.adapters.end(); ++i)
+         adapters.push_back((TrackingDataAdapter*)(*i)->Clone());
+
       for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
             i != mm.trackingSets.end(); ++i)
          trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
@@ -233,7 +259,7 @@ bool MeasurementManager::Initialize()
       MeasurementData md;
       measurements.push_back(md);
    }
-
+   
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
       // Processing tackingSet[i]
@@ -255,22 +281,20 @@ bool MeasurementManager::Initialize()
          // Set retval?
       }
       adapterFromTFSMap[trackingSets[i]] = names;
-
+      
       // Step 3: Set stream objects for all observation data files in trackingSet[i] 
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("Filename");
-      //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index with outer loop     // made changes by TUAN NGUYEN
+      //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index as the outer loop     // made changes by TUAN NGUYEN
       for (UnsignedInt k = 0; k < filenames.size(); ++k)                            // made changes by TUAN NGUYEN
       {
 //         std::stringstream fn;
-//         // fn << trackingSets[i]->GetName() << "DataFile" << i;                    // made changes by TUAN NGUYEN
 //         fn << trackingSets[i]->GetName() << "DataFile" << k;                       // made changes by TUAN NGUYEN
 //         DataFile *newStream = new DataFile(fn.str());
          DataFile *newStream = new DataFile(filenames[k]);
-         // newStream->SetStringParameter("Filename", filenames[i]);                // made changes by TUAN NGUYEN
+         // newStream->SetStringParameter("Filename", filenames[k]);                // made changes by TUAN NGUYEN
          newStream->SetStringParameter("Filename", filenames[k]);                   // made changes by TUAN NGUYEN
          GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???
          newStream->SetStream(got);
-
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
                   (newStream->IsInitialized() ? "initialized" :
@@ -289,7 +313,7 @@ bool MeasurementManager::Initialize()
             #endif
             idToStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
          }// for j loop
-
+         
          if (inSimulationMode)
          {
             if (newStream->OpenStream(inSimulationMode) == false)
@@ -297,7 +321,7 @@ bool MeasurementManager::Initialize()
                      " failed to open in simulation mode");
          }
       }// for k loop
-
+      
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
       StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");   // made changes by TUAN NGUYEN
       for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)                              // made changes by TUAN NGUYEN
@@ -603,14 +627,24 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
+         // Specify ramp table associated with measurement model models[j]:                   // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                         // made changes by TUAN NGUYEN
+///// TBD: Do we want something more generic here?
+         //StringArray sr = models[j]->GetStringArrayParameter("RampTables");                 // made changes by TUAN NGUYEN
+         StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");                 // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                               // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                                   // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                        // made changes by TUAN NGUYEN
+
          // Specify current observation data. If no observation data used, it
          // passes a NULL pointer.
          ObservationData* od = NULL;
          if (!observations.empty())
             od = &(*currentObs);
 
-         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
+         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);             // made changes by TUAN NGUYEN
          MessageInterface::ShowMessage("Calculating adapter based measurement...");
+
          if (measurements[j].isFeasible)
          {
             MessageInterface::ShowMessage("Calculated feasible measurement\n");
@@ -651,15 +685,24 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 
       if ((measurementToCalc < (Integer)adapters.size()) && (measurementToCalc >= 0))
       {
+///// TBD: Do we want something more generic here?
+         // Specify ramp table associated with tracking data adapter adapters[j]:                // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a tracking data adapter                        // made changes by TUAN NGUYEN
+         // StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");   // made changes by TUAN NGUYEN
+         StringArray sr = adapters[measurementToCalc]->GetStringArrayParameter("RampTables");    // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                                  // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                                      // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                           // made changes by TUAN NGUYEN
+
          // Specify current observation data. If no observation data used, it passes a NULL pointer.
          ObservationData* od = NULL;
          if (!observations.empty())
             od = &(*currentObs);
 
          #ifdef DEBUG_CALCULATE
-            MessageInterface::ShowMessage("****** models[%d]name = '%s'\n",
+            MessageInterface::ShowMessage("****** adapters[%d]name = '%s'\n",
                   measurementToCalc,
-                  models[measurementToCalc]->GetName().c_str());
+                  adapters[measurementToCalc]->GetName().c_str());
             MessageInterface::ShowMessage("****** observations.size() = %d\n", observations.size());
             if (od == NULL)
                MessageInterface::ShowMessage("****** Observation data is not used in calculation\n");
@@ -668,7 +711,7 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
          #endif
 
          measurements[measurementToCalc] =
-            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od);
+            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);              // made changes by TUAN NGUYEN
 
          #ifdef DEBUG_CALCULATE
             MessageInterface::ShowMessage("****** measurements[%d] = <%p>,   "
@@ -951,7 +994,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                   }
 
                // Duplication or time order filter
-               if (od_old.epoch >= od->epoch)
+               if (od_old.epoch >= (od->epoch + 2.0e-12))
                {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
                      MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
@@ -1485,20 +1528,35 @@ const StringArray& MeasurementManager::GetMeasurementNames() const
 }
 
 
+
+// made changes by TUAN NGUYEN
+const std::vector<TrackingFileSet*> MeasurementManager::GetTrackingSets() const
+{
+   return trackingSets;
+}
+
+                         // made changes by TUAN NGUYEN
+const std::vector<TrackingDataAdapter*> MeasurementManager::GetTrackingDataAdapters() const
+{
+   return adapters;
+}
+
+
 //-----------------------------------------------------------------------------
 // const Integer GetMeasurementId(const std::string &modelName) const
 //-----------------------------------------------------------------------------
 /**
- * Retrieves the model ID for a named measurement model
+ * Retrieves the model ID (or IDs) for a named measurement model or a named tracking file set
  *
- * @param modelName The name of the measurement model
+ * @param modelName The name of the measurement model or the tracking file set
  *
- * @return The ID for model
+ * @return The ID (or IDs) for model or tracking file set
  */
 //-----------------------------------------------------------------------------
-const Integer MeasurementManager::GetMeasurementId(
+const IntegerArray MeasurementManager::GetMeasurementId(
       const std::string &modelName) const
 {
+   IntegerArray arrayId;
    Integer foundId = -1;
 
    for (UnsignedInt i = 0; i < models.size(); ++i)
@@ -1510,28 +1568,72 @@ const Integer MeasurementManager::GetMeasurementId(
       }
    }
 
-   /// @todo: Handle multiple measurements inside of a TrackingFileSet
-   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   if (foundId != -1)
+      arrayId.push_back(foundId);
+   else
    {
-      if (trackingSets[i]->GetName() == modelName)
+      // Check modelName to be a name of trackingSet 
+      UnsignedInt i;
+      for (i = 0; i < trackingSets.size(); ++i)
       {
+         if (trackingSets[i]->GetName() == modelName)
+            break;
+      }
+
+      if (i < trackingSets.size())
+      {
+         // Get a name list of TrackingDataAdapter object associated the TrackingFileSet specified by modelName
+         StringArray tfsAdapterList;
          if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
+            tfsAdapterList = adapterFromTFSMap.find(trackingSets[i])->second;
+
+         for (UnsignedInt k = 0; k < tfsAdapterList.size(); ++k)
          {
-            /// @todo: Make measurementID accessor work for > 1 adapter in a TFS
-            StringArray tfsAdapterList =
-                  adapterFromTFSMap.find(trackingSets[i])->second;
-
-            std::string modelAdapterName = (tfsAdapterList.size() > 0 ?
-                  tfsAdapterList[0] : "Range");
-
+            // Find an adapter having the same name as tfsAdapterList[i]
+            foundId = -1;
             for (UnsignedInt j = 0; j < adapters.size(); ++j)
-               if (adapters[j]->GetName() == modelAdapterName)
+            {
+               if (adapters[j]->GetName() == tfsAdapterList[k])
+               {
                   foundId = adapters[j]->GetModelID();
+                  break;
+               }
+            }
+
+            // Add founId to ID
+            if (foundId != -1)
+               arrayId.push_back(foundId);
          }
       }
+      else
+         arrayId.push_back(-1);
    }
 
-   return foundId;
+   return arrayId;
+
+   /// @todo: Handle multiple measurements inside of a TrackingFileSet
+
+   //for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   //{
+   //   if (trackingSets[i]->GetName() == modelName)
+   //   {
+   //      if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
+   //      {
+   //         /// @todo: Make measurementID accessor work for > 1 adapter in a TFS
+   //         StringArray tfsAdapterList =
+   //               adapterFromTFSMap.find(trackingSets[i])->second;
+
+   //         std::string modelAdapterName = (tfsAdapterList.size() > 0 ?
+   //               tfsAdapterList[0] : "Range");
+
+   //         for (UnsignedInt j = 0; j < adapters.size(); ++j)
+   //            if (adapters[j]->GetName() == modelAdapterName)
+   //               foundId = adapters[j]->GetModelID();
+   //      }
+   //   }
+   //}
+
+   //return foundId;
 }
 
 
@@ -1646,6 +1748,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             #ifdef DEBUG_CALCULATE_MEASUREMENTS
                MessageInterface::ShowMessage(" Simulation: measurement without events\n");
             #endif
+            // without event, no noise is added due to check feasibility
             measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);         // made changes by TUAN NGUYEN
          }
 
@@ -1739,11 +1842,13 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          MessageInterface::ShowMessage("    %s observation data: %.12lf  %s  %d  %s  %s   %.12lf\n", od->dataFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(),od->value[0]);
       #endif
 
+      #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         MessageInterface::ShowMessage(" processing for measurement models ...\n");
+      #endif
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
          // Verify observation data belonging to the measurement model jth
          bool isbelong;
-         std::string reason;
          if ((models[j]->GetStringParameter("Type") != od->typeName))
          {
             isbelong = false;
@@ -1788,7 +1893,6 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          }
          else
          {
-          
 ///// TBD: Do we want something more generic here?
             // Specify ramp table associated with measurement model models[j]:                // made changes by TUAN NGUYEN
             // Note: Only one ramp table is used for a measurement model                      // made changes by TUAN NGUYEN
@@ -1808,20 +1912,53 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          }
       }// for j loop
 
+      #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         MessageInterface::ShowMessage(" processing for tracking data adapters ...\n");
+      #endif
       // Now do the tracking data adapters
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
-         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
-         if (measurements[j].isFeasible)
+         bool isbelong = true;
+         // @todo: add code to verify observation data belonging to the measurement model jth
+
+
+         if (isbelong == false)
          {
-//            if (!withEvents)
-//               eventCount += measurements[j].eventCount;
-            retval = true;
+            // MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, adapters[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            measurements[j].typeName         = adapters[j]->GetStringParameter("Type");
+            measurements[j].epoch            = od->epoch;
+            measurements[j].epochSystem      = od->epochSystem;
+            measurements[j].isFeasible       = false;
+            measurements[j].covariance       = NULL;
+            measurements[j].eventCount       = 0;
+            measurements[j].feasibilityValue = 0.0;
+            measurements[j].unfeasibleReason = "U";
+            measurements[j].value.clear();  
          }
-         #ifdef DEBUG_ADAPTERS
-            MessageInterface::ShowMessage("   Measurement %d computed; first "
+         else
+         {
+///// TBD: Do we want something more generic here?
+            // Specify ramp table associated with tracking data adapter adapters[j]:          // made changes by TUAN NGUYEN
+            // Note: Only one ramp table is used for a tracking data adapter                  // made changes by TUAN NGUYEN
+            StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");              // made changes by TUAN NGUYEN
+            std::vector<RampTableData>* rt = NULL;                                            // made changes by TUAN NGUYEN
+            if (sr.size() > 0)                                                                // made changes by TUAN NGUYEN
+               rt = &(rampTables[sr[0]]);                                                     // made changes by TUAN NGUYEN
+          
+            measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
+
+            if (measurements[j].isFeasible)
+            {
+               if (!withEvents)
+                  eventCount += measurements[j].eventCount;
+               retval = true;
+            }
+
+            #ifdef DEBUG_ADAPTERS
+               MessageInterface::ShowMessage("   Measurement %d computed; first "
                   "value: %lf\n", j, measurements[j].value[0]);
-         #endif
+            #endif
+         }
       }// for j loop
    }
 
@@ -1994,8 +2131,14 @@ bool MeasurementManager::WriteMeasurements()
             MessageInterface::ShowMessage("   Stream at <%p>\n",
                   idToStreamMap[measurements[i].uniqueID]);
          #endif
-         idToStreamMap[measurements[i].uniqueID]->
+         if (idToStreamMap[measurements[i].uniqueID])
+         {
+            idToStreamMap[measurements[i].uniqueID]->
                WriteMeasurement(&(measurements[i]));
+         }
+         else
+            throw MeasurementException("Error: No data file is defined in TrackingFileSet or MeasurementModel\n");
+
          retval = true;
       }
    }
