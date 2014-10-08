@@ -46,8 +46,8 @@ SignalData::SignalData() :
    tTime                (21545.0),
    rTime                (21545.0),
 #endif
-   tSTM                 (true),
-   rSTM                 (true),
+   //tSTM                 (true),         ?? tSTM is a Rmatrix66   // made changes by TUAN NGUYEN
+   //rSTM                 (true),         ?? rSTM is a Rmatrix66   // made changes by TUAN NGUYEN
    tJ2kRotation         (true),
    rJ2kRotation         (true),
    tDelay               (0.0),                      // made changes by TUAN NGUYEN
@@ -70,6 +70,15 @@ SignalData::SignalData() :
 //------------------------------------------------------------------------------
 SignalData::~SignalData()
 {
+   CleanUp();
+}
+
+
+void SignalData::CleanUp()
+{
+   correctionIDs.clear();
+   corrections.clear();
+   useCorrection.clear();
 }
 
 
@@ -117,6 +126,8 @@ SignalData::SignalData(const SignalData& sd) :
    rangeRateVecObs      (sd.rangeRateVecObs),
    tSTM                 (sd.tSTM),
    rSTM                 (sd.rSTM),
+   tSTMtm               (sd.tSTMtm),                    // made changes by TUAN NGUYEN
+   rSTMtm               (sd.rSTMtm),                    // made changes by TUAN NGUYEN
    tJ2kRotation         (sd.tJ2kRotation),
    rJ2kRotation         (sd.rJ2kRotation),
    correctionIDs        (sd.correctionIDs),
@@ -182,6 +193,8 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rangeRateVecObs      = sd.rangeRateVecObs;
       tSTM                 = sd.tSTM;
       rSTM                 = sd.rSTM;
+      tSTMtm               = sd.tSTMtm;                  // made changes by TUAN NGUYEN
+      rSTMtm               = sd.rSTMtm;                  // made changes by TUAN NGUYEN
       tJ2kRotation         = sd.tJ2kRotation;
       rJ2kRotation         = sd.rJ2kRotation;
       correctionIDs        = sd.correctionIDs;
