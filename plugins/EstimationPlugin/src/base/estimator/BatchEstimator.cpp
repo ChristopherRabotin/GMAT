@@ -841,19 +841,19 @@ void BatchEstimator::CompleteInitialization()
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
    #endif
 
-   // Show all residuals plots
-   if (showAllResiduals)
-   {
-      StringArray plotMeasurements;
-      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
-      {
-         plotMeasurements.clear();
-         plotMeasurements.push_back(modelNames[i]);
-         std::string plotName = instanceName + "_" + modelNames[i] +
-               "_Residuals";
-         BuildResidualPlot(plotName, plotMeasurements);
-      }
-   }
+   //// Show all residuals plots
+   //if (showAllResiduals)
+   //{
+   //   StringArray plotMeasurements;
+   //   for (UnsignedInt i = 0; i < modelNames.size(); ++i)
+   //   {
+   //      plotMeasurements.clear();
+   //      plotMeasurements.push_back(modelNames[i]);
+   //      std::string plotName = instanceName + "_" + modelNames[i] +
+   //            "_Residuals";
+   //      BuildResidualPlot(plotName, plotMeasurements);
+   //   }
+   //}
 
    if (advanceToEstimationEpoch == false)
    {
@@ -899,6 +899,20 @@ void BatchEstimator::CompleteInitialization()
          nextMeasurementEpoch = estimationEpoch;
          currentState = PROPAGATING;
          return;
+      }
+   }
+
+   // Show all residuals plots
+   if (showAllResiduals)
+   {
+      StringArray plotMeasurements;
+      for (UnsignedInt i = 0; i < modelNames.size(); ++i)
+      {
+         plotMeasurements.clear();
+         plotMeasurements.push_back(modelNames[i]);
+         std::string plotName = instanceName + "_" + modelNames[i] +
+               "_Residuals";
+         BuildResidualPlot(plotName, plotMeasurements);
       }
    }
 
@@ -2150,6 +2164,7 @@ bool BatchEstimator::DataFilter()
          }
          else
                weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
+         
          // 2.2. Filter based on maximum residual multiplier
          if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > maxResidualMult)   // if (Wii*abs(O-C) > maximum residual multiplier) then throw away this data record
          {
@@ -2178,7 +2193,7 @@ bool BatchEstimator::DataFilter()
          }
          else
             weight = 1.0 / (*(currentObs->noiseCovariance))(i,i);
-
+         
          // 2. Filter based on n-sigma
          Real sigmaVal = (chooseRMSP ? predictedRMS : newResidualRMS);
          if (sqrt(weight)*abs(currentObs->value[i] - calculatedMeas->value[i]) > (constMult*sigmaVal + additiveConst))   // if (Wii*abs(O-C) > k*sigma+ K) then throw away this data record
@@ -2301,7 +2316,7 @@ Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size)
             // Compute Y
             for (j=1; j <= nMinus1; ++j)
             {
-               sum1[j1-1] = -delta[j-1] * sum1[nn-1];
+               sum1[j1-1] = -delta[j-1] * sum1[nn-1];          // Calculate [H12];   GTDS MatSpec  Eq 8-162b
                j1 += rowCount - j;
             }
 
@@ -2312,7 +2327,7 @@ Integer BatchEstimator::SchurInvert(Real *sum1, Integer array_size)
                j1 = i;
                for (j=1; j <= i; ++j)
                {
-                  sum1[j1-1] -= (sum1[i1-1] * delta[j-1]);
+                  sum1[j1-1] -= (sum1[i1-1] * delta[j-1]);       // Calculate [H22];   GTDS MatSpec Eq
                   j1 += rowCount - j;
                }
                i1 += rowCount - i;
