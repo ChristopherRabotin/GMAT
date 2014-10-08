@@ -120,7 +120,7 @@ protected:
    Real turnaround;
 
    /// Turnaround ratio which is built in on station's tracking system
-   Real M2R;						// M2R maybe equal the value of turnaround; sometime it is set to 0
+   Real M2R;                  // M2R maybe equal the value of turnaround; sometime it is set to 0
 
    // Light time events
    /// Uplink leg for the start signal
@@ -139,9 +139,9 @@ protected:
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
-       AveragingInterval = PhysicalMeasurementParamCount,
-	   BuildInTurnAroundRatio,									// made changes by TUAN NGUYEN
-       AveragedDopplerParamCount
+      AveragingInterval = PhysicalMeasurementParamCount,
+      BuildInTurnAroundRatio,                           // made changes by TUAN NGUYEN
+      AveragedDopplerParamCount
    };
 
    // Start with the parameter IDs and associates strings
