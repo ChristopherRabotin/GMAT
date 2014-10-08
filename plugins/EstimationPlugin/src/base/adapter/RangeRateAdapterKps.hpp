@@ -78,6 +78,16 @@ public:
 protected:
    /// Doppler interval
    Real dopplerInterval;
+
+   /// Previous epoch
+   Real _prev_epoch;
+
+   /// Previous Range 
+   Real _prev_range;
+
+   /// Timer 
+   Real _timer;
+    
    /// Parameter IDs for the RangeRateAdapterKps
    enum
    {

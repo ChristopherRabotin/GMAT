@@ -22,11 +22,11 @@
 #include "RandomNumber.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
-
+#include <iostream>
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
-//#define DEBUG_RANGE_CALCULATION
+#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
 // Static data
@@ -56,7 +56,10 @@ RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmP
 //------------------------------------------------------------------------------
 RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
     RangeAdapterKm     (name),
-    dopplerInterval    (1.0)
+    dopplerInterval    (1.0),
+    _prev_epoch (0.0),
+    _prev_range(0.0),
+    _timer(0.0)
 {
     typeName="RangeRate";
 }
@@ -85,7 +88,10 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
 //------------------------------------------------------------------------------
 RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
     RangeAdapterKm     (rr),
-    dopplerInterval (rr.dopplerInterval)
+    dopplerInterval (rr.dopplerInterval),
+    _prev_epoch (0.0),
+    _prev_range(0.0),
+    _timer(0.0)
 {
 }
 
@@ -362,19 +368,44 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
       ObservationData* forObservation, std::vector<RampTableData>* rampTB)
 {
 
-   #ifdef DEBUG_RANGE_CALCULATION
-      MessageInterface::ShowMessage("RangeRateAdapter::CalculateMeasurement(%s, "
-            "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
-            rampTable);
-   #endif
-
    // Set ramp table and observation data for adapter before doing something
-//   rampTB = rampTable;
+   //   rampTB = rampTable;
    obsData = forObservation;
 
    // Compute range in km
-   cMeasurement =
-         RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, NULL);
+   cMeasurement = RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, NULL);
+
+
+   // if more then one measurement exists, compute range-rate
+   if ((_prev_epoch != 0) &&  _timer >= dopplerInterval )
+   {
+
+        // Compute range-rate
+        cMeasurement.rangerate = (cMeasurement.value[0]-_prev_range)/(2.0*_timer);
+        
+        #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("Range rate %f\n", cMeasurement.rangerate);
+            MessageInterface::ShowMessage("Prev range %f\n", _prev_range);
+            MessageInterface::ShowMessage("Current range %f\n", cMeasurement.value[0]);
+        #endif
+        
+        // set previous range
+        _prev_range = cMeasurement.value[0];
+
+        // Set previous epoch
+        _prev_epoch = cMeasurement.epoch;
+ 
+   }
+   else if ( _prev_epoch == 0)
+   {
+        // Set previous range 
+        _prev_range = cMeasurement.value[0];
+
+        // Set previous epoch
+        _prev_epoch = cMeasurement.epoch;
+   }
+
+   _timer = (cMeasurement.epoch-_prev_epoch)*86400;
 
    return cMeasurement;
 }

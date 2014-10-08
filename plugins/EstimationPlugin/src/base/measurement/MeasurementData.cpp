@@ -45,7 +45,8 @@ MeasurementData::MeasurementData() :
    uplinkBand  (0),				// made changes by TUAN NGUYEN
    uplinkFreq  (0.0),			// made changes by TUAN NGUYEN
    rangeModulo (1.0),			// made changes by TUAN NGUYEN
-   dopplerCountInterval	(1.0e-10)	// made changes by TUAN NGUYEN
+   dopplerCountInterval	(1.0e-10),	// made changes by TUAN NGUYEN
+   rangerate	(0)	
 {
 }
 
@@ -89,7 +90,8 @@ MeasurementData::MeasurementData(const MeasurementData& md) :
    uplinkBand     (md.uplinkBand),			// made changes by TUAN NGUYEN
    uplinkFreq     (md.uplinkFreq),			// made changes by TUAN NGUYEN
    rangeModulo    (md.rangeModulo),			// made changes by TUAN NGUYEN
-   dopplerCountInterval	(md.dopplerCountInterval)	// made changes by TUAN NGUYEN
+   dopplerCountInterval	(md.dopplerCountInterval),	// made changes by TUAN NGUYEN
+   rangerate	(md.rangerate)	
 {
 }
 
@@ -126,6 +128,7 @@ MeasurementData MeasurementData::operator=(const MeasurementData& md)
 	  uplinkFreq      = md.uplinkFreq;			// made changes by TUAN NGUYEN
 	  rangeModulo     = md.rangeModulo;			// made changes by TUAN NGUYEN
 	  dopplerCountInterval = md.dopplerCountInterval;	// made changes by TUAN NGUYEN
+      rangerate       = md.rangerate;
    }
 
    return *this;
