@@ -85,18 +85,18 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    multiplier           (1.0),
    withLighttime        (false),
    thePropagator        (NULL),
-   uplinkFreq           (1.0e9),           // made changes by TUAN NGUYEN
-   freqBand             (0),               // made changes by TUAN NGUYEN
-//   uplinkFreqE          (1.0e9),           // made changes by TUAN NGUYEN      // This code will be moved to DSNDopplerAdapter
-//   freqBandE            (0),               // made changes by TUAN NGUYEN      // This code will be moved to DSNDopplerAdapter
+   uplinkFreq           (1.0e3),           // made changes by TUAN NGUYEN         // unit: Mhz
+   freqBand             (1),               // made changes by TUAN NGUYEN
    obsData              (NULL),            // made changes by TUAN NGUYEN
    addNoise             (false),           // made changes by TUAN NGUYEN
    rampTB               (NULL)             // made changes by TUAN NGUYEN
 {
    noiseSigma.push_back(1.0);           // noiseSigma[0] = 1.0 is default value for range's noise sigma
    noiseSigma.push_back(1.0);           // noiseSigma[1] = 1.0 is default value for doppler's noise sigma
+   noiseSigma.push_back(1.0);           // noiseSigma[2] = 1.0 is default value for dsn range's noise sigma
    errorModel.push_back("RandomConstant");    // errorModel[0] = "RandomConstant" is default value for range's error model
    errorModel.push_back("RandomConstant");    // errorModel[1] = "RandomConstant" is default value for doppler's error model
+   errorModel.push_back("RandomConstant");    // errorModel[2] = "RandomConstant" is default value for dsn range's error model
 }
 
 
@@ -109,8 +109,34 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
 //------------------------------------------------------------------------------
 TrackingDataAdapter::~TrackingDataAdapter()
 {
+   if (calcData)                            // made changes by TUAN NGUYEN
+      delete calcData;                      // made changes by TUAN NGUYEN
+
    if (thePropagator)
       delete thePropagator;
+
+   //if (cMeasurement.covariance)             // made changes by TUAN NGUYEN
+   //   delete cMeasurement.covariance;       // made changes by TUAN NGUYEN
+   cMeasurement.CleanUp();
+
+   for(UnsignedInt i=0; i < participantLists.size(); ++i)
+   {
+      if (participantLists[i])
+      {
+         participantLists[i]->clear();
+         delete participantLists[i];
+      }
+   }
+   participantLists.clear();
+
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+   {
+      theDataDerivatives[i].clear();
+   }
+   theDataDerivatives.clear();
+
+   refObjects.clear();
+//   MessageInterface::ShowMessage("TrackingDataAdapter destruction ((((\n");
 }
 
 
@@ -126,7 +152,7 @@ TrackingDataAdapter::~TrackingDataAdapter()
 TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    MeasurementModelBase (ma),
    measurementType      (ma.measurementType),     // made changes by TUAN NGUYEN
-   participantLists     (ma.participantLists),
+   participantLists     (ma.participantLists),  // made changes by TUAN NGUYEN
    calcData             (NULL),
    navLog               (ma.navLog),
    logLevel             (ma.logLevel),
@@ -139,8 +165,6 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    thePropagator        (NULL),
    uplinkFreq           (ma.uplinkFreq),          // made changes by TUAN NGUYEN
    freqBand             (ma.freqBand),            // made changes by TUAN NGUYEN
-   //uplinkFreqE          (ma.uplinkFreqE),         // made changes by TUAN NGUYEN       // This code will be moved to DSNDopplerAdapter
-   //freqBandE            (ma.freqBandE),           // made changes by TUAN NGUYEN       // This code will be moved to DSNDopplerAdapter
    obsData              (ma.obsData),             // made changes by TUAN NGUYEN
    noiseSigma           (ma.noiseSigma),          // made changes by TUAN NGUYEN
    errorModel           (ma.errorModel),          // made changes by TUAN NGUYEN
@@ -148,6 +172,7 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    rampTB               (ma.rampTB),              // made changes by TUAN NGUYEN
    rampTableNames       (ma.rampTableNames)       // made changes by TUAN NGUYEN
 {
+//   calcData = (MeasureModel*)ma.calcData->Clone();
 }
 
 
@@ -181,8 +206,6 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
 
       uplinkFreq         = ma.uplinkFreq;        // made changes by TUAN NGUYEN
       freqBand           = ma.freqBand;          // made changes by TUAN NGUYEN
-      //uplinkFreqE        = ma.uplinkFreqE;       // made changes by TUAN NGUYEN              // This code will be moved to DSNDopplerAdapter
-      //freqBandE          = ma.freqBandE;         // made changes by TUAN NGUYEN              // This code will be moved to DSNDopplerAdapter
       obsData            = ma.obsData;           // made changes by TUAN NGUYEN
       noiseSigma         = ma.noiseSigma;        // made changes by TUAN NGUYEN
       errorModel         = ma.errorModel;        // made changes by TUAN NGUYEN
@@ -390,7 +413,7 @@ Integer TrackingDataAdapter::SetIntegerParameter(const std::string &label, const
 Real TrackingDataAdapter::GetRealParameter(const Integer id) const
 {
    if (id == UPLINK_FREQUENCY)
-      return uplinkFreq;
+      return uplinkFreq;                        // unit: Mhz
 
    return MeasurementModelBase::GetRealParameter(id);
 }
@@ -403,7 +426,7 @@ Real TrackingDataAdapter::GetRealParameter(const Integer id) const
  * Sets the value for a real parameter
  *
  * @param id The ID for the parameter
- * @param value The value for the parameter
+ * @param value The value for the parameter (unit: Mhz for uplink frequency)
  *
  * @return setting value
  */
@@ -415,7 +438,7 @@ Real TrackingDataAdapter::SetRealParameter(const Integer id, const Real value)
       if (value < 0)
          throw MeasurementException("Error: uplink frequency has a negative value\n");
 
-      uplinkFreq = value;
+      uplinkFreq = value;             // unit: Mhz
       return uplinkFreq;
    }
 
@@ -624,11 +647,6 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
       return true;
    }
 
-   //// Make sure the measurement model has been set
-   //if (!calcData)
-   //   throw MeasurementException("Unable to set parameter data on the "
-   //         "measurement because the associated model has not yet been set.");
-
    if (id == SIGNAL_PATH)
    {
       StringArray *partList = DecomposePathString(value);
@@ -636,16 +654,17 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
       {
          participantLists.push_back(partList);
 
-        // Make sure the measurement model has been set
-        if (!calcData)
-           throw MeasurementException("Unable to set parameter data on the "
-            "measurement because the associated model has not yet been set.");
+         // This code was moved to Initialize() function 
+         // Make sure the measurement model has been set                             // made changes by TUAN NGUYEN
+         if (!calcData)                                                              // made changes by TUAN NGUYEN
+            throw MeasurementException("Unable to set parameter data on the "        // made changes by TUAN NGUYEN
+            "measurement because the associated model has not yet been set.");       // made changes by TUAN NGUYEN
 
-         // Pass the ordered participant lists to the measurement model
-         Integer whichOne = participantLists.size() - 1;
-         for (UnsignedInt i = 0; i < partList->size(); ++i)
-            calcData->SetStringParameter("SignalPath", partList->at(i),
-                  whichOne);
+         // Pass the ordered participant lists to the measurement model              // made changes by TUAN NGUYEN
+         Integer whichOne = participantLists.size() - 1;                             // made changes by TUAN NGUYEN
+         for (UnsignedInt i = 0; i < partList->size(); ++i)                          // made changes by TUAN NGUYEN
+            calcData->SetStringParameter("SignalPath", partList->at(i),              // made changes by TUAN NGUYEN
+                  whichOne);                                                         // made changes by TUAN NGUYEN
 
          return true;
       }
@@ -747,6 +766,22 @@ bool TrackingDataAdapter::SetStringParameter(const Integer id,
       return true;
    }
 
+//   if (id == SIGNAL_PATH)
+//   {
+//      if ((0 <= index)&&(index <= participantLists.size()))
+//      {
+//         if (index == participantLists.size())
+//         {
+//            StringArray* sr = new StringArray();
+//            participantLists.push_back(sr);
+//         }
+//
+//         participantLists[index]->push_back(value);
+//         return calcData->SetStringParameter("SignalPath", value, index);
+//      }
+//      else
+//         throw MeasurementException("Error: index is out of bound\n");
+//   }
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
@@ -970,6 +1005,12 @@ const StringArray& TrackingDataAdapter::GetRefObjectNameArray(
 
    return refObjectNames;
 }
+
+
+//ObjectArray& TrackingDataAdapter::GetRefObjectArray(const Gmat::ObjectType type)
+//{
+//   return refObjects;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1233,7 +1274,8 @@ bool TrackingDataAdapter::Initialize()
    cMeasurement.typeName = modelType;
    cMeasurement.uniqueID = modelID;
 
-   cMeasurement.covariance = new Covariance;
+   if (cMeasurement.covariance == NULL)
+      cMeasurement.covariance = new Covariance;
 
    // Default to a 1x1 identity covariance
    cMeasurement.covariance->SetDimension(1);
