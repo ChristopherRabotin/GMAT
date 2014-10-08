@@ -219,23 +219,6 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
-   // Added by TUAN NGUYEN
-   // Generic doppler entry.  Other doppler entries take precedence
-   lue = new LookupEntry;
-   lue->arbitraryCount = true;
-   lue->signalPathCount = 1;
-   lue->nodeCount = -1;             // Arbitrary
-   nodes.clear();
-   lue->nodes.push_back(nodes);     // Empty for this one
-   lue->type = "Doppler";
-   lue->multFactor = 1.0;
-   lue->magicNumber = lastNumber;
-   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
-      knownTypes.push_back(lue->type);
-   lookupTable.push_back(lue);
-   magicNumbers.push_back(lastNumber);
-   ++lastNumber;
-
    // One way range, 2 participants
    lue = new LookupEntry;
    lue->arbitraryCount = false;
@@ -266,9 +249,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
    lue->type = "Range";
-   // All measurement type "Range" have their measurement value is the length in Km of signal path, so multFactor is 1.0. 
-   // Note that: "USNRange" measurement type has multFactor = 0.5
-   lue->multFactor = 1.0;           // lue->multFactor = 0.5;
+   lue->multFactor = 0.5;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);
@@ -276,20 +257,17 @@ TFSMagicNumbers::TFSMagicNumbers() :
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
+
    
-   // Added by TUAN NGUYEN
-   // USN two way range
+   // Generic DSNRange entry.  Other DSN Range entries take precedence
    lue = new LookupEntry;
-   lue->arbitraryCount = false;
+   lue->arbitraryCount = true;
    lue->signalPathCount = 1;
-   lue->nodeCount = 2;
-   nodes.clear();
-   nodes.push_back("T1");
-   nodes.push_back("S1");
-   nodes.push_back("T1");
-   lue->nodes.push_back(nodes);
-   lue->type = "USNRange";
-   lue->multFactor = 0.5;
+   lue->nodeCount = -1;             // Arbitrary
+   lue->nodes.clear();
+   lue->nodes.push_back(nodes);     // Empty for this one
+   lue->type = "DSNRange";
+   lue->multFactor = 1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);
@@ -310,12 +288,28 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
    lue->type = "DSNRange";
-   // Note that: when multFactor is a non positive number, multiplier factor is a function. 
-   lue->multFactor = -1.0;
+   lue->multFactor = 1.0;   //-1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);
 
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   // Added by TUAN NGUYEN
+   // Generic doppler entry.  Other doppler entries take precedence
+   lue = new LookupEntry;
+   lue->arbitraryCount = true;
+   lue->signalPathCount = 1;
+   lue->nodeCount = -1;             // Arbitrary
+   nodes.clear();
+   lue->nodes.push_back(nodes);     // Empty for this one
+   lue->type = "Doppler";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
    lookupTable.push_back(lue);
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
@@ -331,9 +325,8 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "DSNDoppler";
-   // Note that: when multFactor is a non positive number, multiplier factor is a function.
-   lue->multFactor = -1.0;
+   lue->type = "Doppler";
+   lue->multFactor = 1.0;   // -1.0;
    lue->magicNumber = lastNumber;
    if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
       knownTypes.push_back(lue->type);
