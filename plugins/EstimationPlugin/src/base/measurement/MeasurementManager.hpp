@@ -76,7 +76,7 @@ public:
    void                    AddMeasurementName(std::string measName);
    GmatBase*               GetClone(GmatBase *obj);
    const StringArray&      GetMeasurementNames() const;
-   const Integer           GetMeasurementId(const std::string &modelName) const;
+   const IntegerArray      GetMeasurementId(const std::string &modelName) const;  // made changes by TUAN NGUYEN
    const StringArray&      GetParticipantList();
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
@@ -111,6 +111,9 @@ public:
    void                    Reset();
    
    std::vector<ObservationData>* GetObservationDataList();                          // made changes by TUAN NGUYEN
+
+   const std::vector<TrackingFileSet*>     GetTrackingSets() const ;                 // made changes by TUAN NGUYEN
+   const std::vector<TrackingDataAdapter*> GetTrackingDataAdapters() const;          // made changes by TUAN NGUYEN
 
 protected:
    /// List of the managed measurement models
