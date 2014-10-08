@@ -531,7 +531,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s of Participant %d\n", objPtr->GetParameterText(parameterID).c_str(), objNumber);
        
          MessageInterface::ShowMessage("   freq = %15lf, F = %15lf, F/c = "
-                  "%15lf\n", frequency, GetFrequencyFactorRatio(frequency)*frequency, fFactor);
+                  "%15lf\n", frequency, GetFrequencyFactor(frequency), fFactor);
       #endif
       
       if (objNumber == 1) // participant number 1, either a GroundStation or a Spacecraft
@@ -1372,22 +1372,45 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
       //18. Verify uplink leg light path not to be blocked by station's central body
-      UpdateRotationMatrix(t1T, "R_o_j2k");
-      Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+      // UpdateRotationMatrix(t1T, "R_o_j2k");
+      UpdateRotationMatrix(t1T, "o_j2k");
+      // Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();                                                                  // made changes by TUAN NGUYEN
+      Rvector3 rVec = r4B - r3B;
+      Rvector3 obsVec = R_o_j2k * rVec;
+      Rvector3 outState = obsVec.GetUnitVector();           // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree      // made changes by TUAN NGUYEN
+      //MessageInterface::ShowMessage("At transmit time t1T = %.12lf:\n", t1T);
+      //MessageInterface::ShowMessage("Range Vector in SBBMJ2000: [ %.12lf   %.12lf   %.12lf\n", rVec[0], rVec[1], rVec[2]);
+      //MessageInterface::ShowMessage("R_o_2k = [ %.12lf   %.12lf   %.12lf\n", R_o_j2k(0,0), R_o_j2k(0,1), R_o_j2k(0,2));
+      //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf\n", R_o_j2k(1,0), R_o_j2k(1,1), R_o_j2k(1,2));
+      //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf]\n", R_o_j2k(2,0), R_o_j2k(2,1), R_o_j2k(2,2));
+      //MessageInterface::ShowMessage("Observation vector: [ %.12lf   %.12lf   %.12lf\n", obsVec[0], obsVec[1], obsVec[2]);
       if (currentMeasurement.feasibilityValue > minAngle)
       {
-         UpdateRotationMatrix(t3R, "R_o_j2k");
-         outState = (R_o_j2k * (r2 - r1)).GetUnitVector();
-         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
+         // UpdateRotationMatrix(t3R, "R_o_j2k");
+         UpdateRotationMatrix(t3R, "o_j2k");
+         // outState = (R_o_j2k * (r2 - r1)).GetUnitVector();                                                                        // made changes by TUAN NGUYEN
+         rVec = r2B - r1B;
+         obsVec = R_o_j2k * rVec;
+         outState = obsVec.GetUnitVector();                 // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
+         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree      // made changes by TUAN NGUYEN
+
+         //MessageInterface::ShowMessage("At receive time t3R = %.12lf:\n", t3R);
+         //MessageInterface::ShowMessage("Range Vector in SBBMJ2000: [ %.12lf   %.12lf   %.12lf\n", rVec[0], rVec[1], rVec[2]);
+         //MessageInterface::ShowMessage("R_o_2k = [ %.12lf   %.12lf   %.12lf\n", R_o_j2k(0,0), R_o_j2k(0,1), R_o_j2k(0,2));
+         //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf\n", R_o_j2k(1,0), R_o_j2k(1,1), R_o_j2k(1,2));
+         //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf]\n", R_o_j2k(2,0), R_o_j2k(2,1), R_o_j2k(2,2));
+         //MessageInterface::ShowMessage("Observation vector: [ %.12lf   %.12lf   %.12lf\n", obsVec[0], obsVec[1], obsVec[2]);
 
          if (feasibilityValue > minAngle)
          {
             currentMeasurement.unfeasibleReason = "N";
             currentMeasurement.isFeasible = true;
+            //MessageInterface::ShowMessage(" N up   :  uplink:  %.12lf  downlink:  %.12lf\n", currentMeasurement.feasibilityValue, feasibilityValue);
          }
          else
          {
+            //MessageInterface::ShowMessage(" B2 down:  uplink:  %.12lf  downlink:  %.12lf\n", currentMeasurement.feasibilityValue, feasibilityValue);
             currentMeasurement.feasibilityValue = feasibilityValue;
             currentMeasurement.unfeasibleReason = "B2";
             currentMeasurement.isFeasible = false;
@@ -1397,6 +1420,11 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       {
          currentMeasurement.unfeasibleReason = "B1";
          currentMeasurement.isFeasible = false;
+
+         //UpdateRotationMatrix(t3R, "o_j2k");
+         //outState = (R_o_j2k * (r2B - r1B)).GetUnitVector();                 // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
+         //Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree      // made changes by TUAN NGUYEN
+         //MessageInterface::ShowMessage(" B1 up  :  uplink:  %.12lf  downlink:  \n", currentMeasurement.feasibilityValue, feasibilityValue);
       }
 
       // 19. Calculate real range
@@ -1645,6 +1673,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
       char s[200];
       sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
       std::string st(&s[0]);
+      //MessageInterface::ShowMessage("%s", st.c_str());
       err = 4;
       throw MeasurementException(st);
    }
@@ -1654,6 +1683,7 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
       char s[200];
       sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
       std::string st(&s[0]);
+      //MessageInterface::ShowMessage("%s", st.c_str());
       err = 5;
       throw MeasurementException(st);
    }
