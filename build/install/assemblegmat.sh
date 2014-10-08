@@ -26,15 +26,13 @@ WINDOWS=true
 MAC=false
 LINUX=false
 TYPE=full
-dest=.
 
 usage() {
 cat <<END
 Usage: $0 [option] ...
 Options:
   -b buildname  Assemble the named build instead of the latest available
-  -d dest       Place files in specified directory dest (default: current
-                directory)
+  -d dest       Place files in specified directory dest (default: gmat-<date>)
   -l|-m|[-w]    Assemble for Linux (-l), Mac (-m), or Windows (-w, default)
   -p pw         Use repository password pw (default: prompt) 
   -t type       Assemble a particular type of distribution:
@@ -46,11 +44,6 @@ Options:
 END
 }
 
-# File sources
-devrepo=`dirname $0`'/../..'
-internalrepo='ssh://gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmatinternal.git'
-apppath="$devrepo/application"
-
 # Argument handling
 while getopts b:d:lmp:t:u:w o
 do
@@ -61,11 +54,15 @@ do
         m) LINUX=false; MAC=true; WINDOWS=false;;
         p) pw="$OPTARG";;
         t) TYPE=`echo "$OPTARG" | tr '[:upper:]' '[:lower:]'`;;
-        u) user="$OPTARG";;
+        u) user="${OPTARG}@";;
         w) LINUX=false; MAC=false; WINDOWS=true;;
         ?) usage; exit 1;;
     esac
 done
+
+# File sources
+gmatrepo="ssh://${user}gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmat.git"
+internalrepo="ssh://${user}gs-mesajade.gsfc.nasa.gov/home/GMAT/git/gmatinternal.git"
 
 # Platform-dependent stuff
 if $WINDOWS
@@ -90,6 +87,10 @@ then
     fi
 
     # Create destination directory
+    if [ -z "$dest" ]
+    then
+        dest="gmat-$buildname"
+    fi
     if [ ! -e "$dest" ]
     then
         mkdir -p "$dest"
@@ -119,7 +120,7 @@ then
 fi
 
 # bin, data, matlab
-cp -av "$apppath"/* "$dest"
+git archive -v --format=tar --remote="$gmatrepo" HEAD:application | tar -x -C "$dest"
 
 # remove debug directory
 rm -rf "$dest/debug"
@@ -127,14 +128,13 @@ rm -rf "$dest/debug"
 # Mars-GRAM 2005 data
 if [ $TYPE = 'full' -o $TYPE = 'full-release' ]
 then
-    git clone "$internalrepo" git
-    cp -av git/code/MarsGRAMPlugin/data/MarsGRAM2005 "$dest/data/atmosphere"
-    rm -rf git
+    mgdatadir="$dest/data/atmosphere/MarsGRAM2005"
+    mkdir -p "$mgdatadir"
+    git archive -v --format=tar --remote="$internalrepo" HEAD:code/MarsGRAMPlugin/data/MarsGRAM2005 | tar -x -C "$mgdatadir"
 fi
 
 # libCInterface MATLAB files
-cifacepath="$devrepo/plugins/CInterfacePlugin"
-cp -av "$cifacepath"/matlab/* "$dest/matlab/libCInterface"
+git archive -v --format=tar --remote="$gmatrepo" HEAD:plugins/CInterfacePlugin/matlab | tar -x -C "$dest/matlab/libCInterface"
 
 # Remove proprietary plugins if necessary
 if [ $TYPE = 'public' -o $TYPE = 'public-release' ]

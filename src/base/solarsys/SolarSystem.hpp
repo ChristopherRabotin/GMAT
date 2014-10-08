@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -330,6 +330,10 @@ private:
    
    /// method to find a body in the solar system, given its name
    CelestialBody* FindBody(std::string withName);
+   // WARNING: The J200Body must be set identically for all objects in a GMAT run;
+   // not doing so will give incorrect results.
+   // In addition, the setting of a body other than Earth as the J2000Body has
+   // not been tested.
    void           SetJ2000Body();
    void           CloneBodiesInUse(const SolarSystem &ss,
                                    bool cloneSpecialPoints = true);
@@ -341,6 +345,9 @@ private:
                                Gmat::DeFileFormat format = Gmat::DE_BINARY);
    // method to set default colors
    void           SetDefaultSpacePointColors(SpacePoint *sp);
+   
+   // method to set solar system body texture map file
+   void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data

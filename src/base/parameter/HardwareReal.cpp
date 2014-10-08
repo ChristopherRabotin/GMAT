@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -25,13 +25,15 @@
 
 //------------------------------------------------------------------------------
 // HardwareReal(const std::string &name, const std::string &typeStr, 
-//              GmatBase *obj, const std::string &desc, const std::string &unit)
+//              GmatBase *obj, const std::string &desc, const std::string &unit,
+//              bool isSettable)
 //------------------------------------------------------------------------------
 HardwareReal::HardwareReal(const std::string &name, const std::string &typeStr, 
                            Gmat::ObjectType ownerType, Gmat::ObjectType ownedObjType,
-                           GmatBase *obj, const std::string &desc, const std::string &unit)
+                           GmatBase *obj, const std::string &desc, const std::string &unit,
+                           bool isSettable)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
-             GmatParam::ATTACHED_OBJ, ownerType, false, true, true, true, ownedObjType),
+             GmatParam::ATTACHED_OBJ, ownerType, false, isSettable, true, true, ownedObjType),
      SpacecraftData(name)
 {
    AddRefObject(obj);

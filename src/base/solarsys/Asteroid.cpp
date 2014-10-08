@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -27,6 +27,7 @@
 #include "RealUtilities.hpp"
 #include "AngleUtil.hpp"
 #include "StringUtil.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 //#define DEBUG_ASTEROID 1
 
@@ -56,6 +57,9 @@ Asteroid::Asteroid(std::string name) :
 {
    objectTypeNames.push_back("Asteroid"); 
    parameterCount      = AsteroidParamCount;
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::SALMON, GmatColor::DARK_GRAY);
    
    theCentralBodyName  = SolarSystem::SUN_NAME; 
    bodyType            = Gmat::ASTEROID;

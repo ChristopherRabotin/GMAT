@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -121,6 +121,11 @@ protected:
    StringArray sclk;
    // array of Frame kernel names
    StringArray fk;
+
+   // array of full path kernel names
+   StringArray ckFullPath;
+   StringArray sclkFullPath;
+   StringArray fkFullPath;
 
    // static text and types for parameters
    static const std::string PARAMETER_TEXT[SpiceAttitudeParamCount - AttitudeParamCount];

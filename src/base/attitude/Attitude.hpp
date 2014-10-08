@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -297,6 +297,8 @@ protected:
        MRPS,					   // Dunn Added
        DIRECTION_COSINE_MATRIX,
        ANGULAR_VELOCITY,           // degrees/second
+       BODY_SPIN_AXIS,             // PrecessingSpinner
+       NUTATION_REFERENCE_VECTOR,  // PrecessingSpinner
        EndOtherReps
    };
    
@@ -413,7 +415,8 @@ protected:
 
    /// Additional data for CCSDS-AEM
    std::string           aemFile;
-
+   std::string           aemFileFullPath;
+   
    //------------------------------------------------------------------------------
    //  virtual void ComputeCosineMatrixAndAngularVelocity(Real atTime)
    //------------------------------------------------------------------------------

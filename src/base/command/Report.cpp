@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -113,6 +113,7 @@ Report::Report(const Report &rep) :
    rfName         (rep.rfName),
    reporter       (NULL),
    reportID       (-1),
+   numParams      (0),
    needsHeaders   (rep.needsHeaders),
    hasExecuted    (rep.hasExecuted)
 {

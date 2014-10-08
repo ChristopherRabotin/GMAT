@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,6 +33,7 @@
 //#define DEBUG_CP_SET_STRING
 //#define DEBUG_CP_ACTION
 //#define DEBUG_CP_RENAME
+//#define DEBUG_CP_CLOAKING
 
 //---------------------------------
 // static data
@@ -383,6 +384,64 @@ bool CalculatedPoint::IsParameterReadOnly(const std::string &label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCloaked(const Integer id) const
+//------------------------------------------------------------------------------
+bool CalculatedPoint::IsParameterCloaked(const Integer id) const
+{
+   #ifdef DEBUG_CP_CLOAKING
+   MessageInterface::ShowMessage
+      ("CalculatedPoint::IsParameterCloaked() <%p><%s>'%s' entered, id = %2d %s, cloaking = %s, "
+       "isBuiltIn = %s\n",  this, GetTypeName().c_str(), GetName().c_str(), id,
+       (GetParameterText(id)).c_str(), cloaking ? "true" : "false", isBuiltIn ? "true" : "false");
+   #endif
+   
+   if (!cloaking)
+   {
+      #ifdef DEBUG_CP_CLOAKING
+      MessageInterface::ShowMessage
+         ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning false - object is not cloaked\n",
+          this, GetName().c_str());
+      #endif
+      return false;
+   }
+   
+   // if it's read-only, we'll cloak it
+   if (IsParameterReadOnly(id))
+   {
+      #ifdef DEBUG_CP_CLOAKING
+      MessageInterface::ShowMessage
+         ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning true - parameter %d (%s) is read-only\n",
+          this, GetName().c_str(), id, (GetParameterText(id)).c_str());
+      #endif
+      return true;
+   }
+   
+   if (id >= SpacePointParamCount && id < CalculatedPointParamCount)
+   {
+      if (id == BODY_NAMES)
+      {
+         // If built-in calculated point, BodyNames are cloaked
+         if (isBuiltIn)
+         {
+            #ifdef DEBUG_CP_CLOAKING
+            MessageInterface::ShowMessage
+               ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning true - "
+                "it is built-in point\n", this, GetName().c_str());
+            #endif
+            return true;
+         }
+      }
+   }
+   
+   bool isCloaked = SpacePoint::IsParameterCloaked(id);
+   #ifdef DEBUG_CP_CLOAKING
+   MessageInterface::ShowMessage
+      ("CalculatedPoint::IsParameterCloaked() <%p>'%s' returning %s\n", this, GetName().c_str(),
+       isCloaked ? "true" : "false");
+   #endif
+   return isCloaked;
+}
 
 //------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const Integer id) const

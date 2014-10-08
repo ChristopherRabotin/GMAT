@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -367,7 +367,20 @@ void SpiceAttitudeKernelReader::GetTargetOrientation(const std::string &objectNa
 //   boddef_c(objectNameSPICE, naifIDSPICE);        // CSPICE method to set NAIF ID for an object - is this valid for spacecraft?
    // Convert the time (in TDB) to spacecaft ticks
    SpiceDouble scTime;
+   
+   #ifdef DEBUG_CK_READING
+   // Why VS static build crashes here? (LOJ: 2014.06.27)
+   // In igrf.c, function shellg_0_(),     *b0 = sqrt(bq2); bq2 is NAN
+   MessageInterface::ShowMessage
+      ("   Calling sce2c_c(), naifIDSPICE = %d, etSPICE = %d\n", naifIDSPICE, etSPICE);
+   #endif
+   
    sce2c_c(naifIDSPICE, etSPICE, &scTime);
+
+   #ifdef DEBUG_CK_READING
+   MessageInterface::ShowMessage("   After calling sce2c_c(), scTime = %f\n", scTime);
+   #endif
+   
    if (failed_c())
    {
       ConstSpiceChar option[] = "LONG"; // retrieve long error message, for now

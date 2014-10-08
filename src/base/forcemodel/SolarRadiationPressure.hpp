@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -53,6 +53,7 @@
 #include "CelestialBody.hpp"
 #include "Rvector6.hpp"
 #include "gmatdefs.hpp"
+#include "ShadowState.hpp"
 
 /** 
  * Solar radiation pressure model -- currently incomplete
@@ -100,6 +101,16 @@ public:
    virtual Integer             GetIntegerParameter(const Integer id) const;
    virtual Integer             SetIntegerParameter(const Integer id, const Integer value);
    
+   virtual std::string         GetStringParameter(const Integer id) const;
+   virtual std::string         GetStringParameter(const std::string &label) const;
+   virtual bool                SetStringParameter(const Integer id,
+                                                  const std::string &value);
+   virtual bool                SetStringParameter(const std::string &label,
+                                                  const std::string &value);
+   virtual const StringArray&
+                               GetPropertyEnumStrings(const Integer id) const;
+
+
    virtual void SetSatelliteParameter(const Integer i, 
                                       const std::string parmName, 
                                       const Real parm,
@@ -109,6 +120,8 @@ public:
                                       const Real parm);
    virtual void ClearSatelliteParameters(const std::string parmName = "");
    
+   virtual void SetSpaceObject(const Integer i, GmatBase *obj);
+
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
@@ -143,6 +156,8 @@ protected:
             
    /// Pointer to the source of planetary ephemerides
    CelestialBody *theSun;
+   /// Pointer to the ShadowState
+   ShadowState   *shadowState;
 
    /// Flag used to indicate using an analytic model to locate the Sun
    bool useAnalytic;
@@ -167,10 +182,14 @@ protected:
    std::vector<Real> area;
    /// Mass of the body, in kg
    std::vector<Real> mass;
+   /// Pointers to the spacecraft
+   std::vector<GmatBase*> scObjs;
    /// Solar flux, in W/m^2
    Real flux;
    /// Solar flux, in N/m^2
    Real fluxPressure;
+   // the model to use - Spherical or SPADFile
+   std::string srpModel;
    /// Distance from the Sun, currently set to a dummy value
    Real sunDistance;
    /// Nominal distance to the Sun used in the model: 1 AU
@@ -210,8 +229,17 @@ protected:
    Integer areaID;
 
 
-   void FindShadowState(bool &lit, bool &dark, Real *state);
-   Real ShadowFunction(Real *state);
+//   void     FindShadowState(bool &lit, bool &dark, Real *state);
+//   Real     ShadowFunction(Real *state);
+   Rvector6 ComputeSPADAcceleration(Integer scID, Real ep,
+                                    Real *state, Real *cbSun);
+
+   static const Real FLUX_LOWER_BOUND;
+   static const Real FLUX_UPPER_BOUND;
+   static const Real FLUX_PRESSURE_LOWER_BOUND;
+   static const Real FLUX_PRESSURE_UPPER_BOUND;
+   static const Real NOMINAL_SUN_LOWER_BOUND;
+   static const Real NOMINAL_SUN_UPPER_BOUND;
 
 private:
 
@@ -229,6 +257,7 @@ private:
       MASS,
       FLUX,
       FLUX_PRESSURE,
+      SRP_MODEL,
       SUN_DISTANCE,
       NOMINAL_SUN,
       PSUNRAD,

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -440,7 +440,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		MessageInterface::ShowMessage
 			("GmatPanel::OnHelp() theHelpController=<%p>\n   "
 			"File to display=%s\n", theHelpController,
-			s);
+			s.c_str());
 		#endif
 		// displays chm, not html
 		// see if there is an override for panel (e.g., PropSetupKeyword=Propagator)
@@ -465,7 +465,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 		#ifdef DEBUG_GMATPANEL
 		  MessageInterface::ShowMessage
 			 ("GmatPanel::OnHelp() Web Page=<%s>\n",
-			  s);
+			  s.c_str());
 		#endif
 
 		// if path is relative, try to append it to gmat root 

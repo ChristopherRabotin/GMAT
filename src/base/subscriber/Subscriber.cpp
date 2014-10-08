@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -127,7 +127,10 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    isMinimized			    (false),
    runstate              (Gmat::IDLE),
    prevRunState          (Gmat::IDLE),
-   currProviderId        (0)
+   currProviderId        (0),
+   mPlotUpperLeft        (2,0.0,0.0),
+   mPlotSize             (2,0.0,0.0),
+   propDirection         (1.0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
    objectTypeNames.push_back("Subscriber");
@@ -141,8 +144,6 @@ Subscriber::Subscriber(const std::string &typeStr, const std::string &nomme) :
    for (UnsignedInt i = 0; i < SolverIterOptionCount; i++)
       solverIterOptions.push_back(SOLVER_ITER_OPTION_TEXT[i]);
 
-   mPlotUpperLeft = Rvector(2,0.0,0.0);
-   mPlotSize      = Rvector(2,0.0,0.0);
 }
 
 
@@ -172,6 +173,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    runstate              (copy.runstate),
    prevRunState          (copy.prevRunState),
    currProviderId        (copy.currProviderId),
+   propDirection         (copy.propDirection),
    xWrapperObjectNames   (copy.xWrapperObjectNames),
    yWrapperObjectNames   (copy.yWrapperObjectNames),
    allWrapperObjectNames (copy.allWrapperObjectNames)
@@ -242,6 +244,7 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    runstate = rhs.runstate;
    prevRunState = rhs.prevRunState;
    currProviderId = rhs.currProviderId;
+   propDirection = rhs. propDirection;
    
    xWrapperObjectNames = rhs.xWrapperObjectNames;
    yWrapperObjectNames = rhs.yWrapperObjectNames;
@@ -706,9 +709,9 @@ Integer Subscriber::GetProviderId()
 }
 
 //------------------------------------------------------------------------------
-// virtual void SetProvider(GmatBase *provider);
+// virtual void SetProvider(GmatBase *provider, Real epochInMjd = -999.999)
 //------------------------------------------------------------------------------
-void Subscriber::SetProvider(GmatBase *provider)
+void Subscriber::SetProvider(GmatBase *provider, Real epochInMjd)
 {
    currentProvider = provider;
 }
@@ -737,6 +740,13 @@ void Subscriber::SetDataLabels(const StringArray& elements)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// void SetPropagationDirection(Real propDir)
+//------------------------------------------------------------------------------
+void Subscriber::SetPropagationDirection(Real propDir)
+{
+   propDirection = propDir;
+}
 
 //------------------------------------------------------------------------------
 // void ClearDataLabels()

@@ -7,6 +7,20 @@ function oscele =BROLYD(dpele)
 %        I=5, argUMENT OF PERIGEE               -- AP                *
 %        I=6, MEAN ANOMALY                      -- DM                *
 %--------------------------------------------------------------------*
+
+if dpele(3) > 180     | dpele(3) < 0 %  | dpele(2) > 0.99999 | dpele(1)*(1-dpele(2)) < 5800
+    disp('BROLYD cannot calculate osculating elements because of incorrect input values')
+    disp(['SMADP',' = ', num2str(dpele(1)), '   ECCDP',' = ', num2str(dpele(2)), '   INCDP',' = ', num2str(dpele(3))])
+    oscele=[];
+    return
+end
+pseudostate=0;
+
+if dpele(3) > 177
+    dpele(3)=180-dpele(3); % INC = 180 - INC
+    dpele(4)=-dpele(4); % RAAN = -RAAN
+    pseudostate=1;
+end
 dpele(3:6)=deg2rad(dpele(3:6));
 ae      = 6378.1363E0;
 
@@ -32,9 +46,11 @@ if EDP < 0
     GDP=GDP-pi;
 end
 
-if EDP >= 0.97
-    disp('BROLYD cannot calculate mean elements for near parabolic')
+if EDP > 0.999999
+    disp('BROLYD cannot calculate osculating elements for near parabolic')
     disp('or hyperbolic orbits.')
+    
+    disp(['SMADP',' = ', num2str(dpele(1)), '   ECCDP',' = ', num2str(EDP), '   INCDP',' = ', num2str(dpele(3))])
     oscele=[];
     return
 end
@@ -167,10 +183,28 @@ end
       CS3FGD=cos(3.0*FDP+2.0*GDP);
       SINGD=sin(GDP);
       COSGD=cos(GDP);
-      DLT1E=B14*SINGD+B13*CS2GD-B15*SN3GD;
 %------------------------I
 % COMPUTE (L+G+H) PRIMED I
 %------------------------I
+
+% COMPUTE ISUBC TO TEST CRITICAL INCLINATION
+
+BISUBC=((1.0-5.0*THETA2)^(-2))*((25.0*THETA4*THETA)*(GMP2*EDP2));
+
+if BISUBC >= 0.1
+% MODIFICATIONS FOR CRITICAL INCLINATION
+    disp('Mean inclination is close to the critial inclination 63 deg. 26 min. Result can be inaccurate')
+    DLT1E=0.0;
+    BLGHP=0.0;
+    EDPDL=0.0;
+    DLTI=0.0;
+    SINDH=0.0;
+else
+    
+	DLT1E=B14*SINGD+B13*CS2GD-B15*SN3GD;
+%
+% COMPUTE (L+G+H) PRIMED
+%
       BLGHP=HDP+GDP+BLDP+B3*CS3GD+B1*SN2GD+B2*COSGD;
       BLGHP=mod(BLGHP,(2*pi));
       if BLGHP < 0
@@ -179,6 +213,8 @@ end
       EDPDL=B4*SN2GD-B5*COSGD+B6*CS3GD-(1/4)*CN2*CN*GMP2*(2.0*(3.0*THETA2-1.0)*(DADR2*CN2+DADR+1.0)*SINFD+3.0*(1.0-THETA2)*((-DADR2*CN2-DADR+1.0)*SNF2GD+(DADR2*CN2+DADR+(1/3))*SN3FGD));
       DLTI=(1/2)*THETA*GMP2*SINI*(EDP*CS3FGD+3.0*(EDP*CSF2GD+CS2GFD))-(A21/CN2)*(B8*SINGD+B7*CS2GD-B9*SN3GD);
       SINDH=(1.0/COSI2)*((1/2)*(B12*CS3GD+B11*COSGD+B10*SN2GD-((1/2)*GMP2*THETA*SINI*(6.0*(EDP*SINFD-BLDP+FDP)-(3.0*(SN2GFD+EDP*SNF2GD)+EDP*SN3FGD)))));
+end
+
 %-----------------I
 % COMPUTE (L+G+H) I
 %-----------------I
@@ -223,24 +259,25 @@ end
 %----------------------------------------I
 % COMPUTE H(LONGITUDE OF ASCENDING NODE) I
 %----------------------------------------I
- if BI==0
+ if BI==0 & pseudostate == 0
      H=0;
+     G=BLGH-BL-H;
  else
 	  arg1=SINDH*COSHDP+SINHDP*((1/2)*DLTI*COSI2+SINI2);
       arg2=COSHDP*((1/2)*DLTI*COSI2+SINI2)-(SINDH*SINHDP);
       H=atan2(arg1,arg2);
-      H=mod(H,(2*pi));
-
-      if H < 0
-          H=H+(2*pi);
-      end
+      G=BLGH-BL-H;
  end
  
-      
+ if BI == 0 & pseudostate ~= 0
+    G = 0;
+    H=BLGH-BL-G;
+ end
+ 
 %---------------------------------I
 % COMPUTE G(argUMENT  OF PERIGEE) I
 %---------------------------------I
-	  G=BLGH-BL-H;
+	  H=mod(H,(2*pi));
       G=mod(G,(2*pi));
 
       if H < 0
@@ -260,3 +297,8 @@ end
       oscele(5) = G;
       oscele(6) = BL;
       oscele(3:6)=rad2deg(oscele(3:6));
+      
+if pseudostate ~= 0
+    oscele(3)=180-oscele(3); % INC = 180 - INC
+    oscele(4)=-oscele(4); % RAAN = -RAAN
+end

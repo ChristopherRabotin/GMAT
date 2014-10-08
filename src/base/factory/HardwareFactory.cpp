@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -23,6 +23,8 @@
 #include "HardwareFactory.hpp"
 #include "FuelTank.hpp"
 #include "Thruster.hpp"
+#include "NuclearPowerSystem.hpp"
+#include "SolarPowerSystem.hpp"
 
 
 //---------------------------------
@@ -57,6 +59,11 @@ Hardware* HardwareFactory::CreateHardware(const std::string &ofType,
       return new FuelTank(withName);
    if (ofType == "Thruster")
       return new Thruster(withName);
+   if (ofType == "NuclearPowerSystem")
+      return new NuclearPowerSystem(withName);
+   if (ofType == "SolarPowerSystem")
+      return new SolarPowerSystem(withName);
+
    return NULL;
 }
 
@@ -77,6 +84,8 @@ Factory(Gmat::HARDWARE)
    {
       creatables.push_back("FuelTank");
       creatables.push_back("Thruster");
+      creatables.push_back("NuclearPowerSystem");
+      creatables.push_back("SolarPowerSystem");
    }
 }
 
@@ -97,6 +106,8 @@ Factory(createList, Gmat::HARDWARE)
    {
       creatables.push_back("FuelTank");
       creatables.push_back("Thruster");
+      creatables.push_back("NuclearPowerSystem");
+      creatables.push_back("SolarPowerSystem");
    }
 }
 
@@ -117,6 +128,8 @@ Factory(fact)
    {
       creatables.push_back("FuelTank");
       creatables.push_back("Thruster");
+      creatables.push_back("NuclearPowerSystem");
+      creatables.push_back("SolarPowerSystem");
    }
 }
 
@@ -139,6 +152,8 @@ HardwareFactory& HardwareFactory::operator= (const HardwareFactory& fact)
    {
       creatables.push_back("FuelTank");
       creatables.push_back("Thruster");
+      creatables.push_back("NuclearPowerSystem");
+      creatables.push_back("SolarPowerSystem");
    }
    return *this;
 }

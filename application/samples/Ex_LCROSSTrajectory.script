@@ -254,8 +254,6 @@ GMAT DC_central.DerivativeMethod = ForwardDifference;
 Create Enhanced3DView EarthView;
 GMAT EarthView.SolverIterations = All; %Current or None are other options
 GMAT EarthView.Add = {LCROSS,Luna, Earth, ImpactSat,  LRO}; 
-GMAT EarthView.OrbitColor = [ 255 12632256  12256  243234 ];
-GMAT EarthView.TargetColor = [ 8421440 1234 23445  123124];
 GMAT EarthView.CoordinateSystem = EarthMJ2000Eq; 
 GMAT EarthView.ViewPointReference = Earth;
 GMAT EarthView.ViewPointVector = [ 25000 25000 25000 ];
@@ -278,8 +276,6 @@ GMAT EarthView.ShowPlot = true;
 Create Enhanced3DView MoonView;
 GMAT MoonView.SolverIterations = Current;
 GMAT MoonView.Add = {LCROSS, Luna, Earth, LRO};
-GMAT MoonView.OrbitColor = [ 255 12632256 65280   ];
-GMAT MoonView.TargetColor = [ 8421440  8421440 32423 ];
 GMAT MoonView.CoordinateSystem = MoonInertial;
 GMAT MoonView.ViewPointReference = Luna;
 GMAT MoonView.ViewDirection = Luna;

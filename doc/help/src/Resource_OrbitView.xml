@@ -36,8 +36,8 @@
     by using either the GUI or script interface of GMAT.
     <guilabel>OrbitView</guilabel> plots also come with multiple options that
     allow you to customize the view of spacecraft’s trajectories. See the
-    Fields section below for detailed discussion on available plotting and
-    drawing options.</para>
+    <xref linkend="Fields_Section" xrefstyle="select:title"/> section below
+    for detailed discussion on available plotting and drawing options.</para>
 
     <para>GMAT also provides the option of when to start and stop plotting
     spacecraft’s trajectories to an <guilabel>OrbitView</guilabel> resource
@@ -54,7 +54,8 @@
 
     <para><phrase role="ref_seealso">See Also</phrase>: <xref
     linkend="Toggle"/>, <xref linkend="Spacecraft"/>, <xref
-    linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/></para>
+    linkend="SolarSystem"/>, <xref linkend="CoordinateSystem"/>, <xref
+    linkend="Color"/></para>
   </refsection>
 
   <refsection xml:id="Fields_Section">
@@ -81,9 +82,9 @@
             <entry><para>This field allows you to add a
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
-            <guilabel>Barycenter</guilabel> to a plot. When creating a plot,
-            the <guilabel>Earth</guilabel> is added as a default body and may
-            be removed at any time. You can add a
+            <guilabel>Barycenter</guilabel> resource to a plot. When creating
+            a plot, the <guilabel>Earth</guilabel> is added as a default body
+            and may be removed at any time. You can add a
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
             <guilabel>Barycenter</guilabel> to a plot by using the name used
@@ -154,9 +155,9 @@
           <row>
             <entry><guilabel>Axes</guilabel></entry>
 
-            <entry><para>Allows you to draw the Cartesian
-            axis system associated with the coordinate system selected under
-            the <guilabel>CoordinateSystem</guilabel> field of an
+            <entry><para>Allows you to draw the Cartesian axis system
+            associated with the coordinate system selected under the
+            <guilabel>CoordinateSystem</guilabel> field of an
             <guilabel>OrbitView</guilabel> plot. This field cannot be modified
             in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
@@ -212,8 +213,8 @@
           <row>
             <entry><guilabel>EclipticPlane</guilabel></entry>
 
-            <entry><para>Allows you to draw a grid
-            representing the <guilabel>Ecliptic Plane</guilabel> in an
+            <entry><para>Allows you to draw a grid representing the
+            <guilabel>Ecliptic Plane</guilabel> in an
             <guilabel>OrbitView</guilabel> plot. This field cannot be modified
             in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
@@ -399,8 +400,8 @@
           <row>
             <entry><guilabel>DrawObject</guilabel></entry>
 
-            <entry><para> The <guilabel>DrawObject</guilabel> field allows you 
-			the option of displaying <guilabel>Spacecraft</guilabel> or
+            <entry><para> The <guilabel>DrawObject</guilabel> field allows you
+            the option of displaying <guilabel>Spacecraft</guilabel> or
             <guilabel>Celestial</guilabel> resources on the
             <guilabel>OrbitView</guilabel> plot. This field cannot be modified
             in the Mission Sequence.</para> <variablelist>
@@ -514,8 +515,8 @@
           <row>
             <entry><guilabel>EnableStars </guilabel></entry>
 
-            <entry><para>This field gives you the option of displaying stars on the
-            <guilabel>OrbitView</guilabel> Plot. When the
+            <entry><para>This field gives you the option of displaying stars
+            on the <guilabel>OrbitView</guilabel> Plot. When the
             <guilabel>EnableStars</guilabel> field is turned off, then
             <guilabel>EnableConstellations</guilabel> field is automatically
             diabled. This field cannot be modified in the Mission
@@ -573,8 +574,8 @@
           <row>
             <entry><guilabel>Grid </guilabel></entry>
 
-            <entry><para>Allows you to draw a grid representing the
-            longitude and latitude lines on the celestial bodies added to an
+            <entry><para>Allows you to draw a grid representing the longitude
+            and latitude lines on the celestial bodies added to an
             <guilabel>OrbitView</guilabel> plot. This field cannot be modified
             in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
@@ -745,63 +746,6 @@
           </row>
 
           <row>
-            <entry><guilabel>OrbitColor</guilabel></entry>
-
-            <entry><para>This field lets you select colors for both
-            spacecraft and celestial body trajectories. This field cannot be
-            modified in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer Array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from the Orbit Color
-                    selectbox</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 255 32768 ]</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
             <entry><guilabel>RelativeZOrder</guilabel></entry>
 
             <entry><para>Allows you to select which
@@ -865,9 +809,9 @@
           <row>
             <entry><guilabel>ShowPlot</guilabel></entry>
 
-            <entry><para>Allows you to turn off a plot for a particular
-            run, without deleting the plot, or removing it from the script. If
-            you select true, then the plot will be shown. If you select false,
+            <entry><para>Allows you to turn off a plot for a particular run,
+            without deleting the plot, or removing it from the script. If you
+            select true, then the plot will be shown. If you select false,
             then the plot will not be shown. This field cannot be modified in
             the Mission Sequence. </para> <variablelist>
                 <varlistentry>
@@ -923,12 +867,12 @@
           <row>
             <entry><guilabel>ShowLabels</guilabel></entry>
 
-            <entry><para>Allows you to turn on or off spacecraft and
-            celestial body Object labels. If you select true, then spacecraft
-            and celestial body object labels will show up in orbit view plot.
-            If you select false, then spacecraft and celestial body labels
-            will not be shown in the orbit plot. This field cannot be modified
-            in the Mission Sequence. </para> <variablelist>
+            <entry><para>Allows you to turn on or off spacecraft and celestial
+            body Object labels. If you select true, then spacecraft and
+            celestial body object labels will show up in orbit view plot. If
+            you select false, then spacecraft and celestial body labels will
+            not be shown in the orbit plot. This field cannot be modified in
+            the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1112,10 +1056,9 @@
           <row>
             <entry><guilabel>StarCount</guilabel></entry>
 
-            <entry><para>Allows you to enter the number of stars that
-            need to be displayed in an <guilabel>OrbitView</guilabel> plot.
-            This field cannot be modified in the Mission Sequence.</para>
-            <variablelist>
+            <entry><para>Allows you to enter the number of stars that need to
+            be displayed in an <guilabel>OrbitView</guilabel> plot. This field
+            cannot be modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1169,10 +1112,10 @@
           <row>
             <entry><guilabel>SunLine</guilabel></entry>
 
-            <entry><para>Allows you to draw a line that
-            starts at the center of central body and points towards the
-            <guilabel>Sun</guilabel>. This field cannot be modified in the
-            Mission Sequence. </para> <variablelist>
+            <entry><para>Allows you to draw a line that starts at the center
+            of central body and points towards the <guilabel>Sun</guilabel>.
+            This field cannot be modified in the Mission Sequence. </para>
+            <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1202,65 +1145,6 @@
 
                   <listitem>
                     <para>Off</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Units</term>
-
-                  <listitem>
-                    <para>N/A</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Interfaces</term>
-
-                  <listitem>
-                    <para>GUI, script</para>
-                  </listitem>
-                </varlistentry>
-              </variablelist></entry>
-          </row>
-
-          <row>
-            <entry><guilabel>TargetColor</guilabel></entry>
-
-            <entry><para>Allows you to select any available color for
-            perturbing trajectories during iterative processes such as
-            <guilabel>Differential Correction</guilabel> or
-            <guilabel>Optimization</guilabel>. This field cannot be modified
-            in the Mission Sequence.</para> <variablelist>
-                <varlistentry>
-                  <term>Data Type</term>
-
-                  <listitem>
-                    <para>Integer array</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Allowed Values</term>
-
-                  <listitem>
-                    <para>Any color available from Target Color select
-                    box</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Access</term>
-
-                  <listitem>
-                    <para>set</para>
-                  </listitem>
-                </varlistentry>
-
-                <varlistentry>
-                  <term>Default Value</term>
-
-                  <listitem>
-                    <para>[ 8421440 0 ]</para>
                   </listitem>
                 </varlistentry>
 
@@ -1417,8 +1301,8 @@
             automatically use the view as defined by the fields associated
             with <guilabel>View Definition</guilabel>, <guilabel>View Up
             Direction</guilabel>, and <guilabel>View Option</guilabel>.
-            However, if you change the view using the mouse, GMAT will
-            retain this view upon rerunning the mission as long as
+            However, if you change the view using the mouse, GMAT will retain
+            this view upon rerunning the mission as long as
             <guilabel>UseInitialView</guilabel> is set to false. If
             <guilabel>UseInitialView</guilabel> is set to true, the view for
             an <guilabel>OrbitView</guilabel> plot will be returned to the
@@ -1547,11 +1431,10 @@
           <row>
             <entry><guilabel>ViewPointReference</guilabel></entry>
 
-            <entry><para>This optional field allows you to change
-            the reference point from which
-            <guilabel>ViewPointVector</guilabel> is measured.
-            <guilabel>ViewPointReference</guilabel> defaults to the origin of
-            the coordinate system for the plot. A
+            <entry><para>This optional field allows you to change the
+            reference point from which <guilabel>ViewPointVector</guilabel> is
+            measured. <guilabel>ViewPointReference</guilabel> defaults to the
+            origin of the coordinate system for the plot. A
             <guilabel>ViewPointReference</guilabel> can be any
             <guilabel>Spacecraft</guilabel>, <guilabel>Celestial
             body</guilabel>, <guilabel>Libration Point</guilabel>, or
@@ -1688,8 +1571,8 @@
             <entry><para>This field scales
             <guilabel>ViewPointVector</guilabel> before adding it to
             <guilabel>ViewPointReference</guilabel>. The
-            <guilabel>ViewScaleFactor</guilabel> allows you to back away
-            from an object to fit in the field of view. This field cannot be
+            <guilabel>ViewScaleFactor</guilabel> allows you to back away from
+            an object to fit in the field of view. This field cannot be
             modified in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
@@ -1813,8 +1696,8 @@
             direction appears as up in an <guilabel>OrbitView</guilabel> plot
             and together with the fields associated the the <guilabel>View
             Direction</guilabel>, uniquely define the view. The fields
-            associated with the <guilabel>View Definition</guilabel> allows you to 
-			define the point of view in three-dimensional space, and
+            associated with the <guilabel>View Definition</guilabel> allows
+            you to define the point of view in three-dimensional space, and
             the direction of the line of sight. However, this information
             alone is not enough to uniquely define the view. We also must
             provide how the view is oriented about the line of sight. This is
@@ -1822,11 +1705,11 @@
             direction in the plot and is configured using the
             <guilabel>ViewUpCoordinateSystem</guilabel> field and the
             <guilabel>ViewUpAxis</guilabel> field. The
-            <guilabel>ViewUpCoordinateSystem</guilabel> allows you to
-            select a coordinate system to define the up direction. Most of the
-            time this system will be the same as the coordinate system chosen
-            under the <guilabel>CoordinateSystem</guilabel> field. This field
-            cannot be modified in the Mission Sequence. </para> <variablelist>
+            <guilabel>ViewUpCoordinateSystem</guilabel> allows you to select a
+            coordinate system to define the up direction. Most of the time
+            this system will be the same as the coordinate system chosen under
+            the <guilabel>CoordinateSystem</guilabel> field. This field cannot
+            be modified in the Mission Sequence. </para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -1942,11 +1825,11 @@
           <row>
             <entry><guilabel>XYPlane</guilabel></entry>
 
-            <entry><para>Allows you to draw a grid
-            representing the <guilabel>XY-plane</guilabel> of the coordinate
-            system selected under the <guilabel>CoordinateSystem</guilabel>
-            field of the <guilabel>OrbitView</guilabel> plot. This field
-            cannot be modified in the Mission Sequence.</para> <variablelist>
+            <entry><para>Allows you to draw a grid representing the
+            <guilabel>XY-plane</guilabel> of the coordinate system selected
+            under the <guilabel>CoordinateSystem</guilabel> field of the
+            <guilabel>OrbitView</guilabel> plot. This field cannot be modified
+            in the Mission Sequence.</para> <variablelist>
                 <varlistentry>
                   <term>Data Type</term>
 
@@ -2011,7 +1894,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_OrbitView_GUI_3.png"
+                     fileref="files/images/Resource_OrbitView_GUI_4.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>
@@ -2179,7 +2062,8 @@ Propagate aProp(aSat) {aSat.ElapsedDays = 4}</code></programlisting>
       with initial epoch of other spacecrafts, then GMAT throws in an error
       alerting you that there is a coupled propagation error mismatch between
       the spacecrafts. GMAT also allows you to propagate trajectories of
-      spacecrafts using any combination of the propagators that you may create.</para>
+      spacecrafts using any combination of the propagators that you may
+      create.</para>
 
       <para>Below is an example script snippet that shows how to plot
       trajectories of multiple spacecrafts that use different
@@ -2206,10 +2090,10 @@ Propagate aProp(aSat, aSat2) bProp(aSat3) {aSat.ElapsedSecs = 12000.0}</code></p
     <refsection>
       <title>OrbitView View Definition Controls</title>
 
-      <para>GMAT is capable of drawing orbit plots that allow you to
-      visualize the motion of spacecraft and celestial bodies throughout the
-      mission sequence. Here we discuss the options you can use in setting up
-      and viewing Orbit plots. You can choose many properties including the
+      <para>GMAT is capable of drawing orbit plots that allow you to visualize
+      the motion of spacecraft and celestial bodies throughout the mission
+      sequence. Here we discuss the options you can use in setting up and
+      viewing Orbit plots. You can choose many properties including the
       coordinate system of the orbit view plot and the view location and
       direction from where visualizations can be seen. The script snippet
       below shows how to create <guilabel>OrbitView</guilabel> resource that
@@ -2291,8 +2175,8 @@ MyOrbitViewPlot.ViewPointReference   = ViewRefObject</code></programlisting>
       <guilabel>ViewPointReference</guilabel>
       (<guilabel>r</guilabel><subscript>r</subscript>) in the direction of the
       view point location. If an object is given for
-      <guilabel>ViewPointVector</guilabel> field, i.e. you have the
-      following in the sample script:</para>
+      <guilabel>ViewPointVector</guilabel> field, i.e. you have the following
+      in the sample script:</para>
 
       <programlisting><code>MyOrbitViewPlot.CoordinateSystenm    = MyCoordSys 
 MyOrbitViewPlot.ViewPointVector      = ViewPointObject</code></programlisting>

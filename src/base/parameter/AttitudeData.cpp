@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -259,15 +259,14 @@ void AttitudeData::SetReal(Integer item, Real value)
    }
 }
 
-
 //------------------------------------------------------------------------------
-// std::string GetString(Integer item)
+// Rvector GetRvector(Integer item)
 //------------------------------------------------------------------------------
-std::string AttitudeData::GetString(Integer item)
+Rvector AttitudeData::GetRvector(Integer item)
 {
-   #ifdef DEBUG_GET_STRING
+   #ifdef DEBUG_GET_RVECTOR
    MessageInterface::ShowMessage
-      ("AttitudeData::GetString() entered, item = %d\n", item);
+      ("AttitudeData::GetRvector() entered, item = %d\n", item);
    #endif
    
    if (mSpacecraft == NULL)
@@ -283,14 +282,7 @@ std::string AttitudeData::GetString(Integer item)
    {
    case QUATERNION:
    {
-      // We don't want square brackets around values (GMT-3663)
-      //std::string str = "[ " + GmatStringUtil::ToString(quat[0], 15) + " " +
-      //   GmatStringUtil::ToString(quat[1], 15) + " " + GmatStringUtil::ToString(quat[2], 15) + 
-      //   " " + GmatStringUtil::ToString(quat[3], 15) + "]";
-      std::string str = GmatStringUtil::ToString(quat[0], 15) + " " +
-         GmatStringUtil::ToString(quat[1], 15) + " " + GmatStringUtil::ToString(quat[2], 15) + 
-         " " + GmatStringUtil::ToString(quat[3], 15);
-      return str;
+      return quat;
    }
    default:
       // otherwise, there is an error   
@@ -301,13 +293,13 @@ std::string AttitudeData::GetString(Integer item)
 }
 
 //------------------------------------------------------------------------------
-// void SetString(Integer item, const std::string &value)
+// void SetRvector(Integer item, const Rvector &value)
 //------------------------------------------------------------------------------
-void AttitudeData::SetString(Integer item, const std::string &value)
+void AttitudeData::SetRvector(Integer item, const Rvector &value)
 {
-   #ifdef DEBUG_SET_STRING
+   #ifdef DEBUG_SET_RVECTOR
    MessageInterface::ShowMessage
-      ("AttitudeData::SetString() entered, item = %d, value = '%s'\n",
+      ("AttitudeData::SetRvector() entered, item = %d, value = '%s'\n",
        item, value.c_str());
    #endif
    
@@ -317,13 +309,13 @@ void AttitudeData::SetString(Integer item, const std::string &value)
    Attitude *attitude = (Attitude*)mSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
    if (attitude == NULL)
       throw ParameterException
-         ("AttitudeData::SetString() Attitude of the Spacecraft \"" +
+         ("AttitudeData::SetRvector() Attitude of the Spacecraft \"" +
           mSpacecraft->GetName() + "\" is NULL\n");
    
    switch (item)
    {
    case QUATERNION:
-      attitude->SetStringParameter("Quaternion", value);
+      attitude->SetRvectorParameter("Quaternion", value);
       break;
    default:
       // otherwise, there is an error   

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -86,6 +86,8 @@
 //#define DEBUG_TRANSIENT_FORCES
 //#define DEBUG_PARAMETER_INITIALIZATION
 //#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
+//#define DEBUG_SATELLITE_PARAMETER_UPDATES
+//#define DEBUG_FORMATION_PROPERTIES
 
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
@@ -267,6 +269,9 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    j2kBody           (NULL),
    transientCount    (0)
 {
+#ifdef DEBUG_ODEMODEL
+	MessageInterface::ShowMessage("ODEModel default construction <'%s',%p>\n", GetName().c_str(), this);
+#endif
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
    
@@ -362,7 +367,7 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    transientCount             (fdf.transientCount)
 {
    #ifdef DEBUG_ODEMODEL
-   MessageInterface::ShowMessage("ODEModel copy constructor entered\n");
+   MessageInterface::ShowMessage("ODEModel copy constructor (from <'%s',%p> to <'%s',%p>) entered\n", fdf.GetName().c_str(), &fdf, GetName().c_str(), &(*this));
    #endif
    
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
@@ -402,6 +407,10 @@ ODEModel::ODEModel(const ODEModel& fdf) :
           "*newPm = (*pm)->Clone()", this);
       #endif
    }
+
+   #ifdef DEBUG_ODEMODEL
+   MessageInterface::ShowMessage("ODEModel copy constructor (from <'%s',%p> to <'%s',%p>) exit\n\n", fdf.GetName().c_str(), &fdf, GetName().c_str(), &(*this));
+   #endif
 }
 
 
@@ -419,8 +428,8 @@ ODEModel::ODEModel(const ODEModel& fdf) :
 ODEModel& ODEModel::operator=(const ODEModel& fdf)
 {
    #ifdef DEBUG_ODEMODEL
-      MessageInterface::ShowMessage("ODEModel <%p> Assignment Operator "
-            "entered\n", this);
+      MessageInterface::ShowMessage("ODEModel <'%s',%p> Assignment Operator "
+            "entered\n", GetName(), this);
    #endif
 
    if (&fdf == this)
@@ -1446,7 +1455,7 @@ bool ODEModel::CheckQualifier(const std::string &qualifier,
 bool ODEModel::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("ODEModel::Initialize() entered\n");
+      MessageInterface::ShowMessage("ODEModel::Initialize() (for <'%s',%p>) entered\n", GetName().c_str(), this);
    #endif
 
 //   Integer stateSize = 6;      // Will change if we integrate more variables
@@ -1651,9 +1660,9 @@ bool ODEModel::Initialize()
    // Set flag stating that Initialize was successful once
    forceMembersNotInitialized = false;
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("ODEModel::Initialize() complete\n");
-   #endif
+//   #ifdef DEBUG_INITIALIZATION
+//      MessageInterface::ShowMessage("ODEModel::Initialize() complete\n");
+//   #endif
 
 //   modelState = state->GetState();
 
@@ -1682,6 +1691,10 @@ bool ODEModel::Initialize()
          MessageInterface::ShowMessage("   %s at <%p> named '%s'\n",
                (*current)->GetTypeName().c_str(), *current,
                (*current)->GetName().c_str());
+   #endif
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("ODEModel::Initialize() (for <'%s',%p>) exit\n\n", GetName().c_str(), this);
    #endif
 
    return true;
@@ -1939,6 +1952,11 @@ std::string ODEModel::BuildPropertyName(GmatBase *ownedObj)
 //------------------------------------------------------------------------------
 void ODEModel::UpdateInitialData(bool dynamicOnly)
 {
+   #ifdef DEBUG_SATELLITE_PARAMETER_UPDATES
+      MessageInterface::ShowMessage("ODEModel::UpdateInitialData(%s): \n",
+            (dynamicOnly ? "true" : "false"));
+   #endif
+
    PhysicalModel *current; // = forceList[cf];  // waw: added 06/04/04
 
    // Variables used to set spacecraft parameters
@@ -2140,6 +2158,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
          
          if (sat->GetType() == Gmat::SPACECRAFT)
          { 
+            #ifdef DEBUG_FORMATION_PROPERTIES
+               MessageInterface::ShowMessage("Working on Spacecraft %s",
+                     sat->GetName().c_str());
+            #endif
+
             #ifdef DEBUG_SATELLITE_PARAMETERS
                MessageInterface::ShowMessage(
                    "ODEModel '%s', Member %s: %s->ParmsChanged = %s, "
@@ -2168,6 +2191,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                      "Setting parameters for %s using data from %s\n",
                      pm->GetTypeName().c_str(), sat->GetName().c_str());
                #endif
+               // pass the actual satellite pointer first
+               // (currently only needed by SRP)
+               pm->SetSpaceObject(i, sat);
+
                
                // ... Coordinate System ...
                stringParm = sat->GetStringParameter(satIds[1]);
@@ -2232,6 +2259,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
          }
          else if (sat->GetType() == Gmat::FORMATION) 
          {
+            #ifdef DEBUG_FORMATION_PROPERTIES
+               MessageInterface::ShowMessage("Working on Formation %s",
+                     sat->GetName().c_str());
+            #endif
+
             ObjectArray formSats;
             ObjectArray elements = sat->GetRefObjectArray("SpaceObject");
             for (ObjectArray::iterator n = elements.begin(); n != elements.end();
@@ -2254,6 +2286,10 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
    
    #ifdef DEBUG_SPACECRAFT_PROPERTIES
       MessageInterface::ShowMessage("   ---> %d returned\n", i);
+   #endif
+
+   #ifdef DEBUG_FORMATION_PROPERTIES
+      MessageInterface::ShowMessage("\n");
    #endif
 
    return i;

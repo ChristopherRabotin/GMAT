@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -367,6 +367,22 @@ bool GmatGlobal::IsWritingParameterInfo()
 void GmatGlobal::SetWriteParameterInfo(bool flag)
 {
    isWritingParameterInfo = flag;
+}
+
+//------------------------------------------------------------------------------
+// bool IsWritingFilePathInfo()
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsWritingFilePathInfo()
+{
+   return isWritingFilePathInfo;
+}
+
+//------------------------------------------------------------------------------
+// void SetWriteFilePathInfo(bool flag)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetWriteFilePathInfo(bool flag)
+{
+   isWritingFilePathInfo = flag;
 }
 
 //------------------------------------------------------------------------------
@@ -788,6 +804,7 @@ GmatGlobal::GmatGlobal()
    isEventLocationAvailable = false;
    isMissionTreeDebugOn = false;
    isWritingParameterInfo = false;
+   isWritingFilePathInfo = false;
    isWritingGmatKeyword = true;
    runMode = NORMAL;
    guiMode = NORMAL_GUI;

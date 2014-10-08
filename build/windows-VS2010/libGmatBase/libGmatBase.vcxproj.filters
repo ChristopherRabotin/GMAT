@@ -1332,11 +1332,35 @@
     <ClCompile Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.cpp">
       <Filter>Source Files\parameter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp">
       <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2627,11 +2651,35 @@
     <ClInclude Include="..\..\..\src\base\parameter\OutgoingAsymptoteParameters.hpp">
       <Filter>Source Files\parameter</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp">
+      <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -132,6 +132,7 @@ CoordinateBase (coordSys)
    if (coordSys.axes)
    {
       axes = (AxisSystem*)coordSys.axes->Clone();
+      axes->SetCoordinateSystemName(instanceName);
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (axes, "clonedAxes", "CoordinateSystem Copy Constructor",
@@ -173,6 +174,7 @@ const CoordinateSystem& CoordinateSystem::operator=(
    if (coordSys.axes)
    {
       axes = (AxisSystem*)coordSys.axes->Clone();
+      axes->SetCoordinateSystemName(instanceName);
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (axes, "clonedAxes", "CoordinateSystem Assignment operator",
@@ -248,6 +250,16 @@ CoordinateSystem::~CoordinateSystem()
    instanceName.c_str());
    #endif
 }
+
+
+//---------------------------------------------------------------------------
+// AxisSystem* GetAxisSystem()
+//---------------------------------------------------------------------------
+AxisSystem* CoordinateSystem::GetAxisSystem()
+{
+   return axes;
+}
+
 
 //---------------------------------------------------------------------------
 // GmatCoordinate::ParameterUsage UsesEopFile(const std::string &forBaseSystem) const
@@ -463,6 +475,16 @@ bool CoordinateSystem::HasCelestialBodyOrigin() const
    return false;
 }
 
+void CoordinateSystem::SetAllowWithoutRates(bool allow)
+{
+   if (axes) axes->SetAllowWithoutRates(allow);
+}
+
+bool CoordinateSystem::AllowWithoutRates() const
+{
+   if (axes) return axes->AllowWithoutRates();
+   return false;
+}
 
 
 // methods to set parameters for the AxisSystems
@@ -1215,13 +1237,12 @@ Rvector CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Rvector &inSt
                                          + instanceName);
     #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-      "In CS::FromBaseSystem (2), translation happening\n");
+      "In CS::FromBaseSystem (2), translation happening ...\n");
     #endif
    }
    else
       internalState = inState;
       
-
    if (axes)
    {
       if (!axes->RotateFromBaseSystem(epoch,internalState,finalState,
@@ -1288,7 +1309,8 @@ void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
 
    #ifdef DEBUG_INPUTS_OUTPUTS
       MessageInterface::ShowMessage(
-     "In CS::FromBaseSystem set internalState ...\n");
+     "In CS::FromBaseSystem set internalState ... %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  \n",
+     internalState[0],internalState[1],internalState[2],internalState[3],internalState[4],internalState[5]);
    #endif
       
 
@@ -1311,6 +1333,11 @@ void CoordinateSystem::FromBaseSystem(const A1Mjd &epoch, const Real *inState,
       #endif
       for (Integer i=0; i<6; i++) outState[i]    = internalState[i];
    }
+   #ifdef DEBUG_INPUTS_OUTPUTS
+      MessageInterface::ShowMessage(
+     "LEAVING CS::FromBaseSystem outSTate =  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  \n",
+     outState[0],outState[1],outState[2],outState[3],outState[4],outState[5]);
+   #endif
                                          
 }
 
@@ -2071,7 +2098,7 @@ Gmat::ObjectType CoordinateSystem::GetPropertyObjectType(const Integer id) const
 //                     const std::string &csName, const std::string &axesType,
 //                     SpacePoint *origin, SpacePoint *primary,
 //                     SpacePoint *secondary, SpacePoint *j2000Body,
-//                     SolarSystem *solarSystem)
+//                     SolarSystem *solarSystem, bool initializeIt = true)
 //------------------------------------------------------------------------------
 /**
  * Creates CoordinateSystem with VNB, LVLH, MJ2000Eq, and SpacecraftBody axis.
@@ -2083,15 +2110,21 @@ Gmat::ObjectType CoordinateSystem::GetPropertyObjectType(const Integer id) const
  * @param  secondary   Axes system secondary body pointer
  * @param  j2000Body   Axes system J2000 body pointer
  * @param  solarSystem Solar system pointer
+ * @param  initializeIt Initialize the Coordinate System before returning it?
  *
  * @return new CoordinateSystem pointer if successful, NULL otherwise
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
                      const std::string &csName, const std::string &axesType,
                      SpacePoint *origin, SpacePoint *primary,
                      SpacePoint *secondary, SpacePoint *j2000Body,
-                     SolarSystem *solarSystem)
+                     SolarSystem *solarSystem, bool initializeIt)
 {
    #ifdef DEBUG_CS_CREATE
    MessageInterface::ShowMessage
@@ -2155,7 +2188,7 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
       localCS->SetRefObject(theAxes, Gmat::AXIS_SYSTEM, theAxes->GetName());
       localCS->SetRefObject(j2000Body, Gmat::SPACE_POINT, j2000Body->GetName());
       localCS->SetSolarSystem(solarSystem);
-      localCS->Initialize();
+      if (initializeIt) localCS->Initialize();
       
       #ifdef DEBUG_CS_CREATE
       MessageInterface::ShowMessage
@@ -2217,12 +2250,19 @@ CoordinateSystem* CoordinateSystem::CreateLocalCoordinateSystem(
       if (theAxes->UsesItrfFile() == GmatCoordinate::REQUIRED)
          theAxes->SetCoefficientsFile(gmatGlobal->GetItrfCoefficientsFile());
       
+      #ifdef DEBUG_CS_CREATE
+        MessageInterface::ShowMessage("   --> origin is %s <%p>\n",
+              origin->GetName().c_str(), origin);
+        MessageInterface::ShowMessage("   --> J2000Body is %s <%p>\n",
+              j2000Body->GetName().c_str(), j2000Body);
+      #endif
+      localCS->SetRefObject(theAxes, Gmat::AXIS_SYSTEM, theAxes->GetName());
       localCS->SetStringParameter("Origin", origin->GetName());
       localCS->SetRefObject(origin, Gmat::SPACE_POINT, origin->GetName());
-      localCS->SetRefObject(theAxes, Gmat::AXIS_SYSTEM, theAxes->GetName());
-      localCS->SetRefObject(j2000Body, Gmat::SPACE_POINT, j2000Body->GetName());
+      localCS->SetJ2000Body(j2000Body);
+//      localCS->SetRefObject(j2000Body, Gmat::SPACE_POINT, j2000Body->GetName());
       localCS->SetSolarSystem(solarSystem);
-      localCS->Initialize();
+      if (initializeIt) localCS->Initialize();
       
       #ifdef DEBUG_CS_CREATE
       MessageInterface::ShowMessage

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -250,9 +250,6 @@ char* GmatInterface::GetCallbackStatus()
 //------------------------------------------------------------------------------
 // void PutCallbackData(std::string &data)
 //------------------------------------------------------------------------------
-/*
- */
-//------------------------------------------------------------------------------
 void  GmatInterface::PutCallbackData(std::string &data)
 {
    #ifdef DEBUG_TEST_CALLBACK
@@ -264,6 +261,23 @@ void  GmatInterface::PutCallbackData(std::string &data)
       if (!(callbackObj->PutCallbackData(data)))
          throw InterfaceException(
          "GmatInterface::Error setting callback data on callback server");
+   }
+}
+
+//------------------------------------------------------------------------------
+// void PutCallbackRealData(RealArray &data)
+//------------------------------------------------------------------------------
+void GmatInterface::PutCallbackRealData(RealArray &data)
+{
+   #ifdef DEBUG_TEST_CALLBACK
+   MessageInterface::ShowMessage
+      ("GmatInterface::PutCallbackRealData being called with data[0] = %f\n", data[0]);
+   #endif
+   if (callbackObj)
+   {
+      if (!(callbackObj->PutCallbackRealData(data)))
+         throw InterfaceException(
+         "GmatInterface::Error setting callback real data on callback server");
    }
 }
 

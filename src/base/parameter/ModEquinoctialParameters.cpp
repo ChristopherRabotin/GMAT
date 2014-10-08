@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,14 +29,23 @@
 // To use preset colors, uncomment this line:
 //#define USE_PREDEFINED_COLORS
 
+//@note The ModEquinP class is no longer used in the ParameterFactory
+//      The SemilausRectum is used as originally designed (LOJ: 2014.01.29)
 //------------------------------------------------------------------------------
 // ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 ModEquinP::ModEquinP(const std::string &name, GmatBase *obj)
-   : OrbitReal(name, "SemiLatusRectum", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
+   // Changed SemiLatusRectum to SemilatusRectum and ORIGIN dependent (Fix for GMT-4173)
+   //: OrbitReal(name, "SemiLatusRectum", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
+   //: OrbitReal(name, "SemilatusRectum", obj, "ModEquinoctial P", "km", GmatParam::ORIGIN, MOD_EQ_P, true)
+   // Changed to ModEquinoctialP to avoid confusion and changed back to CoordianteSystem dependent (LOJ: 2014.01.29)
+   : OrbitReal(name, "ModEquinoctialP", obj, "ModEquinoctial P", "km", GmatParam::COORD_SYS, MOD_EQ_P, true)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
+   //mDepObjectName = "Earth";
+   //SetRefObjectName(Gmat::SPACE_POINT, mDepObjectName);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::RED32;
    #endif
@@ -73,9 +82,6 @@ ModEquinP::~ModEquinP()
 //------------------------------------------------------------------------------
 bool ModEquinP::Evaluate()
 {
-   //mRealValue = OrbitData::GetEquinReal("EquinSma");
-   //why SMA? Changed to EQ_SMA (LOJ: 2012.02.08)
-   //mRealValue = OrbitData::GetEquinReal(SMA);
    mRealValue = OrbitData::GetModEquinReal(MOD_EQ_P);
    
    if (mRealValue == GmatOrbitConstants::ORBIT_REAL_UNDEFINED)
@@ -101,6 +107,7 @@ ModEquinF::ModEquinF(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -162,6 +169,7 @@ ModEquinG::ModEquinG(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -225,6 +233,7 @@ ModEquinH::ModEquinH(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::YELLOW32;
    #endif
@@ -286,6 +295,7 @@ ModEquinK::ModEquinK(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::GREEN32;
    #endif
@@ -348,6 +358,7 @@ ModEquinTLONG::ModEquinTLONG(const std::string &name, GmatBase *obj)
 {
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::BLUE32;
    #endif
@@ -412,6 +423,7 @@ ModEquinState::ModEquinState(const std::string &name, GmatBase *obj)
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
+   SetRequiresCelestialBodyCSOrigin(true);
    mIsPlottable = false;
 }
 

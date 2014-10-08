@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -21,6 +21,9 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_INIT_GL
+//#define TRAP_PIXEL_FORMAT_ERRORS  // Enable this to work on pixel format error
+                                    // (see GMT-4316)
+
 
 //------------------------------------------------------------------------------
 // bool SetPixelFormatDescriptor()
@@ -89,12 +92,14 @@ bool SetPixelFormatDescriptor()
    // set the pixel format of the device context
    if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
    {
-      MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
-      #ifdef DEBUG_INIT_GL
-      MessageInterface::ShowMessage("SetPixelFormatDescriptor() returning false\n");
+      #ifdef TRAP_PIXEL_FORMAT_ERRORS
+         MessageInterface::ShowMessage
+            ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
+         #ifdef DEBUG_INIT_GL
+         MessageInterface::ShowMessage("SetPixelFormatDescriptor() returning false\n");
+         #endif
+         return false;
       #endif
-      return false;
    }
    
    #ifdef DEBUG_INIT_GL

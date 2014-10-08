@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 /**
  * Declares Outgoing Asymptote related parameter classes.
- * OutAsym_RadPer, OutAsym_C3, OutAsym_RHA, OutAsym_DHA, OutAsym_BVAZI, OutAsym_TA, OutAsym_State
+ * OutAsymRadPer, OutAsymC3Energy, OutAsymRHA, OutAsymDHA, OutAsymBVAZI, OutAsymState
  */
 //------------------------------------------------------------------------------
 
@@ -24,6 +24,56 @@
 #include "OrbitReal.hpp"
 #include "OrbitRvec6.hpp"
 
+
+//==============================================================================
+//                               OutAsymRadPer
+//==============================================================================
+class GMAT_API OutAsymRadPer : public OrbitReal
+{
+public:
+
+   OutAsymRadPer(const std::string &name = "", GmatBase *obj = NULL);
+   OutAsymRadPer(const OutAsymRadPer &copy);
+   OutAsymRadPer& operator=(const OutAsymRadPer &right);
+   virtual ~OutAsymRadPer();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+	   
+protected:
+
+};
+
+
+//==============================================================================
+//                               OutAsymC3Energy
+//==============================================================================
+class GMAT_API OutAsymC3Energy : public OrbitReal
+{
+public:
+
+   OutAsymC3Energy(const std::string &name = "", GmatBase *obj = NULL);
+   OutAsymC3Energy(const OutAsymC3Energy &copy);
+   OutAsymC3Energy& operator=(const OutAsymC3Energy &right);
+   virtual ~OutAsymC3Energy();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+	   
+protected:
+
+};
+
+
+//==============================================================================
+//                               OutAsymRHA
+//==============================================================================
 class GMAT_API OutAsymRHA : public OrbitReal
 {
 public:
@@ -43,6 +93,10 @@ protected:
 
 };
 
+
+//==============================================================================
+//                               OutAsymDHA
+//==============================================================================
 class GMAT_API OutAsymDHA : public OrbitReal
 {
 public:
@@ -57,10 +111,15 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-	   
+   
 protected:
 
 };
+
+
+//==============================================================================
+//                               OutAsymDBVAZI
+//==============================================================================
 class GMAT_API OutAsymBVAZI : public OrbitReal
 {
 public:
@@ -80,6 +139,10 @@ protected:
 
 };
 
+
+//==============================================================================
+//                               OutAsymState
+//==============================================================================
 class GMAT_API OutAsymState : public OrbitRvec6
 {
 public:

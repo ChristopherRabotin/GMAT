@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,6 +31,7 @@
 #include "GroundStation.hpp"
 #include "MessageInterface.hpp"
 #include "AssetException.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 
 //#define DEBUG_OBJECT_MAPPING
@@ -108,7 +109,10 @@ GroundStation::GroundStation(const std::string &itsName) :
 
    objectTypeNames.push_back("GroundStation");
    parameterCount = GroundStationParamCount;
-
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::THISTLE, GmatColor::DARK_GRAY);
+   
    bfcsName   = "EarthFixed";
    mj2kcsName = "EarthMJ2000Eq";
 }

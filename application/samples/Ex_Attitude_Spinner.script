@@ -115,8 +115,6 @@ Create OrbitView Enhanced3DView1;
 GMAT Enhanced3DView1.SolverIterations = Current;
 GMAT Enhanced3DView1.Add = {Sat, Earth, Sun};
 GMAT Enhanced3DView1.DrawObject = [ true true true ];
-GMAT Enhanced3DView1.OrbitColor = [ 1375731967 32768 35297486 ];
-GMAT Enhanced3DView1.TargetColor = [ 8421440 8421440 8421440 ];
 GMAT Enhanced3DView1.CoordinateSystem = EarthMJ2000Eq;
 GMAT Enhanced3DView1.ViewPointReference = Earth;
 GMAT Enhanced3DView1.ViewPointVector = [ -35000 0 0 ];

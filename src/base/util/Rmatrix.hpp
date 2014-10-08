@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -123,6 +123,10 @@ public:
    
    Rvector GetRow(int r) const;
    Rvector GetColumn(int c) const;
+   Rvector GetRowOrColumn() const;
+   
+   void    MakeOneRowMatrix(const Rvector &vec);
+   void    MakeOneColumnMatrix(const Rvector &vec);
    
    const StringArray& GetStringVals(Integer p = GmatGlobal::DATA_PRECISION,
                                     Integer w = GmatGlobal::DATA_WIDTH);

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -2050,8 +2050,8 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
    
    #if DBGLVL_UPDATE > 1
    MessageInterface::ShowMessage
-      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=<%p>\n",
-       mNumData, mDataCollectFrequency, currentProvider);
+      ("\nOrbitPlot::UpdateData() entered, mNumData=%d, mDataCollectFrequency=%d, "
+       "currentProvider=<%p>\n", mNumData, mDataCollectFrequency, currentProvider);
    ColorMap::const_iterator iter = mCurrentOrbitColorMap.begin();
    while (iter != mCurrentOrbitColorMap.end())
    {
@@ -2075,12 +2075,8 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
       #endif
       
       bool solving = false;
-      //UnsignedIntArray colorArray = mScOrbitColorArray;
       if (runstate == Gmat::SOLVING)
-      {
          solving = true;
-         //colorArray = mScTargetColorArray;
-      }
       
       bool inFunction = false;
       if (currentProvider && currentProvider->TakeAction("IsInFunction"))
@@ -2098,6 +2094,9 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
          mNumCollected = 0;
    }
    
+   #if DBGLVL_UPDATE > 1
+   MessageInterface::ShowMessage("OrbitPlot::UpdateData() returning true\n");
+   #endif
    return true;
 }
 

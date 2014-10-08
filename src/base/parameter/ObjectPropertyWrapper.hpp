@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,6 +55,7 @@ public:
    
    virtual Real                EvaluateReal() const;
    virtual bool                SetReal(const Real toValue);
+   virtual bool                SetRvector(const Rvector &toValue);
    virtual std::string         EvaluateString() const;
    virtual bool                SetString(const std::string &toValue); 
    virtual std::string         EvaluateOnOff() const;

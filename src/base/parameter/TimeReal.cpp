@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -120,6 +120,20 @@ Real TimeReal::EvaluateReal()
    return mRealValue;
 }
 
+//------------------------------------------------------------------------------
+// bool IsOptionalField(const std::string &field) const
+//------------------------------------------------------------------------------
+/**
+ * @return true if input field name is optional field, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool TimeReal::IsOptionalField(const std::string &field) const
+{
+   if (field == "Epoch")
+      return true;
+   
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // virtual Integer GetNumRefObjects() const

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -59,6 +59,8 @@ public:
    virtual bool                           UsesSpacecraft(const std::string &withName = "") const;
    virtual bool                           RequiresCelestialBodyOrigin() const;
    virtual bool                           HasCelestialBodyOrigin() const;
+   virtual void                           SetAllowWithoutRates(bool allow);
+   virtual bool                           AllowWithoutRates() const;
 
    // methods to set parameters for the AxisSystems
    virtual void                  SetPrimaryObject(SpacePoint *prim);
@@ -203,6 +205,7 @@ protected:
    std::string               epochFormat;
    
    bool                      needsCBOrigin;
+   bool                      allowNoRates;
 
    Real                      updateInterval;
    Real                      updateIntervalToUse;

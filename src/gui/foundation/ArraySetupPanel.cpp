@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -74,6 +74,11 @@ void ArraySetupPanel::Create()
    wxStaticText *emptyStaticText =
       new wxStaticText(this, ID_TEXT, wxT("  "),
                        wxDefaultPosition, wxDefaultSize, 0);
+   // We can't add emptyStaticText to two layouts, so I duplicated it
+   // When the window is deleted, it deletes it's children: if the control is added twice, it is deleted twice
+   wxStaticText *emptyStaticText2 =
+      new wxStaticText(this, ID_TEXT, wxT("  "),
+                       wxDefaultPosition, wxDefaultSize, 0);
    
    //-------------------------------------------------------
    // for Array Setup
@@ -102,7 +107,7 @@ void ArraySetupPanel::Create()
    arr1FlexGridSizer->Add(arrNameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(arr1RowStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(emptyStaticText2, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(arr1ColStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    // 2nd row

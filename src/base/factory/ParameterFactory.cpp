@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -33,16 +33,15 @@
 #include "KeplerianParameters.hpp"
 #include "SphericalParameters.hpp"
 #include "EquinoctialParameters.hpp"
-// Modified by M.H.
 #include "ModEquinoctialParameters.hpp"
+#include "AlternateEquinoctialParameters.hpp"
 #include "DelaunayParameters.hpp"
 #include "PlanetodeticParameters.hpp"
-// Modified by YK
 #include "IncomingAsymptoteParameters.hpp"
 #include "OutgoingAsymptoteParameters.hpp"
 #include "BrouwerMeanShortParameters.hpp"
 #include "BrouwerMeanLongParameters.hpp"
-//
+
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
 #include "EnvParameters.hpp"
@@ -198,10 +197,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new EquinMlong(withName);
    if (ofType == "Equinoctial")
       return new EquinState(withName);
-
+   
    // ModifiedEquinoctial parameters; Modified by M.H.
-   if (ofType == "SemiLatusRectum")
-      return new ModEquinP(withName);
+   // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173)
+   // It will create SemilatusRectum Parameter due to issues (2014.01.28)
+   //if (ofType == "SemiLatusRectum")
+   //   return new ModEquinP(withName);
    if (ofType == "ModEquinoctialF")
       return new ModEquinF(withName);
    if (ofType == "ModEquinoctialG")
@@ -214,7 +215,15 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new ModEquinTLONG(withName);
    if (ofType == "ModifiedEquinoctial")
       return new ModEquinState(withName);
-
+   
+   // Alternate Equinoctial parameters by HYKim
+   if (ofType == "AltEquinoctialP")
+      return new AltEquinP(withName);
+   if (ofType == "AltEquinoctialQ")
+      return new AltEquinQ(withName);
+   if (ofType == "AltEquinoctial")
+      return new AltEquinState(withName);
+   
    // Delaunay parameters; Modified by M.H.
    if (ofType == "Delaunayl")
       return new Delal(withName);
@@ -246,23 +255,36 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new PldHFPA(withName);
    if (ofType == "Planetodetic")
       return new PldState(withName);
-
+   
    // IncomingAsymptote parameters; Modified by YK
-   if (ofType == "IncomingBVAZI")
-      return new IncAsymBVAZI(withName);
+   // Added HyperbolicRadPer (LOJ: 2014.04.28)
+   //if (ofType == "HyperbolicRadPer")
+   //   return new HyperbolicRadPer(withName);
+   // Added IncomingRadPer and IncomingC3Energy (LOJ: 2014.05.07)
+   if (ofType == "IncomingRadPer")
+      return new IncAsymRadPer(withName);
+   if (ofType == "IncomingC3Energy")
+      return new IncAsymC3Energy(withName);
    if (ofType == "IncomingRHA")
       return new IncAsymRHA(withName);
    if (ofType == "IncomingDHA")
       return new IncAsymDHA(withName);
+   if (ofType == "IncomingBVAZI")
+      return new IncAsymBVAZI(withName);
    
    // OutgoingAsymptote parameters; Modified by YK
-   if (ofType == "OutgoingBVAZI")
-      return new OutAsymBVAZI(withName);
+   // Added OutgoingRadPer and OutgoingC3Energy (LOJ: 2014.05.07)
+   if (ofType == "OutgoingRadPer")
+      return new OutAsymRadPer(withName);
+   if (ofType == "OutgoingC3Energy")
+      return new OutAsymC3Energy(withName);
    if (ofType == "OutgoingRHA")
       return new OutAsymRHA(withName);
    if (ofType == "OutgoingDHA")
       return new OutAsymDHA(withName);
-
+   if (ofType == "OutgoingBVAZI")
+      return new OutAsymBVAZI(withName);
+   
    // Brouwer Mean Short parameters; Modified by YK
    // Changed Parameter names (see GMT-4228 LOJ: 2014.01.09)
    if (ofType == "BrouwerShortSMA")
@@ -314,6 +336,9 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Energy(withName);
 
    // Angular parameters
+   // Changed to create ModEquinP() since it is settable Parameter
+   // Fix for GMT-4173 (LOJ: 2014.01.22)
+   // Changed back to create SemilatusRectum due to issues (LOJ: 2014.01.28)
    if (ofType == "SemilatusRectum")
       return new SemilatusRectum(withName);
    if (ofType == "HMAG")
@@ -482,6 +507,14 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
        ofType == "ThrustDirection3")
       return new ThrustDirections(ofType, withName);
    
+   // PowerSystem parameters
+   if (ofType == "TotalPowerAvailable")
+      return new TotalPowerAvailable(withName);
+   if (ofType == "RequiredBusPower")
+      return new RequiredBusPower(withName);
+   if (ofType == "ThrustPowerAvailable")
+      return new ThrustPowerAvailable(withName);
+
    // add others here
    
    MessageInterface::ShowMessage
@@ -575,14 +608,19 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Equinoctial");
       
       // ModifedEquinoctial parameters ; Modified by M.H.
-      creatables.push_back("SemiLatusRectum");
+      // Changed SemiLatusRectum to SemilatusRectum (Fix for GMT-4173 (LOJ: 2014.01.22))
+      creatables.push_back("SemilatusRectum");
       creatables.push_back("ModEquinoctialF");
       creatables.push_back("ModEquinoctialG");
       creatables.push_back("ModEquinoctialH");
       creatables.push_back("ModEquinoctialK");
       creatables.push_back("TLONG");
       creatables.push_back("ModEquinoctial");
-
+      
+      // Alternate Equinoctial parameters by HYKim
+      creatables.push_back("AltEquinoctialP");
+      creatables.push_back("AltEquinoctialQ");
+      
       // Delaunay parameters ; Modified by M.H.
       creatables.push_back("Delaunayl");
       creatables.push_back("Delaunayg");
@@ -602,12 +640,17 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Planetodetic");
 
       // IncomingAsymptote parameters ; Modified by YK
+      //creatables.push_back("HyperbolicRadPer");
+      creatables.push_back("IncomingRadPer");
+      creatables.push_back("IncomingC3Energy");
       creatables.push_back("IncomingRHA");
       creatables.push_back("IncomingDHA");
       creatables.push_back("IncomingBVAZI");
       creatables.push_back("IncomingAsymptote");
       
       // OutgoingAsymptote parameters ; Modified by YK
+      creatables.push_back("OutgoingRadPer");
+      creatables.push_back("OutgoingC3Energy");
       creatables.push_back("OutgoingRHA");
       creatables.push_back("OutgoingDHA");
       creatables.push_back("OutgoingBVAZI");
@@ -643,7 +686,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Energy");
       
       // Angular parameters
-      creatables.push_back("SemilatusRectum");
+      // Changed SemiLatusRectum to SemilatusRectum above
+      // and commented out this (LOJ: 2013.01.22)
+      //creatables.push_back("SemilatusRectum");
       creatables.push_back("HMAG");
       creatables.push_back("HX");
       creatables.push_back("HY");
@@ -770,7 +815,11 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("ThrustDirection1");
       creatables.push_back("ThrustDirection2");
       creatables.push_back("ThrustDirection3");
-   }
+
+      creatables.push_back("TotalPowerAvailable");
+      creatables.push_back("RequiredBusPower");
+      creatables.push_back("ThrustPowerAvailable");
+}
 }
 
 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -57,6 +57,9 @@ public:
                           bool includeLower = false,
                           bool includeUpper = false);
    
+   bool CheckLength(const std::string &str, const std::string &field, const std::string &expLength,
+                    const Integer min, const Integer max);
+
    bool CheckVariable(const std::string &varName, ObjectTypeArray ownerTypes,
                       const std::string &field, const std::string &expRange,
                       bool allowNumber = true, bool allowNonPlottable = false,

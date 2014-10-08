@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -122,7 +122,7 @@ void FunctionSetupPanel::Create()
    //------------------------------------------------------
    
 #ifdef __USE_STC_EDITOR__
-   mEditor = new Editor(this, true, -1, wxDefaultPosition, wxSize(700,400));
+   mEditor = new ScriptEditor(this, true, -1, wxDefaultPosition, wxSize(700,400));
 #else
    mFileContentsTextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 

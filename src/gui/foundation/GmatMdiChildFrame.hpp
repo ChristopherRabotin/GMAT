@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -25,7 +25,7 @@
 #include "GmatTreeItemData.hpp"  // for namespace GmatTree::
 
 #ifdef __USE_STC_EDITOR__
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #endif
 
 class GmatMdiChildFrame : public wxMDIChildFrame
@@ -63,8 +63,9 @@ public:
    void               UpdateActiveChild();
    
 #ifdef __USE_STC_EDITOR__
-   Editor* GetEditor();
-   void SetEditor(Editor *editor);
+   // Renamed Editor to ScriptEditor to fix name collision with wxWidget's Scintilla lib
+   ScriptEditor* GetEditor();
+   void SetEditor(ScriptEditor *editor);
 #endif
    
    void SetDirty(bool dirty);
@@ -115,7 +116,7 @@ protected:
 
 
 #ifdef __USE_STC_EDITOR__
-   Editor *theEditor;
+   ScriptEditor *theEditor;
 #endif
 
    // any class wishing to process wxWindows events must use this macro

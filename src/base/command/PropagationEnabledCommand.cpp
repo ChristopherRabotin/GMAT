@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -790,7 +790,7 @@ bool PropagationEnabledCommand::PrepareToPropagate()
           dim+1, streamID, pubdata[0]);
    #endif
 
-   publisher->Publish(this, streamID, pubdata, dim+1);
+   publisher->Publish(this, streamID, pubdata, dim+1, direction);
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage(
@@ -912,7 +912,7 @@ bool PropagationEnabledCommand::Step(Real dt)
              dim+1, streamID, pubdata[0]);
       #endif
 
-      publisher->Publish(this, streamID, pubdata, dim+1);
+      publisher->Publish(this, streamID, pubdata, dim+1, direction);
    }
    
    return retval;

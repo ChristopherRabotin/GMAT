@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -89,8 +89,9 @@ public:
    virtual void         SetProviderId(Integer id);
    virtual Integer      GetProviderId();
    
-   virtual void         SetProvider(GmatBase *provider);
+   virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    virtual void         SetDataLabels(const StringArray& elements);
+   virtual void         SetPropagationDirection(Real propDir);
    virtual void         ClearDataLabels();
    virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetDataCoordSystem(CoordinateSystem *cs);
@@ -212,6 +213,7 @@ protected:
    Gmat::RunState       runstate;
    Gmat::RunState       prevRunState;
    Integer              currProviderId;
+   Real                 propDirection;
    
    /// The list of names of Wrapper objects
    StringArray          xWrapperObjectNames;

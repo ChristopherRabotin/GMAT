@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -46,13 +46,13 @@
 
 
 //#define DEBUG_J2000_STATE
-//#define DEBUG_SPACE_POINT_CLOAKING
+//#define DEBUG_SP_CLOAKING
 //#define DEBUG_SPICE_KERNEL
 //#define DEBUG_SPACE_POINT_ORBIT_KERNELS
 //#define DEBUG_ATTITUDE
 //#define DEBUG_KERNEL_VALIDATE
 //#define DEBUG_SET_STRING
-//#define DEBUG_DEFAULT_COLORS
+//#define DEBUG_COLOR
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -172,23 +172,21 @@ targetColorStr     ("")
    objectTypes.push_back(Gmat::SPACE_POINT);
    objectTypeNames.push_back("SpacePoint");
    
-   // Derived classes must override these colors if necessary
+   // Derived classes must override these colors as necessary
    SetDefaultColors(GmatColor::WHITE, GmatColor::WHITE);
-   
-   // If built-in calculated point name, set default color here
-   if (itsName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
-      SetDefaultColors(GmatColor::MAROON, GmatColor::DARK_GRAY);
    
    // Increment the spacecraft instance count and set default colors
    if (ofType == Gmat::SPACECRAFT)
    {
       ++spacecraftInstanceCount;
-      SetDefaultColors();
+      SetSpacecraftDefaultColors();
    }
    
    /// derived classes must override this, as necessary, to point to
    /// the correct path
-   theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+   //theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+   // Use VEHICLE_EPHEM_SPK_PATH. SPK_PATH was renamed to PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+   theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
    SaveAllAsDefault();
 }
 
@@ -395,17 +393,53 @@ const std::string SpacePoint::GetJ2000BodyName() const
    else           return j2000BodyName;
 }
 
+//------------------------------------------------------------------------------
+//  SpacePoint* GetJ2000Body() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the j2000 Body pointer.
+ *
+ * @return J2000 Body pointer.
+ *
+ */
+//------------------------------------------------------------------------------
 SpacePoint* SpacePoint::GetJ2000Body() const
 {
    return j2000Body;
 }
 
+//------------------------------------------------------------------------------
+//  bool  SetJ2000BodyName(const std::string &toName)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the j2000 Body name.
+ *
+ * @return true if successful; false, otherwise
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
+ */
+//------------------------------------------------------------------------------
 bool SpacePoint::SetJ2000BodyName(const std::string &toName)
 {
    j2000BodyName = toName;
    return true;
 }
 
+//------------------------------------------------------------------------------
+//  void  SetJ2000Body(SpacePoint* toBody)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the j2000 Body.
+ *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
+ */
+//------------------------------------------------------------------------------
 void SpacePoint::SetJ2000Body(SpacePoint* toBody)
 {
    #ifdef DEBUG_J2000_STATE
@@ -427,37 +461,59 @@ void SpacePoint::SetJ2000Body(SpacePoint* toBody)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCloaked(const Integer id) const
+//------------------------------------------------------------------------------
 bool SpacePoint::IsParameterCloaked(const Integer id) const
 {
-   #ifdef DEBUG_SPACE_POINT_CLOAKING
+   #ifdef DEBUG_SP_CLOAKING
       MessageInterface::ShowMessage
-         ("In SpacePoint:IsParameterCloaked with id = %2d %s, cloaking = %s\n",
-          id, (GetParameterText(id)).c_str(), cloaking ? "true" : "false");
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' entered, id = %2d %s, cloaking = %s\n",
+          this, GetName().c_str(), id, (GetParameterText(id)).c_str(), cloaking ? "true" : "false");
    #endif
    if (!cloaking)
    {
-      #ifdef DEBUG_SPACE_POINT_CLOAKING
-      MessageInterface::ShowMessage("      Returning false\n");
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' returning false\n", this, GetName().c_str());
       #endif
       return false;
    }
+   
+   // if it's read-only, we'll cloak it
+   if (IsParameterReadOnly(id))
+   {
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' returning true - parameter is read-only\n",
+          this, GetName().c_str());
+      #endif
+      return true;
+   }
+   
    if (id >= GmatBaseParamCount && id < SpacePointParamCount)
    {
-      //return IsParameterEqualToDefault(id);
       bool equalToDefault = IsParameterEqualToDefault(id);
-      #ifdef DEBUG_SPACE_POINT_CLOAKING
-      MessageInterface::ShowMessage("      Returning %s\n", equalToDefault ? "true" : "false");
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterCloaked() <%p>'%s' returning %s\n", this, GetName().c_str(),
+          equalToDefault ? "true" : "false");
       #endif
       return equalToDefault;
    }
-   //return GmatBase::IsParameterCloaked(id);
+   
    bool isCloaked = GmatBase::IsParameterCloaked(id);
-   #ifdef DEBUG_SPACE_POINT_CLOAKING
-   MessageInterface::ShowMessage("      Returning %s\n", isCloaked ? "true" : "false");
+   #ifdef DEBUG_SP_CLOAKING
+   MessageInterface::ShowMessage
+      ("SpacePoint::IsParameterCloaked() <%p>'%s' returning %s\n", this, GetName().c_str(),
+       isCloaked ? "true" : "false");
    #endif
    return isCloaked;
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterEqualToDefault(const Integer id) const
+//------------------------------------------------------------------------------
 bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
 {
    if (id == J2000_BODY_NAME)
@@ -474,7 +530,7 @@ bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
    }
    if (id == ORBIT_COLOR)
    {
-      #ifdef DEBUG_SPACE_POINT_CLOAKING
+      #ifdef DEBUG_SP_CLOAKING
       MessageInterface::ShowMessage
          ("SpacePoint::IsParameterEqualToDefault() '%s', defaultOrbitColor=%06X, orbitColor=%06X\n",
           GetName().c_str(), defaultOrbitColor, orbitColor);
@@ -649,12 +705,31 @@ UnsignedInt SpacePoint::GetCurrentTargetColor()
 }
 
 //------------------------------------------------------------------------------
+// std::string GetOrbitColorString()
+//------------------------------------------------------------------------------
+std::string SpacePoint::GetOrbitColorString()
+{
+   return orbitColorStr;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetTargetColorString()
+//------------------------------------------------------------------------------
+std::string SpacePoint::GetTargetColorString()
+{
+   return targetColorStr;
+}
+
+//------------------------------------------------------------------------------
 // void SetCurrentOrbitColor(UnsignedInt color)
 //------------------------------------------------------------------------------
 void SpacePoint::SetCurrentOrbitColor(UnsignedInt color)
 {
-   MessageInterface::ShowMessage("SpacePoint::SetCurrentOrbitColor() setting color = %06X\n",
-                                 color);
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage
+      ("SpacePoint::SetCurrentOrbitColor() setting color = %06X\n", color);
+   #endif
+   
    orbitColor = color;
 }
 
@@ -671,7 +746,7 @@ void SpacePoint::SetCurrentTargetColor(UnsignedInt color)
 //------------------------------------------------------------------------------
 void SpacePoint::SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor)
 {
-   #ifdef DEBUG_DEFAULT_COLORS
+   #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
       ("SpacePoint::SetDefaultColors() <%p>'%s' entered, orbColor=%06X, targColor=%06X, "
        "useOrbitColorName=%d, useTargetColorName=%d\n", this, GetName().c_str(), orbColor,
@@ -685,7 +760,7 @@ void SpacePoint::SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor)
    orbitColorStr = RgbColor::ToRgbString(orbColor);
    targetColorStr = RgbColor::ToRgbString(targColor);
    
-   #ifdef DEBUG_DEFAULT_COLORS
+   #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
       ("   orbitColorStr=%s, targetColorStr=%s\n", orbitColorStr.c_str(), targetColorStr.c_str());
    #endif
@@ -704,7 +779,7 @@ void SpacePoint::SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor)
       throw;
    }
 
-   #ifdef DEBUG_DEFAULT_COLORS
+   #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
       ("SpacePoint::SetDefaultColors() '%s' leaving, orbitColorStr=%s, targetColorStr=%s\n",
        GetName().c_str(), orbitColorStr.c_str(), targetColorStr.c_str());
@@ -713,28 +788,37 @@ void SpacePoint::SetDefaultColors(UnsignedInt orbColor, UnsignedInt targColor)
 
 
 //------------------------------------------------------------------------------
-// void SetDefaultColors()
+// void SetSpacecraftDefaultColors()
 //------------------------------------------------------------------------------
 /**
- * Sets default colors from the predefined color list
+ * Sets spacecraft default colors from the predefined color list
  */
 //------------------------------------------------------------------------------
-void SpacePoint::SetDefaultColors()
+void SpacePoint::SetSpacecraftDefaultColors()
 {
-   #ifdef DEBUG_DEFAULT_COLORS
+   #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
-      ("SpacePoint::SetDefaultColors() <%p>'%s' entered, spacecraftInstanceCount = %d\n",
-       this, GetName().c_str(), spacecraftInstanceCount);
+      ("SpacePoint::SetSpacecraftDefaultColors() <%p>'%s' entered, "
+       "spacecraftInstanceCount = %d, MAX_SP_COLOR = %d\n", this, GetName().c_str(),
+       spacecraftInstanceCount, MAX_SP_COLOR);
    #endif
    
-   Integer index = spacecraftInstanceCount-1 % MAX_SP_COLOR;
+   // MAX_SP_COLOR doesn't work with % modulo (LOJ: 2014.03.13)
+   //Integer index = (spacecraftInstanceCount-1) % MAX_SP_COLOR;
+   Integer maxColor = (Integer)MAX_SP_COLOR;
+   Integer index = (spacecraftInstanceCount-1) % maxColor;
+   
+   #ifdef DEBUG_COLOR
+   MessageInterface::ShowMessage("   ==> index = %d\n", index);
+   #endif
    UnsignedInt orbColor = DEFAULT_ORBIT_COLOR[index];
    UnsignedInt targColor = DEFAULT_TARGET_COLOR[index];
    SetDefaultColors(orbColor, targColor);
    
-   #ifdef DEBUG_DEFAULT_COLORS
+   #ifdef DEBUG_COLOR
    MessageInterface::ShowMessage
-      ("SpacePoint::SetDefaultColors() <%p>'%s' leaving\n", this, GetName().c_str());
+      ("SpacePoint::SetSpacecraftDefaultColors() <%p>'%s' leaving\n",
+       this, GetName().c_str());
    #endif
 }
 
@@ -1505,6 +1589,10 @@ GmatBase* SpacePoint::GetRefObject(const Gmat::ObjectType type,
  *
  * @return true if successful; otherwise, false.
  *
+ * WARNING: The J200Body must be set identically for all objects in a GMAT run;
+ * not doing so will give incorrect results.
+ * In addition, the setting of a body other than Earth as the J2000Body has
+ * not been tested.
  */
 //------------------------------------------------------------------------------
 bool SpacePoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -1807,17 +1895,45 @@ std::string SpacePoint::ParseKernelName(const std::string &kernel)
 void SpacePoint::ValidateKernel(const std::string &kName, const std::string label,
                                 const std::string ofType)
 {
-#ifdef DEBUG_KERNEL_VALIDATE
+   #ifdef DEBUG_KERNEL_VALIDATE
    MessageInterface::ShowMessage("ValidateKernel with kName = \"%s\", and ofType = \"%s\"\n",
          kName.c_str(), ofType.c_str());
    MessageInterface::ShowMessage("   and label = %s\n", label.c_str());
-#endif
-
+   #endif
+   
    std::string fullSpkName = kName;
+   
+   // User FileManager::FindPath() to use search order (LOJ: 2014.06.17)
+   static bool writeWarning = true;
+   std::string tempSpkName =
+      FileManager::Instance()->FindPath(kName, FileManager::PLANETARY_EPHEM_SPK_PATH, true, writeWarning);
+   writeWarning = false;
+   
+   #ifdef DEBUG_KERNEL_VALIDATE
+   MessageInterface::ShowMessage("   tempSpkName = '%s'\n", tempSpkName.c_str());
+   #endif
+   
+   if (tempSpkName == "")
+   {
+      GmatBaseException gbe;
+      gbe.SetDetails(errorMessageFormat.c_str(),
+                     fullSpkName.c_str(), label.c_str(), "File must exist");
+      throw gbe;
+   }
+   else
+      fullSpkName = tempSpkName;
+   
+   
    #ifdef DEBUG_KERNEL_VALIDATE
       MessageInterface::ShowMessage(" ................. kName = \"%s\"\n",
             fullSpkName.c_str());
    #endif
+
+   //======================================================================
+   // This section will be removed when file path testing completes
+   //======================================================================
+   #if 0
+   //======================================================================
    if (!(GmatFileUtil::DoesFileExist(kName)))
    {
       // try again with path name from startup file
@@ -1843,6 +1959,10 @@ void SpacePoint::ValidateKernel(const std::string &kName, const std::string labe
          }
       }
    }
+   //======================================================================
+   #endif
+   //======================================================================
+   
    #ifdef __USE_SPICE__
       if (!SpiceInterface::IsValidKernel(fullSpkName, ofType))
       {

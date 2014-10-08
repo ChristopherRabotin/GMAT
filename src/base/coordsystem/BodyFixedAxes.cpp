@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -224,7 +224,17 @@ bool BodyFixedAxes::Initialize()
    if (origin && origin->IsOfType("Spacecraft"))
    {
       Attitude *att = (Attitude*) origin->GetRefObject(Gmat::ATTITUDE, "");
-      if (!att || !(att->ModelComputesRates()))
+      if (!att)
+      {
+         std::string errmsg = "The value of \"";
+         errmsg += origin->GetName() + "\" for field \"Origin\"";
+         errmsg += " on BodyFixed coordinate system \"" + coordName;
+         errmsg += "\" is not an allowed value.\n";
+         errmsg += "The allowed values are: ";
+         errmsg += "[ Spacecraft with an attitude model ].\n";
+         throw CoordinateSystemException(errmsg);
+      }
+      if ((!allowNoRates) && !(att->ModelComputesRates()))
       {
          std::string errmsg = "The value of \"";
          errmsg += origin->GetName() + "\" for field \"Origin\"";
@@ -353,7 +363,8 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       {
          #ifdef DEBUG_BF_RECOMPUTE
             MessageInterface::ShowMessage(
-            "Don't need to recompute R and Rdot BFA for Spacecraft %s at this time!!\n",
+            "Don't need to recompute R and Rdot BFA for Spacecraft "
+            "%s at this time!!\n",
             origin->GetName().c_str());
          #endif
          return;
@@ -361,44 +372,72 @@ void BodyFixedAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
       #ifdef DEBUG_BF_SC
        if (!firstCallFired)
        {
-          MessageInterface::ShowMessage("ABOUT to get dcm and av from spacecraft %s\n",
+          MessageInterface::ShowMessage(
+                "ABOUT to get dcm (and possibly av) from spacecraft %s\n",
                 origin->GetName().c_str());
        }
        #endif
+       // First compute the R matrix
       Spacecraft *sc = (Spacecraft*) origin;
       // DCM from spacecraft is inertial-to-body
       Rmatrix33  dcm = sc->GetAttitude(theEpoch);
-      // av from spacecraft is wrt inertial, expressed in inertial
-      Rvector3   av  = sc->GetAngularVelocity(theEpoch);
-
-     #ifdef DEBUG_BF_SC
-      if (!firstCallFired)
-      {
-         MessageInterface::ShowMessage("Computing R and Rdot for BFA with spacecraft origin\n");
-         MessageInterface::ShowMessage("   Spacecraft = %s\n", sc->GetName().c_str());
-         MessageInterface::ShowMessage("   dcm    = %s\n", dcm.ToString().c_str());
-         MessageInterface::ShowMessage("   av     = %s\n", av.ToString().c_str());
-      }
-      #endif
 
       // we want the rotation matrix to be body-to-inertial
       rotMatrix      = dcm.Transpose();
 
-      // rotate angular velocity from inertial to body
-      Rvector3  avB = dcm * av;
-      // compute Rdot
-      Rmatrix33 skew( 0.0,   -avB[2], avB[1],
-                      avB[2], 0.0,   -avB[0],
-                     -avB[1], avB[0], 0.0);
-      Rmatrix33 RdotBI = -skew * dcm;
-      // we want Rdot to be body-to-inertial
-      rotDotMatrix = RdotBI.Transpose();
+      Attitude *att = (Attitude*) sc->GetRefObject(Gmat::ATTITUDE, "");
+      if (!att->ModelComputesRates())
+      {
+         if (allowNoRates)
+         {
+            rotDotMatrix = Rmatrix33();  // zero matrix
+         }
+         else
+         {
+            std::string errmsg = "The value of \"";
+            errmsg += origin->GetName() + "\" for field \"Origin\"";
+            errmsg += " on BodyFixed coordinate system \"" + coordName;
+            errmsg += "\" is not an allowed value.\n";
+            errmsg += "The allowed values are: ";
+            errmsg += "[ Spacecraft whose attitude model computes rates ].\n";
+            throw CoordinateSystemException(errmsg);
+         }
+      }
+      else
+      {
+         // av from spacecraft is wrt inertial, expressed in inertial
+         Rvector3   av  = sc->GetAngularVelocity(theEpoch);
+         #ifdef DEBUG_BF_SC
+          if (!firstCallFired)
+          {
+             MessageInterface::ShowMessage("Computing R and Rdot for BFA with spacecraft origin\n");
+             MessageInterface::ShowMessage("   Spacecraft = %s\n", sc->GetName().c_str());
+             MessageInterface::ShowMessage("   dcm    = %s\n", dcm.ToString().c_str());
+             MessageInterface::ShowMessage("   av     = %s\n", av.ToString().c_str());
+          }
+          #endif
+
+         // rotate angular velocity from inertial to body
+         Rvector3  avB = dcm * av;
+         // compute Rdot
+         Rmatrix33 skew( 0.0,   -avB[2], avB[1],
+                         avB[2], 0.0,   -avB[0],
+                        -avB[1], avB[0], 0.0);
+         Rmatrix33 RdotBI = -skew * dcm;
+         // we want Rdot to be body-to-inertial
+         rotDotMatrix = RdotBI.Transpose();
+         #ifdef DEBUG_BF_SC
+         if (!firstCallFired)
+         {
+            MessageInterface::ShowMessage("   avB    = %s\n", avB.ToString().c_str());
+            MessageInterface::ShowMessage("   skew   = %s\n", skew.ToString().c_str());
+            MessageInterface::ShowMessage("   RdotBI = %s\n", RdotBI.ToString().c_str());
+         }
+         #endif
+      }
       #ifdef DEBUG_BF_SC
       if (!firstCallFired)
       {
-         MessageInterface::ShowMessage("   avB    = %s\n", avB.ToString().c_str());
-         MessageInterface::ShowMessage("   skew   = %s\n", skew.ToString().c_str());
-         MessageInterface::ShowMessage("   RdotBI = %s\n", RdotBI.ToString().c_str());
          MessageInterface::ShowMessage("   rotMatrix    = %s\n", RdotBI.ToString().c_str());
          MessageInterface::ShowMessage("   rotDotMatrix = %s\n", RdotBI.ToString().c_str());
       }

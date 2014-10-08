@@ -3,10 +3,10 @@
   <ProjectInformation>
     <Author></Author>
     <Source></Source>
-    <FreeFlyerVersion>6.8.0.16238</FreeFlyerVersion>
+    <FreeFlyerVersion>6.8.1.17513</FreeFlyerVersion>
     <RevisionNumber></RevisionNumber>
     <DateCreated>12:30 02/17/2013</DateCreated>
-    <LastModified>21:39 03/18/2013</LastModified>
+    <LastModified>22:00 03/19/2014</LastModified>
     <Title></Title>
     <Subject></Subject>
     <Category></Category>
@@ -520,6 +520,66 @@
         <metadata dim="0" />
       </Array>
     </Object>
+    <Object enabled="true">
+      <Array name="planetodetic" isConstant="false" isGlobal="false">
+        <Name>planetodetic</Name>
+        <Dimension units="" displayed_units="">10</Dimension>
+        <Capacity units="" displayed_units="">10</Capacity>
+        <Element units="" displayed_units="" dim="(10)">
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+        </Element>
+        <metadata dim="0" />
+      </Array>
+    </Object>
+    <Object enabled="true">
+      <Array name="convFixed" isConstant="false" isGlobal="false">
+        <Name>convFixed</Name>
+        <Dimension units="" displayed_units="">10</Dimension>
+        <Capacity units="" displayed_units="">10</Capacity>
+        <Element units="" displayed_units="" dim="(10)">
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+        </Element>
+        <metadata dim="0" />
+      </Array>
+    </Object>
+    <Object enabled="true">
+      <Array name="convInertial" isConstant="false" isGlobal="false">
+        <Name>convInertial</Name>
+        <Dimension units="" displayed_units="">10</Dimension>
+        <Capacity units="" displayed_units="">10</Capacity>
+        <Element units="" displayed_units="" dim="(10)">
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+          <value>0</value>
+        </Element>
+        <metadata dim="0" />
+      </Array>
+    </Object>
   </ProjectObjects>
   <ProjectMissionSequence>
     <ProjectExternals />
@@ -571,6 +631,9 @@
       <FreeForm enabled="true">
         <Label>FreeForm</Label>
         <Line>stateFixed = PositionVelocityConvert(1, 4, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
+        <Line>convFixed = ElementConvert(1, 8, Spacecraft1.Epoch, stateFixed);</Line>
+        <Line>convInertial = ElementConvert(1, 8, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
+        <Line>planetodetic = {convInertial[0], convInertial[1], convInertial[2], convFixed[3], convFixed[4], convFixed[5]};</Line>
       </FreeForm>
       <ReportCommand enabled="true">
         <Report name="Command3" isConstant="false" isGlobal="false">
@@ -713,16 +776,14 @@
               <EventWithFormat name="Command4_:Items1" isConstant="false" isGlobal="false">
                 <Name>Command4_:Items1</Name>
                 <BaseObject>
-                  <ObjectParameter name="Command4_:Items1_:BaseObject" isConstant="false" isGlobal="false">
+                  <ArrayElement name="Command4_:Items1_:BaseObject" isConstant="false" isGlobal="false">
                     <Name>Command4_:Items1_:BaseObject</Name>
-                    <BaseObject>Spacecraft1</BaseObject>
-                    <Parameter>LatLongRadius</Parameter>
-                    <IndexType>NoIndices</IndexType>
-                    <IndexOptions>
-                      <NoIndices />
-                    </IndexOptions>
+                    <BaseObject>planetodetic</BaseObject>
+                    <Index units="" displayed_units="" dim="1">
+                      <value>0</value>
+                    </Index>
                     <metadata dim="0" />
-                  </ObjectParameter>
+                  </ArrayElement>
                 </BaseObject>
                 <Width units="" displayed_units="">20</Width>
                 <Precision units="" displayed_units="">16</Precision>
@@ -733,16 +794,14 @@
               <EventWithFormat name="Command4_:Items2" isConstant="false" isGlobal="false">
                 <Name>Command4_:Items2</Name>
                 <BaseObject>
-                  <ObjectParameter name="Command4_:Items2_:BaseObject" isConstant="false" isGlobal="false">
+                  <ArrayElement name="Command4_:Items2_:BaseObject" isConstant="false" isGlobal="false">
                     <Name>Command4_:Items2_:BaseObject</Name>
-                    <BaseObject>Spacecraft1</BaseObject>
-                    <Parameter>Latitude</Parameter>
-                    <IndexType>NoIndices</IndexType>
-                    <IndexOptions>
-                      <NoIndices />
-                    </IndexOptions>
+                    <BaseObject>planetodetic</BaseObject>
+                    <Index units="" displayed_units="" dim="1">
+                      <value>1</value>
+                    </Index>
                     <metadata dim="0" />
-                  </ObjectParameter>
+                  </ArrayElement>
                 </BaseObject>
                 <Width units="" displayed_units="">20</Width>
                 <Precision units="" displayed_units="">16</Precision>
@@ -753,16 +812,14 @@
               <EventWithFormat name="Command4_:Items3" isConstant="false" isGlobal="false">
                 <Name>Command4_:Items3</Name>
                 <BaseObject>
-                  <ObjectParameter name="Command4_:Items3_:BaseObject" isConstant="false" isGlobal="false">
+                  <ArrayElement name="Command4_:Items3_:BaseObject" isConstant="false" isGlobal="false">
                     <Name>Command4_:Items3_:BaseObject</Name>
-                    <BaseObject>Spacecraft1</BaseObject>
-                    <Parameter>Longitude</Parameter>
-                    <IndexType>NoIndices</IndexType>
-                    <IndexOptions>
-                      <NoIndices />
-                    </IndexOptions>
+                    <BaseObject>planetodetic</BaseObject>
+                    <Index units="" displayed_units="" dim="1">
+                      <value>2</value>
+                    </Index>
                     <metadata dim="0" />
-                  </ObjectParameter>
+                  </ArrayElement>
                 </BaseObject>
                 <Width units="" displayed_units="">20</Width>
                 <Precision units="" displayed_units="">16</Precision>
@@ -773,16 +830,14 @@
               <EventWithFormat name="Command4_:Items4" isConstant="false" isGlobal="false">
                 <Name>Command4_:Items4</Name>
                 <BaseObject>
-                  <ObjectParameter name="Command4_:Items4_:BaseObject" isConstant="false" isGlobal="false">
+                  <ArrayElement name="Command4_:Items4_:BaseObject" isConstant="false" isGlobal="false">
                     <Name>Command4_:Items4_:BaseObject</Name>
-                    <BaseObject>Spacecraft1</BaseObject>
-                    <Parameter>LatLongVi</Parameter>
-                    <IndexType>NoIndices</IndexType>
-                    <IndexOptions>
-                      <NoIndices />
-                    </IndexOptions>
+                    <BaseObject>planetodetic</BaseObject>
+                    <Index units="" displayed_units="" dim="1">
+                      <value>3</value>
+                    </Index>
                     <metadata dim="0" />
-                  </ObjectParameter>
+                  </ArrayElement>
                 </BaseObject>
                 <Width units="" displayed_units="">20</Width>
                 <Precision units="" displayed_units="">16</Precision>
@@ -793,16 +848,14 @@
               <EventWithFormat name="Command4_:Items5" isConstant="false" isGlobal="false">
                 <Name>Command4_:Items5</Name>
                 <BaseObject>
-                  <ObjectParameter name="Command4_:Items5_:BaseObject" isConstant="false" isGlobal="false">
+                  <ArrayElement name="Command4_:Items5_:BaseObject" isConstant="false" isGlobal="false">
                     <Name>Command4_:Items5_:BaseObject</Name>
-                    <BaseObject>Spacecraft1</BaseObject>
-                    <Parameter>LatLongAzimuth</Parameter>
-                    <IndexType>NoIndices</IndexType>
-                    <IndexOptions>
-                      <NoIndices />
-                    </IndexOptions>
+                    <BaseObject>planetodetic</BaseObject>
+                    <Index units="" displayed_units="" dim="1">
+                      <value>4</value>
+                    </Index>
                     <metadata dim="0" />
-                  </ObjectParameter>
+                  </ArrayElement>
                 </BaseObject>
                 <Width units="" displayed_units="">20</Width>
                 <Precision units="" displayed_units="">16</Precision>
@@ -813,16 +866,14 @@
               <EventWithFormat name="Command4_:Items6" isConstant="false" isGlobal="false">
                 <Name>Command4_:Items6</Name>
                 <BaseObject>
-                  <ObjectParameter name="Command4_:Items6_:BaseObject" isConstant="false" isGlobal="false">
+                  <ArrayElement name="Command4_:Items6_:BaseObject" isConstant="false" isGlobal="false">
                     <Name>Command4_:Items6_:BaseObject</Name>
-                    <BaseObject>Spacecraft1</BaseObject>
-                    <Parameter>HorizontalFPA</Parameter>
-                    <IndexType>NoIndices</IndexType>
-                    <IndexOptions>
-                      <NoIndices />
-                    </IndexOptions>
+                    <BaseObject>planetodetic</BaseObject>
+                    <Index units="" displayed_units="" dim="1">
+                      <value>5</value>
+                    </Index>
                     <metadata dim="0" />
-                  </ObjectParameter>
+                  </ArrayElement>
                 </BaseObject>
                 <Width units="" displayed_units="">20</Width>
                 <Precision units="" displayed_units="">16</Precision>
@@ -841,8 +892,11 @@
   <ProjectScript>
     <Line>Earth.Mu = 398600.4418;</Line>
     <Line>stateFixed = PositionVelocityConvert(1, 4, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
+    <Line>convFixed = ElementConvert(1, 8, Spacecraft1.Epoch, stateFixed);</Line>
+    <Line>convInertial = ElementConvert(1, 8, Spacecraft1.Epoch, {Spacecraft1.Position, Spacecraft1.Velocity});</Line>
+    <Line>planetodetic = {convInertial[0], convInertial[1], convInertial[2], convFixed[3], convFixed[4], convFixed[5]};</Line>
     <Line>Report stateFixed[0]&lt;20,16&gt;, stateFixed[1]&lt;20,16&gt;, stateFixed[2]&lt;20,16&gt;, stateFixed[3]&lt;20,16&gt;, stateFixed[4]&lt;20,16&gt;, stateFixed[5]&lt;20,16&gt; to ReportInterface1;</Line>
-    <Line>Report Spacecraft1.LatLongRadius&lt;20,16&gt;, Spacecraft1.Latitude&lt;20,16&gt;, Spacecraft1.Longitude&lt;20,16&gt;, Spacecraft1.LatLongVi&lt;20,16&gt;, Spacecraft1.LatLongAzimuth&lt;20,16&gt;, Spacecraft1.HorizontalFPA&lt;20,16&gt; to ReportInterface1;</Line>
+    <Line>Report planetodetic[0]&lt;20,16&gt;, planetodetic[1]&lt;20,16&gt;, planetodetic[2]&lt;20,16&gt;, planetodetic[3]&lt;20,16&gt;, planetodetic[4]&lt;20,16&gt;, planetodetic[5]&lt;20,16&gt; to ReportInterface1;</Line>
   </ProjectScript>
   <ProjectNotes></ProjectNotes>
 </FreeFlyerProjectFile>

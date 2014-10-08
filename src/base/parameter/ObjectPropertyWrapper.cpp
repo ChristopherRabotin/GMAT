@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -378,6 +378,7 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    if (object == NULL)
       throw ParameterException(
       "Cannot return value of ObjectProperty - object pointer is NULL\n");
+   
    Real itsValue;
    try
    {
@@ -403,9 +404,13 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    }
    catch (BaseException &be)
    {
-      std::stringstream errmsg;
-      errmsg << be.GetFullMessage() << std::endl;
-      throw ParameterException(errmsg.str());
+      //std::stringstream errmsg;
+      //errmsg << be.GetFullMessage(); // << std::endl;
+      //throw ParameterException(errmsg.str());
+      
+      // Just rethrow here since ref object is not a Parameter object which
+      // is confusing when Parameter exception: is shown (LOJ: 2014.04.17)
+      throw;
    }
    
    return itsValue;
@@ -444,16 +449,69 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
          MessageInterface::ShowMessage(
          "   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
       #endif
-      std::stringstream errmsg;
+         
+      //std::stringstream errmsg;
 //      errmsg << "Cannot set Real value for id \"" << propID;
 //      errmsg << "\" for object \"" << object->GetName();
 //      errmsg << "\" - exception thrown: "<< be.GetFullMessage() << std::endl;
-      errmsg << be.GetFullMessage() << std::endl;
-      throw ParameterException(errmsg.str());
+      //errmsg << be.GetFullMessage() << std::endl;
+      //throw ParameterException(errmsg.str());
+      
+      // Just rethrow here since ref object is not a Parameter object which
+      // is confusing  when Parameter exception: is shown (LOJ: 2014.04.17)
+      throw;
    }
    
    return true;
 }
+
+
+//---------------------------------------------------------------------------
+//  bool SetRvector(const Rvector &toValue)
+//---------------------------------------------------------------------------
+/**
+ * Method to set the Real value of the wrapped object.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetRvector(const Rvector &toValue)
+{
+   if (object == NULL)
+      throw ParameterException(
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+
+   try
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetRvector, about to set value to %s\n", toValue.ToString().c_str());
+      #endif
+      object->SetRvectorParameter(propID, toValue);
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("In ObjPropWrapper::SetRvector, value has been set to %s\n", toValue.ToString().c_str());
+      #endif
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("   exception thrown!  msg = %s\n", (be.GetFullMessage()).c_str());
+      #endif
+      
+      //std::stringstream errmsg;
+      //errmsg << be.GetFullMessage() << std::endl;
+      //throw ParameterException(errmsg.str());
+      
+      // Just rethrow here since ref object is not a Parameter object which
+      // is confusing  when Parameter exception: is shown (LOJ: 2014.04.17)
+      throw;
+   }
+   
+   return true;
+}
+
 
 //---------------------------------------------------------------------------
 // std::string EvaluateString() const

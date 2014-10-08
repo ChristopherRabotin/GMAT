@@ -77,7 +77,7 @@ endif
 MAC_CPP_FLAGS=-current_version 0.1 -compatibility_version 0.1 -fvisibility=default
 
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup -headerpad_max_install_names\
+SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup -headerpad_max_install_names\
                    -L$(GMAT_CODE_LOCATION)/base/lib -l$(BASE_LIBRARY) $(PLATFORM_FLAGS)\
                     $(MAC_CPP_FLAGS) $(WXLINKFLAGS) $(MATLAB_LIBRARIES) -lgcc_s.1 $(ARCHITECTURE_FLAGS) -bind_at_load
 
