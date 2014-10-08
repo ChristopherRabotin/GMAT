@@ -40,6 +40,7 @@
 //#define DEBUG_TIMING
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
+//#define DEBUG_DERIVATIVE
 //#define DEBUG_CALCULATE_MEASUREMENT
 
 //------------------------------------------------------------------------------
@@ -94,35 +95,53 @@ MeasureModel::MeasureModel(const std::string &name) :
 MeasureModel::~MeasureModel()
 {
    // Delete all objects in propMap:
-   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
-         i != propMap.end(); ++i)
-      if (i->second != NULL)
+   for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin(); i != propMap.end(); ++i)
+   {
+      if (i->second)
          delete i->second;
+   }
+   propMap.clear();
 
    // Delete all object in participantLists:
    for (UnsignedInt i = 0 ; i < participantLists.size(); ++i)
    {
-      if (participantLists[i] != NULL)
+      if (participantLists[i])
+      {
+         participantLists[i]->clear();
          delete participantLists[i];
+      }
    }
+   participantLists.clear();
 
    // Delete all object in participants:
    for (UnsignedInt i = 0 ; i < participants.size(); ++i)
    {
-      if (participants[i] != NULL)
+      if (participants[i])
       {
+         participants[i]->clear();
          delete participants[i];      // It does not need to delete all objects in object array participants[i]
       }
    }
+   participants.clear();
+   candidates.clear();
 
    // Delete all object in signalPaths:
    for (UnsignedInt i = 0 ; i < signalPaths.size(); ++i)
    {
-      if (signalPaths[i] != NULL)
-      {
+      if (signalPaths[i])
          delete signalPaths[i];      // It deletes all legs in signal path ith
-      }
    }
+   signalPaths.clear();
+   theData.clear();
+
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+   {
+      theDataDerivatives[i].clear();
+   }
+   theDataDerivatives.clear();
+
+   correctionTypeList.clear();
+   correctionModelList.clear();
 }
 
 
@@ -169,12 +188,12 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
-      feasible = false;
-      withLighttime = mm.withLighttime;
-      navLog = mm.navLog;
-      logLevel = mm.logLevel;
-      isPhysical = mm.isPhysical;
-      solarsys = mm.solarsys;
+      feasible            = false;
+      withLighttime       = mm.withLighttime;
+      navLog              = mm.navLog;
+      logLevel            = mm.logLevel;
+      isPhysical          = mm.isPhysical;
+      solarsys            = mm.solarsys;
       epochIsAtEnd        = mm.epochIsAtEnd;                     // made changes by TUAN NGUYEN
       correctionTypeList  = mm.correctionTypeList;               // made changes by TUAN NGUYEN
       correctionModelList = mm.correctionModelList;              // made changes by TUAN NGUYEN
@@ -182,7 +201,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
             i != propMap.end(); ++i)
       {
-         if (i->second != NULL)
+         if (i->second)
          {
             delete i->second;
             i->second = NULL;
@@ -390,10 +409,6 @@ std::string MeasureModel::GetStringParameter(const Integer id,
 bool MeasureModel::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
-   //if ((index < 0) || (index > (Integer)participantLists.size()))
-   //   throw MeasurementException("Index out of bounds when setting string "
-   //         "parameter");
-
    if (id == SIGNAL_PATH)
    {
       if ((index < 0) || (index > (Integer)participantLists.size()))
@@ -850,17 +865,11 @@ bool MeasureModel::Initialize()
                {
                   SignalBase *sb = NULL;
                   if (isPhysical)
-                  {
                      sb = new PhysicalSignal("");
-                     //if (navLog)                              // made changes by TUAN NGUYEN
-                     //   sb->SetProgressReporter(navLog);            // made changes by TUAN NGUYEN
-                  }
                   else
                   {
                      // The signals are single point
 //                     sb = new SinglePointSignal("");
-//                     if (navLog)
-//                        sb->SetProgressReporter(navLog);
                      throw MeasurementException("Single point signals are not "
                            "yet implemented");
                   }
@@ -871,6 +880,8 @@ bool MeasureModel::Initialize()
                         sb->SetProgressReporter(navLog);            // made changes by TUAN NGUYEN
                      sb->SetSolarSystem(solarsys);
                      sb->UsesLighttime(withLighttime);
+
+                     // Set name for transmit participant and receive participant 
                      if (sb->SetTransmitParticipantName(
                            participantLists[i]->at(j)) == false)
                      {
@@ -888,24 +899,22 @@ bool MeasureModel::Initialize()
                               " on measurement model " + instanceName);
                      }
 
+                     // Set transmit participant and its propagator in SignalBase object
                      GmatBase *obj = participants[i]->at(j);
-                     if (sb->SetRefObject(obj, obj->GetType(),
-                           obj->GetName()) == false)
+                     if (sb->SetRefObject(obj, obj->GetType(), obj->GetName()) == false)
                         throw MeasurementException("Failed to set the transmit "
                               "participant");
                      else
-                        if (obj->IsOfType(Gmat::SPACEOBJECT) &&
-                              propMap[(SpacePoint*)obj])
+                        if (obj->IsOfType(Gmat::SPACEOBJECT) && propMap[(SpacePoint*)obj])
                            sb->SetPropagator(propMap[(SpacePoint*)obj], obj);
 
+                     // Set receive participant and its propagator in SignalBase object
                      obj = participants[i]->at(j+1);
-                     if (sb->SetRefObject(obj, obj->GetType(),
-                           obj->GetName()) == false)
+                     if (sb->SetRefObject(obj, obj->GetType(), obj->GetName()) == false)
                         throw MeasurementException("Failed to set the receive "
                               "participant\n");
                      else
-                        if (obj->IsOfType(Gmat::SPACEOBJECT) &&
-                              propMap[(SpacePoint*)obj])
+                        if (obj->IsOfType(Gmat::SPACEOBJECT) && propMap[(SpacePoint*)obj])
                            sb->SetPropagator(propMap[(SpacePoint*)obj], obj);
 
                      if (!sb->Initialize())
@@ -983,6 +992,20 @@ bool MeasureModel::Initialize()
 const std::vector<SignalData*>& MeasureModel::GetSignalData()
 {
    return theData;
+}
+
+//------------------------------------------------------------------------------
+// const std::vector<SignalBase*>& GetSignalPaths()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the signal paths
+ *
+ * @return The vector of signal paths
+ */
+//------------------------------------------------------------------------------
+const std::vector<SignalBase*>& MeasureModel::GetSignalPaths()
+{
+   return signalPaths;
 }
 
 //------------------------------------------------------------------------------
@@ -1184,37 +1207,62 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
             lastleg = leg;
       }
 
-      // 4.3. Get the start signal:
+      // 4.3. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
+      // data to the state known in the PropSetup for the starting Signal
+      leg = signalPaths[i];                                           // made changes by TUAN NGUYEN
+      while (leg != NULL)                                             // made changes by TUAN NGUYEN
+      {                                                               // made changes by TUAN NGUYEN
+         SignalData *sdObj = leg->GetSignalDataObject();              // made changes by TUAN NGUYEN
+
+         #ifdef USE_PRECISION_TIME
+            sdObj->tPrecTime = sdObj->rPrecTime = forEpoch;
+         #else
+            sdObj->tTime = sdObj->rTime = forEpoch;
+         #endif
+         if (sdObj->tNode->IsOfType(Gmat::SPACECRAFT))
+         {
+            const Real* propState =
+               propMap[sdObj->tNode]->GetPropagator()->AccessOutState();
+            Rvector6 state(propState);
+            sdObj->tLoc = state.GetR();
+            sdObj->tVel = state.GetV();
+
+            // transmite participant STM at measurement time tm       // made changes by TUAN NGUYEN
+            for (UnsignedInt ii = 0; ii < 6; ++ii)                    // made changes by TUAN NGUYEN
+               for (UnsignedInt jj = 0; jj < 6; ++jj)                 // made changes by TUAN NGUYEN
+                  sdObj->tSTMtm(ii,jj) = propState[6 + ii*6 + jj];    // made changes by TUAN NGUYEN
+
+            // transmite participant STM at transmite time t1         // made changes by TUAN NGUYEN
+            sdObj->tSTM = sdObj->tSTMtm;                              // made changes by TUAN NGUYEN
+         }
+
+         if (sdObj->rNode->IsOfType(Gmat::SPACECRAFT))
+         {
+            const Real* propState =
+               propMap[sdObj->rNode]->GetPropagator()->AccessOutState();
+            Rvector6 state(propState);
+            sdObj->rLoc = state.GetR();
+            sdObj->rVel = state.GetV();
+
+            // receive participant STM at measurement type tm         // made changes by TUAN NGUYEN
+            for (UnsignedInt ii = 0; ii < 6; ++ii)                    // made changes by TUAN NGUYEN
+               for (UnsignedInt jj = 0; jj < 6; ++jj)                 // made changes by TUAN NGUYEN
+                  sdObj->rSTMtm(ii,jj) = propState[6 + ii*6 + jj];    // made changes by TUAN NGUYEN
+
+            // receive participant STM at receive time t2             // made changes by TUAN NGUYEN
+            sdObj->rSTM = sdObj->rSTMtm;                              // made changes by TUAN NGUYEN
+         }
+
+         leg = leg->GetNext();                                        // made changes by TUAN NGUYEN
+      }                                                               // made changes by TUAN NGUYEN
+
+      // 4.4. Get the start signal:
       SignalBase *startSignal = signalPaths[i]->GetStart(epochIsAtEnd);
       SignalData *sd = &(startSignal->GetSignalData());
       #ifdef DEBUG_TIMING
          MessageInterface::ShowMessage("4.4. Get the start signal leg for signal path %d:\n", i);
       #endif
       
-      // 4.4. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
-      // data to the state known in the PropSetup for the starting Signal
-      #ifdef USE_PRECISION_TIME
-         sd->tPrecTime = sd->rPrecTime = forEpoch;
-      #else
-         sd->tTime = sd->rTime = forEpoch;
-      #endif
-      if (sd->tNode->IsOfType(Gmat::SPACECRAFT))
-      {
-         const Real* propState =
-               propMap[sd->tNode]->GetPropagator()->AccessOutState();
-         Rvector6 state(propState);
-         sd->tLoc = state.GetR();
-         sd->tVel = state.GetV();
-      }
-      if (sd->rNode->IsOfType(Gmat::SPACECRAFT))
-      {
-         const Real* propState =
-               propMap[sd->rNode]->GetPropagator()->AccessOutState();
-         Rvector6 state(propState);
-         sd->rLoc = state.GetR();
-         sd->rVel = state.GetV();
-      }
-     
       // 4.5. Compute C-value:
       // 4.5.1. Compute Light Time range, relativity correction, and ET-TAI correction (backward or forward direction that depends on where measurement time is get):
       #ifdef DEBUG_TIMING
@@ -1235,7 +1283,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       #ifdef DEBUG_TIMING
          MessageInterface::ShowMessage("4.5.2 Calculate media correction for signal path %d:\n", i);
       #endif
-      SignalBase* leg = signalPaths[i];
+      leg = signalPaths[i];
       while(leg != NULL)
       {
          leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
@@ -1363,6 +1411,10 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
 const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
       GmatBase* obj, Integer id)
 {
+   #ifdef DEBUG_DERIVATIVE
+      MessageInterface::ShowMessage("MeasureModel::CalculateMeasurementDerivatives(%s, %d) called\n", obj->GetName().c_str(), id);
+   #endif
+
    theDataDerivatives.clear();
 
    // Collect the data from the signals
@@ -1374,6 +1426,9 @@ const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
          theDataDerivatives.push_back(pathDerivative[j]);
    }
 
+   #ifdef DEBUG_DERIVATIVE
+      MessageInterface::ShowMessage("Exit MeasureModel::CalculateMeasurementDerivatives()\n");
+   #endif
    return theDataDerivatives;
 }
 
