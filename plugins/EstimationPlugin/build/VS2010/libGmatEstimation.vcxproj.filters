@@ -342,7 +342,7 @@
     <ClInclude Include="..\..\src\base\hardware\Transponder.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\adapter\USNRangeAdapter.hpp">
+    <ClInclude Include="..\..\src\base\adapter\DopplerAdapter.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
   </ItemGroup>
@@ -611,7 +611,7 @@
     <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\base\adapter\USNRangeAdapter.cpp">
+    <ClCompile Include="..\..\src\base\adapter\DopplerAdapter.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>
