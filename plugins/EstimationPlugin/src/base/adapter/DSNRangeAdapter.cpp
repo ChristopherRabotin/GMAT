@@ -21,10 +21,12 @@
 #include "DSNRangeAdapter.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include "RandomNumber.hpp"
 
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
+//#define DEBUG_DERIVATIVE_CALCULATION
 //#define DEBUG_RANGE_CALCULATION
 
 //------------------------------------------------------------------------------
@@ -335,6 +337,20 @@ bool DSNRangeAdapter::Initialize()
       retval = true;
 
       // @todo: initialize all needed variables
+      // Calculate measurement covariance again due to it uses RU.
+      std::vector<SignalData*> data = calcData->GetSignalData();
+      Integer measurementSize = data.size();
+      measErrorCovariance.SetDimension(measurementSize);
+      for (Integer i = 0; i < measurementSize; ++i)
+      {
+         for (Integer j = 0; j < measurementSize; ++j)
+         {
+            measErrorCovariance(i,j) = (i == j ?
+                        (noiseSigma[2] != 0.0 ? (noiseSigma[2] * noiseSigma[2]) : 1.0) :            // noiseSigma[2] is used for DSNRange. Its unit is RU
+                        0.0);
+         }
+      }
+
    }
 
    return retval;
@@ -368,25 +384,26 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
             rampTable);
    #endif
 
-   // Set ramp table and observation data for adapter before doing something
+   // 1. Set ramp table and observation data for adapter before doing something
    rampTB = rampTable;
    obsData = forObservation;
    
-   // Compute range in km
+   // 2. Compute range in km
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
-
-   // Convert range from km to RU and store in cMeasurement:
+   
+   // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
    {
-      // 1. Specify uplink frequency
+      // 3.1. Specify uplink frequency
       // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
       uplinkFreq = calcData->GetUplinkFrequency(0, rampTB);
       freqBand = calcData->GetUplinkFrequencyBand(0, rampTB);
       
-      // 2. Specify multiplier (at time t1)
+      // 3.2. Specify multiplier (at time t1)
+      // multiplier only changes its value only after range in km is computed
       multiplier = GetFrequencyFactor(uplinkFreq*1.0e6);
       
-      // 3. Convert range from km to RU in cMeasurement.value[0]
+      // 3.3. Convert range from km to RU in cMeasurement.value[0]
       Integer errnum = 0;
       Real lightspeed = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;                  // unit: km/s
       Real realTravelTime = cMeasurement.value[i]/lightspeed;                                                     // unit: seconds
@@ -394,6 +411,10 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       if (rampTB != NULL)
       {
          // ramped frequency
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("Calculate DSNRange based on ramped table\n");
+         #endif
+
          try
          {
             cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: range unit
@@ -409,10 +430,36 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       else
       {
          // constant frequency
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("Calculate DSNRange based on constant frequency\n");
+         #endif
+
          cMeasurement.value[i] = multiplier*realTravelTime;
       }
       
-      cMeasurement.uplinkFreq = uplinkFreq;
+      if (measurementType == "DSNRange")
+      {
+         //@Todo: write code to add bias to measuement value here
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
+         #endif
+
+         // Add noise to measurement value
+         if (addNoise)
+         {
+//            MessageInterface::ShowMessage("Add noise\n");
+            // Add noise here
+            if (cMeasurement.unfeasibleReason != "R")
+            {
+//               MessageInterface::ShowMessage("create noise: c = %.12lf\n", cMeasurement.value[i]);
+               RandomNumber* rn = RandomNumber::Instance();
+               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[2]);
+               cMeasurement.value[i] = val;
+            }
+         }
+      }
+
+      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
       cMeasurement.uplinkBand = freqBand;
       cMeasurement.rangeModulo = rangeModulo;
 
@@ -462,63 +509,40 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
 const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
       GmatBase* obj, Integer id)
 {
+   #ifdef DEBUG_DERIVATIVE_CALCULATION
+      Integer parmId = GetParmIdFromEstID(id, obj);
+      MessageInterface::ShowMessage("Enter DSNRangeAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+   #endif
+
    // Compute measurement derivatives in km:
    RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
 
-   // @todo: Add code to convert measurement derivatives from km to RU
+   // Convert measurement derivatives from km to RU
+   Real freqFactor = multiplier/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM);
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+   {
+      for (UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
+         theDataDerivatives[i][j] = theDataDerivatives[i][j] * freqFactor;
+   }
+   
+   #ifdef DEBUG_DERIVATIVE_CALCULATION
+      for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      {
+         MessageInterface::ShowMessage("Derivative for path %dth:\n", i);
+         MessageInterface::ShowMessage("[");
+         for (UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
+         {
+            MessageInterface::ShowMessage("    %.12lf", theDataDerivatives[i][j]);
+            MessageInterface::ShowMessage("%s", ((j == theDataDerivatives[i].size()-1)?"":","));
+         }
+         MessageInterface::ShowMessage("]\n");
+      }
+      
+   #endif
 
-
-   //if (!calcData)
-   //   throw MeasurementException("Measurement derivative data was requested "
-   //         "for " + instanceName + " before the measurement was set");
-
-   //Integer parmId = GetParmIdFromEstID(id, obj);
-
-   //// Perform the calculations
-   //#ifdef DEBUG_ADAPTER_DERIVATIVES
-   //   MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
-   //         "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
-   //         obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
-   //#endif
-
-   //const std::vector<RealArray> *derivativeData =
-   //      &(calcData->CalculateMeasurementDerivatives(obj, id)); // parmId));
-
-   //#ifdef DEBUG_ADAPTER_DERIVATIVES
-   //   MessageInterface::ShowMessage("   Derivatives: [");
-   //   for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
-   //   {
-   //      if (i > 0)
-   //         MessageInterface::ShowMessage("]\n                [");
-   //      for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
-   //      {
-   //         if (j > 0)
-   //            MessageInterface::ShowMessage(", ");
-   //         MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
-   //      }
-   //   }
-   //   MessageInterface::ShowMessage("]\n");
-   //#endif
-
-   //// Now assemble the derivative data into the requested derivative
-   //UnsignedInt size = derivativeData->at(0).size();
-
-   //theDataDerivatives.clear();
-   //for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
-   //{
-   //   RealArray oneRow;
-   //   oneRow.assign(size, 0.0);
-   //   theDataDerivatives.push_back(oneRow);
-
-   //   if (derivativeData->at(i).size() != size)
-   //      throw MeasurementException("Derivative data size is a different size "
-   //            "than expected");
-
-   //   for (UnsignedInt j = 0; j < size; ++j)
-   //   {
-   //      theDataDerivatives[i][j] = (derivativeData->at(i))[j];
-   //   }
-   //}
+   #ifdef DEBUG_DERIVATIVE_CALCULATION
+      MessageInterface::ShowMessage("Exit DSNRangeAdapter::CalculateMeasurementDerivatives():\n");
+   #endif
 
    return theDataDerivatives;
 }
