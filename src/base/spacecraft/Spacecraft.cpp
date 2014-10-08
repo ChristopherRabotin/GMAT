@@ -560,7 +560,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //   hardwareList      = a.hardwareList;
 
    // set cloned hardware
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.hardwareList);            // made changes by TUAN NGUYEN      09/23/2014
 
    BuildElementLabelMap();
 
@@ -674,7 +674,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
       #endif
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters);
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.hardwareList);              // made changes by TUAN NGUYEN      09/23/2014
 
    BuildElementLabelMap();
 
@@ -5094,7 +5094,7 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
  */
 //------------------------------------------------------------------------------
 void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                   const ObjectArray &thrs)
+                                   const ObjectArray &thrs, const ObjectArray &otherHardware)   // made changes by TUAN NGUYEN    09/23/2014
 {
    #ifdef DEBUG_OBJ_CLONE
    MessageInterface::ShowMessage
@@ -5193,6 +5193,23 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
          ("Spacecraft::CloneOwnedObjects() calling AttachTanksToThrusters()\n");
       #endif
       AttachTanksToThrusters();
+   }
+
+   // made changes by TUAN NGUYEN         09/23/2014
+   // Clone other hardware
+   for (UnsignedInt i = 0; i < otherHardware.size(); ++i)
+   {
+      // Search otherHardware[i] in hardwareList
+      UnsignedInt j;
+      for(j = 0; j < hardwareList.size(); ++j)
+      {
+         if (hardwareList[j]->GetName() == otherHardware[i]->GetName())
+            break;
+      }
+
+      // If not found, clone otherHardware[i] and add to hardwareList
+      if (j == hardwareList.size())
+         hardwareList.push_back(otherHardware[i]->Clone());
    }
 }
 

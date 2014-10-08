@@ -519,7 +519,7 @@ protected:
    void              DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
                                         bool deleteThrusters, bool otherHardware);
    void              CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                       const ObjectArray &thrs);
+                                       const ObjectArray &thrs, const ObjectArray &otherHw);        // made changes by TUAN NGUYEN      09/23/2014
    void              AttachTanksToThrusters();
    bool              SetHardware(GmatBase *obj, StringArray &hwNames,
                                  ObjectArray &hwArray);
