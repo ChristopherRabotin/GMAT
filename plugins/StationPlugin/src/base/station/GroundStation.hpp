@@ -37,7 +37,7 @@
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
 
-#include "MediaCorrectionInterface.hpp"
+//#include "MediaCorrectionInterface.hpp"
 
 class STATION_API GroundStation : public GroundstationInterface
 {
@@ -121,11 +121,10 @@ public:
    virtual bool         IsValidID(const std::string &id);
 
 
-   virtual Real*                IsValidElevationAngle(const Rvector6 &state_sez);
-//   bool                    IsValidElevationAngle();
-//   RealArray               CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
-//   RealArray               CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
-//   RealArray               CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+   virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
+   //RealArray            CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+   //RealArray            CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+   //RealArray            CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
 
    DEFAULT_TO_NO_CLONES
 
@@ -142,8 +141,8 @@ protected:
    std::string troposphereModel;            // made changes by Tuan Nguyen
 
    /// Troposphere and Ionosphere objects
-   MediaCorrectionInterface* troposphereObj;// made changes by Tuan Nguyen
-   MediaCorrectionInterface* ionosphereObj; // made changes by Tuan Nguyen
+   //MediaCorrectionInterface* troposphereObj;// made changes by Tuan Nguyen
+   //MediaCorrectionInterface* ionosphereObj; // made changes by Tuan Nguyen
 
    /// Parameters needed for Troposphere correction
    Real                 temperature;                     // unit: Kelvin
@@ -165,7 +164,7 @@ public:
       ADD_HARDWARE,                       // made changes by Tuan Nguyen
       IONOSPHERE_MODEL,                   // made changes by Tuan Nguyen
       TROPOSPHERE_MODEL,                  // made changes by Tuan Nguyen
-      DATA_SOURCE,                        // made changes by Tuan Nguyen        
+      DATA_SOURCE,                  // When DataSource is 'Constant', that means temperature, pressure, and humidity are read from script, otherwise they are read from a data base  // made changes by Tuan Nguyen        
       TEMPERATURE,                  // temperature (in K) at ground station. It is used for Troposphere correction
       PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
       HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction

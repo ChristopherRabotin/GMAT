@@ -98,9 +98,9 @@ GroundStation::GroundStation(const std::string &itsName) :
    dataSource                ("Constant"),           // made changes by Tuan Nguyen
    minElevationAngle         (7.0),                  // 7 degree
    troposphereModel          ("None"),               // made changes by Tuan Nguyen
-   ionosphereModel           ("None"),               // made changes by Tuan Nguyen
-   troposphereObj            (NULL),
-   ionosphereObj             (NULL)
+   ionosphereModel           ("None")                // made changes by Tuan Nguyen
+//   troposphereObj            (NULL),
+//   ionosphereObj             (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GroundStation default constructor\n");
@@ -146,9 +146,9 @@ GroundStation::GroundStation(const GroundStation& gs) :
    dataSource            (gs.dataSource),          // made changes by Tuan Nguyen
    minElevationAngle     (gs.minElevationAngle),
    ionosphereModel       (gs.ionosphereModel),     // made changes by Tuan Nguyen
-   troposphereModel      (gs.troposphereModel),    // made changes by Tuan Nguyen
-   troposphereObj        (NULL),
-   ionosphereObj         (NULL)
+   troposphereModel      (gs.troposphereModel)     // made changes by Tuan Nguyen
+//   troposphereObj        (NULL),
+//   ionosphereObj         (NULL)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GroundStation copy constructor start\n");
@@ -196,8 +196,8 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
       minElevationAngle = gs.minElevationAngle;
       troposphereModel  = gs.troposphereModel;      // made changes by Tuan Nguyen
       ionosphereModel   = gs.ionosphereModel;       // made changes by Tuan Nguyen
-      troposphereObj    = NULL;
-      ionosphereObj     = NULL;
+//      troposphereObj    = NULL;
+//      ionosphereObj     = NULL;
    }
 
    return *this;
@@ -444,9 +444,9 @@ bool GroundStation::SetStringParameter(const Integer id,
 
    if (id == TROPOSPHERE_MODEL)
    {
-      if (value != "HopfieldSaastamoinen")
+      if ((value != "HopfieldSaastamoinen")&&(value != "None"))
          throw AssetException("Error: '" + value +"' is not a valid name for TroposphereModel.\n"
-         +"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
+         +"Currently only 'HopfieldSaastamoinen' and 'None' are allowed for Troposphere.\n");
 
       troposphereModel = value;
       return true;
@@ -454,9 +454,9 @@ bool GroundStation::SetStringParameter(const Integer id,
 
    if (id == IONOSPHERE_MODEL)
    {
-      if (value != "IRI2007")
+      if ((value != "IRI2007")&&(value != "None"))
          throw AssetException("Error: '" + value + "' is not a valid name for IonosphereModel.\n"
-         +"Currently only 'IRI2007' is allowed for Ionosphere.\n");
+         +"Currently only 'IRI2007' and 'None' are allowed for Ionosphere.\n");
 
       ionosphereModel = value;
       return true;
@@ -1272,19 +1272,36 @@ Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez)
    return az_el_visible;
 }
 
-/*
 
+//----------------------------------------------------------------------------------------
+// RealArray CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
+//----------------------------------------------------------------------------------------
+/**
+* This function is used to calculate troposphere correction for a signal from a space point
+* to ground station at a given time.
+*
+* @param atTime     the time at which the signal is received at ground station
+* @param sp         the space point at which the signal is send
+* @param frequency  frequency of the signal at ground station
+*
+* return an array containing results of troposphere correction
+*/
+//----------------------------------------------------------------------------------------
+/*
 RealArray GroundStation::CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
 {
    // Convert state of space point sp into topocentric coordinate system
+   // 1. Create topocentric coordinate system at ground station
    CoordinateSystem* topoCS = CoordinateSystem::CreateLocalCoordinateSystem("topoCS", "Topocentric", 
        this,                 // origin of this coordinate system is the ground station 
        NULL, NULL,           // primary and secondary space points do not need to specify for this case  
        j2000Body,            // j2000Body is specified by the station's j2000Body
        theSolarSystem);      // solar system is specified by the station's solar system
 
+   // 2. Create SSBMJ2000
+   SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
    CoordinateSystem* spacePointCS = CoordinateSystem::CreateLocalCoordinateSystem("sp_j2K", "MJ2000Eq", 
-      this, NULL, NULL, j2000Body, theSolarSystem);
+      this, NULL, NULL, ssb, solarSystem);
 
    Rvector6 inState =  sp->GetMJ2000State(atTime);
    Rvector6 outState;
@@ -1312,18 +1329,62 @@ RealArray GroundStation::CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoin
 
    return result;
 }
+*/
 
-
+//----------------------------------------------------------------------------------------
+// RealArray CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
+//----------------------------------------------------------------------------------------
+/**
+* This function is used to calculate ionosphere correction for a signal from a space point
+* to ground station at a given time.
+*
+* @param atTime     the time at which the signal is received at ground station
+* @param sp         the space point at which the signal is send
+* @param frequency  frequency of the signal at ground station
+*
+* return an array containing results of ionosphere correction
+*/
+//----------------------------------------------------------------------------------------
+/*
 RealArray GroundStation::CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
 {
    RealArray result;
    return result;
 }
+*/
+
+//----------------------------------------------------------------------------------------
+// RealArray CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
+//----------------------------------------------------------------------------------------
+/**
+* This function is used to calculate media corrections for a signal from a space point
+* to ground station at a given time.
+*
+* @param atTime     the time at which the signal is received at ground station
+* @param sp         the space point at which the signal is send
+* @param frequency  frequency of the signal at ground station
+*
+* return an array containing results of media corrections
+*/
+//----------------------------------------------------------------------------------------
+/*
+RealArray GroundStation::CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
+{
+   RealArray result, result1;
+   
+   result = CalculateTroposphereCorrection(atTime, sp, frequency);
+   result1 = CalculateIonosphereCorrection(atTime, sp, frequency);
+   result = result + result1;
+
+   return result;
+}
+*/
 
 
+/*
 void GroundStation::CreateTroposphereObject(const std::string& modelName)
 {
-   if (troposphereObj != NULL)
+   if (troposphereObj)
       delete troposphereObj;
 
    // Create troposphere correction model
@@ -1336,7 +1397,7 @@ void GroundStation::CreateTroposphereObject(const std::string& modelName)
 
 void GroundStation::CreateIonosphereObject(const std::string& modelName)
 {
-   if (ionosphereObj != NULL)
+   if (ionosphereObjNULL)
       delete ionosphereObj;
 
    // Create troposphere correction model
