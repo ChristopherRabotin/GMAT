@@ -212,7 +212,7 @@ bool PowerSystem::Initialize()
    // attached to a Spacecraft (the Spacecraft passes its own
    // pointer to the PowerSystem).
 
-   initialEp   = EpochToReal(initialEpoch);
+//   initialEp   = EpochToReal(initialEpoch);  // already done
 
    isInitialized = true;
 
@@ -331,6 +331,63 @@ Real PowerSystem::GetThrustPower() const
             powerAvailable);
    #endif
    return powerAvailable;
+}
+
+//------------------------------------------------------------------------------
+//  void SetEpoch(std::string ep)
+//------------------------------------------------------------------------------
+/**
+ * Set the epoch.
+ *
+ * @param <ep> The new epoch.
+ */
+//------------------------------------------------------------------------------
+void PowerSystem::SetEpoch(const std::string &ep)
+{
+   #ifdef DEBUG_DATE_FORMAT
+   MessageInterface::ShowMessage
+      ("PowerSystem::SetEpoch() Setting epoch  for spacecraft %s to %s\n",
+       instanceName.c_str(), ep.c_str());
+   #endif
+
+   std::string timeSystem;
+   std::string timeFormat;
+   TimeConverterUtil::GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
+   if (timeFormat == "ModJulian") // numeric - save and output without quotes
+      initialEpoch = GmatStringUtil::RemoveEnclosingString(ep, "'");
+   else // "Gregorian" - not numeric - save and output with quotes
+   {
+      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
+         initialEpoch = GmatStringUtil::AddEnclosingString(ep, "'");
+      else
+         initialEpoch = ep;
+   }
+
+   #ifdef DEBUG_DATE_FORMAT
+   MessageInterface::ShowMessage
+      ("PowerSystem::SetEpoch() Calling EpochToReal with %s\n",
+       initialEpoch.c_str());
+   #endif
+   initialEp = EpochToReal(initialEpoch);
+   #ifdef DEBUG_DATE_FORMAT
+   MessageInterface::ShowMessage
+      ("PowerSystem::SetEpoch() Setting initialEp (A1Mjd) to %12.15f\n",
+       initialEp);
+   #endif
+}
+
+//------------------------------------------------------------------------------
+// std::string GetEpochString()
+//------------------------------------------------------------------------------
+std::string PowerSystem::GetEpochString()
+{
+   Real outMjd = -999.999;
+   std::string outStr;
+
+   TimeConverterUtil::Convert("A1ModJulian", initialEp, "",
+                              epochFormat, outMjd, outStr);
+
+   return outStr;
 }
 
 
@@ -697,7 +754,7 @@ bool PowerSystem::SetStringParameter(const Integer id, const std::string &value)
    }
    if (id == INITIAL_EPOCH)
    {
-      initialEpoch = value;   // validation happens at Initialization
+      SetEpoch(value);
       return true;
    }
 
@@ -759,6 +816,9 @@ Real PowerSystem::EpochToReal(const std::string &ep)
    Real outMjd = -999.999;
    std::string outStr;
 
+   // remove enclosing quotes for the validation and conversion
+   std::string epNoQuote = GmatStringUtil::RemoveEnclosingString(ep, "'");
+
    #ifdef DEBUG_DATE_FORMAT
       MessageInterface::ShowMessage
          ("PowerSystem::EpochToReal() Converting from %s to A1ModJulian\n", epochFormat.c_str());
@@ -766,16 +826,14 @@ Real PowerSystem::EpochToReal(const std::string &ep)
 
    if (epochFormat.find("Gregorian") != std::string::npos)
    {
-      if (!GregorianDate::IsValid(ep))
+      if (!GregorianDate::IsValid(epNoQuote))
       {
          std::string errmsg = "PowerSystem error: epoch ";
          errmsg += ep + " is not a valid Gregorian date.\n";
-         throw errmsg;
+         throw HardwareException(errmsg);
       }
    }
 
-   // remove enclosing quotes for the conversion
-   std::string epNoQuote = GmatStringUtil::RemoveEnclosingString(ep, "'");
    TimeConverterUtil::Convert(epochFormat, fromMjd, epNoQuote, "A1ModJulian", outMjd,
                               outStr);
    #ifdef DEBUG_DATE_FORMAT
