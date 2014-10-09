@@ -193,6 +193,66 @@
           </row>
 
           <row>
+            <entry><guilabel>Delimiter</guilabel></entry>
+
+            <entry><para>When <guilabel>FixedWidth</guilabel> field is turned
+            off, this field become active. The <guilabel>Delimiter</guilabel>
+            field allows you to report data to a report file in
+            <literal>Comma</literal>, <literal>Semicolon</literal>,
+            <literal>Space</literal> and <literal>Tab</literal> delimited
+            format.</para> <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Enumeration</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para><literal>Comma</literal>, <literal>SemiColon</literal>, <literal>Space</literal>, <literal>Tab</literal></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>When this field is active, then default is
+                    <literal>Space</literal></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
             <entry><guilabel>Filename</guilabel></entry>
 
             <entry><para>Allows the user to define the file path and file name
@@ -227,6 +287,71 @@
                   <listitem>
                     <para>
                       <literal>ReportFile1.txt</literal>
+                    </para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>N/A</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Interfaces</term>
+
+                  <listitem>
+                    <para>GUI, script</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist></entry>
+          </row>
+
+          <row>
+            <entry><guilabel>FixedWidth</guilabel></entry>
+
+            <entry><para>Allows you to enable or disable
+            <guilabel>Delimiter</guilabel> and
+            <guilabel>ColumnWidth</guilabel> fields. When this field is turned
+            on, the <guilabel>Delimiter</guilabel> field is inactive and
+            <guilabel>ColumnWidth</guilabel> field is active and can be used
+            to vary the width of the data columns. When
+            <guilabel>FixedWidth</guilabel> field is turned off, the
+            <guilabel>ColumnWidth</guilabel> field becomes inactive and
+            <guilabel>Delimiter</guilabel> field is active for use.</para>
+            <variablelist>
+                <varlistentry>
+                  <term>Data Type</term>
+
+                  <listitem>
+                    <para>Boolean</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Allowed Values</term>
+
+                  <listitem>
+                    <para>On, Off</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Access</term>
+
+                  <listitem>
+                    <para>set</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default Value</term>
+
+                  <listitem>
+                    <para>
+                      <literal>On</literal>
                     </para>
                   </listitem>
                 </varlistentry>
@@ -566,9 +691,9 @@
                   <term>Allowed Values</term>
 
                   <listitem>
-                    <para><guilabel>All</guilabel>,
-                    <guilabel>Current</guilabel>,
-                    <guilabel>None</guilabel></para>
+                    <para><literal>All</literal>,
+                    <literal>Current</literal>,
+                    <literal>None</literal></para>
                   </listitem>
                 </varlistentry>
 
@@ -845,7 +970,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Resource_ReportFile_GUI_2.png"
+                     fileref="files/images/Resource_ReportFile_GUI_3.png"
                      scalefit="1" width="100%"/>
         </imageobject>
       </mediaobject>

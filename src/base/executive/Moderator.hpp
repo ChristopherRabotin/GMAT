@@ -476,6 +476,7 @@ private:
    // For Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
+   void ShowMissionSequence(const std::string &msg = "");
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
    
    Moderator();

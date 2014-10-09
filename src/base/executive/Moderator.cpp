@@ -5965,150 +5965,17 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
    
    if (cmd == NULL)
       return NULL;
-   
-   GmatCommand *remvCmd;
-   if (cmd->GetTypeName() != "BeginScript")
-   {
-      GmatCommand *remvCmd = commands[sandboxNum-1]->Remove(cmd);
-      
-      #if DEBUG_COMMAND_DELETE
-      ShowCommand("   Removed = ", remvCmd);
-      #endif
-      
-      #if DEBUG_COMMAND_DELETE
-      ShowCommand("==========> Moderator::DeleteCommand() Returning ", remvCmd);
-      #endif
-      
-      return remvCmd;
-   }
-   
-   //-------------------------------------------------------
-   // Remove commands inside Begin/EndScript block
-   //-------------------------------------------------------
 
-   // Check for previous command, it should not be NULL,
-   // since "NoOp" is the first command
-   
-   GmatCommand *prevCmd = cmd->GetPrevious();
-   if (prevCmd == NULL)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Moderator::DeleteCommand() *** INTERNAL ERROR *** \n"
-          "The previous command cannot be NULL.\n");
-      return NULL;
-   }
-   
    GmatCommand *first = GetFirstCommand();
-   
-   #if DEBUG_COMMAND_DELETE
-   std::string cmdString1 = GmatCommandUtil::GetCommandSeqString(first);
-   MessageInterface::ShowMessage("     ==> Current sequence:");
-   MessageInterface::ShowMessage(cmdString1);
-   #endif
-   
-   GmatCommand *current = cmd->GetNext();
-   
-   #if DEBUG_COMMAND_DELETE
-   GmatCommand *nextCmd = GmatCommandUtil::GetNextCommand(cmd);
-   ShowCommand("     prevCmd = ", prevCmd, " nextCmd = ", nextCmd);
-   #endif
-   
-   // Get matching EndScript for BeginScript
-   GmatCommand *endScript = GmatCommandUtil::GetMatchingEnd(cmd);
-   
-   #if DEBUG_COMMAND_DELETE
-   ShowCommand("     endScript = ", endScript);
-   #endif
-   
-   GmatCommand* next;
-   while (current != NULL)
-   {
-      #if DEBUG_COMMAND_DELETE
-      ShowCommand("     current = ", current);
-      #endif
-      
-      if (current == endScript)
-         break;
-      
-      next = current->GetNext();
-      
-      #if DEBUG_COMMAND_DELETE
-      ShowCommand("     removing and deleting ", current);
-      #endif
-      
-      remvCmd = cmd->Remove(current);
-      
-      // check remvCmd first
-      if (remvCmd != NULL)
-      {
-         remvCmd->ForceSetNext(NULL);
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (remvCmd, remvCmd->GetTypeName(), "Moderator::DeleteCommand()");
-         #endif
-         delete remvCmd;
-      }
-      
-      current = next;
-   }
-   
-   //-------------------------------------------------------
-   // Remove and delete EndScript
-   //-------------------------------------------------------
-   #if DEBUG_COMMAND_DELETE
-   ShowCommand("     removing and deleting ", current);
-   #endif
-   
-   remvCmd = cmd->Remove(current);
-   remvCmd->ForceSetNext(NULL);
-   
-   if (remvCmd != NULL)
-   {
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (remvCmd, remvCmd->GetTypeName(), "Moderator::DeleteCommand()");
-      #endif
-      delete remvCmd;
-      remvCmd = NULL;
-   }
-   
-   next = cmd->GetNext();
-   
-   #if DEBUG_COMMAND_DELETE
-   ShowCommand("     next    = ", next, " nextCmd = ", nextCmd);
-   #endif
-   
-   //-------------------------------------------------------
-   // Remove and delete BeginScript
-   //-------------------------------------------------------
-   #if DEBUG_COMMAND_DELETE
-   ShowCommand("     removing and deleting ", cmd);
-   #endif
-   
-   // Remove BeginScript
-   remvCmd = first->Remove(cmd);
-   
-   // Set next command NULL
-   cmd->ForceSetNext(NULL);
-   if (cmd != NULL)
-   {
-      #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->Remove
-         (cmd, cmd->GetTypeName(), "Moderator::DeleteCommand()");
-      #endif
-      delete cmd;
-      cmd = NULL;
-   }
+   GmatCommand *remvCmd = GmatCommandUtil::RemoveCommand(first, cmd);
    
    #if DEBUG_COMMAND_DELETE
    std::string cmdString2 = GmatCommandUtil::GetCommandSeqString(first);
    MessageInterface::ShowMessage("     ==> sequence after delete:");
    MessageInterface::ShowMessage(cmdString2);
-   ShowCommand("==========> Moderator::DeleteCommand() Returning cmd = ", cmd);
+   ShowCommand("==========> Moderator::DeleteCommand() Returning remvCmd = ", remvCmd);
    #endif
-   
-   // Just return cmd, it should be deleted by the caller.
-   return cmd;
+   return remvCmd;
 }
 
 
@@ -9615,6 +9482,15 @@ void Moderator::ShowCommand(const std::string &title1, GmatCommand *cmd1,
    }
 }
 
+//------------------------------------------------------------------------------
+// void ShowMissionSequence(const std::string &msg)
+//------------------------------------------------------------------------------
+void Moderator::ShowMissionSequence(const std::string &msg)
+{
+   MessageInterface::ShowMessage("%s", msg.c_str());
+   GmatCommand *cmd = GetFirstCommand();
+   MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));   
+}
 
 //------------------------------------------------------------------------------
 // void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL)

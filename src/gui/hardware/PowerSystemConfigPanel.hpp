@@ -44,7 +44,7 @@ private:
    bool     isSolar;
 
    bool     dataChanged;
-   bool     canClose;
+//   bool     canClose;
 
    Real     theEpoch;
 
