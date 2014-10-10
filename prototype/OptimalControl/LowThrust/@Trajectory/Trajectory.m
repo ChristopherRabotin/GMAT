@@ -49,7 +49,6 @@ classdef Trajectory < handle
         sparsityConstraints
         
         %  Indeces into arrays
-        stateStartIdx
         decVecStartIdx
         decVecEndIdx
         constraintStartIdx
@@ -140,7 +139,7 @@ classdef Trajectory < handle
             end
             obj.numLinkages = linkIdx;
             
-            %  
+            %
             obj.SetChunkIndeces();
             obj.SetConstraintBounds();
             obj.SetDecisionVectorBounds();
@@ -164,13 +163,14 @@ classdef Trajectory < handle
             for phaseIdx = 1:obj.numPhases
                 
                 %  State indeces
-                obj.stateStartIdx(phaseIdx) = ...
+%                 obj.stateStartIdx(phaseIdx) = ...
+%                     obj.totalnumDecisionParams - ...
+%                     sum(obj.numDecisionParams(phaseIdx:end)) + 1;
+                obj.decVecStartIdx(phaseIdx) = ...
                     obj.totalnumDecisionParams - ...
                     sum(obj.numDecisionParams(phaseIdx:end)) + 1;
-                obj.decVecStartIdx(phaseIdx) = ...
-                    obj.stateStartIdx(phaseIdx);
                 obj.decVecEndIdx(phaseIdx) = ...
-                    obj.stateStartIdx(phaseIdx)...
+                    obj.decVecStartIdx(phaseIdx) ...
                     + obj.numDecisionParams(phaseIdx) - 1;
                 
                 %  Function indeces
@@ -253,28 +253,70 @@ classdef Trajectory < handle
             %             obj.SetSparsityPattern_Defect_Time();
             %             obj.sparsityPattern = ...
             %                 [obj.sparsityCost; obj.sparsityConstraints];
-            
+            method =  1;
             %  This is a generic algorithm, but it will NOT work in GMAT.
-            iGfun = [];
-            jGvar = [];
-            initialGuess = obj.decisionVector;
-            for decIdx = 1:obj.totalnumDecisionParams
-                tempVec         = obj.decisionVector;
-                tempVec(decIdx) = NaN;
-                obj.SetDecisionVector(tempVec);
-                conVec   = obj.GetContraintVector();
-                costVal  = obj.GetCostFunction();
-                totalVec = [costVal;conVec];
-                for funIdx = 1:obj.totalnumConstraints + 1
-                    if isnan(totalVec(funIdx))
-                        iGfun = [iGfun funIdx];
-                        jGvar = [jGvar decIdx];
+            %  method 1 is based on usin NaN.
+            if method == 1
+                iGfun = [];
+                jGvar = [];
+                initialGuess = obj.decisionVector;
+                sparseCnt = 0;
+                for decIdx = 1:obj.totalnumDecisionParams
+                    tempVec         = obj.decisionVector;
+                    tempVec(decIdx) = NaN;
+                    obj.SetDecisionVector(tempVec);
+                    conVec   = obj.GetContraintVector();
+                    costVal  = obj.GetCostFunction();
+                    totalVec = [costVal;conVec];
+                    for funIdx = 1:obj.totalnumConstraints + 1
+                        if isnan(totalVec(funIdx))
+                            sparseCnt = sparseCnt + 1;
+                            iGfun(sparseCnt,1) = [funIdx];
+                            jGvar(sparseCnt,1) = [decIdx];
+                        end
                     end
                 end
+                %  Set the initial guess back
+                obj.SetDecisionVector(initialGuess);
+            elseif method == 2
+                iGfun = [];
+                jGvar = [];
+                initialGuess = obj.decisionVector;
+                nomconVec    = obj.GetContraintVector();
+                nomcostVal   = obj.GetCostFunction();
+                sparseCnt    = 0;
+                for decIdx = 1:obj.totalnumDecisionParams
+                    tempVec         = obj.decisionVector;
+                    % Evaluate at upper bounds
+                    tempVec(decIdx) = obj.decisionVecUpperBound(decIdx);
+                    obj.SetDecisionVector(tempVec);
+                    highconVec   = obj.GetContraintVector();
+                    highcostVal  = obj.GetCostFunction();
+                    %  Evaluate at lower bounds
+                    tempVec(decIdx) = obj.decisionVecLowerBound(decIdx);
+                    obj.SetDecisionVector(tempVec);
+                    lowconVec   = obj.GetContraintVector();
+                    lowcostVal  = obj.GetCostFunction();
+                    totalVec = [nomcostVal;nomconVec];
+                    lowtotalVec = [highcostVal;lowconVec];
+                    hightotalVec = [highcostVal;lowconVec];
+                    for funIdx = 1:obj.totalnumConstraints + 1
+                        if (lowtotalVec(funIdx) ~= totalVec(funIdx)) || ...
+                           (hightotalVec(funIdx)~= totalVec(funIdx))
+                            sparseCnt = sparseCnt + 1;
+                            iGfun(sparseCnt,1) = [funIdx];
+                            jGvar(sparseCnt,1) = [decIdx];
+                        end
+                    end
+                end
+                %  Set the initial guess back
+                obj.SetDecisionVector(initialGuess);
+
             end
-            %  Set the initial guess back
+            %load('c:\Temp\sparse.mat');
             obj.sparsityPattern = sparse(iGfun,jGvar,1);
-            obj.SetDecisionVector(initialGuess);
+
+
         end
         
         %  Sets decision vector provided by optimizer
@@ -302,7 +344,7 @@ classdef Trajectory < handle
             
             %  Handle plotting
             if obj.showPlot
-               obj.PlotUserFunction();
+                obj.PlotUserFunction();
             end
             
             %  Handle dynamic display
@@ -325,7 +367,7 @@ classdef Trajectory < handle
                     obj.linkageList{linkIdx}.GetLinkageConstraints()];
             end
         end
-        
+                
         %  Compute the cost function.
         function [costFunction] = GetCostFunction(obj)
             costFunction = 0;
@@ -361,8 +403,8 @@ classdef Trajectory < handle
             snseti('Timing level',3);
             % Echo SNOPT Output to MATLAB Command Window
             snscreen on;
-            snset('Major optimality tolerance 1e-5')
-            snset('Major feasibility tolerance 1e-6')
+            % snset('Major optimality tolerance 1e-3')
+            % snset('Major feasibility tolerance 1e-6')
             
             % Set initial guess on basis and Lagrange multipliers to zero
             zmul = zeros(size(z0));
@@ -386,8 +428,8 @@ classdef Trajectory < handle
             %              load 'c:\temp\initGuess.mat'
             %              z0 = initGuess.x;
             %obj.PlotUserFunction();
-%              load 'c:\temp\initGuess.mat';
-%              z0 = z;
+            %load('c:\temp\initGuess.mat')
+                        %   z0 = z;
             [z,F,xmul,Fmul,info,xstate,Fstate,ns,...
                 ninf,sinf,mincw,miniw,minrw]...
                 = snsolve(z0,zmin,zmax,zmul,zstate,...
@@ -450,48 +492,4 @@ classdef Trajectory < handle
         
     end
 end
-
-
-%   %  Set sparsity pattern for partial of defects w/r/t state
-%         function obj = SetSparsityPattern_Defect_State(obj)
-%             for phaseIdx = 1:obj.numPhases
-%                 obj.sparsityConstraints(...
-%                     obj.startDefectConIdx(phaseIdx):...
-%                     obj.endDefectConIdx(phaseIdx),...
-%                     obj.stateStartIdx(phaseIdx):...
-%                     obj.stateEndIdx(phaseIdx))...
-%                     = obj.phaseList{phaseIdx}.GetSparsityPattern_Defect_State();
-%             end
-%         end
-%
-%         %  Set sparsity pattern for partial of defects w/r/t control
-%         function obj = SetSparsityPattern_Defect_Control(obj)
-%             for phaseIdx = 1:obj.numPhases
-%                 obj.sparsityConstraints(...
-%                     obj.startDefectConIdx(phaseIdx):...
-%                     obj.endDefectConIdx(phaseIdx),...
-%                     obj.controlStartIdx(phaseIdx):...
-%                     obj.controlEndIdx(phaseIdx))...
-%                     = obj.phaseList{phaseIdx}.GetSparsityPattern_Defect_Control();
-%             end
-%         end
-%
-%         %  Set sparsity pattern for partial of defects w/r/t time
-%         function obj = SetSparsityPattern_Defect_Time(obj)
-%             for phaseIdx = 1:obj.numPhases
-%                 obj.sparsityConstraints(...
-%                     obj.startDefectConIdx(phaseIdx):...
-%                     obj.endDefectConIdx(phaseIdx),...
-%                     obj.timeStartIdx(phaseIdx):...
-%                     obj.timeEndIdx(phaseIdx))...
-%                     = obj.phaseList{phaseIdx}.GetSparsityPattern_Defect_Time();
-%             end
-%         end
-%
-%         %  Set sparsity pattern of the cost function
-%         function obj = SetSparsityPattern_Cost(obj)
-%             obj.sparsityCost      = obj.sparsityPattern(1,:);
-%             obj.sparsityCost(1,:) = 1;
-%         end
-
 

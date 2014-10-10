@@ -2,19 +2,20 @@
 clc
 %  Properties of the state/controls for continuous optimal control
 %  problem
-numStates       = 7;
-numControls     = 3;
+numStates       = 3;
+numControls     = 2;
 numIntegrals    = 10;
 numStaticParams = 12;
 time0           = -12345;
 timef           = 12345;
 
 %  Properties of the discretization of the state and controls
-numStatePoints   = 8;
-numControlPoints = 7;
-numStateStages   = 0;
-numControlStages = 0;
-
+numStateMeshPoints    = 4;
+numControlMeshPoints  = 3;
+numStateStagePoints   = 2;
+numControlStagePoints = 1;
+numStatePoints   = numStateMeshPoints*(1 + numStateStagePoints); 
+numControlPoints = numControlMeshPoints*( 1 + numControlStagePoints);
 %  Build a dummy V matrix in Eq. 40.
 %  V = [X1 Y1 Z1 VX1 VY1 VZ1 M1]
 %      [X2 Y2 Z2 VX2 VY2 VZ2 M2]
@@ -24,9 +25,10 @@ V = zeros(numStatePoints,numStates);
 for colIdx = 1:numStates 
     for rowIdx = 1:numStatePoints
         value = value + 1;
-        V(rowIdx,colIdx) = value
+        V(rowIdx,colIdx) = value;
     end
 end
+V
 zState = reshape(V,numStates*numStatePoints,1);
 
 %  Build a dummy W matrix in Eq. 41.
@@ -38,9 +40,10 @@ W = zeros(numControlPoints,numControls);
 for colIdx = 1:numControls
     for rowIdx = 1:numControlPoints
         value = value + 1;
-        W(rowIdx,colIdx) = -value
+        W(rowIdx,colIdx) = -value;
     end
 end
+W
 zControl = reshape(W,numControls*numControlPoints,1);
 
 %  Build a dummy static Vector
@@ -59,15 +62,45 @@ for rowIdx = 1:numIntegrals
     value = value + 1;
 end
 
-zTime = [time0; timef;]
+zTime = [time0; timef;];
 stateVector = [zState; zControl; zIntegral; zTime;  zStatic];
-            
-%%  Set the test vector and the test exctracting parts
+
+
 myVector = DecisionVector;
 myVector.ConfigureDecisionVector(numStates,numControls,...
-                 numIntegrals,numStaticParams,numStatePoints,...
-                 numControlPoints,numStateStages, numControlStages);
-myVector.SetDecisionVector(stateVector)           
+                 numIntegrals,numStaticParams,numStateMeshPoints,...
+                 numControlMeshPoints,numStateStagePoints,...
+                 numControlStagePoints);
+myVector.SetDecisionVector(stateVector);
+
+%% The tests start here
+
+%  Check getting state at mesh points and stage points
+meshIdx  = 4;
+stageIdx = 0;
+stateAtMeshPoint = myVector.GetStateAtMeshPoint(meshIdx,stageIdx);
+stateArray = myVector.GetStateArray();
+stateAtMeshPoint - stateArray(10,:)'
+
+meshIdx = 3;
+stageIdx = 2;
+stateAtMeshPoint = myVector.GetStateAtMeshPoint(meshIdx,stageIdx);
+stateArray = myVector.GetStateArray();
+stateAtMeshPoint - stateArray(9,:)'
+
+%  Check getting control at mesh points and stage points
+meshIdx  = 3;
+stageIdx = 0;
+controlAtMeshPoint = myVector.GetControlAtMeshPoint(meshIdx,stageIdx);
+controlArray = myVector.GetControlArray();
+controlAtMeshPoint - controlArray(5,:)'
+
+meshIdx  = 2;
+stageIdx = 1;
+controlAtMeshPoint = myVector.GetControlAtMeshPoint(meshIdx,stageIdx);
+controlArray = myVector.GetControlArray();
+controlAtMeshPoint - controlArray(4,:)'
+
 
 %%  Test getting components of decision vector
 stateSubVector    = myVector.GetStateSubVector() - zState
@@ -98,16 +131,6 @@ stateVector - myVector.decisionVector
 myVector.SetIntegralVector(zIntegral)
 stateVector - myVector.decisionVector
 
-meshIdx = 4;
-stateAtMeshPoint = myVector.GetStateAtMeshPoint(meshIdx);
-stateArray = myVector.GetStateArray();
-stateAtMeshPoint - stateArray(meshIdx,:)'
-
-meshIdx = 3;
-controlAtMeshPoint = myVector.GetControlAtMeshPoint(meshIdx);
-controlArray = myVector.GetControlArray();
-controlAtMeshPoint - controlArray(meshIdx,:)'
-
 stateVec = myVector.GetFirstStateVector();
 stateAtMeshPoint = myVector.GetStateAtMeshPoint(1);
 stateVec - stateAtMeshPoint
@@ -115,11 +138,3 @@ stateVec - stateAtMeshPoint
 stateVec = myVector.GetLastStateVector();
 stateAtMeshPoint = myVector.GetStateAtMeshPoint(numStatePoints);
 stateVec - stateAtMeshPoint
-
-controlVec = myVector.GetFirstControlVector();
-controlAtMeshPoint = myVector.GetControlAtMeshPoint(1);
-controlVec - controlAtMeshPoint
-
-controlVec = myVector.GetLastControlVector();
-controlAtMeshPoint = myVector.GetControlAtMeshPoint(numControlPoints);
-controlVec - controlAtMeshPoint

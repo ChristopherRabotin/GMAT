@@ -31,9 +31,11 @@ orbitECC    = sqrt(orbitECCv'*orbitECCv);
 %orbitINC    = atan(orbitAngMom(3,1)/orbitAngMomMag);
 timeError    = obj.finalTime - obj.initialTime;
 eventFunctions = [];[orbitSMA;orbitECC;timeError];%;orbitINC ];
+rdotv = rvf'*vvf/sqrt(rvf'*rvf)/sqrt(vvf'*vvf);
+vCircError = sqrt(mu/rf) - sqrt(1/1.11317784162123);
 eventFunctions = [rf;orbitECC;timeError];
 obj.eventFunctions = eventFunctions;
-obj.costFunction          = -mf*1000;
+obj.costFunction          = -mf;
 %orbitSMA
 %orbitECC
 

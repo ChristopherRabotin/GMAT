@@ -6,20 +6,23 @@ global igrid iGfun jGvar traj
 
 %  Create trajectory and its settings
 traj                           = Trajectory();
-traj.pathFunctionName          = 'HyperSensitivePathFunction';   
-traj.plotFunctionName          = 'HyperSensitivePlotFunction'; 
+traj.pathFunctionName          = 'HyperSensitivePathFunction_HS';   
+traj.plotFunctionName          = 'HyperSensitivePlotFunction_HS'; 
 traj.showPlot                  = true();
 traj.costLowerBound            = 0;
 traj.costUpperBound            = Inf;
 traj.plotUpdateRate            = 3;
 
 %  Set Time Properties
-phase1                         = RadauPhase;
+phase1                         = HermiteSimpsonPhase;
 %phase1.meshIntervalFractions   = linspace(-1,1,40+1).';
 %phase1.meshIntervalNumPoints   = 4*ones(40,1);
-phase1.meshIntervalFractions   = [ -1 -0.5 0 0.5  1];                
-%phase1.meshIntervalNumPoints   = [10 5 5 10]';
-phase1.meshIntervalNumPoints   = [20 10 10 20]';
+% phase1.meshIntervalFractions   = [ -1 -0.5 0 0.5  1]/2+1/2;                  
+% phase1.meshIntervalNumPoints   = [10 10 10 10]';
+phase1.meshIntervalFractions   = [ 0 0.2 0.8 1 ];                
+phase1.meshIntervalNumPoints   = [10 10 10]';
+% phase1.meshIntervalFractions   = [ 0 1 ];                
+% phase1.meshIntervalNumPoints   = [60]';
 phase1.initialEpoch            = 0;
 phase1.finalEpoch              = 50;
 phase1.initialTimeLowerBound   = 0;

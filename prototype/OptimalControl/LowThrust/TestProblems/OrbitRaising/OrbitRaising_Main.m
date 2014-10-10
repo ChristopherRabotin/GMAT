@@ -25,13 +25,14 @@ traj.costUpperBound     = Inf;
 %  Set Time Properties
 phase1                           = RadauPhase();
 phase1.meshIntervalFractions     = [-1; 1];
-phase1.meshIntervalNumPoints     = 20*ones(1,1);
+phase1.meshIntervalNumPoints     = 50*ones(1,1);
+phase1.meshIntervalNumPoints     = 15*ones(1,1);
 phase1.initialEpoch              = 0;
-phase1.finalEpoch                = 5.32;
+phase1.finalEpoch                = 3.32;
 phase1.initialTimeLowerBound     = 0;
 phase1.initialTimeUpperBound     = 0;
-phase1.finalTimeLowerBound       = 5.32;
-phase1.finalTimeUpperBound       = 5.32;
+phase1.finalTimeLowerBound       = 3.32;
+phase1.finalTimeUpperBound       = 3.32;
 
 %  Set state and control properties
 phase1.numStates                 = 5;

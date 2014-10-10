@@ -10,9 +10,9 @@ global iGfun jGvar traj igrid
 
 %  Set cost function properties
 traj                    = Trajectory();
-traj.pathFunctionName   = 'HohmannTransferNoControlPathFunction';
-traj.pointFunctionName  = 'HohmannTransferNoControlPointFunction';
-traj.plotFunctionName   = 'HohmannTransferNoControlPlotFunction';
+traj.pathFunctionName   = 'HohmannTransferNoControlPathFunction1Burn';
+traj.pointFunctionName  = 'HohmannTransferNoControlPointFunction1Burn';
+traj.plotFunctionName   = 'HohmannTransferNoControlPlotFunction1Burn';
 traj.showPlot           = true();
 traj.plotUpdateRate     = 2;
 traj.costLowerBound     = -Inf;
@@ -26,7 +26,7 @@ traj.displayDebugStatus = false();
 %%  Set Time Properties
 phase1                           = RadauPhase();
 phase1.meshIntervalFractions     = [ -1 1];                
-phase1.meshIntervalNumPoints     = [10]';
+phase1.meshIntervalNumPoints     = [30]';
 phase1.numStates                 = 7;
 phase1.numControls               = 3;
 phase1.initialGuessMode          = 'LinearUnityControl';
@@ -74,7 +74,7 @@ phase1.eventConstraintUpperBound = []';
 %%  Set Time Properties
 phase2                           = RadauPhase();
 phase2.meshIntervalFractions     = [ -1 1];                
-phase2.meshIntervalNumPoints     = [10]';
+phase2.meshIntervalNumPoints     = [30]';
 phase2.numStates                 = 7;
 phase2.numControls               = 0;
 % ===== Initial state data
@@ -100,47 +100,14 @@ phase2.controlUpperBound         = []';
 phase2.controlLowerBound         = []';
 phase2.algConstraintLowerBound   = []';
 phase2.algConstraintUpperBound   = []';
-phase2.eventConstraintLowerBound = []';
-phase2.eventConstraintUpperBound = []';
+phase2.eventConstraintLowerBound = [1.11317784162123 0 0];%[1.5 0 .20]';
+phase2.eventConstraintUpperBound = [1.11317784162123 0 3];%[1.5 0 5]';
 
-%==========================================================================
-%% =====  Define Properties for Phase 3
-%==========================================================================
 
-%%  Set Time Properties
-phase3                           = RadauPhase();
-phase3.numStates                 = 7;
-phase3.numControls               = 3;
-phase3.initialGuessMode          = 'LinearUnityControl';
-phase3.meshIntervalFractions     = [ -1 1];                
-phase3.meshIntervalNumPoints     = [10]';
-% ===== Initial state data
-phase3.initialTimeLowerBound     = 2;
-phase3.initialEpoch              = 3.53494625378467;
-phase3.initialTimeUpperBound     = 6;
-phase3.initialStateLowerBound    = [-10   -10  -10 -10  -10   -10  .900 ]';
-phase3.initialGuessState         = [ -1.2 0.5    0   0  -0.96  0   1.25]; 
-phase3.initialStateUppperBound   = [10     10   10  10   10    10  1.400 ]';
-% ===== Final state data
-phase3.finalTimeLowerBound       = 0;
-phase3.finalEpoch                = 3.93494625378467;
-phase3.finalTimeUpperBound       = 8.0;
-phase3.finalStateLowerBound      = [-10 -10 -10 -10 -10   -10  0.900]';
-phase3.finalGuessState           = [ -1.2 0  0    0 -0.96  0   1.25];
-phase3.finalStateUpperBound      = [ 10  10  10  10  10    10  1.400]';
-% ===== bounds along the path but not at end points
-phase3.stateLowerBound           = [-10 -10 -10 -10 -10 -10 .900 ]';
-phase3.stateUpperBound           = [ 10  10  10  10  10  10 1.400]';
-phase3.controlUpperBound         = [1 1 1]';
-phase3.controlLowerBound         = [-1 -1 -1]';
-phase3.algConstraintLowerBound   = [1 ]';
-phase3.algConstraintUpperBound   = [1 ]';
-phase3.eventConstraintLowerBound = [1.11317784162123 0 0];%[1.5 0 .20]';
-phase3.eventConstraintUpperBound = [1.11317784162123 0 1];%[1.5 0 5]';
 
 %==========================================================================
 %% =====  Define the linkage configuration and optimize
 %==========================================================================
-traj.phaseList        = {phase1,phase2,phase3};
-traj.linkageConfig{1} = {phase1,phase2,phase3};
+traj.phaseList        = {phase1,phase2};
+traj.linkageConfig{1} = {phase1,phase2};
 [z,F,xmul,Fmul]       = traj.Optimize();
