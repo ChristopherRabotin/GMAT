@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2004/01/20
 /**
@@ -42,6 +40,7 @@
 
 //#define DEBUG_MDI_TS_FRAME
 //#define DEBUG_RENAME
+//#define DEBUG_REDRAW_CURVE
 
 BEGIN_EVENT_TABLE(MdiChildTsFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_TS_OPEN_PLOT_FILE, MdiChildTsFrame::OnOpenXyPlotFile)
@@ -133,9 +132,9 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                        wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
    
-   frame->SetLabel(xAxisTitle.WX_TO_STD_STRING, TsPlotCanvas::X_LABEL);
-   frame->SetLabel(yAxisTitle.WX_TO_STD_STRING, TsPlotCanvas::Y_LABEL);
-
+   frame->SetLabel(xAxisTitle, TsPlotCanvas::X_LABEL);
+   frame->SetLabel(yAxisTitle, TsPlotCanvas::Y_LABEL);
+   
    mXyPlot = frame;
    
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
@@ -281,7 +280,7 @@ void MdiChildTsFrame::SetPlotTitle(const wxString &title)
    mPlotTitle = title;
    
    if (mXyPlot)
-      mXyPlot->SetLabel(title.WX_TO_STD_STRING, TsPlotCanvas::PLOT_TITLE);
+      mXyPlot->SetLabel(title, TsPlotCanvas::PLOT_TITLE);
 }
 
 
@@ -346,7 +345,7 @@ void MdiChildTsFrame::AddPlotCurve(Integer curveIndex, const wxString &curveTitl
       #endif
          
       mXyPlot->AddData(curve, penColor);
-      mXyPlot->SetDataName(curveTitle.WX_TO_STD_STRING);
+      mXyPlot->SetDataName(curveTitle);
       
       #ifdef DEBUG_MDI_TS_FRAME
          MessageInterface::ShowMessage
@@ -796,14 +795,29 @@ void MdiChildTsFrame::CurveSettings(bool useLines, Integer lineWidth,
  */
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::RedrawCurve()
-{    
+{
+   #ifdef DEBUG_REDRAW_CURVE
+   MessageInterface::ShowMessage("==========> MdiChildTsFrame::RedrawCurve() entered\n");
+   #endif
    if (mXyPlot)
    {
       Update(); // need Update to show plot as it runs
       
-      mXyPlot->DataUpdate();
+      mXyPlot->DataUpdate(true);
       wxPaintEvent pvt;
       mXyPlot->OnPaint(pvt);
+      
+      // Why OnPaint() is called twice with wx3?
+      // Set the data update flag to true so that OnPaint() will not redraw plots
+      // (LOJ: 2014.10.10 To improve performance with wx3. See GMT-4722)
+      #if wxCHECK_VERSION(3, 0, 0)
+      mXyPlot->DataUpdate(true);
+      #endif
+      
+      #ifdef DEBUG_REDRAW_CURVE
+      MessageInterface::ShowMessage("MdiChildTsFrame::RedrawCurve() calling mXyPlot->Update()\n");
+      #endif
+      
       mXyPlot->Update();
       
       // On linux, this call gives the GUI a time slice to update the plot
@@ -811,6 +825,9 @@ void MdiChildTsFrame::RedrawCurve()
          ::wxYield();
       #endif
    }
+   #ifdef DEBUG_REDRAW_CURVE
+   MessageInterface::ShowMessage("==========> MdiChildTsFrame::RedrawCurve() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -882,7 +899,7 @@ void MdiChildTsFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
       if ( !newTitle )
          return;
       
-      mXyPlot->SetLabel(newTitle.WX_TO_STD_STRING, TsPlotCanvas::PLOT_TITLE);
+      mXyPlot->SetLabel(newTitle, TsPlotCanvas::PLOT_TITLE);
    }
 }
 
