@@ -95,8 +95,6 @@ public:
    // Doppler count interval
    Real dopplerCountInterval;
 
-   Real rangerate;
-
 };
 
 #endif /* MeasurementData_hpp */

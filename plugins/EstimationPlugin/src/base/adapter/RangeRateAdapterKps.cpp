@@ -375,22 +375,41 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    // Compute range in km
    cMeasurement = RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, NULL);
 
+   // twp way range
+   Real two_way_range =0;
+
+   // set range rate
+   Real range_rate =0;
+   
+   // some up the ranges
+   for (UnsignedInt i = 0; i < cMeasurement.value.size(); i++  )
+   {
+     two_way_range = two_way_range + cMeasurement.value[i];
+   }
+
+   // one way range
+   Real one_way_range = two_way_range/2;
 
    // if more then one measurement exists, compute range-rate
    if ((_prev_epoch != 0) &&  _timer >= dopplerInterval )
    {
-
+        
         // Compute range-rate
-        cMeasurement.rangerate = (cMeasurement.value[0]-_prev_range)/(2.0*_timer);
+        range_rate = (one_way_range-_prev_range)/(_timer);
         
         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Range rate %f\n", cMeasurement.rangerate);
+            MessageInterface::ShowMessage("Range rate %f\n", range_rate);
             MessageInterface::ShowMessage("Prev range %f\n", _prev_range);
-            MessageInterface::ShowMessage("Current range %f\n", cMeasurement.value[0]);
+            MessageInterface::ShowMessage("Current range %f\n", one_way_range);
+            MessageInterface::ShowMessage("Epoch %f\n", cMeasurement.epoch);
         #endif
+
+        // set the measurement value
+        cMeasurement.value.clear();
+        cMeasurement.value.push_back(range_rate);
         
         // set previous range
-        _prev_range = cMeasurement.value[0];
+        _prev_range = one_way_range;
 
         // Set previous epoch
         _prev_epoch = cMeasurement.epoch;
@@ -399,10 +418,14 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    else if ( _prev_epoch == 0)
    {
         // Set previous range 
-        _prev_range = cMeasurement.value[0];
+        _prev_range = one_way_range;
 
         // Set previous epoch
         _prev_epoch = cMeasurement.epoch;
+
+        // clear first measurement
+        cMeasurement.value.clear();
+        cMeasurement.value.push_back(0.0);
    }
 
    _timer = (cMeasurement.epoch-_prev_epoch)*86400;
