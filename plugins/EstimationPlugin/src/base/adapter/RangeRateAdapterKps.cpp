@@ -78,7 +78,7 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
 
 
 //------------------------------------------------------------------------------
-// RangeRateAdapterKps(const RangeRateAdapterKps& rak)
+// RangeRateAdapterKps(const RangeRateAdapterKps& rr)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
@@ -97,14 +97,14 @@ RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
 
 
 //------------------------------------------------------------------------------
-// RangeRateAdapterKps& operator=(const RangeRateAdapterKps& rak)
+// RangeRateAdapterKps& operator=(const RangeRateAdapterKps& rr)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
  *
  * @param rr The adapter copied to make this one match it
  *
- * @return This adapter made to look like rak
+ * @return This adapter made to look like rr
  */
 //------------------------------------------------------------------------------
 RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& rr)
@@ -113,6 +113,10 @@ RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& r
    {
       RangeAdapterKm::operator=(rr);
       dopplerInterval = rr.dopplerInterval;
+       _prev_epoch  = rr._prev_epoch;
+      _prev_range = rr._prev_range;
+      _timer = rr._timer;
+
    }
 
    return *this;
@@ -398,6 +402,7 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
         range_rate = (one_way_range-_prev_range)/(_timer);
         
         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("_prev_epoch %f, _timer %f\n", _prev_epoch, _timer);
             MessageInterface::ShowMessage("Range rate %f\n", range_rate);
             MessageInterface::ShowMessage("Prev range %f\n", _prev_range);
             MessageInterface::ShowMessage("Current range %f\n", one_way_range);
@@ -426,7 +431,24 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
         // clear first measurement
         cMeasurement.value.clear();
         cMeasurement.value.push_back(0.0);
+        #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("_prev_epoch %f, _timer %f , range %f\n", _prev_epoch, _timer, _prev_range);
+        #endif
+        
    }
+   else
+   {
+        #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("epoch %f, _timer %f\n", cMeasurement.epoch, _timer);
+        #endif
+        cMeasurement.value.clear();
+        cMeasurement.value.push_back(0.0);
+   }
+
+   #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("value %f\n", cMeasurement.value[0]);
+   #endif
+
 
    _timer = (cMeasurement.epoch-_prev_epoch)*86400;
 
