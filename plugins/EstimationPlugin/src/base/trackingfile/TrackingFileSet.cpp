@@ -23,7 +23,6 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>                  // For magic number mapping code
-
 /// Temporarily here; needs to move into a factory
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
@@ -53,6 +52,7 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "DopplerNoiseSigma",             // DOPPLER_NOISESIGMA         // made changes by TUAN NGUYEN
    "DopplerErrorModel",             // DOPPLER_ERRORMODEL         // made changes by TUAN NGUYEN
    "RangeModuloConstant",           // RANGE_MODULO               // made changes by TUAN NGUYEN
+   "DopplerInterval"          
 };
 
 /// Types of the BatchEstimator parameters
@@ -72,6 +72,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::REAL_TYPE,                 // DOPPLER_NOISESIGMA        // made changes by TUAN NGUYEN
    Gmat::STRING_TYPE,               // DOPPLER_ERROR_MODEL       // made changes by TUAN NGUYEN
    Gmat::REAL_TYPE,                 // RANGE_MODULO              // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE                  // Doppler Interval
 };
 
 
@@ -96,6 +97,7 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    dopplerNoiseSigma         (1.0),              // made changes by TUAN NGUYEN
    dopplerErrorModel         ("RandomConstant"), // made changes by TUAN NGUYEN
    rangeModulo               (1.0e18),           // made changes by TUAN NGUYEN
+   dopplerInterval           (1.0),           
    troposphereModel          ("None"),           // made changes by TUAN NGUYEN
    ionosphereModel           ("None")            // made changes by TUAN NGUYEN
 {
@@ -143,6 +145,7 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    dopplerNoiseSigma         (tfs.dopplerNoiseSigma),         // made changes by TUAN NGUYEN
    dopplerErrorModel         (tfs.dopplerErrorModel),         // made changes by TUAN NGUYEN
    rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
+   dopplerInterval           (tfs.dopplerInterval),          
    troposphereModel          (tfs.troposphereModel),          // made changes by TUAN NGUYEN
    ionosphereModel           (tfs.ionosphereModel)            // made changes by TUAN NGUYEN
 {
@@ -188,6 +191,7 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       dopplerNoiseSigma       = tfs.dopplerNoiseSigma;         // made changes by TUAN NGUYEN
       dopplerErrorModel       = tfs.dopplerErrorModel;         // made changes by TUAN NGUYEN
       rangeModulo             = tfs.rangeModulo;               // made changes by TUAN NGUYEN
+      dopplerInterval             = tfs.dopplerInterval;         
       troposphereModel        = tfs.troposphereModel;          // made changes by TUAN NGUYEN
       ionosphereModel         = tfs.ionosphereModel;           // made changes by TUAN NGUYEN
 
@@ -365,6 +369,14 @@ Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
 
       rangeModulo = value;
       return rangeModulo;
+   }
+   if (id == DOPPLER_INTERVAL)
+   {
+      if (value <= 0.0)
+         throw MeasurementException("Error: "+GetName()+".DopplerInterval has an invalid value. It has to be a positive number\n");
+
+      dopplerInterval = value;
+      return dopplerInterval;
    }
 
    return MeasurementModelBase::SetRealParameter(id, value);
@@ -1528,6 +1540,11 @@ bool TrackingFileSet::Initialize()
          if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")
          {
             measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
+         }
+         // Set range modulo constant for RangeRate
+         if (measurements[i]->GetStringParameter("MeasurementType") == "RangeRate")
+         {
+            measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
          }
 
          // Initialize TrackingDataAdapter

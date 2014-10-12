@@ -401,14 +401,6 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
         // Compute range-rate
         range_rate = (one_way_range-_prev_range)/(_timer);
         
-        #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("_prev_epoch %f, _timer %f\n", _prev_epoch, _timer);
-            MessageInterface::ShowMessage("Range rate %f\n", range_rate);
-            MessageInterface::ShowMessage("Prev range %f\n", _prev_range);
-            MessageInterface::ShowMessage("Current range %f\n", one_way_range);
-            MessageInterface::ShowMessage("Epoch %f\n", cMeasurement.epoch);
-        #endif
-
         // set the measurement value
         cMeasurement.value.clear();
         cMeasurement.value.push_back(range_rate);
@@ -418,7 +410,7 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
 
         // Set previous epoch
         _prev_epoch = cMeasurement.epoch;
- 
+
    }
    else if ( _prev_epoch == 0)
    {
@@ -431,28 +423,20 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
         // clear first measurement
         cMeasurement.value.clear();
         cMeasurement.value.push_back(0.0);
-        #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("_prev_epoch %f, _timer %f , range %f\n", _prev_epoch, _timer, _prev_range);
-        #endif
-        
    }
    else
    {
-        #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("epoch %f, _timer %f\n", cMeasurement.epoch, _timer);
-        #endif
         cMeasurement.value.clear();
         cMeasurement.value.push_back(0.0);
    }
-
-   #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("value %f\n", cMeasurement.value[0]);
-   #endif
-
+        #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("epoch %f, range %f, range rate %f\n", cMeasurement.epoch, one_way_range, range_rate);
+        #endif
 
    _timer = (cMeasurement.epoch-_prev_epoch)*86400;
 
-   return cMeasurement;
+    return cMeasurement;
+
 }
 
 

@@ -186,6 +186,9 @@ protected:
    /// Range modulo constant                                   // made changes by TUAN NGUYEN
    Real rangeModulo;                                           // made changes by TUAN NGUYEN
 
+   // Doppler interval
+   Real dopplerInterval;
+
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
    /// @todo Adjust this code when multiple propagator support is implemented
@@ -212,6 +215,7 @@ protected:
       DOPPLER_NOISESIGMA,                                   // made changes by TUAN NGUYEN
       DOPPLER_ERRORMODEL,                                   // made changes by TUAN NGUYEN
       RANGE_MODULO,                                         // made changes by TUAN NGUYEN
+      DOPPLER_INTERVAL,
       TrackingFileSetParamCount,
    };
 
