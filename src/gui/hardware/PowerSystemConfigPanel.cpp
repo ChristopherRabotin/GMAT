@@ -626,8 +626,8 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
    {
       Integer paramID;
 
-      std::string newEpoch    = epochTxtCtrl->GetValue().c_str();
-      std::string epochFormat = epochFormatComboBox->GetValue().c_str();
+      std::string newEpoch    = epochTxtCtrl->GetValue().WX_TO_STD_STRING;
+      std::string epochFormat = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
       Real        fromMjd     = -999.999;
       Real        a1mjd       = -999.999;
       std::string outStr;
