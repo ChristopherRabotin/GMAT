@@ -426,11 +426,12 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    }
    else
    {
+        cMeasurement.isFeasible = false;
         cMeasurement.value.clear();
         cMeasurement.value.push_back(0.0);
    }
         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("epoch %f, range %f, range rate %f\n", cMeasurement.epoch, one_way_range, range_rate);
+            MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, isfeasible %f\n", cMeasurement.epoch, one_way_range, range_rate, cMeasurement.isFeasible);
         #endif
 
    _timer = (cMeasurement.epoch-_prev_epoch)*86400;
