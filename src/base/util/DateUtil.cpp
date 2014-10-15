@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -319,7 +319,13 @@ void UnpackDateWithDOY (Real packedDate, Integer& year, Integer& day)
    remainder = Mod (packedDate, 1000.0);
    day = (Integer)(GmatMathUtil::Floor(remainder + 0.5));
 
-   if ( day < 0 || day > 366)
+   if ((day > 365) && !IsLeapYear(year))
+      throw Date::LeapYearError();
+
+   Integer daysInYear = 365;
+   if (IsLeapYear(year))  daysInYear = 366;
+
+   if ( day < 0 || day > daysInYear)
       throw Date::TimeRangeError();
 }
 
@@ -367,10 +373,17 @@ void ToMonthDayFromYearDOY (Integer year, Integer dayOfYear, Integer& month,
    Integer i;
    const Integer *ptrDaysList;
 
-   if ( dayOfYear < 0 || dayOfYear > 366 )
+   bool isLeap            = IsLeapYear(year);
+   if (!isLeap && (dayOfYear > 365))
+      throw Date::LeapYearError();
+
+   Integer daysInYear     = 365;
+   if (isLeap) daysInYear = 366;
+
+   if ( dayOfYear < 0 || dayOfYear > daysInYear )
       throw Date::TimeRangeError();
 
-   if (IsLeapYear(year))
+   if (isLeap)
       ptrDaysList = GmatTimeConstants::LEAP_YEAR_DAYS_BEFORE_MONTH;
    else
       ptrDaysList = GmatTimeConstants::DAYS_BEFORE_MONTH;

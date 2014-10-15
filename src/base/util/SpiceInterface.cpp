@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,6 +29,7 @@
 #include "TimeSystemConverter.hpp"
 #include "UtilityException.hpp"
 #include "FileManager.hpp"
+#include "FileUtil.hpp"
 
 //#define DEBUG_SPK_LOADING
 //#define DEBUG_SPK_ISLOADED
@@ -36,6 +37,7 @@
 //#define DEBUG_SPK_GETSTATE
 //#define DEBUG_SPK_PLANETS
 //#define DEBUG_VALID_KERNEL
+//#define DEBUG_SPK_INIT
 
 #ifdef DEBUG_VALID_KERNEL
 #include <unistd.h>
@@ -90,16 +92,19 @@ const Integer SpiceInterface::MAX_SHORT_MESSAGE         = 320;
 const Integer SpiceInterface::MAX_EXPLAIN_MESSAGE       = 320;
 const Integer SpiceInterface::MAX_LONG_MESSAGE          = MAX_LONG_MESSAGE_VALUE;
 const Integer SpiceInterface::MAX_CHAR_COMMENT          = 4000;
+const std::string SpiceInterface::FILE_NOT_FOUND        = "";
 
-/// array of files (kernels) currently loaded
-StringArray    SpiceInterface::loadedKernels;
+/// map of requested (original) kernel names and the actual name
+/// (including path, etc. as needed)
+std::map<std::string, std::string> SpiceInterface::loadedKernels;
+
 /// counter of number of instances created
 Integer        SpiceInterface::numInstances = 0;
 /// the name (full path) of the leap second kernel to use
 std::string    SpiceInterface::lsKernel = "";
 
 //------------------------------------------------------------------------------
-// static methods
+// static public methods
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -132,6 +137,13 @@ bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::strin
    // KernelWriter is created
    InitializeInterface();
 
+   // SPICE expects forward slashes for directory separators
+   std::string kName = FindKernel(fileName);
+   if (kName == FILE_NOT_FOUND)
+   {
+      return false;
+   }
+
    char             kStr[5] = "    ";
    char             aStr[4] = "   ";
    SpiceInt         arclen      = 4;
@@ -140,8 +152,6 @@ bool SpiceInterface::IsValidKernel(const std::string &fileName, const std::strin
    SpiceChar        *arch;
    SpiceChar        *kernelType;
    ConstSpiceChar   *typeToCheck = NULL;
-   // SPICE expects forward slashes for directory separators
-   std::string kName = GmatStringUtil::Replace(fileName, "\\", "/");
    kernelName = kName.c_str();
    // check the type of kernel
    arch        = aStr;
@@ -211,7 +221,8 @@ SpiceInterface::SpiceInterface(const SpiceInterface &copy) :
    kernelNameSPICE         (NULL)
 {
    numInstances++;
-//   // the kernels are all loaded into that one kernel pool, but we need to copy the names
+//   // the kernels are all loaded into that one kernel pool,
+//   // but we need to copy the names
 //   loadedKernels = copy.loadedKernels;
 //   lsKernel      = copy.lsKernel;
 }
@@ -234,7 +245,8 @@ SpiceInterface& SpiceInterface::operator=(const SpiceInterface &copy)
       return *this;
 
    kernelNameSPICE          = NULL;
-//   // the kernels are all loaded into that one kernel pool, but we need to copy the names
+//   // the kernels are all loaded into that one kernel pool,
+//   // but we need to copy the names
 //   loadedKernels.clear();
 //   loadedKernels = copy.loadedKernels;
 //   lsKernel      = copy.lsKernel;
@@ -280,15 +292,24 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
                   fileName.c_str());
       MessageInterface::ShowMessage( "   and CURRENT PATH = %s\n", path);
    #endif
-   // SPICE expects forward slashes for directory separators
-   std::string fName = GmatStringUtil::Replace(fileName, "\\", "/");
 
-   for (StringArray::iterator jj = loadedKernels.begin();
-        jj != loadedKernels.end(); ++jj)
-      if ((*jj) == fName)
+   std::map<std::string, std::string>::iterator ii;
+   for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
+   {
+      if ((*ii).first == fileName)
       {
-         return false;
+         return false;  // already loaded
       }
+   }
+   // SPICE expects forward slashes for directory separators
+   std::string fName = FindKernel(fileName);
+   if (fName == FILE_NOT_FOUND)
+   {
+      std::string errmsg = "Error loading kernel \"";
+      errmsg += fileName + "\".  File not found.\n";
+      throw UtilityException(errmsg);
+   }
+
    kernelNameSPICE = fName.c_str();
    furnsh_c(kernelNameSPICE);
    if (failed_c()) //  == SPICETRUE)
@@ -314,11 +335,12 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
    #ifdef DEBUG_SPK_LOADING
       else
       {
-         MessageInterface::ShowMessage("SpiceInterface Successfully loaded kernel %s <---------\n",
-               fileName.c_str());
+         MessageInterface::ShowMessage("SpiceInterface Successfully loaded kernel %s (%s) <---------\n",
+               fileName.c_str(), fName.c_str());
       }
    #endif
-   loadedKernels.push_back(fileName);
+   // Add the pair to the map of kernels
+   loadedKernels.insert(std::make_pair(fileName, fName));
    
    return true;
 }
@@ -359,28 +381,34 @@ bool SpiceInterface::LoadKernels(const StringArray &fileNames)
 //------------------------------------------------------------------------------
 bool SpiceInterface::UnloadKernel(const std::string &fileName)
 {
-   bool found = false;
-   // SPICE expects forward slashes for directory separators
-   std::string fName = GmatStringUtil::Replace(fileName, "\\", "/");
-   for (StringArray::iterator jj = loadedKernels.begin();
-        jj != loadedKernels.end(); ++jj)
-      if ((*jj) == fName)
+   bool        found          = false;
+   std::string kernelToUnload = "";
+
+   std::map<std::string, std::string>::iterator ii;
+   for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
+   {
+      if ((*ii).first == fileName)
       {
-         found = true;
-         loadedKernels.erase(jj);
-         break;
+         kernelToUnload = (*ii).second;
+         found          = true;
       }
+   }
    if (!found)
    {
-//      MessageInterface::ShowMessage(
-//            "SpiceInterface::UnloadKernel() - kernel %s is not currently loaded.\n",
-//            fileName.c_str());
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage(
+               "SpiceInterface::UnloadKernel() - kernel %s is not currently loaded.\n",
+               fileName.c_str());
+      #endif
       return false;
    }
+
    #ifdef DEBUG_SPK_LOADING
       MessageInterface::ShowMessage("Now attempting to unload kernel %s (%s)\n",
-            fileName.c_str(), fName.c_str());
+            fileName.c_str(), kernelToUnload.c_str());
    #endif
+
+   std::string fName = kernelToUnload;
    kernelNameSPICE = fName.c_str();
    unload_c(kernelNameSPICE);
    if (failed_c())
@@ -400,6 +428,12 @@ bool SpiceInterface::UnloadKernel(const std::string &fileName)
       throw UtilityException(errmsg);
    }
 
+   #ifdef DEBUG_SPK_LOADING
+      MessageInterface::ShowMessage("Successfully UNloaded kernel %s (%s)\n",
+            fileName.c_str(), kernelToUnload.c_str());
+   #endif
+   // erase the unloaded file from the map (by key)
+   loadedKernels.erase(fileName);
    return true; 
 }
 
@@ -437,14 +471,14 @@ bool SpiceInterface::UnloadKernels(const StringArray &fileNames)
 //------------------------------------------------------------------------------
 bool SpiceInterface::UnloadAllKernels()
 {
-   for (StringArray::iterator jj = loadedKernels.begin();
-        jj != loadedKernels.end(); ++jj)
+   std::string kName;
+   std::map<std::string, std::string>::iterator ii;
+   for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
    {
-      // SPICE expects forward slashes for directory separators
-      std::string kName = GmatStringUtil::Replace((*jj), "\\", "/");
+      kName = (*ii).second;
       #ifdef DEBUG_SPK_LOADING
          MessageInterface::ShowMessage("Now attempting to unload kernel %s\n",
-               (*jj).c_str());
+               kName.c_str());
       #endif
       kernelNameSPICE = kName.c_str();
       unload_c(kernelNameSPICE);
@@ -459,12 +493,16 @@ bool SpiceInterface::UnloadAllKernels()
          getmsg_c(option, numChar, err);
          std::string errStr(err);
          std::string errmsg = "Error unloading kernel \"";
-         errmsg += (*jj) + "\".  Message received from CSPICE is: ";
+         errmsg += kName + "\".  Message received from CSPICE is: ";
          errmsg += errStr + "\n";
          reset_c();
          throw UtilityException(errmsg);
       }
       // @todo - handle exceptional conditions (SPICE signals) here ...
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("Successfully unloaded kernel %s\n",
+               kName.c_str());
+      #endif
    }
    loadedKernels.clear();
    return true;
@@ -488,18 +526,14 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::Now attempting to find kernel name %s\n", fileName.c_str());
    #endif
-   // SPICE expects forward slashes for directory separators
-   std::string kName = GmatStringUtil::Replace(fileName, "\\", "/");
-   for (StringArray::iterator jj = loadedKernels.begin();
-        jj != loadedKernels.end(); ++jj)
+
+   std::map<std::string, std::string>::iterator ii;
+   for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
    {
-      if ((*jj) == kName)
-      {
-         #ifdef DEBUG_SPK_ISLOADED
-            MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
-         #endif
-         return true;
-      }
+      #ifdef DEBUG_SPK_ISLOADED
+          MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
+      #endif
+      if ((*ii).first == fileName) return true;
    }
    #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::kernel name %s NOT ALREADY LOADED\n", fileName.c_str());
@@ -661,9 +695,9 @@ SpiceDouble SpiceInterface::A1ToSpiceTime(Real a1Time)
 // protected methods
 //---------------------------------
 
-// ---------------------
-// static methods
-// ---------------------
+//------------------------------------------------------------------------------
+// static protected methods
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //  void InitializeInterface()
 //------------------------------------------------------------------------------
@@ -693,9 +727,26 @@ void SpiceInterface::InitializeInterface()
       // set output file for cspice methods
       SpiceChar      *spiceErrorFileFullPath = pathChar;
       errdev_c("SET", 1840, spiceErrorFileFullPath);
+      if (failed_c())
+      {
+         #ifdef DEBUG_SPK_INIT
+            MessageInterface::ShowMessage("In SpiceInterface::InitializeInterface, CSPICE reports an error using file \"%s\" ...\n",
+                  outPath.c_str());
+         #endif
+         ConstSpiceChar option[] = "LONG"; // retrieve long error message, for now
+         SpiceInt       numChar  = MAX_LONG_MESSAGE;
+         SpiceChar      err[MAX_LONG_MESSAGE];
+         getmsg_c(option, numChar, err);
+         std::string errStr(err);
+         std::string errmsg = "Error using error file \"";
+         errmsg += outPath + "\".  Message received from CSPICE is: ";
+         errmsg += errStr + "\n";
+         reset_c();
+         throw UtilityException(errmsg);
+      }
 
       // set actions for cspice error writing
-      char  report[4] = "ALL";
+      char  report[5] = "LONG"; // "ALL";
       char  action[7] = "RETURN";
       errprt_c("SET", 1840, report);
       erract_c("SET", 1840, action);
@@ -704,4 +755,55 @@ void SpiceInterface::InitializeInterface()
    }
 }
 
-
+//------------------------------------------------------------------------------
+//  std::string FindKernel(const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method finds the kernel with the given name, if it exists.  The code
+ * will check the current directory first; if not found, it will check in the
+ * directory specified for planetary ephem; if still not found, it will
+ * check in the directory relative to the executable directory.
+ *
+ * @return full file name, if found; blank, otherwise
+ *
+ */
+//------------------------------------------------------------------------------
+std::string SpiceInterface::FindKernel(const std::string &withName)
+{
+   bool fileFound = true;
+   // SPICE expects forward slashes for directory separators
+   std::string fullName = GmatStringUtil::Replace(withName, "\\", "/");
+   if (!(GmatFileUtil::DoesFileExist(fullName)))
+   {
+      FileManager *fm = FileManager::Instance();
+      // If there is no path for the file, look for it in the
+      // directory specified for planetary SPK
+      if (withName.find("/") == withName.npos)
+      {
+         // Changed to use VEHICLE_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+         //std::string spkPath = fm->GetPathname(FileManager::SPK_PATH);
+         std::string spkPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
+         fullName = spkPath + fullName;
+         if (!(GmatFileUtil::DoesFileExist(fullName)))
+            fileFound = false;
+      }
+      else // Otherwise, see if it is a relative path name
+      {
+         // Try to find it with the absolute path
+         if (fullName.size() > 1 && fullName[0] == '.')
+         {
+            fullName = fm->GetCurrentWorkingDirectory() + fm->GetPathSeparator() + fullName;
+            if (!(GmatFileUtil::DoesFileExist(fullName)))
+               fileFound = false;
+         }
+         else
+         {
+            fileFound = false;
+         }
+      }
+   }
+   if (fileFound)
+      return fullName;
+   else
+      return FILE_NOT_FOUND;
+}

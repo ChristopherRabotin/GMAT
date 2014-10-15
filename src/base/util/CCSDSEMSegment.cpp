@@ -3,7 +3,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,6 +37,8 @@
 //#define DEBUG_USABLE
 //#define DEBUG_EM_VALIDATE
 //#define DEBUG_INTERP_DATA
+//#define DEBUG_INTERP_DATA_DETAIL
+//#define DEBUG_DETERMINE_STATE
 
 //------------------------------------------------------------------------------
 // static data
@@ -57,6 +59,10 @@ const Integer     CCSDSEMSegment::UNSET_INTEGER  = -999;
 //------------------------------------------------------------------------------
 Real CCSDSEMSegment::ParseEpoch(const std::string &epochString)
 {
+   #ifdef DEBUG_PARSE_EPOCH
+      MessageInterface::ShowMessage("ParseEpoch -- epochString = \"%s\"\n",
+            epochString.c_str());
+   #endif
    // The epochs can be in either of two formats:
    // YYYY-MM-DDThh:mm:ss.mmm
    // YYYY-DOYThh:mm:ss
@@ -146,12 +152,32 @@ Real CCSDSEMSegment::ParseEpoch(const std::string &epochString)
 
    if (doyUsed)
    {
-      UtcDate utc(year, day, hour, minute, seconds);
-      return utc.ToA1Mjd();
+      try
+      {
+         UtcDate utc(year, day, hour, minute, seconds);
+         #ifdef DEBUG_PARSE_EPOCH
+            MessageInterface::ShowMessage(" --- UTC data to packed calendar string = %s\n",
+                  utc.ToPackedCalendarString().c_str());
+         #endif
+         return utc.ToA1Mjd();
+      }
+      catch (Date::LeapYearError &lye)
+      {
+         std::ostringstream errmsg;
+
+         errmsg << "Cannot read CCSDS file.  File contains time \"";
+         errmsg << epochString << "\", which specifies day number ";
+         errmsg << day << " for a non-leap year.\n";
+         throw UtilityException(errmsg.str());
+      }
    }
    else
    {
       UtcDate utc(year, month, day, hour, minute, seconds);
+      #ifdef DEBUG_PARSE_EPOCH
+         MessageInterface::ShowMessage(" --- UTC data to packed calendar string = %s\n",
+               utc.ToPackedCalendarString().c_str());
+      #endif
       return utc.ToA1Mjd();
    }
 
@@ -596,6 +622,9 @@ Real CCSDSEMSegment::GetStopTime() const
 //------------------------------------------------------------------------------
 Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
 {
+   #ifdef DEBUG_DETERMINE_STATE
+      MessageInterface::ShowMessage("In DetermineState, epoch = %12.10f\n", atEpoch);
+   #endif
    // Make sure that if we are using usable times, we only check times
    // between usableStartTime and usableStopTime
    if (usesUsableTimes &&
@@ -616,8 +645,7 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
       Real theTime = (dataStore.at(ii))->epoch;
 
       #ifdef DEBUG_EM_FIND_EXACT_MATCH
-         MessageInterface::ShowMessage("FindExactEpochMatch data entry %d "
-               "epoch = %12.10f\n",
+         MessageInterface::ShowMessage("----  data epoch(%d) = %12.10f \n",
                ii, theTime);
       #endif
       if (GmatMathUtil::IsEqual(theTime, atEpoch, EPOCH_MATCH_TOLERANCE))
@@ -625,7 +653,7 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
          exactMatchFound = true;
          matchPos        = ii;
          #ifdef DEBUG_EM_FIND_EXACT_MATCH
-            MessageInterface::ShowMessage("In FindExactEpochMatch exact match to epoch = %12.10f\n",
+            MessageInterface::ShowMessage("---- EXACT MATCH to epoch = %12.10f\n",
                   (dataStore.at(ii))->epoch);
           #endif
          break;
@@ -648,7 +676,12 @@ Rvector CCSDSEMSegment::DetermineState(Real atEpoch)
    if (exactMatchFound || (interpolationDegree == 0))
       return (dataStore.at(matchPos))->data;
    else
+   {
+      #ifdef DEBUG_DETERMINE_STATE
+         MessageInterface::ShowMessage("In DetermineState, about to interpolate to time %12.10f\n", atEpoch);
+      #endif
       return Interpolate(atEpoch);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -725,6 +758,11 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    // Sanity Checks
    Real minEpoch = dataStore.at(firstUsable)->epoch;
    Real maxEpoch = dataStore.at(lastUsable)->epoch;
+   #ifdef DEBUG_INTERP_DATA
+      MessageInterface::ShowMessage("\n n         = %d, ", n);
+      MessageInterface::ShowMessage("   min epoch = %12.10f", minEpoch);
+      MessageInterface::ShowMessage("   max epoch = %12.10f", maxEpoch);
+   #endif
    if ((atEpoch < (minEpoch - EPOCH_MATCH_TOLERANCE)) ||
        (atEpoch > (maxEpoch + EPOCH_MATCH_TOLERANCE)))
    {
@@ -736,6 +774,9 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
 //   Integer numStates = dataStore.size();
    // The number of usable states we have
    Integer numStates = lastUsable - firstUsable + 1;
+   #ifdef DEBUG_INTERP_DATA
+      MessageInterface::ShowMessage("\n numStates = %d, ", numStates);
+   #endif
    if (n >= numStates)
    {
       std::string errmsg = "Insufficient usable data for LAGRANGE interpolation.\n";
@@ -761,10 +802,10 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Integer initIndex = -1;
    // pick starting point for interpolation data
    // (region ending just before epoch's position in the ephemeris)
-   if (n+1 >= (epochPos - firstUsable))  // was just epochPos
-       initIndex = firstUsable + 1;      // was 1
+   if (n >= (epochPos - firstUsable))  // was n + 1 and just epochPos
+       initIndex = firstUsable; //  + 1; was +1     // was 1
    else
-       initIndex = epochPos - (n+1);
+       initIndex = epochPos - n; // was - (n+1);
    #ifdef DEBUG_INTERP_DATA
       MessageInterface::ShowMessage("first epoch > input epoch is at index %d\n", epochPos);
       MessageInterface::ShowMessage("initIndex =  %d\n", initIndex);
@@ -776,17 +817,20 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Real    pDiff = GmatRealConstants::REAL_MAX;
    Integer q     = -1;;
    Real    diff  = -999.99;
-   for (Integer ii = initIndex; ii <= (numStates-n); ii++)
+   for (Integer ii = initIndex; ii < (numStates-n); ii++) // was <= (numStates-n); ii++)
    {
       Real dataEpoch     = dataStore.at(ii)->epoch;
       Real dataEpochN    = dataStore.at(ii+n)->epoch;
       diff = GmatMathUtil::Abs((dataEpoch + dataEpochN) / 2 - atEpoch);
-      #ifdef DEBUG_INTERP_DATA
+      #ifdef DEBUG_INTERP_DATA_DETAIL
+      if (atEpoch > 21545.070626)
+      {
          MessageInterface::ShowMessage("--- ii = %d\n", ii);
          MessageInterface::ShowMessage("----- epoch at ii = %12.10f\n", dataEpoch);
          MessageInterface::ShowMessage("----- epoch at ii+n = %12.10f\n", dataEpochN);
-         MessageInterface::ShowMessage("----- pDiff= %d\n", pDiff);
+         MessageInterface::ShowMessage("----- pDiff= %12.10f\n", pDiff);
          MessageInterface::ShowMessage("----- diff = %12.10f\n", diff);
+      }
       #endif
       if (diff > pDiff) break;
       else              q = ii;
@@ -798,17 +842,33 @@ Rvector CCSDSEMSegment::InterpolateLagrange(Real atEpoch)
    Real    t1, t2;
 
    #ifdef DEBUG_INTERP_DATA
-      MessageInterface::ShowMessage("\n q = %d\n", q);
+      MessageInterface::ShowMessage("\n Interpolating over %d (q) to %d (q+n)\n", q, (q+n));
+      MessageInterface::ShowMessage("   epoch and Data at those points are:\n");
+      for (Integer jj = q; jj <= q+n; jj++)
+      {
+         // this is specific to Euler angles here ...
+         Rvector theAngles = dataStore.at(jj)->data;
+         Real    theEpoch  = dataStore.at(jj)->epoch;
+         MessageInterface::ShowMessage("   %d     %12.10f       %12.10f  %12.10f  %12.10f\n",
+               jj,  theEpoch,
+               theAngles[0] * GmatMathConstants::DEG_PER_RAD,
+               theAngles[1] * GmatMathConstants::DEG_PER_RAD,
+               theAngles[2] * GmatMathConstants::DEG_PER_RAD);
+      }
    #endif
    for (Integer ii = q; ii <= q+n; ii++)
    {
       t1      = dataStore.at(ii)->epoch;
       d1      = dataStore.at(ii)->data;
-      #ifdef DEBUG_INTERP_DATA
+      #ifdef DEBUG_INTERP_DATA_DETAIL
+      if (atEpoch > 21545.070626)
+      {
+
          MessageInterface::ShowMessage("Using epoch %12.10f and data: ", t1);
          for (Integer nn = 0; nn < dataSize; nn++)
             MessageInterface::ShowMessage("   %12.10f ", d1[nn] * GmatMathConstants::DEG_PER_RAD);
          MessageInterface::ShowMessage("\n");
+      }
       #endif
       for (Integer jj = q; jj <= q+n; jj++)
       {

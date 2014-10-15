@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -59,7 +59,7 @@ public:
    // inherited from GmatBase
    virtual GmatBase*  Clone() const;
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode,
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
                                             const std::string &prefix = "",
                                             const std::string &useName = "");
    // for Ref Objects
@@ -108,6 +108,12 @@ public:
    
    // Used to apply corrections to the command
    virtual void         SetInitialValue(Solver *theSolver);
+   
+   // Methods for subscribers for chunking output data
+   // Used to set/get whether this command is the last Vary command in
+   // the SolverBranchCommand
+   virtual void         SetIsThisLastVaryCommand(bool flag);
+   virtual bool         IsThisLastVaryCommand();
    
    DEFAULT_TO_NO_CLONES
 
@@ -181,6 +187,10 @@ protected:
 
    /// Flag used to finalize the solver data during execution
    bool                solverDataFinalized;
+
+   /// Flag used to indicate whether this command is the last Vary command
+   /// in the SolverBranchCommand
+   bool                isThisLastVaryCommand;
    
    /// Used for wrapper name checking, wrapper name can be a number
    bool IsThereSameWrapperName(int param, const std::string &wrapperName);

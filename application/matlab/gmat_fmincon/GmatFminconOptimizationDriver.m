@@ -30,7 +30,7 @@
 % External References: fmincon, EvaluateGMATObjective, EvaluateGMATConstraints, 
 % CallGMATfminconSolver 
 %
-% Copyright (c) 2002 - 2011 United States Government as represented by the
+% Copyright (c) 2002-2014 United States Government as represented by the
 % Administrator of the National Aeronautics and Space Administration.
 % All Other Rights Reserved.
 % 
@@ -40,6 +40,7 @@
 % --- Declare global variables 
 global NonLinearEqCon JacNonLinearEqCon NonLinearIneqCon JacNonLinearIneqCon
 OpenGMAT
+GMAToptions = optimset(GMAToptions,'Algorithm','active-set');
 [X, fVal, exitFlag] = fmincon(@EvaluateGMATObjective, X0, [], [], [], [], Lower, Upper, ...
 @EvaluateGMATConstraints, GMAToptions) 
 % Apply the converged variables 

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -188,6 +188,38 @@ bool UserInputValidator::CheckFileName(const std::string &str,
           msg.c_str());
       
       SetErrorFlag();
+      return false;
+   }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckFileName(const wxString &str, const std::string &str,
+//                    const std::string &field, bool onlyMsg = false)
+//------------------------------------------------------------------------------
+/*
+ * Checks for a valid file name.
+ *
+ * @param  str        Input file name to be validated
+ * @param  field      Field name should be used in the error message
+ * @param  onlyMsg    if true, it only shows error message (false)
+ *
+ * @return true if input name is valid, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool UserInputValidator::CheckLength(const std::string &str, const std::string &field, const std::string &expLength,
+                                       const Integer min, const Integer max)
+{
+   Integer len = str.length();
+   // We don't want allow blank file name so pass false
+   if ((len < min) || (len > max))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(), "",
+          expLength.c_str());
+      
       return false;
    }
    
@@ -442,6 +474,10 @@ bool UserInputValidator::CheckVariable(const std::string &varName, ObjectTypeArr
       SetErrorFlag();
       return false;
    }
+   
+   #ifdef DEBUG_CHECK_VARIABLE
+   MessageInterface::ShowMessage("   retval = %d\n", retval);
+   #endif
    
    if (retval == -1)
    {

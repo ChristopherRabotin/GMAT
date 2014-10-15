@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -635,6 +635,9 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 	   Real Psat = 2*(Earth2GS_Vel/c)*(Earth2GS/c);
 	   ET_TAI = ET_TAI + Psat;
    }
+
+   if (emb)
+      delete emb;
 
    return ET_TAI;
 }

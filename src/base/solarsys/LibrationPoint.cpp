@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -29,6 +29,7 @@
 #include "Rmatrix33.hpp"
 #include "MessageInterface.hpp"
 #include "GmatDefaults.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 #include <iostream>
 
@@ -85,6 +86,9 @@ secondaryBody       (NULL)
    objectTypes.push_back(Gmat::LIBRATION_POINT);
    objectTypeNames.push_back("LibrationPoint");
    parameterCount = LibrationPointParamCount;
+   
+   // Set default colors
+   SetDefaultColors(GmatColor::GREEN_YELLOW, GmatColor::DARK_GRAY);
 }
 
 //------------------------------------------------------------------------------

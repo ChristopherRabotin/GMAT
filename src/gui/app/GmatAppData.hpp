@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -84,11 +84,18 @@ public:
    
    void SetFont(wxFont font);
    wxFont GetFont();
-
+   
    void SetTempScriptName(const wxString &tempName);
    wxString GetTempScriptName();
-
+   
    wxConfigBase* GetPersonalizationConfig();
+   
+   void ResetIconFile();
+   void SetIconFile();
+   wxString GetIconFile();
+   
+   bool SetIcon(wxTopLevelWindow *topWindow, const std::string &calledFrom);
+   
 #endif
     
 private:
@@ -112,6 +119,8 @@ private:
    wxFont        theFont;
    wxString      theTempScriptName;
    wxConfigBase  *thePersonalizationConfig;
+   wxString      theIconFile;
+   bool          theIconFileSet;
    
    #ifdef __USE_STC_EDITOR__
    wxPageSetupDialogData *thePageSetupDialogData;

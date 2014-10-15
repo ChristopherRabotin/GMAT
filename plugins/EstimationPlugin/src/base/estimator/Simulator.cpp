@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,6 +36,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_TIMESTEP
 //#define DEBUG_EVENT
+//#define DEBUG_INITIALIZE
 
 //------------------------------------------------------------------------------
 // static data
@@ -179,7 +180,7 @@ Simulator& Simulator::operator =(const Simulator& sim)
       locatingEvent       = false;
       measManager         = sim.measManager;
       measList            = sim.measList;
-	  addNoise            = sim.addNoise;
+     addNoise            = sim.addNoise;
    }
 
    return *this;
@@ -498,7 +499,7 @@ Real Simulator::SetRealParameter(const Integer id, const Real value)
    if (id == MEASUREMENT_TIME_STEP)
    {
       #ifdef DEBUG_TIMESTEP
-	     MessageInterface::ShowMessage("simulationStep = %.15lf\n", value);
+        MessageInterface::ShowMessage("simulationStep = %.15lf\n", value);
       #endif
       simulationStep = value;
       return true;
@@ -731,10 +732,10 @@ const StringArray& Simulator::GetStringArrayParameter(const Integer id) const
 // made changes by TUAN NGUYEN
 std::string Simulator::GetOnOffParameter(const Integer id) const
 {
-	if (id == ADD_NOISE)
-	   return (addNoise ? "On" : "Off");
+   if (id == ADD_NOISE)
+      return (addNoise ? "On" : "Off");
 
-	return Solver::GetOnOffParameter(id);
+   return Solver::GetOnOffParameter(id);
 }
 
 // made changes by TUAN NGUYEN
@@ -743,17 +744,17 @@ bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
    if (id == ADD_NOISE)
    {
       if (value == "On")
-	  {
+     {
          addNoise = true;
-		 return true;
-	  }
+       return true;
+     }
       if (value == "Off")
-	  {
+     {
          addNoise = false;
-		 return true;
-	  }
+       return true;
+     }
 
-	  return false;
+     return false;
    }
 
    return Solver::SetOnOffParameter(id, value);
@@ -810,8 +811,8 @@ Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
    // The change below breaks sample missions, so I'm backing it out.  A
    // different change committed today fixes the issue.
 //   if (id == MEASUREMENTS)
-////      return Gmat::MEASUREMENT_MODEL;			// made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
-//      return Gmat::TRACKING_SYSTEM;				// made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+////      return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+//      return Gmat::TRACKING_SYSTEM;            // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
 
    if (id == MEASUREMENTS)
       return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
@@ -1183,6 +1184,10 @@ bool Simulator::TakeAction(const std::string &action,
 //------------------------------------------------------------------------------
 bool Simulator::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Start Simulator::Initialize()\n");
+#endif
+
    // check the validity of the input start and end times
    if (simulationEnd < simulationStart)
       throw SolverException(
@@ -1194,6 +1199,9 @@ bool Simulator::Initialize()
 //   if (measList.empty())
 //      throw SolverException("Simulator error - no measurements set.\n");
 
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Exit Simulator::Initialize()\n");
+#endif
    return true;
 }
 
@@ -1359,6 +1367,9 @@ void Simulator::CompleteInitialization()
             "Simulator::CompleteInitialization - error initializing "
             "MeasurementManager.\n");
 
+   // Load ramped table
+   measManager.LoadRampTables();                                 // made changes by TUAN NGUYEN
+
    nextSimulationEpoch = simulationStart;
    simEpochCounter     = 0;
    timeStep            = (nextSimulationEpoch - currentEpoch) *
@@ -1409,7 +1420,7 @@ void Simulator::FindTimeStep()
 //               GmatTimeConstants::SECS_PER_DAY * 1000000))/1000000.0;
 
       timeStep = (nextSimulationEpoch - currentEpoch) *
-               GmatTimeConstants::SECS_PER_DAY;					// made change by TUAN NGUYEN for Bug GMT-3700
+               GmatTimeConstants::SECS_PER_DAY;               // made change by TUAN NGUYEN for Bug GMT-3700
 
       #ifdef DEBUG_TIMESTEP
          MessageInterface::ShowMessage("Simulator time step = %.15lf based on "
@@ -1435,7 +1446,7 @@ void Simulator::FindTimeStep()
 void Simulator::CalculateData()
 {
    // Tell the measurement manager to calculate the simulation data
-   if (measManager.CalculateMeasurements(true, false) == false)					// made changes by TUAN NGUYEN  for Bug 8 in ticket GMT-4314
+   if (measManager.CalculateMeasurements(true, false) == false)               // made changes by TUAN NGUYEN  for Bug 8 in ticket GMT-4314
    {
       // No measurements were possible
       FindNextSimulationEpoch();
@@ -1515,7 +1526,7 @@ void Simulator::SimulateData()
    // Tell the measurement manager to add noise and write the measurements
    if (measManager.CalculateMeasurements(true, true, addNoise) == true)
    {
-	  // Write measurements to data file
+      // Write measurements to data file
       if (measManager.WriteMeasurements() == false)
          throw EstimatorException("Measurement writing failed");
    }

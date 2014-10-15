@@ -96,8 +96,6 @@ GMAT DefaultIB.GravitationalAccel = 9.81;
 Create OrbitView Enhanced3DView1;
 GMAT Enhanced3DView1.SolverIterations = Current;
 GMAT Enhanced3DView1.Add = {Sat, Earth};
-GMAT Enhanced3DView1.OrbitColor = [ 255 32768 ];
-GMAT Enhanced3DView1.TargetColor = [ 8421440 0 ];
 GMAT Enhanced3DView1.CoordinateSystem = EarthMJ2000Eq;
 GMAT Enhanced3DView1.ViewPointReference = Earth;
 GMAT Enhanced3DView1.ViewPointVector = [ 30000 0 0 ];

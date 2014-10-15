@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -37,7 +37,7 @@
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
 
-#include "MediaCorrectionInterface.hpp"
+//#include "MediaCorrectionInterface.hpp"
 
 class STATION_API GroundStation : public GroundstationInterface
 {
@@ -121,11 +121,10 @@ public:
    virtual bool         IsValidID(const std::string &id);
 
 
-   virtual Real*                IsValidElevationAngle(const Rvector6 &state_sez);
-//   bool                    IsValidElevationAngle();
-//   RealArray               CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
-//   RealArray               CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
-//   RealArray               CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+   virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
+   //RealArray            CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+   //RealArray            CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+   //RealArray            CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
 
    DEFAULT_TO_NO_CLONES
 
@@ -133,35 +132,43 @@ protected:
    /// Ground station ID
    std::string          stationId;
 
-   // Added hardware of the ground station
-   StringArray	        hardwareNames;       // made changes by Tuan Nguyen
+   /// Added hardware of the ground station
+   StringArray          hardwareNames;       // made changes by Tuan Nguyen
    ObjectArray          hardwareList;        // made changes by Tuan Nguyen
-	
+
+   /// Add ionosphere and troposphere correction modes
+   std::string ionosphereModel;             // made changes by Tuan Nguyen
+   std::string troposphereModel;            // made changes by Tuan Nguyen
+
    /// Troposphere and Ionosphere objects
-   MediaCorrectionInterface* troposphereObj;
-   MediaCorrectionInterface* ionosphereObj;
+   //MediaCorrectionInterface* troposphereObj;// made changes by Tuan Nguyen
+   //MediaCorrectionInterface* ionosphereObj; // made changes by Tuan Nguyen
 
    /// Parameters needed for Troposphere correction
-   Real temperature;						// unit: Kelvin
-   Real pressure;							// unit: hPa
-   Real humidity;							// unit: percentage
+   Real                 temperature;                     // unit: Kelvin
+   Real                 pressure;                        // unit: hPa
+   Real                 humidity;                        // unit: percentage
+   std::string          dataSource;                      // specify data source for parameters needed for Troposphere correction: "Constant" or "FromFile"
 
    /// Parameters needed for verifying measurement feasibility
-   Real minElevationAngle;					// unit: degree
+   Real minElevationAngle;               // unit: degree
    /// Visibility vector
    Real az_el_visible[3];
 
-	
+   
 public:
    /// Published parameters for ground stations
    enum
    {
       STATION_ID = BodyFixedPointParamCount,
-      ADD_HARDWARE,								// made changes by Tuan Nguyen
-      TEMPERATURE,					// temperature (in K) at ground station. It is used for Troposphere correction
-      PRESSURE,						// pressure (in hPa) at ground station. It is used for Troposphere correction
-      HUMIDITY,						// humidity (in %) at ground station. It is used for Troposphere correction
-      MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying measurement feasibility
+      ADD_HARDWARE,                       // made changes by Tuan Nguyen
+      IONOSPHERE_MODEL,                   // made changes by Tuan Nguyen
+      TROPOSPHERE_MODEL,                  // made changes by Tuan Nguyen
+      DATA_SOURCE,                  // When DataSource is 'Constant', that means temperature, pressure, and humidity are read from script, otherwise they are read from a data base  // made changes by Tuan Nguyen        
+      TEMPERATURE,                  // temperature (in K) at ground station. It is used for Troposphere correction
+      PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
+      HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
+      MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
       GroundStationParamCount,
    };
 
@@ -171,7 +178,7 @@ public:
       PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount];
 
 private:
-   bool 		        VerifyAddHardware();			// made changes by Tuan Nguyen
+   bool               VerifyAddHardware();         // made changes by Tuan Nguyen
 };
 
 #endif /*GroundStation_hpp*/

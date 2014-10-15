@@ -31,6 +31,7 @@
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
+//#define DEBUG_MOVETOEPOCH
 
 //---------------------------------
 // static data
@@ -91,6 +92,17 @@ SignalBase::~SignalBase()
    // Clear the entire list
    if (next)
       delete next;
+
+   if (tcs) 
+      delete tcs;
+   if (rcs)
+      delete rcs;
+   if (ocs)
+      delete ocs;
+   if (j2k)
+      delete j2k;
+
+   theData.CleanUp();              // made changes by TUAN NGUYEN
 }
 
 
@@ -148,10 +160,20 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       GmatBase::operator=(sb);
 
       theData             = sb.theData;
-      tcs                 = NULL;
-      rcs                 = NULL;
-      ocs                 = NULL;
-      j2k                 = NULL;
+      
+      if (tcs) 
+         delete tcs;
+      tcs = NULL;
+      if (rcs)
+         delete rcs;
+      rcs = NULL;
+      if (ocs)
+         delete ocs;
+      ocs = NULL;
+      if (j2k)
+         delete j2k;
+      j2k = NULL;
+
 #ifdef USE_PRECISION_TIME
       satPrecEpoch        = 21545.0;            // made changes by TUAN NGUYEN
 #else
@@ -601,6 +623,21 @@ SignalData& SignalBase::GetSignalData()
 
 
 //------------------------------------------------------------------------------
+// SignalData* GetSignalDataObject()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the reference to the SignalData object of the signal
+ *
+ * @return The data set
+ */
+//------------------------------------------------------------------------------
+SignalData* SignalBase::GetSignalDataObject()
+{
+   return &theData;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetSignalData(const SignalData& newData)
 //------------------------------------------------------------------------------
 /**
@@ -674,7 +711,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
 
    #ifdef DEBUG_LIGHTTIME
       #ifdef USE_PRECISION_TIME
-      MessageInterface::ShowMessage("%d matching data sets updated; epochs "                  // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("%d matching data sets updated; epochs "                        // made changes by TUAN NGUYEN
             "%.12lf -> %.12lf\n", count, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());   // made changes by TUAN NGUYEN
       #else
       MessageInterface::ShowMessage("%d matching data sets updated; epochs "
@@ -730,6 +767,10 @@ void SignalBase::UsesLighttime(const bool tf)
 //------------------------------------------------------------------------------
 void SignalBase::InitializeSignal(bool chainForwards)
 {
+   #ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("SignalBase::InitializeSignal() for leg %s to %s\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   #endif
+
    if (isInitialized)
    {
       return;
@@ -762,11 +803,19 @@ void SignalBase::InitializeSignal(bool chainForwards)
 
       spObj  = (SpaceObject*) theData.rNode;
       origin = spObj->GetOrigin();
-      rcs    = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
+
+      if (rcs)
+         delete rcs;
+      rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
                origin, NULL, NULL, earth, solarSystem);
-      ocs     = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
+      if (ocs)
+         delete ocs;
+      ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
                bf, NULL, NULL, bf->GetJ2000Body(), solarSystem);
-      j2k    = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
+      
+      if (j2k)
+         delete j2k;
+      j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
                tcs->GetOrigin(), NULL, NULL, earth, solarSystem);
    }
    else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
@@ -781,22 +830,42 @@ void SignalBase::InitializeSignal(bool chainForwards)
 
       spObj  = (SpaceObject*) theData.tNode;
       origin = spObj->GetOrigin();
+      
+      if (tcs)
+         delete tcs;
       tcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
                origin, NULL, NULL, earth, solarSystem);
+      
+      if (ocs)
+         delete ocs;
       ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","Topocentric",
                bf, NULL, NULL, earth, solarSystem);
+      
+      if (j2k)
+         delete j2k;
       j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
                rcs->GetOrigin(), NULL, NULL, earth, solarSystem);
    }
    else
    {
       origin = ((SpaceObject*)theData.tNode)->GetOrigin();
+      if (rcs)
+         delete rcs;
       rcs = CoordinateSystem::CreateLocalCoordinateSystem("RCS", "MJ2000Eq",
               origin, NULL, NULL, earth, solarSystem);
+      
+      if (tcs)
+         delete tcs;
       tcs = CoordinateSystem::CreateLocalCoordinateSystem("TCS", "MJ2000Eq",
               origin, NULL, NULL, earth, solarSystem);
+      
+      if (ocs)
+         delete ocs;
       ocs = CoordinateSystem::CreateLocalCoordinateSystem("OCS","MJ2000Eq",
               origin, NULL, NULL, earth, solarSystem);
+
+      if (j2k)
+         delete j2k;
       j2k = CoordinateSystem::CreateLocalCoordinateSystem("j2k", "MJ2000Eq",
               origin, NULL, NULL, earth, solarSystem);
    }
@@ -1087,7 +1156,9 @@ void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
    // For now ignoring the barycenter piece -- we'll add it once core code works
    Rvector3 rangeVec = theData.rangeVecInertial;      // Check sign?
 
-   Rmatrix phi = (forTransmitter ? theData.tSTM : theData.rSTM);
+   // phi(t1,tm) = phi(t1, t0)* Inv(phi(tm, t0))   where: t0 is initial epoch; tm is measurement time; t1 is either transmit time or receive time
+   // Rmatrix phi = (forTransmitter ? theData.tSTM : theData.rSTM);
+   Rmatrix phi = (forTransmitter ? (theData.tSTM*theData.tSTMtm.Inverse()) : (theData.rSTM*theData.rSTMtm.Inverse()));
 
    // Check: Not using old STM inverse approach -- STMs computed from initial
    // (measurement epoch based) state, so STM inverse is identity
@@ -1352,22 +1423,37 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       else
       {
          Rvector6 state;
+         Rmatrix66 stm;         // state transition matrix. Its default value is I matrix      // made changes by TUAN NGUYEN
          if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-            state = theData.rNode->GetMJ2000PrecState(theEpoch);
-         else // Retrieve spacecraft data from the propagator
          {
+            state = theData.rNode->GetMJ2000PrecState(theEpoch);
+            // For a ground station, its STM is I matrix
+         }
+         else
+         {
+            // Retrieve spacecraft data from the propagator
             const Real *pstate =
                   theData.rPropagator->GetPropagator()->AccessOutState();
+
+            // set value for state and STM
             state.Set(pstate);
+            for (UnsignedInt i = 0; i < 6; ++i)                                                 // made changes by TUAN NGUYEN
+               for (UnsignedInt j = 0; j < 6; ++j)                                              // made changes by TUAN NGUYEN
+                  stm(i,j) = pstate[6 + i*6 + j];                                               // made changes by TUAN NGUYEN
          }
 
          theData.rLoc = state.GetR();
          theData.rVel = state.GetV();
+         // Whenever updating participant's state in signal data, it needs to update participant's STM
+         theData.rSTM = stm;                                                                    // made changes by TUAN NGUYEN
 
          SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");    // made changes by TUAN NGUYEN
          theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -         // made changes by TUAN NGUYEN
                             ssb->GetMJ2000PrecState(theData.rPrecTime);                         // made changes by TUAN NGUYEN
       }
+      #ifdef DEBUG_MOVETOEPOCH
+      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2]);
+      #endif
    }
 
    // 2. Propagate transmit node at time theEpoch and update it's SignalData
@@ -1383,21 +1469,37 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       else
       {
          Rvector6 state;
+         Rmatrix66 stm;         // state transition matrix. Its default value is I matrix      // made changes by TUAN NGUYEN
          if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-            state = theData.tNode->GetMJ2000PrecState(theEpoch);
-         else // Retrieve spacecraft data from the propagator
          {
+            state = theData.tNode->GetMJ2000PrecState(theEpoch);
+            // For a ground station, its STM is I matrix
+         }
+         else
+         {
+            // Retrieve spacecraft data from the propagator
             const Real *pstate =
                   theData.tPropagator->GetPropagator()->AccessOutState();
+
+            // set value for state and STM
             state.Set(pstate);
+            for (UnsignedInt i = 0; i < 6; ++i)                                                 // made changes by TUAN NGUYEN
+               for (UnsignedInt j = 0; j < 6; ++j)                                              // made changes by TUAN NGUYEN
+                  stm(i,j) = pstate[6 + i*6 + j];                                               // made changes by TUAN NGUYEN
          }
+
          theData.tLoc = state.GetR();
          theData.tVel = state.GetV();
+         // Whenever updating participant's state in signal data, it needs to update participant's STM
+         theData.tSTM = stm;                                                                    // made changes by TUAN NGUYEN
 
          SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");    // made changes by TUAN NGUYEN
          theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) -         // made changes by TUAN NGUYEN
                             ssb->GetMJ2000PrecState(theData.tPrecTime);                         // made changes by TUAN NGUYEN
       }
+      #ifdef DEBUG_MOVETOEPOCH
+      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2]);
+      #endif
    }
 }
 #endif
@@ -1438,7 +1540,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
             "stepping receiver"));
    #endif
    bool retval = false;
-
+   
    // 1. Get associated propagator for transmiter node (or receiver node) 
    Propagator *prop = NULL;
 
@@ -1467,7 +1569,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       }
    }
 
-
+   
    // 2. Propagate transmiter node (or receiver node) for stepToTake and specify it's state
    Rvector6 state;
    Rmatrix66 stm;
@@ -1533,15 +1635,19 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
                stepToTake / GmatTimeConstants::SECS_PER_DAY);
       }
 #endif
+      // For ground station, its STM is I matrix
    }
 
-
+   
    // 3. Set value for SignalData object associated to transmiter node (or receiver node)
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
    if (forTransmitter)
    {
       theData.tLoc = state.GetR();
       theData.tVel = state.GetV();
+      // whenever updating participant's state, it needs to update its STM             // made changes by TUAN NGUYEN
+      theData.tSTM = stm;                                                              // made changes by TUAN NGUYEN
+
 #ifdef USE_PRECISION_TIME
       theData.tPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;               // made changes by TUAN NGUYEN
       theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) -   // made changes by TUAN NGUYEN
@@ -1551,12 +1657,14 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) -           // made changes by TUAN NGUYEN
                          ssb->GetMJ2000State(theData.tTime);                           // made changes by TUAN NGUYEN
 #endif
-
    }
    else
    {
       theData.rLoc = state.GetR();
       theData.rVel = state.GetV();
+      // whenever updating participant's state, it needs to update its STM             // made changes by TUAN NGUYEN
+      theData.rSTM = stm;                                                              // made changes by TUAN NGUYEN
+
 #ifdef USE_PRECISION_TIME
       theData.rPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;               // made changes by TUAN NGUYEN
       theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -   // made changes by TUAN NGUYEN
@@ -1567,6 +1675,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
                          ssb->GetMJ2000PrecState(theData.rTime);                       // made changes by TUAN NGUYEN
 #endif
    }
-
+   
+   retval = true;
    return retval;
 }

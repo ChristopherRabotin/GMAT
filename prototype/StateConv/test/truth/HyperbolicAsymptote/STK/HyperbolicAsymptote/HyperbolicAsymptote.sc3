@@ -215,6 +215,7 @@ VO_V100
                     Color #ffff00
                     SpecularColor #545454
                     Shininess 40.000000
+                    ShowWater No
                     _AGI_PIBEGINTERRAINIMAGECALLDATA "SRC"
                         BlendMode Value
                         BlendFactor 1.000000
@@ -237,6 +238,7 @@ VO_V100
                     Color #ffffff
                     SpecularColor #545454
                     Shininess 40.000000
+                    ShowWater No
                     _AGI_PIBEGINTERRAINIMAGECALLDATA "SRC"
                         BlendMode Value
                         BlendFactor 1.000000
@@ -259,6 +261,7 @@ VO_V100
                     Color #0000ff
                     SpecularColor #545454
                     Shininess 40.000000
+                    ShowWater No
                     _AGI_PIBEGINTERRAINIMAGECALLDATA "SRC"
                         BlendMode Value
                         BlendFactor 1.000000
@@ -293,6 +296,7 @@ VO_V100
             IsShowingArcBallConstraintAxis No
             ArcBallColor             #ff00ff
             ArcBallTranslucency      0.500000
+            UseCameraInertia         No
             IsShowingMap             No
             MapResolution            Medium
             MapLineType              Surface
@@ -730,6 +734,7 @@ VO_V100
                 ArcBallRadius           0.900000
                 ArcBallRotateMode       From
                 ZoomSpeed               0.000000
+                ZoomUseDistanceToCb     No
                 GlobeDetailLevel        1
                 UseLayer                Yes
                 FromName                "Earth"
@@ -808,6 +813,7 @@ VO_V100
         ArcBallRadius           0.900000
         ArcBallRotateMode       From
         ZoomSpeed               0.000000
+        ZoomUseDistanceToCb     No
         GlobeDetailLevel        1
         UseLayer                Yes
         FromName                "Earth"

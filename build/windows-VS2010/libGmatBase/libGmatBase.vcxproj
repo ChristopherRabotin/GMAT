@@ -329,6 +329,9 @@
     <ClCompile Include="..\..\..\src\base\hardware\FuelTank.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\HardwareException.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp" />
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\hardware\Thruster.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\GmatInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\interface\Interface.cpp" />
@@ -381,6 +384,7 @@
     <ClCompile Include="..\..\..\src\base\math\Tan.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Tanh.cpp" />
     <ClCompile Include="..\..\..\src\base\math\Transpose.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AngularParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Array.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ArrayElementWrapper.cpp" />
@@ -388,6 +392,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeReal.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\AttitudeRvector.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\AttitudeString.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BallisticMassParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\BallisticMassReal.cpp" />
@@ -437,6 +442,7 @@
     <ClCompile Include="..\..\..\src\base\parameter\Rmat33Var.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Rmat66Var.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\Rvec6Var.cpp" />
+    <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\SpacecraftData.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\SphericalParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\StringObjectWrapper.cpp" />
@@ -482,6 +488,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\Planet.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\PlanetaryEphemException.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
@@ -560,6 +567,7 @@
     <ClCompile Include="..\..\..\src\base\util\Rvector.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector3.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Rvector6.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\SPADFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\util\SpiceKernelReader.cpp" />
@@ -748,6 +756,9 @@
     <ClInclude Include="..\..\..\src\base\hardware\FuelTank.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\HardwareException.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp" />
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\hardware\Thruster.hpp" />
     <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp" />
     <ClInclude Include="..\..\..\src\base\interface\GmatInterface.hpp" />
@@ -801,6 +812,7 @@
     <ClInclude Include="..\..\..\src\base\math\Tan.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Tanh.hpp" />
     <ClInclude Include="..\..\..\src\base\math\Transpose.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AlternateEquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AngularParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Array.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ArrayElementWrapper.hpp" />
@@ -808,6 +820,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeReal.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\AttitudeRvector.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\AttitudeString.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BallisticMassParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\BallisticMassReal.hpp" />
@@ -860,6 +873,7 @@
     <ClInclude Include="..\..\..\src\base\parameter\Rmat33Var.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Rmat66Var.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\Rvec6Var.hpp" />
+    <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\SpacecraftData.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\SphericalParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\StringObjectWrapper.hpp" />
@@ -904,6 +918,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\Planet.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\PlanetaryEphemException.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
@@ -993,6 +1008,7 @@
     <ClInclude Include="..\..\..\src\base\util\Rvector.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector3.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Rvector6.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\SPADFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceAttitudeKernelReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\util\SpiceKernelReader.hpp" />

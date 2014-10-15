@@ -1,5 +1,5 @@
 stk.v.10.0
-WrittenBy    STK_v10.0.2
+WrittenBy    STK_v10.1.0
 BEGIN Scenario
     Name            HyperbolicAsymptote
 
@@ -966,6 +966,12 @@ END MapData
 		MagneticFieldUnit		nanoTesla
     END ConnectReportUnits
     
+    BEGIN ReportFavorites
+        BEGIN Class
+            Name  Satellite
+        END Class
+    END ReportFavorites
+    
     BEGIN ADFFileData
     END ADFFileData
     
@@ -977,6 +983,10 @@ END MapData
 		    UseMyDb      Off
 		    MaxMatches   2000
 
+		BEGIN FieldDefaults
+
+		END FieldDefaults
+
 		END Database
 
 		BEGIN Database
@@ -984,6 +994,10 @@ END MapData
 		    DefDb        stkCityDb.cd
 		    UseMyDb      Off
 		    MaxMatches   2000
+
+		BEGIN FieldDefaults
+
+		END FieldDefaults
 
 		END Database
 
@@ -993,8 +1007,17 @@ END MapData
 		    UseMyDb      Off
 		    MaxMatches   2000
 
+		BEGIN FieldDefaults
+
+		END FieldDefaults
+
 		END Database
     END GenDb
+    
+    BEGIN SOCDb
+        BEGIN Defaults
+        END Defaults
+    END SOCDb
     
     BEGIN Msgp4Ext
     END Msgp4Ext
@@ -1023,6 +1046,10 @@ END MapData
 	    BEGIN Type
 		FileType  EOP
 		Include    Yes
+	    END Type
+	    BEGIN Type
+		FileType  External Vector Data
+		Include    No
 	    END Type
 	    BEGIN Type
 		FileType  Globe
@@ -1122,111 +1149,319 @@ END MapData
     END Desc
     
     BEGIN RfEnv
-<!-- STKv4.0 Format="XML" -->
-<STKOBJECT>
-<OBJECT Class = "RFEnvironment" Name = "STK_RF_Environment">
-    <OBJECT Class = "link" Name = "ActiveCommSystem">
-        <OBJECT Class = "string" Name = ""> &quot;None&quot; </OBJECT>
-    </OBJECT>
-    <OBJECT Class = "string" Name = "Category"> &quot;&quot; </OBJECT>
-    <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-    <OBJECT Class = "string" Name = "Description"> &quot;STK RF Environment&quot; </OBJECT>
-    <OBJECT Class = "double" Name = "EarthTemperature"> 290 K </OBJECT>
-    <OBJECT Class = "link" Name = "PropagationChannel">
-        <OBJECT Class = "PropagationChannel" Name = "RF_Propagation_Channel">
-            <OBJECT Class = "link" Name = "AtmosAbsorptionModel">
-                <OBJECT Class = "AtmosphericAbsorptionModel" Name = "Simple_Satcom">
-                    <OBJECT Class = "string" Name = "Category"> &quot;@Top&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-                    <OBJECT Class = "string" Name = "Description"> &quot;Simple Satcom gaseous absorption model&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-                    <OBJECT Class = "double" Name = "SurfaceTemperature"> 293.15 K </OBJECT>
-                    <OBJECT Class = "string" Name = "Type"> &quot;Simple Satcom&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "UserComment"> &quot;Simple Satcom gaseous absorption model&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-                    <OBJECT Class = "double" Name = "WaterVaporConcentration"> 7.5 g*m^-3 </OBJECT>
-                </OBJECT>
-            </OBJECT>
-            <OBJECT Class = "string" Name = "Category"> &quot;&quot; </OBJECT>
-            <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-            <OBJECT Class = "link" Name = "CloudFogModel">
-                <OBJECT Class = "CloudFogLossModel" Name = "ITU_840-3">
-                    <OBJECT Class = "string" Name = "Category"> &quot;&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-                    <OBJECT Class = "double" Name = "CloudCeiling"> 3000 m </OBJECT>
-                    <OBJECT Class = "double" Name = "CloudLayerThickness"> 500 m </OBJECT>
-                    <OBJECT Class = "double" Name = "CloudLiqWaterDensity"> 7.5 g*m^-3 </OBJECT>
-                    <OBJECT Class = "double" Name = "CloudTemp"> 273.15 K </OBJECT>
-                    <OBJECT Class = "string" Name = "Description"> &quot;ITU 840-3&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-                    <OBJECT Class = "string" Name = "Type"> &quot;ITU 840-3&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "UserComment"> &quot;ITU 840-3&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-                </OBJECT>
-            </OBJECT>
-            <OBJECT Class = "string" Name = "Description"> &quot;RF Propagation Channel&quot; </OBJECT>
-            <OBJECT Class = "link" Name = "RainModel">
-                <OBJECT Class = "RainLossModel" Name = "ITU-R_P618-10">
-                    <OBJECT Class = "string" Name = "Category"> &quot;&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-                    <OBJECT Class = "string" Name = "Description"> &quot;ITU-R P618-10 rain model&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-                    <OBJECT Class = "double" Name = "SurfaceTemperature"> 273.15 K </OBJECT>
-                    <OBJECT Class = "string" Name = "Type"> &quot;ITU-R P618-10&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "UserComment"> &quot;ITU-R P618-10 rain model&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-                </OBJECT>
-            </OBJECT>
-            <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-            <OBJECT Class = "link" Name = "TropoScintModel">
-                <OBJECT Class = "TropoScintLossModel" Name = "ITU_618-8_Scintillation">
-                    <OBJECT Class = "string" Name = "Category"> &quot;&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-                    <OBJECT Class = "bool" Name = "ComputeDeepFade"> False </OBJECT>
-                    <OBJECT Class = "string" Name = "Description"> &quot;ITU 618-8 Scintillation&quot; </OBJECT>
-                    <OBJECT Class = "double" Name = "FadeOutage"> 0.001 unitValue </OBJECT>
-                    <OBJECT Class = "double" Name = "PercentTimeRefracGrad"> 0.1 unitValue </OBJECT>
-                    <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-                    <OBJECT Class = "double" Name = "SurfaceTemperature"> 273.15 K </OBJECT>
-                    <OBJECT Class = "string" Name = "Type"> &quot;ITU 618-8 Scintillation&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "UserComment"> &quot;ITU 618-8 Scintillation&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-                </OBJECT>
-            </OBJECT>
-            <OBJECT Class = "string" Name = "Type"> &quot;RF Propagation Channel&quot; </OBJECT>
-            <OBJECT Class = "link" Name = "UrbanTerresPropLossModel">
-                <OBJECT Class = "UrbanTerrestrialPropagationLossModel" Name = "Two_Ray">
-                    <OBJECT Class = "string" Name = "Category"> &quot;&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "Clonable"> True </OBJECT>
-                    <OBJECT Class = "string" Name = "Description"> &quot;Two Ray (Fourth Power Law) atmospheric absorption model&quot; </OBJECT>
-                    <OBJECT Class = "double" Name = "LossFactor"> 1 &quot;&quot; </OBJECT>
-                    <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-                    <OBJECT Class = "double" Name = "SurfaceTemperature"> 273.15 K </OBJECT>
-                    <OBJECT Class = "string" Name = "Type"> &quot;Two Ray&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "UserComment"> &quot;Two Ray (Fourth Power Law) atmospheric absorption model&quot; </OBJECT>
-                    <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-                </OBJECT>
-            </OBJECT>
-            <OBJECT Class = "bool" Name = "UseAtmosAbsorptionModel"> False </OBJECT>
-            <OBJECT Class = "bool" Name = "UseCloudFogModel"> False </OBJECT>
-            <OBJECT Class = "bool" Name = "UseCustomA"> False </OBJECT>
-            <OBJECT Class = "bool" Name = "UseCustomB"> False </OBJECT>
-            <OBJECT Class = "bool" Name = "UseCustomC"> False </OBJECT>
-            <OBJECT Class = "bool" Name = "UseRainModel"> False </OBJECT>
-            <OBJECT Class = "string" Name = "UserComment"> &quot;RF Propagation Channel&quot; </OBJECT>
-            <OBJECT Class = "bool" Name = "UseTropoScintModel"> False </OBJECT>
-            <OBJECT Class = "bool" Name = "UseUrbanTerresPropLossModel"> False </OBJECT>
-            <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-        </OBJECT>
-    </OBJECT>
-    <OBJECT Class = "double" Name = "RainOutagePercent"> 0.1 &quot;&quot; </OBJECT>
-    <OBJECT Class = "bool" Name = "ReadOnly"> False </OBJECT>
-    <OBJECT Class = "string" Name = "Type"> &quot;STK RF Environment&quot; </OBJECT>
-    <OBJECT Class = "string" Name = "UserComment"> &quot;STK RF Environment&quot; </OBJECT>
-    <OBJECT Class = "string" Name = "Version"> &quot;1.0.0 a&quot; </OBJECT>
-</OBJECT>
-</STKOBJECT>
-    END RfEnv
+<?xml version = "1.0" standalone = "yes"?>
+<VAR name = "STK_RF_Environment">
+    <SCOPE Class = "RFEnvironment">
+        <VAR name = "Version">
+            <STRING>&quot;1.0.0 a&quot;</STRING>
+        </VAR>
+        <VAR name = "ComponentName">
+            <STRING>&quot;STK_RF_Environment&quot;</STRING>
+        </VAR>
+        <VAR name = "Description">
+            <STRING>&quot;STK RF Environment&quot;</STRING>
+        </VAR>
+        <VAR name = "Type">
+            <STRING>&quot;STK RF Environment&quot;</STRING>
+        </VAR>
+        <VAR name = "UserComment">
+            <STRING>&quot;STK RF Environment&quot;</STRING>
+        </VAR>
+        <VAR name = "ReadOnly">
+            <BOOL>false</BOOL>
+        </VAR>
+        <VAR name = "Clonable">
+            <BOOL>true</BOOL>
+        </VAR>
+        <VAR name = "Category">
+            <STRING>&quot;&quot;</STRING>
+        </VAR>
+        <VAR name = "PropagationChannel">
+            <VAR name = "RF_Propagation_Channel">
+                <SCOPE Class = "PropagationChannel">
+                    <VAR name = "Version">
+                        <STRING>&quot;1.0.0 a&quot;</STRING>
+                    </VAR>
+                    <VAR name = "ComponentName">
+                        <STRING>&quot;RF_Propagation_Channel&quot;</STRING>
+                    </VAR>
+                    <VAR name = "Description">
+                        <STRING>&quot;RF Propagation Channel&quot;</STRING>
+                    </VAR>
+                    <VAR name = "Type">
+                        <STRING>&quot;RF Propagation Channel&quot;</STRING>
+                    </VAR>
+                    <VAR name = "UserComment">
+                        <STRING>&quot;RF Propagation Channel&quot;</STRING>
+                    </VAR>
+                    <VAR name = "ReadOnly">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "Clonable">
+                        <BOOL>true</BOOL>
+                    </VAR>
+                    <VAR name = "Category">
+                        <STRING>&quot;&quot;</STRING>
+                    </VAR>
+                    <VAR name = "UseITU618Section2p5">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "UseCloudFogModel">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "CloudFogModel">
+                        <VAR name = "ITU_840-3">
+                            <SCOPE Class = "CloudFogLossModel">
+                                <VAR name = "Version">
+                                    <STRING>&quot;1.0.0 a&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ComponentName">
+                                    <STRING>&quot;ITU_840-3&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Description">
+                                    <STRING>&quot;ITU 840-3&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Type">
+                                    <STRING>&quot;ITU 840-3&quot;</STRING>
+                                </VAR>
+                                <VAR name = "UserComment">
+                                    <STRING>&quot;ITU 840-3&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ReadOnly">
+                                    <BOOL>false</BOOL>
+                                </VAR>
+                                <VAR name = "Clonable">
+                                    <BOOL>true</BOOL>
+                                </VAR>
+                                <VAR name = "Category">
+                                    <STRING>&quot;&quot;</STRING>
+                                </VAR>
+                                <VAR name = "CloudCeiling">
+                                    <QUANTITY Dimension = "DistanceUnit" Unit = "m">
+                                        <REAL>3000</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "CloudLayerThickness">
+                                    <QUANTITY Dimension = "DistanceUnit" Unit = "m">
+                                        <REAL>500</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "CloudTemp">
+                                    <QUANTITY Dimension = "Temperature" Unit = "K">
+                                        <REAL>273.15</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "CloudLiqWaterDensity">
+                                    <QUANTITY Dimension = "Density" Unit = "g*m^-3">
+                                        <REAL>7.5</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                            </SCOPE>
+                        </VAR>
+                    </VAR>
+                    <VAR name = "UseTropoScintModel">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "TropoScintModel">
+                        <VAR name = "ITU_618-8_Scintillation">
+                            <SCOPE Class = "TropoScintLossModel">
+                                <VAR name = "Version">
+                                    <STRING>&quot;1.0.0 a&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ComponentName">
+                                    <STRING>&quot;ITU_618-8_Scintillation&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Description">
+                                    <STRING>&quot;ITU 618-8 Scintillation&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Type">
+                                    <STRING>&quot;ITU 618-8 Scintillation&quot;</STRING>
+                                </VAR>
+                                <VAR name = "UserComment">
+                                    <STRING>&quot;ITU 618-8 Scintillation&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ReadOnly">
+                                    <BOOL>false</BOOL>
+                                </VAR>
+                                <VAR name = "Clonable">
+                                    <BOOL>true</BOOL>
+                                </VAR>
+                                <VAR name = "Category">
+                                    <STRING>&quot;&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ComputeDeepFade">
+                                    <BOOL>false</BOOL>
+                                </VAR>
+                                <VAR name = "FadeOutage">
+                                    <QUANTITY Dimension = "Percent" Unit = "unitValue">
+                                        <REAL>0.001</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "PercentTimeRefracGrad">
+                                    <QUANTITY Dimension = "Percent" Unit = "unitValue">
+                                        <REAL>0.1</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "SurfaceTemperature">
+                                    <QUANTITY Dimension = "Temperature" Unit = "K">
+                                        <REAL>273.15</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                            </SCOPE>
+                        </VAR>
+                    </VAR>
+                    <VAR name = "UseRainModel">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "RainModel">
+                        <VAR name = "ITU-R_P618-10">
+                            <SCOPE Class = "RainLossModel">
+                                <VAR name = "Version">
+                                    <STRING>&quot;1.0.0 a&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ComponentName">
+                                    <STRING>&quot;ITU-R_P618-10&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Description">
+                                    <STRING>&quot;ITU-R P618-10 rain model&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Type">
+                                    <STRING>&quot;ITU-R P618-10&quot;</STRING>
+                                </VAR>
+                                <VAR name = "UserComment">
+                                    <STRING>&quot;ITU-R P618-10 rain model&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ReadOnly">
+                                    <BOOL>false</BOOL>
+                                </VAR>
+                                <VAR name = "Clonable">
+                                    <BOOL>true</BOOL>
+                                </VAR>
+                                <VAR name = "Category">
+                                    <STRING>&quot;&quot;</STRING>
+                                </VAR>
+                                <VAR name = "SurfaceTemperature">
+                                    <QUANTITY Dimension = "Temperature" Unit = "K">
+                                        <REAL>273.15</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                            </SCOPE>
+                        </VAR>
+                    </VAR>
+                    <VAR name = "UseAtmosAbsorptionModel">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "AtmosAbsorptionModel">
+                        <VAR name = "Simple_Satcom">
+                            <SCOPE Class = "AtmosphericAbsorptionModel">
+                                <VAR name = "Version">
+                                    <STRING>&quot;1.0.1 a&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ComponentName">
+                                    <STRING>&quot;Simple_Satcom&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Description">
+                                    <STRING>&quot;Simple Satcom gaseous absorption model&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Type">
+                                    <STRING>&quot;Simple Satcom&quot;</STRING>
+                                </VAR>
+                                <VAR name = "UserComment">
+                                    <STRING>&quot;Simple Satcom gaseous absorption model&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ReadOnly">
+                                    <BOOL>false</BOOL>
+                                </VAR>
+                                <VAR name = "Clonable">
+                                    <BOOL>true</BOOL>
+                                </VAR>
+                                <VAR name = "Category">
+                                    <STRING>&quot;@Top&quot;</STRING>
+                                </VAR>
+                                <VAR name = "SurfaceTemperature">
+                                    <QUANTITY Dimension = "Temperature" Unit = "K">
+                                        <REAL>293.15</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "WaterVaporConcentration">
+                                    <QUANTITY Dimension = "Density" Unit = "g*m^-3">
+                                        <REAL>7.5</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                            </SCOPE>
+                        </VAR>
+                    </VAR>
+                    <VAR name = "UseUrbanTerresPropLossModel">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "UrbanTerresPropLossModel">
+                        <VAR name = "Two_Ray">
+                            <SCOPE Class = "UrbanTerrestrialPropagationLossModel">
+                                <VAR name = "Version">
+                                    <STRING>&quot;1.0.0 a&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ComponentName">
+                                    <STRING>&quot;Two_Ray&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Description">
+                                    <STRING>&quot;Two Ray (Fourth Power Law) atmospheric absorption model&quot;</STRING>
+                                </VAR>
+                                <VAR name = "Type">
+                                    <STRING>&quot;Two Ray&quot;</STRING>
+                                </VAR>
+                                <VAR name = "UserComment">
+                                    <STRING>&quot;Two Ray (Fourth Power Law) atmospheric absorption model&quot;</STRING>
+                                </VAR>
+                                <VAR name = "ReadOnly">
+                                    <BOOL>false</BOOL>
+                                </VAR>
+                                <VAR name = "Clonable">
+                                    <BOOL>true</BOOL>
+                                </VAR>
+                                <VAR name = "Category">
+                                    <STRING>&quot;&quot;</STRING>
+                                </VAR>
+                                <VAR name = "SurfaceTemperature">
+                                    <QUANTITY Dimension = "Temperature" Unit = "K">
+                                        <REAL>273.15</REAL>
+                                    </QUANTITY>
+                                </VAR>
+                                <VAR name = "LossFactor">
+                                    <REAL>1</REAL>
+                                </VAR>
+                            </SCOPE>
+                        </VAR>
+                    </VAR>
+                    <VAR name = "UseCustomA">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "UseCustomB">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                    <VAR name = "UseCustomC">
+                        <BOOL>false</BOOL>
+                    </VAR>
+                </SCOPE>
+            </VAR>
+        </VAR>
+        <VAR name = "EarthTemperature">
+            <QUANTITY Dimension = "Temperature" Unit = "K">
+                <REAL>290</REAL>
+            </QUANTITY>
+        </VAR>
+        <VAR name = "RainOutagePercent">
+            <PROP name = "FormatString">
+                <STRING>&quot;%#6.3f&quot;</STRING>
+            </PROP>
+            <REAL>0.1</REAL>
+        </VAR>
+        <VAR name = "ActiveCommSystem">
+            <LINKTOOBJ>
+                <STRING>&quot;None&quot;</STRING>
+            </LINKTOOBJ>
+        </VAR>
+    </SCOPE>
+</VAR>    END RfEnv
     
     BEGIN CommRad
     END CommRad
@@ -1250,13 +1485,20 @@ BEGIN SubObjects
 Class Satellite
 
 	Circular_EqPro
+	Circular_EqRetro
 	Circular_IncPro
+	Circular_IncRetro
 	Circular_Polar
 	Elliptic_EqPro
+	Elliptic_EqRetro
 	Elliptic_IncPro
+	Elliptic_IncRetro
 	Elliptic_Polar
 	Hyperbolic_EqPro
+	Hyperbolic_EqRetro
 	Hyperbolic_IncPro
+	Hyperbolic_IncPro_Mars
+	Hyperbolic_IncRetro
 	Hyperbolic_Polar
 
 END Class
@@ -1270,8 +1512,14 @@ BEGIN References
     Instance Satellite/Circular_EqPro
         Satellite/Circular_EqPro
     END Instance
+    Instance Satellite/Circular_EqRetro
+        Satellite/Circular_EqRetro
+    END Instance
     Instance Satellite/Circular_IncPro
         Satellite/Circular_IncPro
+    END Instance
+    Instance Satellite/Circular_IncRetro
+        Satellite/Circular_IncRetro
     END Instance
     Instance Satellite/Circular_Polar
         Satellite/Circular_Polar
@@ -1279,8 +1527,14 @@ BEGIN References
     Instance Satellite/Elliptic_EqPro
         Satellite/Elliptic_EqPro
     END Instance
+    Instance Satellite/Elliptic_EqRetro
+        Satellite/Elliptic_EqRetro
+    END Instance
     Instance Satellite/Elliptic_IncPro
         Satellite/Elliptic_IncPro
+    END Instance
+    Instance Satellite/Elliptic_IncRetro
+        Satellite/Elliptic_IncRetro
     END Instance
     Instance Satellite/Elliptic_Polar
         Satellite/Elliptic_Polar
@@ -1288,8 +1542,17 @@ BEGIN References
     Instance Satellite/Hyperbolic_EqPro
         Satellite/Hyperbolic_EqPro
     END Instance
+    Instance Satellite/Hyperbolic_EqRetro
+        Satellite/Hyperbolic_EqRetro
+    END Instance
     Instance Satellite/Hyperbolic_IncPro
         Satellite/Hyperbolic_IncPro
+    END Instance
+    Instance Satellite/Hyperbolic_IncPro_Mars
+        Satellite/Hyperbolic_IncPro_Mars
+    END Instance
+    Instance Satellite/Hyperbolic_IncRetro
+        Satellite/Hyperbolic_IncRetro
     END Instance
     Instance Satellite/Hyperbolic_Polar
         Satellite/Hyperbolic_Polar

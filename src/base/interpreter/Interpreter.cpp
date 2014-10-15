@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -796,6 +796,19 @@ void Interpreter::UpdateView(Integer type)
 void Interpreter::CloseCurrentProject()
 {}
 
+
+//------------------------------------------------------------------------------
+// void ResetIconFile()
+//------------------------------------------------------------------------------
+/*
+ * Some GMAT UiInterpreters need to reset icon file.  This method is
+ * overridden to perform run complete actions for those interpreters.
+ */
+//------------------------------------------------------------------------------
+void Interpreter::ResetIconFile()
+{} 
+
+
 //------------------------------------------------------------------------------
 // void StartMatlabServer()
 //------------------------------------------------------------------------------
@@ -940,14 +953,14 @@ GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
 GmatBase* Interpreter::CreateObject(const std::string &type,
                                     const std::string &name,
                                     Integer manage, bool createDefault,
-                                    bool includeLineOnError)
+                                    bool includeLineOnError, bool showWarning)
 {
    #ifdef DEBUG_CREATE_OBJECT
    MessageInterface::ShowMessage
       ("Interpreter::CreateObject() type=<%s>, name=<%s>, manage=%d, createDefault=%d, "
-       "includeLineOnError=%d\n   continueOnError=%d, inCommandMode=%d, currentFunction=<%p>\n",
-       type.c_str(), name.c_str(), manage, createDefault, includeLineOnError, continueOnError,
-       inCommandMode, currentFunction);
+       "includeLineOnError=%d, showWarning=%d\n   continueOnError=%d, inCommandMode=%d, "
+       "currentFunction=<%p>\n", type.c_str(), name.c_str(), manage, createDefault,
+       includeLineOnError, showWarning, continueOnError, inCommandMode, currentFunction);
    #endif
    
    debugMsg = "In CreateObject()";
@@ -1018,7 +1031,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
                InterpreterException ex("");
                ex.SetDetails("%s object named \"%s\" already exists",
                              type.c_str(), name.c_str());
-               HandleError(ex, true, true);
+               HandleError(ex, true, true, showWarning);
                return obj;
             }
 //         }
@@ -4212,7 +4225,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    }
    else
    {
-      // If firist RHS char is "-" sign, use without it in finding name.
+      // If first RHS char is "-" sign, use without it in finding name.
       // This is due to backward propagation. For example,
       // Propagate -prop(Sat1, Sat2, {Sat1.Periapsis})
       std::string newName = rhs;
@@ -6909,29 +6922,14 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    }
    else if (pmType == "SRP" || pmType == "RelativisticCorrection")
    {
-      if (pmType == "SRP")
-      {
-         id = obj->GetParameterID("SRP");
-         type = obj->GetParameterType(id);
-         retval = SetPropertyValue(obj, id, type, value);
-         
-         if (retval && value != "On")
-            return true;
-         else if (!retval)
-            return false;
-      }
-      
-      if (pmType == "RelativisticCorrection")
-      {
-         id = obj->GetParameterID("RelativisticCorrection");
-         type = obj->GetParameterType(id);
-         retval = SetPropertyValue(obj, id, type, value);
+      id     = obj->GetParameterID(pmType);
+      type   = obj->GetParameterType(id);
+      retval = SetPropertyValue(obj, id, type, value);
 
-         if (retval && value != "On")
-            return true;
-         else if (!retval)
-            return false;
-      }
+      if (retval && value != "On")
+         return true;
+      else if (!retval)
+         return false;
       
       // Create PhysicalModel
       std::string forceName = pmType + "." + centralBodyName;
@@ -7015,6 +7013,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
 
    if (FindPropertyID(forceModel, propName, &owner, propId, propType))
    {
+      #ifdef DEBUG_SET_FORCE_MODEL
+         MessageInterface::ShowMessage
+            ("   Found property ID = %d\n", propId);
+      #endif
       id = owner->GetParameterID(propName);
       type = owner->GetParameterType(id);
 
@@ -7063,6 +7065,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    }
    else
    {
+      #ifdef DEBUG_SET_FORCE_MODEL
+         MessageInterface::ShowMessage
+            ("   Trying owned objects from ODEModel ... \n");
+      #endif
       // Try owned object from ODEModel
       for (int i = 0; i < forceModel->GetOwnedObjectCount(); i++)
       {
@@ -7916,9 +7922,10 @@ AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
 
 
 //------------------------------------------------------------------------------
-// void HandleError(const BaseException &e, bool writeLine, bool warning ...)
+// void HandleError(const BaseException &e, bool writeLine, bool isWarning ...)
 //------------------------------------------------------------------------------
-void Interpreter::HandleError(const BaseException &e, bool writeLine, bool warning)
+void Interpreter::HandleError(const BaseException &e, bool writeLine, bool isWarning,
+                              bool showWarning)
 {
    if (writeLine)
    {
@@ -7935,11 +7942,11 @@ void Interpreter::HandleError(const BaseException &e, bool writeLine, bool warni
       lineNumber = GmatStringUtil::ToString(lineNum);
       currentLine = theReadWriter->GetCurrentLine();
       
-      HandleErrorMessage(e, lineNumber, currentLine, writeLine, warning);
+      HandleErrorMessage(e, lineNumber, currentLine, writeLine, isWarning, showWarning);
    }
    else
    {
-      HandleErrorMessage(e, "", "", writeLine, warning);
+      HandleErrorMessage(e, "", "", writeLine, isWarning, showWarning);
    }
 }
 
@@ -7950,11 +7957,11 @@ void Interpreter::HandleError(const BaseException &e, bool writeLine, bool warni
 void Interpreter::HandleErrorMessage(const BaseException &e,
                                      const std::string &lineNumber,
                                      const std::string &line,
-                                     bool writeLine, bool warning)
+                                     bool writeLine, bool isWarning, bool showWarning)
 {
    std::string currMsg = "";
    std::string msgKind = "**** ERROR **** ";
-   if (warning)
+   if (isWarning)
       msgKind = "*** WARNING *** ";
    
    // Added function name in the message (loj: 2008.08.29)
@@ -7991,8 +7998,11 @@ void Interpreter::HandleErrorMessage(const BaseException &e,
    }
    else
    {
-      if (warning)
-         MessageInterface::ShowMessage(msg);
+      if (isWarning)
+      {
+         if (showWarning)
+            MessageInterface::ShowMessage(msg);
+      }
       else
       {
          // remove duplicate exception message

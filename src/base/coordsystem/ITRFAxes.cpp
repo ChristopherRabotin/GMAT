@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -217,8 +217,16 @@ bool ITRFAxes::Initialize()
    if (eop == NULL)
    {
 	   FileManager* fm = FileManager::Instance();
-	   std::string name = fm->GetFilename("EOP_FILE");
-	   EopFile* eopFile = new EopFile(name);
+      // Changed to use FileManager::FindPath() (LOJ: 2014.07.01)
+	   std::string fileName = fm->GetFilename("EOP_FILE");
+      std::string fileNameFullPath = fm->FindPath("", "EOP_FILE", true, true, true);
+      if (fileNameFullPath == "")
+         throw CoordinateSystemException("**** ERROR **** The EOP file '" + fileName + "' does not exist\n");
+      
+	   EopFile* eopFile = new EopFile(fileNameFullPath);
+      if (eopFile == NULL)
+         throw CoordinateSystemException("**** ERROR **** Cannot open EOP file '" + fileName + "'\n");
+      
 	   eopFile->Initialize();
 	   SetEopFile(eopFile);
    }

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -19,9 +19,9 @@
 #include <wx/utils.h>
 #include <wx/config.h>
 #include "GmatDialog.hpp"
-#include "GmatMainFrame.hpp"
-#include "GmatAppData.hpp"
-#include "FileUtil.hpp"
+#include "GmatMainFrame.hpp"       // for GetHelpController(), etc
+#include "GmatAppData.hpp"         // for SetIcon(), etc.
+#include "FileUtil.hpp"            // for GetPathSeparator(), etc.
 #include "StringUtil.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
@@ -230,14 +230,14 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
    {
       wxString prefix = "Scripting for ";
       objLink = GetName().c_str();
-	  if (objLink.Find(prefix) != wxNOT_FOUND)
+      if (objLink.Find(prefix) != wxNOT_FOUND)
 		objLink = objLink.Mid(prefix.size());
       GmatBase *obj = theGuiInterpreter->GetConfiguredObject(objLink.c_str());
       if (obj != NULL)
          objLink = obj->GetTypeName().c_str();
    }
    
-    wxHelpController *theHelpController = GmatAppData::Instance()->GetMainFrame()->GetHelpController();
+   wxHelpController *theHelpController = GmatAppData::Instance()->GetMainFrame()->GetHelpController();
 	if (theHelpController != NULL)
 	{
 		#ifdef DEBUG_GMAT_DIALOG_HELP
@@ -342,32 +342,11 @@ void GmatDialog::ShowData()
    theDialogSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
 
-   // Set icon if icon file is in the start up file
-   FileManager *fm = FileManager::Instance();
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #if defined __WXMSW__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-      #elif defined __WXGTK__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAC__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-      #endif
-   }
-   catch (GmatBaseException &)
-   {
-      //MessageInterface::ShowMessage(e.GetMessage());
-   }
-
-   CenterOnScreen(wxBOTH);
-
-   // We want always enable OK button
-   //theOkButton->Disable();
-   //theHelpButton->Disable(); //loj: for future build
-
+   // Set GMAT main icon
+   GmatAppData::Instance()->SetIcon(this, "GmatDialog");
+   
+   CenterOnScreen(wxBOTH);   
    LoadData();
-
 }
 
 

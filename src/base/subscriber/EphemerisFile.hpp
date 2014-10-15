@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -39,11 +39,11 @@ public:
    EphemerisFile& operator=(const EphemerisFile&);
    
    // methods for this class
-   std::string          GetFileName();
+   void                 SetProperFileExtension();
    virtual void         ValidateParameters(bool forInitialization);
    
    // methods inherited from Subscriber
-   virtual void         SetProvider(GmatBase *provider);
+   virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
    // methods inherited from GmatBase
    virtual bool         Validate();
@@ -114,9 +114,9 @@ protected:
    StateArray  stateArray;
    
    /// ephemeris output path from the startup file
-   std::string oututPath;
+   std::string outputPath;
    /// ephmeris full file name including the path
-   std::string filePath;
+   std::string fullPathFileName;
    std::string spacecraftName;
    std::string fileName;
    std::string fileFormat;
@@ -130,6 +130,7 @@ protected:
    std::string outCoordSystemName;
    std::string outputFormat;
    bool writeEphemeris;
+   bool usingDefaultFileName;
    /// for propagator change
    std::string prevPropName;
    std::string currPropName;
@@ -151,11 +152,14 @@ protected:
    Integer     waitCount;
    Integer     afterFinalEpochCount;
    Integer     toggleStatus;
-   
+   Integer     propIndicator;
+   Real        prevPropDirection;
+   Real        currPropDirection;
    Real        stepSizeInA1Mjd;
    Real        stepSizeInSecs;
    Real        initialEpochA1Mjd;
    Real        finalEpochA1Mjd;
+   Real        blockBeginA1Mjd;
    Real        nextOutEpochInSecs;
    Real        nextReqEpochInSecs;
    Real        currEpochInDays;
@@ -191,15 +195,16 @@ protected:
    bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
    
-   Gmat::RunState prevRunState;
-   
    CoordinateConverter coordConverter;
    
+   /// number of SPK segments that have been written
+   Integer     numSPKSegmentsWritten;
+
    FileType    fileType;
    
    /// for maneuver handling
    ObjectArray maneuversHandled;
-      
+   
    /// output data stream
    std::ofstream      dstream;
    
@@ -221,9 +226,9 @@ protected:
    static StringArray interpolatorTypeList;
    /// Avilable output format list
    static StringArray outputFormatList;
-   
+      
    // Initialization
-   void         InitializeData();
+   void         InitializeData(bool saveEpochInfo = false);
    void         CreateInterpolator();
    void         CreateEphemerisFile();
    void         CreateSpiceKernelWriter();
@@ -243,6 +248,7 @@ protected:
    
    // Interpolation
    void         RestartInterpolation(const std::string &comments = "",
+                                     bool saveEpochInfo = false,
                                      bool writeAfterData = true,
                                      bool canFinalize = false,
                                      bool ignoreBlankComments = true);
@@ -316,14 +322,20 @@ protected:
    void         RemoveEpochAlreadyWritten(Real epochInSecs, const std::string &msg);
    void         AddNextEpochToWrite(Real epochInSecs, const std::string &msg);
    
+   // Event checking
+   bool         IsEventFeasible(bool checkForNoData = true);
+   
    // CoordinateSystem conversion
    void         ConvertState(Real epochInDays, const Real inState[6],
                              Real outState[6]);
    
-   // for time formatting
+   // Time formatting
    std::string  ToUtcGregorian(Real epoch, bool inDays = false, Integer format = 2);
    
-   // for debugging
+   // Error message formatting
+   void FormatErrorMessage(std::string &ephemMsg, std::string &errMsg);
+   
+   // Debug output
    void         DebugWriteTime(const std::string &msg, Real epoch, bool inDays = false,
                                Integer format = 2);
    void         DebugWriteOrbit(const std::string &msg, Real epoch, const Real state[6],
@@ -332,7 +344,7 @@ protected:
                                 Rvector6 *state, bool logOnly = false);
    void         DebugWriteEpochsOnWaiting(const std::string &msg = "");
    
-   // for deprecated field
+   // Deprecated field
    void         WriteDeprecatedMessage(Integer id) const;
    
    // methods inherited from Subscriber
@@ -341,7 +353,7 @@ protected:
    virtual void HandleManeuvering(GmatBase *originator, bool maneuvering, Real epoch,
                                   const StringArray &satNames,
                                   const std::string &desc);
-   virtual void HandlePropagatorChange(GmatBase *provider);
+   virtual void HandlePropagatorChange(GmatBase *provider, Real epochInMjd);
    virtual void HandleSpacecraftPropertyChange(GmatBase *originator, Real epoch,
                                                const std::string &satName,
                                                const std::string &desc);
@@ -349,6 +361,7 @@ protected:
    {
       SPACECRAFT = SubscriberParamCount,
       FILENAME,
+      FULLPATH_FILENAME,
       FILE_FORMAT,
       EPOCH_FORMAT,
       INITIAL_EPOCH,

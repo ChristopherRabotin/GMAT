@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -406,12 +406,48 @@ void VisualModelPanel::Create()
 //------------------------------------------------------------------------------
 void VisualModelPanel::LoadData()
 {
+   std::string modelFile = currentSpacecraft->GetModelFile();
+   
    #ifdef DEBUG_PANEL_LOAD
-   MessageInterface::ShowMessage("VisualModelPanel::LoadData() entered.\n");
+   MessageInterface::ShowMessage
+      ("VisualModelPanel::LoadData() entered.   modelFile() = '%s'\n",
+       modelFile().c_str());
    #endif
    
+   modelTextCtrl->SetValue(wxT(modelFile.c_str()));
+   
+   Real x,y,z;
+   x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"));
+   y = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"));
+   z = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"));
+   xTranValueText->SetLabel(wxString::Format(wxT("%f"), x));
+   yTranValueText->SetLabel(wxString::Format(wxT("%f"), y));
+   zTranValueText->SetLabel(wxString::Format(wxT("%f"), z));
+   xTranSlider->SetValue(x*100);
+   yTranSlider->SetValue(y*100);
+   zTranSlider->SetValue(z*100);
+   
+   x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"));
+   y = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"));
+   z = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"));
+   xRotValueText->SetLabel(wxString::Format(wxT("%f"), x));
+   yRotValueText->SetLabel(wxString::Format(wxT("%f"), y));
+   zRotValueText->SetLabel(wxString::Format(wxT("%f"), z));
+   xRotSlider->SetValue(x);
+   yRotSlider->SetValue(y);
+   zRotSlider->SetValue(z);
+   
+   x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
+   scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
+   if (x < 1)
+   {
+      int m = scaleSlider->GetMax();
+      x = (float)(m*x)-m;
+   }
+   scaleSlider->SetValue(x);
+   
    InitializeCanvas();
-	if (currentSpacecraft->modelFile == "")
+	if (currentSpacecraft->GetModelFile() == "")
 	{
 		ToggleInterface(false);
 		interfaceEnabled = false;
@@ -485,46 +521,17 @@ void VisualModelPanel::ToggleInterface(bool enable)
 //------------------------------------------------------------------------------
 void VisualModelPanel::InitializeCanvas()
 {
+   std::string modelFileFullPath = currentSpacecraft->GetModelFileFullPath();
    #ifdef DEBUG_INITIALIZE
    MessageInterface::ShowMessage
-      ("==> VisualModelPanel::InitializeCanvas() entered\n   currentSpacecraft->modelFile = '%s'\n",
-       (currentSpacecraft->modelFile).c_str());
+      ("VisualModelPanel::InitializeCanvas() entered\n   modelFileFullPath() = '%s'\n",
+       modelFileFullPath().c_str());
    #endif
    
    Real x,y,z;
-   if (currentSpacecraft->modelFile != "")
+   if (modelFileFullPath != "")
    {
-      modelCanvas->LoadModel(currentSpacecraft->modelFile.c_str());
-      x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"));
-      y = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetY"));
-      z = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetZ"));
-      xTranValueText->SetLabel(wxString::Format(wxT("%f"), x));
-      yTranValueText->SetLabel(wxString::Format(wxT("%f"), y));
-      zTranValueText->SetLabel(wxString::Format(wxT("%f"), z));
-      xTranSlider->SetValue(x*100);
-      yTranSlider->SetValue(y*100);
-      zTranSlider->SetValue(z*100);
-      
-      x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationX"));
-      y = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationY"));
-      z = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelRotationZ"));
-      xRotValueText->SetLabel(wxString::Format(wxT("%f"), x));
-      yRotValueText->SetLabel(wxString::Format(wxT("%f"), y));
-      zRotValueText->SetLabel(wxString::Format(wxT("%f"), z));
-      xRotSlider->SetValue(x);
-      yRotSlider->SetValue(y);
-      zRotSlider->SetValue(z);
-      
-      x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelScale"));
-      scaleValueText->SetLabel(wxString::Format(wxT("%f"), x));
-      if (x < 1)
-      {
-         int m = scaleSlider->GetMax();
-         x = (float)(m*x)-m;
-      }
-      scaleSlider->SetValue(x);
-      
-      modelTextCtrl->SetValue(wxT(currentSpacecraft->modelFile.c_str()));
+      modelCanvas->LoadModel(modelFileFullPath.c_str());
       modelCanvas->Refresh(false);
    }
    
@@ -724,7 +731,7 @@ void VisualModelPanel::UpdateTextCtrl(int id)
    case (ID_MODELFILE_TEXT):
       // Load the model indicated by the path
       modelCanvas->LoadModel(modelTextCtrl->GetValue());
-      currentSpacecraft->modelFile = modelTextCtrl->GetValue();
+      currentSpacecraft->SetStringParameter("ModelFile", modelTextCtrl->GetValue().c_str());
       break;
       
 	case (ID_ROT_TEXT):
@@ -822,7 +829,7 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
          // Set the textctrl to display the selected path
          modelTextCtrl->SetValue(path);         
          // Save to cloned base spacecraft
-         currentSpacecraft->modelFile = path;         
+         currentSpacecraft->SetStringParameter("ModelFile", path.c_str());     
          // Auto scale model so that model can be shown
          AutoScaleModel();
          

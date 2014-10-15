@@ -152,6 +152,8 @@ CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
     adapter/TrackingDataAdapter.o \
     adapter/RangeAdapterKm.o \
+    adapter/DSNRangeAdapter.o \
+    adapter/DopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
     estimator/Estimator.o \

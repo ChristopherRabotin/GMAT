@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -99,21 +99,21 @@ Sensor::Sensor(const Sensor & sensor) :
    isTransmitted2  (sensor.isTransmitted2),
    sensorID        ("")
 {
-	signal1 = NULL;
-	if (sensor.signal1 != NULL)
-	{
-		signal1 = new Signal();
-		signal1->SetEpoch(sensor.signal1->GetEpoch());
-		signal1->SetValue(sensor.signal1->GetValue());
-	}
+   signal1 = NULL;
+   if (sensor.signal1 != NULL)
+   {
+      signal1 = new Signal();
+      signal1->SetEpoch(sensor.signal1->GetEpoch());
+      signal1->SetValue(sensor.signal1->GetValue());
+   }
 
-	signal2 = NULL;
-	if (sensor.signal2 != NULL)
-	{
-		signal2 = new Signal();
-		signal2->SetEpoch(sensor.signal2->GetEpoch());
-		signal2->SetValue(sensor.signal2->GetValue());
-	}
+   signal2 = NULL;
+   if (sensor.signal2 != NULL)
+   {
+      signal2 = new Signal();
+      signal2->SetEpoch(sensor.signal2->GetEpoch());
+      signal2->SetValue(sensor.signal2->GetValue());
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -141,34 +141,34 @@ Sensor & Sensor::operator=(const Sensor & sensor)
 
       if (sensor.signal1 != NULL)
       {
-      	if (signal1 != NULL)
-      		*signal1 = *(sensor.signal1);
-      	else
-      		signal1 = new Signal(*(sensor.signal1));
+         if (signal1 != NULL)
+            *signal1 = *(sensor.signal1);
+         else
+            signal1 = new Signal(*(sensor.signal1));
       }
       else
       {
-      	if (signal1 != NULL)
-      	{
-      		delete signal1;
-      		signal1 = NULL;
-      	}
+         if (signal1 != NULL)
+         {
+            delete signal1;
+            signal1 = NULL;
+         }
       }
 
       if (sensor.signal2 != NULL)
       {
-      	if (signal2 != NULL)
-      		*signal2 = *(sensor.signal2);
-      	else
-      		signal2 = new Signal(*(sensor.signal2));
+         if (signal2 != NULL)
+            *signal2 = *(sensor.signal2);
+         else
+            signal2 = new Signal(*(sensor.signal2));
       }
       else
       {
-      	if (signal2 != NULL)
-      	{
-      		delete signal2;
-      		signal2 = NULL;
-      	}
+         if (signal2 != NULL)
+         {
+            delete signal2;
+            signal2 = NULL;
+         }
       }
 
       sensorID       = "";
@@ -277,10 +277,10 @@ Gmat::ParameterType Sensor::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Sensor::GetParameterUnit(const Integer id) const
 {
-	if (id == HARDWARE_DELAY)
-		return "s";					// Unit of hardware delay is (s) second
-	if (id == SENSOR_ID)
-		return "";					// Sensor ID has no unit
+   if (id == HARDWARE_DELAY)
+      return "s";               // Unit of hardware delay is (s) second
+   if (id == SENSOR_ID)
+      return "";                // Sensor ID has no unit
 
    return Hardware::GetParameterUnit(id);
 }
@@ -496,7 +496,7 @@ Real Sensor::GetRealParameter(const Integer id) const
 Real Sensor::SetRealParameter(const Integer id, const Real value, const Integer index)
 {
    #ifdef DEBUG_SET_REAL_PARA
-	  MessageInterface::ShowMessage("Sensor::SetRealParameter(id = %d, value = %le, index = %d)\n",id, value, index);
+      MessageInterface::ShowMessage("Sensor::SetRealParameter(id = %d, value = %le, index = %d)\n",id, value, index);
    #endif
 
    switch (id)
@@ -652,17 +652,17 @@ Real Sensor::GetDelay(Integer whichOne)
 
 bool Sensor::SetDelay(Real delay, Integer whichOne)
 {
-	switch(whichOne)
-	{
-	case 0:
-		hardwareDelay1 = delay;
-		return true;
-	case 1:
-		hardwareDelay2 = delay;
-		return true;
-	default:
-		return false;
-	}
+   switch(whichOne)
+   {
+   case 0:
+      hardwareDelay1 = delay;
+      return true;
+   case 1:
+      hardwareDelay2 = delay;
+      return true;
+   default:
+      return false;
+   }
 }
 
 //------------------------------------------------------------------------------

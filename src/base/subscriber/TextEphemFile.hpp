@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -30,7 +30,7 @@ class GMAT_API TextEphemFile : public ReportFile
 {
 public:
    TextEphemFile(const std::string &type, const std::string &name,
-                 const std::string &fileName = "", 
+                 const std::string &fname = "", 
                  Parameter *firstVarParam = NULL);
    
    virtual ~TextEphemFile(void);

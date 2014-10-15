@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -117,7 +117,9 @@ public:
    // Debug Parameters
    bool IsWritingParameterInfo();
    void SetWriteParameterInfo(bool flag);
-
+   bool IsWritingFilePathInfo();
+   void SetWriteFilePathInfo(bool flag);
+   
    // Write GMAT keyword when saving to script or showing script
    bool IsWritingGmatKeyword();
    void SetWriteGmatKeyword(bool flag);
@@ -243,6 +245,7 @@ private:
    bool isMatlabDebugOn;
    bool isMissionTreeDebugOn;
    bool isWritingParameterInfo;
+   bool isWritingFilePathInfo;
    bool isWritingGmatKeyword;
    
    bool isEventLocationAvailable;

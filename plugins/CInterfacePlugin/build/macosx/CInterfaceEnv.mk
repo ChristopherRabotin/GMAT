@@ -61,7 +61,7 @@ PROFILE_FLAGS =
 endif
 
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup -fPIC $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup -fPIC $(MAC_ARCHITECTURE_FLAGS)
 
 # --out-implib
 

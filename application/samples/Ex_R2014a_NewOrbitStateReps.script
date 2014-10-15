@@ -1,0 +1,64 @@
+Create Spacecraft aSat1;
+GMAT aSat1.DisplayStateType = ModifiedEquinoctial;
+GMAT aSat1.SemilatusRectum = 7187.60430675539;
+GMAT aSat1.ModEquinoctialF = -0.003922778585859663;
+GMAT aSat1.ModEquinoctialG = -0.02423431419337062;
+GMAT aSat1.ModEquinoctialH = 0.06716454898232072;
+GMAT aSat1.ModEquinoctialK = -0.09038834725719359;
+GMAT aSat1.TLONG = 0.6931030628392251;
+
+Create Spacecraft aSat2;
+GMAT aSat2.DisplayStateType = AlternateEquinoctial;
+GMAT aSat2.SMA = 7191.938817629013;
+GMAT aSat2.EquinoctialH = -0.02423431419337062;
+GMAT aSat2.EquinoctialK = -0.003922778585859663;
+GMAT aSat2.AltEquinoctialP = -0.08982062789020774;
+GMAT aSat2.AltEquinoctialQ = 0.06674269576352432;
+GMAT aSat2.MLONG = 357.9131803707105;
+
+Create Spacecraft aSat3;
+GMAT aSat3.DisplayStateType = Delaunay;
+GMAT aSat3.Delaunayl = 97.10782663991999;
+GMAT aSat3.Delaunayg = 314.1905515359921;
+GMAT aSat3.Delaunayh = 306.6148021947984;
+GMAT aSat3.DelaunayL = 53541.66590560955;
+GMAT aSat3.DelaunayG = 53525.52895581695;
+GMAT aSat3.DelaunayH = 52184.99999999999;
+
+Create Spacecraft aSat4;
+GMAT aSat4.DisplayStateType = OutgoingAsymptote;
+GMAT aSat4.OutgoingRadPer = 90000;
+GMAT aSat4.OutgoingC3Energy = 1.328668138333331;
+GMAT aSat4.OutgoingRHA = 41.20469589091438;
+GMAT aSat4.OutgoingDHA = 12.81023172339924;
+GMAT aSat4.OutgoingBVAZI = 88.98024180552517;
+GMAT aSat4.TA = 99.88774933204918;
+
+Create Spacecraft aSat5;
+GMAT aSat5.DisplayStateType = IncomingAsymptote;
+GMAT aSat5.IncomingRadPer = 90000;
+GMAT aSat5.IncomingC3Energy = 1.328668138333331;
+GMAT aSat5.IncomingRHA = 120.6720147637603;
+GMAT aSat5.IncomingDHA = 1.352950864480033;
+GMAT aSat5.IncomingBVAZI = 77.22015101770275;
+GMAT aSat5.TA = 99.88774933204918;
+
+Create Spacecraft aSat6;
+GMAT aSat6.DisplayStateType = BrouwerMeanShort;
+GMAT aSat6.BrouwerShortSMA = 7192.164618505219;
+GMAT aSat6.BrouwerShortECC = 0.0247807440011103;
+GMAT aSat6.BrouwerShortINC = 12.85242052152975;
+GMAT aSat6.BrouwerShortRAAN = 306.5861302172368;
+GMAT aSat6.BrouwerShortAOP = 311.5753129952481;
+GMAT aSat6.BrouwerShortMA = 99.74270405406094;
+
+Create Spacecraft aSat7;
+GMAT aSat7.DisplayStateType = BrouwerMeanLong;
+GMAT aSat7.BrouwerLongSMA = 7192.167505859423;
+GMAT aSat7.BrouwerLongECC = 0.02492665074866796;
+GMAT aSat7.BrouwerLongINC = 12.85150805080051;
+GMAT aSat7.BrouwerLongRAAN = 306.5823973514623;
+GMAT aSat7.BrouwerLongAOP = 311.2839905382243;
+GMAT aSat7.BrouwerLongMA = 100.0375027229524;
+
+BeginMissionSequence

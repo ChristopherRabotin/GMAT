@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -23,7 +23,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-#include "Parameter.hpp"
+#include "Parameter.hpp" // for namespace GmatParam::
 
 /**
  * Moved out of the RefObjType class so that the Visual Studio exports could be implemented
@@ -79,9 +79,13 @@ public:
    RefData& operator= (const RefData &rd);
    virtual ~RefData();
    
+   void                 SetParameter(Parameter *param);
+   Parameter*           GetParameter();
+   
    bool                 SetName(const std::string &newName,
                                 const std::string &oldName = "");
    GmatBase*            GetSpacecraft();
+   GmatBase*            GetParameterOwner();
    
    Integer              GetNumRefObjects() const;
    
@@ -104,6 +108,7 @@ public:
 
 protected:
 
+   Parameter   *mParameter;
    std::string mActualParamName;
    std::string mParamOwnerName;
    std::string mParamDepName;

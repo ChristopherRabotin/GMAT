@@ -115,6 +115,9 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    initializeLegendLoc (true),
    xLabelPrecision(8),
    yLabelPrecision(6),
+   plotArea(),  // Fixed unitialized value error
+   mouseRect(),
+   legendRect(),
    legendColumns  (1)
 {
    wxPaintDC dc(this);

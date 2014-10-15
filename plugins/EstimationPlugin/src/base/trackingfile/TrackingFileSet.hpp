@@ -53,6 +53,14 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
@@ -123,9 +131,9 @@ public:
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
 
-   virtual void SetSolarSystem(SolarSystem *ss);
-   virtual void SetPropagator(PropSetup *ps);
-   virtual bool Initialize();
+   virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetPropagator(PropSetup *ps);
+   virtual bool         Initialize();
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
 protected:
@@ -164,10 +172,21 @@ protected:
    bool useRelativityCorrection;                               // made changes by TUAN NGUYEN
    /// Flag for the inclusion of ET-TAI correction             // made changes by TUAN NGUYEN
    bool useETminusTAICorrection;                               // made changes by TUAN NGUYEN
-   /// Name of troposphere model                               // made changes by TUAN NGUYEN
-   std::string troposphereModel;                               // made changes by TUAN NGUYEN
-   /// Name of ionosphere model                                // made changes by TUAN NGUYEN
-   std::string ionosphereModel;                                // made changes by TUAN NGUYEN
+   ///// Name of troposphere model                               // made changes by TUAN NGUYEN
+   //std::string troposphereModel;                               // made changes by TUAN NGUYEN
+   ///// Name of ionosphere model                                // made changes by TUAN NGUYEN
+   //std::string ionosphereModel;                                // made changes by TUAN NGUYEN
+
+   /// Noise
+   Real            rangeNoiseSigma;                            // made changes by TUAN NGUYEN
+   std::string     rangeErrorModel;                            // made changes by TUAN NGUYEN
+   Real            dsnrangeNoiseSigma;                         // made changes by TUAN NGUYEN
+   std::string     dsnrangeErrorModel;                         // made changes by TUAN NGUYEN
+   Real            dopplerNoiseSigma;                          // made changes by TUAN NGUYEN
+   std::string     dopplerErrorModel;                          // made changes by TUAN NGUYEN
+
+   /// Range modulo constant                                   // made changes by TUAN NGUYEN
+   Real rangeModulo;                                           // made changes by TUAN NGUYEN
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -188,8 +207,15 @@ protected:
       USELIGHTTIME,
       USE_RELATIVITY,                                       // made changes by TUAN NGUYEN
       USE_ETMINUSTAI,                                       // made changes by TUAN NGUYEN
-      TROPOSPHERE_MODEL,                                    // made changes by TUAN NGUYEN
-      IONOSPHERE_MODEL,                                     // made changes by TUAN NGUYEN
+//      TROPOSPHERE_MODEL,                                    // made changes by TUAN NGUYEN
+//      IONOSPHERE_MODEL,                                     // made changes by TUAN NGUYEN
+      RANGE_NOISESIGMA,                                     // made changes by TUAN NGUYEN
+      RANGE_ERRORMODEL,                                     // made changes by TUAN NGUYEN
+      DSNRANGE_NOISESIGMA,                                  // made changes by TUAN NGUYEN
+      DSNRANGE_ERRORMODEL,                                  // made changes by TUAN NGUYEN
+      DOPPLER_NOISESIGMA,                                   // made changes by TUAN NGUYEN
+      DOPPLER_ERRORMODEL,                                   // made changes by TUAN NGUYEN
+      RANGE_MODULO,                                         // made changes by TUAN NGUYEN
       TrackingFileSetParamCount,
    };
 
@@ -201,7 +227,7 @@ protected:
                                                    MeasurementModelBaseParamCount];      // made changes by TUAN NGUYEN
 
    TrackingDataAdapter *BuildAdapter(const StringArray &strand,
-         const std::string &type);
+         const std::string &type, Integer configIndex);
 };
 
 #endif /* TrackingFileSet_hpp */

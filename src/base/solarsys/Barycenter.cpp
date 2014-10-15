@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -26,6 +26,7 @@
 #include "MessageInterface.hpp"
 #include "GmatDefaults.hpp"
 #include "SolarSystem.hpp"
+#include "ColorTypes.hpp"               // for namespace GmatColor::
 
 //#define DEBUG_BARYCENTER
 //#define DEBUG_BARYCENTER_STATE
@@ -56,7 +57,12 @@ Barycenter::Barycenter(const std::string &itsName) :
    objectTypes.push_back(Gmat::BARYCENTER);
    objectTypeNames.push_back("Barycenter");
    parameterCount = BarycenterParamCount;
-
+   
+   // Set default colors
+   if (itsName == GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME)
+      SetDefaultColors(GmatColor::TEAL, GmatColor::DARK_GRAY);
+   else
+      SetDefaultColors(GmatColor::GOLD, GmatColor::DARK_GRAY);
 }
 
 //------------------------------------------------------------------------------

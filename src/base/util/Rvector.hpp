@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -87,7 +87,7 @@ public:
                                 Integer width = GmatGlobal::DATA_WIDTH,
                                 bool horizontal = true, Integer spacing = 1,
                                 const std::string &prefix = "",
-                                bool appendEol = true) const;
+                                bool appendEol = false) const;
    
    friend Rvector operator*(Real s, const Rvector &v);
    friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);

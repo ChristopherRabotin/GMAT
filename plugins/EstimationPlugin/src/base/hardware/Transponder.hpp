@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -25,13 +25,13 @@
 class ESTIMATION_API Transponder: public RFHardware
 {
 public:
-	Transponder(const std::string &name);
-	virtual ~Transponder();
-	Transponder(const Transponder& trans);
-	Transponder& operator=(const Transponder& trans);
+   Transponder(const std::string &name);
+   virtual ~Transponder();
+   Transponder(const Transponder& trans);
+   Transponder& operator=(const Transponder& trans);
 
-	virtual GmatBase* Clone() const;
-	virtual void      Copy(const GmatBase* trans);
+   virtual GmatBase* Clone() const;
+   virtual void      Copy(const GmatBase* trans);
 
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
@@ -80,24 +80,24 @@ public:
    virtual bool         SetStringParameter(const std::string &label,
                                          const std::string &value);
 
-//   Real						GetOutPutFrequency();
+//   Real                  GetOutPutFrequency();
 
    virtual bool         Initialize();
 
-   virtual Real			GetDelay(Integer whichOne=0);
-   virtual bool 		SetDelay(Real delay, Integer whichOne=0);
-   virtual bool 		IsFeasible(Integer whichOne=0);
-   virtual Integer 		GetSignalCount();
-   virtual bool			IsTransmitted(Integer whichOne=0);
-   virtual Signal*		GetSignal(Integer whichOne=0);
-   virtual bool 		SetSignal(Signal* s,Integer whichOne=0);
+   virtual Real         GetDelay(Integer whichOne=0);
+   virtual bool         SetDelay(Real delay, Integer whichOne=0);
+   virtual bool         IsFeasible(Integer whichOne=0);
+   virtual Integer      GetSignalCount();
+   virtual bool         IsTransmitted(Integer whichOne=0);
+   virtual Signal*      GetSignal(Integer whichOne=0);
+   virtual bool         SetSignal(Signal* s,Integer whichOne=0);
 
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   std::string	inputFrequencyModel;
-   Real			inputCenterFrequency;
-   Real 		inputBandwidth;
+   std::string  inputFrequencyModel;
+   Real         inputCenterFrequency;
+   Real         inputBandwidth;
    std::string  outputFrequencyModel;
    std::string  turnAroundRatio;
 
@@ -118,7 +118,7 @@ protected:
       PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount];
 
 public:
-   Real 			GetTurnAroundRatio();
+   Real          GetTurnAroundRatio();
 
 };
 

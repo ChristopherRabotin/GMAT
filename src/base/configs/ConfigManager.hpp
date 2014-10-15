@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -109,6 +109,8 @@ public:
    bool                RenameItem(Gmat::ObjectType itemType,
                                   const std::string &oldName,
                                   const std::string &newName);
+   bool                RelatedNameChange(std::vector<Gmat::ObjectType> &itemType,
+                                  StringArray &oldName, StringArray &newName);
    
    bool                RemoveAllItems();
    bool                RemoveItem(Gmat::ObjectType type, const std::string &name,
@@ -160,6 +162,14 @@ private:
    std::map<std::string, GmatBase *>   mapping;
    /// Flag indicating that managed object has been added or removed by the user
    bool                                configChanged;
+
+   // Data structures for name changes that need to propagate into commands
+   /// Array of type updates
+   std::vector<Gmat::ObjectType>       changedItemType;
+   /// Old names that were changed
+   StringArray                         oldRelatedName;
+   /// The new names for the related objects
+   StringArray                         newRelatedName;
    
    // Treat default and in use solar system separately until we can manage solar 
    // system by name.  All solar system names are "SolarSystem" for now.

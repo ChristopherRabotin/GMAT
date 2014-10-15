@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -47,6 +47,7 @@
 //#define DEBUG_PROP_PANEL_ERROR
 //#define DEBUG_PROP_INTEGRATOR
 //#define DEBUG_PROP_PROPAGATOR
+//#define DEBUG_PROP_PANEL_SAVE_SRP
 
 
 // Hard coded drag enumeration replaced by dynamic version, so set NONE_DM here
@@ -75,6 +76,7 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_COMBOBOX(ID_CB_ORIGIN, PropagationConfigPanel::OnOriginComboBox)
    EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravityModelComboBox)
    EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereModelComboBox)
+   EVT_COMBOBOX(ID_CB_SRP_MODEL, PropagationConfigPanel::OnSRPModelComboBox)
    EVT_CHECKBOX(ID_SRP_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
    EVT_CHECKBOX(ID_REL_CORRECTION_CHECKBOX, PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange)
    EVT_CHECKBOX(ID_STOP_CHECKBOX, PropagationConfigPanel::OnStopCheckBoxChange)
@@ -617,6 +619,19 @@ void PropagationConfigPanel::Create()
                       wxDefaultPosition, wxDefaultSize, 0 );
    theSrpCheckBox->SetToolTip(pConfig->Read(_T("ForceModelUseSolarRadiationPressureHint")));
 
+   srpModelStaticText = new wxStaticText( this, ID_TEXT,
+                        wxT(GUI_ACCEL_KEY"SRP Model"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   theSRPModelComboBox =
+      new wxComboBox( this, ID_CB_SRP_MODEL, srpModelArray[0],
+                      wxDefaultPosition, wxSize(100,-1),
+                      srpModelArray, wxCB_DROPDOWN|wxCB_READONLY );
+   theSRPModelComboBox->SetToolTip(pConfig->Read(_T("ForceModelSRPModelHint")));
+
+   wxFlexGridSizer *theSRPSizer = new wxFlexGridSizer( 2, 0, 2 );
+   theSRPSizer->Add( srpModelStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   theSRPSizer->Add( theSRPModelComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+
    //-----------------------------------------------------------------
    // Relativistic Correction
    //-----------------------------------------------------------------
@@ -624,6 +639,16 @@ void PropagationConfigPanel::Create()
       new wxCheckBox( this, ID_REL_CORRECTION_CHECKBOX, wxT(GUI_ACCEL_KEY"Relativistic Correction"),
                       wxDefaultPosition, wxDefaultSize, 0 );
    theRelativisticCorrectionCheckBox->SetToolTip(pConfig->Read(_T("ForceModelUseRelativisticCorrectionHint")));
+
+   //-----------------------------------------------------------------
+   // put SRP and RC stuff together
+   //-----------------------------------------------------------------
+   srpRCFlexSizer = new wxFlexGridSizer( 2, 0, 0 );
+   srpRCFlexSizer->AddGrowableCol(1);
+   srpRCFlexSizer->Add( theSrpCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   srpRCFlexSizer->Add( theSRPSizer, 0, wxALIGN_LEFT|wxALL, 5 );
+   srpRCFlexSizer->Add( theRelativisticCorrectionCheckBox, 0, wxALIGN_LEFT|wxALL, 5 );
+   srpRCFlexSizer->Add( 80, 10, 0, wxGROW|wxALIGN_LEFT|wxALL, 5);
 
    //-----------------------------------------------------------------
    // Primary Bodies
@@ -643,8 +668,9 @@ void PropagationConfigPanel::Create()
    fmStaticSizer->Add( centralBodySizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    fmStaticSizer->Add( primaryStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    fmStaticSizer->Add( pointMassSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   fmStaticSizer->Add( theSrpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
-   fmStaticSizer->Add( theRelativisticCorrectionCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   fmStaticSizer->Add( srpRCFlexSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+//   fmStaticSizer->Add( theSrpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+//   fmStaticSizer->Add( theRelativisticCorrectionCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
 
    //-----------------------------------------------------------------
    // Add panelSizer
@@ -832,6 +858,10 @@ void PropagationConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::PopulateForces()
 {
+   #ifdef DEBUG_PROP_PANEL_LOAD
+   MessageInterface::ShowMessage("PropagationConfigPanel::PopulateForces() entered\n");
+   #endif
+   
    try
    {
       if (theForceModel != NULL)
@@ -906,11 +936,11 @@ void PropagationConfigPanel::PopulateForces()
             {
                theGravForce = (GravityField*)force;
                wxString potFilename =
-                     theGravForce->GetStringParameter("PotentialFile").c_str();
-
+                  theGravForce->GetStringParameter("PotentialFile").c_str();
+               
 //               currentBodyId = FindPrimaryBody(wxBodyName);
 //               primaryBodyList[currentBodyId]->bodyName = wxBodyName;
-//               primaryBodyList[currentBodyId]->potFilename = potFilename;
+//               primaryBodyList[currentBodyId]->potFile = potFilename;
                if (primaryBodyData == NULL)
                {
                   #ifdef DEBUG_PROP_PANEL_GRAV
@@ -919,18 +949,23 @@ void PropagationConfigPanel::PopulateForces()
                   #endif
                   primaryBodyData = new ForceType(wxBodyName);
                }
-
+               
                primaryBody = wxBodyName;
 
                primaryBodyData->bodyName = wxBodyName;
-               primaryBodyData->potFilename = potFilename;
-
+               primaryBodyData->potFile = potFilename;
+               primaryBodyData->potFileFullPath = theGravForce->GetStringParameter("PotentialFileFullPath").c_str();
+               
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage
                   ("   Getting gravity model type for %s, potFilename=%s\n",
                    wxBodyName.c_str(), potFilename.c_str());
                #endif
-
+               
+               // Use full path potential file from the base as per new file path design (LOJ: 2014.06.30)
+               
+               //==========================================================
+               #if 0
                std::ifstream inStream(potFilename.c_str());
                if (!inStream)
                {
@@ -941,11 +976,11 @@ void PropagationConfigPanel::PopulateForces()
                   #endif
                   FileManager *fm = FileManager::Instance();
                   std::string gravPath = fm->GetPathname(pathType);
-//                  primaryBodyList[currentBodyId]->potFilename = (gravPath + potFilename.c_str()).c_str();
-                  primaryBodyData->potFilename = (gravPath + potFilename.c_str()).c_str();
+                  //primaryBodyList[currentBodyId]->potFile = (gravPath + potFilename.c_str()).c_str();
+                  primaryBodyData->potFile = (gravPath + potFilename.c_str()).c_str();
                   #ifdef DEBUG_PROP_PANEL_GRAV
                      MessageInterface::ShowMessage("   Could not open %s, so full path = %s\n",
-                                                   potFilename.c_str(), (primaryBodyData->potFilename).c_str());
+                                                   potFilename.c_str(), (primaryBodyData->potFile).c_str());
                   #endif
                }
                else
@@ -955,11 +990,15 @@ void PropagationConfigPanel::PopulateForces()
                   #endif
                   inStream.close();
                }
+               #endif
+               //==========================================================
+               
                GmatGrav::GravityModelType bodyGravModelType =
-//               GravityFileUtil::GetModelType((primaryBodyList[currentBodyId]->potFilename).c_str(), wxBodyName.c_str());
-               GravityFileUtil::GetModelType((primaryBodyData->potFilename).c_str(), wxBodyName.c_str());
+//               GravityFileUtil::GetModelType((primaryBodyList[currentBodyId]->potFile).c_str(), wxBodyName.c_str());
+                  // GravityFileUtil::GetModelType((primaryBodyData->potFile).c_str(), wxBodyName.c_str());
+                  GravityFileUtil::GetModelType((primaryBodyData->potFileFullPath).c_str(), wxBodyName.c_str());
                primaryBodyData->gravType                    = (GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
-                  
+               
                #ifdef DEBUG_PROP_PANEL_GRAV
                MessageInterface::ShowMessage("   Getting the gravity force\n");
                #endif
@@ -987,8 +1026,8 @@ void PropagationConfigPanel::PopulateForces()
                   }
                }
 
-//               if (primaryBodyList[currentBodyId]->potFilename == "")
-               if (primaryBodyData->potFilename == "")
+//               if (primaryBodyList[currentBodyId]->potFile == "")
+               if (primaryBodyData->potFile == "")
                {
                   MessageInterface::PopupMessage
                      (Gmat::WARNING_, "Cannot find Potential File for %s.\n",
@@ -1067,6 +1106,12 @@ void PropagationConfigPanel::PopulateForces()
             }
             else if (wxForceType == "SolarRadiationPressure")
             {
+               theSRP = (SolarRadiationPressure*) force;
+               std::string theSRPModel = "Spherical";
+               if (usePropOriginForSrp)
+                  theSRPModel = theSRP->GetStringParameter("SRPModel");
+               srpModelName = theSRPModel.c_str();
+
                // Currently SRP can only be applied to force model central body,
                // so we don't need to set to primary body list (loj:2007.10.19)
                //currentBodyId = FindPrimaryBody(wxBodyName);
@@ -1076,10 +1121,15 @@ void PropagationConfigPanel::PopulateForces()
             }
          }
       }
-
+      #ifdef DEBUG_PROP_PANEL_LOAD
+      MessageInterface::ShowMessage("PropagationConfigPanel::PopulateForces() leaving\n");
+      #endif
    }
    catch (BaseException &e)
    {
+      #ifdef DEBUG_PROP_PANEL_LOAD
+      MessageInterface::ShowMessage("PropagationConfigPanel::PopulateForces() caught an exception\n");
+      #endif
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
@@ -1101,6 +1151,7 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isAtmosChanged=%d\n", isAtmosChanged);
    MessageInterface::ShowMessage("   isOriginChanged=%d\n", isOriginChanged);
    MessageInterface::ShowMessage("   isErrControlChanged=%d\n", isErrControlChanged);
+   MessageInterface::ShowMessage("   isSRPModelChanged=%d\n", isSRPModelChanged);
    #endif
 
    canClose = true;
@@ -1129,11 +1180,11 @@ void PropagationConfigPanel::SaveData()
             }
             //loj: 2007.10.26
             // Do we need to check empty potential file?
-            // Fow now allow to use default coefficients from the body.
+            // For now allow to use default coefficients from the body.
 //            else if (primaryBodyList[i]->gravType == "Other" &&
-//                     primaryBodyList[i]->potFilename == "")
+//                     primaryBodyList[i]->potFile == "")
             else if (primaryBodyData->gravType == "Other" &&
-                     primaryBodyData->potFilename == "")
+                     primaryBodyData->potFile == "")
             {
                MessageInterface::PopupMessage
                   (Gmat::WARNING_, "Please select a potential file for %s\n",
@@ -1259,9 +1310,9 @@ void PropagationConfigPanel::SaveData()
 //               theGravForce = new GravityField("", bodyName);
                theGravForce->SetSolarSystem(theSolarSystem);
                theGravForce->SetStringParameter("BodyName", bodyName);
-//               theGravForce->SetStringParameter("PotentialFile",
-////                     primaryBodyList[i]->potFilename.c_str());
-//                     primaryBodyData->potFilename.c_str());
+               theGravForce->SetStringParameter("PotentialFile",
+//                     primaryBodyList[i]->potFile.c_str());
+                    primaryBodyData->potFile.c_str());
 
                if (deg != -999)
                {
@@ -1324,8 +1375,7 @@ void PropagationConfigPanel::SaveData()
 //                  bodyName = primaryBodyList[i]->bodyName.c_str();
                   bodyName = primaryBodyData->bodyName.c_str();
 //                  theDragForce = new DragForce(primaryBodyList[i]->dragType.c_str());
-                  theDragForce = new DragForce(
-                        primaryBodyData->dragType.c_str());
+                  theDragForce = new DragForce(primaryBodyData->dragType.c_str());
                   theCelestialBody = theSolarSystem->GetBody(bodyName);
                   theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
 
@@ -1379,6 +1429,12 @@ void PropagationConfigPanel::SaveData()
          catch (BaseException &e)
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+            // we need to set canClose, reset the Changed flag, and then return,
+            // so that the Apply button remains highlighted and SaveData
+            // correctly executes on the next OK/Apply.
+            canClose = false;
+            isForceModelChanged = true;
+            return;
          }
 
          //----------------------------------------------------
@@ -1405,11 +1461,15 @@ void PropagationConfigPanel::SaveData()
 
             paramId= newFm->GetParameterID("SRP");
 
+            #ifdef DEBUG_PROP_PANEL_SAVE_SRP
+               MessageInterface::ShowMessage("SaveData() saving SRP: usePropOriginForSrp = %s\n", (usePropOriginForSrp? "true" : "false"));
+            #endif
             if (usePropOriginForSrp)
             {
                theSRP = new SolarRadiationPressure();
                bodyName = propOriginName;
                theSRP->SetStringParameter("BodyName", bodyName);
+               theSRP->SetStringParameter("SRPModel", srpModelName.c_str());
                newFm->AddForce(theSRP);
                newFm->SetOnOffParameter(paramId, "On");
             }
@@ -1654,9 +1714,11 @@ Integer PropagationConfigPanel::FindPrimaryBody(const wxString &bodyName,
    {
       std::string potFileType = theFileMap[gravType].c_str();
       wxString wxPotFileName = theGuiInterpreter->GetFileName(potFileType).c_str();
-      //MessageInterface::ShowMessage("===> potFile=%s\n", potFileType.c_str());
-//      primaryBodyList.back()->potFilename = wxPotFileName;
-      primaryBodyData->potFilename = wxPotFileName;
+      #ifdef DEBUG_PROP_PANEL_FIND_BODY
+      MessageInterface::ShowMessage("FindPrimaryBody() potFileType=%s\n", potFileType.c_str());
+      #endif
+//      primaryBodyList.back()->potFile = wxPotFileName;
+      primaryBodyData->potFile = wxPotFileName;
    }
 
    #ifdef DEBUG_PROP_PANEL_FIND_BODY
@@ -1792,6 +1854,12 @@ void PropagationConfigPanel::Initialize()
    errorControlArray.Add("RSSState");
    errorControlArray.Add("LargestStep");
    errorControlArray.Add("LargestState");
+
+   // initialize SRP Model type array
+   srpModelArray.Add("Spherical");
+   srpModelArray.Add("SPADFile");
+
+   srpModelName = "Spherical";
 
    // for actual file keyword used in FileManager
    theFileMap["JGM-2"] = "JGM2_FILE";
@@ -2103,13 +2171,15 @@ void PropagationConfigPanel::DisplayPrimaryBodyData()
 }
 
 //------------------------------------------------------------------------------
-// void DisplayGravityFieldData(const wxString& bodyName)
+// void DisplayGravityFieldData(const wxString& bodyName, bool textValueChanged = false)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
+void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName,
+                                                     bool textValueChanged)
 {
    #ifdef DEBUG_PROP_PANEL_GRAV
    MessageInterface::ShowMessage
-      ("DisplayGravityFieldData() currentBodyName=%s gravType=%s\n",
+      ("DisplayGravityFieldData() entered, bodyName='%s', textValueChanged=%d\n"
+       "   currentBodyName=%s gravType=%s\n", bodyName.c_str(), textValueChanged,
 //       currentBodyName.c_str(), primaryBodyList[currentBodyId]->gravType.c_str());
        currentBodyName.c_str(), primaryBodyData->gravType.c_str());
    ShowForceList("DisplayGravityFieldData() entered");
@@ -2181,9 +2251,14 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
    potFileTextCtrl->Enable(false);
    gravityDegreeTextCtrl->Enable(true);
    gravityOrderTextCtrl->Enable(true);
-//   potFileTextCtrl->SetValue(primaryBodyList[currentBodyId]->potFilename);
-   potFileTextCtrl->SetValue(primaryBodyData->potFilename);
-
+//   potFileTextCtrl->SetValue(primaryBodyList[currentBodyId]->potFile);
+   // If text value not changed, use ChangeValue() so that
+   // wxEVT_COMMAND_TEXT_UPDATED event will not be generated (LOJ: 2014.08.11)
+   if (textValueChanged)
+      potFileTextCtrl->SetValue(primaryBodyData->potFile);
+   else
+      potFileTextCtrl->ChangeValue(primaryBodyData->potFile);
+   
    if (gravType == "None")
    {
       gravityDegreeTextCtrl->Enable(false);
@@ -2200,9 +2275,19 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
    theGravModelComboBox->SetValue(gravType);
 //   gravityDegreeTextCtrl->SetValue(primaryBodyList[currentBodyId]->gravDegree);
 //   gravityOrderTextCtrl->SetValue(primaryBodyList[currentBodyId]->gravOrder);
-   gravityDegreeTextCtrl->SetValue(primaryBodyData->gravDegree);
-   gravityOrderTextCtrl->SetValue(primaryBodyData->gravOrder);
-
+   // If text value not changed, use ChangeValue() so that
+   // wxEVT_COMMAND_TEXT_UPDATED event will not be generated (LOJ: 2014.08.11)
+   if (textValueChanged)
+   {
+      gravityDegreeTextCtrl->SetValue(primaryBodyData->gravDegree);
+      gravityOrderTextCtrl->SetValue(primaryBodyData->gravOrder);
+   }
+   else
+   {
+      gravityDegreeTextCtrl->ChangeValue(primaryBodyData->gravDegree);
+      gravityOrderTextCtrl->ChangeValue(primaryBodyData->gravOrder);
+   }
+   
    #ifdef DEBUG_PROP_PANEL_GRAV
    ShowForceList("DisplayGravityFieldData() exiting");
    #endif
@@ -2241,9 +2326,10 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
 
       // Current code always enables Setup for any model; disabled for "None"
 //      if (currentBodyName == "Earth")
-      theDragSetupButton->Enable(true);  // Is this right?
-//      else
-//         theDragSetupButton->Enable(false);  // Is this right?
+      if (currentBodyName == "Mars")
+         theDragSetupButton->Enable(false);  // Is this right?
+      else
+         theDragSetupButton->Enable(true);  // Is this right?
    }
    else
    {
@@ -2270,7 +2356,10 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
          if (primaryBodyData->dragType == dragModelArray[i])
             set = i;
       theAtmosModelComboBox->SetSelection(set);
-      theDragSetupButton->Enable(true);
+      if (primaryBodyData->bodyName == "Mars")
+         theDragSetupButton->Enable(false);
+      else
+         theDragSetupButton->Enable(true);
    }
 }
 
@@ -2308,6 +2397,11 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 void PropagationConfigPanel::DisplaySRPData()
 {
    theSrpCheckBox->SetValue(usePropOriginForSrp);
+   theSRPModelComboBox->SetValue(srpModelName);
+   if (usePropOriginForSrp)
+      theSRPModelComboBox->Enable(true);
+   else
+      theSRPModelComboBox->Enable(false);
 }
 
 
@@ -2363,9 +2457,10 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
       if (atmosCount > 0)
       {
          theAtmosModelComboBox->Enable(true);
-         if (theAtmosModelComboBox->GetValue() == dragModelArray[NONE_DM] //||
+         if ((primaryBodyData->bodyName == "Mars") ||
+             (theAtmosModelComboBox->GetValue() == dragModelArray[NONE_DM] //||
              //theAtmosModelComboBox->GetValue() == dragModelArray[EXPONENTIAL]
-             )
+             ))
          {
             theDragSetupButton->Enable(false);
          }
@@ -2416,6 +2511,8 @@ void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
    }
+   if (primaryBodyString == "Mars")
+      theDragSetupButton->Enable(false);
 }
 
 
@@ -2914,26 +3011,22 @@ bool PropagationConfigPanel::SavePotFile()
             {
                #ifdef DEBUG_PROP_PANEL_SAVE
                   MessageInterface::ShowMessage
-                    ("SavePotFile() Saving Body:%s, potFile=%s\n",
-//                          primaryBodyList[i]->bodyName.c_str(), primaryBodyList[i]->potFilename.c_str());
+                    ("SavePotFile() Saving Body:%s, potFile=%s\n   potFileFullPath=%s\n",
+//                          primaryBodyList[i]->bodyName.c_str(), primaryBodyList[i]->potFile.c_str());
                      primaryBodyData->bodyName.c_str(),
-                     primaryBodyData->potFilename.c_str());
+                     primaryBodyData->potFile.c_str(), primaryBodyData->potFileFullPath.c_str());
                #endif
 
-//               inputString = primaryBodyList[i]->potFilename.c_str();
-               inputString = primaryBodyData->potFilename.c_str();
-               std::ifstream filename(inputString.c_str());
-
-//               // Check if the file doesn't exist then stop
-//               if (!filename)
-//               {
-//                  MessageInterface::PopupMessage
-//                     (Gmat::ERROR_, msg.c_str(), inputString.c_str(),
-//                      "Model File", "File must exist");
-//
-//                  return false;
-//               }
-
+//               inputString = primaryBodyList[i]->potFile.c_str();
+               // Use full path pot file for checking for existence (LOJ: 2014.06.30)
+               //inputString = primaryBodyData->potFile.c_str();
+               inputString = primaryBodyData->potFileFullPath.c_str();
+               #ifdef DEBUG_PROP_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   primaryBodyData->potFileFullPath = '%s'\n", inputString.c_str());
+               #endif
+               
+               std::ifstream filename(inputString.c_str());              
                bool update = true;
                if (!filename)
                {
@@ -2943,11 +3036,16 @@ bool PropagationConfigPanel::SavePotFile()
                         "valid file name and path");
                }
                filename.close();
+               
                if (update)
                {
+                  #ifdef DEBUG_PROP_PANEL_SAVE
+                  MessageInterface::ShowMessage
+                     ("   Calling theGravForce->SetStringParameter('PotentialFile')\n");
+                  #endif
                   theGravForce->SetStringParameter("PotentialFile",
-//                        primaryBodyList[i]->potFilename.c_str());
-                        primaryBodyData->potFilename.c_str());
+//                        primaryBodyList[i]->potFile.c_str());
+                        primaryBodyData->potFile.c_str());
                   retval = true;
                   isPotFileChanged = false;
                }
@@ -2961,7 +3059,11 @@ bool PropagationConfigPanel::SavePotFile()
       canClose = false;
       retval = false;
    }
-
+   
+   #ifdef DEBUG_PROP_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SavePotFile() returning %d\n", retval);
+   #endif
    return retval;
 }
 
@@ -3106,6 +3208,9 @@ void PropagationConfigPanel::OnIntegratorComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnPrimaryBodyComboBox(wxCommandEvent &event)
 {
+   if (primaryBody != thePrimaryBodyComboBox->GetStringSelection())
+      EnableUpdate(true);
+
    UpdatePrimaryBodyItems();
 }
 
@@ -3138,6 +3243,8 @@ void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
       theAtmosModelComboBox->Enable(false);
       theDragSetupButton->Enable(false);
    }
+   if (thePrimaryBodyComboBox->GetValue() == "Mars")
+      theDragSetupButton->Enable(false);
 
    EnableUpdate(true);
 }
@@ -3148,7 +3255,10 @@ void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
 {
-//   if (primaryBodiesArray.IsEmpty())
+   #ifdef DEBUG_PROP_PANEL_GRAV
+   MessageInterface::ShowMessage("OnGravityModelComboBox() entered\n");
+   #endif
+///   if (primaryBodiesArray.IsEmpty())
    if (primaryBody == "None")
       return;
 
@@ -3172,13 +3282,20 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
       if (gravTypeName != "None" && gravTypeName != "Other")
       {
          std::string fileType = theFileMap[gravTypeName].c_str();
-         //MessageInterface::ShowMessage("===> Found %s\n", fileType.c_str());
-
+         #ifdef DEBUG_PROP_PANEL_GRAV
+         MessageInterface::ShowMessage("   Found fileType = %s\n", fileType.c_str());
+         #endif
          try
          {
-//            primaryBodyList[currentBodyId]->potFilename =
-            primaryBodyData->potFilename =
+//            primaryBodyList[currentBodyId]->potFile =
+            primaryBodyData->potFile =
                theGuiInterpreter->GetFileName(fileType).c_str();
+            primaryBodyData->potFileFullPath =
+               theGuiInterpreter->GetFileName(fileType, true).c_str();
+            #ifdef DEBUG_PROP_PANEL_GRAV
+            MessageInterface::ShowMessage
+               ("   potFileFullPath = '%s'\n", primaryBodyData->potFileFullPath.c_str());
+            #endif
          }
          catch (BaseException &e)
          {
@@ -3189,17 +3306,20 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
       }
       else if (gravTypeName == "Other")
       {
-//         primaryBodyList[currentBodyId]->potFilename = potFileTextCtrl->GetValue();
-         primaryBodyData->potFilename = potFileTextCtrl->GetValue();
+//         primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
+         primaryBodyData->potFile = potFileTextCtrl->GetValue();
+         // Added to fix GMT-4651 (LOJ: 2014.07.31)
+         primaryBodyData->potFileFullPath = potFileTextCtrl->GetValue(); 
       }
 
       #ifdef DEBUG_PROP_PANEL_GRAV
       MessageInterface::ShowMessage
-         ("OnGravityModelComboBox() bodyName=%s, potFile=%s\n",
+         ("OnGravityModelComboBox() bodyName=%s\n   potFile=%s\n   potFileFullPath=%s\n",
 //          primaryBodyList[currentBodyId]->bodyName.c_str(),
-//          primaryBodyList[currentBodyId]->potFilename.c_str());
+//          primaryBodyList[currentBodyId]->potFile.c_str());
           primaryBodyData->bodyName.c_str(),
-          primaryBodyData->potFilename.c_str());
+          primaryBodyData->potFile.c_str(), primaryBodyData->potFile.c_str());
+      MessageInterface::ShowMessage("OnGravityModelComboBox() Calling DisplayGravityFieldData()\n");
       #endif
 
 //      DisplayGravityFieldData(primaryBodyList[currentBodyId]->bodyName);
@@ -3208,6 +3328,9 @@ void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
       isPotFileChanged = true;
       EnableUpdate(true);
    }
+   #ifdef DEBUG_PROP_PANEL_GRAV
+   MessageInterface::ShowMessage("OnGravityModelComboBox() leaving\n");
+   #endif
 }
 
 
@@ -3452,6 +3575,26 @@ void PropagationConfigPanel::OnStartEpochComboBox(wxCommandEvent &)
    EnableUpdate(true);
 }
 
+//------------------------------------------------------------------------------
+// void OnSRPModelComboBox(wxCommandEvent &)
+//------------------------------------------------------------------------------
+/**
+ * Tells the GUI that the start epoch combobox has changed
+ */
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnSRPModelComboBox(wxCommandEvent &)
+{
+   wxString modelSelection = theSRPModelComboBox->GetStringSelection();
+
+   if (!srpModelName.IsSameAs(modelSelection))
+   {
+      isSRPModelChanged   = true;
+      isForceModelChanged = true;
+      srpModelName        = theSRPModelComboBox->GetValue();
+      EnableUpdate(true);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void OnStartEpochTextChange(wxCommandEvent &)
@@ -3592,9 +3735,11 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       GmatGrav::GravityModelType bodyGravModelType = GravityFileUtil::GetModelType(filename.c_str(), (primaryBodyData->bodyName).c_str());
       primaryBodyData->gravType                  = (GravityFileUtil::GRAVITY_MODEL_NAMES[bodyGravModelType]).c_str();
       
-//      primaryBodyList[currentBodyId]->potFilename = filename;
-      primaryBodyData->potFilename = filename;
-
+//      primaryBodyList[currentBodyId]->potFile = filename;
+      primaryBodyData->potFile = filename;
+      // Added to fix GMT-4651 (LOJ: 2014.07.31)
+      primaryBodyData->potFileFullPath = filename; 
+      
 //      if (primaryBodyList[currentBodyId]->bodyName == "Earth")
 //         primaryBodyList[currentBodyId]->gravType = earthGravModelArray[E_OTHER];
 //      else if (primaryBodyList[currentBodyId]->bodyName == "Luna")
@@ -3616,7 +3761,7 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       //loj: Do we need to show? body name didn't change
       //waw: Yes, we need to update the degree & order displays (10/17/06)
 //      DisplayGravityFieldData(primaryBodyList[currentBodyId]->bodyName);
-      DisplayGravityFieldData(primaryBodyData->bodyName);
+      DisplayGravityFieldData(primaryBodyData->bodyName, true);
       isDegOrderChanged = true;
       EnableUpdate(true);
    }
@@ -3764,6 +3909,9 @@ void PropagationConfigPanel::OnIntegratorTextUpdate(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
 {
+   #ifdef DEBUG_GRAVITY_TEXT
+   MessageInterface::ShowMessage("OnGravityTextUpdate() entered\n");
+   #endif
    EnableUpdate(true);
 
    if (event.GetEventObject() == gravityDegreeTextCtrl)
@@ -3784,12 +3932,17 @@ void PropagationConfigPanel::OnGravityTextUpdate(wxCommandEvent& event)
    }
    else if (event.GetEventObject() == potFileTextCtrl)
    {
-//      primaryBodyList[currentBodyId]->potFilename = potFileTextCtrl->GetValue();
-      primaryBodyData->potFilename = potFileTextCtrl->GetValue();
+//      primaryBodyList[currentBodyId]->potFile = potFileTextCtrl->GetValue();
+      primaryBodyData->potFile = potFileTextCtrl->GetValue();
+      // Added to fix GMT-4651 (LOJ: 2014.07.31)
+      primaryBodyData->potFileFullPath = potFileTextCtrl->GetValue(); 
       isPotFileChanged = true;
       // Do not set to true if only text changed
       //isForceModelChanged = true;
    }
+   #ifdef DEBUG_GRAVITY_TEXT
+   MessageInterface::ShowMessage("OnGravityTextUpdate() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -3809,6 +3962,11 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 {
    usePropOriginForSrp = theSrpCheckBox->GetValue();
    isForceModelChanged = true;
+   // enable or disable the SRP Model combo box here
+   if (usePropOriginForSrp)
+      theSRPModelComboBox->Enable(true);
+   else
+      theSRPModelComboBox->Enable(false);
    EnableUpdate(true);
 }
 
@@ -3824,7 +3982,7 @@ void PropagationConfigPanel::OnRelativisticCorrectionCheckBoxChange(wxCommandEve
 
 
 //------------------------------------------------------------------------------
-// void OnSRPCheckBoxChange(wxCommandEvent &event)
+// void OnStopCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnStopCheckBoxChange(wxCommandEvent &event)
 {
@@ -3898,14 +4056,16 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
 //            ("   id=%d, body=%s, gravType=%s, dragType=%s, magfType=%s\n   potFile=%s\n"
 //             "   gravf=%p, dragf=%p, srpf=%p\n", i, primaryBodyList[i]->bodyName.c_str(),
 //             primaryBodyList[i]->gravType.c_str(), primaryBodyList[i]->dragType.c_str(),
-//             primaryBodyList[i]->magfType.c_str(), primaryBodyList[i]->potFilename.c_str(),
+//             primaryBodyList[i]->magfType.c_str(), primaryBodyList[i]->potFile.c_str(),
 //             primaryBodyList[i]->gravf, primaryBodyList[i]->dragf,
 //             primaryBodyList[i]->srpf);
          MessageInterface::ShowMessage
             ("   id=%d, body=%s, gravType=%s, dragType=%s, magfType=%s\n   potFile=%s\n"
-             "   gravf=%p, dragf=%p, srpf=%p\n", 0, primaryBodyData->bodyName.c_str(),
+             "   potFileFullPath=%s\n   gravf=%p, dragf=%p, srpf=%p\n", 0,
+             primaryBodyData->bodyName.c_str(),
              primaryBodyData->gravType.c_str(), primaryBodyData->dragType.c_str(),
-             primaryBodyData->magfType.c_str(), primaryBodyData->potFilename.c_str(),
+             primaryBodyData->magfType.c_str(), primaryBodyData->potFile.c_str(),
+             primaryBodyData->potFileFullPath.c_str(),
              primaryBodyData->gravf, primaryBodyData->dragf,
              primaryBodyData->srpf);
       }

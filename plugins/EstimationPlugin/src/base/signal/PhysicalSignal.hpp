@@ -70,6 +70,14 @@ public:
    virtual void AddCorrection(const std::string& modelName,                           // made changes by TUAN NGUYEN
                              const std::string& mediaCorrectionType);                 // made changes by TUAN NGUYEN
 
+   /// This function is used to get frequency at a given time from ramped frequency table          // made changes by TUAN NGUYEN
+   Real           GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);           // made changes by TUAN NGUYEN
+   /// This function is used to get frequency band at a given time from ramped frequency table     // made changes by TUAN NGUYEN
+   Integer        GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB);       // made changes by TUAN NGUYEN
+   /// This function is used to specify frequency band based range of each band                    // made changes by TUAN NGUYEN
+   Integer        FrequencyBand(Real frequency);                                                   // made changes by TUAN NGUYEN
+
+
 protected:
    /// Flag indicating the initialization state of the new signal elements
    bool physicalSignalInitialized;
@@ -95,16 +103,21 @@ protected:
    bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);       // This function will be removed and replaced by bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive)
 #endif
 
-   /// This function is used to compute relativity correction                      // made changes by TUAN NGUYEN
-   Real RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, Real t2);        // made changes by TUAN NGUYEN
+   /// This function is used to compute relativity correction                                // made changes by TUAN NGUYEN
+   Real           RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, Real t2);        // made changes by TUAN NGUYEN
 
-   /// This function is used to compute Et-TAI correction                          // made changes by TUAN NGUYEN
-   Real ETminusTAI(Real tA1MJD, SpacePoint* participant);                          // made changes by TUAN NGUYEN
+   /// This function is used to compute Et-TAI correction                                    // made changes by TUAN NGUYEN
+   Real           ETminusTAI(Real tA1MJD, SpacePoint* participant);                          // made changes by TUAN NGUYEN
 
    /// These functions are used to compute midia correction
-   RealArray TroposphereCorrection(Real freq, Real distance, Real elevationAngle);          // made changes by TUAN NGUYEN
-   RealArray IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);         // made changes by TUAN NGUYEN
-   RealArray CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);     // made changes by TUAN NGUYEN
+   virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);     // made changes by TUAN NGUYEN
+   virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);     // made changes by TUAN NGUYEN
+   RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle);      // made changes by TUAN NGUYEN
+   RealArray      IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);     // made changes by TUAN NGUYEN
+   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);          // made changes by TUAN NGUYEN
+
+   /// This function is used to calculate total hardware delay                               // made changes by TUAN NGUYEN
+   virtual bool   HardwareDelayCalculation();                                                // made changes by TUAN NGUYEN
 
 };
 

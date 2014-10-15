@@ -2,7 +2,7 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-#  Copyright (c) 2002-2011 United States Government as represented by the
+#  Copyright (c) 2002-2014 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
 #  All Other Rights Reserved.
 
@@ -69,7 +69,7 @@ endif
 
 ifeq ($(USE_STC_EDITOR),1)
 STC_EDITOR_OBJECTS = \
-    view/Editor.o \
+    view/ScriptEditor.o \
     view/EditorPanel.o \
     view/EditorPreferences.o \
     view/EditorPrintout.o \
@@ -232,6 +232,7 @@ OBJECTS = \
     function/FunctionSetupPanel.o \
     function/MatlabFunctionSetupPanel.o \
     hardware/BurnThrusterPanel.o \
+    hardware/PowerSystemConfigPanel.o \
     hardware/ThrusterCoefficientDialog.o \
     hardware/ThrusterConfigPanel.o \
     mission/DecoratedTree.o \
@@ -273,6 +274,7 @@ OBJECTS = \
     spacecraft/OrbitPanel.o \
     spacecraft/OrbitDesignerDialog.o \
     spacecraft/OrbitSummaryDialog.o \
+    spacecraft/PowerSystemPanel.o \
     spacecraft/SpacecraftPanel.o \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \

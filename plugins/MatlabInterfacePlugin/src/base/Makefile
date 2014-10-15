@@ -1,4 +1,11 @@
-# $Id: Makefile 9350 2011-03-31 18:30:12Z wendys-dev $
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+#  Copyright (c) 2002-2014 United States Government as represented by the
+#  Administrator of The National Aeronautics and Space Administration.
+#  All Other Rights Reserved.
+#
 # makefile for GMAT's MatlabInterface Plugin
 # This is the base level makefile 
 #

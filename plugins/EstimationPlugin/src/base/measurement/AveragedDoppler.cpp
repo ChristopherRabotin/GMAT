@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -36,8 +36,8 @@ const std::string
 AveragedDoppler::PARAMETER_TEXT[AveragedDopplerParamCount -
                                 PhysicalMeasurementParamCount] =
 {
-      "AveragingInterval",
-	  "BuildInTurnAroundRatio",										// made changes by TUAN NGUYEN
+     "AveragingInterval",
+     "BuildInTurnAroundRatio",                              // made changes by TUAN NGUYEN
 };
 
 const Gmat::ParameterType
@@ -45,7 +45,7 @@ AveragedDoppler::PARAMETER_TYPE[AveragedDopplerParamCount -
                                 PhysicalMeasurementParamCount] =
 {
       Gmat::REAL_TYPE,
-	  Gmat::REAL_TYPE,												// made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,                                    // made changes by TUAN NGUYEN
 };
 
 
@@ -69,7 +69,7 @@ AveragedDoppler::AveragedDoppler(const std::string &type,
    tm                         (GmatTimeConstants::MJD_OF_J2000),
    interval                   (1.0),  // 1 sec default interval
    turnaround                 (1.1),
-   M2R						  (0.0)									// made changes by TUAN NGUYEN
+   M2R                    (0.0)                           // made changes by TUAN NGUYEN
 {
    objectTypeNames.push_back("AveragedDoppler");
    parameterCount = AveragedDopplerParamCount;
@@ -120,7 +120,7 @@ AveragedDoppler::AveragedDoppler(const AveragedDoppler & ad) :
    tm                         (ad.tm),
    interval                   (ad.interval),
    turnaround                 (ad.turnaround),
-   M2R                        (ad.M2R),								// made changes by TUAN NGUYEN
+   M2R                        (ad.M2R),                        // made changes by TUAN NGUYEN
    uplinkLegS                 (ad.uplinkLegS),
    downlinkLegS               (ad.downlinkLegS),
    uplinkLegE                 (ad.uplinkLegE),
@@ -180,7 +180,7 @@ AveragedDoppler& AveragedDoppler::operator=(const AveragedDoppler& ad)
       t3R[1] = ad.t3R[1];
 
       turnaround = ad.turnaround;
-	  M2R        = ad. M2R;							// made changes by TUAN NGUYEN
+      M2R        = ad. M2R;                     // made changes by TUAN NGUYEN
 
       uplinkLegS   = ad.uplinkLegS;
       downlinkLegS = ad.downlinkLegS;
@@ -762,16 +762,16 @@ bool AveragedDoppler::Initialize()
       }
 
 ///// TBD: Should this always be done?
-  	  // Set options to run relativity and ET-TAI corrections: 
-      uplinkLegS.SetRelativityCorrection(useRelativityCorrection);				// made changes by TUAN NGUYEN
-	  downlinkLegS.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
-      uplinkLegE.SetRelativityCorrection(useRelativityCorrection);				// made changes by TUAN NGUYEN
-      downlinkLegE.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
+      // Set options to run relativity and ET-TAI corrections: 
+      uplinkLegS.SetRelativityCorrection(useRelativityCorrection);            // made changes by TUAN NGUYEN
+      downlinkLegS.SetRelativityCorrection(useRelativityCorrection);          // made changes by TUAN NGUYEN
+      uplinkLegE.SetRelativityCorrection(useRelativityCorrection);            // made changes by TUAN NGUYEN
+      downlinkLegE.SetRelativityCorrection(useRelativityCorrection);          // made changes by TUAN NGUYEN
 
-//	  uplinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);				// made changes by TUAN NGUYEN
-//	  downlinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
-//	  uplinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);				// made changes by TUAN NGUYEN
-//    downlinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
+//     uplinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);            // made changes by TUAN NGUYEN
+//     downlinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);          // made changes by TUAN NGUYEN
+//     uplinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);            // made changes by TUAN NGUYEN
+//     downlinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);          // made changes by TUAN NGUYEN
    }
 
    return retval;
@@ -822,13 +822,13 @@ void AveragedDoppler::InitializeMeasurement()
    downlinkLegE.AddCoordinateSystem(F2, index);// Participant 2 CS for the event
 
    // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system			// made changes by TUAN NGUYEN
-   if (solarSystem == NULL)																											// made changes by TUAN NGUYEN
+   if (solarSystem == NULL)														                     													// made changes by TUAN NGUYEN
 	   throw MeasurementException("Error in AveragedDoppler::InitializeMeasurement() due to solar system object is NULL.\n");		// made changes by TUAN NGUYEN
 
    uplinkLegS.SetSolarSystem(solarSystem);									// made changes by TUAN NGUYEN
-   downlinkLegS.SetSolarSystem(solarSystem);								// made changes by TUAN NGUYEN
+   downlinkLegS.SetSolarSystem(solarSystem);								   // made changes by TUAN NGUYEN
    uplinkLegE.SetSolarSystem(solarSystem);									// made changes by TUAN NGUYEN
-   downlinkLegE.SetSolarSystem(solarSystem);								// made changes by TUAN NGUYEN
+   downlinkLegE.SetSolarSystem(solarSystem);								   // made changes by TUAN NGUYEN
 
    SetupTimeIntervals();
 }

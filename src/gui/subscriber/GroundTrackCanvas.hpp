@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -76,7 +76,7 @@ private:
    
    static const int LAST_STD_BODY_ID;// = 10;
    static const int MAX_COORD_SYS;// = 10;
-   static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
+   //static const std::string BODY_NAME[GmatPlot::MAX_BODIES];
    static const Real MAX_ZOOM_IN;// = 3700.0;
    static const Real RADIUS_ZOOM_RATIO;// = 2.2;
    static const Real DEFAULT_DIST;// = 30000.0;

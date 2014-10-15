@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -61,7 +61,7 @@ Antenna::PARAMETER_TYPE[AntennaParamCount - HardwareParamCount] =
 //-----------------------------------------------------------------------------
 Antenna::Antenna(const std::string &type, const std::string &name) :
    Hardware             (Gmat::HARDWARE, type, name),
-   antennaDelay         (0.0),			// (1e-6),
+   antennaDelay         (0.0),         // (1e-6),
    phaseCenterLocation1 (0.0),
    phaseCenterLocation2 (0.0),
    phaseCenterLocation3 (0.0)
@@ -121,7 +121,7 @@ Antenna & Antenna::operator=(const Antenna & ant)
    {
       Hardware::operator=(ant);
 
-      antennaDelay 		   = ant.antennaDelay;
+      antennaDelay          = ant.antennaDelay;
       phaseCenterLocation1 = ant.phaseCenterLocation1;
       phaseCenterLocation2 = ant.phaseCenterLocation2;
       phaseCenterLocation3 = ant.phaseCenterLocation3;
@@ -248,17 +248,17 @@ Gmat::ParameterType Antenna::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Antenna::GetParameterUnit(const Integer id) const
 {
-	switch (id)
-	{
-		case ANTENNA_DELAY:
-			return "s"; 					// Unit of antenna delay is (s) second
-		case PHASE_CENTER_LOCATION1:
-		case PHASE_CENTER_LOCATION2:
-		case PHASE_CENTER_LOCATION3:
-			return "";						// It has no unit
-		default:
-			break;
-	}
+   switch (id)
+   {
+      case ANTENNA_DELAY:
+         return "s";                // Unit of antenna delay is (s) second
+      case PHASE_CENTER_LOCATION1:
+      case PHASE_CENTER_LOCATION2:
+      case PHASE_CENTER_LOCATION3:
+         return "";                  // It has no unit
+      default:
+         break;
+   }
 
    return Hardware::GetParameterUnit(id);
 }
@@ -483,7 +483,7 @@ Real Antenna::SetRealParameter(const Integer id, const Real value)
       case PHASE_CENTER_LOCATION1:
       case PHASE_CENTER_LOCATION2:
       case PHASE_CENTER_LOCATION3:
-	     MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter in script was ignored. In the current version, GMAT does not allow to use this paramter!!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
+         MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter in script was ignored. In the current version, GMAT does not allow to use this paramter!!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
          return 0.0;
    }
 

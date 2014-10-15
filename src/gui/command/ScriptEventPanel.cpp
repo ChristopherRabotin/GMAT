@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -195,7 +195,7 @@ void ScriptEventPanel::Create()
        "parent = <%p>'%s', theScriptsWin = <%s>'%s'\n", this, this->GetName().c_str(),
        theScriptsWin, theScriptsWin->GetName().c_str());
    #endif
-   mEditor = new Editor(theScriptsWin, true, ID_STC);
+   mEditor = new ScriptEditor(theScriptsWin, true, ID_STC);
 #else
    // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
    mFileContentsTextCtrl =
@@ -251,7 +251,7 @@ void ScriptEventPanel::Create()
          ("ScriptEventPanel::Create() Not using sash window\n   Creating Editor from "
           "parent = <%p>'%s'\n", this, this->GetName().c_str());
       #endif
-      mEditor = new Editor(this, true, ID_STC);
+      mEditor = new ScriptEditor(this, true, ID_STC);
    #else
       // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
       mFileContentsTextCtrl =

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="CalculationParameters"
+<refentry version="5.0" xml:id="CalculationParameters" xml:lang="en-US"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -59,8 +59,7 @@
     <literal><replaceable>Spacecraft</replaceable>.Mars.Altitude</literal>.
     Any built-in central body or user-defined <guilabel>Asteroid</guilabel>,
     <guilabel>Comet</guilabel>, <guilabel>Moon</guilabel>, or
-    <guilabel>Planet</guilabel> is valid as a dependency. If the dependency is
-    omitted, <literal>Earth</literal> is assumed.</para>
+    <guilabel>Planet</guilabel> is valid as a dependency.</para>
 
     <para>Likewise, coordinate-system-dependent parameters have a value that
     is dependent on the chosen coordinate system. The <guilabel>DEC</guilabel>
@@ -69,8 +68,27 @@
     <guilabel>CoordinateSystem</guilabel> resource, such as
     <literal><replaceable>Spacecraft</replaceable>.EarthFixed.DEC</literal>.
     Any default or user-defined <guilabel>CoordinateSystem</guilabel> resource
-    is valid as a dependency. If the dependency is omitted,
-    <literal>EarthMJ2000Eq</literal> is assumed.</para>
+    is valid as a dependency.</para>
+
+    <para>If a dependency is used when retrieving the value of the parameter,
+    as in the following line, the value of <guilabel>Altitude</guilabel> is
+    calculated at Mars before setting it to the variable <literal>x</literal>.
+    If the dependency is omitted, <guilabel>Earth</guilabel> and
+    <guilabel>EarthMJ2000Eq</guilabel> are assumed unless noted
+    otherwise.</para>
+
+    <programlisting>x = DefaultSC.Mars.Altitude</programlisting>
+
+    <para>If a dependency is used when setting the value of a parameter, the
+    value of the parameter is first converted based on the value of the
+    dependency, then the value is set. For example, in the following line, the
+    value of <guilabel>SMA</guilabel> is first calculated at Mars, then it is
+    set to the value <literal>10000</literal> in that context. If the
+    dependency is omitted when setting the value, the default is assumed to be
+    the central body or coordinate system of the parent resource (in this
+    case, <guilabel>DefaultSC</guilabel>).</para>
+
+    <para><programlisting>DefaultSC.Mars.SMA = 10000</programlisting></para>
 
     <para>Attached-hardware parameters have no dependencies, but are
     themselves dependent on being attached to a
@@ -278,6 +296,76 @@
 
           <tbody>
             <row>
+              <entry><guilabel>A1Gregorian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>N</entry>
+
+              <entry><para>Spacecraft epoch in the A.1 system and the
+              Gregorian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(N/A)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>A1ModJulian</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Spacecraft epoch in the A.1 system and the Modified
+              Julian format.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>Acceleration</guilabel></entry>
 
               <entry>N</entry>
@@ -425,121 +513,14 @@
             </row>
 
             <row>
-              <entry><guilabel>AtmosDensity</guilabel></entry>
-
-              <entry>N</entry>
-
-              <entry>Y</entry>
-
-              <entry><para> The atmospheric density at the current
-              <guilabel>Spacecraft</guilabel> epoch and location computed
-              using the <guilabel>ForceModel</guilabel> selected for the
-              dependency.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>String</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para><guilabel>ForceModel</guilabel></para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>kg/m^3</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>A1Gregorian</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>N</entry>
-
-              <entry><para>Spacecraft epoch in the A.1 system and the
-              Gregorian format.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>String</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(N/A)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>A1ModJulian</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>Spacecraft epoch in the A.1 system and the Modified
-              Julian format.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>d</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>AOP</guilabel></entry>
+              <entry><guilabel>AltEquinoctialP</guilabel></entry>
 
               <entry>Y</entry>
 
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AOP</guilabel></link></para><variablelist>
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AltEquinoctialP</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -557,32 +538,24 @@
                   </varlistentry>
 
                   <varlistentry>
-                    <term>Output Range</term>
-
-                    <listitem>
-                      <para>0° ≤ <guilabel>AOP</guilabel> &lt; 360°</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
                     <term>Units</term>
 
                     <listitem>
-                      <para>deg</para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
             </row>
 
             <row>
-              <entry><guilabel>AZI</guilabel></entry>
+              <entry><guilabel>AltEquinoctialQ</guilabel></entry>
 
               <entry>Y</entry>
 
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AZI</guilabel></link></para><variablelist>
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AltEquinoctialQ</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -600,18 +573,10 @@
                   </varlistentry>
 
                   <varlistentry>
-                    <term>Output Range</term>
-
-                    <listitem>
-                      <para>-180° ≤ <guilabel>AZI</guilabel> ≤ 180°</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
                     <term>Units</term>
 
                     <listitem>
-                      <para>deg</para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -759,6 +724,49 @@
             </row>
 
             <row>
+              <entry><guilabel>AOP</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AOP</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>AOP</guilabel> &lt; 360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>Apoapsis</guilabel></entry>
 
               <entry>N</entry>
@@ -796,19 +804,51 @@
             </row>
 
             <row>
-              <entry><guilabel>BVectorAngle</guilabel></entry>
+              <entry><guilabel>AtmosDensity</guilabel></entry>
 
               <entry>N</entry>
 
               <entry>Y</entry>
 
-              <entry><para>B-plane angle between the <inlineequation>
-                  <mathphrase>B</mathphrase>
-                </inlineequation> vector and the <inlineequation>
-                  <mathphrase>T</mathphrase>
-                </inlineequation> unit vector. See the
-              <guilabel>BdotR</guilabel> parameter for notes on this
-              calculation.</para><variablelist>
+              <entry><para> The atmospheric density at the current
+              <guilabel>Spacecraft</guilabel> epoch and location computed
+              using the <guilabel>ForceModel</guilabel> selected for the
+              dependency.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>ForceModel</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>kg/km^3</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>AZI</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>AZI</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -829,8 +869,7 @@
                     <term>Output Range</term>
 
                     <listitem>
-                      <para>-180° ≤ <guilabel>BVectorAngle</guilabel> ≤
-                      180°</para>
+                      <para>-180° ≤ <guilabel>AZI</guilabel> ≤ 180°</para>
                     </listitem>
                   </varlistentry>
 
@@ -839,44 +878,6 @@
 
                     <listitem>
                       <para>deg</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>BVectorMag</guilabel></entry>
-
-              <entry>N</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>B-plane <inlineequation>
-                  <mathphrase>B</mathphrase>
-                </inlineequation> vector magnitude. See the
-              <guilabel>BdotR</guilabel> parameter for notes on this
-              calculation.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>km</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -1006,6 +1007,585 @@
 
                     <listitem>
                       <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerLongAOP</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerLongAOP</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerLongAOP</guilabel> ≤
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerLongECC</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerLongECC</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerLongINC</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerLongINC</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerLongINC</guilabel> ≤
+                      180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerLongMA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerLongMA</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerLongMA</guilabel> ≤
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerLongRAAN</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerLongRAAN</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerLongRAAN</guilabel> ≤
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerLongSMA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerLongSMA</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerShortAOP</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerShortAOP</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerShortAOP</guilabel> ≤
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerShortECC</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerShortECC</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerShortINC</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerShortINC</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerShortINC</guilabel> ≤
+                      180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerShortMA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerShortMA</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerShortMA</guilabel> ≤
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerShortRAAN</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerShortRAAN</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>BrouwerShortRAAN</guilabel> ≤
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BrouwerShortSMA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>BrouwerShortSMA</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BVectorAngle</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>B-plane angle between the <inlineequation>
+                  <mathphrase>B</mathphrase>
+                </inlineequation> vector and the <inlineequation>
+                  <mathphrase>T</mathphrase>
+                </inlineequation> unit vector. See the
+              <guilabel>BdotR</guilabel> parameter for notes on this
+              calculation.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>-180° ≤ <guilabel>BVectorAngle</guilabel> ≤
+                      180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>BVectorMag</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>B-plane <inlineequation>
+                  <mathphrase>B</mathphrase>
+                </inlineequation> vector magnitude. See the
+              <guilabel>BdotR</guilabel> parameter for notes on this
+              calculation.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -1549,6 +2129,243 @@
 
                     <listitem>
                       <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Delaunayg</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>Delaunayg</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>Delaunayg</guilabel> &lt;
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>DelaunayG</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>DelaunayG</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km<superscript>2</superscript>/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Delaunayh</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>Delaunayh</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>Delaunayh</guilabel> &lt;
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>DelaunayH</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>DelaunayH</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km<superscript>2</superscript>/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>Delaunayl</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>Delaunayl</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>Delaunayl</guilabel> &lt;
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>DelaunayL</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>DelaunayL</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km<superscript>2</superscript>/s</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -2503,14 +3320,58 @@
             </row>
 
             <row>
-              <entry><guilabel>LST</guilabel></entry>
-
-              <entry>N</entry>
+              <entry><guilabel>IncomingBVAZI</guilabel></entry>
 
               <entry>Y</entry>
 
-              <entry><para>Local sidereal time of the spacecraft from the
-              celestial body's inertial x-axis.</para><variablelist>
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>IncomingBVAZI</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>IncomingBVAZI</guilabel> &lt;
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>IncomingC3Energy</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>IncomingC3Energy</guilabel></link>.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -2528,10 +3389,126 @@
                   </varlistentry>
 
                   <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>MJ/kg
+                      (km<superscript>2</superscript>/s<superscript>2</superscript>)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>IncomingDHA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>IncomingDHA</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
                     <term>Output Range</term>
 
                     <listitem>
-                      <para>0° ≤ <guilabel>LST</guilabel> &lt; 360°</para>
+                      <para>-90° ≤ <guilabel>IncomingDHA</guilabel> ≤
+                      90°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>IncomingRadPer</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>IncomingRadPer</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>IncomingRHA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>IncomingRHA</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>IncomingRHA</guilabel> &lt;
+                      360°</para>
                     </listitem>
                   </varlistentry>
 
@@ -2617,6 +3594,49 @@
                     <listitem>
                       <para>-180° ≤ <guilabel>Longitude</guilabel> ≤
                       180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>LST</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Local sidereal time of the spacecraft from the
+              celestial body's inertial x-axis.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>LST</guilabel> &lt; 360°</para>
                     </listitem>
                   </varlistentry>
 
@@ -2737,7 +3757,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CelestialBody</guilabel></para>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -2796,6 +3816,146 @@
 
                     <listitem>
                       <para>rad/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>ModEquinoctialF</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>ModEquinoctialF</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>ModEquinoctialG</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>ModEquinoctialG</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>ModEquinoctialH</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>ModEquinoctialH</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>ModEquinoctialK</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>ModEquinoctialK</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -2947,7 +4107,8 @@
 
               <entry>N</entry>
 
-              <entry><para>State transition matrix.</para><variablelist>
+              <entry><para>State transition matrix with respect to the
+              origin-independent MJ2000Eq axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -2960,7 +4121,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -2981,8 +4142,9 @@
 
               <entry>N</entry>
 
-              <entry><para>Upper-left quadrant of the state transition
-              matrix.</para><variablelist>
+              <entry><para>Upper-left quadrant of the state transition matrix,
+              with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -2995,7 +4157,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3017,7 +4179,8 @@
               <entry>N</entry>
 
               <entry><para>Upper-right quadrant of the state transition
-              matrix.</para><variablelist>
+              matrix, with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3030,7 +4193,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3051,8 +4214,9 @@
 
               <entry>N</entry>
 
-              <entry><para>Lower-left quadrant of the state transition
-              matrix.</para><variablelist>
+              <entry><para>Lower-left quadrant of the state transition matrix,
+              with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3065,7 +4229,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3087,7 +4251,8 @@
               <entry>N</entry>
 
               <entry><para>Lower-right quadrant of the state transition
-              matrix.</para><variablelist>
+              matrix, with respect to the origin-independent MJ2000Eq
+              axes.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3100,7 +4265,7 @@
                     <term>Dependency</term>
 
                     <listitem>
-                      <para><guilabel>CoordinateSystem</guilabel></para>
+                      <para>(None)</para>
                     </listitem>
                   </varlistentry>
 
@@ -3109,6 +4274,209 @@
 
                     <listitem>
                       <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>OutgoingBVAZI</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>OutgoingBVAZI</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>OutgoingBVAZI</guilabel> &lt;
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>OutgoingC3Energy</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>OutgoingC3Energy</guilabel></link>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>MJ/kg
+                      (km<superscript>2</superscript>/s<superscript>2</superscript>)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>OutgoingDHA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>OutgoingDHA</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>-90° ≤ <guilabel>OutgoingRHA</guilabel> ≤
+                      90°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>OutgoingRadPer</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>OutgoingRadPer</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>OutgoingRHA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>OutgoingRHA</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>OutgoingRHA</guilabel> &lt;
+                      360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -3146,6 +4514,276 @@
 
                     <listitem>
                       <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PlanetodeticAZI</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>PlanetodeticAZI</guilabel></link>.
+              This parameter must be used with a
+              <guilabel>CoordinateSystem</guilabel> with
+              <guilabel>BodyFixed</guilabel> axes.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel> (with
+                      <guilabel>BodyFixed</guilabel> axes)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>-180° ≤ <guilabel>PlanetodeticAZI</guilabel> ≤
+                      180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PlanetodeticHFPA</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>PlanetodeticHFPA</guilabel></link>.
+              This parameter must be used with a
+              <guilabel>CoordinateSystem</guilabel> with
+              <guilabel>BodyFixed</guilabel> axes.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel> (with
+                      <guilabel>BodyFixed</guilabel> axes)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>-90° ≤ <guilabel>PlanetodeticHFPA</guilabel> ≤
+                      90°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PlanetodeticLAT</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>PlanetodeticLAT</guilabel></link>.
+              This parameter must be used with a
+              <guilabel>CoordinateSystem</guilabel> with
+              <guilabel>BodyFixed</guilabel> axes.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel> (with
+                      <guilabel>BodyFixed</guilabel> axes)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>-180° ≤ <guilabel>PlanetodeticLAT</guilabel> ≤
+                      180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PlanetodeticLON</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>PlanetodeticLON</guilabel></link>.
+              This parameter must be used with a
+              <guilabel>CoordinateSystem</guilabel> with
+              <guilabel>BodyFixed</guilabel> axes.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel> (with
+                      <guilabel>BodyFixed</guilabel> axes)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>-180° ≤ <guilabel>PlanetodeticLON</guilabel> ≤
+                      180°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PlanetodeticRMAG</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>PlanetodeticRMAG</guilabel></link>.
+              This parameter must be used with a
+              <guilabel>CoordinateSystem</guilabel> with
+              <guilabel>BodyFixed</guilabel> axes.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel> (with
+                      <guilabel>BodyFixed</guilabel> axes)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>PlanetodeticVMAG</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>PlanetodeticVMAG</guilabel></link>.
+              This parameter must be used with a
+              <guilabel>CoordinateSystem</guilabel> with
+              <guilabel>BodyFixed</guilabel> axes.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel> (with
+                      <guilabel>BodyFixed</guilabel> axes)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -3412,6 +5050,76 @@
             </row>
 
             <row>
+              <entry><guilabel>RadApo</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>RadApo</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>RadPer</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>RadPer</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>RAV</guilabel></entry>
 
               <entry>Y</entry>
@@ -3533,14 +5241,14 @@
             </row>
 
             <row>
-              <entry><guilabel>RadApo</guilabel></entry>
+              <entry><guilabel>SemilatusRectum</guilabel></entry>
 
               <entry>Y</entry>
 
               <entry>Y</entry>
 
               <entry><para>See <link
-              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>RadApo</guilabel></link></para><variablelist>
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>SemilatusRectum</guilabel></link></para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3568,14 +5276,14 @@
             </row>
 
             <row>
-              <entry><guilabel>RadPer</guilabel></entry>
+              <entry><guilabel>SemilatusRectum</guilabel></entry>
+
+              <entry>N</entry>
 
               <entry>Y</entry>
 
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Spacecraft"><guilabel>Spacecraft</guilabel>.<guilabel>RadPer</guilabel></link></para><variablelist>
+              <entry><para>Semilatus rectum of the osculating
+              orbit.</para><variablelist>
                   <varlistentry>
                     <term>Data Type</term>
 
@@ -3667,41 +5375,6 @@
 
                     <listitem>
                       <para>m<superscript>2</superscript></para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>SemilatusRectum</guilabel></entry>
-
-              <entry>N</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>Semilatus rectum of the osculating
-              orbit.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para><guilabel>CelestialBody</guilabel></para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>km</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -3891,6 +5564,84 @@
             </row>
 
             <row>
+              <entry><guilabel>TLONG</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="SpacecraftOrbitState"><guilabel>Spacecraft</guilabel>.<guilabel>TLONG</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CoordinateSystem</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Output Range</term>
+
+                    <listitem>
+                      <para>0° ≤ <guilabel>TLONG</guilabel> &lt; 360°</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>deg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>TotalMass</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Total mass, including fuel mass from attached
+              <guilabel>FuelTank</guilabel> resources.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>kg</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>TTGregorian</guilabel></entry>
 
               <entry>Y</entry>
@@ -3961,41 +5712,6 @@
             </row>
 
             <row>
-              <entry><guilabel>TotalMass</guilabel></entry>
-
-              <entry>N</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>Total mass, including fuel mass from attached
-              <guilabel>FuelTank</guilabel> resources.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>kg</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
               <entry><guilabel>UTCGregorian</guilabel></entry>
 
               <entry>Y</entry>
@@ -4060,6 +5776,74 @@
 
                     <listitem>
                       <para>d</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>VelApoapsis</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Scalar velocity at apoapsis.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>VelPeriapsis</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>Scalar velocity at periapsis.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para><guilabel>CelestialBody</guilabel></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km/s</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -4200,74 +5984,6 @@
 
                     <listitem>
                       <para><guilabel>CoordinateSystem</guilabel></para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>km/s</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>VelApoapsis</guilabel></entry>
-
-              <entry>N</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>Scalar velocity at apoapsis.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para><guilabel>CelestialBody</guilabel></para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>km/s</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>VelPeriapsis</guilabel></entry>
-
-              <entry>N</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>Scalar velocity at periapsis.</para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para><guilabel>CelestialBody</guilabel></para>
                     </listitem>
                   </varlistentry>
 
@@ -5378,251 +7094,6 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
             </row>
 
             <row>
-              <entry><guilabel>C10</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C10</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>N/kPa<superscript>C11</superscript></para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>C11</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C11</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>C12</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C12</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>N</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>C13</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C13</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>C14</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C14</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>1/kPa</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>C15</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C15</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>C16</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C16</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>1/kPa</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
               <entry><guilabel>C2</guilabel></entry>
 
               <entry>Y</entry>
@@ -5903,6 +7374,251 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
             </row>
 
             <row>
+              <entry><guilabel>C10</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C10</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N/kPa<superscript>C11</superscript></para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>C11</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C11</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>C12</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C12</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>N</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>C13</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C13</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>C14</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C14</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>1/kPa</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>C15</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C15</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>C16</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>C16</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>1/kPa</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
               <entry><guilabel>DutyCycle</guilabel></entry>
 
               <entry>Y</entry>
@@ -6002,251 +7718,6 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
 
                     <listitem>
                       <para>s</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K10</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K10</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>s/kPa<superscript>C11</superscript></para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K11</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K11</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K12</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K12</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>s</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K13</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K13</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K14</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K14</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>1/kPa</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K15</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K15</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-                </variablelist></entry>
-            </row>
-
-            <row>
-              <entry><guilabel>K16</guilabel></entry>
-
-              <entry>Y</entry>
-
-              <entry>Y</entry>
-
-              <entry><para>See <link
-              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K16</guilabel></link></para><variablelist>
-                  <varlistentry>
-                    <term>Data Type</term>
-
-                    <listitem>
-                      <para>Real</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Dependency</term>
-
-                    <listitem>
-                      <para>(None)</para>
-                    </listitem>
-                  </varlistentry>
-
-                  <varlistentry>
-                    <term>Units</term>
-
-                    <listitem>
-                      <para>1/kPa</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -6527,6 +7998,251 @@ aReport.Add = {aSat.aThruster.DutyCycle}</code></programlisting></para>
 
                     <listitem>
                       <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K10</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K10</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>s/kPa<superscript>C11</superscript></para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K11</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K11</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K12</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K12</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>s</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K13</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K13</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K14</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K14</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>1/kPa</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K15</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K15</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>K16</guilabel></entry>
+
+              <entry>Y</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>See <link
+              linkend="Thruster"><guilabel>Thruster</guilabel>.<guilabel>K16</guilabel></link></para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>1/kPa</para>
                     </listitem>
                   </varlistentry>
                 </variablelist></entry>
@@ -6918,6 +8634,161 @@ myVar =  mySat.MyCoordinateSystem.Element1 </code></programlisting></para>
 
                     <listitem>
                       <para>Real</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </refsection>
+
+    <refsection>
+      <title>Solver</title>
+
+      <para><guilabel>Solver</guilabel> parameters allow you to query a
+      <guilabel>Solver</guilabel> for its convergence state to determine if
+      the <guilabel>Solver</guilabel> converged. There are both string and
+      numeric parameters which are described in further detail in the table
+      below the following usage example using solver parameters before and
+      after a <guilabel>Target</guilabel> sequence.</para>
+
+      <para><programlisting><code>Create Spacecraft aSat
+Create Propagator aPropagator
+
+Create ImpulsiveBurn aBurn
+Create DifferentialCorrector aDC
+Create OrbitView EarthView
+EarthView.Add = {Earth,aSat}
+EarthView.ViewScaleFactor = 5
+
+Create ReportFile aReport
+
+BeginMissionSequence
+Report aReport aDC.SolverStatus aDC.SolverState
+Target aDC
+   Vary aDC(aBurn.Element1 = 1.0, {Upper = 3})
+   Maneuver aBurn(aSat)
+   Propagate aPropagator(aSat,{aSat.Apoapsis})
+   Achieve aDC(aSat.RMAG = 42164)
+EndTarget
+Report aReport aDC.SolverStatus aDC.SolverState</code></programlisting></para>
+
+      <informaltable colsep="0" frame="topbot">
+        <tgroup cols="4">
+          <colspec colnum="1" colwidth="1.5in"/>
+
+          <colspec colnum="2" colwidth="0.75in"/>
+
+          <colspec colnum="3" colwidth="0.75in"/>
+
+          <colspec colnum="4"/>
+
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+
+              <entry>Settable</entry>
+
+              <entry>Plottable</entry>
+
+              <entry>Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><guilabel>SolverStatus</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>N</entry>
+
+              <entry><para>The <guilabel>SolverStatus</guilabel> parameter
+              contains the state of a <guilabel>Solver</guilabel>. If the
+              <guilabel>Solver</guilabel> has not executed,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>Initialized</guilabel>. If the
+              <guilabel>Solver</guilabel> has executed and converged,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>Converged</guilabel>. If the
+              <guilabel>Solver</guilabel> is iterating,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>Running</guilabel>. If the <guilabel>Solver</guilabel>
+              has executed and reached the maximum number of iterations before
+              convergence, <guilabel>SolverStatus</guilabel> is
+              <guilabel>ExceededIterations</guilabel>. If the
+              <guilabel>Solver</guilabel> has executed and failed to converge,
+              but did not exceed the maximum iterations,
+              <guilabel>SolverStatus</guilabel> is
+              <guilabel>DidNotConverge</guilabel>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>String</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Dependency</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>(None)</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></entry>
+            </row>
+
+            <row>
+              <entry><guilabel>SolverState</guilabel></entry>
+
+              <entry>N</entry>
+
+              <entry>Y</entry>
+
+              <entry><para>The <guilabel>SolverState</guilabel> parameter
+              contains the state of a <guilabel>Solver</guilabel>. If the
+              solver has not executed, <guilabel>SolverState</guilabel> is 0.
+              If the <guilabel>Solver</guilabel> has executed and converged,
+              <guilabel>SolverState</guilabel> is <guilabel>1</guilabel>. If
+              the <guilabel>Solver</guilabel> is iterating, <guilabel>
+              SolverState</guilabel> is 0. If the <guilabel>Solver</guilabel>
+              has executed and reached the maximum number of iterations before
+              convergence, <guilabel>SolverState</guilabel> is
+              <guilabel>-1</guilabel>. If the <guilabel>Solver</guilabel> has
+              executed and failed to converge, but did not exceed the maximum
+              iterations, <guilabel>SolverState</guilabel> is
+              <guilabel>-2</guilabel>.</para><variablelist>
+                  <varlistentry>
+                    <term>Data Type</term>
+
+                    <listitem>
+                      <para>Integer</para>
                     </listitem>
                   </varlistentry>
 

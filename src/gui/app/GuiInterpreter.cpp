@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -347,7 +347,7 @@ GmatBase* GuiInterpreter::CreateObject(const std::string &type,
    
    GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    continueOnError = false;
-   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false);
+   GmatBase *obj = Interpreter::CreateObject(type, name, manage, createDefault, false, false);
    
    if (obj == NULL)
    {
@@ -704,11 +704,14 @@ std::string GuiInterpreter::GetPotentialFileName(const std::string &fileType)
 
 
 //------------------------------------------------------------------------------
-// std::string GetFileName(const std::string &fileType)
+// std::string GetFileName(const std::string &fileType, bool getFullpath = false,
+//                         bool forInput = true, bool writeWarning = false,
+//                         bool writeInfo = false)
 //------------------------------------------------------------------------------
-std::string GuiInterpreter::GetFileName(const std::string &fileType)
+std::string GuiInterpreter::GetFileName(const std::string &fileType, bool getFullpath,
+                                        bool forInput, bool writeWarning, bool writeInfo)
 {
-   return theModerator->GetFileName(fileType);
+   return theModerator->GetFileName(fileType, getFullpath, forInput, writeWarning, writeInfo);
 }
 
 
@@ -1057,6 +1060,17 @@ void GuiInterpreter::CloseCurrentProject()
 {
 #if !defined __CONSOLE_APP__
    GmatAppData::Instance()->GetMainFrame()->CloseCurrentProject();
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetIconFile()
+//------------------------------------------------------------------------------
+void GuiInterpreter::ResetIconFile()
+{
+#if !defined __CONSOLE_APP__
+   GmatAppData::Instance()->ResetIconFile();
 #endif
 }
 

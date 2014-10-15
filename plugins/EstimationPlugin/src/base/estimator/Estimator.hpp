@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -172,11 +172,11 @@ protected:
    /// The accumulated measurement data (transformed to the estimation epoch)
    std::vector<RealArray>  hAccum;
 
-   /// Weight, Observation data, calculated data					// made changes by TUAN NGUYEN
-   //std::fstream reportFile;											// made changes by TUAN NGUYEN
-   RealArray Weight;												// made changes by TUAN NGUYEN
-   RealArray OData;		// correction value of observation data		// made changes by TUAN NGUYEN
-   RealArray CData;													// made changes by TUAN NGUYEN
+   /// Weight, Observation data, calculated data                         // made changes by TUAN NGUYEN
+   //std::fstream reportFile;                                            // made changes by TUAN NGUYEN
+   RealArray Weight;                                                     // made changes by TUAN NGUYEN
+   RealArray OData;        // correction value of observation data       // made changes by TUAN NGUYEN
+   RealArray CData;                                                      // made changes by TUAN NGUYEN
 
    /// The indices for the MeasurementModels with observations at current epoch
    IntegerArray            modelsToAccess;
@@ -187,21 +187,21 @@ protected:
    Covariance              *stateCovariance;
    /// The estimated state in GMAT internal coordinate system
    GmatState               *estimationState;
-   /// The previous estimated state	 in GMAT internal coordinate system					// made changes by TUAN NGUYEN
-   GmatState               oldEstimationState;											// made changes by TUAN NGUYEN
+   /// The previous estimated state    in GMAT internal coordinate system               // made changes by TUAN NGUYEN
+   GmatState               oldEstimationState;                                          // made changes by TUAN NGUYEN
    
-   /// Apriori state (solve-for) presenting in participants' cooridnate systems			// made changes by TUAN NGUYEN
-   GmatState aprioriSolveForState;														// made changes by TUAN NGUYEN
-   /// The previous state (solve-for) presenting in participants' coordinate systems	// made changes by TUAN NGUYEN
-   GmatState previousSolveForState;														// made changes by TUAN NGUYEN
-   /// The current state (solve-for) presenting in participants' coordinate systems		// made changes by TUAN NGUYEN
-   GmatState currentSolveForState;														// made changes by TUAN NGUYEN
+   /// Apriori state (solve-for) presenting in participants' cooridnate systems         // made changes by TUAN NGUYEN
+   GmatState aprioriSolveForState;                                                      // made changes by TUAN NGUYEN
+   /// The previous state (solve-for) presenting in participants' coordinate systems    // made changes by TUAN NGUYEN
+   GmatState previousSolveForState;                                                     // made changes by TUAN NGUYEN
+   /// The current state (solve-for) presenting in participants' coordinate systems     // made changes by TUAN NGUYEN
+   GmatState currentSolveForState;                                                      // made changes by TUAN NGUYEN
 
 
    /// Size of the estimation state vector
    UnsignedInt             stateSize;
-   /// The estimated state											// made changes by TUAN NGUYEN
-   GmatState               initialEstimationState;					// made changes by TUAN NGUYEN
+   /// The estimated state                                       // made changes by TUAN NGUYEN
+   GmatState               initialEstimationState;               // made changes by TUAN NGUYEN
 
    /// The information matrix, $\Lambda$
    Rmatrix                 information;
@@ -237,24 +237,24 @@ protected:
 
 
 //   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
-//   std::string         epochFormat;							// made changes by TUAN NGUYEN
-//   std::string         startEpoch;							// made changes by TUAN NGUYEN
-//   std::string         endEpoch;							// made changes by TUAN NGUYEN
-//   /// Start epoch for the estimation						// made changes by TUAN NGUYEN
-//   GmatEpoch           estimationStart;						// made changes by TUAN NGUYEN
-//   /// End epoch for the end of the estimation				// made changes by TUAN NGUYEN
-//   GmatEpoch           estimationEnd;						// made changes by TUAN NGUYEN
+//   std::string         epochFormat;                     // made changes by TUAN NGUYEN
+//   std::string         startEpoch;                      // made changes by TUAN NGUYEN
+//   std::string         endEpoch;                        // made changes by TUAN NGUYEN
+//   /// Start epoch for the estimation                   // made changes by TUAN NGUYEN
+//   GmatEpoch           estimationStart;                 // made changes by TUAN NGUYEN
+//   /// End epoch for the end of the estimation          // made changes by TUAN NGUYEN
+//   GmatEpoch           estimationEnd;                   // made changes by TUAN NGUYEN
 
    /// Parameters for data sigma editting
-   Real maxResidualMult;									// made changes by TUAN NGUYEN
-   Real constMult;											// made changes by TUAN NGUYEN
-   Real additiveConst;										// made changes by TUAN NGUYEN
+   Real maxResidualMult;                                  // made changes by TUAN NGUYEN
+   Real constMult;                                        // made changes by TUAN NGUYEN
+   Real additiveConst;                                    // made changes by TUAN NGUYEN
 
    ///// Predicted RMS
-   //Real predictedRMS;			// It was moved to BatchEstimator
+   //Real predictedRMS;         // It was moved to BatchEstimator
 
    /// Number of removed observation data records
-   std::map<std::string, UnsignedInt> numRemovedRecords;	// made changes by TUAN NGUYEN
+   std::map<std::string, UnsignedInt> numRemovedRecords;   // made changes by TUAN NGUYEN
 
    ///// Report file
    //std::string reportFilename;
@@ -271,12 +271,12 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
-//	  EPOCH_FORMAT,							// made changes by TUAN NGUYEN  for time span filter
-//	  START_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
-//	  END_EPOCH,							// made changes by TUAN NGUYEN	for time span filter
-	  MAX_RESIDUAL_MULTIPLIER,				// made changes by TUAN NGUYEN  for data sigma editting
-	  CONSTANT_MULTIPLIER,					// made changes by TUAN NGUYEN	for data sigma editting
-	  ADDITIVE_CONSTANT,					// made changes by TUAN NGUYEN	for data sigma editting
+//     EPOCH_FORMAT,                      // made changes by TUAN NGUYEN   for time span filter
+//     START_EPOCH,                       // made changes by TUAN NGUYEN   for time span filter
+//     END_EPOCH,                         // made changes by TUAN NGUYEN   for time span filter
+     MAX_RESIDUAL_MULTIPLIER,             // made changes by TUAN NGUYEN   for data sigma editting
+     CONSTANT_MULTIPLIER,                 // made changes by TUAN NGUYEN   for data sigma editting
+     ADDITIVE_CONSTANT,                   // made changes by TUAN NGUYEN   for data sigma editting
       EstimatorParamCount
    };
 
@@ -288,7 +288,7 @@ protected:
                                PARAMETER_TYPE[EstimatorParamCount -
                                               SolverParamCount];
 
-   virtual Integer TestForConvergence(std::string &reason);		// made change by TUAN NGUYEN
+   virtual Integer TestForConvergence(std::string &reason);      // made change by TUAN NGUYEN
 
    Real                    ConvertToRealEpoch(const std::string &theEpoch,
                                               const std::string &theFormat);
@@ -303,12 +303,12 @@ protected:
                                             const std::string&);
    virtual void            SetResultValue(Integer, Real, const std::string&);
 
-//   virtual void            ValidateModelToAccess();					// made changes by TUAN NGUYEN
-//   virtual bool            DataFilter();								// It was moved to BatchEstimator
+//   virtual void            ValidateModelToAccess();               // made changes by TUAN NGUYEN
+//   virtual bool            DataFilter();                          // It was moved to BatchEstimator
 
 ///// TBD: Do simulators need this too?  If so, move to base class
-   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);			// made changes by TUAN NGUYEN
-   virtual void            GetEstimationState(GmatState& outputState);																				// made changes by TUAN NGUYEN
+   virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);         // made changes by TUAN NGUYEN
+   virtual void            GetEstimationState(GmatState& outputState);                                                                             // made changes by TUAN NGUYEN
 
    /// Estimation status contains all st
    enum EstimationStatus
@@ -318,14 +318,14 @@ protected:
       RELATIVETOL_CONVERGED,
       ABS_AND_REL_TOL_CONVERGED,
       MAX_CONSECUTIVE_DIVERGED,
-	  MAX_ITERATIONS_DIVERGED,
+      MAX_ITERATIONS_DIVERGED,
       CONVERGING,
       DIVERGING,
    };
 
 
 //private:
-//   bool                    IsReuseableType(const std::string& value);	// It was moved to BatchEstimator
+//   bool                    IsReuseableType(const std::string& value);   // It was moved to BatchEstimator
 
 };
 

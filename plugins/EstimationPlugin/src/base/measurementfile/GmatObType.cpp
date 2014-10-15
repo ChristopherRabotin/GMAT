@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -243,9 +243,6 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
 
    if (retval == false)
    {
-//      MessageInterface::ShowMessage(																		// made changes by TUAN NGUYEN
-//            "GMATInternal Data File %s could not be opened\n",											// made changes by TUAN NGUYEN
-//            streamName.c_str());																			// made changes by TUAN NGUYEN
 	  throw MeasurementException("GMATInternal Data File " + streamName + " could not be opened\n");		// made changes by TUAN NGUYEN
    }
    return retval;
@@ -292,26 +289,43 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    bool retval = false;
 
    std::stringstream dataLine;
-   char databuffer[20];
-   char epochbuffer[20];
+   char databuffer[200];
+   char epochbuffer[200];
 
    Real taiEpoch = (md->epochSystem == TimeConverterUtil::TAIMJD ? md->epoch :
          TimeConverterUtil::ConvertToTaiMjd(md->epochSystem, md->epoch,
                GmatTimeConstants::JD_NOV_17_1858));
 
-   sprintf(epochbuffer, "%17.11lf", taiEpoch);
+   sprintf(epochbuffer, "%18.12lf", taiEpoch);
    dataLine << epochbuffer << "    " << md->typeName
             << "    " << md->type << "    ";
    for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
       dataLine << md->participantIDs[j] << "    ";
 
+   if (md->typeName == "Doppler")                                                          // made changes by TUAN NGUYEN
+   {                                                                                       // made changes by TUAN NGUYEN
+      dataLine << md->uplinkBand << "    ";                                                // made changes by TUAN NGUYEN
+      dataLine << md->dopplerCountInterval;                                                // made changes by TUAN NGUYEN
+   }                                                                                       // made changes by TUAN NGUYEN
+
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      sprintf(databuffer, "%18.6lf", md->value[k]);
+      if (md->typeName == "DSNRange")                                                      // made changes by TUAN NGUYEN
+         sprintf(databuffer, "%18.6lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));   // made changes by TUAN NGUYEN
+      else                                                                                 // made changes by TUAN NGUYEN
+         sprintf(databuffer, "%18.6lf", md->value[k]);
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
    }
+
+   // extended information:                                                                // made changes by TUAN NGUYEN
+   if (md->typeName == "DSNRange")                                                         // made changes by TUAN NGUYEN
+   {                                                                                       // made changes by TUAN NGUYEN
+      sprintf(databuffer, "    %d    %.15le    %.15le",                                    // made changes by TUAN NGUYEN
+         md->uplinkBand, md->uplinkFreq, md->rangeModulo);	                               // made changes by TUAN NGUYEN
+      dataLine << databuffer;				                                                    // made changes by TUAN NGUYEN
+   }                                                                                       // made changes by TUAN NGUYEN
 
    theStream << dataLine.str() << "\n";
 
@@ -319,7 +333,7 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
       MessageInterface::ShowMessage("GmatObType::WriteMeasurement: \"%s\"\n",
             dataLine.str().c_str());
    #endif
-
+   
    // temporary
    retval = true;
 
@@ -437,7 +451,13 @@ ObservationData* GmatObType::ReadObservation()
       {
          MessageInterface::ShowMessage("Signal based measurement of type %d "
                "not processed successfully for line %s\n", type, str.c_str());
-   }
+      }
+
+      if ((currentObs.typeName == "Range")||(currentObs.typeName == "DSNRange")
+         ||(currentObs.typeName == "Doppler"))
+      {
+         dataSize = 1;
+      }
    }
 
    for (Integer i = 0; i < participantSize; ++i)
@@ -446,12 +466,27 @@ ObservationData* GmatObType::ReadObservation()
       currentObs.participantIDs.push_back(str);
    }
 
+   if (currentObs.typeName == "Doppler")                // made changes by TUAN NGUYEN
+   {                                                    // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
+      theLine >> currentObs.dopplerCountInterval;       // made changes by TUAN NGUYEN
+   }                                                    // made changes by TUAN NGUYEN
+
    for (Integer i = 0; i < dataSize; ++i)
    {
       theLine >> value;
       currentObs.value.push_back(value);
-	  currentObs.value_orig.push_back(value);
+	   currentObs.value_orig.push_back(value);
    }
+
+   // read extended infor from data record              // made changes by TUAN NGUYEN
+   if (currentObs.typeName == "DSNRange")               // made changes by TUAN NGUYEN
+   {                                                    // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
+      theLine >> currentObs.uplinkFreq;                 // made changes by TUAN NGUYEN
+      theLine >> currentObs.rangeModulo;                // made changes by TUAN NGUYEN
+   }                                                    // made changes by TUAN NGUYEN
+
 /*
    Covariance *noise = new Covariance();
    noise->SetDimension(dataSize);
@@ -464,14 +499,21 @@ ObservationData* GmatObType::ReadObservation()
 */
    #ifdef DEBUG_FILE_READ
       MessageInterface::ShowMessage(" %.12lf    %s    %d    ", currentObs.epoch, currentObs.typeName.c_str(), currentObs.type);
-            currentObs.typeName.c_str(), currentObs.type);
       for (Integer i = 0; i < participantSize; ++i)
 		  MessageInterface::ShowMessage("%s    ", currentObs.participantIDs.at(i).c_str());
 
       for (Integer i = 0; i < dataSize; ++i)
 		  MessageInterface::ShowMessage("%.12lf    ", currentObs.value.at(i));
 
-	  MessageInterface::ShowMessage("\n");
+      if (currentObs.typeName == "DSNRange")
+      {
+         MessageInterface::ShowMessage("   %d   %.12le   %.12le", currentObs.uplinkBand, currentObs.uplinkFreq, currentObs.rangeModulo);
+      }
+      else if (currentObs.typeName == "Doppler")
+      {
+         MessageInterface::ShowMessage("   %d   %.12le", currentObs.uplinkBand, currentObs.dopplerCountInterval);
+      }
+	   MessageInterface::ShowMessage("\n");
       MessageInterface::ShowMessage("GmatObType::ReadObservation() End\n");
    #endif
 

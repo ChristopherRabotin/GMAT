@@ -259,6 +259,83 @@ TFSMagicNumbers::TFSMagicNumbers() :
    ++lastNumber;
 
    
+   // Generic DSNRange entry.  Other DSN Range entries take precedence
+   lue = new LookupEntry;
+   lue->arbitraryCount = true;
+   lue->signalPathCount = 1;
+   lue->nodeCount = -1;             // Arbitrary
+   lue->nodes.clear();
+   lue->nodes.push_back(nodes);     // Empty for this one
+   lue->type = "DSNRange";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   // Added by TUAN NGUYEN
+   // DSN two way range
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "DSNRange";
+   lue->multFactor = 1.0;   //-1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   // Added by TUAN NGUYEN
+   // Generic doppler entry.  Other doppler entries take precedence
+   lue = new LookupEntry;
+   lue->arbitraryCount = true;
+   lue->signalPathCount = 1;
+   lue->nodeCount = -1;             // Arbitrary
+   nodes.clear();
+   lue->nodes.push_back(nodes);     // Empty for this one
+   lue->type = "Doppler";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   // Added by TUAN NGUYEN
+   // DSN two way doppler
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Doppler";
+   lue->multFactor = 1.0;   // -1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   
    // Build the factor map                                                      // made changes by TUAN NGUYEN
    factorMap.clear();                                                           // made changes by TUAN NGUYEN
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)                         // made changes by TUAN NGUYEN

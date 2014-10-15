@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -18,7 +18,7 @@
 #ifndef EditorPrintout_hpp
 #define EditorPrintout_hpp
 
-#include "Editor.hpp"
+#include "ScriptEditor.hpp"
 #include <wx/print.h>
 
 class EditorPrintout: public wxPrintout
@@ -26,7 +26,7 @@ class EditorPrintout: public wxPrintout
 public:
 
    // constructor
-   EditorPrintout (Editor *editor, wxChar *title = NULL);
+   EditorPrintout (ScriptEditor *editor, wxChar *title = NULL);
 
    // event handlers
    bool OnPrintPage (int page);
@@ -37,7 +37,7 @@ public:
    void GetPageInfo (int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
 
 private:
-   Editor *mEditor;
+   ScriptEditor *mEditor;
    int mPagePrinted;
    wxRect mPageRect;
    wxRect mPrintRect;

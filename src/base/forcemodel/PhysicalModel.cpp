@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -1099,6 +1099,22 @@ void PhysicalModel::SetSatelliteParameter(const Integer i,
 {
 }
 
+//------------------------------------------------------------------------------
+// void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Passes spacecraft pointers to the force model.
+ *
+ * This default implementation just returns.
+ *
+ * @param i   ID for the spacecraft
+ * @param obj pointer to the Spacecraft
+ */
+//------------------------------------------------------------------------------
+void PhysicalModel::SetSpaceObject(const Integer i, GmatBase *obj)
+{
+   return;
+}
 
 //------------------------------------------------------------------------------
 // bool UsesSpacecraftOrigin()

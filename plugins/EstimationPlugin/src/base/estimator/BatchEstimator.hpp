@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -83,9 +83,9 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   virtual std::string  GetOnOffParameter(const Integer id) const;						// made changes by TUAN NGUYEN
-   virtual bool         SetOnOffParameter(const Integer id,								// made changes by TUAN NGUYEN
-                                         const std::string &value);						// made changes by TUAN NGUYEN
+   virtual std::string  GetOnOffParameter(const Integer id) const;                   // made changes by TUAN NGUYEN
+   virtual bool         SetOnOffParameter(const Integer id,                          // made changes by TUAN NGUYEN
+                                         const std::string &value);                  // made changes by TUAN NGUYEN
 
    virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
@@ -119,10 +119,10 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
-//   /// Flag indicating convergence					// made changes by TUAN NGUYEN
-//   bool        converged;								// made changes by TUAN NGUYEN
-   /// Estimation status								// made changes by TUAN NGUYEN
-   Integer                 estimationStatus;			// made changes by TUAN NGUYEN
+//   /// Flag indicating convergence                 // made changes by TUAN NGUYEN
+//   bool        converged;                          // made changes by TUAN NGUYEN
+   /// Estimation status                             // made changes by TUAN NGUYEN
+   Integer                 estimationStatus;         // made changes by TUAN NGUYEN
 
    // String to show reason of convergence
    std::string convergenceReason;
@@ -132,16 +132,16 @@ protected:
    std::string             inversionType;
 
    /// Maximum consecutive divergences
-   Integer				   maxConsDivergences;
+   Integer               maxConsDivergences;
 
    /// Parameter IDs for the BatchEstimators
    enum
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
-//	  USE_PRIORI_ESTIMATE,								// made changes by TUAN NGUYEN
+//     USE_PRIORI_ESTIMATE,                        // made changes by TUAN NGUYEN
       INVERSION_ALGORITHM,
-	  MAX_CONSECUTIVE_DIVERGENCES,						// made changes by TUAN NGUYEN
+      MAX_CONSECUTIVE_DIVERGENCES,                 // made changes by TUAN NGUYEN
       BatchEstimatorParamCount,
    };
 

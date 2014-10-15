@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -50,21 +50,21 @@
  */
 //------------------------------------------------------------------------------
 PhysicalMeasurement::PhysicalMeasurement(const std::string &type,
-			const std::string &nomme) :
+         const std::string &nomme) :
    CoreMeasurement      (type, nomme),
-//   frequency            (2090659968.0),			// made changes by TUAN NGUYEN
-   frequency            (0.0),						// made changes by TUAN NGUYEN
-   freqBand             (0),						// made changes by TUAN NGUYEN
+// frequency            (2090659968.0),          // made changes by TUAN NGUYEN
+   frequency            (0.0),                   // made changes by TUAN NGUYEN
+   freqBand             (0),                     // made changes by TUAN NGUYEN
 ///// TBD: Determine if there is a more generic way to add these
-//   rangeModulo          (1.0e6),					// made changes by TUAN NGUYEN
-   rampTB               (NULL),						// made changes by TUAN NGUYEN
-   obsData              (NULL),						// made changes by TUAN NGUYEN
-   useRelativityCorrection (false),					// made changes by TUAN NGUYEN
-   useETminusTAICorrection (false)					// made changes by TUAN NGUYEN
+//   rangeModulo          (1.0e6),               // made changes by TUAN NGUYEN
+   rampTB               (NULL),                  // made changes by TUAN NGUYEN
+   obsData              (NULL),                  // made changes by TUAN NGUYEN
+   useRelativityCorrection (false),              // made changes by TUAN NGUYEN
+   useETminusTAICorrection (false)               // made changes by TUAN NGUYEN
 {
    objectTypeNames.push_back("PhysicalMeasurement");
 
-   troposphere	= NULL;
+   troposphere   = NULL;
    #ifdef IONOSPHERE
       ionosphere = NULL;
    #endif
@@ -80,12 +80,12 @@ PhysicalMeasurement::PhysicalMeasurement(const std::string &type,
 //------------------------------------------------------------------------------
 PhysicalMeasurement::~PhysicalMeasurement()
 {
-	if (troposphere != NULL)
-		delete troposphere;
+   if (troposphere != NULL)
+      delete troposphere;
 
    #ifdef IONOSPHERE
-	   if (ionosphere != NULL)
-		   delete ionosphere;
+      if (ionosphere != NULL)
+         delete ionosphere;
    #endif
 }
 
@@ -102,12 +102,12 @@ PhysicalMeasurement::~PhysicalMeasurement()
 PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
    CoreMeasurement      (pm),
    frequency            (pm.frequency),
-   freqBand             (pm.freqBand),						// made changes by TUAN NGUYEN
-//   rangeModulo          (pm.rangeModulo),					// made changes by TUAN NGUYEN
-   rampTB               (pm.rampTB),						// made changes by TUAN NGUYEN
-   obsData              (pm.obsData),						// made changes by TUAN NGUYEN
-   useRelativityCorrection (pm.useRelativityCorrection),	// made changes by TUAN NGUYEN
-   useETminusTAICorrection (pm.useETminusTAICorrection)		// made changes by TUAN NGUYEN
+   freqBand             (pm.freqBand),                       // made changes by TUAN NGUYEN
+// rangeModulo          (pm.rangeModulo),                    // made changes by TUAN NGUYEN
+   rampTB               (pm.rampTB),                         // made changes by TUAN NGUYEN
+   obsData              (pm.obsData),                        // made changes by TUAN NGUYEN
+   useRelativityCorrection (pm.useRelativityCorrection),     // made changes by TUAN NGUYEN
+   useETminusTAICorrection (pm.useETminusTAICorrection)      // made changes by TUAN NGUYEN
 {
    if (pm.troposphere != NULL)
       troposphere = new Troposphere(*(pm.troposphere));
@@ -142,12 +142,12 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
       CoreMeasurement::operator=(pm);
 
       frequency = pm.frequency;
-	  freqBand  = pm.freqBand;					// made changes by TUAN NGUYEN
-//	  rangeModulo = pm.rangeModulo;				// made changes by TUAN NGUYEN
-	  rampTB      = pm.rampTB;					// made changes by TUAN NGUYEN
-	  obsData     = pm.obsData;					// made changes by TUAN NGUYEN
-	  useRelativityCorrection = pm.useRelativityCorrection; // made changes by TUAN NGUYEN
-	  useETminusTAICorrection = pm.useETminusTAICorrection; // made changes by TUAN NGUYEN
+      freqBand  = pm.freqBand;                 // made changes by TUAN NGUYEN
+//    rangeModulo = pm.rangeModulo;            // made changes by TUAN NGUYEN
+      rampTB      = pm.rampTB;                 // made changes by TUAN NGUYEN
+      obsData     = pm.obsData;                // made changes by TUAN NGUYEN
+      useRelativityCorrection = pm.useRelativityCorrection; // made changes by TUAN NGUYEN
+      useETminusTAICorrection = pm.useETminusTAICorrection; // made changes by TUAN NGUYEN
 
       // Rebuild the correction models
       if (troposphere != NULL)
@@ -188,11 +188,11 @@ void PhysicalMeasurement::SetConstantFrequency(Real newFreq, Integer index)
    {
       if (index == 0)
          frequency = frequencyE = newFreq;
-	  else
+     else
          frequencyE = newFreq;
    }
    else
-	  throw MeasurementException("Error: Frequency was set to a non-positive value.\n"); 
+     throw MeasurementException("Error: Frequency was set to a non-positive value.\n"); 
 }
 
 
@@ -215,10 +215,10 @@ Real PhysicalMeasurement::GetConstantFrequency(Integer index)
 // made changes by TUAN NGUYEN
 void PhysicalMeasurement::SetFrequencyBand(Integer frequencyBand, Integer index)
 {
-	if (index == 0)
-		freqBand = freqBandE = frequencyBand;
-	else
-		freqBandE = frequencyBand;
+   if (index == 0)
+      freqBand = freqBandE = frequencyBand;
+   else
+      freqBandE = frequencyBand;
 }
 
 // made changes by TUAN NGUYEN
@@ -230,33 +230,33 @@ Integer PhysicalMeasurement::GetFrequencyBand(Integer index)
 //// made changes by TUAN NGUYEN
 //void PhysicalMeasurement::SetRangeModulo(Real rangeMod)
 //{
-//	rangeModulo = rangeMod;
+//   rangeModulo = rangeMod;
 //}
 //
 //
 //// made changes by TUAN NGUYEN
 //Real PhysicalMeasurement::GetRangeModulo()
 //{
-//	return rangeModulo;
+//   return rangeModulo;
 //}
 //
 // made changes by TUAN NGUYEN
 void PhysicalMeasurement::SetObsValue(const RealArray& value)
 {
-	obsValue = value;
+   obsValue = value;
 }
 
 // made changes by TUAN NGUYEN
 RealArray PhysicalMeasurement::GetObsValue()
 {
-	return obsValue;
+   return obsValue;
 }
 
 
 // made changes by TUAN NGUYEN
 void PhysicalMeasurement::SetObservationDataRecord(ObservationData* data)
 {
-	obsData = data;
+   obsData = data;
 }
 
 // made changes by TUAN NGUYEN
@@ -269,12 +269,12 @@ void PhysicalMeasurement::SetRampTable(std::vector<RampTableData>* rt)
 void PhysicalMeasurement::SetRelativityCorrection(bool useCorr)
 {
 #ifdef DEBUG_SET_RELATIVITY_CORRECTION
-	MessageInterface::ShowMessage("Start PhysicalMeasurement::SetRelativityCorrection(%s)\n", (useCorr ? "true":"false"));
+   MessageInterface::ShowMessage("Start PhysicalMeasurement::SetRelativityCorrection(%s)\n", (useCorr ? "true":"false"));
 #endif
    useRelativityCorrection = useCorr;
 
 #ifdef DEBUG_SET_RELATIVITY_CORRECTION
-	MessageInterface::ShowMessage("Exit PhysicalMeasurement::SetRelativityCorrection()\n");
+   MessageInterface::ShowMessage("Exit PhysicalMeasurement::SetRelativityCorrection()\n");
 #endif
 }
 
@@ -282,13 +282,13 @@ void PhysicalMeasurement::SetRelativityCorrection(bool useCorr)
 void PhysicalMeasurement::SetETMinusTAICorrection(bool useCorr)
 {
 #ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
-	MessageInterface::ShowMessage("Start PhysicalMeasurement::SetETMinusTAICorrection(%s)\n", (useCorr ? "true":"false"));
+   MessageInterface::ShowMessage("Start PhysicalMeasurement::SetETMinusTAICorrection(%s)\n", (useCorr ? "true":"false"));
 #endif
 
-	useETminusTAICorrection = useCorr;
+   useETminusTAICorrection = useCorr;
 
 #ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
-	MessageInterface::ShowMessage("Exit PhysicalMeasurement::SetETMinusTAICorrection()\n");
+   MessageInterface::ShowMessage("Exit PhysicalMeasurement::SetETMinusTAICorrection()\n");
 #endif
 }
 
@@ -299,12 +299,12 @@ void PhysicalMeasurement::SetETMinusTAICorrection(bool useCorr)
 /**
  * This function is used to add media correction model to the measurement
  *
- * @param nodelName	The name of media correction model involving in the
- * 						measurement
+ * @param nodelName   The name of media correction model involving in the
+ *                    measurement
  */
 //----------------------------------------------------------------------
 void PhysicalMeasurement::AddCorrection(const std::string& modelName, 
-	const std::string& mediaCorrectionType)
+   const std::string& mediaCorrectionType)
 {
    #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage("Adding correction named %s\n",
@@ -312,55 +312,55 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
    #endif
    if (mediaCorrectionType == "TroposphereModel")
    {
-	  if (modelName == "HopfieldSaastamoinen")
-	  {
-	     if (troposphere != NULL)
-	        delete troposphere;
+      if (modelName == "HopfieldSaastamoinen")
+      {
+         if (troposphere != NULL)
+            delete troposphere;
 
-	     // Create troposphere correction model
-	     troposphere = new Troposphere(modelName);
+         // Create troposphere correction model
+         troposphere = new Troposphere(modelName);
 
          #ifdef DEBUG_MEDIA_CORRECTION
             MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphere);
          #endif
-	  }
+      }
       else if (modelName == "None")
-	  {
-	  }
-	  else
-	  {
-		  throw MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
-			+"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
-	  }
+      {
+      }
+      else
+      {
+         throw MeasurementException("Error: '" + modelName +"' is not a valid name for Troposphere correction.\n"
+         +"Currently only 'HopfieldSaastamoinen' is allowed for Troposphere.\n");
+      }
    }
    else if (mediaCorrectionType == "IonosphereModel")
    {
-      if (modelName == "IRI2007")							// made changes by TUAN NGUYEN
-	  {
+      if (modelName == "IRI2007")                     // made changes by TUAN NGUYEN
+      {
          #ifdef DEBUG_MEDIA_CORRECTION
             MessageInterface::ShowMessage("   Set as ionosphere model\n");
          #endif
 
 ///// TBD: Determine if there is a more generic way to add these
-	     // Create IRI2007 ionosphere correction model
+         // Create IRI2007 ionosphere correction model
          #ifdef IONOSPHERE
-		     ionosphere = new Ionosphere(modelName);
+            ionosphere = new Ionosphere(modelName);
          #else
-		   MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
-				         "available.\nIt will be be added to GMAT in a future release.\n");
+            MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
+                     "available.\nIt will be be added to GMAT in a future release.\n");
 
-		   throw GmatBaseException("Ionosphere IRI2007 model currently is not "
-		         "available.\nIt will be be added to GMAT in a future release.\n");
+            throw GmatBaseException("Ionosphere IRI2007 model currently is not "
+               "available.\nIt will be be added to GMAT in a future release.\n");
          #endif
-	  }
+      }
       else if (modelName == "None")
-	  {
-	  }
-	  else
-	  {
-		  throw MeasurementException("Error: '" + modelName + "' is not a valid name for Ionosphere correction.\n"
-			+"Currently only 'IRI2007' is allowed for Ionosphere.\n");
-	  }
+      {
+      }
+      else
+      {
+         throw MeasurementException("Error: '" + modelName + "' is not a valid name for Ionosphere correction.\n"
+         +"Currently only 'IRI2007' is allowed for Ionosphere.\n");
+      }
    }
 }
 
@@ -371,9 +371,9 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 /**
  * This function is used to calculate Troposphere correction.
  *
- * @param freq		The frequency of signal	(unit: MHz)
- * @param rVec		Range vector in J2k coordinate system
- * @param Ro_j2k Rotational matrix converting j2k coordinate system to
+ * @param freq      The frequency of signal   (unit: MHz)
+ * @param rVec      Range vector in J2k coordinate system
+ * @param Ro_j2k    Rotational matrix converting j2k coordinate system to
  *                  topocentric coordinate system
  *
  */
@@ -385,27 +385,27 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
 
    if (troposphere != NULL)
    {
-   	Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
-   	troposphere->SetWaveLength(wavelength);
-	Rvector3 signal_direction = Ro_j2k *rVec.GetUnitVector(); 
-   	Real elevationAngle = asin(signal_direction.GetElement(2));
-   	troposphere->SetElevationAngle(elevationAngle);
-   	troposphere->SetRange(rVec.GetMagnitude()*GmatMathConstants::KM_TO_M);
-   	tropoCorrection = troposphere->Correction();
-//   	Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
+      Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
+      troposphere->SetWaveLength(wavelength);
+      Rvector3 signal_direction = Ro_j2k *rVec.GetUnitVector(); 
+      Real elevationAngle = asin(signal_direction.GetElement(2));
+      troposphere->SetElevationAngle(elevationAngle);
+      troposphere->SetRange(rVec.GetMagnitude()*GmatMathConstants::KM_TO_M);
+      tropoCorrection = troposphere->Correction();
+//    Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
 
-		#ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
-			MessageInterface::ShowMessage("       *Run Troposphere media correction:\n");
-			MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
-			MessageInterface::ShowMessage("         .Elevation angle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
-			MessageInterface::ShowMessage("         .Range correction = %.12lf m\n", tropoCorrection[0]);
-		#endif
+      #ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
+         MessageInterface::ShowMessage("       *Run Troposphere media correction:\n");
+         MessageInterface::ShowMessage("         .Wave length = %.12lf m\n", wavelength);
+         MessageInterface::ShowMessage("         .Elevation angle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
+         MessageInterface::ShowMessage("         .Range correction = %.12lf m\n", tropoCorrection[0]);
+      #endif
    }
    else
    {
-   	tropoCorrection.push_back(0.0);
-   	tropoCorrection.push_back(0.0);
-   	tropoCorrection.push_back(0.0);
+      tropoCorrection.push_back(0.0);
+      tropoCorrection.push_back(0.0);
+      tropoCorrection.push_back(0.0);
    }
 
    return tropoCorrection;
@@ -420,8 +420,8 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Rvector3 rVec, R
 /**
  * This function is used to calculate Troposphere correction.
  *
- * @param freq				The frequency of signal	(unit: MHz)
- * @param distance			Distance from ground station to spacecraft (unit: km)
+ * @param freq              The frequency of signal   (unit: MHz)
+ * @param distance          Distance from ground station to spacecraft (unit: km)
  * @param elevationAngle    The elevation angle from ground station to spacecraft (unit: radian)
  *                 
  * return Troposphere correction vector
@@ -433,28 +433,28 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
 
    if (troposphere != NULL)
    {
-      // Set troposphere's ref objects						// made changes by TUAN NGUYEN
-	  troposphere->SetSolarSystem(solarSystem);				// made changes by TUAN NGUYEN
+      // Set troposphere's ref objects                     // made changes by TUAN NGUYEN
+      troposphere->SetSolarSystem(solarSystem);            // made changes by TUAN NGUYEN
 
-	  // Set temperature, pressure, humidity to Troposphere object
-	  Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
+      // Set temperature, pressure, humidity to Troposphere object
+      Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
 
-	  for (int i=0; i < participants.size(); ++i)
-	  {
-	     if (participants[i]->IsOfType(Gmat::GROUND_STATION))
-	     {
-		    troposphere->SetTemperature(((GroundstationInterface*)participants[i])->GetRealParameter("Temperature"));
-		    troposphere->SetPressure(((GroundstationInterface*)participants[i])->GetRealParameter("Pressure"));
-		    troposphere->SetHumidityFraction(((GroundstationInterface*)participants[i])->GetRealParameter("Humidity")/100);
-		    break;
-	     }
-	  }
+      for (int i=0; i < participants.size(); ++i)
+      {
+         if (participants[i]->IsOfType(Gmat::GROUND_STATION))
+         {
+            troposphere->SetTemperature(((GroundstationInterface*)participants[i])->GetRealParameter("Temperature"));
+            troposphere->SetPressure(((GroundstationInterface*)participants[i])->GetRealParameter("Pressure"));
+            troposphere->SetHumidityFraction(((GroundstationInterface*)participants[i])->GetRealParameter("Humidity")/100);
+            break;
+         }
+      }
 
-   	  troposphere->SetWaveLength(wavelength);
-   	  troposphere->SetElevationAngle(elevationAngle);
-   	  troposphere->SetRange(distance*GmatMathConstants::KM_TO_M);
-   	  tropoCorrection = troposphere->Correction();
-//   	Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
+      troposphere->SetWaveLength(wavelength);
+      troposphere->SetElevationAngle(elevationAngle);
+      troposphere->SetRange(distance*GmatMathConstants::KM_TO_M);
+      tropoCorrection = troposphere->Correction();
+//    Real rangeCorrection = tropoCorrection[0]/GmatMathConstants::KM_TO_M;
 
       #ifdef DEBUG_TROPOSPHERE_MEDIA_CORRECTION
          MessageInterface::ShowMessage("       *Run Troposphere media correction:\n");
@@ -465,9 +465,9 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
    }
    else
    {
-   	  tropoCorrection.push_back(0.0);
-   	  tropoCorrection.push_back(0.0);
-   	  tropoCorrection.push_back(0.0);
+      tropoCorrection.push_back(0.0);
+      tropoCorrection.push_back(0.0);
+      tropoCorrection.push_back(0.0);
    }
 
    return tropoCorrection;
@@ -481,10 +481,10 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
 /**
  * This function is used to calculate Ionosphere correction.
  *
- * @param freq		The frequency of signal										(unit: MHz)
- * @param r1		Position of ground station in SSBMJ2000 coordinate system	(unit: km)
- * @param r2		Position of spacecraft in SSBMJ2000 coordinate system		(unit: km)
- * @param epoch	Time at which the signal is transmitted or received from ground station		(unit: Julian day)
+ * @param freq    The frequency of signal                                     (unit: MHz)
+ * @param r1      Position of ground station in SSBMJ2000 coordinate system   (unit: km)
+ * @param r2      Position of spacecraft in SSBMJ2000 coordinate system       (unit: km)
+ * @param epoch   Time at which the signal is transmitted or received from ground station      (unit: Julian day)
  */
 //------------------------------------------------------------------------
 #ifdef IONOSPHERE
@@ -494,77 +494,83 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 
    if (ionosphere != NULL)
    {
-      // 0. Set ionosphere's ref objects						// made changes by TUAN NGUYEN
-      ionosphere->SetSolarSystem(solarSystem);				// made changes by TUAN NGUYEN
+      // 0. Set ionosphere's ref objects                  // made changes by TUAN NGUYEN
+      ionosphere->SetSolarSystem(solarSystem);            // made changes by TUAN NGUYEN
 
-   	  // 1. Set wave length:
-   	  Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);		// unit: meter
-   	  ionosphere->SetWaveLength(wavelength);
+      // 1. Set wave length:
+      Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);      // unit: meter
+      ionosphere->SetWaveLength(wavelength);
 
-   	  // 2. Set time:
-   	  ionosphere->SetTime(epoch);															// unit: Julian day
+      // 2. Set time:
+      ionosphere->SetTime(epoch);                                                         // unit: Julian day
 
-   	  // 3. Set station and spacecraft positions:
-	  // Get Earthfixed coordinate system
-   	  GroundstationInterface* gs 	= (GroundstationInterface*)participants[0];
-   	  CoordinateSystem* cs = gs->GetBodyFixedCoordinateSystem();
+      // 3. Set station and spacecraft positions:
+      // Get Earthfixed coordinate system
+      GroundstationInterface* gs    = (GroundstationInterface*)participants[0];
+      CoordinateSystem* cs = gs->GetBodyFixedCoordinateSystem();
 
-	  // Create EarthMJ2000Eq coordinate system
-	  // CoordinateSystem* fk5cs = Moderator::Instance()->GetCoordinateSystem("EarthMJ2000Eq");			// It is no longer using Moderator 
-	  CelestialBody *earthBody = solarSystem->GetBody("Earth");
-	  CoordinateSystem* fk5cs = CoordinateSystem::CreateLocalCoordinateSystem("Earthfk5", "MJ2000Eq",
+      // Create EarthMJ2000Eq coordinate system
+      // CoordinateSystem* fk5cs = Moderator::Instance()->GetCoordinateSystem("EarthMJ2000Eq");         // It is no longer using Moderator 
+      CelestialBody *earthBody = solarSystem->GetBody("Earth");
+      CoordinateSystem* fk5cs = CoordinateSystem::CreateLocalCoordinateSystem("Earthfk5", "MJ2000Eq",
                earthBody, NULL, NULL, earthBody, solarSystem);
 
 
-	  // Get rotation matrix from EarthMJ2000 cs to Earthfixed cs
-   	  Rvector inState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
-	  Rvector outState(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-	  CoordinateConverter* cv = new CoordinateConverter();
-	  A1Mjd time(epoch);
-	  cv->Convert(time, inState, cs, outState, fk5cs);
-	  Rmatrix33 R_g_j2k    = cv->GetLastRotationMatrix().Transpose();
+      // Get rotation matrix from EarthMJ2000 cs to Earthfixed cs
+      Rvector inState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
+      Rvector outState(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      CoordinateConverter* cv = new CoordinateConverter();
+      A1Mjd time(epoch);
+      cv->Convert(time, inState, cs, outState, fk5cs);
+      Rmatrix33 R_g_j2k    = cv->GetLastRotationMatrix().Transpose();
 
-	  // Specify location of ground station and spacecraft in EarthFixed coordinate system
-	  // Rvector3 r1_ebf = R_g_j2k*r1;
-	  // Rvector3 r2_ebf = R_g_j2k*r2;
-	  SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-	  Rvector3 ssb2Earth = earthBody->GetMJ2000Position(time) - ssb->GetMJ2000Position(time);
-	  Rvector3 r1_ebf = R_g_j2k*(r1 - ssb2Earth);
-	  Rvector3 r2_ebf = R_g_j2k*(r2 - ssb2Earth);
+      // Specify location of ground station and spacecraft in EarthFixed coordinate system
+      // Rvector3 r1_ebf = R_g_j2k*r1;
+      // Rvector3 r2_ebf = R_g_j2k*r2;
+      SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
+      Rvector3 ssb2Earth = earthBody->GetMJ2000Position(time) - ssb->GetMJ2000Position(time);
+      Rvector3 r1_ebf = R_g_j2k*(r1 - ssb2Earth);
+      Rvector3 r2_ebf = R_g_j2k*(r2 - ssb2Earth);
 
 
-	  ionosphere->SetStationPosition(r1_ebf);											// unit: km
-   	  ionosphere->SetSpacecraftPosition(r2_ebf);										// unit: km
+      ionosphere->SetStationPosition(r1_ebf);                                 // unit: km
+      ionosphere->SetSpacecraftPosition(r2_ebf);                              // unit: km
 
-   	  // 4. Set earth radius:
-	  SpacePoint* earth 	= (SpacePoint*)gs->GetRefObject(Gmat::SPACE_POINT, "Earth");
-   	  Real earthRadius 	= earth->GetRealParameter("EquatorialRadius");
-   	  ionosphere->SetEarthRadius(earthRadius);											// unit: km
+      // 4. Set earth radius:
+      SpacePoint* earth    = (SpacePoint*)gs->GetRefObject(Gmat::SPACE_POINT, "Earth");
+      Real earthRadius    = earth->GetRealParameter("EquatorialRadius");
+      ionosphere->SetEarthRadius(earthRadius);                               // unit: km
 
       #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
-	     MessageInterface::ShowMessage("      *Run Ionosphere media correction for:\n");
-	     MessageInterface::ShowMessage("         +Earth radius = %lf km\n", earthRadius);
-	     MessageInterface::ShowMessage("         +Wave length = %.12lf m\n", wavelength);
-	     MessageInterface::ShowMessage("         +Time = %.12lf\n", epoch);
-	     MessageInterface::ShowMessage("         +Station location in Earth body fixed coordinate system (km)   : (%.12lf,  %.12lf,   %.12lf)\n", r1_ebf[0], r1_ebf[1], r1_ebf[2]); 
-	     MessageInterface::ShowMessage("         +Spacecraft location in Earth body fixed coordinate system (km): (%.12lf,  %.12lf,   %.12lf)\n", r2_ebf[0], r2_ebf[1], r2_ebf[2]);
+         MessageInterface::ShowMessage("      *Run Ionosphere media correction for:\n");
+         MessageInterface::ShowMessage("         +Earth radius = %lf km\n", earthRadius);
+         MessageInterface::ShowMessage("         +Wave length = %.12lf m\n", wavelength);
+         MessageInterface::ShowMessage("         +Time = %.12lf\n", epoch);
+         MessageInterface::ShowMessage("         +Station location in Earth body fixed coordinate system (km)   : (%.12lf,  %.12lf,   %.12lf)\n", r1_ebf[0], r1_ebf[1], r1_ebf[2]); 
+         MessageInterface::ShowMessage("         +Spacecraft location in Earth body fixed coordinate system (km): (%.12lf,  %.12lf,   %.12lf)\n", r2_ebf[0], r2_ebf[1], r2_ebf[2]);
       #endif
+      
+      // 5. Run ionosphere correction:
+      ionoCorrection = ionosphere->Correction();
+      Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;            // unit: meter
 
-	  // 5. Run ionosphere correction:
-   	  ionoCorrection = ionosphere->Correction();
-   	  Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;				// unit: meter
+      // 6. Clean up
+      if (cv)                                   // made changes by TUAN NGUYEN
+         delete cv;                             // made changes by TUAN NGUYEN
+      if (fk5cs)                                // made changes by TUAN NGUYEN
+         delete fk5cs;                          // made changes by TUAN NGUYEN
 
       #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
-   	     MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
-	     MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", rangeCorrection*GmatMathConstants::KM_TO_M);
+         MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
+         MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", rangeCorrection*GmatMathConstants::KM_TO_M);
       #endif
    }
    else
    {
-	  // When ionopshere is not use, it's value is set to 0
-   	  ionoCorrection.push_back(0.0);
-   	  ionoCorrection.push_back(0.0);
-   	  ionoCorrection.push_back(0.0);
+      // When ionopshere is not use, it's value is set to 0
+      ionoCorrection.push_back(0.0);
+      ionoCorrection.push_back(0.0);
+      ionoCorrection.push_back(0.0);
    }
 
    return ionoCorrection;
@@ -577,10 +583,10 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 /**
  * This function is used to calculate media corrections.
  *
- * @param freq		The frequency of signal	(unit: MHz)
- * @param r1		Position of ground station in SSB FK5 coordinate system
- * @param r2		Position of spacecraft in SSB FK5 coordinate system
- * @param epoch	    The time at which signal is transmitted from or received at ground station
+ * @param freq      The frequency of signal   (unit: MHz)
+ * @param r1        Position of ground station in SSB FK5 coordinate system
+ * @param r2        Position of spacecraft in SSB FK5 coordinate system
+ * @param epoch     The time at which signal is transmitted from or received at ground station
  */
 //------------------------------------------------------------------------
 RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
@@ -593,7 +599,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, 
 
    // 1. Run Troposphere correction:
    UpdateRotationMatrix(epoch, "o_j2k");
-   Rvector3 rangeVector = r2 - r1;										           // vector pointing from ground station to spacecraft
+   Rvector3 rangeVector = r2 - r1;                                         // vector pointing from ground station to spacecraft
    Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2)); 
 
    if (elevationAngle > 0.0)
@@ -601,7 +607,7 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, 
       mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
 
       #ifdef DEBUG_MEASUREMENT_CORRECTION
-	     Rvector3 r = r2-r1;
+         Rvector3 r = r2-r1;
          MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r[0], r[1], r[2]);
          MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", mediaCorrection[0], mediaCorrection[1], mediaCorrection[2]);
       #endif
@@ -619,9 +625,9 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, 
    else
    {
       // When elevation angle is less than 0 degree (below horizon), all mediacorrection are set to 0 (no media correction involves)
-	  mediaCorrection.push_back(0.0);
-	  mediaCorrection.push_back(0.0);
-	  mediaCorrection.push_back(0.0);
+      mediaCorrection.push_back(0.0);
+      mediaCorrection.push_back(0.0);
+      mediaCorrection.push_back(0.0);
    }
 
    return mediaCorrection;
@@ -764,21 +770,21 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    EventData p2Data = ev.GetEventData(participants[p2Index]);
    
 #ifdef USE_EARTHMJ2000EQ_CS
-   rangeVec = p2Data.position - p1Data.position;												// made changes by TUAN NGUYEN
+   rangeVec = p2Data.position - p1Data.position;                                            // made changes by TUAN NGUYEN
 #else
    /// Calculate range vector in Solar System Barycenter coordinate system:
-   CelestialBody* cb1 = (CelestialBody*)p1Data.cs_origin;										// made changes by TUAN NGUYEN
-   CelestialBody* cb2 = (CelestialBody*)p2Data.cs_origin;										// made changes by TUAN NGUYEN
-   Real t1 = p1Data.epoch;																		// made changes by TUAN NGUYEN
-   Real t2 = p2Data.epoch;																		// made changes by TUAN NGUYEN
-   SpecialCelestialPoint* ssb = (SpecialCelestialPoint*)solarSystem->GetSpecialPoint("SolarSystemBarycenter");		// made changes by TUAN NGUYEN
+   CelestialBody* cb1 = (CelestialBody*)p1Data.cs_origin;                                   // made changes by TUAN NGUYEN
+   CelestialBody* cb2 = (CelestialBody*)p2Data.cs_origin;                                   // made changes by TUAN NGUYEN
+   Real t1 = p1Data.epoch;                                                                  // made changes by TUAN NGUYEN
+   Real t2 = p2Data.epoch;                                                                  // made changes by TUAN NGUYEN
+   SpecialCelestialPoint* ssb = (SpecialCelestialPoint*)solarSystem->GetSpecialPoint("SolarSystemBarycenter");      // made changes by TUAN NGUYEN
 
-   // vector from SSB to the central body at time t1 and t2										// made changes by TUAN NGUYEN
-   Rvector3 BE1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);						// made changes by TUAN NGUYEN
-   Rvector3 BE2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);						// made changes by TUAN NGUYEN
-   Rvector3 p1B = BE1 + p1Data.position;														// made changes by TUAN NGUYEN
-   Rvector3 p2B = BE2 + p2Data.position;														// made changes by TUAN NGUYEN
-   rangeVec = p2B - p1B;																		// made changes by TUAN NGUYEN
+   // vector from SSB to the central body at time t1 and t2                                 // made changes by TUAN NGUYEN
+   Rvector3 BE1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);                  // made changes by TUAN NGUYEN
+   Rvector3 BE2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);                  // made changes by TUAN NGUYEN
+   Rvector3 p1B = BE1 + p1Data.position;                                                    // made changes by TUAN NGUYEN
+   Rvector3 p2B = BE2 + p2Data.position;                                                    // made changes by TUAN NGUYEN
+   rangeVec = p2B - p1B;                                                                    // made changes by TUAN NGUYEN
 #endif
 
    // Be sure to use the correct rotation matrices, etc
@@ -815,12 +821,12 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
       MessageInterface::ShowMessage("  B: %s\n", B.ToString().c_str());
    #endif
 
-   Rmatrix33 body2FK5_matrix = dataToUse.rInertial2obj.Transpose();		// made change by TUAN NGUYEN:  get rotation matrix from object frame to inertial frame
+   Rmatrix33 body2FK5_matrix = dataToUse.rInertial2obj.Transpose();      // made change by TUAN NGUYEN:  get rotation matrix from object frame to inertial frame
 
    if (wrtR)
    {
       // temp = dataToUse.rInertial2obj * A;
-	  temp = body2FK5_matrix * A;		// made change by TUAN NGUYEN
+      temp = body2FK5_matrix * A;      // made change by TUAN NGUYEN
 
       for (Integer i = 0; i < 3; ++i)
          for (Integer j = 0; j < 3; ++j)
@@ -829,7 +835,7 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    if (wrtV)
    {
       // temp = dataToUse.rInertial2obj * B;
-	  temp = body2FK5_matrix * B;		// made change by TUAN NGUYEN
+      temp = body2FK5_matrix * B;      // made change by TUAN NGUYEN
 
       Integer offset = (wrtR ? 3 : 0);
       for (Integer i = 0; i < 3; ++i)
@@ -936,24 +942,24 @@ void PhysicalMeasurement::SetHardwareDelays(bool loadEvents)
 Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
 {
    if (rampTB == NULL)
-	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    if ((*rampTB).size() == 0)
-	   throw MeasurementException("Error: No data is in ramp table\n");
+      throw MeasurementException("Error: No data is in ramp table\n");
 
    if (t <= (*rampTB)[0].epoch)
-	   return (*rampTB)[0].uplinkBand;
+      return (*rampTB)[0].uplinkBand;
    else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-	   return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+      return (*rampTB)[(*rampTB).size()-1].uplinkBand;
 
    // search for interval which contains time t:
    Real upBand = 0;
    for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
    {
       if (t < (*rampTB)[i].epoch)
-	  {
+      {
          upBand = (*rampTB)[i-1].uplinkBand;
-		 break;
-	  }
+         break;
+      }
    }
 
    return upBand;
@@ -962,38 +968,38 @@ Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
 Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
 {
    if (rampTB == NULL)
-	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    if ((*rampTB).size() == 0)
-	   throw MeasurementException("Error: No data is in Ramp table\n");
+      throw MeasurementException("Error: No data is in Ramp table\n");
 
    if (t <= (*rampTB)[0].epoch)
-	   return (*rampTB)[0].rampFrequency;
+      return (*rampTB)[0].rampFrequency;
    else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-	   return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+      return (*rampTB)[(*rampTB).size()-1].rampFrequency;
 
    // search for interval which contains time t:
    UnsignedInt interval_index = 0;
    for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
    {
       if (t < (*rampTB)[i].epoch)
-	  {
+      {
          interval_index = i-1;      
-		 break;
-	  }
+         break;
+      }
    }
 
    // specify frequency at time t:
    Real t_start = (*rampTB)[interval_index].epoch;
    Real f0 = (*rampTB)[interval_index].rampFrequency;
    Real f_dot = (*rampTB)[interval_index].rampRate;
-	   
+      
    Real f = f0 + f_dot*(t - t_start);
 
    return f;
 }
 
 //------------------------------------------------------------------------------
-// Integer GetFrequencyBand(Real frequency)
+// Integer FrequencyBand(Real frequency)
 //------------------------------------------------------------------------------
 /**
  * Get frequency band corresponding to a given frequency
@@ -1009,17 +1015,17 @@ Integer PhysicalMeasurement::FrequencyBand(Real frequency)
 
    // S-band
    if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
-	  freqBand = 1;					// 1 for S-band
+      freqBand = 1;               // 1 for S-band
 
    // X-band (Band values from Wikipedia; check them!
    if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
-      freqBand = 2;					// 2 for X-band
+      freqBand = 2;               // 2 for X-band
 
    if (freqBand == 0)
    {
-	  std::stringstream strs;
-	  strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency <<" Hz\n";
-	  throw MeasurementException(strs.str());
+      std::stringstream strs;
+      strs << "Error in PhysicalMeasurement::FrequencyBand():  GMAT cannot specify frequency band for frequency = " << frequency <<" Hz\n";
+      throw MeasurementException(strs.str());
    }
 
    return freqBand;
@@ -1058,14 +1064,14 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    if (rampTB == NULL)
    {
       err = 2;
-	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
    else if ((*rampTB).size() < 2)
    {
       err = 3;
-	  std::stringstream ss;
-	  ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
-	  throw MeasurementException(ss.str());
+      std::stringstream ss;
+      ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+      throw MeasurementException(ss.str());
    }
    
 
@@ -1078,56 +1084,56 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    if (t1 < time_min)
    {
       // t0 and t1 < time_min
-	   return delta_t*(*rampTB)[0].rampFrequency;
+      return delta_t*(*rampTB)[0].rampFrequency;
    }
    else if (t1 > time_max)
    {
-	  if (t0 < time_min)
-	  {
-		  // t0 < time_min < time_max < t1
-		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-		  t0 = time_min;
-	  }
-	  else if (t0 > time_max)
-	  {
-		  // t0 and t1 > time_max
-		  return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
-	  }
-	  else
-	  {
-		  // time_min <= t0 <= time_max < t1
-		  correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
-		  t1 = time_max;
-	  }
+      if (t0 < time_min)
+      {
+         // t0 < time_min < time_max < t1
+         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         t0 = time_min;
+      }
+      else if (t0 > time_max)
+      {
+         // t0 and t1 > time_max
+         return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+      }
+      else
+      {
+         // time_min <= t0 <= time_max < t1
+         correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+         t1 = time_max;
+      }
    }
    else
    {
-	  if (t0 < time_min)
-	  {
-		  // t0 < time_min <= t1 <= time_max
-		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-		  t0 = time_min;
-	  }
+      if (t0 < time_min)
+      {
+         // t0 < time_min <= t1 <= time_max
+         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         t0 = time_min;
+      }
    }
 #endif
 
    if ((t1 < time_min)||(t1 > time_max))
    {
-	  char s[200];
-	  sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
-	  std::string st(&s[0]);
-	  err = 4;
-	  throw MeasurementException(st);
+      char s[200];
+      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+      std::string st(&s[0]);
+      err = 4;
+      throw MeasurementException(st);
    }
 
    
    if ((t0 < time_min)||(t0 > time_max))
    {
-	  char s[200];
-	  sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
-	  std::string st(&s[0]);
-	  err = 5;
-	  throw MeasurementException(st);
+      char s[200];
+      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+      std::string st(&s[0]);
+      err = 5;
+      throw MeasurementException(st);
    }
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
@@ -1140,10 +1146,10 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
    {
       if (t1 < (*rampTB)[i].epoch)
-	  {
+      {
          end_interval = i-1;      
-		 break;
-	  }
+         break;
+      }
    }
 
    Real basedFreq = (*rampTB)[end_interval].rampFrequency; 
@@ -1166,11 +1172,11 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    {
       f_dot = (*rampTB)[i].rampRate;
 
-	  // Specify lenght of the current interval
-	  if (i == end_interval)
-		 interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
-	  else
-		 interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+      // Specify lenght of the current interval
+      if (i == end_interval)
+         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+      else
+         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
 
       f0 = (*rampTB)[i].rampFrequency;
       if (dt < interval_len)
@@ -1179,22 +1185,22 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
          interval_len = dt;
       }
       // Specify frequency at the end of the current interval
-	  f1 = f0 + f_dot*interval_len;
+      f1 = f0 + f_dot*interval_len;
 
-	  // Take integral for the current interval
-	  value1 = ((f0 + f1)/2 - basedFreq) * interval_len;
-	  value  = value + value1;
+      // Take integral for the current interval
+      value1 = ((f0 + f1)/2 - basedFreq) * interval_len;
+      value  = value + value1;
 
 #ifdef DEBUG_INTEGRAL_RAMPED_FREQUENCY
-	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
+      MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf   f1 = %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, f1, (f0+f1)/2, interval_len);
       MessageInterface::ShowMessage("interval i = %d: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
-	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+      (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
 #endif
 
       // Specify dt 
- 	  dt = dt - interval_len;
+      dt = dt - interval_len;
 
-	  i--;
+      i--;
    }
    Real rel_val = value;
    value = value + basedFreq*delta_t;

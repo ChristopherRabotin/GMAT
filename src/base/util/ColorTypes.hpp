@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -38,10 +38,10 @@ namespace GmatColor
    const UnsignedInt CORNFLOWER_BLUE     = 0X6495ED;
    const UnsignedInt CYAN                = 0X00FFFF;
    const UnsignedInt DARK_BLUE           = 0X00008B;
-   const UnsignedInt DARK_GOLDEN_ROD     = 0XEEE8AA;
+   const UnsignedInt DARK_GOLDEN_ROD     = 0XB8860B;
    const UnsignedInt DARK_GRAY           = 0XA9A9A9;
    const UnsignedInt DARK_GREEN          = 0X006400;
-   const UnsignedInt DARK_OLIVE_GREEN    = 0X556BEF;
+   const UnsignedInt DARK_OLIVE_GREEN    = 0X556B2F;
    const UnsignedInt DARK_ORCHID         = 0X9932CC;
    const UnsignedInt DARK_SLATE_BLUE     = 0X483D8B;
    const UnsignedInt DARK_SLATE_GRAY     = 0X2F4F4F;

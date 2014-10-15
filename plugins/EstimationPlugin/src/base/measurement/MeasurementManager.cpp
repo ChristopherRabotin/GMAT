@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -30,7 +30,7 @@
 
 // Temporary to get Adapters hooked up
 #include "GmatObType.hpp"
-#include "RampTableType.hpp"						// made changes by TUAN NGUYEN
+#include "RampTableType.hpp"                             // made changes by TUAN NGUYEN
 
 
 //#define DEBUG_INITIALIZATION
@@ -39,10 +39,12 @@
 //#define DEBUG_CALCULATE_MEASUREMENTS
 //#define DEBUG_GET_ACTIVE_EVENTS
 //#define DEBUG_LOAD_OBSERVATIONS
+//#define DEBUG_RAMP_TABLE                              // made changes by TUAN NGUYEN
 //#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+//#define DEBUG_INITIALIZE
 //#define DEBUG_MODEL_MAPPING
 //#define DEBUG_CALCULATE
-//#define DEBUG_ADVANCE_OBSERVATION							// made changes by TUAN NGUYEN
+//#define DEBUG_ADVANCE_OBSERVATION                     // made changes by TUAN NGUYEN
 //#define DEBUG_EXECUTION
 //#define DEBUG_ADAPTERS
 
@@ -77,6 +79,7 @@ MeasurementManager::MeasurementManager() :
 //------------------------------------------------------------------------------
 MeasurementManager::~MeasurementManager()
 {
+   //MessageInterface::ShowMessage("MeasurementMaganger destruction!!!!!!!!!!!!\n");
 }
 
 //------------------------------------------------------------------------------
@@ -99,6 +102,7 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
 {
    modelNames = mm.modelNames;
 
+   // process MeasurementModel objects
    for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
          i != mm.models.end(); ++i)
    {
@@ -107,8 +111,18 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
                (*i)->GetStringParameter("Type").c_str());
       #endif
       models.push_back((MeasurementModel*)((*i)->Clone()));
-      MeasurementData md;
-      measurements.push_back(md);
+   }
+
+   // made changes by TUAN NGUYEN @ 9/16/2014
+   // process TrackingDataAdapter objects
+   for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
+         i != mm.adapters.end(); ++i)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Cloning %s TrackingDataAdapter\n",
+               (*i)->GetStringParameter("Type").c_str());
+      #endif
+      adapters.push_back((TrackingDataAdapter*)((*i)->Clone()));
    }
 
    for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
@@ -119,8 +133,10 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
                (*i)->GetName().c_str());
       #endif
       trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
-      MeasurementData md;
-      measurements.push_back(md);
+
+      // Note: No measurement data associated with TrackingFileSet object, but TrackingDataAdapter has its owe measurement data
+      // MeasurementData md;                                    // made changes by TUAN NGUYEN
+      // measurements.push_back(md);                            // made changes by TUAN NGUYEN
    }
 }
 
@@ -139,29 +155,41 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 {
    if (&mm != this)
    {
-      thePropagator     = mm.thePropagator;
-      anchorEpoch  = mm.anchorEpoch;
-      currentEpoch = mm.currentEpoch;
-      modelNames   = mm.modelNames;
-      eventCount   = mm.eventCount;
-      inSimulationMode  = mm.inSimulationMode;
-      // Clone the measurements and tracking file sets
+      thePropagator    = mm.thePropagator;
+      anchorEpoch      = mm.anchorEpoch;
+      currentEpoch     = mm.currentEpoch;
+      modelNames       = mm.modelNames;
+      eventCount       = mm.eventCount;
+      inSimulationMode = mm.inSimulationMode;
+
+      // Clone the measurements, adapters, and tracking file sets
+      // Clean up first
       for (std::vector<MeasurementModel*>::iterator i = models.begin();
             i != models.end(); ++i)
          delete (*i);
-
       models.clear();
-      measurements.clear();
 
-      for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
-            i != mm.models.end(); ++i)
-         models.push_back((MeasurementModel*)(*i)->Clone());
+      for (std::vector<TrackingDataAdapter*>::iterator i = adapters.begin();
+            i != adapters.end(); ++i)
+         delete (*i);
+      adapters.clear();
 
       for (std::vector<TrackingFileSet*>::iterator i = trackingSets.begin();
             i != trackingSets.end(); ++i)
          delete (*i);
-
       trackingSets.clear();
+
+      measurements.clear();
+
+      // Then clone them
+      for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
+            i != mm.models.end(); ++i)
+         models.push_back((MeasurementModel*)(*i)->Clone());
+
+      for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
+            i != mm.adapters.end(); ++i)
+         adapters.push_back((TrackingDataAdapter*)(*i)->Clone());
+
       for (std::vector<TrackingFileSet*>::const_iterator i = mm.trackingSets.begin();
             i != mm.trackingSets.end(); ++i)
          trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
@@ -212,11 +240,11 @@ bool MeasurementManager::SetPropagator(PropSetup* ps)
 bool MeasurementManager::Initialize()
 {
    #ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+      MessageInterface::ShowMessage(
          "Entered MeasurementManager::Initialize() method\n");
    #endif
 
-   #ifdef DEBUG_INITIALIZATION
+   #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage(
             "Entered MeasurementManager::Initialize()\n");
    #endif
@@ -231,12 +259,15 @@ bool MeasurementManager::Initialize()
       MeasurementData md;
       measurements.push_back(md);
    }
-
+   
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
+      // Processing tackingSet[i]
+      // Step 1: Initialize trackingSets[i]
       if (trackingSets[i]->Initialize() == false)
          return false;
 
+      // Step2: Get set of measurement adapers and set value for measurements
       std::vector<TrackingDataAdapter*> *setAdapters =
             trackingSets[i]->GetAdapters();
       StringArray names;
@@ -250,18 +281,20 @@ bool MeasurementManager::Initialize()
          // Set retval?
       }
       adapterFromTFSMap[trackingSets[i]] = names;
-
-      // And the stream objects
+      
+      // Step 3: Set stream objects for all observation data files in trackingSet[i] 
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("Filename");
-      for (UnsignedInt i = 0; i < filenames.size(); ++i)
+      //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index as the outer loop     // made changes by TUAN NGUYEN
+      for (UnsignedInt k = 0; k < filenames.size(); ++k)                            // made changes by TUAN NGUYEN
       {
-         std::stringstream fn;
-         fn << trackingSets[i]->GetName() << "DataFile" << i;
-         DataFile *newStream = new DataFile(fn.str());
-         newStream->SetStringParameter("Filename", filenames[i]);
-         GmatObType *got = new GmatObType();
+//         std::stringstream fn;
+//         fn << trackingSets[i]->GetName() << "DataFile" << k;                       // made changes by TUAN NGUYEN
+//         DataFile *newStream = new DataFile(fn.str());
+         DataFile *newStream = new DataFile(filenames[k]);
+         // newStream->SetStringParameter("Filename", filenames[k]);                // made changes by TUAN NGUYEN
+         newStream->SetStringParameter("Filename", filenames[k]);                   // made changes by TUAN NGUYEN
+         GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???
          newStream->SetStream(got);
-
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
                   (newStream->IsInitialized() ? "initialized" :
@@ -279,69 +312,79 @@ bool MeasurementManager::Initialize()
                      newStream->GetName().c_str());
             #endif
             idToStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
-         }
-
+         }// for j loop
+         
          if (inSimulationMode)
          {
             if (newStream->OpenStream(inSimulationMode) == false)
                throw MeasurementException("The stream " + filenames[i] +
                      " failed to open in simulation mode");
          }
-      }
+      }// for k loop
+      
+      // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
+      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");   // made changes by TUAN NGUYEN
+      for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)                              // made changes by TUAN NGUYEN
+      {                                                                                         // made changes by TUAN NGUYEN
+//         std::stringstream fn;                                                                  // made changes by TUAN NGUYEN
+//         fn << trackingSets[i]->GetName() << "RampedTable" << k1;                               // made changes by TUAN NGUYEN
+//         DataFile *newStream = new DataFile(fn.str());                                          // made changes by TUAN NGUYEN
+         DataFile *newStream = new DataFile(rampedTablenames[k1]);                              // made changes by TUAN NGUYEN
+         newStream->SetStringParameter("Filename", rampedTablenames[k1]);                       // made changes by TUAN NGUYEN
 
-	  // And the ramped table stream objects													// made changes by TUAN NGUYEN
-      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");	// made changes by TUAN NGUYEN
-      for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)									// made changes by TUAN NGUYEN
-      {																							// made changes by TUAN NGUYEN
-         std::stringstream fn;																	// made changes by TUAN NGUYEN
-         fn << trackingSets[i]->GetName() << "RampedTable" << i;								// made changes by TUAN NGUYEN
-         DataFile *newStream = new DataFile(fn.str());											// made changes by TUAN NGUYEN
-         newStream->SetStringParameter("Filename", filenames[i]);								// made changes by TUAN NGUYEN
-         RampTableType *rpt = new RampTableType();												// made changes by TUAN NGUYEN
-         newStream->SetStream(rpt);																// made changes by TUAN NGUYEN
+#ifdef DEBUG_RAMP_TABLE
+         MessageInterface::ShowMessage("MeasurementManager::Initialize():  Ramp table name = %s\n", rampedTablenames[k1].c_str());
+#endif
+         RampTableType *rpt = new RampTableType();                                              // made changes by TUAN NGUYEN
+         newStream->SetStream(rpt);                                                             // made changes by TUAN NGUYEN
+         newStream->SetStringParameter("Format", "GMAT_RampTable");                             // made changes by TUAN NGUYEN
 
-         #ifdef DEBUG_INITIALIZATION															// made changes by TUAN NGUYEN
-            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",					// made changes by TUAN NGUYEN
-                  (newStream->IsInitialized() ? "initialized" :									// made changes by TUAN NGUYEN
-                  "not initialized"), newStream->GetName().c_str(), newStream);					// made changes by TUAN NGUYEN
-         #endif																					// made changes by TUAN NGUYEN
+         #ifdef DEBUG_RAMP_TABLE                                                                // made changes by TUAN NGUYEN
+            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",                    // made changes by TUAN NGUYEN
+                  (newStream->IsInitialized() ? "initialized" :                                 // made changes by TUAN NGUYEN
+                  "not initialized"), newStream->GetName().c_str(), newStream);                 // made changes by TUAN NGUYEN
+         #endif                                                                                 // made changes by TUAN NGUYEN
 
-		 SetRampTableDataStreamObject(newStream);												// made changes by TUAN NGUYEN
+         SetRampTableDataStreamObject(newStream);                                               // made changes by TUAN NGUYEN
 
-         // Associate the adapters with the stream												// made changes by TUAN NGUYEN
-         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)									// made changes by TUAN NGUYEN
-         {																						// made changes by TUAN NGUYEN
-            #ifdef DEBUG_INITIALIZATION															// made changes by TUAN NGUYEN
-               MessageInterface::ShowMessage("Associating %d with %s\n",						// made changes by TUAN NGUYEN
-                     (*setAdapters)[j]->GetModelID(),											// made changes by TUAN NGUYEN
-                     newStream->GetName().c_str());												// made changes by TUAN NGUYEN
-            #endif																				// made changes by TUAN NGUYEN
-            idToRampTableStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;				// made changes by TUAN NGUYEN
-         }																						// made changes by TUAN NGUYEN
+         // Associate the adapters with the stream                                              // made changes by TUAN NGUYEN
+         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)                                  // made changes by TUAN NGUYEN
+         {                                                                                      // made changes by TUAN NGUYEN
+            #ifdef DEBUG_INITIALIZATION                                                         // made changes by TUAN NGUYEN
+               MessageInterface::ShowMessage("Associating %d with %s\n",                        // made changes by TUAN NGUYEN
+                     (*setAdapters)[j]->GetModelID(),                                           // made changes by TUAN NGUYEN
+                     newStream->GetName().c_str());                                             // made changes by TUAN NGUYEN
+            #endif                                                                              // made changes by TUAN NGUYEN
+            idToRampTableStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;                // made changes by TUAN NGUYEN
+         }// for j loop                                                                         // made changes by TUAN NGUYEN
 
-         if (inSimulationMode)																	// made changes by TUAN NGUYEN
-         {																						// made changes by TUAN NGUYEN
-            if (newStream->OpenStream(inSimulationMode) == false)								// made changes by TUAN NGUYEN
-               throw MeasurementException("The stream " + filenames[i] +						// made changes by TUAN NGUYEN
-                     " failed to open in simulation mode");										// made changes by TUAN NGUYEN
-         }																						// made changes by TUAN NGUYEN
-      }																							// made changes by TUAN NGUYEN
+         if (inSimulationMode)                                                                  // made changes by TUAN NGUYEN
+         {                                                                                      // made changes by TUAN NGUYEN
+            if (newStream->OpenStream(inSimulationMode) == false)                               // made changes by TUAN NGUYEN
+               throw MeasurementException("The stream " + rampedTablenames[k1] +                // made changes by TUAN NGUYEN
+                     " failed to open in simulation mode");                                     // made changes by TUAN NGUYEN
+         }                                                                                      // made changes by TUAN NGUYEN
+      }// for k1 loop                                                                           // made changes by TUAN NGUYEN
 
-   }
+   }// for i loop
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
-      if (streamList[i]->IsInitialized() == false)						// made changes by TUAN NGUYEN
-		 streamList[i]->Initialize();									// made changes by TUAN NGUYEN
+      if (streamList[i]->IsInitialized() == false)                       // made changes by TUAN NGUYEN
+         streamList[i]->Initialize();                                    // made changes by TUAN NGUYEN
    }
 
 ///// TBD: Do we want something more generic here?
-   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)		// made changes by TUAN NGUYEN
-   {																	// made changes by TUAN NGUYEN
-      if (rampTableDataStreamList[i]->IsInitialized() == false)			// made changes by TUAN NGUYEN
-		 rampTableDataStreamList[i]->Initialize();						// made changes by TUAN NGUYEN
-   }																	// made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)      // made changes by TUAN NGUYEN
+   {                                                                     // made changes by TUAN NGUYEN
+      if (rampTableDataStreamList[i]->IsInitialized() == false)          // made changes by TUAN NGUYEN
+         rampTableDataStreamList[i]->Initialize();                       // made changes by TUAN NGUYEN
+   }                                                                     // made changes by TUAN NGUYEN
 
+   #ifdef DEBUG_INITIALIZE
+      MessageInterface::ShowMessage(
+            "Entered MeasurementManager::Initialize()\n");
+   #endif
 #ifdef DEBUG_FLOW
    MessageInterface::ShowMessage(
          "Exit MeasurementManager::Initialize() method\n");
@@ -367,37 +410,37 @@ bool MeasurementManager::Initialize()
 bool MeasurementManager::PrepareForProcessing(bool simulating)
 {
    #ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+      MessageInterface::ShowMessage(
          "Entered MeasurementManager::PrepareForProcessing() method\n");
       MessageInterface::ShowMessage(
             "Working with %d streams\n", streamList.size());
    #endif
 
-#ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage(
          "Entered MeasurementManager::PrepareForProcessing(%s)\n",
          (simulating ? "true" : "false"));
-#endif
+   #endif
 
    // Verify no pair of streams having the same file name but different data format:
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
-	  std::string fname      = streamList[i]->GetStringParameter("Filename");
-	  std::string dataformat = streamList[i]->GetStringParameter("Format");
-//	  MessageInterface::ShowMessage("* streamList[i = %d] Filename = '%s'   Format = '%s'\n", i, fname.c_str(), dataformat.c_str());
-	  for(UnsignedInt j = 0; j < streamList.size(); ++j)
+      std::string fname      = streamList[i]->GetStringParameter("Filename");
+      std::string dataformat = streamList[i]->GetStringParameter("Format");
+//     MessageInterface::ShowMessage("* streamList[i = %d] Filename = '%s'   Format = '%s'\n", i, fname.c_str(), dataformat.c_str());
+      for(UnsignedInt j = 0; j < streamList.size(); ++j)
       {
-		 if (i == j)
-		    continue;
-//		 MessageInterface::ShowMessage("   + streamList[j = %d] Filename = '%s'   Format = '%s'\n", j, streamList[j]->GetStringParameter("Filename").c_str(), streamList[j]->GetStringParameter("Format").c_str());
-		 if ((fname == streamList[j]->GetStringParameter("Filename"))&&(dataformat != streamList[j]->GetStringParameter("Format")))
-			throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + streamList[j]->GetName() + "' have the same file name but different data format\n");
+         if (i == j)
+            continue;
+//       MessageInterface::ShowMessage("   + streamList[j = %d] Filename = '%s'   Format = '%s'\n", j, streamList[j]->GetStringParameter("Filename").c_str(), streamList[j]->GetStringParameter("Format").c_str());
+         if ((fname == streamList[j]->GetStringParameter("Filename"))&&(dataformat != streamList[j]->GetStringParameter("Format")))
+            throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + streamList[j]->GetName() + "' have the same file name but different data format\n");
       }
 
-	  for(UnsignedInt j = 0; j < rampTableDataStreamList.size(); ++j)
+      for(UnsignedInt j = 0; j < rampTableDataStreamList.size(); ++j)
       {
-		 if ((fname == rampTableDataStreamList[j]->GetStringParameter("Filename"))&&(dataformat != rampTableDataStreamList[j]->GetStringParameter("Format")))
-			throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + rampTableDataStreamList[j]->GetName() + "' have the same file name but different data format\n");
+         if ((fname == rampTableDataStreamList[j]->GetStringParameter("Filename"))&&(dataformat != rampTableDataStreamList[j]->GetStringParameter("Format")))
+            throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + rampTableDataStreamList[j]->GetName() + "' have the same file name but different data format\n");
       }
    }
 
@@ -434,27 +477,27 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
    }
 
 ///// TBD: Do we want something more generic here?
-   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)							// made changes by TUAN NGUYEN
-   {																						// made changes by TUAN NGUYEN
-      #ifdef USE_DATAFILE_PLUGINS															// made changes by TUAN NGUYEN
-         std::string writeMode = (simulating ? "w" : "r");									// made changes by TUAN NGUYEN
-         rampTableDataStreamList[i]->SetStringParameter(									// made changes by TUAN NGUYEN
-               rampTableDataStreamList[i]->GetParameterID("ReadWriteMode"), writeMode);		// made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)                          // made changes by TUAN NGUYEN
+   {                                                                                         // made changes by TUAN NGUYEN
+      #ifdef USE_DATAFILE_PLUGINS                                                            // made changes by TUAN NGUYEN
+         std::string writeMode = (simulating ? "w" : "r");                                   // made changes by TUAN NGUYEN
+         rampTableDataStreamList[i]->SetStringParameter(                                     // made changes by TUAN NGUYEN
+               rampTableDataStreamList[i]->GetParameterID("ReadWriteMode"), writeMode);      // made changes by TUAN NGUYEN
 
-         if (rampTableDataStreamList[i]->OpenFile() == false)								// made changes by TUAN NGUYEN
-            retval = false;																	// made changes by TUAN NGUYEN
-      #else																					// made changes by TUAN NGUYEN
-         if (rampTableDataStreamList[i]->OpenStream(simulating) == false)					// made changes by TUAN NGUYEN
-            retval = false;																	// made changes by TUAN NGUYEN
-      #endif																				// made changes by TUAN NGUYEN
-   }																						// made changes by TUAN NGUYEN
+         if (rampTableDataStreamList[i]->OpenFile() == false)                                // made changes by TUAN NGUYEN
+            retval = false;                                                                  // made changes by TUAN NGUYEN
+      #else                                                                                  // made changes by TUAN NGUYEN
+         if (rampTableDataStreamList[i]->OpenStream(simulating) == false)                    // made changes by TUAN NGUYEN
+            retval = false;                                                                  // made changes by TUAN NGUYEN
+      #endif                                                                                 // made changes by TUAN NGUYEN
+   }                                                                                         // made changes by TUAN NGUYEN
 
    inSimulationMode = simulating;
 
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
          "Exit MeasurementManager::PrepareForProcessing() method: retval = %s\n", (retval?"true":"false"));
-#endif
+   #endif
 
    return retval;
 }
@@ -490,21 +533,21 @@ bool MeasurementManager::ProcessingComplete()
    }
 
 ///// TBD: Do we want something more generic here?
-   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)		// made changes by TUAN NGUYEN
-   {																	// made changes by TUAN NGUYEN
-      #ifdef USE_DATAFILE_PLUGINS										// made changes by TUAN NGUYEN
-         if (rampTableDataStreamList[i]->CloseFile() == false)			// made changes by TUAN NGUYEN
-            retval = false;												// made changes by TUAN NGUYEN
-      #else																// made changes by TUAN NGUYEN
-         if (rampTableDataStreamList[i]->CloseStream() == false)		// made changes by TUAN NGUYEN
-            retval = false;												// made changes by TUAN NGUYEN
-      #endif															// made changes by TUAN NGUYEN
-   }																	// made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)      // made changes by TUAN NGUYEN
+   {                                                                     // made changes by TUAN NGUYEN
+      #ifdef USE_DATAFILE_PLUGINS                                        // made changes by TUAN NGUYEN
+         if (rampTableDataStreamList[i]->CloseFile() == false)           // made changes by TUAN NGUYEN
+            retval = false;                                              // made changes by TUAN NGUYEN
+      #else                                                              // made changes by TUAN NGUYEN
+         if (rampTableDataStreamList[i]->CloseStream() == false)         // made changes by TUAN NGUYEN
+            retval = false;                                              // made changes by TUAN NGUYEN
+      #endif                                                             // made changes by TUAN NGUYEN
+   }                                                                     // made changes by TUAN NGUYEN
 
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
          "Exit MeasurementManager::ProcessingComplete() method\n");
-#endif
+   #endif
    return retval;
 }
 
@@ -521,10 +564,10 @@ bool MeasurementManager::ProcessingComplete()
 //------------------------------------------------------------------------------
 bool MeasurementManager::Finalize()
 {
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
          "Entered MeasurementManager::Finalize() method\n");
-#endif
+   #endif
 
    bool retval = true;
    return retval;
@@ -560,20 +603,20 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
    {
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
-         // Specify ramp table associated with measurement model models[j]:						// made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model							// made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement model models[j]:                   // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                         // made changes by TUAN NGUYEN
 ///// TBD: Do we want something more generic here?
-		 StringArray sr = models[j]->GetStringArrayParameter("RampTables");						// made changes by TUAN NGUYEN
-		 std::vector<RampTableData>* rt = NULL;													// made changes by TUAN NGUYEN
-		 if (sr.size() > 0)																		// made changes by TUAN NGUYEN
-		    rt = &(rampTables[sr[0]]);															// made changes by TUAN NGUYEN
+         StringArray sr = models[j]->GetStringArrayParameter("RampTables");                   // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                               // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                                   // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                        // made changes by TUAN NGUYEN
 
-		 // Specify current observation data. If no observation data used, it passes a NULL pointer. 
-		 ObservationData* od = NULL;															// made changes by TUAN NGUYEN
-		 if (!observations.empty())																// made changes by TUAN NGUYEN
-            od = &(*currentObs);																// made changes by TUAN NGUYEN
+         // Specify current observation data. If no observation data used, it passes a NULL pointer. 
+         ObservationData* od = NULL;                                                          // made changes by TUAN NGUYEN
+         if (!observations.empty())                                                           // made changes by TUAN NGUYEN
+            od = &(*currentObs);                                                              // made changes by TUAN NGUYEN
 
-		 measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);					// made changes by TUAN NGUYEN
+         measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);               // made changes by TUAN NGUYEN
 
          if (measurements[j].isFeasible)
          {
@@ -584,22 +627,32 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
+         // Specify ramp table associated with measurement model models[j]:                   // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                         // made changes by TUAN NGUYEN
+///// TBD: Do we want something more generic here?
+         //StringArray sr = models[j]->GetStringArrayParameter("RampTables");                 // made changes by TUAN NGUYEN
+         StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");                 // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                               // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                                   // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                        // made changes by TUAN NGUYEN
+
          // Specify current observation data. If no observation data used, it
          // passes a NULL pointer.
          ObservationData* od = NULL;
          if (!observations.empty())
             od = &(*currentObs);
 
-         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
-MessageInterface::ShowMessage("Calculating adapter based measurement...");
+         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);             // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("Calculating adapter based measurement...");
+
          if (measurements[j].isFeasible)
          {
-MessageInterface::ShowMessage("Calculated feasible measurement\n");
+            MessageInterface::ShowMessage("Calculated feasible measurement\n");
             ++successCount;
             eventCount += measurements[j].eventCount;
-   }
-else
-MessageInterface::ShowMessage("NOT feasible\n");
+         }
+         else
+            MessageInterface::ShowMessage("NOT feasible\n");
 
       }
    }
@@ -608,22 +661,22 @@ MessageInterface::ShowMessage("NOT feasible\n");
       if ((measurementToCalc < (Integer)models.size()) && measurementToCalc >= 0)
       {
 ///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:						// made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model							// made changes by TUAN NGUYEN
-		 StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");		// made changes by TUAN NGUYEN
-		 std::vector<RampTableData>* rt = NULL;													// made changes by TUAN NGUYEN
-		 if (sr.size() > 0)																		// made changes by TUAN NGUYEN
-		    rt = &(rampTables[sr[0]]);															// made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement model models[j]:                      // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                            // made changes by TUAN NGUYEN
+         StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");      // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                                  // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                                      // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                           // made changes by TUAN NGUYEN
 
-		 // Specify current observation data. If no observation data used, it passes a NULL pointer. 
-		 ObservationData* od = NULL;															// made changes by TUAN NGUYEN
-		 if (!observations.empty())																// made changes by TUAN NGUYEN
-            od = &(*currentObs);																// made changes by TUAN NGUYEN
+         // Specify current observation data. If no observation data used, it passes a NULL pointer. 
+         ObservationData* od = NULL;                                                             // made changes by TUAN NGUYEN
+         if (!observations.empty())                                                              // made changes by TUAN NGUYEN
+            od = &(*currentObs);                                                                 // made changes by TUAN NGUYEN
 
-         measurements[measurementToCalc] =														// made changes by TUAN NGUYEN
-			 models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
+         measurements[measurementToCalc] =                                                       // made changes by TUAN NGUYEN
+            models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);                 // made changes by TUAN NGUYEN
          
-		 if (measurements[measurementToCalc].isFeasible)
+         if (measurements[measurementToCalc].isFeasible)
          {
             successCount = 1;
             eventCount = measurements[measurementToCalc].eventCount;
@@ -632,24 +685,33 @@ MessageInterface::ShowMessage("NOT feasible\n");
 
       if ((measurementToCalc < (Integer)adapters.size()) && (measurementToCalc >= 0))
       {
+///// TBD: Do we want something more generic here?
+         // Specify ramp table associated with tracking data adapter adapters[j]:                // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a tracking data adapter                        // made changes by TUAN NGUYEN
+         // StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");   // made changes by TUAN NGUYEN
+         StringArray sr = adapters[measurementToCalc]->GetStringArrayParameter("RampTables");    // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                                  // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                                      // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                           // made changes by TUAN NGUYEN
+
          // Specify current observation data. If no observation data used, it passes a NULL pointer.
          ObservationData* od = NULL;
          if (!observations.empty())
             od = &(*currentObs);
 
          #ifdef DEBUG_CALCULATE
-            MessageInterface::ShowMessage("****** models[%d]name = '%s'\n",
+            MessageInterface::ShowMessage("****** adapters[%d]name = '%s'\n",
                   measurementToCalc,
-                  models[measurementToCalc]->GetName().c_str());
+                  adapters[measurementToCalc]->GetName().c_str());
             MessageInterface::ShowMessage("****** observations.size() = %d\n", observations.size());
             if (od == NULL)
                MessageInterface::ShowMessage("****** Observation data is not used in calculation\n");
             else
-              MessageInterface::ShowMessage("****** currentObs: epoch = %.12lf, participants: %s  %s,  meas value = %.12lf\n", currentObs->epoch, currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), currentObs->value[0]);
+               MessageInterface::ShowMessage("****** currentObs: epoch = %.12lf, participants: %s  %s,  meas value = %.12lf\n", currentObs->epoch, currentObs->participantIDs[0].c_str(), currentObs->participantIDs[1].c_str(), currentObs->value[0]);
          #endif
 
          measurements[measurementToCalc] =
-            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od);
+            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);              // made changes by TUAN NGUYEN
 
          #ifdef DEBUG_CALCULATE
             MessageInterface::ShowMessage("****** measurements[%d] = <%p>,   "
@@ -666,7 +728,7 @@ MessageInterface::ShowMessage("NOT feasible\n");
          {
             successCount = 1;
             eventCount = measurements[measurementToCalc].eventCount;
-   }
+         }
       }
    }
 
@@ -696,20 +758,20 @@ MessageInterface::ShowMessage("NOT feasible\n");
 const MeasurementData* MeasurementManager::GetMeasurement(
          const Integer measurementToGet)
 {
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
          "Entered MeasurementManager::GetMeasurement(measurentToGet = %d) method\n", measurementToGet);
-#endif
+   #endif
 
    MeasurementData *theMeasurement = NULL;
    if ( (measurementToGet >= 0) &&
         (measurementToGet < (Integer)measurements.size()))
       theMeasurement = &measurements[measurementToGet];
 
-#ifdef DEBUG_FLOW
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_FLOW
+      MessageInterface::ShowMessage(
          "Exit MeasurementManager::GetMeasurement() method\n");
-#endif
+   #endif
 
    return theMeasurement;
 }
@@ -815,33 +877,33 @@ bool MeasurementManager::WriteMeasurement(const Integer measurementToWrite)
 //-----------------------------------------------------------------------------
 UnsignedInt MeasurementManager::LoadObservations()
 {
-#ifdef DEBUG_LOAD_OBSERVATIONS
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_LOAD_OBSERVATIONS
+      MessageInterface::ShowMessage(
          "Entered MeasurementManager::LoadObservations() method\n");
-#endif
+   #endif
 
    #ifdef USE_DATAFILE_PLUGINS
       DataFileAdapter dfa;
    #endif
 
-   std::vector<ObservationData>     obsTable;				// made changes by TUAN NGUYEN
-   std::vector<UnsignedInt>         startIndexes;			// made changes by TUAN NGUYEN
-   std::vector<UnsignedInt>         endIndexes;				// made changes by TUAN NGUYEN
+   std::vector<ObservationData>     obsTable;              // made changes by TUAN NGUYEN
+   std::vector<UnsignedInt>         startIndexes;          // made changes by TUAN NGUYEN
+   std::vector<UnsignedInt>         endIndexes;            // made changes by TUAN NGUYEN
    observations.clear();
    
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
-      startIndexes.push_back(obsTable.size());				// made changes by TUAN NGUYEN
+      startIndexes.push_back(obsTable.size());             // made changes by TUAN NGUYEN
 
       ObservationData *od;
 ///// TBD: Look at file handlers here once data file pieces are designed
-	  ObservationData od_old;
-	  od_old.epoch = -1.0;
+      ObservationData od_old;
+      od_old.epoch = -1.0;
 
-	  std::string streamFormat = streamList[i]->GetStringParameter("Format");
+      std::string streamFormat = streamList[i]->GetStringParameter("Format");
 ///// TBD: Especially here; this style will cause maintenence issues as more types are added
-	  if ((streamFormat == "GMAT_OD")||(streamFormat == "GMAT_ODDoppler")||(streamFormat == "GMATInternal"))		// made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
-	  {
+      if ((streamFormat == "GMAT_OD")||(streamFormat == "GMAT_ODDoppler")||(streamFormat == "GMATInternal"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
+      {
       #ifdef USE_DATAFILE_PLUGINS
          if (streamList[i]->GetIsOpen())
          {
@@ -865,148 +927,148 @@ UnsignedInt MeasurementManager::LoadObservations()
             }
          }
       #else
-		 
+       
          if (streamList[i]->IsOpen())
          {
-			UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
-			filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
-			Real acc = 1.0;
+            UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
+            filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
+            Real acc = 1.0;
 
-			Real epoch1 = 0.0;
+            Real epoch1 = 0.0;
             Real epoch2 = 0.0;
 
-			Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
-			StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
-			while (true)
-			{
-			   od = streamList[i]->ReadObservation();
-			   ++numRec;
+            Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
+            StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
+            while (true)
+            {
+               od = streamList[i]->ReadObservation();
+               ++numRec;
 
-			   // End of file
-			   if (od == NULL)
-			   {
-				  --numRec;
+               // End of file
+               if (od == NULL)
+               {
+                  --numRec;
                   break;
-			   }
+               }
 
-			   // Get start epoch and end epoch when od != NULL
-			   if (epoch1 == 0.0)
-			   {
-			      epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-			      epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
-			   }
+               // Get start epoch and end epoch when od != NULL
+               if (epoch1 == 0.0)
+               {
+                  epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+                  epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
+               }
 
-			   // Data thinning filter
-			   acc = acc + thinningRatio;
-			   if (acc < 1.0)
+               // Data thinning filter
+               acc = acc + thinningRatio;
+               if (acc < 1.0)
                {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
-				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
-//				  MessageInterface::ShowMessage("acc = %lf\n", acc);
-				  ++filter4Num;
-				  continue;
-			   }
-			   else
-			      acc = acc -1.0;
+//                MessageInterface::ShowMessage("acc = %lf\n", acc);
+                  ++filter4Num;
+                  continue;
+               }
+               else
+                  acc = acc -1.0;
 
-			   // Time span filter
+               // Time span filter
                if ((od->epoch < epoch1)||(od->epoch > epoch2))
                {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
-		          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
                   ++filter5Num;
-				  continue;
+                  continue;
                }
 
-			   // Invalid measurement value filter
-            if (od->value.size() > 0)
-			   if (od->value[0] == -1.0)		// throw away this observation data if it is invalid	// made changes by TUAN NGUYEN
-			   {
-                  #ifdef DEBUG_LOAD_OBSERVATIONS
-				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-                  #endif
-				  ++filter1Num;
-				  continue;
-			   }
+               // Invalid measurement value filter
+               if (od->value.size() > 0)
+                  if (od->value[0] == -1.0)      // throw away this observation data if it is invalid   // made changes by TUAN NGUYEN
+                  {
+                     #ifdef DEBUG_LOAD_OBSERVATIONS
+                        MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                     #endif
+                     ++filter1Num;
+                     continue;
+                  }
 
-			   // Duplication or time order filter
-			   if (od_old.epoch >= od->epoch)
-			   {
+               // Duplication or time order filter
+               if (od_old.epoch >= (od->epoch + 2.0e-12))
+               {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
-		          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
-				  ++filter2Num;
-				  continue;
-			   }
+                  ++filter2Num;
+                  continue;
+               }
 
-			   // Selected stations filter
+               // Selected stations filter
                bool choose = false;
                if (selectedStations.size() == 0)
-				  choose = true;
-			   else
-			   {
-				  for (int j=0; j < selectedStations.size(); ++j)
-				  {
-				     if (selectedStations[j] == od->participantIDs[0])
-					 {
-					    choose = true;
-						break;
-					 }
-				  }
+                  choose = true;
+               else
+               {
+                  for (int j=0; j < selectedStations.size(); ++j)
+                  {
+                     if (selectedStations[j] == od->participantIDs[0])
+                     {
+                        choose = true;
+                         break;
+                     }
+                  }
                }
 
                if (choose == false)
-			   {
+               {
                   #ifdef DEBUG_LOAD_OBSERVATIONS
-				  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                     MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
-				  ++filter3Num;
-				  continue;
-			   }
+                  ++filter3Num;
+                  continue;
+               }
 
-			   obsTable.push_back(*od);
+               obsTable.push_back(*od);
                #ifdef DEBUG_LOAD_OBSERVATIONS
-	           MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf   ", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-			   if (od->typeName == "DSNTwoWayDoppler")
-				   MessageInterface::ShowMessage(" Band = %d    Doppler count interval = %le\n", od->uplinkBand, od->dopplerCountInterval);
-			   else if (od->typeName == "DSNTwoWayRange")
-				   MessageInterface::ShowMessage(" Band = %d    Frequency = %.15le   Range Modulo = %.15le\n", od->uplinkBand, od->uplinkFreq, od->rangeModulo);
-			   else
-				   MessageInterface::ShowMessage("\n");
+                  MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf   ", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+                  if (od->typeName == "DSNTwoWayDoppler")
+                     MessageInterface::ShowMessage(" Band = %d    Doppler count interval = %le\n", od->uplinkBand, od->dopplerCountInterval);
+                  else if (od->typeName == "DSNTwoWayRange")
+                     MessageInterface::ShowMessage(" Band = %d    Frequency = %.15le   Range Modulo = %.15le\n", od->uplinkBand, od->uplinkFreq, od->rangeModulo);
+                  else
+                     MessageInterface::ShowMessage("\n");
                #endif
 
-			   ++count;
+               ++count;
                od_old = *od;
-			}// endwhile(true)	
+            }// endwhile(true)   
 
-			MessageInterface::ShowMessage("Number of thown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
+            MessageInterface::ShowMessage("Number of thown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
             MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
-			MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter2Num);
-			MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
-			MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
-			MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);
-			MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
+            MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter2Num);
+            MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);
+            MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter4Num);
+            MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter5Num);
+            MessageInterface::ShowMessage("Total number of records in '%s': %d\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec);
             MessageInterface::ShowMessage("Number of records in '%s' used for estimation: %d\n\n", streamList[i]->GetStringParameter("Filename").c_str(), count);
 
          } // endif (streamList[i]->IsOpen())
-		 
+       
       #endif
-	  } // endif ((streamFormat == "GMAT_OD")
+      } // endif ((streamFormat == "GMAT_OD")
 
-	  // made changes by TUAN NGUYEN : fix bug GMT-4394
-	  if (obsTable.size() == 0)
-		 throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
-	  else
-	  {
+      // made changes by TUAN NGUYEN : fix bug GMT-4394
+      if (obsTable.size() == 0)
+         throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
+      else
+      {
          if ((Integer)startIndexes[i] <= (obsTable.size()-1))
-		    endIndexes.push_back(obsTable.size()-1);
-	     else
-		    throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
-	  }
-	  
-   }
+            endIndexes.push_back(obsTable.size()-1);
+         else
+            throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
+      }
+     
+   }// for i loop
 
 
    // Sort observation data by epoch due to observations table is required to have an epoch ascending order
@@ -1016,41 +1078,41 @@ UnsignedInt MeasurementManager::LoadObservations()
       UnsignedInt minIndex = streamList.size();
       for (UnsignedInt i = 0; i < streamList.size(); ++i)
       {
-		 if (startIndexes[i] > endIndexes[i])
+         if (startIndexes[i] > endIndexes[i])
             continue;
 
-		 if (minIndex == streamList.size())
+         if (minIndex == streamList.size())
             minIndex = i;
-		 else
-		 {
-		    if (obsTable[startIndexes[minIndex]].epoch > obsTable[startIndexes[i]].epoch)
+         else
+         {
+            if (obsTable[startIndexes[minIndex]].epoch > obsTable[startIndexes[i]].epoch)
                minIndex = i;
-		 }
-	  }
-	  
-	  if (minIndex < streamList.size())
-	  {
-	     observations.push_back(obsTable[startIndexes[minIndex]]);
-		 startIndexes[minIndex]++;
-	  }
-	  else
-		 completed = true;
+         }
+     }
+     
+     if (minIndex < streamList.size())
+     {
+        observations.push_back(obsTable[startIndexes[minIndex]]);
+        startIndexes[minIndex]++;
+     }
+     else
+        completed = true;
 
    }
    
    #ifdef DEBUG_LOAD_OBSERVATIONS
-   for (UnsignedInt i = 0; i < observations.size(); ++i)
-	   MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
+      for (UnsignedInt i = 0; i < observations.size(); ++i)
+         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
    #endif
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
    MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
 
-#ifdef DEBUG_LOAD_OBSERVATIONS
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_LOAD_OBSERVATIONS
+     MessageInterface::ShowMessage(
          "Exit MeasurementManager::LoadObservations() method\n");
-#endif
+   #endif
 
    return observations.size(); 
 }
@@ -1064,7 +1126,7 @@ std::vector<ObservationData>* MeasurementManager::GetObservationDataList()
 
 
 //-----------------------------------------------------------------------------
-// void LoadRampTables()												// this function was added by TUAN NGUYEN
+// void LoadRampTables()                                    // this function was added by TUAN NGUYEN
 //-----------------------------------------------------------------------------
 /**
  * Load all frequency ramp tables.
@@ -1073,10 +1135,10 @@ std::vector<ObservationData>* MeasurementManager::GetObservationDataList()
 //-----------------------------------------------------------------------------
 void MeasurementManager::LoadRampTables()
 {
-#ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-   MessageInterface::ShowMessage("Entered MeasurementManager::LoadRampTables() method\n");
-   MessageInterface::ShowMessage("  rampTableDataStreamList.size() = %d\n", rampTableDataStreamList.size());
-#endif
+   #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+      MessageInterface::ShowMessage("Entered MeasurementManager::LoadRampTables() method\n");
+      MessageInterface::ShowMessage("  rampTableDataStreamList.size() = %d\n", rampTableDataStreamList.size());
+   #endif
 
    #ifdef USE_DATAFILE_PLUGINS
       DataFileAdapter dfa;
@@ -1087,10 +1149,10 @@ void MeasurementManager::LoadRampTables()
    for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)
    {
       RampTableData *rtd;
-	  RampTableData rtd_old;
-	  rtd_old.epoch = -1.0;
-	  if (rampTableDataStreamList[i]->GetStringParameter("Format") == "GMAT_RampTable")
-	  {
+      RampTableData rtd_old;
+      rtd_old.epoch = -1.0;
+      if (rampTableDataStreamList[i]->GetStringParameter("Format") == "GMAT_RampTable")
+      {
       #ifdef USE_DATAFILE_PLUGINS
          if (rampTableDataStreamList[i]->GetIsOpen())
          {
@@ -1116,43 +1178,46 @@ void MeasurementManager::LoadRampTables()
       #else
          if (rampTableDataStreamList[i]->IsOpen())
          {
-			if (rampTableDataStreamList[i]->GetStringParameter("Format") == "GMAT_RampTable")
-			{
-			   std::vector<RampTableData> ramp_table;
+            if (rampTableDataStreamList[i]->GetStringParameter("Format") == "GMAT_RampTable")
+            {
+               std::vector<RampTableData> ramp_table;
                rtd = rampTableDataStreamList[i]->ReadRampTableData();
                while (rtd != NULL)
                {
-				  // Data records containing rampType = 0(snap), 6(invalid/unknown) , and 7(left bank in DSN file) will be removed from ramp table  
-				  if ((rtd_old.epoch < rtd->epoch)&&(rtd->rampType >= 1)&&(rtd->rampType <= 5))
-			      {
+                  // Data records containing rampType = 0(snap), 6(invalid/unknown) , and 7(left bank in DSN file) will be removed from ramp table  
+                  if ((rtd_old.epoch < rtd->epoch)&&(rtd->rampType >= 1)&&(rtd->rampType <= 5))
+                  {
                      ramp_table.push_back(*rtd);
 
                      #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-					    MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
+                        MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
                      #endif
 
-					 rtd_old = *rtd;
-			      }
-			      else
-		          {
+                     rtd_old = *rtd;
+                  }
+                  else
+                  {
                      #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-					    MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time or rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
+                        MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time or rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
                      #endif
-			      }
+                  }
                   rtd = rampTableDataStreamList[i]->ReadRampTableData();
                }
 
-			   rampTables[rampTableDataStreamList[i]->GetName()] = ramp_table;
-			}
+               rampTables[rampTableDataStreamList[i]->GetName()] = ramp_table;
+               #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+                  MessageInterface::ShowMessage("      ^^^^^^ ramp_table[%s] = <%p>\n", rampTableDataStreamList[i]->GetName().c_str(), &rampTables[rampTableDataStreamList[i]->GetName()]);
+               #endif
+            }
          }
       #endif
-	  }
+      }
    }
 
-#ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-   MessageInterface::ShowMessage(
+   #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+      MessageInterface::ShowMessage(
          "Exit MeasurementManager::LoadRampTable() method\n");
-#endif
+   #endif
 }
 
 
@@ -1216,7 +1281,7 @@ GmatEpoch MeasurementManager::GetNextEpoch()
  */
 //-----------------------------------------------------------------------------
 const ObservationData *MeasurementManager::GetObsData(
-		const Integer observationToGet)
+      const Integer observationToGet)
 {
    if (observationToGet == -1)
       return &(*currentObs);
@@ -1269,7 +1334,7 @@ ObservationData* MeasurementManager::GetObsDataObject(const Integer observationT
  * Advances the current observation pointer to the next observation in the
  * observations vector
  *
- * @return	true when it is at the end of observations table otherwise return false
+ * @return   true when it is at the end of observations table otherwise return false
  */
 //-----------------------------------------------------------------------------
 bool MeasurementManager::AdvanceObservation()
@@ -1278,14 +1343,14 @@ bool MeasurementManager::AdvanceObservation()
    {
       ++currentObs;
 
-	  // This change intends to use all observation data no matter it is either in used or not. 
-	  // When they come into BatchEstimatorInv::Accumulate() function, all unused data will be 
-	  // writen to report file as unused data.  
-      //while ((currentObs != observations.end())&&		// made changes by TUAN NGUYEN
-		    // (!currentObs->inUsed))					// made changes by TUAN NGUYEN
-      //{												// made changes by TUAN NGUYEN
-      //      ++currentObs;								// made changes by TUAN NGUYEN
-      //}												// made changes by TUAN NGUYEN
+     // This change intends to use all observation data no matter it is either in used or not. 
+     // When they come into BatchEstimatorInv::Accumulate() function, all unused data will be 
+     // writen to report file as unused data.  
+      //while ((currentObs != observations.end())&&      // made changes by TUAN NGUYEN
+          // (!currentObs->inUsed))                      // made changes by TUAN NGUYEN
+      //{                                                // made changes by TUAN NGUYEN
+      //      ++currentObs;                              // made changes by TUAN NGUYEN
+      //}                                                // made changes by TUAN NGUYEN
    }
 
 
@@ -1293,13 +1358,13 @@ bool MeasurementManager::AdvanceObservation()
    if (currentObs == observations.end())
       MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs == end\n");
    else
-	   MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs->epoch = %.12lf   correntObs->value.size() = %d\n", currentObs->epoch, currentObs->value.size());
+      MessageInterface::ShowMessage("MeasurementManager::AdanceObservation():   currentObs->epoch = %.12lf   correntObs->value.size() = %d\n", currentObs->epoch, currentObs->value.size());
 #endif
 
    if (currentObs == observations.end())
       return true;
    else
-	  return false;
+     return false;
 }
 
 //------------------------------------------------------------------------------
@@ -1322,16 +1387,16 @@ Integer MeasurementManager::AddMeasurement(MeasurementModel *meas)
    }
    else
    {
-   meas->SetModelID(largestId++);
-   models.push_back(meas);
+      meas->SetModelID(largestId++);
+      models.push_back(meas);
       retval = meas->GetModelID();
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage(
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage(
             "Added measurement of type %s with unique ID %d\n",
             meas->GetStringParameter("Type").c_str(),
             meas->GetModelID());
-   #endif
+      #endif
    }
 
    return retval;
@@ -1385,9 +1450,9 @@ const StringArray& MeasurementManager::GetParticipantList()
    participants.clear();
 
    #ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage("MeasurementManager knows about %d "
+      MessageInterface::ShowMessage("MeasurementManager knows about %d "
          "measurement models\n", models.size());
-   MessageInterface::ShowMessage("MeasurementManager knows about %d "
+      MessageInterface::ShowMessage("MeasurementManager knows about %d "
             "TrackingDataSets\n", trackingSets.size());
       MessageInterface::ShowMessage("MeasurementManager knows about %d "
          "measurement model names\n", modelNames.size());
@@ -1463,20 +1528,35 @@ const StringArray& MeasurementManager::GetMeasurementNames() const
 }
 
 
+
+// made changes by TUAN NGUYEN
+const std::vector<TrackingFileSet*> MeasurementManager::GetTrackingSets() const
+{
+   return trackingSets;
+}
+
+                         // made changes by TUAN NGUYEN
+const std::vector<TrackingDataAdapter*> MeasurementManager::GetTrackingDataAdapters() const
+{
+   return adapters;
+}
+
+
 //-----------------------------------------------------------------------------
 // const Integer GetMeasurementId(const std::string &modelName) const
 //-----------------------------------------------------------------------------
 /**
- * Retrieves the model ID for a named measurement model
+ * Retrieves the model ID (or IDs) for a named measurement model or a named tracking file set
  *
- * @param modelName The name of the measurement model
+ * @param modelName The name of the measurement model or the tracking file set
  *
- * @return The ID for model
+ * @return The ID (or IDs) for model or tracking file set
  */
 //-----------------------------------------------------------------------------
-const Integer MeasurementManager::GetMeasurementId(
-		const std::string &modelName) const
+const IntegerArray MeasurementManager::GetMeasurementId(
+      const std::string &modelName) const
 {
+   IntegerArray arrayId;
    Integer foundId = -1;
 
    for (UnsignedInt i = 0; i < models.size(); ++i)
@@ -1488,28 +1568,72 @@ const Integer MeasurementManager::GetMeasurementId(
       }
    }
 
-   /// @todo: Handle multiple measurements inside of a TrackingFileSet
-   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   if (foundId != -1)
+      arrayId.push_back(foundId);
+   else
    {
-      if (trackingSets[i]->GetName() == modelName)
+      // Check modelName to be a name of trackingSet 
+      UnsignedInt i;
+      for (i = 0; i < trackingSets.size(); ++i)
       {
+         if (trackingSets[i]->GetName() == modelName)
+            break;
+      }
+
+      if (i < trackingSets.size())
+      {
+         // Get a name list of TrackingDataAdapter object associated the TrackingFileSet specified by modelName
+         StringArray tfsAdapterList;
          if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
+            tfsAdapterList = adapterFromTFSMap.find(trackingSets[i])->second;
+
+         for (UnsignedInt k = 0; k < tfsAdapterList.size(); ++k)
          {
-            /// @todo: Make measurementID accessor work for > 1 adapter in a TFS
-            StringArray tfsAdapterList =
-                  adapterFromTFSMap.find(trackingSets[i])->second;
-
-            std::string modelAdapterName = (tfsAdapterList.size() > 0 ?
-                  tfsAdapterList[0] : "Range");
-
+            // Find an adapter having the same name as tfsAdapterList[i]
+            foundId = -1;
             for (UnsignedInt j = 0; j < adapters.size(); ++j)
-               if (adapters[j]->GetName() == modelAdapterName)
+            {
+               if (adapters[j]->GetName() == tfsAdapterList[k])
+               {
                   foundId = adapters[j]->GetModelID();
+                  break;
+               }
+            }
+
+            // Add founId to ID
+            if (foundId != -1)
+               arrayId.push_back(foundId);
          }
       }
+      else
+         arrayId.push_back(-1);
    }
 
-   return foundId;
+   return arrayId;
+
+   /// @todo: Handle multiple measurements inside of a TrackingFileSet
+
+   //for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   //{
+   //   if (trackingSets[i]->GetName() == modelName)
+   //   {
+   //      if (adapterFromTFSMap.find(trackingSets[i]) != adapterFromTFSMap.end())
+   //      {
+   //         /// @todo: Make measurementID accessor work for > 1 adapter in a TFS
+   //         StringArray tfsAdapterList =
+   //               adapterFromTFSMap.find(trackingSets[i])->second;
+
+   //         std::string modelAdapterName = (tfsAdapterList.size() > 0 ?
+   //               tfsAdapterList[0] : "Range");
+
+   //         for (UnsignedInt j = 0; j < adapters.size(); ++j)
+   //            if (adapters[j]->GetName() == modelAdapterName)
+   //               foundId = adapters[j]->GetModelID();
+   //      }
+   //   }
+   //}
+
+   //return foundId;
 }
 
 
@@ -1546,7 +1670,7 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
          {
             retval = trackingSets[i];
             break;
-   }
+         }
    }
 
    return retval;
@@ -1554,16 +1678,16 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// bool CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)	
-//																					This method was modified by TUAN NGUYEN
+// bool CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)   
+//                                                               This method was modified by TUAN NGUYEN
 //------------------------------------------------------------------------------
 /**
  * Fires the calculation method of each owned MeasurementModel
  *
- * @param  forSimulation	true for simulation calculation and false for 
+ * @param  forSimulation   true for simulation calculation and false for 
  *                          estimation calculation. Default value is false
  * @param  withEvents       flag to indicate calculation with ro without events
- * @param  addNoise			flag to indicate noise added to measurement
+ * @param  addNoise         flag to indicate noise added to measurement
  *
  * @return True if at least one measurement is feasible and calculated; false
  *         otherwise
@@ -1572,13 +1696,13 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)
 {
    #ifdef DEBUG_FLOW
-      MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(%s,%s)\n", (forSimulation?"true":"false"), (withEvents?"true":"false"));
+      MessageInterface::ShowMessage(" Entered bool MeasurementManager::CalculateMeasurements(simulation = %s, withEvents = %s, addNoise = %s)\n", (forSimulation?"true":"false"), (withEvents?"true":"false"), (addNoise?"true":"false"));
    #endif
    
    // Specify observation data for measurement
-   ObservationData* od = NULL;																// made changes by TUAN NGUYEN
-   if (!observations.empty())																// made changes by TUAN NGUYEN
-     od = &(*currentObs);																	// made changes by TUAN NGUYEN
+   ObservationData* od = NULL;                                                // made changes by TUAN NGUYEN
+   if (!observations.empty())                                                 // made changes by TUAN NGUYEN
+      od = &(*currentObs);                                                    // made changes by TUAN NGUYEN
 
    bool retval = false;
    eventCount = 0;
@@ -1588,44 +1712,45 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-	        MessageInterface::ShowMessage(" Measurement models[%d] name = '%s'    measurement type = '%s'\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
+           MessageInterface::ShowMessage(" Measurement models[%d] name = '%s'    measurement type = '%s'\n", j, models[j]->GetName().c_str(), models[j]->GetStringParameter("Type").c_str());
          #endif
 
 ///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:					// made changes by TUAN NGUYEN
-	     // Note: Only one ramp table is used for a measurement model						// made changes by TUAN NGUYEN
-         StringArray sr = models[j]->GetStringArrayParameter("RampTables");					// made changes by TUAN NGUYEN
-	     std::vector<RampTableData>* rt = NULL;												// made changes by TUAN NGUYEN
-	     if (sr.size() > 0)																	// made changes by TUAN NGUYEN
-	        rt = &(rampTables[sr[0]]);														// made changes by TUAN NGUYEN
-		 
-		 if (withEvents)
-		 {  
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-	        MessageInterface::ShowMessage(" Simulation: measurement with events\n");
-         #endif
-			if (measurements[j].isFeasible)
-			{
-	           measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);		// made changes by TUAN NGUYEN
-			   if (measurements[j].unfeasibleReason == "R")											// made changes by TUAN NGUYEN
-			   {
-				  Real a1Time = measurements[j].epoch;
-				  Real taiTime;
-				  std::string tais;
-				  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
-				  char s[1000];
-				  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epoches.\n", models[j]->GetName().c_str(), taiTime);
-			      throw MeasurementException(s); 
-			   }
-			}
-		 }
-		 else
-		 {
-         #ifdef DEBUG_CALCULATE_MEASUREMENTS
-	        MessageInterface::ShowMessage(" Simulation: measurement without events\n");
-         #endif
-			measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);			// made changes by TUAN NGUYEN
-		 }
+         // Specify ramp table associated with measurement model models[j]:               // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                     // made changes by TUAN NGUYEN
+         StringArray sr = models[j]->GetStringArrayParameter("RampTables");               // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                           // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                               // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                    // made changes by TUAN NGUYEN
+       
+         if (withEvents)
+         {  
+            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+               MessageInterface::ShowMessage(" Simulation: measurement with events\n");
+            #endif
+            if (measurements[j].isFeasible)
+            {
+               measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);      // made changes by TUAN NGUYEN
+               if (measurements[j].unfeasibleReason == "R")                                          // made changes by TUAN NGUYEN
+               {
+                  Real a1Time = measurements[j].epoch;
+                  Real taiTime;
+                  std::string tais;
+                  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
+                  char s[1000];
+                  sprintf(&s[0], "Error: In simulation for measurement model %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epoches.\n", models[j]->GetName().c_str(), taiTime);
+                  throw MeasurementException(s); 
+               }
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+               MessageInterface::ShowMessage(" Simulation: measurement without events\n");
+            #endif
+            // without event, no noise is added due to check feasibility
+            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);         // made changes by TUAN NGUYEN
+         }
 
          if (measurements[j].isFeasible)
          {
@@ -1634,118 +1759,207 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             retval = true;
          }
 
-         #ifdef DEBUG_FLOW
-		    MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[j].isFeasible?"feasible":" not feasible"), measurements[j].value[0]);
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[j].isFeasible?"feasible":" not feasible"), measurements[j].value[0]);
          #endif
 
-      }
+      } // for j loop
+
       // Now do the same thing for the TrackingDataAdapters
       for (UnsignedInt i = 0; i < adapters.size(); ++i)
       {
-         std::vector<RampTableData>* rt = NULL;
-         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-         retval = measurements[i].isFeasible;
-   }
+         // Specify ramp table associated with measurement adapters[i]:                   // made changes by TUAN NGUYEN
+         // Note: Only one ramp table is used for a measurement model                     // made changes by TUAN NGUYEN
+         StringArray sr = adapters[i]->GetStringArrayParameter("RampTables");             // made changes by TUAN NGUYEN
+         std::vector<RampTableData>* rt = NULL;                                           // made changes by TUAN NGUYEN
+         if (sr.size() > 0)                                                               // made changes by TUAN NGUYEN
+            rt = &(rampTables[sr[0]]);                                                    // made changes by TUAN NGUYEN
+
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage("******** Ramped table names size = %d\n", sr.size());
+            MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
+            for(int ii=0; ii < rt->size(); ++ii)
+               MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
+         #endif
+         
+         // Set AddNoise to measuement apdater
+         adapters[i]->SetBooleanParameter("AddNoise", addNoise);
+
+         // Run CalculateMeasurement() function 
+//         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+//         retval = measurements[i].isFeasible;
+         if (withEvents)
+         {  
+            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+               MessageInterface::ShowMessage(" Simulation: measurement adapter %s with events\n", adapters[i]->GetName().c_str());
+            #endif
+            if (measurements[i].isFeasible)
+            {
+               measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+               if (measurements[i].unfeasibleReason == "R")
+               {
+                  Real a1Time = measurements[i].epoch;
+                  Real taiTime;
+                  std::string tais;
+                  TimeConverterUtil::Convert("A1ModJulian", a1Time, "", "TAIModJulian", taiTime, tais); 
+                  char s[1000];
+                  sprintf(&s[0], "Error: In simulation for measurement adapter %s, epoch %.12lf TAIMdj is out of ramped table.\n Please make sure ramped table cover all simulation epoches.\n", adapters[i]->GetName().c_str(), taiTime);
+                  throw MeasurementException(s); 
+               }
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_CALCULATE_MEASUREMENTS
+               MessageInterface::ShowMessage(" Simulation: measurement adapter %s without events\n", adapters[i]->GetName().c_str());
+            #endif
+            measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
+         }
+
+         if (measurements[i].isFeasible)
+         {
+            if (!withEvents)
+               eventCount += measurements[i].eventCount;
+            retval = true;
+         }
+         
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[i].isFeasible?"feasible":" not feasible"), measurements[i].value[0]);
+         #endif
+      } // for i loop
    }
    else
    {  // This section is used for estimation only:
       if (od == NULL)
-	  {
+      {
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-	        MessageInterface::ShowMessage("    observation data is NULL\n");
+            MessageInterface::ShowMessage("    observation data is NULL\n");
          #endif
-         return retval;					// no calculation measurement value whenever no observation data is available
-	  }
+         return retval;               // no calculation measurement value whenever no observation data is available
+      }
       #ifdef DEBUG_CALCULATE_MEASUREMENTS
-	  else
-		  MessageInterface::ShowMessage("    %s observation data: %.12lf  %s  %d  %s  %s   %.12lf\n", od->dataFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(),od->value[0]);
+      else
+         MessageInterface::ShowMessage("    %s observation data: %.12lf  %s  %d  %s  %s   %.12lf\n", od->dataFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(),od->value[0]);
       #endif
 
+      #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         MessageInterface::ShowMessage(" processing for measurement models ...\n");
+      #endif
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
          // Verify observation data belonging to the measurement model jth
-		 bool isbelong;
-		 std::string reason;
+         bool isbelong;
          if ((models[j]->GetStringParameter("Type") != od->typeName))
-		 {
-	        isbelong = false;
-		 }
-		 else
-		 {
-			isbelong = false;
-		    ObjectArray participants = models[j]->GetParticipants();		// participants in measurement model
-			if (participants.size() == od->participantIDs.size())
-			{
-			   int num = participants.size();
-			   for (int i1 = 0; i1 < num; ++i1)
-			   {
-				  isbelong = false;
-			      for (int i2 = 0; i2 < num; ++i2)
-			      {
-					 if (od->participantIDs[i1] == participants[i2]->GetStringParameter("Id"))
-					 {
-						 isbelong = true;
-						 break;
-					 }
-			      }
-
-				  if (isbelong == false)  
-					 break;				  
-			   }
-
-			}
-		 }
-		 
-		 if (isbelong == false)
          {
-//			 MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, models[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-		    measurements[j].typeName		 = models[j]->GetStringParameter("Type");
-	        measurements[j].epoch			 = od->epoch;
-	        measurements[j].epochSystem	     = od->epochSystem;
-		    measurements[j].isFeasible		 = false;
-	        measurements[j].covariance		 = NULL;
-	        measurements[j].eventCount		 = 0;
-	        measurements[j].feasibilityValue = 0.0;
-			measurements[j].unfeasibleReason = "U";
-	        measurements[j].value.clear();  
+            isbelong = false;
          }
-		 else
-		 {
-		    
+         else
+         {
+            isbelong = false;
+            ObjectArray participants = models[j]->GetParticipants();      // participants in measurement model
+            if (participants.size() == od->participantIDs.size())
+            {
+               int num = participants.size();
+               for (int i1 = 0; i1 < num; ++i1)
+               {
+                  isbelong = false;
+                  for (int i2 = 0; i2 < num; ++i2)
+                  {
+                     if (od->participantIDs[i1] == participants[i2]->GetStringParameter("Id"))
+                     {
+                        isbelong = true;
+                        break;
+                     }
+                  } // for i2 loop
+
+                  if (isbelong == false)  
+                     break;              
+               } // for i1 loop
+            }
+         }
+       
+         if (isbelong == false)
+         {
+//          MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, models[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            measurements[j].typeName       = models[j]->GetStringParameter("Type");
+            measurements[j].epoch          = od->epoch;
+            measurements[j].epochSystem        = od->epochSystem;
+            measurements[j].isFeasible       = false;
+            measurements[j].covariance       = NULL;
+            measurements[j].eventCount       = 0;
+            measurements[j].feasibilityValue = 0.0;
+            measurements[j].unfeasibleReason = "U";
+            measurements[j].value.clear();  
+         }
+         else
+         {
 ///// TBD: Do we want something more generic here?
-            // Specify ramp table associated with measurement model models[j]:					// made changes by TUAN NGUYEN
-	        // Note: Only one ramp table is used for a measurement model						// made changes by TUAN NGUYEN
-            StringArray sr = models[j]->GetStringArrayParameter("RampTables");					// made changes by TUAN NGUYEN
-	        std::vector<RampTableData>* rt = NULL;												// made changes by TUAN NGUYEN
-	        if (sr.size() > 0)																	// made changes by TUAN NGUYEN
-	           rt = &(rampTables[sr[0]]);														// made changes by TUAN NGUYEN
-		    
-	        measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);				// made changes by TUAN NGUYEN
-	     
+            // Specify ramp table associated with measurement model models[j]:                // made changes by TUAN NGUYEN
+            // Note: Only one ramp table is used for a measurement model                      // made changes by TUAN NGUYEN
+            StringArray sr = models[j]->GetStringArrayParameter("RampTables");                // made changes by TUAN NGUYEN
+            std::vector<RampTableData>* rt = NULL;                                            // made changes by TUAN NGUYEN
+            if (sr.size() > 0)                                                                // made changes by TUAN NGUYEN
+               rt = &(rampTables[sr[0]]);                                                     // made changes by TUAN NGUYEN
+          
+            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);            // made changes by TUAN NGUYEN
+        
             if (measurements[j].isFeasible)
             {
                if (!withEvents)
                   eventCount += measurements[j].eventCount;
                retval = true;
             }
-		 }
-      }
+         }
+      }// for j loop
 
+      #ifdef DEBUG_CALCULATE_MEASUREMENTS
+         MessageInterface::ShowMessage(" processing for tracking data adapters ...\n");
+      #endif
       // Now do the tracking data adapters
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
-         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od);
-         if (measurements[j].isFeasible)
+         bool isbelong = true;
+         // @todo: add code to verify observation data belonging to the measurement model jth
+
+
+         if (isbelong == false)
          {
-//            if (!withEvents)
-//               eventCount += measurements[j].eventCount;
-            retval = true;
-   }
-         #ifdef DEBUG_ADAPTERS
-            MessageInterface::ShowMessage("   Measurement %d computed; first "
+            // MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, adapters[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            measurements[j].typeName         = adapters[j]->GetStringParameter("Type");
+            measurements[j].epoch            = od->epoch;
+            measurements[j].epochSystem      = od->epochSystem;
+            measurements[j].isFeasible       = false;
+            measurements[j].covariance       = NULL;
+            measurements[j].eventCount       = 0;
+            measurements[j].feasibilityValue = 0.0;
+            measurements[j].unfeasibleReason = "U";
+            measurements[j].value.clear();  
+         }
+         else
+         {
+///// TBD: Do we want something more generic here?
+            // Specify ramp table associated with tracking data adapter adapters[j]:          // made changes by TUAN NGUYEN
+            // Note: Only one ramp table is used for a tracking data adapter                  // made changes by TUAN NGUYEN
+            StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");              // made changes by TUAN NGUYEN
+            std::vector<RampTableData>* rt = NULL;                                            // made changes by TUAN NGUYEN
+            if (sr.size() > 0)                                                                // made changes by TUAN NGUYEN
+               rt = &(rampTables[sr[0]]);                                                     // made changes by TUAN NGUYEN
+          
+            measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
+
+            if (measurements[j].isFeasible)
+            {
+               if (!withEvents)
+                  eventCount += measurements[j].eventCount;
+               retval = true;
+            }
+
+            #ifdef DEBUG_ADAPTERS
+               MessageInterface::ShowMessage("   Measurement %d computed; first "
                   "value: %lf\n", j, measurements[j].value[0]);
-         #endif
-      }
+            #endif
+         }
+      }// for j loop
    }
 
    #ifdef DEBUG_FLOW
@@ -1792,7 +2006,7 @@ bool MeasurementManager::MeasurementHasEvents()
 ObjectArray& MeasurementManager::GetActiveEvents()
 {
 #ifdef DEBUG_GET_ACTIVE_EVENTS
-	MessageInterface::ShowMessage("MeasurementManager::GetActiveEvents()   entered: \n");
+   MessageInterface::ShowMessage("MeasurementManager::GetActiveEvents()   entered: \n");
 #endif
 
    activeEvents.clear();
@@ -1801,7 +2015,7 @@ ObjectArray& MeasurementManager::GetActiveEvents()
    for (UnsignedInt j = 0; j < models.size(); ++j)
    {
 #ifdef DEBUG_GET_ACTIVE_EVENTS
-	   MessageInterface::ShowMessage("    measurement model[%d] <%s> is %s.\n", j, models[j]->GetName().c_str(), (measurements[j].isFeasible?"feasible":"not feasible"));
+      MessageInterface::ShowMessage("    measurement model[%d] <%s> is %s.\n", j, models[j]->GetName().c_str(), (measurements[j].isFeasible?"feasible":"not feasible"));
 #endif
       if (measurements[j].isFeasible)
       {
@@ -1812,14 +2026,14 @@ ObjectArray& MeasurementManager::GetActiveEvents()
             eventMap[currentEvent] = models[j];
             activeEvents.push_back(currentEvent);
 #ifdef DEBUG_GET_ACTIVE_EVENTS
-	  MessageInterface::ShowMessage("    measurement model[%d] <%s> event %s.\n", j, models[j]->GetName().c_str(), currentEvent->GetName().c_str());
+     MessageInterface::ShowMessage("    measurement model[%d] <%s> event %s.\n", j, models[j]->GetName().c_str(), currentEvent->GetName().c_str());
 #endif
          }
       }
    }
 
 #ifdef DEBUG_GET_ACTIVE_EVENTS
-	MessageInterface::ShowMessage("MeasurementManager::GetActiveEvents()   exit: \n");
+   MessageInterface::ShowMessage("MeasurementManager::GetActiveEvents()   exit: \n");
 #endif
 
    return activeEvents;
@@ -1881,7 +2095,7 @@ const std::vector<RealArray>& MeasurementManager::CalculateDerivatives(
    #endif
 
    if ((Integer)models.size() > forMeasurement)
-   return models[forMeasurement]->CalculateMeasurementDerivatives(obj, wrt);
+      return models[forMeasurement]->CalculateMeasurementDerivatives(obj, wrt);
    else
       return adapters[forMeasurement]->CalculateMeasurementDerivatives(obj,wrt);
 }
@@ -1917,8 +2131,14 @@ bool MeasurementManager::WriteMeasurements()
             MessageInterface::ShowMessage("   Stream at <%p>\n",
                   idToStreamMap[measurements[i].uniqueID]);
          #endif
-         idToStreamMap[measurements[i].uniqueID]->
+         if (idToStreamMap[measurements[i].uniqueID])
+         {
+            idToStreamMap[measurements[i].uniqueID]->
                WriteMeasurement(&(measurements[i]));
+         }
+         else
+            throw MeasurementException("Error: No data file is defined in TrackingFileSet or MeasurementModel\n");
+
          retval = true;
       }
    }
@@ -1976,7 +2196,7 @@ const StringArray& MeasurementManager::GetStreamList()
 
 ///// TBD: Do we want something more generic here?
 //-----------------------------------------------------------------------------
-// const StringArray& GetRampTableDataStreamList()				// this function was added by TUAN NGUYEN for processing ramp tables
+// const StringArray& GetRampTableDataStreamList()            // this function was added by TUAN NGUYEN for processing ramp tables
 //-----------------------------------------------------------------------------
 /**
  * Retrieves a list of the ramp table data streams available to this
@@ -2196,7 +2416,7 @@ Integer MeasurementManager::FindModelForObservation()
       {
          MeasurementData theMeas = adapters[i]->GetMeasurement();
 
-   #ifdef DEBUG_MODEL_MAPPING
+         #ifdef DEBUG_MODEL_MAPPING
              MessageInterface::ShowMessage("   Current model type: %d\n",
                    theMeas.type);
          #endif
@@ -2346,7 +2566,7 @@ Integer MeasurementManager::AddMeasurement(TrackingDataAdapter* adapter)
 
 const std::vector<MeasurementModel*>& MeasurementManager::GetAllMeasurementModels()
 {
-	return models;
+   return models;
 }
 
 UnsignedInt MeasurementManager::GetCurrentRecordNumber()
@@ -2355,8 +2575,8 @@ UnsignedInt MeasurementManager::GetCurrentRecordNumber()
    for (std::vector<ObservationData>::iterator j = observations.begin(); j != observations.end(); ++j)
    {
       if (j == currentObs)
-		 break;
-	  ++i;
+       break;
+     ++i;
    }
 
    return i;

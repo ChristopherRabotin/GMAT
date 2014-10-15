@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -111,7 +111,7 @@ RFHardware & RFHardware::operator=(const RFHardware & rfh)
    {
       Sensor::operator=(rfh);
 
-      primaryAntenna 	 = rfh.primaryAntenna;
+      primaryAntenna     = rfh.primaryAntenna;
       primaryAntennaName = rfh.primaryAntennaName;
    }
 
@@ -217,8 +217,8 @@ Gmat::ParameterType RFHardware::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string RFHardware::GetParameterUnit(const Integer id) const
 {
-	if (PRIMARY_ANTENNA)
-		return "";					// It has no unit
+   if (PRIMARY_ANTENNA)
+      return "";               // It has no unit
 
    return Sensor::GetParameterUnit(id);
 }
@@ -415,10 +415,10 @@ bool RFHardware::HasRefObjectTypeArray()
 
 Gmat::ObjectType RFHardware::GetPropertyObjectType(const Integer id) const
 {
-	if (id == PRIMARY_ANTENNA)
-		return Gmat::ANTENNA;
-	else
-		return Gmat::UNKNOWN_OBJECT;
+   if (id == PRIMARY_ANTENNA)
+      return Gmat::ANTENNA;
+   else
+      return Gmat::UNKNOWN_OBJECT;
 }
 
 
@@ -441,10 +441,10 @@ bool RFHardware::Initialize()
 
    if (Sensor::Initialize())
    {
-   	if (primaryAntenna != NULL)
-   		retval = true;
-   	else
-   		MessageInterface::ShowMessage("Primary antenna not set for the %s \"%s\"\n",
+      if (primaryAntenna != NULL)
+         retval = true;
+      else
+         MessageInterface::ShowMessage("Primary antenna not set for the %s \"%s\"\n",
             typeName.c_str(), instanceName.c_str());
    }
 

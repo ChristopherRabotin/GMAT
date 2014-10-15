@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -363,6 +363,25 @@ bool ElementWrapper::SetArray(const Rmatrix &toValue)
 }
 
 //---------------------------------------------------------------------------
+// const Rvector& EvaluateRvector() const
+//---------------------------------------------------------------------------
+const Rvector& ElementWrapper::EvaluateRvector() const
+{
+   throw GmatBaseException(
+      "In ElementWrapper, EvaluateRvector() method not valid for wrapper of non-Rvector type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetRvector(const Rvector &toValue)
+//---------------------------------------------------------------------------
+bool ElementWrapper::SetRvector(const Rvector &toValue)
+{
+   throw GmatBaseException(
+      "In ElementWrapper, SetRvector() method not valid for wrapper of non-Rvector type.\n");
+}
+
+
+//---------------------------------------------------------------------------
 // std::string EvaluateString() const
 //---------------------------------------------------------------------------
 std::string ElementWrapper::EvaluateString() const
@@ -489,6 +508,7 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
    bool bval = false;
    std::string sval = "UnknownValue";
    Rmatrix rmat;
+   Rvector rvec;
    GmatBase *rhsObj = NULL;
    
    Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
@@ -547,6 +567,25 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
       case Gmat::RMATRIX_TYPE:
          rmat = rhsWrapper->EvaluateArray();
          break;
+      case Gmat::RVECTOR_TYPE:
+         rvec = rhsWrapper->EvaluateRvector();
+         #ifdef DEBUG_EW_SET_VALUE
+         MessageInterface::ShowMessage
+            ("   RVECTOR_TYPE rhs rvec = %s   Now making one row or column matrix\n",
+             rvec.ToString().c_str());
+         #endif
+         if (lhsWrapperType == Gmat::ARRAY_WT)
+         {
+            GmatBase *lhsArr = lhsWrapper->GetRefObject();
+            Integer numRows = lhsArr->GetIntegerParameter("NumRows");
+            Integer numCols = lhsArr->GetIntegerParameter("NumCols");
+            // Make it 1xN matrix if row > col
+            if (numRows > numCols)
+               rmat.MakeOneColumnMatrix(rvec);
+            else
+               rmat.MakeOneRowMatrix(rvec);
+         }
+         break;
       case Gmat::STRING_TYPE:
       case Gmat::ENUMERATION_TYPE:
       case Gmat::COLOR_TYPE:
@@ -568,10 +607,10 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
       #ifdef DEBUG_EW_SET_VALUE
       MessageInterface::ShowMessage
          ("   ==> Now assign \"%s\" to \"%s\", rhsObj=<%p>, sval='%s'\n",
-          rhs.c_str(), lhs.c_str(), rhsObj, sval.c_str());
+          lhs.c_str(), rhs.c_str(), rhsObj, sval.c_str());
       #endif
       
-      // Now assign to LHS
+      // Now assign to RHS
       switch (lhsDataType)
       {
       case Gmat::BOOLEAN_TYPE:
@@ -628,11 +667,26 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
          }
       case Gmat::RVECTOR_TYPE:
          {
+            bool valueSet = false;
             if (rhsDataType == Gmat::STRING_TYPE)
+            {
                lhsWrapper->SetString(rhs);
-            else
+               valueSet = true;
+            }
+            else if (rhsDataType == Gmat::RMATRIX_TYPE)
+            {
+               if (rmat.GetNumRows() == 1 || rmat.GetNumColumns() == 1)
+               {
+                  Rvector rvec = rmat.GetRowOrColumn();
+                  lhsWrapper->SetRvector(rvec);
+                  valueSet = true;
+               }
+            }
+            
+            if (!valueSet)
                throw GmatBaseException
                   ("ElementWrapper::SetValue() Cannot set \"" + lhs + "\" to " + rhs + "\"");
+            
             break;
          }
       case Gmat::REAL_TYPE:
@@ -664,8 +718,11 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             break;
          }
       case Gmat::RMATRIX_TYPE:
-         if (rhsDataType == Gmat::RMATRIX_TYPE)
+         if (rhsDataType == Gmat::RMATRIX_TYPE ||
+             rhsDataType == Gmat::RVECTOR_TYPE)
+         {
             lhsWrapper->SetArray(rmat);
+         }
          else if (rhsDataType == Gmat::REAL_TYPE)
          {
             // Setting scalar to 1x1 matrix is allowed

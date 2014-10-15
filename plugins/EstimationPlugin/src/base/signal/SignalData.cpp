@@ -46,11 +46,16 @@ SignalData::SignalData() :
    tTime                (21545.0),
    rTime                (21545.0),
 #endif
-   tSTM                 (true),
-   rSTM                 (true),
+   //tSTM                 (true),         ?? tSTM is a Rmatrix66   // made changes by TUAN NGUYEN
+   //rSTM                 (true),         ?? rSTM is a Rmatrix66   // made changes by TUAN NGUYEN
    tJ2kRotation         (true),
    rJ2kRotation         (true),
+   tDelay               (0.0),                      // made changes by TUAN NGUYEN
+   rDelay               (0.0),                      // made changes by TUAN NGUYEN
    solveLightTime       (true),
+   feasibility          (true),                     // made changes by TUAN NGUYEN
+   feasibilityReason    ("N"),                      // made changes by TUAN NGUYEN
+   feasibilityValue     (90.0),                     // made changes by TUAN NGUYEN
    next                 (NULL)
 {
 }
@@ -65,6 +70,15 @@ SignalData::SignalData() :
 //------------------------------------------------------------------------------
 SignalData::~SignalData()
 {
+   CleanUp();
+}
+
+
+void SignalData::CleanUp()
+{
+   correctionIDs.clear();
+   corrections.clear();
+   useCorrection.clear();
 }
 
 
@@ -112,12 +126,19 @@ SignalData::SignalData(const SignalData& sd) :
    rangeRateVecObs      (sd.rangeRateVecObs),
    tSTM                 (sd.tSTM),
    rSTM                 (sd.rSTM),
+   tSTMtm               (sd.tSTMtm),                    // made changes by TUAN NGUYEN
+   rSTMtm               (sd.rSTMtm),                    // made changes by TUAN NGUYEN
    tJ2kRotation         (sd.tJ2kRotation),
    rJ2kRotation         (sd.rJ2kRotation),
    correctionIDs        (sd.correctionIDs),
    corrections          (sd.corrections),
    useCorrection        (sd.useCorrection),
+   tDelay               (sd.tDelay),                    // made changes by TUAN NGUYEN
+   rDelay               (sd.rDelay),                    // made changes by TUAN NGUYEN
    solveLightTime       (sd.solveLightTime),
+   feasibility          (sd.feasibility),               // made changes by TUAN NGUYEN
+   feasibilityReason    (sd.feasibilityReason),         // made changes by TUAN NGUYEN
+   feasibilityValue     (sd.feasibilityValue),          // made changes by TUAN NGUYEN
    next                 (NULL)
 {
 }
@@ -172,12 +193,19 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rangeRateVecObs      = sd.rangeRateVecObs;
       tSTM                 = sd.tSTM;
       rSTM                 = sd.rSTM;
+      tSTMtm               = sd.tSTMtm;                  // made changes by TUAN NGUYEN
+      rSTMtm               = sd.rSTMtm;                  // made changes by TUAN NGUYEN
       tJ2kRotation         = sd.tJ2kRotation;
       rJ2kRotation         = sd.rJ2kRotation;
       correctionIDs        = sd.correctionIDs;
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;
+      tDelay               = sd.tDelay;                  // made changes by TUAN NGUYEN
+      rDelay               = sd.rDelay;                  // made changes by TUAN NGUYEN
       solveLightTime       = sd.solveLightTime;
+      feasibility          = sd.feasibility;             // made changes by TUAN NGUYEN
+      feasibilityReason    = sd.feasibilityReason;       // made changes by TUAN NGUYEN
+      feasibilityValue     = sd.feasibilityValue;        // made changes by TUAN NGUYEN
       next                 = NULL;
    }
 

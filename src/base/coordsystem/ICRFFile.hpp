@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -42,9 +42,11 @@ public:
 protected:
    static const Integer MAX_TABLE_SIZE;
 
-   /// name of data file (It contains the path to the file)
+   /// name of data file
    std::string          icrfFileName;
-
+   /// full path name of icrf file (It contains the path to the file)
+   std::string          icrfFileNameFullPath;
+   
    /// a table containing values of independent variable
    Real*                independence;
    /// a table containing dependent vectors

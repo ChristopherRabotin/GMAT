@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -52,7 +52,6 @@
 //#define DEBUG_ORBIT_PANEL_TEXT_CHANGE
 //#define DEBUG_ORBIT_PANEL_REFRESH
 //#define DEBUG_ORBIT_PANEL_SAVE
-//#define DEBUG_ORBIT_PANEL_CHECK_RANGE
 
 //------------------------------
 // event tables for wxWidgets
@@ -102,7 +101,7 @@ OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
    mIsEpochModified = false;
    canClose = true;
    dataChanged = false;
-   
+
    Create();
 }
 
@@ -409,8 +408,8 @@ void OrbitPanel::SaveData()
       //-----------------------------------------------------------
       if (mIsStateChanged)
       {
-         Rvector6 state;
-         bool retval = CheckState(state);
+         Rvector6 tempState;
+         bool retval = CheckState(tempState);
          #ifdef DEBUG_ORBIT_PANEL_SAVE
          MessageInterface::ShowMessage("OrbitPanel::SaveData() setting canClose to %s in state change part\n", retval? "true" : "false");
          #endif
@@ -419,7 +418,7 @@ void OrbitPanel::SaveData()
          if (retval)
          {
             // Build state uses new state type
-            BuildState(state);
+            BuildState(tempState);
             theSpacecraft->SetState(stateTypeStr, mCartState);
             ComputeTrueAnomaly(mCartState, stateTypeStr);
             theSpacecraft->SetAnomaly(mAnomalyType, mTrueAnomaly);
@@ -679,7 +678,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 1
    description1 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[0] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, 
                      wxT(""), wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit1"), 
@@ -687,7 +686,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 2
    description2 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[1] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit2"), 
@@ -695,7 +694,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 3
    description3 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[2] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit3"), 
@@ -703,7 +702,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 4
    description4 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[3] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit4"), 
@@ -711,7 +710,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 5    
    description5 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[4] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                                  wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit5"), 
@@ -719,7 +718,7 @@ void OrbitPanel::AddElements(wxWindow *parent)
    
    // Element 6
    description6 = new wxStaticText( elementsPanel, ID_TEXT, 
-                      wxT(""), wxDefaultPosition, wxSize(100,-1), 0 );
+                      wxT(""), wxDefaultPosition, wxSize(118,-1), 0 );
    textCtrl[5] = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""),
                                 wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    unit6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Unit6"), 
@@ -776,7 +775,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    
    #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
    MessageInterface::ShowMessage
-      ("OrbitPanel::OnComboBoxChange() coordSysStr=%s, stateTypeStr=%s\n",
+      ("\nOrbitPanel::OnComboBoxChange() coordSysStr=%s, stateTypeStr=%s\n",
        coordSysStr.c_str(), stateTypeStr.c_str());
    #endif
    
@@ -857,24 +856,31 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       MessageInterface::ShowMessage
          ("   OnComboBoxChange() mFromCoordSysStr=%s, mFromStateTypeStr=%s\n",
           mFromCoordSysStr.c_str(), mFromStateTypeStr.c_str());
-      MessageInterface::ShowMessage("------ epochChanged = %s, epochModified = %s, stateModified = %s\n",
+      MessageInterface::ShowMessage("   --- epochChanged = %s, epochModified = %s, stateModified = %s\n",
            (mIsEpochChanged? "true" : "false"), (mIsEpochModified? "true" : "false"),
            (IsStateModified()? "true" : "false"));
       #endif
       
       if (event.GetEventObject() == mCoordSysComboBox)
+      {
          mIsCoordSysChanged = true;
+         BuildValidStateTypes(coordSysStr);
+      }
       
       if (event.GetEventObject() == stateTypeComboBox)
       {
-         Rvector6 state;
+         Rvector6 tempState;
          mIsStateTypeChanged = true;
          bool retval = false;
          
          // If state modified by user, validate elements first
          if (IsStateModified())
          {
-            retval = CheckState(state);
+            #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
+            MessageInterface::ShowMessage
+               ("   State type modified, so calling CheckState()\n");
+            #endif
+            retval = CheckState(tempState);
             
             if (!retval)
             {
@@ -902,7 +908,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
 
                #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
                MessageInterface::ShowMessage
-                  ("   Computed TrueAnomaly =\n   [%12.10f]\n", mTrueAnomaly);
+                  ("   Computed TrueAnomaly = [%12.10f]\n", mTrueAnomaly);
                #endif
             }
             catch (BaseException &be)
@@ -915,7 +921,6 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
             }
          }
 
-
          BuildValidCoordinateSystemList(stateTypeStr);
       }
       
@@ -924,7 +929,9 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
          GetConfiguredObject(mCoordSysComboBox->GetValue().c_str());
       
-      BuildValidStateTypes();
+      // only want to build new state type list if we are changing the CS
+//      BuildValidStateTypes();
+
       
       try
       {
@@ -944,6 +951,11 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       {
          mCoordSysComboBox->SetValue(mFromCoordSysStr.c_str());
          stateTypeComboBox->SetValue(mFromStateTypeStr.c_str());
+         #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
+         MessageInterface::ShowMessage
+            ("---> ERROR displaying the state ... setting state to %s and coordinate system to %s\n",
+                  mFromStateTypeStr.c_str(),mFromCoordSysStr.c_str());
+         #endif
          mOutCoord = prevCoord;
          BuildValidStateTypes();
          return;
@@ -967,13 +979,13 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
           mAnomalyType.c_str());
       #endif
       
-      Rvector6 state;
+      Rvector6 tempState;
       bool retval = false;
       
       // If state modified by user, validate elements first
       if (IsStateModified())
       {
-         retval = CheckState(state);
+         retval = CheckState(tempState);
          
          if (!retval)
          {
@@ -1071,16 +1083,16 @@ void OrbitPanel::OnButton(wxCommandEvent& event)
 
    if (!orbitDlg.updateOrbit)
       return;
+   
    stateTypeComboBox->SetValue(wxT("Keplerian"));
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
 
-
-   Rvector6 state;
+   Rvector6 tempState;
    mIsStateTypeChanged = true;
    bool retval = false;
 
-   retval = CheckState(state);
-
+   retval = CheckState(tempState);
+   
    CoordinateSystem *prevCoord = mOutCoord;
 
    if (retval)
@@ -1441,7 +1453,7 @@ void OrbitPanel::DisplayState()
 
 
 //------------------------------------------------------------------------------
-// void BuildValidStateTypes()
+// void BuildValidStateTypes(const std::string &forCS = "mOutCoord")
 //------------------------------------------------------------------------------
 /**
  * Builds a valid list of state types to be displayed in the combo box, based
@@ -1449,29 +1461,53 @@ void OrbitPanel::DisplayState()
  * are valid when the origin of the coordinate system is a celestial body.
  */
 //------------------------------------------------------------------------------
-void OrbitPanel::BuildValidStateTypes()
+void OrbitPanel::BuildValidStateTypes(const std::string &forCS)
 {
    bool rebuild = false;
    if (mStateTypeNames.empty())
        rebuild = true;
+
+   #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+      std::string      currentStateType = stateTypeComboBox->GetValue().c_str();
+      MessageInterface::ShowMessage
+         ("**** In BuildValidStateTypes (%s) --------->  mFromStateTypeStr=%s, currentStateType=%s, mOutCoord = %s\n",
+               forCS.c_str(), mFromStateTypeStr.c_str(), currentStateType.c_str(), mOutCoord->GetName().c_str());
+   #endif
    
    // get the origin for the output coordinate system
-   std::string originName = mOutCoord->GetStringParameter("Origin");
-   SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
+   std::string originName;
+   CoordinateSystem *theCS = mOutCoord;
+   if (forCS != "mOutCoord")
+      theCS = (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(forCS);
+
+   originName              = theCS->GetStringParameter("Origin");
+   SpacePoint  *origin     = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(
+                              originName);
+   bool        originIsCB  = origin->IsOfType(Gmat::CELESTIAL_BODY);
+   bool        csIsFixed   = theCS->AreAxesOfType("BodyFixedAxes");
    
    #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage
       ("   BuildValidStateTypes() origin=%s, addr=%d, mShowFullStateTypeList=%d\n",
        originName.c_str(), origin, mShowFullStateTypeList);
+   MessageInterface::ShowMessage("   originIsCB = %s, csIsFixed = %s\n",
+         (originIsCB? "true" : "false"), (csIsFixed? "true" : "false"));
    #endif
    
-   if (origin->IsOfType(Gmat::CELESTIAL_BODY) && !mShowFullStateTypeList)
-      rebuild = true;
-   else if (!origin->IsOfType(Gmat::CELESTIAL_BODY) && mShowFullStateTypeList)
+   // We need to rebuild every time now that we are also checking for
+   // BodyFixedAxes requirement
+//   if (originIsCB && !mShowFullStateTypeList)
+//      rebuild = true;
+//   else if (!originIsCB && mShowFullStateTypeList)
       rebuild = true;
    
    if (!rebuild)
+   {
+      #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+      MessageInterface::ShowMessage("   Not Building new state type list so just returning\n");
+      #endif
       return;
+   }
    
    #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage("   Building new state type list...\n");
@@ -1484,16 +1520,25 @@ void OrbitPanel::BuildValidStateTypes()
    // get state type list from the base code (StateConverter)
    const std::string *stateTypeList = StateConversionUtil::GetStateTypeList();
    typeCount = StateConversionUtil::GetTypeCount();
-   for (int i = 0; i<typeCount; i++)
-      mStateTypeNames.push_back(stateTypeList[i]);
+   for (int ii = 0; ii<typeCount; ii++)
+      mStateTypeNames.push_back(stateTypeList[ii]);
    
    // fill state type combobox
-   if (origin->IsOfType(Gmat::CELESTIAL_BODY))
+   if (originIsCB)
    {         
       for (int i = 0; i<typeCount; i++)
-         stateTypeComboBox->Append(wxString(stateTypeList[i].c_str()));
-      
+      {
+         bool needsFixed = StateConversionUtil::RequiresFixedCoordinateSystem(stateTypeList[i]);
+         if (!needsFixed || (needsFixed && csIsFixed))
+            stateTypeComboBox->Append(wxString(stateTypeList[i].c_str()));
+      }
       mShowFullStateTypeList = true;
+
+      #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+      MessageInterface::ShowMessage
+         ("   In CB origin section, Setting state type to %s\n",
+          mFromStateTypeStr.c_str());
+      #endif
       stateTypeComboBox->SetValue(wxT(mFromStateTypeStr.c_str()));
    }
    else
@@ -1504,7 +1549,11 @@ void OrbitPanel::BuildValidStateTypes()
       for (Integer ii = 0; ii < typeCount; ii++)
       {
          if (!(StateConversionUtil::RequiresCelestialBodyOrigin(stateTypeList[ii])))
-            stateTypeComboBox->Append(wxString(stateTypeList[ii].c_str()));
+         {
+            bool needsFixed = StateConversionUtil::RequiresFixedCoordinateSystem(stateTypeList[ii]);
+            if (!needsFixed || (needsFixed && csIsFixed))
+               stateTypeComboBox->Append(wxString(stateTypeList[ii].c_str()));
+         }
       }
       
       mShowFullStateTypeList = false;
@@ -1513,18 +1562,28 @@ void OrbitPanel::BuildValidStateTypes()
            (mFromStateTypeStr == mStateTypeNames[StateConversionUtil::MOD_KEPLERIAN]))
       {
          // default to Cartesian
+         #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+         MessageInterface::ShowMessage
+            ("   In NON-CB origin section, Setting state type to Cartesian because Kepl\n",
+             mFromStateTypeStr.c_str());
+         #endif
          stateTypeComboBox->
             SetValue(wxT(mStateTypeNames[StateConversionUtil::CARTESIAN]).c_str());
       }
       else
       {
+         #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
+         MessageInterface::ShowMessage
+            ("   In NON-CB origin section, Setting state type to %s\n",
+             mFromStateTypeStr.c_str());
+         #endif
          stateTypeComboBox->SetValue(wxT(mFromStateTypeStr.c_str()));
       }
    }
    
    #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage
-      ("   BuildValidStateTypes() Setting state type to %s\n",
+      ("****** BuildValidStateTypes() Setting state type to %s\n",
        mFromStateTypeStr.c_str());
    #endif
 }
@@ -1544,7 +1603,7 @@ void OrbitPanel::BuildValidStateTypes()
 //------------------------------------------------------------------------------
 void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
 {
-   bool reqCBOnly = StateConversionUtil::RequiresCelestialBodyOrigin(forStateType);
+   bool reqCBOnly      = StateConversionUtil::RequiresCelestialBodyOrigin(forStateType);
    bool reqFixedCSOnly = StateConversionUtil::RequiresFixedCoordinateSystem(forStateType);
    #ifdef DEBUG_ORBIT_PANEL_REFRESH
       MessageInterface::ShowMessage("Entering BuildValidCoordinateSystemList with stateType = %s\n",
@@ -1579,7 +1638,8 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
    {
       // If current selection is BodyFixed CS, show it; otherwise show the
       // first BodyFixed CS from the list
-      mCoordSysComboBox->Append(theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes"));
+      mCoordSysComboBox->Append(
+            theGuiManager->GetCoordSystemWithAxesOf("BodyFixedAxes", reqCBOnly));
       if (mCoordSysComboBox->FindString(currentCS.c_str(), true) == wxNOT_FOUND)
          newCS = mCoordSysComboBox->GetString(0);
       else
@@ -1595,8 +1655,21 @@ void OrbitPanel::BuildValidCoordinateSystemList(const std::string &forStateType)
          tmpCS      = (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordSystemNames.at(ii));
          originName = tmpCS->GetStringParameter("Origin");
          origin     = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(originName);
-         if ((origin->IsOfType("CelestialBody")) && !(tmpCS->UsesSpacecraft(theSpacecraft->GetName()))) // add it to the list
-            mCoordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
+         if ((origin->IsOfType("CelestialBody")) && !(tmpCS->UsesSpacecraft(theSpacecraft->GetName())))
+         {
+            #ifdef DEBUG_ORBIT_PANEL_REFRESH
+               MessageInterface::ShowMessage("   cs %s is %sof type BodyFixed\n",
+                     coordSystemNames[ii].c_str(), ((tmpCS->AreAxesOfType("BodyFixedAxes"))? "" : "NOT ") );
+            #endif
+            // add it to the list, if appropriate
+            if (!reqFixedCSOnly || (reqFixedCSOnly && tmpCS->AreAxesOfType("BodyFixedAxes")))
+            {
+               #ifdef DEBUG_ORBIT_PANEL_REFRESH
+                  MessageInterface::ShowMessage("   adding %s to combo box\n", coordSystemNames[ii].c_str());
+               #endif
+               mCoordSysComboBox->Append(wxString(coordSystemNames[ii].c_str()));
+            }
+         }
       }
       mCoordSysComboBox->SetValue(newCS.c_str());
    }
@@ -1792,50 +1865,67 @@ void OrbitPanel::ResetStateFlags(bool discardEdits)
 
 
 //------------------------------------------------------------------------------
-// bool CheckState(Rvector6 &state)
+// bool CheckState(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckState(Rvector6 &state)
+bool OrbitPanel::CheckState(Rvector6 &outState)
 {
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckState, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   current state type = %s\n", mFromStateTypeStr.c_str());
+   MessageInterface::ShowMessage
+      ("OrbitPanel::CheckState() entered, current state type = %s\n", mFromStateTypeStr.c_str());
    #endif
+   
+   // Get state string values from the TextCtrl
    for (int i=0; i<6; i++)
-      mElements[i] = textCtrl[i]->GetValue();
+      mElementStrs[i] = textCtrl[i]->GetValue();
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   #endif
    
    wxString stateTypeStr  = stateTypeComboBox->GetValue().c_str();
    bool retval = false;
    
    if (mFromStateTypeStr == "Cartesian")
-      retval = CheckCartesian(state);
+      retval = CheckCartesian(outState);
    else if (mFromStateTypeStr == "Keplerian")
-      retval = CheckKeplerian(state);
+      retval = CheckKeplerian(outState);
    else if (mFromStateTypeStr == "ModifiedKeplerian")
-      retval = CheckModKeplerian(state);
-   else if (mFromStateTypeStr == "SphericalAZFPA" ||
-            mFromStateTypeStr == "SphericalRADEC")
-      retval = CheckSpherical(state, stateTypeStr);
+      retval = CheckModKeplerian(outState);
+   else if (mFromStateTypeStr == "SphericalAZFPA")
+      retval = CheckSphericalAZFPA(outState);
+   else if (mFromStateTypeStr == "SphericalRADEC")
+      retval = CheckSphericalRADEC(outState);
+   //else if (mFromStateTypeStr == "SphericalAZFPA" ||
+   //         mFromStateTypeStr == "SphericalRADEC")
+   //retval = CheckSpherical(outState, stateTypeStr);
    else if (mFromStateTypeStr == "Equinoctial")
-      retval = CheckEquinoctial(state);
-   
+      retval = CheckEquinoctial(outState);
+   else if (mFromStateTypeStr == "ModifiedEquinoctial")
+      retval = CheckModifiedEquinoctial(outState);
+   else if (mFromStateTypeStr == "AlternateEquinoctial")
+      retval = CheckAlternateEquinoctial(outState);
+   else if (mFromStateTypeStr == "Delaunay")
+      retval = CheckDelaunay(outState);
+   else if (mFromStateTypeStr == "Planetodetic")
+      retval = CheckPlanetodetic(outState);
    else if (mFromStateTypeStr == "OutgoingAsymptote") // YK
-      retval = CheckOutgoingAsymptote(state);
+      retval = CheckOutgoingAsymptote(outState);
    else if (mFromStateTypeStr == "IncomingAsymptote") 
-      retval = CheckIncomingAsymptote(state);
+      retval = CheckIncomingAsymptote(outState);
    else if (mFromStateTypeStr == "BrouwerMeanShort") 
-      retval = CheckOutgoingAsymptote(state);
+      retval = CheckBrouwerMeanShort(outState);
    else if (mFromStateTypeStr == "BrouwerMeanLong") 
-      retval = CheckIncomingAsymptote(state);
+      retval = CheckBrouwerMeanLong(outState);
 
    else
    {
@@ -1845,73 +1935,89 @@ bool OrbitPanel::CheckState(Rvector6 &state)
    }
    
    if (!retval)
+   {
+      #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+      MessageInterface::ShowMessage
+         ("OrbitPanel::CheckState() returning false, outState = %s", outState.ToString().c_str());
+      #endif
       return retval;
+   }
    
-   state = mOutState;
+   outState = mOutState;
    
    // Copy only modified fields
    for (int i=0; i<6; i++)
    {
       if (mIsStateModified[i])
-         state[i] = atof(mElements[i].c_str());
+         outState[i] = atof(mElementStrs[i].c_str());
    }
+   
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckState, LEAVING, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   and current state type = %s\n", mFromStateTypeStr.c_str());
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("   and current state type = %s\n", mFromStateTypeStr.c_str());
+   MessageInterface::ShowMessage("OrbitPanel::CheckState() returning %d\n", retval);
    #endif
    
    return retval;
-   
 }
 
 
 //------------------------------------------------------------------------------
-// bool CheckCartesian(Rvector6 &state)
+// bool CheckCartesian(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed Cartesian state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckCartesian(Rvector6 &state)
+bool OrbitPanel::CheckCartesian(Rvector6 &outState)
 {
    bool retval = true;
-   std::string cartesianNames[6];
-   cartesianNames[0] = "X";
-   cartesianNames[1] = "Y";
-   cartesianNames[2] = "Z";
-   cartesianNames[3] = "VX";
-   cartesianNames[4] = "VY";
-   cartesianNames[5] = "VZ";
-
+   StringArray labels = theSpacecraft->GetStateElementLabels("Cartesian");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckKeplerian() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "X";
+   labels[1] = "Y";
+   labels[2] = "Z";
+   labels[3] = "VX";
+   labels[4] = "VY";
+   labels[5] = "VZ";
+   #endif
+   
    for (unsigned int ii = 0; ii < 6; ii++)
    {
-      if (!theScPanel->CheckReal(state[ii], mElements[ii], cartesianNames[ii], "Real Number"))
-         retval = false;
-      else
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
          try
          {
-            StateConversionUtil::ValidateValue(cartesianNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat,
+                                               gg->GetDataPrecision());
          }
          catch (BaseException &ue)
          {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
             retval   = false;
             canClose = false;
          }
       }
+      else
+         retval = false;
    }
-
    
-   
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
    MessageInterface::ShowMessage("CheckCartesian() returning %d\n", retval);
    #endif
    
@@ -1920,34 +2026,44 @@ bool OrbitPanel::CheckCartesian(Rvector6 &state)
 
 
 //------------------------------------------------------------------------------
-// bool CheckKeplerian(Rvector6 &state)
+// bool CheckKeplerian(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed Keplerian state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckKeplerian(Rvector6 &state)
+bool OrbitPanel::CheckKeplerian(Rvector6 &outState)
 {
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("Keplerian");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckKeplerian() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
    mAnomalyType = anomalyComboBox->GetValue().c_str();
    // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
    mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
 
-   bool retval = true;
    
-   if (theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number"))
+   if (theScPanel->CheckReal(outState[0], mElementStrs[0], "SMA", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("SMA", state[0], errMsgFormat, gg->GetDataPrecision(), "ECC", state[1]);
+         StateConversionUtil::ValidateValue("SMA", outState[0], errMsgFormat, gg->GetDataPrecision(), "ECC", outState[1]);
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -1957,16 +2073,15 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[1], mElements[1], "ECC", "Real Number"))
+   if (theScPanel->CheckReal(outState[1], mElementStrs[1], "ECC", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("ECC", state[1], errMsgFormat, gg->GetDataPrecision(), "SMA", state[0]);
+         StateConversionUtil::ValidateValue("ECC", outState[1], errMsgFormat, gg->GetDataPrecision(), "SMA", outState[0]);
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -1976,17 +2091,15 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   
-   if (theScPanel->CheckReal(state[2], mElements[2], "INC", "Real Number"))
+   if (theScPanel->CheckReal(outState[2], mElementStrs[2], "INC", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("INC", state[2], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("INC", outState[2], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -1996,16 +2109,15 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[3], mElements[3], "RAAN", "Real Number"))
+   if (theScPanel->CheckReal(outState[3], mElementStrs[3], "RAAN", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("RAAN", state[3], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("RAAN", outState[3], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2015,16 +2127,15 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[4], mElements[4], "AOP", "Real Number"))
+   if (theScPanel->CheckReal(outState[4], mElementStrs[4], "AOP", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("AOP", state[4], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("AOP", outState[4], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2035,27 +2146,26 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
    }
    
    // check Anomaly
-   if (theScPanel->CheckReal(state[5], mElements[5], mAnomalyType, "Real Number"))
+   if (theScPanel->CheckReal(outState[5], mElementStrs[5], mAnomalyType, "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("TA", state[5], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("TA", outState[5], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
-      mAnomaly = state[5];
+      mAnomaly = outState[5];
    }
    else
    {
       retval = false;
    }
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
    MessageInterface::ShowMessage("CheckKeplerian() returning %d\n", retval);
    #endif
    
@@ -2064,41 +2174,48 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
 
 
 //------------------------------------------------------------------------------
-// bool CheckModKeplerian(Rvector6 &state)
+// bool CheckModKeplerian(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed Modified Keplerian state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
+bool OrbitPanel::CheckModKeplerian(Rvector6 &outState)
 {
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("ModifiedKeplerian");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckKeplerian() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
    mAnomalyType = anomalyComboBox->GetValue().c_str();
    // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
    mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
-
-   bool retval = true;
+   
    
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckModKeplerian, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
    #endif
-
-   if (theScPanel->CheckReal(state[0], mElements[0], "RadPer", "Real Number"))
+   
+   if (theScPanel->CheckReal(outState[0], mElementStrs[0], "RadPer", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("RadPer", state[0], errMsgFormat, gg->GetDataPrecision(), "RadApo", state[1]);
+         StateConversionUtil::ValidateValue("RadPer", outState[0], errMsgFormat, gg->GetDataPrecision(), "RadApo", outState[1]);
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2108,16 +2225,15 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[1], mElements[1], "RadApo", "Real Number"))
+   if (theScPanel->CheckReal(outState[1], mElementStrs[1], "RadApo", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("RadApo", state[1], errMsgFormat, gg->GetDataPrecision(), "RadPer", state[0]);
+         StateConversionUtil::ValidateValue("RadApo", outState[1], errMsgFormat, gg->GetDataPrecision(), "RadPer", outState[0]);
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2127,16 +2243,15 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[2], mElements[2], "INC", "Real Number"))
+   if (theScPanel->CheckReal(outState[2], mElementStrs[2], "INC", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("INC", state[2], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("INC", outState[2], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2146,16 +2261,15 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[3], mElements[3], "RAAN", "Real Number"))
+   if (theScPanel->CheckReal(outState[3], mElementStrs[3], "RAAN", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("RAAN", state[3], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("RAAN", outState[3], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2165,16 +2279,15 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[4], mElements[4], "AOP", "Real Number"))
+   if (theScPanel->CheckReal(outState[4], mElementStrs[4], "AOP", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("AOP", state[4], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("AOP", outState[4], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2185,64 +2298,178 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
    }
    
    // check Anomaly
-   if (theScPanel->CheckReal(state[5], mElements[5], mAnomalyType, "Real Number"))
+   if (theScPanel->CheckReal(outState[5], mElementStrs[5], mAnomalyType, "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("TA", state[5], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("TA", outState[5], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
       #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
          MessageInterface::ShowMessage(
                "OrbitPanel::CheckModKeplerian, about to set anomaly with %12.10f  %12.10f  %12.10f  %s\n",
-               state[0], state[1], state[5], mAnomalyType.c_str());
+               outState[0], outState[1], outState[5], mAnomalyType.c_str());
       #endif
-         mAnomaly = state[5];
+      mAnomaly = outState[5];
    }
    else
    {
       retval = false;
    }
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
    MessageInterface::ShowMessage("CheckModKeplerian() returning %d\n", retval);
    #endif
    
    return retval;
 }
 
-
 //------------------------------------------------------------------------------
-// bool CheckSpherical(Rvector6 &state, const wxString &stateType)
+// bool CheckSphericalAZFPA(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
- * Checks the currently displayed Spherical state for validity.
+ * Checks the currently displayed SphericalAZFPA state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
+bool OrbitPanel::CheckSphericalAZFPA(Rvector6 &outState)
 {
    bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("SphericalAZFPA");
    
-   if (theScPanel->CheckReal(state[0], mElements[0], "RMAG", "Real Number"))
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckKeplerian() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+      else
+         retval = false;
+   }
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("CheckSphericalAZFPA() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckSphericalRADEC(Rvector6 &outState)
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed SphericalRADEC state for validity.
+ *
+ * @param <outState> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckSphericalRADEC(Rvector6 &outState)
+{
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("SphericalRADEC");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckKeplerian() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+      else
+         retval = false;
+   }
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("CheckSphericalRADEC() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+
+#if 0
+//------------------------------------------------------------------------------
+// bool CheckSpherical(Rvector6 &outState, const wxString &stateType)
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed Spherical state for validity.
+ *
+ * @param <outState> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckSpherical(Rvector6 &outState, const wxString &stateType)
+{
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckKeplerian() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   if (theScPanel->CheckReal(outState[0], mElementStrs[0], "RMAG", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("RMAG", state[0], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("RMAG", outState[0], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2252,16 +2479,15 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[1], mElements[1], "RA", "Real Number"))
+   if (theScPanel->CheckReal(outState[1], mElementStrs[1], "RA", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("RA", state[1], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("RA", outState[1], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2271,16 +2497,15 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[2], mElements[2], "DEC", "Real Number"))
+   if (theScPanel->CheckReal(outState[2], mElementStrs[2], "DEC", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("DEC", state[2], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("DEC", outState[2], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2290,16 +2515,15 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[3], mElements[3], "VMAG", "Real Number"))
+   if (theScPanel->CheckReal(outState[3], mElementStrs[3], "VMAG", "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue("VMAG", state[3], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue("VMAG", outState[3], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2322,16 +2546,15 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       label6 = "DECV";
    }
    
-   if (theScPanel->CheckReal(state[4], mElements[4], label5, "Real Number"))
+   if (theScPanel->CheckReal(outState[4], mElementStrs[4], label5, "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue(label5, state[4], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue(label5, outState[4], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2341,16 +2564,15 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       retval = false;
    }
    
-   if (theScPanel->CheckReal(state[5], mElements[5], label6, "Real Number"))
+   if (theScPanel->CheckReal(outState[5], mElementStrs[5], label6, "Real Number"))
    {
       try
       {
-         StateConversionUtil::ValidateValue(label6, state[5], errMsgFormat, gg->GetDataPrecision());
+         StateConversionUtil::ValidateValue(label6, outState[5], errMsgFormat, gg->GetDataPrecision());
       }
       catch (BaseException &ue)
       {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+         MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
          retval   = false;
          canClose = false;
       }
@@ -2360,144 +2582,82 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
       retval = false;
    }
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
    MessageInterface::ShowMessage("CheckSpherical() returning %d\n", retval);
    #endif
    
    return retval;
 }
+#endif
+
 
 
 //------------------------------------------------------------------------------
-// bool CheckEquinoctial(Rvector6 &state)
+// bool CheckEquinoctial(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed Equinoctial state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
+bool OrbitPanel::CheckEquinoctial(Rvector6 &outState)
 {
    bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("Equinoctial");
    
-   if (theScPanel->CheckReal(state[0], mElements[0], "SMA", "Real Number"))
-   {
-      try
-      {
-         StateConversionUtil::ValidateValue("SMA", state[0], errMsgFormat, gg->GetDataPrecision());
-      }
-      catch (BaseException &ue)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
-         retval   = false;
-         canClose = false;
-      }
-   }
-   else
-   {
-      retval = false;
-   }
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckEquinoctial() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
    
-   if (theScPanel->CheckReal(state[1], mElements[1], "EquinoctialH", "Real Number"))
-   {
-      try
-      {
-         StateConversionUtil::ValidateValue("EquinoctialH", state[1], errMsgFormat, gg->GetDataPrecision(), "EquinoctialK",state[2]);
-      }
-      catch (BaseException &ue)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
-         retval   = false;
-         canClose = false;
-      }
-   }
-   else
-   {
-         retval =  false;
-   }
+
+   #if 0
+   std::string labels[6];
+   labels[0] = "SMA";
+   labels[1] = "EquinoctialH";
+   labels[2] = "EquinoctialK";
+   labels[3] = "EquinoctialP";
+   labels[4] = "EquinoctialQ";
+   labels[5] = "MLONG";
+   #endif
    
-   if (theScPanel->CheckReal(state[2], mElements[2], "EquinoctialK", "Real Number"))
+   for (unsigned int ii = 0; ii < 6; ii++)
    {
-      try
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
-         StateConversionUtil::ValidateValue("EquinoctialK", state[2], errMsgFormat, gg->GetDataPrecision(), "EquinoctialH",state[1]);
+         try
+         {
+            // More checking is needed for EqunoctialH and EqunoctialK
+            if (labels[ii] == "EquinoctialH")
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[2], outState[2]);
+            else if (labels[ii] == "EquinoctialK")
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[1], outState[1]);
+            else
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
       }
-      catch (BaseException &ue)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
-         retval   = false;
-         canClose = false;
-      }
-   }
-   else
-   {
-      retval = false;
+      else
+         retval = false;
    }
    
-   if (theScPanel->CheckReal(state[3], mElements[3], "EquinoctialP", "Real Number"))
-   {
-      try
-      {
-         StateConversionUtil::ValidateValue("EquinoctialP", state[3], errMsgFormat, gg->GetDataPrecision());
-      }
-      catch (BaseException &ue)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
-         retval   = false;
-         canClose = false;
-      }
-   }
-   else
-   {
-      retval = false;
-   }
-   
-   if (theScPanel->CheckReal(state[4], mElements[4], "EquinoctialQ", "Real Number"))
-   {
-      try
-      {
-         StateConversionUtil::ValidateValue("EquinoctialQ", state[4], errMsgFormat, gg->GetDataPrecision());
-      }
-      catch (BaseException &ue)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
-         retval   = false;
-         canClose = false;
-      }
-   }
-   else
-   {
-      retval = false;
-   }
-   
-   if (theScPanel->CheckReal(state[5], mElements[5], "Mean Longitude", "Real Number"))
-   {
-      try
-      {
-         StateConversionUtil::ValidateValue("EquinoctialQ", state[5], errMsgFormat, gg->GetDataPrecision());
-      }
-      catch (BaseException &ue)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, ue.GetFullMessage() + "\n");
-         retval   = false;
-         canClose = false;
-      }
-   }
-   else
-   {
-      retval = false;
-   }
-   
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
    MessageInterface::ShowMessage("CheckEquinoctial() returning %d\n", retval);
    #endif
    
@@ -2505,61 +2665,340 @@ bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
 }
 
 //------------------------------------------------------------------------------
-// bool CheckOutgoingAsymptote(Rvector6 &state) by YK
+// bool CheckModifiedEquinoctial(Rvector6 &outState)
 //------------------------------------------------------------------------------
 /**
- * Checks the currently displayed OutgoingAsymptote state for validity.
+ * Checks the currently displayed ModifiedEquinoctial state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckOutgoingAsymptote(Rvector6 &state)
+bool OrbitPanel::CheckModifiedEquinoctial(Rvector6 &outState)
 {
-	
    bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("ModifiedEquinoctial");
    
-   std::string ElementNames[6];
-   ElementNames[0] = "RadPer";
-   ElementNames[1] = "C3Energy";
-   ElementNames[2] = "OutgoingRHA";
-   ElementNames[3] = "OutgoingDHA";
-   ElementNames[4] = "OutgoingBVAZI";
-   ElementNames[5] = "TA";
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckModifiedEquinoctial() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "SemiLatusRectum";
+   labels[1] = "ModEquinoctialF";
+   labels[2] = "ModEquinoctialG";
+   labels[3] = "ModEquinoctialH";
+   labels[4] = "ModEquinoctialK";
+   labels[5] = "TLONG";
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
+      {
+         try
+         {
+            // More checking is needed for ModEqunoctialH and ModEqunoctialK
+            if (labels[ii] == "ModEquinoctialH")
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[4], outState[4]);
+            else if (labels[ii] == "ModEquinoctialK")
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[3], outState[3]);
+            else
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+      else
+         retval = false;
+   }
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("CheckModifiedEquinoctial() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckAlternateEquinoctial(Rvector6 &outState)
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed AlternateEquinoctial state for validity.
+ *
+ * @param <outState> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckAlternateEquinoctial(Rvector6 &outState)
+{
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("AlternateEquinoctial");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckAlternateEquinoctial() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
+      {
+         try
+         {
+            // More checking is needed for EqunoctialH and EqunoctialK
+            if (labels[ii] == "EquinoctialH")
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[2], outState[2]);
+            else if (labels[ii] == "EquinoctialK")
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[1], outState[1]);
+            else
+               StateConversionUtil::ValidateValue
+                  (labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+      else
+         retval = false;
+   }
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("CheckAlternateEquinoctial() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckDelaunay(Rvector6 &outState)
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed Delaunay state for validity.
+ *
+ * @param <outState> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckDelaunay(Rvector6 &outState)
+{
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("Delaunay");
+   
+ 	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckDelaunay() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+
+   #if 0
+   std::string labels[6];
+   labels[0] = "Delaunayl";
+   labels[1] = "Delaunayg";
+   labels[2] = "Delaunayh";
+   labels[3] = "DelaunayL";
+   labels[4] = "DelaunayG";
+   labels[5] = "DelaunayH";
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
+      {
+         #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+            MessageInterface::ShowMessage("OrbitPanel::CheckDelaunay() : label = %s, outState[%d] = %12.10f\n",
+                  labels[ii].c_str(), ii, outState[ii]);
+         #endif
+         try
+         {
+            if (ii == 4) // Do additional check for L and G
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[3], outState[3]);
+            }
+            else if (ii == 5)  // Do additional check for H and G
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision(), labels[4], outState[4]);
+            }
+            else
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+            }
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+      else
+         retval = false;
+   }
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("CheckDelaunay() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckPlanetodetic(Rvector6 &outState)
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed Planetodetic state for validity.
+ *
+ * @param <outState> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckPlanetodetic(Rvector6 &outState)
+{
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("Planetodetic");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckPlanetodetic() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "PlanetodeticRMAG";
+   labels[1] = "PlanetodeticLON";
+   labels[2] = "PlanetodeticLAT";
+   labels[3] = "PlanetodeticVMAG";
+   labels[4] = "PlanetodeticAZI";
+   labels[5] = "PlanetodeticHFPA";
+   #endif
+   
+   for (unsigned int ii = 0; ii < 6; ii++)
+   {
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
+      {
+         try
+         {
+            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+         }
+         catch (BaseException &ue)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            retval   = false;
+            canClose = false;
+         }
+      }
+      else
+         retval = false;
+   }
+   
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
+   MessageInterface::ShowMessage("CheckPlanetodetic() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool CheckOutgoingAsymptote(Rvector6 &outState) by YK
+//------------------------------------------------------------------------------
+/**
+ * Checks the currently displayed OutgoingAsymptote state for validity.
+ *
+ * @param <outState> output state
+ *
+ * @return true if state is valid; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckOutgoingAsymptote(Rvector6 &outState)
+{
+   bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("OutgoingAsymptote");
+   
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckOutgoingAsymptote() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "RadPer";
+   labels[1] = "C3Energy";
+   labels[2] = "OutgoingRHA";
+   labels[3] = "OutgoingDHA";
+   labels[4] = "OutgoingBVAZI";
+   labels[5] = "TA";
+   #endif
+   
    mAnomalyType = anomalyComboBox->GetValue().c_str();
    // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
    mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
 
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckOutgoingAsymptote, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
    #endif
    
    for (unsigned int ii = 0; ii < 6; ii++)
    {
-      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
-         retval = false;
-      else
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
          try
          {
-            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
          }
          catch (BaseException &ue)
          {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
             retval   = false;
             canClose = false;
          }
       }
+      else
+         retval = false;
    }
-
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
    MessageInterface::ShowMessage("CheckOutgoingAsymptote() returning %d\n", retval);
    #endif
    
@@ -2567,61 +3006,74 @@ bool OrbitPanel::CheckOutgoingAsymptote(Rvector6 &state)
 }
 
 //------------------------------------------------------------------------------
-// bool CheckIncomingAsymptote(Rvector6 &state) by YK
+// bool CheckIncomingAsymptote(Rvector6 &outState) by YK
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed IncomingAsymptote state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
- * @return true if state is valid; false otherwise
+ * @return true if outState is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckIncomingAsymptote(Rvector6 &state)
+bool OrbitPanel::CheckIncomingAsymptote(Rvector6 &outState)
 {
-	
    bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("IncomingAsymptote");
    
-   std::string ElementNames[6];
-   ElementNames[0] = "RadPer";
-   ElementNames[1] = "C3Energy";
-   ElementNames[2] = "IncomingRHA";
-   ElementNames[3] = "IncomingDHA";
-   ElementNames[4] = "IncomingBVAZI";
-   ElementNames[5] = "TA";
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckIncomingAsymptote() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "RadPer";
+   labels[1] = "C3Energy";
+   labels[2] = "IncomingRHA";
+   labels[3] = "IncomingDHA";
+   labels[4] = "IncomingBVAZI";
+   labels[5] = "TA";
+   #endif
+   
    mAnomalyType = anomalyComboBox->GetValue().c_str();
    // ****** NOTE: For now, since only "TA" is allowed, GetValue will return "".  Reset to "TA" ******
    mAnomalyType = mAnomalyTypeNames[StateConversionUtil::TA];
-
+   
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckIncomingAsymptote, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
    #endif
    
    for (unsigned int ii = 0; ii < 6; ii++)
    {
-      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
-         retval = false;
-      else
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
          try
          {
-            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+            #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+            MessageInterface::ShowMessage
+               ("   CheckIncomingAsymptote() calling StateConversionUtil::ValidateValue() "
+                "with label: %s, value: %.10f\n", labels[ii].c_str(), outState[ii]);
+            #endif
+            StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
          }
          catch (BaseException &ue)
          {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
             retval   = false;
             canClose = false;
          }
       }
+      else
+         retval = false;
    }
-
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
    MessageInterface::ShowMessage("CheckIncomingAsymptote() returning %d\n", retval);
    #endif
    
@@ -2630,61 +3082,76 @@ bool OrbitPanel::CheckIncomingAsymptote(Rvector6 &state)
 
 
 //------------------------------------------------------------------------------
-// bool CheckBrouwerMeanShort(Rvector6 &state) by YK
+// bool CheckBrouwerMeanShort(Rvector6 &outState) by YK
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed BrouwerMeanShort state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckBrouwerMeanShort(Rvector6 &state)
+bool OrbitPanel::CheckBrouwerMeanShort(Rvector6 &outState)
 {
-	
    bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("BrouwerMeanShort");
    
-   std::string ElementNames[6];
-   ElementNames[0] = "SMAP";
-   ElementNames[1] = "ECCP";
-   ElementNames[2] = "INCP";
-   ElementNames[3] = "RAANP";
-   ElementNames[4] = "AOPP";
-   ElementNames[5] = "MAP";
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckBrouwerMeanShort() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "BrouwerShortSMA";
+   labels[1] = "BrouwerShortECC";
+   labels[2] = "BrouwerShortINC";
+   labels[3] = "BrouwerShortRAAN";
+   labels[4] = "BrouwerShortAOP";
+   labels[5] = "BrouwerShortMA";
+   #endif
+   
    mAnomalyType = anomalyComboBox->GetValue().c_str();
    // ****** NOTE: For now, since only "MA" is allowed, GetValue will return "".  Reset to "MA" ******
    mAnomalyType = mAnomalyTypeNames[StateConversionUtil::MA];
 
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckBrouwerMeanShort, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
    #endif
    
    for (unsigned int ii = 0; ii < 6; ii++)
    {
-      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
-         retval = false;
-      else
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
          try
          {
-            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+            if (ii == 0) // Do additional check for SMA
+            {
+               StateConversionUtil::ValidateValue(labels[0], outState[0], errMsgFormat, gg->GetDataPrecision(), labels[1], outState[1]);
+            }
+            else
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+            }
          }
          catch (BaseException &ue)
          {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
             retval   = false;
             canClose = false;
          }
       }
+      else
+         retval = false;
    }
-
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
    MessageInterface::ShowMessage("CheckBrouwerMeanShort() returning %d\n", retval);
    #endif
    
@@ -2692,61 +3159,76 @@ bool OrbitPanel::CheckBrouwerMeanShort(Rvector6 &state)
 }
 
 //------------------------------------------------------------------------------
-// bool CheckBrouwerMeanLong(Rvector6 &state) by YK
+// bool CheckBrouwerMeanLong(Rvector6 &outState) by YK
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed BrouwerMeanLong state for validity.
  *
- * @param <state> output state
+ * @param <outState> output state
  *
  * @return true if state is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckBrouwerMeanLong(Rvector6 &state)
+bool OrbitPanel::CheckBrouwerMeanLong(Rvector6 &outState)
 {
-	
    bool retval = true;
+   StringArray labels = theSpacecraft->GetStateElementLabels("BrouwerMeanLong");
    
-   std::string ElementNames[6];
-   ElementNames[0] = "SMADP";
-   ElementNames[1] = "ECCDP";
-   ElementNames[2] = "INCDP";
-   ElementNames[3] = "RAANDP";
-   ElementNames[4] = "AOPDP";
-   ElementNames[5] = "MADP";
+	#ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("OrbitPanel::CheckBrouwerMeanLong() entered\n");
+   MessageInterface::ShowMessage
+      ("   mElementStrs = %s %s %s %s %s %s\n", mElementStrs[0].c_str(), mElementStrs[1].c_str(),
+       mElementStrs[2].c_str(), mElementStrs[3].c_str(), mElementStrs[4].c_str(), mElementStrs[5].c_str());
+   for (int i = 0; i < 6; i++)
+      MessageInterface::ShowMessage("labels[%d] = %s\n", i, labels[i].c_str());
+   #endif
+   
+   #if 0
+   std::string labels[6];
+   labels[0] = "BrouwerLongSMA";
+   labels[1] = "BrouwerLongECC";
+   labels[2] = "BrouwerLongINC";
+   labels[3] = "BrouwerLongRAAN";
+   labels[4] = "BrouwerLongAOP";
+   labels[5] = "BrouwerLongMA";
+   #endif
+   
    mAnomalyType = anomalyComboBox->GetValue().c_str();
    // ****** NOTE: For now, since only "MA" is allowed, GetValue will return "".  Reset to "MA" ******
    mAnomalyType = mAnomalyTypeNames[StateConversionUtil::MA];
 
    #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
-      MessageInterface::ShowMessage(
-            "OrbitPanel::CheckBrouwerMeanLong, state = %12.10f  %12.10f  %12.10f  %12.10f  %12.10f  %12.10f\n",
-            state[0], state[1], state[2], state[3], state[4], state[5]);
-      MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
+   MessageInterface::ShowMessage("   current anomaly type = %s\n", mAnomalyType.c_str());
    #endif
    
    for (unsigned int ii = 0; ii < 6; ii++)
    {
-      if (!theScPanel->CheckReal(state[ii], mElements[ii], ElementNames[ii], "Real Number"))
-         retval = false;
-      else
+      if (theScPanel->CheckReal(outState[ii], mElementStrs[ii], labels[ii], "Real Number"))
       {
          try
          {
-            StateConversionUtil::ValidateValue(ElementNames[ii], state[ii], errMsgFormat, gg->GetDataPrecision());
+            if (ii == 0) // Do additional check for SMA
+            {
+               StateConversionUtil::ValidateValue(labels[0], outState[0], errMsgFormat, gg->GetDataPrecision(), labels[1], outState[1]);
+            }
+            else
+            {
+               StateConversionUtil::ValidateValue(labels[ii], outState[ii], errMsgFormat, gg->GetDataPrecision());
+            }
          }
          catch (BaseException &ue)
          {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, ue.GetFullMessage() + "\n");
+            MessageInterface::PopupMessage(Gmat::ERROR_, ue.GetFullMessage() + "\n");
             retval   = false;
             canClose = false;
          }
       }
+      else
+         retval = false;
    }
-
    
-   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECKSTATE
+   MessageInterface::ShowMessage("   outState = %s", outState.ToString().c_str());
    MessageInterface::ShowMessage("CheckBrouwerMeanLong() returning %d\n", retval);
    #endif
    
@@ -2754,19 +3236,16 @@ bool OrbitPanel::CheckBrouwerMeanLong(Rvector6 &state)
 }
 
 
-
 //------------------------------------------------------------------------------
-// bool CheckAnomaly(Rvector6 &state)
+// bool CheckAnomaly()
 //------------------------------------------------------------------------------
 /**
  * Checks the currently displayed anomaly for validity.
  *
- * @param <state> output state
- *
  * @return true if anomaly is valid; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::CheckAnomaly(Rvector6 &state)
+bool OrbitPanel::CheckAnomaly()
 {
    bool validSma = true;
    bool validEcc = true;
@@ -2801,17 +3280,18 @@ bool OrbitPanel::CheckAnomaly(Rvector6 &state)
 
 
 //------------------------------------------------------------------------------
-// bool ComputeTrueAnomaly(const std::string &stateTypeStr)
+// bool ComputeTrueAnomaly(Rvector6 &inState, const std::string &stateTypeStr)
 //------------------------------------------------------------------------------
 /*
  * Computes true anomaly (mTrueAnomaly) from the current anomaly (mAnomaly).
  *
+ * @param <inState>  input state to compute true anomaly from
  * @param <stateTypeStr> the state type
  *
  * @return true if true anomaly successfully computed; false otherwise
  */
 //------------------------------------------------------------------------------
-bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTypeStr)
+bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &inState, const std::string &stateTypeStr)
 {
    #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
@@ -2859,7 +3339,7 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
          Real flat   = GetOriginData(theSpacecraft->GetOrigin(), "flattening");
          Real radius = GetOriginData(theSpacecraft->GetOrigin(), "radius");
          Rvector kepl = StateConversionUtil::Convert
-                        (state, "Cartesian", mStateTypeNames[StateConversionUtil::KEPLERIAN],
+                        (inState, "Cartesian", mStateTypeNames[StateConversionUtil::KEPLERIAN],
                         mu, flat, radius, mAnomalyType);
          sma = kepl[0];
          ecc = kepl[1];

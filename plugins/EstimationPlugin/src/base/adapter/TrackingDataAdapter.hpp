@@ -25,6 +25,8 @@
 #include "MeasureModel.hpp"
 #include "MeasurementData.hpp"
 #include "ProgressReporter.hpp"
+#include "RampTableData.hpp"                         // made changes by TUAN NGUYEN
+#include "ObservationData.hpp"                       // made changes by TUAN NGUYEN
 
 // Forward reference
 class SolarSystem;
@@ -56,6 +58,39 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+
+
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value,
+                                         const Integer index);
+
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool SetStringParameter(const Integer id,
@@ -90,6 +125,7 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+//   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);     // ^^^^
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -135,6 +171,13 @@ public:
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
    virtual void         UsesLightTime(const bool tf);
 
+   // Multiplier Factor                                                // made changes by TUAN NGUYEN
+   virtual void         SetMultiplierFactor(Real mult);                // made changes by TUAN NGUYEN
+   virtual Real         GetMultiplierFactor();                         // made changes by TUAN NGUYEN
+
+   // Get measurement model object
+   virtual MeasureModel * GetMeasurementModel() { return calcData; };  // made changes by TUAN NGUYEN
+
 protected:
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
@@ -166,21 +209,58 @@ protected:
    /// Propagator used for light time solutions, when needed
    PropSetup *thePropagator;
 
-   /// Parameter IDs for the BatchEstimators
+
+   /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path
+   Real                       uplinkFreq;                           // unit is MHz                       // made changes by TUAN NGUYEN
+   /// Frequency band   (In DSNDoppler, it is used for S path)                                           // made changes by TUAN NGUYEN
+   Integer                    freqBand;                                                                  // made changes by TUAN NGUYEN
+   /// Observation data object containing an observation data record                                     // made changes by TUAN NGUYEN
+   ObservationData*           obsData;                                                                   // made changes by TUAN NGUYEN
+   /// Ramped frequency table used to calculate ramped frequency measurements                            // made changes by TUAN NGUYEN
+   std::vector<RampTableData>* rampTB;                                                                   // made changes by TUAN NGUYEN
+   /// Name of the frequency ramp table that supplied or receives data                                   // made changes by TUAN NGUYEN
+   StringArray                rampTableNames;                                                            // made changes by TUAN NGUYEN
+   /// Add noise to measurement (used only for simulation)                                               // made changes by TUAN NGUYEN
+   bool                       addNoise;                                                                  // made changes by TUAN NGUYEN
+   /// Noise sigma
+   RealArray                  noiseSigma;      // noiseSigma[0]: noise sigma for Range, noiseSigma[1]: noise sigma for Doppler 
+   /// Error model
+   StringArray                errorModel;      // errorModel[0]: error model for Range, errorModel[1]: error model for Doppler
+   
+   /// Measurement error covariance matrix                                                               // made changes by TUAN NGUYEN
+   Covariance                 measErrorCovariance;                                                       // made changes by TUAN NGUYEN
+
+   /// Measurement type
+   std::string                measurementType;  // it's value could be "Range", "DSNRange", "Doppler", etc
+
+
+   /// Parameter IDs for the TrackingDataAdapter
    enum
    {
-      SIGNAL_PATH  = MeasurementModelBaseParamCount,                           // made changes by TUAN NGUYEN
-      AdapterParamCount,
+      SIGNAL_PATH  = MeasurementModelBaseParamCount,
+      OBS_DATA,                                           // made changes by TUAN NGUYEN
+      RAMPTABLES,                                         // made changes by TUAN NGUYEN
+      MEASUREMENT_TYPE,                                   // made changes by TUAN NGUYEN
+      BIAS,                                               // made changes by TUAN NGUYEN
+      NOISE_SIGMA,                                        // made changes by TUAN NGUYEN
+      ERROR_MODEL,                                        // made changes by TUAN NGUYEN
+      ADD_NOISE,                                          // made changes by TUAN NGUYEN
+      UPLINK_FREQUENCY,                                   // made changes by TUAN NGUYEN
+      UPLINK_BAND,                                        // made changes by TUAN NGUYEN
+      AdapterParamCount,                                  // made changes by TUAN NGUYEN
    };
 
-   /// Strings describing the BatchEstimator parameters
+
+   /// Strings describing the TrackingDataAdapter parameters
    static const std::string PARAMETER_TEXT[AdapterParamCount -
-                                           MeasurementModelBaseParamCount];            // made changes by TUAN NGUYEN
-   /// Types of the BatchEstimator parameters
+                                           MeasurementModelBaseParamCount];                              // made changes by TUAN NGUYEN
+   /// Types of the TrackingDataAdapter parameters
    static const Gmat::ParameterType PARAMETER_TYPE[AdapterParamCount -
-                                                   MeasurementModelBaseParamCount];      // made changes by TUAN NGUYEN
+                                                   MeasurementModelBaseParamCount];                      // made changes by TUAN NGUYEN
 
    StringArray*         DecomposePathString(const std::string &value);
+   Real                 GetFrequencyFactor(Real frequency);                                              // made changes by TUAN NGUYEN
+   Real                 IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);                    // made changes by TUAN NGUYEN
 };
 
 #endif /* TrackingDataAdapter_hpp */

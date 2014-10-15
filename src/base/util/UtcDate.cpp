@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -28,6 +28,7 @@
 #include "RealUtilities.hpp"   // for Round() 
 #include "A1Mjd.hpp"     // for A1Mjd
 #include "UtcDate.hpp"   // for UtcDate
+#include "TimeSystemConverter.hpp"
 //  #include "A1Date.hpp"    // for A1Date
 
 using namespace GmatTimeConstants;
@@ -252,15 +253,7 @@ Real UtcDate::ToA1Mjd() const
 
    // Convert to Modified Julian date
    Real utcmjd = ModifiedJulianDate(year,month,day,hour,minute,second);
-
-   A1Mjd newA1Mjd; 
-   utcmjd = newA1Mjd.UtcMjdToA1Mjd(utcmjd);
-
-   // Check for the tolerance then round-off 
-   Real testUtc = fabs(utcmjd - (Integer)utcmjd);
-   if (testUtc < 1.0e-07) 
-      utcmjd = Round(utcmjd);
-      
-   return utcmjd;
-
+   // Convert to A1Mjd
+   Real a1Mjd = TimeConverterUtil::Convert(utcmjd, TimeConverterUtil::UTCMJD, TimeConverterUtil::A1MJD);
+   return a1Mjd;
 }

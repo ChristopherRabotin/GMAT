@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -805,7 +805,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report",
@@ -870,7 +870,7 @@ void OutputTree::OnCompareNumericLines(wxCommandEvent &event)
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report|eph|txt",
@@ -950,7 +950,7 @@ void OutputTree::OnCompareNumericColumns(wxCommandEvent &event)
       return;
    }
    
-   std::string basefilename = theReport->GetPathAndFileName();
+   std::string basefilename = theReport->GetFullPathFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename1 =
       wxFileSelector("Choose a file to open", "", "", "report|eph|txt",

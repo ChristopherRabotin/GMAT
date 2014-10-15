@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,7 +45,7 @@ class PropagationConfigPanel : public GmatPanel
 public:
 
    PropagationConfigPanel(wxWindow *parent, const wxString &propName);
-   ~PropagationConfigPanel();  
+   virtual ~PropagationConfigPanel();
 
 private:
    
@@ -89,7 +89,8 @@ private:
       wxString gravOrder;
       wxString magfDegree;
       wxString magfOrder;
-      wxString potFilename;
+      wxString potFile;
+      wxString potFileFullPath;
       PointMassForce *pmf;
       GravityField *gravf;
       DragForce *dragf;
@@ -104,11 +105,11 @@ private:
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
             gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; 
-            magfOrder = "0"; potFilename = ""; pmf = pf; gravf = gf; 
+            magfOrder = "0"; potFile = ""; potFileFullPath = ""; pmf = pf; gravf = gf; 
             dragf = df; srpf = NULL; useSrp = false; relativisticCorrection = false;
          }
       
-      ForceType& operator= (const ForceType& right)
+         ForceType& operator= (const ForceType& right)
          {
             if (this == &right)
                return *this;
@@ -117,8 +118,8 @@ private:
             dragType = right.dragType; magfType = right.magfType; 
             gravDegree = right.gravDegree; gravOrder = right.gravOrder;
             magfDegree = right.magfDegree; magfOrder = right.magfOrder;
-            potFilename = right.potFilename; pmf = right.pmf;
-            gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
+            potFile = right.potFile; potFileFullPath = right.potFileFullPath;
+            pmf = right.pmf; gravf = right.gravf; dragf = right.dragf; srpf = right.srpf;
             useSrp = right.useSrp; relativisticCorrection = right.relativisticCorrection;
             return *this;
          }
@@ -134,8 +135,10 @@ private:
    bool isSpkBodyChanged;
    bool isSpkEpFormatChanged;
    bool isSpkEpochChanged;
+   bool isSRPModelChanged;
 
    wxFlexGridSizer *intFlexGridSizer;
+   wxFlexGridSizer *srpRCFlexSizer;
    GmatStaticBoxSizer *intStaticSizer;
    GmatStaticBoxSizer *fmStaticSizer;
    GmatStaticBoxSizer *magfStaticSizer;      // So it can be hidden
@@ -152,6 +155,7 @@ private:
    wxStaticText *maxStepStaticText;
    wxStaticText *unitsMaxStepStaticText;
    wxStaticText *maxStepAttemptStaticText;
+   wxStaticText *srpModelStaticText;
 
 
    wxTextCtrl *initialStepSizeTextCtrl;
@@ -176,6 +180,7 @@ private:
    wxComboBox *theAtmosModelComboBox;
    wxComboBox *theMagfModelComboBox;
    wxComboBox *theErrorComboBox;
+   wxComboBox *theSRPModelComboBox;
    
    wxBitmapButton *theGravModelSearchButton;
    wxButton *theDragSetupButton;
@@ -218,6 +223,7 @@ private:
    wxString dragTypeName;
    wxString propOriginName;
    wxString errorControlTypeName;
+   wxString srpModelName;
    
    wxArrayString integratorTypeArray;
    wxArrayString earthGravModelArray;
@@ -228,6 +234,7 @@ private:
    wxArrayString dragModelArray;
    wxArrayString magfModelArray;
    wxArrayString errorControlArray;
+   wxArrayString srpModelArray;
    
    std::map<wxString, wxString> theFileMap;
    
@@ -304,7 +311,7 @@ private:
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
-   void DisplayGravityFieldData(const wxString& bodyName);
+   void DisplayGravityFieldData(const wxString& bodyName, bool textValueChanged = false);
    void DisplayAtmosphereModelData();
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
@@ -345,6 +352,8 @@ private:
    void OnPropOriginComboBox(wxCommandEvent &);
    void OnPropEpochComboBox(wxCommandEvent &);
    void OnStartEpochComboBox(wxCommandEvent &);
+   void OnSRPModelComboBox(wxCommandEvent &event);
+
    void OnStartEpochTextChange(wxCommandEvent &);
 
    
@@ -395,6 +404,7 @@ private:
       ID_CB_ATMOS,
       ID_CB_MAG,
       ID_CB_ERROR,
+      ID_CB_SRP_MODEL,
       ID_BUTTON_ADD_BODY,
       ID_BUTTON_GRAV_SEARCH,
       ID_BUTTON_SETUP,

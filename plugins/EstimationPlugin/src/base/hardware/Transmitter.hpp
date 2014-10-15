@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -89,21 +89,21 @@ public:
 
    virtual bool         Initialize();
 
-   virtual Real			GetDelay(Integer whichOne=0);
-   virtual bool 			SetDelay(Real delay, Integer whichOne=0);
-   virtual Integer 		GetSignalCount();
-   virtual bool			IsTransmitted(Integer whichOne=0);
-   virtual Signal*		GetSignal(Integer whichOne=0);
-   virtual bool 			SetSignal(Signal* s,Integer whichOne=0);
+   virtual Real         GetDelay(Integer whichOne=0);
+   virtual bool         SetDelay(Real delay, Integer whichOne=0);
+   virtual Integer      GetSignalCount();
+   virtual bool         IsTransmitted(Integer whichOne=0);
+   virtual Signal*      GetSignal(Integer whichOne=0);
+   virtual bool         SetSignal(Signal* s,Integer whichOne=0);
 
 
-   Real 						GetOutPutFrequency();
+   Real                 GetOutPutFrequency();
 
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   std::string	frequencyModel;
-   Real			frequency;
+   std::string   frequencyModel;
+   Real          frequency;
 
    /// Published parameters for the RF hardware
    enum

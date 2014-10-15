@@ -2,7 +2,7 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-#  Copyright (c) 2002-2011 United States Government as represented by the
+#  Copyright (c) 2002-2014 United States Government as represented by the
 #  Administrator of The National Aeronautics and Space Administration.
 #  All Other Rights Reserved.
 
@@ -328,6 +328,9 @@ OBJECTS = \
     hardware/FuelTank.o \
     hardware/HardwareException.o \
     hardware/Hardware.o \
+    hardware/NuclearPowerSystem.o \
+    hardware/PowerSystem.o \
+    hardware/SolarPowerSystem.o \
     hardware/Thruster.o \
     interface/InterfaceException.o \
     interface/Interface.o \
@@ -380,6 +383,7 @@ OBJECTS = \
     math/Tan.o \
     math/Tanh.o \
     math/Transpose.o \
+    parameter/AlternateEquinoctialParameters.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
     parameter/ArrayWrapper.o \
@@ -387,6 +391,7 @@ OBJECTS = \
     parameter/AttitudeData.o \
     parameter/AttitudeParameters.o \
     parameter/AttitudeReal.o \
+    parameter/AttitudeRvector.o \
     parameter/AttitudeString.o \
     parameter/BallisticMassParameters.o \
     parameter/BallisticMassReal.o \
@@ -436,6 +441,7 @@ OBJECTS = \
     parameter/Rmat33Var.o \
     parameter/Rmat66Var.o \
     parameter/Rvec6Var.o \
+    parameter/RvectorVar.o \
     parameter/SpacecraftData.o \
     parameter/SphericalParameters.o \
     parameter/StringWrapper.o \
@@ -477,6 +483,7 @@ OBJECTS = \
     solarsys/PlanetaryEphemException.o \
     solarsys/PlanetaryEphem.o \
     solarsys/Planet.o \
+    solarsys/ShadowState.o \
     solarsys/SlpFile.o \
     solarsys/SolarFluxFileReader.o \
     solarsys/SolarSystemException.o \
@@ -552,6 +559,7 @@ OBJECTS = \
     util/Rvector3.o \
     util/Rvector6.o \
     util/Rvector.o \
+    util/SPADFileReader.o \
     util/StateConversionUtil.o \
     util/StringTokenizer.o \
     util/StringUtil.o \

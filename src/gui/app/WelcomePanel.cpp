@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -23,7 +23,7 @@
 #include "FileManager.hpp"         // for GetFullPathname()
 #include "FileUtil.hpp"            // for DoesDirectoryExist()
 #include "StringUtil.hpp"          // for Replace()
-#include "GmatAppData.hpp"
+#include "GmatAppData.hpp"         // for SetIcon(), etc
 #include "GmatMainFrame.hpp"
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
@@ -243,22 +243,8 @@ void WelcomePanel::Create()
    SetSizer(thePanelSizer);
    thePanelSizer->SetSizeHints(this);
    
-   // Set icon if icon file is in the start up file
-   try
-   {
-      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-      #if defined __WXMSW__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
-      #elif defined __WXGTK__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
-      #elif defined __WXMAC__
-         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
-      #endif
-   }
-   catch (GmatBaseException &/*e*/)
-   {
-      //MessageInterface::ShowMessage(e.GetMessage());
-   }
+   // Set GMAT main icon
+   GmatAppData::Instance()->SetIcon(this, "WelcomePanel");
    
    #ifdef DEBUG_CREATE
    MessageInterface::ShowMessage("WelcomePanel::Create() leaving\n");

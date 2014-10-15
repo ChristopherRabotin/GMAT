@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -25,20 +25,20 @@
 class ESTIMATION_API Signal
 {
 public:
-	Signal();
-	virtual ~Signal();
+   Signal();
+   virtual ~Signal();
    Signal(const Signal& sig);
    Signal& operator=(const Signal& sig);
 
 
-	void SetEpoch(GmatEpoch ep);
-	GmatEpoch GetEpoch();
-	Real GetValue();
-	bool SetValue(Real v);
+   void SetEpoch(GmatEpoch ep);
+   GmatEpoch GetEpoch();
+   Real GetValue();
+   bool SetValue(Real v);
 
 private:
-	GmatEpoch epoch;
-	Real value;
+   GmatEpoch epoch;
+   Real value;
 };
 
 #endif /* Signal_hpp */

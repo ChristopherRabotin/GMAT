@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -55,8 +55,48 @@ using namespace GmatStringUtil;
 
 //#define DEBUG_FIRST_10_LINES
 //#define DEBUG_REAL_COLUMNS
-//#define DBGLVL_COMPARE_FILES 3
+//#define DBGLVL_COMPARE_FILES 1
 //#define DBGLVL_FUNCTION_OUTPUT 2
+//#define DEBUG_ABSOLUTE_PATH
+
+
+//------------------------------------------------------------------------------
+// std::string GetGmatPath()
+//------------------------------------------------------------------------------
+/**
+ * Accessor method to find the location of the GMAT application
+ *
+ * This method is currently only coded for Windows, to address path issues found
+ * in GMAT R2014a (see GMT-2688 and email reporting issues around May 9 2014)
+ *
+ * @return The path to the GMAT application on Windows machines; an empty 
+ * string for the others
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetGmatPath()
+{
+   std::string retval = "";
+
+#ifdef _MSC_VER  // if Microsoft Visual C++
+   char buffer[GmatFile::MAX_PATH_LEN];
+   GetModuleFileName(NULL, buffer, GmatFile::MAX_PATH_LEN);
+
+   #ifdef DEBUG_ABSOLUTE_PATH
+      MessageInterface::ShowMessage("EXE path: %s\n", buffer);
+   #endif
+
+   std::string currDir = buffer;
+   Integer end = currDir.find_last_of("\\");
+   if (end != std::string::npos)
+      retval = currDir.substr(0, end+1);
+   
+   #ifdef DEBUG_ABSOLUTE_PATH
+      MessageInterface::ShowMessage("EXE dir: %s\n", retval.c_str());
+   #endif
+#endif
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // std::string GetPathSeparator()
@@ -69,6 +109,7 @@ std::string GmatFileUtil::GetPathSeparator()
 {
    std::string sep = "/";
    
+   #if 0
    char *buffer;
    buffer = getenv("OS");
    if (buffer != NULL)
@@ -83,31 +124,55 @@ std::string GmatFileUtil::GetPathSeparator()
       if (osStr.find("Windows") != osStr.npos)
          sep = "\\";
    }
+   #endif
+   
+   if (IsOsWindows())
+      sep = "\\";
    
    return sep;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string GetWorkingDirectory()
+// std::string GMAT_API ConvertToOsFileName(const std::string &fileName)
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ConvertToOsFileName(const std::string &fileName)
+{
+   std::string fname = fileName;
+   if (IsOsWindows())
+   {
+      if (fname.find("/") != fname.npos)
+         fname = GmatStringUtil::Replace(fname, "/", "\\");
+   }
+   else
+   {
+      if (fname.find("\\") != fname.npos)
+         fname = GmatStringUtil::Replace(fname, "\\", "/");
+   }
+   return fname;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetCurrentWorkingDirectory()
 //------------------------------------------------------------------------------
 /*
  * @return  The current working directory, generally the application path.
  */
 //------------------------------------------------------------------------------
-std::string GmatFileUtil::GetWorkingDirectory()
+std::string GmatFileUtil::GetCurrentWorkingDirectory()
 {
    std::string currDir;
    
 #ifdef _MSC_VER  // if Microsoft Visual C++
    char buffer[GmatFile::MAX_PATH_LEN];
-   
+
    //if (_getcwd(buffer, sizeof(buffer) / sizeof(TCHAR)))
    if (GetCurrentDirectory(GmatFile::MAX_PATH_LEN, buffer) > 0)
       currDir = buffer;
    else
       MessageInterface::ShowMessage
-         ("*** WARNING *** GmatFileUtil::GetWorkingDirectory() \n"
+         ("*** WARNING *** GmatFileUtil::GetCurrentWorkingDirectory() \n"
           "Cannot get current directory, so jsut returning empty directory\n");
    
 #else
@@ -128,7 +193,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
 
 
 //------------------------------------------------------------------------------
-// bool SetWorkingDirectory(const std::string &newDir)
+// bool SetCurrentWorkingDirectory(const std::string &newDir)
 //------------------------------------------------------------------------------
 /*
  * Sets current working directory to newDir
@@ -136,7 +201,7 @@ std::string GmatFileUtil::GetWorkingDirectory()
  * @return  true if current working is successfully set to newDir, false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatFileUtil::SetWorkingDirectory(const std::string &newDir)
+bool GmatFileUtil::SetCurrentWorkingDirectory(const std::string &newDir)
 {
 #ifdef _MSC_VER  // if Microsoft Visual C++
    if (SetCurrentDirectory(newDir.c_str()) > 0)
@@ -284,7 +349,7 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
       {
          thePathToUse = fullPath.substr(0,appLoc);
       }
-  #endif
+   #endif
    
    std::string::size_type lastSlash = thePathToUse.find_last_of("/\\");
 
@@ -424,6 +489,35 @@ std::string GmatFileUtil::GetInvalidFileNameMessage(Integer option)
 
 
 //------------------------------------------------------------------------------
+// bool GMAT_API IsOsWindows()
+//------------------------------------------------------------------------------
+/**
+ * @return true if platform OS is Windows, false if empty buffer from getenv()
+ *              or other platform
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsOsWindows()
+{
+   char *buffer;
+   buffer = getenv("OS");
+   if (buffer != NULL)
+   {
+      #ifdef DEBUG_FILE_UTIL
+      MessageInterface::ShowMessage
+         ("GmatFileUtil::IsOsWindows() Current OS is %s\n", buffer);
+      #endif
+      
+      std::string osStr(buffer);
+      
+      if (osStr.find("Windows") != osStr.npos)
+         return true;
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool GMAT_API IsPathRelative(const std::string &fullPath)
 //------------------------------------------------------------------------------
 /**
@@ -443,13 +537,66 @@ bool GmatFileUtil::IsPathRelative(const std::string &fullPath)
 
 
 //------------------------------------------------------------------------------
-// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk = true)
+// bool GMAT_API IsPathAbsolute(const std::string &fullPath)
 //------------------------------------------------------------------------------
-bool GmatFileUtil::IsValidFileName(const std::string &fname, bool blankIsOk)
+/**
+ * @return true if given path is absolute path, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsPathAbsolute(const std::string &fullPath)
+{
+   std::string fpath = GmatStringUtil::RemoveAllBlanks(fullPath);
+   bool retval = false;
+   
+   if (IsPathRelative(fpath))
+   {
+      retval = false;
+   }
+   else
+   {
+      if (IsOsWindows())
+      {
+         if (fpath.find(":") == 1 && (fpath.find("\\") != fpath.npos ||
+                                      fpath.find("/") != fpath.npos))
+            retval = true;
+         else if (fpath.find("//") != fpath.npos || fpath.find("\\\\") != fpath.npos) // network drive
+            retval = true;
+         else
+            retval = false;
+      }
+      else
+      {
+         if (fpath.find("/") == 0 && fpath.find("/") != fpath.npos)
+            retval = true;
+         else
+            retval = false;
+      }
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasNoPath(const std::string &fullPath)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::HasNoPath(const std::string &fullPath)
+{
+   if (IsPathRelative(fullPath) || IsPathAbsolute(fullPath))
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk = true)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk)
 {
    if (fname == "")
    {
-      if (blankIsOk)
+      if (isBlankOk)
          return true;
       else
          return false;
@@ -502,13 +649,13 @@ bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &
 
 
 //------------------------------------------------------------------------------
-// bool DoesDirectoryExist(const std::string &fullPath, bool blankIsOk = true)
+// bool DoesDirectoryExist(const std::string &fullPath, bool isBlankOk = true)
 //------------------------------------------------------------------------------
 /*
  * @return  true  If directory exist, false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsOk)
+bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool isBlankOk)
 {
    #ifdef DEBUG_DIR_EXIST
    MessageInterface::ShowMessage
@@ -517,7 +664,7 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool blankIsO
    
    if (fullPath == "")
    {
-      if (blankIsOk)
+      if (isBlankOk)
          return true;
       else
          return false;
@@ -1231,7 +1378,7 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    
    if (!in1)
    {
-      textBuffer.push_back("Cannot open first file: " + newfilename1 + "\n");
+      textBuffer.push_back("Cannot open first file: " + filename1 + "\n");
       return false;
    }
    
@@ -1246,7 +1393,7 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    {
       if (!in2)
       {
-         textBuffer.push_back("Cannot open second file: " + newfilename2 + "\n");
+         textBuffer.push_back("Cannot open second file: " + filename2 + "\n");
          return false;
       }
       // Check if file2 is an ascii file
@@ -1261,7 +1408,7 @@ bool GmatFileUtil::PrepareCompare(Integer numDirsToCompare,
    {
       if (!in3)
       {
-         textBuffer.push_back("Cannot open third file: " + newfilename3 + "\n");
+         textBuffer.push_back("Cannot open third file: " + filename3 + "\n");
          return false;
       }
       // Check if file3 is an ascii file

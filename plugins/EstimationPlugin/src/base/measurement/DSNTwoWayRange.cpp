@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -162,9 +162,9 @@ DSNTwoWayRange& DSNTwoWayRange::operator=(const DSNTwoWayRange& dsn)
       currentMeasurement.type = Gmat::DSN_TWOWAYRANGE;
       currentMeasurement.uniqueID = dsn.currentMeasurement.uniqueID;
 
-      covariance = dsn.covariance;
-      freqMap    = dsn.freqMap;
-	  rangeModulo = dsn.rangeModulo;
+      covariance  = dsn.covariance;
+      freqMap     = dsn.freqMap;
+      rangeModulo = dsn.rangeModulo;
    }
 
    return *this;
@@ -318,9 +318,9 @@ Integer DSNTwoWayRange::GetParameterCount() const
 /**
 * Get value of a real parameter
 * 
-* @param id		index number of parameter
+* @param id      index number of parameter
 *
-* @return		value of the parameter
+* @return        value of the parameter
 */
 //------------------------------------------------------------------------------
 Real DSNTwoWayRange::GetRealParameter(const Integer id) const
@@ -338,10 +338,10 @@ Real DSNTwoWayRange::GetRealParameter(const Integer id) const
 /**
 * Set value for a real parameter
 * 
-* @param id		index number of parameter
-* @param value	value which is used to set to the parameter 
+* @param id       index number of parameter
+* @param value    value which is used to set to the parameter 
 *
-* @return		the value which is set to the parameter
+* @return         the value which is set to the parameter
 */
 //------------------------------------------------------------------------------
 Real DSNTwoWayRange::SetRealParameter(const Integer id, const Real value)
@@ -349,14 +349,14 @@ Real DSNTwoWayRange::SetRealParameter(const Integer id, const Real value)
    if (id == RangeModuloConstant)
    {
       if (value <= 0)
-	  {
+      {
          std::stringstream ss;
-		 ss << "Error: RangeModuloConstant parameter has an invalid value (" << value << "). It's value has to be a positive real number\n";
-	     throw MeasurementException(ss.str());
-	  }
-	  else
+         ss << "Error: RangeModuloConstant parameter has an invalid value (" << value << "). It's value has to be a positive real number\n";
+         throw MeasurementException(ss.str());
+      }
+      else
          rangeModulo = value;
-	  return value;
+      return value;
    }
 
    return TwoWayRange::SetRealParameter(id, value);
@@ -369,9 +369,9 @@ Real DSNTwoWayRange::SetRealParameter(const Integer id, const Real value)
 /**
 * Get value of a real parameter
 * 
-* @param label	name of parameter
+* @param label   name of parameter
 *
-* @return		value of the parameter
+* @return        value of the parameter
 */
 //------------------------------------------------------------------------------
 Real DSNTwoWayRange::GetRealParameter(const std::string &label) const
@@ -386,10 +386,10 @@ Real DSNTwoWayRange::GetRealParameter(const std::string &label) const
 /**
 * Set value for a real parameter
 * 
-* @param lable	name of parameter
-* @param value	value which is used to set to the parameter 
+* @param lable   name of parameter
+* @param value   value which is used to set to the parameter 
 *
-* @return		the value which is set to the parameter
+* @return        the value which is set to the parameter
 */
 //------------------------------------------------------------------------------
 Real DSNTwoWayRange::SetRealParameter(const std::string &label, const Real value)
@@ -508,8 +508,8 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
    currentDerivatives.clear();
    currentDerivatives.push_back(oneRow);
 
-   if (objNumber == -1)																									// made changes by TUAN NGUYEN
-	   return currentDerivatives;			// return zero vector when variable is independent of DSNTwoWay range		// made changes by TUAN NGUYEN
+   if (objNumber == -1)                                                                                             // made changes by TUAN NGUYEN
+      return currentDerivatives;         // return zero vector when variable is independent of DSNTwoWay range      // made changes by TUAN NGUYEN
 
    Integer parameterID = GetParmIdFromEstID(id, obj);
 
@@ -522,29 +522,29 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
    {
       Real fFactor = GetFrequencyFactor(frequency)/
                (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M);
-	  
+     
       #ifdef DEBUG_DERIVATIVES
-	     if (objNumber == 2)
+         if (objNumber == 2)
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s of Participant %d"
-				" at measurment time: tm = %.12lf\n", objPtr->GetParameterText(parameterID).c_str(), objNumber, ((Spacecraft*) objPtr)->GetEpoch());
-		 else
+            " at measurment time: tm = %.12lf\n", objPtr->GetParameterText(parameterID).c_str(), objNumber, ((Spacecraft*) objPtr)->GetEpoch());
+         else
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s of Participant %d\n", objPtr->GetParameterText(parameterID).c_str(), objNumber);
-		 
+       
          MessageInterface::ShowMessage("   freq = %15lf, F = %15lf, F/c = "
-                  "%15lf\n", frequency, GetFrequencyFactorRatio(frequency)*frequency, fFactor);
+                  "%15lf\n", frequency, GetFrequencyFactor(frequency), fFactor);
       #endif
       
       if (objNumber == 1) // participant number 1, either a GroundStation or a Spacecraft
       {
          if (objPtr->GetParameterText(parameterID) == "Position")
          {
-			// Get the inverse of the orbit STM at the measurement epoch
+            // Get the inverse of the orbit STM at the measurement epoch
             // Will need adjustment if stm changes
             Rmatrix stmInv(6,6);
             GetInverseSTM(obj, stmInv);
 
             // Uplink leg derivative:
-			Rvector3 uplinkRderiv;
+            Rvector3 uplinkRderiv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkRderiv, true, 0, 1, true, false);
 
             // Downlink leg derivative:
@@ -556,22 +556,22 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
                currentDerivatives[0][i] =
                      fFactor * (uplinkRderiv[i] + downlinkRderiv[i]);
             #ifdef DEBUG_DERIVATIVES
-			   MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkRderiv.ToString().c_str());
-			   MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkRderiv.ToString().c_str());
+               MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkRderiv.ToString().c_str());
+               MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkRderiv.ToString().c_str());
                MessageInterface::ShowMessage("Position Derivative: [%.12lf "
                      "%.12lf %.12lf]\n", currentDerivatives[0][0],
                      currentDerivatives[0][1], currentDerivatives[0][2]);
             #endif
 
-		 }
+         }
          else if (objPtr->GetParameterText(parameterID) == "Velocity")
          {
-			// Get the inverse of the orbit STM at the measurement epoch
+            // Get the inverse of the orbit STM at the measurement epoch
             // Will need adjustment if stm changes
             Rmatrix stmInv(6,6);
             GetInverseSTM(obj, stmInv);
 
-			// Downlink leg derivative:
+            // Downlink leg derivative:
             Rvector3 uplinkVderiv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkVderiv, true, 0, 1, false, true);
 
@@ -584,8 +584,8 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
                currentDerivatives[0][i] =
                      fFactor * (uplinkVderiv[i] + downlinkVderiv[i]);
             #ifdef DEBUG_DERIVATIVES
-			   MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkVderiv.ToString().c_str());
-			   MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkVderiv.ToString().c_str());
+               MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkVderiv.ToString().c_str());
+               MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkVderiv.ToString().c_str());
                MessageInterface::ShowMessage("Velocity Derivative: [%.12lf "
                      "%.12lf %.12lf]\n", currentDerivatives[0][0],
                      currentDerivatives[0][1], currentDerivatives[0][2]);
@@ -594,26 +594,26 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
          else if (objPtr->GetParameterText(parameterID) == "CartesianX")
          {
 
-			// Get the inverse of the orbit STM at the measurement epoch
+            // Get the inverse of the orbit STM at the measurement epoch
             // Will need adjustment if stm changes
             Rmatrix stmInv(6,6);
             GetInverseSTM(obj, stmInv);
-			
+         
             // Uplink leg derivative:
             Rvector6 uplinkDeriv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkDeriv, true, 0, 1, true, true);
-			
+         
             // Downlink leg derivative:
             Rvector6 downlinkDeriv;
-			GetRangeDerivative(downlinkLeg, stmInv, downlinkDeriv, false, 1, 0, true, true);
-			
+            GetRangeDerivative(downlinkLeg, stmInv, downlinkDeriv, false, 1, 0, true, true);
+         
             // Add 'em up per eq 7.80 and 7.81
             for (Integer i = 0; i < 6; ++i)
                currentDerivatives[0][i] =
                      fFactor * (uplinkDeriv[i] + downlinkDeriv[i]);
             #ifdef DEBUG_DERIVATIVES
-			   MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkDeriv.ToString().c_str());
-			   MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkDeriv.ToString().c_str());
+               MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkDeriv.ToString().c_str());
+               MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkDeriv.ToString().c_str());
                MessageInterface::ShowMessage("CartesianState Derivative: "
                      "[%.12lf %.12lf %.12lf %.12lf %.12lf %.12lf]\n",
                      currentDerivatives[0][0], currentDerivatives[0][1],
@@ -647,7 +647,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
             GetInverseSTM(obj, stmInv);
 
             // Uplink leg derivative:
-			Rvector3 uplinkRderiv;
+            Rvector3 uplinkRderiv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkRderiv, false, 0, 1, true, false);
 
             // Downlink leg derivative:
@@ -659,8 +659,8 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
                currentDerivatives[0][i] =
                      fFactor * (uplinkRderiv[i] + downlinkRderiv[i]);
             #ifdef DEBUG_DERIVATIVES
-			   MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkRderiv.ToString().c_str());
-			   MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkRderiv.ToString().c_str());
+               MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkRderiv.ToString().c_str());
+               MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkRderiv.ToString().c_str());
                MessageInterface::ShowMessage("Position Derivative: [%.12lf "
                      "%.12lf %.12lf]\n", currentDerivatives[0][0],
                      currentDerivatives[0][1], currentDerivatives[0][2]);
@@ -673,7 +673,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
             Rmatrix stmInv(6,6);
             GetInverseSTM(obj, stmInv);
 
-			// Downlink leg derivative:
+            // Downlink leg derivative:
             Rvector3 uplinkVderiv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkVderiv, false, 0, 1, false, true);
 
@@ -686,8 +686,8 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
                currentDerivatives[0][i] =
                      fFactor * (uplinkVderiv[i] + downlinkVderiv[i]);
             #ifdef DEBUG_DERIVATIVES
-			   MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkVderiv.ToString().c_str());
-			   MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkVderiv.ToString().c_str());
+               MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkVderiv.ToString().c_str());
+               MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkVderiv.ToString().c_str());
                MessageInterface::ShowMessage("Velocity Derivative: [%.12lf "
                      "%.12lf %.12lf]\n", currentDerivatives[0][0],
                      currentDerivatives[0][1], currentDerivatives[0][2]);
@@ -699,23 +699,23 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
             // Will need adjustment if stm changes
             Rmatrix stmInv(6,6);
             GetInverseSTM(obj, stmInv);
-			
+         
             // Uplink leg derivative:
-			Rvector6 uplinkDeriv;
+            Rvector6 uplinkDeriv;
             GetRangeDerivative(uplinkLeg, stmInv, uplinkDeriv, false, 0, 1, true, true);
-			
+         
             // Downlink leg derivative:
             Rvector6 downlinkDeriv;
-			GetRangeDerivative(downlinkLeg, stmInv, downlinkDeriv, true, 1, 0, true, true);
-			
+            GetRangeDerivative(downlinkLeg, stmInv, downlinkDeriv, true, 1, 0, true, true);
+         
             // Add 'em up per eq 7.80 and 7.81
             for (Integer i = 0; i < 6; ++i)
                currentDerivatives[0][i] =
                      fFactor * (uplinkDeriv[i] + downlinkDeriv[i]);
-			
+         
             #ifdef DEBUG_DERIVATIVES
-			   MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkDeriv.ToString().c_str());
-			   MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkDeriv.ToString().c_str());
+               MessageInterface::ShowMessage("uplinkDeriv[]   = %s\n",uplinkDeriv.ToString().c_str());
+               MessageInterface::ShowMessage("downlinkDeriv[] = %s\n",downlinkDeriv.ToString().c_str());
                MessageInterface::ShowMessage("CartesianState Derivative: "
                      "[%.12lf %.12lf %.12lf %.12lf %.12lf %.12lf]\n",
                      currentDerivatives[0][0], currentDerivatives[0][1],
@@ -778,7 +778,7 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
  * Calculates measurement values based on the current state of the participants.
  *
  * This method can perform the calculations either with or without event
- * corrections.  When calculating without events, the purpose of the calculation
+ * corrections. When calculating without events, the purpose of the calculation
  * is to determine feasibility of the measurement.
  *
  * @param withEvents Flag used to toggle event inclusion
@@ -827,10 +827,10 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       // coords
       std::string updateAll = "All";
       UpdateRotationMatrix(currentMeasurement.epoch, updateAll);
-//	  outState = R_o_j2k * rangeVecInertial;
-//    currentMeasurement.feasibilityValue = outState[2];
-	  outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
-	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
+      //     outState = R_o_j2k * rangeVecInertial;
+      //    currentMeasurement.feasibilityValue = outState[2];
+      outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -852,9 +852,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("   BodyFixed Location of %s:  %s\n",
                participants[1]->GetName().c_str(),
                bfLoc2.ToString().c_str());
-		 Rvector3 bfRvec = bfLoc2 - bfLoc1; 
-		 MessageInterface::ShowMessage("   Range vector in BodyFixed coordinate system: %s\n", bfRvec.ToString().c_str());
-		 MessageInterface::ShowMessage("   outState: %s\n", outState.ToString().c_str());
+         Rvector3 bfRvec = bfLoc2 - bfLoc1; 
+         MessageInterface::ShowMessage("   Range vector in BodyFixed coordinate system: %s\n", bfRvec.ToString().c_str());
+         MessageInterface::ShowMessage("   outState: %s\n", outState.ToString().c_str());
       #endif
 
 //      if (currentMeasurement.feasibilityValue > minAngle)
@@ -871,7 +871,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 //      {
 //         currentMeasurement.isFeasible = false;
 //         currentMeasurement.value[0] = 0.0;
-//         currentMeasurement.eventCount = 0;	 
+//         currentMeasurement.eventCount = 0;    
 //      }
 
       #ifdef DEBUG_RANGE_CALC
@@ -921,80 +921,80 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
       SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-	  std::string cbName1 = ((SpacePoint*)participants[0])->GetJ2000BodyName();
-	  CelestialBody* cb1 = solarSystem->GetBody(cbName1);
-	  std::string cbName2 = ((SpacePoint*)participants[1])->GetJ2000BodyName();
-	  CelestialBody* cb2 = solarSystem->GetBody(cbName2);
+      std::string cbName1 = ((SpacePoint*)participants[0])->GetJ2000BodyName();
+      CelestialBody* cb1 = solarSystem->GetBody(cbName1);
+      std::string cbName2 = ((SpacePoint*)participants[1])->GetJ2000BodyName();
+      CelestialBody* cb2 = solarSystem->GetBody(cbName2);
 
-	  // 1. Get the range from the down link
-      Rvector3 r1, r2;						// position of downlink leg's participants in central body MJ2000Eq coordinate system 
-	  Rvector3 r1B, r2B;					// position of downlink leg's participants in solar system bary center MJ2000Eq coordinate system
+      // 1. Get the range from the down link
+      Rvector3 r1, r2;                  // position of downlink leg's participants in central body MJ2000Eq coordinate system 
+      Rvector3 r1B, r2B;                // position of downlink leg's participants in solar system bary center MJ2000Eq coordinate system
 
-      r1 = downlinkLeg.GetPosition(participants[0]);										// position of station at reception time t3R in central body MJ2000Eq coordinate system
-      r2 = downlinkLeg.GetPosition(participants[1]);										// position of spacecraft at transmit time t2T in central body MJ2000Eq coordinate system
-	  t3R = downlinkLeg.GetEventData((GmatBase*) participants[0]).epoch;					// reception time at station for downlink leg
-	  t2T = downlinkLeg.GetEventData((GmatBase*) participants[1]).epoch;                    // transmit time at spacecraft for downlink leg
+      r1 = downlinkLeg.GetPosition(participants[0]);                              // position of station at reception time t3R in central body MJ2000Eq coordinate system
+      r2 = downlinkLeg.GetPosition(participants[1]);                              // position of spacecraft at transmit time t2T in central body MJ2000Eq coordinate system
+      t3R = downlinkLeg.GetEventData((GmatBase*) participants[0]).epoch;          // reception time at station for downlink leg
+      t2T = downlinkLeg.GetEventData((GmatBase*) participants[1]).epoch;          // transmit time at spacecraft for downlink leg
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	  MessageInterface::ShowMessage("Debug downlinkLeg <'%s',%p>: r1 = (%lf  %lf  %lf)\n", downlinkLeg.GetName().c_str(), &downlinkLeg, r1[0], r1[1], r1[2]);
-	  MessageInterface::ShowMessage("                             r2 = (%lf  %lf  %lf)\n", r2[0], r2[1], r2[2]);
+         MessageInterface::ShowMessage("Debug downlinkLeg <'%s',%p>: r1 = (%lf  %lf  %lf)\n", downlinkLeg.GetName().c_str(), &downlinkLeg, r1[0], r1[1], r1[2]);
+         MessageInterface::ShowMessage("                             r2 = (%lf  %lf  %lf)\n", r2[0], r2[1], r2[2]);
       #endif
 
-	  Rvector3 ssb2cb_t3R = cb1->GetMJ2000Position(t3R) - ssb->GetMJ2000Position(t3R);		// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t3R
-      Rvector3 ssb2cb_t2T = cb2->GetMJ2000Position(t2T) - ssb->GetMJ2000Position(t2T);		// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t2T
+      Rvector3 ssb2cb_t3R = cb1->GetMJ2000Position(t3R) - ssb->GetMJ2000Position(t3R);      // vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t3R
+      Rvector3 ssb2cb_t2T = cb2->GetMJ2000Position(t2T) - ssb->GetMJ2000Position(t2T);      // vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t2T
       
-	  r1B = ssb2cb_t3R + r1;																// position of station at reception time t3R in SSB coordinate system
-	  r2B = ssb2cb_t2T + r2;																// position of spacecraft at transmit time t2T in SSB coordinate system
+      r1B = ssb2cb_t3R + r1;                                                      // position of station at reception time t3R in SSB coordinate system
+      r2B = ssb2cb_t2T + r2;                                                      // position of spacecraft at transmit time t2T in SSB coordinate system
 
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
+         Rmatrix33 mt = downlinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
-	     MessageInterface::ShowMessage("1. Get downlink leg range:\n");
-		 MessageInterface::ShowMessage("   Station %s position in %sMJ2000 coordinate system    : r1 = (%.12lf, %.12lf, %.12lf)km  at epoch t3R = %.12lf\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), r1.Get(0), r1.Get(1), r1.Get(2), t3R);
-		 MessageInterface::ShowMessage("   Spacecraft %s position in %sMJ2000 coordinate system : r2 = (%.12lf, %.12lf, %.12lf)km  at epoch t2T = %.12lf\n", participants[1]->GetName().c_str(),  participants[1]->GetJ2000BodyName().c_str(), r2.Get(0), r2.Get(1), r2.Get(2), t2T);
-		 MessageInterface::ShowMessage("   Station %s position in SSB coordinate system         : r1B = (%.12lf, %.12lf, %.12lf)km  at epoch t3R = %.12lf\n", participants[0]->GetName().c_str(), r1B.Get(0), r1B.Get(1), r1B.Get(2), t3R);
-		 MessageInterface::ShowMessage("   Spacecraft %s position in  SSB coordinate system     : r2B = (%.12lf, %.12lf, %.12lf)km  at epoch t2T = %.12lf\n", participants[1]->GetName().c_str(), r2B.Get(0), r2B.Get(1), r2B.Get(2), t2T);
+         MessageInterface::ShowMessage("1. Get downlink leg range:\n");
+         MessageInterface::ShowMessage("   Station %s position in %sMJ2000 coordinate system    : r1 = (%.12lf, %.12lf, %.12lf)km  at epoch t3R = %.12lf\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), r1.Get(0), r1.Get(1), r1.Get(2), t3R);
+         MessageInterface::ShowMessage("   Spacecraft %s position in %sMJ2000 coordinate system : r2 = (%.12lf, %.12lf, %.12lf)km  at epoch t2T = %.12lf\n", participants[1]->GetName().c_str(),  participants[1]->GetJ2000BodyName().c_str(), r2.Get(0), r2.Get(1), r2.Get(2), t2T);
+         MessageInterface::ShowMessage("   Station %s position in SSB coordinate system         : r1B = (%.12lf, %.12lf, %.12lf)km  at epoch t3R = %.12lf\n", participants[0]->GetName().c_str(), r1B.Get(0), r1B.Get(1), r1B.Get(2), t3R);
+         MessageInterface::ShowMessage("   Spacecraft %s position in  SSB coordinate system     : r2B = (%.12lf, %.12lf, %.12lf)km  at epoch t2T = %.12lf\n", participants[1]->GetName().c_str(), r2B.Get(0), r2B.Get(1), r2B.Get(2), t2T);
 
-		 MessageInterface::ShowMessage("   Transformation matrix from Earth fixed coordinate system to EarthFK5 coordinate system at epoch t3R = %.12lf:\n", t3R);
-		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(0,0), mt(0,1), mt(0,2));
-		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(1,0), mt(1,1), mt(1,2));
-		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(2,0), mt(2,1), mt(2,2));
+         MessageInterface::ShowMessage("   Transformation matrix from Earth fixed coordinate system to EarthFK5 coordinate system at epoch t3R = %.12lf:\n", t3R);
+         MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(0,0), mt(0,1), mt(0,2));
+         MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(1,0), mt(1,1), mt(1,2));
+         MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt(2,0), mt(2,1), mt(2,2));
       #endif
 #ifdef USE_EARTHMJ2000EQ_CS
-	  Rvector3 downlinkVector = r2 - r1;
+      Rvector3 downlinkVector = r2 - r1;
 #else
-      Rvector3 downlinkVector = r2B - r1B;		// rVector = r2 - r1;
+      Rvector3 downlinkVector = r2B - r1B;      // rVector = r2 - r1;
 #endif
       downlinkRange = downlinkVector.GetMagnitude();
 
       // Calculate ET-TAI at t3R:
-	  Real ettaiT3 = downlinkLeg.ETminusTAI(t3R, (GmatBase*)participants[0]);
+      Real ettaiT3 = downlinkLeg.ETminusTAI(t3R, (GmatBase*)participants[0]);
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     #ifdef USE_EARTHMJ2000EQ_CS
-	     MessageInterface::ShowMessage("   Downlink range without relativity correction = r2-r1:  %.12lf km\n", downlinkRange);
+         #ifdef USE_EARTHMJ2000EQ_CS
+         MessageInterface::ShowMessage("   Downlink range without relativity correction = r2-r1:  %.12lf km\n", downlinkRange);
          #else
          MessageInterface::ShowMessage("   Downlink range without relativity correction = r2B-r1B:  %.12lf km\n", downlinkRange);
          #endif
-		 MessageInterface::ShowMessage("   Relativity correction for downlink leg    = %.12lf km\n", downlinkLeg.GetRelativityCorrection());
-		 MessageInterface::ShowMessage("   Downlink range with relativity correction = %.12lf km\n", downlinkRange + downlinkLeg.GetRelativityCorrection());
-		 MessageInterface::ShowMessage("   (ET-TAI) at t3R = %.12le s\n", ettaiT3);
+         MessageInterface::ShowMessage("   Relativity correction for downlink leg    = %.12lf km\n", downlinkLeg.GetRelativityCorrection());
+         MessageInterface::ShowMessage("   Downlink range with relativity correction = %.12lf km\n", downlinkRange + downlinkLeg.GetRelativityCorrection());
+         MessageInterface::ShowMessage("   (ET-TAI) at t3R = %.12le s\n", ettaiT3);
       #endif
 
 
- 	   // 2. Calculate down link range rate:
-      Rvector3 p1V = downlinkLeg.GetVelocity(participants[0]);								// velocity of station at reception time t3R in central body MJ2000 coordinate system
-      Rvector3 p2V = downlinkLeg.GetVelocity(participants[1]);								// velocity of specraft at transmit time t2T in central body MJ2000 coordinate system
+      // 2. Calculate down link range rate:
+      Rvector3 p1V = downlinkLeg.GetVelocity(participants[0]);                        // velocity of station at reception time t3R in central body MJ2000 coordinate system
+      Rvector3 p2V = downlinkLeg.GetVelocity(participants[1]);                        // velocity of specraft at transmit time t2T in central body MJ2000 coordinate system
 
-	  Rvector3 ssb2cbV_t3R = cb1->GetMJ2000Velocity(t3R) - ssb->GetMJ2000Velocity(t3R);		// velocity of central body at time t3R w.r.t SSB MJ2000Eq coordinate system
-      Rvector3 ssb2cbV_t2T = cb2->GetMJ2000Velocity(t2T) - ssb->GetMJ2000Velocity(t2T);		// velocity of central body at time t2T w.r.t SSB MJ2000Eq coordinate system
+      Rvector3 ssb2cbV_t3R = cb1->GetMJ2000Velocity(t3R) - ssb->GetMJ2000Velocity(t3R);      // velocity of central body at time t3R w.r.t SSB MJ2000Eq coordinate system
+      Rvector3 ssb2cbV_t2T = cb2->GetMJ2000Velocity(t2T) - ssb->GetMJ2000Velocity(t2T);      // velocity of central body at time t2T w.r.t SSB MJ2000Eq coordinate system
       
-	  Rvector3 p1VB = ssb2cbV_t3R + p1V;													// velocity of station at reception time t3R in SSB coordinate system
-	  Rvector3 p2VB = ssb2cbV_t2T + p2V;													// velocity of spacecraft at transmit time t2T in SSB coordinate system
+      Rvector3 p1VB = ssb2cbV_t3R + p1V;                                       // velocity of station at reception time t3R in SSB coordinate system
+      Rvector3 p2VB = ssb2cbV_t2T + p2V;                                       // velocity of spacecraft at transmit time t2T in SSB coordinate system
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("2. Get downlink leg range rate:\n");
+         MessageInterface::ShowMessage("2. Get downlink leg range rate:\n");
          MessageInterface::ShowMessage("   Station %s velocity in %sMJ2000 coordinate system    : p1V = (%.12lf, %.12lf, %.12lf)km/s\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), p1V.Get(0), p1V.Get(1), p1V.Get(2));
          MessageInterface::ShowMessage("   Spacecraft %s velocity in %sMJ2000 coordinate system : p2V = (%.12lf, %.12lf, %.12lf)km/s\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), p2V.Get(0), p2V.Get(1), p2V.Get(2));
          MessageInterface::ShowMessage("   Station %s velocity in SSB coordinate system         : p1VB = (%.12lf, %.12lf, %.12lf)km/s\n", participants[0]->GetName().c_str(), p1VB.Get(0), p1VB.Get(1), p1VB.Get(2));
@@ -1006,7 +1006,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
 #ifdef USE_EARTHMJ2000EQ_CS
-	  Rvector downRRateVec = p2V - p1V /* - r12_j2k_vel*/;
+      Rvector downRRateVec = p2V - p1V /* - r12_j2k_vel*/;
 #else
       Rvector downRRateVec = p2VB - p1VB /* - r12_j2k_vel*/;
 #endif
@@ -1019,34 +1019,34 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
 
       // 3. Get the range from the uplink
-      Rvector3 r3, r4;						// position of uplink leg's participants in central body MJ2000Eq coordinate system
-	  Rvector3 r3B, r4B;					// position of uplink leg's participants in solar system bary center MJ2000Eq coordinate system
+      Rvector3 r3, r4;                  // position of uplink leg's participants in central body MJ2000Eq coordinate system
+      Rvector3 r3B, r4B;                // position of uplink leg's participants in solar system bary center MJ2000Eq coordinate system
 
-	  r3 = uplinkLeg.GetPosition(participants[0]);										// position of station at transmit time t1T in central body MJ2000Eq coordinate system
-      r4 = uplinkLeg.GetPosition(participants[1]);										// position of spacecraft at reception time t2R in central body MJ2000Eq coordinate system
-	  t1T = uplinkLeg.GetEventData((GmatBase*) participants[0]).epoch;					// transmit time at station for uplink leg
-	  t2R = uplinkLeg.GetEventData((GmatBase*) participants[1]).epoch;					// reception time at spacecraft for uplink leg
-	  
-	  Rvector3 ssb2cb_t2R = cb2->GetMJ2000Position(t2R) - ssb->GetMJ2000Position(t2R);	// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t2R
-      Rvector3 ssb2cb_t1T = cb1->GetMJ2000Position(t1T) - ssb->GetMJ2000Position(t1T);	// vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t1T
+      r3 = uplinkLeg.GetPosition(participants[0]);                                       // position of station at transmit time t1T in central body MJ2000Eq coordinate system
+      r4 = uplinkLeg.GetPosition(participants[1]);                                       // position of spacecraft at reception time t2R in central body MJ2000Eq coordinate system
+      t1T = uplinkLeg.GetEventData((GmatBase*) participants[0]).epoch;                   // transmit time at station for uplink leg
+      t2R = uplinkLeg.GetEventData((GmatBase*) participants[1]).epoch;                   // reception time at spacecraft for uplink leg
+     
+      Rvector3 ssb2cb_t2R = cb2->GetMJ2000Position(t2R) - ssb->GetMJ2000Position(t2R);   // vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t2R
+      Rvector3 ssb2cb_t1T = cb1->GetMJ2000Position(t1T) - ssb->GetMJ2000Position(t1T);   // vector from solar system bary center to central body in SSB MJ2000Eq coordinate system at time t1T
       
-	  r3B = ssb2cb_t1T + r3;															// position of station at transmit time t1T in SSB coordinate system
-	  r4B = ssb2cb_t2R + r4;															// position of spacecraft at reception time t2R in SSB coordinate system
+      r3B = ssb2cb_t1T + r3;                                                             // position of station at transmit time t1T in SSB coordinate system
+      r4B = ssb2cb_t2R + r4;                                                             // position of spacecraft at reception time t2R in SSB coordinate system
 
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     Rmatrix33 mt1 = uplinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
+         Rmatrix33 mt1 = uplinkLeg.GetEventData((GmatBase*) participants[0]).rInertial2obj.Transpose();
 
-	     MessageInterface::ShowMessage("3. Get uplink leg range:\n");
-		 MessageInterface::ShowMessage("   Spacecraft %s position in %sMJ2000 coordinate system : r4 = (%.12lf, %.12lf, %.12lf)km   at epoch t2R = %.12lf\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), r4.Get(0), r4.Get(1), r4.Get(2), t2R);
-		 MessageInterface::ShowMessage("   Station %s position in %sMJ2000 coordinate system    : r3 = (%.12lf, %.12lf, %.12lf)km   at epoch t1T = %.12lf\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), r3.Get(0), r3.Get(1), r3.Get(2), t1T);
-		 MessageInterface::ShowMessage("   Spacecraft %s position in SSB coordinate system      : r4B = (%.12lf, %.12lf, %.12lf)km   at epoch t2R = %.12lf\n", participants[1]->GetName().c_str(), r4B.Get(0), r4B.Get(1), r4B.Get(2), t2R);
-		 MessageInterface::ShowMessage("   Station %s position in SSB coordinate system         : r3B = (%.12lf, %.12lf, %.12lf)km   at epoch t1T = %.12lf\n", participants[0]->GetName().c_str(), r3B.Get(0), r3B.Get(1), r3B.Get(2), t1T);
+         MessageInterface::ShowMessage("3. Get uplink leg range:\n");
+         MessageInterface::ShowMessage("   Spacecraft %s position in %sMJ2000 coordinate system : r4 = (%.12lf, %.12lf, %.12lf)km   at epoch t2R = %.12lf\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), r4.Get(0), r4.Get(1), r4.Get(2), t2R);
+         MessageInterface::ShowMessage("   Station %s position in %sMJ2000 coordinate system    : r3 = (%.12lf, %.12lf, %.12lf)km   at epoch t1T = %.12lf\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), r3.Get(0), r3.Get(1), r3.Get(2), t1T);
+         MessageInterface::ShowMessage("   Spacecraft %s position in SSB coordinate system      : r4B = (%.12lf, %.12lf, %.12lf)km   at epoch t2R = %.12lf\n", participants[1]->GetName().c_str(), r4B.Get(0), r4B.Get(1), r4B.Get(2), t2R);
+         MessageInterface::ShowMessage("   Station %s position in SSB coordinate system         : r3B = (%.12lf, %.12lf, %.12lf)km   at epoch t1T = %.12lf\n", participants[0]->GetName().c_str(), r3B.Get(0), r3B.Get(1), r3B.Get(2), t1T);
 
-		 MessageInterface::ShowMessage("   Transformation matrix from Earth fixed coordinate system to EarthFK5 coordinate system at epoch t1T = %.12lf:\n", t1T);
-		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(0,0), mt1(0,1), mt1(0,2));
-		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(1,0), mt1(1,1), mt1(1,2));
-		 MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(2,0), mt1(2,1), mt1(2,2));
+         MessageInterface::ShowMessage("   Transformation matrix from Earth fixed coordinate system to EarthFK5 coordinate system at epoch t1T = %.12lf:\n", t1T);
+         MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(0,0), mt1(0,1), mt1(0,2));
+         MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(1,0), mt1(1,1), mt1(1,2));
+         MessageInterface::ShowMessage("                %18.12lf  %18.12lf  %18.12lf\n", mt1(2,0), mt1(2,1), mt1(2,2));
       #endif
 #ifdef USE_EARTHMJ2000EQ_CS
       Rvector3 uplinkVector = r4 - r3;
@@ -1055,38 +1055,38 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 #endif
       uplinkRange = uplinkVector.GetMagnitude();
 
-	  // Calculate ET-TAI at t1T:
-	  Real ettaiT1 = downlinkLeg.ETminusTAI(t1T, (GmatBase*)participants[0]);
+      // Calculate ET-TAI at t1T:
+      Real ettaiT1 = downlinkLeg.ETminusTAI(t1T, (GmatBase*)participants[0]);
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     #ifdef USE_EARTHMJ2000EQ_CS
-	     MessageInterface::ShowMessage("   Uplink range without relativity correction = r4-r3:  %.12lf km\n", uplinkRange);
+         #ifdef USE_EARTHMJ2000EQ_CS
+         MessageInterface::ShowMessage("   Uplink range without relativity correction = r4-r3:  %.12lf km\n", uplinkRange);
          #else
          MessageInterface::ShowMessage("   Uplink range without relativity correction = r4B-r3B:  %.12lf km\n", uplinkRange);
          #endif
-		 MessageInterface::ShowMessage("   Relativity correction for uplink leg    = %.12lf km\n", uplinkLeg.GetRelativityCorrection());
-		 MessageInterface::ShowMessage("   Uplink range without relativity correction = %.12lf km\n", uplinkRange + uplinkLeg.GetRelativityCorrection());
-		 MessageInterface::ShowMessage("   (ET-TAI) at t1T = %.12le s\n", ettaiT1);
+         MessageInterface::ShowMessage("   Relativity correction for uplink leg    = %.12lf km\n", uplinkLeg.GetRelativityCorrection());
+         MessageInterface::ShowMessage("   Uplink range without relativity correction = %.12lf km\n", uplinkRange + uplinkLeg.GetRelativityCorrection());
+         MessageInterface::ShowMessage("   (ET-TAI) at t1T = %.12le s\n", ettaiT1);
       #endif
 
 
-   	  // 4. Calculate up link range rate
+      // 4. Calculate up link range rate
       Rvector3 p3V = uplinkLeg.GetVelocity(participants[0]);
       Rvector3 p4V = uplinkLeg.GetVelocity(participants[1]);
 
 
-	  Rvector3 ssb2cbV_t2R = cb2->GetMJ2000Velocity(t2R) - ssb->GetMJ2000Velocity(t2R);		// velocity of central body at time t2R w.r.t SSB MJ2000Eq coordinate system
-      Rvector3 ssb2cbV_t1T = cb1->GetMJ2000Velocity(t1T) - ssb->GetMJ2000Velocity(t1T);		// velocity of central body at time t1T w.r.t SSB MJ2000Eq coordinate system
+      Rvector3 ssb2cbV_t2R = cb2->GetMJ2000Velocity(t2R) - ssb->GetMJ2000Velocity(t2R);      // velocity of central body at time t2R w.r.t SSB MJ2000Eq coordinate system
+      Rvector3 ssb2cbV_t1T = cb1->GetMJ2000Velocity(t1T) - ssb->GetMJ2000Velocity(t1T);      // velocity of central body at time t1T w.r.t SSB MJ2000Eq coordinate system
       
-	  Rvector3 p3VB = ssb2cbV_t1T + p3V;													// velocity of station at reception time t1T in SSB coordinate system
-	  Rvector3 p4VB = ssb2cbV_t2R + p4V;													// velocity of spacecraft at transmit time t2R in SSB coordinate system
+      Rvector3 p3VB = ssb2cbV_t1T + p3V;                                       // velocity of station at reception time t1T in SSB coordinate system
+      Rvector3 p4VB = ssb2cbV_t2R + p4V;                                       // velocity of spacecraft at transmit time t2R in SSB coordinate system
 
-	  // @todo Relative origin velocities need to be subtracted when the origins
+      // @todo Relative origin velocities need to be subtracted when the origins
       // differ; check and fix that part using r12_j2k_vel here.  It's not yet
       // incorporated because we need to handle the different epochs for the
       // bodies, and we ought to do this part in barycentric coordinates
 #ifdef USE_EARTHMJ2000EQ_CS
-	  Rvector upRRateVec = p4V - p3V /* - r12_j2k_vel*/ ;
+      Rvector upRRateVec = p4V - p3V /* - r12_j2k_vel*/ ;
 #else
       Rvector upRRateVec = p4VB - p3VB /* - r12_j2k_vel*/ ;
 #endif
@@ -1097,85 +1097,85 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       targetRangeRate = (downlinkRangeRate + uplinkRangeRate) / 2.0;
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("4. Get uplink leg range rate:\n");
-		 MessageInterface::ShowMessage("   Station %s velocity in %sMJ2000 coordinate system    : p3V = (%.12lf, %.12lf, %.12lf)km/s\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), p3V.Get(0), p3V.Get(1), p3V.Get(2));
+         MessageInterface::ShowMessage("4. Get uplink leg range rate:\n");
+         MessageInterface::ShowMessage("   Station %s velocity in %sMJ2000 coordinate system    : p3V = (%.12lf, %.12lf, %.12lf)km/s\n", participants[0]->GetName().c_str(), participants[0]->GetJ2000BodyName().c_str(), p3V.Get(0), p3V.Get(1), p3V.Get(2));
          MessageInterface::ShowMessage("   Spacecraft %s velocity in %sMJ2000 coordinate system : p4V = (%.12lf, %.12lf, %.12lf)km/s\n", participants[1]->GetName().c_str(), participants[1]->GetJ2000BodyName().c_str(), p4V.Get(0), p4V.Get(1), p4V.Get(2));
-		 MessageInterface::ShowMessage("   Station %s velocity in SSB coordinate system         : p3VB = (%.12lf, %.12lf, %.12lf)km/s\n", participants[0]->GetName().c_str(), p3VB.Get(0), p3VB.Get(1), p3VB.Get(2));
+         MessageInterface::ShowMessage("   Station %s velocity in SSB coordinate system         : p3VB = (%.12lf, %.12lf, %.12lf)km/s\n", participants[0]->GetName().c_str(), p3VB.Get(0), p3VB.Get(1), p3VB.Get(2));
          MessageInterface::ShowMessage("   Spacecraft %s velocity in SSB coordinate system      : p4VB = (%.12lf, %.12lf, %.12lf)km/s\n", participants[1]->GetName().c_str(), p4VB.Get(0), p4VB.Get(1), p4VB.Get(2));
          MessageInterface::ShowMessage("   Uplink Range Rate:  %.12lf km/s\n", uplinkRangeRate);
-		 MessageInterface::ShowMessage("   Target Range Rate:  %.12lf km/s\n", targetRangeRate);
-		 MessageInterface::ShowMessage("   Delay between transmiting signal and receiving signal at transponder:  t2T - t2R = %.12le s\n", (t2T-t2R)*86400);
+         MessageInterface::ShowMessage("   Target Range Rate:  %.12lf km/s\n", targetRangeRate);
+         MessageInterface::ShowMessage("   Delay between transmiting signal and receiving signal at transponder:  t2T - t2R = %.12le s\n", (t2T-t2R)*86400);
       #endif
 
 
       // 5. Get sensors used in DSN 2-ways range
-	  if (participantHardware.empty()||
-	  		((!participantHardware.empty())&&
-	   		  participantHardware[0].empty()&&
-	   		  participantHardware[1].empty()
-	   		)
-	  	 )
-	  {
-		 // Throw an exception when no hardware is defined in measurement due to frequency factor specified 
-		 // based on transmitted frequency from transmitter.
-		 throw MeasurementException("No transmmitter, transponder, and reciever is defined in measurement participants.\n");
-		 return false;
+      if (participantHardware.empty()||
+           ((!participantHardware.empty())&&
+              participantHardware[0].empty()&&
+              participantHardware[1].empty()
+           )
+        )
+      {
+         // Throw an exception when no hardware is defined in measurement due to frequency factor specified 
+         // based on transmitted frequency from transmitter.
+         throw MeasurementException("No transmmitter, transponder, and reciever is defined in measurement participants.\n");
+         return false;
       }
-
+      
       ObjectArray objList1;
       ObjectArray objList2;
       ObjectArray objList3;
-      //			objList1 := all transmitters in participantHardware list
-      //			objList2 := all receivers in participantHardware list
-      //			objList3 := all transponders in participantHardware list
+      //         objList1 := all transmitters in participantHardware list
+      //         objList2 := all receivers in participantHardware list
+      //         objList3 := all transponders in participantHardware list
       for(std::vector<Hardware*>::iterator hw = this->participantHardware[0].begin();
-		  		hw != this->participantHardware[0].end(); ++hw)
+              hw != this->participantHardware[0].end(); ++hw)
       {
-		 if ((*hw) != NULL)
-		 {
-		 	if ((*hw)->GetTypeName() == "Transmitter")
-		  			objList1.push_back(*hw);
-		 	if ((*hw)->GetTypeName() == "Receiver")
-		  			objList2.push_back(*hw);
-		 }
-		 else
-		 	MessageInterface::ShowMessage(" sensor = NULL\n");
+         if ((*hw) != NULL)
+         {
+            if ((*hw)->GetTypeName() == "Transmitter")
+               objList1.push_back(*hw);
+            if ((*hw)->GetTypeName() == "Receiver")
+               objList2.push_back(*hw);
+         }
+         else
+            MessageInterface::ShowMessage(" sensor = NULL\n");
       }
 
       for(std::vector<Hardware*>::iterator hw = this->participantHardware[1].begin();
-		  		hw != this->participantHardware[1].end(); ++hw)
+              hw != this->participantHardware[1].end(); ++hw)
       {
-		 if ((*hw) != NULL)
-		 {
-		 	if ((*hw)->GetTypeName() == "Transponder")
-		  			objList3.push_back(*hw);
-		 }
-		 else
-		 	MessageInterface::ShowMessage(" sensor = NULL\n");
+         if ((*hw) != NULL)
+         {
+            if ((*hw)->GetTypeName() == "Transponder")
+               objList3.push_back(*hw);
+         }
+         else
+            MessageInterface::ShowMessage(" sensor = NULL\n");
       }
 
       if (objList1.size() != 1)
-		 throw MeasurementException(((objList1.size() == 0)?"Error: The first participant does not have a transmitter to send signal.\n":"Error: The first participant has more than one transmitter.\n"));
+         throw MeasurementException(((objList1.size() == 0)?"Error: The first participant does not have a transmitter to send signal.\n":"Error: The first participant has more than one transmitter.\n"));
       if (objList2.size() != 1)
-		 throw MeasurementException(((objList2.size() == 0)?"Error: The first participant does not have a receiver to receive signal.\n":"Error: The first participant has more than one receiver.\n"));
-	  if (objList3.size() != 1)
-	  	 throw MeasurementException((objList3.size() == 0)?"Error: The second participant does not have a transponder to transpond signal.\n":"Error: The second participant has more than one transponder.\n");
+         throw MeasurementException(((objList2.size() == 0)?"Error: The first participant does not have a receiver to receive signal.\n":"Error: The first participant has more than one receiver.\n"));
+      if (objList3.size() != 1)
+         throw MeasurementException((objList3.size() == 0)?"Error: The second participant does not have a transponder to transpond signal.\n":"Error: The second participant has more than one transponder.\n");
 
-	  Transmitter* 	gsTransmitter 	= (Transmitter*)objList1[0];
-	  Receiver* 		gsReceiver 		= (Receiver*)objList2[0];
-	  Transponder* 	scTransponder 	= (Transponder*)objList3[0];
-	  if (gsTransmitter == NULL)
-	   	 throw GmatBaseException("Transmitter is NULL object.\n");
-	  if (gsReceiver == NULL)
-	   	 throw GmatBaseException("Receiver is NULL object.\n");
-	  if (scTransponder == NULL)
-	   	 throw GmatBaseException("Transponder is NULL object.\n");
+      Transmitter*    gsTransmitter    = (Transmitter*)objList1[0];
+      Receiver*       gsReceiver       = (Receiver*)objList2[0];
+      Transponder*    scTransponder    = (Transponder*)objList3[0];
+      if (gsTransmitter == NULL)
+         throw GmatBaseException("Transmitter is NULL object.\n");
+      if (gsReceiver == NULL)
+         throw GmatBaseException("Receiver is NULL object.\n");
+      if (scTransponder == NULL)
+         throw GmatBaseException("Transponder is NULL object.\n");
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("5. Sensors, delays, and signals:\n");
-		 MessageInterface::ShowMessage("   List of sensors: %s, %s, %s\n",
-				gsTransmitter->GetName().c_str(), gsReceiver->GetName().c_str(),
-				scTransponder->GetName().c_str());
+         MessageInterface::ShowMessage("5. Sensors, delays, and signals:\n");
+         MessageInterface::ShowMessage("   List of sensors: %s, %s, %s\n",
+            gsTransmitter->GetName().c_str(), gsReceiver->GetName().c_str(),
+            scTransponder->GetName().c_str());
       #endif
 
 
@@ -1185,318 +1185,342 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       targetDelay = scTransponder->GetDelay();
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		 MessageInterface::ShowMessage("   Transmitter delay = %le s\n", gsTransmitter->GetDelay());
-		 MessageInterface::ShowMessage("   Receiver delay = %le s\n", gsReceiver->GetDelay());
-		 MessageInterface::ShowMessage("   Transponder delay = %le s\n", scTransponder->GetDelay());
+         MessageInterface::ShowMessage("   Transmitter delay = %le s\n", gsTransmitter->GetDelay());
+         MessageInterface::ShowMessage("   Receiver delay = %le s\n", gsReceiver->GetDelay());
+         MessageInterface::ShowMessage("   Transponder delay = %le s\n", scTransponder->GetDelay());
       #endif
      
 
       // 7. Get frequency from transmitter of ground station (participants[0])
-	  Real uplinkFreq;
-	  if (obsData == NULL)																											// made changes by TUAN NGUYEN
-	  {
-		 if (rampTB == NULL)
-		 {
+      Real uplinkFreq;
+      if (obsData == NULL)                                                                                 // made changes by TUAN NGUYEN
+      {
+         if (rampTB == NULL)
+         {
             // Get uplink frequency from GMAT script when ramp table is not used
             Signal* uplinkSignal = gsTransmitter->GetSignal();
-            uplinkFreq = uplinkSignal->GetValue();		// unit: MHz
-	        frequency = uplinkFreq*1.0e6;				// unit: Hz
+            uplinkFreq = uplinkSignal->GetValue();                  // unit: MHz
+            frequency = uplinkFreq*1.0e6;                           // unit: Hz
 
-			// Get uplink band based on definition of frequency range
-			freqBand = FrequencyBand(frequency);
+            // Get uplink band based on definition of frequency range
+            freqBand = FrequencyBand(frequency);
 
-			// Range modulo constant is specified by GMAT script
+            // Range modulo constant is specified by GMAT script
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from GMAT script...\n"); 
+               MessageInterface::ShowMessage("   Uplink frequency is gotten from GMAT script...\n"); 
             #endif
-		 }
-		 else
-		 {
-			// Get uplink frequency at a given time from ramped frequency table
-			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
-			uplinkFreq = frequency/1.0e6;							// unit MHz
+         }
+         else
+         {
+            // Get uplink frequency at a given time from ramped frequency table
+            frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
+            uplinkFreq = frequency/1.0e6;                          // unit MHz
 
-			// Get frequency band from ramp table at given time
-			freqBand = GetUplinkBandFromRampTable(t1T);
+            // Get frequency band from ramp table at given time
+            freqBand = GetUplinkBandFromRampTable(t1T);
 
-			// Range modulo constant is specified by GMAT script
+            // Range modulo constant is specified by GMAT script
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
+               MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
             #endif
-		 }
-	  }
-	  else
-	  {
-		 if (rampTB == NULL)
-		 {
-			// Get uplink frequency at a given time from observation data
-            frequency = obsData->uplinkFreq;			            // unit: Hz	
-
-            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
-            #endif
-		 }
-		 else
-		 {
-			// Get uplink frequency at a given time from ramped frequency table
-			frequency = GetFrequencyFromRampTable(t1T);				// unit: Hz		// Get frequency at transmit time t1T
+         }
+      }
+      else
+      {
+         if (rampTB == NULL)
+         {
+            // Get uplink frequency at a given time from observation data
+            frequency = obsData->uplinkFreq;                       // unit: Hz   
 
             #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		      MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
+            MessageInterface::ShowMessage("   Uplink frequency is gotten from observation data...: frequency = %.12le\n", frequency); 
             #endif
-		 }
+         }
+         else
+         {
+            // Get uplink frequency at a given time from ramped frequency table
+            frequency = GetFrequencyFromRampTable(t1T);            // unit: Hz      // Get frequency at transmit time t1T
 
-         uplinkFreq = frequency/1.0e6;				// unit: MHz
+            #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+               MessageInterface::ShowMessage("   Uplink frequency is gotten from ramp table...: frequency = %.12le\n", frequency); 
+            #endif
+         }
+
+         uplinkFreq = frequency/1.0e6;                            // unit: MHz
          freqBand = obsData->uplinkBand;
-         rangeModulo = obsData->rangeModulo;		// unit: range unit
-		 obsValue = obsData->value;					// unit: range unit
+         rangeModulo = obsData->rangeModulo;                      // unit: range unit
+         obsValue = obsData->value;                               // unit: range unit
 
          #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
             MessageInterface::ShowMessage("   Uplink band, range modulo constant, and observation value are gotten from observation data...\n"); 
          #endif
 
-	  }
-	  
+      }
+     
 
       // 8. Calculate media correction for uplink leg:
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS   
          MessageInterface::ShowMessage("6. Media correction for uplink leg\n");
-		 MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
+         MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
       #endif
 
-	  // r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system for uplink leg		// made change by TUAN NGUYEN
-	  RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);						// made change by TUAN NGUYEN
+      // r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system for uplink leg      // made change by TUAN NGUYEN
+      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);                          // made change by TUAN NGUYEN
 
-	  Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
+      Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
       Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
-	  #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		 MessageInterface::ShowMessage("   Uplink media correction           = %.12lf m\n",uplinkCorrection[0]);
-		 MessageInterface::ShowMessage("   Uplink relativity correction      = %.12lf km\n",uplinkLeg.GetRelativityCorrection());
-		 MessageInterface::ShowMessage("   Uplink total range correction     = %.12lf km\n",uplinkRangeCorrection);
-		 MessageInterface::ShowMessage("   Uplink precision light time range = %.12lf km\n",uplinkRange);
-		 MessageInterface::ShowMessage("   Uplink real range                 = %.12lf km\n",uplinkRealRange);
-	  #endif
+      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+         MessageInterface::ShowMessage("   Uplink media correction           = %.12lf m\n",uplinkCorrection[0]);
+         MessageInterface::ShowMessage("   Uplink relativity correction      = %.12lf km\n",uplinkLeg.GetRelativityCorrection());
+         MessageInterface::ShowMessage("   Uplink total range correction     = %.12lf km\n",uplinkRangeCorrection);
+         MessageInterface::ShowMessage("   Uplink precision light time range = %.12lf km\n",uplinkRange);
+         MessageInterface::ShowMessage("   Uplink real range                 = %.12lf km\n",uplinkRealRange);
+      #endif
 
 
       // 9. Doppler shift the frequency from the transmitter using uplinkRangeRate:
-	  Real uplinkDSFreq = (1 - uplinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*uplinkFreq;
+      Real uplinkDSFreq = (1 - uplinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*uplinkFreq;
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("7. Transponder input and output frequencies\n");
-		 MessageInterface::ShowMessage("   Uplink Doppler shift frequency = %.12lf MHz\n", uplinkDSFreq);
+         MessageInterface::ShowMessage("7. Transponder input and output frequencies\n");
+         MessageInterface::ShowMessage("   Uplink Doppler shift frequency = %.12lf MHz\n", uplinkDSFreq);
       #endif
 
 
-	  // 10.Set frequency for the input signal of transponder
-	  Signal* inputSignal = scTransponder->GetSignal(0);
-	  inputSignal->SetValue(uplinkDSFreq);
-	  scTransponder->SetSignal(inputSignal, 0);
+      // 10.Set frequency for the input signal of transponder
+      Signal* inputSignal = scTransponder->GetSignal(0);
+      inputSignal->SetValue(uplinkDSFreq);
+      scTransponder->SetSignal(inputSignal, 0);
 
 
-	  // 11. Check the transponder feasibility to receive the input signal:
-	  if (scTransponder->IsFeasible(0) == false)
-	  {
-	   	 currentMeasurement.isFeasible = false;
-	   	 currentMeasurement.value[0] = 0;
-	   	 throw MeasurementException("The transponder is unfeasible to receive uplink signal.\n");
-	  }
+      // 11. Check the transponder feasibility to receive the input signal:
+      if (scTransponder->IsFeasible(0) == false)
+      {
+         currentMeasurement.isFeasible = false;
+         currentMeasurement.value[0] = 0;
+         throw MeasurementException("The transponder is unfeasible to receive uplink signal.\n");
+      }
 
 
-	  // 12. Get frequency of transponder output signal
-	  Signal* outputSignal = scTransponder->GetSignal(1);
-	  Real downlinkFreq = outputSignal->GetValue();
+      // 12. Get frequency of transponder output signal
+      Signal* outputSignal = scTransponder->GetSignal(1);
+      Real downlinkFreq = outputSignal->GetValue();
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		 MessageInterface::ShowMessage("  Downlink frequency = %.12lf Mhz\n", downlinkFreq);
+         MessageInterface::ShowMessage("  Downlink frequency = %.12lf Mhz\n", downlinkFreq);
       #endif
 
 
-	  // 13. Doppler shift the transponder output frequency:
-	  Real downlinkDSFreq = (1 - downlinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*downlinkFreq;
+      // 13. Doppler shift the transponder output frequency:
+      Real downlinkDSFreq = (1 - downlinkRangeRate*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM)*downlinkFreq;
 
-	  #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		 MessageInterface::ShowMessage("  Downlink Doppler shift frequency = %.12lf MHz\n", downlinkDSFreq);
+      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+         MessageInterface::ShowMessage("  Downlink Doppler shift frequency = %.12lf MHz\n", downlinkDSFreq);
       #endif
 
 
-	  // 14. Set frequency on receiver
-	  Signal* downlinkSignal = gsReceiver->GetSignal();
-	  downlinkSignal->SetValue(downlinkDSFreq);
+      // 14. Set frequency on receiver
+      Signal* downlinkSignal = gsReceiver->GetSignal();
+      downlinkSignal->SetValue(downlinkDSFreq);
 
 
-	  // 15. Check the receiver feasibility to receive the downlink signal
-	  if (gsReceiver->IsFeasible() == false)
-	  {
-	   	 currentMeasurement.isFeasible = false;
-	   	 currentMeasurement.value[0] = 0;
-	   	 throw MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
-	  }
+      // 15. Check the receiver feasibility to receive the downlink signal
+      if (gsReceiver->IsFeasible() == false)
+      {
+         currentMeasurement.isFeasible = false;
+         currentMeasurement.value[0] = 0;
+         throw MeasurementException("The receiver is unfeasible to receive downlink signal.\n");
+      }
 
 
-	  // 16. Calculate media correction for downlink leg:
+      // 16. Calculate media correction for downlink leg:
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
       #endif
-	  // r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system for downlink leg					// made change by TUAN NGUYEN
-	  RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);					// made change by TUAN NGUYEN
+      // r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system for downlink leg               // made change by TUAN NGUYEN
+      RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);                               // made change by TUAN NGUYEN
 
-	  Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
-	  Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
+      Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
+      Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		 MessageInterface::ShowMessage("   Downlink media correction           = %.12lf m\n",downlinkCorrection[0]);
-		 MessageInterface::ShowMessage("   Downlink relativity correction      = %.12lf km\n",downlinkLeg.GetRelativityCorrection());
-		 MessageInterface::ShowMessage("   Downlink total range correction     = %.12lf km\n",downlinkRangeCorrection);
-		 MessageInterface::ShowMessage("   Downlink precision light time range = %.12lf km\n",downlinkRange);
-		 MessageInterface::ShowMessage("   Downlink real range                 = %.12lf km\n",downlinkRealRange);
+         MessageInterface::ShowMessage("   Downlink media correction           = %.12lf m\n",downlinkCorrection[0]);
+         MessageInterface::ShowMessage("   Downlink relativity correction      = %.12lf km\n",downlinkLeg.GetRelativityCorrection());
+         MessageInterface::ShowMessage("   Downlink total range correction     = %.12lf km\n",downlinkRangeCorrection);
+         MessageInterface::ShowMessage("   Downlink precision light time range = %.12lf km\n",downlinkRange);
+         MessageInterface::ShowMessage("   Downlink real range                 = %.12lf km\n",downlinkRealRange);
       #endif
 
-	  // 17. Calculate travel time 
-	  // 17.1. Calculate uplink time and down link time:
-	  uplinkTime   = uplinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
-	  downlinkTime = downlinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
-	  // 17.2. Calculate ET-TAI correction
-	  Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);												// made change by TUAN NGUYEN
-	  // 17.3 Calculate travel time
-	  Real realTravelTime = uplinkTime + downlinkTime + ettaiCorrection + receiveDelay + transmitDelay + targetDelay;		// unit: second		// made change by TUAN NGUYEN
+      // 17. Calculate travel time 
+      // 17.1. Calculate uplink time and down link time:
+      uplinkTime   = uplinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+      downlinkTime = downlinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
+      // 17.2. Calculate ET-TAI correction
+      Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);                                                                 // made change by TUAN NGUYEN
+      // 17.3 Calculate travel time
+      Real realTravelTime = uplinkTime + downlinkTime + ettaiCorrection + receiveDelay + transmitDelay + targetDelay;      // unit: second      // made change by TUAN NGUYEN
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("9. Travel time:\n");
-		 MessageInterface::ShowMessage("   Uplink time         = %.12lf s\n",uplinkTime);
-		 MessageInterface::ShowMessage("   Downlink time       = %.12lf s\n",downlinkTime);
-		 MessageInterface::ShowMessage("   (ET-TAI) correction = %.12le s\n", ettaiCorrection);
-		 MessageInterface::ShowMessage("   Transmit delay      = %.12le s\n", transmitDelay);
-		 MessageInterface::ShowMessage("   Transpond delay     = %.12le s\n", targetDelay);
-		 MessageInterface::ShowMessage("   Receive delay       = %.12le s\n", receiveDelay);
-		 MessageInterface::ShowMessage("   Real travel time    = %.15lf s\n",realTravelTime);
+         MessageInterface::ShowMessage("9. Travel time:\n");
+         MessageInterface::ShowMessage("   Uplink time         = %.12lf s\n",uplinkTime);
+         MessageInterface::ShowMessage("   Downlink time       = %.12lf s\n",downlinkTime);
+         MessageInterface::ShowMessage("   (ET-TAI) correction = %.12le s\n", ettaiCorrection);
+         MessageInterface::ShowMessage("   Transmit delay      = %.12le s\n", transmitDelay);
+         MessageInterface::ShowMessage("   Transpond delay     = %.12le s\n", targetDelay);
+         MessageInterface::ShowMessage("   Receive delay       = %.12le s\n", receiveDelay);
+         MessageInterface::ShowMessage("   Real travel time    = %.15lf s\n",realTravelTime);
       #endif
 
 
-	  //18. Verify uplink leg light path not to be blocked by station's central body
-      UpdateRotationMatrix(t1T, "R_o_j2k");
-	  Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();
-	  currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;		// elevation angle in degree	// made changes by TUAN NGUYEN
-	  if (currentMeasurement.feasibilityValue > minAngle)
-	  {
-         UpdateRotationMatrix(t3R, "R_o_j2k");
-         outState = (R_o_j2k * (r2 - r1)).GetUnitVector();
-	     Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;					// elevation angle in degree	// made changes by TUAN NGUYEN
+      //18. Verify uplink leg light path not to be blocked by station's central body
+      // UpdateRotationMatrix(t1T, "R_o_j2k");
+      UpdateRotationMatrix(t1T, "o_j2k");
+      // Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();                                                                  // made changes by TUAN NGUYEN
+      Rvector3 rVec = r4B - r3B;
+      Rvector3 obsVec = R_o_j2k * rVec;
+      Rvector3 outState = obsVec.GetUnitVector();           // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree      // made changes by TUAN NGUYEN
+      //MessageInterface::ShowMessage("At transmit time t1T = %.12lf:\n", t1T);
+      //MessageInterface::ShowMessage("Range Vector in SBBMJ2000: [ %.12lf   %.12lf   %.12lf\n", rVec[0], rVec[1], rVec[2]);
+      //MessageInterface::ShowMessage("R_o_2k = [ %.12lf   %.12lf   %.12lf\n", R_o_j2k(0,0), R_o_j2k(0,1), R_o_j2k(0,2));
+      //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf\n", R_o_j2k(1,0), R_o_j2k(1,1), R_o_j2k(1,2));
+      //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf]\n", R_o_j2k(2,0), R_o_j2k(2,1), R_o_j2k(2,2));
+      //MessageInterface::ShowMessage("Observation vector: [ %.12lf   %.12lf   %.12lf\n", obsVec[0], obsVec[1], obsVec[2]);
+      if (currentMeasurement.feasibilityValue > minAngle)
+      {
+         // UpdateRotationMatrix(t3R, "R_o_j2k");
+         UpdateRotationMatrix(t3R, "o_j2k");
+         // outState = (R_o_j2k * (r2 - r1)).GetUnitVector();                                                                        // made changes by TUAN NGUYEN
+         rVec = r2B - r1B;
+         obsVec = R_o_j2k * rVec;
+         outState = obsVec.GetUnitVector();                 // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
+         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree      // made changes by TUAN NGUYEN
 
-		 if (feasibilityValue > minAngle)
-		 {
-			currentMeasurement.unfeasibleReason = "N";
-		    currentMeasurement.isFeasible = true;
-		 }
-		 else
-		 {
-			currentMeasurement.feasibilityValue = feasibilityValue;
-			currentMeasurement.unfeasibleReason = "B2";
-		    currentMeasurement.isFeasible = false;
-		 }
-	  }
-	  else
-	  {
-		 currentMeasurement.unfeasibleReason = "B1";
-		 currentMeasurement.isFeasible = false;
-	  }
+         //MessageInterface::ShowMessage("At receive time t3R = %.12lf:\n", t3R);
+         //MessageInterface::ShowMessage("Range Vector in SBBMJ2000: [ %.12lf   %.12lf   %.12lf\n", rVec[0], rVec[1], rVec[2]);
+         //MessageInterface::ShowMessage("R_o_2k = [ %.12lf   %.12lf   %.12lf\n", R_o_j2k(0,0), R_o_j2k(0,1), R_o_j2k(0,2));
+         //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf\n", R_o_j2k(1,0), R_o_j2k(1,1), R_o_j2k(1,2));
+         //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf]\n", R_o_j2k(2,0), R_o_j2k(2,1), R_o_j2k(2,2));
+         //MessageInterface::ShowMessage("Observation vector: [ %.12lf   %.12lf   %.12lf\n", obsVec[0], obsVec[1], obsVec[2]);
 
-	  // 19. Calculate real range
-	  //	   Real realRange = ((upRange + downRange) /
-	  //            (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M) +
-	  //            receiveDelay + transmitDelay + targetDelay) * freqFactor;
+         if (feasibilityValue > minAngle)
+         {
+            currentMeasurement.unfeasibleReason = "N";
+            currentMeasurement.isFeasible = true;
+            //MessageInterface::ShowMessage(" N up   :  uplink:  %.12lf  downlink:  %.12lf\n", currentMeasurement.feasibilityValue, feasibilityValue);
+         }
+         else
+         {
+            //MessageInterface::ShowMessage(" B2 down:  uplink:  %.12lf  downlink:  %.12lf\n", currentMeasurement.feasibilityValue, feasibilityValue);
+            currentMeasurement.feasibilityValue = feasibilityValue;
+            currentMeasurement.unfeasibleReason = "B2";
+            currentMeasurement.isFeasible = false;
+         }
+      }
+      else
+      {
+         currentMeasurement.unfeasibleReason = "B1";
+         currentMeasurement.isFeasible = false;
 
-	  Real freqConversionFactor = GetFrequencyFactor(frequency);
-	  Real realRangeKm = realTravelTime * GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;		    // unit: km
-	  Real realRange;																					// unit: range unit
-	  Real realRangeFull;																				// unit: range unit
+         //UpdateRotationMatrix(t3R, "o_j2k");
+         //outState = (R_o_j2k * (r2B - r1B)).GetUnitVector();                 // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
+         //Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree      // made changes by TUAN NGUYEN
+         //MessageInterface::ShowMessage(" B1 up  :  uplink:  %.12lf  downlink:  \n", currentMeasurement.feasibilityValue, feasibilityValue);
+      }
 
-	  if (rampTB == NULL)
-	  {
-		 // unrapmed frequency: Moyer's eq 13-122
-	     #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		    MessageInterface::ShowMessage("   Unramped frequency calculation is used\n");
+      // 19. Calculate real range
+      Real freqConversionFactor = GetFrequencyFactor(frequency);
+      Real realRangeKm = realTravelTime * GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/1000.0;          // unit: km
+      Real realRange;                                                                                   // unit: range unit
+      Real realRangeFull;                                                                               // unit: range unit
+
+      if (rampTB == NULL)
+      {
+         // unrapmed frequency: Moyer's eq 13-122
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("   Unramped frequency calculation is used\n");
          #endif
 
-		 realRangeFull = realTravelTime*freqConversionFactor;											// unit: range unit
-	  }
-	  else
-	  {
+         realRangeFull = realTravelTime*freqConversionFactor;                                 // unit: range unit
+      }
+      else
+      {
          // ramped frequency: Moyer's eq 13-120
-	     #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-		    MessageInterface::ShowMessage("   Ramped frequency calculation is used\n");
+         #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+            MessageInterface::ShowMessage("   Ramped frequency calculation is used\n");
          #endif
-		 Integer errnum;
-		 try
-		 {
-		    realRangeFull = IntegralRampedFrequency(t3R, realTravelTime, errnum);						// unit: range unit
-		 } catch (MeasurementException exp)
-		 {
-            currentMeasurement.value[0] = 0.0;					// It has no C-value due to the failure of calculation of IntegralRampedFrequency()
-	        currentMeasurement.uplinkFreq = frequency;
-	        currentMeasurement.uplinkBand = freqBand;
-	        currentMeasurement.rangeModulo = rangeModulo;
-			currentMeasurement.isFeasible = false;
-			currentMeasurement.unfeasibleReason = "R";
-//			currentMeasurement.feasibilityValue is set to elevation angle as shown in section 18
-			if ((errnum == 2)||(errnum == 3))
-			   throw exp;
-			else
-			   return false;
-		 }
-	  }
+         Integer errnum;
+         try
+         {
+            realRangeFull = IntegralRampedFrequency(t3R, realTravelTime, errnum);                  // unit: range unit
+         } catch (MeasurementException exp)
+         {
+            currentMeasurement.value[0] = 0.0;               // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
+            currentMeasurement.uplinkFreq = frequency;
+            currentMeasurement.uplinkBand = freqBand;
+            currentMeasurement.rangeModulo = rangeModulo;
+            currentMeasurement.isFeasible = false;
+            currentMeasurement.unfeasibleReason = "R";
+//          currentMeasurement.feasibilityValue is set to elevation angle as shown in section 18
+            if ((errnum == 2)||(errnum == 3))
+               throw exp;
+            else
+               return false;
+         }
+      }
 
-	  // Add noise to calculated measurement
-	  if (noiseSigma != NULL)
+      // Add noise to calculated measurement
+      if (noiseSigma != NULL)
       {
          Real v_sign = ((realRangeFull < 0.0)?-1.0:1.0);
-		 RandomNumber* rn = RandomNumber::Instance();
-		 Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
-		 while (val*v_sign <= 0.0)
-			val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
-		 realRangeFull = val;
+         RandomNumber* rn = RandomNumber::Instance();
+         Real val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+         while (val*v_sign <= 0.0)
+           val = rn->Gaussian(realRangeFull, noiseSigma->GetElement(0));
+         realRangeFull = val;
       }
-	  // Get range
-	  realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);										// unit: range unit
-	  
+      // Get range
+      realRange = GmatMathUtil::Mod(realRangeFull, rangeModulo);                              // unit: range unit
+     
 
-	  //if (obsData != NULL)
-	  //{
-	  //   if (GmatMathUtil::Abs(realRange - obsValue[0]) > rangeModulo/2)
-	  //   {
-		 //   if (realRange > obsValue[0])
-			//   realRange = realRange - rangeModulo;
-		 //   else
-			//   realRange = realRange + rangeModulo;
-		 //}
-	  //}
-	  
+      //if (obsData != NULL)
+      //{
+      //   if (GmatMathUtil::Abs(realRange - obsValue[0]) > rangeModulo/2)
+      //   {
+      //      if (realRange > obsValue[0])
+      //         realRange = realRange - rangeModulo;
+      //      else
+      //         realRange = realRange + rangeModulo;
+      //   }
+      //}
+     
 
-	  #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
-	     MessageInterface::ShowMessage("   Range modulo constant (in range unit)       = %.12le\n", rangeModulo);
-		 MessageInterface::ShowMessage("   Uplink frequency                            = %.12le Hz\n", frequency);
-		 MessageInterface::ShowMessage("   Frequency conversion factor                 = %.12le Hz\n", freqConversionFactor);
-		 MessageInterface::ShowMessage("   Calculated round trip range (in km)         = %.8lf km\n", realRangeKm);
-		 MessageInterface::ShowMessage("   Calculated full range value (in range unit) = %.8lf\n", realRangeFull);
-		 MessageInterface::ShowMessage("   Calculated real range (in range unit)       = %.8lf\n", realRange);
-		 if (obsData != NULL)
-		    MessageInterface::ShowMessage("   Observation range     (in range unit)       = %.8lf\n", obsValue[0]);
+      #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
+         MessageInterface::ShowMessage("   Range modulo constant (in range unit)       = %.12le\n", rangeModulo);
+         MessageInterface::ShowMessage("   Uplink frequency                            = %.12le Hz\n", frequency);
+         MessageInterface::ShowMessage("   Frequency conversion factor                 = %.12le Hz\n", freqConversionFactor);
+         MessageInterface::ShowMessage("   Calculated round trip range (in km)         = %.8lf km\n", realRangeKm);
+         MessageInterface::ShowMessage("   Calculated full range value (in range unit) = %.8lf\n", realRangeFull);
+         MessageInterface::ShowMessage("   Calculated real range (in range unit)       = %.8lf\n", realRange);
+         if (obsData != NULL)
+            MessageInterface::ShowMessage("   Observation range     (in range unit)       = %.8lf\n", obsValue[0]);
       #endif
 
 
 
-	  // 20. Set value for currentMeasurement
+      // 20. Set value for currentMeasurement
       // currentMeasurement.value[0] = realRange;
-	  currentMeasurement.value[0] = realRangeFull;
-	  currentMeasurement.uplinkFreq = frequency;
-	  currentMeasurement.uplinkBand = freqBand;
-	  currentMeasurement.rangeModulo = rangeModulo;
+      currentMeasurement.value[0] = realRangeFull;
+      currentMeasurement.uplinkFreq = frequency;
+      currentMeasurement.uplinkBand = freqBand;
+      currentMeasurement.rangeModulo = rangeModulo;
 
 
       #ifdef DEBUG_CURRENT_MEASUREMENT
-	     MessageInterface::ShowMessage("   currentMeasurement = <%p>\n", currentMeasurement);
-	     MessageInterface::ShowMessage("   currentMeasurement.rangeModulo = %.12le\n", currentMeasurement.rangeModulo);
-	     MessageInterface::ShowMessage("   currentMeasurement.value[0] = %.12le\n", currentMeasurement.value[0]);
-		 MessageInterface::ShowMessage("   currentMeasurement.isFeasible = %s\n", (currentMeasurement.isFeasible ? "true" : "false"));
-		 MessageInterface::ShowMessage("   currentMeasurement.feasibilityValue = %.12le\n", currentMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("   currentMeasurement = <%p>\n", currentMeasurement);
+         MessageInterface::ShowMessage("   currentMeasurement.rangeModulo = %.12le\n", currentMeasurement.rangeModulo);
+         MessageInterface::ShowMessage("   currentMeasurement.value[0] = %.12le\n", currentMeasurement.value[0]);
+         MessageInterface::ShowMessage("   currentMeasurement.isFeasible = %s\n", (currentMeasurement.isFeasible ? "true" : "false"));
+         MessageInterface::ShowMessage("   currentMeasurement.feasibilityValue = %.12le\n", currentMeasurement.feasibilityValue);
       #endif
 
       
@@ -1530,36 +1554,36 @@ Real DSNTwoWayRange::GetFrequencyFactor(Real frequency)
       {
          // S-band
          factor = frequency / 2.0;
-	     if (freqBand == 0)
-		    freqBand = 1;					// 1 for S-band
+         if (freqBand == 0)
+            freqBand = 1;               // 1 for S-band
       }
       else if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
       {
-		 // X-band (Band values from Wikipedia; check them!
-         // factor = frequency * 11.0 / 75.0;				// for X-band with BVE and HEF attenna mounted before BVE:    Moyer's eq 13-109
-	     factor = frequency * 221.0 / 1498.0;				// for X-band with BVE:   Moyer's eq 13-110
-	     if (freqBand == 0)
-		    freqBand = 2;					// 2 for X-band
+         // X-band (Band values from Wikipedia; check them!
+         // factor = frequency * 11.0 / 75.0;            // for X-band with BVE and HEF attenna mounted before BVE:    Moyer's eq 13-109
+         factor = frequency * 221.0 / 1498.0;            // for X-band with BVE:   Moyer's eq 13-110
+         if (freqBand == 0)
+            freqBand = 2;               // 2 for X-band
       }
       else
       {
-		 std::stringstream ss;
-		 ss << "Error: No frequency band was specified for frequency = " << frequency << "Hz\n";
-		 throw MeasurementException(ss.str());
+         std::stringstream ss;
+         ss << "Error: No frequency band was specified for frequency = " << frequency << "Hz\n";
+         throw MeasurementException(ss.str());
       }
       // Todo: Figure out how to detect HEV and BVE
    }
    else
    {
-	   switch (freqBand)
-	   {
-	   case 1:
-		   factor = frequency/ 2.0;
-		   break;
-	   case 2:
-		   factor = frequency *221.0/1498.0;
-		   break;
-	   }
+      switch (freqBand)
+      {
+         case 1:
+            factor = frequency/ 2.0;
+            break;
+         case 2:
+            factor = frequency *221.0/1498.0;
+            break;
+      }
    }
 
    return factor;
@@ -1585,21 +1609,21 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    err = 0;
    if (delta_t < 0)
    {
-	  err = 1;
+      err = 1;
       throw MeasurementException("Error: Elapse time has to be a non negative number\n");
    }
 
    if (rampTB == NULL)
    {
       err = 2;
-	  throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
    else if ((*rampTB).size() == 0)
    {
       err = 3;
-	  std::stringstream ss;
-	  ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
-	  throw MeasurementException(ss.str());
+      std::stringstream ss;
+      ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+      throw MeasurementException(ss.str());
    }
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
@@ -1611,55 +1635,57 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    if (t1 < time_min)
    {
       // t0 and t1 < time_min
-	   return delta_t*(*rampTB)[0].rampFrequency;
+      return delta_t*(*rampTB)[0].rampFrequency;
    }
    else if (t1 > time_max)
    {
-	  if (t0 < time_min)
-	  {
-		  // t0 < time_min < time_max < t1
-		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-		  t0 = time_min;
-	  }
-	  else if (t0 > time_max)
-	  {
-		  // t0 and t1 > time_max
-		  return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
-	  }
-	  else
-	  {
-		  // time_min <= t0 <= time_max < t1
-		  correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
-		  t1 = time_max;
-	  }
+      if (t0 < time_min)
+      {
+         // t0 < time_min < time_max < t1
+         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         t0 = time_min;
+      }
+      else if (t0 > time_max)
+      {
+         // t0 and t1 > time_max
+         return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+      }
+      else
+      {
+         // time_min <= t0 <= time_max < t1
+         correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+         t1 = time_max;
+      }
    }
    else
    {
-	  if (t0 < time_min)
-	  {
-		  // t0 < time_min <= t1 <= time_max
-		  correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
-		  t0 = time_min;
-	  }
+      if (t0 < time_min)
+      {
+         // t0 < time_min <= t1 <= time_max
+         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         t0 = time_min;
+      }
    }
 #endif
 
    if ((t1 < time_min)||(t1 > time_max))
    {
-	  char s[200];
-	  sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
-	  std::string st(&s[0]);
-	  err = 4;
-	  throw MeasurementException(st);
+      char s[200];
+      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+      std::string st(&s[0]);
+      //MessageInterface::ShowMessage("%s", st.c_str());
+      err = 4;
+      throw MeasurementException(st);
    }
 
    if ((t0 < time_min)||(t0 > time_max))
    {
-	  char s[200];
-	  sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
-	  std::string st(&s[0]);
-	  err = 5;
-	  throw MeasurementException(st);
+      char s[200];
+      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+      std::string st(&s[0]);
+      //MessageInterface::ShowMessage("%s", st.c_str());
+      err = 5;
+      throw MeasurementException(st);
    }
 
    // search for end interval:
@@ -1667,10 +1693,10 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
    {
       if (t1 < (*rampTB)[i].epoch)
-	  {
+      {
          end_interval = i-1;      
-		 break;
-	  }
+         break;
+      }
    }
 
    // search for end interval:
@@ -1687,37 +1713,37 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    {
       f_dot = (*rampTB)[i].rampRate;
 
-	  // Specify frequency at the begining and lenght of the current interval   
-	  if (i == end_interval)
-		 interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
-	  else
-		 interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+      // Specify frequency at the begining and lenght of the current interval   
+      if (i == end_interval)
+         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+      else
+         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
 
-	  f0 = (*rampTB)[i].rampFrequency;
-	  if (dt < interval_len)
-	  {
-		 f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
+      f0 = (*rampTB)[i].rampFrequency;
+      if (dt < interval_len)
+      {
+         f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
          interval_len = dt;
-	  }
+      }
 
-	  // Specify frequency at the end of the current interval
-	  f1 = f0 + f_dot*interval_len;
+      // Specify frequency at the end of the current interval
+      f1 = f0 + f_dot*interval_len;
 
-	  // Take integral for the current interval
-	  value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1))/2 - basedFreqFactor) * interval_len;
-	  value  = value + value1;
+      // Take integral for the current interval
+      value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1))/2 - basedFreqFactor) * interval_len;
+      value  = value + value1;
 
-//	  MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf  %.12lf     f1 = %.12lf   %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, GetFrequencyFactor(f0), f1, GetFrequencyFactor(f1), (f0+f1)/2, interval_len);
+//      MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf  %.12lf     f1 = %.12lf   %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, GetFrequencyFactor(f0), f1, GetFrequencyFactor(f1), (f0+f1)/2, interval_len);
 //      MessageInterface::ShowMessage("interval i = %d: Start: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
-//	   (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+//      (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
 //      MessageInterface::ShowMessage("interval i = %d:   End: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n\n", i+1,
-//	   (*rampTB)[i+1].epoch,  (*rampTB)[i+1].uplinkBand, (*rampTB)[i+1].rampType, (*rampTB)[i+1].rampFrequency, (*rampTB)[i+1].rampRate);
+//      (*rampTB)[i+1].epoch,  (*rampTB)[i+1].uplinkBand, (*rampTB)[i+1].rampType, (*rampTB)[i+1].rampFrequency, (*rampTB)[i+1].rampRate);
 
 
       // Specify dt 
- 	  dt = dt - interval_len;
+      dt = dt - interval_len;
 
-	  i--;
+      i--;
    }
    value = value + basedFreqFactor*delta_t;
 

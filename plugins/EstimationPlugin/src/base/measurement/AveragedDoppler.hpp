@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -120,7 +120,7 @@ protected:
    Real turnaround;
 
    /// Turnaround ratio which is built in on station's tracking system
-   Real M2R;						// M2R maybe equal the value of turnaround; sometime it is set to 0
+   Real M2R;                  // M2R maybe equal the value of turnaround; sometime it is set to 0
 
    // Light time events
    /// Uplink leg for the start signal
@@ -139,9 +139,9 @@ protected:
    /// Enumeration defining the MeasurementModel's scriptable parameters
    enum
    {
-       AveragingInterval = PhysicalMeasurementParamCount,
-	   BuildInTurnAroundRatio,									// made changes by TUAN NGUYEN
-       AveragedDopplerParamCount
+      AveragingInterval = PhysicalMeasurementParamCount,
+      BuildInTurnAroundRatio,                           // made changes by TUAN NGUYEN
+      AveragedDopplerParamCount
    };
 
    // Start with the parameter IDs and associates strings

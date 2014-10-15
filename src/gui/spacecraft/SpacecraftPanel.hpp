@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -31,6 +31,7 @@
 #include "TankPanel.hpp"
 #include "AttitudePanel.hpp"
 #include "ThrusterPanel.hpp"
+#include "PowerSystemPanel.hpp"
 #include "SpicePanel.hpp"
 #include "GuiInterpreter.hpp"
 #include "VisualModelPanel.hpp"
@@ -86,12 +87,13 @@ private:
    wxPanel *sensors;
    
    BallisticsMassPanel *theBallisticMassPanel;
-   OrbitPanel *theOrbitPanel;
-   TankPanel *theTankPanel;
-   ThrusterPanel *theThrusterPanel;
-   AttitudePanel *theAttitudePanel;
-   VisualModelPanel *theVisualModelPanel;
-   SpicePanel    *theSpicePanel;
+   OrbitPanel          *theOrbitPanel;
+   TankPanel           *theTankPanel;
+   ThrusterPanel       *theThrusterPanel;
+   AttitudePanel       *theAttitudePanel;
+   VisualModelPanel    *theVisualModelPanel;
+   SpicePanel          *theSpicePanel;
+   PowerSystemPanel    *thePwrSysPanel;
    
    // IDs for the controls and the menu commands
    enum

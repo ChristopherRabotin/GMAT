@@ -1,4 +1,19 @@
 function oscele=BROLYD_short(elep)
+
+pseudostate=0;
+if elep(3) > 180    | elep(3) < 0 % | elep(2) > 0.99999 | elep(1)*(1-elep(2)) < 5800
+    disp('BROLYD cannot calculate osculating elements because of incorrect input values')
+    
+    disp(['SMADP',' = ', num2str(elep(1)), '   ECCDP',' = ', num2str(elep(2)), '   INCDP',' = ', num2str(elep(3))])
+    oscele=[];
+    return
+end
+
+if elep(3) > 177
+    elep(3)=180-elep(3); % INC = 180 - INC
+    elep(4)=-elep(4); % RAAN = -RAAN
+    pseudostate=1;
+end
 elep(3:6)=deg2rad(elep(3:6));
 j2     = 0.1082626925638815E-02;
 %j2=0.10826158E-02;
@@ -13,9 +28,18 @@ raanp=elep(4);
 aopp=elep(5);
 map=elep(6);
 
-if eccp >= 0.97
-    disp('BROLYD cannot calculate mean elements for near parabolic')
+if eccp < 0
+    eccp=eccp*-1;
+    map=map+pi;
+    aopp=aopp-pi;
+end
+
+if eccp > 0.999999
+    disp('BROLYD cannot calculate osculating elements for near parabolic')
     disp('or hyperbolic orbits.')
+    
+    disp(['SMADP',' = ', num2str(elep(1)), '   ECCDP',' = ', num2str(eccp), '   INCDP',' = ', num2str(elep(3))])
+    
     oscele=[];
     return
 end
@@ -91,22 +115,41 @@ else
     ma1=atan0(esinl,ecosl);
 end
 
-sinhalfisinh=(sin(0.5*incp)+cos(0.5*incp)*0.5*dinc)*sin(raanp)+1/2*sin(incp)/cos(incp/2)*draan*cos(raanp);
-sinhalficosh=(sin(0.5*incp)+cos(0.5*incp)*0.5*dinc)*cos(raanp)-1/2*sin(incp)/cos(incp/2)*draan*sin(raanp);
+sinhalfisinh=(sin(0.5*incp)+cos(0.5*incp)*0.5*dinc)*sin(raanp)+sin(incp/2)*draan*cos(raanp);
+sinhalficosh=(sin(0.5*incp)+cos(0.5*incp)*0.5*dinc)*cos(raanp)-sin(incp/2)*draan*sin(raanp);
+sqrt(sinhalfisinh^2+sinhalficosh^2)
 inc1=2*asin(sqrt(sinhalfisinh^2+sinhalficosh^2));
     
-if inc1 ==0
+if inc1 ==0 & pseudostate == 0
     raan1=0;
+    aop1=lgh-ma1-raan1;
 else
     raan1=atan0(sinhalfisinh,sinhalficosh);
+    aop1=lgh-ma1-raan1;
 end
-aop1=lgh-ma1-raan1;
+
+if inc1 ==0 & pseudostate ~=0
+    aop1 = 0;
+    raan1=lgh-ma1-aop1;
+end
 
 aop1=mod(aop1,2*pi);
 if aop1 < 0
     aop1=aop1+2*pi;
 end
+
+
+raan1=mod(raan1,2*pi);
+if raan1 < 0
+    raan1=raan1+2*pi;
+end
 oscele=[sma1*re ecc1 inc1 raan1 aop1 ma1];
+
 oscele(3:6)=rad2deg(oscele(3:6));
+
+if pseudostate ~= 0
+    oscele(3)=180-oscele(3); % INC = 180 - INC
+    oscele(4)=-oscele(4); % RAAN = -RAAN
+end
 
 

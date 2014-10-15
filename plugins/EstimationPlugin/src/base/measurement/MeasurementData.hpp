@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -45,6 +45,7 @@ class ESTIMATION_API MeasurementData
 public:
    MeasurementData();
    virtual ~MeasurementData();
+   void CleanUp();
    MeasurementData(const MeasurementData& md);
    MeasurementData operator=(const MeasurementData& md);
 

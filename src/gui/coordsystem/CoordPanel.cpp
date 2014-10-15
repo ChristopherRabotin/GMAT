@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -90,8 +90,8 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
 {
    #ifdef DEBUG_COORD_PANEL
    MessageInterface::ShowMessage
-      ("CoordPanel::EnableOptions() axis=(%p)%s\n", axis,
-       typeComboBox->GetStringSelection().c_str());
+      ("CoordPanel::EnableOptions() ENTERED ----------------------\n"
+       "axis=(%p)%s\n", axis, typeComboBox->GetStringSelection().c_str());
    #endif
    
    // save epoch value locally
@@ -102,6 +102,9 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    
    if (typeStr == "")
       typeStr = "MJ2000Eq";
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage("typeStr=%s\n", typeStr.c_str());
+   #endif
 
    if (axis == NULL)
       // create a temp axis to use flags
@@ -111,7 +114,17 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       tmpAxis = axis;
    
    if (tmpAxis == NULL)
+   {
+      #ifdef DEBUG_COORD_PANEL
+      MessageInterface::ShowMessage
+         ("CoordPanel::EnableOptions() EXITING ---------------------- because tmpAxis is NULL!!!!!!\n");
+      #endif
       return;
+   }
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage("tmpAxis = <%p>\n", tmpAxis);
+   MessageInterface::ShowMessage("mEnableAll = %s\n", (mEnableAll? "true" : "false"));
+   #endif
    
    if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
       mShowPrimaryBody = false;
@@ -140,8 +153,7 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
 
       #ifdef DEBUG_COORD_PANEL
       MessageInterface::ShowMessage
-         ("CoordPanel::EnableOptions() about to set epoch value to %12.10f (string = %s)\n",
-               epoch, epochValue.c_str());
+         ("About to set epoch value to %12.10f (string = %s)\n", epoch, epochValue.c_str());
       #endif
       // set the text ctrl
       epochTextCtrl->SetValue(epochValue);
@@ -161,7 +173,12 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       mShowUpdate = false;
    else
       mShowUpdate = true; 
-
+   
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("Calling SetDefaultEpochRefAxis() or SetDefaultAlignmentConstraintAxis()\n");
+   #endif
+   
    if (typeStr == "ObjectReferenced")
       SetDefaultObjectRefAxis();
    else if ((typeStr == "TOEEq") || (typeStr == "TOEEc"))
@@ -172,6 +189,11 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
       SetDefaultEpochRefAxis();
    else if (typeStr == "LocalAlignedConstrained")
       SetDefaultAlignmentConstraintAxis();
+   
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("mShowAlignmentConstraint = %d, mShowXyz = %d\n",mShowAlignmentConstraint, mShowXyz);
+   #endif
    
    if (mEnableAll)
    {
@@ -235,19 +257,47 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
          secondaryStaticText->Enable(mShowSecondaryBody);
          secondaryComboBox->Enable(mShowSecondaryBody);
          epochStaticText->Enable(mShowEpoch);
+         #ifdef DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage("Calling epochTextCtrl->Enable(mShowEpoch)\n");
+         #endif
          epochTextCtrl->Enable(mShowEpoch);
+
+         // Mod by LOJ (2014.08.01)
+         // epochTextCtrl->Clear() causes crash on static link build so
+         // changed epochTextCtrl->Clear() to epochTextCtrl->ChangeValue().
+         // wxTextCtrl::Clear() Clears the text in the control.
+         // Note that this function WILL generate a wxEVT_COMMAND_TEXT_UPDATED event.
+         // if (!mShowEpoch)
+         //    epochTextCtrl->Clear();
+         // wxTextCtrl::SetValue() is deprecated and should not be used in new code.
+         // Please use the ChangeValue function instead.
+         // wxTextCtrl::ChangeValue() Sets the text value and marks the control as
+         // not-modified (which means that IsModified would return false immediately
+         // after the call to ChangeValue).
+         // Note that this function WILL NOT generate the wxEVT_COMMAND_TEXT_UPDATED event.
+         // This is the only difference with SetValue.
          if (!mShowEpoch)
-            epochTextCtrl->Clear();
+            epochTextCtrl->ChangeValue("");
+         #ifdef DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage("Calling xStaticText->Enable(mShowXyz)\n");
+         #endif
          xStaticText->Enable(mShowXyz);
          xComboBox->Enable(mShowXyz);
          yStaticText->Enable(mShowXyz);
          yComboBox->Enable(mShowXyz);
          zStaticText->Enable(mShowXyz);
          zComboBox->Enable(mShowXyz);
-
+         
+         #ifdef DEBUG_COORD_PANEL
+         MessageInterface::ShowMessage("Calling EnableAlignmentConstraint(false)\n");
+         #endif
          // Hide and disable the alignment and constraint widgets
          EnableAlignmentConstraint(false);
       }
+      
+      #ifdef DEBUG_COORD_PANEL
+      MessageInterface::ShowMessage("Disabling some items for GSE, GSM, BodySpinSun\n");
+      #endif
       
       // disable some items
       if (typeStr == "GSE" || typeStr == "GSM")
@@ -298,6 +348,10 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    primaryStaticText->SetFocus();
    staticboxsizerAxes->Layout();
    Refresh();
+   #ifdef DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("CoordPanel::EnableOptions() EXITING ----------------------\n");
+   #endif
 }
 
 bool CoordPanel::IsAlignmentConstraintTextModified()
@@ -1252,11 +1306,42 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       wxString originName = originComboBox->GetValue().Trim();
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
       coordSys->SetStringParameter("Origin", std::string(originName.c_str()));
-      coordSys->SetOrigin(origin);
       #ifdef DEBUG_COORD_PANEL_SAVE
       MessageInterface::ShowMessage
-         ("CoordPanel::SaveData() axis set on coordSys %s, and origin set to %s <%p>.\n",
-          coordName.c_str(), originName.c_str(), origin);
+         ("CoordPanel::SaveData() About to set origin to %s\n", originName.c_str());
+      #endif
+      try
+      {
+         coordSys->SetRefObject(origin, Gmat::SPACE_POINT, origin->GetName());
+      }
+      catch (BaseException &be)
+      {
+         // Need to popup this error here
+         MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage().c_str());
+         canClose = false;
+         // Since there was an error, copy the clone's data back to the object
+         if (csClone != NULL)
+         {
+            coordSys->Copy(csClone);
+            delete csClone;
+         }
+         return canClose;
+      }
+
+//      coordSys->SetOrigin(origin);
+      #ifdef DEBUG_COORD_PANEL_SAVE
+      if (axis)
+      {
+         MessageInterface::ShowMessage
+            ("CoordPanel::SaveData() axis of type %s set on coordSys %s, and origin set to %s <%p>.\n",
+             axis->GetTypeName().c_str(), coordName.c_str(), originName.c_str(), origin);
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("CoordPanel::SaveData() axis (NULL!) set on coordSys %s, and origin set to %s <%p>.\n",
+             coordName.c_str(), originName.c_str(), origin);
+      }
       #endif
       
       CelestialBody *j2000body =

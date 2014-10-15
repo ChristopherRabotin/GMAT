@@ -5,7 +5,7 @@
 // GMAT: General Mission Analysis Tool.
 //
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -200,6 +200,8 @@ Attitude::OTHER_REP_TEXT[EndOtherReps - 7000] =
    "MRPs",                   // Dunn Added
    "DirectionCosineMatrix",  // was "InitialDirectionCosineMatrix",
    "AngularVelocity",        // was "InitialAngularVelocity",
+   "BodySpinAxis",           // PrecessingSpinner
+   "NutationReferenceVector",// PrecessingSpinner
 };
 
 const Gmat::ParameterType
@@ -212,6 +214,8 @@ Attitude::OTHER_REP_TYPE[EndOtherReps - 7000] =
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,  // Dunn Added
    Gmat::RMATRIX_TYPE,
+   Gmat::RVECTOR_TYPE,
+   Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
 };
 
@@ -376,7 +380,8 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    refBody                 (NULL),
    attitudeConstraintType  ("OrbitNormal"),
    // Additional CCSDS-AEM fields here
-   aemFile                 ("")
+   aemFile                 (""),
+   aemFileFullPath         ("")
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
@@ -398,8 +403,8 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    // Additional SpiceAttitude fields here
    // none at this time
    // Additional PrecessingSpinner fields here
-   nutationReferenceVector.Set(0,0,1);
-   bodySpinAxis.Set(0,0,1);
+   nutationReferenceVector.Set(0.0,0.0,1.0);
+   bodySpinAxis.Set(0.0,0.0,1.0);
    // Additional NadirPointing fields here
    bodyAlignmentVector.Set(1.0, 0.0, 0.0);
    bodyConstraintVector.Set(0.0, 0.0, 1.0);
@@ -467,7 +472,8 @@ Attitude::Attitude(const Attitude& att) :
    bodyAlignmentVector     (att.bodyAlignmentVector),
    bodyConstraintVector    (att.bodyConstraintVector),
    // Additional CCSDS-AEM fields here
-   aemFile                 (att.aemFile)
+   aemFile                 (att.aemFile),
+   aemFileFullPath         (att.aemFileFullPath)
 {
 #ifdef DEBUG_ATTITUDE_INIT
    MessageInterface::ShowMessage("New attitude created by copying attitude <%p> of type %s\n",
@@ -543,6 +549,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    bodyConstraintVector    = att.bodyConstraintVector;
    // Additional CCSDS-AEM fields here
    aemFile                 = att.aemFile;
+   aemFileFullPath         = att.aemFileFullPath;
 
    return *this;
 }
@@ -2721,6 +2728,41 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
       if (isInitialized) needsReinit = true;
       return angVel;
    }
+   if (id == BODY_SPIN_AXIS)
+   {
+      if (sz != 3) throw AttitudeException(
+                  "Incorrectly sized Rvector passed in for Body Spin Axis.");
+      for (i=0;i<3;i++)   bodySpinAxis(i) = value(i);
+      Real bsMag = bodySpinAxis.GetMagnitude();
+      // Error message and vector normalization
+      if ( bsMag < 1.0e-5 )
+      {
+         std::string errmsg = "PrecessingSpinner attitude model is singular ";
+         errmsg            += "and/or undefined for the Spacecraft.  ";
+         errmsg            += "Magnitude of ";
+         errmsg            += "BodySpinVector must be >= 1e-5\n";
+         throw AttitudeException(errmsg);
+      }
+      if (isInitialized) needsReinit = true;
+      return bodySpinAxis;
+   }
+   if (id == NUTATION_REFERENCE_VECTOR)
+   {
+      if (sz != 3) throw AttitudeException(
+                  "Incorrectly sized Rvector passed in for Nutation Reference Vector.");
+      for (i=0;i<3;i++)   nutationReferenceVector(i) = value(i);
+      Real nrMag = nutationReferenceVector.GetMagnitude();
+      if ( nrMag < 1.0e-5 )
+      {
+         std::string errmsg = "PrecessingSpinner attitude model is singular ";
+         errmsg            += "and/or undefined for the Spacecraft.  ";
+         errmsg            += "Magnitude of ";
+         errmsg            += "NutationReferenceVector must be >= 1e-5\n";
+         throw AttitudeException(errmsg);
+      }
+      if (isInitialized) needsReinit = true;
+      return nutationReferenceVector;
+   }
 
    return GmatBase::SetRvectorParameter(id,value);
 }
@@ -3071,10 +3113,18 @@ bool Attitude::SetStringParameter(const Integer     id,
    }
    if (id == AEM_FILE_NAME)
    {
-      aemFile = value;
+      if (value != aemFile)
+      {
+         // Get full path from the static GmatBase::GetFullPathFileName() (LOJ: 2014.06.26)
+         std::string aemFileNoPath;
+         aemFileFullPath =
+            GmatBase::GetFullPathFileName(aemFileNoPath, GetName(), value,
+                         "VEHICLE_EPHEM_CCSDS_PATH", true, "", true, true);
+         aemFile = value;
+      }
       return true;
    }
-
+   
    return GmatBase::SetStringParameter(id, value);
 }
 

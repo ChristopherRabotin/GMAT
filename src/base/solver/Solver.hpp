@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -112,10 +112,10 @@ public:
    virtual ~Solver();
    Solver(const Solver& sol);
    Solver&             operator=(const Solver& sol);
-
-   bool                IsSolverInternal()
-   {  return isInternal; }
    
+   bool                IsSolverInternal() { return isInternal; }
+   bool                RequiresVariables() { return requiresVariables; }
+   bool                NeedsServerStartup() { return needsServerStartup; }
    virtual SolverState GetState();
    virtual SolverState GetNestedState();
    virtual SolverState AdvanceState();
@@ -211,7 +211,12 @@ protected:
    /// Flag indicating if this Solver runs integrated into GMAT, or through
    /// an external controller like MATLAB
    bool                isInternal;
-   
+   /// Flag indicating variables needs to be set such as internal optimizer or
+   /// SNOPT external optimizer (Added by LOJ: 2014.08.19)
+   bool                requiresVariables;
+   /// Flag indicating GMAT server start up
+   /// For now only external optimizer calling MATLAB needs server to start
+   bool                needsServerStartup;
    /// Current state for the state machine
    SolverState         currentState;
    /// current nested state
@@ -260,6 +265,9 @@ protected:
    // Reporting parameters
    /// Name of the targeter text file.  An empty string turns the file off.
    std::string          solverTextFile;
+   /// Full path targeter text file
+   std::string          solverTextFileFullPath;
+   
    /// Used to indicate if data should append to the text file
    Integer              instanceNumber;
    /// The solver text file

@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool.
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -373,11 +373,11 @@ Real Receiver::SetRealParameter(const Integer id, const Real value)
 //            bandwidth = value;
 //         return bandwidth;
 
-      case HARDWARE_DELAY:
-	  case CENTER_FREQUENCY:
-	  case BANDWIDTH:
+//      case HARDWARE_DELAY:
+      case CENTER_FREQUENCY:
+      case BANDWIDTH:
          MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
-		 return 0.0;
+         return 0.0;
 
       default:
          break;
@@ -466,7 +466,7 @@ bool Receiver::SetStringParameter(const Integer id,
    {
       case FREQUENCY_MODEL:
 //       frequencyModel = value;
-		 MessageInterface::ShowMessage("Warning: the setting '%s' to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
+       MessageInterface::ShowMessage("Warning: the setting '%s' to '%s.%s' parameter was ignored. The current version of GMAT does not allow to use this paramter !!!\n", value.c_str(), GetName().c_str(), GetParameterText(id).c_str());
          return true;
 
       default:

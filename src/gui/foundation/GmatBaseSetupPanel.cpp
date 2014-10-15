@@ -4,7 +4,7 @@
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
-// Copyright (c) 2002-2011 United States Government as represented by the
+// Copyright (c) 2002-2014 United States Government as represented by the
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
@@ -20,7 +20,7 @@
 
 #include "GmatBaseSetupPanel.hpp"
 #include "MessageInterface.hpp"
-#include "FileManager.hpp"         // for GetPathname()
+#include "FileManager.hpp"         // for GetAbsPathname()
 #include <wx/confbase.h>
 #include <wx/fileconf.h>
 #include <wx/config.h>
