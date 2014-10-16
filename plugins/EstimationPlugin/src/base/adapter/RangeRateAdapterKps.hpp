@@ -22,6 +22,7 @@
 #define RangeRateAdapterKps_hpp
 
 #include "RangeAdapterKm.hpp"
+#include "SpaceObject.hpp"
 
 /**
  * A measurement adapter for ranges in Km
@@ -49,6 +50,11 @@ public:
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
 
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
 
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
@@ -87,6 +93,13 @@ protected:
 
    /// Timer 
    Real _timer;
+
+   /// Flag indicating is a current value is available
+   bool valueReady;
+   /// Epoch of the most recently calculated data value
+   GmatEpoch lastComputedEpoch;
+   /// Pointer to the spacecraft that gets propagated in this model
+   SpaceObject *targetSat;
     
    /// Parameter IDs for the RangeRateAdapterKps
    enum

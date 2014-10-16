@@ -55,13 +55,16 @@ RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmP
  */
 //------------------------------------------------------------------------------
 RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
-    RangeAdapterKm     (name),
-    dopplerInterval    (1.0),
-    _prev_epoch (0.0),
-    _prev_range(0.0),
-    _timer(0.0)
+   RangeAdapterKm       (name),
+   dopplerInterval      (1.0),
+   _prev_epoch          (0.0),
+   _prev_range          (0.0),
+   _timer               (0.0),
+   valueReady           (false),
+   lastComputedEpoch    (0.0),
+   targetSat            (NULL)
 {
-    typeName="RangeRate";
+   typeName="RangeRate";
 }
 
 
@@ -87,11 +90,14 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
  */
 //------------------------------------------------------------------------------
 RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
-    RangeAdapterKm     (rr),
-    dopplerInterval (rr.dopplerInterval),
-    _prev_epoch (0.0),
-    _prev_range(0.0),
-    _timer(0.0)
+   RangeAdapterKm       (rr),
+   dopplerInterval      (rr.dopplerInterval),
+   _prev_epoch          (0.0),
+   _prev_range          (0.0),
+   _timer               (0.0),
+   valueReady           (false),
+   lastComputedEpoch    (0.0),
+   targetSat            (NULL)
 {
 }
 
@@ -116,7 +122,9 @@ RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& r
        _prev_epoch  = rr._prev_epoch;
       _prev_range = rr._prev_range;
       _timer = rr._timer;
-
+      valueReady = false;
+      lastComputedEpoch = 0.0;
+      targetSat = NULL;
    }
 
    return *this;
@@ -375,69 +383,94 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    //   rampTB = rampTable;
    obsData = forObservation;
 
-   // Compute range in km
-   cMeasurement = RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, NULL);
+   GmatEpoch currentSignalEpoch = targetSat->GetEpoch();
 
-   // twp way range
-   Real two_way_range = 0;
+   if (lastComputedEpoch != currentSignalEpoch)
+      valueReady = false;
 
-   // set range rate
-   Real range_rate = 0;
+   MessageInterface::ShowMessage("LCE: %.12lf, CSE: %.12lf, delta: %le, %s\n", lastComputedEpoch,
+         currentSignalEpoch, lastComputedEpoch - currentSignalEpoch,
+         (valueReady ? "Value ready" : "Value not ready"));
+
+   if (!valueReady)
+   {
+      // Compute range in km
+      cMeasurement = RangeAdapterKm::CalculateMeasurement
+            (withEvents, forObservation, NULL);
+
+      // two way range
+      Real two_way_range = 0;
    
-   // some up the ranges
-   for (UnsignedInt i = 0; i < cMeasurement.value.size(); i++  )
-   {
-     two_way_range = two_way_range + cMeasurement.value[i];
+      // set range rate
+      Real range_rate = 0;
+
+      // some up the ranges
+      for (UnsignedInt i = 0; i < cMeasurement.value.size(); i++  )
+      {
+        two_way_range = two_way_range + cMeasurement.value[i];
+      }
+
+      // one way range
+      Real one_way_range = two_way_range / 2.0;
+
+      {
+         // if more then one measurement exists, compute range-rate
+         if ((_prev_epoch != 0) &&
+             ((_timer >= dopplerInterval) || (_prev_epoch == cMeasurement.epoch)))
+         {
+            lastComputedEpoch = targetSat->GetEpoch();
+
+            cMeasurement.isFeasible = true;
+            // Compute range-rate
+            range_rate = (one_way_range-_prev_range)/(_timer);
+
+            // set the measurement value
+            cMeasurement.value.clear();
+            cMeasurement.value.push_back(range_rate);
+
+            // set previous range
+            _prev_range = one_way_range;
+
+            // Set previous epoch
+            _prev_epoch = cMeasurement.epoch;
+
+            valueReady = true;
+         }
+         else if ( _prev_epoch == 0)
+         {
+            cMeasurement.isFeasible = false;
+            // Set previous range
+            _prev_range = one_way_range;
+
+            // Set previous epoch
+            _prev_epoch = cMeasurement.epoch;
+
+            // clear first measurement
+            cMeasurement.value.clear();
+            cMeasurement.value.push_back(0.0);
+
+            valueReady = false;
+            lastComputedEpoch = 0.0;
+         }
+         else
+         {
+            cMeasurement.isFeasible = false;
+            cMeasurement.value.clear();
+            cMeasurement.value.push_back(0.0);
+
+            valueReady = false;
+            lastComputedEpoch = 0.0;
+         }
+
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
+                  "isFeasible %s\n", cMeasurement.epoch, one_way_range,
+                  range_rate, (cMeasurement.isFeasible ? "true" : "false"));
+         #endif
+
+         _timer = (cMeasurement.epoch-_prev_epoch)*86400.0;
+      }
    }
-
-   // one way range
-   Real one_way_range = two_way_range / 2.0;
-
-   // if more then one measurement exists, compute range-rate
-   if ((_prev_epoch != 0) && (_timer >= dopplerInterval))
-   {
-      cMeasurement.isFeasible = true;
-      // Compute range-rate
-      range_rate = (one_way_range-_prev_range)/(_timer);
-        
-      // set the measurement value
-      cMeasurement.value.clear();
-      cMeasurement.value.push_back(range_rate);
-        
-      // set previous range
-      _prev_range = one_way_range;
-
-      // Set previous epoch
-      _prev_epoch = cMeasurement.epoch;
-   }
-   else if ( _prev_epoch == 0)
-   {
-      cMeasurement.isFeasible = false;
-      // Set previous range 
-      _prev_range = one_way_range;
-
-      // Set previous epoch
-      _prev_epoch = cMeasurement.epoch;
-
-      // clear first measurement
-      cMeasurement.value.clear();
-      cMeasurement.value.push_back(0.0);
-   }
-   else
-   {
-      cMeasurement.isFeasible = false;
-      cMeasurement.value.clear();
-      cMeasurement.value.push_back(0.0);
-   }
-
-   #ifdef DEBUG_RANGE_CALCULATION
-      MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
-            "isfeasible %s\n", cMeasurement.epoch, one_way_range, 
-            range_rate, (cMeasurement.isFeasible ? "true" : "false"));
-   #endif
-
-   _timer = (cMeasurement.epoch-_prev_epoch)*86400.0;
-
    return cMeasurement;
 }
 
@@ -562,4 +595,51 @@ void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
    TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+//       const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Sets reference objects: overridden from base class to facilitate epoch
+ * generation
+ *
+ * @param obj The reference object
+ * @param type The object type
+ * @param name The name of the object
+ *
+ * @return true is the pointer was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
+      const Gmat::ObjectType type, const std::string& name)
+{
+   if (obj->IsOfType(Gmat::SPACECRAFT))
+      targetSat = (SpaceObject*) obj;
+   return RangeAdapterKm::SetRefObject(obj, type, name);
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+//       const std::string& name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets reference objects: overridden from base class to facilitate epoch
+ * generation
+ *
+ * @param obj The reference object
+ * @param type The object type
+ * @param name The name of the object
+ * @param index Index into the array of objects that receive this one
+ *
+ * @return true is the pointer was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
+      const Gmat::ObjectType type, const std::string& name, const Integer index)
+{
+   if (obj->IsOfType(Gmat::SPACECRAFT))
+      targetSat = (SpaceObject*) obj;
+   return RangeAdapterKm::SetRefObject(obj, type, name, index);
 }
