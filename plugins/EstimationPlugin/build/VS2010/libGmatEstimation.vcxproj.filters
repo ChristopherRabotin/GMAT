@@ -345,6 +345,9 @@
     <ClInclude Include="..\..\src\base\adapter\USNRangeAdapter.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -612,6 +615,9 @@
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\adapter\USNRangeAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>

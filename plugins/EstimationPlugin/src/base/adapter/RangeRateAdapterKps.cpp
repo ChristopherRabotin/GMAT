@@ -371,7 +371,6 @@ bool RangeRateAdapterKps::Initialize()
 const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB)
 {
-
    // Set ramp table and observation data for adapter before doing something
    //   rampTB = rampTable;
    obsData = forObservation;
@@ -380,10 +379,10 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    cMeasurement = RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, NULL);
 
    // twp way range
-   Real two_way_range =0;
+   Real two_way_range = 0;
 
    // set range rate
-   Real range_rate =0;
+   Real range_rate = 0;
    
    // some up the ranges
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); i++  )
@@ -392,52 +391,54 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
    }
 
    // one way range
-   Real one_way_range = two_way_range/2;
+   Real one_way_range = two_way_range / 2.0;
 
    // if more then one measurement exists, compute range-rate
-   if ((_prev_epoch != 0) &&  _timer >= dopplerInterval )
+   if ((_prev_epoch != 0) && (_timer >= dopplerInterval))
    {
+      cMeasurement.isFeasible = true;
+      // Compute range-rate
+      range_rate = (one_way_range-_prev_range)/(_timer);
         
-        // Compute range-rate
-        range_rate = (one_way_range-_prev_range)/(_timer);
+      // set the measurement value
+      cMeasurement.value.clear();
+      cMeasurement.value.push_back(range_rate);
         
-        // set the measurement value
-        cMeasurement.value.clear();
-        cMeasurement.value.push_back(range_rate);
-        
-        // set previous range
-        _prev_range = one_way_range;
+      // set previous range
+      _prev_range = one_way_range;
 
-        // Set previous epoch
-        _prev_epoch = cMeasurement.epoch;
-
+      // Set previous epoch
+      _prev_epoch = cMeasurement.epoch;
    }
    else if ( _prev_epoch == 0)
    {
-        // Set previous range 
-        _prev_range = one_way_range;
+      cMeasurement.isFeasible = false;
+      // Set previous range 
+      _prev_range = one_way_range;
 
-        // Set previous epoch
-        _prev_epoch = cMeasurement.epoch;
+      // Set previous epoch
+      _prev_epoch = cMeasurement.epoch;
 
-        // clear first measurement
-        cMeasurement.value.clear();
-        cMeasurement.value.push_back(0.0);
+      // clear first measurement
+      cMeasurement.value.clear();
+      cMeasurement.value.push_back(0.0);
    }
    else
    {
-        cMeasurement.isFeasible = false;
-        cMeasurement.value.clear();
-        cMeasurement.value.push_back(0.0);
+      cMeasurement.isFeasible = false;
+      cMeasurement.value.clear();
+      cMeasurement.value.push_back(0.0);
    }
-        #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, isfeasible %f\n", cMeasurement.epoch, one_way_range, range_rate, cMeasurement.isFeasible);
-        #endif
 
-   _timer = (cMeasurement.epoch-_prev_epoch)*86400;
+   #ifdef DEBUG_RANGE_CALCULATION
+      MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
+            "isfeasible %s\n", cMeasurement.epoch, one_way_range, 
+            range_rate, (cMeasurement.isFeasible ? "true" : "false"));
+   #endif
 
-    return cMeasurement;
+   _timer = (cMeasurement.epoch-_prev_epoch)*86400.0;
 
+   return cMeasurement;
 }
 
 
