@@ -12,20 +12,14 @@ classdef RadauPhase < Phase
         meshIntervalFractions
         numStateStagePoints;
         numControlStagePoints;
-        stepSize
     end
     
     properties (SetAccess = 'protected')
-        
-        %  Time parameters
-        timeMat
+       
         %  Mesh point and radau transcription details
         radauPoints
         radauWeights
         radauDiffMatrix
-        numRadauPoints
-        numStateEvalPoints
-        totalNumPoints
     end
     
     methods
@@ -37,16 +31,13 @@ classdef RadauPhase < Phase
             [obj.radauPoints,obj.radauWeights,obj.radauDiffMatrix]...
                 = lgrPS(obj.meshIntervalFractions, ...
                 obj.meshIntervalNumPoints);
-            obj.numRadauPoints = length(obj.radauWeights);
+            obj.numCollocationPoints = length(obj.radauWeights);
             
             %  Compute the number of mesh points
-            obj.numMeshPoints        = obj.numRadauPoints;
-            obj.numStatePoints       = obj.numRadauPoints + 1;
-            obj.numControlPoints     = obj.numRadauPoints;
+            obj.numMeshPoints        = obj.numCollocationPoints;
+            obj.numStatePoints       = obj.numCollocationPoints + 1;
+            obj.numControlPoints     = obj.numCollocationPoints;
             obj.numTimeParams        = 2;
-            obj.numCollocationPoints = obj.numControlPoints;
-            obj.numStateEvalPoints   = obj.numMeshPoints;
-            obj.totalNumPoints       = obj.numStatePoints;
             obj.meshPoints           = obj.radauPoints/2 + 1/2;
             obj.SetStageProperties();
             
@@ -59,6 +50,13 @@ classdef RadauPhase < Phase
             
             obj.numDefectConstraints = obj.numStates*...
                 obj.numCollocationPoints;
+            
+            %  Set the point types for each of the mesh points
+            %  1 means state and control
+            %  2 means state only
+            %  3 means control only
+            timeVectorType = ones(obj.numStatePoints,1);
+            timeVectorType(obj.numStatePoints) = 2;
         end
         
         %  Configure the time vector
@@ -106,7 +104,7 @@ classdef RadauPhase < Phase
         
         %  Configure time parameters
         function ComputeTimeParameters(obj)
-            obj.timeMat     = GetInitialFinalTime(obj);
+            GetInitialFinalTime(obj);
             obj.finalTime   = obj.DecVector.GetLastTime();
             obj.initialTime = obj.DecVector.GetFirstTime();
         end

@@ -23,7 +23,6 @@ classdef HermiteSimpsonPhase < Phase
     properties (SetAccess = 'protected')
         
         %  Time parameters
-        timeMat
         totalNumPoints
         %  Vector: mesh step size for each mesh interval
         meshStepSizes
@@ -196,7 +195,7 @@ classdef HermiteSimpsonPhase < Phase
         
         %  Configure Time Parameters
         function ComputeTimeParameters(obj)
-            obj.timeMat     = GetInitialFinalTime(obj);
+            GetInitialFinalTime(obj);
             obj.finalTime   = obj.DecVector.GetLastTime();
             obj.initialTime = obj.DecVector.GetFirstTime();
         end

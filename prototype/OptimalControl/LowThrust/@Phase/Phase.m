@@ -35,6 +35,7 @@ classdef Phase < handle
         numIntegrals = 0
         decisionVector
         timeVector
+        timeVectorType
         
         %% User functions
         pathFunctionName
@@ -107,6 +108,7 @@ classdef Phase < handle
         pathEndIdx
         eventEndIdx
         
+        % timeVector
         finalTime
         initialTime
         
@@ -394,6 +396,7 @@ classdef Phase < handle
             end
             
             %  Update the time vector accordingly.
+            %  TODO: This is a kludge.  Should not need to be set here.
             obj.ComputeTimeVector()
             
         end
@@ -618,9 +621,6 @@ classdef Phase < handle
         function  timeMat = GetInitialFinalTime(obj)
             timeMat = [obj.DecVector.GetFirstTime();...
                 obj.DecVector.GetLastTime()];
-            %             reshape(obj.DecVector.decisionVector...
-            %                 (obj.timeStartIdx:obj.timeEndIdx),...
-            %                 obj.numTimeParams,1);
         end
         
         %  Configure initial time parameters

@@ -1,5 +1,5 @@
 %% =====  Intializations
-%ClearAll
+ClearAll
 global igrid iGfun jGvar traj 
 
 %% =====  Define the phase and trajectory properties

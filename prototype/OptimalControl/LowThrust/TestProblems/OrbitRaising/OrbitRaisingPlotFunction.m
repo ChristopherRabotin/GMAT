@@ -42,4 +42,4 @@ for i = 1:length(uR)
     plot([uStartx(i);uStopx(i)],[uStarty(i);uStopy(i)],'r-','LineWidth',1.2);
 end
 % pause;
-drawnow;
+%drawnow;
