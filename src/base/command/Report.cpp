@@ -120,8 +120,6 @@ Report::Report(const Report &rep) :
    parmNames = rep.parmNames;
    actualParmNames = rep.actualParmNames;
    parms.clear();
-   parmRows.clear();
-   parmCols.clear();
    parmWrappers.clear();
 }
 
@@ -151,8 +149,6 @@ Report& Report::operator=(const Report &rep)
       parmNames = rep.parmNames;
       actualParmNames = rep.actualParmNames;
       parms.clear();
-      parmRows.clear();
-      parmCols.clear();
    }
    
    return *this;
@@ -446,8 +442,6 @@ bool Report::TakeAction(const std::string &action, const std::string &actionData
    {
       parmNames.clear();
       actualParmNames.clear();
-      parmRows.clear();
-      parmCols.clear();
 
       // I think we also need to clear wrappers here (loj: 2008.11.24)
       ClearWrappers();
@@ -1101,8 +1095,6 @@ bool Report::AddParameter(const std::string &paramName, Integer index,
       
       parmNames.push_back(newName);
       actualParmNames.push_back(paramName);
-      parmRows.push_back(row);
-      parmCols.push_back(col);
       parms.push_back(param);
       parmWrappers.push_back(NULL);
       numParams = actualParmNames.size();
@@ -1171,8 +1163,6 @@ void Report::DeleteParameters()
    parmWrappers.clear();   
    actualParmNames.clear();
    parms.clear();
-   parmRows.clear();
-   parmCols.clear();
 }
 
 
