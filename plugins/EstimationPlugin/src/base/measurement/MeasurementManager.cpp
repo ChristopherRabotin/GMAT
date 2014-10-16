@@ -1674,9 +1674,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
             MessageInterface::ShowMessage("******** Ramped table names size = %d\n", sr.size());
-            MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
-            for(int ii=0; ii < rt->size(); ++ii)
-               MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
+            if (sr.size() > 0)
+            {
+               MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
+               for(int ii=0; ii < rt->size(); ++ii)
+                  MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
+            }
          #endif
          
          // Set AddNoise to measuement apdater
@@ -1721,7 +1724,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          }
          
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[i].isFeasible?"feasible":" not feasible"), measurements[i].value[0]);
+            MessageInterface::ShowMessage(" Adapter Measurement is %s. Its value is "
+                  "%lf\n", (measurements[i].isFeasible?"feasible":
+                  " not feasible"), measurements[i].value[0]);
          #endif
       } // for i loop
    }
