@@ -1037,12 +1037,15 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
  * @param forObservation An observation supplying data needed for the
  *                       calculation (not used)
  * @param rampTB A ramp table for the data (not used)
+ * @param atTimeOffset Time offset, in seconds, from the base epoch (used for
+ *                     differenced measurements)
  *
  * @return true if the the calculation succeeded, false if not
  */
 //------------------------------------------------------------------------------
 bool MeasureModel::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+      Real atTimeOffset)
 {
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(" Enter MeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
@@ -1089,6 +1092,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
    
+MessageInterface::ShowMessage("Base epoch: %.12lf, timeOffset %lf sec, New epoch ",
+      forEpoch.GetMjd(), atTimeOffset);
+   if (atTimeOffset != 0.0)
+      forEpoch += atTimeOffset * GmatTimeConstants::DAYS_PER_SEC;
+MessageInterface::ShowMessage("%.12lf\n", forEpoch.GetMjd());
+
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
@@ -1356,6 +1365,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
  * @param obj The "with respect to" object owning the "with respect to"
  *            parameter.
  * @param id The ID of the "with respect to" field
+ * @param atTimeOffset Time offset, in seconds, from the base epoch (used for
+ *                     differenced measurements)
+
  *
  * @return The vector of derivative data
  */

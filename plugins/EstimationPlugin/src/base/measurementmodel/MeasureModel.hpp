@@ -115,7 +115,9 @@ public:
 
    virtual bool CalculateMeasurement(bool withEvents = false,
                        ObservationData* forObservation = NULL,
-                       std::vector<RampTableData>* rampTB = NULL);
+                       std::vector<RampTableData>* rampTB = NULL,
+                       Real atTimeOffset = 0.0);
+
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);
