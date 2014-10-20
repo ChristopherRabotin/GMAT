@@ -87,10 +87,8 @@ protected:
 
    /// Previous epoch
    Real _prev_epoch;
-
    /// Previous Range 
    Real _prev_range;
-
    /// Timer 
    Real _timer;
 

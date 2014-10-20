@@ -41,6 +41,7 @@
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
 //#define DEBUG_CALCULATE_MEASUREMENT
+#define DEBUG_OFFSET
 
 //------------------------------------------------------------------------------
 // Static data
@@ -1092,11 +1093,17 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
    
-MessageInterface::ShowMessage("Base epoch: %.12lf, timeOffset %lf sec, New epoch ",
-      forEpoch.GetMjd(), atTimeOffset);
+   #ifdef DEBUG_OFFSET
+      MessageInterface::ShowMessage("Base epoch: %.12lf, timeOffset %lf sec, New epoch ",
+            forEpoch.GetMjd(), atTimeOffset);
+   #endif
+
    if (atTimeOffset != 0.0)
       forEpoch += atTimeOffset * GmatTimeConstants::DAYS_PER_SEC;
-MessageInterface::ShowMessage("%.12lf\n", forEpoch.GetMjd());
+
+   #ifdef DEBUG_OFFSET
+      MessageInterface::ShowMessage("%.12lf\n", forEpoch.GetMjd());
+   #endif
 
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch

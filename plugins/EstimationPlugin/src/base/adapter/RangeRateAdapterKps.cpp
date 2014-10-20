@@ -28,6 +28,8 @@
 //#define DEBUG_ADAPTER_DERIVATIVES
 //#define DEBUG_RANGE_CALCULATION
 #define DEBUG_DERIV
+
+
 //------------------------------------------------------------------------------
 // Static data
 //------------------------------------------------------------------------------
@@ -259,7 +261,8 @@ Real RangeRateAdapterKps::SetRealParameter(const Integer id, const Real value)
    if (id == DOPPLER_INTERVAL)
    {
       if (value <= 0.0)
-         throw MeasurementException("Error: Doppler interval must be a positive value\n");
+         throw MeasurementException("Error: Doppler interval must be a "
+               "positive value\n");
 
       dopplerInterval = value;
       return dopplerInterval;
@@ -297,13 +300,11 @@ Real RangeRateAdapterKps::GetRealParameter(const std::string &label) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapterKps::SetRealParameter(const std::string &label, const Real value)
+Real RangeRateAdapterKps::SetRealParameter(const std::string &label,
+      const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
 }
-
-
-
 
 
 //------------------------------------------------------------------------------
@@ -325,11 +326,9 @@ bool RangeRateAdapterKps::RenameRefObject(const Gmat::ObjectType type,
 {
    bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
 
-   // Handle additional renames specific to this adapter
+   // Handle additional renames specific to this adapter (currently none)
 
    return retval;
-
-
 }
 
 
@@ -348,13 +347,11 @@ bool RangeRateAdapterKps::Initialize()
 
    if (RangeAdapterKm::Initialize())
    {
+      // Handle additional initialization specific to this adapter (currently none)
       retval = true;
-
-      // @todo: initialize all needed variables
    }
 
    return retval;
-
 }
 
 
@@ -376,39 +373,38 @@ bool RangeRateAdapterKps::Initialize()
  * @return The computed measurement data
  */
 //------------------------------------------------------------------------------
-const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents,
-                              ObservationData* forObservation ,
-                              std::vector<RampTableData>* rampTB  )
+const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
+                              bool withEvents, ObservationData* forObservation,
+                              std::vector<RampTableData>* rampTB)
 {
-
    #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("LCE: %.12lf, CSE: %.12lf, delta: %le, %s\n", lastComputedEpoch,
-            currentSignalEpoch, lastComputedEpoch - currentSignalEpoch,
+      MessageInterface::ShowMessage("LCE: %.12lf, CSE: %.12lf, delta: %le, %s\n",
+            lastComputedEpoch, currentSignalEpoch,
+            lastComputedEpoch - currentSignalEpoch,
             (valueReady ? "Value ready" : "Value not ready"));
    #endif
 
-      // Compute range in km
-      cMeasurement = RangeAdapterKm::CalculateMeasurement
-            (false, NULL, NULL);
-      MeasurementData cMeasurement2 =
-            RangeAdapterKm::CalculateMeasurementAtOffset(false,
-                  dopplerInterval, NULL, NULL);
+   // Compute range in km, at epoch and at epoch plus offset
+   cMeasurement = RangeAdapterKm::CalculateMeasurement
+         (false, NULL, NULL);
+   MeasurementData cMeasurement2 =
+         RangeAdapterKm::CalculateMeasurementAtOffset(false, dopplerInterval,
+               NULL, NULL);
 
-     if ((cMeasurement.isFeasible) && (cMeasurement2.isFeasible))
-     {
-
+   if ((cMeasurement.isFeasible) && (cMeasurement2.isFeasible))
+   {
       // two way range
       Real two_way_range  = 0.0;
       Real two_way_range2 = 0.0;
-   
+
       // set range rate
       Real range_rate = 0;
 
       // some up the ranges
       for (UnsignedInt i = 0; i < cMeasurement.value.size(); i++  )
       {
-         two_way_range  = two_way_range  + cMeasurement.value[i];
-         two_way_range2 = two_way_range2 + cMeasurement2.value[i];
+        two_way_range  = two_way_range  + cMeasurement.value[i];
+        two_way_range2 = two_way_range2 + cMeasurement2.value[i];
       }
 
       // one way range
@@ -422,15 +418,15 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
       cMeasurement.value.clear();
       cMeasurement.value.push_back(range_rate);
 
+      #ifdef DEBUG_RANGE_CALCULATION
+        MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
+              "isFeasible %s, range2 %f, dRange %le\n", cMeasurement.epoch,
+              one_way_range, range_rate,
+              (cMeasurement.isFeasible ? "true" : "false"), one_way_range2,
+              one_way_range - one_way_range2);
+      #endif
+   }
 
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
-                  "isFeasible %s, range2 %f, dRange %le\n", cMeasurement.epoch, one_way_range,
-                  range_rate, (cMeasurement.isFeasible ? "true" : "false"),
-                  one_way_range2, one_way_range - one_way_range2);
-         #endif
-
-     }
    return cMeasurement;
 }
 
@@ -448,42 +444,40 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(bool withEvents
  * @return The derivative vector
  */
 //------------------------------------------------------------------------------
-const std::vector<RealArray>& RangeRateAdapterKps::CalculateMeasurementDerivatives(
-      GmatBase* obj, Integer id)
+const std::vector<RealArray>& RangeRateAdapterKps::
+            CalculateMeasurementDerivatives(GmatBase* obj, Integer id)
 {
+   //Compute measurement derivatives in km at epoch plus offset
+   MeasurementData cMeasurement2 =
+           RangeAdapterKm::CalculateMeasurementAtOffset(false,
+                 dopplerInterval, NULL, NULL);
+   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
 
-           //Compute measurement derivatives in km at epoch
-           MeasurementData cMeasurement2 =
-                    RangeAdapterKm::CalculateMeasurementAtOffset(false,
-                          dopplerInterval, NULL, NULL); 
+   // copy the data off
+   std::vector<RealArray> theDataDerivatives2 = theDataDerivatives;
 
-           RangeAdapterKm::CalculateMeasurementDerivatives(obj, id); 
-            
-           // copy the data off 
-           std::vector<RealArray> theDataDerivatives2 = theDataDerivatives; 
-         
-           // Compute measurement derivatives in km at epoch plus offset:
-           cMeasurement = RangeAdapterKm::CalculateMeasurement
-                    (false, NULL, NULL);
-           RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   // Compute measurement derivatives in km at epoch
+   cMeasurement = RangeAdapterKm::CalculateMeasurement(false, NULL, NULL);
+   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
 
-           std::vector<RealArray> theDataDerivatives1 = theDataDerivatives; 
-           
-            //Do the differencing
+   std::vector<RealArray> theDataDerivatives1 = theDataDerivatives;
 
-           for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
-           {
-                for ( UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
-                {
-                    
-                    theDataDerivatives[i][j] = (theDataDerivatives2[i][j] - theDataDerivatives1[i][j])/dopplerInterval;
-                    #ifdef DEBUG_DERIV
-                         MessageInterface::ShowMessage("j %f\n",j );
-                         MessageInterface::ShowMessage("deriv %f\n",theDataDerivatives[i][j] );
-                    #endif
-                }
+   //Do the differencing
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+   {
+      for ( UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
+      {
+         theDataDerivatives[i][j] = (theDataDerivatives2[i][j] -
+               theDataDerivatives1[i][j]) / dopplerInterval;
 
-           }
+         #ifdef DEBUG_DERIV
+             MessageInterface::ShowMessage("j %f\n", j);
+             MessageInterface::ShowMessage("deriv %f\n",
+                   theDataDerivatives[i][j]);
+         #endif
+      }
+   }
+
    return theDataDerivatives;
 }
 
@@ -502,7 +496,6 @@ const std::vector<RealArray>& RangeRateAdapterKps::CalculateMeasurementDerivativ
 bool RangeRateAdapterKps::WriteMeasurements()
 {
    bool retval = false;
-
    return retval;
 }
 
@@ -523,7 +516,6 @@ bool RangeRateAdapterKps::WriteMeasurements()
 bool RangeRateAdapterKps::WriteMeasurement(Integer id)
 {
    bool retval = false;
-
    return retval;
 }
 
@@ -542,7 +534,6 @@ bool RangeRateAdapterKps::WriteMeasurement(Integer id)
 Integer RangeRateAdapterKps::HasParameterCovariances(Integer parameterId)
 {
    Integer retval = 0;
-
    return retval;
 }
 
@@ -559,7 +550,6 @@ Integer RangeRateAdapterKps::HasParameterCovariances(Integer parameterId)
 Integer RangeRateAdapterKps::GetEventCount()
 {
    Integer retval = 0;
-
    return retval;
 }
 
