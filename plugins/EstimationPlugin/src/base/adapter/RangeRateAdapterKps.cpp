@@ -471,8 +471,8 @@ const std::vector<RealArray>& RangeRateAdapterKps::
                theDataDerivatives1[i][j]) / dopplerInterval;
 
          #ifdef DEBUG_DERIV
-             MessageInterface::ShowMessage("j %f\n", j);
-             MessageInterface::ShowMessage("deriv %f\n",
+             MessageInterface::ShowMessage("j %d -> ", j);
+             MessageInterface::ShowMessage("deriv %le\n",
                    theDataDerivatives[i][j]);
          #endif
       }
