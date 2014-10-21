@@ -41,7 +41,7 @@
 //#define DEBUG_FEASIBILITY
 //#define DEBUG_EXECUTION
 //#define DEBUG_CALCULATE_MEASUREMENT
-#define DEBUG_OFFSET
+//#define DEBUG_OFFSET
 
 //------------------------------------------------------------------------------
 // Static data
