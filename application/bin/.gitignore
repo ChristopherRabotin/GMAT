@@ -9,3 +9,5 @@
 /*.sh*
 /gmat_startup_file.txt~
 /GmatTester
+/tdm_dsn7.txt
+/lib
