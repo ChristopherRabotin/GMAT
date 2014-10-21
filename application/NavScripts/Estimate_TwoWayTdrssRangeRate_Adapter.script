@@ -6,7 +6,8 @@ GMAT TDRSS4.DateFormat = UTCGregorian;
 GMAT TDRSS4.Epoch = '09 Jun 2004 00:00:00.000';
 GMAT TDRSS4.CoordinateSystem = EarthMJ2000Eq;
 GMAT TDRSS4.DisplayStateType = Cartesian;
-GMAT TDRSS4.X = -33706.32486153131;
+% GMAT TDRSS4.X = -33706.32486153131;
+GMAT TDRSS4.X = -33702.32486153131;
 GMAT TDRSS4.Y = -25220.99822905847;
 GMAT TDRSS4.Z = 2557.37264082928;
 GMAT TDRSS4.VX = 1.820046298589535;
@@ -36,11 +37,11 @@ GMAT ST2K_48.Altitude = 1.45231;
 GMAT ST2K_48.Id = 'ST2K_48';
 
 %----- The data file
-Create TrackingFileSet simData
-simData.AddTrackingConfig = {{ST2K_48, TDRSS4, ST2K_48}, 'RangeRate'}
-simData.Filename = ODSatTdrss4MauiTwoWayRangeRate.gmd
-simData.UseLighttime = true;
-simData.DopplerInterval = 10.00;
+Create TrackingFileSet estData
+estData.AddTrackingConfig = {{ST2K_48, TDRSS4, ST2K_48}, 'RangeRate'}
+estData.Filename = ODSatTdrss4MauiTwoWayRangeRate.gmd
+estData.UseLighttime = true;
+estData.DopplerInterval = 10.00;
 
 
 %----- The propagator
@@ -52,22 +53,21 @@ GMAT ODProp.FM = ODProp_ForceModel;
 GMAT ODProp.Type = PrinceDormand78;
 GMAT ODProp.MinStep = 0;
 
-%------ Create the measurement simulator
-Create Simulator MeasSim
-MeasSim.AddData         = {simData};
-MeasSim.Propagator      = ODProp;
-MeasSim.InitialEpochFormat = UTCGregorian;
-MeasSim.InitialEpoch       = '09 Jun 2004 00:00:00.000';
-MeasSim.FinalEpochFormat   = UTCGregorian;
-MeasSim.FinalEpoch         = '12 Jun 2004 00:00:00.000';
-MeasSim.MeasurementTimeStep = 100;
-
-
-Create XYPlot XYPlot1;
-GMAT XYPlot1.SolverIterations = All;
-GMAT XYPlot1.XVariable = TDRSS4.A1ModJulian;
-GMAT XYPlot1.YVariables = {TDRSS4.EarthMJ2000Eq.X, TDRSS4.EarthMJ2000Eq.Y, TDRSS4.EarthMJ2000Eq.Z};
+%------ Create the measurement estimator
+Create BatchEstimatorInv BatchEst;
+GMAT BatchEst.ShowProgress = true;
+GMAT BatchEst.ReportStyle = 'Normal';
+GMAT BatchEst.ReportFile = 'RREstimator.data';
+GMAT BatchEst.MaximumIterations = 15;
+GMAT BatchEst.Measurements = {estData};
+GMAT BatchEst.AddSolveFor = {'TDRSS4.CartesianState'}; %, 'RangeMeasurement.Bias'};
+GMAT BatchEst.AbsoluteTol = 1e-04;
+GMAT BatchEst.RelativeTol = 1e-06;
+GMAT BatchEst.Propagator = ODProp;
+GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
+GMAT BatchEst.OLSEInitialRMSSigma = 3e45;
+% BatchEst.OLSEMultiplicativeConstant = 4
 
 %------ Run the measurement simulator
 BeginMissionSequence
-RunSimulator MeasSim
+RunEstimator BatchEst
