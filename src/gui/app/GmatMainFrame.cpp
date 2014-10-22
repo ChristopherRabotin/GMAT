@@ -176,6 +176,7 @@
 //#define DEBUG_PERSISTENCE
 //#define DEBUG_REPOSITION_CHILDREN
 //#define DEBUG_SCREEN_SHOT
+//#define DEBUG_MAINFRAME_HELP
 
 using namespace GmatMenu;
 
@@ -1621,6 +1622,15 @@ void GmatMainFrame::RemoveOutput(const wxString &name)
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseWelcomePanel()
 {
+   if (mWelcomePanel != NULL)
+   {
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage
+         ("\nGmatMainFrame::CloseWelcomePanel() about to close welcome panel!\n");
+      #endif
+      mWelcomePanel->Close();
+   }
+
    mWelcomePanel = NULL;
 }
 
@@ -1712,7 +1722,8 @@ void GmatMainFrame::CloseActiveChild()
 
 //------------------------------------------------------------------------------
 // bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-//                       bool closeReports = true, bool closeUndockedMissionTree = true)
+//                       bool closeReports = true, bool closeUndockedMissionTree = true,
+//                       bool closeWelcomePanel = true)
 //------------------------------------------------------------------------------
 /*
  * Closes all mdi children frames.
@@ -1725,13 +1736,14 @@ void GmatMainFrame::CloseActiveChild()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                                      bool closeReports, bool closeUndockedMissionTree,
-                                     bool closingGmat)
+                                     bool closingGmat,  bool closeWelcomePanel)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
       ("\nGmatMainFrame::CloseAllChildren() entered, closeScriptWindow=%d, closePlots=%d, "
-       "closeReports=%d, closeUndockedMissionTree=%d, closingGmat=%d\n", closeScriptWindow, closePlots,
-       closeReports, closeUndockedMissionTree, closingGmat);
+       "closeReports=%d, closeUndockedMissionTree=%d, closingGmat=%d, closeWelcomePanel = %d\n",
+       closeScriptWindow, closePlots,
+       closeReports, closeUndockedMissionTree, closingGmat, closeWelcomePanel);
    MessageInterface::ShowMessage
       ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
@@ -1767,8 +1779,14 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    wxCloseEvent event;
    GmatAppData *gmatAppData = GmatAppData::Instance();
 
-   if (mWelcomePanel != NULL)
+   if ((mWelcomePanel != NULL) && closeWelcomePanel)
+   {
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage
+         ("\nGmatMainFrame::CloseAllChildren() about to close welcome panel!\n");
+      #endif
       mWelcomePanel->Close();
+   }
 
    wxArrayString ignoreNames;
    
@@ -2326,7 +2344,7 @@ void GmatMainFrame::CloseCurrentProject()
 //------------------------------------------------------------------------------
 // bool InterpretScript(const wxString &filename, Integer scriptOpenOpt,
 //                      bool closeScript, bool readBack, const wxString &savePath,
-//                      bool multiScripts)
+//                      bool multiScripts,bool closeWelcomePanel = true)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
@@ -2346,13 +2364,14 @@ void GmatMainFrame::CloseCurrentProject()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpenOpt,
                                     bool closeScript, bool readBack,
-                                    const wxString &savePath, bool multiScripts)
+                                    const wxString &savePath, bool multiScripts,
+                                    bool closeWelcomePanel)
 {
    #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
       ("\nGmatMainFrame::InterpretScript() entered\n   filename=%s\n   scriptOpenOpt=%d, "
-       "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath='%s'\n", filename.c_str(),
-       scriptOpenOpt, closeScript, readBack, multiScripts, savePath.c_str());
+       "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath='%s'\n", filename.WX_TO_C_STRING,
+       scriptOpenOpt, closeScript, readBack, multiScripts, savePath.WX_TO_C_STRING);
    #endif
 
    wxSafeYield();
@@ -2362,7 +2381,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
    // Always refresh the gui before new scripts are read
-   CloseAllChildren(closeScript, true, true, false);
+   CloseAllChildren(closeScript, true, true, false, false, closeWelcomePanel);
    gmatAppData->GetResourceTree()->ClearResource(true);
    gmatAppData->GetMissionTree()->ClearMission();
    gmatAppData->GetOutputTree()->UpdateOutput(true, true, true);
@@ -2420,7 +2439,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       // Update ResourceTree and MissionTree
       gmatAppData->GetResourceTree()->UpdateResource(true);
       gmatAppData->GetMissionTree()->UpdateMission(true);
+#ifndef __WXMAC__
       wxSafeYield();
+#endif
       
       #ifdef DEBUG_INTERPRET
       MessageInterface::ShowMessage("   Now restoring UndockedMissionPanel\n");
@@ -2432,13 +2453,22 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       #endif
       UpdateGuiScriptSyncStatus(1, 1);
       
+      #ifdef DEBUG_INTERPRET
+      MessageInterface::ShowMessage("   Now checking for status clear and open script editor\n");
+      #endif
       // if not running script folder, clear status
       if (!multiScripts)
          SetStatusText("", 2);
+      #ifdef DEBUG_INTERPRET
+      MessageInterface::ShowMessage("   Finished with SetStatusText\n");
+      #endif
       
       // open script editor
       if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
          OpenScript(false);
+      #ifdef DEBUG_INTERPRET
+      MessageInterface::ShowMessage("   Finished with OpenScript\n");
+      #endif
    }
    else
    {
@@ -2458,8 +2488,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       gmatAppData->GetResourceTree()->UpdateResource(true);
       gmatAppData->GetMissionTree()->UpdateMission(true);
    }
-   
+#ifndef __WXMAC__
    wxSafeYield();
+#endif
    mInterpretFailed = !success;
    
    #ifdef DEBUG_INTERPRET
@@ -3302,6 +3333,11 @@ void GmatMainFrame::OpenScript(bool restore)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OpenRecentScript(size_t index, wxCommandEvent &event)
 {
+   #ifdef DEBUG_OPEN_SCRIPT
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnOpenRecentScript() called with index = %d\n",
+            (Integer) index);
+   #endif
    wxArrayString files;
    wxString aFilename;
    wxString aKey;
@@ -3327,8 +3363,14 @@ void GmatMainFrame::OpenRecentScript(size_t index, wxCommandEvent &event)
  *
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OpenRecentScript(wxString filename, wxCommandEvent &event)
+void GmatMainFrame::OpenRecentScript(wxString filename, wxCommandEvent &event,
+      bool closeWelcomePanel)
 {
+   #ifdef DEBUG_OPEN_SCRIPT
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnOpenRecentScript() called with filename = %s, closeWelcomePanel = %s\n",
+            filename.WX_TO_C_STRING, (closeWelcomePanel? "true" : "false"));
+   #endif
    // Check if file exist first
    if (!wxFileName::FileExists(filename))
    {
@@ -3370,7 +3412,8 @@ void GmatMainFrame::OpenRecentScript(wxString filename, wxCommandEvent &event)
       }
 
       SetStatusText("", 2);
-      InterpretScript(mScriptFilename.c_str(), GmatGui::OPEN_SCRIPT_ON_ERROR, true);
+      InterpretScript(mScriptFilename.c_str(), GmatGui::OPEN_SCRIPT_ON_ERROR, true,
+            false, "", false, closeWelcomePanel);
    }
 }
 
@@ -3748,6 +3791,10 @@ void GmatMainFrame::OnHelpWelcome(wxCommandEvent& WXUNUSED(event))
 {
    if (mWelcomePanel == NULL)
    {
+      #ifdef DEBUG_MAINFRAME_HELP
+      MessageInterface::ShowMessage
+         ("\nGmatMainFrame::OnHelpWelcome() entered- creating welcome panel!\n");
+      #endif
       mWelcomePanel =
          new WelcomePanel(this, _T("Welcome to GMAT"), 20, 20, 600, 350);
    }

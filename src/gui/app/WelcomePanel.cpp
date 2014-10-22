@@ -480,7 +480,9 @@ wxFlexGridSizer *WelcomePanel::FillGroup(wxFileConfig *config, wxString INIGroup
 //------------------------------------------------------------------------------
 void WelcomePanel::OnOpenRecentScript(wxHyperlinkEvent& event)
 {
-   GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(event.GetURL(), event);
+   GmatAppData::Instance()->GetMainFrame()->OpenRecentScript(event.GetURL(),
+                                            event, false);
+   GmatAppData::Instance()->GetMainFrame()->CloseWelcomePanel();  // ****
 }
 
 

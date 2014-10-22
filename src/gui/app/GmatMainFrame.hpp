@@ -102,7 +102,7 @@ public:
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          bool closeReports = true, bool closeUndockedMissionTree = true,
-                         bool closingGmat = false);
+                         bool closingGmat = false, bool closeWelcomePanel = true);
    void MinimizeChildren();
    void ComputeReportPositionAndSize(const wxString &name, Integer &x,
                                      Integer &y, Integer &w, Integer &h,
@@ -115,7 +115,8 @@ public:
    bool InterpretScript(const wxString &filename,
                         Integer scriptOpenOpt = GmatGui::OPEN_SCRIPT_ON_ERROR,
                         bool closeScript = false, bool readBack = false,
-                        const wxString &savePath = "", bool multScripts = false);
+                        const wxString &savePath = "", bool multScripts = false,
+                        bool closeWelcomePanel = true);
    bool BuildScript(const wxString &filename, bool addToResourceTree = false);
    Integer RunCurrentScript();
    Integer BuildAndRunScript(const wxString &filename, bool addToResourceTree = false);
@@ -162,7 +163,7 @@ public:
    void OnNewScript(wxCommandEvent &event);
    void OnOpenScript(wxCommandEvent &event);
    void OpenRecentScript(size_t index, wxCommandEvent &event);
-   void OpenRecentScript(wxString filename, wxCommandEvent &event);
+   void OpenRecentScript(wxString filename, wxCommandEvent &event, bool closeWelcomePanel = true);
    void OnOpenRecentScript1(wxCommandEvent &event);  // I know this is retarded but the event returns the MDI frame
    void OnOpenRecentScript2(wxCommandEvent &event);  // as its event object.  There doesn't seem to be a way
    void OnOpenRecentScript3(wxCommandEvent &event);  // to figure out which menu item called an event handler
