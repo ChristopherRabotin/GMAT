@@ -3061,24 +3061,33 @@ void GmatCommand::InsertCommandName(std::string &genString)
 //------------------------------------------------------------------------------
 void GmatCommand::ShowCommand(const std::string &prefix,
                               const std::string &title1, GmatCommand *cmd1,
-                              const std::string &title2, GmatCommand *cmd2)
+                              const std::string &title2, GmatCommand *cmd2,
+                              bool showDetail)
 {
    if (title2 == "")
    {
+      std::string cmdStr1;
+      if (showDetail)
+         cmdStr1 = cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
       MessageInterface::ShowMessage
          ("%s%s: %s<%p><%s>[%s]\n", prefix.c_str(), this->GetTypeName().c_str(),
-          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
-          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
+          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL", cmdStr1.c_str());
    }
    else
    {
+      std::string cmdStr1, cmdStr2;
+      std::string sepStr = "";
+      if (showDetail)
+      {
+         cmdStr1 = cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
+         cmdStr2 = cmd2 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
+         sepStr = "\n";
+      }
       MessageInterface::ShowMessage
-         ("%s%s:\n   %s<%p><%s>[%s]\n   %s<%p><%s>[%s]\n", prefix.c_str(),
+         ("%s%s:\n   %s<%p><%s>[%s]%s   %s<%p><%s>[%s]\n", prefix.c_str(),
           this->GetTypeName().c_str(), title1.c_str(), cmd1,
-          cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
-          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL",
-          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL",
-          cmd2 ? cmd2->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
+          cmd1 ? cmd1->GetTypeName().c_str() : "NULL", cmdStr1.c_str(), sepStr.c_str(),
+          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL", cmdStr2.c_str());
    }
 }
 

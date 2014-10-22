@@ -136,6 +136,7 @@ public:
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
+   Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
    bool InterpretScript(const std::string &filename, bool readBack = false,

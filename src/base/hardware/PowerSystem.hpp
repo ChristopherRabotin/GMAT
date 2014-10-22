@@ -34,7 +34,7 @@ class GMAT_API PowerSystem : public Hardware
 {
 public:
 
-   PowerSystem(std::string systemType, std::string nomme);
+   PowerSystem(const std::string &systemType, const std::string &nomme);
    virtual ~PowerSystem();
    PowerSystem(const PowerSystem& copy);
    PowerSystem& operator=(const PowerSystem& copy);
@@ -53,6 +53,9 @@ public:
    virtual Real         GetPowerGenerated() const = 0;      // Total Power Available
    virtual Real         GetSpacecraftBusPower() const;      // Required Bus Power
    virtual Real         GetThrustPower() const;             // Thrust Power Available
+
+   virtual void         SetEpoch(const std::string &ep);
+   virtual std::string  GetEpochString();
 
    // Parameter access methods - overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
@@ -87,7 +90,7 @@ public:
 protected:
    /// Epoch format
    std::string          epochFormat;
-   /// Initial epoch
+   /// Initial epoch as input/set
    std::string          initialEpoch;
    /// Initial Maximum Power
    Real                 initialMaxPower;
@@ -100,8 +103,9 @@ protected:
    Real                 busCoeff2;
    Real                 busCoeff3;
 
-   /// initialEpoch as a real
+   /// initialEpoch as a real A1Mjd
    Real                 initialEp;
+   /// initialEpoch
 
    /// Pointer to the SolarSystem
    SolarSystem         *solarSystem;

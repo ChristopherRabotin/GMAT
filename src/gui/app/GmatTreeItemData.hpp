@@ -222,8 +222,10 @@ namespace GmatTree
       GROUND_STATION,
       
       HARDWARE,
-      FUELTANK,
-      THRUSTER,
+      FUELTANK_CHEMICAL,
+      FUELTANK_ELECTRIC,
+      THRUSTER_CHEMICAL,  // need these two as they will have different submenus and icons
+      THRUSTER_ELECTRIC,
       POWER_SYSTEM,
       SENSOR,
       

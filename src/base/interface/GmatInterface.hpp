@@ -44,6 +44,7 @@ public:
    bool  RegisterCallbackServer(GmatBase *callbackObject);
    char* GetCallbackStatus();
    void  PutCallbackData(std::string &data);
+   void  PutCallbackRealData(RealArray &data);
    char* GetCallbackResults();
    
    char* GetRunState();
