@@ -59,11 +59,6 @@ RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmP
 RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
    RangeAdapterKm       (name),
    dopplerInterval      (1.0),
-   _prev_epoch          (0.0),
-   _prev_range          (0.0),
-   _timer               (0.0),
-   valueReady           (false),
-   lastComputedEpoch    (0.0),
    targetSat            (NULL)
 {
    typeName="RangeRate";
@@ -94,11 +89,6 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
 RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
    RangeAdapterKm       (rr),
    dopplerInterval      (rr.dopplerInterval),
-   _prev_epoch          (0.0),
-   _prev_range          (0.0),
-   _timer               (0.0),
-   valueReady           (false),
-   lastComputedEpoch    (0.0),
    targetSat            (NULL)
 {
 }
@@ -121,11 +111,6 @@ RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& r
    {
       RangeAdapterKm::operator=(rr);
       dopplerInterval = rr.dopplerInterval;
-       _prev_epoch  = rr._prev_epoch;
-      _prev_range = rr._prev_range;
-      _timer = rr._timer;
-      valueReady = false;
-      lastComputedEpoch = 0.0;
       targetSat = NULL;
    }
 
@@ -377,13 +362,6 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
                               bool withEvents, ObservationData* forObservation,
                               std::vector<RampTableData>* rampTB)
 {
-   #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("LCE: %.12lf, CSE: %.12lf, delta: %le, %s\n",
-            lastComputedEpoch, currentSignalEpoch,
-            lastComputedEpoch - currentSignalEpoch,
-            (valueReady ? "Value ready" : "Value not ready"));
-   #endif
-
    // Compute range in km, at epoch and at epoch plus offset
    cMeasurement = RangeAdapterKm::CalculateMeasurement
          (false, NULL, NULL);
@@ -473,7 +451,7 @@ const std::vector<RealArray>& RangeRateAdapterKps::
          #ifdef DEBUG_DERIV
              MessageInterface::ShowMessage("j %d -> ", j);
              MessageInterface::ShowMessage("deriv %le\n",
-                   theDataDerivatives[i][j]);
+                   theDataDerivatives2[i][j]);
          #endif
       }
    }
