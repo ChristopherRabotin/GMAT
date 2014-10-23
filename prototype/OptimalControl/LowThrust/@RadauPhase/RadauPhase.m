@@ -37,8 +37,11 @@ classdef RadauPhase < Phase
             obj.numMeshPoints        = obj.numCollocationPoints;
             obj.numStatePoints       = obj.numCollocationPoints + 1;
             obj.numControlPoints     = obj.numCollocationPoints;
+            obj.numPathConstraintPoints = obj.numCollocationPoints;
             obj.numTimeParams        = 2;
             obj.meshPoints           = obj.radauPoints/2 + 1/2;
+            obj.numDefectConstraints = obj.numStates*...
+                obj.numCollocationPoints;
             obj.SetStageProperties();
             
             %  Compute bookkeeping properties of the discretization
@@ -48,15 +51,13 @@ classdef RadauPhase < Phase
                 obj.numControlParams + obj.numStaticParams + ...
                 obj.numTimeParams;
             
-            obj.numDefectConstraints = obj.numStates*...
-                obj.numCollocationPoints;
-            
-            %  Set the point types for each of the mesh points
+            %  Set the point types for each of the mesh points and the mesh
+            %  and stage index
             %  1 means state and control
             %  2 means state only
             %  3 means control only
-            timeVectorType = ones(obj.numStatePoints,1);
-            timeVectorType(obj.numStatePoints) = 2;
+            obj.timeVectorType = ones(obj.numStatePoints,1);
+            obj.timeVectorType(obj.numStatePoints,1) = 2;
         end
         
         %  Configure the time vector
@@ -85,7 +86,7 @@ classdef RadauPhase < Phase
                 defectConstraintsLHS = obj.radauDiffMatrix*stateMat;
                 obj.ComputeTimeParameters();
                 defectConstraints = defectConstraintsLHS - ...
-                    (obj.finalTime -obj.initialTime)*0.5*rhsMatrix;
+                    0.5*(obj.finalTime -obj.initialTime)*rhsMatrix;
                 defectConstraints = reshape(defectConstraints,...
                     obj.numDefectConstraints,1);
                 obj.defectConstraintVec = defectConstraints;
@@ -97,8 +98,8 @@ classdef RadauPhase < Phase
             if obj.PathFunction.hasCostFunction
                 obj.costFuncIntegral = costVec'*obj.radauWeights;
                 obj.ComputeTimeParameters();
-                obj.costFuncIntegral = ((obj.finalTime -...
-                    obj.initialTime)/2)*obj.costFuncIntegral;
+                obj.costFuncIntegral = 0.5*(obj.finalTime -...
+                    obj.initialTime)*obj.costFuncIntegral;
             end
         end
         
@@ -114,6 +115,16 @@ classdef RadauPhase < Phase
             obj.numStateStagePoints   = 0;
             obj.numControlStagePoints = 0;
             obj.numStagePoints        = 0;
+        end
+        
+        %  Get the mesh index given the point index
+        function meshIdx = GetMeshIndex(obj,pointIdx)
+             meshIdx = pointIdx;
+        end
+        
+        %  Get the stage index given the point index
+        function stageIdx = GetStageIndex(~,~)
+            stageIdx = 0;
         end
     end
 end

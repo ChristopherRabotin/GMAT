@@ -332,7 +332,7 @@ classdef DecisionVector < handle
         
         %  Get the last state vector
         function stateVec = GetLastStateVector(obj)
-            stateVec = GetStateAtMeshPoint(obj,obj.numStatePoints);
+            stateVec = GetStateAtMeshPoint(obj,obj.numStateMeshPoints);
         end
         
         %  Get the first control vector
@@ -393,7 +393,7 @@ classdef DecisionVector < handle
                 throw(ME);
             end
             
-            %  Set state to zero if this is a a mesh point
+            %  Set state to zero if this is a mesh point
             if nargin < 3
                 stageIdx = 0;
             end

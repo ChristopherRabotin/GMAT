@@ -62,6 +62,7 @@ classdef Phase < handle
         meshPoints
         numMeshPoints
         numCollocationPoints
+        numPathConstraintPoints
         
         %  Cost and constraint related parameters
         numMeshIntervals
@@ -146,64 +147,71 @@ classdef Phase < handle
             %  Get properties that are dependent upon the transcription
             %  being used.  These come from the leaf classes
             obj = GetTranscriptionProperties(obj);
-            %obj = SetStateChunkIndeces(obj);
             
             %  Initialize the decision vector helper class
-            numIntegrals = 0;  % TODO:  should not be hard coded
             obj.DecVector.ConfigureDecisionVector(obj.numStates, ...
-                obj.numControls,numIntegrals,obj.numStaticParams,...
+                obj.numControls,obj.numIntegrals,obj.numStaticParams,...
                 obj.numStatePoints,obj.numControlPoints,...
                 obj.numStateStagePoints,obj.numControlStagePoints);
             
-            %  Compute and set the initial guess and configure time.  This
-            %  will need to be handled on a transcription bases.
-            obj = SetInitialGuess(obj);
+            %  Compute and set the initial guess and configure time. 
+            obj.SetInitialGuess();
             obj.ComputeTimeVector();
             
-            %  Intialize the user functions
+            %  Intialize the user provided path and point functions
+            obj.IntializeUserFunctions();
+            
+            %  Set constraint size properties and bounds
+            obj.SetConstraintProperties();
+            obj.SetConstraintBounds();
+            obj.SetDecisionVectorBounds();
+            
+        end
+        
+        function IntializeUserFunctions(obj)
+            
+            %  Set the phase number and function names
             obj.PathFunction.phaseNum = obj.phaseNum;
             obj.PointFunction.phaseNum = obj.phaseNum;
             obj.PathFunction.functionName  = obj.pathFunctionName;
             obj.PointFunction.functionName = obj.pointFunctionName;
-            obj.PreparePathFunction(1,0);  % Evaluate at first point
+            %  Prepare the function for evaluation and intialize
+            obj.PreparePathFunction(1,0,1);  % Evaluate at first point
             obj.PathFunction.Initialize();
             obj.ComputePathFunctions();
             obj.PreparePointFunction();
             obj.PointFunction.Initialize();
             
+        end
+        
+        %  Set indeces for chunks of the constraint vector
+        function obj = SetConstraintProperties(obj)
+            
+            
             %  Set chunk values and bounds.
-            obj.numPathConstraints = obj.numMeshPoints*...
+            obj.numIntegrals = 0;  % TODO:  should not be hard coded
+            obj.numPathConstraints = obj.numPathConstraintPoints*...
                 obj.PathFunction.numAlgFunctions;
             obj.numEventConstraints = obj.PointFunction.numEventFunctions;
             obj.numConstraints = obj.numDefectConstraints + ...
                 obj.numPathConstraints + obj.numEventConstraints;
             
-            obj = SetConstraintChunkIndeces(obj);
-            obj = SetConstraintBounds(obj);
-            obj = SetDecisionVectorBounds(obj);
-            
-        end
-        
-        
-        %  Set indeces for chunks of the constraint vector
-        function obj = SetConstraintChunkIndeces(obj)
-            
             %  Set start and end indeces of different constraint
             %  parameter types.  These describe where different chunks
             %  of the constraint vector begin and end.
-            
             obj.defectStartIdx = 1;
             obj.defectEndIdx  = obj.defectStartIdx + ...
                 obj.numDefectConstraints -1;
             obj.pathStartIdx = obj.defectEndIdx + 1;
-            obj.pathEndIdx = obj.pathStartIdx + obj.numPathConstraints -1;
+            obj.pathEndIdx = obj.pathStartIdx + ...
+                obj.numPathConstraints -1;
             obj.eventStartIdx = obj.pathEndIdx + 1;
             obj.eventEndIdx = obj.eventStartIdx + ...
                 obj.numEventConstraints -1;
             
         end
         
-        %  MERGE
+        %  Set the upper and lower bounds on the decision vector
         function obj = SetDecisionVectorBounds(obj)
             
             % numPoints = obj.numStatePoints;
@@ -307,10 +315,8 @@ classdef Phase < handle
         %  Set bounds on the path constraints
         function obj = SetPathConstraintBounds(obj)
             if obj.PathFunction.hasAlgFunctions
-                numPathCon = obj.numCollocationPoints*...
-                    obj.PathFunction.numAlgFunctions;
-                obj.pathConLowerBound = zeros(numPathCon,1);
-                obj.pathConUpperBound = zeros(numPathCon,1);
+                obj.pathConLowerBound = zeros(obj.numPathConstraints,1);
+                obj.pathConUpperBound = zeros(obj.numPathConstraints,1);
                 lowIdx = 1;
                 for conIdx = 1:obj.numCollocationPoints
                     highIdx = lowIdx + obj.PathFunction.numAlgFunctions-1;
@@ -424,32 +430,37 @@ classdef Phase < handle
         %  Compute the path functions
         function ComputePathFunctions(obj)
             
-            % stateMat = obj.DecVector.GetStateArray();
-            algIdx    = 1;
-            obj.costFuncIntegral = 0;
-            
             %  Loop over mesh and stage points compute
             %  functions at each point
-            pointCnt = 0;
-            for meshIdx = 1:obj.numMeshPoints
+            algIdx               = 1;
+            obj.costFuncIntegral = 0;
+            quadCount            = 0;
+            for pointCnt = 1:length(obj.timeVector)
                 
-                for stageIdx = 1:obj.numStagePoints + 1
+                %                 if pointCnt == 94;
+                %                     x = 9;
+                %                 end
+                
+                %  Prepare then evaluate the path function
+                pointType = obj.timeVectorType(pointCnt);
+                meshIdx  =  obj.GetMeshIndex(pointCnt);
+                stageIdx = GetStageIndex(obj,pointCnt);
+                obj.PreparePathFunction(meshIdx,stageIdx,pointType);
+                obj.PathFunction.Evaluate();
+                
+                %  Only evaluate when quadrature point,(i.e.pointType=1)
+                if pointType == 1
                     
-                    pointCnt = pointCnt + 1;
-                    
-                    %  Prepare then evaluate the path function
-                    obj.PreparePathFunction(meshIdx,stageIdx-1);
-                    obj.PathFunction.Evaluate();
-                    
+                    quadCount = quadCount + 1;
                     %  Handle defect constraints
                     if obj.PathFunction.hasDynFunctions
-                        odeMatrix(pointCnt,1:obj.numStates) = ...
+                        odeMatrix(quadCount,1:obj.numStates) = ...
                             obj.PathFunction.dynFunctions';
                     end
                     
                     %  Handle cost function
                     if obj.PathFunction.hasCostFunction
-                        costVec(pointCnt,1) = ...
+                        costVec(quadCount,1) = ...
                             obj.PathFunction.costFunction;
                     end
                     
@@ -461,12 +472,11 @@ classdef Phase < handle
                         algIdx = algIdx + ...
                             obj.PathFunction.numAlgFunctions;
                     end
-                    
                 end
                 
             end
             
-            % Compute defect and integrals
+            % Compute defect constraints and integrals
             if ~obj.PathFunction.hasDynFunctions
                 odeMatrix = [];
             end
@@ -525,14 +535,25 @@ classdef Phase < handle
         end
         
         %  Configure input structure for given mesh point
-        function PreparePathFunction(obj,meshIdx,stageIdx)
+        function PreparePathFunction(obj,meshIdx,stageIdx,pointType)
             
             %  This function extracts the state, control, time for state
-            %  data from the decision vector at the mesh point "pointIdx"
-            obj.PathFunction.stateVec =...
-                obj.DecVector.GetStateAtMeshPoint(meshIdx,stageIdx);
-            obj.PathFunction.controlVec = ...
-                obj.DecVector.GetControlAtMeshPoint(meshIdx,stageIdx);
+            %  data from the decision vector
+            obj.PathFunction.pointType = pointType;
+            if pointType == 1 || pointType == 2
+                obj.PathFunction.stateVec =...
+                    obj.DecVector.GetStateAtMeshPoint(meshIdx,stageIdx);
+            else
+                obj.PathFunction.stateVec = ...
+                    obj.PathFunction.stateVec*NaN;
+            end
+            if pointType == 1 || pointType == 3
+                obj.PathFunction.controlVec = ...
+                    obj.DecVector.GetControlAtMeshPoint(meshIdx,stageIdx);
+            else
+                obj.PathFunction.controlVec = ...
+                    obj.PathFunction.controlVec*NaN;
+            end
             
         end
         
@@ -545,8 +566,6 @@ classdef Phase < handle
                 obj.DecVector.GetFirstStateVector();
             obj.PointFunction.finalStateVec = ...
                 obj.DecVector.GetLastStateVector();
-            %             obj.PointFunction.initialControlVec = ...
-            %                 obj.DecVector.GetInitialControlVector();
             obj.PointFunction.intConstraintVec = obj.intConstraintVec;
             obj.PointFunction.initialTime = ...
                 obj.DecVector.GetFirstTime();
@@ -739,6 +758,8 @@ classdef Phase < handle
         
     end
     
+    %  Abstract methods that must be implemented on the derived classes as
+    %  they are specific to the type of phase.
     methods (Abstract)
         SetStageProperties(obj)
         GetTranscriptionProperties(obj)
@@ -747,6 +768,8 @@ classdef Phase < handle
         %         ComputeDefectConstraints(obj)
         %         ComputeCostFunctionIntegral(obj)
         ComputeTimeParameters(obj)
+        GetMeshIndex(obj)
+        GetStageIndex(obj)
     end
     
 end

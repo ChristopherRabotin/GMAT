@@ -5,23 +5,25 @@ classdef UserPathFunction < UserFunction
     
     properties %(SetAccess = 'private')
         
-        %  State Data
+        %%  State Data
         stateVec
         controlVec
         time
+        %  1 if state and control.  2 if state only. 3 if control only.
+        pointType 
         
-        %  Arrays of function values
+        %%  Arrays of function values
         numAlgFunctions = 0;
         numDynFunctions = 0;
         numIntFunctions = 0;
         
-        %  Flags defining function types
+        %%  Flags defining function types
         hasCostFunction = false();
         hasAlgFunctions = false();
         hasDynFunctions = false();
         hasIntFunctions = false();
         
-        %  Number of each type of function
+        %%  Number of each type of function
         costFunction = [];
         algFunctions = [];
         dynFunctions = [];

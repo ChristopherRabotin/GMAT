@@ -7,9 +7,9 @@ zad = gradientinit(z);
 traj.SetDecisionVector(zad);
 
 %  Compute the cost and constraints
-constraintVector = traj.GetContraintVector();
-costFunction     = traj.GetCostFunction();
-
+[costFunction,constraintVector] = ...
+                traj.GetCostConstraintFunctions();
+            
 % Construct the vector of constraints plus the objective function
 F = [costFunction; constraintVector];
 

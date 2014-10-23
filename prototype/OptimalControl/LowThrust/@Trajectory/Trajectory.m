@@ -2,130 +2,242 @@ classdef Trajectory < handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
+    properties (SetAccess = 'public')
         
-        %%  Bound constraint vectors
+        %%  Bound constraints for cost function
+        
+        % Real.  The lower bound on the cost function
         costLowerBound
+        % Real.  The upper bound on the cost function
         costUpperBound
-        decisionVecLowerBound
-        decisionVecUpperBound
-        allConLowerBound
-        allConUpperBound
         
-        %%  Decision vector and cost function and sparsity
-        decisionVector
-        costFunction
-        costSparsity
-        constraintSparsity
-        sparsityPattern
+        %%  User function names
         
-        %%  Key quantities regarding problem dimensions
-        phaseList
-        numPhases
-        numDecisionParams
-        numFunctions
-        numConstraints
-        totalnumDecisionParams
-        totalnumConstraints
+        %  String.  The name of the user path function
+        pathFunctionName        = '';
+        %  String.  The name of the user point function
+        pointFunctionName       = '';
+        %  String.  The name of the user plot function
+        plotFunctionName        = '';
         
-        %%  Linkage config
-        %  linkageConfig is a cell array of "pointers" to the phases in
+        %%  Plotting parameters
+        
+        %  Bool.  Flag indicating whether or not to show user plot
+        showPlot                = false();
+        %  Int.  Number of func evals between plot updates
+        plotUpdateRate          = 5;
+        
+        %%  Linkage configuration parameters
+        
+        %  Array of "pointers" to the phases in
         %  each linkage config.  To join p1,p2, and p3 together, as well
         %  link phase p2 to p4
         %  linkageConfig{1} = {p1,p2,p3}
         %  linkageConfig{2} = {p2,p4}
         linkageConfig
-        numLinkageConfigs
-        %  An array of Linkage classes, one for each linkage in the
-        %  linkageConfig arrays.  For the example above, linkage array
-        %  would be of length 3:  (p1->p2), (p2->p3), and (p2->p4)
-        linkageList
-        %  Array of the number of links in each config.  This is just one
-        %  minus the number of phases in each config.
-        numLinkages
-        
-        %  Temp for debugging
-        sparsityCost
-        sparsityConstraints
-        
-        %  Indeces into arrays
-        decVecStartIdx
-        decVecEndIdx
-        constraintStartIdx
-        
-        %  User function names
-        pathFunctionName        = '';
-        pointFunctionName       = '';
-        plotFunctionName        = '';
-        
-        %  Plotting parameters
-        showPlot                = false();
-        showDynamicDisplay      = false();
-        isOptimizing            = false();
-        isFinished              = false();
-        dynDisplayUpdateRate    = 5;
-        dynDisplayUpdateCounter = 1
-        plotUpdateRate          = 5;
-        plotUpdateCounter       = 1;
-        
-        %  Debug
-        displayDebugStatus      = 0;
+        % Array of phases to be included in the optimization problem
+        phaseList
         
     end
     
-    methods
+    properties (SetAccess = 'private')
+        
+        %%  Decision vector data members
+        
+        %  Real array. the total desicion vector for the optimization
+        %  problem containing chunks for all phases.
+        decisionVector
+        % Real array.  The lower bound vector for the decision vector
+        decisionVecLowerBound
+        % Real array.  The upper bound vector for the decision vector
+        decisionVecUpperBound
+        % Integer array.  The ith entry is the start of the decision vector
+        % chunk for the ith phase
+        decVecStartIdx
+        % Integer array.  The ith entry is the index for the start of
+        % the decision vector chunk for the ith phase
+        decVecEndIdx
+        %  Integer.  The number of elements in the trajectory decision
+        %  vector
+        totalnumDecisionParams
+        %  Integer Array.  The ith entry is the number of decision
+        %  parameters for the ith phase
+        numPhaseDecisionParams
+        
+        %%  Sparsity pattern data members
+        
+        %  Sparse matrix.  sparsity pattern for the cost function
+        sparsityCost
+        %  Sparse matrix.  Sparsity pattern for the constraints
+        sparsityConstraints
+        %  Sparse matrix.  The sparsity pattern for the complete problem
+        %  including cost and constraints.
+        sparsityPattern
+        
+        %%  Linkage related data members
+        
+        %  Array of Linkages. An array of Linkage classes, 
+        %  one for each linkage in the linkageConfig arrays. 
+        linkageList
+        %  Integer Array.  Number of links in each config.
+        numLinkages
+        
+        %%  Key quantities regarding problem dimensions
+        
+        % Integer.  The number of phases in the problem
+        numPhases
+        % Integer array.  The ith element is the number of constraints
+        % in the ith phase.
+        numPhaseConstraints
+        % Real. The cost function value
+        costFunction
+        %  Real Array.  The lower bound vector for all constraints in the
+        %  problem (i.e. for all phases).
+        allConLowerBound
+        %  Real Array.  The upper bound vector for all constraints in the
+        %  problem (i.e. for all phases).
+        allConUpperBound
+        %  Integer Array.  The ith element is the index indicates where
+        %  the constraints for the ith phase start in the concatenated
+        %  constraint vector
+        conPhaseStartIdx
+        % Integer.  The total number of constraints including all phases
+        % and linkages
+        totalnumConstraints
+        
+        %% Housekeeping parameters
+        
+        %  Bool.  Flag indicating whether or not optimization is under way
+        isOptimizing       = false();
+        %  Bool.  Flag indicating that optimization is complete
+        isFinished         = false();
+        %  Int.  Number of func evals since the last plot update
+        plotUpdateCounter  = 1;
+        %  Bool.  Flag to write out debug data
+        displayDebugStatus = 0;
+        
+    end
+    
+    methods (Access = public)
+        
         
         function obj = Initialize(obj)
+            %  Initialize the trajectory and all helper classes.
+            obj.InitializePhases();
+            obj.InitializeLinkages();
+            obj.SetBounds();
+            obj.SetInitialGuess();
+            obj.SetSparsityPattern();
+            obj.WriteSetupReport()
             
-            %  Get properties of each phase for later book-keeping
-            obj.numPhases = length(obj.phaseList);
-            if obj.numPhases <= 0
-                errorMsg = 'Trajectory requires at least one phase.';
-                errorLoc  = 'Phase:Initialize';
+        end
+        
+        
+        function obj = SetDecisionVector(obj,decVector)
+            %  Sets decision vector by calling each phase and setting
+            %  chunks.
+            if length(decVector) == obj.totalnumDecisionParams
+                obj.decisionVector = decVector;
+            else
+                errorMsg = ['Length of decisionVector must be ' ...
+                    ' equal to totalnumDecisionParams'];
+                errorLoc  = 'Trajectory:SetDecisionVector';
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
             end
-            obj.numDecisionParams = 0;
-            obj.numFunctions = 1; % CHANGE BACK TO 1
-            obj.totalnumDecisionParams = 0;
-            obj.totalnumConstraints = 0;
             
-            %  Initialize phase data
+            %  Now loop over phases and set on each phase
             for phaseIdx = 1:obj.numPhases
-                if obj.displayDebugStatus
-                    disp(['Attempting to Initialize Phase ' num2str(...
-                        phaseIdx)]);
-                end
-                
-                %  Configure user functions
-                obj.phaseList{phaseIdx}.pathFunctionName = ...
-                    obj.pathFunctionName;
-                obj.phaseList{phaseIdx}.pointFunctionName = ...
-                    obj.pointFunctionName;
-                
-                %  Intialize the current phase
-                obj.phaseList{phaseIdx}.phaseNum = phaseIdx;
-                obj.phaseList{phaseIdx}.Initialize();
-                
-                % Decision vector properties
-                obj.numFunctions(phaseIdx) = ...
-                    obj.phaseList{phaseIdx}.numConstraints;
-                obj.numDecisionParams(phaseIdx) = ...
-                    obj.phaseList{phaseIdx}.numDecisionParams;
-                
-                %  Constraint properties
-                obj.totalnumDecisionParams = ...
-                    obj.totalnumDecisionParams + ...
-                    obj.phaseList{phaseIdx}.numDecisionParams;
-                obj.totalnumConstraints = obj.totalnumConstraints + ...
-                    obj.phaseList{phaseIdx}.numConstraints;
-                if obj.displayDebugStatus
-                    disp(['Completed Initialization of Phase ' num2str(...
-                        phaseIdx)]);
-                end
+                obj.phaseList{phaseIdx}.SetDecisionVector(...
+                    decVector(obj.decVecStartIdx(phaseIdx):...
+                    obj.decVecEndIdx(phaseIdx)));
             end
             
-            %%  Intialize link data
+            %  Handle plotting
+            if obj.showPlot
+                obj.PlotUserFunction();
+            end
+            
+        end
+        
+        
+        function [costFunction,constraintVec] = ...
+                GetCostConstraintFunctions(obj)
+            %  Compute cost and constraint functions
+            constraintVec = GetContraintVector(obj);
+            costFunction = GetCostFunction(obj);
+        end
+        
+        
+        function [z,F,xmul,Fmul] = Optimize(obj)
+            %  Call the optimizer.  This is the Main() function and should not
+            %  go here.  Eventually it will move to a new class.
+            % SNOPT Required Globals
+            global igrid iGfun jGvar traj
+            obj.Initialize();
+            
+            %  Set the bounds on the Decision Variables
+            zmax = obj.decisionVecUpperBound;
+            zmin = obj.decisionVecLowerBound;
+            
+            % Set the bounds on the NLP constraints
+            Fmin = [obj.costLowerBound;obj.allConLowerBound];
+            Fmax = [obj.costUpperBound;obj.allConUpperBound];
+            z0   = obj.decisionVector;
+            
+            %% =====  Initialize the optimizer and execute the problem
+            % Set the derivative option
+            snseti('Derivative Option',1);
+            % Set the derivative verification level
+            snseti('Verify Level',-1);
+            % Set name of SNOPT print file
+            snprint('snoptmain.out');
+            % Print CPU times at bottom of SNOPT print file
+            snseti('Timing level',3);
+            % Echo SNOPT Output to MATLAB Command Window
+            snscreen on;
+            % snset('Major optimality tolerance 1e-3')
+            % snset('Major feasibility tolerance 1e-6')
+            
+            % Set initial guess on basis and Lagrange multipliers to zero
+            zmul = zeros(size(z0));
+            zstate = zmul;
+            Fmul = zeros(size(Fmin));
+            Fstate = Fmul;
+            ObjAdd = 0;
+            % Row 1 is the objective function row
+            ObjRow = 1;
+            % Assume for simplicity that all constraints
+            % are purely nonlinear
+            AA      = [];
+            iAfun   = [];
+            jAvar   = [];
+            userfun = 'SNOPTFunctionWrapper';
+            
+            [iGfun,jGvar] = find(obj.sparsityPattern);
+            obj.isOptimizing = true();
+            obj.plotUpdateCounter = 1;
+            
+            %  Call SNOPT.
+            [z,F,xmul,Fmul,info,xstate,Fstate,ns,...
+                ninf,sinf,mincw,miniw,minrw]...
+                = snsolve(z0,zmin,zmax,zmul,zstate,...
+                Fmin,Fmax,Fmul,Fstate,...
+                ObjAdd,ObjRow,AA,iAfun,jAvar,iGfun,jGvar,userfun);
+            obj.isOptimizing = false();
+            obj.isFinished   = true();
+            obj.PlotUserFunction();
+            obj.WriteSetupReport(1);
+            
+        end
+    end
+    
+    %% Private methods
+    methods (Access = private)
+        
+        %%  Intialize link helper classes and construct the linkages
+        function InitializeLinkages(obj)
+            
             linkIdx = 0;
             for configIdx = 1:length(obj.linkageConfig)
                 while linkIdx < length(obj.linkageConfig{configIdx})-1
@@ -138,44 +250,96 @@ classdef Trajectory < handle
                 end
             end
             obj.numLinkages = linkIdx;
-            
-            %
-            obj.SetChunkIndeces();
-            obj.SetConstraintBounds();
-            obj.SetDecisionVectorBounds();
-            obj.InitializeSparsityPattern();
-            obj = SetInitialGuess(obj);
-            obj = SetSparsityPattern(obj);
-            obj.WriteSetupReport()
-            
-            if obj.displayDebugStatus
-                disp('Completed Initialization of Trajectory');
-            end
-            
         end
         
-        %  Configure start and stop indeces for different chunks fo the c
-        %  complete decision vector
+        %% Intialize the phase helper classes and phase related data
+        function InitializePhases(obj)
+            
+            %  Get properties of each phase for later book-keeping
+            obj.numPhases = length(obj.phaseList);
+            if obj.numPhases <= 0
+                errorMsg = 'Trajectory requires at least one phase.';
+                errorLoc  = 'Phase:Initialize';
+                ME = MException(errorLoc,errorMsg);
+                throw(ME);
+            end
+            
+            %  Initialize phases and a few trajectory data members
+            obj.numPhaseConstraints = 1;
+            obj.totalnumDecisionParams = 0;
+            obj.totalnumConstraints = 0;
+            for phaseIdx = 1:obj.numPhases
+                
+                %  Configure user functions
+                obj.phaseList{phaseIdx}.pathFunctionName = ...
+                    obj.pathFunctionName;
+                obj.phaseList{phaseIdx}.pointFunctionName = ...
+                    obj.pointFunctionName;
+                
+                %  Intialize the current phase
+                obj.phaseList{phaseIdx}.phaseNum = phaseIdx;
+                obj.phaseList{phaseIdx}.Initialize();
+                
+                %  Extract decision vector and constraint properties
+                obj.numPhaseConstraints(phaseIdx) = ...
+                    obj.phaseList{phaseIdx}.numConstraints;
+                obj.numPhaseDecisionParams(phaseIdx) = ...
+                    obj.phaseList{phaseIdx}.numDecisionParams;
+                obj.totalnumDecisionParams = ...
+                    obj.totalnumDecisionParams + ...
+                    obj.numPhaseDecisionParams(phaseIdx);
+                obj.totalnumConstraints = obj.totalnumConstraints + ...
+                    obj.phaseList{phaseIdx}.numConstraints;
+                
+            end
+            
+            obj.SetChunkIndeces();
+        end
+        
+        %  Compute all constraints
+        function [constraintVec] = GetContraintVector(obj)
+            %  Loop over the phases and concatenate the constraint vectors
+            constraintVec = [];
+            for phaseIdx = 1:obj.numPhases
+                constraintVec = [constraintVec ; ...
+                    obj.phaseList{phaseIdx}.GetContraintVector()];
+            end
+            
+            %  Now loop over the linkage constraints
+            for linkIdx = 1:obj.numLinkages
+                constraintVec = [constraintVec; ...
+                    obj.linkageList{linkIdx}.GetLinkageConstraints()];
+            end
+        end
+        
+        %  Compute the cost function.
+        function [costFunction] = GetCostFunction(obj)
+            costFunction = 0;
+            for phaseIdx = 1:obj.numPhases
+                costFunction = costFunction + ...
+                    obj.phaseList{phaseIdx}.GetCostFunction();
+            end
+        end
+        
+        %  Configure start and stop indeces for different chunks of the
+        %  decision vector and constraint vector
         function obj = SetChunkIndeces(obj)
             
             %  Loop over phases and set start and end indeces for different
             %  chunks of the decision vector
             for phaseIdx = 1:obj.numPhases
                 
-                %  State indeces
-%                 obj.stateStartIdx(phaseIdx) = ...
-%                     obj.totalnumDecisionParams - ...
-%                     sum(obj.numDecisionParams(phaseIdx:end)) + 1;
+                %  Indeces for start and end of decision vector chunks
                 obj.decVecStartIdx(phaseIdx) = ...
                     obj.totalnumDecisionParams - ...
-                    sum(obj.numDecisionParams(phaseIdx:end)) + 1;
+                    sum(obj.numPhaseDecisionParams(phaseIdx:end)) + 1;
                 obj.decVecEndIdx(phaseIdx) = ...
                     obj.decVecStartIdx(phaseIdx) ...
-                    + obj.numDecisionParams(phaseIdx) - 1;
+                    + obj.numPhaseDecisionParams(phaseIdx) - 1;
                 
                 %  Function indeces
-                obj.constraintStartIdx(phaseIdx) = ...
-                    sum(obj.numFunctions(1:phaseIdx-1)) + 1;
+                obj.conPhaseStartIdx(phaseIdx) = ...
+                    sum(obj.numPhaseConstraints(1:phaseIdx-1)) + 1;
                 
             end
         end
@@ -184,6 +348,12 @@ classdef Trajectory < handle
         function obj = InitializeSparsityPattern(obj)
             obj.sparsityPattern = sparse(obj.totalnumConstraints,...
                 obj.totalnumDecisionParams);
+        end
+        
+        %  Set bounds for decision vector and constraints
+        function obj = SetBounds(obj)
+            obj.SetConstraintBounds();
+            obj.SetDecisionVectorBounds();
         end
         
         %  Sets upper and lower bounds on the complete constraint vector
@@ -221,7 +391,7 @@ classdef Trajectory < handle
             lowIdx = 1;
             for phaseIdx = 1:obj.numPhases
                 highIdx = lowIdx + ...
-                    obj.phaseList{phaseIdx}.numDecisionParams-1;
+                    obj.numPhaseDecisionParams(phaseIdx)-1;
                 obj.decisionVecLowerBound(lowIdx:highIdx) = ...
                     obj.phaseList{phaseIdx}.decisionVecLowerBound;
                 obj.decisionVecUpperBound(lowIdx:highIdx) = ...
@@ -230,29 +400,49 @@ classdef Trajectory < handle
             end
         end
         
+        %  Handles plotting of user function
+        function PlotUserFunction(obj)
+            
+            %  Plot the function if at solution or at rate
+            if ~isempty(obj.plotFunctionName)
+                
+                % Show the plot if criteria pass
+                if (obj.showPlot && obj.isOptimizing && ...
+                        obj.plotUpdateCounter == 1) ||...
+                        (obj.showPlot && obj.isFinished);
+                    feval(obj.plotFunctionName,obj);
+                end
+                
+                %  Update rate counter, and reset if needed
+                obj.plotUpdateCounter = obj.plotUpdateCounter + 1;
+                if obj.plotUpdateCounter == obj.plotUpdateRate
+                    obj.plotUpdateCounter = 1;
+                end
+            end
+            
+        end
+        
+        %  Loop over the phases and concatenate the complete decision
+        %  vector
         function obj = SetInitialGuess(obj)
             % Loop over all phases
             obj.decisionVector = zeros(obj.totalnumDecisionParams,1);
             lowIdx = 1;
             for phaseIdx = 1:obj.numPhases
-                highIdx=lowIdx+obj.phaseList{phaseIdx}.numDecisionParams-1;
+                highIdx=lowIdx+obj.numPhaseDecisionParams(phaseIdx)-1;
                 obj.decisionVector(lowIdx:highIdx) = ...
                     obj.phaseList{phaseIdx}.DecVector.decisionVector;
                 lowIdx = highIdx + 1;
             end
         end
         
+        %  Determine the sparsity patter for the problem
         function obj = SetSparsityPattern(obj)
             
+            %  Intialize the sparsity pattern sparse matrix
+            obj.InitializeSparsityPattern();
+            
             %  Intialize the sparse matrices
-            %             obj = InitializeSparsityPattern(obj);
-            %             obj = SetSparsityPattern_Cost(obj);
-            %             obj.sparsityConstraints = obj.sparsityPattern(1:end,:);
-            %             obj.SetSparsityPattern_Defect_State();
-            %             obj.SetSparsityPattern_Defect_Control();
-            %             obj.SetSparsityPattern_Defect_Time();
-            %             obj.sparsityPattern = ...
-            %                 [obj.sparsityCost; obj.sparsityConstraints];
             method =  1;
             %  This is a generic algorithm, but it will NOT work in GMAT.
             %  method 1 is based on usin NaN.
@@ -302,7 +492,7 @@ classdef Trajectory < handle
                     hightotalVec = [highcostVal;lowconVec];
                     for funIdx = 1:obj.totalnumConstraints + 1
                         if (lowtotalVec(funIdx) ~= totalVec(funIdx)) || ...
-                           (hightotalVec(funIdx)~= totalVec(funIdx))
+                                (hightotalVec(funIdx)~= totalVec(funIdx))
                             sparseCnt = sparseCnt + 1;
                             iGfun(sparseCnt,1) = [funIdx];
                             jGvar(sparseCnt,1) = [decIdx];
@@ -311,183 +501,10 @@ classdef Trajectory < handle
                 end
                 %  Set the initial guess back
                 obj.SetDecisionVector(initialGuess);
-
+                
             end
-            %load('c:\Temp\sparse.mat');
             obj.sparsityPattern = sparse(iGfun,jGvar,1);
-
-
-        end
-        
-        %  Sets decision vector provided by optimizer
-        function obj = SetDecisionVector(obj,decVector)
             
-            %  Set the decision vector on the trajectory.
-            %  Maybe this is not needed, maybe we should just pass straight
-            %  through to phases.  Not Sure.
-            if length(decVector) == obj.totalnumDecisionParams
-                obj.decisionVector = decVector;
-            else
-                errorMsg = ['Length of decisionVector must be ' ...
-                    ' equal to totalnumDecisionParams'];
-                errorLoc  = 'Trajectory:SetDecisionVector';
-                ME = MException(errorLoc,errorMsg);
-                throw(ME);
-            end
-            
-            %  Now loop over phases and set on each phase
-            for phaseIdx = 1:obj.numPhases
-                obj.phaseList{phaseIdx}.SetDecisionVector(...
-                    decVector(obj.decVecStartIdx(phaseIdx):...
-                    obj.decVecEndIdx(phaseIdx)));
-            end
-            
-            %  Handle plotting
-            if obj.showPlot
-                obj.PlotUserFunction();
-            end
-            
-            %  Handle dynamic display
-            obj.UpdateDynamicDisplay();
-            
-        end
-        
-        %  Compute all constraints
-        function [constraintVec] = GetContraintVector(obj)
-            %  Loop over the phases and concatenate the constraint vectors
-            constraintVec = [];
-            for phaseIdx = 1:obj.numPhases
-                constraintVec = [constraintVec ; ...
-                    obj.phaseList{phaseIdx}.GetContraintVector()];
-            end
-            
-            %  Now loop over the linkage constraints
-            for linkIdx = 1:obj.numLinkages
-                constraintVec = [constraintVec; ...
-                    obj.linkageList{linkIdx}.GetLinkageConstraints()];
-            end
-        end
-                
-        %  Compute the cost function.
-        function [costFunction] = GetCostFunction(obj)
-            costFunction = 0;
-            for phaseIdx = 1:obj.numPhases
-                costFunction = costFunction + ...
-                    obj.phaseList{phaseIdx}.GetCostFunction();
-            end
-        end
-        
-        function [z,F,xmul,Fmul] = Optimize(obj)
-            
-            % SNOPT Required Globals
-            global igrid iGfun jGvar traj
-            obj.Initialize();
-            
-            %  Set the bounds on the Decision Variables
-            zmax = obj.decisionVecUpperBound;
-            zmin = obj.decisionVecLowerBound;
-            
-            % Set the bounds on the NLP constraints
-            Fmin = [obj.costLowerBound;obj.allConLowerBound];
-            Fmax = [obj.costUpperBound;obj.allConUpperBound];
-            z0   = obj.decisionVector;
-            
-            %% =====  Initialize the optimizer and execute the problem
-            % Set the derivative option
-            snseti('Derivative Option',1);
-            % Set the derivative verification level
-            snseti('Verify Level',-1);
-            % Set name of SNOPT print file
-            snprint('snoptmain.out');
-            % Print CPU times at bottom of SNOPT print file
-            snseti('Timing level',3);
-            % Echo SNOPT Output to MATLAB Command Window
-            snscreen on;
-            % snset('Major optimality tolerance 1e-3')
-            % snset('Major feasibility tolerance 1e-6')
-            
-            % Set initial guess on basis and Lagrange multipliers to zero
-            zmul = zeros(size(z0));
-            zstate = zmul;
-            Fmul = zeros(size(Fmin));
-            Fstate = Fmul;
-            ObjAdd = 0;
-            % Row 1 is the objective function row
-            ObjRow = 1;
-            % Assume for simplicity that all constraints
-            % are purely nonlinear
-            AA      = [];
-            iAfun   = [];
-            jAvar   = [];
-            userfun = 'SNOPTFunctionWrapper';
-            
-            [iGfun,jGvar] = find(obj.sparsityPattern);
-            obj.isOptimizing = true();
-            obj.plotUpdateCounter = 1;
-            %obj.PlotUserFunction(); %  Plot the guess
-            %              load 'c:\temp\initGuess.mat'
-            %              z0 = initGuess.x;
-            %obj.PlotUserFunction();
-            %load('c:\temp\initGuess.mat')
-                        %   z0 = z;
-            [z,F,xmul,Fmul,info,xstate,Fstate,ns,...
-                ninf,sinf,mincw,miniw,minrw]...
-                = snsolve(z0,zmin,zmax,zmul,zstate,...
-                Fmin,Fmax,Fmul,Fstate,...
-                ObjAdd,ObjRow,AA,iAfun,jAvar,iGfun,jGvar,userfun);
-            obj.isOptimizing = false();
-            obj.isFinished   = true();
-            obj.PlotUserFunction();
-            obj.WriteSetupReport(1);
-            
-        end
-        
-        %  Handles plotting of user function
-        function PlotUserFunction(obj)
-            
-            %  Plot the function if at solution or at rate
-            if ~isempty(obj.plotFunctionName)
-                
-                % Show the plot if criteria pass
-                if (obj.showPlot && obj.isOptimizing && ...
-                        obj.plotUpdateCounter == 1) ||...
-                        (obj.showPlot && obj.isFinished);
-                    feval(obj.plotFunctionName,obj);
-                end
-                
-                %  Update rate counter, and reset if needed
-                obj.plotUpdateCounter = obj.plotUpdateCounter + 1;
-                if obj.plotUpdateCounter == obj.plotUpdateRate
-                    obj.plotUpdateCounter = 1;
-                end
-            end
-            
-        end
-        
-        function UpdateDynamicDisplay(obj)
-            
-            %             %  Intialize the figure
-            %             figHandle = figure(99999);
-            %             colNames = cell(obj.numPhases*2,1);
-            %             colIdx   = 0;
-            %
-            %             %  Populate initially with zeros
-            %             data     = zeros(3,obj.numPhases*2)
-            %             for phaseIdx = 1:obj.numPhases
-            %                 for pointIdx = 1:2
-            %                     colIdx           = colIdx + 1;
-            %                     if pointIdx == 1;
-            %                         pointStr = ' Start';
-            %                     else
-            %                         pointStr = ' End';
-            %                     end
-            %                     colNames{colIdx} = ['Phase ' ...
-            %                         num2str(phaseIdx) pointStr];
-            %                 end
-            %             end
-            %             uitable(figHandle, 'Data', data, 'ColumnName', colNames, ...
-            %                    'Position', [20 20 700 100]);
-            %
         end
         
     end

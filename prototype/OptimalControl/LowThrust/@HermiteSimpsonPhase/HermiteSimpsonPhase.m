@@ -90,22 +90,23 @@ classdef HermiteSimpsonPhase < Phase
             obj.numStatePoints       = obj.numMeshPoints;
             obj.numControlPoints     = obj.numMeshPoints;
             obj.numTimeParams        = 2;
-            obj.numCollocationPoints = obj.totalNumPoints - 1;
+            obj.numCollocationPoints = obj.totalNumPoints-1;
             obj.numDefectConstraints = obj.numStates*...
                 (obj.totalNumPoints - 1);
-            
+            obj.numPathConstraintPoints = obj.totalNumPoints;
+
             %  Compute bookkeeping properties of the discretization
             obj.numStateParams   = obj.numStates*...
                 obj.numCollocationPoints;
             obj.numControlParams = obj.numControls*...
                 obj.numCollocationPoints;
-            numStateStagePoints = 1;
-            numControlStagePoints = 1;
+            obj.numStateStagePoints = 1;
+            obj.numControlStagePoints = 1;
                         
             obj.numStateParams    = obj.numStates*(obj.numMeshPoints*...
-                (1 + numStateStagePoints));
+                (1 + obj.numStateStagePoints));
             obj.numControlParams  = obj.numControls*(obj.numMeshPoints* ...
-                ( 1+ numControlStagePoints));
+                ( 1+ obj.numControlStagePoints));
             
             obj.numStateParams    = obj.numStates*(obj.totalNumPoints);
             obj.numControlParams  = obj.numControls*(obj.totalNumPoints);
@@ -113,6 +114,14 @@ classdef HermiteSimpsonPhase < Phase
             obj.numDecisionParams = obj.numStateParams + ...
                 obj.numControlParams + obj.numStaticParams + ...
                 obj.numTimeParams;
+            
+            %  Set the point types for each of the mesh points and the mesh
+            %  and stage index
+            %  1 means state and control
+            %  2 means state only
+            %  3 means control only
+            %  For HS, all points are type 1
+            obj.timeVectorType = ones(obj.totalNumPoints,1);
             
         end
              
@@ -211,7 +220,25 @@ classdef HermiteSimpsonPhase < Phase
         function ComputeTimeVector(obj)
             obj.ComputeTimeParameters();
             obj.timeVector = (obj.finalTime - obj.initialTime)*...
-                obj.meshPoints;
+                obj.meshPoints + obj.initialTime;
+        end
+        
+        %  Get the mesh index given the point index
+        function meshIdx = GetMeshIndex(~,pointIdx)          
+            if even(pointIdx)
+                meshIdx = pointIdx/2;
+            else
+                meshIdx = 1 + floor(pointIdx/2);
+            end
+        end
+        
+        %  Get the stage index given the point index
+        function stageIdx = GetStageIndex(~,pointIdx)
+            if even(pointIdx)
+                stageIdx = 1;
+            else
+                stageIdx = 0;
+            end
         end
         
     end

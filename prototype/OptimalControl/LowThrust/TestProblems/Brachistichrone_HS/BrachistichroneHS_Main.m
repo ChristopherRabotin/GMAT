@@ -10,9 +10,9 @@ global igrid iGfun jGvar traj
 
 %  Create trajectory and configure user function names 
 traj                    = Trajectory();
-traj.pathFunctionName   = 'BrachistichronePathFunction';
-traj.pointFunctionName  = 'BrachistichronePointFunction';
-traj.plotFunctionName   = 'BrachistichronePlotFunction';
+traj.pathFunctionName   = 'BrachistichronePathFunction_HS';
+traj.pointFunctionName  = 'BrachistichronePointFunction_HS';
+traj.plotFunctionName   = 'BrachistichronePlotFunction_HS';
 traj.showPlot           = true();
 traj.plotUpdateRate     = 2;
 traj.costLowerBound     = -Inf;
@@ -23,8 +23,8 @@ traj.costUpperBound     = Inf;
 %==========================================================================
 
 %  Set mesh properities
-phase1                         = RadauPhase;
-phase1.meshIntervalFractions   = [-1; 1];
+phase1                         = HermiteSimpsonPhase;
+phase1.meshIntervalFractions   = [0 1];
 phase1.meshIntervalNumPoints   = 25;
 
 %  Set time properties

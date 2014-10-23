@@ -123,7 +123,7 @@ for phaseIdx = 1:obj.numPhases
         obj.phaseList{phaseIdx}.DecVector.timeStopIdx;
     
     %%  Constraint Chunk Indeces
-    conStartIdx = obj.constraintStartIdx(phaseIdx);
+    conStartIdx = obj.conPhaseStartIdx(phaseIdx);
     defectStart = conStartIdx;
     defectStop  = conStartIdx + ...
         obj.phaseList{phaseIdx}.defectEndIdx;

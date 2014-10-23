@@ -10,9 +10,9 @@ global igrid iGfun jGvar traj
 
 %  Create trajectory and configure user function names 
 traj                    = Trajectory();
-traj.pathFunctionName   = 'OrbitRaisingPathFunction';
-traj.pointFunctionName  = 'OrbitRaisingPointFunction';
-traj.plotFunctionName   = 'OrbitRaisingPlotFunction';
+traj.pathFunctionName   = 'OrbitRaisingPathFunction_HS';
+traj.pointFunctionName  = 'OrbitRaisingPointFunction_HS';
+traj.plotFunctionName   = 'OrbitRaisingPlotFunction_HS';
 traj.showPlot           = true();
 traj.plotUpdateRate     = 3;
 traj.costLowerBound     = -Inf;
@@ -23,9 +23,8 @@ traj.costUpperBound     = Inf;
 %==========================================================================
 
 %  Set Time Properties
-phase1                           = RadauPhase();
-phase1.meshIntervalFractions     = [-1; 1];
-%phase1.meshIntervalNumPoints     = 50*ones(1,1);
+phase1                           = HermiteSimpsonPhase();
+phase1.meshIntervalFractions     = [0; 1];
 phase1.meshIntervalNumPoints     = 15*ones(1,1);
 phase1.initialEpoch              = 0;
 phase1.finalEpoch                = 3.32;
@@ -39,7 +38,7 @@ phase1.numStates                 = 5;
 phase1.initialGuessMode          = 'LinearUnityControl';
 phase1.initialGuessState         = [1 0 0 1 1]'; % [r0 theta0 vr0 vtheta0 m0]
 phase1.initialGuessEpoch         = 0;
-phase1.finalGuessState           = [1.5 0 0 1 1]'; % [rf thetaf vrf vthetaf mf]
+phase1.finalGuessState           = [1 pi 0 1 1]'; % [rf thetaf vrf vthetaf mf]
 phase1.finalGuessEpoch           = 1;
 phase1.initialStateLowerBound    = [1 0 0 1 1]';
 phase1.initialStateUppperBound   = [1 0 0 1 1]';
