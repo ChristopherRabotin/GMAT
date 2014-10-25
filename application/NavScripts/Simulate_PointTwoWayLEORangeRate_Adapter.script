@@ -23,11 +23,12 @@ GMAT ST2K_48.Altitude = 1.45231;
 GMAT ST2K_48.Id = 'ST2K_48';
 
 %----- The data file
-Create TrackingFileSet estData
-estData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'RangeRate'}
-estData.Filename = ODSatTwoWayRangeRate.gmd
-estData.UseLighttime = true;
-estData.DopplerInterval = 1.0;
+Create TrackingFileSet simData
+simData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'PointRangeRate'}
+simData.Filename = ODSatTwoWayRangeRate.gmd
+simData.UseLighttime = true;
+simData.DopplerInterval = 1.00;
+
 
 %----- The propagator
 Create ForceModel ODProp_ForceModel;
@@ -38,21 +39,22 @@ GMAT ODProp.FM = ODProp_ForceModel;
 GMAT ODProp.Type = PrinceDormand78;
 GMAT ODProp.MinStep = 0;
 
-%------ Create the measurement estimator
-Create BatchEstimatorInv BatchEst;
-GMAT BatchEst.ShowProgress = true;
-GMAT BatchEst.ReportStyle = 'Normal';
-GMAT BatchEst.ReportFile = 'RREstimator.data';
-GMAT BatchEst.MaximumIterations = 15;
-GMAT BatchEst.Measurements = {estData};
-GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'}; %, 'RangeMeasurement.Bias'};
-GMAT BatchEst.AbsoluteTol = 1e-05;
-GMAT BatchEst.RelativeTol = 1e-06;
-GMAT BatchEst.Propagator = ODProp;
-GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
-GMAT BatchEst.OLSEInitialRMSSigma = 3e45;
-% BatchEst.OLSEMultiplicativeConstant = 4
+%------ Create the measurement simulator
+Create Simulator MeasSim
+MeasSim.AddData         = {simData};
+MeasSim.Propagator      = ODProp;
+MeasSim.InitialEpochFormat = UTCGregorian;
+MeasSim.InitialEpoch       = '09 Jun 2004 00:00:00.000';
+MeasSim.FinalEpochFormat   = UTCGregorian;
+MeasSim.FinalEpoch         = '12 Jun 2004 00:00:00.000';
+MeasSim.MeasurementTimeStep = 100;
+
+
+Create XYPlot XYPlot1;
+GMAT XYPlot1.SolverIterations = All;
+GMAT XYPlot1.XVariable = ODSat.A1ModJulian;
+GMAT XYPlot1.YVariables = {ODSat.EarthMJ2000Eq.X, ODSat.EarthMJ2000Eq.Y, ODSat.EarthMJ2000Eq.Z};
 
 %------ Run the measurement simulator
 BeginMissionSequence
-RunEstimator BatchEst
+RunSimulator MeasSim

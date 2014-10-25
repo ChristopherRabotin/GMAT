@@ -153,6 +153,7 @@ CPP_OBJECTS = \
     adapter/TrackingDataAdapter.o \
     adapter/RangeAdapterKm.o \
     adapter/RangeRateAdapterKps.o \
+    adapter/PointRangeRateAdapterKps.o \
     adapter/DSNRangeAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \

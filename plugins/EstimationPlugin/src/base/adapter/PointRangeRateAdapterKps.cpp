@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                           RangeRateAdapterKps
+//                           PointRangeRateAdapterKps
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -18,7 +18,7 @@
  */
 //------------------------------------------------------------------------------
 
-#include "RangeRateAdapterKps.hpp"
+#include "PointRangeRateAdapterKps.hpp"
 #include "RandomNumber.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
@@ -30,25 +30,25 @@
 //#define DEBUG_DERIV
 
 
+////------------------------------------------------------------------------------
+//// Static data
+////------------------------------------------------------------------------------
+//const std::string
+//PointRangeRateAdapterKps::PARAMETER_TEXT[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
+//{
+//   "DopplerInterval",
+//};
+//
+//const Gmat::ParameterType
+//PointRangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
+//{
+//   Gmat::REAL_TYPE,
+//};
+
+
+
 //------------------------------------------------------------------------------
-// Static data
-//------------------------------------------------------------------------------
-const std::string
-RangeRateAdapterKps::PARAMETER_TEXT[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
-{
-   "DopplerInterval",                   
-};
-
-const Gmat::ParameterType
-RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
-{
-   Gmat::REAL_TYPE,   
-};
-
-
-
-//------------------------------------------------------------------------------
-// RangeRateAdapterKps(const std::string& name)
+// PointRangeRateAdapterKps(const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Constructor
@@ -56,9 +56,9 @@ RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmP
  * @param name The name of the adapter
  */
 //------------------------------------------------------------------------------
-RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
+PointRangeRateAdapterKps::PointRangeRateAdapterKps(const std::string& name) :
    RangeAdapterKm       (name),
-   dopplerInterval      (1.0),
+//   dopplerInterval      (1.0),
    targetSat            (NULL)
 {
    typeName="RangeRate";
@@ -66,19 +66,19 @@ RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
 
 
 //------------------------------------------------------------------------------
-// ~RangeRateAdapterKps()
+// ~PointRangeRateAdapterKps()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-RangeRateAdapterKps::~RangeRateAdapterKps()
+PointRangeRateAdapterKps::~PointRangeRateAdapterKps()
 {
 }
 
 
 //------------------------------------------------------------------------------
-// RangeRateAdapterKps(const RangeRateAdapterKps& rr)
+// PointRangeRateAdapterKps(const PointRangeRateAdapterKps& rr)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
@@ -86,16 +86,16 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
  * @param rr The adapter copied to make this one
  */
 //------------------------------------------------------------------------------
-RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
+PointRangeRateAdapterKps::PointRangeRateAdapterKps(const PointRangeRateAdapterKps& rr) :
    RangeAdapterKm       (rr),
-   dopplerInterval      (rr.dopplerInterval),
+//   dopplerInterval      (rr.dopplerInterval),
    targetSat            (NULL)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// RangeRateAdapterKps& operator=(const RangeRateAdapterKps& rr)
+// PointRangeRateAdapterKps& operator=(const PointRangeRateAdapterKps& rr)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
@@ -105,12 +105,12 @@ RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
  * @return This adapter made to look like rr
  */
 //------------------------------------------------------------------------------
-RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& rr)
+PointRangeRateAdapterKps& PointRangeRateAdapterKps::operator=(const PointRangeRateAdapterKps& rr)
 {
    if (this != &rr)
    {
       RangeAdapterKm::operator=(rr);
-      dopplerInterval = rr.dopplerInterval;
+//      dopplerInterval = rr.dopplerInterval;
       targetSat = NULL;
    }
 
@@ -127,9 +127,9 @@ RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& r
  * @return A new adapter set to match this one
  */
 //------------------------------------------------------------------------------
-GmatBase* RangeRateAdapterKps::Clone() const
+GmatBase* PointRangeRateAdapterKps::Clone() const
 {
-   return new RangeRateAdapterKps(*this);
+   return new PointRangeRateAdapterKps(*this);
 }
 
 //------------------------------------------------------------------------------
@@ -143,10 +143,10 @@ GmatBase* RangeRateAdapterKps::Clone() const
  * @return The script name
  */
 //------------------------------------------------------------------------------
-std::string RangeRateAdapterKps::GetParameterText(const Integer id) const
+std::string PointRangeRateAdapterKps::GetParameterText(const Integer id) const
 {
-   if (id >= RangeAdapterKmParamCount && id < RangeRateAdapterParamCount)
-      return PARAMETER_TEXT[id - RangeAdapterKmParamCount];
+//   if (id >= RangeAdapterKmParamCount && id < RangeRateAdapterParamCount)
+//      return PARAMETER_TEXT[id - RangeAdapterKmParamCount];
    return RangeAdapterKm::GetParameterText(id);
 }
 
@@ -161,13 +161,13 @@ std::string RangeRateAdapterKps::GetParameterText(const Integer id) const
  * @return The parameter ID
  */
 //------------------------------------------------------------------------------
-Integer RangeRateAdapterKps::GetParameterID(const std::string& str) const
+Integer PointRangeRateAdapterKps::GetParameterID(const std::string& str) const
 {
-   for (Integer i = RangeAdapterKmParamCount; i < RangeRateAdapterParamCount; i++)
-   {
-      if (str == PARAMETER_TEXT[i - RangeAdapterKmParamCount])
-         return i;
-   }
+//   for (Integer i = RangeAdapterKmParamCount; i < RangeRateAdapterParamCount; i++)
+//   {
+//      if (str == PARAMETER_TEXT[i - RangeAdapterKmParamCount])
+//         return i;
+//   }
    return RangeAdapterKm::GetParameterID(str);
 }
 
@@ -184,10 +184,10 @@ Integer RangeRateAdapterKps::GetParameterID(const std::string& str) const
  * @return The parameter's type
  */
 //------------------------------------------------------------------------------
-Gmat::ParameterType RangeRateAdapterKps::GetParameterType(const Integer id) const
+Gmat::ParameterType PointRangeRateAdapterKps::GetParameterType(const Integer id) const
 {
-   if (id >= RangeAdapterKmParamCount && id < RangeRateAdapterParamCount)
-      return PARAMETER_TYPE[id - RangeAdapterKmParamCount];
+//   if (id >= RangeAdapterKmParamCount && id < RangeRateAdapterParamCount)
+//      return PARAMETER_TYPE[id - RangeAdapterKmParamCount];
 
    return RangeAdapterKm::GetParameterType(id);
 }
@@ -204,7 +204,7 @@ Gmat::ParameterType RangeRateAdapterKps::GetParameterType(const Integer id) cons
  * @return The description string
  */
 //------------------------------------------------------------------------------
-std::string RangeRateAdapterKps::GetParameterTypeString(const Integer id) const
+std::string PointRangeRateAdapterKps::GetParameterTypeString(const Integer id) const
 {
    return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
@@ -220,10 +220,10 @@ std::string RangeRateAdapterKps::GetParameterTypeString(const Integer id) const
  * @return The value of the parameter
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapterKps::GetRealParameter(const Integer id) const
+Real PointRangeRateAdapterKps::GetRealParameter(const Integer id) const
 {
-   if (id == DOPPLER_INTERVAL)
-      return dopplerInterval;
+//   if (id == DOPPLER_INTERVAL)
+//      return dopplerInterval;
 
    return RangeAdapterKm::GetRealParameter(id);
 }
@@ -241,17 +241,17 @@ Real RangeRateAdapterKps::GetRealParameter(const Integer id) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapterKps::SetRealParameter(const Integer id, const Real value)
+Real PointRangeRateAdapterKps::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == DOPPLER_INTERVAL)
-   {
-      if (value <= 0.0)
-         throw MeasurementException("Error: Doppler interval must be a "
-               "positive value\n");
-
-      dopplerInterval = value;
-      return dopplerInterval;
-   }
+//   if (id == DOPPLER_INTERVAL)
+//   {
+//      if (value <= 0.0)
+//         throw MeasurementException("Error: Doppler interval must be a "
+//               "positive value\n");
+//
+//      dopplerInterval = value;
+//      return dopplerInterval;
+//   }
 
    return RangeAdapterKm::SetRealParameter(id, value);
 }
@@ -267,7 +267,7 @@ Real RangeRateAdapterKps::SetRealParameter(const Integer id, const Real value)
  * @return The value of the parameter
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapterKps::GetRealParameter(const std::string &label) const
+Real PointRangeRateAdapterKps::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
 }
@@ -285,7 +285,7 @@ Real RangeRateAdapterKps::GetRealParameter(const std::string &label) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real RangeRateAdapterKps::SetRealParameter(const std::string &label,
+Real PointRangeRateAdapterKps::SetRealParameter(const std::string &label,
       const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
@@ -306,7 +306,7 @@ Real RangeRateAdapterKps::SetRealParameter(const std::string &label,
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::RenameRefObject(const Gmat::ObjectType type,
+bool PointRangeRateAdapterKps::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
@@ -326,7 +326,7 @@ bool RangeRateAdapterKps::RenameRefObject(const Gmat::ObjectType type,
  * @return true if the initialization succeeds, false if it fails
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::Initialize()
+bool PointRangeRateAdapterKps::Initialize()
 {
    bool retval = false;
 
@@ -358,55 +358,47 @@ bool RangeRateAdapterKps::Initialize()
  * @return The computed measurement data
  */
 //------------------------------------------------------------------------------
-const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
+const MeasurementData& PointRangeRateAdapterKps::CalculateMeasurement(
                               bool withEvents, ObservationData* forObservation,
                               std::vector<RampTableData>* rampTB)
 {
    // Compute range in km, at epoch and at epoch plus offset
    cMeasurement = RangeAdapterKm::CalculateMeasurement
          (false, NULL, NULL);
-   MeasurementData cMeasurement2 =
-         RangeAdapterKm::CalculateMeasurementAtOffset(false, dopplerInterval,
-               NULL, NULL);
 
-   if ((cMeasurement.isFeasible) && (cMeasurement2.isFeasible))
+   if (cMeasurement.isFeasible)
    {
-      // two way range
-      Real two_way_range  = 0.0;
-      Real two_way_range2 = 0.0;
+      std::vector<SignalData*> data = calcData->GetSignalData();
 
       // set range rate
       Real range_rate = 0;
 
       // some up the ranges
-      for (UnsignedInt i = 0; i < cMeasurement.value.size(); i++  )
+      if (data.size() != 1)
+         throw MeasurementException("Signal data is poorly sized for point "
+               "range rate adapter data");
+
+      SignalData* strand = data[0];
+      Real rdotv = 0.0;
+      Integer count = 0;
+      while (strand)
       {
-        two_way_range  = two_way_range  + cMeasurement.value[i];
-        two_way_range2 = two_way_range2 + cMeasurement2.value[i];
+         Real range = strand->rangeVecInertial.GetMagnitude();
+         rdotv += strand->rangeRateVecInertial *
+               strand->rangeVecInertial / range;
+         strand = strand->next;
+         ++count;
       }
-
-      // one way range
-      Real one_way_range  = two_way_range  / 2.0;
-      Real one_way_range2 = two_way_range2 / 2.0;
-
-      // Compute range-rate
-      range_rate = (one_way_range2-one_way_range)/(dopplerInterval);
+      range_rate = rdotv / count;
 
       // set the measurement value
       cMeasurement.value.clear();
       cMeasurement.value.push_back(range_rate);
-
-      #ifdef DEBUG_RANGE_CALCULATION
-        MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
-              "isFeasible %s, range2 %f, dRange %le\n", cMeasurement.epoch,
-              one_way_range, range_rate,
-              (cMeasurement.isFeasible ? "true" : "false"), one_way_range2,
-              one_way_range - one_way_range2);
-      #endif
    }
 
-//if (cMeasurement.isFeasible)
-//   MessageInterface::ShowMessage("%.12lf %.12lf ", cMeasurement.epoch, cMeasurement.value[0]);
+if (cMeasurement.isFeasible)
+   MessageInterface::ShowMessage("%.12lf %.12lf ", cMeasurement.epoch, cMeasurement.value[0]);
+
 
    return cMeasurement;
 }
@@ -425,47 +417,178 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
  * @return The derivative vector
  */
 //------------------------------------------------------------------------------
-const std::vector<RealArray>& RangeRateAdapterKps::
+const std::vector<RealArray>& PointRangeRateAdapterKps::
             CalculateMeasurementDerivatives(GmatBase* obj, Integer id)
 {
-   //Compute measurement derivatives in km at epoch plus offset
-   MeasurementData cMeasurement2 =
-           RangeAdapterKm::CalculateMeasurementAtOffset(false,
-                 dopplerInterval, NULL, NULL);
-   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   if (!calcData)
+      throw MeasurementException("Measurement derivative data was requested "
+            "for " + instanceName + " before the measurement was set");
 
-   // copy the data off
-   std::vector<RealArray> theDataDerivatives2 = theDataDerivatives;
+   // Perform the calculations
+   #ifdef DEBUG_ADAPTER_DERIVATIVES
+      Integer parmId = GetParmIdFromEstID(id, obj);
+      MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
+            "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
+            obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+   #endif
 
-   // Compute measurement derivatives in km at epoch
-   cMeasurement = RangeAdapterKm::CalculateMeasurement(false, NULL, NULL);
-   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+//   const std::vector<RealArray> *derivativeData =
+//         &(calcData->CalculateMeasurementDerivatives(obj, id)); // parmId));
 
-   std::vector<RealArray> theDataDerivatives1 = theDataDerivatives;
+   Integer parameterID = -1;
+   UnsignedInt size = 6;
 
-   //Do the differencing
-   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+
+   if (obj != NULL)
    {
-      for ( UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
-      {
-         theDataDerivatives[i][j] = (theDataDerivatives2[i][j] -
-               theDataDerivatives1[i][j]) / dopplerInterval;
+      if (id > 250)
+         parameterID = GetParmIdFromEstID(id, obj);
+      else
+         parameterID = id;
 
-         #ifdef DEBUG_DERIV
-             MessageInterface::ShowMessage("j %d -> ", j);
-             MessageInterface::ShowMessage("deriv %le\n",
-                   theDataDerivatives2[i][j]);
+      // Point range rate is computed off of the measurement data
+      std::vector<SignalData*> data = calcData->GetSignalData();
+
+      if (obj->GetParameterText(parameterID) == "Position")
+      {
+//         Rvector3 result;
+//
+//         SignalData *strand = data[0];
+//         Integer count = 0;
+//         while (strand)
+//         {
+//            Real range = strand->rangeVecInertial.GetMagnitude();
+//            for (UnsignedInt i = 0; i < 3; ++i)
+//               result[i] += strand->rangeRateVecInertial[i] / range;
+//            ++count;
+//            strand = strand->next;
+//         }
+//
+//         for (UnsignedInt jj = 0; jj < 3; ++jj)
+//            theDataDerivatives[0][jj] = result[jj];
+      }
+      else if (obj->GetParameterText(parameterID) == "Velocity")
+      {
+//         Rvector3 result;
+//
+//         for (UnsignedInt jj = 0; jj < 3; ++jj)
+//            theDataDerivatives[0][jj] = result[jj];
+      }
+      else if (obj->GetParameterText(parameterID) == "CartesianX")
+      {
+         RealArray oneRow;
+         oneRow.assign(6, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+
+         SignalData *upStrand = data[0];
+         SignalData *downStrand = data[0]->next;
+
+         Rmatrix33 I33(true);
+
+         if (downStrand == NULL)
+            throw MeasurementException("Range rate computations require signal "
+                  "path of the form T1 -> S1 -> T1");
+
+         if (obj->IsOfType(Gmat::GROUND_STATION))
+            throw MeasurementException("Derivatives w.r.t. Station location "
+                  "parameters are not yet supported");
+         else
+         {
+            Real upRange = upStrand->rangeVecObs.GetMagnitude();
+            Real upRangeCubed = upRange * upRange * upRange;
+            Real upRDotV =
+                  upStrand->rangeVecObs(0) * upStrand->rangeRateVecObs(0) +
+                  upStrand->rangeVecObs(1) * upStrand->rangeRateVecObs(1) +
+                  upStrand->rangeVecObs(2) * upStrand->rangeRateVecObs(2);
+
+            Real downRange = downStrand->rangeVecObs.GetMagnitude();
+            Real downRangeCubed = downRange * downRange * downRange;
+            Real downRDotV =
+                  downStrand->rangeVecObs(0) * downStrand->rangeRateVecObs(0) +
+                  downStrand->rangeVecObs(1) * downStrand->rangeRateVecObs(1) +
+                  downStrand->rangeVecObs(2) * downStrand->rangeRateVecObs(2);
+
+            for (UnsignedInt ii = 0; ii < 3; ii++)
+            {
+               theDataDerivatives[0][ii]   = 0.5 * (
+                     (upStrand->rangeRateVecObs(ii)   / upRange   -
+                      upStrand->rangeVecObs(ii)   * upRDotV   / upRangeCubed) -
+                     (downStrand->rangeRateVecObs(ii) / downRange -
+                      downStrand->rangeVecObs(ii) * downRDotV / downRangeCubed));
+               theDataDerivatives[0][ii+3] = 0.5 *
+                     (upStrand->rangeVecObs(ii)   / upRange -
+                      downStrand->rangeVecObs(ii) / downRange);
+            }
+         }
+
+
+//MessageInterface::ShowMessage("   Signal %d Range Vec [%s] Range rate [%s] Range Vec Obs: [%s] Range rate Obs [%s]\n",
+//      count, strand->rangeVecInertial.ToString(15).c_str(),
+//      strand->rangeRateVecInertial.ToString(15).c_str(), strand->rangeVecObs.ToString(15).c_str(),
+//      strand->rangeRateVecObs.ToString(15).c_str());
+
+      }
+      else if (obj->GetParameterText(parameterID) == "Bias")
+      {
+         size = 1;
+         for (UnsignedInt i = 0; i < size; ++i)
+            theDataDerivatives[0][i] += 1.0;
+      }
+      else
+      {
+         #ifdef DEBUG_DERIVATIVES
+            MessageInterface::ShowMessage("   Deriv is w.r.t. something "
+                     "independent, so zero\n");
          #endif
+         for (UnsignedInt i = 0; i < 3; ++i)
+            theDataDerivatives[0][i] += 0.0;
       }
    }
 
-//for (Integer i = 0; i < 6; ++i)
-//{
-//   if (i > 0)
-//      MessageInterface::ShowMessage(" ");
-//   MessageInterface::ShowMessage("%.12lf", theDataDerivatives[0][i]);
-//}
-//MessageInterface::ShowMessage("\n");
+   #ifdef DEBUG_ADAPTER_DERIVATIVES
+      MessageInterface::ShowMessage("   Derivatives: [");
+      for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage("]\n                [");
+         for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
+         {
+            if (j > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
+         }
+      }
+      MessageInterface::ShowMessage("]\n");
+   #endif
+
+//   // Now assemble the derivative data into the requested derivative
+//   UnsignedInt size = theDataDerivatives->at(0).size();
+//
+//   theDataDerivatives.clear();
+//   for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
+//   {
+//      RealArray oneRow;
+//      oneRow.assign(size, 0.0);
+//      theDataDerivatives.push_back(oneRow);
+//
+//      if (derivativeData->at(i).size() != size)
+//         throw MeasurementException("Derivative data size is a different size "
+//               "than expected");
+//
+//      for (UnsignedInt j = 0; j < size; ++j)
+//      {
+//         theDataDerivatives[i][j] = (derivativeData->at(i))[j];
+//      }
+//   }
+
+for (Integer i = 0; i < 6; ++i)
+{
+   if (i > 0)
+      MessageInterface::ShowMessage(" ");
+   MessageInterface::ShowMessage("%.12lf", theDataDerivatives[0][i]);
+}
+MessageInterface::ShowMessage("\n");
 
    return theDataDerivatives;
 }
@@ -482,7 +605,7 @@ const std::vector<RealArray>& RangeRateAdapterKps::
  * @return true if written, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::WriteMeasurements()
+bool PointRangeRateAdapterKps::WriteMeasurements()
 {
    bool retval = false;
    return retval;
@@ -502,7 +625,7 @@ bool RangeRateAdapterKps::WriteMeasurements()
  * @return true if written, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::WriteMeasurement(Integer id)
+bool PointRangeRateAdapterKps::WriteMeasurement(Integer id)
 {
    bool retval = false;
    return retval;
@@ -520,7 +643,7 @@ bool RangeRateAdapterKps::WriteMeasurement(Integer id)
  * @return Size of the covariance data that is available
  */
 //------------------------------------------------------------------------------
-Integer RangeRateAdapterKps::HasParameterCovariances(Integer parameterId)
+Integer PointRangeRateAdapterKps::HasParameterCovariances(Integer parameterId)
 {
    Integer retval = 0;
    return retval;
@@ -536,7 +659,7 @@ Integer RangeRateAdapterKps::HasParameterCovariances(Integer parameterId)
  * @return The event count
  */
 //------------------------------------------------------------------------------
-Integer RangeRateAdapterKps::GetEventCount()
+Integer PointRangeRateAdapterKps::GetEventCount()
 {
    Integer retval = 0;
    return retval;
@@ -561,7 +684,7 @@ Integer RangeRateAdapterKps::GetEventCount()
  *       to get a scripted adapter functioning in GMAT Nav.
  */
 //------------------------------------------------------------------------------
-void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
+void PointRangeRateAdapterKps::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
    TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
@@ -582,7 +705,7 @@ void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
  * @return true is the pointer was set, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
+bool PointRangeRateAdapterKps::SetRefObject(GmatBase* obj,
       const Gmat::ObjectType type, const std::string& name)
 {
    if (obj->IsOfType(Gmat::SPACECRAFT))
@@ -606,7 +729,7 @@ bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
  * @return true is the pointer was set, false if not
  */
 //------------------------------------------------------------------------------
-bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
+bool PointRangeRateAdapterKps::SetRefObject(GmatBase* obj,
       const Gmat::ObjectType type, const std::string& name, const Integer index)
 {
    if (obj->IsOfType(Gmat::SPACECRAFT))

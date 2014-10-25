@@ -5,7 +5,7 @@ Create Spacecraft ODSat;
 GMAT ODSat.DateFormat = UTCGregorian;
 GMAT ODSat.Epoch = '09 Jun 2004 00:00:00.000';
 GMAT ODSat.Id = ODSatID;
-GMAT ODSat.X = 6648.937;
+GMAT ODSat.X = 6648.837;
 GMAT ODSat.Y = -335.169;
 GMAT ODSat.Z = 2789.137;
 GMAT ODSat.VX = -0.34697109;
@@ -24,7 +24,7 @@ GMAT ST2K_48.Id = 'ST2K_48';
 
 %----- The data file
 Create TrackingFileSet estData
-estData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'RangeRate'}
+estData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'PointRangeRate'}
 estData.Filename = ODSatTwoWayRangeRate.gmd
 estData.UseLighttime = true;
 estData.DopplerInterval = 1.0;
@@ -50,7 +50,7 @@ GMAT BatchEst.AbsoluteTol = 1e-05;
 GMAT BatchEst.RelativeTol = 1e-06;
 GMAT BatchEst.Propagator = ODProp;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
-GMAT BatchEst.OLSEInitialRMSSigma = 3e45;
+GMAT BatchEst.OLSEInitialRMSSigma = 3e212;
 % BatchEst.OLSEMultiplicativeConstant = 4
 
 %------ Run the measurement simulator
