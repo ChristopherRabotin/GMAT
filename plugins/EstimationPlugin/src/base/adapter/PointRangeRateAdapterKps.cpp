@@ -396,10 +396,6 @@ const MeasurementData& PointRangeRateAdapterKps::CalculateMeasurement(
       cMeasurement.value.push_back(range_rate);
    }
 
-if (cMeasurement.isFeasible)
-   MessageInterface::ShowMessage("%.12lf %.12lf ", cMeasurement.epoch, cMeasurement.value[0]);
-
-
    return cMeasurement;
 }
 
@@ -432,9 +428,6 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
             obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
 
-//   const std::vector<RealArray> *derivativeData =
-//         &(calcData->CalculateMeasurementDerivatives(obj, id)); // parmId));
-
    Integer parameterID = -1;
    UnsignedInt size = 6;
 
@@ -451,28 +444,77 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
 
       if (obj->GetParameterText(parameterID) == "Position")
       {
-//         Rvector3 result;
-//
-//         SignalData *strand = data[0];
-//         Integer count = 0;
-//         while (strand)
-//         {
-//            Real range = strand->rangeVecInertial.GetMagnitude();
-//            for (UnsignedInt i = 0; i < 3; ++i)
-//               result[i] += strand->rangeRateVecInertial[i] / range;
-//            ++count;
-//            strand = strand->next;
-//         }
-//
-//         for (UnsignedInt jj = 0; jj < 3; ++jj)
-//            theDataDerivatives[0][jj] = result[jj];
+         RealArray oneRow;
+         oneRow.assign(3, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+
+         SignalData *upStrand = data[0];
+         SignalData *downStrand = data[0]->next;
+
+         Rmatrix33 I33(true);
+
+         if ((downStrand == NULL) || (downStrand->next != NULL))
+            throw MeasurementException("Range rate computations require signal "
+                  "path of the form T1 -> S1 -> T1");
+
+         if (obj->IsOfType(Gmat::GROUND_STATION))
+            throw MeasurementException("Derivatives w.r.t. Station location "
+                  "parameters are not yet supported");
+         else
+         {
+            Real upRange = upStrand->rangeVecInertial.GetMagnitude();
+            Real upRangeCubed = upRange * upRange * upRange;
+            Real upRDotV =
+                  upStrand->rangeVecInertial(0) * upStrand->rangeRateVecInertial(0) +
+                  upStrand->rangeVecInertial(1) * upStrand->rangeRateVecInertial(1) +
+                  upStrand->rangeVecInertial(2) * upStrand->rangeRateVecInertial(2);
+
+            Real downRange = downStrand->rangeVecInertial.GetMagnitude();
+            Real downRangeCubed = downRange * downRange * downRange;
+            Real downRDotV =
+                  downStrand->rangeVecInertial(0) * downStrand->rangeRateVecInertial(0) +
+                  downStrand->rangeVecInertial(1) * downStrand->rangeRateVecInertial(1) +
+                  downStrand->rangeVecInertial(2) * downStrand->rangeRateVecInertial(2);
+
+            for (UnsignedInt ii = 0; ii < 3; ++ii)
+            {
+               theDataDerivatives[0][ii]   = 0.5 * (
+                     (upStrand->rangeRateVecInertial(ii)   / upRange   -
+                      upStrand->rangeVecInertial(ii)   * upRDotV   / upRangeCubed) -
+                     (downStrand->rangeRateVecInertial(ii) / downRange -
+                      downStrand->rangeVecInertial(ii) * downRDotV / downRangeCubed));
+            }
+         }
       }
       else if (obj->GetParameterText(parameterID) == "Velocity")
       {
-//         Rvector3 result;
-//
-//         for (UnsignedInt jj = 0; jj < 3; ++jj)
-//            theDataDerivatives[0][jj] = result[jj];
+         RealArray oneRow;
+         oneRow.assign(3, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+
+         SignalData *upStrand = data[0];
+         SignalData *downStrand = data[0]->next;
+
+         if ((downStrand == NULL) || (downStrand->next != NULL))
+            throw MeasurementException("Range rate computations require signal "
+                  "path of the form T1 -> S1 -> T1");
+
+         if (obj->IsOfType(Gmat::GROUND_STATION))
+            throw MeasurementException("Derivatives w.r.t. Station location "
+                  "parameters are not yet supported");
+         else
+         {
+            Real upRange = upStrand->rangeVecInertial.GetMagnitude();
+            Real downRange = downStrand->rangeVecInertial.GetMagnitude();
+            for (UnsignedInt ii = 0; ii < 3; ++ii)
+            {
+               theDataDerivatives[0][ii]   = 0.5 *
+                     (upStrand->rangeVecInertial(ii)   / upRange -
+                      downStrand->rangeVecInertial(ii) / downRange);
+            }
+         }
       }
       else if (obj->GetParameterText(parameterID) == "CartesianX")
       {
@@ -486,7 +528,7 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
 
          Rmatrix33 I33(true);
 
-         if (downStrand == NULL)
+         if ((downStrand == NULL) || (downStrand->next != NULL))
             throw MeasurementException("Range rate computations require signal "
                   "path of the form T1 -> S1 -> T1");
 
@@ -495,39 +537,45 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
                   "parameters are not yet supported");
          else
          {
-            Real upRange = upStrand->rangeVecObs.GetMagnitude();
+            Real upRange = upStrand->rangeVecInertial.GetMagnitude();
             Real upRangeCubed = upRange * upRange * upRange;
             Real upRDotV =
-                  upStrand->rangeVecObs(0) * upStrand->rangeRateVecObs(0) +
-                  upStrand->rangeVecObs(1) * upStrand->rangeRateVecObs(1) +
-                  upStrand->rangeVecObs(2) * upStrand->rangeRateVecObs(2);
+                  upStrand->rangeVecInertial(0) * upStrand->rangeRateVecInertial(0) +
+                  upStrand->rangeVecInertial(1) * upStrand->rangeRateVecInertial(1) +
+                  upStrand->rangeVecInertial(2) * upStrand->rangeRateVecInertial(2);
 
-            Real downRange = downStrand->rangeVecObs.GetMagnitude();
+            Real downRange = downStrand->rangeVecInertial.GetMagnitude();
             Real downRangeCubed = downRange * downRange * downRange;
             Real downRDotV =
-                  downStrand->rangeVecObs(0) * downStrand->rangeRateVecObs(0) +
-                  downStrand->rangeVecObs(1) * downStrand->rangeRateVecObs(1) +
-                  downStrand->rangeVecObs(2) * downStrand->rangeRateVecObs(2);
+                  downStrand->rangeVecInertial(0) * downStrand->rangeRateVecInertial(0) +
+                  downStrand->rangeVecInertial(1) * downStrand->rangeRateVecInertial(1) +
+                  downStrand->rangeVecInertial(2) * downStrand->rangeRateVecInertial(2);
 
-            for (UnsignedInt ii = 0; ii < 3; ii++)
+            for (UnsignedInt ii = 0; ii < 3; ++ii)
             {
                theDataDerivatives[0][ii]   = 0.5 * (
-                     (upStrand->rangeRateVecObs(ii)   / upRange   -
-                      upStrand->rangeVecObs(ii)   * upRDotV   / upRangeCubed) -
-                     (downStrand->rangeRateVecObs(ii) / downRange -
-                      downStrand->rangeVecObs(ii) * downRDotV / downRangeCubed));
+                     (upStrand->rangeRateVecInertial(ii)   / upRange   -
+                      upStrand->rangeVecInertial(ii)   * upRDotV   / upRangeCubed) -
+                     (downStrand->rangeRateVecInertial(ii) / downRange -
+                      downStrand->rangeVecInertial(ii) * downRDotV / downRangeCubed));
                theDataDerivatives[0][ii+3] = 0.5 *
-                     (upStrand->rangeVecObs(ii)   / upRange -
-                      downStrand->rangeVecObs(ii) / downRange);
+                     (upStrand->rangeVecInertial(ii)   / upRange -
+                      downStrand->rangeVecInertial(ii) / downRange);
             }
+            #ifdef DEBUG_DERIVATIVES
+               MessageInterface::ShowMessage("   Range [%.12lf  %.12f] Range Vec "
+                     "[%s] [%s] Range rate [%s] [%s] Range Vec: [%s] [%s] "
+                     "Range rate [%s] [%s]\n", upRange, downRange,
+                     upStrand->rangeVecInertial.ToString(15).c_str(),
+                     downStrand->rangeVecInertial.ToString(15).c_str(),
+                     upStrand->rangeRateVecInertial.ToString(15).c_str(),
+                     downStrand->rangeRateVecInertial.ToString(15).c_str(),
+                     upStrand->rangeVecInertial.ToString(15).c_str(),
+                     downStrand->rangeVecInertial.ToString(15).c_str(),
+                     upStrand->rangeRateVecInertial.ToString(15).c_str(),
+                     downStrand->rangeRateVecInertial.ToString(15).c_str());
+            #endif
          }
-
-
-//MessageInterface::ShowMessage("   Signal %d Range Vec [%s] Range rate [%s] Range Vec Obs: [%s] Range rate Obs [%s]\n",
-//      count, strand->rangeVecInertial.ToString(15).c_str(),
-//      strand->rangeRateVecInertial.ToString(15).c_str(), strand->rangeVecObs.ToString(15).c_str(),
-//      strand->rangeRateVecObs.ToString(15).c_str());
-
       }
       else if (obj->GetParameterText(parameterID) == "Bias")
       {
@@ -561,34 +609,6 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
       }
       MessageInterface::ShowMessage("]\n");
    #endif
-
-//   // Now assemble the derivative data into the requested derivative
-//   UnsignedInt size = theDataDerivatives->at(0).size();
-//
-//   theDataDerivatives.clear();
-//   for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
-//   {
-//      RealArray oneRow;
-//      oneRow.assign(size, 0.0);
-//      theDataDerivatives.push_back(oneRow);
-//
-//      if (derivativeData->at(i).size() != size)
-//         throw MeasurementException("Derivative data size is a different size "
-//               "than expected");
-//
-//      for (UnsignedInt j = 0; j < size; ++j)
-//      {
-//         theDataDerivatives[i][j] = (derivativeData->at(i))[j];
-//      }
-//   }
-
-for (Integer i = 0; i < 6; ++i)
-{
-   if (i > 0)
-      MessageInterface::ShowMessage(" ");
-   MessageInterface::ShowMessage("%.12lf", theDataDerivatives[0][i]);
-}
-MessageInterface::ShowMessage("\n");
 
    return theDataDerivatives;
 }
