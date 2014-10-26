@@ -1,4 +1,4 @@
-/$Id$
+//$Id$
 //------------------------------------------------------------------------------
 //                           RangeRateAdapterKps
 //------------------------------------------------------------------------------
@@ -433,19 +433,51 @@ const std::vector<RealArray>& RangeRateAdapterKps::
 {
 
     // assign current range rate
-    //Real current_range_rate = cMeasurement.value[0];
+    Real current_range_rate = cMeasurement.value[0];
 
     // compute delta range rate
-    //Real delta_range_rate = current_range_rate - prev_range_rate; 
+    Real delta_range_rate = (current_range_rate - prev_range_rate); 
 
     // reassign prev range rate
-    //Real prev_range_rate = current_range_rate;
+    prev_range_rate = current_range_rate;
 
     //MessageInterface::ShowMessage("current_range_rate %f\n", current_range_rate);
 
-    // Compute measurement derivatives in km at epoch
-  // cMeasurement = RangeAdapterKm::CalculateMeasurement(false, NULL, NULL);
-   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+    std::vector<SignalData*> data = calcData->GetSignalData();
+
+    // Set pointers to the uplink and downlink data for convenience
+    SignalData* upData = data[0];
+    SignalData* downData = data[0]->next;
+
+    // Epoch doesn't matter here -- for spacecraft, the call retrieves the current state from the spacecraft
+    Rvector6 startState = targetSat->GetMJ2000State(0.0);
+    
+
+    // STM for the whole signal path = stm up * stm down, both for the spacecraft
+    Rmatrix66 propStm = upData->rSTM * downData->tSTM;
+
+    // Use it to propagate the spacecraft
+    Rvector6 endState = propStm * startState;
+
+    //compute derivatives
+    RealArray oneRow;
+    oneRow.assign(6, 0.0);
+    theDataDerivatives.clear();
+    theDataDerivatives.push_back(oneRow);
+
+    for (UnsignedInt i = 0; i <6; ++i)
+    {
+        Real delta_state = (endState[i] - startState[i])/1000;
+        Real current_deriv = delta_range_rate / delta_state;
+        MessageInterface::ShowMessage("delta cartesian state %f\n", delta_state);
+        MessageInterface::ShowMessage("End state [%f %f %f] [%f %f %f]\n", endState[0], endState[1],endState[2], endState[3], endState[4], endState[5]);
+        MessageInterface::ShowMessage("Start state [%f %f %f] [%f %f %f]\n", startState[0], startState[1],startState[2], startState[3], startState[4], startState[5]);
+        MessageInterface::ShowMessage("current deriv %f\n", current_deriv);
+        MessageInterface::ShowMessage("i %i\n", i);
+        
+        theDataDerivatives[0][i]=current_deriv;        
+
+    }
 
    return theDataDerivatives;
 }
@@ -457,7 +489,9 @@ const std::vector<RealArray>& RangeRateAdapterKps::
 /**
  * Method to write measurements
  *
- * @todo Implement this method
+ * @todo
+
+ Implement this method
  *
  * @return true if written, false if not
  */
