@@ -85,12 +85,8 @@ protected:
    /// Doppler interval
    Real dopplerInterval;
 
-   /// Previous epoch
-   Real _prev_epoch;
-   /// Previous Range 
-   Real _prev_range;
-   /// Timer 
-   Real _timer;
+   /// Prev range rate
+   Real prev_range_rate;
 
    /// Flag indicating is a current value is available
    bool valueReady;

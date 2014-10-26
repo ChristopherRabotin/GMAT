@@ -1,4 +1,4 @@
-//$Id$
+/$Id$
 //------------------------------------------------------------------------------
 //                           RangeRateAdapterKps
 //------------------------------------------------------------------------------
@@ -59,7 +59,8 @@ RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmP
 RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
    RangeAdapterKm       (name),
    dopplerInterval      (1.0),
-   targetSat            (NULL)
+   targetSat            (NULL),
+   prev_range_rate     (0.0)
 {
    typeName="RangeRate";
 }
@@ -89,7 +90,8 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
 RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
    RangeAdapterKm       (rr),
    dopplerInterval      (rr.dopplerInterval),
-   targetSat            (NULL)
+   targetSat            (NULL),
+   prev_range_rate     (rr.prev_range_rate)
 {
 }
 
@@ -112,6 +114,7 @@ RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& r
       RangeAdapterKm::operator=(rr);
       dopplerInterval = rr.dopplerInterval;
       targetSat = NULL;
+      prev_range_rate = rr.prev_range_rate;
    }
 
    return *this;
@@ -428,44 +431,21 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
 const std::vector<RealArray>& RangeRateAdapterKps::
             CalculateMeasurementDerivatives(GmatBase* obj, Integer id)
 {
-   //Compute measurement derivatives in km at epoch plus offset
-   MeasurementData cMeasurement2 =
-           RangeAdapterKm::CalculateMeasurementAtOffset(false,
-                 dopplerInterval, NULL, NULL);
+
+    // assign current range rate
+    //Real current_range_rate = cMeasurement.value[0];
+
+    // compute delta range rate
+    //Real delta_range_rate = current_range_rate - prev_range_rate; 
+
+    // reassign prev range rate
+    //Real prev_range_rate = current_range_rate;
+
+    //MessageInterface::ShowMessage("current_range_rate %f\n", current_range_rate);
+
+    // Compute measurement derivatives in km at epoch
+  // cMeasurement = RangeAdapterKm::CalculateMeasurement(false, NULL, NULL);
    RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-
-   // copy the data off
-   std::vector<RealArray> theDataDerivatives2 = theDataDerivatives;
-
-   // Compute measurement derivatives in km at epoch
-   cMeasurement = RangeAdapterKm::CalculateMeasurement(false, NULL, NULL);
-   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-
-   std::vector<RealArray> theDataDerivatives1 = theDataDerivatives;
-
-   //Do the differencing
-   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
-   {
-      for ( UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
-      {
-         theDataDerivatives[i][j] = (theDataDerivatives2[i][j] -
-               theDataDerivatives1[i][j]) / dopplerInterval;
-
-         #ifdef DEBUG_DERIV
-             MessageInterface::ShowMessage("j %d -> ", j);
-             MessageInterface::ShowMessage("deriv %le\n",
-                   theDataDerivatives2[i][j]);
-         #endif
-      }
-   }
-
-//for (Integer i = 0; i < 6; ++i)
-//{
-//   if (i > 0)
-//      MessageInterface::ShowMessage(" ");
-//   MessageInterface::ShowMessage("%.12lf", theDataDerivatives[0][i]);
-//}
-//MessageInterface::ShowMessage("\n");
 
    return theDataDerivatives;
 }
