@@ -344,7 +344,7 @@ void BatchEstimatorInv::Accumulate()
 
             for (int i = 0; i < rowCount; ++i)
                hTilde.push_back(hTrow);
-
+            
             // Now walk the state vector and get elements of H-tilde for each piece
             for (UnsignedInt i = 0; i < stateMap->size(); ++i)
             {
@@ -363,7 +363,7 @@ void BatchEstimatorInv::Accumulate()
                   stateDeriv = measManager.CalculateDerivatives(
                      (*stateMap)[i]->object, (*stateMap)[i]->elementID,
                      modelsToAccess[0]);
-
+                  
                   // Fill in the corresponding elements of hTilde
                   for (UnsignedInt j = 0; j < rowCount; ++j)
                      for (Integer k = 0; k < (*stateMap)[i]->length; ++k)
@@ -598,7 +598,7 @@ void BatchEstimatorInv::Accumulate()
       nextMeasurementEpoch = measManager.GetEpoch();
       FindTimeStep();
 
-      if (currentEpoch <= nextMeasurementEpoch)
+      if (currentEpoch <= (nextMeasurementEpoch + 5.0e-12))       // It needs to add 5.0e-12 in order to avoid accuracy limit of double   // made changes by TUAN NGUYEN
          currentState = PROPAGATING;
       else
          currentState = ESTIMATING;
