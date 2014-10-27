@@ -854,16 +854,16 @@ void BatchEstimator::CompleteInitialization()
    //      BuildResidualPlot(plotName, plotMeasurements);
    //   }
    //}
-
+   
    if (advanceToEstimationEpoch == false)
    {
       PropagationStateManager *psm = propagator->GetPropStateManager();
       GmatState               *gs  = psm->GetState();
       estimationState              = esm.GetState();
       stateSize = estimationState->GetSize();
-
+      
       Estimator::CompleteInitialization();
-
+      
       // If estimation epoch not set, use the epoch from the prop state
       if ((estEpochFormat == "FromParticipants") || (estimationEpoch <= 0.0))
       {
@@ -873,7 +873,7 @@ void BatchEstimator::CompleteInitialization()
             estimationEpoch   = ((SpaceObject *)(participants[i]))->GetEpoch();
       }
       currentEpoch         = gs->GetEpoch();
-
+      
       // Tell the measManager to complete its initialization
       bool measOK = measManager.SetPropagator(propagator);
       measOK = measOK && measManager.Initialize();
@@ -881,7 +881,7 @@ void BatchEstimator::CompleteInitialization()
          throw SolverException(
                "BatchEstimator::CompleteInitialization - error initializing "
                "MeasurementManager.\n");
-
+      
       // Now load up the observations
       measManager.PrepareForProcessing(false);
       UnsignedInt numRec = measManager.LoadObservations();                           // made changes by TUAN NGUYEN
@@ -889,10 +889,9 @@ void BatchEstimator::CompleteInitialization()
       {
          throw EstimatorException("No observation data is used for estimation\n");   // made changes by TUAN NGUYEN
       }
-     
+      
 ///// Check for more generic approach
       measManager.LoadRampTables();                                                  // made changes by TUAN NGUYEN
-
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
          advanceToEstimationEpoch = true;
@@ -901,7 +900,7 @@ void BatchEstimator::CompleteInitialization()
          return;
       }
    }
-
+   
    // Show all residuals plots
    if (showAllResiduals)
    {
@@ -915,12 +914,11 @@ void BatchEstimator::CompleteInitialization()
          BuildResidualPlot(plotName, plotMeasurements);
       }
    }
-
+   
    advanceToEstimationEpoch = false;
 
    // First measurement epoch is the epoch of the first measurement.  Duh.
    nextMeasurementEpoch = measManager.GetEpoch();
-
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
             "Init complete!\n   STM = %s\n   Covariance = %s\n",
@@ -945,7 +943,7 @@ void BatchEstimator::CompleteInitialization()
 
    measurementResiduals.clear();
    measurementEpochs.clear();
-
+   
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
@@ -956,15 +954,17 @@ void BatchEstimator::CompleteInitialization()
    }
 
    if (useApriori)
+   {
       for (Integer i = 0; i < information.GetNumRows(); ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
             residuals[i] += information(i,j) * x0bar[j];
       }
+   }
 
    esm.BufferObjects(&outerLoopBuffer);
    esm.MapObjectsToVector();
-
+   
 //   converged   = false;
    estimationStatus = UNKNOWN;                 // made changes by TUAN NGUYEN
    // Convert estimation state from GMAT internal coordinate system to participants' coordinate system
@@ -990,7 +990,6 @@ void BatchEstimator::CompleteInitialization()
             GmatTimeConstants::SECS_PER_DAY;
       currentState = PROPAGATING;
    }
-
 
 
    #ifdef DEBUG_INITIALIZATION
@@ -1060,7 +1059,8 @@ void BatchEstimator::FindTimeStep()
    #endif
 
    }
-   else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
+   //else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))       // value of accuray is set to 5.0e-12 due to the accuracy limit of double   // made changes by TUAN NGUYEN 
+   else if (fabs((currentEpoch - nextMeasurementEpoch)/currentEpoch) < GmatRealConstants::REAL_EPSILON)
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
