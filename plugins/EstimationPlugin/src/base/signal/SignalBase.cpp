@@ -29,6 +29,7 @@
 #include "SpaceObject.hpp"
 #include <sstream>
 
+//#define DEBUG_SET_PARAMETER
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
 //#define DEBUG_MOVETOEPOCH
@@ -101,7 +102,7 @@ SignalBase::~SignalBase()
       delete ocs;
    if (j2k)
       delete j2k;
-
+   
    theData.CleanUp();              // made changes by TUAN NGUYEN
 }
 
@@ -241,6 +242,10 @@ bool SignalBase::SetProgressReporter(ProgressReporter* reporter)
 //------------------------------------------------------------------------------
 bool SignalBase::SetTransmitParticipantName(std::string name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetTransmitParticipantName('%s')\n", this, name.c_str());
+#endif
+
    bool retval = false;
    if (name != "")
    {
@@ -264,6 +269,10 @@ bool SignalBase::SetTransmitParticipantName(std::string name)
 //------------------------------------------------------------------------------
 bool SignalBase::SetReceiveParticipantName(std::string name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetReceivrParticipantName('%s')\n", this, name.c_str());
+#endif
+
    bool retval = false;
    if (name != "")
    {
@@ -315,6 +324,10 @@ const StringArray& SignalBase::GetRefObjectNameArray(
 bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetRefObject(obj = <%p>, type = %d, name = '%s')\n", this, obj, type, name.c_str());
+#endif
+
    bool retval = false;
 
    if (obj != NULL)
@@ -359,6 +372,10 @@ bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 bool SignalBase::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::RenameRefObject(type = %d, oldName = '%s', newName = '%s')\n", this, type, oldName.c_str(), newName.c_str());
+#endif
+
    bool retval = false;
 
    if (oldName == theData.transmitParticipant)
@@ -485,16 +502,21 @@ bool SignalBase::Add(SignalBase* signalToAdd)
 //------------------------------------------------------------------------------
 void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetPropagator(propagator = <%p>, forObject = <%p,'%s'>)\n", this, propagator, forObj, forObj->GetName().c_str());
+#endif
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Setting a propagator <%p> in the Signal "
             "class for %s\n", propagator, (forObj == NULL ?
             "both participants" : forObj->GetName().c_str()));
    #endif
+   
    if (propagator == NULL)
       throw MeasurementException("The propagator passed in for the object " +
             forObj->GetName() + " is NULL, so the object cannot be propagated "
                   "for light time evaluation");
-
+   
    if (theData.solveLightTime)
    {
       if ((theData.tNode == forObj) || (forObj == NULL))
@@ -504,6 +526,7 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
             MessageInterface::ShowMessage("  Transmitter propagator set\n");
          #endif
       }
+      
       if ((theData.rNode == forObj) || (forObj == NULL))
       {
          theData.rPropagator = propagator;
@@ -511,7 +534,7 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
             MessageInterface::ShowMessage("  Receiver propagator set\n");
          #endif
       }
-
+      
       if (next)
          next->SetPropagator(propagator, forObj);
    }
@@ -529,6 +552,11 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
 //------------------------------------------------------------------------------
 bool SignalBase::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start SignalBase<%p>::Initialize()\n", this);
+#endif
+
+
    bool retval = false;
 
    if (GmatBase::Initialize())
@@ -570,6 +598,9 @@ bool SignalBase::Initialize()
       isInitialized = false;
    }
 
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("End SignalBase<%p>::Initialize()\n", this);
+#endif
    return retval;
 }
 
@@ -768,7 +799,7 @@ void SignalBase::UsesLighttime(const bool tf)
 void SignalBase::InitializeSignal(bool chainForwards)
 {
    #ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage("SignalBase::InitializeSignal() for leg %s to %s\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   MessageInterface::ShowMessage("SignalBase<%p>::InitializeSignal() for leg %s to %s\n", this, theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
    #endif
 
    if (isInitialized)
@@ -1584,7 +1615,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("   ---> Before: %.12lf\n", state[0]);
       #endif
-
+      
       retval = prop->Step(stepToTake);
       if (retval == false)
       {
@@ -1638,7 +1669,6 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       // For ground station, its STM is I matrix
    }
 
-   
    // 3. Set value for SignalData object associated to transmiter node (or receiver node)
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
    if (forTransmitter)
@@ -1664,7 +1694,6 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       theData.rVel = state.GetV();
       // whenever updating participant's state, it needs to update its STM             // made changes by TUAN NGUYEN
       theData.rSTM = stm;                                                              // made changes by TUAN NGUYEN
-
 #ifdef USE_PRECISION_TIME
       theData.rPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;               // made changes by TUAN NGUYEN
       theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -   // made changes by TUAN NGUYEN
