@@ -305,7 +305,7 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    if (md->typeName == "Doppler")                                                          // made changes by TUAN NGUYEN
    {                                                                                       // made changes by TUAN NGUYEN
       dataLine << md->uplinkBand << "    ";                                                // made changes by TUAN NGUYEN
-      dataLine << md->dopplerCountInterval;                                                // made changes by TUAN NGUYEN
+      dataLine << md->dopplerCountInterval << "    ";                                      // made changes by TUAN NGUYEN
    }                                                                                       // made changes by TUAN NGUYEN
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
