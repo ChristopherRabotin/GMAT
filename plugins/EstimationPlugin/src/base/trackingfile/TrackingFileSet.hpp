@@ -172,21 +172,11 @@ protected:
    bool useRelativityCorrection;                               // made changes by TUAN NGUYEN
    /// Flag for the inclusion of ET-TAI correction             // made changes by TUAN NGUYEN
    bool useETminusTAICorrection;                               // made changes by TUAN NGUYEN
-   ///// Name of troposphere model                               // made changes by TUAN NGUYEN
-   //std::string troposphereModel;                               // made changes by TUAN NGUYEN
-   ///// Name of ionosphere model                                // made changes by TUAN NGUYEN
-   //std::string ionosphereModel;                                // made changes by TUAN NGUYEN
-
-   /// Noise
-   Real            rangeNoiseSigma;                            // made changes by TUAN NGUYEN
-   std::string     rangeErrorModel;                            // made changes by TUAN NGUYEN
-   Real            dsnrangeNoiseSigma;                         // made changes by TUAN NGUYEN
-   std::string     dsnrangeErrorModel;                         // made changes by TUAN NGUYEN
-   Real            dopplerNoiseSigma;                          // made changes by TUAN NGUYEN
-   std::string     dopplerErrorModel;                          // made changes by TUAN NGUYEN
 
    /// Range modulo constant                                   // made changes by TUAN NGUYEN
    Real rangeModulo;                                           // made changes by TUAN NGUYEN
+   /// Doppler count interval                                  // made changes by TUAN NGUYEN
+   Real dopplerCountInterval;                                  // made changes by TUAN NGUYEN
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -207,15 +197,8 @@ protected:
       USELIGHTTIME,
       USE_RELATIVITY,                                       // made changes by TUAN NGUYEN
       USE_ETMINUSTAI,                                       // made changes by TUAN NGUYEN
-//      TROPOSPHERE_MODEL,                                    // made changes by TUAN NGUYEN
-//      IONOSPHERE_MODEL,                                     // made changes by TUAN NGUYEN
-      RANGE_NOISESIGMA,                                     // made changes by TUAN NGUYEN
-      RANGE_ERRORMODEL,                                     // made changes by TUAN NGUYEN
-      DSNRANGE_NOISESIGMA,                                  // made changes by TUAN NGUYEN
-      DSNRANGE_ERRORMODEL,                                  // made changes by TUAN NGUYEN
-      DOPPLER_NOISESIGMA,                                   // made changes by TUAN NGUYEN
-      DOPPLER_ERRORMODEL,                                   // made changes by TUAN NGUYEN
       RANGE_MODULO,                                         // made changes by TUAN NGUYEN
+      DOPPLER_COUNT_INTERVAL,                               // made changes by TUAN NGUYEN
       TrackingFileSetParamCount,
    };
 

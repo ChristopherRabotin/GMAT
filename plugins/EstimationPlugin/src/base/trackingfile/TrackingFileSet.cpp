@@ -45,15 +45,8 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "UseLighttime",                  // USELIGHTTIME
    "UseRelativityCorrection",       // USE_RELATIVITY             // made changes by TUAN NGUYEN
    "UseETminusTAI",                 // USE_ETMINUSTAI             // made changes by TUAN NGUYEN
-//   "TroposphereModel",              // TROPOSPHERE_MODEL          // made changes by TUAN NGUYEN
-//   "IonosphereModel",               // IONOSPHERE_MODEL           // made changes by TUAN NGUYEN
-   "RangeNoiseSigma",               // RANGE_NOISESIGMA           // made changes by TUAN NGUYEN
-   "RangeErrorModel",               // RANGE_ERRORMODEL           // made changes by TUAN NGUYEN
-   "DSNRangeNoiseSigma",            // DSNRANGE_NOISESIGMA        // made changes by TUAN NGUYEN
-   "DSNRangeErrorModel",            // DSNRANGE_ERRORMODEL        // made changes by TUAN NGUYEN
-   "DopplerNoiseSigma",             // DOPPLER_NOISESIGMA         // made changes by TUAN NGUYEN
-   "DopplerErrorModel",             // DOPPLER_ERRORMODEL         // made changes by TUAN NGUYEN
    "RangeModuloConstant",           // RANGE_MODULO               // made changes by TUAN NGUYEN
+   "DopplerCountInterval",          // DOPPLER_COUNT_INTERVAL     // made changes by TUAN NGUYEN
 };
 
 /// Types of the BatchEstimator parameters
@@ -66,15 +59,8 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::BOOLEAN_TYPE,              // USELIGHTTIME
    Gmat::BOOLEAN_TYPE,              // USE_RELATIVITY            // made changes by TUAN NGUYEN
    Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI            // made changes by TUAN NGUYEN
-//   Gmat::STRING_TYPE,               // TROPOSPHERE_MODEL         // made changes by TUAN NGUYEN
-//   Gmat::STRING_TYPE,               // IONOSPHERE_MODEL          // made changes by TUAN NGUYEN
-   Gmat::REAL_TYPE,                 // RANGE_NOISESIGMA          // made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,               // RANGE_ERROR_MODEL         // made changes by TUAN NGUYEN
-   Gmat::REAL_TYPE,                 // DSNRANGE_NOISESIGMA       // made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,               // DSNRANGE_ERROR_MODEL      // made changes by TUAN NGUYEN
-   Gmat::REAL_TYPE,                 // DOPPLER_NOISESIGMA        // made changes by TUAN NGUYEN
-   Gmat::STRING_TYPE,               // DOPPLER_ERROR_MODEL       // made changes by TUAN NGUYEN
    Gmat::REAL_TYPE,                 // RANGE_MODULO              // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL    // made changes by TUAN NGUYEN
 };
 
 
@@ -94,15 +80,8 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    thePropagator        (NULL),
    useRelativityCorrection   (false),            // made changes by TUAN NGUYEN
    useETminusTAICorrection   (false),            // made changes by TUAN NGUYEN
-   rangeNoiseSigma           (1.0),              // made changes by TUAN NGUYEN
-   rangeErrorModel           ("RandomConstant"), // made changes by TUAN NGUYEN
-   dsnrangeNoiseSigma        (1.0),              // made changes by TUAN NGUYEN
-   dsnrangeErrorModel        ("RandomConstant"), // made changes by TUAN NGUYEN
-   dopplerNoiseSigma         (1.0),              // made changes by TUAN NGUYEN
-   dopplerErrorModel         ("RandomConstant"), // made changes by TUAN NGUYEN
-   rangeModulo               (1.0e18)           // made changes by TUAN NGUYEN
-//   troposphereModel          ("None"),           // made changes by TUAN NGUYEN
-//   ionosphereModel           ("None")            // made changes by TUAN NGUYEN
+   rangeModulo               (1.0e18),           // made changes by TUAN NGUYEN
+   dopplerCountInterval      (1.0)               // made changes by TUAN NGUYEN
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -129,6 +108,10 @@ TrackingFileSet::~TrackingFileSet()
 
    // clear tracking configs
    trackingConfigs.clear();
+
+   // cleat file names and ramped table names
+   filenames.clear();
+   rampedTablenames.clear();
 }
 
 
@@ -152,18 +135,13 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    datafiles                 (tfs.datafiles),
    useRelativityCorrection   (tfs.useRelativityCorrection),   // made changes by TUAN NGUYEN
    useETminusTAICorrection   (tfs.useETminusTAICorrection),   // made changes by TUAN NGUYEN
-   rangeNoiseSigma           (tfs.rangeNoiseSigma),           // made changes by TUAN NGUYEN
-   rangeErrorModel           (tfs.rangeErrorModel),           // made changes by TUAN NGUYEN
-   dsnrangeNoiseSigma        (tfs.dsnrangeNoiseSigma),        // made changes by TUAN NGUYEN
-   dsnrangeErrorModel        (tfs.dsnrangeErrorModel),        // made changes by TUAN NGUYEN
-   dopplerNoiseSigma         (tfs.dopplerNoiseSigma),         // made changes by TUAN NGUYEN
-   dopplerErrorModel         (tfs.dopplerErrorModel),         // made changes by TUAN NGUYEN
-   rangeModulo               (tfs.rangeModulo)               // made changes by TUAN NGUYEN
-//   troposphereModel          (tfs.troposphereModel),          // made changes by TUAN NGUYEN
-//   ionosphereModel           (tfs.ionosphereModel)            // made changes by TUAN NGUYEN
+   rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
+   dopplerCountInterval      (tfs.dopplerCountInterval)       // made changes by TUAN NGUYEN
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
+
+   isInitialized = false;
 }
 
 
@@ -205,15 +183,8 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       datafiles               = tfs.datafiles;
       useRelativityCorrection = tfs.useRelativityCorrection;   // made changes by TUAN NGUYEN
       useETminusTAICorrection = tfs.useETminusTAICorrection;   // made changes by TUAN NGUYEN
-      rangeNoiseSigma         = tfs.rangeNoiseSigma;           // made changes by TUAN NGUYEN
-      rangeErrorModel         = tfs.rangeErrorModel;           // made changes by TUAN NGUYEN
-      dsnrangeNoiseSigma      = tfs.dsnrangeNoiseSigma;        // made changes by TUAN NGUYEN
-      dsnrangeErrorModel      = tfs.dsnrangeErrorModel;        // made changes by TUAN NGUYEN
-      dopplerNoiseSigma       = tfs.dopplerNoiseSigma;         // made changes by TUAN NGUYEN
-      dopplerErrorModel       = tfs.dopplerErrorModel;         // made changes by TUAN NGUYEN
       rangeModulo             = tfs.rangeModulo;               // made changes by TUAN NGUYEN
-//      troposphereModel        = tfs.troposphereModel;          // made changes by TUAN NGUYEN
-//      ionosphereModel         = tfs.ionosphereModel;           // made changes by TUAN NGUYEN
+      dopplerCountInterval    = tfs.dopplerCountInterval;      // made changes by TUAN NGUYEN
 
       isInitialized = false;
    }
@@ -329,17 +300,10 @@ std::string TrackingFileSet::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real TrackingFileSet::GetRealParameter(const Integer id) const
 {
-   if (id == RANGE_NOISESIGMA)
-      return rangeNoiseSigma;
-
-   if (id == DSNRANGE_NOISESIGMA)
-      return dsnrangeNoiseSigma;
-
-   if (id == DOPPLER_NOISESIGMA)
-      return dopplerNoiseSigma;
-
    if (id == RANGE_MODULO)
       return rangeModulo;
+   if (id == DOPPLER_COUNT_INTERVAL)
+      return dopplerCountInterval;
 
    return MeasurementModelBase::GetRealParameter(id);
 }
@@ -361,42 +325,6 @@ Real TrackingFileSet::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == RANGE_NOISESIGMA)
-   {
-      if (value <= 0.0)
-      {
-         std::stringstream ss;
-         ss << "Error: value of " << GetName() << ".RangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
-         throw MeasurementException(ss.str());
-      }
-      rangeNoiseSigma = value;
-      return rangeNoiseSigma;
-   }
-
-   if (id == DSNRANGE_NOISESIGMA)
-   {
-      if (value <= 0.0)
-      {
-         std::stringstream ss;
-         ss << "Error: value of " << GetName() << ".DSNRangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
-         throw MeasurementException(ss.str());
-      }
-      dsnrangeNoiseSigma = value;
-      return dsnrangeNoiseSigma;
-   }
-
-   if (id == DOPPLER_NOISESIGMA)
-   {
-      if (value <= 0.0)
-      {
-         std::stringstream ss;
-         ss << "Error: value of " << GetName() << ".DopplerNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
-         throw MeasurementException(ss.str());
-      }
-      dopplerNoiseSigma = value;
-      return dopplerNoiseSigma;
-   }
-
    if (id == RANGE_MODULO)
    {
       if (value <= 0.0)
@@ -404,6 +332,15 @@ Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
 
       rangeModulo = value;
       return rangeModulo;
+   }
+
+   if (id == DOPPLER_COUNT_INTERVAL)
+   {
+      if (value <= 0.0)
+         throw MeasurementException("Error: "+GetName()+".DopplerCountInterval has an invalid value. It has to be a positive number\n");
+
+      dopplerCountInterval = value;
+      return dopplerCountInterval;
    }
 
    return MeasurementModelBase::SetRealParameter(id, value);
@@ -461,21 +398,6 @@ Real TrackingFileSet::SetRealParameter(const std::string & label,
 //------------------------------------------------------------------------------
 std::string TrackingFileSet::GetStringParameter(const Integer id) const
 {
-   //if (id == TROPOSPHERE_MODEL)
-   //   return troposphereModel;
-
-   //if (id == IONOSPHERE_MODEL)
-   //   return ionosphereModel;
-
-   if (id == RANGE_ERRORMODEL)
-      return rangeErrorModel;
-
-   if (id == DSNRANGE_ERRORMODEL)
-      return dsnrangeErrorModel;
-
-   if (id == DOPPLER_ERRORMODEL)
-      return dopplerErrorModel;
-
    return MeasurementModelBase::GetStringParameter(id);
 }
 
@@ -495,18 +417,6 @@ std::string TrackingFileSet::GetStringParameter(const Integer id) const
 bool TrackingFileSet::SetStringParameter(const Integer id,
       const std::string& value)
 {
-   //if (id == TROPOSPHERE_MODEL)
-   //{
-   //   troposphereModel = value;
-   //   return true;
-   //}
-
-   //if (id == IONOSPHERE_MODEL)
-   //{
-   //   ionosphereModel = value;
-   //   return true;
-   //}
-
    if (id == FILENAME)
    {
       if (find(filenames.begin(), filenames.end(), value) == filenames.end())
@@ -526,30 +436,6 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       }                                                                                                 // made changes by TUAN NGUYEN
       return false;                                                                                     // made changes by TUAN NGUYEN
    }                                                                                                    // made changes by TUAN NGUYEN
-
-   if (id == RANGE_ERRORMODEL)
-   {
-      if (value != "RandomConstant")
-         throw MeasurementException("Error: '"+ value + "' is invalid value for " + GetName() + ".RangeErrorModel\n");
-      rangeErrorModel = value;
-      return true;
-   }
-
-   if (id == DSNRANGE_ERRORMODEL)
-   {
-      if (value != "RandomConstant")
-         throw MeasurementException("Error: '"+ value + "' is invalid value for " + GetName() + ".DSNRangeErrorModel\n");
-      dsnrangeErrorModel = value;
-      return true;
-   }
-
-   if (id == DOPPLER_ERRORMODEL)
-   {
-      if (value != "RandomConstant")
-         throw MeasurementException("Error: '" + value + "' is invalid value for " + GetName() + ".DopplerErrorModel\n");
-      dopplerErrorModel = value;
-      return true;
-   }
 
    return MeasurementModelBase::SetStringParameter(id, value);
 }
@@ -675,7 +561,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          MessageInterface::ShowMessage("%d members in config:\n",
                trackingConfigs.size());
          for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
-            MessageInterface::ShowMessage("   %s\n", trackingConfigs[i].c_str());
+            MessageInterface::ShowMessage("   %s\n", trackingConfigs[i].GetDefinitionString().c_str());
       #endif
       return true;
    }
@@ -1218,16 +1104,6 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
             break;
          }
       }
-
-      //for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)            // made changes by TUAN NGUYEN
-      //{                                                                    // made changes by TUAN NGUYEN
-      //   if (rampedTablenames[i] == oldName)                               // made changes by TUAN NGUYEN
-      //   {                                                                 // made changes by TUAN NGUYEN
-      //      rampedTablenames[i] = newName;                                 // made changes by TUAN NGUYEN
-      //      retval = true;                                                 // made changes by TUAN NGUYEN
-      //      break;                                                         // made changes by TUAN NGUYEN
-      //   }                                                                 // made changes by TUAN NGUYEN
-      //}                                                                    // made changes by TUAN NGUYEN
    }
 
    if ((type == Gmat::SPACE_POINT) || (type == Gmat::UNKNOWN_OBJECT))
@@ -1453,8 +1329,11 @@ void TrackingFileSet::SetPropagator(PropSetup* ps)
 bool TrackingFileSet::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize()\n");
+      MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize() <%p>\n", this);
    #endif
+   
+   if (this->IsInitialized())
+      return true;
 
    bool retval = false;
    if (MeasurementModelBase::Initialize())
@@ -1481,10 +1360,11 @@ bool TrackingFileSet::Initialize()
             if (trackingConfigs[i].strands.size() != 1)
                throw MeasurementException("Multiple strands and empty strands "
                      "are not yet implemented");
-
+            
             TrackingDataAdapter *tda =
                   BuildAdapter(trackingConfigs[i].strands[0],
                         trackingConfigs[i].types[j], i);
+            
             if (tda == NULL)
             {
                throw MeasurementException("Unable to build the " +
@@ -1551,42 +1431,40 @@ bool TrackingFileSet::Initialize()
          if (thePropagator)
             measurements[i]->SetPropagator(thePropagator);
 
-         // Set measurement corrections to TrackingDataAdapter                     // made changes by TUAN NGUYEN
-         if (useRelativityCorrection)                                              // made changes by TUAN NGUYEN
-            measurements[i]->SetCorrection("Moyer","Relativity");                  // made changes by TUAN NGUYEN
-         if (useETminusTAICorrection)                                              // made changes by TUAN NGUYEN
-            measurements[i]->SetCorrection("Moyer","ET-TAI");                      // made changes by TUAN NGUYEN
-         //if (troposphereModel != "")                                               // made changes by TUAN NGUYEN
-         //   measurements[i]->SetCorrection(troposphereModel,"TroposphereModel");   // made changes by TUAN NGUYEN
-         //if (ionosphereModel != "")                                                // made changes by TUAN NGUYEN
-         //   measurements[i]->SetCorrection(ionosphereModel,"IonosphereModel");     // made changes by TUAN NGUYEN
+         // Set measurement corrections to TrackingDataAdapter                                 // made changes by TUAN NGUYEN
+         if (useRelativityCorrection)                                                          // made changes by TUAN NGUYEN
+            measurements[i]->SetCorrection("Moyer","Relativity");                              // made changes by TUAN NGUYEN
+         if (useETminusTAICorrection)                                                          // made changes by TUAN NGUYEN
+            measurements[i]->SetCorrection("Moyer","ET-TAI");                                  // made changes by TUAN NGUYEN
 
-         // Set ramped frequency tables to TrackingDataAdapter                            // made changes by TUAN NGUYEN
-         for (UnsignedInt k = 0; k < rampedTablenames.size(); ++k)                        // made changes by TUAN NGUYEN
-         {
-            measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);    // made changes by TUAN NGUYEN
-         }
+         // Set ramped frequency tables to TrackingDataAdapter                                 // made changes by TUAN NGUYEN
+         for (UnsignedInt k = 0; k < rampedTablenames.size(); ++k)                             // made changes by TUAN NGUYEN
+         {                                                                                     // made changes by TUAN NGUYEN
+            measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);         // made changes by TUAN NGUYEN
+         }                                                                                     // made changes by TUAN NGUYEN
 
-         // Set noise sigma and error model to TrackingDataAdapter
-         measurements[i]->SetRealParameter("NoiseSigma", rangeNoiseSigma, 0);
-         measurements[i]->SetRealParameter("NoiseSigma", dopplerNoiseSigma, 1);
-         measurements[i]->SetRealParameter("NoiseSigma", dsnrangeNoiseSigma, 2);
-         measurements[i]->SetStringParameter("ErrorModel", rangeErrorModel, 0);
-         measurements[i]->SetStringParameter("ErrorModel", dopplerErrorModel, 1);
-         measurements[i]->SetStringParameter("ErrorModel", dsnrangeErrorModel, 2);
+         // Set range modulo constant for DSNRange                                             // made changes by TUAN NGUYEN
+         if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")             // made changes by TUAN NGUYEN
+         {                                                                                     // made changes by TUAN NGUYEN
+            measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);             // made changes by TUAN NGUYEN
+         }                                                                                     // made changes by TUAN NGUYEN
 
-         // Set range modulo constant for DSNRange
-         if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")
-         {
-            measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
-         }
+         // Set doppler count interval for Doppler                                             // made changes by TUAN NGUYEN
+         if (measurements[i]->GetStringParameter("MeasurementType") == "Doppler")              // made changes by TUAN NGUYEN
+         {                                                                                     // made changes by TUAN NGUYEN
+            measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);   // made changes by TUAN NGUYEN
+         }                                                                                     // made changes by TUAN NGUYEN
 
          // Initialize TrackingDataAdapter
          retval = retval && measurements[i]->Initialize();
       }
-
+      
       isInitialized = true;
    }
+   
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Exit TrackingFileSet::Initialize() <%p>\n", this);
+   #endif
 
    return retval;
 }
@@ -1726,8 +1604,9 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new DopplerAdapter(adapterName);                       // made changes by TUAN NGUYEN
       if (retval)                                                     // made changes by TUAN NGUYEN
       {
+         ((DopplerAdapter*)retval)->adapter = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex); 
          retval->UsesLightTime(useLighttime);                         // made changes by TUAN NGUYEN
-         retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN
+         retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN         
       }
    }                                                                  // made changes by TUAN NGUYEN
    else                                                               // made changes by TUAN NGUYEN
@@ -1772,6 +1651,10 @@ TrackingFileSet::MeasurementDefinition::MeasurementDefinition()
 //------------------------------------------------------------------------------
 TrackingFileSet::MeasurementDefinition::~MeasurementDefinition()
 {
+   for (UnsignedInt i = 0; i < strands.size(); ++i)                 // made changes by TUAN NGUYEN
+      strands[i].clear();                                           // made changes by TUAN NGUYEN
+   strands.clear();                                                 // made changes by TUAN NGUYEN
+   types.clear();                                                   // made changes by TUAN NGUYEN
 }
 
 //------------------------------------------------------------------------------
