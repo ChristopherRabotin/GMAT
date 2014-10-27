@@ -155,7 +155,18 @@ protected:
    /// Visibility vector
    Real az_el_visible[3];
 
+   /// Noise
+   Real            rangeNoiseSigma;       // unit: Km          // made changes by TUAN NGUYEN
+   std::string     rangeErrorModel;                            // made changes by TUAN NGUYEN
+   Real            dsnrangeNoiseSigma;    // unit: RU          // made changes by TUAN NGUYEN
+   std::string     dsnrangeErrorModel;                         // made changes by TUAN NGUYEN
+   Real            dopplerNoiseSigma;     // unit: Hz          // made changes by TUAN NGUYEN
+   std::string     dopplerErrorModel;                          // made changes by TUAN NGUYEN
    
+   /// Bias
+   Real            rangeBias;              // unit: Km         // made changes by TUAN NGUYEN
+   Real            dsnrangeBias;           // unit: RU         // made changes by TUAN NGUYEN
+   Real            dopplerBias;            // unit: Hz         // made changes by TUAN NGUYEN
 public:
    /// Published parameters for ground stations
    enum
@@ -169,6 +180,15 @@ public:
       PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
       HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
       MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
+      RANGE_NOISESIGMA,                                     // made changes by TUAN NGUYEN
+      RANGE_ERRORMODEL,                                     // made changes by TUAN NGUYEN
+      DSNRANGE_NOISESIGMA,                                  // made changes by TUAN NGUYEN
+      DSNRANGE_ERRORMODEL,                                  // made changes by TUAN NGUYEN
+      DOPPLER_NOISESIGMA,                                   // made changes by TUAN NGUYEN
+      DOPPLER_ERRORMODEL,                                   // made changes by TUAN NGUYEN
+      RANGE_BIAS,                                        // made changes by TUAN NGUYEN
+      DSNRANGE_BIAS,                                     // made changes by TUAN NGUYEN
+      DOPPLER_BIAS,                                      // made changes by TUAN NGUYEN
       GroundStationParamCount,
    };
 

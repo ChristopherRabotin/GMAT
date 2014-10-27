@@ -57,7 +57,16 @@ GroundStation::PARAMETER_TEXT[GroundStationParamCount - BodyFixedPointParamCount
       "Temperature",            // K- degree
       "Pressure",               // hPa
       "Humidity",               // percentage
-      "MinimumElevationAngle",      // degree
+      "MinimumElevationAngle",  // degree
+      "RangeNoiseSigma",               // RANGE_NOISESIGMA           // made changes by TUAN NGUYEN
+      "RangeErrorModel",               // RANGE_ERRORMODEL           // made changes by TUAN NGUYEN
+      "DSNRangeNoiseSigma",            // DSNRANGE_NOISESIGMA        // made changes by TUAN NGUYEN
+      "DSNRangeErrorModel",            // DSNRANGE_ERRORMODEL        // made changes by TUAN NGUYEN
+      "DopplerNoiseSigma",             // DOPPLER_NOISESIGMA         // made changes by TUAN NGUYEN
+      "DopplerErrorModel",             // DOPPLER_ERRORMODEL         // made changes by TUAN NGUYEN
+      "RangeBias",                     // RANGE_BIAS                 // made changes by TUAN NGUYEN
+      "DSNRangeBias",                  // DSNRANGE_BIAS              // made changes by TUAN NGUYEN
+      "DopplerBias",                   // DOPPLER_BIAS               // made changes by TUAN NGUYEN
    };
 
 const Gmat::ParameterType
@@ -72,6 +81,15 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
       Gmat::REAL_TYPE,      // Pressure
       Gmat::REAL_TYPE,      // Humidity
       Gmat::REAL_TYPE,      // MinimumElevationAngle
+      Gmat::REAL_TYPE,             // RANGE_NOISESIGMA          // made changes by TUAN NGUYEN
+      Gmat::STRING_TYPE,           // RANGE_ERROR_MODEL         // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,             // DSNRANGE_NOISESIGMA       // made changes by TUAN NGUYEN
+      Gmat::STRING_TYPE,           // DSNRANGE_ERROR_MODEL      // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,             // DOPPLER_NOISESIGMA        // made changes by TUAN NGUYEN
+      Gmat::STRING_TYPE,           // DOPPLER_ERROR_MODEL       // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,             // RANGE_BIAS                // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,             // DSNRANGE_BIAS             // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,             // DOPPLER_BIAS              // made changes by TUAN NGUYEN
    };
 
 
@@ -98,6 +116,15 @@ GroundStation::GroundStation(const std::string &itsName) :
    humidity                  (55.0),                 // 55%
    dataSource                ("Constant"),           // made changes by Tuan Nguyen
    minElevationAngle         (7.0),                  // 7 degree
+   rangeNoiseSigma           (1.0),              // made changes by TUAN NGUYEN
+   rangeErrorModel           ("RandomConstant"), // made changes by TUAN NGUYEN
+   dsnrangeNoiseSigma        (1.0),              // made changes by TUAN NGUYEN
+   dsnrangeErrorModel        ("RandomConstant"), // made changes by TUAN NGUYEN
+   dopplerNoiseSigma         (1.0),              // made changes by TUAN NGUYEN
+   dopplerErrorModel         ("RandomConstant"), // made changes by TUAN NGUYEN
+   rangeBias                 (0.0),                  // unit: km         // made changes by TUAN NGUYEN
+   dsnrangeBias              (0.0),                  // unit: RU         // made changes by TUAN NGUYEN
+   dopplerBias               (0.0),                  // unit: Hz         // made changes by TUAN NGUYEN
    troposphereModel          ("None"),               // made changes by Tuan Nguyen
    ionosphereModel           ("None")                // made changes by Tuan Nguyen
 //   troposphereObj            (NULL),
@@ -149,6 +176,15 @@ GroundStation::GroundStation(const GroundStation& gs) :
    humidity              (gs.humidity),
    dataSource            (gs.dataSource),          // made changes by Tuan Nguyen
    minElevationAngle     (gs.minElevationAngle),
+   rangeNoiseSigma       (gs.rangeNoiseSigma),           // made changes by TUAN NGUYEN
+   rangeErrorModel       (gs.rangeErrorModel),           // made changes by TUAN NGUYEN
+   dsnrangeNoiseSigma    (gs.dsnrangeNoiseSigma),        // made changes by TUAN NGUYEN
+   dsnrangeErrorModel    (gs.dsnrangeErrorModel),        // made changes by TUAN NGUYEN
+   dopplerNoiseSigma     (gs.dopplerNoiseSigma),         // made changes by TUAN NGUYEN
+   dopplerErrorModel     (gs.dopplerErrorModel),         // made changes by TUAN NGUYEN
+   rangeBias             (gs.rangeBias),                 // made changes by TUAN NGUYEN
+   dsnrangeBias          (gs.dsnrangeBias),              // made changes by TUAN NGUYEN
+   dopplerBias           (gs.dopplerBias),               // made changes by TUAN NGUYEN
    ionosphereModel       (gs.ionosphereModel),     // made changes by Tuan Nguyen
    troposphereModel      (gs.troposphereModel)     // made changes by Tuan Nguyen
 //   troposphereObj        (NULL),
@@ -198,6 +234,16 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
       dataSource      = gs.dataSource;              // made changes by Tuan Nguyen
 
       minElevationAngle = gs.minElevationAngle;
+      rangeNoiseSigma    = gs.rangeNoiseSigma;           // made changes by TUAN NGUYEN
+      rangeErrorModel    = gs.rangeErrorModel;           // made changes by TUAN NGUYEN
+      dsnrangeNoiseSigma = gs.dsnrangeNoiseSigma;        // made changes by TUAN NGUYEN
+      dsnrangeErrorModel = gs.dsnrangeErrorModel;        // made changes by TUAN NGUYEN
+      dopplerNoiseSigma  = gs.dopplerNoiseSigma;         // made changes by TUAN NGUYEN
+      dopplerErrorModel  = gs.dopplerErrorModel;         // made changes by TUAN NGUYEN
+      rangeBias          = gs.rangeBias;                 // made changes by TUAN NGUYEN
+      dsnrangeBias       = gs.dsnrangeBias;              // made changes by TUAN NGUYEN
+      dopplerBias        = gs.dopplerBias;               // made changes by TUAN NGUYEN
+
       troposphereModel  = gs.troposphereModel;      // made changes by Tuan Nguyen
       ionosphereModel   = gs.ionosphereModel;       // made changes by Tuan Nguyen
 //      troposphereObj    = NULL;
@@ -401,6 +447,15 @@ std::string GroundStation::GetStringParameter(const Integer id) const
    if (id == DATA_SOURCE)
       return dataSource;
 
+   if (id == RANGE_ERRORMODEL)
+      return rangeErrorModel;
+
+   if (id == DSNRANGE_ERRORMODEL)
+      return dsnrangeErrorModel;
+
+   if (id == DOPPLER_ERRORMODEL)
+      return dopplerErrorModel;
+
    return GroundstationInterface::GetStringParameter(id);
 }
 
@@ -474,6 +529,31 @@ bool GroundStation::SetStringParameter(const Integer id,
       dataSource = value;
       return true;
    }
+
+   if (id == RANGE_ERRORMODEL)
+   {
+      if (value != "RandomConstant")
+         throw GmatBaseException("Error: '"+ value + "' is invalid value for " + GetName() + ".RangeErrorModel\n");
+      rangeErrorModel = value;
+      return true;
+   }
+
+   if (id == DSNRANGE_ERRORMODEL)
+   {
+      if (value != "RandomConstant")
+         throw GmatBaseException("Error: '"+ value + "' is invalid value for " + GetName() + ".DSNRangeErrorModel\n");
+      dsnrangeErrorModel = value;
+      return true;
+   }
+
+   if (id == DOPPLER_ERRORMODEL)
+   {
+      if (value != "RandomConstant")
+         throw GmatBaseException("Error: '" + value + "' is invalid value for " + GetName() + ".DopplerErrorModel\n");
+      dopplerErrorModel = value;
+      return true;
+   }
+
 
    return GroundstationInterface::SetStringParameter(id, value);
 }
@@ -698,6 +778,24 @@ Real GroundStation::GetRealParameter(const Integer id) const
    if (id == MINIMUM_ELEVATION_ANGLE)
       return minElevationAngle;
 
+   if (id == RANGE_NOISESIGMA)
+      return rangeNoiseSigma;
+
+   if (id == DSNRANGE_NOISESIGMA)
+      return dsnrangeNoiseSigma;
+
+   if (id == DOPPLER_NOISESIGMA)
+      return dopplerNoiseSigma;
+
+   if (id == RANGE_BIAS)
+      return rangeBias;
+
+   if (id == DSNRANGE_BIAS)
+      return dsnrangeBias;
+
+   if (id == DOPPLER_BIAS)
+      return dopplerBias;
+
    return GroundstationInterface::GetRealParameter(id);
 }
 
@@ -747,6 +845,62 @@ Real GroundStation::SetRealParameter(const Integer id,
       return minElevationAngle;
    }
    
+   if (id == RANGE_NOISESIGMA)
+   {
+      if (value <= 0.0)
+      {
+         std::stringstream ss;
+         ss << "Error: value of " << GetName() << ".RangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
+         throw GmatBaseException(ss.str());
+      }
+      rangeNoiseSigma = value;
+      return rangeNoiseSigma;
+   }
+
+   if (id == DSNRANGE_NOISESIGMA)
+   {
+      if (value <= 0.0)
+      {
+         std::stringstream ss;
+         ss << "Error: value of " << GetName() << ".DSNRangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
+         throw GmatBaseException(ss.str());
+      }
+      dsnrangeNoiseSigma = value;
+      return dsnrangeNoiseSigma;
+   }
+
+   if (id == DOPPLER_NOISESIGMA)
+   {
+      if (value <= 0.0)
+      {
+         std::stringstream ss;
+         ss << "Error: value of " << GetName() << ".DopplerNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
+         throw GmatBaseException(ss.str());
+      }
+      dopplerNoiseSigma = value;
+      return dopplerNoiseSigma;
+   }
+
+
+   if (id == RANGE_BIAS)
+   {
+      rangeBias = value;
+      return rangeBias;
+   }
+
+   if (id == DSNRANGE_BIAS)
+   {
+      dsnrangeBias = value;
+      return dsnrangeBias;
+   }
+
+   if (id == DOPPLER_BIAS)
+   {
+      dopplerBias = value;
+      return dopplerBias;
+   }
+
+
    return GroundstationInterface::SetRealParameter(id, value);
 }
 
