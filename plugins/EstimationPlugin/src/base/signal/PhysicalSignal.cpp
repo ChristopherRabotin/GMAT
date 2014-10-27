@@ -877,8 +877,8 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       MessageInterface::ShowMessage("Solver-for parameter: %s\n", objPtr->GetParameterText(parameterID).c_str());
       #endif
 
-
-      if (objPtr->GetParameterText(parameterID) == "Position")
+      std::string paramName = objPtr->GetParameterText(parameterID);
+      if (paramName == "Position")
       {
          Rvector3 result;
          GetRangeDerivative(objPtr, true, false, result);
@@ -893,7 +893,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                theDataDerivatives[0][jj] = result[jj];
          }
       }
-      else if (objPtr->GetParameterText(parameterID) == "Velocity")
+      else if (paramName == "Velocity")
       {
          Rvector3 result;
          GetRangeDerivative(objPtr, false, true, result);
@@ -908,7 +908,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                theDataDerivatives[0][jj] = result[jj];
          }
       }
-      else if (objPtr->GetParameterText(parameterID) == "CartesianX")
+      else if (paramName == "CartesianX")
       {
          Rvector6 result;
          GetRangeDerivative(objPtr, true, true, result);
@@ -934,19 +934,24 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
          #endif
       }
-      else if (objPtr->GetParameterText(parameterID) == "Bias")
-      {
-         for (Integer i = 0; i < size; ++i)
-            theDataDerivatives[0][i] += 1.0;
-      }
       else
       {
+         UnsignedInt startIndex = paramName.size()-4;
+         //MessageInterface::ShowMessage("param name <%s>\n", paramName.substr(startIndex).c_str());
+         if (paramName.substr(startIndex) == "Bias")
+         {
+            for (Integer i = 0; i < size; ++i)
+               theDataDerivatives[0][i] += 1.0;
+         }
+         else
+         {
          #ifdef DEBUG_DERIVATIVES
             MessageInterface::ShowMessage("   Deriv is w.r.t. something "
                      "independent, so zero\n");
          #endif
-         for (UnsignedInt i = 0; i < 3; ++i)
-            theDataDerivatives[0][i] += 0.0;
+            for (UnsignedInt i = 0; i < 3; ++i)
+               theDataDerivatives[0][i] += 0.0;
+         }
       }
    }
 
