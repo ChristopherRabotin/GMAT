@@ -421,7 +421,7 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
          "Entered MeasurementManager::PrepareForProcessing(%s)\n",
          (simulating ? "true" : "false"));
    #endif
-
+   
    // Verify no pair of streams having the same file name but different data format:
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
@@ -443,14 +443,14 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
             throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + rampTableDataStreamList[j]->GetName() + "' have the same file name but different data format\n");
       }
    }
-
+   
    /// @todo: Set the propagators based on the spacecraft in each adapter.  This
    ///        piece is not yet part of the GMAT implementation, but when ready,
    ///        needs to be addressed here.
    // Pass the propagator to the tracking data adapters
    for (UnsignedInt i = 0; i < adapters.size(); ++i)
       adapters[i]->SetPropagator(thePropagator);
-
+   
    // Open all streams in streamList
    bool retval = true;
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
@@ -475,7 +475,7 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
          }
       #endif
    }
-
+   
 ///// TBD: Do we want something more generic here?
    for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)                          // made changes by TUAN NGUYEN
    {                                                                                         // made changes by TUAN NGUYEN
@@ -491,7 +491,7 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
             retval = false;                                                                  // made changes by TUAN NGUYEN
       #endif                                                                                 // made changes by TUAN NGUYEN
    }                                                                                         // made changes by TUAN NGUYEN
-
+   
    inSimulationMode = simulating;
 
    #ifdef DEBUG_FLOW
@@ -1766,6 +1766,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       } // for j loop
 
       // Now do the same thing for the TrackingDataAdapters
+      #ifdef DEBUG_CALCULATE_MEASUREMENTS
+      MessageInterface::ShowMessage("adapters size = %d\n", adapters.size());
+      #endif
       for (UnsignedInt i = 0; i < adapters.size(); ++i)
       {
          // Specify ramp table associated with measurement adapters[i]:                   // made changes by TUAN NGUYEN
@@ -1784,6 +1787,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          
          // Set AddNoise to measuement apdater
          adapters[i]->SetBooleanParameter("AddNoise", addNoise);
+         #ifdef DEBUG_CALCULATE_MEASUREMENTS
+            MessageInterface::ShowMessage("******** Finsh setting noise\n");
+         #endif
 
          // Run CalculateMeasurement() function 
 //         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
