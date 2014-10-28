@@ -171,8 +171,8 @@ SET(BASE_SRCS
     command/PenUp.cpp
     command/Propagate.cpp
     command/PropagationEnabledCommand.cpp
-	command/PlotCommand.cpp
-	command/SolverSequenceCommand.cpp
+    command/PlotCommand.cpp
+    command/SolverSequenceCommand.cpp
     command/Report.cpp
     command/RunSolver.cpp
     command/SaveMission.cpp
@@ -212,18 +212,18 @@ SET(BASE_SRCS
     coordsystem/TOEEqAxes.cpp
     coordsystem/TopocentricAxes.cpp
     coordsystem/TrueOfDateAxes.cpp
-	coordsystem/ICRFAxes.cpp
-	coordsystem/ICRFFile.cpp
-	coordsystem/ITRFAxes.cpp
-	coordsystem/IAUFile.cpp
-	coordsystem/BodySpinSunAxes.cpp
-	event/Brent.cpp
-	event/EventException.cpp
-	event/EventFunction.cpp
-	event/EventLocator.cpp
-	event/LocatedEvent.cpp
-	event/LocatedEventTable.cpp
-	event/RootFinder.cpp
+    coordsystem/ICRFAxes.cpp
+    coordsystem/ICRFFile.cpp
+    coordsystem/ITRFAxes.cpp
+    coordsystem/IAUFile.cpp
+    coordsystem/BodySpinSunAxes.cpp
+    event/Brent.cpp
+    event/EventException.cpp
+    event/EventFunction.cpp
+    event/EventLocator.cpp
+    event/LocatedEvent.cpp
+    event/LocatedEventTable.cpp
+    event/RootFinder.cpp
     executive/Moderator.cpp
     executive/PlotInterface.cpp
     executive/PlotReceiver.cpp
@@ -260,17 +260,17 @@ SET(BASE_SRCS
     forcemodel/ODEModelException.cpp
     forcemodel/ODEModel.cpp
     forcemodel/GravityField.cpp
-	forcemodel/GravityBase.cpp
+    forcemodel/GravityBase.cpp
     forcemodel/HarmonicField.cpp
     forcemodel/PhysicalModel.cpp
     forcemodel/PointMassForce.cpp
     forcemodel/SolarRadiationPressure.cpp
-	forcemodel/EventModel.cpp
-	forcemodel/RelativisticCorrection.cpp
-	forcemodel/harmonic/Harmonic.cpp
-	forcemodel/harmonic/HarmonicGravity.cpp
-	forcemodel/harmonic/HarmonicGravityCof.cpp
-	forcemodel/harmonic/HarmonicGravityGrv.cpp
+    forcemodel/EventModel.cpp
+    forcemodel/RelativisticCorrection.cpp
+    forcemodel/harmonic/Harmonic.cpp
+    forcemodel/harmonic/HarmonicGravity.cpp
+    forcemodel/harmonic/HarmonicGravityCof.cpp
+    forcemodel/harmonic/HarmonicGravityGrv.cpp
     foundation/Covariance.cpp
     foundation/ElementWrapper.cpp
     foundation/GmatBaseException.cpp
@@ -410,7 +410,7 @@ SET(BASE_SRCS
     parameter/TimeString.cpp
     parameter/Variable.cpp
     parameter/VariableWrapper.cpp
-	parameter/AttitudeString.cpp
+    parameter/AttitudeString.cpp
     plugin/DynamicLibrary.cpp
     propagator/AdamsBashforthMoulton.cpp
     propagator/DormandElMikkawyPrince68.cpp
@@ -469,8 +469,8 @@ SET(BASE_SRCS
     subscriber/ReportFile.cpp
     subscriber/Subscriber.cpp
     subscriber/XyPlot.cpp
-	subscriber/OrbitPlot.cpp
-	subscriber/GroundTrackPlot.cpp
+    subscriber/OrbitPlot.cpp
+    subscriber/GroundTrackPlot.cpp
     util/A1Date.cpp
     util/A1Mjd.cpp
     util/AngleUtil.cpp
@@ -478,8 +478,8 @@ SET(BASE_SRCS
     util/AttitudeUtil.cpp
     util/BaseException.cpp
     util/BodyFixedStateConverter.cpp
-	util/CalculationUtilities.cpp
-	util/Code500EphemerisFile.cpp
+    util/CalculationUtilities.cpp
+    util/Code500EphemerisFile.cpp
     util/ColorDatabase.cpp
     util/CCSDSAEMEulerAngleSegment.cpp
     util/CCSDSAEMQuaternionSegment.cpp
@@ -516,15 +516,15 @@ SET(BASE_SRCS
     util/TimeSystemConverter.cpp
     util/TimeTypes.cpp
     util/UtcDate.cpp
-	util/StateConversionUtil.cpp
-	util/GravityFileUtil.cpp
-	util/Frozen.cpp
-	util/OrbitDesignerTime.cpp
-	util/SunSync.cpp
-	util/RepeatSunSync.cpp
-	util/RepeatGroundTrack.cpp
+    util/StateConversionUtil.cpp
+    util/GravityFileUtil.cpp
+    util/Frozen.cpp
+    util/OrbitDesignerTime.cpp
+    util/SunSync.cpp
+    util/RepeatSunSync.cpp
+    util/RepeatGroundTrack.cpp
     solarsys/SimpleExponentialAtmosphere.cpp
-	solarsys/SpecialCelestialPoint.cpp
+    solarsys/SpecialCelestialPoint.cpp
     ${MSISE_SRCS}
     ${SPICE_SRCS}
 )
@@ -532,8 +532,11 @@ SET(BASE_SRCS
 
 # ====================================================================
 # add the install targets
+# NOTE from Ravi: This should be INSTALL(...) to work with standard CMake
+# usage. That way the user can do "make install" to install everything.
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
 
+# Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS})
 
 # specify the version of the library. 

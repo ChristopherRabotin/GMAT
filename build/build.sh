@@ -2,8 +2,9 @@
 # Author: 	Jfisher
 # Project:	Gmat
 # Title:	configure.sh
-# Purpose:	Windows Script to configure and easily build gmat for end users
-# Usage: 	-arch [x86 | x64] -mac
+# Purpose:	Shell script to configure and easily build gmat for end users
+# Usage: 	build.sh [-arch (x86 | x64)]
+#               Default behavior auto-detects architecture and OS
 
 # Clear the screen
 clear
@@ -14,21 +15,27 @@ echo "Starting GMAT Build"
 echo "........................................................"
 echo
 
-# Set default variables
-arch="x86"
-mac=false
-
 # ***********************************
 # Input Args
 # ***********************************
+
+# Auto-detect architecture if not input
 if [ "$1" = "-arch" ]
 then
-	arch=$2
+  arch=$2
+elif [[ "$(uname -m)" = *"64" ]]
+then
+  arch="x64"
+else
+  arch="x86"
 fi
 
-if [ "$3" = "-mac" ] 
+# Auto-detect Mac/Linux
+if [ "$(uname)" = "Darwin" ] 
 then
-	mac=true
+  mac=true
+else
+  mac=false
 fi
 
 # ***********************************
@@ -38,17 +45,17 @@ fi
 # Change to build/os directory
 if [ "$mac" = true ]
 then
-		cd ../build/macosx
+  cd ../build/macosx
 else 
-		cd ../build/linux
+  cd ../build/linux
 fi
 
 # Generate unix makefiles
 if [ "$arch" = "x86" ]
 then
-	cmake -G "Unix Makefiles" ../../src/
+  cmake -G "Unix Makefiles" ../../src/
 else
-	cmake -G "Unix Makefiles" -D 64_BIT=true ../../src/
+  cmake -G "Unix Makefiles" -D 64_BIT=true ../../src/
 fi
 
 # Make Gmat
@@ -59,5 +66,5 @@ cd ../
 
 echo ""
 echo "*************************************"
-echo "Gmat Build Finished Succesfully!"
+echo "Gmat Build Finished. Check build output for status."
 echo "*************************************"
