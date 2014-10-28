@@ -5,7 +5,7 @@ Create Spacecraft ODSat;
 GMAT ODSat.DateFormat = UTCGregorian;
 GMAT ODSat.Epoch = '09 Jun 2004 00:00:00.000';
 GMAT ODSat.Id = ODSatID;
-GMAT ODSat.X = 6648.937;
+GMAT ODSat.X = 6648.737;
 GMAT ODSat.Y = -335.169;
 GMAT ODSat.Z = 2789.137;
 GMAT ODSat.VX = -0.34697109;
@@ -50,7 +50,7 @@ GMAT BatchEst.AbsoluteTol = 1e-05;
 GMAT BatchEst.RelativeTol = 1e-06;
 GMAT BatchEst.Propagator = ODProp;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
-GMAT BatchEst.OLSEInitialRMSSigma = 3e45;
+GMAT BatchEst.OLSEInitialRMSSigma = 3e95;
 % BatchEst.OLSEMultiplicativeConstant = 4
 
 %------ Run the measurement simulator

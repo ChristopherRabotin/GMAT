@@ -85,6 +85,13 @@ protected:
    /// Doppler interval
    Real dopplerInterval;
 
+   /// Data from current epoch pass in the strand
+   MeasurementData cMeasurement1;
+   /// Data from forward offset pass in the strand
+   MeasurementData cMeasurement2;
+   /// Signal data from two strands
+   std::vector<SignalData> strandData[2];
+
    /// Prev range rate
    Real prev_range_rate;
 
@@ -94,7 +101,14 @@ protected:
    GmatEpoch lastComputedEpoch;
    /// Pointer to the spacecraft that gets propagated in this model
    SpaceObject *targetSat;
-    
+
+   void CalculateCartesianDerivative(SignalData *sigData, RealArray &toArray,
+         bool forTransmitter);
+   void CalculatePositionDerivative(SignalData *sigData, RealArray &toArray,
+         bool forTransmitter);
+   void CalculateVelocityDerivative(SignalData *sigData, RealArray &toArray,
+         bool forTransmitter);
+
    /// Parameter IDs for the RangeRateAdapterKps
    enum
    {
