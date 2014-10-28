@@ -19,8 +19,8 @@ USE_SPICE = 1
 # if this is 1, it will build the base library and the console app only
 CONSOLE_APP = 0
 USE_F2C_VERSION = 1
-# STC_EDITOR not yet available on Mac
-USE_STC_EDITOR = 0
+# STC_EDITOR now available on Mac (wx 3.0.1) - set this to 0 for Console version
+USE_STC_EDITOR = 1
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 
@@ -35,6 +35,7 @@ TOP_DIR = /Users/wshoan/git/gmat_wx3
 WX_INSTALLED = /Applications/wxWidgets-3.0.1/build-cocoa-debug
 WX_LIB_LOC = $(WX_INSTALLED)/lib
 WX_LIB = wx_osx_cocoau_gl-3.0
+WX_LIB_2 = wx_osx_cocoau_stc-3.0
 # WX_VERSION must be in this format
 WX_VERSION = 3_0_1
 
@@ -78,30 +79,37 @@ endif
 INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle
 
 # flags that depend on whether you are building 32-bit or 64-bit
-ifeq ($(BUILD_64BIT), 1)
+#ifeq ($(BUILD_64BIT), 1)
 CSPICE_VER = cspice64
 GMAT_BIN_DIR = bin
-# was bin64 and lib64
 GMAT_LIB_DIR = lib
-MAC_ARCHITECTURE_FLAGS = 
+# was bin64 and lib64
+MAC_ARCHITECTURE_FLAGS =
 WXCPPFLAGS = 
 WXLINKFLAGS =
-MAC_ARCHITECTURE_FLAGS = 
+#MAC_ARCHITECTURE_FLAGS =
 F2C_DIR = f2c64
 PROCFLAGS = -DUSE_64_BIT_LONGS
-else
-CSPICE_VER = cspice
-GMAT_BIN_DIR = bin
-GMAT_LIB_DIR = lib
-MAC_ARCHITECTURE_FLAGS = -arch i386
-%% WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
-%% WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
-F2C_DIR = f2c32
-PROCFLAGS = 
-endif
+#else
+#CSPICE_VER = cspice
+#GMAT_BIN_DIR = bin
+#GMAT_LIB_DIR = lib
+#MAC_ARCHITECTURE_FLAGS = -arch i386
+## WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
+## WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
+#F2C_DIR = f2c32
+#PROCFLAGS =
+#endif
 
 WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
 WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
+
+ifeq ($(USE_STC_EDITOR), 1)
+WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES) -D__USE_STC_EDITOR__
+else
+WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
+endif
+
 
 
 # flag indicating whether or not to build as a shared library
@@ -208,12 +216,17 @@ F77_FLAGS = $(OPTIMIZATIONS) -Wall
 
 # Link specific flags
 LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
-               -framework OpenGL -framework AGL  -headerpad_max_install_names \
+               -headerpad_max_install_names \
                -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
-             -L$(WX_LIB_LOC) -l$(WX_LIB) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
-             
+             -L$(WX_LIB_LOC) -l$(WX_LIB) -l$(WX_LIB_2) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
+#LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
+#               -framework OpenGL -framework AGL  -headerpad_max_install_names \
+#               -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
+#             -L$(WX_LIB_LOC) -l$(WX_LIB) -l$(WX_LIB_2) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
+
 # removed
-#-l$(WX_LIB)
+# AGL is unneeded and OpenGL is included automatically
+# -framework OpenGL  -framework AGL
 
 GUI_CPP_FLAGS = $(WXCPPFLAGS)
 GUI_LINK_FLAGS = $(WXLINKFLAGS)

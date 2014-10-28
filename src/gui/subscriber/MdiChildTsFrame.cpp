@@ -807,11 +807,15 @@ void MdiChildTsFrame::RedrawCurve()
       wxPaintEvent pvt;
       mXyPlot->OnPaint(pvt);
       
+      // Turning this OFF for Mac for now; this modification makes the XY Plot
+      // go grey at the end of the run
+      #ifndef __WXMAC__
       // Why OnPaint() is called twice with wx3?
       // Set the data update flag to true so that OnPaint() will not redraw plots
       // (LOJ: 2014.10.10 To improve performance with wx3. See GMT-4722)
       #if wxCHECK_VERSION(3, 0, 0)
       mXyPlot->DataUpdate(true);
+      #endif
       #endif
       
       #ifdef DEBUG_REDRAW_CURVE
