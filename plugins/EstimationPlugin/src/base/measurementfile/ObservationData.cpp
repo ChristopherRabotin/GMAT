@@ -84,10 +84,14 @@ ObservationData::ObservationData(const ObservationData& od):
    uniqueID                (od.uniqueID),
    epochSystem             (od.epochSystem),
    epoch                   (od.epoch),
+   epochAtEnd              (od.epochAtEnd),
+   epochAtIntegrationEnd   (od.epochAtIntegrationEnd),
    participantIDs          (od.participantIDs),
+   strands                 (od.strands),
    value                   (od.value),
+   dataMap                 (od.dataMap),
    value_orig              (od.value_orig),				// made changes by TUAN NGUYEN
-   unit					   (od.unit),					// made changes by TUAN NGUYEN
+   unit                    (od.unit),					// made changes by TUAN NGUYEN
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
    extraTypes              (od.extraTypes),
@@ -117,26 +121,30 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
-	  inUsed                  = od.inUsed;			// made changes by TUAN NGUYEN
-	  removedReason           = od.removedReason;	// made changes by TUAN NGUYEN
+      inUsed                  = od.inUsed;			// made changes by TUAN NGUYEN
+      removedReason           = od.removedReason;	// made changes by TUAN NGUYEN
       typeName                = od.typeName;
       type                    = od.type;
       uniqueID                = od.uniqueID;
       epochSystem             = od.epochSystem;
       epoch                   = od.epoch;
+      epochAtEnd              = od.epochAtEnd;
+      epochAtIntegrationEnd   = od.epochAtIntegrationEnd;
       participantIDs          = od.participantIDs;
+      strands                 = od.strands;
       value                   = od.value;
-	  value_orig              = od.value_orig;      // made changes by TUAN NGUYEN
-	  unit                    = od.unit;			// made changes by TUAN NGUYEN
+      dataMap                 = od.dataMap;
+      value_orig              = od.value_orig;      // made changes by TUAN NGUYEN
+      unit                    = od.unit;			// made changes by TUAN NGUYEN
       noiseCovariance         = od.noiseCovariance;
       extraDataDescriptions   = od.extraDataDescriptions;
       extraTypes              = od.extraTypes;
       extraData               = od.extraData;
-	  dataFormat              = od.dataFormat;		// made changes by TUAN NGUYEN
-	  uplinkBand              = od.uplinkBand;		// made changes by TUAN NGUYEN
-	  uplinkFreq              = od.uplinkFreq;		// made changes by TUAN NGUYEN
-	  rangeModulo             = od.rangeModulo;		// made changes by TUAN NGUYEN
-	  dopplerCountInterval    = od.dopplerCountInterval;	// made changes by TUAN NGUYEN
+      dataFormat              = od.dataFormat;		// made changes by TUAN NGUYEN
+      uplinkBand              = od.uplinkBand;		// made changes by TUAN NGUYEN
+      uplinkFreq              = od.uplinkFreq;		// made changes by TUAN NGUYEN
+      rangeModulo             = od.rangeModulo;		// made changes by TUAN NGUYEN
+      dopplerCountInterval    = od.dopplerCountInterval;	// made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -160,6 +168,8 @@ void ObservationData::Clear()
    epoch                   = 0.0;
    participantIDs.clear();
    value.clear();
+   dataMap.clear();
+   strands.clear();
    value_orig.clear();								// made changes by TUAN NGUYEN
    extraDataDescriptions.clear();
    extraTypes.clear();

@@ -858,8 +858,12 @@ UnsignedInt MeasurementManager::LoadObservations()
       od_old.epoch = -1.0;
 
       std::string streamFormat = streamList[i]->GetStringParameter("Format");
+
+MessageInterface::ShowMessage("StreamFormat is %s\n", streamFormat.c_str());
+
 ///// TBD: Especially here; this style will cause maintenence issues as more types are added
-      if ((streamFormat == "GMAT_OD")||(streamFormat == "GMAT_ODDoppler")||(streamFormat == "GMATInternal"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
+      if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
+          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
       {
       #ifdef USE_DATAFILE_PLUGINS
          if (streamList[i]->GetIsOpen())
@@ -884,7 +888,10 @@ UnsignedInt MeasurementManager::LoadObservations()
             }
          }
       #else
-       
+
+MessageInterface::ShowMessage("%s stream %s\n", streamFormat.c_str(),
+      (streamList[i]->IsOpen() ? "is open" : "is not open"));
+
          if (streamList[i]->IsOpen())
          {
             UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
@@ -900,7 +907,7 @@ UnsignedInt MeasurementManager::LoadObservations()
             {
                od = streamList[i]->ReadObservation();
                ++numRec;
-
+MessageInterface::ShowMessage("%d ", numRec);
                // End of file
                if (od == NULL)
                {

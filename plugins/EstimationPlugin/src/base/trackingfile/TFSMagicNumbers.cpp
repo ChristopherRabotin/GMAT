@@ -25,6 +25,9 @@
 
 #define MAGIC_NUMBER_BASE 9000
 
+//#define DEBUG_MNLOOKUP
+
+
 //------------------------------------------------------------------------------
 // Static data
 //------------------------------------------------------------------------------
@@ -149,6 +152,66 @@ Integer TFSMagicNumbers::GetMagicNumber(
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// Integer FillMagicNumber(ObsData* theObs)
+//------------------------------------------------------------------------------
+/**
+ * Parses the configuration in an observation and fills in magic number and type
+ *
+ * TDM Data files do not directly provide enough information to fill in the GMAT
+ * observation type numbers and types.  The TDMObType code calls this method to
+ * complete the data needed in an ObsData record.
+ *
+ * @todo The implementation here hard codes the mapping for two data types:
+ *       DSNRange and DSNDoppler.  We need to refactor this code so that new
+ *       data types can be added -- for example, in a plugin -- without the need
+ *       to edit this file.
+ *
+ * @param theObs The observation that needs magic number data
+ *
+ * @return The magic number for the observation
+ */
+//------------------------------------------------------------------------------
+//Integer TFSMagicNumbers::FillMagicNumber(ObsData* theObs)
+Integer TFSMagicNumbers::FillMagicNumber(ObservationData* theObs)
+{
+   Integer retval = -1;
+   bool remapData = false;
+
+      MessageInterface::ShowMessage("Generating magic number:\n"
+            "   typeName:  %s\n   units:     %s\n   %d strands\n"
+            "   %d participants in strand 0\n", theObs->typeName.c_str(),
+            theObs->unit.c_str(), theObs->strands.size(),
+            (theObs->strands.size() > 0 ? theObs->strands[0].size() : 0));
+
+   // For now, DSN Range and Doppler remap their data into the old style models
+   if ((theObs->typeName == "RANGE") && (theObs->unit == "RU") &&
+       (theObs->strands.size() == 1) && (theObs->strands[0].size() == 3))
+   {
+      theObs->typeName = "DSNRange";
+      remapData = true;
+   }
+
+   if ((theObs->typeName == "RECEIVE_FREQ") && // (theObs->units == "RU") &&
+       (theObs->strands.size() == 1) && (theObs->strands[0].size() == 3))
+   {
+      theObs->typeName = "DSNDoppler";
+      remapData = true;
+   }
+
+   for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
+      if (lookupTable[i]->type == theObs->typeName)
+         theObs->type = lookupTable[i]->magicNumber;
+
+   if (remapData)
+      SetType(theObs);
+
+      MessageInterface::ShowMessage("   Updated type name: %s\n",
+            theObs->typeName.c_str());
+      MessageInterface::ShowMessage("   Magic number: %d\n", theObs->type);
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // StringArray GetKnownTypes()
@@ -179,6 +242,36 @@ StringArray TFSMagicNumbers::GetKnownTypes()
 Real TFSMagicNumbers::GetMNMultiplier(Integer magicNumber)
 {
    return factorMap[magicNumber];
+}
+
+
+//------------------------------------------------------------------------------
+// void TFSMagicNumbers::SetType(ObsData* forData)
+//------------------------------------------------------------------------------
+/**
+ * Looks up the magic number based on data contained in an observation record
+ *
+ * This method sets the observation type in an observation record, remapping the
+ * data to old style measurement models.  It is a temporary method used until
+ * the adapter based DSN modeling is in place.
+ *
+ * @param forData The observation record
+ */
+//------------------------------------------------------------------------------
+//void TFSMagicNumbers::SetType(ObsData* forData)
+void TFSMagicNumbers::SetType(ObservationData* forData)
+{
+   #ifndef DSN_ADAPTERS_READY
+      if (forData->typeName == "DSNRange")
+      {
+         forData->type = Gmat::DSN_TWOWAYRANGE;
+      }
+
+      if (forData->typeName == "DSNDoppler")
+      {
+         forData->type = Gmat::DSN_TWOWAYDOPPLER;
+      }
+   #endif
 }
 
 
