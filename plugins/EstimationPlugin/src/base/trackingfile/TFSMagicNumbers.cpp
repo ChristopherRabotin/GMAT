@@ -197,7 +197,7 @@ Integer TFSMagicNumbers::FillMagicNumber(ObservationData* theObs)
    if ((theObs->typeName == "RECEIVE_FREQ") && // (theObs->units == "RU") &&
        (theObs->strands.size() == 1) && (theObs->strands[0].size() == 3))
    {
-      theObs->typeName = "DSNDoppler";
+      theObs->typeName = "DSNTwoWayDoppler";
       remapData = true;
    }
 
@@ -298,9 +298,39 @@ void TFSMagicNumbers::SetType(ObservationData* forData)
          forData->value = remappedData;
       }
 
-      if (forData->typeName == "DSNDoppler")
+      if (forData->typeName == "DSNTwoWayDoppler")
       {
          forData->type = Gmat::DSN_TWOWAYDOPPLER;
+         forData->strands.clear();
+
+         RealArray remappedData;
+         for (UnsignedInt i = 0; i < forData->dataMap.size(); ++i)
+         {
+            // Hard code to X band for now
+            forData->uplinkBand = 2;
+            if (forData->dataMap[i] == "RECEIVE_FREQ")
+            {
+               remappedData.push_back(forData->value[i]);
+               forData->value_orig.push_back(forData->value[i]);
+            }
+
+            if (forData->dataMap[i] == "INTEGRATION_INTERVAL")
+               forData->dopplerCountInterval = (Integer)forData->value[i];
+
+//            // CCSDS recommends using this for the transmit rather tahn a ramp
+//            // file, but GMAT doesn't currently work that way
+//            if ((forData->dataMap[i] == "TRANSMIT_FREQ") ||
+//                (forData->dataMap[i] == "TRANSMIT_FREQ_1"))
+//            {
+//               /// Current TDM is in MHz, not the spec'd Hz; try to fix that here:
+//               if (forData->value[i] > 1.0e6)
+//                  forData->uplinkFreq = (Integer)forData->value[i];
+//               else
+//                  forData->uplinkFreq = (Integer)forData->value[i] * 1.0e6;
+//            }
+         }
+         forData->dataMap.clear();
+         forData->value = remappedData;
       }
 
       #ifdef DUMP_OBSDATA
@@ -493,7 +523,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "DSNDoppler";
+   lue->type = "DSNTwoWayDoppler";
    // Note that: when multFactor is a non positive number, multiplier factor is a function.
    lue->multFactor = -1.0;
    lue->magicNumber = lastNumber;
