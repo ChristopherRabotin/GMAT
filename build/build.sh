@@ -53,9 +53,9 @@ fi
 # Generate unix makefiles
 if [ "$arch" = "x86" ]
 then
-  cmake -G "Unix Makefiles" ../../src/
+  cmake -G "Unix Makefiles" -D 64_BIT=OFF ../../src/
 else
-  cmake -G "Unix Makefiles" -D 64_BIT=true ../../src/
+  cmake -G "Unix Makefiles" -D 64_BIT=ON ../../src/
 fi
 
 # Make Gmat
