@@ -204,8 +204,9 @@ void BatchEstimatorInv::Accumulate()
 	  //ss = ss.substr(0,4);
 	  //sLine << ss << "     ";
 
-      sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
-	  sLine << s;
+	  // This line crashes on Linux, so commented out
+//      sprintf(&s[0],"%22.6lf   %22.6lf                      N/A                  N/A                   N/A                   N/A                   N/A                  N/A", currentObs->value_orig[0], currentObs->value[0]);
+//	  sLine << s;
 
 
 	  if (textFileMode != "Normal")
