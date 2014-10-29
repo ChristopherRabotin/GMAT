@@ -125,9 +125,9 @@ DEL *.* /s /f /q
 
 :: Generate visual studio solutions based on user -arch
 IF %arch% == x86 % (
-	cmake -G "Visual Studio 10" ../../src/
+	cmake -G "Visual Studio 10" -D GMAT_64_BIT=OFF ..
 ) ELSE (
-	cmake -G "Visual Studio 10 Win64" -D 64_BIT=true ../../src/
+	cmake -G "Visual Studio 10 Win64" -D GMAT_64_BIT=ON ..
 )
 
 :: Generate nmake makefiles

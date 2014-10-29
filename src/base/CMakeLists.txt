@@ -43,12 +43,6 @@ endif (UNIX)
 
 # ====================================================================
 # SPICE specifics
-if(64_BIT)
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
-else()
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
-endif()
-	
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 LINK_DIRECTORIES("${CSPICE_DIR}/lib")
 

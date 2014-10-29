@@ -79,7 +79,7 @@ INCLUDE_DIRECTORIES("./base/factory")
 INCLUDE_DIRECTORIES("./base/include")
 INCLUDE_DIRECTORIES("./base/plugin")
 INCLUDE_DIRECTORIES("./base/propagator")
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/cspice64/include")
+INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 
 # ====================================================================
 # source files

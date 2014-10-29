@@ -22,12 +22,6 @@ endif()
 
 # ====================================================================
 # SPICE specifics
-if(64_BIT)
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
-else()
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
-endif()
-
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 SET(SPICE_LIB_DIR  "${CSPICE_DIR}/lib")
 LINK_DIRECTORIES(${SPICE_LIB_DIR})

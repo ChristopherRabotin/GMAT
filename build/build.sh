@@ -45,21 +45,25 @@ fi
 # Change to build/os directory
 if [ "$mac" = true ]
 then
-  cd ../build/macosx
-else 
-  cd ../build/linux
+  mkdir -p macosx/cmake
+  cd macosx/cmake
+  ncores=$(sysctl hw.ncpu | awk '{print $2}')
+else
+  mkdir -p linux/cmake
+  cd linux/cmake
+  ncores=$(nproc)
 fi
 
 # Generate unix makefiles
 if [ "$arch" = "x86" ]
 then
-  cmake -G "Unix Makefiles" -D 64_BIT=OFF ../../src/
+  cmake -G "Unix Makefiles" -D GMAT_64_BIT=OFF ../../..
 else
-  cmake -G "Unix Makefiles" -D 64_BIT=ON ../../src/
+  cmake -G "Unix Makefiles" -D GMAT_64_BIT=ON ../../..
 fi
 
-# Make Gmat
-make
+# Compile Gmat using all available cores
+make -j$((ncores+1))
 
 # Change back to build directory
 cd ../

@@ -60,12 +60,6 @@ endif()
 
 # ====================================================================
 # SPICE
-if(64_BIT)
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
-else()
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
-endif()
-
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
 

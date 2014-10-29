@@ -23,42 +23,42 @@ cmake_minimum_required(VERSION 3.0)
 
 # Set Cmake project
 PROJECT(GMAT)
-SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "The version of the build")
+SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Set SPICE directory
-SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice" CACHE STRING "CSpice Root Directory")
+SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice" CACHE PATH "CSpice Root Directory")
 
 # Set wxWidgets directory
 if(WIN32)
-  SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE STRING "wxWidget Root Directory")
-endif()
-if(UNIX)
-  SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE STRING "wxWidget Root Directory")
+  SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
+
+elseif(UNIX)
+  SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
+
 endif()
 
 # Set general build options
-OPTION(VERBOSE_MAKE "VerboseMake" OFF)
 OPTION(DEBUG_BUILD "DebugBuild" OFF)
 OPTION(PROFILE_BUILD "ProfileBuild" OFF)
-OPTION(64_BIT "64-Bit Binaries" ON)
-OPTION(GUI_BUILD "Build the GUI, requires wxWidgets" OFF)
+OPTION(GMAT_64_BIT "64-Bit Binaries" ON)
+OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" OFF)
 
 # Optional GMAT plugins
-OPTION(PLUGIN_CINTERFACE "CInterface Plugin" OFF)
-OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" OFF)
-OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" OFF)
-OPTION(PLUGIN_ESTIMATION "Estimation Plugins" OFF)
-OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" OFF)
-OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" OFF)
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
+OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
+OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
+OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
 OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
-OPTION(PLUGIN_FORMATION "Formation Plugin" OFF)
-OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" OFF)
-OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" OFF)
+OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
+OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
 OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" OFF)
-OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" OFF)
-OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" OFF)
-OPTION(PLUGIN_STATION "Station Plugin" OFF)
+OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
+OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
+OPTION(PLUGIN_STATION "Station Plugin" ON)
 
 # Optional Jazz Plugin Inputs
 # to-do
@@ -73,7 +73,13 @@ if(PLUGIN_FMINCONOPTIMIZER OR PLUGIN_MATLABINTERFACE)
   endif()
 endif()
 
-# Check if SPICE directory exists
+# Find appropriate 32/64-bit SPICE directories
+if(GMAT_64_BIT)
+  SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
+else()
+  SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
+endif()
+
 if( IS_DIRECTORY ${CSPICE_DIR} )
   MESSAGE(STATUS "SPICE FOUND in " ${CSPICE_DIR})
 else()
@@ -81,12 +87,12 @@ else()
 endif()
 
 # If building GUI, check if wxWidgets directory exists
-if( GUI_BUILD )
+if( GMAT_GUI )
   if( IS_DIRECTORY ${WXWIDGET_DIR} )
     MESSAGE(STATUS "wxWidgets FOUND in" ${WXWIDGET_DIR})
   else()
-    MESSAGE(WARNING "wxWidgets NOT FOUND in directory " ${WXWIDGET_DIR} " ,GUI disabled.")
-    SET(GUI_BUILD OFF)
+    MESSAGE(WARNING "wxWidgets NOT FOUND in directory " ${WXWIDGET_DIR} " , GUI disabled.")
+    SET(GMAT_GUI OFF CACHE BOOL "Disabled due to missing wxWidgets" FORCE)
   endif()
 endif()
 
@@ -162,7 +168,7 @@ if(WIN32)
 endif()
 
 # Set 64 bit Definitions and directories
-if (64_BIT)
+if (GMAT_64_BIT)
   MESSAGE(STATUS "Will compile 64-bit GMAT")
   ADD_DEFINITIONS("-DUSE_64_BIT_LONGS")
 else()
@@ -172,11 +178,6 @@ endif()
 # Set DevIL Proprocessor defs for linux
 if (WIN32)
   ADD_DEFINITIONS("-DSKIP_DEVIL")
-endif()
-
-# to print out what Make is doing
-if (VERBOSE_MAKE)
-  SET(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
 # ====================================================================

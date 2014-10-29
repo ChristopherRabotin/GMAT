@@ -26,6 +26,6 @@ SUBDIRS(console)
 
 # ====================================================================
 # GUI binary
-if (GUI_BUILD)
+if (GMAT_GUI)
   SUBDIRS(gui)
 endif()
