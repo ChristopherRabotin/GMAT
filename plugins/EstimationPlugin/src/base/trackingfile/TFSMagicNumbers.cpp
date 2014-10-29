@@ -178,17 +178,19 @@ Integer TFSMagicNumbers::FillMagicNumber(ObservationData* theObs)
    Integer retval = -1;
    bool remapData = false;
 
+   #ifdef DEBUG_MNLOOKUP
       MessageInterface::ShowMessage("Generating magic number:\n"
             "   typeName:  %s\n   units:     %s\n   %d strands\n"
             "   %d participants in strand 0\n", theObs->typeName.c_str(),
             theObs->unit.c_str(), theObs->strands.size(),
             (theObs->strands.size() > 0 ? theObs->strands[0].size() : 0));
+   #endif
 
    // For now, DSN Range and Doppler remap their data into the old style models
    if ((theObs->typeName == "RANGE") && (theObs->unit == "RU") &&
        (theObs->strands.size() == 1) && (theObs->strands[0].size() == 3))
    {
-      theObs->typeName = "DSNRange";
+      theObs->typeName = "DSNTwoWayRange";
       remapData = true;
    }
 
@@ -203,13 +205,16 @@ Integer TFSMagicNumbers::FillMagicNumber(ObservationData* theObs)
       if (lookupTable[i]->type == theObs->typeName)
          theObs->type = lookupTable[i]->magicNumber;
 
+   // Helper function used to rearrange the data in an observation when needed
    if (remapData)
       SetType(theObs);
 
+   #ifdef DEBUG_MNLOOKUP
       MessageInterface::ShowMessage("   Updated type name: %s\n",
             theObs->typeName.c_str());
       MessageInterface::ShowMessage("   Magic number: %d\n", theObs->type);
-
+   #endif
+   
    return retval;
 }
 
@@ -262,15 +267,79 @@ Real TFSMagicNumbers::GetMNMultiplier(Integer magicNumber)
 void TFSMagicNumbers::SetType(ObservationData* forData)
 {
    #ifndef DSN_ADAPTERS_READY
-      if (forData->typeName == "DSNRange")
+      if (forData->typeName == "DSNTwoWayRange")
       {
          forData->type = Gmat::DSN_TWOWAYRANGE;
+         forData->strands.clear();
+
+         RealArray remappedData;
+         for (UnsignedInt i = 0; i < forData->dataMap.size(); ++i)
+         {
+            if (forData->dataMap[i] == "RANGE")
+            {
+               remappedData.push_back(forData->value[i]);
+               forData->value_orig.push_back(forData->value[i]);
+            }
+            if (forData->dataMap[i] == "TRANSMIT_BAND")
+               forData->uplinkBand = (Integer)forData->value[i];
+            if (forData->dataMap[i] == "RANGE_MODULUS")
+               forData->rangeModulo = (Integer)forData->value[i];
+            if ((forData->dataMap[i] == "TRANSMIT_FREQ") ||
+                (forData->dataMap[i] == "TRANSMIT_FREQ_1"))
+            {
+               /// Current TDM is in MHz, not the spec'd Hz; try to fix that here:
+               if (forData->value[i] > 1.0e6)
+                  forData->uplinkFreq = (Integer)forData->value[i];
+               else
+                  forData->uplinkFreq = (Integer)forData->value[i] * 1.0e6;
+            }
+         }
+         forData->dataMap.clear();
+         forData->value = remappedData;
       }
 
       if (forData->typeName == "DSNDoppler")
       {
          forData->type = Gmat::DSN_TWOWAYDOPPLER;
       }
+
+      #ifdef DUMP_OBSDATA
+         // Write out the observation
+         MessageInterface::ShowMessage("Observation record at %p:\n", forData);
+         MessageInterface::ShowMessage("   typeName:  %s\n", forData->typeName.c_str());
+         MessageInterface::ShowMessage("   type:  %d\n", forData->type);
+         MessageInterface::ShowMessage("   inUsed:  %s\n", (forData->inUsed ? "true" : "false"));
+         MessageInterface::ShowMessage("   removedReason:  %s\n", forData->removedReason.c_str());
+         MessageInterface::ShowMessage("   uniqueID:  %d\n", forData->uniqueID);
+         MessageInterface::ShowMessage("   epochSystem:  %d\n", forData->epochSystem);
+         MessageInterface::ShowMessage("   epoch:  %.12le\n", forData->epoch);
+         MessageInterface::ShowMessage("   epochAtEnd:  %s\n", (forData->epochAtEnd ? "true" : "false"));
+         MessageInterface::ShowMessage("   epochAtIntegrationEnd:  %s\n", (forData->epochAtIntegrationEnd ? "true" : "false"));
+         MessageInterface::ShowMessage("   participantIDs:  %d members\n", forData->participantIDs.size());
+         for (UnsignedInt i = 0; i < forData->participantIDs.size(); ++i)
+            MessageInterface::ShowMessage("      %d: %s\n", i, forData->participantIDs[i].c_str());
+         MessageInterface::ShowMessage("   strands: %d strands in the record\n", forData->strands.size());
+         MessageInterface::ShowMessage("   value:  %d members\n", forData->value.size());
+         MessageInterface::ShowMessage("   dataMap:  %d members\n", forData->dataMap.size());
+         for (UnsignedInt i = 0; i < forData->value.size(); ++i)
+         {
+            if (forData->dataMap.size() > i)
+               MessageInterface::ShowMessage("      %s --> ", forData->dataMap[i].c_str());
+            else
+               MessageInterface::ShowMessage("      ");
+            MessageInterface::ShowMessage("%.12lf\n", forData->value[i]);
+         }
+         MessageInterface::ShowMessage("   value_orig:  %d members\n", forData->value_orig.size());
+         MessageInterface::ShowMessage("   unit:  %s\n", forData->unit.c_str());
+         MessageInterface::ShowMessage("   noiseCovariance:  <%p>\n", forData->noiseCovariance);
+         MessageInterface::ShowMessage("   extraDataDescriptions:  %d members\n", forData->extraDataDescriptions.size());
+         MessageInterface::ShowMessage("   extraTypes:  %d members\n", forData->extraTypes.size());
+         MessageInterface::ShowMessage("   extraData:  %d members\n", forData->extraData.size());
+         MessageInterface::ShowMessage("   uplinkBand:  %d\n", forData->uplinkBand);
+         MessageInterface::ShowMessage("   uplinkFreq:  %.12le\n", forData->uplinkFreq);
+         MessageInterface::ShowMessage("   rangeModulo: %.12le\n", forData->rangeModulo);
+         MessageInterface::ShowMessage("   dopplerCountInterval:  %.12le\n", forData->dopplerCountInterval);
+      #endif
    #endif
 }
 
@@ -402,7 +471,7 @@ TFSMagicNumbers::TFSMagicNumbers() :
    nodes.push_back("S1");
    nodes.push_back("T1");
    lue->nodes.push_back(nodes);
-   lue->type = "DSNRange";
+   lue->type = "DSNTwoWayRange";
    // Note that: when multFactor is a non positive number, multiplier factor is a function. 
    lue->multFactor = -1.0;
    lue->magicNumber = lastNumber;
