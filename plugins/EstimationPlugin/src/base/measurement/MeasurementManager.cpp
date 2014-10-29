@@ -859,8 +859,6 @@ UnsignedInt MeasurementManager::LoadObservations()
 
       std::string streamFormat = streamList[i]->GetStringParameter("Format");
 
-MessageInterface::ShowMessage("StreamFormat is %s\n", streamFormat.c_str());
-
 ///// TBD: Especially here; this style will cause maintenence issues as more types are added
       if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
           (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
@@ -889,9 +887,6 @@ MessageInterface::ShowMessage("StreamFormat is %s\n", streamFormat.c_str());
          }
       #else
 
-MessageInterface::ShowMessage("%s stream %s\n", streamFormat.c_str(),
-      (streamList[i]->IsOpen() ? "is open" : "is not open"));
-
          if (streamList[i]->IsOpen())
          {
             UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
@@ -907,13 +902,59 @@ MessageInterface::ShowMessage("%s stream %s\n", streamFormat.c_str(),
             {
                od = streamList[i]->ReadObservation();
                ++numRec;
-MessageInterface::ShowMessage("%d ", numRec);
+
                // End of file
                if (od == NULL)
                {
                   --numRec;
                   break;
                }
+
+               #ifdef DUMP_OBSDATA
+                  // Write out the observation
+                  MessageInterface::ShowMessage("In MeasurementManager: Observation record at %p:\n", od);
+                  MessageInterface::ShowMessage("   typeName:  %s\n", od->typeName.c_str());
+                  MessageInterface::ShowMessage("   type:  %d\n", od->type);
+                  MessageInterface::ShowMessage("   inUsed:  %s\n", (od->inUsed ? "true" : "false"));
+                  MessageInterface::ShowMessage("   removedReason:  %s\n", od->removedReason.c_str());
+                  MessageInterface::ShowMessage("   uniqueID:  %d\n", od->uniqueID);
+                  MessageInterface::ShowMessage("   epochSystem:  %d\n", od->epochSystem);
+                  MessageInterface::ShowMessage("   epoch:  %.12le\n", od->epoch);
+                  MessageInterface::ShowMessage("   epochAtEnd:  %s\n", (od->epochAtEnd ? "true" : "false"));
+                  MessageInterface::ShowMessage("   epochAtIntegrationEnd:  %s\n", (od->epochAtIntegrationEnd ? "true" : "false"));
+                  MessageInterface::ShowMessage("   participantIDs:  %d members\n", od->participantIDs.size());
+                  for (UnsignedInt i = 0; i < od->participantIDs.size(); ++i)
+                     MessageInterface::ShowMessage("      %d: %s\n", i, od->participantIDs[i].c_str());
+                  MessageInterface::ShowMessage("   strands: %d strands in the record\n", od->strands.size());
+                  MessageInterface::ShowMessage("   value:  %d members\n", od->value.size());
+                  MessageInterface::ShowMessage("   dataMap:  %d members\n", od->dataMap.size());
+                  for (UnsignedInt i = 0; i < od->value.size(); ++i)
+                  {
+                     if (od->dataMap.size() > i)
+                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
+                     else
+                        MessageInterface::ShowMessage("      ");
+                     MessageInterface::ShowMessage("%.12lf\n", od->value[i]);
+                  }
+                  MessageInterface::ShowMessage("   value_orig:  %d members\n", od->value_orig.size());
+                  for (UnsignedInt i = 0; i < od->value_orig.size(); ++i)
+                  {
+                     if (od->dataMap.size() > i)
+                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
+                     else
+                        MessageInterface::ShowMessage("      ");
+                     MessageInterface::ShowMessage("%.12lf\n", od->value_orig[i]);
+                  }
+                  MessageInterface::ShowMessage("   unit:  %s\n", od->unit.c_str());
+                  MessageInterface::ShowMessage("   noiseCovariance:  <%p>\n", od->noiseCovariance);
+                  MessageInterface::ShowMessage("   extraDataDescriptions:  %d members\n", od->extraDataDescriptions.size());
+                  MessageInterface::ShowMessage("   extraTypes:  %d members\n", od->extraTypes.size());
+                  MessageInterface::ShowMessage("   extraData:  %d members\n", od->extraData.size());
+                  MessageInterface::ShowMessage("   uplinkBand:  %d\n", od->uplinkBand);
+                  MessageInterface::ShowMessage("   uplinkFreq:  %.12le\n", od->uplinkFreq);
+                  MessageInterface::ShowMessage("   rangeModulo: %.12le\n", od->rangeModulo);
+                  MessageInterface::ShowMessage("   dopplerCountInterval:  %.12le\n", od->dopplerCountInterval);
+               #endif
 
                // Get start epoch and end epoch when od != NULL
                if (epoch1 == 0.0)
