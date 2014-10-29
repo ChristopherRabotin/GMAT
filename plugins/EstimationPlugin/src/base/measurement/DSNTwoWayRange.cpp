@@ -410,7 +410,7 @@ Real DSNTwoWayRange::SetRealParameter(const std::string &label, const Real value
 bool DSNTwoWayRange::Initialize()
 {
    #ifdef DEBUG_RANGE_CALC
-      MessageInterface::ShowMessage("Entered RangeMeasurement::Initialize(); "
+      MessageInterface::ShowMessage("Entered DSNTwoWayRange::Initialize(); "
             "this = %p\n", this);
    #endif
 
@@ -530,8 +530,8 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
          else
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s of Participant %d\n", objPtr->GetParameterText(parameterID).c_str(), objNumber);
        
-         MessageInterface::ShowMessage("   freq = %15lf, F = %15lf, F/c = "
-                  "%15lf\n", frequency, GetFrequencyFactorRatio(frequency)*frequency, fFactor);
+//         MessageInterface::ShowMessage("   freq = %15lf, F = %15lf, F/c = "
+//                  "%15lf\n", frequency, GetFrequencyFactorRatio(frequency)*frequency, fFactor);
       #endif
       
       if (objNumber == 1) // participant number 1, either a GroundStation or a Spacecraft
