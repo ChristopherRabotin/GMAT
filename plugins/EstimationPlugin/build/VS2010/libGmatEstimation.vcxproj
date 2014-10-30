@@ -106,14 +106,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\tdmReader;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\Xerces\include;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;..\..\..\..\..\Gmat3rdParty\Xerces\lib;..\..\..\..\..\Gmat3rdParty\Xerces\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;cspice.lib;xerces-c_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
@@ -139,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp" />
+    <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp" />
     <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp" />
@@ -224,6 +226,9 @@
     <ClInclude Include="..\..\src\base\signal\SignalBase.hpp" />
     <ClInclude Include="..\..\src\base\signal\SignalData.hpp" />
     <ClInclude Include="..\..\src\base\signal\SinglePointSignal.hpp" />
+    <ClInclude Include="..\..\src\base\tdmReader\TdmErrorHandler.hpp" />
+    <ClInclude Include="..\..\src\base\tdmReader\TdmObType.hpp" />
+    <ClInclude Include="..\..\src\base\tdmReader\TdmReadWriter.hpp" />
     <ClInclude Include="..\..\src\base\trackingfile\TFSMagicNumbers.hpp" />
     <ClInclude Include="..\..\src\base\trackingfile\TrackingFileSet.hpp" />
     <ClInclude Include="..\..\src\base\trackingsystem\DSNTrackingSystem.hpp" />
@@ -235,6 +240,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp" />
+    <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp" />
     <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp" />
@@ -317,6 +323,9 @@
     <ClCompile Include="..\..\src\base\signal\SignalBase.cpp" />
     <ClCompile Include="..\..\src\base\signal\SignalData.cpp" />
     <ClCompile Include="..\..\src\base\signal\SinglePointSignal.cpp" />
+    <ClCompile Include="..\..\src\base\tdmReader\TdmErrorHandler.cpp" />
+    <ClCompile Include="..\..\src\base\tdmReader\TdmObType.cpp" />
+    <ClCompile Include="..\..\src\base\tdmReader\TdmReadWriter.cpp" />
     <ClCompile Include="..\..\src\base\trackingfile\TFSMagicNumbers.cpp" />
     <ClCompile Include="..\..\src\base\trackingfile\TrackingFileSet.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\DSNTrackingSystem.cpp" />

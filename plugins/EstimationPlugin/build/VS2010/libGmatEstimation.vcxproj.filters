@@ -64,6 +64,9 @@
     <Filter Include="Source Files\trackingfile">
       <UniqueIdentifier>{404d12fd-af03-4d42-aa71-609df48dfc47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\tdmReader">
+      <UniqueIdentifier>{bd163232-214a-48be-9c8c-bcb3e35e0970}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\include\estimation_defs.hpp">
@@ -348,6 +351,18 @@
     <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\tdmReader\TdmObType.hpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\tdmReader\TdmReadWriter.hpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\tdmReader\TdmErrorHandler.hpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -618,6 +633,18 @@
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\tdmReader\TdmObType.cpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\tdmReader\TdmReadWriter.cpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\tdmReader\TdmErrorHandler.cpp">
+      <Filter>Source Files\tdmReader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>
