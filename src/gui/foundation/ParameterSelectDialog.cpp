@@ -317,6 +317,8 @@ void ParameterSelectDialog::LoadData()
             ShowCoordSystem(false);
          }
       }
+	  else
+		  ShowCoordSystem(false);
    }
    
    // Hide array element
@@ -1551,6 +1553,15 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
       #ifdef DEBUG_CS
       MessageInterface::ShowMessage("ShowCoordSystem() property is empty, so just return\n");
       #endif
+      mCoordSysSizer->Detach(mCentralBodyComboBox);
+      mCoordSysSizer->Detach(mCoordSysComboBox);
+      mCoordSysSizer->Detach(mODEModelComboBox);
+      mCoordSysLabel->Hide();
+      mCoordSysComboBox->Hide();
+      mCentralBodyComboBox->Hide();
+      mODEModelComboBox->Hide();
+      mCoordSysSizer->Layout();
+      mParameterSizer->Layout();
       return;
    }
    
