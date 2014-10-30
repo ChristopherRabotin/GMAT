@@ -110,8 +110,12 @@ PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
    useRelativity              (ps.useRelativity),               // made changes by TUAN NGUYEN
    relCorrection              (ps.relCorrection),
    useETTAI                   (ps.useETTAI),
+#ifdef IONOSPHERE
    troposphere                (NULL),
    ionosphere                 (NULL)
+#else
+   troposphere                (NULL)
+#endif
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: copy construction\n");
@@ -1592,9 +1596,12 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       theData.useCorrection.push_back(false);
 #endif
 
+#ifdef IONOSPHERE
    if ((troposphere == NULL)&&(ionosphere == NULL))
       return true;
-
+#else   if ((troposphere == NULL)&&(ionosphere == NULL))
+      return true;
+#endif
 
    bool retval = false;
    mediaCorrection = 0.0;                                                               // unit: km
