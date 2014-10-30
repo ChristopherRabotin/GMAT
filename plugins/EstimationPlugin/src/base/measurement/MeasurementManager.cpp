@@ -901,8 +901,10 @@ UnsignedInt MeasurementManager::LoadObservations()
       od_old.epoch = -1.0;
 
       std::string streamFormat = streamList[i]->GetStringParameter("Format");
+
 ///// TBD: Especially here; this style will cause maintenence issues as more types are added
-      if ((streamFormat == "GMAT_OD")||(streamFormat == "GMAT_ODDoppler")||(streamFormat == "GMATInternal"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
+      if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
+          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
       {
       #ifdef USE_DATAFILE_PLUGINS
          if (streamList[i]->GetIsOpen())
@@ -927,7 +929,7 @@ UnsignedInt MeasurementManager::LoadObservations()
             }
          }
       #else
-       
+
          if (streamList[i]->IsOpen())
          {
             UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
@@ -950,6 +952,52 @@ UnsignedInt MeasurementManager::LoadObservations()
                   --numRec;
                   break;
                }
+
+               #ifdef DUMP_OBSDATA
+                  // Write out the observation
+                  MessageInterface::ShowMessage("In MeasurementManager: Observation record at %p:\n", od);
+                  MessageInterface::ShowMessage("   typeName:  %s\n", od->typeName.c_str());
+                  MessageInterface::ShowMessage("   type:  %d\n", od->type);
+                  MessageInterface::ShowMessage("   inUsed:  %s\n", (od->inUsed ? "true" : "false"));
+                  MessageInterface::ShowMessage("   removedReason:  %s\n", od->removedReason.c_str());
+                  MessageInterface::ShowMessage("   uniqueID:  %d\n", od->uniqueID);
+                  MessageInterface::ShowMessage("   epochSystem:  %d\n", od->epochSystem);
+                  MessageInterface::ShowMessage("   epoch:  %.12le\n", od->epoch);
+                  MessageInterface::ShowMessage("   epochAtEnd:  %s\n", (od->epochAtEnd ? "true" : "false"));
+                  MessageInterface::ShowMessage("   epochAtIntegrationEnd:  %s\n", (od->epochAtIntegrationEnd ? "true" : "false"));
+                  MessageInterface::ShowMessage("   participantIDs:  %d members\n", od->participantIDs.size());
+                  for (UnsignedInt i = 0; i < od->participantIDs.size(); ++i)
+                     MessageInterface::ShowMessage("      %d: %s\n", i, od->participantIDs[i].c_str());
+                  MessageInterface::ShowMessage("   strands: %d strands in the record\n", od->strands.size());
+                  MessageInterface::ShowMessage("   value:  %d members\n", od->value.size());
+                  MessageInterface::ShowMessage("   dataMap:  %d members\n", od->dataMap.size());
+                  for (UnsignedInt i = 0; i < od->value.size(); ++i)
+                  {
+                     if (od->dataMap.size() > i)
+                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
+                     else
+                        MessageInterface::ShowMessage("      ");
+                     MessageInterface::ShowMessage("%.12lf\n", od->value[i]);
+                  }
+                  MessageInterface::ShowMessage("   value_orig:  %d members\n", od->value_orig.size());
+                  for (UnsignedInt i = 0; i < od->value_orig.size(); ++i)
+                  {
+                     if (od->dataMap.size() > i)
+                        MessageInterface::ShowMessage("      %s --> ", od->dataMap[i].c_str());
+                     else
+                        MessageInterface::ShowMessage("      ");
+                     MessageInterface::ShowMessage("%.12lf\n", od->value_orig[i]);
+                  }
+                  MessageInterface::ShowMessage("   unit:  %s\n", od->unit.c_str());
+                  MessageInterface::ShowMessage("   noiseCovariance:  <%p>\n", od->noiseCovariance);
+                  MessageInterface::ShowMessage("   extraDataDescriptions:  %d members\n", od->extraDataDescriptions.size());
+                  MessageInterface::ShowMessage("   extraTypes:  %d members\n", od->extraTypes.size());
+                  MessageInterface::ShowMessage("   extraData:  %d members\n", od->extraData.size());
+                  MessageInterface::ShowMessage("   uplinkBand:  %d\n", od->uplinkBand);
+                  MessageInterface::ShowMessage("   uplinkFreq:  %.12le\n", od->uplinkFreq);
+                  MessageInterface::ShowMessage("   rangeModulo: %.12le\n", od->rangeModulo);
+                  MessageInterface::ShowMessage("   dopplerCountInterval:  %.12le\n", od->dopplerCountInterval);
+               #endif
 
                // Get start epoch and end epoch when od != NULL
                if (epoch1 == 0.0)
@@ -1777,9 +1825,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
             MessageInterface::ShowMessage("******** Ramped table names size = %d\n", sr.size());
-            MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
-            for(int ii=0; ii < rt->size(); ++ii)
-               MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
+            if (sr.size() > 0)
+            {
+               MessageInterface::ShowMessage("******** Ramped table [%s] = <%p>\n", sr[0].c_str(), rt);
+               for(int ii=0; ii < rt->size(); ++ii)
+                  MessageInterface::ShowMessage("epoch = %.12lf\n", (*rt)[ii].epoch);
+            }
          #endif
          
          // Set AddNoise to measuement apdater
@@ -1824,7 +1875,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          }
          
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
-            MessageInterface::ShowMessage(" Measurement is %s. Its value is %lf\n", (measurements[i].isFeasible?"feasible":" not feasible"), measurements[i].value[0]);
+            MessageInterface::ShowMessage(" Adapter Measurement is %s. Its value is "
+                  "%lf\n", (measurements[i].isFeasible?"feasible":
+                  " not feasible"), measurements[i].value[0]);
          #endif
       } // for i loop
    }

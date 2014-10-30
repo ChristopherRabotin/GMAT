@@ -113,9 +113,11 @@ public:
    virtual void         SetPropagator(PropSetup* ps);
    virtual bool         Initialize();
 
-   virtual bool         CalculateMeasurement(bool withEvents = false,
-                           ObservationData* forObservation = NULL,
-                           std::vector<RampTableData>* rampTB = NULL);
+   virtual bool CalculateMeasurement(bool withEvents = false,
+                       ObservationData* forObservation = NULL,
+                       std::vector<RampTableData>* rampTB = NULL,
+                       Real atTimeOffset = 0.0);
+
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                                                         Integer id);

@@ -1570,7 +1570,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    }
 
    
-   // 2. Propagate transmiter node (or receiver node) for stepToTake and specify it's state
+   // 2. Propagate transmiter node (or receiver node) for stepToTake and specify its state
    Rvector6 state;
    Rmatrix66 stm;
    if (prop)      // Handle spacecraft
@@ -1597,6 +1597,12 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       for (UnsignedInt i = 0; i < 6; ++i)
          for (UnsignedInt j = 0; j < 6; ++j)
             stm(i,j) = outState[6 + i*6 + j];
+
+      // Buffer the STM
+      if (forTransmitter)
+         theData.tSTM = stm;
+      else
+         theData.rSTM = stm;
 
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("   ---> After %.12lf : %.12lf\n",

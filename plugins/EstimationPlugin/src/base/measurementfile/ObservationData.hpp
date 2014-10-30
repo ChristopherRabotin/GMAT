@@ -60,8 +60,7 @@ public:
    /// The text name of the data type, if available
    std::string       typeName;
    /// The type of measurement in this record
-   Gmat::MeasurementType
-                     type;
+   Integer           type;
    /// Unique ID for associated data stream.
    Integer           uniqueID;
    /// Enumerated ID for the epoch time system
@@ -69,16 +68,25 @@ public:
                      epochSystem;
    /// The epoch of the measurement
    GmatEpoch         epoch;
+   /// Flag indicating if epoch is at start or end of signal
+   bool              epochAtEnd;
+   /// Flag indicating if epoch is at start or end of integration
+   bool              epochAtIntegrationEnd;
+   
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
+   /// The signal strands for the measurement
+   std::vector<StringArray> strands;
    /// The observed value with correction.  Array to handle more than one value, like AZ_EL
    RealArray         value;
+   /// Associated data element names for the data in the value array
+   StringArray       dataMap;
 
-   /// The original observed value								// made changes by TUAN NGUYEN
-   RealArray         value_orig;								// made changes by TUAN NGUYEN
+   /// The original observed value                    // made changes by TUAN NGUYEN
+   RealArray         value_orig;                      // made changes by TUAN NGUYEN
 
-   /// Measurement unit											// made changes by TUAN NGUYEN
-   std::string		 unit;										// made changes by TUAN NGUYEN
+   /// Measurement unit                               // made changes by TUAN NGUYEN
+   std::string		   unit;                            // made changes by TUAN NGUYEN
    /// The associated noise covariance matrix
    Covariance*       noiseCovariance;
 
