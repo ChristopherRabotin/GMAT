@@ -27,7 +27,7 @@
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
-#include "USNRangeAdapter.hpp"
+//#include "USNRangeAdapter.hpp"
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
@@ -104,7 +104,7 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    dsnrangeErrorModel        ("RandomConstant"), // made changes by TUAN NGUYEN
    dopplerNoiseSigma         (1.0),              // made changes by TUAN NGUYEN
    dopplerErrorModel         ("RandomConstant"), // made changes by TUAN NGUYEN
-   rangeModulo               (1.0e18)           // made changes by TUAN NGUYEN
+   rangeModulo               (1.0e18),           // made changes by TUAN NGUYEN
 //   troposphereModel          ("None"),           // made changes by TUAN NGUYEN
 //   ionosphereModel           ("None")            // made changes by TUAN NGUYEN
    dopplerInterval           (1.0)           
@@ -163,10 +163,9 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    dsnrangeErrorModel        (tfs.dsnrangeErrorModel),        // made changes by TUAN NGUYEN
    dopplerNoiseSigma         (tfs.dopplerNoiseSigma),         // made changes by TUAN NGUYEN
    dopplerErrorModel         (tfs.dopplerErrorModel),         // made changes by TUAN NGUYEN
-   rangeModulo               (tfs.rangeModulo)               // made changes by TUAN NGUYEN
+   rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
 //   troposphereModel          (tfs.troposphereModel),          // made changes by TUAN NGUYEN
 //   ionosphereModel           (tfs.ionosphereModel)            // made changes by TUAN NGUYEN
-   rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
    dopplerInterval           (tfs.dopplerInterval)          
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
