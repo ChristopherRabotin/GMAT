@@ -30,23 +30,6 @@
 //#define DEBUG_DERIV
 
 
-////------------------------------------------------------------------------------
-//// Static data
-////------------------------------------------------------------------------------
-//const std::string
-//PointRangeRateAdapterKps::PARAMETER_TEXT[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
-//{
-//   "DopplerInterval",
-//};
-//
-//const Gmat::ParameterType
-//PointRangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
-//{
-//   Gmat::REAL_TYPE,
-//};
-
-
-
 //------------------------------------------------------------------------------
 // PointRangeRateAdapterKps(const std::string& name)
 //------------------------------------------------------------------------------
@@ -708,7 +691,7 @@ Integer PointRangeRateAdapterKps::GetEventCount()
 void PointRangeRateAdapterKps::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-   TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
+   TrackingDataAdapter::SetCorrection(correctionName, correctionType);
 }
 
 //------------------------------------------------------------------------------
