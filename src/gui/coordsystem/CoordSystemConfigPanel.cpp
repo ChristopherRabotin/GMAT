@@ -188,7 +188,7 @@ void CoordSystemConfigPanel::SaveData()
       //-------------------------------------------------------
       // check/set new epoch
       //-------------------------------------------------------
-      if (mEpochChanged)
+      if ((mEpochChanged) && (mCoordPanel->GetEpochTextCtrl()->IsEnabled()))
       {
          std::string savedEpoch = (mCoordPanel->epochValue).WX_TO_STD_STRING;
          Real epoch;

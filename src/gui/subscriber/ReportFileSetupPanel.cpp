@@ -505,6 +505,8 @@ void ReportFileSetupPanel::SaveData()
      str = ",";
    else if (str == "SEMICOLON") 
      str = ";";
+   else
+	 str = delimiterComboBox->GetValue();
    canClose = CheckLength(str, "Delimiter", "Length = 1", 1, 1);
    if (canClose)
 	 delimiter = str[0];
