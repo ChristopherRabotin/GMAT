@@ -277,6 +277,10 @@ SET(BASE_SRCS
     function/Function.cpp
     function/FunctionException.cpp
     function/FunctionManager.cpp
+    hardware/ChemicalTank.cpp
+    hardware/ChemicalThruster.cpp
+    hardware/ElectricTank.cpp
+    hardware/ElectricThruster.cpp
     hardware/FuelTank.cpp
     hardware/HardwareException.cpp
     hardware/Hardware.cpp

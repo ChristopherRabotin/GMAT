@@ -901,12 +901,27 @@ Integer GuiInterpreter::RunMission(Integer sandboxNum)
  * @param <snadobxNum> sandbox number
  *
  * @return a status code
- *    0 = successful, <0 = error (tbd)
+ *    1 = successful, <0 = error (tbd)
  */
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
    return theModerator->ChangeRunState(state, sandboxNum);
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetDetailedRunState(Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * Calls Moderator to to get detailed run state.
+ *
+ * @return detailed run state
+ */
+//------------------------------------------------------------------------------
+Gmat::RunState GuiInterpreter::GetDetailedRunState(Integer sandboxNum)
+{
+   return theModerator->GetDetailedRunState(sandboxNum);
 }
 
 

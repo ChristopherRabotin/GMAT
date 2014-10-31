@@ -121,10 +121,6 @@ protected:
    bool                       needsHeaders;
    /// Flag to detect if the command executed once
    bool                       hasExecuted;
-   /// Array of parameter row index
-   std::vector<Integer>       parmRows;
-   /// Array of parameter column index
-   std::vector<Integer>       parmCols;
    /// ElementWraper pointers of parameters
    std::vector<ElementWrapper*> parmWrappers;
    

@@ -325,6 +325,10 @@ OBJECTS = \
     function/Function.o \
     function/FunctionException.o \
     function/FunctionManager.o \
+    hardware/ChemicalTank.o \
+    hardware/ChemicalThruster.o \
+    hardware/ElectricTank.o \
+    hardware/ElectricThruster.o \
     hardware/FuelTank.o \
     hardware/HardwareException.o \
     hardware/Hardware.o \

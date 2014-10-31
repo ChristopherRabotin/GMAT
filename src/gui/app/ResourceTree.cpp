@@ -190,8 +190,10 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
 
    EVT_MENU(POPUP_ADD_GROUND_STATION, ResourceTree::OnAddGroundStation)
    EVT_MENU(POPUP_ADD_SPACECRAFT, ResourceTree::OnAddSpacecraft)
-   EVT_MENU(POPUP_ADD_FUELTANK, ResourceTree::OnAddFuelTank)
-   EVT_MENU(POPUP_ADD_THRUSTER, ResourceTree::OnAddThruster)
+   EVT_MENU(POPUP_ADD_FUELTANK_CHEMICAL, ResourceTree::OnAddChemicalFuelTank)
+   EVT_MENU(POPUP_ADD_FUELTANK_ELECTRIC, ResourceTree::OnAddElectricFuelTank)
+   EVT_MENU(POPUP_ADD_THRUSTER_CHEMICAL, ResourceTree::OnAddChemicalThruster)
+   EVT_MENU(POPUP_ADD_THRUSTER_ELECTRIC, ResourceTree::OnAddElectricThruster)
    EVT_MENU(POPUP_ADD_FORMATION, ResourceTree::OnAddFormation)
    EVT_MENU(POPUP_ADD_CONSTELLATION, ResourceTree::OnAddConstellation)
    EVT_MENU(POPUP_ADD_IMPULSIVE_BURN, ResourceTree::OnAddImpulsiveBurn)
@@ -289,7 +291,16 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    entries[2].Set(wxACCEL_NORMAL, WXK_F2, POPUP_RENAME);
    wxAcceleratorTable accel(3, entries);
    this->SetAcceleratorTable(accel);
-
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d",
+       currFont.GetFaceName().c_str(), currFont.GetNativeFontInfoDesc().c_str(),
+       currFont.GetNativeFontInfoUserDesc().c_str(), currFont.GetPointSize());
+   #endif
+   
    theGuiManager->UpdateAll();
 }
 
@@ -785,10 +796,12 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::GROUND_STATION:
       theGuiManager->UpdateGroundStation();
       break;
-   case GmatTree::FUELTANK:
+   case GmatTree::FUELTANK_CHEMICAL:
+   case GmatTree::FUELTANK_ELECTRIC:
       theGuiManager->UpdateFuelTank();
       break;
-   case GmatTree::THRUSTER:
+   case GmatTree::THRUSTER_CHEMICAL:
+   case GmatTree::THRUSTER_ELECTRIC:
       theGuiManager->UpdateThruster();
       break;
    case GmatTree::POWER_SYSTEM:
@@ -1286,15 +1299,25 @@ void ResourceTree::GetItemTypeAndIcon(GmatBase *obj,
       itemIcon = GmatTree::RESOURCE_ICON_GROUND_STATION;
    }
    // Hardware
-   else if (obj->IsOfType("FuelTank"))
+   else if (obj->IsOfType("ChemicalTank"))
    {
-      itemType = GmatTree::FUELTANK;
-      itemIcon = GmatTree::RESOURCE_ICON_TANK;
+      itemType = GmatTree::FUELTANK_CHEMICAL;
+      itemIcon = GmatTree::RESOURCE_ICON_TANK;   // need specific one
    }
-   else if (obj->IsOfType("Thruster"))
+   else if (obj->IsOfType("ElectricTank"))
    {
-      itemType = GmatTree::THRUSTER;
-      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;
+      itemType = GmatTree::FUELTANK_ELECTRIC;
+      itemIcon = GmatTree::RESOURCE_ICON_TANK; // need specific one
+   }
+   else if (obj->IsOfType("ChemicalThruster"))
+   {
+      itemType = GmatTree::THRUSTER_CHEMICAL;
+      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER;  // need specific one
+   }
+   else if (obj->IsOfType("ElectricThruster"))
+   {
+      itemType = GmatTree::THRUSTER_ELECTRIC;
+      itemIcon = GmatTree::RESOURCE_ICON_THRUSTER; // need specific one
    }
    else if (obj->IsOfType("PowerSystem"))
    {
@@ -2223,6 +2246,10 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    wxString name;
    if (GetNameFromUser(name, oldName, "Enter new name:", "Rename") == 1)
       newName = name;
+#ifdef DEBUG_RENAME
+MessageInterface::ShowMessage("ResourceTree::OnRename() oldName = %s, newName = %s\n",
+      oldName.c_str(), newName.c_str());
+#endif
    
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
@@ -2865,7 +2892,7 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAddFuelTank(wxCommandEvent &event)
+// void OnAddChemicalFuelTank(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Add a fuel tank to hardware folder
@@ -2873,11 +2900,36 @@ void ResourceTree::OnAddSpacecraft(wxCommandEvent &event)
  * @param <event> command event
  */
 //------------------------------------------------------------------------------
-void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
+void ResourceTree::OnAddChemicalFuelTank(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
-   std::string newName = theGuiInterpreter->GetNewName("FuelTank", 1);
-   GmatBase *obj = CreateObject("FuelTank", newName);
+   std::string newName = theGuiInterpreter->GetNewName("ChemicalTank", 1);
+   GmatBase *obj = CreateObject("ChemicalTank", newName);
+
+   if (obj != NULL)
+   {
+      AddObjectToTree(obj);
+
+      Expand(item);
+      SelectItem(GetLastChild(item));
+      theGuiManager->UpdateFuelTank();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddElectricFuelTank(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a fuel tank to hardware folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddElectricFuelTank(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName("ElectricTank", 1);
+   GmatBase *obj = CreateObject("ElectricTank", newName);
    
    if (obj != NULL)
    {
@@ -2891,7 +2943,7 @@ void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAddThruster(wxCommandEvent &event)
+// void OnAddChemicalThruster(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Add a thruster to hardware folder
@@ -2899,11 +2951,36 @@ void ResourceTree::OnAddFuelTank(wxCommandEvent &event)
  * @param <event> command event
  */
 //------------------------------------------------------------------------------
-void ResourceTree::OnAddThruster(wxCommandEvent &event)
+void ResourceTree::OnAddChemicalThruster(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
-   std::string newName = theGuiInterpreter->GetNewName("Thruster", 1);
-   GmatBase *obj = CreateObject("Thruster", newName);
+   std::string newName = theGuiInterpreter->GetNewName("ChemicalThruster", 1);
+   GmatBase *obj = CreateObject("ChemicalThruster", newName);
+
+   if (obj != NULL)
+   {
+      AddObjectToTree(obj);
+
+      Expand(item);
+      SelectItem(GetLastChild(item));
+      theGuiManager->UpdateThruster();
+   }
+}
+
+//------------------------------------------------------------------------------
+// void OnAddElectricThruster(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a thruster to hardware folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddElectricThruster(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   std::string newName = theGuiInterpreter->GetNewName("ElectricThruster", 1);
+   GmatBase *obj = CreateObject("ElectricThruster", newName);
 
    if (obj != NULL)
    {
@@ -5071,8 +5148,10 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
    switch (itemType)
    {
    case GmatTree::HARDWARE_FOLDER:
-      menu->Append(POPUP_ADD_FUELTANK, wxT("Fuel Tank"));
-      menu->Append(POPUP_ADD_THRUSTER, wxT("Thruster"));
+      menu->Append(POPUP_ADD_FUELTANK_CHEMICAL, wxT("Chemical Tank"));
+      menu->Append(POPUP_ADD_FUELTANK_ELECTRIC, wxT("Electric Tank"));
+      menu->Append(POPUP_ADD_THRUSTER_CHEMICAL, wxT("Chemical Thruster"));
+      menu->Append(POPUP_ADD_THRUSTER_ELECTRIC, wxT("Electric Thruster"));
       listOfObjects = theGuiInterpreter->GetCreatableList(Gmat::HARDWARE);
       newId = HARDWARE_BEGIN;
       for (StringArray::iterator i = listOfObjects.begin();
@@ -5080,8 +5159,10 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType,
       {
          // Drop the ones that are already there for now
          std::string hardwareType = (*i);
-         if ((hardwareType != "FuelTank") &&
-             (hardwareType != "Thruster") )
+//         if ((hardwareType != "FuelTank") &&
+//             (hardwareType != "Thruster") )
+         if ((hardwareType.find("Thruster") == hardwareType.npos) &&
+            (hardwareType.find("Tank") == hardwareType.npos))
          {
             // Save the ID and type name for event handling
             pluginMap[POPUP_ADD_HARDWARE + newId] = hardwareType;
@@ -5330,8 +5411,10 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::GMAT_FUNCTION:
       objType = Gmat::FUNCTION;
       break;
-   case GmatTree::FUELTANK:
-   case GmatTree::THRUSTER:
+   case GmatTree::FUELTANK_CHEMICAL:
+   case GmatTree::FUELTANK_ELECTRIC:
+   case GmatTree::THRUSTER_CHEMICAL:
+   case GmatTree::THRUSTER_ELECTRIC:
    case GmatTree::POWER_SYSTEM:
    case GmatTree::HARDWARE:
    case GmatTree::SENSOR:
@@ -5421,8 +5504,10 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    case GmatTree::USER_COORDINATE_SYSTEM:
       return mCoordSysItem;
       
-   case GmatTree::FUELTANK:
-   case GmatTree::THRUSTER:
+   case GmatTree::FUELTANK_CHEMICAL:
+   case GmatTree::FUELTANK_ELECTRIC:
+   case GmatTree::THRUSTER_CHEMICAL:
+   case GmatTree::THRUSTER_ELECTRIC:
    case GmatTree::POWER_SYSTEM:
    case GmatTree::HARDWARE:
       return mHardwareItem;

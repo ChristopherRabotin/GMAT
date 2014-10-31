@@ -94,6 +94,12 @@ protected:
    ObjectMap               thrusterMap;
    /// List of fuel tanks used in the maneuver (deprecated)
    StringArray             tankNames;
+   /// The throttle logic algorithm - used to determine how
+   // power is distributed amongst electric thrusters
+   std::string             throttleLogicAlgorithm;
+   /// Are the thrusters of type Electric?  If not, then they are
+   /// Chemical thrusters
+   bool                    isElectricBurn;
    
    bool SetThrustersFromSpacecraft();
    
@@ -103,6 +109,7 @@ protected:
       THRUSTER = BurnParamCount,
       FUEL_TANK,
       BURN_SCALE_FACTOR,
+      THROTTLE_LOGIC_ALGORITHM,
       FiniteBurnParamCount
    };
    
@@ -113,6 +120,11 @@ protected:
    static const Gmat::ParameterType 
                         PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount];
    
+   /// When the thrusters are electric, we must compute the throttle logic
+   // given the available thrust power.  This method will set the power
+   // level on each of the electric thrusters.
+   bool ComputeThrottleLogic(Real powerAvailable);
+
 };
 
 #endif // FiniteBurn_hpp

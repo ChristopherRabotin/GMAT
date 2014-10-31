@@ -3490,13 +3490,18 @@ bool CelestialBody::SetStringParameter(const Integer id,
 
    if (id == TEXTURE_MAP_FILE_NAME)
    {
-      // Find find from the FileManager (LOJ: 2014.06.18)
-      textureMapFileName = value;
-      #ifdef DEBUG_TEXTURE_FILE
-      MessageInterface::ShowMessage
-         ("3 Calling SetTextureFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
-      #endif
-      SetTextureFileName(textureMapFileName, true);
+      // Check for texture map file has changed to avoid duplicate waring message
+      // from the FileManager (LOJ: 2014.08.27)
+      if (textureMapFileName != value)
+      {
+         // Find find from the FileManager (LOJ: 2014.06.18)
+         textureMapFileName = value;
+         #ifdef DEBUG_TEXTURE_FILE
+         MessageInterface::ShowMessage
+            ("3 Calling SetTextureFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
+         #endif
+         SetTextureFileName(textureMapFileName, true);
+      }
       
       // Question: Do we want to throw an exception during the setting?
       #if 0
