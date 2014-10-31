@@ -19,22 +19,26 @@
 #
 
 # Require CMake minimum version
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
 # Set Cmake project
 PROJECT(GMAT)
 SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
-# Set SPICE directory
-SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice" CACHE PATH "CSpice Root Directory")
-
-# Set wxWidgets directory
+# Set SPICE and wxWidgets directories
 if(WIN32)
   SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice/windows" CACHE PATH "CSpice Root Directory")
 
 elseif(UNIX)
   SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
+
+  if(APPLE)
+    SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice/macosx" CACHE PATH "CSpice Root Directory")
+  else()
+    SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice/linux" CACHE PATH "CSpice Root Directory")
+  endif()
 
 endif()
 
@@ -211,8 +215,8 @@ endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 # ====================================================================
 # Go to src directory and look for CMake instructions there
-SUBDIRS(src)
+ADD_SUBDIRECTORY(src)
 
 # ====================================================================
 # Go to plugins directory and look for CMake instructions there
-SUBDIRS(plugins)
+ADD_SUBDIRECTORY(plugins)

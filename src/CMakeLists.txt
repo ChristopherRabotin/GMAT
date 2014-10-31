@@ -18,14 +18,24 @@
 
 # ====================================================================
 # GMAT base library
-SUBDIRS(base)
+ADD_SUBDIRECTORY(base)
+
+# Enable RPATH on Mac so that the build path is not hardcoded into
+# the library's internal name. This is necessary to use GMAT from
+# a 3rd-party app such as Matlab. Note that this will no longer be
+# necessary once the project moves to CMake 3.0.
+if(APPLE)
+  GET_DIRECTORY_PROPERTY(BaseTarget DIRECTORY base DEFINITION TargetName)
+  SET_TARGET_PROPERTIES(${BaseTarget} PROPERTIES MACOSX_RPATH TRUE)
+endif()
 
 # ====================================================================
 # Console binary
-SUBDIRS(console)
+ADD_SUBDIRECTORY(console)
 
 # ====================================================================
 # GUI binary
 if (GMAT_GUI)
-  SUBDIRS(gui)
+  ADD_SUBDIRECTORY(gui)
 endif()
+

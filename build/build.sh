@@ -64,11 +64,17 @@ fi
 
 # Compile Gmat using all available cores
 make -j$((ncores+1))
+status=$?
 
 # Change back to build directory
 cd ../
 
 echo ""
 echo "*************************************"
-echo "Gmat Build Finished. Check build output for status."
+if [ $status = 0 ]
+then
+  echo "Gmat Build Finished Successfully!"
+else
+  echo "Gmat Build Failed! Check build output for status."
+fi
 echo "*************************************"

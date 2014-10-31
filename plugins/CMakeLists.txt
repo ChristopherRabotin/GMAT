@@ -14,86 +14,141 @@
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
+# Variable used to collect a list of all enabled plugins
+SET(PluginTargets "")
+
 # ====================================================================
 # CInterface Plugin binary
 if (PLUGIN_CINTERFACE)
-  SUBDIRS(CInterfacePlugin/src/)
+  SET(PLUGINDIR "CInterfacePlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # CInterface Plugin binary
 if (PLUGIN_DATAINTERFACE)
-  SUBDIRS(DataInterfacePlugin/src/)
+  SET(PLUGINDIR "DataInterfacePlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # EphemPropagator Plugin binary
 if (PLUGIN_EPHEMPROPAGATOR)
-  SUBDIRS(EphemPropagatorPlugin/src/)
+  SET(PLUGINDIR "EphemPropagatorPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # Estimation Plugin binary
 if (PLUGIN_ESTIMATION)
-  SUBDIRS(EstimationPlugin/src/)
+  SET(PLUGINDIR "EstimationPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # EventLocator Plugin binary
 if (PLUGIN_EVENTLOCATOR)
-  SUBDIRS(EventLocatorPlugin/src/)
+  SET(PLUGINDIR "EventLocatorPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # ExtraPropagators Plugin binary
 if (PLUGIN_EXTRAPROPAGATORS)
-  SUBDIRS(ExtraPropagatorsPlugin/src/)
+  SET(PLUGINDIR "ExtraPropagatorsPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # FminconOptimizer Plugin binary
 if (PLUGIN_FMINCONOPTIMIZER)
-  SUBDIRS(FminconOptimizerPlugin/src/)
+  SET(PLUGINDIR "FminconOptimizerPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # Formation Plugin binary
 if (PLUGIN_FORMATION)
-  SUBDIRS(FormationPlugin/src/)
+  SET(PLUGINDIR "FormationPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # GeometricMeasurement Plugin binary
 if (PLUGIN_GEOMETRICMEASUREMENT)
-  SUBDIRS(GeometricMeasurementPlugin/src/)
+  SET(PLUGINDIR "GeometricMeasurementPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # GmatFunction Plugin binary
 if (PLUGIN_GMATFUNCTION)
-  SUBDIRS(GmatFunctionPlugin/src/)
+  SET(PLUGINDIR "GmatFunctionPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # MatlabInterface Plugin binary
 if (PLUGIN_MATLABINTERFACE)
-  SUBDIRS(MatlabInterfacePlugin/src/)
+  SET(PLUGINDIR "MatlabInterfacePlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # ProductionPropagators Plugin binary
 if (PLUGIN_PRODUCTIONPROPAGATORS)
-  SUBDIRS(ProductionPropagatorPlugin/src/)
+  SET(PLUGINDIR "ProductionPropagatorPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # SaveCommand Plugin binary
 if (PLUGIN_SAVECOMMAND)
-  SUBDIRS(SaveCommandPlugin/src/)
+  SET(PLUGINDIR "SaveCommandPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
 # ====================================================================
 # Station Plugin binary
 if (PLUGIN_STATION)
-  SUBDIRS(StationPlugin/src/)
+  SET(PLUGINDIR "StationPlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# Enable RPATH on Mac so that the build path is not hardcoded into
+# the library's internal name. This is necessary to use GMAT from
+# a 3rd-party app such as Matlab. Note that this will no longer be
+# necessary once the project moves to CMake 3.0.
+if(PluginTargets)
+  if(APPLE)
+    SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES MACOSX_RPATH TRUE)
+  endif()
 endif()

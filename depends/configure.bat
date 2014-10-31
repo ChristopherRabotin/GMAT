@@ -79,7 +79,7 @@ IF NOT EXIST %p0% (
 :: ***********************************
 
 :: Check if dependency libraries already exists
-set cspice_path=cspice
+set cspice_path=cspice\windows
 set wxWidgets_path=wxWidgets
 
 :: Create directories and download cspice if it does not already exist.
