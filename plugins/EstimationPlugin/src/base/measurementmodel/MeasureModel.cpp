@@ -1069,7 +1069,7 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
 //------------------------------------------------------------------------------
 bool MeasureModel::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTB,
-      Real atTimeOffset)
+      Real atTimeOffset, Integer forStrand)
 {
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(" Enter MeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
@@ -1189,6 +1189,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    SignalBase *leg, *lastleg, *firstleg;
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
+      // For a measurement that need to control strand by strand with time
+      // offsets (e.g. for differencing
+      if (forStrand != -1)
+         i = forStrand;
+
       #ifdef DEBUG_CALCULATE_MEASUREMENT
          MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d:  ", i);
          SignalBase* s = signalPaths[i];
@@ -1363,6 +1368,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("4.3. Specify feasibility for signal path %d:\n", i);
       #endif
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
+
+      if (forStrand != -1)
+         break;
    }
    
    retval = true;
@@ -1428,7 +1436,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
  */
 //------------------------------------------------------------------------------
 const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
-      GmatBase* obj, Integer id)
+      GmatBase* obj, Integer id, Integer forStrand)
 {
    #ifdef DEBUG_DERIVATIVE
       MessageInterface::ShowMessage("MeasureModel::CalculateMeasurementDerivatives(%s, %d) called\n", obj->GetName().c_str(), id);
@@ -1437,10 +1445,20 @@ const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
    theDataDerivatives.clear();
 
    // Collect the data from the signals
-   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   if (forStrand == -1)
+   {
+      for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+      {
+         std::vector<RealArray> pathDerivative =
+               signalPaths[i]->ModelSignalDerivative(obj, id);
+         for (UnsignedInt j = 0; j < pathDerivative.size(); ++j)
+            theDataDerivatives.push_back(pathDerivative[j]);
+      }
+   }
+   else
    {
       std::vector<RealArray> pathDerivative =
-            signalPaths[i]->ModelSignalDerivative(obj, id);
+            signalPaths[forStrand]->ModelSignalDerivative(obj, id);
       for (UnsignedInt j = 0; j < pathDerivative.size(); ++j)
          theDataDerivatives.push_back(pathDerivative[j]);
    }
