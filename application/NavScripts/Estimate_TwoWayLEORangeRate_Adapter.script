@@ -43,14 +43,14 @@ Create BatchEstimatorInv BatchEst;
 GMAT BatchEst.ShowProgress = true;
 GMAT BatchEst.ReportStyle = 'Normal';
 GMAT BatchEst.ReportFile = 'RREstimator.data';
-GMAT BatchEst.MaximumIterations = 15;
+GMAT BatchEst.MaximumIterations = 45;
 GMAT BatchEst.Measurements = {estData};
 GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState'}; %, 'RangeMeasurement.Bias'};
 GMAT BatchEst.AbsoluteTol = 1e-05;
 GMAT BatchEst.RelativeTol = 1e-06;
 GMAT BatchEst.Propagator = ODProp;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
-GMAT BatchEst.OLSEInitialRMSSigma = 3e95;
+GMAT BatchEst.OLSEInitialRMSSigma = 12000;
 % BatchEst.OLSEMultiplicativeConstant = 4
 
 %------ Run the measurement simulator
