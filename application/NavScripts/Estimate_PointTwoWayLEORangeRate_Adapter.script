@@ -51,7 +51,7 @@ GMAT BatchEst.RelativeTol = 1e-06;
 GMAT BatchEst.Propagator = ODProp;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
 GMAT BatchEst.OLSEInitialRMSSigma = 3e212;
-% BatchEst.OLSEMultiplicativeConstant = 4
+BatchEst.OLSEMultiplicativeConstant = 40
 
 %------ Run the measurement simulator
 BeginMissionSequence
