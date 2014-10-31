@@ -67,6 +67,13 @@ public:
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
                               std::vector<RampTableData>* rampTB = NULL);
+
+   virtual const MeasurementData&
+                        CalculateMeasurementAtOffset(bool withEvents,
+                              Real dt, ObservationData* forObservation,
+                              std::vector<RampTableData>* rampTB,
+                              Integer forStrand);
+
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
                               Integer id);
@@ -89,25 +96,6 @@ protected:
    MeasurementData cMeasurement1;
    /// Data from forward offset pass in the strand
    MeasurementData cMeasurement2;
-   /// Signal data from two strands
-   std::vector<SignalData> strandData[2];
-
-   /// Prev range rate
-   Real prev_range_rate;
-
-   /// Flag indicating is a current value is available
-   bool valueReady;
-   /// Epoch of the most recently calculated data value
-   GmatEpoch lastComputedEpoch;
-   /// Pointer to the spacecraft that gets propagated in this model
-   SpaceObject *targetSat;
-
-   void CalculateCartesianDerivative(SignalData *sigData, RealArray &toArray,
-         bool forTransmitter);
-   void CalculatePositionDerivative(SignalData *sigData, RealArray &toArray,
-         bool forTransmitter);
-   void CalculateVelocityDerivative(SignalData *sigData, RealArray &toArray,
-         bool forTransmitter);
 
    /// Parameter IDs for the RangeRateAdapterKps
    enum
