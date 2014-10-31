@@ -596,15 +596,16 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
 
    #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("   Derivatives: [");
-      for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
+      for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
       {
          if (i > 0)
             MessageInterface::ShowMessage("]\n                [");
-         for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
+         for (UnsignedInt j = 0; j < theDataDerivatives.at(i).size(); ++j)
          {
             if (j > 0)
                MessageInterface::ShowMessage(", ");
-            MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
+            MessageInterface::ShowMessage("%.12le",
+                  (theDataDerivatives.at(i))[j]);
          }
       }
       MessageInterface::ShowMessage("]\n");
