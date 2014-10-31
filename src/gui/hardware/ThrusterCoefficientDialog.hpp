@@ -27,24 +27,33 @@ class ThrusterCoefficientDialog : public GmatDialog
 {
 public:
    ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
-                             const wxString &title, GmatBase *obj,
-                             const wxString &type, const RealArray &coefsCOrK);
+           const wxString &title, GmatBase *obj, Integer numCoefs,
+           const RealArray &coefs1, const RealArray &coefs2);
 
-   RealArray&      GetCoefValues()  { return coefValues;    }
-   bool            AreCoefsSaved()  { return coefsModified; }
+   RealArray&      GetCoefs1Values()  { return coefs1Values;    }
+   RealArray&      GetCoefs2Values()  { return coefs2Values;    }
+
+   bool            AreCoefs1Saved()  { return coefs1Modified; }
+   bool            AreCoefs2Saved()  { return coefs2Modified; }
    
 private:
    
    GmatBase    *theObject;
-   Integer     coefCount;
-   StringArray coefNames;
-   RealArray   coefValues;
-   
-   bool        coefsModified;
+   Integer     coefsCount;
+   StringArray coefs1Names;
+   StringArray coefs2Names;
+   RealArray   coefs1Values;
+   RealArray   coefs2Values;
 
-   wxString coefType;
-   
-   wxGrid *coefGrid;
+   bool        isElectric;
+
+   bool        coefs1Modified;
+   bool        coefs2Modified;
+
+   wxGrid      *coefGrid1;
+   wxGrid      *coefGrid2;
+
+   wxNotebook  *coefNotebook;
    
    // methods inherited from GmatDialog
    virtual void Create();
@@ -58,7 +67,9 @@ private:
    // IDs for the controls and the menu commands
    enum
    {     
-      ID_GRID = 30300,
+      ID_GRID1 = 30300,
+      ID_GRID2,
+      ID_NOTEBOOK,
    };
 };
 

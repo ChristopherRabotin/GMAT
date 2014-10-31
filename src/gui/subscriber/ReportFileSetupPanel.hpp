@@ -78,6 +78,7 @@ protected:
    {     
       ID_TEXT = 93000,
       ID_CHECKBOX,
+      ID_CHECKBOX_FIXEDWIDTH,
       ID_TEXT_CTRL,
       ID_BUTTON,
       ID_COMBOBOX,

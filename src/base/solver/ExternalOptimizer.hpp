@@ -93,7 +93,7 @@ protected:
    enum
    {
       FUNCTION_PATH = OptimizerParamCount,
-      SOURCE_TYPE,
+      //SOURCE_TYPE,
       ExternalOptimizerParamCount
    };
    
@@ -104,8 +104,8 @@ protected:
    /// elements of the gradient (if calculated); values of the constraints
    //std::vector<Real>   costConstraintArray;
    /// type of external interface used (as of 2006.07.13, only MATLAB is 
-   /// supported)
-   std::string         sourceType;
+   /// supported) - Moved to Optimizer
+   //std::string         sourceType;
    /// flag indicating whether or not the interface was opened successfully
    /// and the supporting structures needed by the interface were found
    bool                sourceReady;

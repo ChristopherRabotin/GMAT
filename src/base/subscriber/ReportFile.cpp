@@ -622,7 +622,7 @@ bool ReportFile::Initialize()
    }
    
    // If default file name is used, write informatinal message about the file location (LOJ: 2014.06.24)
-   if (usingDefaultFileName)
+   if (usingDefaultFileName && GmatGlobal::Instance()->IsWritingFilePathInfo())
       MessageInterface::ShowMessage
          ("*** The output file '%s' will be written as \n                    '%s'\n",
           fileName.c_str(), fullPathFileName.c_str());
@@ -1131,7 +1131,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       
       fullPathFileName =
          GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt",
-                                       false, true);
+                                       false);
       
       // Close the stream if it is open
       if (dstream.is_open())

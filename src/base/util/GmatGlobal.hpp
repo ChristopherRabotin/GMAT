@@ -95,6 +95,10 @@ public:
    void SetNitsClient(bool flag);
    bool GetRunInterrupted();
    void SetRunInterrupted(bool flag);
+   Gmat::RunState GetRunState();
+   void SetRunState(Gmat::RunState rs);
+   Gmat::RunState GetDetailedRunState();
+   void SetDetailedRunState(Gmat::RunState drs);
    Integer GetRunMode();
    void SetRunMode(Integer mode);
    Integer GetGuiMode();
@@ -241,6 +245,8 @@ private:
    bool isBatchMode;
    bool isNitsClient;
    bool runInterrupted;
+   Gmat::RunState runState;
+   Gmat::RunState detailedRunState;
    bool isMatlabAvailable;
    bool isMatlabDebugOn;
    bool isMissionTreeDebugOn;

@@ -354,7 +354,8 @@ protected:
    virtual void         ShowCommand(const std::string &prefix,
                                     const std::string &title1, GmatCommand *cmd1,
                                     const std::string &title2 = "",
-                                    GmatCommand *cmd2 = NULL);
+                                    GmatCommand *cmd2 = NULL,
+                                    bool showDetail = false);
    virtual void         ShowWrapper(const std::string &prefix,
                                     const std::string &title,
                                     ElementWrapper *wrapper);

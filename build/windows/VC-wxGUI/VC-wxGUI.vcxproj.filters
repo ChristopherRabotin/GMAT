@@ -2313,6 +2313,18 @@
     <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
       <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4405,6 +4417,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
       <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

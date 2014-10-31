@@ -175,6 +175,11 @@ namespace Gmat
       FUEL_TANK,
       THRUSTER,
       
+      CHEMICAL_THRUSTER,
+      ELECTRIC_THRUSTER,
+      CHEMICAL_FUEL_TANK,
+      ELECTRIC_FUEL_TANK,
+
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,

@@ -30,7 +30,7 @@ class GMAT_API SolarPowerSystem : public PowerSystem
 {
 public:
 
-   SolarPowerSystem(std::string nomme);
+   SolarPowerSystem(const std::string &nomme);
    virtual ~SolarPowerSystem();
    SolarPowerSystem(const SolarPowerSystem& copy);
    SolarPowerSystem&            operator=(const SolarPowerSystem& copy);
@@ -122,6 +122,8 @@ protected:
    std::string         shadowModel;
    /// list of body names
    StringArray         shadowBodyNames;
+   /// list of default body names
+   StringArray         defaultShadowBodyNames;
    /// Array of shadow bodies
    std::vector<CelestialBody*> shadowBodies;
 

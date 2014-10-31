@@ -73,7 +73,7 @@ bool SolarPowerSystem::occultationWarningWritten = false;
  * @param nomme Name for the power system.
  */
 //------------------------------------------------------------------------------
-SolarPowerSystem::SolarPowerSystem(std::string nomme) :
+SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    PowerSystem          ("SolarPowerSystem",nomme),
    solarCoeff1          (1.32077),
    solarCoeff2          (-0.10848),
@@ -90,6 +90,10 @@ SolarPowerSystem::SolarPowerSystem(std::string nomme) :
 
    shadowBodyNames.clear();
    shadowBodies.clear();
+
+   defaultShadowBodyNames.clear();
+   defaultShadowBodyNames.push_back("Earth");
+
 
    shadowState    = new ShadowState();
 }
@@ -139,6 +143,11 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    {
       shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
    }
+   defaultShadowBodyNames.clear();
+   for (unsigned int j = 0; j < (copy.defaultShadowBodyNames).size(); j++)
+   {
+      defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(j));
+   }
 
    shadowState    = new ShadowState();
 }
@@ -177,12 +186,18 @@ SolarPowerSystem& SolarPowerSystem::operator=(const SolarPowerSystem& copy)
       {
          shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
       }
-      shadowBodies.clear();
-      // copy the list of body pointers
-      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+      defaultShadowBodyNames.clear();
+      // copy the list of body names
+      for (unsigned int i = 0; i < (copy.defaultShadowBodyNames).size(); i++)
       {
-         shadowBodies.push_back((copy.shadowBodies).at(i));
+         defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(i));
       }
+      shadowBodies.clear();
+//      // copy the list of body pointers - do I want to do this???
+//      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+//      {
+//         shadowBodies.push_back((copy.shadowBodies).at(i));
+//      }
 
       shadowModel = copy.shadowModel;
 
@@ -216,7 +231,7 @@ bool SolarPowerSystem::Initialize()
       MessageInterface::ShowMessage("Calling Initialization on %s\n",
             instanceName.c_str());
       MessageInterface::ShowMessage("number of shadow bodies = %d\n",
-            (Integer) shadowBodies.size());
+            (Integer) shadowBodyNames.size());
    #endif
    PowerSystem::Initialize();
 
@@ -231,7 +246,8 @@ bool SolarPowerSystem::Initialize()
    // if no names were added to the ShadowBodies list, add the Default body
    // This will cause "ShadowBodies = {'Earth'} to be written to the script <<
    if (shadowBodyNames.empty())
-      shadowBodyNames.push_back("Earth");
+      shadowBodyNames = defaultShadowBodyNames;
+//      shadowBodyNames.push_back("Earth");
 
    // Set up the list of shadowBodies using current solarSystem
    shadowBodies.clear();
@@ -247,6 +263,10 @@ bool SolarPowerSystem::Initialize()
          throw HardwareException(errmsg);
       }
       shadowBodies.push_back(body);
+      #ifdef DEBUG_SOLAR_POWER
+         MessageInterface::ShowMessage("Adding shadow body %s to %s\n",
+               body->GetName().c_str(), instanceName.c_str());
+      #endif
    }
 
    if (!shadowState)
@@ -462,6 +482,9 @@ Real SolarPowerSystem::GetPowerGenerated() const
 
    // Englander Eq. 17
    generatedPower = percentSunAll * basePower * solarScaleFactor;
+   #ifdef DEBUG_SOLAR_POWER
+      MessageInterface::ShowMessage("   generatedPower    = %12.10f\n", generatedPower);
+   #endif
 
    return generatedPower;
 }
@@ -850,7 +873,12 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(const Integer id) c
 {
    if (id == SHADOW_BODIES)
    {
-      return shadowBodyNames;
+      if (shadowBodyNames.empty())
+      {
+         return defaultShadowBodyNames;
+      }
+      else
+         return shadowBodyNames;
    }
 
    return PowerSystem::GetStringArrayParameter(id);

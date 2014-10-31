@@ -115,6 +115,7 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Parameter",     "Variable",         "Array",            "String",           "StopCondition",
    "Solver",        "Subscriber",       "ReportFile",       "XYPlot",           "OrbitView",
    "EphemerisFile", "PropSetup",        "Function",         "FuelTank",         "Thruster",
+   "ChemicalThruster", "ElectricThruster","ChemicalTank", "ElectricTank",
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
    "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
@@ -141,6 +142,7 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false,     true,      true,      false,     false,
+   false,     false,     false,     false,
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
@@ -1169,6 +1171,14 @@ bool GmatBase::IsCallbackExecuting()
 // bool PutCallbackData(std::string &data)
 //---------------------------------------------------------------------------
 bool GmatBase::PutCallbackData(std::string &data)
+{
+   return false;
+}
+
+//---------------------------------------------------------------------------
+// bool PutCallbackRealData(RealArray &data)
+//---------------------------------------------------------------------------
+bool GmatBase::PutCallbackRealData(RealArray &data)
 {
    return false;
 }

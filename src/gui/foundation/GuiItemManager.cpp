@@ -3574,6 +3574,8 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       for (int i=0; i<theNumFiniteBurnProperty; i++)
          propertyListBox->Append(theFiniteBurnPropertyList[i]);
    }
+   else if (objType == "Array") ;
+   else if (objType == "Variable") ;
    else
    {
       throw GmatBaseException("There are no properties associated with " +

@@ -29,7 +29,7 @@ class GMAT_API NuclearPowerSystem : public PowerSystem
 {
 public:
 
-   NuclearPowerSystem(std::string nomme);
+   NuclearPowerSystem(const std::string &nomme);
    virtual ~NuclearPowerSystem();
    NuclearPowerSystem(const NuclearPowerSystem& copy);
    NuclearPowerSystem& operator=(const NuclearPowerSystem& copy);
