@@ -118,8 +118,7 @@ classdef Trajectory < handle
         
     end
     
-    methods (Access = public)
-        
+    methods (Access = public)  
         
         function obj = Initialize(obj)
             %  Initialize the trajectory and all helper classes.
@@ -129,9 +128,7 @@ classdef Trajectory < handle
             obj.SetInitialGuess();
             obj.SetSparsityPattern();
             obj.WriteSetupReport()
-            
         end
-        
         
         function obj = SetDecisionVector(obj,decVector)
             %  Sets decision vector by calling each phase and setting
@@ -145,6 +142,8 @@ classdef Trajectory < handle
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
             end
+            
+            %  Eventually need to redimensionalize here
             
             %  Now loop over phases and set on each phase
             for phaseIdx = 1:obj.numPhases
@@ -160,14 +159,12 @@ classdef Trajectory < handle
             
         end
         
-        
         function [costFunction,constraintVec] = ...
                 GetCostConstraintFunctions(obj)
             %  Compute cost and constraint functions
             constraintVec = GetContraintVector(obj);
             costFunction = GetCostFunction(obj);
         end
-        
         
         function [z,F,xmul,Fmul] = Optimize(obj)
             %  Call the optimizer.  This is the Main() function and should not
@@ -196,6 +193,8 @@ classdef Trajectory < handle
             snseti('Timing level',3);
             % Echo SNOPT Output to MATLAB Command Window
             snscreen on;
+            %
+            %snseti('Scale Option', 2)
             % snset('Major optimality tolerance 1e-3')
             % snset('Major feasibility tolerance 1e-6')
             
@@ -235,9 +234,8 @@ classdef Trajectory < handle
     %% Private methods
     methods (Access = private)
         
-        %%  Intialize link helper classes and construct the linkages
-        function InitializeLinkages(obj)
-            
+        %%  Initialize link helper classes and construct the linkages
+        function InitializeLinkages(obj)        
             linkIdx = 0;
             for configIdx = 1:length(obj.linkageConfig)
                 while linkIdx < length(obj.linkageConfig{configIdx})-1
@@ -270,7 +268,7 @@ classdef Trajectory < handle
             obj.totalnumConstraints = 0;
             for phaseIdx = 1:obj.numPhases
                 
-                %  Configure user functions
+                %  Configure user function names
                 obj.phaseList{phaseIdx}.pathFunctionName = ...
                     obj.pathFunctionName;
                 obj.phaseList{phaseIdx}.pointFunctionName = ...
@@ -292,7 +290,6 @@ classdef Trajectory < handle
                     obj.phaseList{phaseIdx}.numConstraints;
                 
             end
-            
             obj.SetChunkIndeces();
         end
         
@@ -506,7 +503,6 @@ classdef Trajectory < handle
             obj.sparsityPattern = sparse(iGfun,jGvar,1);
             
         end
-        
     end
 end
 

@@ -25,7 +25,7 @@ classdef RadauPhase < Phase
     methods
         
         %  Compute Radau points, weights, and differentiation matrix
-        function obj = GetTranscriptionProperties(obj)
+        function obj = InitTranscription(obj)
             
             %  Compute Radau points, weights, and differentiation matrix
             [obj.radauPoints,obj.radauWeights,obj.radauDiffMatrix]...

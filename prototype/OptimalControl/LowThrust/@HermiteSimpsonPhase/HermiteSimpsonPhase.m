@@ -34,7 +34,7 @@ classdef HermiteSimpsonPhase < Phase
     methods
         
         %  Compute Radau points, weights, and differentiation matrix
-        function obj = GetTranscriptionProperties(obj)
+        function obj = InitTranscription(obj)
             
             %  Set stage properties (i.e. how many stages are there?)
             obj.SetStageProperties()

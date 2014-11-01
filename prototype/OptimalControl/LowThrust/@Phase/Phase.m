@@ -146,20 +146,18 @@ classdef Phase < handle
             
             %  Get properties that are dependent upon the transcription
             %  being used.  These come from the leaf classes
-            obj = GetTranscriptionProperties(obj);
+            obj = InitTranscription(obj);
             
             %  Initialize the decision vector helper class
-            obj.DecVector.ConfigureDecisionVector(obj.numStates, ...
+            obj.DecVector.Initialize(obj.numStates, ...
                 obj.numControls,obj.numIntegrals,obj.numStaticParams,...
                 obj.numStatePoints,obj.numControlPoints,...
                 obj.numStateStagePoints,obj.numControlStagePoints);
             
-            %  Compute and set the initial guess and configure time. 
-            obj.SetInitialGuess();
-            obj.ComputeTimeVector();
-            
-            %  Intialize the user provided path and point functions
+            %  Compute and set the initial guess and configure time.
+            obj.InitializeTimeVector();
             obj.IntializeUserFunctions();
+            obj.SetInitialGuess();           
             
             %  Set constraint size properties and bounds
             obj.SetConstraintProperties();
@@ -186,7 +184,6 @@ classdef Phase < handle
         
         %  Set indeces for chunks of the constraint vector
         function obj = SetConstraintProperties(obj)
-            
             
             %  Set chunk values and bounds.
             obj.numIntegrals = 0;  % TODO:  should not be hard coded
@@ -221,7 +218,7 @@ classdef Phase < handle
             
             %  Use a temporary decision vector object for bookkeeping
             boundVector = DecisionVector();
-            boundVector.ConfigureDecisionVector(obj.numStates, ...
+            boundVector.Initialize(obj.numStates, ...
                 obj.numControls,obj.numIntegrals,obj.numStaticParams,...
                 obj.numStatePoints,obj.numControlPoints,...
                 obj.numStateStagePoints,obj.numControlStagePoints);
@@ -274,6 +271,13 @@ classdef Phase < handle
             boundVector.SetTimeVector(upperBoundTimeArray);
             obj.decisionVecUpperBound = boundVector.decisionVector;
             
+        end
+        
+        %
+        function InitializeTimeVector(obj)
+            obj.DecVector.SetTimeVector(...
+                [obj.initialEpoch; obj.finalEpoch]);
+            obj.ComputeTimeVector();
         end
         
         %  Set bounds on constraints
@@ -381,8 +385,7 @@ classdef Phase < handle
             %  Call the decision vector and populate with the guess
             obj.DecVector.SetStateArray(xGuessMat);
             obj.DecVector.SetControlArray(uGuessMat);
-            obj.DecVector.SetTimeVector(...
-                [obj.initialEpoch; obj.finalEpoch]);
+            
         end
         
         %  Sets decision vector provided by optimizer
@@ -762,11 +765,10 @@ classdef Phase < handle
     %  they are specific to the type of phase.
     methods (Abstract)
         SetStageProperties(obj)
-        GetTranscriptionProperties(obj)
+        InitTranscription(obj)
+        % InitializeTimeVector(obj)
         ComputeTimeVector(obj)
         ComputeQuadratures(obj)
-        %         ComputeDefectConstraints(obj)
-        %         ComputeCostFunctionIntegral(obj)
         ComputeTimeParameters(obj)
         GetMeshIndex(obj)
         GetStageIndex(obj)
