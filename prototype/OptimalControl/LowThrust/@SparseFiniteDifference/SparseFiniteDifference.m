@@ -87,7 +87,7 @@ classdef SparseFiniteDifference < handle
                 % ex. will be used as eval(['SetDecisionVector' '(' 'traj' ',' 'decisionVector' ')'])                        
         end               
         function SetPerturbationParameter(this,pert)
-            if ~isreal(pert) | pert > 1 
+            if ~isreal(pert) || pert > 1 
                 error('SparseFiniteDifference.SetPerturbationParameter : The perturbation parameter must be a real constant (much) smaller than one.')
             elseif pert < sqrt(this.EPS)
                 error('SparseFiniteDifference.SetPerturbationParameter : The perturbation parameter EPSR must satisfy that EPSR >= 1.490e-8.')                
@@ -158,23 +158,23 @@ classdef SparseFiniteDifference < handle
             if isempty(this.IndexSet)
                 this.GetOptIndexSet();
             end            
-            if isempty(this.ObjClass) | isempty(this.ObjGetFunMethod) | isempty(this.ObjSetVarMethod) | isempty(this.ObjGetVarMethod) | isempty(this.SparsityPattern)
+            if isempty(this.ObjClass) || isempty(this.ObjGetFunMethod) || isempty(this.ObjSetVarMethod) || isempty(this.ObjGetVarMethod) || isempty(this.SparsityPattern)
                 error('SparseFiniteDifference.GetCentralDiff : at least one of the object class, setting and getting methods of the class, and the sparsity pattern of the Jacobian are not set, yet.')
             end
             try           
-                eval([this.ObjGetFunMethod '( this.ObjClass )']);
+                eval([this.ObjGetFunMethod '( this.ObjClass );']);
             catch exception
                 error('Currently, it seems that the ObjGetFunMethod of the objective class is not properly assigned. ')
             end
             
             try           
-                currentVar=eval([this.ObjGetVarMethod '( this.ObjClass )']); 
+                currentVar=eval([this.ObjGetVarMethod '( this.ObjClass );']); 
             catch exception
                 error('Currently, it seems that the ObjGetVarMethod of the objective class is not properly assigned. ')
             end     
             
             try           
-                eval([this.ObjSetVarMethod '( this.ObjClass ,currentVar )']);
+                eval([this.ObjSetVarMethod '( this.ObjClass ,currentVar );']);
             catch exception
                 error('Currently, it seems that the ObjSetVarMethod of the objective class is not properly assigned. ')
             end                
@@ -207,14 +207,14 @@ classdef SparseFiniteDifference < handle
                 pertVec = sparse(this.IndexSet{i},1,denPertVec,this.numVar,1);
                 forwardPoint = currentVar + pertVec;
                 backwardPoint = currentVar - pertVec;
-                eval([this.ObjSetVarMethod '(this.ObjClass,forwardPoint )']);
-                forwardObjFuns = eval([this.ObjGetFunMethod '(this.ObjClass)']);
+                eval([this.ObjSetVarMethod '(this.ObjClass,forwardPoint );']);
+                forwardObjFuns = eval([this.ObjGetFunMethod '(this.ObjClass);']);
                 
-                eval([this.ObjSetVarMethod '(this.ObjClass,backwardPoint )']);
-                backwardObjFuns = eval([this.ObjGetFunMethod '(this.ObjClass)']);
+                eval([this.ObjSetVarMethod '(this.ObjClass,backwardPoint );']);
+                backwardObjFuns = eval([this.ObjGetFunMethod '(this.ObjClass);']);
                 
                 deltaObjFuns=forwardObjFuns-backwardObjFuns;
-                eval([this.ObjSetVarMethod '(this.ObjClass ,currentVar )']); % restore the original values
+                eval([this.ObjSetVarMethod '(this.ObjClass ,currentVar );']); % restore the original values
                 
                 for j=1:IndexSetLength
                     Jacobian(:,this.IndexSet{i}(j))=this.SparsityPattern(:,this.IndexSet{i}(j))/(2*pertVec(this.IndexSet{i}(j))).*deltaObjFuns; % element-wise multiplication

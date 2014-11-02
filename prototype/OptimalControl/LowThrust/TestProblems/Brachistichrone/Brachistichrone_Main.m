@@ -10,6 +10,7 @@ global igrid iGfun jGvar traj
 
 %  Create trajectory and configure user function names 
 traj                    = Trajectory();
+traj.derivativeMethod   = 'AutomaticDiff'
 traj.pathFunctionName   = 'BrachistichronePathFunction';
 traj.pointFunctionName  = 'BrachistichronePointFunction';
 traj.plotFunctionName   = 'BrachistichronePlotFunction';

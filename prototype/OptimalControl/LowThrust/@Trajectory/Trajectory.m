@@ -37,6 +37,7 @@ classdef Trajectory < handle
         linkageConfig
         % Array of phases to be included in the optimization problem
         phaseList
+        derivativeMethod = 'AutomaticDiff'; % possible methods are CPR, GraphColoring, AutomaticDiff, etc.
         
     end
     
@@ -73,11 +74,15 @@ classdef Trajectory < handle
         %  Sparse matrix.  The sparsity pattern for the complete problem
         %  including cost and constraints.
         sparsityPattern
+        sparseFiniteDiffMethod % proper name?
+        %  Integer:  Internal method Id to avoid string compares during run
+        %  0: None, 1: Automatic, 2: CPR
+        derivativeMethodId
         
         %%  Linkage related data members
         
-        %  Array of Linkages. An array of Linkage classes, 
-        %  one for each linkage in the linkageConfig arrays. 
+        %  Array of Linkages. An array of Linkage classes,
+        %  one for each linkage in the linkageConfig arrays.
         linkageList
         %  Integer Array.  Number of links in each config.
         numLinkages
@@ -104,6 +109,11 @@ classdef Trajectory < handle
         % Integer.  The total number of constraints including all phases
         % and linkages
         totalnumConstraints
+        %  The vector of constraint values
+        constraintVec
+        
+        %  Optimizer
+        trajOptimizer = Optimizer;
         
         %% Housekeeping parameters
         
@@ -115,10 +125,13 @@ classdef Trajectory < handle
         plotUpdateCounter  = 1;
         %  Bool.  Flag to write out debug data
         displayDebugStatus = 0;
+        %  Bool.  Flag for when perturbing for finite differencing
+        isPerturbing = 0;
         
     end
     
-    methods (Access = public)  
+    methods (Access = public)
+        
         
         function obj = Initialize(obj)
             %  Initialize the trajectory and all helper classes.
@@ -127,15 +140,15 @@ classdef Trajectory < handle
             obj.SetBounds();
             obj.SetInitialGuess();
             obj.SetSparsityPattern();
+            obj.InitializeSparseFiniteDiff();
+            obj.trajOptimizer.Initialize();
             obj.WriteSetupReport()
+            
         end
         
         function obj = SetDecisionVector(obj,decVector)
-            %  Sets decision vector by calling each phase and setting
-            %  chunks.
-            if length(decVector) == obj.totalnumDecisionParams
-                obj.decisionVector = decVector;
-            else
+            %  Sets decision vector on trajectory and phases
+            if ~length(decVector) == obj.totalnumDecisionParams
                 errorMsg = ['Length of decisionVector must be ' ...
                     ' equal to totalnumDecisionParams'];
                 errorLoc  = 'Trajectory:SetDecisionVector';
@@ -143,12 +156,19 @@ classdef Trajectory < handle
                 throw(ME);
             end
             
-            %  Eventually need to redimensionalize here
+            %  If using automatic differentiation via IntLab, turn the
+            %  decision vector into a gradient type.  Note this is NOT
+            %  required in GMAT as GMAT will not support auto diff.
+            if obj.derivativeMethodId == 1
+                obj.decisionVector = gradientinit(decVector);
+            else
+                obj.decisionVector = decVector;
+            end
             
             %  Now loop over phases and set on each phase
             for phaseIdx = 1:obj.numPhases
                 obj.phaseList{phaseIdx}.SetDecisionVector(...
-                    decVector(obj.decVecStartIdx(phaseIdx):...
+                    obj.decisionVector(obj.decVecStartIdx(phaseIdx):...
                     obj.decVecEndIdx(phaseIdx)));
             end
             
@@ -158,71 +178,59 @@ classdef Trajectory < handle
             end
             
         end
+        function Jacobian=GetJacobian(obj)
+            %  Returns the sparse Jacobian
+            if obj.derivativeMethodId == 0
+                Jacobian = [];
+            elseif obj.derivativeMethodId == 1
+                Jacobian = [obj.costFunction.dx;obj.constraintVec.dx];
+            elseif obj.derivativeMethodId == 2
+                %  Turn off plotting during finite differencing then turn
+                %  it back on
+                obj.isPerturbing = true();
+                Jacobian=GetCentralDiff(obj.sparseFiniteDiffMethod);
+                obj.isPerturbing = false();
+            else
+                error('Unsupported Derivative Type')
+            end
+        end
         
-        function [costFunction,constraintVec] = ...
-                GetCostConstraintFunctions(obj)
+        function [AllFunctions] = GetCostConstraintFunctions(obj) 
             %  Compute cost and constraint functions
             constraintVec = GetContraintVector(obj);
-            costFunction = GetCostFunction(obj);
+            costFunction  = GetCostFunction(obj);
+            if isa(constraintVec,'gradient')
+                AllFunctions = [costFunction.x;constraintVec.x];
+            else
+                AllFunctions = [costFunction;constraintVec];
+            end
+        end
+        
+        function [decisionVector]=GetDecisionVector(obj) % mod by YK
+            %  Returns the decision vector
+            decisionVector = obj.decisionVector;
         end
         
         function [z,F,xmul,Fmul] = Optimize(obj)
-            %  Call the optimizer.  This is the Main() function and should not
-            %  go here.  Eventually it will move to a new class.
-            % SNOPT Required Globals
-            global igrid iGfun jGvar traj
+            %  Execute the problem
+
+            %  Initialize the trajectory class, which initlizes everything
+            %  required to optimize teh problem
             obj.Initialize();
             
-            %  Set the bounds on the Decision Variables
-            zmax = obj.decisionVecUpperBound;
-            zmin = obj.decisionVecLowerBound;
-            
-            % Set the bounds on the NLP constraints
-            Fmin = [obj.costLowerBound;obj.allConLowerBound];
-            Fmax = [obj.costUpperBound;obj.allConUpperBound];
-            z0   = obj.decisionVector;
-            
-            %% =====  Initialize the optimizer and execute the problem
-            % Set the derivative option
-            snseti('Derivative Option',1);
-            % Set the derivative verification level
-            snseti('Verify Level',-1);
-            % Set name of SNOPT print file
-            snprint('snoptmain.out');
-            % Print CPU times at bottom of SNOPT print file
-            snseti('Timing level',3);
-            % Echo SNOPT Output to MATLAB Command Window
-            snscreen on;
-            %
-            %snseti('Scale Option', 2)
-            % snset('Major optimality tolerance 1e-3')
-            % snset('Major feasibility tolerance 1e-6')
-            
-            % Set initial guess on basis and Lagrange multipliers to zero
-            zmul = zeros(size(z0));
-            zstate = zmul;
-            Fmul = zeros(size(Fmin));
-            Fstate = Fmul;
-            ObjAdd = 0;
-            % Row 1 is the objective function row
-            ObjRow = 1;
-            % Assume for simplicity that all constraints
-            % are purely nonlinear
-            AA      = [];
-            iAfun   = [];
-            jAvar   = [];
-            userfun = 'SNOPTFunctionWrapper';
-            
-            [iGfun,jGvar] = find(obj.sparsityPattern);
-            obj.isOptimizing = true();
+            %  Configure house-keeping data
+            obj.isOptimizing      = true();
             obj.plotUpdateCounter = 1;
+                     
+            %  Call the optmizer and optimize the problem
+            [z,F,xmul,Fmul] = obj.trajOptimizer.Optimize(...
+                obj.decisionVector,obj.decisionVecLowerBound,...
+                 obj.decisionVecUpperBound,...
+                [obj.costLowerBound;obj.allConLowerBound],...
+                [obj.costUpperBound;obj.allConUpperBound],...
+            obj.sparsityPattern)
             
-            %  Call SNOPT.
-            [z,F,xmul,Fmul,info,xstate,Fstate,ns,...
-                ninf,sinf,mincw,miniw,minrw]...
-                = snsolve(z0,zmin,zmax,zmul,zstate,...
-                Fmin,Fmax,Fmul,Fstate,...
-                ObjAdd,ObjRow,AA,iAfun,jAvar,iGfun,jGvar,userfun);
+            %   Configure house-keeping data 
             obj.isOptimizing = false();
             obj.isFinished   = true();
             obj.PlotUserFunction();
@@ -234,8 +242,9 @@ classdef Trajectory < handle
     %% Private methods
     methods (Access = private)
         
-        %%  Initialize link helper classes and construct the linkages
-        function InitializeLinkages(obj)        
+        %%  Intialize link helper classes and construct the linkages
+        function InitializeLinkages(obj)
+            
             linkIdx = 0;
             for configIdx = 1:length(obj.linkageConfig)
                 while linkIdx < length(obj.linkageConfig{configIdx})-1
@@ -249,7 +258,28 @@ classdef Trajectory < handle
             end
             obj.numLinkages = linkIdx;
         end
-        
+        %%  Intialize SFD algorithm
+        function InitializeSparseFiniteDiff(obj) % mod by YK
+            if strcmp(obj.derivativeMethod,'None')
+                obj.derivativeMethodId = 0;
+            elseif strcmp(obj.derivativeMethod,'CPR')
+                obj.sparseFiniteDiffMethod = SparseFiniteDifference;
+                SetSparseFiniteDifference( ...
+                    obj.sparseFiniteDiffMethod, obj, obj.sparsityPattern, ...
+                    'SetDecisionVector','GetDecisionVector', ...
+                    'GetCostConstraintFunctions');
+                GetOptIndexSet(obj.sparseFiniteDiffMethod);
+                obj.derivativeMethodId = 2;
+            elseif strcmp(obj.derivativeMethod,'AutomaticDiff')
+                obj.derivativeMethodId = 1;
+            elseif strcmp(obj.derivativeMethod,'GraphColoring')
+                % to do
+                obj.derivativeMethodId = 3;
+            else
+                error('Unsupported Derivative Method')
+            end
+            
+        end
         %% Intialize the phase helper classes and phase related data
         function InitializePhases(obj)
             
@@ -268,7 +298,7 @@ classdef Trajectory < handle
             obj.totalnumConstraints = 0;
             for phaseIdx = 1:obj.numPhases
                 
-                %  Configure user function names
+                %  Configure user functions
                 obj.phaseList{phaseIdx}.pathFunctionName = ...
                     obj.pathFunctionName;
                 obj.phaseList{phaseIdx}.pointFunctionName = ...
@@ -290,6 +320,7 @@ classdef Trajectory < handle
                     obj.phaseList{phaseIdx}.numConstraints;
                 
             end
+            
             obj.SetChunkIndeces();
         end
         
@@ -307,6 +338,10 @@ classdef Trajectory < handle
                 constraintVec = [constraintVec; ...
                     obj.linkageList{linkIdx}.GetLinkageConstraints()];
             end
+            
+            %  Set the constraint vector on the class for use in partial
+            %  derivatives later
+            obj.constraintVec = constraintVec;
         end
         
         %  Compute the cost function.
@@ -316,6 +351,9 @@ classdef Trajectory < handle
                 costFunction = costFunction + ...
                     obj.phaseList{phaseIdx}.GetCostFunction();
             end
+            
+            %  Set the cost function for use in partials
+            obj.costFunction = costFunction;
         end
         
         %  Configure start and stop indeces for different chunks of the
@@ -405,8 +443,8 @@ classdef Trajectory < handle
                 
                 % Show the plot if criteria pass
                 if (obj.showPlot && obj.isOptimizing && ...
-                        obj.plotUpdateCounter == 1) ||...
-                        (obj.showPlot && obj.isFinished);
+                        obj.plotUpdateCounter == 1 && ~obj.isPerturbing)...
+                        || (obj.showPlot && obj.isFinished);
                     feval(obj.plotFunctionName,obj);
                 end
                 
@@ -462,6 +500,8 @@ classdef Trajectory < handle
                             jGvar(sparseCnt,1) = [decIdx];
                         end
                     end
+                    %  Set the initial guess back % mod by YK
+                    obj.SetDecisionVector(initialGuess);
                 end
                 %  Set the initial guess back
                 obj.SetDecisionVector(initialGuess);
@@ -503,6 +543,7 @@ classdef Trajectory < handle
             obj.sparsityPattern = sparse(iGfun,jGvar,1);
             
         end
+        
     end
 end
 

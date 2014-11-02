@@ -7,4 +7,8 @@ global iGfun jGvar traj
 traj.SetDecisionVector(z);
 C = traj.GetCostConstraintFunctions();
 J = traj.GetJacobian();
-G = snfindG(iGfun,jGvar,J);
+if ~isempty(J)
+    G = snfindG(iGfun,jGvar,J);
+else
+    G = [];
+end

@@ -440,10 +440,6 @@ classdef Phase < handle
             quadCount            = 0;
             for pointCnt = 1:length(obj.timeVector)
                 
-                %                 if pointCnt == 94;
-                %                     x = 9;
-                %                 end
-                
                 %  Prepare then evaluate the path function
                 pointType = obj.timeVectorType(pointCnt);
                 meshIdx  =  obj.GetMeshIndex(pointCnt);
