@@ -77,14 +77,17 @@ classdef ElectricThruster < handle
                     obj.MassFlowCoeff1)/1e6;
             elseif strcmp(obj.ThrustModel,'ConstantThrustAndIsp')
                 %  ConstantThrust is in Newtons, must return K Newton.
-                thrustMag =(obj.ConstantThrust/1e3);
-                mDot = (obj.ConstantThrust)/obj.Isp/(obj.GravitationalAccel);
+                fac = 1000;
+                thrustMag =(obj.ConstantThrust/fac);
+                mDot = (obj.ConstantThrust)/obj.Isp/...
+                    (obj.GravitationalAccel);
             elseif strcmp(obj.ThrustModel,'FixedEfficiency')
                 % Englander: Eq. 15
-                thrustMag = 2*obj.FixedEfficiency*powerUsed/1000/...
-                    obj.Isp/(obj.GravitationalAccel/1000);
-                mDot = 2*obj.FixedEfficiency*powerUsed/1000/...
-                    (obj.Isp*(obj.GravitationalAccel/1000))^2;
+                fac = 1000;
+                thrustMag = 2*obj.FixedEfficiency*powerUsed/fac/...
+                    obj.Isp/(obj.GravitationalAccel/fac);
+                mDot = 2*obj.FixedEfficiency*powerUsed/fac/...
+                    (obj.Isp*(obj.GravitationalAccel/fac))^2;
             end
             
             if obj.debugMath
@@ -116,7 +119,7 @@ classdef ElectricThruster < handle
         function SetPowerAllocated(obj,power)
             obj.powerAllocated = power;
             if obj.debugMath
-                disp(['====== Electric Thruster Debug Data =====']);
+                disp('====== Electric Thruster Debug Data =====');
                 disp(['Power Allocated : ' num2str(power,16)]);
             end
         end
@@ -135,7 +138,7 @@ classdef ElectricThruster < handle
                 yhat = cross(rv,vv);
                 yhat = yhat/norm(yhat);
                 zhat = cross(xhat,yhat);
-                DCM = [xhat yhat zhat];
+                DCM  = [xhat yhat zhat];
             elseif obj.ThrustCoordSys == 3;
                 % J2000Ec
                 DCM(1,1) = 1.0;
@@ -165,14 +168,11 @@ classdef ElectricThruster < handle
             
             %  Compute thrust unit vector in thrust coord sys
             thrustUnitVec  = obj.GetThrustUnitVec();
-
+            
             %  Compute matrix from thrust system to inertial
             Rmat = GetThrustDCM(obj);
             %  Compute the thrust vector
             thrustDir = Rmat*thrustUnitVec;
-            if obj.debugMath
-
-            end
             [thrustMag,mDot,powerUsed] = ...
                 obj.GetNomThrustandMassFlow();
             thrustVec = obj.DutyCycle*obj.ThrustScaleFactor*...

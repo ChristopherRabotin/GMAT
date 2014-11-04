@@ -1,5 +1,5 @@
 %%  Point to the folder one level above the LowThrust Directory
-repoPath = 'C:/Users/sphughe1/Documents/Repos/mesa-jade/';
+repoPath = 'C:/Users/sphughe1/Documents/Repos/mesa-jade/public/gmat/prototype/OptimalControl/';
 
 %%  Required Directory Structure
 %

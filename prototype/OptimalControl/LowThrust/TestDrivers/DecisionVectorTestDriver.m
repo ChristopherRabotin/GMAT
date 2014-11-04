@@ -1,5 +1,5 @@
 %% Configure the test vector 
-
+clc
 %  Properties of the state/controls for continuous optimal control
 %  problem
 numStates       = 7;
@@ -12,6 +12,8 @@ timef           = 12345;
 %  Properties of the discretization of the state and controls
 numStatePoints   = 8;
 numControlPoints = 7;
+numStateStages   = 0;
+numControlStages = 0;
 
 %  Build a dummy V matrix in Eq. 40.
 %  V = [X1 Y1 Z1 VX1 VY1 VZ1 M1]
@@ -64,7 +66,7 @@ stateVector = [zState; zControl; zIntegral; zTime;  zStatic];
 myVector = DecisionVector;
 myVector.ConfigureDecisionVector(numStates,numControls,...
                  numIntegrals,numStaticParams,numStatePoints,...
-                 numControlPoints);
+                 numControlPoints,numStateStages, numControlStages);
 myVector.SetDecisionVector(stateVector)           
 
 %%  Test getting components of decision vector

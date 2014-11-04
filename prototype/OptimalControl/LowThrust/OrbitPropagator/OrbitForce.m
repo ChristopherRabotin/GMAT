@@ -104,8 +104,8 @@ if Force.UseFiniteBurn
         disp(['Acc. Vec    Z   : ' num2str(accFiniteBurn(3),16)]);
     end
 end
-%accFiniteBurn = accFiniteBurn*1000;
-massFlowTotal = massFlowTotal*0;
+%accFiniteBurn = accFiniteBurn*0;
+%massFlowTotal = massFlowTotal*0;
 
 %%  Sum the forces
 Xdot(1:3,1) = vv;

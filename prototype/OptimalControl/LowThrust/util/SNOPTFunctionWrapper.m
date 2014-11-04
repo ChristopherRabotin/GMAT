@@ -1,19 +1,15 @@
 function [C,G] = SNOPTFunctionWrapper(z);
+%  Compute the cost and constraints
+% Construct the vector of constraints plus the objective function
 
 global iGfun jGvar traj
-
-%  Configure automatic differentiation using intlab.
-zad = gradientinit(z);
-traj.SetDecisionVector(zad);
-
-%  Compute the cost and constraints
-constraintVector = traj.GetContraintVector();
-costFunction     = traj.GetCostFunction();
-
-% Construct the vector of constraints plus the objective function
-F = [costFunction; constraintVector];
-
-% Extract gradient information
-C = F.x;
-J = F.dx;
-G = snfindG(iGfun,jGvar,J);
+reDim = true();
+nonDim = true();
+traj.SetDecisionVector(z,reDim);
+C = traj.GetCostConstraintFunctions(nonDim);
+J = traj.GetJacobian(nonDim);
+if ~isempty(J)
+    G = snfindG(iGfun,jGvar,J);
+else
+    G = [];
+end
