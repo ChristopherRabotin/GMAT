@@ -3,10 +3,11 @@ function [C,G] = SNOPTFunctionWrapper(z);
 % Construct the vector of constraints plus the objective function
 
 global iGfun jGvar traj
-
-traj.SetDecisionVector(z);
-C = traj.GetCostConstraintFunctions();
-J = traj.GetJacobian();
+reDim = true();
+nonDim = true();
+traj.SetDecisionVector(z,reDim);
+C = traj.GetCostConstraintFunctions(nonDim);
+J = traj.GetJacobian(nonDim);
 if ~isempty(J)
     G = snfindG(iGfun,jGvar,J);
 else

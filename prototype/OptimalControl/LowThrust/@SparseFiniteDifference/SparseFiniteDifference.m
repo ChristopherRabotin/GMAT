@@ -134,10 +134,10 @@ classdef SparseFiniteDifference < handle
             end
             
             this.numIndexSet = length(this.IndexSet);
-            if this.numIndexSet == this.numVar
-%                 warnMessage=char('SparseFiniteDifference.GetOptIndexSet : The number of variable Sets is equal to', ...
-%                     'the number of variables. The sparse finite differencing is not effective');
-%                 disp(warnMessage)        
+            if this.numIndexSet >= this.numVar - 1
+                 warnMessage=char('SparseFiniteDifference.GetOptIndexSet : The number of variable Sets is equal to', ...
+                     'the number of variables. The sparse finite differencing is not effective');
+                 disp(warnMessage)        
             end
         end                
         function answer=IsStrOrthogonal(this,colVec1,colVec2) % only belong to the CPR based SFD algorithm

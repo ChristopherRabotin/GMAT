@@ -10,10 +10,11 @@ global igrid iGfun jGvar traj
 
 %  Create trajectory and configure user function names 
 traj                    = Trajectory();
+traj.derivativeMethod   = 'AutomaticDiff';
 traj.pathFunctionName   = 'OrbitRaisingPathFunction';
 traj.pointFunctionName  = 'OrbitRaisingPointFunction';
 traj.plotFunctionName   = 'OrbitRaisingPlotFunction';
-traj.showPlot           = true();
+traj.showPlot           = false();
 traj.plotUpdateRate     = 3;
 traj.costLowerBound     = -Inf;
 traj.costUpperBound     = Inf;

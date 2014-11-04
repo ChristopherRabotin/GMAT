@@ -39,6 +39,9 @@ classdef Trajectory < handle
         phaseList
         derivativeMethod = 'AutomaticDiff'; % possible methods are CPR, GraphColoring, AutomaticDiff, etc.
         
+        %  Scaling method
+        scalingMethod = 'None'
+        
     end
     
     properties (SetAccess = 'private')
@@ -112,8 +115,13 @@ classdef Trajectory < handle
         %  The vector of constraint values
         constraintVec
         
-        %  Optimizer
-        trajOptimizer = Optimizer;
+        %%  Helper classes
+        
+        %  Optimizer helper class
+        TrajOptimizer = Optimizer();
+        %  Non-dimensionalizer helper class
+        ScaleHelper   = NonDimensionalizer();
+        
         
         %% Housekeeping parameters
         
@@ -127,6 +135,8 @@ classdef Trajectory < handle
         displayDebugStatus = 0;
         %  Bool.  Flag for when perturbing for finite differencing
         isPerturbing = 0;
+        %  Number of function evals during optimization
+        numFunEvals = 0;
         
     end
     
@@ -141,19 +151,28 @@ classdef Trajectory < handle
             obj.SetInitialGuess();
             obj.SetSparsityPattern();
             obj.InitializeSparseFiniteDiff();
-            obj.trajOptimizer.Initialize();
+            obj.InitializeScaleHelper()
+            obj.TrajOptimizer.Initialize();
             obj.WriteSetupReport()
             
         end
         
-        function obj = SetDecisionVector(obj,decVector)
-            %  Sets decision vector on trajectory and phases
+        function obj = SetDecisionVector(obj,decVector,dimType)
+            %  Sets decision vector on trajectory and phases.
+            %  if dimType = 1, incoming vector is non-dimensional.
+            %  if dimType ~= 1, incoming vector is non-dimensional.
             if ~length(decVector) == obj.totalnumDecisionParams
                 errorMsg = ['Length of decisionVector must be ' ...
                     ' equal to totalnumDecisionParams'];
                 errorLoc  = 'Trajectory:SetDecisionVector';
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
+            end
+            
+            %  Unscale the derivative vector if requested
+            if dimType
+                decVector = ...
+                    obj.ScaleHelper.UnScaleDecisionVector(decVector);
             end
             
             %  If using automatic differentiation via IntLab, turn the
@@ -178,8 +197,10 @@ classdef Trajectory < handle
             end
             
         end
-        function Jacobian=GetJacobian(obj)
+        function Jacobian=GetJacobian(obj,dimType)
             %  Returns the sparse Jacobian
+            %  if dimType == 1, returned Jacobian non-dimensional.
+            %  if dimType ~= 1, incoming vector is dimensional.
             if obj.derivativeMethodId == 0
                 Jacobian = [];
             elseif obj.derivativeMethodId == 1
@@ -193,16 +214,28 @@ classdef Trajectory < handle
             else
                 error('Unsupported Derivative Type')
             end
+            
+            %  Non-dimensionalize if necessary
+            if dimType
+                Jacobian = obj.ScaleHelper.UnScaleJacobian(Jacobian);
+            end
         end
         
-        function [AllFunctions] = GetCostConstraintFunctions(obj) 
+        function [AllFunctions] = GetCostConstraintFunctions(obj,dimType)
             %  Compute cost and constraint functions
-            constraintVec = GetContraintVector(obj);
-            costFunction  = GetCostFunction(obj);
-            if isa(constraintVec,'gradient')
-                AllFunctions = [costFunction.x;constraintVec.x];
+            obj.numFunEvals = obj.numFunEvals + 1;
+            conVec  = GetContraintVector(obj);
+            costFun = GetCostFunction(obj);
+            if isa(conVec,'gradient')
+                AllFunctions = [costFun.x;conVec.x];
             else
-                AllFunctions = [costFunction;constraintVec];
+                AllFunctions = [costFun;conVec];
+            end
+            
+            %  Non-dimensionalize if necessary
+            if dimType
+                AllFunctions = ...
+                    obj.ScaleHelper.ScaleCostConstraintVector(AllFunctions);
             end
         end
         
@@ -213,7 +246,7 @@ classdef Trajectory < handle
         
         function [z,F,xmul,Fmul] = Optimize(obj)
             %  Execute the problem
-
+            
             %  Initialize the trajectory class, which initlizes everything
             %  required to optimize teh problem
             obj.Initialize();
@@ -221,16 +254,24 @@ classdef Trajectory < handle
             %  Configure house-keeping data
             obj.isOptimizing      = true();
             obj.plotUpdateCounter = 1;
-                     
+            obj.numFunEvals       = 0;
+            
+            %  Non-dimensionalize quantities
+            decVec = obj.ScaleHelper.ScaleDecisionVector(...
+                obj.decisionVector);
+            decVecLB = obj.ScaleHelper.ScaleDecisionVector(...
+                obj.decisionVecLowerBound);
+            decVecUB = obj.ScaleHelper.ScaleDecisionVector(...
+                obj.decisionVecUpperBound);
+            
             %  Call the optmizer and optimize the problem
-            [z,F,xmul,Fmul] = obj.trajOptimizer.Optimize(...
-                obj.decisionVector,obj.decisionVecLowerBound,...
-                 obj.decisionVecUpperBound,...
+            [z,F,xmul,Fmul] = obj.TrajOptimizer.Optimize(...
+                decVec,decVecLB,decVecUB,...
                 [obj.costLowerBound;obj.allConLowerBound],...
                 [obj.costUpperBound;obj.allConUpperBound],...
-            obj.sparsityPattern)
+                obj.sparsityPattern);
             
-            %   Configure house-keeping data 
+            %   Configure house-keeping data
             obj.isOptimizing = false();
             obj.isFinished   = true();
             obj.PlotUserFunction();
@@ -385,6 +426,27 @@ classdef Trajectory < handle
                 obj.totalnumDecisionParams);
         end
         
+        %  Initialize the non-dimensionalization helper class
+        function InitializeScaleHelper(obj)
+            
+            %  Instantiate the scaler class with basic info
+            if ~strcmp(obj.derivativeMethod,'None')
+                [jacRowIdxVec,jacColIdxVec] = find(obj.sparsityPattern);
+            else
+                jacRowIdxVec = [];
+                jacColIdxVec = [];
+            end
+            obj.ScaleHelper.Initialize(obj.totalnumDecisionParams,...
+                obj.totalnumConstraints,jacRowIdxVec,jacColIdxVec)
+            
+            %  Set the weights and shifts based on users choice
+            switch obj.scalingMethod
+                case 'None'
+                    %Nothing to do here.  Defaults do this
+            end
+            
+        end
+        
         %  Set bounds for decision vector and constraints
         function obj = SetBounds(obj)
             obj.SetConstraintBounds();
@@ -480,7 +542,7 @@ classdef Trajectory < handle
             %  Intialize the sparse matrices
             method =  1;
             %  This is a generic algorithm, but it will NOT work in GMAT.
-            %  method 1 is based on usin NaN.
+            %  method 1 is based on using NaN.
             if method == 1
                 iGfun = [];
                 jGvar = [];
@@ -489,56 +551,56 @@ classdef Trajectory < handle
                 for decIdx = 1:obj.totalnumDecisionParams
                     tempVec         = obj.decisionVector;
                     tempVec(decIdx) = NaN;
-                    obj.SetDecisionVector(tempVec);
+                    obj.SetDecisionVector(tempVec,false());
                     conVec   = obj.GetContraintVector();
                     costVal  = obj.GetCostFunction();
                     totalVec = [costVal;conVec];
                     for funIdx = 1:obj.totalnumConstraints + 1
                         if isnan(totalVec(funIdx))
                             sparseCnt = sparseCnt + 1;
-                            iGfun(sparseCnt,1) = [funIdx];
-                            jGvar(sparseCnt,1) = [decIdx];
+                            iGfun(sparseCnt,1) = funIdx;
+                            jGvar(sparseCnt,1) = decIdx;
                         end
                     end
                     %  Set the initial guess back % mod by YK
-                    obj.SetDecisionVector(initialGuess);
+                    obj.SetDecisionVector(initialGuess,false());
                 end
                 %  Set the initial guess back
-                obj.SetDecisionVector(initialGuess);
+                obj.SetDecisionVector(initialGuess,false());
             elseif method == 2
-                iGfun = [];
-                jGvar = [];
-                initialGuess = obj.decisionVector;
-                nomconVec    = obj.GetContraintVector();
-                nomcostVal   = obj.GetCostFunction();
-                sparseCnt    = 0;
-                for decIdx = 1:obj.totalnumDecisionParams
-                    tempVec         = obj.decisionVector;
-                    % Evaluate at upper bounds
-                    tempVec(decIdx) = obj.decisionVecUpperBound(decIdx);
-                    obj.SetDecisionVector(tempVec);
-                    highconVec   = obj.GetContraintVector();
-                    highcostVal  = obj.GetCostFunction();
-                    %  Evaluate at lower bounds
-                    tempVec(decIdx) = obj.decisionVecLowerBound(decIdx);
-                    obj.SetDecisionVector(tempVec);
-                    lowconVec   = obj.GetContraintVector();
-                    lowcostVal  = obj.GetCostFunction();
-                    totalVec = [nomcostVal;nomconVec];
-                    lowtotalVec = [highcostVal;lowconVec];
-                    hightotalVec = [highcostVal;lowconVec];
-                    for funIdx = 1:obj.totalnumConstraints + 1
-                        if (lowtotalVec(funIdx) ~= totalVec(funIdx)) || ...
-                                (hightotalVec(funIdx)~= totalVec(funIdx))
-                            sparseCnt = sparseCnt + 1;
-                            iGfun(sparseCnt,1) = [funIdx];
-                            jGvar(sparseCnt,1) = [decIdx];
-                        end
-                    end
-                end
-                %  Set the initial guess back
-                obj.SetDecisionVector(initialGuess);
-                
+                %                 iGfun = [];
+                %                 jGvar = [];
+                %                 initialGuess = obj.decisionVector;
+                %                 nomconVec    = obj.GetContraintVector();
+                %                 nomcostVal   = obj.GetCostFunction();
+                %                 sparseCnt    = 0;
+                %                 for decIdx = 1:obj.totalnumDecisionParams
+                %                     tempVec         = obj.decisionVector;
+                %                     % Evaluate at upper bounds
+                %                     tempVec(decIdx) = obj.decisionVecUpperBound(decIdx);
+                %                     obj.SetDecisionVector(tempVec);
+                %                    % highconVec   = obj.GetContraintVector();
+                %                    % highcostVal  = obj.GetCostFunction();
+                %                     %  Evaluate at lower bounds
+                %                     tempVec(decIdx) = obj.decisionVecLowerBound(decIdx);
+                %                     obj.SetDecisionVector(tempVec);
+                %                     lowconVec   = obj.GetContraintVector();
+                %                     lowcostVal  = obj.GetCostFunction();
+                %                     totalVec = [nomcostVal;nomconVec];
+                %                     lowtotalVec = [highcostVal;lowconVec];
+                %                     hightotalVec = [highcostVal;lowconVec];
+                %                     for funIdx = 1:obj.totalnumConstraints + 1
+                %                         if (lowtotalVec(funIdx) ~= totalVec(funIdx)) || ...
+                %                                 (hightotalVec(funIdx)~= totalVec(funIdx))
+                %                             sparseCnt = sparseCnt + 1;
+                %                             iGfun(sparseCnt,1) = [funIdx];
+                %                             jGvar(sparseCnt,1) = [decIdx];
+                %                         end
+                %                     end
+                %                 end
+                %                 %  Set the initial guess back
+                %                 obj.SetDecisionVector(initialGuess);
+                %
             end
             obj.sparsityPattern = sparse(iGfun,jGvar,1);
             

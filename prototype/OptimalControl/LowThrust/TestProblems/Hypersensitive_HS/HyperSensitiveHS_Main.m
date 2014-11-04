@@ -6,9 +6,10 @@ global igrid iGfun jGvar traj
 
 %  Create trajectory and its settings
 traj                           = Trajectory();
+traj.derivativeMethod          = 'AutomaticDiff';
 traj.pathFunctionName          = 'HyperSensitivePathFunction_HS';   
 traj.plotFunctionName          = 'HyperSensitivePlotFunction_HS'; 
-traj.showPlot                  = true();
+traj.showPlot                  = false();
 traj.costLowerBound            = 0;
 traj.costUpperBound            = Inf;
 traj.plotUpdateRate            = 3;

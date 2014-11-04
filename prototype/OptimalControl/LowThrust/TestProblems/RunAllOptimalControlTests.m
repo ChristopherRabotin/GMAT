@@ -1,4 +1,5 @@
-ClearAll
+ClearAll;
+tic;
 
 %%  Radau solutions
 HyperSensitive_Main
@@ -11,4 +12,6 @@ HyperSensitiveHS_Main
 OrbitRaisingHS_Main
 BrachistichroneHS_Main
 HyperSensitiveMultiPhaseHS_Main
+
+toc
 

@@ -51,7 +51,7 @@ classdef NonDimensionalizer < handle
             % Initialize scaling parameters to ones and zeros.
             obj.decVecWeight = ones(obj.numVars);
             obj.decVecShift  = zeros(obj.numVars);
-            obj.conVecWeight    = ones(obj.numRowsinSparsity);
+            obj.conVecWeight = ones(obj.numCons)*3.21354;
             obj.costWeight   = 1;
         end
         
@@ -90,28 +90,49 @@ classdef NonDimensionalizer < handle
             costFunc= costFunc*obj.costWeight;
         end
         
+        function [costConVec] = ScaleCostConstraintVector(obj,costConVec)
+            costConVec(1) = obj.ScaleCostFunction(costConVec(1));
+            costConVec(2:end) = ...
+                obj.ScaleConstraintVector(costConVec(2:end));
+            
+        end
+        
         function [costFunc] =  UnScaleCostFunction(obj,costFunc)
             %  Unscale the cost function
             costFunc= costFunc/obj.costWeight;
         end
         
         function [jacArray] = ScaleJacobian(obj,jacArray)
+            
+            %  If Jacobian is undefined (i.e. optimizer is doing FD) 
+            if obj.numRowsinSparsity == 0
+                return
+            end
+            
             %  Scale the Jacobian
             for arrIdx = 1:obj.numRowsinSparsity
                 funIdx = obj.jacRowIdxVec(arrIdx);
                 varIdx = obj.jacColIdxVec(arrIdx);
                 jacArray(funIdx,varIdx) = ...
-                    jacArray(funIdx,varIdx)*obj.conVecWeight(funIdx);
+                    jacArray(funIdx,varIdx)*obj.conVecWeight(funIdx)...
+                    *obj.decVecWeight(varIdx);
             end
         end
         
         function [jacArray] = UnScaleJacobian(obj,jacArray)
+            
+            %  If Jacobian is undefined (i.e. optimizer is doing FD) 
+            if obj.numRowsinSparsity == 0
+                return
+            end
+       
             %  Unscale the Jacobian
             for arrIdx = 1:obj.numRowsinSparsity
                 funIdx = obj.jacRowIdxVec(arrIdx);
                 varIdx = obj.jacColIdxVec(arrIdx);
                 jacArray(funIdx,varIdx) = ...
-                    jacArray(funIdx,varIdx)/obj.conVecWeight(funIdx);
+                    jacArray(funIdx,varIdx)/obj.conVecWeight(funIdx)/...
+                    obj.decVecWeight(varIdx);
             end
         end
         
@@ -130,18 +151,18 @@ classdef NonDimensionalizer < handle
             
             %  Validate the input dimensions
             if length(conVecWeight) ~= obj.numCons
-                errorMsg = ['Length of constraint weight vector'  ... 
+                errorMsg = ['Length of constraint weight vector'  ...
                     ' must be equal to numCons'];
                 errorLoc= ['NonDimensionalizer:' ...
                     'SetConstraintScaling_UserDefined'];
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
             end
-           
-           % Set the weight array
-           obj.conVecWeight = conVecWeight;
+            
+            % Set the weight array
+            obj.conVecWeight = conVecWeight;
         end
-
+        
         function SetCostScaling_UserDefined(obj,costWeight)
             %  Set the scaling of the cost functin directly
             
@@ -153,9 +174,9 @@ classdef NonDimensionalizer < handle
                 ME = MException(errorLoc,errorMsg);
                 throw(ME);
             end
-           
-           % Set the weight array
-           obj.costWeight = costWeight;
+            
+            % Set the weight array
+            obj.costWeight = costWeight;
         end
         
     end

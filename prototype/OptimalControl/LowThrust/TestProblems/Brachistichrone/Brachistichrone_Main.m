@@ -37,21 +37,21 @@ phase1.finalTimeLowerBound     = 0;
 phase1.finalTimeUpperBound     = 100;
 
 %  Set state and control properties
-phase1.numStates                 = 3;
-phase1.numControls               = 1;
-phase1.initialGuessMode          = 'LinearNoControl';
-phase1.initialStateLowerBound    = [0 0 0]';
-phase1.initialGuessState         = [0 0 0]'; % [r0 theta0 vr0 vtheta0 m0]
-phase1.initialStateUppperBound   = [0 0 0]';
-phase1.initialGuessEpoch         = 0;
-phase1.finalStateLowerBound      = [2 -2 -10]';
-phase1.finalGuessState           = [2 -2 -2]'; % [rf thetaf vrf vthetaf mf]
-phase1.finalStateUpperBound      = [2 -2 0]';
-phase1.finalGuessEpoch           = 2;
-phase1.stateLowerBound           = [-10 -10 -10]';
-phase1.stateUpperBound           = [10 0 0]';
-phase1.controlUpperBound         = [10]';
-phase1.controlLowerBound         = [-10]';
+phase1.numStates                = 3;
+phase1.numControls              = 1;
+phase1.initialGuessMode         = 'LinearNoControl';
+phase1.initialStateLowerBound   = [0 0 0]';
+phase1.initialGuessState        = [0 0 0]'; % [r0 theta0 vr0 vtheta0 m0]
+phase1.initialStateUppperBound  = [0 0 0]';
+phase1.initialGuessEpoch        = 0;
+phase1.finalStateLowerBound     = [2 -2 -10]';
+phase1.finalGuessState          = [2 -2 -2]'; % [rf thetaf vrf vthetaf mf]
+phase1.finalStateUpperBound     = [2 -2 0]';
+phase1.finalGuessEpoch          = 2;
+phase1.stateLowerBound          = [-10 -10 -10]';
+phase1.stateUpperBound          = [10 0 0]';
+phase1.controlUpperBound        = [10]';
+phase1.controlLowerBound        = [-10]';
 
 %==========================================================================
 %% =====  Define the linkage configuration and optimize
