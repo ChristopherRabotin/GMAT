@@ -105,7 +105,8 @@ public:
    
    // Getting file names
    std::string GetFileName(const std::string &fileType, bool getFullpath = false,
-                           bool forInput = true);
+                           bool forInput = true, bool writeWarning = false,
+                           bool writeInfo = false);
    
    // StopCondition
    GmatBase* CreateStopCondition(const std::string &type,
@@ -135,6 +136,7 @@ public:
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
+   Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
    bool InterpretScript(const std::string &filename, bool readBack = false,

@@ -371,7 +371,8 @@ public:
    
    // Getting file names
    std::string GetFileName(const std::string &fileType, bool getFullpath = false,
-                           bool forInput = true);
+                           bool forInput = true, bool writeWarning = false,
+                           bool writeInfo = false);
    
    // Mission
    bool LoadDefaultMission();
@@ -391,6 +392,7 @@ public:
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
    Gmat::RunState GetUserInterrupt();
    Gmat::RunState GetRunState();
+   Gmat::RunState GetDetailedRunState(Integer sandboxNum = 1);
    
    // Script
    bool InterpretScript(const std::string &filename, bool readBack = false,
@@ -474,6 +476,7 @@ private:
    // For Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
+   void ShowMissionSequence(const std::string &msg = "");
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
    
    Moderator();
@@ -514,10 +517,15 @@ private:
    LeapSecsFileReader *theLeapSecsFile;
    Interface *theMatlabInterface;
    Gmat::RunState runState;
-
+   Gmat::RunState detailedRunState;
+   
    // Dynamic library data table
    std::map<std::string, DynamicLibrary*>   userLibraries;
    std::vector<Gmat::PluginResource*>  userResources;
+
+   // Thruster related
+   static bool thrusterDeprecateMsgWritten;
+   static bool fuelTankDeprecateMsgWritten;
 };
 
 #endif // Moderator_hpp

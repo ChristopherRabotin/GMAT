@@ -131,7 +131,7 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
    {
       // Find personalization file from the search path (LOJ: 2014.07.02)
       //std::string pfile = FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE);
-      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, true);
+      std::string pfile = FileManager::Instance()->FindPath("", "PERSONALIZATION_FILE", true, false, false);
       #ifdef DEBUG_GUI_CONFIG
       MessageInterface::ShowMessage("   pfile = '%s'\n", pfile.c_str());
       #endif
@@ -140,11 +140,14 @@ wxConfigBase* GmatAppData::GetPersonalizationConfig()
       //if (!FileManager::Instance()->DoesDirectoryExist(pfile))
       if (pfile == "")
       {
-         //@todo - Show actual cross-platform home directory in the message
-         MessageInterface::PopupMessage
-            ( Gmat::WARNING_, "Invalid personalization file specified: '%s',\n"
-              "   so creating local configuration file 'GMAT.ini' in the user's home directory.",
-              pfile.c_str() );
+         // Show actual cross-platform home directory in the message
+         if (GmatGlobal::Instance()->IsWritingFilePathInfo())
+         {
+            MessageInterface::ShowMessage
+               ( "*** WARNING *** Invalid personalization file specified: '%s',\n"
+                 "   so creating local configuration file 'GMAT.ini' in the user's home directory.",
+                 pfile.c_str() );
+         }
          
          // Make blank pfile so that default local configureation file can be written
          // to user's home directory 
@@ -319,7 +322,8 @@ bool GmatAppData::SetIcon(wxTopLevelWindow *topWindow, const std::string &called
    #endif
    
    // Write non-existent icon file warning per GMAT session
-   static bool writeWarning = true;
+   // Changed to write no warning (LOJ: 2014.09.19)
+   static bool writeWarning = false;
    FileManager *fm = FileManager::Instance();
    
    if (theIconFile == "")
@@ -410,8 +414,7 @@ void GmatAppData::SetIconFile()
    
    // Set icon file from the search path (LOJ: 2014.07.02)
    FileManager *fm = FileManager::Instance();
-   //theIconFile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
-   theIconFile = fm->FindMainIconFile(true).c_str();
+   theIconFile = fm->FindMainIconFile().c_str();
    
    if (theIconFile != "")
       theIconFileSet = true;

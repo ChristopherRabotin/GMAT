@@ -57,6 +57,9 @@ public:
                           bool includeLower = false,
                           bool includeUpper = false);
    
+   bool CheckLength(const std::string &str, const std::string &field, const std::string &expLength,
+                    const Integer min, const Integer max);
+
    bool CheckVariable(const std::string &varName, ObjectTypeArray ownerTypes,
                       const std::string &field, const std::string &expRange,
                       bool allowNumber = true, bool allowNonPlottable = false,
