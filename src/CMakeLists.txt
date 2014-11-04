@@ -17,6 +17,23 @@
 #
 
 # ====================================================================
+# Output directories based on configuration type.
+# (Make all output go to the /gmat/application/bin/ directory.
+
+# First for the generic no-config case (e.g. with mingw)
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application/bin" )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application/bin" )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application/bin" )
+
+# Second, for multi-config builds (e.g. msvc)
+foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+  string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+  set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${PROJECT_SOURCE_DIR}/application/bin" )
+  set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${PROJECT_SOURCE_DIR}/application/bin" )
+  set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${PROJECT_SOURCE_DIR}/application/bin" )
+endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
+# ====================================================================
 # GMAT base library
 ADD_SUBDIRECTORY(base)
 

@@ -24,7 +24,7 @@ SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
-ADD_DEFINITIONS("-DCINTERFACE_EXPORTS")
+ADD_DEFINITIONS("-DLOCATOR_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
@@ -109,13 +109,4 @@ endif()
 
 # ====================================================================
 # add the install targets
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../application/plugins")
-
 ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
-
-# specify the version of the library. 
-if(WIN32)
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
-else()
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} )
-endif()

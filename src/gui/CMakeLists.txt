@@ -375,8 +375,6 @@ endif()
 # compilation
 
 # add the install targets
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
-
 if(WIN32)
 	if(64_BIT)
 		SET(WXCONTRIB_LIB_DIR "${WXWIDGET_DIR}/lib/vc_amd64_dll")

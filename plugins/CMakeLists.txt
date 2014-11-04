@@ -14,6 +14,24 @@
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
+
+# ====================================================================
+# Output directories based on configuration type.
+# (Make all output go to the /gmat/application/bin/ directory.
+
+# First for the generic no-config case (e.g. with mingw)
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application/plugins" )
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application/plugins" )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application/plugins" )
+
+# Second, for multi-config builds (e.g. msvc)
+foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+  string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+  set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${PROJECT_SOURCE_DIR}/application/plugins" )
+  set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${PROJECT_SOURCE_DIR}/application/plugins" )
+  set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${PROJECT_SOURCE_DIR}/application/plugins" )
+endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
 
@@ -143,11 +161,20 @@ if (PLUGIN_STATION)
   SET(PluginTargets ${PluginTargets} ${tmp})
 endif()
 
-# Enable RPATH on Mac so that the build path is not hardcoded into
-# the library's internal name. This is necessary to use GMAT from
-# a 3rd-party app such as Matlab. Note that this will no longer be
-# necessary once the project moves to CMake 3.0.
+# Set plugin properties all at once
 if(PluginTargets)
+  # Specify the library version
+  SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES VERSION ${GMAT_VERSION})
+
+  # Specify link flags for Win32 targets
+  if(WIN32)
+    SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
+  endif()
+
+  # Enable RPATH on Mac so that the build path is not hardcoded into
+  # the library's internal name. This is necessary to use GMAT from
+  # a 3rd-party app such as Matlab. Note that this will no longer be
+  # necessary once the project moves to CMake 3.0.
   if(APPLE)
     SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES MACOSX_RPATH TRUE)
   endif()

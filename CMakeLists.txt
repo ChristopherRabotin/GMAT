@@ -26,18 +26,20 @@ PROJECT(GMAT)
 SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
-# Set SPICE and wxWidgets directories
+# Set default dependency directories
 if(WIN32)
-  SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
-  SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice/windows" CACHE PATH "CSpice Root Directory")
+  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(CSPICE_DIR "${PROJECT_SOURCE_DIR}/depends/cspice/windows" CACHE PATH "CSpice Root Directory")
+  # F2C_DIR will be set after validating CSPICE_DIR (further down)
 
 elseif(UNIX)
-  SET(WXWIDGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
 
   if(APPLE)
-    SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice/macosx" CACHE PATH "CSpice Root Directory")
+    SET(CSPICE_DIR "${PROJECT_SOURCE_DIR}/depends/cspice/macosx" CACHE PATH "CSpice Root Directory")
   else()
-    SET(CSPICE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/depends/cspice/linux" CACHE PATH "CSpice Root Directory")
+    SET(CSPICE_DIR "${PROJECT_SOURCE_DIR}/depends/cspice/linux" CACHE PATH "CSpice Root Directory")
   endif()
 
 endif()
@@ -87,7 +89,18 @@ endif()
 if( IS_DIRECTORY ${CSPICE_DIR} )
   MESSAGE(STATUS "SPICE FOUND in " ${CSPICE_DIR})
 else()
-  MESSAGE(FATAL_ERROR "SPICE NOT FOUND in directory " ${CSPICE_DIR} " , Stopping build.")
+  MESSAGE(FATAL_ERROR "SPICE NOT FOUND in " ${CSPICE_DIR} " , Stopping build.")
+endif()
+
+# Set F2C directory
+if(WIN32)
+  SET(F2C_DIR "${CSPICE_DIR}/include")
+else()
+  if( IS_DIRECTORY ${F2C_DIR} )
+    MESSAGE(STATUS "F2C FOUND in " ${F2C_DIR})
+  else()
+    MESSAGE(FATAL ERROR "F2C NOT FOUND in" ${F2C_DIR} " , Stopping build.")
+  endif()
 endif()
 
 # If building GUI, check if wxWidgets directory exists
@@ -95,12 +108,13 @@ if( GMAT_GUI )
   if( IS_DIRECTORY ${WXWIDGET_DIR} )
     MESSAGE(STATUS "wxWidgets FOUND in" ${WXWIDGET_DIR})
   else()
-    MESSAGE(WARNING "wxWidgets NOT FOUND in directory " ${WXWIDGET_DIR} " , GUI disabled.")
+    MESSAGE(WARNING "wxWidgets NOT FOUND in " ${WXWIDGET_DIR} " , GUI disabled.")
     SET(GMAT_GUI OFF CACHE BOOL "Disabled due to missing wxWidgets" FORCE)
   endif()
 endif()
 
-# Default to Release build
+# Default to Release build on single-config generators
+# e.g. make, but not VisualStudio
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release)
 endif()
@@ -123,7 +137,7 @@ endif()
 
 # ====================================================================
 #need to include Find****.cmake
-SET( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+SET( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # ====================================================================
 # Common build options
@@ -195,23 +209,6 @@ endif()
 if(NOT WIN32)
   ADD_DEFINITIONS("-DLINUX_MAC")
 endif()
-
-# ====================================================================
-# Output directories based on configuration type.
-# (Make all output go to the /gmat/application/bin/ directory.
-
-# First for the generic no-config case (e.g. with mingw)
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/application/bin" )
-set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/application/bin" )
-set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/application/bin" )
-
-# Second, for multi-config builds (e.g. msvc)
-foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-  string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-  set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_CURRENT_SOURCE_DIR}/application/bin" )
-  set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_CURRENT_SOURCE_DIR}/application/bin" )
-  set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_CURRENT_SOURCE_DIR}/application/bin" )
-endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 # ====================================================================
 # Go to src directory and look for CMake instructions there

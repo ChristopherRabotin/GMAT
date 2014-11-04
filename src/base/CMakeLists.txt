@@ -530,9 +530,6 @@ SET(BASE_SRCS
 
 # ====================================================================
 # add the install targets
-# NOTE from Ravi: This should be INSTALL(...) to work with standard CMake
-# usage. That way the user can do "make install" to install everything.
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
 
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS})
