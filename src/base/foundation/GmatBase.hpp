@@ -166,6 +166,7 @@ public:
    virtual bool         ExecuteCallback();
    virtual bool         IsCallbackExecuting();
    virtual bool         PutCallbackData(std::string &data);
+   virtual bool         PutCallbackRealData(RealArray &data);
    virtual std::string  GetCallbackResults();
 
    // required method for all subclasses
