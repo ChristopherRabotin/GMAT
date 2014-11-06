@@ -37,6 +37,7 @@ function [retval] = opengmat
 root_path = findgmatrootpath;
     
 % Copy startup file to local directory if needed
+gsf = which('gmat_startup_file.txt');
 copygsf = ~strcmp(fileparts(gsf), pwd);
 if copygsf
     disp('Local GMAT startup file missing ... copying global GMAT startup file:');
