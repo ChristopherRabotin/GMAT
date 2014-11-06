@@ -41,7 +41,7 @@ GMAT Prop.InitialStepSize = 60;
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------
-%BeginMissionSequence
-PrepareMissionSequence;
+BeginMissionSequence
+%PrepareMissionSequence;
 Propagate DefaultProp(DefaultSC, 'AMatrix');
 Propagate Prop(DefaultSC, 'AMatrix');

@@ -104,3 +104,7 @@ endif()
 # ====================================================================
 # add the install targets
 ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+
+INSTALL( TARGETS ${TargetName}
+  DESTINATION plugins
+  )

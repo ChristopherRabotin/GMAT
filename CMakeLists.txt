@@ -26,6 +26,12 @@ PROJECT(GMAT)
 SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
+# Set default GMAT installation location
+# Can be overridden by using "-DCMAKE_INSTALL_PREFIX=/foo/bar" at command line
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
+endif()
+
 # Set default dependency directories
 if(WIN32)
   SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
@@ -147,6 +153,11 @@ if(WIN32)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W2")
 endif()
 
+# Enable parallel builds on VisualStudio
+if(MSVC)
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
 if(UNIX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 endif()
@@ -217,3 +228,19 @@ ADD_SUBDIRECTORY(src)
 # ====================================================================
 # Go to plugins directory and look for CMake instructions there
 ADD_SUBDIRECTORY(plugins)
+
+# ====================================================================
+# Set install instructions
+# executed when running "make install" or building the VS "INSTALL" target
+MESSAGE(STATUS "Will install GMAT to " ${CMAKE_INSTALL_PREFIX})
+INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
+  DESTINATION ${CMAKE_INSTALL_PREFIX}
+  USE_SOURCE_PERMISSIONS
+  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
+  PATTERN "debug" EXCLUDE # don't copy debug directory
+  )
+INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/matlab/libCInterface
+  USE_SOURCE_PERMISSIONS
+  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
+  )

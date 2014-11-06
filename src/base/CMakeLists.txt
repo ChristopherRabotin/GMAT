@@ -540,3 +540,7 @@ if(WIN32)
 else()
 	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} )
 endif()
+
+INSTALL( TARGETS ${TargetName}
+  DESTINATION bin
+  )
