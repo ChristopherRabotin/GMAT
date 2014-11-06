@@ -154,10 +154,14 @@ if(PluginTargets)
     SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
   endif()
 
-  # Enable RPATH on Mac so that the build path is not hardcoded into
+  # Enable RPATH on Mac/Linux so that the build path is not hardcoded into
   # the library's internal name. This is necessary to use GMAT from
   # a 3rd-party app such as Matlab.
-  if(APPLE)
-    SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES MACOSX_RPATH TRUE INSTALL_RPATH "@loader_path/")
+  if(UNIX)
+    if(APPLE)
+      SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES MACOSX_RPATH TRUE INSTALL_RPATH "@loader_path/")
+    else()
+      SET_TARGET_PROPERTIES(${PluginTargets} PROPERTIES INSTALL_RPATH "\$ORIGIN/")
+    endif()
   endif()
 endif()

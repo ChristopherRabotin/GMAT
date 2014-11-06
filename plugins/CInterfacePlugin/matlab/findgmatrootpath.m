@@ -19,7 +19,9 @@ function root_path = findgmatrootpath
 
 fid = fopen('gmat_startup_file.txt','r');
 if fid == -1
-    error('gmat_startup_file not found on current path')
+    error('GMAT:findgmatrootpath', ...
+        ['gmat_startup_file.txt not found in MATLAB path. Ensure you have a valid GMAT ' ...
+        'installation and add its appropriate paths to your MATLAB path.']);
 else
     gsfl = '';
     while ~strncmp(gsfl,'ROOT_PATH',9)
@@ -28,4 +30,8 @@ else
     fclose(fid);
     ps = strfind(gsfl,'=');
     root_path = strtrim(gsfl(ps+1:end));
+    if ~exist(fullfile(root_path, 'bin', 'gmat_startup_file.txt'))
+        error('GMAT:findgmatrootpath', ...
+            'The ROOT_PATH variable in gmat_startup_file.txt does not point to a valid GMAT installation.');
+    end
 end

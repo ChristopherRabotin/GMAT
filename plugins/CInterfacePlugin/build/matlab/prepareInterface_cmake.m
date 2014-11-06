@@ -9,29 +9,24 @@
 % Adapted to create prototypes using installed GMAT CInterface instead of
 % in-build CInterface.
 
-disp('This script builds the GMAT interface prototypes by calling');
-disp('loadlibrary. The prototype files are placed in');
-disp('GMAT/matlab/libCInterface/');
+disp('This script builds the GMAT interface prototype files and places them');
+disp('in <GMAT>/matlab/libCInterface/ for the currently installed <GMAT> directory');
 
 % Make sure GMAT is installed and in MATLAB's search path
 if(exist('findgmatrootpath') ~= 2)
     error('GMAT:prepareInterface', ...
-    ['GMAT not installed in MATLAB path. Ensure you have a valid GMAT ' ...
-    'installation and its top-level path is added to your MATLAB path.']);
+    ['GMAT not found in MATLAB path. Ensure you have a valid GMAT ' ...
+    'installation and its appropriate paths added to your MATLAB path.']);
 end
 
 % Check that ROOT_PATH of startup file is a valid GMAT installation
 root_path = findgmatrootpath;
-if ~exist(fullfile(root_path, 'bin', 'gmat_startup_file.txt'))
-    error('GMAT:prepareInterface', ...
-        ['The ROOT_PATH variable in gmat_startup_file.txt does not '...
-        'point to a valid GMAT installation.']);
-end
 
 thisdir = fileparts(mfilename('fullpath'));
 
 % Path to CInterface shared library
-libfile = fullfile(root_path, 'bin', 'libCInterface');
+libname = 'libCInterface';
+libfile = fullfile(root_path, 'bin', libname);
 
 % Path to header file describing library functions
 hfile = fullfile(thisdir, '..', '..', 'src', 'plugin', ...
@@ -46,12 +41,21 @@ destdir = fullfile(root_path, 'matlab', 'libCInterface');
 % Generate CInterface MATLAB prototypes
 [notfound, warnings] = loadlibrary(libfile, hfile, ...
     'mfilename', 'interfacewrapper', 'includepath', incdir);
+unloadlibrary(libname);
 
 % Install prototype wrapper
 movefile('interfacewrapper.m', destdir);
+disp('Moving file interfacewrapper.m');
 
 % Install thunk files
-d = dir(['libCInterface_thunk_' computer() '*']);
+validexts = {'.dll', '.dylib', '.so'};
+d = dir(['libCInterface_thunk_' computer('arch') '*']);
 for i = 1:length(d)
-    movefile(d(i).name, destdir);
+    [~,~,ext] = fileparts(d(i).name);
+    if(isempty(strmatch(ext, validexts, 'exact')))
+        delete(d(i).name);
+    else
+        disp(['Moving file ' d(i).name]);
+        movefile(d(i).name, destdir);
+    end
 end
