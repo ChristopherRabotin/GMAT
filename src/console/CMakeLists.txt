@@ -20,6 +20,8 @@ else()
 	SET(CONSOLETARGET "gmatConsole")
 endif()
 
+SET(TargetName ${CONSOLETARGET})
+
 # ====================================================================
 # SPICE specifics
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
@@ -95,10 +97,10 @@ endif()
 # compilation
 
 # add the install targets
-ADD_EXECUTABLE(${CONSOLETARGET} ${SRCS})
+ADD_EXECUTABLE(${TargetName} ${SRCS})
 
-SET_TARGET_PROPERTIES(${CONSOLETARGET} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
 
-INSTALL( TARGETS ${CONSOLETARGET}
+INSTALL( TARGETS ${TargetName}
   DESTINATION bin
   )

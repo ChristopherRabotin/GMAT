@@ -17,7 +17,7 @@ MESSAGE("GMAT GUI building setup " ${VERSION})
 
 # ====================================================================
 SET(GUITARGET "GmatGui")
-
+SET(TargetName ${GUITARGET})
 
 # ====================================================================
 # DEVIL package
@@ -96,7 +96,7 @@ elseif(APPLE)
 	LINK_LIBRARIES(${OpenGL_LIBRARY})
     
     #SET(EXTRA_LIBS ${GLU_LIBRARY} ${OpenGL_LIBRARY})
-    #target_link_libraries(${GUITARGET} ${EXTRA_LIBS})
+    #target_link_libraries(${TargetName} ${EXTRA_LIBS})
     #LINK_LIBRARIES("GLU")
 else()
 	LINK_LIBRARIES("GL")
@@ -337,12 +337,12 @@ SET(GUI_SRCS
 if(APPLE)
 #macrez:
 #	echo "linking Carbon and wx resource files ......."
-#	$(REZ) -d WXUSINGDLL -o $(GUITARGET)
-#	cp -f $(GUITARGET) ../../application/bin/.
+#	$(REZ) -d WXUSINGDLL -o $(TargetName)
+#	cp -f $(TargetName) ../../application/bin/.
 
 #macosx: 
 #	echo "building Mac application bundle ......."
-#	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/bin/$(GUITARGET)
+#	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/bin/$(TargetName)
 #	mkdir -p $(CONTENTS_DIR)
 #	mkdir -p $(MACOS_DIR)
 #	mkdir -p $(RES_DIR)
@@ -350,7 +350,7 @@ if(APPLE)
 #	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
 #	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
 #	echo -n "APPL????" > $(MAC_PKGINFO)
-#	ln -f $(TOP_DIR)/application/bin/$(GUITARGET) $(MAC_APP)
+#	ln -f $(TOP_DIR)/application/bin/$(TargetName) $(MAC_APP)
 #	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
 #	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 #	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/lib $(BASELIBNAME) $(PCRE_LIB_LOC)
@@ -388,44 +388,44 @@ if(WIN32)
 	LINK_LIBRARIES("${WXCONTRIB_LIB_DIR}/wxmsw28_stc.lib")
 endif()
 
-ADD_EXECUTABLE(${GUITARGET} ${GUI_SRCS})
+ADD_EXECUTABLE(${TargetName} ${GUI_SRCS})
 
 if(UNIX)
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_core-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_richtext-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_aui-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_xrc-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_qa-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_html-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_adv-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_stc-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_base_xml-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_base_net-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_base-2.8.so")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_gl-2.8.so")
-	#target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_netutils-2.8.so")	//Does not build on linux/mac
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_core-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_richtext-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_aui-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_xrc-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_qa-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_html-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_adv-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_stc-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_xml-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_net-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base-2.8.so")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_gl-2.8.so")
+	#target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_netutils-2.8.so")	//Does not build on linux/mac
 elseif(APPLE)
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_core-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_richtext-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_aui-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_xrc-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_qa-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_html-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_adv-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_stc-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_base_carbon_xml-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_base_carbon_net-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_base_carbon-2.8.dylib")
-	target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_mac_gl-2.8.dylib")
-	#target_link_libraries(${GUITARGET} "/${WXWIDGET_DIR}/lib/libwx_gtk2_netutils-2.8.dylib")	//Does not build on linux/mac
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_core-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_richtext-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_aui-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_xrc-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_qa-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_html-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_adv-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_stc-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_carbon_xml-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_carbon_net-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_carbon-2.8.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_gl-2.8.dylib")
+	#target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_netutils-2.8.dylib")	//Does not build on linux/mac
 endif()
 
 if(WIN32)
-	SET_TARGET_PROPERTIES(${GUITARGET} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}" LINK_FLAGS "/SUBSYSTEM:windows")
+	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}" LINK_FLAGS "/SUBSYSTEM:windows")
 else()
-	SET_TARGET_PROPERTIES(${GUITARGET} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
+	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
 endif()
 
-INSTALL( TARGETS ${GUITARGET}
+INSTALL( TARGETS ${TargetName}
   DESTINATION bin
   )

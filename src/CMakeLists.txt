@@ -16,29 +16,40 @@
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
+# Variable used to collect a list of all src targets
+SET(SrcTargets "")
+
 # ====================================================================
 # GMAT base library
-ADD_SUBDIRECTORY(base)
+SET(SRCDIR "base")
+ADD_SUBDIRECTORY(${SRCDIR})
+GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+SET(SrcTargets ${SrcTargets} ${tmp})
+
+
+# ====================================================================
+# Console binary
+SET(SRCDIR "console")
+ADD_SUBDIRECTORY(${SRCDIR})
+GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+SET(SrcTargets ${SrcTargets} ${tmp})
+
+# ====================================================================
+# GUI binary
+if (GMAT_GUI)
+  SET(SRCDIR "gui")
+  ADD_SUBDIRECTORY(${SRCDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
+  SET(SrcTargets ${SrcTargets} ${tmp})
+endif()
 
 # Enable RPATH on Mac/Linux so that the build path is not hardcoded into
 # the library's internal name. This is necessary to use GMAT from
 # a 3rd-party app such as Matlab.
 if(UNIX)
-  GET_DIRECTORY_PROPERTY(BaseTarget DIRECTORY base DEFINITION TargetName)
   if(APPLE)
-    SET_TARGET_PROPERTIES(${BaseTarget} PROPERTIES MACOSX_RPATH TRUE INSTALL_RPATH "@loader_path/")
+    SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES MACOSX_RPATH TRUE INSTALL_RPATH "@loader_path/")
   else()
-    SET_TARGET_PROPERTIES(${BaseTarget} PROPERTIES INSTALL_RPATH "\$ORIGIN/")
+    SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES INSTALL_RPATH "\$ORIGIN/")
   endif()
 endif()
-
-# ====================================================================
-# Console binary
-ADD_SUBDIRECTORY(console)
-
-# ====================================================================
-# GUI binary
-if (GMAT_GUI)
-  ADD_SUBDIRECTORY(gui)
-endif()
-

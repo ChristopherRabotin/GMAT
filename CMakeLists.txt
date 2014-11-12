@@ -230,17 +230,5 @@ ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(plugins)
 
 # ====================================================================
-# Set install instructions
-# executed when running "make install" or building the VS "INSTALL" target
-MESSAGE(STATUS "Will install GMAT to " ${CMAKE_INSTALL_PREFIX})
-INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
-  DESTINATION ${CMAKE_INSTALL_PREFIX}
-  USE_SOURCE_PERMISSIONS
-  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
-  PATTERN "debug" EXCLUDE # don't copy debug directory
-  )
-INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/matlab/libCInterface
-  USE_SOURCE_PERMISSIONS
-  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
-  )
+# Set overall install instructions
+ADD_SUBDIRECTORY(build/install)

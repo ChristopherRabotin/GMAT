@@ -1,0 +1,51 @@
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+# CMAKE script file for GMAT Project
+# This file must be installed in the GMAT build/install directory
+#
+# Original Author: Ravi Mathur
+#
+# DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
+#
+
+# ====================================================================
+# Set overall install instructions
+# executed when running "make install" or building the VS "INSTALL" target
+
+# Install the default application/ directory structure
+MESSAGE(STATUS "Will install GMAT to " ${CMAKE_INSTALL_PREFIX})
+INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
+  DESTINATION ${CMAKE_INSTALL_PREFIX}
+  USE_SOURCE_PERMISSIONS
+  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
+  PATTERN "debug" EXCLUDE # don't copy debug directory
+  )
+
+# Install the CInterface Matlab scripts (opengmat, closegmat, etc...)
+INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/matlab/libCInterface
+  USE_SOURCE_PERMISSIONS
+  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
+  )
+
+# Create the CInterface Matlab thunk files if Matlab exists
+# Requirements:
+#  - "matlab" command must exist on the system
+if(PLUGIN_CINTERFACE)
+  FIND_PROGRAM(matlab_bin matlab)
+  if(NOT (matlab_bin MATCHES "matlab_bin-NOTFOUND"))
+    SET(MSTART "matlab -nodisplay -r")
+    SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
+    SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
+    SET(MCD "cd('${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/build/matlab');")
+    SET(MPREP "prepareInterface_cmake;")
+    SET(MEXIT "exit;")
+    SET(MATLAB_COMMAND "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MPREP} ${MEXIT}\"")
+    MESSAGE(STATUS "${MATLAB_COMMAND}")
+    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+  else()
+    MESSAGE(WARNING "matlab command not found, cannot build Matlab prototype files for the GMAT CInterface Plugin. Please install Matlab, or create a symlink to the 'matlab' command in a searchable directory.")
+  endif()
+endif()

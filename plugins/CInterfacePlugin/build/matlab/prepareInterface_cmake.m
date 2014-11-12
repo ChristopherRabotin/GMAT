@@ -10,7 +10,7 @@
 % in-build CInterface.
 
 disp('This script builds the GMAT interface prototype files and places them');
-disp('in <GMAT>/matlab/libCInterface/ for the currently installed <GMAT> directory');
+disp('in the appropriate GMAT folder for Matlab use.');
 
 % Make sure GMAT is installed and in MATLAB's search path
 if(exist('findgmatrootpath') ~= 2)
@@ -22,21 +22,22 @@ end
 % Check that ROOT_PATH of startup file is a valid GMAT installation
 root_path = findgmatrootpath;
 
-thisdir = fileparts(mfilename('fullpath'));
+% Path to folder where prototypes should be installed
+destdir = fullfile(root_path, 'matlab', 'libCInterface');
+disp('Matlab prototype files will be placed in:');
+disp(destdir);
 
 % Path to CInterface shared library
 libname = 'libCInterface';
 libfile = fullfile(root_path, 'bin', libname);
 
 % Path to header file describing library functions
+thisdir = fileparts(mfilename('fullpath'));
 hfile = fullfile(thisdir, '..', '..', 'src', 'plugin', ...
     'CInterfaceFunctions');
 
 % Path to folder with additional CInterface include files
 incdir = fullfile(thisdir, '..', '..', 'src', 'include');
-
-% Path to folder where prototypes should be installed
-destdir = fullfile(root_path, 'matlab', 'libCInterface');
 
 % Generate CInterface MATLAB prototypes
 [notfound, warnings] = loadlibrary(libfile, hfile, ...
