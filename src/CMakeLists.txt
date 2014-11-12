@@ -26,7 +26,6 @@ ADD_SUBDIRECTORY(${SRCDIR})
 GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${SRCDIR} DEFINITION TargetName)
 SET(SrcTargets ${SrcTargets} ${tmp})
 
-
 # ====================================================================
 # Console binary
 SET(SRCDIR "console")
@@ -43,13 +42,7 @@ if (GMAT_GUI)
   SET(SrcTargets ${SrcTargets} ${tmp})
 endif()
 
-# Enable RPATH on Mac/Linux so that the build path is not hardcoded into
-# the library's internal name. This is necessary to use GMAT from
-# a 3rd-party app such as Matlab.
-if(UNIX)
-  if(APPLE)
-    SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES MACOSX_RPATH TRUE INSTALL_RPATH "@loader_path/")
-  else()
-    SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES INSTALL_RPATH "\$ORIGIN/")
-  endif()
-endif()
+# ====================================================================
+# Bulk changes to the src targets can be made here, using the
+# SET_TARGET_PROPERTIES(${SrcTargets} ...) function. This is cleaner
+# than applying the target properties at each subdirectory.

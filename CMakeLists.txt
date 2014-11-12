@@ -221,6 +221,18 @@ if(NOT WIN32)
   ADD_DEFINITIONS("-DLINUX_MAC")
 endif()
 
+# Enable RPATH on Mac/Linux so that shared libraries' install names are
+# specified as relative paths instead of absolute paths. This is necessary
+# to distribute GMAT and use it from 3rd-party apps such as Matlab.
+if(UNIX)
+  if(APPLE)
+    SET(CMAKE_MACOSX_RPATH TRUE)
+    SET(CMAKE_INSTALL_RPATH "@loader_path/")
+  else()
+    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/")
+  endif()
+endif()
+
 # ====================================================================
 # Go to src directory and look for CMake instructions there
 ADD_SUBDIRECTORY(src)
