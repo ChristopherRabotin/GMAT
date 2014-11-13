@@ -1098,7 +1098,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
          se.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Filename", msg.c_str());
          throw se;
       }
-
+      
       // This checking will be done in FileManager::FindPath()
       // // Check for non-existing directory
       // if (!GmatFileUtil::DoesDirectoryExist(value))
@@ -1131,7 +1131,14 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       
       fullPathFileName =
          GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt",
-                                       false);
+                                       true);
+      
+      // Check for invalid output directory
+      if (fullPathFileName == "")
+      {
+         lastErrorMessage = FileManager::Instance()->GetLastFilePathMessage();
+         throw SubscriberException(lastErrorMessage);
+      }
       
       // Close the stream if it is open
       if (dstream.is_open())
@@ -1488,7 +1495,10 @@ bool ReportFile::OpenReportFile()
           fullPathFileName.c_str());
       #endif
       
-      throw SubscriberException("Cannot open report file: " + fullPathFileName + "\n");
+      std::string tempname = fullPathFileName;
+      if (fullPathFileName == "")
+         tempname = fileName;
+      throw SubscriberException("Cannot open report file: " + tempname + "\n");
    }
    
    #ifdef DEBUG_REPORTFILE_OPEN
