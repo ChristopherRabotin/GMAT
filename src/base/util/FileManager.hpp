@@ -138,6 +138,7 @@ public:
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
    
+   // Methods for startup file
    std::string GetStartupFileDir();
    std::string GetStartupFileName();
    std::string GetFullStartupFilePath();
@@ -147,6 +148,11 @@ public:
    void WriteStartupFile(const std::string &fileName = "");
    
    std::string GetRootPath();
+   
+   // Methods for texture map file
+   bool GetTextureMapFile(const std::string &inFileName, const std::string &bodyName,
+                          const std::string &objName, std::string &outFileName,
+                          std::string &outFullPathName, bool writeWarning);
    
    // Methods returning path
    std::string GetPathname(const FileType type);
@@ -185,6 +191,9 @@ public:
    std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
    
+   // Warning/Error message
+   std::string GetLastFilePathMessage();
+   
    // Plug-in code
    const StringArray& GetPluginList();
    
@@ -219,6 +228,8 @@ private:
    std::string mWriteParameterInfo;
    std::string mWriteFilePathInfo;
    std::string mWriteGmatKeyword;
+   std::string mLastFilePathMessage;
+   
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
    std::map<std::string, FileInfo*> mFileMap;
