@@ -312,6 +312,9 @@ public:
    virtual bool        IsParameterReadOnly(const Integer id) const;
    virtual bool        IsParameterCloaked(const Integer id) const;
    virtual bool        IsParameterEqualToDefault(const Integer id) const;
+   virtual bool        IsParameterValid(const Integer id, const std::string &value);
+   virtual bool        IsParameterValid(const std::string &label, const std::string &value);
+   
    virtual bool        SaveAllAsDefault();
    virtual bool        SaveParameterAsDefault(const Integer id);
 
@@ -568,7 +571,8 @@ protected:
    virtual bool     SetUpSPICE();
    virtual bool     NeedsOnlyMainSPK();
    
-   void SetTextureFileName(const std::string &filename, bool writeInfo = false);
+   bool SetTextureMapFileName(const std::string &fileName,
+                              bool writeWarning = false, bool validateOnly = false);
    
 private:
 
