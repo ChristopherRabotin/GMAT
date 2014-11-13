@@ -202,6 +202,10 @@ public:
    virtual bool         IsParameterCloaked(const std::string &label) const;
    virtual bool         IsParameterEqualToDefault(const Integer id) const;
    virtual bool         IsParameterEqualToDefault(const std::string &label) const;
+   virtual bool         IsParameterValid(const Integer id,
+                                         const std::string &value);
+   virtual bool         IsParameterValid(const std::string &label,
+                                         const std::string &value);
    virtual bool         IsParameterVisible(const Integer id) const;
    virtual bool         IsParameterVisible(const std::string &label) const;
 

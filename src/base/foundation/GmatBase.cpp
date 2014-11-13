@@ -52,6 +52,7 @@
 //#define DEBUG_WRITE_PARAM
 //#define DEBUG_CLOAKING
 //#define DEBUG_WRAPPER_REF
+//#define DEBUG_FILE_PATH
 
 /// Set the static "undefined" parameters
 //const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
@@ -1570,10 +1571,44 @@ bool GmatBase::IsParameterEqualToDefault(const std::string &label) const
 }
 
 //---------------------------------------------------------------------------
+//  bool IsParameterValid(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter value is valid.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return true if the parameter value is valid, false if not
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterValid(const Integer id,
+                                const std::string &value)
+{
+   return true;
+}
+
+//---------------------------------------------------------------------------
+//  bool IsParameterValid(const std::string &label, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter value is valid.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter value is valid, false if not
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsParameterValid(const std::string &label,
+                                const std::string &value)
+{
+   return IsParameterValid(GetParameterID(label), value);
+}
+
+//---------------------------------------------------------------------------
 //  bool IsParameterVisible(const Integer id) const
 //---------------------------------------------------------------------------
 /**
- * Checks to see if the requested parameter is visible from the GUI
+ * Checks to see if the requested parameter is visible from the GUI.
  *
  * @param <id> ID for the parameter.
  *
@@ -1589,7 +1624,7 @@ bool GmatBase::IsParameterVisible(const Integer id) const
 //  bool IsParameterVisible(const std::string &label) const
 //---------------------------------------------------------------------------
 /**
- * Checks to see if the requested parameter is visible from the GUI
+ * Checks to see if the requested parameter is visible from the GUI.
  *
  * @param <label> Description for the parameter.
  *
@@ -3913,9 +3948,9 @@ std::string GmatBase::GetFullPathFileName(std::string &outFileName,
 {
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage
-      ("\nGmatBase::SetFullPathFileName() entered, objName='%s', inFileName='%s', fileType='%s', "
+      ("\nGmatBase::GetFullPathFileName() entered, objName='%s', inFileName='%s', fileType='%s', "
        "forInput=%d, fileExt='%s', writeWarning=%d, writeInfo=%d\n", objName.c_str(),
-       inFileName.c_str(), fileType.c_str(),fileExt.c_str(), forInput, writeWarning, writeInfo);
+       inFileName.c_str(), fileType.c_str(), forInput, fileExt.c_str(), writeWarning, writeInfo);
    #endif
    
    std::string fname = inFileName;
@@ -3923,8 +3958,8 @@ std::string GmatBase::GetFullPathFileName(std::string &outFileName,
    // If file is for output and input file name is blank, build outFileName
    if (!forInput && fname == "")
    {
-         fname = objName + fileExt;
-         outFileName = fname;
+      fname = objName + fileExt;
+      outFileName = fname;
    }
    
    std::string fullPath =
@@ -3938,7 +3973,7 @@ std::string GmatBase::GetFullPathFileName(std::string &outFileName,
    
    #ifdef DEBUG_FILE_PATH
    MessageInterface::ShowMessage
-      ("GmatBase::SetFullPathFileName() returning outFileName='%s', fullPath='%s'\n",
+      ("GmatBase::GetFullPathFileName() returning outFileName='%s', fullPath='%s'\n",
        outFileName.c_str(), fullPath.c_str());
    #endif
    
