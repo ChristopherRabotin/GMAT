@@ -1,18 +1,16 @@
 # $Id$
 # Architecture flags
-#ifeq ($(BUILD_64BIT), 1)
-#GMAT_BIN_DIR = bin64
-#GMAT_LIB_DIR = lib64
-#GMAT_PLUGIN_DIR = plugins64
-MAC_ARCHITECTURE_FLAGS = 
-F2C_DIR = f2c64
-#else
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
-#MAC_ARCHITECTURE_FLAGS = -arch i386
-#F2C_DIR = f2c32
-#endif
+
+ifeq ($(BUILD_64BIT), 1)
+MAC_ARCHITECTURE_FLAGS =
+F2C_DIR = f2c64
+else
+MAC_ARCHITECTURE_FLAGS = -arch i386
+F2C_DIR = f2c32
+endif
 
 # Environment settings for the event locator plugin; Linux 64-bit version
 

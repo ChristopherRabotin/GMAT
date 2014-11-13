@@ -9,6 +9,13 @@ LINUX_MAC = 1
 # Set to 0 for Linux, 1 for Mac 
 MAC_SPECIFIC = 1
 
+
+ifeq ($(BUILD_64BIT), 1)
+MAC_ARCHITECTURE_FLAGS =
+else
+MAC_ARCHITECTURE_FLAGS = -arch i386
+endif
+
 DEBUG_BUILD = 0
 
 # Select the base library
@@ -16,8 +23,8 @@ BASE_LIBRARY = GmatBase
 # BASE_LIB_LOCATION is only used on Mac
 BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
 
-GMAT_FUNCTION_CPP_FLAGS = -fPIC -fno-rtti
-GMAT_FUNCTION_LINK_FLAGS = -fPIC -fno-rtti
+GMAT_FUNCTION_CPP_FLAGS = -fPIC -fno-rtti $(MAC_ARCHITECTURE_FLAGS)
+GMAT_FUNCTION_LINK_FLAGS = -fPIC -fno-rtti $(MAC_ARCHITECTURE_FLAGS)
 #removed
 # -arch i386
 
@@ -66,7 +73,7 @@ OPTIMIZATIONS = -O3 -fno-strict-aliasing $(WX_28_DEFINES)
 endif
 
 # Do not edit below this line -- here we build up longer compile/link strings
-CPP_BASE = $(OPTIMIZATIONS) $(GMAT_FUNCTION_CPP_FLAGS) -Wall \
+CPP_BASE = $(OPTIMIZATIONS) $(GMAT_FUNCTION_CPP_FLAGS) $(MAC_ARCHITECTURE_FLAGS) -Wall \
            $(PROFILE_FLAGS) $(DEBUG_FLAGS)
 
 CPPFLAGS = $(CPP_BASE)

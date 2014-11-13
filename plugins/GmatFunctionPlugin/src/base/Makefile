@@ -59,7 +59,7 @@ OBJECTS = \
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET) : $(OBJECTS)
 	mkdir -p ../../lib
-	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) -fPIC
+	$(CPP) $(OBJECTS) -o $(TARGET) $(SHARED_LIB_FLAGS) $(MAC_ARCHITECTURE_FLAGS) -fPIC
 	install_name_tool -change lib/lib$(BASE_LIBRARY).dylib \
 	$(BASE_LIB_LOCATION)lib$(BASE_LIBRARY).dylib $(TARGET)
 	cp $(TARGET) $(GMAT_BIN_LOCATION)/../plugins
