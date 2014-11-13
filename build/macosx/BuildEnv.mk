@@ -8,64 +8,89 @@
 # -------------------------------------------------------------------------------------------
 
 # ------> FLAGS USED TO CONTROL THE BUILD
-# *** EDIT THIS *** - Flags used to control the build
-# 1 = 64-bit, 0 = 32-bit - BUT set this only if it is not set in the main project Makefile
-#                          OR you are building the GmatConsole separately
-ifndef BUILD_64BIT
-BUILD_64BIT = 1
-endif   
- 
-USE_SPICE = 1
+
+## *** EDIT THIS ***
+# ------> TOP DIRECTORY
+# put the top of the GMAT project directory structure here .... make sure not to have trailing blanks!!!
+TOP_DIR = <path-to-your-GMAT-directory>
+
+## *** EDIT THIS ***
+# ------> WX version
+# select the wx version (wx2.8.12 will be 32-bit; wx 3.0.1 will be 64-bit)
+# WX_VERSION must be in this format
+WX_VERSION = 3
+#WX_VERSION = 2
+
+## *** EDIT THESE ***
+# ------> WX installed location
+WX3_INSTALLED = /Applications/wxWidgets-3.0.1/build-cocoa-debug
+WX2_INSTALLED = /Applications/wxMac-2.8.12/shared
+
+## *** EDIT THIS ***
+# ------> Console app (0-> full GUI build; 1 -> console only)
 # if this is 1, it will build the base library and the console app only
 CONSOLE_APP = 0
+
+## *** EDIT THESE ***
+# ------> Spice, f2c, debug, profile (these should be left at default for most cases)
+USE_SPICE = 1
 USE_F2C_VERSION = 1
-# STC_EDITOR now available on Mac (wx 3.0.1) - set this to 0 for Console version
-USE_STC_EDITOR = 1
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 
-# ------> TOP DIRECTORY
-# *** EDIT THIS *** - put the top of the GMAT project directory structure here .... make sure not to have trailing blanks!!!
-TOP_DIR = /Users/wshoan/git/gmat_wx3
 
-# ------> WXWIDGETS
-# *** EDIT THIS *** -  this is where you installed wxWidgets ('sudo make install' of wxMac will put things in /usr/local directories)
-#WX_INSTALLED = /usr/local/bin
-#WX_LIB_LOC = /usr/local/lib
-WX_INSTALLED = /Applications/wxWidgets-3.0.1/build-cocoa-debug
-WX_LIB_LOC = $(WX_INSTALLED)/lib
-WX_LIB = wx_osx_cocoau_gl-3.0
-WX_LIB_2 = wx_osx_cocoau_stc-3.0
-# WX_VERSION must be in this format
-WX_VERSION = 3_0_1
-
+## *** EDIT THIS ***
 # ------> CSPICE
-# *** EDIT THIS *** - this is where you installed the version of CSPICE that you're using ...
+# this is where you installed the version of CSPICE that you're using 
+# NOTE: it is assumed that inside this folder, there is a cspice folder for 32-bit and
+# a cspice64 folder for 64-bit
 ifeq ($(USE_SPICE), 1)
-SPICE_DIR = /Applications/CSPICE_N0064
-# 0 -> use cpspice.a, 1 -> use libcspice.dylib in bin directory
+SPICE_DIR = /Applications/CSPICE_N0065
+# 0 -> use cpspice.a, 1 -> use libcspice.dylib (NOT CURRENTLY SUPPORTED) in bin directory
 SPICE_USE_DYLIB = 0
 else
 SPICE_DIR =
 endif
 
+## *** EDIT THIS ***
 # ------> F2C
-# *** EDIT THIS *** - If you are using F2C, say where it is located; if not, point to fortran libraries
+# If you are using F2C, say where it is located; if not, point to fortran libraries
+# This assumes that, in the f2c location you specify, you have f2c32 and f2c64 folders
 ifeq ($(USE_F2C_VERSION), 1)
-F2C_LOC = /Users/wshoan/Documents/workspace/GMAT_3rdParty
+F2C_LOC = <path-to-your-F2C-directory>
 else
 FORTRAN_LIB = -L/usr/local/gfortran/lib -lgfortran 
 F2C_LOC = 
 endif
 
+## *** EDIT THIS ***
 # ------> PCRE
-# *** EDIT THIS *** - where is PCRE installed
+# where is PCRE installed (NOTE: pcre NOT CURRENTLY USED)
 PCRE_LIB_LOC = /Applications/pcre-8.12/.libs
 
 
 # *************************** DO NOT EDIT BELOW THIS LINE ********************************
 LINUX_MAC = 1
 MAC_SPECIFIC = 1
+
+ifeq ($(WX_VERSION),3)
+WX_INSTALLED = $(WX3_INSTALLED)
+WX_LIB_LOC = $(WX_INSTALLED)/lib
+WX_LIB = -lwx_osx_cocoau_gl-3.0 -lwx_osx_cocoau_stc-3.0
+#WX_LIB_2 = -lwx_osx_cocoau_stc-3.0
+BUILD_64BIT = 1
+# STC_EDITOR now available on Mac (wx 3.0.1) - set this to 0 for Console version
+USE_STC_EDITOR = 1
+INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle
+else
+WX_INSTALLED = $(WX2_INSTALLED)
+WX_LIB_LOC = $(WX_INSTALLED)/lib
+WX_LIB = -lwx_mac_gl-2.8
+#WX_LIB_2 =
+BUILD_64BIT = 0
+USE_STC_EDITOR = 0
+INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle_2_8_12
+endif
 
 WX_28_SYNTAX = 0     # not currently modifiable
 
@@ -75,33 +100,23 @@ else
 WX_28_DEFINES = 
 endif
 
-# this will point to the proper script for the Wx version
-INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle
-
-# flags that depend on whether you are building 32-bit or 64-bit
-#ifeq ($(BUILD_64BIT), 1)
-CSPICE_VER = cspice64
+## bin and lib directories
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
-# was bin64 and lib64
+
+# flags that depend on whether you are building 32-bit or 64-bit
+ifeq ($(BUILD_64BIT), 1)
+CSPICE_VER = cspice64
 MAC_ARCHITECTURE_FLAGS =
-WXCPPFLAGS = 
-WXLINKFLAGS =
-#MAC_ARCHITECTURE_FLAGS =
 F2C_DIR = f2c64
 PROCFLAGS = -DUSE_64_BIT_LONGS
-#else
-#CSPICE_VER = cspice
-#GMAT_BIN_DIR = bin
-#GMAT_LIB_DIR = lib
-#MAC_ARCHITECTURE_FLAGS = -arch i386
-## WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
-## WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
-#F2C_DIR = f2c32
-#PROCFLAGS =
-#endif
+else
+CSPICE_VER = cspice
+MAC_ARCHITECTURE_FLAGS = -arch i386
+F2C_DIR = f2c32
+PROCFLAGS =
+endif
 
-WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
 WXLINKFLAGS = `$(WX_INSTALLED)/wx-config --libs --universal=no --static=no`
 
 ifeq ($(USE_STC_EDITOR), 1)
@@ -109,7 +124,6 @@ WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES
 else
 WXCPPFLAGS = `$(WX_INSTALLED)/wx-config --cppflags`  -D__WXMAC__ $(WX_28_DEFINES)
 endif
-
 
 
 # flag indicating whether or not to build as a shared library
@@ -173,7 +187,6 @@ else
 SHARED_BASE_FLAGS =
 endif
 
-
 #
 # Compiler options
 CPP = g++
@@ -192,11 +205,12 @@ OPTIMIZATIONS = $(SOME_OPTIMIZATIONS)
 endif
 
 # For MacOS application
-MAC_CPP_FLAGS=-current_version 0.5 -compatibility_version 0.5 -fvisibility=default
+## MAC_CPP_FLAGS=-current_version 0.5 -compatibility_version 0.5 -fvisibility=default
 
 
 # Define macros for linking the Carbon and wx resource files
 #REZ = /usr/bin/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r $(MAC_ARCHITECTURE_FLAGS)
+# Specify where the SetFIle tool is
 SETFILE = /usr/bin/SetFile
 
 # Set options for debugging and profiling
@@ -218,7 +232,7 @@ F77_FLAGS = $(OPTIMIZATIONS) -Wall
 LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
                -headerpad_max_install_names \
                -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
-             -L$(WX_LIB_LOC) -l$(WX_LIB) -l$(WX_LIB_2) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
+             -L$(WX_LIB_LOC) $(WX_LIB) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
 #LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
 #               -framework OpenGL -framework AGL  -headerpad_max_install_names \
 #               -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
