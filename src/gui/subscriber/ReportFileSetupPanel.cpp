@@ -517,10 +517,10 @@ void ReportFileSetupPanel::SaveData()
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
+   GmatBase *clonedObj = reportFile->Clone();
    try
    {
       Integer id;
-      GmatBase *clonedObj = reportFile->Clone();
       
       if (mHasBoolDataChanged)
       {
@@ -616,14 +616,15 @@ void ReportFileSetupPanel::SaveData()
       }
       
       reportFile->Copy(clonedObj);
-      delete clonedObj;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return;
    }
+   
+   delete clonedObj;
+   return;
 }
 
 

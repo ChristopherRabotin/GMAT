@@ -178,10 +178,10 @@ void GroundTrackPlotPanel::InitializeData()
    mHasRealDataChanged = false;
    mHasDataOptionChanged = false;
    mHasObjectListChanged = false;
-   
-   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    mHasCentralBodyChanged = false;
    mHasTextureMapChanged = false;
+   
+   #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    mHasOrbitColorChanged = false;
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
@@ -432,6 +432,8 @@ void GroundTrackPlotPanel::LoadData()
       
       // Load central body
       wxString centralBody = mGroundTrackPlot->GetStringParameter("CentralBody").c_str();
+      mCentralBody = centralBody;
+      
       #ifdef DEBUG_PANEL_LOAD
       MessageInterface::ShowMessage("   centralBody = '%s'\n", centralBody.c_str());
       #endif
@@ -486,8 +488,9 @@ void GroundTrackPlotPanel::LoadData()
       mShowPlotCheckBox->SetValue(mGroundTrackPlot->GetBooleanParameter("ShowPlot"));
       
       // Load solver iteration and texture map file
-      mSolverIterComboBox->SetValue(mGroundTrackPlot->GetStringParameter("SolverIterations").c_str());    
-      mTextureMapTextCtrl->SetValue(mGroundTrackPlot->GetStringParameter("TextureMap").c_str());
+      mSolverIterComboBox->SetValue(mGroundTrackPlot->GetStringParameter("SolverIterations").c_str());
+      mTextureFile = mGroundTrackPlot->GetStringParameter("TextureMap").c_str();
+      mTextureMapTextCtrl->SetValue(mTextureFile);
       mTextureMapTextCtrl->SetInsertionPointEnd();
       
       // Select first object in the list to show color
@@ -519,7 +522,7 @@ void GroundTrackPlotPanel::SaveData()
 {
    #if DEBUG_PANEL_SAVE
    MessageInterface::ShowMessage
-      ("GroundTrackPlotPanel::SaveData() entered,mHasCentralBodyChanged=%d, "
+      ("GroundTrackPlotPanel::SaveData() entered, mHasCentralBodyChanged=%d, "
        " mHasObjectListChanged=%d\n   mHasIntegerDataChanged=%d, "
        "mHasTextureMapChanged=%d\n", mHasCentralBodyChanged, mHasObjectListChanged,
        mHasIntegerDataChanged, mHasTextureMapChanged);
@@ -551,15 +554,17 @@ void GroundTrackPlotPanel::SaveData()
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
+   GmatBase *clonedObj = mGroundTrackPlot->Clone();
    try
    {
       if (mHasCentralBodyChanged)
       {
-         mHasCentralBodyChanged = false;
          std::string newCentralBody = mCentralBodyComboBox->GetValue().WX_TO_STD_STRING;
          std::string newTexture = mTextureMapTextCtrl->GetValue().WX_TO_STD_STRING;
-         mGroundTrackPlot->SetStringParameter("CentralBody", newCentralBody);
-         mGroundTrackPlot->SetStringParameter("TextureMap", newTexture);
+         clonedObj->SetStringParameter("CentralBody", newCentralBody);
+         mHasCentralBodyChanged = false;
+         // Set mHasTextureMapChanged to true so that it can be validated below (LOJ: 2014.11.03)
+         mHasTextureMapChanged = true;
       }
       
       if (mHasObjectListChanged)
@@ -567,7 +572,7 @@ void GroundTrackPlotPanel::SaveData()
          #if DEBUG_PANEL_SAVE
          MessageInterface::ShowMessage("   Saving object list\n");
          #endif
-         mGroundTrackPlot->TakeAction("Clear");
+         clonedObj->TakeAction("Clear");
          int count = mObjectCheckListBox->GetCount();
          for (int i = 0; i < count; i++)
          {
@@ -577,9 +582,10 @@ void GroundTrackPlotPanel::SaveData()
                #ifdef DEBUG_PANEL_SAVE
                MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
                #endif
-               mGroundTrackPlot->SetStringParameter("Add", objName);
+               clonedObj->SetStringParameter("Add", objName);
             }
          }
+         mHasObjectListChanged = false;
       }
       
       if (mHasIntegerDataChanged)
@@ -587,11 +593,10 @@ void GroundTrackPlotPanel::SaveData()
          #if DEBUG_PANEL_SAVE
          MessageInterface::ShowMessage("   Saving Integer data\n");
          #endif
-         
+         clonedObj->SetIntegerParameter("DataCollectFrequency", collectFreq);
+         clonedObj->SetIntegerParameter("UpdatePlotFrequency", updateFreq);
+         clonedObj->SetIntegerParameter("NumPointsToRedraw", pointsToRedraw);
          mHasIntegerDataChanged = false;
-         mGroundTrackPlot->SetIntegerParameter("DataCollectFrequency", collectFreq);
-         mGroundTrackPlot->SetIntegerParameter("UpdatePlotFrequency", updateFreq);
-         mGroundTrackPlot->SetIntegerParameter("NumPointsToRedraw", pointsToRedraw);
       }
       
       if (mHasDataOptionChanged)
@@ -599,46 +604,70 @@ void GroundTrackPlotPanel::SaveData()
          #if DEBUG_PANEL_SAVE
          MessageInterface::ShowMessage("   Saving drawing options\n");
          #endif
+         clonedObj->SetBooleanParameter("ShowPlot", mShowPlotCheckBox->GetValue());
+         clonedObj->SetStringParameter("SolverIterations",
+                                       mSolverIterComboBox->GetValue().c_str());
          mHasDataOptionChanged = false;
-         mGroundTrackPlot->SetBooleanParameter("ShowPlot", mShowPlotCheckBox->GetValue());
-         mGroundTrackPlot->SetStringParameter("SolverIterations",
-                                              mSolverIterComboBox->GetValue().c_str());
       }
-
+      
       // Save texture map
       if (mHasTextureMapChanged)
       {
          #if DEBUG_PANEL_SAVE
          MessageInterface::ShowMessage("   Saving new texture map\n");
          #endif
-         mHasTextureMapChanged = false;
-         mGroundTrackPlot->SetStringParameter("TextureMap",
-                                              mTextureMapTextCtrl->GetValue().c_str());
+         // Validate texture map file (LOJ: 2014.10.30)
+         wxString wxTextureMap = mTextureMapTextCtrl->GetValue();
+         std::string textureMap = wxTextureMap.WX_TO_STD_STRING;
+         if (clonedObj->IsParameterValid("TextureMap", textureMap))
+         {
+            clonedObj->SetStringParameter("TextureMap", textureMap);
+            // If texture map file is blank, display default one
+            if (wxTextureMap == "")
+               mTextureMapTextCtrl->SetValue(STD_TO_WX_STRING(clonedObj->GetStringParameter("TextureMap").c_str()));
+            mHasTextureMapChanged = false;
+         }
+         else
+         {
+            // Recheck central body
+            mHasCentralBodyChanged = true;
+            canClose = false;
+            MessageInterface::PopupMessage(Gmat::ERROR_, clonedObj->GetLastErrorMessage());
+         }
       }
       
       #ifdef __USE_COLOR_FROM_SUBSCRIBER__
       // Save orbit colors
       if (mHasOrbitColorChanged)
       {
-         mHasOrbitColorChanged = false;
          SaveObjectColors("Orbit", mOrbitColorMap);
+         mHasOrbitColorChanged = false;
       }
       
       // Save target colors
       if (mHasTargetColorChanged)
       {
-         mHasTargetColorChanged = false;
          SaveObjectColors("Target", mTargetColorMap);
+         mHasTargetColorChanged = false;
       }
       #endif
       
-      EnableUpdate(false);
-      canClose = true;
+      // Copy new values to original object (LOJ: 2014.10.30)
+      if (canClose)
+      {
+         mGroundTrackPlot->Copy(clonedObj);
+         mCentralBody = mCentralBodyComboBox->GetValue().c_str();
+         mTextureFile = mTextureMapTextCtrl->GetValue().c_str();
+         EnableUpdate(false);
+      }
    }
    catch (BaseException &e)
    {
+      canClose = false;
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage().c_str());
    }
+   
+   delete clonedObj;
    
    #if DEBUG_PANEL_SAVE
    MessageInterface::ShowMessage("GroundTrackPlotPanel::SaveData() exiting.\n");
@@ -789,12 +818,19 @@ void GroundTrackPlotPanel::OnComboBoxChange(wxCommandEvent& event)
    else if (event.GetEventObject() == mCentralBodyComboBox)
    {
       mHasCentralBodyChanged = true;
-      
-      // Update texture map to corresponding texture map
-      CelestialBody *body = (CelestialBody*)
-         theGuiInterpreter->GetConfiguredObject(mCentralBodyComboBox->GetValue().c_str());
-      Integer id = body->GetParameterID("TextureMapFileName");
-      wxString bodyTexture = body->GetStringParameter(id).c_str();
+      wxString bodyTexture;
+      if (mCentralBodyComboBox->GetValue() == mCentralBody)
+      {
+         bodyTexture = mTextureFile;
+      }
+      else
+      {
+         // Update texture map to corresponding body
+         CelestialBody *body = (CelestialBody*)
+            theGuiInterpreter->GetConfiguredObject(mCentralBodyComboBox->GetValue().c_str());
+         Integer id = body->GetParameterID("TextureMapFileName");
+         bodyTexture = body->GetStringParameter(id).c_str();
+      }
       #ifdef DEBUG_CENTRAL_BODY
       MessageInterface::ShowMessage
          ("OnComboBoxChange(), bodyTexture = '%s'\n", bodyTexture.c_str());
@@ -820,6 +856,10 @@ void GroundTrackPlotPanel::OnTextChange(wxCommandEvent& event)
           obj == mNumPointsToRedrawTextCtrl)
       {
          mHasIntegerDataChanged = true;
+      }
+      else if (obj == mTextureMapTextCtrl)
+      {
+         mHasTextureMapChanged = true;
       }
       
       EnableUpdate(true);
