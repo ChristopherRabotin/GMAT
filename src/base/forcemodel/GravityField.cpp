@@ -816,10 +816,12 @@ std::string GravityField::GetParameterTypeString(const Integer id) const
 }
 
 
-
-// All read only for now except degree and order
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
 bool GravityField::IsParameterReadOnly(const Integer id) const
 {
+   // All read only for now except degree and order
    if (id < HarmonicFieldParamCount)
       return HarmonicField::IsParameterReadOnly(id);
 
