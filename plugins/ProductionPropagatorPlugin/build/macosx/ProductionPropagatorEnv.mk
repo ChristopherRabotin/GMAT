@@ -15,14 +15,20 @@ MAC_SPECIFIC = 1
 
 DEBUG_BUILD = 0
 
+ifeq ($(BUILD_64BIT), 1)
+MAC_ARCHITECTURE_FLAGS =
+else
+MAC_ARCHITECTURE_FLAGS = -arch i386
+endif
+
 # Select the base library
 BASE_LIBRARY = GmatBase
 # BASE_LIB_LOCATION is only used on Mac
 #BASE_LIB_LOCATION = GMAT.app/Contents/Frameworks/
 BASE_LIB_LOCATION = ../bin/GMAT.app/Contents/Frameworks/
 
-EXTRA_PROPAGATOR_CPP_FLAGS = -fPIC -fno-rtti
-EXTRA_PROPAGATOR_LINK_FLAGS = -fPIC -fno-rtti
+EXTRA_PROPAGATOR_CPP_FLAGS = -fPIC -fno-rtti $(MAC_ARCHITECTURE_FLAGS)
+EXTRA_PROPAGATOR_LINK_FLAGS = -fPIC -fno-rtti $(MAC_ARCHITECTURE_FLAGS)
 #removed
 # -arch i386
 
@@ -59,10 +65,10 @@ SHARED_LIB_FLAGS = $(EXTRA_PROPAGATOR_LINK_FLAGS) -shared -Wl --out-implib \
                    -L$(GMAT_CODE_LOCATION)/base/lib -lGmatBase
 endif
 
-DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
-                 -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
-                 -march=pentium -malign-double -fexceptions \
-                 -fexpensive-optimizations
+#DESIRED_OPTIMIZATIONS =  -DSTRICT -Wall -fno-pcc-struct-return -O3 \
+#                 -finline-functions -funroll-loops -fno-rtti -DNO_GCC_PRAGMA \
+#                 -march=pentium -malign-double -fexceptions \
+#                 -fexpensive-optimizations
 
 ifeq ($(DEBUG_BUILD), 1)
 OPTIMIZATIONS = -fno-strict-aliasing $(WX_28_DEFINES)

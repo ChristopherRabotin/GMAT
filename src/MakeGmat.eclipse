@@ -25,9 +25,11 @@ ifeq ($(LINUX_MAC),1)
 PROGRAM_EXTENSION =
 ifeq ($(MAC_SPECIFIC), 1)
 LIBRARY_EXTENSION=.dylib
-ifeq ($(BUILD_64BIT), 1)
-BUILD_GUI_WITH_WX = 1
-endif
+#ifeq ($(CONSOLE_APP), 1)
+#BUILD_GUI_WITH_WX = 0
+#else
+#BUILD_GUI_WITH_WX = 1
+#endif
 else
 LIBRARY_EXTENSION=.so
 endif
