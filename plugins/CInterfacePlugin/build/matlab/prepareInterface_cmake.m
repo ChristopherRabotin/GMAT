@@ -45,12 +45,12 @@ incdir = fullfile(thisdir, '..', '..', 'src', 'include');
 unloadlibrary(libname);
 
 % Install prototype wrapper
-movefile('interfacewrapper.m', destdir);
 disp('Moving file interfacewrapper.m');
+movefile('interfacewrapper.m', destdir);
 
 % Install thunk files
 validexts = {'.dll', '.dylib', '.so'};
-d = dir(['libCInterface_thunk_' computer('arch') '*']);
+d = dir(['libCInterface_thunk_*']);
 for i = 1:length(d)
     [~,~,ext] = fileparts(d(i).name);
     if(isempty(strmatch(ext, validexts, 'exact')))
