@@ -7054,7 +7054,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
             MessageInterface::ShowMessage
                ("'%s' not found, so removing the type '%s' from possible input types\n", label.c_str(), (*iter).c_str());
             #endif
-            possibleInputTypes.erase(iter);
+            iter = possibleInputTypes.erase(iter);
          }
       }
       

@@ -342,7 +342,7 @@ void ForPanel::GetNewValue(Integer row, Integer col)
    }
    ParameterSelectDialog paramDlg(this, mParamObjectTypeList,
 			 GuiItemManager::SHOW_PLOTTABLE, 0, false, false,
-			 !settableOnly, true, !settableOnly, true, DefaultType, true, settableOnly);
+			 !settableOnly, true, !settableOnly, !settableOnly, DefaultType, true, settableOnly);
    paramDlg.ShowModal();
    
    if (paramDlg.IsParamSelected())
