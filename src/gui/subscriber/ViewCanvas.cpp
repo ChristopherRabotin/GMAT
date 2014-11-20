@@ -3142,12 +3142,12 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
    //glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
-   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.WX_TO_STD_STRING.c_str());
+   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.WX_TO_C_STRING);
    
    if (label3 != "")
    {
       glRasterPos2i(xpos, 50);
-      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.WX_TO_STD_STRING.c_str());
+      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.WX_TO_C_STRING);
    }
    
    if (showCS)
@@ -3155,7 +3155,7 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
       // Prepend space before coordinate system name (Bug 2318 fix)
       wxString viewCsName = "  " + mViewCoordSysName;
       glRasterPos2i(xpos, ypos+20);
-      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.WX_TO_STD_STRING.c_str());
+      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.WX_TO_C_STRING);
    }
    
    glEnable(GL_LIGHTING);
@@ -3184,7 +3184,7 @@ void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.WX_TO_STD_STRING.c_str());
+   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.WX_TO_C_STRING);
    
    SetupProjection();
 }

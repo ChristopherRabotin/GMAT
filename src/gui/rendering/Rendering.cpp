@@ -270,7 +270,7 @@ void DrawStringAt(const wxString &str, const Rvector3 &point)
    glRasterPos3d(point[0], point[1], point[2]);
    // Changed to use c_str() from std::string (LOJ: 2014.08.07)
    //glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)str.c_str());
-   glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)(str.WX_TO_STD_STRING.c_str()));
+   glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)(str.WX_TO_C_STRING));
 }
 
 
@@ -282,5 +282,5 @@ void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z, GLfloat 
    glRasterPos4f(x, y, z, k);
    // Changed to use WX_TO_STD_STRING mactro for wx3.0 (LOJ: 2014.08.07)
    //glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)str.c_str());
-   glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)(str.WX_TO_STD_STRING.c_str()));
+   glCallLists(strlen(str.c_str()), GL_BYTE, (GLubyte*)(str.WX_TO_C_STRING));
 }

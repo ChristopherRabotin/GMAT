@@ -44,7 +44,7 @@ public:
    virtual bool         OnPoke(const wxString &topic, const wxString &item,
                                const void *data, size_t size, wxIPCFormat format);
    virtual const void*  OnRequest(const wxString &topic, const wxString &item,
-                                 size_t *size, wxIPCFormat format);
+                                  size_t *size, wxIPCFormat format);
    #else
    
    virtual bool         OnExecute(const wxString &topic, wxChar *data, int size,
@@ -52,6 +52,8 @@ public:
    virtual bool         OnPoke(const wxString &topic, const wxString &item,
                                wxChar *data, int size, wxIPCFormat format);
    virtual wxChar*      OnRequest(const wxString &topic, const wxString &item,
+                                  int *size, wxIPCFormat format);
+   
    #endif
    
    virtual bool         OnStartAdvise(const wxString &topic, const wxString &item);

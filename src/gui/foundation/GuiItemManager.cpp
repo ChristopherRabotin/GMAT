@@ -113,23 +113,23 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
    #ifdef DEBUG_LOAD_ICON
    MessageInterface::ShowMessage
       ("GuiItemManager::LoadIcon() entered, filename='%s', bitmap=<%p>\n",
-       filename.c_str(), bitmap);
+       filename.WX_TO_C_STRING, bitmap);
    #endif
    
    if (bitmapType == wxBITMAP_TYPE_PNG && !mPngHandlerLoaded)
    {
       FileManager *fm = FileManager::Instance();
       std::string loc = fm->GetFullPathname("ICON_PATH");
-      wxString    locWx = loc.c_str();
+      wxString    locWx = STD_TO_WX_STRING(loc);
       
-      #ifdef DEBUG_TOOLBAR
+      #ifdef DEBUG_LOAD_ICON
       MessageInterface::ShowMessage("   loc = '%s'\n", loc.c_str());
       #endif
       
       // Check if icon file directory exist
-      if (GmatFileUtil::DoesDirectoryExist(loc.c_str(), false))
+      if (GmatFileUtil::DoesDirectoryExist(loc, false))
       {
-         #ifdef DEBUG_TOOLBAR
+         #ifdef DEBUG_LOAD_ICON
          MessageInterface::ShowMessage("   Loadinig images from '%s'\n", loc.c_str());
          MessageInterface::ShowMessage("   Loading .png files\n");
          #endif
@@ -139,11 +139,13 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
          mPngIconLocation = locWx;
       }
    }
-   
-   
+      
    wxImage iconImage;
    wxString fileType = ".png";
    wxString fullFileName = mPngIconLocation + filename + fileType;
+   #ifdef DEBUG_LOAD_ICON
+   MessageInterface::ShowMessage("   fullFileName = '%s'\n", fullFileName.WX_TO_C_STRING);
+   #endif
    if (mPngHandlerLoaded && GmatFileUtil::DoesFileExist(fullFileName.c_str()))
    {
       iconImage.LoadFile(fullFileName, bitmapType);
