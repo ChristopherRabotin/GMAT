@@ -9,6 +9,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -51,13 +55,18 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -91,6 +100,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\application\plugins64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <OutDir>..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -164,6 +180,24 @@
       <AdditionalLibraryDirectories>..\..\..\application\bin64;..\..\..\..\Gmat3rdParty\cspice64\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_DYNAMICLINK;EPHEM_PROPAGATOR_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\plugin;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\foundation;..\..\..\src\base\hardware;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\spacecraft;..\..\..\src\base\util;..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -9,6 +9,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -38,7 +42,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -46,6 +50,11 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <CharacterSet>Unicode</CharacterSet>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -91,6 +100,13 @@
     <LibraryPath>C:\Program Files\MATLAB\R2011a\extern\lib\win64\microsoft;$(LibraryPath)</LibraryPath>
     <OutDir>..\..\..\application\bin64\debug64\</OutDir>
     <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <OutDir>..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -160,6 +176,24 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\..\application\bin64;..\..\..\application\plugins64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libMatlabInterface.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\MATLAB\R2014a\extern\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\plugin;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\subscriber;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\coordsystem;..\..\..\src\base\util;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\foundation;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\parameter;..\..\..\src\base\solver;..\..\..\src\base\subscriber;..\..\..\src\base\interface;..\..\..\src\base\command;..\..\..\src\base\executive;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\gui\include;..\..\..\src\gui\app;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_DYNAMICLINK;FMINCON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DisableSpecificWarnings>4231;4996;4251;4430</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\application\plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libMatlabInterface.lib;libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
