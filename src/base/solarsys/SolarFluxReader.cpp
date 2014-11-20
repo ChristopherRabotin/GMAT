@@ -215,13 +215,13 @@ bool SolarFluxReader::LoadObsData()
       fD.epoch = mjd - 0.5;
     
       for(int l=0; l<8; l++)
-         fD.kp[l] = atof(tokens[l+5].c_str());
+         fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str());
       for(int l=0; l<8; l++)
-         fD.ap[l] = atof(tokens[l+14].c_str());
-      fD.adjF107 = atof(tokens[26].c_str());
-      fD.adjCtrF107a = atof(tokens[28].c_str());
-      fD.obsF107 = atof(tokens[30].c_str());
-      fD.obsCtrF107a = atof(tokens[31].c_str());
+         fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
+      fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
+      fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
+      fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
+      fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
 
       obsFluxData.push_back(fD);
 
