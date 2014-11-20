@@ -607,7 +607,12 @@ bool GmatApp::ProcessCommandLineOptions()
    {
       for (int i = 1; i < argc; ++i)
       {
+         #if wxCHECK_VERSION(3, 0, 0)
+         std::string arg = argv[i].WX_TO_STD_STRING;
+         #else
          std::string arg = argv[i];
+         #endif
+         
          #ifdef DEBUG_CMD_LINE
          MessageInterface::PutMessage("arg = %s\n", arg.c_str());
          #endif
