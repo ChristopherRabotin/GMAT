@@ -51,6 +51,8 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;     // made changes by TUAN NGUYEN
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -203,6 +205,10 @@ protected:
    /// The estimated state                                       // made changes by TUAN NGUYEN
    GmatState               initialEstimationState;               // made changes by TUAN NGUYEN
 
+   /// Estimation status                                         // made changes by TUAN NGUYEN
+   Integer                 estimationStatus;                     // made changes by TUAN NGUYEN
+
+
    /// The information matrix, $\Lambda$
    Rmatrix                 information;
    /// The residual vector, N in Tapley, Schutz and Born
@@ -236,28 +242,15 @@ protected:
    bool                    locatingEvent;
 
 
-//   /// Range of epoch is specified by start epoch and end epoch and format used by epoch
-//   std::string         epochFormat;                     // made changes by TUAN NGUYEN
-//   std::string         startEpoch;                      // made changes by TUAN NGUYEN
-//   std::string         endEpoch;                        // made changes by TUAN NGUYEN
-//   /// Start epoch for the estimation                   // made changes by TUAN NGUYEN
-//   GmatEpoch           estimationStart;                 // made changes by TUAN NGUYEN
-//   /// End epoch for the end of the estimation          // made changes by TUAN NGUYEN
-//   GmatEpoch           estimationEnd;                   // made changes by TUAN NGUYEN
-
    /// Parameters for data sigma editting
    Real maxResidualMult;                                  // made changes by TUAN NGUYEN
    Real constMult;                                        // made changes by TUAN NGUYEN
    Real additiveConst;                                    // made changes by TUAN NGUYEN
 
-   ///// Predicted RMS
-   //Real predictedRMS;         // It was moved to BatchEstimator
 
    /// Number of removed observation data records
    std::map<std::string, UnsignedInt> numRemovedRecords;   // made changes by TUAN NGUYEN
 
-   ///// Report file
-   //std::string reportFilename;
    /// A string as a line/lines buffer to store a line/lines for writing to report file
    std::string linesBuff;
 
@@ -271,12 +264,11 @@ protected:
       PROPAGATOR,
       SHOW_RESIDUALS,
       ADD_RESIDUAL_PLOT,
-//     EPOCH_FORMAT,                      // made changes by TUAN NGUYEN   for time span filter
-//     START_EPOCH,                       // made changes by TUAN NGUYEN   for time span filter
-//     END_EPOCH,                         // made changes by TUAN NGUYEN   for time span filter
-     MAX_RESIDUAL_MULTIPLIER,             // made changes by TUAN NGUYEN   for data sigma editting
-     CONSTANT_MULTIPLIER,                 // made changes by TUAN NGUYEN   for data sigma editting
-     ADDITIVE_CONSTANT,                   // made changes by TUAN NGUYEN   for data sigma editting
+      MAX_RESIDUAL_MULTIPLIER,             // made changes by TUAN NGUYEN   for data sigma editting
+      CONSTANT_MULTIPLIER,                 // made changes by TUAN NGUYEN   for data sigma editting
+      ADDITIVE_CONSTANT,                   // made changes by TUAN NGUYEN   for data sigma editting
+      CONVERGENT_STATUS,                   // made changes by TUAN NGUYEN
+//      SOLVEFOR_STATE,                      // made changes by TUAN NGUYEN     // It was added temporarily. SolveFor state should get from the object having solve-for variable in new design
       EstimatorParamCount
    };
 
@@ -322,10 +314,6 @@ protected:
       CONVERGING,
       DIVERGING,
    };
-
-
-//private:
-//   bool                    IsReuseableType(const std::string& value);   // It was moved to BatchEstimator
 
 };
 
