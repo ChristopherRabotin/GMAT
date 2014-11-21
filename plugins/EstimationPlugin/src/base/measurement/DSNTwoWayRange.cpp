@@ -1617,8 +1617,9 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    {
       err = 2;
       throw MeasurementException("Error: No ramp table available for measurement calculation\n");
-   }
-   else if ((*rampTB).size() == 0)
+   } 
+      
+   if ((*rampTB).size() == 0)
    {
       err = 3;
       std::stringstream ss;
@@ -1626,34 +1627,46 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
       throw MeasurementException(ss.str());
    }
 
+   // Get the beginning index and the ending index for frequency data records for this measurement model 
+   UnsignedInt beginIndex, endIndex;
+   BeginEndIndexesOfRampTable(beginIndex, endIndex, err);
+
+
+
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
-   Real time_min = (*rampTB)[0].epoch;
-   Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+//   Real time_min = (*rampTB)[0].epoch;
+//   Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+   Real time_min = (*rampTB)[beginIndex].epoch;
+   Real time_max = (*rampTB)[endIndex-1].epoch;
 
 #ifdef RAMP_TABLE_EXPANDABLE
    Real correct_val = 0;
    if (t1 < time_min)
    {
       // t0 and t1 < time_min
-      return delta_t*(*rampTB)[0].rampFrequency;
+      //return delta_t*(*rampTB)[0].rampFrequency;
+      return delta_t*(*rampTB)[beginIndex].rampFrequency;
    }
    else if (t1 > time_max)
    {
       if (t0 < time_min)
       {
          // t0 < time_min < time_max < t1
-         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
          t0 = time_min;
       }
       else if (t0 > time_max)
       {
          // t0 and t1 > time_max
-         return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+         //return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+         return delta_t*(*rampTB)[endIndex-1].rampFrequency;
       }
       else
       {
          // time_min <= t0 <= time_max < t1
-         correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+         //correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+         correct_val = (*rampTB)[endIndex -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
          t1 = time_max;
       }
    }
@@ -1662,7 +1675,8 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
       if (t0 < time_min)
       {
          // t0 < time_min <= t1 <= time_max
-         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
          t0 = time_min;
       }
    }
@@ -1689,8 +1703,17 @@ Real DSNTwoWayRange::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err
    }
 
    // search for end interval:
-   UnsignedInt end_interval = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //UnsignedInt end_interval = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t1 < (*rampTB)[i].epoch)
+   //   {
+   //      end_interval = i-1;      
+   //      break;
+   //   }
+   //}
+   UnsignedInt end_interval = beginIndex;
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t1 < (*rampTB)[i].epoch)
       {
