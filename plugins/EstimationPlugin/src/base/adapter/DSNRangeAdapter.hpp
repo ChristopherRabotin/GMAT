@@ -81,8 +81,10 @@ public:
 
 protected:
    /// Range modulo constant
-   Real            rangeModulo;
+   Real            rangeModulo;                             // unit: RU
 
+   ///// Table containing ramped frequency data for this measurement only
+   //std::vector<RampTableData> freqRampedTable;
 
    /// Parameter IDs for the DSNRangeAdapter
    enum
@@ -97,6 +99,9 @@ protected:
    /// Types of the DSNRangeAdapter parameters
    static const Gmat::ParameterType PARAMETER_TYPE[DSNRangeAdapterParamCount -
                                                    RangeAdapterKmParamCount];                      // made changes by TUAN NGUYEN
+
+   Real                 GetFrequencyFactor(Real frequency);                                        // made changes by TUAN NGUYEN
+   virtual Real         IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);              // made changes by TUAN NGUYEN
 
 };
 

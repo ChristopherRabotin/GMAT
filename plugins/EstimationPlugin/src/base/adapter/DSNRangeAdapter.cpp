@@ -22,7 +22,7 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include "RandomNumber.hpp"
-
+#include <sstream>
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
@@ -62,6 +62,7 @@ DSNRangeAdapter::DSNRangeAdapter(const std::string& name) :
    rangeModulo         (1.0e18)
 {
    typeName = "DSNRange";              // change type name from "RangeKm" to "DSNRange"
+   rampTB = NULL; 
 }
 
 
@@ -74,6 +75,7 @@ DSNRangeAdapter::DSNRangeAdapter(const std::string& name) :
 //------------------------------------------------------------------------------
 DSNRangeAdapter::~DSNRangeAdapter()
 {
+   //freqRampedTable.clear();
 }
 
 
@@ -90,6 +92,7 @@ DSNRangeAdapter::DSNRangeAdapter(const DSNRangeAdapter& dsnr) :
    RangeAdapterKm      (dsnr),
    rangeModulo         (dsnr.rangeModulo)
 {
+   rampTB = NULL;
 }
 
 
@@ -111,6 +114,7 @@ DSNRangeAdapter& DSNRangeAdapter::operator=(const DSNRangeAdapter& dsnr)
       RangeAdapterKm::operator=(dsnr);
 
       rangeModulo = dsnr.rangeModulo;
+      rampTB = NULL;
    }
 
    return *this;
@@ -337,19 +341,6 @@ bool DSNRangeAdapter::Initialize()
       retval = true;
 
       // @todo: initialize all needed variables
-      // Calculate measurement covariance again due to it uses RU.
-      std::vector<SignalData*> data = calcData->GetSignalData();
-      Integer measurementSize = data.size();
-      measErrorCovariance.SetDimension(measurementSize);
-      for (Integer i = 0; i < measurementSize; ++i)
-      {
-         for (Integer j = 0; j < measurementSize; ++j)
-         {
-            measErrorCovariance(i,j) = (i == j ?
-                        (noiseSigma[2] != 0.0 ? (noiseSigma[2] * noiseSigma[2]) : 1.0) :            // noiseSigma[2] is used for DSNRange. Its unit is RU
-                        0.0);
-         }
-      }
 
    }
 
@@ -384,12 +375,22 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
             rampTable);
    #endif
 
-   // 1. Set ramp table and observation data for adapter before doing something
+   // 1. Set value for local variables
    rampTB = rampTable;
+   Integer err = 0;
+   if (rampTable != NULL)
+   {
+      BeginEndIndexesOfRampTable(err);
+   }
+
    obsData = forObservation;
+   // 1.2. Reset value for range modulo constant
+   if (obsData)
+      rangeModulo = obsData->rangeModulo;                                                                         // unit: RU
    
    // 2. Compute range in km
-   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
+   //RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
+   RangeAdapterKm::CalculateMeasurement(withEvents, forObservation);
    
    // 3. Convert range from km to RU and store in cMeasurement:
    for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
@@ -417,7 +418,7 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
 
          try
          {
-            cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: range unit
+            cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: RU
          } catch (MeasurementException exp)
          {
             cMeasurement.value[i] = 0.0;               // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
@@ -436,27 +437,31 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
 
          cMeasurement.value[i] = multiplier*realTravelTime;
       }
+      Real C_idealVal = cMeasurement.value[i];
       
       if (measurementType == "DSNRange")
       {
-         //@Todo: write code to add bias to measuement value here
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
-         #endif
+         // Compute bias, noise sigma, and measurement error covariance matrix
+         ComputeMeasurementBias("DSNRangeBias");
+         ComputeMeasurementNoiseSigma("DSNRangeNoiseSigma");
+         ComputeMeasurementErrorCovarianceMatrix();
 
          // Add noise to measurement value
          if (addNoise)
          {
-//            MessageInterface::ShowMessage("Add noise\n");
             // Add noise here
             if (cMeasurement.unfeasibleReason != "R")
             {
-//               MessageInterface::ShowMessage("create noise: c = %.12lf\n", cMeasurement.value[i]);
                RandomNumber* rn = RandomNumber::Instance();
-               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[2]);
+               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
                cMeasurement.value[i] = val;
             }
          }
+         //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("      . Add bias...\n");
+         #endif
+         cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
       }
 
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
@@ -468,16 +473,25 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("===================================================================\n");
          MessageInterface::ShowMessage("====  DSNRangeAdapter: Range Calculation for Measurement Data %dth  \n", i);
          MessageInterface::ShowMessage("===================================================================\n");
-         MessageInterface::ShowMessage("      . Measurement type       : <%s>\n", measurementType.c_str());
-         MessageInterface::ShowMessage("      . Noise adding option    : %s\n", (addNoise?"true":"false"));
-         MessageInterface::ShowMessage("      . Range modulo constant  : %.12lf RU\n", rangeModulo);
-         MessageInterface::ShowMessage("      . Real travel time       : %.12lf seconds\n", realTravelTime);
-         MessageInterface::ShowMessage("      . Multiplier factor      : %.12lf\n", GetMultiplierFactor());
-         MessageInterface::ShowMessage("      . C-value (with noise)   : %.12lf RU\n", cMeasurement.value[i]);
-         MessageInterface::ShowMessage("      . Measurement epoch A1Mjd: %.12lf\n", cMeasurement.epoch); 
+         
+         MessageInterface::ShowMessage("      . Path : ");
+         for (UnsignedInt k=0; k < participantLists[i]->size(); ++k)
+            MessageInterface::ShowMessage("%s,  ", participantLists[i]->at(k).c_str());
+         MessageInterface::ShowMessage("\n");
+
+         MessageInterface::ShowMessage("      . Measurement type           : <%s>\n", measurementType.c_str());
+         MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
+         MessageInterface::ShowMessage("      . Range modulo constant      : %.12lf RU\n", rangeModulo);
+         MessageInterface::ShowMessage("      . Real travel time           : %.12lf seconds\n", realTravelTime);
+         MessageInterface::ShowMessage("      . Multiplier factor          : %.12lf\n", GetMultiplierFactor());
+         MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf RU\n", C_idealVal);
+         MessageInterface::ShowMessage("      . DSN Noise sigma            : %.12lf RU\n", noiseSigma[i]);
+         MessageInterface::ShowMessage("      . DSN Bias                   : %.12lf RU\n", measurementBias[i]);
+         MessageInterface::ShowMessage("      . C-value with noise and bias: %.12lf RU\n", cMeasurement.value[i]);
+         MessageInterface::ShowMessage("      . Measurement epoch A1Mjd    : %.12lf\n", cMeasurement.epoch); 
          MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
-         MessageInterface::ShowMessage("      . Feasibility reason     : %s\n", cMeasurement.unfeasibleReason.c_str());
-         MessageInterface::ShowMessage("      . Elevation angle        : %.12lf degree\n", cMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("      . Feasibility reason         : %s\n", cMeasurement.unfeasibleReason.c_str());
+         MessageInterface::ShowMessage("      . Elevation angle            : %.12lf degree\n", cMeasurement.feasibilityValue);
          MessageInterface::ShowMessage("===================================================================\n");
       #endif
 
@@ -514,17 +528,52 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
       MessageInterface::ShowMessage("Enter DSNRangeAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
 
-   // Compute measurement derivatives in km:
-   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   // Get parameter name specified by id
+   Integer parameterID;
+   if (id > 250)
+      parameterID = id - obj->GetType() * 250; //GetParmIdFromEstID(id, obj);
+   else
+      parameterID = id;
+   std::string paramName = obj->GetParameterText(parameterID);
 
-   // Convert measurement derivatives from km to RU
-   Real freqFactor = multiplier/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM);
-   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
-   {
-      for (UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
-         theDataDerivatives[i][j] = theDataDerivatives[i][j] * freqFactor;
-   }
+   #ifdef DEBUG_DERIVATIVE_CALCULATION
+      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+   #endif
+
    
+   if (paramName.substr(paramName.size()-4) == "Bias")
+   {
+      // Compute measurement derivatives w.r.t Bias:
+      if (paramName == "DSNRangeBias")
+      {
+         RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+      }
+      else
+      {
+         // for RangeBias and DopplerBias, derivative is 0.0
+         Integer size = obj->GetEstimationParameterSize(id);
+         theDataDerivatives.clear();
+         RealArray val;
+         val.assign(size, 0.0);
+         theDataDerivatives.push_back(val);
+      }
+   }
+   else
+   {
+      // Compute measurement derivatives w.r.t position and velocity in km:
+      RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+
+      // Convert measurement derivatives from km to RU
+      Real freqFactor = multiplier/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM);
+      for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      {
+         for (UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
+         {
+            if ((paramName == "Position")||(paramName == "Velocity")||(paramName == "CartesianX"))
+               theDataDerivatives[i][j] = theDataDerivatives[i][j] * freqFactor;
+         }
+      }
+   }
    #ifdef DEBUG_DERIVATIVE_CALCULATION
       for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
       {
@@ -647,3 +696,253 @@ void DSNRangeAdapter::SetCorrection(const std::string& correctionName,
 {
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
 }
+
+
+
+
+
+//------------------------------------------------------------------------------
+// Real GetFrequencyFactor(Real frequency)
+//------------------------------------------------------------------------------
+/**
+ * Constructs the multiplier used to convert into range units
+ *
+ * @param frequency F_T used in the computation.  The default (0.0) generates
+ *                  the factor for DSN14.
+ *
+ * @return The factor used in the conversion.
+ */
+//------------------------------------------------------------------------------
+Real DSNRangeAdapter::GetFrequencyFactor(Real frequency)
+{
+   Real factor;
+
+   if ((obsData == NULL)&&(rampTB == NULL))
+   {
+      // Map the frequency to the corresponding factor here
+      if ((frequency >= 2000000000.0) && (frequency <= 4000000000.0))
+      {
+         // S-band
+         factor = frequency / 2.0;
+         if (freqBand == 0)
+            freqBand = 1;               // 1 for S-band
+      }
+      else if ((frequency >= 7000000000.0) && (frequency <= 8400000000.0))
+      {
+         // X-band (Band values from Wikipedia; check them!
+         // factor = frequency * 11.0 / 75.0;            // for X-band with BVE and HEF attenna mounted before BVE:    Moyer's eq 13-109
+         factor = frequency * 221.0 / 1498.0;            // for X-band with BVE:   Moyer's eq 13-110
+         if (freqBand == 0)
+            freqBand = 2;               // 2 for X-band
+      }
+      else
+      {
+         std::stringstream ss;
+         ss << "Error: No frequency band was specified for frequency = " << frequency << "Hz\n";
+         throw MeasurementException(ss.str());
+      }
+      // Todo: Figure out how to detect HEV and BVE
+   }
+   else
+   {
+      switch (freqBand)
+      {
+      case 1:
+         factor = frequency/ 2.0;
+         break;
+      case 2:
+         factor = frequency *221.0/1498.0;
+         break;
+      }
+   }
+
+   return factor;
+}
+
+
+//------------------------------------------------------------------------------
+// Real RampedFrequencyIntergration(Real t0, Real delta_t)
+//------------------------------------------------------------------------------
+/**
+ * Calculate the tetegration of ramped frequency in range from time t0 to time t1
+ *
+ * @param t1         The end time for integration (unit: A1Mjd)
+ * @param delta_t    Elapse time (unit: second)
+ * @param err        Error number
+ *
+ * @return The integration of ramped frequency.
+ * Assumptions: ramp table had been sorted by epoch 
+ */
+//------------------------------------------------------------------------------
+Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& err)
+{
+   err = 0;
+   if (delta_t < 0)
+   {
+      err = 1;
+      throw MeasurementException("Error: Elapse time has to be a non negative number\n");
+   }
+
+   if (rampTB == NULL)
+   {
+      err = 2;
+      throw MeasurementException("Error: No ramp table available for measurement calculation\n");
+   }
+   
+   if ((*rampTB).size() == 0)
+   {
+      err = 3;
+      std::stringstream ss;
+      ss << "Error: Ramp table has " << (*rampTB).size() << " data records. It needs at least 2 records\n";
+      throw MeasurementException(ss.str());
+   }
+
+   // Get the beginning index and the ending index for frequency data records for this measurement model 
+   BeginEndIndexesOfRampTable(err);
+
+
+   Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
+   //Real time_min = (*rampTB)[0].epoch;
+   //Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+   Real time_min = (*rampTB)[beginIndex].epoch;
+   Real time_max = (*rampTB)[endIndex-1].epoch;
+
+#ifdef RAMP_TABLE_EXPANDABLE
+   Real correct_val = 0;
+   if (t1 < time_min)
+   {
+      // t0 and t1 < time_min
+      //return delta_t*(*rampTB)[0].rampFrequency;
+      return delta_t*(*rampTB)[beginIndex].rampFrequency;
+   }
+   else if (t1 > time_max)
+   {
+     if (t0 < time_min)
+     {
+        // t0 < time_min < time_max < t1
+        //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+        correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+        t0 = time_min;
+     }
+     else if (t0 > time_max)
+     {
+        // t0 and t1 > time_max
+        //return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+        return delta_t*(*rampTB)[endIndex-1].rampFrequency;
+     }
+     else
+     {
+        // time_min <= t0 <= time_max < t1
+        //correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+        correct_val = (*rampTB)[endIndex -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+        t1 = time_max;
+     }
+   }
+   else
+   {
+     if (t0 < time_min)
+     {
+        // t0 < time_min <= t1 <= time_max
+        //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+        correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+        t0 = time_min;
+     }
+   }
+#endif
+
+   if ((t1 < time_min)||(t1 > time_max))
+   {
+      char s[200];
+      sprintf(&s[0], "Error: End epoch t3R = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t1, time_min, time_max);
+      std::string st(&s[0]);
+      err = 4;
+      throw MeasurementException(st);
+   }
+
+   if ((t0 < time_min)||(t0 > time_max))
+   {
+      char s[200];
+      sprintf(&s[0], "Error: Start epoch t1T = %.12lf is out of range [%.12lf , %.12lf] of ramp table\n", t0, time_min, time_max);
+      std::string st(&s[0]);
+      err = 5;
+      throw MeasurementException(st);
+   }
+
+   // search for end interval:
+   //UnsignedInt end_interval = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t1 < (*rampTB)[i].epoch)
+   //   {
+   //      end_interval = i-1;      
+   //      break;
+   //   }
+   //}
+   UnsignedInt end_interval = beginIndex;
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
+   {
+      if (t1 < (*rampTB)[i].epoch)
+      {
+         end_interval = i-1;      
+         break;
+      }
+   }
+
+
+   // search for end interval:
+   Real f0, f1, f_dot;
+   Real value1;
+   Real interval_len;
+
+   Real basedFreq = (*rampTB)[end_interval].rampFrequency;
+   Real basedFreqFactor = GetFrequencyFactor(basedFreq);
+   Real value = 0.0;
+   Real dt = delta_t;
+   Integer i = end_interval;
+   while (dt > 0)
+   {
+      f_dot = (*rampTB)[i].rampRate;
+
+      // Specify frequency at the begining and lenght of the current interval   
+      if (i == end_interval)
+         interval_len = (t1 - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+      else
+         interval_len = ((*rampTB)[i+1].epoch - (*rampTB)[i].epoch)*GmatTimeConstants::SECS_PER_DAY;
+
+      f0 = (*rampTB)[i].rampFrequency;
+      if (dt < interval_len)
+      {
+         f0 = (*rampTB)[i].rampFrequency + f_dot*(interval_len - dt);
+         interval_len = dt;
+      }
+
+      // Specify frequency at the end of the current interval
+      f1 = f0 + f_dot*interval_len;
+
+      // Take integral for the current interval
+      value1 = ((GetFrequencyFactor(f0) + GetFrequencyFactor(f1))/2 - basedFreqFactor) * interval_len;
+      value  = value + value1;
+
+//     MessageInterface::ShowMessage("interval i = %d:    value1 = %.12lf    f0 = %.12lf  %.12lf     f1 = %.12lf   %.12lf     f_ave = %.12lfHz   width = %.12lfs \n", i, value1, f0, GetFrequencyFactor(f0), f1, GetFrequencyFactor(f1), (f0+f1)/2, interval_len);
+//      MessageInterface::ShowMessage("interval i = %d: Start: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n", i,
+//      (*rampTB)[i].epoch,  (*rampTB)[i].uplinkBand, (*rampTB)[i].rampType, (*rampTB)[i].rampFrequency, (*rampTB)[i].rampRate);
+//      MessageInterface::ShowMessage("interval i = %d:   End: epoch = %.12lf     band = %d    ramp type = %d   ramp freq = %.12le    ramp rate = %.12le\n\n", i+1,
+//      (*rampTB)[i+1].epoch,  (*rampTB)[i+1].uplinkBand, (*rampTB)[i+1].rampType, (*rampTB)[i+1].rampFrequency, (*rampTB)[i+1].rampRate);
+
+
+      // Specify dt 
+      dt = dt - interval_len;
+
+      i--;
+   }
+   value = value + basedFreqFactor*delta_t;
+
+//   MessageInterface::ShowMessage("value = %.12lf\n", value);
+
+#ifdef RAMP_TABLE_EXPANDABLE
+   return value + correct_val;
+#else
+   return value;
+#endif
+}
+
