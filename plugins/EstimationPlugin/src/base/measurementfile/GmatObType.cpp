@@ -466,10 +466,12 @@ ObservationData* GmatObType::ReadObservation()
       currentObs.participantIDs.push_back(str);
    }
 
+   currentObs.unit = "Km";                              // made changes by TUAN NGUYEN
    if (currentObs.typeName == "Doppler")                // made changes by TUAN NGUYEN
    {                                                    // made changes by TUAN NGUYEN
       theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
       theLine >> currentObs.dopplerCountInterval;       // made changes by TUAN NGUYEN
+      currentObs.unit = "Hz";                           // made changes by TUAN NGUYEN
    }                                                    // made changes by TUAN NGUYEN
 
    for (Integer i = 0; i < dataSize; ++i)
@@ -485,6 +487,7 @@ ObservationData* GmatObType::ReadObservation()
       theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
       theLine >> currentObs.uplinkFreq;                 // made changes by TUAN NGUYEN
       theLine >> currentObs.rangeModulo;                // made changes by TUAN NGUYEN
+      currentObs.unit = "RU";                           // made changes by TUAN NGUYEN
    }                                                    // made changes by TUAN NGUYEN
 
 /*
