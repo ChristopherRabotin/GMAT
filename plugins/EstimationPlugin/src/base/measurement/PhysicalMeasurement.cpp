@@ -946,14 +946,32 @@ Integer PhysicalMeasurement::GetUplinkBandFromRampTable(Real t)
    if ((*rampTB).size() == 0)
       throw MeasurementException("Error: No data is in ramp table\n");
 
-   if (t <= (*rampTB)[0].epoch)
-      return (*rampTB)[0].uplinkBand;
-   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-      return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+   // Get the beginning index and the ending index for frequency data records for this measurement model 
+   UnsignedInt beginIndex, endIndex;
+   Integer err = 0;
+   BeginEndIndexesOfRampTable(beginIndex, endIndex, err);
+
+   //if (t <= (*rampTB)[0].epoch)
+   //   return (*rampTB)[0].uplinkBand;
+   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+   //   return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+   if (t <= (*rampTB)[beginIndex].epoch)
+      return (*rampTB)[beginIndex].uplinkBand;
+   else if (t >= (*rampTB)[endIndex-1].epoch)
+      return (*rampTB)[endIndex-1].uplinkBand;
 
    // search for interval which contains time t:
+   //Real upBand = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t < (*rampTB)[i].epoch)
+   //   {
+   //      upBand = (*rampTB)[i-1].uplinkBand;
+   //      break;
+   //   }
+   //}
    Real upBand = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t < (*rampTB)[i].epoch)
       {
@@ -972,18 +990,37 @@ Real PhysicalMeasurement::GetFrequencyFromRampTable(Real t)
    if ((*rampTB).size() == 0)
       throw MeasurementException("Error: No data is in Ramp table\n");
 
-   if (t <= (*rampTB)[0].epoch)
-      return (*rampTB)[0].rampFrequency;
-   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-      return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+   // Get the beginning index and the ending index for frequency data records for this measurement model 
+   UnsignedInt beginIndex, endIndex;
+   Integer err = 0;
+   BeginEndIndexesOfRampTable(beginIndex, endIndex, err);
+
+
+   //if (t <= (*rampTB)[0].epoch)
+   //   return (*rampTB)[0].rampFrequency;
+   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+   //   return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+   if (t <= (*rampTB)[beginIndex].epoch)
+      return (*rampTB)[beginIndex].rampFrequency;
+   else if (t >= (*rampTB)[endIndex-1].epoch)
+      return (*rampTB)[endIndex-1].rampFrequency;
 
    // search for interval which contains time t:
-   UnsignedInt interval_index = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //UnsignedInt interval_index = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t < (*rampTB)[i].epoch)
+   //   {
+   //      interval_index = i-1;      
+   //      break;
+   //   }
+   //}
+   UnsignedInt interval_index = beginIndex;
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t < (*rampTB)[i].epoch)
       {
-         interval_index = i-1;      
+         interval_index = i-1;
          break;
       }
    }
@@ -1033,6 +1070,53 @@ Integer PhysicalMeasurement::FrequencyBand(Real frequency)
 
 
 
+void PhysicalMeasurement::BeginEndIndexesOfRampTable(UnsignedInt& beginIndex, UnsignedInt & endIndex, Integer & err)
+{
+   // 1. Get search key
+   std::string gsName, scName, gsID, scID, searchkey;
+   if (participants[0]->IsOfType(Gmat::GROUND_STATION))
+   {
+      gsName = participants[0]->GetName();
+      gsID   = participants[0]->GetStringParameter("Id");
+      scName = participants[1]->GetName();
+      scID   = participants[1]->GetStringParameter("Id");
+   }
+   else
+   {
+      gsName = participants[1]->GetName();
+      gsID   = participants[1]->GetStringParameter("Id");
+      scName = participants[0]->GetName();
+      scID   = participants[0]->GetStringParameter("Id");
+   }
+   searchkey = gsID + " " + scID + " ";
+
+   // 2. Search for the beginning index
+   beginIndex = 0;
+   for(; beginIndex < (*rampTB).size(); ++beginIndex)
+   {
+      if (searchkey == (*rampTB)[beginIndex].indexkey.substr(0,searchkey.size()))
+         break;
+   }
+
+   // 3. Search for the ending index
+   endIndex = beginIndex; 
+   for(; endIndex < (*rampTB).size(); ++endIndex)
+   {
+      if (searchkey != (*rampTB)[endIndex].indexkey.substr(0,searchkey.size()))
+         break;
+   }
+
+   // 4. Verify number of data records
+   if ((endIndex - beginIndex) < 2)
+   {
+      err = 3;
+      std::stringstream ss;
+      ss << "Error: Ramp table has " << (endIndex - beginIndex) << " frequency data records for uplink signal from "<< gsName << " to " << scName << ". It needs at least 2 records\n";
+      throw MeasurementException(ss.str());
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // Real RampedFrequencyIntergration(Real t0, Real t1)
 //------------------------------------------------------------------------------
@@ -1066,7 +1150,8 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       err = 2;
       throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    }
-   else if ((*rampTB).size() < 2)
+   
+   if ((*rampTB).size() < 2)
    {
       err = 3;
       std::stringstream ss;
@@ -1074,35 +1159,45 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       throw MeasurementException(ss.str());
    }
    
+   // Get the beginning index and the ending index for frequency data records for this measurement model 
+   UnsignedInt beginIndex, endIndex;
+   BeginEndIndexesOfRampTable(beginIndex, endIndex, err);
+
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
-   Real time_min = (*rampTB)[0].epoch;
-   Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+   //Real time_min = (*rampTB)[0].epoch;
+   //Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
+   Real time_min = (*rampTB)[beginIndex].epoch;
+   Real time_max = (*rampTB)[endIndex-1].epoch;
 
 #ifdef RAMP_TABLE_EXPANDABLE
    Real correct_val = 0;
    if (t1 < time_min)
    {
       // t0 and t1 < time_min
-      return delta_t*(*rampTB)[0].rampFrequency;
+      //return delta_t*(*rampTB)[0].rampFrequency;
+      return delta_t*(*rampTB)[beginIndex].rampFrequency;
    }
    else if (t1 > time_max)
    {
       if (t0 < time_min)
       {
          // t0 < time_min < time_max < t1
-         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
          t0 = time_min;
       }
       else if (t0 > time_max)
       {
          // t0 and t1 > time_max
-         return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+         //return delta_t*(*rampTB)[(*rampTB).size()-1].rampFrequency;
+         return delta_t*(*rampTB)[endIndex-1].rampFrequency;
       }
       else
       {
          // time_min <= t0 <= time_max < t1
-         correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+         //correct_val = (*rampTB)[(*rampTB).size() -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
+         correct_val = (*rampTB)[endIndex -1].rampFrequency * (t1-time_max)*GmatTimeConstants::SECS_PER_DAY;
          t1 = time_max;
       }
    }
@@ -1111,7 +1206,8 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
       if (t0 < time_min)
       {
          // t0 < time_min <= t1 <= time_max
-         correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         //correct_val = (*rampTB)[0].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
+         correct_val = (*rampTB)[beginIndex].rampFrequency * (time_min-t0)*GmatTimeConstants::SECS_PER_DAY;
          t0 = time_min;
       }
    }
@@ -1142,8 +1238,17 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
    MessageInterface::ShowMessage(" elapse time   = %.15lf s\n", delta_t);
 #endif
    // search for end interval:
-   UnsignedInt end_interval = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //UnsignedInt end_interval = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t1 < (*rampTB)[i].epoch)
+   //   {
+   //      end_interval = i-1;      
+   //      break;
+   //   }
+   //}
+   UnsignedInt end_interval = beginIndex;
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t1 < (*rampTB)[i].epoch)
       {
@@ -1151,6 +1256,7 @@ Real PhysicalMeasurement::IntegralRampedFrequency(Real t1, Real delta_t, Integer
          break;
       }
    }
+
 
    Real basedFreq = (*rampTB)[end_interval].rampFrequency; 
 

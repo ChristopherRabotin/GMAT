@@ -106,6 +106,11 @@ protected:
 
    /// Frequency ramp table used to calculate frequency ramp measurements                         // made changes by TUAN NGUYEN
    std::vector<RampTableData>* rampTB;                                                            // made changes by TUAN NGUYEN
+
+   /// Table containing ramped frequency data for this measurement only                           // made changes by TUAN NGUYEN
+   std::vector<RampTableData> freqRampedTable;                                                    // made changes by TUAN NGUYEN
+
+
    /// Flags to indicate using relativity correction and ET-TAI correction                        // made changes by TUAN NGUYEN
    bool                        useRelativityCorrection;                                           // made changes by TUAN NGUYEN
    bool                        useETminusTAICorrection;                                           // made changes by TUAN NGUYEN
@@ -141,6 +146,7 @@ protected:
    Real                       GetFrequencyFromRampTable(Real epoch);         // Get frequency from ramped table for a given epoch (in A1Mjd)      // made changes by TUAN NGUYEN
    Integer                    GetUplinkBandFromRampTable(Real epoch);                         // made changes by TUAN NGUYEN
    virtual Real               IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);   // made changes by TUAN NGUYEN
+   void                       BeginEndIndexesOfRampTable(UnsignedInt& beginIndex, UnsignedInt & endIndex, Integer & err); // made changes by TUAN NGUYEN
 
    /// Enumeration defining the PhysicalMeasurement's scriptable parameters
    enum
