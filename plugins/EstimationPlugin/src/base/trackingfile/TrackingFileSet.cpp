@@ -1604,7 +1604,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new DopplerAdapter(adapterName);                       // made changes by TUAN NGUYEN
       if (retval)                                                     // made changes by TUAN NGUYEN
       {
-         ((DopplerAdapter*)retval)->adapter = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex); 
+         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex); 
          retval->UsesLightTime(useLighttime);                         // made changes by TUAN NGUYEN
          retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN         
       }
