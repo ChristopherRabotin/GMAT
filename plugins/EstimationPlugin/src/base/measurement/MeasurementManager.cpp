@@ -1104,6 +1104,23 @@ UnsignedInt MeasurementManager::LoadObservations()
       for (UnsignedInt i = 0; i < observations.size(); ++i)
          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
    #endif
+      //std::fstream fs;
+      //fs.open("datafile.txt",std::ios_base::out);
+      //ObservationData data;
+      //char line[1000];
+      //std::string s;
+      //for (UnsignedInt i = 0; i < observations.size(); ++i)
+      //{
+      //   data = observations[i];
+      //   Real TAIepoch = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, data.epoch);
+      //   sprintf(&line[0], "%.12lf   DSNTwoWayDoppler   7051   %s %s   %d   %lf   %.16le\0", TAIepoch, data.participantIDs[0].c_str(), data.participantIDs[1].c_str(), data.uplinkBand, data.dopplerCountInterval, data.value[0]);
+      //   s = "";
+      //   s.append(&line[0]);
+      //   MessageInterface::ShowMessage("%s\n", s.c_str());
+      //   fs << s << "\n";
+      //   fs.flush();
+      //}
+      //fs.close();
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
@@ -1180,6 +1197,7 @@ void MeasurementManager::LoadRampTables()
          {
             if (rampTableDataStreamList[i]->GetStringParameter("Format") == "GMAT_RampTable")
             {
+               std::map<std::string, RampTableData> ramp_table_map;
                std::vector<RampTableData> ramp_table;
                rtd = rampTableDataStreamList[i]->ReadRampTableData();
                while (rtd != NULL)
@@ -1187,10 +1205,23 @@ void MeasurementManager::LoadRampTables()
                   // Data records containing rampType = 0(snap), 6(invalid/unknown) , and 7(left bank in DSN file) will be removed from ramp table  
                   if ((rtd_old.epoch < rtd->epoch)&&(rtd->rampType >= 1)&&(rtd->rampType <= 5))
                   {
-                     ramp_table.push_back(*rtd);
+                     // Specify keyindex
+                     std::stringstream ss;
+                     ss.precision(21);
+                     for (UnsignedInt p = 0; p < rtd->participantIDs.size(); p++)
+                     {
+                        ss << rtd->participantIDs[p];
+                        ss << " ";          // adding a blank between partcipants
+                     }
+                     ss << rtd->epoch;
+                     rtd->indexkey = ss.str();
+
+                     // Store data record into ramp table map if it is not in there 
+                     if (ramp_table_map.find(rtd->indexkey) == ramp_table_map.end())
+                        ramp_table_map[rtd->indexkey] = *rtd;
 
                      #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-                        MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
+                     MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le  indexkey = <%s>\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate, rtd->indexkey.c_str());
                      #endif
 
                      rtd_old = *rtd;
@@ -1201,13 +1232,31 @@ void MeasurementManager::LoadRampTables()
                         MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time or rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
                      #endif
                   }
+
                   rtd = rampTableDataStreamList[i]->ReadRampTableData();
                }
 
+               // Store data from ramp table map to ramp_table
+               for (std::map<std::string, RampTableData>::iterator q = ramp_table_map.begin(); q != ramp_table_map.end(); ++q)
+               {
+                  ramp_table.push_back(q->second);
+               }
+
+               // store ramp_table to rampTables
                rampTables[rampTableDataStreamList[i]->GetName()] = ramp_table;
                #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
+                  MessageInterface::ShowMessage("Ramp Table:\n");
+                  for (UnsignedInt j = 0; j < ramp_table.size(); ++j)
+                  {
+                     RampTableData data = ramp_table[j];
+                     MessageInterface::ShowMessage("%.12lf  %s  %s  %d  %d  %le  %le\n", data.epoch, data.participantIDs[0].c_str(), data.participantIDs[1].c_str(), data.uplinkBand, data.rampType, data.rampFrequency, data.rampRate);
+                  }
                   MessageInterface::ShowMessage("      ^^^^^^ ramp_table[%s] = <%p>\n", rampTableDataStreamList[i]->GetName().c_str(), &rampTables[rampTableDataStreamList[i]->GetName()]);
                #endif
+
+               // Clean up memmory
+               ramp_table_map.clear();
+               ramp_table.clear();
             }
          }
       #endif
@@ -1924,14 +1973,30 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       // Now do the tracking data adapters
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
-         bool isbelong = true;
-         // @todo: add code to verify observation data belonging to the measurement model jth
-
+         // Code to verify observation data belonging to the measurement model jth
+         bool isbelong = false;
+         if ((adapters[j]->GetStringParameter("MeasurementType") == od->typeName))
+         {
+            std::vector<ObjectArray*> participantObjLists = adapters[j]->GetMeasurementModel()->GetParticipantObjectLists();
+            UnsignedInt num = participantObjLists[0]->size();                                       // participants in measurement model
+            if (num == od->participantIDs.size())
+            {
+               isbelong = true;
+               for (UnsignedInt i1 = 0; i1 < num; ++i1)
+               {
+                  if (od->participantIDs[i1] == participantObjLists[0]->at(i1)->GetStringParameter("Id"))
+                  {
+                     isbelong = false;
+                     break;
+                  }
+               }
+            }
+         }
 
          if (isbelong == false)
          {
-            // MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, adapters[j]->GetStringParameter("Type").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
-            measurements[j].typeName         = adapters[j]->GetStringParameter("Type");
+            // MessageInterface::ShowMessage("This observation data is not belong to model[%d]<%s>: %lf  %s  %s  %s  %lf\n",j, adapters[j]->GetStringParameter("MeasurementType").c_str(), od->epoch, od->typeName.c_str(), od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            measurements[j].typeName         = adapters[j]->GetStringParameter("MeasurementType");
             measurements[j].epoch            = od->epoch;
             measurements[j].epochSystem      = od->epochSystem;
             measurements[j].isFeasible       = false;
