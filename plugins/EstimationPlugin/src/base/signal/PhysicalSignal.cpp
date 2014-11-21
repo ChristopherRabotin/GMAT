@@ -69,6 +69,9 @@ PhysicalSignal::PhysicalSignal(const std::string &typeStr,
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: default construction\n");
 #endif
+   rampTable = NULL;
+   beginIndex = 0;
+   endIndex = 0;
 }
 
 
@@ -785,6 +788,11 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
       retval = nodePassed;
    }
    
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) exit\n", satPrecEpoch.GetMjd(),
+            epochAtReceive ? "with fixed Receiver" : "with fixed Transmitter");
+   #endif
+
    return retval;
 }
 #endif
@@ -815,6 +823,17 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    // Verify valid input
    if (obj == NULL)
       throw MeasurementException("Error: a NULL object inputs to PhysicalSignal::ModelSignalDerivative() function\n");
+
+   // Get parameter ID
+   Integer parameterID = -1;
+   if (forId > 250)
+      parameterID = GetParmIdFromEstID(forId, obj);
+   else
+      parameterID = forId;
+   std::string paramName = obj->GetParameterText(parameterID);
+   #ifdef DEBUG_DERIVATIVES
+   MessageInterface::ShowMessage("Solver-for parameter: %s\n", obj->GetParameterText(parameterID).c_str());
+   #endif
 
    // Verify initialization
    if (!isInitialized)
@@ -865,19 +884,19 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    if (theData.rNode == obj)
       objPtr = theData.rNode;
 
-   Integer parameterID = -1;
+   //Integer parameterID = -1;
    if (objPtr != NULL)
    {
-      if (forId > 250)
-         parameterID = GetParmIdFromEstID(forId, obj);
-      else
-         parameterID = forId;
+      //if (forId > 250)
+      //   parameterID = GetParmIdFromEstID(forId, obj);
+      //else
+      //   parameterID = forId;
 
-      #ifdef DEBUG_DERIVATIVES
-      MessageInterface::ShowMessage("Solver-for parameter: %s\n", objPtr->GetParameterText(parameterID).c_str());
-      #endif
+      //#ifdef DEBUG_DERIVATIVES
+      //MessageInterface::ShowMessage("Solver-for parameter: %s\n", objPtr->GetParameterText(parameterID).c_str());
+      //#endif
 
-      std::string paramName = objPtr->GetParameterText(parameterID);
+      //std::string paramName = objPtr->GetParameterText(parameterID);
       if (paramName == "Position")
       {
          Rvector3 result;
@@ -937,11 +956,38 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       else
       {
          UnsignedInt startIndex = paramName.size()-4;
-         //MessageInterface::ShowMessage("param name <%s>\n", paramName.substr(startIndex).c_str());
          if (paramName.substr(startIndex) == "Bias")
          {
-            for (Integer i = 0; i < size; ++i)
-               theDataDerivatives[0][i] += 1.0;
+            if (previous == NULL)
+            {  // This signal leg  object is the first one in signal path  
+               SignalBase* firstleg = this;
+               // Get last signal leg
+               SignalBase* lastleg = this;
+               while (lastleg->GetNext() !=NULL)
+                  lastleg = lastleg->GetNext();
+               
+               if ((firstleg->GetSignalData().tNode->IsOfType(Gmat::GROUND_STATION)) && (lastleg->GetSignalData().rNode->IsOfType(Gmat::GROUND_STATION) == false))
+               {
+                  for (Integer i = 0; i < size; ++i)
+                     theDataDerivatives[0][i] += 1.0;
+               }
+            }
+            else if (next == NULL)
+            {
+               // This signal leg is the last one in signal path
+               if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+               {
+                  for (Integer i = 0; i < size; ++i)
+                     theDataDerivatives[0][i] += 1.0;
+               }
+            }
+
+            #ifdef DEBUG_DERIVATIVES
+            MessageInterface::ShowMessage("   Deriv is w.r.t. %s  it value %lf\n", paramName.c_str(), theDataDerivatives[0][0]);
+            #endif
+
+            //for (Integer i = 0; i < size; ++i)
+            //   theDataDerivatives[0][i] += 1.0;
          }
          else
          {
@@ -954,6 +1000,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
          }
       }
    }
+
 
    if ((parameterID >= 0) && (logLevel < 2))
    {
@@ -2407,6 +2454,55 @@ RealArray PhysicalSignal::IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 
 #endif
 
 
+
+void PhysicalSignal::SpecifyBeginEndIndexesOfRampTable()
+{
+   // 1. Get search key
+   std::string gsName, scName, gsID, scID, searchkey;
+   if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+   {
+      gsName = theData.tNode->GetName();
+      gsID   = theData.tNode->GetStringParameter("Id");
+      scName = theData.rNode->GetName();
+      scID   = theData.rNode->GetStringParameter("Id");
+   }
+   else
+   {
+      gsName = theData.rNode->GetName();
+      gsID   = theData.rNode->GetStringParameter("Id");
+      scName = theData.tNode->GetName();
+      scID   = theData.tNode->GetStringParameter("Id");
+   }
+   searchkey = gsID + " " + scID + " ";
+   
+   // 2. Search for the beginning index
+   beginIndex = 0;
+   for(; beginIndex < (*rampTable).size(); ++beginIndex)
+   {
+      if (searchkey == (*rampTable)[beginIndex].indexkey.substr(0,searchkey.size()))
+         break;
+   }
+   
+   // 3. Search for the ending index
+   endIndex = beginIndex; 
+   for(; endIndex < (*rampTable).size(); ++endIndex)
+   {
+      if (searchkey != (*rampTable)[endIndex].indexkey.substr(0,searchkey.size()))
+         break;
+   }
+   
+   // 4. Verify number of data records
+   if ((endIndex - beginIndex) < 2)
+   {
+      std::stringstream ss;
+      ss << "Error: Ramp table has " << (endIndex - beginIndex) << " frequency data records for uplink signal from "<< gsName << " to " << scName << ". It needs at least 2 records\n";
+      throw MeasurementException(ss.str());
+   }
+}
+
+
+
+
 //------------------------------------------------------------------------------------------------
 // Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB)
 //------------------------------------------------------------------------------------------------
@@ -2426,15 +2522,34 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
 	   throw MeasurementException("Error: No ramp table available for measurement calculation\n");
    if ((*rampTB).size() == 0)
 	   throw MeasurementException("Error: No data is in Ramp table\n");
+   
+   if (rampTable == NULL)
+   {
+      rampTable = rampTB;
+      SpecifyBeginEndIndexesOfRampTable();
+   }
 
-   if (t <= (*rampTB)[0].epoch)
-	   return (*rampTB)[0].rampFrequency;
-   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-	   return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+   //if (t <= (*rampTB)[0].epoch)
+	  // return (*rampTB)[0].rampFrequency;
+   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+	  // return (*rampTB)[(*rampTB).size()-1].rampFrequency;
+   if (t <= (*rampTB)[beginIndex].epoch)
+	   return (*rampTB)[beginIndex].rampFrequency;
+   else if (t >= (*rampTB)[endIndex-1].epoch)
+	   return (*rampTB)[endIndex-1].rampFrequency;
 
    // search for interval which contains time t:
-   UnsignedInt interval_index = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //UnsignedInt interval_index = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t < (*rampTB)[i].epoch)
+	  // {
+   //      interval_index = i-1;      
+		 //  break;
+	  // }
+   //}
+   UnsignedInt interval_index = beginIndex;
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t < (*rampTB)[i].epoch)
 	   {
@@ -2442,7 +2557,7 @@ Real PhysicalSignal::GetFrequencyFromRampTable(Real t, std::vector<RampTableData
 		   break;
 	   }
    }
-
+   
    // specify frequency at time t:
    Real t_start = (*rampTB)[interval_index].epoch;
    Real f0 = (*rampTB)[interval_index].rampFrequency;
@@ -2474,14 +2589,33 @@ Integer PhysicalSignal::GetFrequencyBandFromRampTable(Real t, std::vector<RampTa
    if ((*rampTB).size() == 0)
       throw MeasurementException("Error: No data is in ramp table\n");
 
-   if (t <= (*rampTB)[0].epoch)
-      return (*rampTB)[0].uplinkBand;
-   else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
-      return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+   if (rampTable == NULL)
+   {
+      rampTable = rampTB;
+      SpecifyBeginEndIndexesOfRampTable();
+   }
+
+   //if (t <= (*rampTB)[0].epoch)
+   //   return (*rampTB)[0].uplinkBand;
+   //else if (t >= (*rampTB)[(*rampTB).size()-1].epoch)
+   //   return (*rampTB)[(*rampTB).size()-1].uplinkBand;
+   if (t <= (*rampTB)[beginIndex].epoch)
+      return (*rampTB)[beginIndex].uplinkBand;
+   else if (t >= (*rampTB)[endIndex-1].epoch)
+      return (*rampTB)[endIndex-1].uplinkBand;
 
    // search for interval which contains time t:
+   //Real upBand = 0;
+   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   //{
+   //   if (t < (*rampTB)[i].epoch)
+   //   {
+   //      upBand = (*rampTB)[i-1].uplinkBand;
+   //      break;
+   //   }
+   //}
    Real upBand = 0;
-   for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
+   for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {
       if (t < (*rampTB)[i].epoch)
       {

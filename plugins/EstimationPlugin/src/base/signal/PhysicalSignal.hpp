@@ -119,6 +119,13 @@ protected:
    /// This function is used to calculate total hardware delay                               // made changes by TUAN NGUYEN
    virtual bool   HardwareDelayCalculation();                                                // made changes by TUAN NGUYEN
 
+private:
+   /// ramp table and the beginning index and the ending index                               // made changes by TUAN NGUYEN
+   std::vector<RampTableData>* rampTable;                                                    // made changes by TUAN NGUYEN
+   UnsignedInt beginIndex;                                                                   // made changes by TUAN NGUYEN
+   UnsignedInt endIndex;                                                                     // made changes by TUAN NGUYEN
+
+   void           SpecifyBeginEndIndexesOfRampTable();                                       // made changes by TUAN NGUYEN
 };
 
 #endif /* PhysicalSignal_hpp */
