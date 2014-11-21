@@ -28,7 +28,11 @@
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_SET_PARAMETER
+//#define DEBUG_INITIALIZATION
 //#define DEBUG_RANGE_CALCULATION
+
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -42,6 +46,10 @@
 RangeAdapterKm::RangeAdapterKm(const std::string& name) :
    TrackingDataAdapter      ("RangeKm", name)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("RangeAdapterKm default constructor <%p>\n", this);
+#endif
+
 }
 
 
@@ -54,6 +62,9 @@ RangeAdapterKm::RangeAdapterKm(const std::string& name) :
 //------------------------------------------------------------------------------
 RangeAdapterKm::~RangeAdapterKm()
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("RangeAdapterKm default destructor  <%p>\n", this);
+#endif
 }
 
 
@@ -69,6 +80,10 @@ RangeAdapterKm::~RangeAdapterKm()
 RangeAdapterKm::RangeAdapterKm(const RangeAdapterKm& rak) :
    TrackingDataAdapter      (rak)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("RangeAdapterKm copy constructor   from <%p> to <%p>\n", &rak, this);
+#endif
+
 }
 
 
@@ -85,6 +100,10 @@ RangeAdapterKm::RangeAdapterKm(const RangeAdapterKm& rak) :
 //------------------------------------------------------------------------------
 RangeAdapterKm& RangeAdapterKm::operator=(const RangeAdapterKm& rak)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("RangeAdapterKm operator =   set <%p> = <%p>\n", this, &rak);
+#endif
+
    if (this != &rak)
    {
       TrackingDataAdapter::operator=(rak);
@@ -105,6 +124,10 @@ RangeAdapterKm& RangeAdapterKm::operator=(const RangeAdapterKm& rak)
 //------------------------------------------------------------------------------
 GmatBase* RangeAdapterKm::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("RangeAdapterKm::Clone() clone this <%p>\n", this);
+#endif
+
    return new RangeAdapterKm(*this);
 }
 
@@ -213,6 +236,28 @@ bool RangeAdapterKm::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
+// bool SetMeasurement(MeasureModel* meas)
+//------------------------------------------------------------------------------
+/**
+ * Sets the measurement model pointer
+ *
+ * @param meas The pointer
+ *
+ * @return true if set, false if not
+ */
+//------------------------------------------------------------------------------
+bool RangeAdapterKm::SetMeasurement(MeasureModel* meas)
+{
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("RangeAdapterKm<%p>::SetMeasurement(meas = <%p,%s>)\n", this, meas, meas->GetName().c_str()); 
+#endif
+
+   return TrackingDataAdapter::SetMeasurement(meas);
+}
+
+
+
+//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
@@ -223,6 +268,10 @@ bool RangeAdapterKm::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool RangeAdapterKm::Initialize()
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Start Initializing a RangeAdapterKm <%p>\n", this);
+   #endif
+
    bool retval = false;
 
    if (TrackingDataAdapter::Initialize())
@@ -250,24 +299,28 @@ bool RangeAdapterKm::Initialize()
             cMeasurement.participantIDs.push_back(theId);
          }
       }
+   
+
    }
 
+   //std::vector<SignalData*> data = calcData->GetSignalData();
+   //Integer measurementSize = data.size();
+   //measErrorCovariance.SetDimension(measurementSize);
+   //for (Integer i = 0; i < measurementSize; ++i)
+   //{
+   //   for (Integer j = 0; j < measurementSize; ++j)
+   //   {
+   //      measErrorCovariance(i,j) = (i == j ?
+   //                     (noiseSigma[0] != 0.0 ? (noiseSigma[0] * noiseSigma[0]) : 1.0) :            // noiseSigma[0] is used for Range in Km. Its unit is Km
+   //                     0.0);
+   //   }
+   //}
    
-   // Calculate measurement covariance
-   std::vector<SignalData*> data = calcData->GetSignalData();
-   Integer measurementSize = data.size();
-   measErrorCovariance.SetDimension(measurementSize);
-   for (Integer i = 0; i < measurementSize; ++i)
-   {
-      for (Integer j = 0; j < measurementSize; ++j)
-      {
-         measErrorCovariance(i,j) = (i == j ?
-                        (noiseSigma[0] != 0.0 ? (noiseSigma[0] * noiseSigma[0]) : 1.0) :            // noiseSigma[0] is used for Range in Km. Its unit is Km
-                        0.0);
-      }
-   }
-   //MessageInterface::ShowMessage("Covariance size = %d\n", measurementSize);
    
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("End Initializing a RangeAdapterKm <%p>\n", this);
+   #endif
+
    return retval;
 }
 
@@ -364,7 +417,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 
             // accumulate all hardware delays for signal path ith                          // made changes by TUAN NGUYEN
             values[i] += ((current->tDelay + current->rDelay)*                             // made changes by TUAN NGUYEN
-               GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);   // made changes by TUAN NGUYEN
+                  GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);// made changes by TUAN NGUYEN
 
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
@@ -405,12 +458,13 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 
       }// for i loop
       
-      // Specify noise sigma value
-      Real nsigma = 0.0;
-      if ((measurementType == "Range")||(measurementType == "DSNRange"))
-         nsigma = noiseSigma[0];                               // unit: km
-      else if (measurementType == "Doppler")
-         nsigma = noiseSigma[1];                               // unit: Hz
+
+      if (measurementType == "Range")
+      {
+         ComputeMeasurementBias("RangeBias");
+         ComputeMeasurementNoiseSigma("RangeNoiseSigma");
+         ComputeMeasurementErrorCovarianceMatrix();
+      }
 
       // Set measurement values
       cMeasurement.value.clear();
@@ -424,44 +478,54 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("===================================================================\n");
             MessageInterface::ShowMessage("====  RangeAdapterKm: Range Calculation for Measurement Data %dth  \n", i);
             MessageInterface::ShowMessage("===================================================================\n");
-            MessageInterface::ShowMessage("      . Measurement type : <%s>  nsigma = %lf\n", measurementType.c_str(), nsigma);
-            MessageInterface::ShowMessage("      . Noise adding option: %s\n", (addNoise?"true":"false"));
-            MessageInterface::ShowMessage("      . Real range for path %dth: %.12lf km \n", i, values[i]);
-         #endif
 
-         // No action is neede for multiplier in RangeAdapterKm due to it calculates full range of signal path.
-         // Multiplier will be used in any class derived from RangeAdapterKm
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . No action is needed for multiplier in RangeAdapterKm object.\n");
+            MessageInterface::ShowMessage("      . Path : ");
+            for (UnsignedInt k=0; k < participantLists[i]->size(); ++k)
+               MessageInterface::ShowMessage("%s,  ", participantLists[i]->at(k).c_str());
+            MessageInterface::ShowMessage("\n");
+
+            MessageInterface::ShowMessage("      . Measurement type           : <%s>\n", measurementType.c_str());            
+            MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
+            MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
+            MessageInterface::ShowMessage("      . Bias adding option        : %s\n", (addBias?"true":"false"));
+            if (measurementType == "Range")
+            {
+               MessageInterface::ShowMessage("      . Range noise sigma          : %.12lf km \n", noiseSigma[i]);
+               MessageInterface::ShowMessage("      . Range bias                 : %.12lf km \n", measurementBias[i]);
+               MessageInterface::ShowMessage("      . Multiplier                 : %.12lf \n", multiplier);
+            }
          #endif
 
          // This section is only done when measurement type is 'Range'. For other types such as DSNRange or Doppler, it will be done in their adapters  
          if (measurementType == "Range")
          {
-            //@Todo: write code to add bias to measuement value here
-            #ifdef DEBUG_RANGE_CALCULATION
-               MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
-            #endif
-
             // Add noise to measurement value                                              // made changes by TUAN NGUYEN
             if (addNoise)                                                                  // made changes by TUAN NGUYEN
             {                                                                              // made changes by TUAN NGUYEN
                // Add noise here                                                           // made changes by TUAN NGUYEN
                RandomNumber* rn = RandomNumber::Instance();                                // made changes by TUAN NGUYEN
-               Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
-               while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
-                  val = rn->Gaussian(measVal, nsigma);                                     // made changes by TUAN NGUYEN
+               // Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
+               Real val = rn->Gaussian(measVal, noiseSigma[i]);                            // made changes by TUAN NGUYEN
+//             while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
+               val = rn->Gaussian(measVal, noiseSigma[i]);                                 // made changes by TUAN NGUYEN
                measVal = val;                                                              // made changes by TUAN NGUYEN
             }                                                                              // made changes by TUAN NGUYEN
+
+            // Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+            if (addBias)
+               measVal = measVal + measurementBias[i];
+
+            // Apply multiplier for "Range" measurement model
+            measVal = measVal*multiplier;
          }
          cMeasurement.value[i] = measVal;                                               // made changes by TUAN NGUYEN
 
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . C-value (with noise)   : %.12lf km\n", cMeasurement.value[i]);
-            MessageInterface::ShowMessage("      . Measurement epoch A1Mjd: %.12lf\n", cMeasurement.epoch); 
+            MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf km\n", cMeasurement.value[i]);
+            MessageInterface::ShowMessage("      . Measurement epoch A1Mjd     : %.12lf\n", cMeasurement.epoch); 
             MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
-            MessageInterface::ShowMessage("      . Feasibility reason     : %s\n", cMeasurement.unfeasibleReason.c_str());
-            MessageInterface::ShowMessage("      . Elevation angle        : %.12lf degree\n", cMeasurement.feasibilityValue);
+            MessageInterface::ShowMessage("      . Feasibility reason          : %s\n", cMeasurement.unfeasibleReason.c_str());
+            MessageInterface::ShowMessage("      . Elevation angle             : %.12lf degree\n", cMeasurement.feasibilityValue);
             MessageInterface::ShowMessage("===================================================================\n");
          #endif
 
@@ -548,8 +612,11 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
    #endif
 
    // Now assemble the derivative data into the requested derivative
-   UnsignedInt size = derivativeData->at(0).size();
+   Real factor = 1.0;                                           // made changes by TUAN NGUYEN
+   if (measurementType == "Range")                              // made changes by TUAN NGUYEN
+      factor = multiplier;                                      // made changes by TUAN NGUYEN
 
+   UnsignedInt size = derivativeData->at(0).size();
    theDataDerivatives.clear();
    for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
    {
@@ -563,7 +630,7 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
 
       for (UnsignedInt j = 0; j < size; ++j)
       {
-         theDataDerivatives[i][j] = (derivativeData->at(i))[j];
+         theDataDerivatives[i][j] = (derivativeData->at(i))[j] * factor;
       }
    }
 
@@ -672,5 +739,9 @@ Integer RangeAdapterKm::GetEventCount()
 void RangeAdapterKm::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("RangeAdapterKm<%p>::SetCorrection(correctionName = %s, correctionType = %s)\n", this, correctionName.c_str(), correctionType.c_str()); 
+#endif
+
    TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
 }

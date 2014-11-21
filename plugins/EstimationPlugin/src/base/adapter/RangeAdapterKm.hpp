@@ -46,6 +46,7 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+   virtual bool         SetMeasurement(MeasureModel* meas);
 
    virtual bool         Initialize();
 
