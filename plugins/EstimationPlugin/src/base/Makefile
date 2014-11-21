@@ -20,13 +20,13 @@ ifeq ($(PLATFORM), mac)
 SHARED_EXTENSION = .dylib
 SHARED_LIB_FLAGS = -dylib -dynamiclib -undefined dynamic_lookup \
                    -L$(GMAT_Code_Location)/base/$(GMAT_LIB_DIR) -l$(BASE_LIBRARY) \
-                    $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS)
+                    $(MAC_CPP_FLAGS) $(ARCHITECTURE_FLAGS) $(LINK_FLAGS) -lxerces-c-3.1
                    
 # -reexport-lGmatBaseNoMatlab -dylib -dynamiclib -Wl -undefined dynamic_lookup
 
 else
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = -shared $(LINK_FLAGS)
+SHARED_LIB_FLAGS = -shared $(LINK_FLAGS) -lxerces-c-3.1
 # No longer in gcc 4.6:  --out-implib
 endif
 
@@ -41,7 +41,8 @@ TARGET = ../../$(GMAT_LIB_DIR)/libGmatEstimation$(SHARED_EXTENSION)
 
 
 ifeq ($(USE_DATAFILE_PLUGIN), 0)
-DATAFILE_INCLUDES = -Imeasurementfile
+DATAFILE_INCLUDES = -Imeasurementfile \
+                    -ItdmReader
 
 DATAFILE_OBJECTS = measurementfile/B3_obtype.o \
                    measurementfile/DataFile.o \
@@ -53,6 +54,9 @@ DATAFILE_OBJECTS = measurementfile/B3_obtype.o \
                    measurementfile/GmatODDopplerType.o \
                    measurementfile/RampTableData.o \
                    measurementfile/RampTableType.o \
+                   tdmReader/TdmErrorHandler.o \
+                   tdmReader/TdmObType.o \
+                   tdmReader/TdmReadWriter.o \
                    factory/DataFileFactory.o \
                    factory/ObTypeFactory.o
 else
@@ -152,6 +156,8 @@ CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
     adapter/TrackingDataAdapter.o \
     adapter/RangeAdapterKm.o \
+    adapter/RangeRateAdapterKps.o \
+    adapter/PointRangeRateAdapterKps.o \
     adapter/DSNRangeAdapter.o \
     adapter/DopplerAdapter.o \
     command/RunEstimator.o \

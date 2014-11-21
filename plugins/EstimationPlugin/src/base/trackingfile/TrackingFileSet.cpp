@@ -23,11 +23,13 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>                  // For magic number mapping code
-
 /// Temporarily here; needs to move into a factory
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
+//#include "USNRangeAdapter.hpp"
+#include "RangeRateAdapterKps.hpp"
+#include "PointRangeRateAdapterKps.hpp"
 
 //#define DEBUG_INITIALIZATION
 
@@ -82,6 +84,7 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    useETminusTAICorrection   (false),            // made changes by TUAN NGUYEN
    rangeModulo               (1.0e18),           // made changes by TUAN NGUYEN
    dopplerCountInterval      (1.0)               // made changes by TUAN NGUYEN
+   dopplerInterval           (1.0)           
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -137,6 +140,7 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useETminusTAICorrection   (tfs.useETminusTAICorrection),   // made changes by TUAN NGUYEN
    rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
    dopplerCountInterval      (tfs.dopplerCountInterval)       // made changes by TUAN NGUYEN
+   dopplerInterval           (tfs.dopplerInterval)          
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
@@ -185,6 +189,7 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       useETminusTAICorrection = tfs.useETminusTAICorrection;   // made changes by TUAN NGUYEN
       rangeModulo             = tfs.rangeModulo;               // made changes by TUAN NGUYEN
       dopplerCountInterval    = tfs.dopplerCountInterval;      // made changes by TUAN NGUYEN
+      dopplerInterval             = tfs.dopplerInterval;         
 
       isInitialized = false;
    }
@@ -341,6 +346,14 @@ Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
 
       dopplerCountInterval = value;
       return dopplerCountInterval;
+   }
+   if (id == DOPPLER_INTERVAL)
+   {
+      if (value <= 0.0)
+         throw MeasurementException("Error: "+GetName()+".DopplerInterval has an invalid value. It has to be a positive number\n");
+
+      dopplerInterval = value;
+      return dopplerInterval;
    }
 
    return MeasurementModelBase::SetRealParameter(id, value);
@@ -1454,6 +1467,11 @@ bool TrackingFileSet::Initialize()
          {                                                                                     // made changes by TUAN NGUYEN
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);   // made changes by TUAN NGUYEN
          }                                                                                     // made changes by TUAN NGUYEN
+         // Set range modulo constant for RangeRate
+         if (measurements[i]->GetStringParameter("MeasurementType") == "RangeRate")
+         {
+            measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
+         }
 
          // Initialize TrackingDataAdapter
          retval = retval && measurements[i]->Initialize();
@@ -1608,9 +1626,28 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->UsesLightTime(useLighttime);                         // made changes by TUAN NGUYEN
          retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN         
       }
-   }                                                                  // made changes by TUAN NGUYEN
-   else                                                               // made changes by TUAN NGUYEN
-      throw MeasurementException("Error: '"+ type +"' measurement type was not implemented in this version of EstimationPlugin.\n");    // made changes by TUAN NGUYEN
+   }                                                                  
+   else if (type == "RangeRate")                                       
+   {                                                                  
+      retval = new RangeRateAdapterKps(instanceName + type);              
+      if (retval)                                                     
+      {
+         retval->UsesLightTime(useLighttime);                         
+         retval->SetStringParameter("MeasurementType", type);       
+      }
+   }
+   else if (type == "PointRangeRate")
+   {
+      retval = new PointRangeRateAdapterKps(instanceName + type);
+      if (retval)
+      {
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
+   else                                                               
+      throw MeasurementException("Error: '"+ type +"' measurement type was "
+            "not implemented in this version of EstimationPlugin.\n");    // made changes by TUAN NGUYEN
 
    if (retval)
    {

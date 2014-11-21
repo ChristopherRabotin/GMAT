@@ -24,6 +24,9 @@
 #include "estimation_defs.hpp"
 #include "gmatdefs.hpp"
 
+//#include "ObsData.hpp"
+#include "ObservationData.hpp"
+
 /**
  * Magic numbers for the TrackingFileSet measurements and .gmd files
  *
@@ -45,12 +48,16 @@
 class ESTIMATION_API TFSMagicNumbers
 {
 public:
-   StringArray GetKnownTypes();
-   Integer GetMagicNumber(const std::vector<StringArray> &nodelist,
-         const std::string &type);
-   Real GetMNMultiplier(Integer magicNumber);
    static TFSMagicNumbers *Instance();
 
+   StringArray GetKnownTypes();
+   Integer     GetMagicNumber(const std::vector<StringArray> &nodelist,
+                              const std::string &type);
+//   Integer     FillMagicNumber(ObsData* theObs);
+   Integer     FillMagicNumber(ObservationData* theObs);
+   Real        GetMNMultiplier(Integer magicNumber);
+//   void        SetType(ObsData* forData);
+   void        SetType(ObservationData* forData);
 
 private:
    /// The singleton instance of the class

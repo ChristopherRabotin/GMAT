@@ -113,8 +113,12 @@ PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
    useRelativity              (ps.useRelativity),               // made changes by TUAN NGUYEN
    relCorrection              (ps.relCorrection),
    useETTAI                   (ps.useETTAI),
+#ifdef IONOSPHERE
    troposphere                (NULL),
    ionosphere                 (NULL)
+#else
+   troposphere                (NULL)
+#endif
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: copy construction\n");
@@ -1388,8 +1392,14 @@ bool PhysicalSignal::HardwareDelayCalculation()
 //---------------------------------------------------------------------------------------------
 bool PhysicalSignal::MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB)
 {
+#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    if ((troposphere == NULL)&&(ionosphere == NULL))
       return true;
+#else
+   if (troposphere == NULL)
+      return true;
+#endif
+
    // 0. Verify the exsisting of transmit participant and receive participant 
    if (theData.tNode == NULL)
    {
@@ -1638,9 +1648,12 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
       theData.useCorrection.push_back(false);
 #endif
 
+#ifdef IONOSPHERE
    if ((troposphere == NULL)&&(ionosphere == NULL))
       return true;
-
+#else   if ((troposphere == NULL)&&(ionosphere == NULL))
+      return true;
+#endif
 
    bool retval = false;
    mediaCorrection = 0.0;                                                               // unit: km
@@ -2040,7 +2053,7 @@ Real PhysicalSignal::RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, R
    Real gammar = 1.0;
 
    Real relCorr = 0.0;
-   for(Integer i = 0; i < planetList.size(); ++i)
+   for (UnsignedInt i = 0; i < planetList.size(); ++i)
    {
       CelestialBody* planet = solarSystem->GetBody(planetList[i]);
       Real planetMu = planet->GetRealParameter(planet->GetParameterID("Mu"));

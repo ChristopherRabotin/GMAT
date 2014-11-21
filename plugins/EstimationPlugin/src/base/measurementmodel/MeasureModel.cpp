@@ -46,6 +46,7 @@
 //#define DEBUG_EXECUTION
 //#define DEBUG_DERIVATIVE
 //#define DEBUG_CALCULATE_MEASUREMENT
+//#define DEBUG_OFFSET
 
 //------------------------------------------------------------------------------
 // Static data
@@ -1159,12 +1160,15 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
  * @param forObservation An observation supplying data needed for the
  *                       calculation (not used)
  * @param rampTB A ramp table for the data (not used)
+ * @param atTimeOffset Time offset, in seconds, from the base epoch (used for
+ *                     differenced measurements)
  *
  * @return true if the the calculation succeeded, false if not
  */
 //------------------------------------------------------------------------------
 bool MeasureModel::CalculateMeasurement(bool withEvents,
-      ObservationData* forObservation, std::vector<RampTableData>* rampTB)
+      ObservationData* forObservation, std::vector<RampTableData>* rampTB,
+      Real atTimeOffset, Integer forStrand)
 {
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(" Enter MeasureModel::CalculateMeasurement(%s, <%p>, <%p>)\n", (withEvents?"true":"false"), forObservation, rampTB); 
@@ -1212,6 +1216,18 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       }
    }
    
+   #ifdef DEBUG_OFFSET
+      MessageInterface::ShowMessage("Base epoch: %.12lf, timeOffset %lf sec, New epoch ",
+            forEpoch.GetMjd(), atTimeOffset);
+   #endif
+
+   if (atTimeOffset != 0.0)
+      forEpoch += atTimeOffset * GmatTimeConstants::DAYS_PER_SEC;
+
+   #ifdef DEBUG_OFFSET
+      MessageInterface::ShowMessage("%.12lf\n", forEpoch.GetMjd());
+   #endif
+
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
@@ -1273,6 +1289,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    SignalBase *leg, *lastleg, *firstleg;
    for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
    {
+      // For a measurement that need to control strand by strand with time
+      // offsets (e.g. for differencing
+      if (forStrand != -1)
+         i = forStrand;
+
       #ifdef DEBUG_CALCULATE_MEASUREMENT
          MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d:  ", i);
          SignalBase* s = signalPaths[i];
@@ -1481,6 +1502,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("4.3. Specify feasibility for signal path %d:\n", i);
       #endif
       feasible = feasible && signalPaths[i]->IsSignalFeasible();
+
+      if (forStrand != -1)
+         break;
    }
    
    retval = true;
@@ -1538,12 +1562,15 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
  * @param obj The "with respect to" object owning the "with respect to"
  *            parameter.
  * @param id The ID of the "with respect to" field
+ * @param atTimeOffset Time offset, in seconds, from the base epoch (used for
+ *                     differenced measurements)
+
  *
  * @return The vector of derivative data
  */
 //------------------------------------------------------------------------------
 const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
-      GmatBase* obj, Integer id)
+      GmatBase* obj, Integer id, Integer forStrand)
 {
    #ifdef DEBUG_DERIVATIVE
       MessageInterface::ShowMessage("MeasureModel::CalculateMeasurementDerivatives(%s, %d) called\n", obj->GetName().c_str(), id);
@@ -1552,10 +1579,20 @@ const std::vector<RealArray>& MeasureModel::CalculateMeasurementDerivatives(
    theDataDerivatives.clear();
 
    // Collect the data from the signals
-   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   if (forStrand == -1)
+   {
+      for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+      {
+         std::vector<RealArray> pathDerivative =
+               signalPaths[i]->ModelSignalDerivative(obj, id);
+         for (UnsignedInt j = 0; j < pathDerivative.size(); ++j)
+            theDataDerivatives.push_back(pathDerivative[j]);
+      }
+   }
+   else
    {
       std::vector<RealArray> pathDerivative =
-            signalPaths[i]->ModelSignalDerivative(obj, id);
+            signalPaths[forStrand]->ModelSignalDerivative(obj, id);
       for (UnsignedInt j = 0; j < pathDerivative.size(); ++j)
          theDataDerivatives.push_back(pathDerivative[j]);
    }

@@ -178,6 +178,9 @@ protected:
    /// Doppler count interval                                  // made changes by TUAN NGUYEN
    Real dopplerCountInterval;                                  // made changes by TUAN NGUYEN
 
+   // Doppler interval
+   Real dopplerInterval;
+
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
    /// @todo Adjust this code when multiple propagator support is implemented

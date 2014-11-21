@@ -410,7 +410,7 @@ Real DSNTwoWayRange::SetRealParameter(const std::string &label, const Real value
 bool DSNTwoWayRange::Initialize()
 {
    #ifdef DEBUG_RANGE_CALC
-      MessageInterface::ShowMessage("Entered RangeMeasurement::Initialize(); "
+      MessageInterface::ShowMessage("Entered DSNTwoWayRange::Initialize(); "
             "this = %p\n", this);
    #endif
 

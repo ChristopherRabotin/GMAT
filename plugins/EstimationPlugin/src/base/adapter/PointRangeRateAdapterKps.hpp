@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                           RangeAdapterKm
+//                        PointPointRangeRateAdapterKps
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -11,29 +11,29 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS 
 // contract, Task Order 28
 //
-// Author: Darrel J. Conway, Thinking Systems, Inc.
-// Created: Feb 12, 2014
+// Author: Michael Barrucco, Thinking Systems, Inc.
+// Created: Oct 2nd, 2014
 /**
  * A measurement adapter for ranges in Km
  */
 //------------------------------------------------------------------------------
 
-#ifndef RangeAdapterKm_hpp
-#define RangeAdapterKm_hpp
+#ifndef PointRangeRateAdapterKps_hpp
+#define PointRangeRateAdapterKps_hpp
 
-#include "TrackingDataAdapter.hpp"
-
+#include "RangeAdapterKm.hpp"
+#include "SpaceObject.hpp"
 
 /**
  * A measurement adapter for ranges in Km
  */
-class ESTIMATION_API RangeAdapterKm: public TrackingDataAdapter
+class ESTIMATION_API PointRangeRateAdapterKps: public RangeAdapterKm
 {
 public:
-   RangeAdapterKm(const std::string& name);
-   virtual ~RangeAdapterKm();
-   RangeAdapterKm(const RangeAdapterKm& rak);
-   RangeAdapterKm&      operator=(const RangeAdapterKm& rak);
+   PointRangeRateAdapterKps(const std::string& name);
+   virtual ~PointRangeRateAdapterKps();
+   PointRangeRateAdapterKps(const PointRangeRateAdapterKps& rr);
+   PointRangeRateAdapterKps&      operator=(const PointRangeRateAdapterKps& rr);
 
    virtual GmatBase*    Clone() const;
 
@@ -43,10 +43,22 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
-   virtual bool         SetMeasurement(MeasureModel* meas);
 
    virtual bool         Initialize();
 
@@ -54,10 +66,6 @@ public:
    virtual const MeasurementData&
                         CalculateMeasurement(bool withEvents = false,
                               ObservationData* forObservation = NULL,
-                              std::vector<RampTableData>* rampTB = NULL);
-   virtual const MeasurementData&
-                        CalculateMeasurementAtOffset(bool withEvents = false,
-                              Real dt = 0.0, ObservationData* forObservation = NULL,
                               std::vector<RampTableData>* rampTB = NULL);
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
@@ -74,13 +82,22 @@ public:
 
    DEFAULT_TO_NO_CLONES
 protected:
-   /// Parameter IDs for the RangeAdapterKm
-   enum
-   {
-      RangeAdapterKmParamCount = AdapterParamCount,                                  // made changes by TUAN NGUYEN
-   };
+//   /// Doppler interval
+//   Real dopplerInterval;
 
+   /// Previous epoch
+   Real _prev_epoch;
+   /// Previous Range 
+   Real _prev_range;
+   /// Timer 
+   Real _timer;
 
+   /// Flag indicating is a current value is available
+   bool valueReady;
+   /// Epoch of the most recently calculated data value
+   GmatEpoch lastComputedEpoch;
+   /// Pointer to the spacecraft that gets propagated in this model
+   SpaceObject *targetSat;
 };
 
-#endif /* RangeAdapterKm_hpp */
+#endif /* PointRangeRateAdapterKps_hpp */
