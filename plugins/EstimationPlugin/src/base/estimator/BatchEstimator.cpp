@@ -95,7 +95,7 @@ BatchEstimator::BatchEstimator(const std::string &type,
    useApriori                 (false),                  // second term of Equation Eq8-184 in GTDS MathSpec is not used   
    advanceToEstimationEpoch   (false),
 //   converged                  (false),
-   estimationStatus           (UNKNOWN),
+//   estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
    maxConsDivergences         (3),                     // made changes by TUAN NGUYEN
    inversionType              ("Internal")   // ("")   // made changes by TUAN NGUYEN
@@ -138,7 +138,7 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
 //   converged                  (false),
-   estimationStatus           (UNKNOWN),
+//   estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP),
    maxConsDivergences        (est.maxConsDivergences),         // made changes by TUAN NGUYEN
    inversionType              (est.inversionType)
@@ -176,7 +176,7 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
 
       advanceToEstimationEpoch = false;
 //      converged                = false;
-      estimationStatus         = UNKNOWN;
+//      estimationStatus         = UNKNOWN;
 
       chooseRMSP               = est.chooseRMSP;
       maxConsDivergences      = est.maxConsDivergences;      // made changes by TUAN NGUYEN
@@ -655,7 +655,6 @@ bool BatchEstimator::TakeAction(const std::string &action,
    {
       currentState = INITIALIZING;
       isInitialized = false;
-//      converged   = false;
       estimationStatus = UNKNOWN;
 
       return true;
@@ -683,8 +682,7 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-//    converged = false;
-      estimationStatus = UNKNOWN;
+      //estimationStatus = UNKNOWN;         // made changes by TUAN NGUYEN          // This code is moved to Estimator::Initialize()
       retval    = true;
    }
 
@@ -965,7 +963,6 @@ void BatchEstimator::CompleteInitialization()
    esm.BufferObjects(&outerLoopBuffer);
    esm.MapObjectsToVector();
    
-//   converged   = false;
    estimationStatus = UNKNOWN;                 // made changes by TUAN NGUYEN
    // Convert estimation state from GMAT internal coordinate system to participants' coordinate system
    GetEstimationState(aprioriSolveForState);   // made changes by TUAN NGUYEN
@@ -1099,7 +1096,7 @@ void BatchEstimator::CalculateData()
 
    // Update the STM
    esm.MapObjectsToSTM();
-
+   
    // Tell the measurement manager to calculate the simulation data
 //   measManager.CalculateMeasurements();
 
@@ -1130,7 +1127,6 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
-   
    #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
    #endif
@@ -1199,7 +1195,6 @@ void BatchEstimator::CheckCompletion()
    #endif
 
    convergenceReason = "";
-//   converged = TestForConvergence(convergenceReason);
    estimationStatus = TestForConvergence(convergenceReason);
    
    #ifdef RUN_SINGLE_PASS
@@ -1207,13 +1202,19 @@ void BatchEstimator::CheckCompletion()
    #endif
 
    ++iterationsTaken;
-//   if ((converged) || (iterationsTaken >= maxIterations))
    if ((estimationStatus == ABSOLUTETOL_CONVERGED) ||
       (estimationStatus == RELATIVETOL_CONVERGED) ||
       (estimationStatus == ABS_AND_REL_TOL_CONVERGED) ||
       (estimationStatus == MAX_CONSECUTIVE_DIVERGED) ||
       (estimationStatus == MAX_ITERATIONS_DIVERGED))
    {
+      if ((estimationStatus == ABSOLUTETOL_CONVERGED) ||              // made changes by TUAN NGUYEN
+         (estimationStatus == RELATIVETOL_CONVERGED) ||               // made changes by TUAN NGUYEN
+         (estimationStatus == ABS_AND_REL_TOL_CONVERGED))             // made changes by TUAN NGUYEN
+         status = CONVERGED;                                          // made changes by TUAN NGUYEN
+      else                                                            // made changes by TUAN NGUYEN
+         status = EXCEEDED_ITERATIONS;                                // made changes by TUAN NGUYEN
+      
       currentState = FINISHED;
    }
    else

@@ -119,10 +119,9 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
-//   /// Flag indicating convergence                 // made changes by TUAN NGUYEN
-//   bool        converged;                          // made changes by TUAN NGUYEN
-   /// Estimation status                             // made changes by TUAN NGUYEN
-   Integer                 estimationStatus;         // made changes by TUAN NGUYEN
+
+//   /// Estimation status                             // made changes by TUAN NGUYEN
+//   Integer                 estimationStatus;         // made changes by TUAN NGUYEN     // This variable is moved to Estimator class
 
    // String to show reason of convergence
    std::string convergenceReason;
