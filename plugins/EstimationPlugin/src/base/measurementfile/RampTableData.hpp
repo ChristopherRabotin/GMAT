@@ -51,7 +51,7 @@ public:
    std::string       typeName;
    /// The type of measurement in this record
    Gmat::MeasurementType   
-					 type;
+					      type;
    /// Enumerated ID for the epoch time system
    TimeConverterUtil::TimeSystemTypes  epochSystem;
    /// The start epoch in a ramp 
@@ -67,6 +67,8 @@ public:
    /// Ramp rate
    Real              rampRate;					// unit: Hz/s
 
+   /// Index key used for sorting records contains participantIDs and epoch        // made changes by TUAN NGUYEN
+   std::string       indexkey;                                                     // made changes by TUAN NGUYEN
 
 };
 
