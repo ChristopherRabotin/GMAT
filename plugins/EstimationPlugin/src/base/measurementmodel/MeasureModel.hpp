@@ -139,8 +139,18 @@ public:
    Real                 GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);       // made changes by TUAN NGUYEN
    Integer              GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);   // made changes by TUAN NGUYEN
 
-   // Measurement Model Settings
+   /// Measurement Model Settings
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
+
+   /// Propagate all spacecrafts to a given epoch
+//   virtual bool         MoveAllToEpoch(GmatTime epoch);                                                      // made changes by TUAN NGUYEN
+//   void                 PrepareToPropagate();                                                                // made changes by TUAN NGUYEN
+//   void                 InitializeAllSignalLegs();                                                           // made changes by TUAN NGUYEN
+   void                 SetCountInterval(Real timeInterval);                                                 // made changes by TUAN NGUYEN
+
+   /// Get paticipant objects lists                                                                          // made changes by TUAN NGUYEN
+   virtual const std::vector<ObjectArray*>&                                                                  // made changes by TUAN NGUYEN
+                        GetParticipantObjectLists();                                                         // made changes by TUAN NGUYEN
 
 protected:
    /// The ordered list of participants in the signal path
@@ -173,6 +183,9 @@ protected:
 
    /// Flag to indicate measurerment time tag to be at the end of signal path // made changes by TUAN NGUYEN
    bool epochIsAtEnd;                                                         // made changes by TUAN NGUYEN
+
+   /// Count interval is time interval (in seconds) between Start-path and End-path    // made changes by TUAN NGUYEN
+   Real countInterval;                                                                 // made changes by TUAN NGUYEN
 
    /// The reporter for status information
    ProgressReporter *navLog;

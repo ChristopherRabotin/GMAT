@@ -23,7 +23,6 @@
 #include "ProgressReporter.hpp"
 #include "MeasurementException.hpp"
 
-#include "SignalBase.hpp"
 #include "PhysicalSignal.hpp"
 //#include "SinglePointSignal.hpp"
 #include "ObservationData.hpp"
@@ -33,8 +32,13 @@
 #include "Propagator.hpp"
 #include "MessageInterface.hpp"
 #include "TextParser.hpp"
+#include "GroundstationInterface.hpp"              // made changes by TUAN NGUYEN
+#include "Transmitter.hpp"                         // made changes by TUAN NGUYEN
+
 #include <sstream>
 
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_SET_PARAMETER
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
 //#define DEBUG_TIMING
@@ -79,9 +83,14 @@ MeasureModel::MeasureModel(const std::string &name) :
    navLog            (NULL),
    logLevel          (0),              // Default to everything
    epochIsAtEnd      (true),                                   // made changes by TUAN NGUYEN
+   countInterval     (0.0),                                    // made changes by TUAN NGUYEN
    isPhysical        (true),
    solarsys          (NULL)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasureModel default constructor  <%p>\n", this);
+#endif
+
 }
 
 
@@ -94,6 +103,9 @@ MeasureModel::MeasureModel(const std::string &name) :
 //------------------------------------------------------------------------------
 MeasureModel::~MeasureModel()
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasureModel default destructor  <%p>\n", this);
+#endif
    // Delete all objects in propMap:
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin(); i != propMap.end(); ++i)
    {
@@ -101,6 +113,9 @@ MeasureModel::~MeasureModel()
          delete i->second;
    }
    propMap.clear();
+#ifdef DEBUG_CONSTRUCTION
+//   MessageInterface::ShowMessage("MeasureModel default destructor  step 1\n");
+#endif
 
    // Delete all object in participantLists:
    for (UnsignedInt i = 0 ; i < participantLists.size(); ++i)
@@ -112,6 +127,9 @@ MeasureModel::~MeasureModel()
       }
    }
    participantLists.clear();
+#ifdef DEBUG_CONSTRUCTION
+//   MessageInterface::ShowMessage("MeasureModel default destructor  step 2\n");
+#endif
 
    // Delete all object in participants:
    for (UnsignedInt i = 0 ; i < participants.size(); ++i)
@@ -124,6 +142,9 @@ MeasureModel::~MeasureModel()
    }
    participants.clear();
    candidates.clear();
+#ifdef DEBUG_CONSTRUCTION
+//   MessageInterface::ShowMessage("MeasureModel default destructor  step 3\n");
+#endif
 
    // Delete all object in signalPaths:
    for (UnsignedInt i = 0 ; i < signalPaths.size(); ++i)
@@ -133,6 +154,9 @@ MeasureModel::~MeasureModel()
    }
    signalPaths.clear();
    theData.clear();
+#ifdef DEBUG_CONSTRUCTION
+//   MessageInterface::ShowMessage("MeasureModel default destructor  step 4\n");
+#endif
 
    for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
    {
@@ -142,6 +166,10 @@ MeasureModel::~MeasureModel()
 
    correctionTypeList.clear();
    correctionModelList.clear();
+#ifdef DEBUG_CONSTRUCTION
+//   MessageInterface::ShowMessage("MeasureModel default destructor  step 5\n");
+#endif
+
 }
 
 
@@ -164,9 +192,14 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
    isPhysical        (mm.isPhysical),
    solarsys          (mm.solarsys),
    epochIsAtEnd      (mm.epochIsAtEnd),                     // made changes by TUAN NGUYEN
+   countInterval     (mm.countInterval),                    // made changes by TUAN NGUYEN
    correctionTypeList(mm.correctionTypeList),               // made changes by TUAN NGUYEN
    correctionModelList(mm.correctionModelList)              // made changes by TUAN NGUYEN
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasureModel copy constructor  from <%p> to <%p>\n", &mm, this);
+#endif
+
 }
 
 
@@ -183,6 +216,10 @@ MeasureModel::MeasureModel(const MeasureModel& mm) :
 //------------------------------------------------------------------------------
 MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasureModel operator =   set <%p> = <%p>\n", this, &mm);
+#endif
+
    if (this != &mm)
    {
       GmatBase::operator=(mm);
@@ -195,6 +232,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       isPhysical          = mm.isPhysical;
       solarsys            = mm.solarsys;
       epochIsAtEnd        = mm.epochIsAtEnd;                     // made changes by TUAN NGUYEN
+      countInterval       = mm.countInterval;                    // made changes by TUAN NGUYEN
       correctionTypeList  = mm.correctionTypeList;               // made changes by TUAN NGUYEN
       correctionModelList = mm.correctionModelList;              // made changes by TUAN NGUYEN
 
@@ -226,6 +264,10 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
 //------------------------------------------------------------------------------
 GmatBase* MeasureModel::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasureModel::Clone()   clone this <%p>\n", this);
+#endif
+
    return new MeasureModel(*this);
 }
 
@@ -357,15 +399,6 @@ bool MeasureModel::SetStringParameter(const Integer id,
 {
    if (id == SIGNAL_PATH)
    {
-//      StringArray *partList = DecomposePathString(value);
-//      if (partList->size() > 0)
-//      {
-//         participantLists.push_back(partList);
-//         return true;
-//      }
-//
-//      // The list is empty
-//      delete partList;
       return false;
    }
 
@@ -409,6 +442,10 @@ std::string MeasureModel::GetStringParameter(const Integer id,
 bool MeasureModel::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("MeasureModel<%p>::SetStringParameter(id = '%s',value = '%s', index = %d)\n", this, GetParameterText(id).c_str(), value.c_str(), index);
+#endif
+
    if (id == SIGNAL_PATH)
    {
       if ((index < 0) || (index > (Integer)participantLists.size()))
@@ -636,6 +673,10 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
 bool MeasureModel::RenameRefObject(const Gmat::ObjectType type,
       const std::string &oldName, const std::string &newName)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("MeasureModel<%p>::RenameRefObject(type = %d, oldName = '%s', newName = '%s')\n", this, type, oldName.c_str(), newName.c_str());
+#endif
+
    bool retval = false;
 
    // Handle participant name changes
@@ -672,6 +713,10 @@ bool MeasureModel::RenameRefObject(const Gmat::ObjectType type,
 bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("MeasureModel<%p>::SetRefObject(obj = <%p>, type = %d, name = '%s')\n", this, obj, type, name.c_str());
+#endif
+
    bool retval = false;
 
    if (obj->IsOfType(Gmat::SPACE_POINT))
@@ -710,6 +755,10 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name, const Integer index)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("MeasureModel<%p>::SetRefObject(obj = <%p>, type = %d, name = '%s', index = %d)\n", this, obj, type, name.c_str(), index);
+#endif
+
    bool retval = false;
 
    if (obj->IsOfType(Gmat::SPACE_POINT))
@@ -725,7 +774,7 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             candidates.end())
       {
          #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("Adding object %s to %s\n",
+            MessageInterface::ShowMessage("Adding object %s to %s.cadidates\n",
                   obj->GetName().c_str(), instanceName.c_str());
          #endif
          candidates.push_back(obj);
@@ -750,19 +799,19 @@ bool MeasureModel::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 void MeasureModel::SetPropagator(PropSetup* ps)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("MeasureModel<%p>::SetPropagator(ps = <%p>)\n", this, ps);
+#else
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Setting propagator to %p in "
-            "MeasureModel\n", ps);
+      MessageInterface::ShowMessage("MeasureModel<%p>::SetPropagator(ps = <%p>)\n", this, ps);
    #endif
-
+#endif
+   
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
    {
       SpacePoint *obj = i->first;
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("   Mapping a propagator for %s...",
-               obj->GetName().c_str());
-      #endif
+      
       if (obj->IsOfType(Gmat::SPACEOBJECT))
       {
          // Clone the propagator for each SpaceObject
@@ -772,12 +821,11 @@ void MeasureModel::SetPropagator(PropSetup* ps)
             propMap[obj] = propagator;
             propsNeedInit = true;
             for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+            {
                signalPaths[i]->SetPropagator(propagator, obj);
+            }
          }
       }
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("set to %p\n", propMap[obj]);
-      #endif
    }
 }
 
@@ -794,7 +842,7 @@ void MeasureModel::SetPropagator(PropSetup* ps)
 bool MeasureModel::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("MeasurementModel::Initialize()\n");
+      MessageInterface::ShowMessage("Start MeasurementModel<%p>::Initialize()\n", this);
    #endif
 
    bool retval = false;
@@ -863,6 +911,7 @@ bool MeasureModel::Initialize()
                SignalBase *head = NULL;
                for (UnsignedInt j = 0; j < participantLists[i]->size()-1; ++j)
                {
+                  // 1. Create a signal leg
                   SignalBase *sb = NULL;
                   if (isPhysical)
                      sb = new PhysicalSignal("");
@@ -874,6 +923,8 @@ bool MeasureModel::Initialize()
                            "yet implemented");
                   }
 
+                  // 2. Set solar system, lightime correction, names of transmit and receive participants,
+                  //    participant objects, and their propagators 
                   if (sb)
                   {
                      if (navLog)                                    // made changes by TUAN NGUYEN
@@ -977,8 +1028,55 @@ bool MeasureModel::Initialize()
       }
    }
 
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("End MeasurementModel<%p>::Initialize()\n", this);
+   #endif
+
    return retval;
 }
+
+/*
+bool MeasureModel::MoveAllToEpoch(GmatTime epoch)
+{
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("MeasureModel<%p>::MoveAllToEpoch(%.12lf)\n", this, epoch.GetMjd());
+#endif
+
+   bool retVal = true;
+
+   // for current version, only one path is used
+   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   {
+      // propagate all spacecrafts of path ith to the given epoch
+      SignalBase* leg = signalPaths[i];
+      while (leg != NULL)
+      {
+         // propagate all spacecrafts for this leg to the given epoch
+         leg->MoveToEpoch(epoch, epochIsAtEnd, true);
+
+         // move to the next leg
+         leg = leg->GetNext();
+      }
+   }
+
+   return retVal;
+}
+
+
+void MeasureModel::InitializeAllSignalLegs()
+{
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("MeasureModel<%p>::InitializeAllSignalLegs()\n", this);
+#endif
+
+   SignalBase *leg; //, *lastleg, *firstleg;
+   for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
+   {
+      leg = signalPaths[i];
+      leg->InitializeSignal(epochIsAtEnd);
+   }
+}
+*/
 
 //------------------------------------------------------------------------------
 // const std::vector<SignalData*>& GetSignalData()
@@ -1047,6 +1145,7 @@ bool MeasureModel::SetProgressReporter(ProgressReporter* reporter)
    return retval;
 }
 
+
 //@todo: Move the calling parameters here into the adapters
 //------------------------------------------------------------------------------
 // bool CalculateMeasurement(bool withEvents, ObservationData* forObservation,
@@ -1082,9 +1181,10 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    #ifdef DEBUG_TIMING
       MessageInterface::ShowMessage("1. Prepare the propagators\n");
    #endif
-   if (propsNeedInit)
-      PrepareToPropagate();
-   
+   //if (propsNeedInit)                             // made changes by TUAN NGUYEN
+   //   PrepareToPropagate();                       // made changes by TUAN NGUYEN
+   PrepareToPropagate();                            // made changes by TUAN NGUYEN
+
    ///// Clean up the assumption that epoch is at the end
    //bool epochIsAtEnd = true;
 
@@ -1202,6 +1302,20 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       while(leg != NULL)
       {
          leg->HardwareDelayCalculation();                  // caluclate hardware delay for signal leg
+
+         // Add count time interval to the reveiver's hardware delay of the last participant when measurement time tag is at the end of signal path  
+         // (or to the transmiter's hardware delay of the first participant when measurement time tag is at the begining of signal path)
+         if (epochIsAtEnd)
+         {
+            if ((leg->GetNext() == NULL)&&(countInterval != 0.0))
+               leg->GetSignalDataObject()->rDelay += countInterval;
+         }
+         else
+         {
+            if ((leg == firstleg)&&(countInterval != 0.0))
+               leg->GetSignalDataObject()->tDelay += countInterval;
+         }
+
          leg = leg->GetNext();
          if (leg != NULL)
             lastleg = leg;
@@ -1227,12 +1341,12 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
 
-            // transmite participant STM at measurement time tm       // made changes by TUAN NGUYEN
+            // transmit participant STM at measurement time tm        // made changes by TUAN NGUYEN
             for (UnsignedInt ii = 0; ii < 6; ++ii)                    // made changes by TUAN NGUYEN
                for (UnsignedInt jj = 0; jj < 6; ++jj)                 // made changes by TUAN NGUYEN
                   sdObj->tSTMtm(ii,jj) = propState[6 + ii*6 + jj];    // made changes by TUAN NGUYEN
 
-            // transmite participant STM at transmite time t1         // made changes by TUAN NGUYEN
+            // transmit participant STM at transmite time t1          // made changes by TUAN NGUYEN
             sdObj->tSTM = sdObj->tSTMtm;                              // made changes by TUAN NGUYEN
          }
 
@@ -1288,6 +1402,26 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       {
          leg->MediaCorrectionCalculation(rampTB);          // calculate media corrections for signal leg
          leg = leg->GetNext();
+      }
+
+      // 4.6. Reset value of hardware delay
+      leg = firstleg = lastleg = signalPaths[i];
+      while(leg != NULL)
+      {
+         if (epochIsAtEnd)
+         {
+            if ((leg->GetNext() == NULL)&&(countInterval != 0.0))
+               leg->GetSignalDataObject()->rDelay -= countInterval;
+         }
+         else
+         {
+            if ((leg == firstleg)&&(countInterval != 0.0))
+               leg->GetSignalDataObject()->tDelay -= countInterval;
+         }
+
+         leg = leg->GetNext();
+         if (leg != NULL)
+            lastleg = leg;
       }
 
       #ifdef DEBUG_CALCULATE_MEASUREMENT
@@ -1456,10 +1590,17 @@ void MeasureModel::UsesLightTime(const bool tf)
 //------------------------------------------------------------------------------
 void MeasureModel::PrepareToPropagate()
 {
+   if (propsNeedInit == false)                                      // made changes by TUAN NGUYEN
+      return;                                                       // made changes by TUAN NGUYEN
+
    #ifdef DEBUG_LIGHTTIME
       MessageInterface::ShowMessage("Called SignalBase::PrepareToPropagate()\n");
+   #else
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Called SignalBase::PrepareToPropagate()\n");
+      #endif
    #endif
-
+   
    // Set propagators for spacecraft and formations only
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
          i != propMap.end(); ++i)
@@ -1470,7 +1611,7 @@ void MeasureModel::PrepareToPropagate()
          Propagator *prop = tProp->GetPropagator();
          ODEModel *ode = tProp->GetODEModel();
          PropagationStateManager *psm = tProp->GetPropStateManager();
-
+         
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("Integrator for %s has address "
                   "<%p>\n", i->first->GetName().c_str(), prop);
@@ -1495,16 +1636,17 @@ void MeasureModel::PrepareToPropagate()
 
          ode->SetState(psm->GetState());
          ode->SetSolarSystem(solarsys);
-
+         
          prop->SetPhysicalModel(ode);
          prop->Initialize();
-
+         
          ode->SetPropStateManager(psm);
+         
          if (ode->BuildModelFromMap() == false)
             throw MeasurementException("Unable to assemble the ODE model for " +
                   tProp->GetName());
          prop->Update(true);
-
+         
          if (ode->SetupSpacecraftData(&objects, 0) <= 0)
             throw MeasurementException("Propagate::Initialize -- "
                   "ODE model for Signal cannot set spacecraft parameters");
@@ -1583,9 +1725,20 @@ bool MeasureModel::GetTimeTagFlag()
 }
 
 
+void MeasureModel::SetCountInterval(Real timeInterval)
+{
+   countInterval = timeInterval;
+}
+
+
 // made changes by TUAN NGUYEN
-#include "GroundstationInterface.hpp"
-#include "Transmitter.hpp"
+const std::vector<ObjectArray*>& MeasureModel::GetParticipantObjectLists()
+{
+   return participants;
+}
+
+
+// made changes by TUAN NGUYEN
 Real MeasureModel::GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB)
 {
    // 1. Specify the first signal leg
