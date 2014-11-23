@@ -45,6 +45,7 @@ public:
    virtual ~SignalData();
    SignalData(const SignalData& sd);
    SignalData& operator=(const SignalData& sd);
+   void CleanUp();
 
    // The data structures
    /// Name of the starting participant
@@ -116,10 +117,17 @@ public:
    Real        feasibilityValue;       // Contain elevation angle                   // made changes by TUAN NGUYEN
 
    // State Transition Matrices for derivatives of light time measurements
-   /// The STM at the transmitter
+   /// The STM of transmit participant at transmit time t1
    Rmatrix66 tSTM;
-   /// The STM at the receiver
+   /// The STM of receive participant at receive time t2
    Rmatrix66 rSTM;
+
+   /// The STM of transmit participant at measurement time tm                                                          // made changes by TUAN NGUYEN
+   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)   // made changes by TUAN NGUYEN
+   Rmatrix66 tSTMtm;                                                                                                   // made changes by TUAN NGUYEN
+   /// The STM of receive participant at  measurement time tm                                                          // made changes by TUAN NGUYEN
+   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)   // made changes by TUAN NGUYEN
+   Rmatrix66 rSTMtm;                                                                                                   // made changes by TUAN NGUYEN
 
    /// Rotation matrix from J2K to transmitter coordinate system
    Rmatrix33 tJ2kRotation;

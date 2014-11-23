@@ -45,6 +45,7 @@ class ESTIMATION_API MeasurementData
 public:
    MeasurementData();
    virtual ~MeasurementData();
+   void CleanUp();
    MeasurementData(const MeasurementData& md);
    MeasurementData operator=(const MeasurementData& md);
 

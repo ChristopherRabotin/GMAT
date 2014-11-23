@@ -1085,16 +1085,18 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
           !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
+         // Handle MeasurmentModel and TrackingFileSet
          modelNames.push_back(obj->GetName());
-         measManager.AddMeasurement((MeasurementModel *)obj);
+         measManager.AddMeasurement((MeasurementModel *)obj);         
          return true;
       }
       if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
       {
+         // Handle for TrackingSystem
          #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Loading the measurement manager\n");
+            MessageInterface::ShowMessage("Handle for TrackingSystem\n");
          #endif
-
+         
          MeasurementModel *meas;
          // Retrieve each measurement model from the tracking system ...
          for (UnsignedInt i = 0;
@@ -1410,29 +1412,99 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
 void Estimator::BuildResidualPlot(const std::string &plotName,
       const StringArray &measurementNames)
 {
-   OwnedPlot *rPlot = new OwnedPlot(plotName);
-
-   rPlot->SetStringParameter("PlotTitle", plotName);
-   rPlot->SetBooleanParameter("UseLines", false);
-   rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
-
+   OwnedPlot *rPlot;
    for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
    {
-      std::string curveName = measurementNames[i] + " Residuals";
-      rPlot->SetStringParameter("Add", curveName);
       // Register measurement ID for this curve
-      Integer id = measManager.GetMeasurementId(measurementNames[i]);
+      IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
+      std::vector<TrackingFileSet*> tfs = measManager.GetTrackingSets();
 
-      rPlot->SetUsedDataID(id);
+      UnsignedInt k;
+      for (k = 0; k < tfs.size(); ++k)
+         if (tfs[k]->GetName() == measurementNames[i])
+            break;
 
+      if (k == tfs.size())
+      //if (id.size() == 1)
+      {
+         IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
+
+         rPlot = new OwnedPlot(plotName);
+         rPlot->SetStringParameter("PlotTitle", plotName);
+         rPlot->SetBooleanParameter("UseLines", false);
+         rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
+         rPlot->SetStringParameter("Add", measurementNames[i] + " Residuals");
+         rPlot->SetUsedDataID(id[0]);
+         rPlot->Initialize();
+
+         residualPlots.push_back(rPlot);
+      }
+      else
+      {
+         std::vector<TrackingDataAdapter*>* adapters = tfs[k]->GetAdapters(); 
+         for (UnsignedInt j = 0; j < adapters->size(); ++j)
+         {
+            Integer id = adapters->at(j)->GetModelID();
+
+            std::stringstream ss;
+            ss << adapters->at(j)->GetName();
+            std::string pName = ss.str();
+
+            std::stringstream ss1;
+            ss1 << pName << " Residuals";
+            std::string curveName = ss1.str();
+            
+
+            rPlot = new OwnedPlot(pName);
+            rPlot->SetStringParameter("PlotTitle", plotName);
+            rPlot->SetBooleanParameter("UseLines", false);
+            rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
+            rPlot->SetStringParameter("Add", curveName);
+            rPlot->SetUsedDataID(id);
+            rPlot->Initialize();
+
+            residualPlots.push_back(rPlot);
+         }
+      }
       // todo: Register participants for this curve
       //rPlot->SetUsedObjectID(Integer id);
    }
 
-   rPlot->Initialize();
-   residualPlots.push_back(rPlot);
 }
 
+//void Estimator::BuildResidualPlot(const std::string &plotName,
+//      const StringArray &measurementNames)
+//{
+//   IntegerArray arrayid;
+//
+//   OwnedPlot *rPlot = new OwnedPlot(plotName);
+//
+//   rPlot->SetStringParameter("PlotTitle", plotName);
+//   rPlot->SetBooleanParameter("UseLines", false);
+//   rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
+//   for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
+//   {
+//      std::string curveName = measurementNames[i] + " Residuals";
+//      rPlot->SetStringParameter("Add", curveName);
+//      // Register measurement ID for this curve
+//      arrayid = measManager.GetMeasurementId(measurementNames[i]);
+////      if (id[0] < 1000)
+////      {
+//         // processing for MeasurementModel
+//         rPlot->SetUsedDataID(arrayid[0]);
+////      }
+//      //else
+//      //{
+//      //   // processing for TrackingFileSet
+//
+//      //}
+//
+//      // todo: Register participants for this curve
+//      //rPlot->SetUsedObjectID(Integer id);
+//   }
+//   rPlot->Initialize();
+//   residualPlots.push_back(rPlot);
+//}
 
 //------------------------------------------------------------------------------
 // void PlotResiduals()
@@ -1638,6 +1710,7 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 
          (*outputStateElement) = outState[index]; 
          delete cv;
+         delete gmatcs;                             // made changes by TUAN NGUYEN
       }
    }
 

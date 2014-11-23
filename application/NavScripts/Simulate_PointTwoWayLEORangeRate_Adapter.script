@@ -25,7 +25,7 @@ GMAT ST2K_48.Id = 'ST2K_48';
 %----- The data file
 Create TrackingFileSet simData
 simData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'PointRangeRate'}
-simData.Filename = ODSatTwoWayRangeRate.gmd
+simData.Filename = ODSatPointTwoWayRangeRate.gmd
 simData.UseLighttime = true;
 simData.DopplerInterval = 1.00;
 

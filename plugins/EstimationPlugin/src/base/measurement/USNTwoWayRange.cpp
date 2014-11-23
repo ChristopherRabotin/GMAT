@@ -1103,7 +1103,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 
 
       //19. Verify uplink leg light path not to be blocked by station's central body
-      UpdateRotationMatrix(t1T, "R_o_j2k");
+      UpdateRotationMatrix(t1T, "o_j2k");
       Rvector3 outState = (R_o_j2k * (r4B - r3B)).GetUnitVector();
       currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
@@ -1112,7 +1112,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 
       if (currentMeasurement.feasibilityValue > minAngle)
       {
-         UpdateRotationMatrix(t3R, "R_o_j2k");
+         UpdateRotationMatrix(t3R, "o_j2k");
          outState = (R_o_j2k * (r2B - r1B)).GetUnitVector();
          Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
          #ifdef DEBUG_RANGE_CALC_WITH_EVENTS

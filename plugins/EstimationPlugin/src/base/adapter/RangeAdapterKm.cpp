@@ -22,6 +22,7 @@
 #include "RandomNumber.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include "SignalBase.hpp"
 #include <sstream>
 
 
@@ -251,6 +252,22 @@ bool RangeAdapterKm::Initialize()
       }
    }
 
+   
+   // Calculate measurement covariance
+   std::vector<SignalData*> data = calcData->GetSignalData();
+   Integer measurementSize = data.size();
+   measErrorCovariance.SetDimension(measurementSize);
+   for (Integer i = 0; i < measurementSize; ++i)
+   {
+      for (Integer j = 0; j < measurementSize; ++j)
+      {
+         measErrorCovariance(i,j) = (i == j ?
+                        (noiseSigma[0] != 0.0 ? (noiseSigma[0] * noiseSigma[0]) : 1.0) :            // noiseSigma[0] is used for Range in Km. Its unit is Km
+                        0.0);
+      }
+   }
+   //MessageInterface::ShowMessage("Covariance size = %d\n", measurementSize);
+   
    return retval;
 }
 
@@ -289,39 +306,44 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
    // Fire the measurement model to build the collection of signal data
    if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))   // made changes by TUAN NGUYEN
    {
-      std::vector<SignalData*> data = calcData->GetSignalData();
+      std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
       Real        unfeasibilityValue;
 
       // set to default
-      cMeasurement.isFeasible = true;
-      cMeasurement.unfeasibleReason = "N";
+      cMeasurement.isFeasible = false;
+      cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
 
       RealArray values;
-      for (UnsignedInt i = 0; i < data.size(); ++i)
+      for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
          // Calculate C-value for signal path ith:
          values.push_back(0.0);
-         SignalData *current = data[i];
+         SignalBase *currentleg = paths[i];
+         SignalData *current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
          SignalData *first = current;
          UnsignedInt legIndex = 0;
          
-         while (current != NULL)
+         while (currentleg != NULL)
          {
             ++legIndex;
             // Set feasibility value
             if (current->feasibilityReason == "N")
             {
-               if (current->stationParticipant)
+               if ((current->stationParticipant)&&(cMeasurement.unfeasibleReason == ""))
+               {
+                  cMeasurement.isFeasible = true;
+                  cMeasurement.unfeasibleReason = "N";
                   cMeasurement.feasibilityValue = current->feasibilityValue;
+               }
             }
             else if (current->feasibilityReason == "B")
             {
                std::stringstream ss;
                ss << "B" << legIndex;
                current->feasibilityReason = ss.str();
-               if (cMeasurement.unfeasibleReason == "N")
+               if ((cMeasurement.unfeasibleReason == "")||(cMeasurement.unfeasibleReason == "N"))
                {
                   cMeasurement.unfeasibleReason = current->feasibilityReason; 
                   cMeasurement.isFeasible = false;
@@ -376,31 +398,19 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
 #endif
             }
 
-            current = current->next;
+            currentleg = currentleg->GetNext();
+            current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
+
          }// while loop
 
       }// for i loop
       
-      //// Set feasibility value
-      //cMeasurement.isFeasible = calcData->IsMeasurementFeasible();
-      //if (cMeasurement.isFeasible)
-      //{
-      //   cMeasurement.feasibilityValue = 0.0;
-      //   cMeasurement.unfeasibleReason = "N";
-      //}
-      //else
-      //{
-      //   cMeasurement.unfeasibleReason = "N";
-      //}
-
-      //@Todo: Add bias here
-
       // Specify noise sigma value
       Real nsigma = 0.0;
       if ((measurementType == "Range")||(measurementType == "DSNRange"))
-         nsigma = noiseSigma[0];
-      else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))
-         nsigma = noiseSigma[1];
+         nsigma = noiseSigma[0];                               // unit: km
+      else if (measurementType == "Doppler")
+         nsigma = noiseSigma[1];                               // unit: Hz
 
       // Set measurement values
       cMeasurement.value.clear();
@@ -419,34 +429,31 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . Real range for path %dth: %.12lf km \n", i, values[i]);
          #endif
 
-         // No action to use multiplier in RangeAdapterKm due to it calculates full range fo signal path
-         // multiplier will be used in any class derived from RangeAdapterKm
-
-         //// Multiplier factor
-         //if (GetMultiplierFactor() != -1.0)                             // made changes by TUAN NGUYEN
-         //{
-         //   measVal = measVal * GetMultiplierFactor();                  // made changes by TUAN NGUYEN
-         //   #ifdef DEBUG_RANGE_CALCULATION
-         //   MessageInterface::ShowMessage("      . Multiplier factor      : %.12lf\n", GetMultiplierFactor());
-         //   MessageInterface::ShowMessage("      . Real range * mutiplier : %.12lf km\n", measVal);
-         //   #endif
-         //}
-
-         //@Todo: write code to add bias to measuement value here
+         // No action is neede for multiplier in RangeAdapterKm due to it calculates full range of signal path.
+         // Multiplier will be used in any class derived from RangeAdapterKm
          #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
+            MessageInterface::ShowMessage("      . No action is needed for multiplier in RangeAdapterKm object.\n");
          #endif
 
-         // Add noise to measurement value                                              // made changes by TUAN NGUYEN
-         if (addNoise)                                                                  // made changes by TUAN NGUYEN
-         {                                                                              // made changes by TUAN NGUYEN
-            // Add noise here                                                           // made changes by TUAN NGUYEN
-            RandomNumber* rn = RandomNumber::Instance();                                // made changes by TUAN NGUYEN
-            Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
-            while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
-               val = rn->Gaussian(measVal, nsigma);                                     // made changes by TUAN NGUYEN
-            measVal = val;                                                              // made changes by TUAN NGUYEN
-         }                                                                              // made changes by TUAN NGUYEN
+         // This section is only done when measurement type is 'Range'. For other types such as DSNRange or Doppler, it will be done in their adapters  
+         if (measurementType == "Range")
+         {
+            //@Todo: write code to add bias to measuement value here
+            #ifdef DEBUG_RANGE_CALCULATION
+               MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
+            #endif
+
+            // Add noise to measurement value                                              // made changes by TUAN NGUYEN
+            if (addNoise)                                                                  // made changes by TUAN NGUYEN
+            {                                                                              // made changes by TUAN NGUYEN
+               // Add noise here                                                           // made changes by TUAN NGUYEN
+               RandomNumber* rn = RandomNumber::Instance();                                // made changes by TUAN NGUYEN
+               Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
+               while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
+                  val = rn->Gaussian(measVal, nsigma);                                     // made changes by TUAN NGUYEN
+               measVal = val;                                                              // made changes by TUAN NGUYEN
+            }                                                                              // made changes by TUAN NGUYEN
+         }
          cMeasurement.value[i] = measVal;                                               // made changes by TUAN NGUYEN
 
          #ifdef DEBUG_RANGE_CALCULATION
@@ -459,6 +466,11 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          #endif
 
       }
+
+      // Calculate measurement covariance
+      cMeasurement.covariance = &measErrorCovariance;
+
+
       #ifdef DEBUG_ADAPTER_EXECUTION
          MessageInterface::ShowMessage("Computed measurement\n   Type:  %d\n   "
                "Type:  %s\n   UID:   %d\n   Epoch:%.12lf\n   Participants:\n",
@@ -662,7 +674,7 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
    #endif
 
    const std::vector<RealArray> *derivativeData =
-         &(calcData->CalculateMeasurementDerivatives(obj, id)); // parmId));
+         &(calcData->CalculateMeasurementDerivatives(obj, id));
 
    #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("   Derivatives: [");
@@ -699,6 +711,10 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
          theDataDerivatives[i][j] = (derivativeData->at(i))[j];
       }
    }
+
+   #ifdef DEBUG_ADAPTER_DERIVATIVES
+      MessageInterface::ShowMessage("Exit RangeAdapterKm::CalculateMeasurementDerivatives():\n");
+   #endif
 
    return theDataDerivatives;
 }

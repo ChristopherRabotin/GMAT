@@ -554,6 +554,12 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
       ionoCorrection = ionosphere->Correction();
       Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;            // unit: meter
 
+      // 6. Clean up
+      if (cv)                                   // made changes by TUAN NGUYEN
+         delete cv;                             // made changes by TUAN NGUYEN
+      if (fk5cs)                                // made changes by TUAN NGUYEN
+         delete fk5cs;                          // made changes by TUAN NGUYEN
+
       #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
          MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
          MessageInterface::ShowMessage("         +Range correction = %.12lf m\n", rangeCorrection*GmatMathConstants::KM_TO_M);

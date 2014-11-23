@@ -125,6 +125,7 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+//   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);     // ^^^^
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -174,6 +175,9 @@ public:
    virtual void         SetMultiplierFactor(Real mult);                // made changes by TUAN NGUYEN
    virtual Real         GetMultiplierFactor();                         // made changes by TUAN NGUYEN
 
+   // Get measurement model object
+   virtual MeasureModel * GetMeasurementModel() { return calcData; };  // made changes by TUAN NGUYEN
+
 protected:
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
@@ -207,13 +211,9 @@ protected:
 
 
    /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path
-   Real                       uplinkFreq;      // Its unit is Hz (not MHz)                               // made changes by TUAN NGUYEN
+   Real                       uplinkFreq;                           // unit is MHz                       // made changes by TUAN NGUYEN
    /// Frequency band   (In DSNDoppler, it is used for S path)                                           // made changes by TUAN NGUYEN
    Integer                    freqBand;                                                                  // made changes by TUAN NGUYEN
-   ///// Constant frequency value used in a physical measurement when needed for E path in DSNDoppler      // made changes by TUAN NGUYEN          // This code will be moved to DSNDopplerAdapter
-   //Real                       uplinkFreqE;      // Its unit is Hz (not MHz)                              // made changes by TUAN NGUYEN          // This code will be moved to DSNDopplerAdapter
-   ///// Frequency band for E path in DSNDoppler                                                           // made changes by TUAN NGUYEN          // This code will be moved to DSNDopplerAdapter
-   //Integer                    freqBandE;                                                                 // made changes by TUAN NGUYEN          // This code will be moved to DSNDopplerAdapter
    /// Observation data object containing an observation data record                                     // made changes by TUAN NGUYEN
    ObservationData*           obsData;                                                                   // made changes by TUAN NGUYEN
    /// Ramped frequency table used to calculate ramped frequency measurements                            // made changes by TUAN NGUYEN
@@ -226,8 +226,12 @@ protected:
    RealArray                  noiseSigma;      // noiseSigma[0]: noise sigma for Range, noiseSigma[1]: noise sigma for Doppler 
    /// Error model
    StringArray                errorModel;      // errorModel[0]: error model for Range, errorModel[1]: error model for Doppler
+   
+   /// Measurement error covariance matrix                                                               // made changes by TUAN NGUYEN
+   Covariance                 measErrorCovariance;                                                       // made changes by TUAN NGUYEN
+
    /// Measurement type
-   std::string                measurementType;  // it's value could be "Range", "DSNRange", "USNRange", "GeoRange", "Doppler", "DSNDoppler", "USNDopple", "GeoRange", etc
+   std::string                measurementType;  // it's value could be "Range", "DSNRange", "Doppler", etc
 
 
    /// Parameter IDs for the TrackingDataAdapter

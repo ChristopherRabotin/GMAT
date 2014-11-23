@@ -98,20 +98,6 @@ protected:
    GmatEpoch lastComputedEpoch;
    /// Pointer to the spacecraft that gets propagated in this model
    SpaceObject *targetSat;
-    
-//   /// Parameter IDs for the PointRangeRateAdapterKps
-//   enum
-//   {
-//      DOPPLER_INTERVAL = RangeAdapterKmParamCount,
-//      RangeRateAdapterParamCount,
-//   };
-//      /// Strings describing the DSNRangeAdapter parameters
-//   static const std::string PARAMETER_TEXT[RangeRateAdapterParamCount -
-//                                           RangeAdapterKmParamCount];
-//   /// Types of the RangeRateAdapter parameters
-//   static const Gmat::ParameterType PARAMETER_TYPE[RangeRateAdapterParamCount -
-//                                                   RangeAdapterKmParamCount];
-
 };
 
 #endif /* PointRangeRateAdapterKps_hpp */

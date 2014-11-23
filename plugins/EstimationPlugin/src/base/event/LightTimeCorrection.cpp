@@ -636,6 +636,9 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 	   ET_TAI = ET_TAI + Psat;
    }
 
+   if (emb)
+      delete emb;
+
    return ET_TAI;
 }
 

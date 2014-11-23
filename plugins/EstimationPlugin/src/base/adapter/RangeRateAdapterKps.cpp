@@ -23,26 +23,27 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include <iostream>
+#include <sstream>
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
 //#define DEBUG_RANGE_CALCULATION
 //#define DEBUG_DERIV
 
-//#define USE_STM_DERIVATIVES
-
 
 //------------------------------------------------------------------------------
 // Static data
 //------------------------------------------------------------------------------
 const std::string
-RangeRateAdapterKps::PARAMETER_TEXT[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
+RangeRateAdapterKps::
+PARAMETER_TEXT[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
 {
    "DopplerInterval",                   
 };
 
 const Gmat::ParameterType
-RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
+RangeRateAdapterKps::
+PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
 {
    Gmat::REAL_TYPE,   
 };
@@ -60,11 +61,7 @@ RangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmP
 //------------------------------------------------------------------------------
 RangeRateAdapterKps::RangeRateAdapterKps(const std::string& name) :
    RangeAdapterKm       (name),
-   dopplerInterval      (1.0),
-   prev_range_rate      (0.0),
-   valueReady           (false),
-   lastComputedEpoch    (0.0),
-   targetSat            (NULL)
+   dopplerInterval      (1.0)
 {
    typeName="RangeRate";
 }
@@ -93,11 +90,7 @@ RangeRateAdapterKps::~RangeRateAdapterKps()
 //------------------------------------------------------------------------------
 RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
    RangeAdapterKm       (rr),
-   dopplerInterval      (rr.dopplerInterval),
-   prev_range_rate      (rr.prev_range_rate),
-   valueReady           (rr.valueReady),
-   lastComputedEpoch    (rr.lastComputedEpoch),
-   targetSat            (NULL)
+   dopplerInterval      (rr.dopplerInterval)
 {
 }
 
@@ -113,16 +106,13 @@ RangeRateAdapterKps::RangeRateAdapterKps(const RangeRateAdapterKps& rr) :
  * @return This adapter made to look like rr
  */
 //------------------------------------------------------------------------------
-RangeRateAdapterKps& RangeRateAdapterKps::operator=(const RangeRateAdapterKps& rr)
+RangeRateAdapterKps& RangeRateAdapterKps::operator=(
+      const RangeRateAdapterKps& rr)
 {
    if (this != &rr)
    {
       RangeAdapterKm::operator=(rr);
       dopplerInterval = rr.dopplerInterval;
-      targetSat = NULL;
-      valueReady = rr.valueReady;
-      lastComputedEpoch = rr.lastComputedEpoch;
-      prev_range_rate = rr.prev_range_rate;
    }
 
    return *this;
@@ -142,6 +132,7 @@ GmatBase* RangeRateAdapterKps::Clone() const
 {
    return new RangeRateAdapterKps(*this);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -174,7 +165,8 @@ std::string RangeRateAdapterKps::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer RangeRateAdapterKps::GetParameterID(const std::string& str) const
 {
-   for (Integer i = RangeAdapterKmParamCount; i < RangeRateAdapterParamCount; i++)
+   for (Integer i = RangeAdapterKmParamCount; i < RangeRateAdapterParamCount;
+         ++i)
    {
       if (str == PARAMETER_TEXT[i - RangeAdapterKmParamCount])
          return i;
@@ -341,11 +333,86 @@ bool RangeRateAdapterKps::Initialize()
 {
    bool retval = false;
 
-   if (RangeAdapterKm::Initialize())
+   // Set up a second signal path identical to the first
+   if (participantLists.size() == 1)
    {
-      // Handle additional initialization specific to this adapter (currently none)
-      retval = true;
+      StringArray *secondStrand = new StringArray(*(participantLists[0]));
+      participantLists.push_back(secondStrand);
+
+      for (UnsignedInt i = 0; i < secondStrand->size(); ++i)
+         calcData->SetStringParameter("SignalPath", secondStrand->at(i), 1);
    }
+
+   // Epoch is at start!
+   calcData->SetTimeTagFlag(false);
+
+   // Validate identical strands
+   if (participantLists.size() != 2)
+      throw MeasurementException("Range rate adapter strand data is not "
+            "initializing correctly");
+   if (participantLists[0]->size() != participantLists[1]->size())
+      throw MeasurementException("Range rate adapter strand data is not "
+            "initializing correctly");
+   for (UnsignedInt i = 0; i < participantLists[0]->size(); ++i)
+      if (participantLists[0]->at(i) != participantLists[1]->at(i))
+         throw MeasurementException("Range rate adapter strand data is not "
+                     "initializing correctly");
+
+   if (TrackingDataAdapter::Initialize())
+   {
+      retval = true;
+
+      for (UnsignedInt i = 0; i < participantLists.size(); ++i)
+      {
+         for (UnsignedInt j = 0; j < participantLists[i]->size(); ++j)
+         {
+            std::string theId;
+
+            for (UnsignedInt k = 0; k < refObjects.size(); ++k)
+            {
+               if (refObjects[k]->GetName() == participantLists[i]->at(j))
+               {
+                  theId = refObjects[k]->GetStringParameter("Id");
+                  break;
+               }
+            }
+            // Hide the duplicate strand from the data file
+            if (i == 0)
+               cMeasurement.participantIDs.push_back(theId);
+         }
+      }
+   }
+
+   // Calculate measurement covariance
+   // We use 2 strands to build a single measuremetn value for this model
+   // std::vector<SignalData*> data = calcData->GetSignalData();
+   Integer measurementSize = 1; //data.size();
+   measErrorCovariance.SetDimension(measurementSize);
+   for (Integer i = 0; i < measurementSize; ++i)
+   {
+      for (Integer j = 0; j < measurementSize; ++j)
+      {
+         measErrorCovariance(i,j) = (i == j ?
+                        (noiseSigma[0] != 0.0 ? (noiseSigma[0] * noiseSigma[0]) : 1.0) :            // noiseSigma[0] is used for Range in Km. Its unit is Km
+                        0.0);
+      }
+   }
+
+   #ifdef DEBUG_INITIALIZATON
+      MessageInterface::ShowMessage("%d strands:\n", participantLists.size());
+      for (UnsignedInt i = 0; i < participantLists.size(); ++i)
+      {
+         for (UnsignedInt j = 0; j < participantLists[i]->size(); ++j)
+         {
+            if (j == 0)
+               MessageInterface::ShowMessage("   ");
+            else
+               MessageInterface::ShowMessage(" --> ");
+            MessageInterface::ShowMessage("%s", participantLists[i]->at(j).c_str());
+         }
+         MessageInterface::ShowMessage("\n");
+      }
+   #endif
 
    return retval;
 }
@@ -373,31 +440,10 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
                               bool withEvents, ObservationData* forObservation,
                               std::vector<RampTableData>* rampTB)
 {
-   strandData[0].clear();
-   strandData[1].clear();
-
    // Compute range in km, at epoch and at epoch plus offset
-   cMeasurement1 = RangeAdapterKm::CalculateMeasurement
-         (false, NULL, NULL);
-   SignalData* sigData = (calcData->GetSignalData())[0];
-   while (sigData)
-   {
-      SignalData dat(*sigData);
-      strandData[0].push_back(dat);
-      sigData = sigData->next;
-   }
-
-   cMeasurement2 =
-         RangeAdapterKm::CalculateMeasurementAtOffset(false, dopplerInterval,
-               NULL, NULL);
-
-   sigData = (calcData->GetSignalData())[0];
-   while (sigData)
-   {
-      SignalData dat(*sigData);
-      strandData[1].push_back(dat);
-      sigData = sigData->next;
-   }
+   cMeasurement1 = CalculateMeasurementAtOffset(false, 0.0, NULL, NULL, 0);
+   cMeasurement2 = CalculateMeasurementAtOffset(false, dopplerInterval,
+               NULL, NULL, 1);
 
    if ((cMeasurement1.isFeasible) && (cMeasurement2.isFeasible))
    {
@@ -408,8 +454,8 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
       // set range rate
       Real range_rate = 0;
 
-      // some up the ranges
-      for (UnsignedInt i = 0; i < cMeasurement1.value.size(); i++  )
+      // sum up the ranges
+      for (UnsignedInt i = 0; i < cMeasurement1.value.size(); i++)
       {
         two_way_range  = two_way_range  + cMeasurement1.value[i];
         two_way_range2 = two_way_range2 + cMeasurement2.value[i];
@@ -419,12 +465,26 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
       Real one_way_range  = two_way_range  / 2.0;
       Real one_way_range2 = two_way_range2 / 2.0;
 
+      #ifdef DEBUG_MEASUREMENT
+         MessageInterface::ShowMessage("R1: %lf, R2: %lf\n", one_way_range,
+               one_way_range2);
+      #endif
+
       // Compute range-rate
       range_rate = (one_way_range2-one_way_range)/(dopplerInterval);
 
       // set the measurement value
       cMeasurement.value.clear();
       cMeasurement.value.push_back(range_rate);
+      cMeasurement.isFeasible = true;
+
+      // Get measurement epoch in the first signal path. It will apply for all other paths
+      #ifdef USE_PRECISION_TIME
+         cMeasurement.epoch = cMeasurement1.epoch;
+      #else
+         cMeasurement.epoch = cMeasurement1.epoch;
+      #endif
+
 
       #ifdef DEBUG_RANGE_CALCULATION
         MessageInterface::ShowMessage("epoch %f, range %f, range rate %f, "
@@ -434,9 +494,14 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
               one_way_range - one_way_range2);
       #endif
    }
+   else
+      cMeasurement.isFeasible = false;
 
-//if (cMeasurement.isFeasible)
-//   MessageInterface::ShowMessage("%.12lf %.12lf ", cMeasurement.epoch, cMeasurement.value[0]);
+   #ifdef DEBUG_MEASUREMENT
+      if (cMeasurement.isFeasible)
+         MessageInterface::ShowMessage("%.12lf %.12lf ", cMeasurement.epoch,
+               cMeasurement.value[0]);
+   #endif
 
    return cMeasurement;
 }
@@ -444,7 +509,7 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
 
 //------------------------------------------------------------------------------
 // const std::vector<RealArray>& CalculateMeasurementDerivatives(GmatBase* obj,
-//       Integer id)
+//                                     Integer id)
 //------------------------------------------------------------------------------
 /**
  * Computes measurement derivatives for a given parameter on a given object
@@ -457,238 +522,132 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
 //------------------------------------------------------------------------------
 const std::vector<RealArray>& RangeRateAdapterKps::
             CalculateMeasurementDerivatives(GmatBase* obj, Integer id)
-#ifdef USE_STM_DERIVATIVES
 {
-   if (!calcData)
-      throw MeasurementException("Measurement derivative data was requested "
-            "for " + instanceName + " before the measurement was set");
+      if (!calcData)
+         throw MeasurementException("Measurement derivative data was requested "
+               "for " + instanceName + " before the measurement was set");
 
-   // Perform the calculations
-   #ifdef DEBUG_ADAPTER_DERIVATIVES
-      Integer parmId = GetParmIdFromEstID(id, obj);
-      MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
-            "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
-            obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
-   #endif
+      // Perform the calculations
+      #ifdef DEBUG_ADAPTER_DERIVATIVES
+         Integer parmId = GetParmIdFromEstID(id, obj);
+         MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
+               "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
+               obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+      #endif
 
-   Integer parameterID = -1;
-   UnsignedInt size = 6;
+      Integer parameterID = -1;
 
+      if (obj == NULL)
+         throw MeasurementException("With respect to object for derivatives is "
+               "not set correctly in a RangeRate measurement");
 
-   if (obj != NULL)
-   {
       if (id > 250)
          parameterID = GetParmIdFromEstID(id, obj);
       else
          parameterID = id;
 
-   if (obj->GetParameterText(parameterID) == "Position")
-   {
-//      RealArray oneRow;
-//      oneRow.assign(3, 0.0);
-//      theDataDerivatives.clear();
-//      theDataDerivatives.push_back(oneRow);
-//
-//      SignalData *upStrand = data[0];
-//      SignalData *downStrand = data[0]->next;
-//
-//      Rmatrix33 I33(true);
-//
-//      if ((downStrand == NULL) || (downStrand->next != NULL))
-//         throw MeasurementException("Range rate computations require signal "
-//               "path of the form T1 -> S1 -> T1");
-//
-//      if (obj->IsOfType(Gmat::GROUND_STATION))
-//         throw MeasurementException("Derivatives w.r.t. Station location "
-//               "parameters are not yet supported");
-//      else
-//      {
-//         Real upRange = upStrand->rangeVecInertial.GetMagnitude();
-//         Real upRangeCubed = upRange * upRange * upRange;
-//         Real upRDotV =
-//               upStrand->rangeVecInertial(0) * upStrand->rangeRateVecInertial(0) +
-//               upStrand->rangeVecInertial(1) * upStrand->rangeRateVecInertial(1) +
-//               upStrand->rangeVecInertial(2) * upStrand->rangeRateVecInertial(2);
-//
-//         Real downRange = downStrand->rangeVecInertial.GetMagnitude();
-//         Real downRangeCubed = downRange * downRange * downRange;
-//         Real downRDotV =
-//               downStrand->rangeVecInertial(0) * downStrand->rangeRateVecInertial(0) +
-//               downStrand->rangeVecInertial(1) * downStrand->rangeRateVecInertial(1) +
-//               downStrand->rangeVecInertial(2) * downStrand->rangeRateVecInertial(2);
-//
-//         for (UnsignedInt ii = 0; ii < 3; ++ii)
-//         {
-//            theDataDerivatives[0][ii]   = 0.5 * (
-//                  (upStrand->rangeRateVecInertial(ii)   / upRange   -
-//                   upStrand->rangeVecInertial(ii)   * upRDotV   / upRangeCubed) -
-//                  (downStrand->rangeRateVecInertial(ii) / downRange -
-//                   downStrand->rangeVecInertial(ii) * downRDotV / downRangeCubed));
-//         }
-//      }
-   }
-   else if (obj->GetParameterText(parameterID) == "Velocity")
-   {
-//      RealArray oneRow;
-//      oneRow.assign(3, 0.0);
-//      theDataDerivatives.clear();
-//      theDataDerivatives.push_back(oneRow);
-//
-//      SignalData *upStrand = data[0];
-//      SignalData *downStrand = data[0]->next;
-//
-//      if ((downStrand == NULL) || (downStrand->next != NULL))
-//         throw MeasurementException("Range rate computations require signal "
-//               "path of the form T1 -> S1 -> T1");
-//
-//      if (obj->IsOfType(Gmat::GROUND_STATION))
-//         throw MeasurementException("Derivatives w.r.t. Station location "
-//               "parameters are not yet supported");
-//      else
-//      {
-//         Real upRange = upStrand->rangeVecInertial.GetMagnitude();
-//         Real downRange = downStrand->rangeVecInertial.GetMagnitude();
-//         for (UnsignedInt ii = 0; ii < 3; ++ii)
-//         {
-//            theDataDerivatives[0][ii]   = 0.5 *
-//                  (upStrand->rangeVecInertial(ii)   / upRange -
-//                   downStrand->rangeVecInertial(ii) / downRange);
-//         }
-//      }
-   }
-   else if (obj->GetParameterText(parameterID) == "CartesianX")
-   {
-      RealArray oneRow;
-      oneRow.assign(6, 0.0);
-      theDataDerivatives.clear();
-      theDataDerivatives.push_back(oneRow);
-
-      RealArray leg1Derivatives, leg2Derivatives;
-      if (strandData[0].size() == 2)
+      if (obj->GetParameterText(parameterID) == "Position")
       {
-         RealArray sigDv;
-         CalculateCartesianDerivative(&(strandData[0][0]), leg1Derivatives, false);
-         CalculateCartesianDerivative(&(strandData[0][1]), sigDv, true);
-         for (UnsignedInt i = 0; i < leg1Derivatives.size(); ++i)
-         {
-            leg1Derivatives[i] += sigDv[i];
-            leg1Derivatives[i] *= 0.5;
-         }
+         std::vector<RealArray> dv =
+               calcData->CalculateMeasurementDerivatives(obj, id);
+         if (dv.size() != 2)
+            throw MeasurementException("The 2-way range rate measurement is "
+                  "improperly sized");
+
+         RealArray oneRow;
+         oneRow.assign(3, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+
+         // Now put the two strands together
+         for (UnsignedInt i = 0; i < 6; ++i)
+            theDataDerivatives[0][i] = (dv[1][i] - dv[0][i]) / dopplerInterval;
+      }
+      else if (obj->GetParameterText(parameterID) == "Velocity")
+      {
+         std::vector<RealArray> dv =
+               calcData->CalculateMeasurementDerivatives(obj, id);
+         if (dv.size() != 2)
+            throw MeasurementException("The 2-way range rate measurement is "
+                  "improperly sized");
+
+         RealArray oneRow;
+         oneRow.assign(3, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+
+         // Now put the two strands together
+         for (UnsignedInt i = 0; i < 6; ++i)
+            theDataDerivatives[0][i] = (dv[1][i] - dv[0][i]) / dopplerInterval;
+      }
+      else if (obj->GetParameterText(parameterID) == "CartesianX")
+      {
+         std::vector<RealArray> dv =
+               calcData->CalculateMeasurementDerivatives(obj, id);
+         if (dv.size() != 2)
+            throw MeasurementException("The 2-way range rate measurement is "
+                  "improperly sized");
+
+         #ifdef DEBUG_DERIVATIVES
+            MessageInterface::ShowMessage("Derivative data:\n");
+            for (UnsignedInt i = 0; i < dv.size(); ++i)
+            {
+               MessageInterface::ShowMessage("   %d:  ", i);
+               for (UnsignedInt j = 0; j < dv[i].size(); ++j)
+               {
+                  if (j > 0)
+                     MessageInterface::ShowMessage(", ");
+                  MessageInterface::ShowMessage("%.12le", dv[i][j]);
+               }
+               MessageInterface::ShowMessage("\n");
+            }
+         #endif
+
+         RealArray oneRow;
+         oneRow.assign(6, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+
+         // Now put the two strands together
+         for (UnsignedInt i = 0; i < 6; ++i)
+            theDataDerivatives[0][i] = (dv[1][i] - dv[0][i]) / dopplerInterval;
+      }
+      else if (obj->GetParameterText(parameterID) == "Bias")
+      {
+         RealArray oneRow;
+         oneRow.assign(1, 0.0);
+         theDataDerivatives.clear();
+         theDataDerivatives.push_back(oneRow);
+         theDataDerivatives[0][0] = 1.0;
       }
       else
-         throw MeasurementException("The 2-way range rate measurement is "
-               "improperly sized");
-      if (strandData[1].size() == 2)
       {
-         RealArray sigDv;
-         CalculateCartesianDerivative(&(strandData[1][0]), leg2Derivatives, false);
-         CalculateCartesianDerivative(&(strandData[1][1]), sigDv, true);
-         for (UnsignedInt i = 0; i < leg2Derivatives.size(); ++i)
+         #ifdef DEBUG_DERIVATIVES
+            MessageInterface::ShowMessage("   Deriv is w.r.t. something "
+                     "independent, so zero\n");
+         #endif
+         for (UnsignedInt i = 0; i < 3; ++i)
+            theDataDerivatives[0][i] += 0.0;
+      }
+
+   #ifdef DEBUG_DERIVATIVES
+      MessageInterface::ShowMessage("Deriv:\n");
+      for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      {
+         for (UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
          {
-            leg2Derivatives[i] += sigDv[i];
-            leg2Derivatives[i] *= 0.5;
+            if (j > 0)
+               MessageInterface::ShowMessage(" ");
+            else
+               MessageInterface::ShowMessage("   [");
+            MessageInterface::ShowMessage("%.12le", theDataDerivatives[i][j]);
          }
+         MessageInterface::ShowMessage("]\n");
       }
-      else
-         throw MeasurementException("The 2-way range rate measurement is "
-               "improperly sized");
-
-      // Now put the two strands together
-      for (UnsignedInt i = 0; i < 6; ++i)
-      {
-         theDataDerivatives[0][i] = (leg2Derivatives[i] - leg1Derivatives[i]) /
-               dopplerInterval;
-      }
-
-      #ifdef DEBUG_DERIVATIVES
-         MessageInterface::ShowMessage("   Range [%.12lf  %.12f] Range Vec "
-               "[%s] [%s] Range rate [%s] [%s] Range Vec: [%s] [%s] "
-               "Range rate [%s] [%s]\n", upRange, downRange,
-               upStrand->rangeVecInertial.ToString(15).c_str(),
-               downStrand->rangeVecInertial.ToString(15).c_str(),
-               upStrand->rangeRateVecInertial.ToString(15).c_str(),
-               downStrand->rangeRateVecInertial.ToString(15).c_str(),
-               upStrand->rangeVecInertial.ToString(15).c_str(),
-               downStrand->rangeVecInertial.ToString(15).c_str(),
-               upStrand->rangeRateVecInertial.ToString(15).c_str(),
-               downStrand->rangeRateVecInertial.ToString(15).c_str());
-      #endif
-   }
-   else if (obj->GetParameterText(parameterID) == "Bias")
-   {
-      RealArray oneRow;
-      oneRow.assign(1, 0.0);
-      theDataDerivatives.clear();
-      theDataDerivatives.push_back(oneRow);
-      theDataDerivatives[0][0] = 1.0;
-   }
-   else
-   {
-      #ifdef DEBUG_DERIVATIVES
-         MessageInterface::ShowMessage("   Deriv is w.r.t. something "
-                  "independent, so zero\n");
-      #endif
-      for (UnsignedInt i = 0; i < 3; ++i)
-         theDataDerivatives[0][i] += 0.0;
-   }
-}
-
+   #endif
 
    return theDataDerivatives;
 }
-#else
-{
-
-    // assign current range rate
-    Real current_range_rate = cMeasurement.value[0];
-
-    // compute delta range rate
-    Real delta_range_rate = (current_range_rate - prev_range_rate);
-
-    // reassign prev range rate
-    prev_range_rate = current_range_rate;
-
-    //MessageInterface::ShowMessage("current_range_rate %f\n", current_range_rate);
-
-    std::vector<SignalData*> data = calcData->GetSignalData();
-
-    // Set pointers to the uplink and downlink data for convenience
-    SignalData* upData = data[0];
-    SignalData* downData = data[0]->next;
-
-    // Epoch doesn't matter here -- for spacecraft, the call retrieves the current state from the spacecraft
-    Rvector6 startState = targetSat->GetMJ2000State(0.0);
-
-
-    // STM for the whole signal path = stm up * stm down, both for the spacecraft
-    Rmatrix66 propStm = upData->rSTM * downData->tSTM;
-
-    // Use it to propagate the spacecraft
-    Rvector6 endState = propStm * startState;
-
-    //compute derivatives
-    RealArray oneRow;
-    oneRow.assign(6, 0.0);
-    theDataDerivatives.clear();
-    theDataDerivatives.push_back(oneRow);
-
-    for (UnsignedInt i = 0; i <6; ++i)
-    {
-        Real delta_state = (endState[i] - startState[i])/1000;
-        Real current_deriv = delta_range_rate / delta_state;
-        MessageInterface::ShowMessage("delta cartesian state %f\n", delta_state);
-        MessageInterface::ShowMessage("End state [%f %f %f] [%f %f %f]\n", endState[0], endState[1],endState[2], endState[3], endState[4], endState[5]);
-        MessageInterface::ShowMessage("Start state [%f %f %f] [%f %f %f]\n", startState[0], startState[1],startState[2], startState[3], startState[4], startState[5]);
-        MessageInterface::ShowMessage("current deriv %f\n", current_deriv);
-        MessageInterface::ShowMessage("i %i\n", i);
-
-        theDataDerivatives[0][i]=current_deriv;
-
-    }
-
-   return theDataDerivatives;
-}
-#endif
 
 //------------------------------------------------------------------------------
 // bool WriteMeasurements()
@@ -785,7 +744,7 @@ Integer RangeRateAdapterKps::GetEventCount()
 void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-   TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
+   TrackingDataAdapter::SetCorrection(correctionName, correctionType);
 }
 
 //------------------------------------------------------------------------------
@@ -806,8 +765,6 @@ void RangeRateAdapterKps::SetCorrection(const std::string& correctionName,
 bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
       const Gmat::ObjectType type, const std::string& name)
 {
-   if (obj->IsOfType(Gmat::SPACECRAFT))
-      targetSat = (SpaceObject*) obj;
    return RangeAdapterKm::SetRefObject(obj, type, name);
 }
 
@@ -830,116 +787,140 @@ bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
 bool RangeRateAdapterKps::SetRefObject(GmatBase* obj,
       const Gmat::ObjectType type, const std::string& name, const Integer index)
 {
-   if (obj->IsOfType(Gmat::SPACECRAFT))
-      targetSat = (SpaceObject*) obj;
    return RangeAdapterKm::SetRefObject(obj, type, name, index);
 }
 
+
 //------------------------------------------------------------------------------
-// void RangeRateAdapterKps::CalculateCartesianDerivative(SignalData* sigData,
-//       RealArray toArray)
+// const MeasurementData& CalculateMeasurementAtOffset(
+//       bool withEvents, Real dt, ObservationData* forObservation,
+//       std::vector<RampTableData>* rampTB, Integer forStrand)
 //------------------------------------------------------------------------------
 /**
- * Computes the range derivative w.r.t. Cartesian state
+ * Calculate the measurement at a time offset from the base epoch
  *
- * @param sigData The signal data for the computation
- * @param toArray The array receiving the derivative; it should have size 0 on
- *                input
- * @param forTransmitter True is the derivative is w.r.t. transmitter state
+ * @note This code is adapterd from the RangeAdapterKm::CalculateMeasurement
+ * method.  The single strand and time offsets were added, but the bulk of the
+ * code is a direct copy of the code found there.
+ *
+ * Computes the signal data an individual strand of the measurement, with a
+ * time offset.  The interface here preserves the interfaces used in the Range
+ * Adapter so that if it proves more globally useful, it can be moved into that
+ * code.
+ *
+ * @param withEvents Flag usied in the legacy code to toggle light time.  Unused
+ *                   here.
+ * @param dt The time offset, in seconds, applied to teh start epoch of the
+ *           strand.
+ * @param forObservation Observation supplying extra data.  Unused in this code.
+ * @param rampTB Ramp table data.  Unused in this code.
+ * @param forStrand Strand index for the computations.
+ *
+ * @return The measurement data
  */
 //------------------------------------------------------------------------------
-void RangeRateAdapterKps::CalculateCartesianDerivative(SignalData* sigData,
-      RealArray &toArray, bool forTransmitter)
+const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
+      bool withEvents, Real dt, ObservationData* forObservation,
+      std::vector<RampTableData>* rampTB, Integer forStrand)
 {
-   toArray.clear();
-   CalculatePositionDerivative(sigData, toArray, forTransmitter);
-   RealArray vData;
-   CalculateVelocityDerivative(sigData, vData, forTransmitter);
-   if (vData.size() == 3)
-      for (UnsignedInt i = 0; i < 3; ++i)
-         toArray.push_back(vData[i]);
-}
+   static MeasurementData offsetMeas;
 
-//------------------------------------------------------------------------------
-// void RangeRateAdapterKps::CalculatePositionDerivative(SignalData* sigData,
-//       RealArray& toArray)
-//------------------------------------------------------------------------------
-/**
- * Computes the range derivative w.r.t. position
- *
- * Note:  Current implementation is for the inertial frame
- *
- * @param sigData The signal data for the computation
- * @param toArray The array receiving the derivative; it should have size 0 on
- *                input
- * @param forTransmitter True is the derivative is w.r.t. transmitter state
- */
-//------------------------------------------------------------------------------
-void RangeRateAdapterKps::CalculatePositionDerivative(SignalData* sigData,
-      RealArray& toArray, bool forTransmitter)
-{
-   Rmatrix33 A;
-   Real range = sigData->rangeVecInertial.GetMagnitude();
-   Rvector3 deriv;
+   if (!calcData)
+      throw MeasurementException("Measurement data was requested for " +
+            instanceName + " before the measurement was set");
 
-   if (forTransmitter)
+   if ((forStrand == -1) || (forStrand >= (Integer)participantLists.size()))
+      throw MeasurementException("Strand index is out of bounds");
+
+   // Fire the measurement model to build the collection of signal data
+   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt,
+         forStrand))
    {
-      A = sigData->tSTM.UpperLeft();
-      for (UnsignedInt i = 0; i < 3; ++i)
-         deriv(i) = - sigData->rangeVecInertial(0) + A(i,0) +
-                      sigData->rangeVecInertial(1) + A(i,1) +
-                      sigData->rangeVecInertial(2) + A(i,2);
-   }
-   else
-   {
-      A = sigData->rSTM.UpperLeft();
-      for (UnsignedInt i = 0; i < 3; ++i)
-         deriv(i) = sigData->rangeVecInertial(0) + A(i,0) +
-                    sigData->rangeVecInertial(1) + A(i,1) +
-                    sigData->rangeVecInertial(2) + A(i,2);
+      std::vector<SignalData*> data = calcData->GetSignalData();
+      std::string unfeasibilityReason;
+
+      // set to default
+      offsetMeas.isFeasible = true;
+      offsetMeas.unfeasibleReason = "N";
+      offsetMeas.feasibilityValue = 90.0;
+
+      RealArray values;
+
+      // Calculate C-value for signal path ith:
+      values.push_back(0.0);
+      SignalData *current = data[forStrand];
+      SignalData *first = current;
+      UnsignedInt legIndex = 0;
+
+      while (current != NULL)
+      {
+         ++legIndex;
+
+         // Set feasibility value
+         if (current->feasibilityReason == "N")
+         {
+            if (current->stationParticipant)
+               offsetMeas.feasibilityValue = current->feasibilityValue;
+         }
+         else if (current->feasibilityReason == "B")
+         {
+            std::stringstream ss;
+            ss << "B" << legIndex;
+            current->feasibilityReason = ss.str();
+            if (offsetMeas.unfeasibleReason == "N")
+            {
+               offsetMeas.unfeasibleReason = current->feasibilityReason;
+               offsetMeas.isFeasible = false;
+               offsetMeas.feasibilityValue = current->feasibilityValue;
+            }
+         }
+
+         // accumulate all light time range for signal path ith
+         Rvector3 signalVec = current->rangeVecInertial;
+         values[0] += signalVec.GetMagnitude();
+
+         // accumulate all range corrections for signal path ith
+         for (UnsignedInt j = 0; j < current->correctionIDs.size(); ++j)
+         {
+            if (current->useCorrection[j])
+               values[0] += current->corrections[j];
+         }// for j loop
+
+         // Get measurement epoch from the first member
+         #ifdef USE_PRECISION_TIME
+            offsetMeas.epoch = first->tPrecTime.GetMjd() -
+                  first->tDelay/GmatTimeConstants::SECS_PER_DAY;
+         #else
+            offsetMeas.epoch = first->tTime -
+                  first->tDelay/GmatTimeConstants::SECS_PER_DAY;
+         #endif
+
+         current = current->next;
+      }
+
+      // Set measurement values
+      offsetMeas.value.clear();
+      for (UnsignedInt i = 0; i < values.size(); ++i)
+         offsetMeas.value.push_back(0.0);
+
+      for (UnsignedInt i = 0; i < values.size(); ++i)
+      {
+         Real measVal = values[i];
+
+//         // Add noise to measurement value
+//         if (addNoise)
+//         {
+//            // Add noise here
+//            RandomNumber* rn = RandomNumber::Instance();
+//            Real val = rn->Gaussian(measVal, nsigma);
+//            while (val <= 0.0)
+//               val = rn->Gaussian(measVal, nsigma);
+//            measVal = val;
+//         }
+         offsetMeas.value[i] = measVal;
+
+      }
    }
 
-   for (UnsignedInt i = 0; i < 3; ++i)
-      toArray.push_back(deriv[i] / range);
-}
-
-//------------------------------------------------------------------------------
-// void RangeRateAdapterKps::CalculateVelocityDerivative(SignalData* sigData,
-//       RealArray& toArray)
-//------------------------------------------------------------------------------
-/**
- * Computes the range derivative w.r.t. velocity
- *
- * @param sigData The signal data for the computation
- * @param toArray The array receiving the derivative; it should have size 0 on
- *                input
- * @param forTransmitter True is the derivative is w.r.t. transmitter state
- */
-//------------------------------------------------------------------------------
-void RangeRateAdapterKps::CalculateVelocityDerivative(SignalData* sigData,
-      RealArray& toArray, bool forTransmitter)
-{
-   Rmatrix33 B;
-   Real range = sigData->rangeVecInertial.GetMagnitude();
-   Rvector3 deriv;
-
-   if (forTransmitter)
-   {
-      B = sigData->tSTM.UpperRight();
-      for (UnsignedInt i = 0; i < 3; ++i)
-         deriv(i) = - sigData->rangeVecInertial(0) + B(i,0) +
-                      sigData->rangeVecInertial(1) + B(i,1) +
-                      sigData->rangeVecInertial(2) + B(i,2);
-   }
-   else
-   {
-      B = sigData->rSTM.UpperRight();
-      for (UnsignedInt i = 0; i < 3; ++i)
-         deriv(i) = sigData->rangeVecInertial(0) + B(i,0) +
-                    sigData->rangeVecInertial(1) + B(i,1) +
-                    sigData->rangeVecInertial(2) + B(i,2);
-   }
-
-   for (UnsignedInt i = 0; i < 3; ++i)
-      toArray.push_back(deriv[i] / range);
+   return offsetMeas;
 }

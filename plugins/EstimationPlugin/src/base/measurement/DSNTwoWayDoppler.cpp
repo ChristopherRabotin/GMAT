@@ -1325,12 +1325,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // 15. Check feasibility of signals for Start path and End path:
       currentMeasurement.isFeasible = true;
       // 15.1. Check for Start part
-      UpdateRotationMatrix(t1TS, "R_o_j2k");
+      // UpdateRotationMatrix(t1TS, "R_o_j2k");
+      UpdateRotationMatrix(t1TS, "o_j2k");
       Rvector3 outState = (R_o_j2k * (r4S - r3S)).GetUnitVector();
       currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
       if (currentMeasurement.feasibilityValue > minAngle)
       {
-         UpdateRotationMatrix(t3RS, "R_o_j2k");
+         // UpdateRotationMatrix(t3RS, "R_o_j2k");
+         UpdateRotationMatrix(t3RS, "o_j2k");
          outState = (R_o_j2k * (r2S - r1S)).GetUnitVector();
          Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
 
@@ -1355,12 +1357,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // 15.2. When Start path is feasible, we check for End part
       if (currentMeasurement.isFeasible)
       {
-         UpdateRotationMatrix(t1TE, "R_o_j2k");
+         // UpdateRotationMatrix(t1TE, "R_o_j2k");
+         UpdateRotationMatrix(t1TE, "o_j2k");
          outState = (R_o_j2k * (r4E - r3E)).GetUnitVector();
          currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
          if (currentMeasurement.feasibilityValue > minAngle)
          {
-            UpdateRotationMatrix(t3RE, "R_o_j2k");
+            // UpdateRotationMatrix(t3RE, "R_o_j2k");
+            UpdateRotationMatrix(t3RE, "o_j2k");
             outState = (R_o_j2k * (r2E - r1E)).GetUnitVector();
             Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
 

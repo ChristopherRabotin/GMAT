@@ -57,17 +57,17 @@ public:
 
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string &str) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
    virtual std::string  GetStringParameter(const Integer id) const;
-   virtual bool SetStringParameter(const Integer id,
+   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
-   virtual std::string GetStringParameter(const Integer id,
+   virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
-   virtual bool SetStringParameter(const Integer id,
+   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
    virtual const StringArray&
@@ -76,12 +76,12 @@ public:
                         GetStringArrayParameter(const Integer id,
                                                 const Integer index) const;
 
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const std::string &label,
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-   virtual std::string GetStringParameter(const std::string &label,
+   virtual std::string  GetStringParameter(const std::string &label,
                                            const Integer index) const;
-   virtual bool SetStringParameter(const std::string &label,
+   virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value,
                                            const Integer index);
    virtual const StringArray&
@@ -102,46 +102,48 @@ public:
 //   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
 //                                     const std::string &name,
 //                                     const Integer index);
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index);
 
    DEFAULT_TO_NO_CLONES
 
-   virtual void SetPropagator(PropSetup* ps);
-   virtual bool Initialize();
+   virtual void         SetPropagator(PropSetup* ps);
+   virtual bool         Initialize();
 
    virtual bool CalculateMeasurement(bool withEvents = false,
                        ObservationData* forObservation = NULL,
                        std::vector<RampTableData>* rampTB = NULL,
-                       Real atTimeOffset = 0.0);
+                       Real atTimeOffset = 0.0, Integer forStrand = -1);
 
    virtual const std::vector<RealArray>&
                         CalculateMeasurementDerivatives(GmatBase *obj,
-                                                        Integer id);
+                                                        Integer id,
+                                                        Integer forStrand = -1);
 
    const std::vector<SignalData*>& GetSignalData();
-   bool IsMeasurementFeasible();
-   virtual void UsesLightTime(const bool tf);
+   const std::vector<SignalBase*>& GetSignalPaths();                                                         // made changes by TUAN NGUYEN
+   bool                 IsMeasurementFeasible();
+   virtual void         UsesLightTime(const bool tf);
 
    /// Set measurement (relativity, ET-TAI, ionosphere, or troposphere) correction to measurement model      // made changes by TUAN NGUYEN
-   virtual void SetCorrection(const std::string& correctionName,                                             // made changes by TUAN NGUYEN
-      const std::string& correctionType);                                                                    // made changes by TUAN NGUYEN
-   virtual void AddCorrection(const std::string& correctionName,                                             // made changes by TUAN NGUYEN
-      const std::string& correctionType);                                                                    // made changes by TUAN NGUYEN
+   virtual void         SetCorrection(const std::string& correctionName,                                     // made changes by TUAN NGUYEN
+                           const std::string& correctionType);                                               // made changes by TUAN NGUYEN
+   virtual void         AddCorrection(const std::string& correctionName,                                     // made changes by TUAN NGUYEN
+                           const std::string& correctionType);                                               // made changes by TUAN NGUYEN
    /// Set flag to indicate measurement time tag is at the end of signal path                                // made changes by TUAN NGUYEN
-   void SetTimeTagFlag(const bool flag);                                                                     // made changes by TUAN NGUYEN
+   void                 SetTimeTagFlag(const bool flag);                                                     // made changes by TUAN NGUYEN
    /// Get flag to indicate measurement time tag                                                             // made changes by TUAN NGUYEN
-   bool GetTimeTagFlag();                                                                                    // made changes by TUAN NGUYEN
+   bool                 GetTimeTagFlag();                                                                    // made changes by TUAN NGUYEN
 
    /// Get uplink frequency and uplink band for a given signal path
-   Real    GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);                    // made changes by TUAN NGUYEN
-   Integer GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);                // made changes by TUAN NGUYEN
+   Real                 GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);       // made changes by TUAN NGUYEN
+   Integer              GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);   // made changes by TUAN NGUYEN
 
    // Measurement Model Settings
-   virtual bool SetProgressReporter(ProgressReporter* reporter);
+   virtual bool         SetProgressReporter(ProgressReporter* reporter);
 
 protected:
    /// The ordered list of participants in the signal path

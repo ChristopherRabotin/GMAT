@@ -48,7 +48,7 @@ public:
    virtual void         SetSolarSystem(SolarSystem *ss);
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
-   
+
    std::string          GetModelFile();
    std::string          GetModelFileFullPath();
    int                  GetModelId();
@@ -78,7 +78,7 @@ public:
                         GetEulerAngleSequence() const;
    
    Rvector3             GetSPADSRPArea(const Real ep, const Rvector3 &sunVector);
-   
+
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;
    virtual void         Copy(const GmatBase* orig);
@@ -225,7 +225,7 @@ public:
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
    virtual void UpdateClonedObjectParameter(GmatBase *obj,
-                                            Integer updatedParameterId);
+         Integer updatedParameterId);
 
    virtual void      UpdateElementLabels();
    virtual void      UpdateElementLabels(const std::string &displayStateType);
@@ -437,7 +437,7 @@ protected:
    StringArray       stateElementUnits;
    /// Possible state representations
    StringArray       representations;
-   
+
    // The ID of the model that the spacecraft uses, and the filename as well
    std::string          modelFile;   
    int                  modelID;
@@ -498,7 +498,7 @@ protected:
    bool              epochSet;
    /// Flag indicating whether or not unique state element found
    bool              uniqueStateTypeFound;
-   
+
    /// coordinate system map to be used for Thrusters for now
    std::map<std::string, CoordinateSystem*> coordSysMap;
 
@@ -568,7 +568,8 @@ protected:
                                         bool deleteThrusters, bool deletePowerSystem,
                                         bool otherHardware);
    void              CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                       const ObjectArray &thrs, PowerSystem *pwr);
+                                       const ObjectArray &thrs, PowerSystem *pwr,
+                                       const ObjectArray &otherHw);        // made changes by TUAN NGUYEN      09/23/2014
    void              AttachTanksToThrusters();
    bool              SetHardware(GmatBase *obj, StringArray &hwNames,
                                  ObjectArray &hwArray);

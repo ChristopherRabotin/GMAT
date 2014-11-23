@@ -372,7 +372,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    objectTypeNames.push_back("Spacecraft");
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
-   
+      
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -418,20 +418,20 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    representations.push_back("SphericalAZFPA");
    representations.push_back("SphericalRADEC");
    representations.push_back("Equinoctial");
-   representations.push_back("ModifiedEquinoctial");  // Modified by M.H.
+   representations.push_back("ModifiedEquinoctial"); // Modified by M.H.
    representations.push_back("AlternateEquinoctial"); // Modified by HYKim
    representations.push_back("Delaunay");
    representations.push_back("Planetodetic");
-   representations.push_back("IncomingAsymptote");    // Mod by YK
-   representations.push_back("OutgoingAsymptote");    // Mod by YK
-   representations.push_back("BrouwerMeanShort");     // Mod by YK
-   representations.push_back("BrouwerMeanLong");      // Mod by YK
-   
+   representations.push_back("IncomingAsymptote");   // Mod by YK
+   representations.push_back("OutgoingAsymptote");   // Mod by YK
+   representations.push_back("BrouwerMeanShort");    // Mod by YK
+   representations.push_back("BrouwerMeanLong");     // Mod by YK
+
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
       ("Spacecraft constructor using state element labels mulimap\n");
    #endif
-   
+
    parameterCount = SpacecraftParamCount;
 
    // Create a default unnamed attitude
@@ -451,10 +451,10 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
       (attitude, "new attitude", "Spacecraft constructor()",
        "attitude = new CSFixed("")", this);
    #endif
-   
+
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
-   
+
    // Initialize the STM to the identity matrix
    orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
    orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
@@ -618,11 +618,11 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //   hardwareList      = a.hardwareList;
 
    // set cloned hardware
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
-   
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes by TUAN NGUYEN      09/23/2014
+
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
-   
+
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(copy) <%p>'%s' exiting\n", this, GetName().c_str());
@@ -735,12 +735,12 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
-   #endif
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem);
-   
+      #endif
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes by TUAN NGUYEN      09/23/2014
+
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
-   
+
    orbitSTM = a.orbitSTM;
    orbitAMatrix = a.orbitAMatrix;
 
@@ -2236,14 +2236,14 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
          {
             #ifdef DEBUG_GET_REAL
             MessageInterface::ShowMessage(
-            "In SC::GetParameterID, multiple reps found!! - str = %s and id = %d\n",
+            "In SC::GetParameterID, multiple reps found!! - str = %s and id = %d\n ",
             str.c_str(), (ii + CART_X));
             #endif
             return ii + CART_X;
          }
       }
-      
-      
+
+
       // Check for element label
       for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
       {
@@ -2251,7 +2251,7 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
          {
             #ifdef DEBUG_GET_REAL
             MessageInterface::ShowMessage(
-            "In SC::GetParameterID, getting id %d for str = %s\n",
+            "In SC::GetParameterID, getting id %d for str = %s\n ",
             i, str.c_str());
             #endif
             return i;
@@ -2362,7 +2362,7 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
    {
       return true;
    }
-   
+
    if (id == MODEL_FILE_FULL_PATH || id == SPAD_SRP_FILE_FULL_PATH)
       return true;
    
@@ -2379,9 +2379,9 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
 
    // NAIF ID for the spacecraft reference frame is not read-only for spacecraft
    if (id == NAIF_ID_REFERENCE_FRAME)  return false;
-   
+
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
-   
+
    return SpaceObject::IsParameterReadOnly(id);
 }
 
@@ -2951,11 +2951,11 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       throw SpaceObjectException
          ("ERROR - setting of anomaly of type other than True Anomaly not "
           "currently allowed.");
-   
+
    // First try to set as a state element
    if (SetElement(label, value))
       return value;
-   
+
    if (label == "A1Epoch")
    {
       state.SetEpoch(value);
@@ -3210,7 +3210,7 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
     
     if (id == MODEL_FILE)
        return modelFile;
-    
+
     if (id == MODEL_FILE_FULL_PATH)
        return modelFileFullPath;
 
@@ -3604,7 +3604,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == MODEL_FILE)
    {
-      modelFile = value;
+        modelFile = value;
       
       // Use FileManager::FindPath() for full path file name (2014.06.24)
       modelFileFullPath = FileManager::Instance()->FindPath(value, "SPACECRAFT_MODEL_FILE", true, false, true);
@@ -3613,9 +3613,9 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          MessageInterface::ShowMessage
             ("*** WARNING *** The model file '%s' does not exist for the spacecraft '%s'\n",
              modelFile.c_str(), GetName().c_str());
-      }
    }
-   
+   }
+
    #ifdef DEBUG_SC_SET_STRING
    MessageInterface::ShowMessage
       ("Spacecraft::SetStringParameter() returning true\n");
@@ -5281,7 +5281,7 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
  * Deletes owned objects, such as attitude, tanks, and thrusters, and power system(s)
  */
 //------------------------------------------------------------------------------
-void Spacecraft::DeleteOwnedObjects(bool deleteAttitude,  bool deleteTanks,
+void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
                                     bool deleteThrusters, bool deletePowerSystem,
                                     bool otherHardware)
 {
@@ -5399,7 +5399,8 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude,  bool deleteTanks,
  */
 //------------------------------------------------------------------------------
 void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
-                                   const ObjectArray &thrs, PowerSystem *pwrSys)
+                                   const ObjectArray &thrs, PowerSystem *pwrSys,
+                                   const ObjectArray &otherHardware)   // made changes by TUAN NGUYEN    09/23/2014
 {
    #ifdef DEBUG_OBJ_CLONE
    MessageInterface::ShowMessage
@@ -5523,6 +5524,23 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
       ("Spacecraft::CloneOwnedObjects() <%p>'%s' EXITING, att=<%p>, powerSystem <%p>, tank count = %d,"
        " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
    #endif
+
+   // made changes by TUAN NGUYEN         09/23/2014
+   // Clone other hardware
+   for (UnsignedInt i = 0; i < otherHardware.size(); ++i)
+   {
+      // Search otherHardware[i] in hardwareList
+      UnsignedInt j;
+      for(j = 0; j < hardwareList.size(); ++j)
+      {
+         if (hardwareList[j]->GetName() == otherHardware[i]->GetName())
+            break;
+      }
+
+      // If not found, clone otherHardware[i] and add to hardwareList
+      if (j == hardwareList.size())
+         hardwareList.push_back(otherHardware[i]->Clone());
+   }
 }
 
 
@@ -6093,7 +6111,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          MessageInterface::ShowMessage
             ("==> It is %Read-Only\n", IsParameterReadOnly(parmOrder[i]) ? "" : "NOT ");
          #endif
-      }
+   }
    }
    
    // Prep in case spacecraft "own" the attached hardware
@@ -6152,11 +6170,11 @@ void Spacecraft::UpdateElementLabels()
  */
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
-{   
+{
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage("==> Spacecraft::UpdateElementLabels() using state labels multimap\n");
    #endif
-   
+
    // Check if displayStateType found in the labels map
    if (stateElementLabelsMap.find(displayStateType) != stateElementLabelsMap.end())
       stateElementLabel = stateElementLabelsMap[displayStateType];
@@ -6166,7 +6184,7 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
          ("*** INTERNAL ERROR *** The state element labels map has not been built for \"" +
           displayStateType + "\"\n");
    }
-   
+
    // Check if displayStateType found in the units map
    if (stateElementUnitsMap.find(displayStateType) != stateElementUnitsMap.end())
       stateElementUnits = stateElementUnitsMap[displayStateType];
@@ -6176,7 +6194,7 @@ void Spacecraft::UpdateElementLabels(const std::string &displayStateType)
          ("*** INTERNAL ERROR *** The state element units map has not been built for \"" +
           displayStateType + "\"\n");
    }
-}
+   }
 
 
 //------------------------------------------------------------------------------
@@ -6227,13 +6245,13 @@ Rvector6 Spacecraft::GetStateInRepresentation(const std::string &rep, bool useDe
       else
          csState.Set(state.GetState());
    }
-   
+
    // Then convert to the desired representation
    std::string newRep = rep; // LOJ: I made rep to be const std::string &rep (2014.04.17)
    if (rep == "")
       //rep = stateType;   // do I want displayStateType here?
       newRep = stateType;   // do I want displayStateType here?
-   
+
    //if (rep == "Cartesian")
    if (newRep == "Cartesian")
    {
@@ -6297,7 +6315,7 @@ void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st
          "Spacecraft::SetStateFromRepresentation: Setting %s state to %s, label = '%s'\n",
          rep.c_str(), st.ToString(16).c_str(), label.c_str());
    #endif
-      
+
    if (internalCoordSystem == NULL)
       throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
    if (coordinateSystem == NULL)
@@ -6330,7 +6348,7 @@ void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st
       csState = StateConversionUtil::Convert(st, rep, "Cartesian",
                 originMu, originFlattening, originEqRadius, anomalyType);
    }
-   
+
    #ifdef DEBUG_STATE_INTERFACE
    MessageInterface::ShowMessage
       ("Spacecraft::SetStateFromRepresentation: state has been converted\n");
@@ -6338,7 +6356,7 @@ void Spacecraft::SetStateFromRepresentation(const std::string &rep, Rvector6 &st
       ("   Now convert to internal CS, internalCoordSystem=<%p>, coordinateSystem=<%p>\n",
        internalCoordSystem, coordinateSystem);
    #endif
-   
+
    // Then convert to the internal CS
    if (internalCoordSystem != coordinateSystem)
    {
@@ -6544,7 +6562,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          #endif
          SetPossibleInputTypes(label, stateType);
       }
-      
+
       // Get the true anomaly if needed
       if ((stateType == "Keplerian") || (stateType == "ModifiedKeplerian"))
       {
@@ -6564,7 +6582,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
           (GetParameterText(id+ELEMENT1_ID)).c_str(), rep.c_str());
       MessageInterface::ShowMessage
          ("In SC::SetElement, after LookUpLabel, its label = \"%s\" and its value = %12.10f\n",
-          label.c_str(), value);
+               label.c_str(), value);
    }
    #endif
 
@@ -6595,7 +6613,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    if ((id == 5) && (StateConversionUtil::IsValidAnomalyType(label)))
 //      trueAnomaly.SetType(label);
       anomalyType = label;  // is this right?
-      
+
    if (id >= 0)
    {
       // Only validate coupled elements in Assignment mode (i.e. before initialization).
@@ -6626,7 +6644,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
          Rvector6 vec6(state.GetState());
          MessageInterface::ShowMessage
-            ("   CS was %sset, state is now\n   %s\n", (csSet ? "" : "NOT "),
+            ("   CS was %sset, state is now\n   %s \n", (csSet ? "" : "NOT "),
              vec6.ToString().c_str());
          MessageInterface::ShowMessage
             ("In SC::SetElement, '%s', returning TRUE\n", GetName().c_str());
@@ -6634,7 +6652,7 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          return true;
       }
    }
-   
+
    #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
    MessageInterface::ShowMessage("In SC::SetElement, returning FALSE\n");
    #endif
@@ -6687,13 +6705,13 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       rep = stateType;
       return ELEMENT6_ID;
    }
-   
+
    
    // Use multimap to find out the element id
    #ifdef DEBUG_LOOK_UP_LABEL
    MessageInterface::ShowMessage("   LookUpLabel() using stateElementLabelsMap\n");
    #endif
-   
+
    std::map<std::string, StringArray>::iterator iter;
    bool done = false;
    for (iter = stateElementLabelsMap.begin(); iter != stateElementLabelsMap.end(); ++iter)
@@ -6726,7 +6744,7 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
       if (done)
          break;
    }
-   
+
    #ifdef DEBUG_LOOK_UP_LABEL
       MessageInterface::ShowMessage("Spacecraft::LookUpLabel(%s..) gives rep %s with retval = %d\n",
          label.c_str(), rep.c_str(), retval);
@@ -6924,14 +6942,14 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    #ifdef DEBUG_SC_INPUT_TYPES
    MessageInterface::ShowMessage
       ("\nEntering SetPossibleInputTypes: spacecraft = '%s', label = '%s', rep = '%s'\n",
-       instanceName.c_str(), label.c_str(), rep.c_str());
-   MessageInterface::ShowMessage("possibleInputTypes are:\n");
-   for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
-      MessageInterface::ShowMessage("      %2d    %s\n", ii, possibleInputTypes.at(ii).c_str());
+            instanceName.c_str(), label.c_str(), rep.c_str());
+      MessageInterface::ShowMessage("possibleInputTypes are:\n");
+      for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
+         MessageInterface::ShowMessage("      %2d    %s\n", ii, possibleInputTypes.at(ii).c_str());
    MessageInterface::ShowMessage
       ("stateType = %s, uniqueStateTypeFound=%d\n", stateType.c_str(), uniqueStateTypeFound);
    #endif
-   
+
    
    #ifdef DEBUG_MULTIMAP
    MessageInterface::ShowMessage
@@ -6979,7 +6997,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
          if (find(labels.begin(), labels.end(), label) == labels.end())
          {
             #ifdef DEBUG_SC_INPUT_TYPES
-            MessageInterface::ShowMessage
+      MessageInterface::ShowMessage
                ("'%s' not found, so removing the type '%s' from possible input types\n", label.c_str(), (*iter).c_str());
             #endif
             possibleInputTypes.erase(iter);
@@ -7016,15 +7034,15 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
       {
          #ifdef DEBUG_SC_INPUT_TYPES
          MessageInterface::ShowMessage
-            ("**** ERROR The label '%s' is not allowed in the the rep '%s', so throwing exception\n",
-             label.c_str(), rep.c_str());
-         #endif
-         std::string errmsg = "Error: you have set orbital state elements not contained in the same state type.  ";
-         errmsg += "This is only allowed after the BeginMissionSequence command.\n";
-         throw SpaceObjectException(errmsg);
-      }
+         ("**** ERROR The label '%s' is not allowed in the the rep '%s', so throwing exception\n",
+          label.c_str(), rep.c_str());
+      #endif
+      std::string errmsg = "Error: you have set orbital state elements not contained in the same state type.  ";
+      errmsg += "This is only allowed after the BeginMissionSequence command.\n";
+      throw SpaceObjectException(errmsg);
    }
-   
+   }
+  
    // If there is only one state rep, clear and add it to possibleInputTypes
    if (numRepCount == 1)
    {
@@ -7033,9 +7051,9 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
          ("Unique state type found for label '%s', uniqueStateTypeFound = %d\n", label.c_str(),
           uniqueStateTypeFound);
       #endif
-      
+   
       if (!uniqueStateTypeFound)
-      {
+   {
          possibleInputTypes.clear();
          possibleInputTypes.push_back(defaultStateType);
          stateType = defaultStateType;
@@ -7043,25 +7061,25 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
          #ifdef DEBUG_SC_INPUT_TYPES
          MessageInterface::ShowMessage("==> 2 stateType set to %s for the label %s\n", stateType.c_str(), label.c_str());
          #endif
-      }
+   }
    }
    else
-   {      
+   {
       #ifdef DEBUG_SC_INPUT_TYPES
       MessageInterface::ShowMessage("Multiple state types found for label '%s'\n", label.c_str());
       #endif
       
       // If unique state type not found, add the state rep to possible types
       if (!uniqueStateTypeFound)
-      {
+   {
          // Loop through range of temp state type
          for (unsigned int i = 0; i < tempInputTypes.size(); i++)
-         {
+   {
             std::string tempType = tempInputTypes[i];
             if (find(possibleInputTypes.begin(), possibleInputTypes.end(), tempType) == possibleInputTypes.end())
                possibleInputTypes.push_back(tempType);
-         }
-      }
+   }
+   }
    }   
    
    if (possibleInputTypes.size() < 1)
@@ -7074,9 +7092,9 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
    MessageInterface::ShowMessage
       ("----> leaving SetPossibleInputTypes: spacecraft = %s, label = %s, rep = %s, stateType = %s\n",
        instanceName.c_str(), label.c_str(), rep.c_str(), stateType.c_str());
-   MessageInterface::ShowMessage("----> possibleInputTypes are now:\n");
-   for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
-      MessageInterface::ShowMessage("---->       %d    %s\n", ii, possibleInputTypes.at(ii).c_str());
+      MessageInterface::ShowMessage("----> possibleInputTypes are now:\n");
+      for (unsigned int ii = 0; ii < possibleInputTypes.size(); ii++)
+         MessageInterface::ShowMessage("---->       %d    %s\n", ii, possibleInputTypes.at(ii).c_str());
    #endif
 }
 
@@ -7109,7 +7127,7 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
       MessageInterface::ShowMessage("In SC::ValidateOrbitStateValue, about to validate %s with value %le when RadPer already set\n", withLabel.c_str(), andValue);
       #endif
-      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "RadPer", state[0]);
+         validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision(), "RadPer", state[0]);
    }
 
    // Check for SMA and ECC relative to each other, if necessary
@@ -7166,7 +7184,7 @@ bool Spacecraft::ValidateOrbitStateValue(const std::string &forRep, const std::s
       #ifdef DEBUG_SPACECRAFT_SET_ELEMENT
       MessageInterface::ShowMessage("In SC::ValidateOrbitStateValue, about to validate %s with value %le\n", withLabel.c_str(), andValue);
       #endif
-      validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
+         validated = StateConversionUtil::ValidateValue(withLabel, andValue, errorMessageFormat, GetDataPrecision());
    }
    return validated;
 }

@@ -25,7 +25,7 @@ GMAT ST2K_48.Id = 'ST2K_48';
 %----- The data file
 Create TrackingFileSet estData
 estData.AddTrackingConfig = {{ST2K_48, ODSat, ST2K_48}, 'PointRangeRate'}
-estData.Filename = ODSatTwoWayRangeRate.gmd
+estData.Filename = ODSatPointTwoWayRangeRate.gmd
 estData.UseLighttime = true;
 estData.DopplerInterval = 1.0;
 
@@ -51,7 +51,7 @@ GMAT BatchEst.RelativeTol = 1e-06;
 GMAT BatchEst.Propagator = ODProp;
 GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
 GMAT BatchEst.OLSEInitialRMSSigma = 3e212;
-% BatchEst.OLSEMultiplicativeConstant = 4
+BatchEst.OLSEMultiplicativeConstant = 40
 
 %------ Run the measurement simulator
 BeginMissionSequence

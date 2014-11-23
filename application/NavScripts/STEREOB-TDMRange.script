@@ -40,7 +40,7 @@ GMAT DS14.Location1 = -2353.62142;     % unit: km
 GMAT DS14.Location2 = -4641.34147;     % unit: km
 GMAT DS14.Location3 = 3677.05232;      % unit: km
 %GMAT DS14.Id = 'D14'; %'D14';
-GMAT DS14.Id = '308'; %'D14';
+GMAT DS14.Id = '122'; %'D14';
 GMAT DS14.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS14.MinimumElevationAngle = 7.00000;
 
@@ -51,7 +51,7 @@ GMAT DS15.HorizonReference = Sphere;
 GMAT DS15.Location1 = -2353.53896;     % unit: km
 GMAT DS15.Location2 = -4641.64943;     % unit: km
 GMAT DS15.Location3 = 3676.66998;      % unit: km
-GMAT DS15.Id = 'D15'; %'D15';
+GMAT DS15.Id = '123'; %'D15';
 GMAT DS15.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS15.MinimumElevationAngle = 7.00000;
 
@@ -62,7 +62,7 @@ GMAT DS24.HorizonReference = Sphere;
 GMAT DS24.Location1 = -2354.90671;     % unit: km
 GMAT DS24.Location2 = -4646.84008;     % unit: km
 GMAT DS24.Location3 = 3669.24232;      % unit: km
-GMAT DS24.Id = 'D24'; %'D24';
+GMAT DS24.Id = '287'; %'D24';
 GMAT DS24.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS24.MinimumElevationAngle = 7.00000;
 
@@ -73,7 +73,7 @@ GMAT DS25.HorizonReference = Sphere;
 GMAT DS25.Location1 = -2355.02201;     % unit: km
 GMAT DS25.Location2 = -4646.95320;     % unit: km
 GMAT DS25.Location3 = 3669.04057;      % unit: km
-GMAT DS25.Id = 'D25'; %'D25';
+GMAT DS25.Id = '11'; %'D25';
 GMAT DS25.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS25.MinimumElevationAngle = 7.00000;
 
@@ -84,7 +84,7 @@ GMAT DS26.HorizonReference = Sphere;
 GMAT DS26.Location1 = -2354.89080;     % unit: km
 GMAT DS26.Location2 = -4647.16632;     % unit: km
 GMAT DS26.Location3 = 3668.87175;      % unit: km
-GMAT DS26.Id = 'D26'; %'D26';
+GMAT DS26.Id = '1'; %'D26';
 GMAT DS26.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS26.MinimumElevationAngle = 7.00000;
 
@@ -95,7 +95,7 @@ GMAT DS34.HorizonReference = Sphere;
 GMAT DS34.Location1 = -4461.14709;     % unit: km
 GMAT DS34.Location2 = 2682.43924;      % unit: km
 GMAT DS34.Location3 = -3674.39313;     % unit: km
-GMAT DS34.Id = 'D34'; %'D34';
+GMAT DS34.Id = '307'; %'D34';
 GMAT DS34.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS34.MinimumElevationAngle = 7.00000;
 
@@ -106,7 +106,7 @@ DS43.HorizonReference = Sphere;
 DS43.Location1 = -4460.89492;     % unit: km
 DS43.Location2 = 2682.36151;      % unit: km
 DS43.Location3 = -3674.74815;     % unit: km
-DS43.Id = 'D43';	%'D43';
+DS43.Id = '125';	%'D43';
 DS43.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS43.MinimumElevationAngle = 7.00000;
 
@@ -117,7 +117,7 @@ GMAT DS45.HorizonReference = Sphere;
 GMAT DS45.Location1 = -4460.93558;     % unit: km
 GMAT DS45.Location2 = 2682.76566;      % unit: km
 GMAT DS45.Location3 = -3674.38098;     % unit: km
-GMAT DS45.Id = 'D45'; %'D45';
+GMAT DS45.Id = '126'; %'D45';
 GMAT DS45.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS45.MinimumElevationAngle = 7.00000;
 
@@ -128,7 +128,7 @@ GMAT DS54.HorizonReference = Sphere;
 GMAT DS54.Location1 = 4849.43449;     % unit: km
 GMAT DS54.Location2 = -360.72390;     % unit: km
 GMAT DS54.Location3 = 4114.61884;     % unit: km
-GMAT DS54.Id = 'D54'; %'D54';
+GMAT DS54.Id = '308'; %'D54';
 GMAT DS54.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS54.MinimumElevationAngle = 7.00000;
 
@@ -139,7 +139,7 @@ GMAT DS55.HorizonReference = Sphere;
 GMAT DS55.Location1 = 4849.52526;     % unit: km
 GMAT DS55.Location2 = -360.60609;     % unit: km
 GMAT DS55.Location3 = 4114.49508;     % unit: km
-GMAT DS55.Id = 'D55'; %'D55';
+GMAT DS55.Id = '13'; %'D55';
 GMAT DS55.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS55.MinimumElevationAngle = 7.00000;
 
@@ -150,7 +150,7 @@ GMAT DS63.HorizonReference = Sphere;
 GMAT DS63.Location1 = 4849.09252;     % unit: km
 GMAT DS63.Location2 = -360.18035;     % unit: km
 GMAT DS63.Location3 = 4115.10925;     % unit: km
-GMAT DS63.Id = 'D63'; %'D63';
+GMAT DS63.Id = '128'; %'D63';
 GMAT DS63.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS63.MinimumElevationAngle = 7.00000;
 
@@ -161,7 +161,7 @@ GMAT DS65.HorizonReference = Sphere;
 GMAT DS65.Location1 = 4849.33963;     % unit: km
 GMAT DS65.Location2 = -360.42766;     % unit: km
 GMAT DS65.Location3 = 4114.75073;     % unit: km
-GMAT DS65.Id = 'D65'; %'D65';
+GMAT DS65.Id = '129'; %'D65';
 GMAT DS65.AddHardware = {Transmitter1, Receiver1, Antenna1};
 DS65.MinimumElevationAngle = 7.00000;
 
@@ -222,15 +222,9 @@ ODProp.MaxStepAttempts = 50;
 %---------- Datafiles
 %----------------------------------------
 
-%Create DataFile DopplerData;
-%DopplerData.Filename = 'STEREO_B_tcp.gmd';
-%DopplerData.SelectedStationIDs = {'D14', 'D15', 'D24','D25','D26','D43','D45','D54','D55','D63','D65' };
-%DopplerData.DataThinningRatio = 0.002;
-%DopplerData.Format = GMAT_ODDoppler
- 
 Create DataFile RangeData;
 RangeData.Filename = 'STEREO_B_rng.tdm';
-RangeData.SelectedStationIDs = {'D14', 'D15', 'D24','D25','D26','D43','D45','D54','D55','D63','D65' };
+RangeData.SelectedStationIDs = {'122', '123', '287','11','1','125','126','308','13','128','129' };
 RangeData.DataThinningRatio = 1;
 RangeData.Format = TDM
  
@@ -329,7 +323,6 @@ EstRangeMeasurementDS43.NoiseSigma = [ 10.6097387521888 ];
 %EstRangeMeasurementDS43.TimeConstant = 6000;
 EstRangeMeasurementDS43.RangeModuloConstant = 3.3554432e+07; 
 
-
 Create MeasurementModel EstRangeMeasurementDS45;
 EstRangeMeasurementDS45.ObservationData = {RangeData};
 EstRangeMeasurementDS45.RampTables = {RampTB1};  
@@ -392,175 +385,12 @@ EstRangeMeasurementDS65.NoiseSigma = [ 10.6097387521888 ];
 EstRangeMeasurementDS65.RangeModuloConstant = 3.3554432e+07; 
 %EstRangeMeasurementDS65.ResidualMax = 5.0e6;
 
-Create MeasurementModel EstDopplerMeasurementDS14;
-EstDopplerMeasurementDS14.ObservationData = {DopplerData};
-EstDopplerMeasurementDS14.RampTables = {RampTB1};  
-EstDopplerMeasurementDS14.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS14.Participants = {DS14, EstSat}; 
-EstDopplerMeasurementDS14.RelativityCorrection = On;
-EstDopplerMeasurementDS14.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS14.Bias = [ 0 ];
-EstDopplerMeasurementDS14.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS14.TimeConstant = 6000;
-%EstDopplerMeasurementDS14.RangeModuloConstant = 3.3554432e+07; 
-%EstDopplerMeasurementDS14.ResidualMax = 500.0;
-
-Create MeasurementModel EstDopplerMeasurementDS15;
-EstDopplerMeasurementDS15.ObservationData = {DopplerData};
-EstDopplerMeasurementDS15.RampTables = {RampTB1};  
-EstDopplerMeasurementDS15.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS15.Participants = {DS15, EstSat}; 
-EstDopplerMeasurementDS15.RelativityCorrection = On;
-EstDopplerMeasurementDS15.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS15.Bias = [ 0 ];
-EstDopplerMeasurementDS15.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS15.TimeConstant = 6000;
-%EstDopplerMeasurementDS15.RangeModuloConstant = 3.3554432e+07; 
-%EstDopplerMeasurementDS15.ResidualMax = 1000.0;
-
-Create MeasurementModel EstDopplerMeasurementDS24;
-EstDopplerMeasurementDS24.ObservationData = {DopplerData};
-EstDopplerMeasurementDS24.RampTables = {RampTB1};  
-EstDopplerMeasurementDS24.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS24.Participants = {DS24, EstSat}; 
-EstDopplerMeasurementDS24.RelativityCorrection = On;
-EstDopplerMeasurementDS24.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS24.Bias = [ 0 ];
-EstDopplerMeasurementDS24.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS24.TimeConstant = 6000;
-%EstDopplerMeasurementDS24.RangeModuloConstant = 3.3554432e+07; 
-%EstDopplerMeasurementDS24.ResidualMax = 500.0;
-
-Create MeasurementModel EstDopplerMeasurementDS25;
-EstDopplerMeasurementDS25.ObservationData = {DopplerData};
-EstDopplerMeasurementDS25.RampTables = {RampTB1};  
-EstDopplerMeasurementDS25.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS25.Participants = {DS25, EstSat}; 
-EstDopplerMeasurementDS25.RelativityCorrection = On;
-EstDopplerMeasurementDS25.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS25.Bias = [ 0 ];
-EstDopplerMeasurementDS25.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS25.TimeConstant = 6000;
-%EstDopplerMeasurementDS25.RangeModuloConstant = 3.3554432e+07; 
-%EstDopplerMeasurementDS25.ResidualMax = 6000.0;
-
-Create MeasurementModel EstDopplerMeasurementDS26;
-EstDopplerMeasurementDS26.ObservationData = {DopplerData};
-EstDopplerMeasurementDS26.RampTables = {RampTB1};  
-EstDopplerMeasurementDS26.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS26.Participants = {DS26, EstSat}; 
-EstDopplerMeasurementDS26.RelativityCorrection = On;
-EstDopplerMeasurementDS26.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS26.Bias = [ 0 ];
-EstDopplerMeasurementDS26.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS26.TimeConstant = 6000;
-%EstDopplerMeasurementDS26.RangeModuloConstant = 3.3554432e+07; 
-
-Create MeasurementModel EstDopplerMeasurementDS34;
-EstDopplerMeasurementDS34.ObservationData = {DopplerData};
-EstDopplerMeasurementDS34.RampTables = {RampTB1};  
-EstDopplerMeasurementDS34.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS34.Participants = {DS34, EstSat}; 
-EstDopplerMeasurementDS34.RelativityCorrection = On;
-EstDopplerMeasurementDS34.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS34.Bias = [ 0 ];
-EstDopplerMeasurementDS34.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS34.TimeConstant = 6000;
-%EstDopplerMeasurementDS34.RangeModuloConstant = 3.3554432e+07; 
-
-
-Create MeasurementModel EstDopplerMeasurementDS45;
-EstDopplerMeasurementDS45.ObservationData = {DopplerData};
-EstDopplerMeasurementDS45.RampTables = {RampTB1};  
-EstDopplerMeasurementDS45.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS45.Participants = {DS45, EstSat}; 
-EstDopplerMeasurementDS45.RelativityCorrection = On;
-EstDopplerMeasurementDS45.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS45.Bias = [ 0 ];
-EstDopplerMeasurementDS45.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS45.TimeConstant = 6000;
-%EstDopplerMeasurementDS45.RangeModuloConstant = 3.3554432e+07; 
-
-
-Create MeasurementModel EstDopplerMeasurementDS43;
-EstDopplerMeasurementDS43.ObservationData = {DopplerData};
-EstDopplerMeasurementDS43.RampTables = {RampTB1};  
-EstDopplerMeasurementDS43.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS43.Participants = {DS43, EstSat};
-EstDopplerMeasurementDS43.RelativityCorrection = On;
-EstDopplerMeasurementDS43.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS43.Bias = [ 0 ];
-EstDopplerMeasurementDS43.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS43.TimeConstant = 6000;
-%EstDopplerMeasurementDS43.RangeModuloConstant = 3.3554432e+07; 
-
-
-Create MeasurementModel EstDopplerMeasurementDS54;
-EstDopplerMeasurementDS54.ObservationData = {DopplerData};
-EstDopplerMeasurementDS54.RampTables = {RampTB1};  
-EstDopplerMeasurementDS54.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS54.Participants = {DS54, EstSat}; 
-EstDopplerMeasurementDS54.RelativityCorrection = On;
-EstDopplerMeasurementDS54.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS54.Bias = [ 0 ];
-EstDopplerMeasurementDS54.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS54.TimeConstant = 6000;
-%EstDopplerMeasurementDS54.RangeModuloConstant = 3.3554432e+07; 
-
-Create MeasurementModel EstDopplerMeasurementDS55;
-EstDopplerMeasurementDS55.ObservationData = {DopplerData};
-EstDopplerMeasurementDS55.RampTables = {RampTB1};  
-EstDopplerMeasurementDS55.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS55.Participants = {DS55, EstSat}; 
-EstDopplerMeasurementDS55.RelativityCorrection = On;
-EstDopplerMeasurementDS55.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS55.Bias = [ 0 ];
-EstDopplerMeasurementDS55.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS55.TimeConstant = 6000;
-%EstDopplerMeasurementDS55.RangeModuloConstant = 3.3554432e+07; 
-
-Create MeasurementModel EstDopplerMeasurementDS63;
-EstDopplerMeasurementDS63.ObservationData = {DopplerData};
-EstDopplerMeasurementDS63.RampTables = {RampTB1};  
-EstDopplerMeasurementDS63.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS63.Participants = {DS63, EstSat}; 
-EstDopplerMeasurementDS63.RelativityCorrection = On;
-EstDopplerMeasurementDS63.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS63.Bias = [ 0 ];
-EstDopplerMeasurementDS63.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS63.TimeConstant = 6000;
-%EstDopplerMeasurementDS63.RangeModuloConstant = 3.3554432e+07; 
-
-
-Create MeasurementModel EstDopplerMeasurementDS65;
-EstDopplerMeasurementDS65.ObservationData = {DopplerData};
-EstDopplerMeasurementDS65.RampTables = {RampTB1};  
-EstDopplerMeasurementDS65.Type = DSNTwoWayDoppler;  
-EstDopplerMeasurementDS65.Participants = {DS65, EstSat}; 
-EstDopplerMeasurementDS65.RelativityCorrection = On;
-EstDopplerMeasurementDS65.ETminusTAICorrection = Off;
-EstDopplerMeasurementDS65.Bias = [ 0 ];
-EstDopplerMeasurementDS65.NoiseSigma = [ 0.0281646156920849 ];
-%EstDopplerMeasurementDS65.TimeConstant = 6000;
-%EstDopplerMeasurementDS65.RangeModuloConstant = 3.3554432e+07; 
-%EstDopplerMeasurementDS65.ResidualMax = 1000;
-% 14
-% 15
-% 24
-% 25
-% 26
-% 43
-% 45
-% 54
-% 55
-% 63
-% 65
-
 %----------------------------------------
 %---------- Communications Hardware
 %----------------------------------------
 
 Create Antenna Antenna1;
+Create Antenna Antenna2;
 
 Create Transmitter Transmitter1;
 GMAT Transmitter1.PrimaryAntenna = Antenna1;
@@ -574,98 +404,28 @@ GMAT Transponder1.PrimaryAntenna = Antenna2;
 GMAT Transponder1.HardwareDelay = 1.33792558583979e-06  %2.0*200.55e-3/299792.458;
 GMAT Transponder1.TurnAroundRatio = '240/221' 
 
-Create Antenna Antenna2;
-
 %----------------------------------------
 %---------- Tracking Systems
 %----------------------------------------
 %Need to use DSNTrackingSystem if you wish to perform media correction
 Create DSNTrackingSystem EstDSNTracker;
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15', 'EstRangeMeasurementDS24', 'EstRangeMeasurementDS65','EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15', 'EstDopplerMeasurementDS24', 'EstDopplerMeasurementDS65'};
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15', 'EstRangeMeasurementDS24', 'EstRangeMeasurementDS25'};
-
-%GMAT EstDSNTracker.Add = {'EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15', 'EstDopplerMeasurementDS24', 'EstDopplerMeasurementDS65'};
-
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS25','EstRangeMeasurementDS43','EstRangeMeasurementDS65'};
-
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15', 'EstRangeMeasurementDS24','EstRangeMeasurementDS25','EstRangeMeasurementDS26','EstRangeMeasurementDS43','EstRangeMeasurementDS45','EstRangeMeasurementDS54','EstRangeMeasurementDS55','EstRangeMeasurementDS63', 'EstRangeMeasurementDS65'};
-
-%latest one
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15','EstRangeMeasurementDS43','EstRangeMeasurementDS54', 'EstRangeMeasurementDS65'};
-
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15','EstRangeMeasurementDS43','EstRangeMeasurementDS54', 'EstRangeMeasurementDS65','EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15','EstDopplerMeasurementDS43','EstDopplerMeasurementDS54', 'EstDopplerMeasurementDS65'};
-
-% Tuan, THe two lines below work.
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15','EstRangeMeasurementDS43','EstRangeMeasurementDS54', 'EstRangeMeasurementDS65'};
-%GMAT EstDSNTracker.Add = {'EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15','EstDopplerMeasurementCAN','EstDopplerMeasurementDS54', 'EstDopplerMeasurementDS65'};
-
-%but combined get error:
-%  GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14',   'EstRangeMeasurementDS15',  'EstRangeMeasurementDS43',  'EstRangeMeasurementDS54',   'EstRangeMeasurementDS65', ...
-%                            'EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15','EstDopplerMeasurementDS43','EstDopplerMeasurementDS54', 'EstDopplerMeasurementDS65'};
-% % 
-
-
-%GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15', 'EstRangeMeasurementDS24','EstRangeMeasurementDS25','EstRangeMeasurementDS26','EstRangeMeasurementDS43','EstRangeMeasurementDS45','EstRangeMeasurementDS54','EstRangeMeasurementDS55','EstRangeMeasurementDS63', 'EstRangeMeasurementDS65'};
-
-
-
-
 GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15', 'EstRangeMeasurementDS24','EstRangeMeasurementDS25','EstRangeMeasurementDS26','EstRangeMeasurementDS43','EstRangeMeasurementDS45','EstRangeMeasurementDS54','EstRangeMeasurementDS55','EstRangeMeasurementDS63', 'EstRangeMeasurementDS65'};
-
-%GMAT EstDSNTracker.Add = {'EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15', 'EstDopplerMeasurementDS24','EstDopplerMeasurementDS25','EstDopplerMeasurementDS26','EstDopplerMeasurementDS43','EstDopplerMeasurementDS45','EstDopplerMeasurementDS54','EstDopplerMeasurementDS55','EstDopplerMeasurementDS63', 'EstDopplerMeasurementDS65'};
-
-
-% GMAT EstDSNTracker.Add = {'EstRangeMeasurementDS14', 'EstRangeMeasurementDS15', 'EstRangeMeasurementDS24','EstRangeMeasurementDS25','EstRangeMeasurementDS26','EstRangeMeasurementDS43','EstRangeMeasurementDS45','EstRangeMeasurementDS54','EstRangeMeasurementDS55','EstRangeMeasurementDS63', 'EstRangeMeasurementDS65', ...
-% 'EstDopplerMeasurementDS14', 'EstDopplerMeasurementDS15', 'EstDopplerMeasurementDS24','EstDopplerMeasurementDS25','EstDopplerMeasurementDS26','EstDopplerMeasurementDS43','EstDopplerMeasurementDS45','EstDopplerMeasurementDS54','EstDopplerMeasurementDS55','EstDopplerMeasurementDS63', 'EstDopplerMeasurementDS65'};
-% 
-
-
-
 GMAT EstDSNTracker.TroposphereModel = 'None';  %'HopfieldSaastamoinen'
 GMAT EstDSNTracker.IonosphereModel = 'None';   %'IRI2007'
 
 Create BatchEstimatorInv bat
 bat.Propagator = ODProp;
 bat.Measurements = {EstDSNTracker} 
-
-bat.AddSolveFor = {EstSat.CartesianState,EstRangeMeasurementDS25.Bias,EstRangeMeasurementDS26.Bias}
+bat.AddSolveFor = {EstSat.CartesianState}
 bat.MaximumIterations = 25;
 bat.EstimationEpochFormat = 'FromParticipants';  %'TAIModJulian
-%bat.EstimationEpoch = 'FromParticipants';       $'21545'
-%bat.StartEpoch = '21545';  %use this and next field to edit tracking data used
-%bat.EndEpoch = '21546';
-
-bat.OLSEInitialRMSSigma = 8000;
+bat.OLSEInitialRMSSigma = 8000000;
 bat.OLSEMultiplicativeConstant = 10;
 bat.OLSEAdditiveConstant = 0;
 bat.AbsoluteTol = 1.9
 bat.RelativeTol = 1e-4
 bat.ReportFile = 'STEREOB_Working_File.report';
 bat.ReportStyle = 'Verbose';
-
-
-
-% Create BatchEstimatorInv bat;
-% GMAT bat.ShowProgress = true;
-% GMAT bat.ReportStyle = Normal;
-% GMAT bat.ReportFile = 'BatchEstimatorInvbat.data';
-% GMAT bat.MaximumIterations = 50;
-% GMAT bat.Measurements = {EstDSNTracker};
-
-% GMAT bat.AddSolveFor = {'EstSat.CartesianState'};
-% GMAT bat.AbsoluteTol = 0.001;
-% GMAT bat.RelativeTol = 0.001;
-% GMAT bat.Propagator = ODProp;
-% GMAT bat.ShowAllResiduals = On;
-% GMAT bat.EpochFormat = 'TAIModJulian';
-% GMAT bat.StartEpoch = '6116.00';
-% GMAT bat.EndEpoch = '58127.5';
-% GMAT bat.MaximumResidualMultiplier = 1e+180;
-% GMAT bat.ConstantMultiplier = 3;
-% GMAT bat.AdditiveConstant = 0;
-% GMAT bat.EstimationEpochFormat = 'FromParticipants';  %'TAIModJulian
-% GMAT bat.UsePrioriEstimate = On;
-
 
 %----------------------------------------
 %---------- Plots and Reports

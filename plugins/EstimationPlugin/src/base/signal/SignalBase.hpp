@@ -106,6 +106,16 @@ public:
 
    bool                 StepParticipant(Real stepToTake,
                                               bool forTransmitter);
+#ifdef USE_PRECISION_TIME
+   void                 MoveToEpoch(const GmatTime theEpoch,                     // made changes by TUAN NGUYEN
+                                          bool epochAtReceive,                   // made changes by TUAN NGUYEN
+                                          bool moveAll = true);                  // made changes by TUAN NGUYEN
+#else
+   void                 MoveToEpoch(const GmatEpoch theEpoch,                    // This function will be removed and replaced by MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive, bool moveAll = true)
+                                          bool epochAtReceive,
+                                          bool moveAll = true);
+#endif
+
 protected:
    /// The next node in the list of signals (NULL at the end of the list)
    SignalBase                 *next;
@@ -199,21 +209,12 @@ protected:
    virtual void               UpdateRotationMatrix(Real atEpoch,
                                     const std::string &whichOne = "All");
 
-   virtual void GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
-         Rvector &deriv);
-   virtual void GetRangeVectorDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
-         Rmatrix& derivMatrix);
+   virtual void               GetRangeDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
+                                 Rvector &deriv);
+   virtual void               GetRangeVectorDerivative(GmatBase *forObj, bool wrtR, bool wrtV,
+                                 Rmatrix& derivMatrix);
 
    Integer                    GetParmIdFromEstID(Integer forId, GmatBase *obj);
-#ifdef USE_PRECISION_TIME
-   void                       MoveToEpoch(const GmatTime theEpoch,               // made changes by TUAN NGUYEN
-                                          bool epochAtReceive,                   // made changes by TUAN NGUYEN
-                                          bool moveAll = true);                  // made changes by TUAN NGUYEN
-#else
-   void                       MoveToEpoch(const GmatEpoch theEpoch,              // This function will be removed and replaced by MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive, bool moveAll = true)
-                                          bool epochAtReceive,
-                                          bool moveAll = true);
-#endif
    //bool                       StepParticipant(Real stepToTake,                 // make this function public
    //                                           bool forTransmitter);
 };

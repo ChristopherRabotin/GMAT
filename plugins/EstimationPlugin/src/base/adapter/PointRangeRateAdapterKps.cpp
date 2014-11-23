@@ -30,23 +30,6 @@
 //#define DEBUG_DERIV
 
 
-////------------------------------------------------------------------------------
-//// Static data
-////------------------------------------------------------------------------------
-//const std::string
-//PointRangeRateAdapterKps::PARAMETER_TEXT[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
-//{
-//   "DopplerInterval",
-//};
-//
-//const Gmat::ParameterType
-//PointRangeRateAdapterKps::PARAMETER_TYPE[RangeRateAdapterParamCount - RangeAdapterKmParamCount] =
-//{
-//   Gmat::REAL_TYPE,
-//};
-
-
-
 //------------------------------------------------------------------------------
 // PointRangeRateAdapterKps(const std::string& name)
 //------------------------------------------------------------------------------
@@ -596,15 +579,16 @@ const std::vector<RealArray>& PointRangeRateAdapterKps::
 
    #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("   Derivatives: [");
-      for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
+      for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
       {
          if (i > 0)
             MessageInterface::ShowMessage("]\n                [");
-         for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
+         for (UnsignedInt j = 0; j < theDataDerivatives.at(i).size(); ++j)
          {
             if (j > 0)
                MessageInterface::ShowMessage(", ");
-            MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
+            MessageInterface::ShowMessage("%.12le",
+                  (theDataDerivatives.at(i))[j]);
          }
       }
       MessageInterface::ShowMessage("]\n");
@@ -707,7 +691,7 @@ Integer PointRangeRateAdapterKps::GetEventCount()
 void PointRangeRateAdapterKps::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-   TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
+   TrackingDataAdapter::SetCorrection(correctionName, correctionType);
 }
 
 //------------------------------------------------------------------------------

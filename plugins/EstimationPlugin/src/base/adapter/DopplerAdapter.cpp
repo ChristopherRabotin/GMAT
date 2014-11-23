@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                           DSNRangeAdapter
+//                           DopplerAdapter
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -12,44 +12,45 @@
 // contract, Task Order 28
 //
 // Author: Tuan Dang Nguyen, NASA/GSFC
-// Created: Aug 13, 2014
+// Created: Sept 30, 2014
 /**
- * A measurement adapter for DSN ranges in Range Unit (RU)
+ * A measurement adapter for DSN Doppler
  */
 //------------------------------------------------------------------------------
 
-#include "DSNRangeAdapter.hpp"
+#include "DopplerAdapter.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
-#include "RandomNumber.hpp"
+#include "SignalBase.hpp"
+#include "Transponder.hpp"
 
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
 //#define DEBUG_DERIVATIVE_CALCULATION
-//#define DEBUG_RANGE_CALCULATION
+#define DEBUG_DOPPLER_CALCULATION
 
 //------------------------------------------------------------------------------
 // Static data
 //------------------------------------------------------------------------------
 const std::string
-DSNRangeAdapter::PARAMETER_TEXT[DSNRangeAdapterParamCount - RangeAdapterKmParamCount] =
+DopplerAdapter::PARAMETER_TEXT[DopplerAdapterParamCount - RangeAdapterKmParamCount] =
 {
-   "RangeModuloConstant",                   // made changes by TUAN NGUYEN
+   "DopplerCountInterval",
 };
 
 
 const Gmat::ParameterType
-DSNRangeAdapter::PARAMETER_TYPE[DSNRangeAdapterParamCount - RangeAdapterKmParamCount] =
+DopplerAdapter::PARAMETER_TYPE[DopplerAdapterParamCount - RangeAdapterKmParamCount] =
 {
-   Gmat::REAL_TYPE,                        // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,
 };
 
 
 
 
 //------------------------------------------------------------------------------
-// DSNRangeAdapter(const std::string& name)
+// DopplerAdapter(const std::string& name)
 //------------------------------------------------------------------------------
 /**
  * Constructor
@@ -57,60 +58,75 @@ DSNRangeAdapter::PARAMETER_TYPE[DSNRangeAdapterParamCount - RangeAdapterKmParamC
  * @param name The name of the adapter
  */
 //------------------------------------------------------------------------------
-DSNRangeAdapter::DSNRangeAdapter(const std::string& name) :
-   RangeAdapterKm      (name),
-   rangeModulo         (1.0e18)
+DopplerAdapter::DopplerAdapter(const std::string& name) :
+   RangeAdapterKm         (name),
+   adapterS               (NULL),
+   turnaround             (1.0),
+   uplinkFreqE            (1.0e9),
+   freqBandE              (1),
+   dopplerCountInterval   (1.0)        // 1 second
 {
-   typeName = "DSNRange";              // change type name from "RangeKm" to "DSNRange"
+   typeName = "Doppler";              // change type name from "RangeKm" to "Doppler"
 }
 
 
 //------------------------------------------------------------------------------
-// ~DSNRangeAdapter()
+// ~DopplerAdapter()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-DSNRangeAdapter::~DSNRangeAdapter()
+DopplerAdapter::~DopplerAdapter()
 {
+   if (adapterS)
+      delete adapterS;
 }
 
 
 //------------------------------------------------------------------------------
-// DSNRangeAdapter(const DSNRangeAdapter& dsnr)
+// DopplerAdapter(const DopplerAdapter& da)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor
  *
- * @param dsnr The adapter copied to make this one
+ * @param da The adapter copied to make this one
  */
 //------------------------------------------------------------------------------
-DSNRangeAdapter::DSNRangeAdapter(const DSNRangeAdapter& dsnr) :
-   RangeAdapterKm      (dsnr),
-   rangeModulo         (dsnr.rangeModulo)
+DopplerAdapter::DopplerAdapter(const DopplerAdapter& da) :
+   RangeAdapterKm         (da),
+   adapterS               (NULL),
+   turnaround             (da.turnaround),
+   uplinkFreqE            (da.uplinkFreqE),
+   freqBandE              (da.freqBandE),
+   dopplerCountInterval   (da.dopplerCountInterval)
 {
 }
 
 
 //------------------------------------------------------------------------------
-// DSNRangeAdapter& operator=(const DSNRangeAdapter& dsnr)
+// DopplerAdapter& operator=(const DopplerAdapter& da)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
  *
- * @param dsnr The adapter copied to make this one match it
+ * @param da The adapter copied to make this one match it
  *
- * @return This adapter made to look like rak
+ * @return This adapter made to look like da
  */
 //------------------------------------------------------------------------------
-DSNRangeAdapter& DSNRangeAdapter::operator=(const DSNRangeAdapter& dsnr)
+DopplerAdapter& DopplerAdapter::operator=(const DopplerAdapter& da)
 {
-   if (this != &dsnr)
+   if (this != &da)
    {
-      RangeAdapterKm::operator=(dsnr);
+      RangeAdapterKm::operator=(da);
 
-      rangeModulo = dsnr.rangeModulo;
+      turnaround           = da.turnaround;
+      uplinkFreqE          = da.uplinkFreqE;
+      freqBandE            = da.freqBandE;
+      dopplerCountInterval = da.dopplerCountInterval;
+
+      adapterS             = NULL;
    }
 
    return *this;
@@ -126,9 +142,9 @@ DSNRangeAdapter& DSNRangeAdapter::operator=(const DSNRangeAdapter& dsnr)
  * @return A new adapter set to match this one
  */
 //------------------------------------------------------------------------------
-GmatBase* DSNRangeAdapter::Clone() const
+GmatBase* DopplerAdapter::Clone() const
 {
-   return new DSNRangeAdapter(*this);
+   return new DopplerAdapter(*this);
 }
 
 
@@ -143,9 +159,9 @@ GmatBase* DSNRangeAdapter::Clone() const
  * @return The script name
  */
 //------------------------------------------------------------------------------
-std::string DSNRangeAdapter::GetParameterText(const Integer id) const
+std::string DopplerAdapter::GetParameterText(const Integer id) const
 {
-   if (id >= RangeAdapterKmParamCount && id < DSNRangeAdapterParamCount)
+   if (id >= RangeAdapterKmParamCount && id < DopplerAdapterParamCount)
       return PARAMETER_TEXT[id - RangeAdapterKmParamCount];
    return RangeAdapterKm::GetParameterText(id);
 }
@@ -162,9 +178,9 @@ std::string DSNRangeAdapter::GetParameterText(const Integer id) const
  * @return The parameter ID
  */
 //------------------------------------------------------------------------------
-Integer DSNRangeAdapter::GetParameterID(const std::string& str) const
+Integer DopplerAdapter::GetParameterID(const std::string& str) const
 {
-   for (Integer i = RangeAdapterKmParamCount; i < DSNRangeAdapterParamCount; i++)
+   for (Integer i = RangeAdapterKmParamCount; i < DopplerAdapterParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - RangeAdapterKmParamCount])
          return i;
@@ -184,9 +200,9 @@ Integer DSNRangeAdapter::GetParameterID(const std::string& str) const
  * @return The parameter's type
  */
 //------------------------------------------------------------------------------
-Gmat::ParameterType DSNRangeAdapter::GetParameterType(const Integer id) const
+Gmat::ParameterType DopplerAdapter::GetParameterType(const Integer id) const
 {
-   if (id >= RangeAdapterKmParamCount && id < DSNRangeAdapterParamCount)
+   if (id >= RangeAdapterKmParamCount && id < DopplerAdapterParamCount)
       return PARAMETER_TYPE[id - RangeAdapterKmParamCount];
 
    return RangeAdapterKm::GetParameterType(id);
@@ -204,7 +220,7 @@ Gmat::ParameterType DSNRangeAdapter::GetParameterType(const Integer id) const
  * @return The description string
  */
 //------------------------------------------------------------------------------
-std::string DSNRangeAdapter::GetParameterTypeString(const Integer id) const
+std::string DopplerAdapter::GetParameterTypeString(const Integer id) const
 {
    return MeasurementModelBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
@@ -222,10 +238,10 @@ std::string DSNRangeAdapter::GetParameterTypeString(const Integer id) const
  * @return The value of the parameter
  */
 //------------------------------------------------------------------------------
-Real DSNRangeAdapter::GetRealParameter(const Integer id) const
+Real DopplerAdapter::GetRealParameter(const Integer id) const
 {
-   if (id == RANGE_MODULO_CONSTANT)
-      return rangeModulo;
+   if (id == DOPPLER_COUNT_INTERVAL)
+      return dopplerCountInterval;
 
    return RangeAdapterKm::GetRealParameter(id);
 }
@@ -243,15 +259,15 @@ Real DSNRangeAdapter::GetRealParameter(const Integer id) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real DSNRangeAdapter::SetRealParameter(const Integer id, const Real value)
+Real DopplerAdapter::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == RANGE_MODULO_CONSTANT)
+   if (id == DOPPLER_COUNT_INTERVAL)
    {
       if (value <= 0.0)
-         throw MeasurementException("Error: range modulo constant has a nonpositive value\n");
+         throw MeasurementException("Error: Doppler count interval has a nonpositive value\n");
 
-      rangeModulo = value;
-      return rangeModulo;
+      dopplerCountInterval = value;
+      return dopplerCountInterval;
    }
 
    return RangeAdapterKm::SetRealParameter(id, value);
@@ -269,7 +285,7 @@ Real DSNRangeAdapter::SetRealParameter(const Integer id, const Real value)
  * @return The value of the parameter
  */
 //------------------------------------------------------------------------------
-Real DSNRangeAdapter::GetRealParameter(const std::string &label) const
+Real DopplerAdapter::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
 }
@@ -287,7 +303,7 @@ Real DSNRangeAdapter::GetRealParameter(const std::string &label) const
  * @return setting value
  */
 //------------------------------------------------------------------------------
-Real DSNRangeAdapter::SetRealParameter(const std::string &label, const Real value)
+Real DopplerAdapter::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
 }
@@ -308,7 +324,7 @@ Real DSNRangeAdapter::SetRealParameter(const std::string &label, const Real valu
  * @return true if a rename happened, false if not
  */
 //------------------------------------------------------------------------------
-bool DSNRangeAdapter::RenameRefObject(const Gmat::ObjectType type,
+bool DopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
    bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
@@ -328,7 +344,7 @@ bool DSNRangeAdapter::RenameRefObject(const Gmat::ObjectType type,
  * @return true if the initialization succeeds, false if it fails
  */
 //------------------------------------------------------------------------------
-bool DSNRangeAdapter::Initialize()
+bool DopplerAdapter::Initialize()
 {
    bool retval = false;
 
@@ -337,20 +353,58 @@ bool DSNRangeAdapter::Initialize()
       retval = true;
 
       // @todo: initialize all needed variables
-      // Calculate measurement covariance again due to it uses RU.
-      std::vector<SignalData*> data = calcData->GetSignalData();
-      Integer measurementSize = data.size();
-      measErrorCovariance.SetDimension(measurementSize);
-      for (Integer i = 0; i < measurementSize; ++i)
+      // 1. Create S-path measurement model;
+
+      adapterS =  new RangeAdapterKm("adapterS");
+      *adapterS = *this;
+
+      // 2. Set all needed parameters
+      // 2.1. Set for participantLists
+      for (UnsignedInt i = 0; i < participantLists.size(); ++i)
       {
-         for (Integer j = 0; j < measurementSize; ++j)
+         MessageInterface::ShowMessage("i = %d\n", i);
+         for (UnsignedInt j = 0; j < participantLists[i]->size(); ++j)
          {
-            measErrorCovariance(i,j) = (i == j ?
-                        (noiseSigma[2] != 0.0 ? (noiseSigma[2] * noiseSigma[2]) : 1.0) :            // noiseSigma[2] is used for DSNRange. Its unit is RU
-                        0.0);
+            MessageInterface::ShowMessage("j = %d\n", j);
+            MessageInterface::ShowMessage("adapterS->SetStringParameter('SignalPath', '%s', %d)\n", participantLists[i]->at(j).c_str(), i);
+            adapterS->SetStringParameter("SignalPath", participantLists[i]->at(j), i);
          }
       }
+      // 2.2. Set for all Reference objects
+      StringArray refObjNames = adapterS->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+      MessageInterface::ShowMessage(" Reference object names:\n");
+      for (UnsignedInt i = 0; i < refObjNames.size(); ++i)
+         MessageInterface::ShowMessage(" .%s\n", refObjNames[i].c_str());
 
+      ObjectArray objs = GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
+      MessageInterface::ShowMessage(" Reference objects: size = %d\n", objs.size());
+      for (UnsignedInt i = 0; i < objs.size(); ++i)
+         MessageInterface::ShowMessage(" .<%p,%s>\n", objs[i], objs[i]->GetName().c_str());
+
+      for (UnsignedInt i = 0; i < refObjNames.size(); ++i)
+      {
+         // search for object with name refObjNames[i]
+         GmatBase* obj = NULL;
+         for (UnsignedInt j = 0; j < objs.size(); ++j)
+         {
+            if (objs[j]->GetName() == refObjNames[i])
+            {
+               obj = objs[j];
+               break;
+            }
+         }
+
+         // set reference object obj to adapterS
+         adapterS->SetRefObject(obj, obj->GetType(), obj->GetName());
+      }
+      
+      // 2.3. Set propagator
+      if (thePropagator)
+      {
+         adapterS->SetPropagator(thePropagator);
+      }
+
+      adapterS->Initialize();
    }
 
    return retval;
@@ -375,11 +429,11 @@ bool DSNRangeAdapter::Initialize()
  * @return The computed measurement data
  */
 //------------------------------------------------------------------------------
-const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
+const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       ObservationData* forObservation, std::vector<RampTableData>* rampTable)
 {
-   #ifdef DEBUG_RANGE_CALCULATION
-      MessageInterface::ShowMessage("DSNRangeAdapter::CalculateMeasurement(%s, "
+   #ifdef DEBUG_DOPPLER_CALCULATION
+      MessageInterface::ShowMessage("DopplerAdapter::CalculateMeasurement(%s, "
             "<%p>, <%p>) called\n", (withEvents ? "true" : "false"), forObservation,
             rampTable);
    #endif
@@ -387,104 +441,141 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
    // 1. Set ramp table and observation data for adapter before doing something
    rampTB = rampTable;
    obsData = forObservation;
+
+
+   // 3. Compute for End path
+   // 3.1. Propagate all space objects to time tm
+   // This step is not needed due to measurement time tm is set to t3RE
    
-   // 2. Compute range in km
+   // 3.2. Compute range in km for End Path
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
+   measDataE = cMeasurement;
    
-   // 3. Convert range from km to RU and store in cMeasurement:
-   for (UnsignedInt i = 0; i < cMeasurement.value.size(); ++i)
+   // 3.3. Specify uplink frequency
+   // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
+   uplinkFreqE = calcData->GetUplinkFrequency(0, rampTB);
+   freqBandE = calcData->GetUplinkFrequencyBand(0, rampTB);
+
+   
+   // 3. Compute for Start path
+   // 3.1. Propagate all space objects to time tm-Tc
+   MeasureModel* measModel = adapterS->GetMeasurementModel();
+   std::vector<SignalBase*> paths = measModel->GetSignalPaths();
+   for (UnsignedInt i = 0; i < paths.size(); ++i)
    {
-      // 3.1. Specify uplink frequency
-      // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-      uplinkFreq = calcData->GetUplinkFrequency(0, rampTB);
-      freqBand = calcData->GetUplinkFrequencyBand(0, rampTB);
+      SignalBase* leg = paths[i];
+      while (leg != NULL)
+         leg->MoveToEpoch(cMeasurement.epoch, true, true);
+      leg = leg->GetNext();
+   }
+
+   // 3.2. Compute range in km for End Path
+   adapterS->CalculateMeasurement(withEvents, forObservation, rampTB);
+   measDataS = cMeasurement;
+
+   // 3.3. Specify uplink frequency
+   // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
+   uplinkFreq = measModel->GetUplinkFrequency(0, rampTB);
+   freqBand   = measModel->GetUplinkFrequencyBand(0, rampTB);
+
       
-      // 3.2. Specify multiplier (at time t1)
-      // multiplier only changes its value only after range in km is computed
-      multiplier = GetFrequencyFactor(uplinkFreq*1.0e6);
-      
-      // 3.3. Convert range from km to RU in cMeasurement.value[0]
-      Integer errnum = 0;
-      Real lightspeed = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;                  // unit: km/s
-      Real realTravelTime = cMeasurement.value[i]/lightspeed;                                                     // unit: seconds
-      
+   // 4. Convert range from km to Hz and store in cMeasurement:
+   Real dtS, dtE, dtdt, t1TE, t3RE;
+   Real interval = dopplerCountInterval;
+
+   for (UnsignedInt i = 0; i < paths.size(); ++i)          // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths.
+   {
+      // 4.1. Calculate total turn around ratio for paths[i]
+      // Note: Total turn around ratio equals product of transponder turn around ratio for all spacecrafts
+      SignalBase* leg = paths[i];
+      turnaround = 1.0;
+      while (leg != NULL)
+      {
+         SignalData* sd = leg->GetSignalDataObject();
+         SpacePoint* sp = sd->rNode;
+         if (sp->IsOfType(Gmat::SPACECRAFT))
+         {
+            ObjectArray hw = sp->GetRefObjectArray(Gmat::HARDWARE);
+            for (UnsignedInt j = 0; j < hw.size(); ++j)
+            {
+               if (hw[j]->IsOfType("Transponder"))
+               {
+                  turnaround *= ((Transponder*)hw[j])->GetRealParameter("TurnAroundRatio");
+                  break;
+               }
+            }// for j
+         }
+
+         leg = leg->GetNext();
+      }// while
+
+      // 4.2. Specify multiplier for S-path and E-path
+      multiplierS = turnaround*(uplinkFreq*1.0e6)/interval;
+      multiplierE = turnaround*(uplinkFreqE*1.0e6)/interval;
+
+      // 4.3. Time travel for S-path and E-path
+      dtS = measDataS.value[i] / (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
+      dtE = measDataE.value[i] / (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
+      dtdt = dtE - dtS;
+      t3RE = measDataE.epoch;
+      t1TE = t3RE - dtE;
+
+      // 4.4. Calculate Frequency Doppler Shift
       if (rampTB != NULL)
       {
-         // ramped frequency
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Calculate DSNRange based on ramped table\n");
-         #endif
-
+         Integer errnum;
          try
          {
-            cMeasurement.value[i] = IntegralRampedFrequency(cMeasurement.epoch, realTravelTime, errnum);                  // unit: range unit
+//           currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;
+            
+            cMeasurement.value[i] = - turnaround*IntegralRampedFrequency(t1TE, interval - dtdt, errnum)/ interval;
          } catch (MeasurementException exp)
          {
-            cMeasurement.value[i] = 0.0;               // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
+            cMeasurement.value[i] = 0.0;                     // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
+            cMeasurement.uplinkFreq = uplinkFreqE;           // unit: Hz
+            cMeasurement.uplinkBand = freqBandE;
+            cMeasurement.dopplerCountInterval = interval;    // unit: second
             cMeasurement.isFeasible = false;
             cMeasurement.unfeasibleReason = "R";
+//          currentMeasurement.feasibilityValue is set to elevation angle as shown in section 15
+         
             if ((errnum == 2)||(errnum == 3))
                throw exp;
          }
       }
       else
-      {
-         // constant frequency
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("Calculate DSNRange based on constant frequency\n");
-         #endif
-
-         cMeasurement.value[i] = multiplier*realTravelTime;
+      {       
+         cMeasurement.value[i] = -turnaround*uplinkFreq*(interval - dtdt)/interval;
       }
       
-      if (measurementType == "DSNRange")
-      {
-         //@Todo: write code to add bias to measuement value here
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
-         #endif
-
-         // Add noise to measurement value
-         if (addNoise)
-         {
-//            MessageInterface::ShowMessage("Add noise\n");
-            // Add noise here
-            if (cMeasurement.unfeasibleReason != "R")
-            {
-//               MessageInterface::ShowMessage("create noise: c = %.12lf\n", cMeasurement.value[i]);
-               RandomNumber* rn = RandomNumber::Instance();
-               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[2]);
-               cMeasurement.value[i] = val;
-            }
-         }
-      }
-
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
       cMeasurement.uplinkBand = freqBand;
-      cMeasurement.rangeModulo = rangeModulo;
+      cMeasurement.dopplerCountInterval = interval;
 
 
-      #ifdef DEBUG_RANGE_CALCULATION
+      #ifdef DEBUG_DOPPLER_CALCULATION
          MessageInterface::ShowMessage("===================================================================\n");
-         MessageInterface::ShowMessage("====  DSNRangeAdapter: Range Calculation for Measurement Data %dth  \n", i);
+         MessageInterface::ShowMessage("====  DopplerAdapter: Range Calculation for Measurement Data %dth  \n", i);
          MessageInterface::ShowMessage("===================================================================\n");
-         MessageInterface::ShowMessage("      . Measurement type       : <%s>\n", measurementType.c_str());
-         MessageInterface::ShowMessage("      . Noise adding option    : %s\n", (addNoise?"true":"false"));
-         MessageInterface::ShowMessage("      . Range modulo constant  : %.12lf RU\n", rangeModulo);
-         MessageInterface::ShowMessage("      . Real travel time       : %.12lf seconds\n", realTravelTime);
-         MessageInterface::ShowMessage("      . Multiplier factor      : %.12lf\n", GetMultiplierFactor());
-         MessageInterface::ShowMessage("      . C-value (with noise)   : %.12lf RU\n", cMeasurement.value[i]);
-         MessageInterface::ShowMessage("      . Measurement epoch A1Mjd: %.12lf\n", cMeasurement.epoch); 
+         MessageInterface::ShowMessage("      . Measurement type            : <%s>\n", measurementType.c_str());
+         MessageInterface::ShowMessage("      . Noise adding option         : %s\n", (addNoise?"true":"false"));
+         MessageInterface::ShowMessage("      . Doppler count interval      : %.12lf seconds\n", interval);
+         MessageInterface::ShowMessage("      . Real travel time for S-path : %.12lf seconds\n", dtS);
+         MessageInterface::ShowMessage("      . Real travel time for E-path : %.12lf seconds\n", dtE);
+         MessageInterface::ShowMessage("      . Multiplier factor for S-path: %.12lf\n", multiplierS);
+         MessageInterface::ShowMessage("      . Multiplier factor for E-path: %.12lf\n", multiplierE);
+         MessageInterface::ShowMessage("      . C-value (with noise)        : %.12lf Hz\n", cMeasurement.value[i]);
+         MessageInterface::ShowMessage("      . Measurement epoch A1Mjd     : %.12lf\n", cMeasurement.epoch); 
          MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
-         MessageInterface::ShowMessage("      . Feasibility reason     : %s\n", cMeasurement.unfeasibleReason.c_str());
-         MessageInterface::ShowMessage("      . Elevation angle        : %.12lf degree\n", cMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("      . Feasibility reason          : %s\n", cMeasurement.unfeasibleReason.c_str());
+         MessageInterface::ShowMessage("      . Elevation angle             : %.12lf degree\n", cMeasurement.feasibilityValue);
          MessageInterface::ShowMessage("===================================================================\n");
       #endif
 
    }
 
-   #ifdef DEBUG_RANGE_CALCULATION
-      MessageInterface::ShowMessage("DSNRangeAdapter::CalculateMeasurement(%s, "
+   #ifdef DEBUG_DOPPLER_CALCULATION
+      MessageInterface::ShowMessage("DopplerAdapter::CalculateMeasurement(%s, "
             "<%p>, <%p>) exit\n", (withEvents ? "true" : "false"), forObservation,
             rampTable);
    #endif
@@ -506,23 +597,28 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
  * @return The derivative vector
  */
 //------------------------------------------------------------------------------
-const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
+const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       GmatBase* obj, Integer id)
 {
    #ifdef DEBUG_DERIVATIVE_CALCULATION
       Integer parmId = GetParmIdFromEstID(id, obj);
-      MessageInterface::ShowMessage("Enter DSNRangeAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+      MessageInterface::ShowMessage("Enter DopplerAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
 
-   // Compute measurement derivatives in km:
-   RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   
+   // Compute measurement derivatives in km for E-path:
+   std::vector<RealArray> derivativesE = RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
 
-   // Convert measurement derivatives from km to RU
-   Real freqFactor = multiplier/(GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM);
-   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+   // Compute measurement derivatives in km for S-path:
+   std::vector<RealArray> derivativesS = adapterS->CalculateMeasurementDerivatives(obj, id);
+
+   // Convert measurement derivatives from km/s to Hz
+   for (UnsignedInt i = 0; i < derivativesE.size(); ++i)
    {
-      for (UnsignedInt j = 0; j < theDataDerivatives[i].size(); ++j)
-         theDataDerivatives[i][j] = theDataDerivatives[i][j] * freqFactor;
+      for (UnsignedInt j = 0; j < derivativesE[i].size(); ++j)
+      {
+         theDataDerivatives[i][j] = derivativesE[i][j] * multiplierE - derivativesS[i][j] * multiplierS;
+      }
    }
    
    #ifdef DEBUG_DERIVATIVE_CALCULATION
@@ -541,7 +637,7 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
    #endif
 
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      MessageInterface::ShowMessage("Exit DSNRangeAdapter::CalculateMeasurementDerivatives():\n");
+      MessageInterface::ShowMessage("Exit DopplerAdapter::CalculateMeasurementDerivatives():\n");
    #endif
 
    return theDataDerivatives;
@@ -559,7 +655,7 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
  * @return true if written, false if not
  */
 //------------------------------------------------------------------------------
-bool DSNRangeAdapter::WriteMeasurements()
+bool DopplerAdapter::WriteMeasurements()
 {
    bool retval = false;
 
@@ -580,7 +676,7 @@ bool DSNRangeAdapter::WriteMeasurements()
  * @return true if written, false if not
  */
 //------------------------------------------------------------------------------
-bool DSNRangeAdapter::WriteMeasurement(Integer id)
+bool DopplerAdapter::WriteMeasurement(Integer id)
 {
    bool retval = false;
 
@@ -599,7 +695,7 @@ bool DSNRangeAdapter::WriteMeasurement(Integer id)
  * @return Size of the covariance data that is available
  */
 //------------------------------------------------------------------------------
-Integer DSNRangeAdapter::HasParameterCovariances(Integer parameterId)
+Integer DopplerAdapter::HasParameterCovariances(Integer parameterId)
 {
    Integer retval = 0;
 
@@ -616,7 +712,7 @@ Integer DSNRangeAdapter::HasParameterCovariances(Integer parameterId)
  * @return The event count
  */
 //------------------------------------------------------------------------------
-Integer DSNRangeAdapter::GetEventCount()
+Integer DopplerAdapter::GetEventCount()
 {
    Integer retval = 0;
 
@@ -642,7 +738,7 @@ Integer DSNRangeAdapter::GetEventCount()
  *       to get a scripted adapter functioning in GMAT Nav.
  */
 //------------------------------------------------------------------------------
-void DSNRangeAdapter::SetCorrection(const std::string& correctionName,
+void DopplerAdapter::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
