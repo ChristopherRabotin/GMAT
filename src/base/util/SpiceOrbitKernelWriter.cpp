@@ -40,9 +40,11 @@
 #include "TimeSystemConverter.hpp"
 #include "UtilityException.hpp"
 #include "RealUtilities.hpp"
+#include "FileUtil.hpp"
 
 //#define DEBUG_SPK_WRITING
 //#define DEBUG_SPK_INIT
+//#define DEBUG_SPK_KERNELS
 
 //---------------------------------
 // static data
@@ -87,6 +89,8 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    kernelFileName  (fileName),
    frameName       (frame),
    fileOpen        (false),
+   fileFinalized   (false),
+   dataWritten     (false),
    tmpTxtFile      (NULL),
    fm              (NULL)
 {
@@ -145,21 +149,10 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    referenceFrame    = frameName.c_str();
    handle            = -999;
 
-   // @todo - do we need to call boddef_c here to set the NAIF ID for the spacecraft????
-
-   // get a file handle here
-   SpiceInt        maxChar = MAX_CHAR_COMMENT;
-   std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
-   ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
-   #ifdef DEBUG_SPK_INIT
-      MessageInterface::ShowMessage("... attempting to open SPK file with  fileName = %s\n",
-            fileName.c_str());
-   #endif
-   spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
-   if (failed_c()) // CSPICE method to detect failure of previous call to CSPICE
+   // first, try to rename an existing file, as SPICE will not overwrite or
+   // append to an existing file - this is the most common error returned from spkopn
+   if (GmatFileUtil::DoesFileExist(kernelFileName))
    {
-      // first, try to rename the existing file, as SPICE will not overwrite or
-      // append to an existing file - this is the most common error returned from spkopn
       Integer     fileCounter = 0;
       bool        done        = false;
       std::string fileWithBSP = fileName;
@@ -190,7 +183,7 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
             }
             else
             {
-               reset_c(); // reset failure flag in SPICE
+//               reset_c(); // reset failure flag in SPICE
                std::string errmsg =
                      "Unknown system error occurred when attempting to rename existing SPK file \"";
                errmsg += kernelFileName + "\".\n";
@@ -199,26 +192,20 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
          }
 
       }
-      reset_c(); // reset failure flag in SPICE
-      // then try to open the file again (should create a new one)
-      spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
-      if (failed_c()) // CSPICE method to detect failure of previous call to CSPICE
+   }
+   else // otherwise, check to make sure the directory is writable
+   {
+      std::string dirName = GmatFileUtil::ParsePathName(kernelFileName, true);
+      if (dirName == "")
+         dirName = "./";
+      if (!GmatFileUtil::DoesDirectoryExist(dirName, true))
       {
-         ConstSpiceChar option[]   = "LONG"; // retrieve long error message
-         SpiceInt       numErrChar = MAX_LONG_MESSAGE_VALUE;
-         //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
-         SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
-         getmsg_c(option, numErrChar, err);
-         std::string errStr(err);
-         std::string errmsg = "Error getting file handle for SPK file \"";
-         errmsg += kernelFileName + "\".  Message received from CSPICE is: ";
-         errmsg += errStr + "\n";
-         reset_c();
-         delete [] err;
+         std::string errmsg =
+               "Directory \"";
+         errmsg += dirName + "\" does not exist.\n";
          throw UtilityException(errmsg);
       }
    }
-   fileOpen = true;
    // set up the "basic" meta data here ...
    SetBasicMetaData();
 
@@ -268,6 +255,8 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const SpiceOrbitKernelWriter &cop
    basicMetaData     (copy.basicMetaData),
    addedMetaData     (copy.addedMetaData),
    fileOpen          (copy.fileOpen),    // ??
+   fileFinalized     (copy.fileFinalized),
+   dataWritten       (copy.dataWritten),
    tmpTxtFile        (copy.tmpTxtFile),
    fm                (copy.fm)// ??
 {
@@ -302,6 +291,8 @@ SpiceOrbitKernelWriter& SpiceOrbitKernelWriter::operator=(const SpiceOrbitKernel
       basicMetaData     = copy.basicMetaData;
       addedMetaData     = copy.addedMetaData;
       fileOpen          = copy.fileOpen; // ??
+      fileFinalized     = copy.fileFinalized;
+      dataWritten       = copy.dataWritten;
       tmpTxtFile        = copy.tmpTxtFile; // ??
       fm                = copy.fm;
 
@@ -323,7 +314,13 @@ SpiceOrbitKernelWriter& SpiceOrbitKernelWriter::operator=(const SpiceOrbitKernel
 //------------------------------------------------------------------------------
 SpiceOrbitKernelWriter::~SpiceOrbitKernelWriter()
 {
-   if (fileOpen) FinalizeKernel();
+   if (!dataWritten)
+   {
+//      MessageInterface::ShowMessage(
+//            "*** WARNING *** SPK kernel %s not written - no data provided\n",
+//            kernelFileName.c_str());
+   }
+   FinalizeKernel();
 }
 
 
@@ -361,6 +358,15 @@ SpiceOrbitKernelWriter* SpiceOrbitKernelWriter::Clone(void) const
 void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
                                      const StateArray &states, const EpochArray &epochs)
 {
+   #ifdef DEBUG_SPK_KERNELS
+      MessageInterface::ShowMessage("In SOKW::WriteSegment, start = %12.10, end = %12.10\n",
+            start.Get(), end.Get());
+      MessageInterface::ShowMessage("   writing %d states\n", (Integer) states.size());
+   #endif
+   // If the file has not been set up yet, open it
+   if (!fileOpen)
+      OpenFileForWriting();
+
    SpiceInt numStates = states.size();
    if ((Integer) epochs.size() != (Integer) numStates)
    {
@@ -421,6 +427,14 @@ void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
       delete [] err;
       throw UtilityException(errmsg);
    }
+
+
+   dataWritten = true;
+
+   #ifdef DEBUG_SPK_KERNELS
+      MessageInterface::ShowMessage("In SOKW::WriteSegment, data has been written\n");
+   #endif
+
    delete [] epochArray;
    delete [] stateArray;
 }
@@ -438,7 +452,7 @@ void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
 //------------------------------------------------------------------------------
 void SpiceOrbitKernelWriter::AddMetaData(const std::string &line, bool done)
 {
-   if (!fileOpen)
+   if (fileFinalized)
    {
       std::string errmsg = "Unable to add meta data to SPK kernel \"";
       errmsg += kernelFileName + "\".  File has been finalized and closed.\n";
@@ -463,7 +477,7 @@ void SpiceOrbitKernelWriter::AddMetaData(const std::string &line, bool done)
 //------------------------------------------------------------------------------
 void SpiceOrbitKernelWriter::AddMetaData(const StringArray &lines, bool done)
 {
-   if (!fileOpen)
+   if (fileFinalized)
    {
       std::string errmsg = "Unable to add meta data to SPK kernel \"";
       errmsg += kernelFileName + "\".  File has been finalized and closed.\n";
@@ -532,70 +546,36 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
       MessageInterface::ShowMessage("In FinalizeKernel .... kernelFileName = %s\n",
             kernelFileName.c_str());
    #endif
-   // write all the meta data to the file
-   if (tmpFileOK) WriteMetaData();
+
+   if ((fileOpen) && (dataWritten)) // should be both or neither are true
+   {
+      // write all the meta data to the file
+      if (tmpFileOK) WriteMetaData();
+      // close the SPK file
+      spkcls_c(handle);
+      if (failed_c())
+      {
+         ConstSpiceChar option[] = "SHORT"; // retrieve short error message, for now
+         SpiceInt       numChar  = MAX_SHORT_MESSAGE;
+         //SpiceChar      err[MAX_SHORT_MESSAGE];
+         SpiceChar      *err = new SpiceChar[MAX_SHORT_MESSAGE];
+         getmsg_c(option, numChar, err);
+         // This should no longer occur as the method WriteDataToClose is called to
+         // write 'bogus' data to a segment, if no segment has been written before.
+         if (eqstr_c(err, "SPICE(NOSEGMENTSFOUND)"))
+         {
+            MessageInterface::ShowMessage(
+                  "SPICE cannot close a kernel (%s) with no segments.\n",
+                  kernelFileName.c_str());
+         }
+         reset_c();
+         delete [] err;
+      }
+   }
    basicMetaData.clear();
    addedMetaData.clear();
-   // close the SPK file
-   spkcls_c(handle);
-   if (failed_c())
-   {
-      ConstSpiceChar option[] = "SHORT"; // retrieve short error message, for now
-      SpiceInt       numChar  = MAX_SHORT_MESSAGE;
-      //SpiceChar      err[MAX_SHORT_MESSAGE];
-      SpiceChar      *err = new SpiceChar[MAX_SHORT_MESSAGE];
-      getmsg_c(option, numChar, err);
-      // This should no longer occur as the method WriteDataToClose is called to
-      // write 'bogus' data to a segment, if no segment has been written before.
-      if (eqstr_c(err, "SPICE(NOSEGMENTSFOUND)"))
-      {
-         MessageInterface::ShowMessage(
-               "SPICE cannot close a kernel (%s) with no segments.\n",
-               kernelFileName.c_str());
-      }
-      reset_c();
-      delete [] err;
-   }
-   fileOpen = false;
-}
-
-void SpiceOrbitKernelWriter::WriteDataToClose()
-{
-   #ifdef DEBUG_SPK_WRITING
-      MessageInterface::ShowMessage("In WriteDataToClose ....\n");
-   #endif
-   A1Mjd *start = new A1Mjd(21545.00);
-   A1Mjd *end   = new A1Mjd(21546.00);
-   EpochArray  epochs;
-   StateArray  states;
-   for (unsigned int ii = 0; ii < 10; ii++)
-   {
-      Real      epochVal = start->Get() + 0.1 * ii;
-      A1Mjd     *epochii = new A1Mjd(epochVal);
-      Rvector6  *stateii = new Rvector6(7000.00 + ii, 500.00 + ii, 1000.00 + ii,
-                                   0.10000 + ii, 0.2000 + ii, 0.30000 + ii);
-      epochs.push_back(epochii);
-      states.push_back(stateii);
-   }
-   end->Set(epochs.at(9)->Get());
-   WriteSegment(*start, *end, states, epochs);
-   delete start;
-   delete end;
-   for (unsigned int ii = 0; ii < 10; ii++)
-   {
-      delete epochs[ii];
-      delete states[ii];
-   }
-   std::string warnmsg = "No segments were written to kernel ";
-   warnmsg += kernelFileName;
-   warnmsg += " in a previous run.  Because SPICE cannot close a kernel ";
-   warnmsg += "with no segments, GMAT has written a segment ";
-   warnmsg += "containing invalid data to the file.\n";
-   MessageInterface::ShowMessage(warnmsg.c_str());
-
-   #ifdef DEBUG_SPK_WRITING
-      MessageInterface::ShowMessage("EXITing WriteDataToClose ....\n");
-   #endif
+   fileOpen      = false;
+   fileFinalized = true;
 }
 
 //------------------------------------------------------------------------------
@@ -660,6 +640,44 @@ void SpiceOrbitKernelWriter::WriteMetaData()
    delete [] tmpTxt;
 }
 
+//------------------------------------------------------------------------------
+//  bool OpenFileForWriting()
+//------------------------------------------------------------------------------
+/**
+ * This method sets up and opens the file for writing.
+ *
+ */
+//------------------------------------------------------------------------------
+bool SpiceOrbitKernelWriter::OpenFileForWriting()
+{
+   // get a file handle here
+   SpiceInt        maxChar = MAX_CHAR_COMMENT;
+   std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
+   ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
+   #ifdef DEBUG_SPK_INIT
+      MessageInterface::ShowMessage("... attempting to open SPK file with  fileName = %s\n",
+            kernelFileName.c_str());
+   #endif
+   spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
+   if (failed_c()) // CSPICE method to detect failure of previous call to CSPICE
+   {
+      ConstSpiceChar option[]   = "LONG"; // retrieve long error message
+      SpiceInt       numErrChar = MAX_LONG_MESSAGE_VALUE;
+      //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+      SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+      getmsg_c(option, numErrChar, err);
+      std::string errStr(err);
+      std::string errmsg = "Error getting file handle for SPK file \"";
+      errmsg += kernelFileName + "\".  Message received from CSPICE is: ";
+      errmsg += errStr + "\n";
+      reset_c();
+      delete [] err;
+      throw UtilityException(errmsg);
+   }
+
+   fileOpen = true;
+   return true;
+}
 
 //---------------------------------
 // private methods

@@ -509,6 +509,7 @@ OBJECTS = \
     spacecraft/TextTrajectoryFile.o \
     stopcond/StopCondition.o \
     subscriber/EphemerisFile.o \
+    subscriber/EphemManager.o \
     subscriber/MessageWindow.o \
     subscriber/TextEphemFile.o \
     subscriber/OrbitPlot.o \

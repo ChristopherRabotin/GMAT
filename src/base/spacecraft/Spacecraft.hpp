@@ -34,6 +34,9 @@
 #include "Attitude.hpp"
 #include "SPADFileReader.hpp"
 
+// Declare forward reference
+class EphemManager;
+
 class GMAT_API Spacecraft : public SpaceObject
 {
 public:
@@ -84,6 +87,11 @@ public:
    Real                 GetThrustPower();
    // Get the Required Bus Power
    Real                 GetSpacecraftBusPower();
+
+   // Record the Spacecraft ephemeris in the background (needed by Event Location)
+   virtual void         RecordEphemerisData();
+   /// Load the recorded ephemeris and start up another file to continue recording
+   virtual void         ProvideEphemerisData();
 
 
    // inherited from GmatBase
@@ -562,6 +570,8 @@ protected:
    SPADFileReader    *spadSRPReader;
    /// Body-fixed coordinate system used for SPAD SRP calculations
    CoordinateSystem  *spadBFCS;
+   /// The manager for the hidden ephemeris recording needed by EventLocation
+   EphemManager      *ephemMgr;
 
    /// Toggle to making Cart state dynamic; Integer to handle multiple includes
    Integer           includeCartesianState;
