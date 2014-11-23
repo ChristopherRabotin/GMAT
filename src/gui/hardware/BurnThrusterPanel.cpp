@@ -555,7 +555,7 @@ void BurnThrusterPanel::LoadData()
       else
       {
          tankName = tanks[0];
-         tankComboBox->SetValue(STD_TO_WX_STRING(tankName));
+         tankComboBox->SetValue(STD_TO_WX_STRING(tankName.c_str()));
          isTankEmpty = false;
       }
       

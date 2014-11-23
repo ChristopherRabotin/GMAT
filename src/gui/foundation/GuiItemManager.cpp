@@ -120,7 +120,7 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
    {
       FileManager *fm = FileManager::Instance();
       std::string loc = fm->GetFullPathname("ICON_PATH");
-      wxString    locWx = STD_TO_WX_STRING(loc);
+      wxString    locWx = STD_TO_WX_STRING(loc.c_str());
       
       #ifdef DEBUG_LOAD_ICON
       MessageInterface::ShowMessage("   loc = '%s'\n", loc.c_str());
@@ -130,7 +130,7 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
       if (GmatFileUtil::DoesDirectoryExist(loc, false))
       {
          #ifdef DEBUG_LOAD_ICON
-         MessageInterface::ShowMessage("   Loadinig images from '%s'\n", loc.c_str());
+         MessageInterface::ShowMessage("   Loading images from '%s'\n", loc.c_str());
          MessageInterface::ShowMessage("   Loading .png files\n");
          #endif
          

@@ -13,7 +13,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "TsPlotCanvas.hpp"
 #include "MessageInterface.hpp"
 #include "TsPlotOptionsDialog.hpp"
@@ -779,7 +778,7 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 void TsPlotCanvas::SetDataName(const wxString &dataName)
 {
    #ifdef DEBUG_INTERFACE
-   MessageInterface::ShowMessage("Adding data named %s\n", dataName.WX_TO_C_STRING);
+   MessageInterface::ShowMessage("Adding data named %s\n", dataName.c_str());
    #endif
    
    names.push_back(dataName);
@@ -1143,7 +1142,7 @@ void TsPlotCanvas::ToggleLegend(wxCommandEvent& event)
 
 void TsPlotCanvas::SetOptions(wxCommandEvent& event)
 {
-   TsPlotOptionsDialog dlg(xName, yName, this, -1, "Plot options");
+   TsPlotOptionsDialog dlg(xName.c_str(),yName.c_str(),this, -1, "Plot options");
    dlg.SetPlotTitle(plotTitle);
    dlg.SetXLabel(xLabel);
    dlg.SetYLabel(yLabel);

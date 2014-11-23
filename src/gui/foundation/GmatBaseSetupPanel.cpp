@@ -524,7 +524,7 @@ void GmatBaseSetupPanel::CreateProperties(wxFlexGridSizer *mainSizer,
       itemSizer->Add(propertyControls[j], 0, wxALL|wxALIGN_LEFT, border);
       itemSizer->Add(propertyUnits[j], 0, wxALL|wxALIGN_LEFT, border);
       // set the path to the section that contains the parameter's items
-      config->SetPath(wxString(("/"+(*propertyNames)[j])).c_str());
+      config->SetPath(STD_TO_WX_STRING(("/"+(*propertyNames)[j])).WX_TO_STD_STRING);
       groupProp = "Parent";
       doDefaultAction = !(config->Read(groupProp, &groupProp));
       if (!doDefaultAction)

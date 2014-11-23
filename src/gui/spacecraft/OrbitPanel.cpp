@@ -1568,7 +1568,7 @@ void OrbitPanel::BuildValidStateTypes(const std::string &forCS)
              mFromStateTypeStr.c_str());
          #endif
          stateTypeComboBox->
-            SetValue(wxString(mStateTypeNames[StateConversionUtil::CARTESIAN]).c_str());
+            SetValue(STD_TO_WX_STRING((mStateTypeNames[StateConversionUtil::CARTESIAN]).c_str()));
       }
       else
       {
