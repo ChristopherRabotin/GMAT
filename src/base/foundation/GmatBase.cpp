@@ -116,13 +116,13 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Parameter",     "Variable",         "Array",            "String",           "StopCondition",
    "Solver",        "Subscriber",       "ReportFile",       "XYPlot",           "OrbitView",
    "EphemerisFile", "PropSetup",        "Function",         "FuelTank",         "Thruster",
-   "ChemicalThruster", "ElectricThruster","ChemicalTank", "ElectricTank",
+   "ChemicalThruster", "ElectricThruster","ChemicalTank", "ElectricTank",       "PowerSystem",
+   "SolarPowerSystem", "NuclearPowerSystem",
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
    "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
    "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
-   "RFHardware",    "Antenna",          "PowerSystem",      "SolarPowerSystem", "NuclearPowerSystem",
-   "UnknownObject"
+   "RFHardware",    "Antenna",          "UnknownObject"
 };
 /**
  * Build the list of automatic global settings
@@ -143,12 +143,13 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false,     true,      true,      false,     false,
-   false,     false,     false,     false,
+   false,     false,     false,     false,     false,
+   false,     false,
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,
+   false,     false,
    false
 };
 
