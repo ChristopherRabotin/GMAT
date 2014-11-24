@@ -1368,6 +1368,9 @@
     <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
       <Filter>Source Files\hardware</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2692,6 +2695,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
       <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
+      <Filter>Source Files\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
