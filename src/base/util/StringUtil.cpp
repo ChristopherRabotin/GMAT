@@ -5406,31 +5406,23 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 //------------------------------------------------------------------------------
 std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 {
-//#ifdef __MAC__
-#ifndef _MSC_VER // if not Microsoft Visual C++
-   std::wostringstream convStream;
-   convStream << str.c_str();
-   std::wstring wstrTo(convStream.str());
-   return wstrTo;
-#else
    // Convert an ASCII string to a Unicode String
-   // Method 1:
+   // Method 1 (cross-platform):
    std::wstring wstrTo;
    wchar_t *wszTo = new wchar_t[str.length() + 1];
    wszTo[str.size()] = L'\0';
-   // CP_ACP represents the system Ansi codepage.
-   MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, wszTo, (int)str.length());
+   int num = std::mbstowcs(wszTo, str.c_str(), str.length());
    wstrTo = wszTo;
    delete[] wszTo;
    return wstrTo;
    
-   // Method 2:
+   // Method 2 (Windows only):
    // int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
    // std::wstring wstr(size_needed, 0);
    // MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
    // return wstr;
 
-   // Method 3:
+   // Method 3 (Windows only):
    // int len;
    // int slength = (int)s.length() + 1;
    // len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
@@ -5439,7 +5431,7 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
    // std::wstring wstr(buf);
    // delete[] buf;
    // return wstr;
-#endif
+
 }
 
 
@@ -5452,26 +5444,18 @@ std::wstring GmatStringUtil::StringToWideString(const std::string &str)
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
 {
-//#ifdef __MAC__
-#ifndef _MSC_VER // if not Microsoft Visual C++
-   std::ostringstream convStream;
-   convStream << wstr.c_str();
-   std::string strTo(convStream.str());
-   return strTo;
-#else
-   // Convert a Unicode string to an ASCII string
-   // Method 1:
+   // Convert a Unicode string to an ASCII String
+   // Method 1 (cross-platform):
    std::string strTo;
    char *szTo = new char[wstr.length() + 1];
    szTo[wstr.size()] = '\0';
-   // CP_ACP represents the system Ansi codepage.
-   WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, szTo, (int)wstr.length(), NULL, NULL);
+   int num = std::wcstombs(szTo, wstr.c_str(), wstr.length());
+
    strTo = szTo;
    delete[] szTo;
    return strTo;
-#endif
    
-   // Method 2:
+   // Method 2 (Windows only):
    // int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
    // std::string strTo(size_needed, 0);
    // WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
