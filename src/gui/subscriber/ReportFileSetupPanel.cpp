@@ -27,7 +27,9 @@
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
 #include <fstream>
+#if wxCHECK_VERSION(3, 0, 0)
 #include <wx/valnum.h>
+#endif
 
 //#define DEBUG_REPORTFILE_PANEL 1
 //#define DEBUG_REPORTFILE_PANEL_LOAD 1
