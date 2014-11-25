@@ -74,10 +74,16 @@ DragForce::PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount] =
    "AtmosphereModel",               // ATMOSPHERE_MODEL
    "AtmosphereBody",                // ATMOSPHERE_BODY
    "InputSource",                   // SOURCE_TYPE
+   "HistoricWeatherSource",         // HISTORIC_WEATHER_SOURCE
+   "PredictedWeatherSource",        // PREDICTED_WEATHER_SOURCE
    "SolarFluxFile",                 // FLUX_FILE
+   "CSSISpaceWeatherFile",          // CSSI_WEATHER_FILE
+   "SchattenFile",                  // SCHATTEN_WEATHER_FILE
    "F107",                          // FLUX
    "F107A",                         // AVERAGE_FLUX
    "MagneticIndex",                 // MAGNETIC_INDEX
+   "SchattenErrorModel",            // SCHATTEN_ERROR_MODEL
+   "SchattenTimingModel",           // SCHATTEN_TIMING_MODEL
    "FixedCoordinateSystem",         // FIXED_COORD_SYSTEM  (Read-only parameter)
    "AngularMomentumUpdateInterval", // W_UPDATE_INTERVAL (in days, Read-only)
    "KpToApMethod",                  // KP2AP_METHOD (Read-only)
@@ -89,10 +95,16 @@ DragForce::PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount] =
    Gmat::OBJECT_TYPE,   // "AtmosphereModel"
    Gmat::STRING_TYPE,   // "AtmosphereBody",
    Gmat::STRING_TYPE,   // "InputSource", ("File" or "Constant" for now)
+   Gmat::STRING_TYPE,   // "HistoricWeatherSource",
+   Gmat::STRING_TYPE,   // "PredictedWeatherSource",
    Gmat::STRING_TYPE,   // "SolarFluxFile",
+   Gmat::STRING_TYPE,   // "CSSISpaceWeatherFile",
+   Gmat::STRING_TYPE,   // "SchattenFile",
    Gmat::REAL_TYPE,     // "F107",
    Gmat::REAL_TYPE,     // "F107A",
    Gmat::REAL_TYPE,     // "MagneticIndex",
+   Gmat::STRING_TYPE,   // "SchattenError",
+   Gmat::STRING_TYPE,   // "SchattenTiming",
    Gmat::STRING_TYPE,   // "FixedCoordinateSystem"
    Gmat::REAL_TYPE,     // "AngularMomentumUpdateInterval"
    Gmat::INTEGER_TYPE,  // "KpToApMethod"
@@ -1650,9 +1662,27 @@ std::string DragForce::GetStringParameter(const Integer id) const
    
    if (id == SOURCE_TYPE)
       return dataType;
+
+   if (id == HISTORIC_WEATHER_SOURCE)
+      return historicWSource;
+
+   if (id == PREDICTED_WEATHER_SOURCE)
+      return predictedWSource;
     
    if (id == FLUX_FILE)
       return fluxFile;
+
+   if (id == CSSI_WEATHER_FILE)
+      return cssiWFile;
+
+   if (id == SCHATTEN_WEATHER_FILE)
+      return schattenWFile;
+
+   if(id == SCHATTEN_ERROR_MODEL)
+      return schattenErrorModel;
+
+   if (id == SCHATTEN_TIMING_MODEL)
+      return schattenTimingModel;
     
    if (id == FIXED_COORD_SYSTEM)
       return bodyName + "Fixed";
@@ -1737,6 +1767,24 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
     
+   if (id == HISTORIC_WEATHER_SOURCE)
+   {
+      if (value == "")
+         return false;
+      
+      historicWSource = value;
+      return true;
+   }
+
+   if (id == PREDICTED_WEATHER_SOURCE)
+   {
+      if (value == "")
+         return false;
+
+      predictedWSource = value;
+      return true;
+   }
+
    if (id == FLUX_FILE)
    {
       fluxFile = value;
@@ -1749,6 +1797,41 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
+   if (id == CSSI_WEATHER_FILE)
+   {
+      if (value == "")
+         return false;
+
+      cssiWFile = value;
+      return true;
+   }
+
+   if (id == SCHATTEN_WEATHER_FILE)
+   {
+      if (value == "")
+         return false;
+
+      schattenWFile = value;
+      return true;
+   }
+
+   if (id == SCHATTEN_ERROR_MODEL)
+   {
+      if (value == "")
+         return false;
+
+      schattenErrorModel = value;
+      return true;
+   }
+
+   if (id == SCHATTEN_TIMING_MODEL)
+   {
+      if (value == "")
+         return false;
+
+      schattenTimingModel = value;
+      return true;
+   }
 
    return PhysicalModel::SetStringParameter(id, value);
 }
