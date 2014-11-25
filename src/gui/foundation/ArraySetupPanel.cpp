@@ -158,19 +158,19 @@ void ArraySetupPanel::Create()
    
    wxBoxSizer *arrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrValBoxSizer->Add(singleValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   arrValBoxSizer->Add(mArrGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrValBoxSizer->Add(mArrGrid, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    GmatStaticBoxSizer *arrStaticBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Array");
    arrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   arrStaticBoxSizer->Add(arrValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrStaticBoxSizer->Add(arrValBoxSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(arrStaticBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(arrStaticBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
 }
 
