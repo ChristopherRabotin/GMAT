@@ -84,7 +84,6 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    useETminusTAICorrection   (false),            // made changes by TUAN NGUYEN
    rangeModulo               (1.0e18),           // made changes by TUAN NGUYEN
    dopplerCountInterval      (1.0)               // made changes by TUAN NGUYEN
-   dopplerInterval           (1.0)           
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -140,7 +139,6 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useETminusTAICorrection   (tfs.useETminusTAICorrection),   // made changes by TUAN NGUYEN
    rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
    dopplerCountInterval      (tfs.dopplerCountInterval)       // made changes by TUAN NGUYEN
-   dopplerInterval           (tfs.dopplerInterval)          
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
@@ -346,14 +344,6 @@ Real TrackingFileSet::SetRealParameter(const Integer id, const Real value)
 
       dopplerCountInterval = value;
       return dopplerCountInterval;
-   }
-   if (id == DOPPLER_INTERVAL)
-   {
-      if (value <= 0.0)
-         throw MeasurementException("Error: "+GetName()+".DopplerInterval has an invalid value. It has to be a positive number\n");
-
-      dopplerInterval = value;
-      return dopplerInterval;
    }
 
    return MeasurementModelBase::SetRealParameter(id, value);
