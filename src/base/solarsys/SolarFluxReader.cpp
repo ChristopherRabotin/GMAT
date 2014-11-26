@@ -36,10 +36,10 @@
 //------------------------------------------------------------------------------
 SolarFluxReader::SolarFluxReader()
 {
-   if(!obsFluxData.empty())
+   if (!obsFluxData.empty())
       obsFluxData.clear();
 
-   if(!predictFluxData.empty())
+   if (!predictFluxData.empty())
       predictFluxData.clear();
 
    obsFileName = NULL;
@@ -79,11 +79,11 @@ SolarFluxReader::~SolarFluxReader(void)
 //------------------------------------------------------------------------------
 bool SolarFluxReader::Open()
 {
-   if(obsFileName != NULL)
+   if (obsFileName != NULL)
    {
       inObs.open(obsFileName, std::ios_base::in);
    }
-   if(predictFileName != NULL)
+   if (predictFileName != NULL)
    {
       inPredict.open(predictFileName, std::ios_base::in);
    }
@@ -107,27 +107,27 @@ bool SolarFluxReader::Open()
 //------------------------------------------------------------------------------
 bool SolarFluxReader::LoadFluxData(const char *obsFileName, const char *predictFileName)
 {
-   if(obsFileName != NULL)
+   if (obsFileName != NULL)
       this->obsFileName = obsFileName;
-   if(predictFileName != NULL)
+   if (predictFileName != NULL)
       this->predictFileName = predictFileName;
 
    // Open the files to load
    Open();
    
-   if(inObs.is_open())
+   if (inObs.is_open())
    {
       inObs.seekg(0, std::ios_base::beg);
   
-      while(true)
+      while (true)
       {
          inObs.getline(line, 256, '\n');
       
-         if(strcmp(line, beg_ObsTag) == 0)
+         if (strcmp(line, beg_ObsTag) == 0)
          {
             begObs = inObs.tellg();
          }
-         else if(strcmp(line, end_ObsTag) == 0)
+         else if (strcmp(line, end_ObsTag) == 0)
          {
             endObs = inObs.tellg();
             endObs = endObs - strlen(line) - 2 ;
@@ -143,9 +143,28 @@ bool SolarFluxReader::LoadFluxData(const char *obsFileName, const char *predictF
       throw SolarSystemException("SolarFluxReader: Historic/Observed File is NOT opened.\n");
    }
 
-   if(inPredict.is_open())
+   if (inPredict.is_open())
    {
-      
+      inPredict.seekg(0, std::ios_base::beg);
+      std::string strLine = "";
+
+      while (true)
+      {
+         inPredict.getline(line, 256, '\n');
+         
+         strLine = line;
+         // if we read the line with "Nominal Timing" and "Early Timing" content, continue reading two more lines to get
+         // into the data lines.
+         if (strLine.find("NOMINAL TIMING") != std::string::npos && strLine.find("EARLY TIMING") != std::string::npos)
+         {
+            inPredict.getline(line, 256, '\n');
+            inPredict.getline(line, 256, '\n');
+            begData = inPredict.tellg();
+
+            break;
+         }
+      }
+
       LoadPredictData();
    }
    else
@@ -174,9 +193,9 @@ bool SolarFluxReader::LoadFluxData(const char *obsFileName, const char *predictF
 //------------------------------------------------------------------------------
 bool SolarFluxReader::Close()
 {
-   if(inObs.is_open())
+   if (inObs.is_open())
       inObs.close();
-   if(inPredict.is_open())
+   if (inPredict.is_open())
       inPredict.close();
 
    return true;
@@ -202,7 +221,7 @@ bool SolarFluxReader::LoadObsData()
    Real sec = 0.0;
 
    inObs.seekg(begObs, std::ios_base::beg);
-   while(true)
+   while (true)
    {
       inObs.getline(line, 256, '\n');
       std::istringstream buf(line);
@@ -214,9 +233,9 @@ bool SolarFluxReader::LoadObsData()
       // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
       fD.epoch = mjd - 0.5;
     
-      for(int l=0; l<8; l++)
+      for (Integer l=0; l<8; l++)
          fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str());
-      for(int l=0; l<8; l++)
+      for (Integer l=0; l<8; l++)
          fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
       fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
       fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
@@ -225,7 +244,7 @@ bool SolarFluxReader::LoadObsData()
 
       obsFluxData.push_back(fD);
 
-      if(inObs.tellg() == endObs)
+      if (inObs.tellg() == endObs)
          break;
    }
 
@@ -247,8 +266,7 @@ bool SolarFluxReader::LoadObsData()
  */
 //------------------------------------------------------------------------------
 bool SolarFluxReader::LoadPredictData()
-{
-
+{ 
    return true;
 }
 

@@ -40,7 +40,7 @@ public:
    ~SolarFluxReader(); 
    
 private:
-   typedef struct FluxData
+   typedef struct FluxDataCSSI
    {
       GmatEpoch epoch;
       Real kp[8];
@@ -51,10 +51,25 @@ private:
       Real obsCtrF107a;
    };
 
+   typedef struct FluxData : FluxDataCSSI
+   {
+      // the first three items is NOMINAL, the second three items
+      // is EARLY, and the last three items is LATE TIMING.
+      Real F107a[9];
+      // the first is NOMINAL, the second is EARLY, and the last is LATE TIMING.
+      Real apSchatten[3];
+   };
+  
+
    const char *beg_ObsTag;
    const char *end_ObsTag;
+   /// offset required to start reading observation (BEGIN OBSERVED) tag
    std::streamoff begObs;
+   /// offset required to stop reading observation (END OBSERVED) tag
    std::streamoff endObs;
+   /// offset required to start reading Schatten data
+   std::streamoff begData;
+
    char *line; 
 
    const char *obsFileName;
