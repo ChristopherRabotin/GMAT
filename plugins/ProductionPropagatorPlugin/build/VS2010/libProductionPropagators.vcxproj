@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3-unicode|Win32">
+      <Configuration>Debug-wx3-unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -24,6 +28,11 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -41,11 +50,18 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <TargetExt>.dll</TargetExt>
+    <OutDir>..\..\..\..\application\debug\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
     <TargetExt>.dll</TargetExt>
     <OutDir>..\..\..\..\application\debug\plugins\</OutDir>
   </PropertyGroup>
@@ -67,6 +83,21 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\plugin;..\..\src\base\propagator;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\hardware;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;PROPAGATOR_EXPORTS;_DYNAMICLINK</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4251;4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\application\debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\factory;..\..\src\base\plugin;..\..\src\base\propagator;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\factory;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\hardware;..\..\..\..\src\base\propagator;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PROPAGATOR_EXPORTS;_DYNAMICLINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4231;4251;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>

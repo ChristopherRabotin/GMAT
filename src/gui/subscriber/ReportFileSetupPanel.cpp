@@ -27,7 +27,9 @@
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
 #include <fstream>
-
+#if wxCHECK_VERSION(3, 0, 0)
+#include <wx/valnum.h>
+#endif
 
 //#define DEBUG_REPORTFILE_PANEL 1
 //#define DEBUG_REPORTFILE_PANEL_LOAD 1
@@ -252,14 +254,22 @@ void ReportFileSetupPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(35, -1),  0);
+                                     wxDefaultPosition, wxSize(35, -1),  0
+#if wxCHECK_VERSION(3, 0, 0) 
+									 ,wxIntegerValidator<unsigned short>() 
+#endif
+									 );
    
    wxStaticText *precisionText =
       new wxStaticText(this, -1, wxT("Precision"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(35, -1),  0);
+                                     wxDefaultPosition, wxSize(35, -1),  0
+#if wxCHECK_VERSION(3, 0, 0) 
+									 , wxIntegerValidator<unsigned short>() 
+#endif
+									 );
    
    wxFlexGridSizer *option2Sizer = new wxFlexGridSizer(2);
    option2Sizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -477,7 +487,6 @@ void ReportFileSetupPanel::SaveData()
        mHasParameterChanged, mHasBoolDataChanged);
    #endif
    
-   canClose = true;
    std::string str;
    Integer width, prec;
    char delimiter;
@@ -487,13 +496,21 @@ void ReportFileSetupPanel::SaveData()
    //-----------------------------------------------------------------
    
    str = colWidthTextCtrl->GetValue();
-   CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   width = reportFile->GetIntegerParameter(reportFile->GetParameterID("ColumnWidth"));
+   canClose = CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   if (!canClose)
+      return;
    
    str = precisionTextCtrl->GetValue();
-   CheckInteger(prec, str, "Precision", "Integer Number > 0");
+   prec = reportFile->GetIntegerParameter(reportFile->GetParameterID("Precision"));
+   canClose = CheckInteger(prec, str, "Precision", "Integer Number > 0");
+   if (!canClose)
+      return;
    
    str = mFileTextCtrl->GetValue();
-   CheckFileName(str, "Filename");
+   canClose = CheckFileName(str, "Filename");
+   if (!canClose)
+      return;
    
    str = delimiterComboBox->GetValue();
    str = GmatStringUtil::ToUpper(str);

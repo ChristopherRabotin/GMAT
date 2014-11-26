@@ -1,6 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug-wx3-unicode|Win32">
+      <Configuration>Debug-wx3-unicode</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -32,7 +36,18 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
@@ -61,7 +76,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
@@ -88,7 +109,15 @@
     <OutDir>..\..\..\application\debug\</OutDir>
     <TargetName>GMAT</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <OutDir>..\..\..\application\debug\</OutDir>
+    <TargetName>GMAT</TargetName>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\..\application\bin64\debug64\</OutDir>
+    <TargetName>GMAT_D</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
     <OutDir>..\..\..\application\bin64\debug64\</OutDir>
     <TargetName>GMAT_D</TargetName>
   </PropertyGroup>
@@ -119,7 +148,48 @@
       <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_DYNAMICLINK;WXUSINGDLL;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\lib\vc_dll;..\..\..\..\Gmat3rdParty\wxWidgets\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber</AdditionalIncludeDirectories>
+      <UndefinePreprocessorDefinitions>
+      </UndefinePreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;_DYNAMICLINK;WXUSINGDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4231;4996;4251</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets64\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
@@ -344,7 +414,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.cpp" />
@@ -355,14 +427,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\subscriber\OpenGlPlotSetupPanel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.cpp" />
@@ -378,25 +454,34 @@
     <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPreferences.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPrintout.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\FindReplaceDialog.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\ViewTextDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\view\ViewTextFrame.cpp" />
@@ -537,7 +622,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\MdiChildTsFrame.hpp" />
@@ -548,14 +635,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\OpenGlPlotSetupPanel.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\subscriber\OrbitViewCanvas.hpp" />
@@ -573,25 +664,34 @@
     <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPreferences.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPrintout.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\FindReplaceDialog.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\ViewTextDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\view\ViewTextFrame.hpp" />
