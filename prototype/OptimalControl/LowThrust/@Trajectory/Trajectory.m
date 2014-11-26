@@ -48,7 +48,7 @@ classdef Trajectory < handle
         
         %%  Decision vector data members
         
-        %  Real array. the total desicion vector for the optimization
+        %  Real array. \mathbf{Z}. total desicion vector for optimization
         %  problem containing chunks for all phases.
         decisionVector
         % Real array.  The lower bound vector for the decision vector
@@ -61,7 +61,7 @@ classdef Trajectory < handle
         % Integer array.  The ith entry is the index for the start of
         % the decision vector chunk for the ith phase
         decVecEndIdx
-        %  Integer.  The number of elements in the trajectory decision
+        %  Integer.  Number of elements in the trajectory decision
         %  vector
         totalnumDecisionParams
         %  Integer Array.  The ith entry is the number of decision
@@ -146,6 +146,8 @@ classdef Trajectory < handle
         function obj = Initialize(obj)
             %  Initialize the trajectory and all helper classes.
             obj.InitializePhases();
+            %  This needs to change.  Linkage should be passed to phase and
+            %  initlized there.
             obj.InitializeLinkages();
             obj.SetBounds();
             obj.SetInitialGuess();

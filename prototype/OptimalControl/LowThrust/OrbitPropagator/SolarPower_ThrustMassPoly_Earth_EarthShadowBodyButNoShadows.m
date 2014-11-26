@@ -1,22 +1,16 @@
-%% TODO:
-%  Include mass flow rate in state vector
-%  Update spacecraft and tank at integrator stages.
 
-%%  Set up prop epoch
-propDuration    = 1*86400;
-outputStepSize  = 10;
 
 %%  Define spacecraft orbit properties
 Sat          = Spacecraft();
 Sat.Epoch    = 21548.0299479207;
 Sat.DryMass  = 850;
 Sat.Attitude = 1;  % 1 for J2000, 2 for VNB
-Sat.OrbitState = [-6515.97236231483
-    931.372927012761
-    -1066.34795707823
-    -0.888689684465484
-    -7.58686200413001
-    -1.1949439525609];
+Sat.OrbitState = [-6159.48026910191
+    -1086.08255858410
+   -6471.533790730538
+    4.712777171391656
+    0.8309897693832682
+   -4.624758002168765];
 
 %%  Define the spacecraft power configuration
 Sat.PowerModel         = 'Solar';  % Options: Solar, Nuclear.
@@ -24,7 +18,7 @@ Sat.InitialMaxPower    = 1.2124;  %  kW
 Sat.PowerInitialEpoch  = 21547.00000039794;
 Sat.PowerDecayRate     = 5.123 ;  % Percent per year decay rate
 Sat.PowerMargin        = 4.998;
-Sat.ModelShadows       = 0;
+Sat.ModelShadows       = 1;
 Sat.BusCoeff1          = 0.32;
 Sat.BusCoeff2          = 0.0001;
 Sat.BusCoeff3          = 0.0001;
@@ -84,34 +78,3 @@ Force.Debug          = 0;
 Force.bodyMu         = 398600.4415;
 Force.RefEpoch       = Sat.Epoch;
 Force.debugMath      = false();
-
-%%  Configure integrator and propagate
-if Force.STM  && ~Force.UseFiniteBurn
-    initialState = [Sat.OrbitState; reshape(eye(6),[36,1])];
-elseif Force.STM  && Force.UseFiniteBurn
-    initialState = [Sat.OrbitState; Sat.GetTotalMass(); ...
-        reshape(eye(6),[36,1])];
-elseif ~Force.STM  && Force.UseFiniteBurn
-    initialState = [Sat.OrbitState; Sat.GetTotalMass()];
-else
-    initialState = Sat.OrbitState;
-end
-odeOptions           = odeset('RelTol',1e-9,'AbsTol',1e-9);
-
-[timeHist, stateHist, data] = ode78_FM('OrbitForce', 0, propDuration, initialState, 1e-12, 0, Force, Sat);
-
-%[timeHist, stateHist, data] = ode113('OrbitForce', [0, propDuration], initialState,odeOptions,Force,Sat);
-
-SEPPropagationPlots
-
-if Force.UseFiniteBurn
-    initState  = stateHist(1,:);
-    finalState = stateHist(end,:);
-    disp([initState(7) initState(1:3) ])
-    disp([finalState(7) finalState(1:3) ])
-else
-    initState  = stateHist(1,:);
-    finalState = stateHist(end,:);
-    disp([initState(1:3) ])
-    disp([finalState(1:3) ])
-end

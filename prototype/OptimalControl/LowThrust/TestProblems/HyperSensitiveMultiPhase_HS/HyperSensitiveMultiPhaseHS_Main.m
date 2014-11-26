@@ -12,7 +12,7 @@ global igrid iGfun jGvar traj
 traj                           = Trajectory();
 traj.pathFunctionName          = 'HyperSensitivePathFunctionMultiPhase_HS';   
 traj.plotFunctionName          = 'HyperSensitivePlotFunctionMultiPhase_HS'; 
-traj.showPlot                  = false();
+traj.showPlot                  = true();
 traj.plotUpdateRate            = 2;
 traj.costLowerBound            = 0;
 traj.costUpperBound            = Inf;

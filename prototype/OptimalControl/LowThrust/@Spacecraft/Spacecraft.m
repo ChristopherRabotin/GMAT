@@ -36,15 +36,15 @@ classdef Spacecraft < handle
         SolarCoeff5 = -0.012790;
         
         %%  Constants and miscellaneous
-        % AU = 149597870.691;
-        AU = 1.49597870e8;
+        AU = 149597870.691;
+        %AU = 1.49597870e8;
         
         
         %%  Hardware
         Thrusters   = {};
         Tanks       = {};
         ThrusterSet = {};
-        debugMath = false();
+        debugMath = true();
         
     end
     
@@ -112,6 +112,7 @@ classdef Spacecraft < handle
                 obj.BusCoeff3/sunDist^2;
             if obj.debugMath
                 disp(['Bus Power       : ' num2str(busPower,16)]);
+                disp(['Sun Dist        : ' num2str(sunDist,16)]);
             end
         end
         

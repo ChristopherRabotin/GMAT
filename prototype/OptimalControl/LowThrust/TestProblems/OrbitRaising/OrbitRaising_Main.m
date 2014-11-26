@@ -14,7 +14,7 @@ traj.derivativeMethod   = 'AutomaticDiff';
 traj.pathFunctionName   = 'OrbitRaisingPathFunction';
 traj.pointFunctionName  = 'OrbitRaisingPointFunction';
 traj.plotFunctionName   = 'OrbitRaisingPlotFunction';
-traj.showPlot           = false();
+traj.showPlot           = true();
 traj.plotUpdateRate     = 3;
 traj.costLowerBound     = -Inf;
 traj.costUpperBound     = Inf;
@@ -41,6 +41,8 @@ phase1.initialGuessMode          = 'LinearUnityControl';
 phase1.initialGuessState         = [1 0 0 1 1]'; % [r0 theta0 vr0 vtheta0 m0]
 phase1.initialGuessEpoch         = 0;
 phase1.finalGuessState           = [1.5 0 0 1 1]'; % [rf thetaf vrf vthetaf mf]
+%  A better guess
+phase1.finalGuessState           = [1 pi 0 1 1]'; % [rf thetaf vrf vthetaf mf]
 phase1.finalGuessEpoch           = 1;
 phase1.initialStateLowerBound    = [1 0 0 1 1]';
 phase1.initialStateUppperBound   = [1 0 0 1 1]';

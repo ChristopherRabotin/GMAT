@@ -75,6 +75,7 @@ classdef ElectricThruster < handle
                     obj.MassFlowCoeff3*powerUsed^2+...
                     obj.MassFlowCoeff2*powerUsed^1 +...
                     obj.MassFlowCoeff1)/1e6;
+                obj.Isp = thrustMag/mDot/obj.GravitationalAccel*1000;
             elseif strcmp(obj.ThrustModel,'ConstantThrustAndIsp')
                 %  ConstantThrust is in Newtons, must return K Newton.
                 fac = 1000;
@@ -93,6 +94,7 @@ classdef ElectricThruster < handle
             if obj.debugMath
                 disp(['Thrust Mag      : ' num2str(thrustMag,16)]);
                 disp(['Mass Flow       : ' num2str(mDot,16)]);
+                disp(['Isp             : ' num2str(obj.Isp,16)]);
             end
             
         end
@@ -150,7 +152,7 @@ classdef ElectricThruster < handle
                 DCM(3,1) = 0.0;
                 DCM(3,2) = 0.397777155914121383;
                 DCM(3,3) = 0.917482062076895741;
-                DCM      = DCM';
+                DCM      = DCM;
             end
             
         end

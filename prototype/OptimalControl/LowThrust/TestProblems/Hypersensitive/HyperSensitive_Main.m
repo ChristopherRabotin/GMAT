@@ -1,5 +1,5 @@
 %% =====  Intializations
-ClearAll
+%ClearAll
 global igrid iGfun jGvar traj 
 
 %% =====  Define the phase and trajectory properties
@@ -51,79 +51,3 @@ phase1.controlLowerBound       = -50;
 traj.phaseList = {phase1};
 
 [z,F,xmul,Fmul] = traj.Optimize();
-return
-
-z = traj.decisionVector.x;
-          
-load('origSolution.mat')
-if length(z) == length(zTruth)
-   norm(z - zTruth)
-end
-
-%% =====  Plot/analyze the results
-% Extract the state and control from the decision vector z.
-% Remember that the state is approximated at the LGR points
-% plus the final point, while the control is only approximated 
-% at only the LGR points.
-NLGR = traj.phaseList{1}.numRadauPoints;
-tau = traj.phaseList{1}.radauPoints;
-nstates = traj.phaseList{1}.numStates;
-ncontrols = traj.phaseList{1}.numControls;
-w   = traj.phaseList{1}.radauWeights;
-D   = traj.phaseList{1}.radauDiffMatrix;
-
-x = z(1:NLGR+1);
-u = z((NLGR+1)+1:(NLGR+1)+NLGR);
-t0 = z(end-1);
-tf = z(end);
-t = (tf-t0)*(tau+1)/2+t0;
-tLGR = t(1:end-1);
-%-----------------------------------------------------------------%
-% Extract the Lagrange multipliers corresponding                  %
-% the defect constraints.                                         %
-%-----------------------------------------------------------------%
-multipliersDefects = Fmul(2:nstates*NLGR+1);
-multipliersDefects = reshape(multipliersDefects,NLGR,nstates);
-%-----------------------------------------------------------------%
-% Compute the costates at the LGR points via transformation       %
-%-----------------------------------------------------------------%
-costateLGR = inv(diag(w))*multipliersDefects;
-%-----------------------------------------------------------------%
-% Compute the costate at the tau=+1 via transformation            %
-%-----------------------------------------------------------------%
-costateF = D(:,end).'*multipliersDefects;                                                                                                   
-%-----------------------------------------------------------------%                                                                         
-% Now assemble the costates into a single matrix                  %                                                                         
-%-----------------------------------------------------------------%
-costate = [costateLGR; costateF];    
-lamx    = costate;
-
-figure(1);
-subplot(2,2,1);
-plot(x,lamx,'-o'); hold on;
-xlabel('x');
-ylabel('\lambda_x');
-set(gca,'FontName','Times','FontSize',18);
-grid on;
-
-subplot(2,2,2);
-plot(t,x,'-o'); hold on;
-xlabel('time');
-ylabel('x(t)');
-set(gca,'FontName','Times','FontSize',18);
-grid on;
-
-subplot(2,2,3);
-plot(t,lamx,'-o'); hold on;
-xlabel('time');
-ylabel('\lambda_x(t)');
-set(gca,'FontName','Times','FontSize',18);
-grid on;
-
-subplot(2,2,4);
-plot(tLGR,u,'-o'); hold on; grid on;
-xlabel('t');
-ylabel('u(t)');
-set(gca,'FontName','Times','FontSize',18);
-
-

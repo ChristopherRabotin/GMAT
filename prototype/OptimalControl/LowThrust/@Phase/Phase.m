@@ -5,7 +5,7 @@ classdef Phase < handle
     properties (SetAccess = 'public')
         
         
-        %%  Bounds during phase
+        %% State bounds phase
         controlUpperBound
         controlLowerBound
         stateUpperBound
@@ -41,17 +41,15 @@ classdef Phase < handle
         pathFunctionName
         pointFunctionName
         
-        %%  Bound vectors for different constraint types. These are
-        %  assembled from user inputs.
+        %%  Constraint bounds vectors for different constraint types.
+        %  These are assembled from user inputs.
         algConstraintLowerBound
         algConstraintUpperBound
         eventConstraintLowerBound
         eventConstraintUpperBound
         intConstraintUpperBound
         intConstraintLowerBound
-        decisionVecLowerBound
-        decisionVecUpperBound
-        
+
         phaseNum
         
     end
@@ -121,6 +119,11 @@ classdef Phase < handle
         %  For managinging decision vector
         DecVector;% = DecisionVector();
         %probTranscription();  %  For transcription details
+        %  For Computing the intitial guess
+        GuessGen = GuessGenerator
+        
+        decisionVecLowerBound
+        decisionVecUpperBound
         
         
     end
@@ -157,7 +160,7 @@ classdef Phase < handle
             %  Compute and set the initial guess and configure time.
             obj.InitializeTimeVector();
             obj.IntializeUserFunctions();
-            obj.SetInitialGuess();           
+            obj.SetInitialGuess();
             
             %  Set constraint size properties and bounds
             obj.SetConstraintProperties();
@@ -345,43 +348,35 @@ classdef Phase < handle
         %  Compute the initial guess.  Needs to be a new class!
         function obj = SetInitialGuess(obj)
             
+            %  Intialize the guess generator class
+            obj.GuessGen.Initialize(...
+                obj.timeVector,obj.DecVector.numStates,...
+                obj.DecVector.numStatePoints,obj.DecVector.numControls,...
+                obj.DecVector.numControlPoints)
+            
             switch obj.initialGuessMode
                 
                 case {'LinearNoControl','LinearUnityControl','LinearCoast'}
                     
-                    %  Initialize the state and control array
-                    xGuessMat = zeros(obj.DecVector.numStatePoints,...
-                        obj.numStates);
-                    uGuessMat = zeros(obj.DecVector.numControlPoints,...
-                        obj.numControls);
-                    
-                    %  Fill in the state array
-                    for i = 1:obj.numStates
-                        xGuessMat(:,i) = linspace(...
-                            obj.initialGuessState(i),...
-                            obj.finalGuessState(i),...
-                            obj.DecVector.numStatePoints).';
-                    end
+                    xGuessMat = obj.GuessGen.ComputeLinearStateGuess(...
+                        obj.initialGuessState,obj.finalGuessState);
                     
                     %  Fill in the control array
                     if strcmp(obj.initialGuessMode,'LinearUnityControl')
-                        controlVar = 1;
+                        controlMag = 1;
                     else
-                        controlVar = 0;
+                        controlMag = 0;
                     end
                     if strcmp(obj.initialGuessMode,'LinearUnityControl') ...
                             || strcmp(obj.initialGuessMode,'LinearNoControl')
-                        for i = 1:obj.numControls
-                            uGuessMat(:,i) = linspace(...
-                                controlVar,controlVar,...
-                                obj.DecVector.numControlPoints).';
-                        end
+                        uGuessMat = obj.GuessGen.ComputeConstControlGuess(...
+                            controlMag);
                     else
                         uGuessMat = [];
                     end
                     
             end
-            
+                        
             %  Call the decision vector and populate with the guess
             obj.DecVector.SetStateArray(xGuessMat);
             obj.DecVector.SetControlArray(uGuessMat);
