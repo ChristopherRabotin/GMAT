@@ -267,6 +267,37 @@ bool SolarFluxReader::LoadObsData()
 //------------------------------------------------------------------------------
 bool SolarFluxReader::LoadPredictData()
 { 
+   Integer hour = 0, minute = 0;
+   Real sec = 0.0;
+
+   inPredict.seekg(begData, std::ios_base::beg);
+
+   while (!inPredict.eof())
+   {
+      inPredict.getline(line, 256, '\n');
+      std::istringstream buf(line);
+      std::istream_iterator<std::string> beg(buf), end;
+      std::vector<std::string> tokens(beg, end);
+
+      FluxData fD;
+      Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), 0, hour, minute, sec); 
+      // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
+      fD.epoch = mjd - 0.5;
+
+      for (Integer l=0; l<3; l++)
+         fD.F107a[l] = atof(tokens[l+2].c_str());
+      fD.apSchatten[0] = atof(tokens[5].c_str());
+      for (Integer l=0; l<3; l++)
+         fD.F107a[l+3] = atof(tokens[l+6].c_str());
+      fD.apSchatten[1] = atof(tokens[9].c_str());
+      for (Integer l=0; l<3; l++)
+         fD.F107a[l+6] = atof(tokens[l+10].c_str());
+      fD.apSchatten[2] = atof(tokens[13].c_str());
+     
+      obsFluxData.push_back(fD);
+
+   }
+
    return true;
 }
 
