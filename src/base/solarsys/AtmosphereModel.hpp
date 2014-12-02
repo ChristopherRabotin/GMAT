@@ -23,7 +23,7 @@
 #define AtmosphereModel_hpp
 
 #include "GmatBase.hpp"
-#include "SolarFluxFileReader.hpp"
+#include "SolarFluxReader.hpp"
 #include "AtmosphereException.hpp"
 #include "TimeTypes.hpp"
 
@@ -123,7 +123,7 @@ public:
 
 protected:
    /// Solar flux binary file reader
-   SolarFluxFileReader     *fileReader;
+   SolarFluxReader         *fileReader;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
