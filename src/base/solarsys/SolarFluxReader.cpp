@@ -34,7 +34,9 @@
  * Constructor
  */
 //------------------------------------------------------------------------------
-SolarFluxReader::SolarFluxReader()
+SolarFluxReader::SolarFluxReader():
+   obsFileName       (""),
+   predictFileName   ("")
 {
    if (!obsFluxData.empty())
       obsFluxData.clear();
@@ -42,8 +44,6 @@ SolarFluxReader::SolarFluxReader()
    if (!predictFluxData.empty())
       predictFluxData.clear();
 
-   obsFileName = NULL;
-   predictFileName = NULL;
    beg_ObsTag = "BEGIN OBSERVED";
    end_ObsTag = "END OBSERVED";
    begObs = endObs = -1;
@@ -79,11 +79,11 @@ SolarFluxReader::~SolarFluxReader(void)
 //------------------------------------------------------------------------------
 bool SolarFluxReader::Open()
 {
-   if (obsFileName != NULL)
+   if (!obsFileName.empty())
    {
       inObs.open(obsFileName, std::ios_base::in);
    }
-   if (predictFileName != NULL)
+   if (!predictFileName.empty())
    {
       inPredict.open(predictFileName, std::ios_base::in);
    }
@@ -105,11 +105,11 @@ bool SolarFluxReader::Open()
  * @return bool
  */
 //------------------------------------------------------------------------------
-bool SolarFluxReader::LoadFluxData(const char *obsFileName, const char *predictFileName)
+bool SolarFluxReader::LoadFluxData(const std::string &obsFileName, const std::string &predictFileName)
 {
-   if (obsFileName != NULL)
+   if (!obsFileName.empty())
       this->obsFileName = obsFileName;
-   if (predictFileName != NULL)
+   if (!predictFileName.empty())
       this->predictFileName = predictFileName;
 
    // Open the files to load
@@ -316,9 +316,27 @@ bool SolarFluxReader::LoadPredictData()
 //------------------------------------------------------------------------------
 SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 {
-   GmatEpoch epoch_1st = obsFluxData.at(0).epoch;
-   
+   Integer index;
+   GmatEpoch epoch_1st;
    FluxData fD;
+
+   // Requirement list in google docs:
+   // HistoricAndNearTerm source is always given precedence if requested epoch is in the historic data section.  
+   // Otherwise, predicted data is used from the predicted source.
+   // If requested data is not on a file (regardless of the file type), 
+   // use closest data from the requested epoch and issue a single warning message 
+   // that data was not available so using closest data and from which file source.
+   epoch_1st = obsFluxData.at(0).epoch;
+   index = epoch - epoch_1st;
+   // if the requested epoch fall beyond the 
+   // last item in the obsFluxData, then search in predictFluxData
+   if (index > obsFluxData.size())
+   {
+      epoch_1st = predictFluxData.at(0).epoch;
+      index = epoch - epoch_1st;
+   }
+
+  
    // do some calculation off the epoch passed to index to the obsFluxData
 
    return fD;

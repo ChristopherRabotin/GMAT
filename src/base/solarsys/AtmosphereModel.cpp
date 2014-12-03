@@ -72,15 +72,13 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    fileReader           (NULL),
    solarSystem          (NULL),
    mCentralBody         (NULL),
-   solarFluxFile        (NULL),
-   fileName             (""),        // Set to a default when working
+   obsFileName          (""),        // Set to a default when working
+   predictFileName      (""),
    sunVector            (NULL),
    centralBody          ("Earth"),
    centralBodyLocation  (NULL),
    cbRadius             (GmatSolarSystemDefaults::PLANET_EQUATORIAL_RADIUS[GmatSolarSystemDefaults::EARTH]),
    cbFlattening         (0.0),       // Default is spherical
-   newFile              (false),
-   fileRead             (false),
    nominalF107          (150.0),
    nominalF107a         (150.0),
    nominalKp            (3.0),
@@ -142,15 +140,13 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    fileReader           (NULL),
    solarSystem          (am.solarSystem),
    mCentralBody         (am.mCentralBody),
-   solarFluxFile        (NULL),
-   fileName             (am.fileName),
+   obsFileName          (am.obsFileName),
+   predictFileName      (am.predictFileName),
    sunVector            (NULL),
    centralBody          (am.centralBody),
    centralBodyLocation  (NULL),
    cbRadius             (am.cbRadius),
    cbFlattening         (am.cbFlattening),
-   newFile              (false),
-   fileRead             (false),
    nominalF107          (am.nominalF107),
    nominalF107a         (am.nominalF107a),
    nominalKp            (am.nominalKp),
@@ -192,15 +188,13 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    fileReader           = NULL;
    solarSystem          = am.solarSystem;
    mCentralBody         = am.mCentralBody;
-   solarFluxFile        = NULL;
-   fileName             = am.fileName;
+   obsFileName          = am.obsFileName;
+   predictFileName      = am.predictFileName;
    sunVector            = NULL;
    centralBody          = am.centralBody;
    centralBodyLocation  = NULL;
    cbRadius             = am.cbRadius;
    cbFlattening         = am.cbFlattening;
-   newFile              = false;
-   fileRead             = false;
    nominalF107          = am.nominalF107;
    nominalF107a         = am.nominalF107a;
    nominalKp            = am.nominalKp;
@@ -932,68 +926,6 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
    /// @todo Throw exceptions when the values are unphysical here.
 
    return GmatBase::SetRealParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetSolarFluxFile(const std::string &file)
-//------------------------------------------------------------------------------
-/**
- * @param <file> The solar flux file
- */
-//------------------------------------------------------------------------------
-void AtmosphereModel::SetSolarFluxFile(const std::string &file)
-{
-   if (strcmp(fileName.c_str(), file.c_str()) == 0)
-      SetOpenFileFlag(true);
-   else
-   {
-      fileName = file;
-      SetOpenFileFlag(false);
-   }   
-}
-
-//------------------------------------------------------------------------------
-// void SetNewFileFlag(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Sets the new file flag
- * 
- * @param <flag> The value for the flag.
- */
-//------------------------------------------------------------------------------
-void AtmosphereModel::SetNewFileFlag(bool flag)
-{
-   newFile = flag;
-}
-
-//------------------------------------------------------------------------------
-// void SetOpenFileFlag(bool flag)
-//------------------------------------------------------------------------------
-/**
- * Sets the file opened flag
- * 
- * @param <flag> The value for the flag.
- */
-//------------------------------------------------------------------------------
-void AtmosphereModel::SetOpenFileFlag(bool flag)
-{
-   fileRead = flag;
-}
-
-//------------------------------------------------------------------------------
-// void CloseFile()
-//------------------------------------------------------------------------------
-/**
- * Closes the solar flux file.
- */
-//------------------------------------------------------------------------------
-void AtmosphereModel::CloseFile()
-{
-   if (fileReader->CloseSolarFluxFile(solarFluxFile))
-      fileRead = false;
-   else
-      throw AtmosphereException("Error closing Atmosphere Model data file.\n");
 }
 
 

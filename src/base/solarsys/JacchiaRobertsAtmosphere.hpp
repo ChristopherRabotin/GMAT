@@ -96,7 +96,7 @@ private:
 
 
    Real JacchiaRoberts(Real height, Real space_craft[3], Real sun[3],
-                      Real a1_time, bool new_file);
+                      Real a1_time);
    Real exotherm(Real space_craft[3], Real sun[3], GEOPARMS *geo,
                        Real height, Real sun_dec, Real geo_lat);
    Real rho_100(Real height, Real temperature);

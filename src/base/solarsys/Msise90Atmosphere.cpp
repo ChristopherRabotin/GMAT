@@ -56,8 +56,6 @@ static FILE *logFile;  // Temp log file
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     AtmosphereModel     ("MSISE90", name),
-    fileData            (false),
-    fluxfilename        (""),
     sod                 (0.0),
     yd                  (0),
     f107                (0.0),
@@ -69,6 +67,8 @@ Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     #endif
     for (Integer i = 0; i < 7; i++)
        ap[i] = 0.0;
+
+    fileReader = new SolarFluxReader();
 }
 
 //------------------------------------------------------------------------------
@@ -80,6 +80,14 @@ Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
 //------------------------------------------------------------------------------
 Msise90Atmosphere::~Msise90Atmosphere()
 {
+   if (fileReader)
+   {
+      if (!fileReader->Close())
+         throw AtmosphereException("Error closing Solar Flux data file.\n");
+
+      delete fileReader;
+      fileReader = NULL;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -93,8 +101,6 @@ Msise90Atmosphere::~Msise90Atmosphere()
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
    AtmosphereModel     (msise),
-   fileData            (false),  // is this correct?
-   fluxfilename        (msise.fluxfilename),
    sod                 (msise.sod),
    yd                  (msise.yd),
    f107                (msise.f107),
@@ -124,8 +130,6 @@ Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
 
    AtmosphereModel::operator=(msise);
    
-   fileData     = false;  // is this correct?
-   fluxfilename = msise.fluxfilename;
    sod          = msise.sod;
    yd           = msise.yd;
    f107         = msise.f107;
@@ -380,9 +384,9 @@ void Msise90Atmosphere::GetInputs(Real epoch)
 
    yd = year * 1000 + doy;
 
-   if (fileData)
+   if (epoch)
    {
-      /// @todo Implement the file reader
+      fileReader->GetInputs(epoch);
    }
    else
    {

@@ -212,6 +212,7 @@ JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const std::string &name) :
    cbPolarRadius        (6356.766),       // for initialization only. Reset in SetCentralBody()
    cbPolarSquared       (40408473.978756)
 {
+   fileReader = new SolarFluxReader();
 }
 
 
@@ -226,11 +227,13 @@ JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
 {
    if (fileReader)
    {
-      if (fileReader->CloseSolarFluxFile(solarFluxFile))
-         fileRead = false;
-      else
-         throw AtmosphereException("Error closing JacchiaRoberts data file.\n");
+      if (!fileReader->Close())
+         throw AtmosphereException("Error closing Solar Flux data files.\n");
+
+      delete fileReader;
+      fileReader = NULL;
    }
+
 }
 
 //------------------------------------------------------------------------------
@@ -362,7 +365,7 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
       {         
          // Output density in units of kg/m3
          density[i] = 1.0e3 * JacchiaRoberts(height, &pos[i*6], sunVector,
-               utc_time, newFile);
+               utc_time);
       }
       else
       {
@@ -439,63 +442,31 @@ void JacchiaRobertsAtmosphere::SetCentralBody(CelestialBody *cb)
  */  
 //------------------------------------------------------------------------------
 Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3], 
-                                              Real sun[3], Real a1_time,
-                                              bool new_file)
+                                              Real sun[3], Real a1_time)
 {
    #ifdef DEBUG_JR_DRAG
       MessageInterface::ShowMessage
          ("JacchiaRobertsAtmosphere::JacchiaRoberts(%15lf, [%15lf %15lf %15lf],"
           "\n   [%15lf %15lf %15lf], %15lf, %s\n",
           height, space_craft[0], space_craft[1], space_craft[2],
-          sun[0], sun[1], sun[2], a1_time, (new_file ? "true" : "false") );
+          sun[0], sun[1], sun[2], a1_time);
    #endif
 
    GEOPARMS geo;
    Real density, temperature, t_500, sun_dec, geo_lat;
-   FILE *tkptr;
+   
+   // Read F10.7 and F10.7a to calculate the geo.xtemp
+   SolarFluxReader::FluxData fD = fileReader->GetInputs(a1_time);
+   geo.xtemp = 379.0 + 3.24 * fD.adjCtrF107a + 1.3 * (fD.adjF107 - fD.adjCtrF107a);
+   geo.tkp   = fD.kp[0];
 
-   if (new_file)
-   {
-      if (!fileRead)
-      {  
-         tkptr = fileReader->OpenSolarFluxFile(fileName);
-         solarFluxFile = tkptr;
-         fileRead = true;
-         
-         if (tkptr != NULL)
-         {  
-            // Read minimum temperature and geomagnetic indices
-            Integer status = fileReader->LoadSolarFluxFile(a1_time, tkptr, new_file, &geo);
-            // Following Swingby code's procedure, return density = 0.0
-            // if values read from file are not accurate.
-            if (status != 0)
-            {
-                  throw AtmosphereException("Error loading in JacchiaRoberts data file."
-                                            "Density has be set to 0.0\n");
-               Real dValue = 0.0;
-               return dValue; 
-            }    
-         }
-         else
-            throw AtmosphereException("Error opening JacchiaRoberts data file.\n");
-      }       
-      #ifdef DEBUG_JR_DRAG
-         MessageInterface::ShowMessage
-            ("   Using file\n   K_p     = %15.10le\n   exoTemp = %lf\n", geo.tkp,
-             geo.xtemp);
-      #endif
-   }
-   else
-   {
-      geo.xtemp = 379.0 + 3.24 * nominalF107a + 1.3 * (nominalF107 - nominalF107a);
-      geo.tkp   = nominalKp;
-      #ifdef DEBUG_JR_DRAG
-         MessageInterface::ShowMessage
-            ("   Using constant values\n   F10.7   = %lf\n"
-             "   F10.7a  = %lf\n   K_p     = %lf\n   exoTemp = %lf\n",
-             nominalF107, nominalF107a, geo.tkp, geo.xtemp);
-      #endif
-   }
+   #ifdef DEBUG_JR_DRAG
+      MessageInterface::ShowMessage
+         ("   Using constant values\n   F10.7   = %lf\n"
+            "   F10.7a  = %lf\n   K_p     = %lf\n   exoTemp = %lf\n",
+            nominalF107, nominalF107a, geo.tkp, geo.xtemp);
+   #endif
+
    // Compute declination of the sun
    sun_dec = atan2(sun[2], sqrt(sun[0]*sun[0] + sun[1]*sun[1]));
    // Geodetic latitude of spacecraft, in radians

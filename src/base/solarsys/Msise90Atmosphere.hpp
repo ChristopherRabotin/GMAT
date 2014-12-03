@@ -41,11 +41,8 @@ public:
                                    Integer count = 1);
 
    virtual GmatBase*       Clone() const; // inherited from GmatBase
+
 protected:
-   /// Flag to indicate if data comes from a file
-   bool                    fileData;
-   /// Name of the file
-   std::string             fluxfilename;
    /// Second of day
    Real                    sod;
    /// Year + Day of year, in the form YYYYDDD

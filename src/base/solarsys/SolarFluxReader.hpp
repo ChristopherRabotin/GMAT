@@ -32,14 +32,13 @@
 #include "DateUtil.hpp"
 #include "GmatConstants.hpp"
 
-class SolarFluxReader
+class GMAT_API SolarFluxReader
 {
 
 public:
    SolarFluxReader();
    ~SolarFluxReader(); 
    
-private:
    typedef struct FluxDataCSSI
    {
       GmatEpoch epoch;
@@ -60,7 +59,7 @@ private:
       Real apSchatten[3];
    };
   
-
+private:
    const char *beg_ObsTag;
    const char *end_ObsTag;
    /// offset required to start reading observation (BEGIN OBSERVED) tag
@@ -69,11 +68,11 @@ private:
    std::streamoff endObs;
    /// offset required to start reading Schatten data
    std::streamoff begData;
-
+   /// each line in the file
    char *line; 
 
-   const char *obsFileName;
-   const char *predictFileName;
+   std::string obsFileName;
+   std::string predictFileName;
    
    /// Obs File Stream
    std::ifstream inObs;
@@ -88,12 +87,12 @@ private:
    bool LoadPredictData();
 
 public:
-   /// Open both CSSI and Schatten files
+   /// Open CSSI and Schatten files if opened
    bool Open();
-   /// Close both CSSI and Schatten files
+   /// Close CSSI and Schatten files if opened
    bool Close();
    /// Load data from both opened files
-   bool LoadFluxData(const char *obsFileName = NULL, const char *predictFileName = NULL);
+   bool LoadFluxData(const std::string &obsFileName = "", const std::string &predictFileName = "");
    /// Get Flux data from either of two vectors filled in during LoadFluxData
    FluxData GetInputs(GmatEpoch epoch);
 };

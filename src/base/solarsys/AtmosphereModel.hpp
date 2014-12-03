@@ -111,12 +111,7 @@ public:
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
-
-   // Flux file methods
-   void SetSolarFluxFile(const std::string &file);
-   void SetNewFileFlag(bool flag);
-   void SetOpenFileFlag(bool flag);
-   void CloseFile();
+ 
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -128,10 +123,10 @@ protected:
    SolarSystem             *solarSystem;
    /// The central body
    CelestialBody           *mCentralBody;
-   /// Pointer to the binary file
-   FILE                    *solarFluxFile;
-   /// Solar flux file name
-   std::string             fileName;
+   /// CSSI Solar flux file name
+   std::string             obsFileName;
+   /// Schatten Solar flux file name
+   std::string             predictFileName;
    /// Vector from the central body to the sun
    Real                    *sunVector;
    /// Name of the central body
@@ -142,10 +137,6 @@ protected:
    Real                    cbRadius;
    /// Central body flattening factor
    Real                    cbFlattening;
-   /// Flag indicating that the flux file name is set to a new value
-   bool                    newFile;
-   /// Flag indicating that the flux file has been opened and read once already
-   bool                    fileRead;
     
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
