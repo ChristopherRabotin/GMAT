@@ -52,15 +52,15 @@
 PhysicalMeasurement::PhysicalMeasurement(const std::string &type,
          const std::string &nomme) :
    CoreMeasurement      (type, nomme),
-// frequency            (2090659968.0),          // made changes by TUAN NGUYEN
-   frequency            (0.0),                   // made changes by TUAN NGUYEN
-   freqBand             (0),                     // made changes by TUAN NGUYEN
+// frequency            (2090659968.0),
+   frequency            (0.0),
+   freqBand             (0),
 ///// TBD: Determine if there is a more generic way to add these
-//   rangeModulo          (1.0e6),               // made changes by TUAN NGUYEN
-   rampTB               (NULL),                  // made changes by TUAN NGUYEN
-   obsData              (NULL),                  // made changes by TUAN NGUYEN
-   useRelativityCorrection (false),              // made changes by TUAN NGUYEN
-   useETminusTAICorrection (false)               // made changes by TUAN NGUYEN
+//   rangeModulo          (1.0e6),
+   rampTB               (NULL),
+   obsData              (NULL),
+   useRelativityCorrection (false),
+   useETminusTAICorrection (false)
 {
    objectTypeNames.push_back("PhysicalMeasurement");
 
@@ -102,12 +102,12 @@ PhysicalMeasurement::~PhysicalMeasurement()
 PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
    CoreMeasurement      (pm),
    frequency            (pm.frequency),
-   freqBand             (pm.freqBand),                       // made changes by TUAN NGUYEN
-// rangeModulo          (pm.rangeModulo),                    // made changes by TUAN NGUYEN
-   rampTB               (pm.rampTB),                         // made changes by TUAN NGUYEN
-   obsData              (pm.obsData),                        // made changes by TUAN NGUYEN
-   useRelativityCorrection (pm.useRelativityCorrection),     // made changes by TUAN NGUYEN
-   useETminusTAICorrection (pm.useETminusTAICorrection)      // made changes by TUAN NGUYEN
+   freqBand             (pm.freqBand),
+// rangeModulo          (pm.rangeModulo),
+   rampTB               (pm.rampTB),
+   obsData              (pm.obsData),
+   useRelativityCorrection (pm.useRelativityCorrection),
+   useETminusTAICorrection (pm.useETminusTAICorrection)
 {
    if (pm.troposphere != NULL)
       troposphere = new Troposphere(*(pm.troposphere));
@@ -142,12 +142,12 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
       CoreMeasurement::operator=(pm);
 
       frequency = pm.frequency;
-      freqBand  = pm.freqBand;                 // made changes by TUAN NGUYEN
-//    rangeModulo = pm.rangeModulo;            // made changes by TUAN NGUYEN
-      rampTB      = pm.rampTB;                 // made changes by TUAN NGUYEN
-      obsData     = pm.obsData;                // made changes by TUAN NGUYEN
-      useRelativityCorrection = pm.useRelativityCorrection; // made changes by TUAN NGUYEN
-      useETminusTAICorrection = pm.useETminusTAICorrection; // made changes by TUAN NGUYEN
+      freqBand  = pm.freqBand;
+//    rangeModulo = pm.rangeModulo;
+      rampTB      = pm.rampTB;
+      obsData     = pm.obsData;
+      useRelativityCorrection = pm.useRelativityCorrection;
+      useETminusTAICorrection = pm.useETminusTAICorrection;
 
       // Rebuild the correction models
       if (troposphere != NULL)
@@ -212,7 +212,6 @@ Real PhysicalMeasurement::GetConstantFrequency(Integer index)
 
 
 ///// TBD: Determine if there is a more generic way to add these
-// made changes by TUAN NGUYEN
 void PhysicalMeasurement::SetFrequencyBand(Integer frequencyBand, Integer index)
 {
    if (index == 0)
@@ -221,51 +220,51 @@ void PhysicalMeasurement::SetFrequencyBand(Integer frequencyBand, Integer index)
       freqBandE = frequencyBand;
 }
 
-// made changes by TUAN NGUYEN
+
 Integer PhysicalMeasurement::GetFrequencyBand(Integer index)
 {
    return ((index == 0) ? freqBand : freqBandE);
 }
 
-//// made changes by TUAN NGUYEN
+
 //void PhysicalMeasurement::SetRangeModulo(Real rangeMod)
 //{
 //   rangeModulo = rangeMod;
 //}
 //
 //
-//// made changes by TUAN NGUYEN
 //Real PhysicalMeasurement::GetRangeModulo()
 //{
 //   return rangeModulo;
 //}
 //
-// made changes by TUAN NGUYEN
+
+
 void PhysicalMeasurement::SetObsValue(const RealArray& value)
 {
    obsValue = value;
 }
 
-// made changes by TUAN NGUYEN
+
 RealArray PhysicalMeasurement::GetObsValue()
 {
    return obsValue;
 }
 
 
-// made changes by TUAN NGUYEN
+
 void PhysicalMeasurement::SetObservationDataRecord(ObservationData* data)
 {
    obsData = data;
 }
 
-// made changes by TUAN NGUYEN
+
 void PhysicalMeasurement::SetRampTable(std::vector<RampTableData>* rt)
 {
    rampTB = rt;
 }
 
-// made changes by TUAN NGUYEN
+
 void PhysicalMeasurement::SetRelativityCorrection(bool useCorr)
 {
 #ifdef DEBUG_SET_RELATIVITY_CORRECTION
@@ -278,7 +277,7 @@ void PhysicalMeasurement::SetRelativityCorrection(bool useCorr)
 #endif
 }
 
-// made changes by TUAN NGUYEN
+
 void PhysicalMeasurement::SetETMinusTAICorrection(bool useCorr)
 {
 #ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
@@ -335,7 +334,7 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
    }
    else if (mediaCorrectionType == "IonosphereModel")
    {
-      if (modelName == "IRI2007")                     // made changes by TUAN NGUYEN
+      if (modelName == "IRI2007")
       {
          #ifdef DEBUG_MEDIA_CORRECTION
             MessageInterface::ShowMessage("   Set as ionosphere model\n");
@@ -433,8 +432,8 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
 
    if (troposphere != NULL)
    {
-      // Set troposphere's ref objects                     // made changes by TUAN NGUYEN
-      troposphere->SetSolarSystem(solarSystem);            // made changes by TUAN NGUYEN
+      // Set troposphere's ref objects
+      troposphere->SetSolarSystem(solarSystem);
 
       // Set temperature, pressure, humidity to Troposphere object
       Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);
@@ -494,8 +493,8 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 
    if (ionosphere != NULL)
    {
-      // 0. Set ionosphere's ref objects                  // made changes by TUAN NGUYEN
-      ionosphere->SetSolarSystem(solarSystem);            // made changes by TUAN NGUYEN
+      // 0. Set ionosphere's ref objects
+      ionosphere->SetSolarSystem(solarSystem);
 
       // 1. Set wave length:
       Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);      // unit: meter
@@ -555,10 +554,10 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
       Real rangeCorrection = ionoCorrection[0]*GmatMathConstants::M_TO_KM;            // unit: meter
 
       // 6. Clean up
-      if (cv)                                   // made changes by TUAN NGUYEN
-         delete cv;                             // made changes by TUAN NGUYEN
-      if (fk5cs)                                // made changes by TUAN NGUYEN
-         delete fk5cs;                          // made changes by TUAN NGUYEN
+      if (cv)
+         delete cv;
+      if (fk5cs)
+         delete fk5cs;
 
       #ifdef DEBUG_IONOSPHERE_MEDIA_CORRECTION
          MessageInterface::ShowMessage("      *Ionosphere media correction result:\n");
@@ -770,21 +769,21 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    EventData p2Data = ev.GetEventData(participants[p2Index]);
    
 #ifdef USE_EARTHMJ2000EQ_CS
-   rangeVec = p2Data.position - p1Data.position;                                            // made changes by TUAN NGUYEN
+   rangeVec = p2Data.position - p1Data.position;
 #else
    /// Calculate range vector in Solar System Barycenter coordinate system:
-   CelestialBody* cb1 = (CelestialBody*)p1Data.cs_origin;                                   // made changes by TUAN NGUYEN
-   CelestialBody* cb2 = (CelestialBody*)p2Data.cs_origin;                                   // made changes by TUAN NGUYEN
-   Real t1 = p1Data.epoch;                                                                  // made changes by TUAN NGUYEN
-   Real t2 = p2Data.epoch;                                                                  // made changes by TUAN NGUYEN
-   SpecialCelestialPoint* ssb = (SpecialCelestialPoint*)solarSystem->GetSpecialPoint("SolarSystemBarycenter");      // made changes by TUAN NGUYEN
+   CelestialBody* cb1 = (CelestialBody*)p1Data.cs_origin;
+   CelestialBody* cb2 = (CelestialBody*)p2Data.cs_origin;
+   Real t1 = p1Data.epoch;
+   Real t2 = p2Data.epoch;
+   SpecialCelestialPoint* ssb = (SpecialCelestialPoint*)solarSystem->GetSpecialPoint("SolarSystemBarycenter");
 
-   // vector from SSB to the central body at time t1 and t2                                 // made changes by TUAN NGUYEN
-   Rvector3 BE1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);                  // made changes by TUAN NGUYEN
-   Rvector3 BE2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);                  // made changes by TUAN NGUYEN
-   Rvector3 p1B = BE1 + p1Data.position;                                                    // made changes by TUAN NGUYEN
-   Rvector3 p2B = BE2 + p2Data.position;                                                    // made changes by TUAN NGUYEN
-   rangeVec = p2B - p1B;                                                                    // made changes by TUAN NGUYEN
+   // vector from SSB to the central body at time t1 and t2
+   Rvector3 BE1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);
+   Rvector3 BE2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);
+   Rvector3 p1B = BE1 + p1Data.position;
+   Rvector3 p2B = BE2 + p2Data.position;
+   rangeVec = p2B - p1B;
 #endif
 
    // Be sure to use the correct rotation matrices, etc
@@ -821,12 +820,12 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
       MessageInterface::ShowMessage("  B: %s\n", B.ToString().c_str());
    #endif
 
-   Rmatrix33 body2FK5_matrix = dataToUse.rInertial2obj.Transpose();      // made change by TUAN NGUYEN:  get rotation matrix from object frame to inertial frame
+   Rmatrix33 body2FK5_matrix = dataToUse.rInertial2obj.Transpose();      // get rotation matrix from object frame to inertial frame
 
    if (wrtR)
    {
       // temp = dataToUse.rInertial2obj * A;
-      temp = body2FK5_matrix * A;      // made change by TUAN NGUYEN
+      temp = body2FK5_matrix * A;
 
       for (Integer i = 0; i < 3; ++i)
          for (Integer j = 0; j < 3; ++j)
@@ -835,7 +834,7 @@ void PhysicalMeasurement::GetRangeVectorDerivative(Event &ev,
    if (wrtV)
    {
       // temp = dataToUse.rInertial2obj * B;
-      temp = body2FK5_matrix * B;      // made change by TUAN NGUYEN
+      temp = body2FK5_matrix * B;
 
       Integer offset = (wrtR ? 3 : 0);
       for (Integer i = 0; i < 3; ++i)

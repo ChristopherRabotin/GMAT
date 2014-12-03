@@ -30,7 +30,7 @@
 
 // Temporary to get Adapters hooked up
 #include "GmatObType.hpp"
-#include "RampTableType.hpp"                             // made changes by TUAN NGUYEN
+#include "RampTableType.hpp"
 
 
 //#define DEBUG_INITIALIZATION
@@ -39,12 +39,12 @@
 //#define DEBUG_CALCULATE_MEASUREMENTS
 //#define DEBUG_GET_ACTIVE_EVENTS
 //#define DEBUG_LOAD_OBSERVATIONS
-//#define DEBUG_RAMP_TABLE                              // made changes by TUAN NGUYEN
+//#define DEBUG_RAMP_TABLE
 //#define DEBUG_LOAD_FREQUENCY_RAMP_TABLE
 //#define DEBUG_INITIALIZE
 //#define DEBUG_MODEL_MAPPING
 //#define DEBUG_CALCULATE
-//#define DEBUG_ADVANCE_OBSERVATION                     // made changes by TUAN NGUYEN
+//#define DEBUG_ADVANCE_OBSERVATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_ADAPTERS
 
@@ -113,7 +113,7 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
       models.push_back((MeasurementModel*)((*i)->Clone()));
    }
 
-   // made changes by TUAN NGUYEN @ 9/16/2014
+   // made changes @ 9/16/2014
    // process TrackingDataAdapter objects
    for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
          i != mm.adapters.end(); ++i)
@@ -135,8 +135,8 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
       trackingSets.push_back((TrackingFileSet*)((*i)->Clone()));
 
       // Note: No measurement data associated with TrackingFileSet object, but TrackingDataAdapter has its owe measurement data
-      // MeasurementData md;                                    // made changes by TUAN NGUYEN
-      // measurements.push_back(md);                            // made changes by TUAN NGUYEN
+      // MeasurementData md;
+      // measurements.push_back(md);
    }
 }
 
@@ -284,15 +284,15 @@ bool MeasurementManager::Initialize()
       
       // Step 3: Set stream objects for all observation data files in trackingSet[i] 
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("Filename");
-      //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index as the outer loop     // made changes by TUAN NGUYEN
-      for (UnsignedInt k = 0; k < filenames.size(); ++k)                            // made changes by TUAN NGUYEN
+      //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index as the outer loop
+      for (UnsignedInt k = 0; k < filenames.size(); ++k)
       {
 //         std::stringstream fn;
-//         fn << trackingSets[i]->GetName() << "DataFile" << k;                       // made changes by TUAN NGUYEN
+//         fn << trackingSets[i]->GetName() << "DataFile" << k;
 //         DataFile *newStream = new DataFile(fn.str());
          DataFile *newStream = new DataFile(filenames[k]);
-         // newStream->SetStringParameter("Filename", filenames[k]);                // made changes by TUAN NGUYEN
-         newStream->SetStringParameter("Filename", filenames[k]);                   // made changes by TUAN NGUYEN
+         // newStream->SetStringParameter("Filename", filenames[k]);
+         newStream->SetStringParameter("Filename", filenames[k]);
          GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???
          newStream->SetStream(got);
          #ifdef DEBUG_INITIALIZATION
@@ -323,63 +323,63 @@ bool MeasurementManager::Initialize()
       }// for k loop
       
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
-      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");   // made changes by TUAN NGUYEN
-      for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)                              // made changes by TUAN NGUYEN
-      {                                                                                         // made changes by TUAN NGUYEN
-//         std::stringstream fn;                                                                  // made changes by TUAN NGUYEN
-//         fn << trackingSets[i]->GetName() << "RampedTable" << k1;                               // made changes by TUAN NGUYEN
-//         DataFile *newStream = new DataFile(fn.str());                                          // made changes by TUAN NGUYEN
-         DataFile *newStream = new DataFile(rampedTablenames[k1]);                              // made changes by TUAN NGUYEN
-         newStream->SetStringParameter("Filename", rampedTablenames[k1]);                       // made changes by TUAN NGUYEN
+      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");
+      for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)
+      {
+//         std::stringstream fn;
+//         fn << trackingSets[i]->GetName() << "RampedTable" << k1;
+//         DataFile *newStream = new DataFile(fn.str());
+         DataFile *newStream = new DataFile(rampedTablenames[k1]);
+         newStream->SetStringParameter("Filename", rampedTablenames[k1]);
 
 #ifdef DEBUG_RAMP_TABLE
          MessageInterface::ShowMessage("MeasurementManager::Initialize():  Ramp table name = %s\n", rampedTablenames[k1].c_str());
 #endif
-         RampTableType *rpt = new RampTableType();                                              // made changes by TUAN NGUYEN
-         newStream->SetStream(rpt);                                                             // made changes by TUAN NGUYEN
-         newStream->SetStringParameter("Format", "GMAT_RampTable");                             // made changes by TUAN NGUYEN
+         RampTableType *rpt = new RampTableType();
+         newStream->SetStream(rpt);
+         newStream->SetStringParameter("Format", "GMAT_RampTable");
 
-         #ifdef DEBUG_RAMP_TABLE                                                                // made changes by TUAN NGUYEN
-            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",                    // made changes by TUAN NGUYEN
-                  (newStream->IsInitialized() ? "initialized" :                                 // made changes by TUAN NGUYEN
-                  "not initialized"), newStream->GetName().c_str(), newStream);                 // made changes by TUAN NGUYEN
-         #endif                                                                                 // made changes by TUAN NGUYEN
+         #ifdef DEBUG_RAMP_TABLE
+            MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
+                  (newStream->IsInitialized() ? "initialized" :
+                  "not initialized"), newStream->GetName().c_str(), newStream);
+         #endif
 
-         SetRampTableDataStreamObject(newStream);                                               // made changes by TUAN NGUYEN
+         SetRampTableDataStreamObject(newStream);
 
-         // Associate the adapters with the stream                                              // made changes by TUAN NGUYEN
-         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)                                  // made changes by TUAN NGUYEN
-         {                                                                                      // made changes by TUAN NGUYEN
-            #ifdef DEBUG_INITIALIZATION                                                         // made changes by TUAN NGUYEN
-               MessageInterface::ShowMessage("Associating %d with %s\n",                        // made changes by TUAN NGUYEN
-                     (*setAdapters)[j]->GetModelID(),                                           // made changes by TUAN NGUYEN
-                     newStream->GetName().c_str());                                             // made changes by TUAN NGUYEN
-            #endif                                                                              // made changes by TUAN NGUYEN
-            idToRampTableStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;                // made changes by TUAN NGUYEN
-         }// for j loop                                                                         // made changes by TUAN NGUYEN
+         // Associate the adapters with the stream
+         for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
+         {
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Associating %d with %s\n",
+                     (*setAdapters)[j]->GetModelID(),
+                     newStream->GetName().c_str());
+            #endif
+            idToRampTableStreamMap[(*setAdapters)[j]->GetModelID()] = newStream;
+         }// for j loop
 
-         if (inSimulationMode)                                                                  // made changes by TUAN NGUYEN
-         {                                                                                      // made changes by TUAN NGUYEN
-            if (newStream->OpenStream(inSimulationMode) == false)                               // made changes by TUAN NGUYEN
-               throw MeasurementException("The stream " + rampedTablenames[k1] +                // made changes by TUAN NGUYEN
-                     " failed to open in simulation mode");                                     // made changes by TUAN NGUYEN
-         }                                                                                      // made changes by TUAN NGUYEN
-      }// for k1 loop                                                                           // made changes by TUAN NGUYEN
+         if (inSimulationMode)
+         {
+            if (newStream->OpenStream(inSimulationMode) == false)
+               throw MeasurementException("The stream " + rampedTablenames[k1] + 
+                     " failed to open in simulation mode");
+         }
+      }// for k1 loop
 
    }// for i loop
 
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
-      if (streamList[i]->IsInitialized() == false)                       // made changes by TUAN NGUYEN
-         streamList[i]->Initialize();                                    // made changes by TUAN NGUYEN
+      if (streamList[i]->IsInitialized() == false)
+         streamList[i]->Initialize();
    }
 
 ///// TBD: Do we want something more generic here?
-   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)      // made changes by TUAN NGUYEN
-   {                                                                     // made changes by TUAN NGUYEN
-      if (rampTableDataStreamList[i]->IsInitialized() == false)          // made changes by TUAN NGUYEN
-         rampTableDataStreamList[i]->Initialize();                       // made changes by TUAN NGUYEN
-   }                                                                     // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)
+   {
+      if (rampTableDataStreamList[i]->IsInitialized() == false)
+         rampTableDataStreamList[i]->Initialize();
+   }
 
    #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage(
@@ -427,12 +427,10 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
    {
       std::string fname      = streamList[i]->GetStringParameter("Filename");
       std::string dataformat = streamList[i]->GetStringParameter("Format");
-//     MessageInterface::ShowMessage("* streamList[i = %d] Filename = '%s'   Format = '%s'\n", i, fname.c_str(), dataformat.c_str());
       for(UnsignedInt j = 0; j < streamList.size(); ++j)
       {
          if (i == j)
             continue;
-//       MessageInterface::ShowMessage("   + streamList[j = %d] Filename = '%s'   Format = '%s'\n", j, streamList[j]->GetStringParameter("Filename").c_str(), streamList[j]->GetStringParameter("Format").c_str());
          if ((fname == streamList[j]->GetStringParameter("Filename"))&&(dataformat != streamList[j]->GetStringParameter("Format")))
             throw MeasurementException("Error: DataFile objects '"+ streamList[i]->GetName() +"' and '" + streamList[j]->GetName() + "' have the same file name but different data format\n");
       }
@@ -477,20 +475,20 @@ bool MeasurementManager::PrepareForProcessing(bool simulating)
    }
    
 ///// TBD: Do we want something more generic here?
-   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)                          // made changes by TUAN NGUYEN
-   {                                                                                         // made changes by TUAN NGUYEN
-      #ifdef USE_DATAFILE_PLUGINS                                                            // made changes by TUAN NGUYEN
-         std::string writeMode = (simulating ? "w" : "r");                                   // made changes by TUAN NGUYEN
-         rampTableDataStreamList[i]->SetStringParameter(                                     // made changes by TUAN NGUYEN
-               rampTableDataStreamList[i]->GetParameterID("ReadWriteMode"), writeMode);      // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)
+   {
+      #ifdef USE_DATAFILE_PLUGINS
+         std::string writeMode = (simulating ? "w" : "r");
+         rampTableDataStreamList[i]->SetStringParameter(
+               rampTableDataStreamList[i]->GetParameterID("ReadWriteMode"), writeMode);
 
-         if (rampTableDataStreamList[i]->OpenFile() == false)                                // made changes by TUAN NGUYEN
-            retval = false;                                                                  // made changes by TUAN NGUYEN
-      #else                                                                                  // made changes by TUAN NGUYEN
-         if (rampTableDataStreamList[i]->OpenStream(simulating) == false)                    // made changes by TUAN NGUYEN
-            retval = false;                                                                  // made changes by TUAN NGUYEN
-      #endif                                                                                 // made changes by TUAN NGUYEN
-   }                                                                                         // made changes by TUAN NGUYEN
+         if (rampTableDataStreamList[i]->OpenFile() == false)
+            retval = false;
+      #else
+         if (rampTableDataStreamList[i]->OpenStream(simulating) == false)
+            retval = false;
+      #endif
+   }
    
    inSimulationMode = simulating;
 
@@ -533,16 +531,16 @@ bool MeasurementManager::ProcessingComplete()
    }
 
 ///// TBD: Do we want something more generic here?
-   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)      // made changes by TUAN NGUYEN
-   {                                                                     // made changes by TUAN NGUYEN
-      #ifdef USE_DATAFILE_PLUGINS                                        // made changes by TUAN NGUYEN
-         if (rampTableDataStreamList[i]->CloseFile() == false)           // made changes by TUAN NGUYEN
-            retval = false;                                              // made changes by TUAN NGUYEN
-      #else                                                              // made changes by TUAN NGUYEN
-         if (rampTableDataStreamList[i]->CloseStream() == false)         // made changes by TUAN NGUYEN
-            retval = false;                                              // made changes by TUAN NGUYEN
-      #endif                                                             // made changes by TUAN NGUYEN
-   }                                                                     // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < rampTableDataStreamList.size(); ++i)
+   {
+      #ifdef USE_DATAFILE_PLUGINS
+         if (rampTableDataStreamList[i]->CloseFile() == false)
+            retval = false;
+      #else
+         if (rampTableDataStreamList[i]->CloseStream() == false)
+            retval = false;
+      #endif
+   }
 
    #ifdef DEBUG_FLOW
       MessageInterface::ShowMessage(
@@ -603,20 +601,20 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
    {
       for (UnsignedInt j = 0; j < models.size(); ++j)
       {
-         // Specify ramp table associated with measurement model models[j]:                   // made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model                         // made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement model models[j]:
+         // Note: Only one ramp table is used for a measurement model
 ///// TBD: Do we want something more generic here?
-         StringArray sr = models[j]->GetStringArrayParameter("RampTables");                   // made changes by TUAN NGUYEN
-         std::vector<RampTableData>* rt = NULL;                                               // made changes by TUAN NGUYEN
-         if (sr.size() > 0)                                                                   // made changes by TUAN NGUYEN
-            rt = &(rampTables[sr[0]]);                                                        // made changes by TUAN NGUYEN
+         StringArray sr = models[j]->GetStringArrayParameter("RampTables");
+         std::vector<RampTableData>* rt = NULL;
+         if (sr.size() > 0)
+            rt = &(rampTables[sr[0]]);
 
          // Specify current observation data. If no observation data used, it passes a NULL pointer. 
-         ObservationData* od = NULL;                                                          // made changes by TUAN NGUYEN
-         if (!observations.empty())                                                           // made changes by TUAN NGUYEN
-            od = &(*currentObs);                                                              // made changes by TUAN NGUYEN
+         ObservationData* od = NULL;
+         if (!observations.empty())
+            od = &(*currentObs);
 
-         measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);               // made changes by TUAN NGUYEN
+         measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
 
          if (measurements[j].isFeasible)
          {
@@ -627,14 +625,14 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
 
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
       {
-         // Specify ramp table associated with measurement model models[j]:                   // made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model                         // made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement model models[j]:
+         // Note: Only one ramp table is used for a measurement model
 ///// TBD: Do we want something more generic here?
-         //StringArray sr = models[j]->GetStringArrayParameter("RampTables");                 // made changes by TUAN NGUYEN
-         StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");                 // made changes by TUAN NGUYEN
-         std::vector<RampTableData>* rt = NULL;                                               // made changes by TUAN NGUYEN
-         if (sr.size() > 0)                                                                   // made changes by TUAN NGUYEN
-            rt = &(rampTables[sr[0]]);                                                        // made changes by TUAN NGUYEN
+         //StringArray sr = models[j]->GetStringArrayParameter("RampTables");
+         StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");
+         std::vector<RampTableData>* rt = NULL;
+         if (sr.size() > 0)
+            rt = &(rampTables[sr[0]]);
 
          // Specify current observation data. If no observation data used, it
          // passes a NULL pointer.
@@ -642,7 +640,7 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
          if (!observations.empty())
             od = &(*currentObs);
 
-         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);             // made changes by TUAN NGUYEN
+         measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
          MessageInterface::ShowMessage("Calculating adapter based measurement...");
 
          if (measurements[j].isFeasible)
@@ -661,20 +659,20 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
       if ((measurementToCalc < (Integer)models.size()) && measurementToCalc >= 0)
       {
 ///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:                      // made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model                            // made changes by TUAN NGUYEN
-         StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");      // made changes by TUAN NGUYEN
-         std::vector<RampTableData>* rt = NULL;                                                  // made changes by TUAN NGUYEN
-         if (sr.size() > 0)                                                                      // made changes by TUAN NGUYEN
-            rt = &(rampTables[sr[0]]);                                                           // made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement model models[j]:
+         // Note: Only one ramp table is used for a measurement model
+         StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");
+         std::vector<RampTableData>* rt = NULL;
+         if (sr.size() > 0)
+            rt = &(rampTables[sr[0]]);
 
          // Specify current observation data. If no observation data used, it passes a NULL pointer. 
-         ObservationData* od = NULL;                                                             // made changes by TUAN NGUYEN
-         if (!observations.empty())                                                              // made changes by TUAN NGUYEN
-            od = &(*currentObs);                                                                 // made changes by TUAN NGUYEN
+         ObservationData* od = NULL;
+         if (!observations.empty())
+            od = &(*currentObs);
 
-         measurements[measurementToCalc] =                                                       // made changes by TUAN NGUYEN
-            models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);                 // made changes by TUAN NGUYEN
+         measurements[measurementToCalc] = 
+            models[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);
          
          if (measurements[measurementToCalc].isFeasible)
          {
@@ -686,13 +684,13 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
       if ((measurementToCalc < (Integer)adapters.size()) && (measurementToCalc >= 0))
       {
 ///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with tracking data adapter adapters[j]:                // made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a tracking data adapter                        // made changes by TUAN NGUYEN
-         // StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");   // made changes by TUAN NGUYEN
-         StringArray sr = adapters[measurementToCalc]->GetStringArrayParameter("RampTables");    // made changes by TUAN NGUYEN
-         std::vector<RampTableData>* rt = NULL;                                                  // made changes by TUAN NGUYEN
-         if (sr.size() > 0)                                                                      // made changes by TUAN NGUYEN
-            rt = &(rampTables[sr[0]]);                                                           // made changes by TUAN NGUYEN
+         // Specify ramp table associated with tracking data adapter adapters[j]:
+         // Note: Only one ramp table is used for a tracking data adapter
+         // StringArray sr = models[measurementToCalc]->GetStringArrayParameter("RampTables");
+         StringArray sr = adapters[measurementToCalc]->GetStringArrayParameter("RampTables");
+         std::vector<RampTableData>* rt = NULL;
+         if (sr.size() > 0)
+            rt = &(rampTables[sr[0]]);
 
          // Specify current observation data. If no observation data used, it passes a NULL pointer.
          ObservationData* od = NULL;
@@ -711,7 +709,7 @@ Integer MeasurementManager::Calculate(const Integer measurementToCalc,
          #endif
 
          measurements[measurementToCalc] =
-            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);              // made changes by TUAN NGUYEN
+            adapters[measurementToCalc]->CalculateMeasurement(withEvents, od, rt);
 
          #ifdef DEBUG_CALCULATE
             MessageInterface::ShowMessage("****** measurements[%d] = <%p>,   "
@@ -886,14 +884,14 @@ UnsignedInt MeasurementManager::LoadObservations()
       DataFileAdapter dfa;
    #endif
 
-   std::vector<ObservationData>     obsTable;              // made changes by TUAN NGUYEN
-   std::vector<UnsignedInt>         startIndexes;          // made changes by TUAN NGUYEN
-   std::vector<UnsignedInt>         endIndexes;            // made changes by TUAN NGUYEN
+   std::vector<ObservationData>     obsTable;
+   std::vector<UnsignedInt>         startIndexes;
+   std::vector<UnsignedInt>         endIndexes;
    observations.clear();
    
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
-      startIndexes.push_back(obsTable.size());             // made changes by TUAN NGUYEN
+      startIndexes.push_back(obsTable.size());
 
       ObservationData *od;
 ///// TBD: Look at file handlers here once data file pieces are designed
@@ -904,7 +902,7 @@ UnsignedInt MeasurementManager::LoadObservations()
 
 ///// TBD: Especially here; this style will cause maintenence issues as more types are added
       if ((streamFormat == "GMAT_OD") || (streamFormat == "GMAT_ODDoppler") ||
-          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // made changes by TUAN NGUYEN. It needs for loading all type of observation data (except ramp table)
+          (streamFormat == "GMATInternal") || (streamFormat == "TDM"))      // It needs for loading all type of observation data (except ramp table)
       {
       #ifdef USE_DATAFILE_PLUGINS
          if (streamList[i]->GetIsOpen())
@@ -1013,7 +1011,6 @@ UnsignedInt MeasurementManager::LoadObservations()
                   #ifdef DEBUG_LOAD_OBSERVATIONS
                      MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
                   #endif
-//                MessageInterface::ShowMessage("acc = %lf\n", acc);
                   ++filter4Num;
                   continue;
                }
@@ -1032,7 +1029,7 @@ UnsignedInt MeasurementManager::LoadObservations()
 
                // Invalid measurement value filter
                if (od->value.size() > 0)
-                  if (od->value[0] == -1.0)      // throw away this observation data if it is invalid   // made changes by TUAN NGUYEN
+                  if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
                   {
                      #ifdef DEBUG_LOAD_OBSERVATIONS
                         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", streamFormat.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
@@ -1105,7 +1102,7 @@ UnsignedInt MeasurementManager::LoadObservations()
       #endif
       } // endif ((streamFormat == "GMAT_OD")
 
-      // made changes by TUAN NGUYEN : fix bug GMT-4394
+      // fix bug GMT-4394
       if (obsTable.size() == 0)
          throw MeasurementException("Error: No observation data in tracking data file '" + streamList[i]->GetStringParameter("Filename") +"'\n"); 
       else
@@ -1152,23 +1149,6 @@ UnsignedInt MeasurementManager::LoadObservations()
       for (UnsignedInt i = 0; i < observations.size(); ++i)
          MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
    #endif
-      //std::fstream fs;
-      //fs.open("datafile.txt",std::ios_base::out);
-      //ObservationData data;
-      //char line[1000];
-      //std::string s;
-      //for (UnsignedInt i = 0; i < observations.size(); ++i)
-      //{
-      //   data = observations[i];
-      //   Real TAIepoch = TimeConverterUtil::ConvertToTaiMjd(TimeConverterUtil::A1MJD, data.epoch);
-      //   sprintf(&line[0], "%.12lf   DSNTwoWayDoppler   7051   %s %s   %d   %lf   %.16le\0", TAIepoch, data.participantIDs[0].c_str(), data.participantIDs[1].c_str(), data.uplinkBand, data.dopplerCountInterval, data.value[0]);
-      //   s = "";
-      //   s.append(&line[0]);
-      //   MessageInterface::ShowMessage("%s\n", s.c_str());
-      //   fs << s << "\n";
-      //   fs.flush();
-      //}
-      //fs.close();
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
@@ -1191,11 +1171,10 @@ std::vector<ObservationData>* MeasurementManager::GetObservationDataList()
 
 
 //-----------------------------------------------------------------------------
-// void LoadRampTables()                                    // this function was added by TUAN NGUYEN
+// void LoadRampTables()
 //-----------------------------------------------------------------------------
 /**
  * Load all frequency ramp tables.
- *
  */
 //-----------------------------------------------------------------------------
 void MeasurementManager::LoadRampTables()
@@ -1392,7 +1371,6 @@ const ObservationData *MeasurementManager::GetObsData(
 }
 
 
-// Made changes by TUAN NGUYEN
 //-----------------------------------------------------------------------------
 // ObservationData* GetObsDataObject(const Integer observationToGet)
 //-----------------------------------------------------------------------------
@@ -1439,15 +1417,6 @@ bool MeasurementManager::AdvanceObservation()
    if (currentObs != observations.end())
    {
       ++currentObs;
-
-     // This change intends to use all observation data no matter it is either in used or not. 
-     // When they come into BatchEstimatorInv::Accumulate() function, all unused data will be 
-     // writen to report file as unused data.  
-      //while ((currentObs != observations.end())&&      // made changes by TUAN NGUYEN
-          // (!currentObs->inUsed))                      // made changes by TUAN NGUYEN
-      //{                                                // made changes by TUAN NGUYEN
-      //      ++currentObs;                              // made changes by TUAN NGUYEN
-      //}                                                // made changes by TUAN NGUYEN
    }
 
 
@@ -1626,13 +1595,12 @@ const StringArray& MeasurementManager::GetMeasurementNames() const
 
 
 
-// made changes by TUAN NGUYEN
 const std::vector<TrackingFileSet*> MeasurementManager::GetTrackingSets() const
 {
    return trackingSets;
 }
 
-                         // made changes by TUAN NGUYEN
+
 const std::vector<TrackingDataAdapter*> MeasurementManager::GetTrackingDataAdapters() const
 {
    return adapters;
@@ -1776,7 +1744,6 @@ GmatBase* MeasurementManager::GetClone(GmatBase *obj)
 
 //------------------------------------------------------------------------------
 // bool CalculateMeasurements(bool forSimulation, bool withEvents, bool addNoise)   
-//                                                               This method was modified by TUAN NGUYEN
 //------------------------------------------------------------------------------
 /**
  * Fires the calculation method of each owned MeasurementModel
@@ -1797,9 +1764,9 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
    #endif
    
    // Specify observation data for measurement
-   ObservationData* od = NULL;                                                // made changes by TUAN NGUYEN
-   if (!observations.empty())                                                 // made changes by TUAN NGUYEN
-      od = &(*currentObs);                                                    // made changes by TUAN NGUYEN
+   ObservationData* od = NULL;
+   if (!observations.empty())
+      od = &(*currentObs);
 
    bool retval = false;
    eventCount = 0;
@@ -1813,12 +1780,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #endif
 
 ///// TBD: Do we want something more generic here?
-         // Specify ramp table associated with measurement model models[j]:               // made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model                     // made changes by TUAN NGUYEN
-         StringArray sr = models[j]->GetStringArrayParameter("RampTables");               // made changes by TUAN NGUYEN
-         std::vector<RampTableData>* rt = NULL;                                           // made changes by TUAN NGUYEN
-         if (sr.size() > 0)                                                               // made changes by TUAN NGUYEN
-            rt = &(rampTables[sr[0]]);                                                    // made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement model models[j]:
+         // Note: Only one ramp table is used for a measurement model
+         StringArray sr = models[j]->GetStringArrayParameter("RampTables");
+         std::vector<RampTableData>* rt = NULL;
+         if (sr.size() > 0)
+            rt = &(rampTables[sr[0]]);
        
          if (withEvents)
          {  
@@ -1827,8 +1794,8 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             #endif
             if (measurements[j].isFeasible)
             {
-               measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);      // made changes by TUAN NGUYEN
-               if (measurements[j].unfeasibleReason == "R")                                          // made changes by TUAN NGUYEN
+               measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt, addNoise);
+               if (measurements[j].unfeasibleReason == "R")
                {
                   Real a1Time = measurements[j].epoch;
                   Real taiTime;
@@ -1846,7 +1813,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
                MessageInterface::ShowMessage(" Simulation: measurement without events\n");
             #endif
             // without event, no noise is added due to check feasibility
-            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);         // made changes by TUAN NGUYEN
+            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
          }
 
          if (measurements[j].isFeasible)
@@ -1868,12 +1835,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
       #endif
       for (UnsignedInt i = 0; i < adapters.size(); ++i)
       {
-         // Specify ramp table associated with measurement adapters[i]:                   // made changes by TUAN NGUYEN
-         // Note: Only one ramp table is used for a measurement model                     // made changes by TUAN NGUYEN
-         StringArray sr = adapters[i]->GetStringArrayParameter("RampTables");             // made changes by TUAN NGUYEN
-         std::vector<RampTableData>* rt = NULL;                                           // made changes by TUAN NGUYEN
-         if (sr.size() > 0)                                                               // made changes by TUAN NGUYEN
-            rt = &(rampTables[sr[0]]);                                                    // made changes by TUAN NGUYEN
+         // Specify ramp table associated with measurement adapters[i]:
+         // Note: Only one ramp table is used for a measurement model
+         StringArray sr = adapters[i]->GetStringArrayParameter("RampTables");
+         std::vector<RampTableData>* rt = NULL;
+         if (sr.size() > 0)
+            rt = &(rampTables[sr[0]]);
 
          #ifdef DEBUG_CALCULATE_MEASUREMENTS
             MessageInterface::ShowMessage("******** Ramped table names size = %d\n", sr.size());
@@ -1892,8 +1859,6 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          #endif
 
          // Run CalculateMeasurement() function 
-//         measurements[i] = adapters[i]->CalculateMeasurement(withEvents, od, rt);
-//         retval = measurements[i].isFeasible;
          if (withEvents)
          {  
             #ifdef DEBUG_CALCULATE_MEASUREMENTS
@@ -2002,14 +1967,14 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          else
          {
 ///// TBD: Do we want something more generic here?
-            // Specify ramp table associated with measurement model models[j]:                // made changes by TUAN NGUYEN
-            // Note: Only one ramp table is used for a measurement model                      // made changes by TUAN NGUYEN
-            StringArray sr = models[j]->GetStringArrayParameter("RampTables");                // made changes by TUAN NGUYEN
-            std::vector<RampTableData>* rt = NULL;                                            // made changes by TUAN NGUYEN
-            if (sr.size() > 0)                                                                // made changes by TUAN NGUYEN
-               rt = &(rampTables[sr[0]]);                                                     // made changes by TUAN NGUYEN
+            // Specify ramp table associated with measurement model models[j]:
+            // Note: Only one ramp table is used for a measurement model
+            StringArray sr = models[j]->GetStringArrayParameter("RampTables");
+            std::vector<RampTableData>* rt = NULL;
+            if (sr.size() > 0)
+               rt = &(rampTables[sr[0]]);
           
-            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);            // made changes by TUAN NGUYEN
+            measurements[j] = models[j]->CalculateMeasurement(withEvents, od, rt);
         
             if (measurements[j].isFeasible)
             {
@@ -2062,12 +2027,12 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
          else
          {
 ///// TBD: Do we want something more generic here?
-            // Specify ramp table associated with tracking data adapter adapters[j]:          // made changes by TUAN NGUYEN
-            // Note: Only one ramp table is used for a tracking data adapter                  // made changes by TUAN NGUYEN
-            StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");              // made changes by TUAN NGUYEN
-            std::vector<RampTableData>* rt = NULL;                                            // made changes by TUAN NGUYEN
-            if (sr.size() > 0)                                                                // made changes by TUAN NGUYEN
-               rt = &(rampTables[sr[0]]);                                                     // made changes by TUAN NGUYEN
+            // Specify ramp table associated with tracking data adapter adapters[j]:
+            // Note: Only one ramp table is used for a tracking data adapter
+            StringArray sr = adapters[j]->GetStringArrayParameter("RampTables");
+            std::vector<RampTableData>* rt = NULL;
+            if (sr.size() > 0)
+               rt = &(rampTables[sr[0]]);
           
             measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
 
@@ -2320,7 +2285,7 @@ const StringArray& MeasurementManager::GetStreamList()
 
 ///// TBD: Do we want something more generic here?
 //-----------------------------------------------------------------------------
-// const StringArray& GetRampTableDataStreamList()            // this function was added by TUAN NGUYEN for processing ramp tables
+// const StringArray& GetRampTableDataStreamList()
 //-----------------------------------------------------------------------------
 /**
  * Retrieves a list of the ramp table data streams available to this

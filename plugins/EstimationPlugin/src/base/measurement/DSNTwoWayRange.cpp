@@ -498,18 +498,14 @@ const std::vector<RealArray>& DSNTwoWayRange::CalculateMeasurementDerivatives(
          #endif
       }
 
-//   if (objNumber == -1)
-//      throw MeasurementException(
-//            "DSNTwoWayRange error - object is neither participant nor "
-//            "measurement model.");
 
    RealArray oneRow;
    oneRow.assign(size, 0.0);
    currentDerivatives.clear();
    currentDerivatives.push_back(oneRow);
 
-   if (objNumber == -1)                                                                                             // made changes by TUAN NGUYEN
-      return currentDerivatives;         // return zero vector when variable is independent of DSNTwoWay range      // made changes by TUAN NGUYEN
+   if (objNumber == -1)
+      return currentDerivatives;         // return zero vector when variable is independent of DSNTwoWay range
 
    Integer parameterID = GetParmIdFromEstID(id, obj);
 
@@ -830,7 +826,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       //     outState = R_o_j2k * rangeVecInertial;
       //    currentMeasurement.feasibilityValue = outState[2];
       outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -1193,7 +1189,7 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
 
       // 7. Get frequency from transmitter of ground station (participants[0])
       Real uplinkFreq;
-      if (obsData == NULL)                                                                                 // made changes by TUAN NGUYEN
+      if (obsData == NULL)
       {
          if (rampTB == NULL)
          {
@@ -1264,8 +1260,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("   UpLink signal frequency = %.12lf MHz\n", uplinkFreq);
       #endif
 
-      // r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system for uplink leg      // made change by TUAN NGUYEN
-      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);                          // made change by TUAN NGUYEN
+      // r3B and r4B are location of station and spacecraft in SSBMJ2000Eq coordinate system for uplink leg
+      RealArray uplinkCorrection = CalculateMediaCorrection(uplinkFreq, r3B, r4B, t1T);
 
       Real uplinkRangeCorrection = uplinkCorrection[0]*GmatMathConstants::M_TO_KM + uplinkLeg.GetRelativityCorrection();
       Real uplinkRealRange = uplinkRange + uplinkRangeCorrection;
@@ -1337,8 +1333,8 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("8. Media correction for downlink leg\n");
       #endif
-      // r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system for downlink leg               // made change by TUAN NGUYEN
-      RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);                               // made change by TUAN NGUYEN
+      // r1B and r2B are location of station and spacecraft in SSBMJ2000Eq coordinate system for downlink leg
+      RealArray downlinkCorrection = CalculateMediaCorrection(downlinkDSFreq, r1B, r2B, t3R);
 
       Real downlinkRangeCorrection = downlinkCorrection[0]*GmatMathConstants::M_TO_KM + downlinkLeg.GetRelativityCorrection();
       Real downlinkRealRange = downlinkRange + downlinkRangeCorrection;
@@ -1355,9 +1351,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       uplinkTime   = uplinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
       downlinkTime = downlinkRealRange*GmatMathConstants::KM_TO_M / GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;
       // 17.2. Calculate ET-TAI correction
-      Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);                                                                 // made change by TUAN NGUYEN
+      Real ettaiCorrection = (useETminusTAICorrection?(ettaiT1 - ettaiT3):0.0);
       // 17.3 Calculate travel time
-      Real realTravelTime = uplinkTime + downlinkTime + ettaiCorrection + receiveDelay + transmitDelay + targetDelay;      // unit: second      // made change by TUAN NGUYEN
+      Real realTravelTime = uplinkTime + downlinkTime + ettaiCorrection + receiveDelay + transmitDelay + targetDelay;      // unit: second
 
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("9. Travel time:\n");
@@ -1374,33 +1370,20 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
       //18. Verify uplink leg light path not to be blocked by station's central body
       // UpdateRotationMatrix(t1T, "R_o_j2k");
       UpdateRotationMatrix(t1T, "o_j2k");
-      // Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();                                                                  // made changes by TUAN NGUYEN
+      // Rvector3 outState = (R_o_j2k * (r4 - r3)).GetUnitVector();
       Rvector3 rVec = r4B - r3B;
       Rvector3 obsVec = R_o_j2k * rVec;
-      Rvector3 outState = obsVec.GetUnitVector();           // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree      // made changes by TUAN NGUYEN
-      //MessageInterface::ShowMessage("At transmit time t1T = %.12lf:\n", t1T);
-      //MessageInterface::ShowMessage("Range Vector in SBBMJ2000: [ %.12lf   %.12lf   %.12lf\n", rVec[0], rVec[1], rVec[2]);
-      //MessageInterface::ShowMessage("R_o_2k = [ %.12lf   %.12lf   %.12lf\n", R_o_j2k(0,0), R_o_j2k(0,1), R_o_j2k(0,2));
-      //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf\n", R_o_j2k(1,0), R_o_j2k(1,1), R_o_j2k(1,2));
-      //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf]\n", R_o_j2k(2,0), R_o_j2k(2,1), R_o_j2k(2,2));
-      //MessageInterface::ShowMessage("Observation vector: [ %.12lf   %.12lf   %.12lf\n", obsVec[0], obsVec[1], obsVec[2]);
+      Rvector3 outState = obsVec.GetUnitVector();           // It has to use range vector in SSB coordinate system
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
       if (currentMeasurement.feasibilityValue > minAngle)
       {
          // UpdateRotationMatrix(t3R, "R_o_j2k");
          UpdateRotationMatrix(t3R, "o_j2k");
-         // outState = (R_o_j2k * (r2 - r1)).GetUnitVector();                                                                        // made changes by TUAN NGUYEN
+         // outState = (R_o_j2k * (r2 - r1)).GetUnitVector();
          rVec = r2B - r1B;
          obsVec = R_o_j2k * rVec;
-         outState = obsVec.GetUnitVector();                 // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
-         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree      // made changes by TUAN NGUYEN
-
-         //MessageInterface::ShowMessage("At receive time t3R = %.12lf:\n", t3R);
-         //MessageInterface::ShowMessage("Range Vector in SBBMJ2000: [ %.12lf   %.12lf   %.12lf\n", rVec[0], rVec[1], rVec[2]);
-         //MessageInterface::ShowMessage("R_o_2k = [ %.12lf   %.12lf   %.12lf\n", R_o_j2k(0,0), R_o_j2k(0,1), R_o_j2k(0,2));
-         //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf\n", R_o_j2k(1,0), R_o_j2k(1,1), R_o_j2k(1,2));
-         //MessageInterface::ShowMessage("           %.12lf   %.12lf   %.12lf]\n", R_o_j2k(2,0), R_o_j2k(2,1), R_o_j2k(2,2));
-         //MessageInterface::ShowMessage("Observation vector: [ %.12lf   %.12lf   %.12lf\n", obsVec[0], obsVec[1], obsVec[2]);
+         outState = obsVec.GetUnitVector();                 // It has to use range vector in SSB coordinate system
+         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree
 
          if (feasibilityValue > minAngle)
          {
@@ -1422,9 +1405,9 @@ bool DSNTwoWayRange::Evaluate(bool withEvents)
          currentMeasurement.isFeasible = false;
 
          //UpdateRotationMatrix(t3R, "o_j2k");
-         //outState = (R_o_j2k * (r2B - r1B)).GetUnitVector();                 // It has to use range vector in SSB coordinate system  // made changes by TUAN NGUYEN
-         //Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree      // made changes by TUAN NGUYEN
-         //MessageInterface::ShowMessage(" B1 up  :  uplink:  %.12lf  downlink:  \n", currentMeasurement.feasibilityValue, feasibilityValue);
+         //outState = (R_o_j2k * (r2B - r1B)).GetUnitVector();                 // It has to use range vector in SSB coordinate system
+         //Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree
+         
       }
 
       // 19. Calculate real range

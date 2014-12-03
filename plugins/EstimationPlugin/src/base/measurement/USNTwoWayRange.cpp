@@ -536,11 +536,11 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
    #endif
 
    // Get minimum elevation angle for ground station
-   Real minAngle;                                                                                            // made changes by TUAN NGUYEN
-   if (participants[0]->IsOfType(Gmat::GROUND_STATION))                                                      // made changes by TUAN NGUYEN
-      minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");      // made changes by TUAN NGUYEN
-   else if (participants[1]->IsOfType(Gmat::GROUND_STATION))                                                 // made changes by TUAN NGUYEN
-      minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");      // made changes by TUAN NGUYEN
+   Real minAngle;
+   if (participants[0]->IsOfType(Gmat::GROUND_STATION))
+      minAngle = ((GroundstationInterface*)participants[0])->GetRealParameter("MinimumElevationAngle");
+   else if (participants[1]->IsOfType(Gmat::GROUND_STATION))
+      minAngle = ((GroundstationInterface*)participants[1])->GetRealParameter("MinimumElevationAngle");
 
    if (withEvents == false)
    {
@@ -564,7 +564,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 //    outState = R_o_j2k * rangeVecInertial;
 //    currentMeasurement.feasibilityValue = outState[2];
       outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -935,7 +935,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
 
          // 8. Get frequency from transmitter of ground station (participants[0])
          Real uplinkFreq;
-         if (obsData == NULL)                                                                                 // made changes by TUAN NGUYEN
+         if (obsData == NULL)
          {
             if (rampTB == NULL)
             {
@@ -1105,7 +1105,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       //19. Verify uplink leg light path not to be blocked by station's central body
       UpdateRotationMatrix(t1T, "o_j2k");
       Rvector3 outState = (R_o_j2k * (r4B - r3B)).GetUnitVector();
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
       #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
          MessageInterface::ShowMessage("Uplink elevation angle = %.8lf     minAngle = %.8lf\n", currentMeasurement.feasibilityValue, minAngle);
       #endif
@@ -1114,7 +1114,7 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       {
          UpdateRotationMatrix(t3R, "o_j2k");
          outState = (R_o_j2k * (r2B - r1B)).GetUnitVector();
-         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
+         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree
          #ifdef DEBUG_RANGE_CALC_WITH_EVENTS
             MessageInterface::ShowMessage("Downlink elevation angle = %.8lf\n", currentMeasurement.feasibilityValue);
          #endif

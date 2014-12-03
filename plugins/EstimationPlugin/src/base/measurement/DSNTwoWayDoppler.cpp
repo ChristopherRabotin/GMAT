@@ -220,18 +220,14 @@ const std::vector<RealArray>& DSNTwoWayDoppler::CalculateMeasurementDerivatives(
       #endif
    }
 
-//   if (objNumber == -1)                                                                 // made changes by TUAN NGUYEN
-//      throw MeasurementException(                                                       // made changes by TUAN NGUYEN
-//            "DSNTwoWayDoppler error - object is neither participant nor "               // made changes by TUAN NGUYEN
-//            "measurement model.");                                                      // made changes by TUAN NGUYEN
 
    RealArray oneRow;
    oneRow.assign(size, 0.0);
    currentDerivatives.clear();
    currentDerivatives.push_back(oneRow);
 
-   if (objNumber == -1)                                                                                             // made changes by TUAN NGUYEN
-      return currentDerivatives;         // return zero vector when variable is independent of DSNTwoWay range      // made changes by TUAN NGUYEN
+   if (objNumber == -1)
+      return currentDerivatives;         // return zero vector when variable is independent of DSNTwoWay range
 
    Integer parameterID = GetParmIdFromEstID(id, obj);
 
@@ -517,7 +513,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 //    outState = R_o_j2k * rangeVecInertial;
 //    currentMeasurement.feasibilityValue = outState[2];
       outState = (R_o_j2k * rangeVecInertial).GetUnitVector();
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
 
       #ifdef CHECK_PARTICIPANT_LOCATIONS
          MessageInterface::ShowMessage("Evaluating without events\n");
@@ -1139,8 +1135,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       #endif
 
       // 12.1. Calculate media correction for uplink leg:
-      // r3SB and r4SB are location of station and spacecraft in SSB inertial coordinate system for uplink leg   for S path   // made change by TUAN NGUYEN
-      RealArray uplinkCorrectionS = CalculateMediaCorrection(uplinkFreqS, r3SB, r4SB, t1TS);                                  // made change by TUAN NGUYEN
+      // r3SB and r4SB are location of station and spacecraft in SSB inertial coordinate system for uplink leg   for S path
+      RealArray uplinkCorrectionS = CalculateMediaCorrection(uplinkFreqS, r3SB, r4SB, t1TS);
      
       Real uplinkRangeCorrectionS = uplinkCorrectionS[0]*GmatMathConstants::M_TO_KM + uplinkLegS.GetRelativityCorrection();
       Real uplinkRealRangeS = uplinkRangeS + uplinkRangeCorrectionS;
@@ -1195,8 +1191,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("       Downlink frequency = Turn around ratio x Uplink Doppler shift frequency              = %.12le Mhz\n", downlinkFreqS);
          MessageInterface::ShowMessage("       Downlink Doppler shift frequency = (1 - downlink range rate / c)x Downlink frequency = %.12le MHz\n", downlinkDSFreqS);
       #endif
-      // r1SB and r2SB are location of station and spacecraft in central body inertial coordinate system for downlink leg   for S path      // made change by TUAN NGUYEN
-      RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1SB, r2SB, t3RS);                                          // made change by TUAN NGUYEN
+      // r1SB and r2SB are location of station and spacecraft in central body inertial coordinate system for downlink leg   for S path
+      RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1SB, r2SB, t3RS);
 
       Real downlinkRangeCorrectionS = downlinkCorrectionS[0]*GmatMathConstants::M_TO_KM + downlinkLegS.GetRelativityCorrection();
       Real downlinkRealRangeS = downlinkRangeS + downlinkRangeCorrectionS;
@@ -1214,8 +1210,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("4.2.1. Media correction for uplink leg:\n");
       #endif
       // 13.1. Calculate media correction for uplink leg:
-      // r3EB and r4EB are location of station and spacecraft in SSB inertial coordinate system for uplink leg   for E path   // made change by TUAN NGUYEN
-      RealArray uplinkCorrectionE = CalculateMediaCorrection(uplinkFreqE, r3EB, r4EB, t1TE);                                  // made change by TUAN NGUYEN
+      // r3EB and r4EB are location of station and spacecraft in SSB inertial coordinate system for uplink leg   for E path
+      RealArray uplinkCorrectionE = CalculateMediaCorrection(uplinkFreqE, r3EB, r4EB, t1TE);
 
       Real uplinkRangeCorrectionE = uplinkCorrectionE[0]*GmatMathConstants::M_TO_KM + uplinkLegE.GetRelativityCorrection();
       Real uplinkRealRangeE = uplinkRangeE + uplinkRangeCorrectionE;
@@ -1271,8 +1267,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("       Downlink Doppler shift frequency = (1 - downlink range rate / c)x Downlink frequency = %.12le MHz\n", downlinkDSFreqE);
       #endif
 
-      // r1EB and r2EB are location of station and spacecraft in SSB inertial coordinate system for downlink leg   for E path      // made change by TUAN NGUYEN
-      RealArray downlinkCorrectionE = CalculateMediaCorrection(downlinkDSFreqE, r1EB, r2EB, t3RE);                                 // made change by TUAN NGUYEN
+      // r1EB and r2EB are location of station and spacecraft in SSB inertial coordinate system for downlink leg   for E path
+      RealArray downlinkCorrectionE = CalculateMediaCorrection(downlinkDSFreqE, r1EB, r2EB, t3RE);
 
       Real downlinkRangeCorrectionE = downlinkCorrectionE[0]*GmatMathConstants::M_TO_KM + downlinkLegE.GetRelativityCorrection();
       Real downlinkRealRangeE = downlinkRangeE + downlinkRangeCorrectionE;
@@ -1287,12 +1283,12 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 
       // 14. Time travel for start path and the end path:
       // 14.1. Calculate ET-TAI correction
-      Real ettaiCorrectionS = (useETminusTAICorrection?(ettaiT1S - ettaiT3S):0.0);                                                   // made change by TUAN NGUYEN
-      Real ettaiCorrectionE = (useETminusTAICorrection?(ettaiT1E - ettaiT3E):0.0);                                                   // made change by TUAN NGUYEN
+      Real ettaiCorrectionS = (useETminusTAICorrection?(ettaiT1S - ettaiT3S):0.0);
+      Real ettaiCorrectionE = (useETminusTAICorrection?(ettaiT1E - ettaiT3E):0.0);
       // 14.2 Total times for the start path and the end path:
-      dtS = (uplinkRealRangeS + downlinkRealRangeS)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM + ettaiCorrectionS +   // made change by TUAN NGUYEN
+      dtS = (uplinkRealRangeS + downlinkRealRangeS)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM + ettaiCorrectionS + 
             transmitDelay + receiveDelay + targetDelay;
-      dtE = (uplinkRealRangeE + downlinkRealRangeE)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM + ettaiCorrectionE +   // made change by TUAN NGUYEN
+      dtE = (uplinkRealRangeE + downlinkRealRangeE)*GmatMathConstants::KM_TO_M/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM + ettaiCorrectionE + 
             transmitDelay + receiveDelay + targetDelay;
       
       #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
@@ -1328,13 +1324,13 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       // UpdateRotationMatrix(t1TS, "R_o_j2k");
       UpdateRotationMatrix(t1TS, "o_j2k");
       Rvector3 outState = (R_o_j2k * (r4S - r3S)).GetUnitVector();
-      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+      currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
       if (currentMeasurement.feasibilityValue > minAngle)
       {
          // UpdateRotationMatrix(t3RS, "R_o_j2k");
          UpdateRotationMatrix(t3RS, "o_j2k");
          outState = (R_o_j2k * (r2S - r1S)).GetUnitVector();
-         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
+         Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree
 
          if (feasibilityValue > minAngle)
          {
@@ -1360,13 +1356,13 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          // UpdateRotationMatrix(t1TE, "R_o_j2k");
          UpdateRotationMatrix(t1TE, "o_j2k");
          outState = (R_o_j2k * (r4E - r3E)).GetUnitVector();
-         currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree   // made changes by TUAN NGUYEN
+         currentMeasurement.feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;      // elevation angle in degree
          if (currentMeasurement.feasibilityValue > minAngle)
          {
             // UpdateRotationMatrix(t3RE, "R_o_j2k");
             UpdateRotationMatrix(t3RE, "o_j2k");
             outState = (R_o_j2k * (r2E - r1E)).GetUnitVector();
-            Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree   // made changes by TUAN NGUYEN
+            Real feasibilityValue = asin(outState[2])*GmatMathConstants::DEG_PER_RAD;                 // elevation angle in degree
 
             if (feasibilityValue > minAngle)
             {
@@ -1405,17 +1401,17 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("         dtdt = dtE - dtS : %.15lf s\n", dtdt);
       #endif
 
-      currentMeasurement.uplinkFreq = frequencyE;            // uplink frequency for E path                              // made changes by TUAN NGUYEN
-      currentMeasurement.uplinkBand = freqBand;                                                                          // made changes by TUAN NGUYEN
-      currentMeasurement.dopplerCountInterval = interval;                                                                // made changes by TUAN NGUYEN
+      currentMeasurement.uplinkFreq = frequencyE;            // uplink frequency for E path
+      currentMeasurement.uplinkBand = freqBand;
+      currentMeasurement.dopplerCountInterval = interval;
 
-      if (rampTB != NULL)                                                                                                // made changes by TUAN NGUYEN
+      if (rampTB != NULL)
       {
          Integer errnum;
          try
          {
-//           currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;      // made changes by TUAN NGUYEN
-             currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE, errnum)/ interval;         // made changes by TUAN NGUYEN
+//           currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;
+             currentMeasurement.value[0] = - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE, errnum)/ interval;
          } catch (MeasurementException exp)
          {
             currentMeasurement.value[0] = 0.0;                  // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
@@ -1438,14 +1434,14 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
             MessageInterface::ShowMessage("    ramped integral = %.12lf\n", rampedIntegral);
          #endif
       }
-      else                                                                                             // made changes by TUAN NGUYEN
+      else
       {
          #ifdef DEBUG_DOPPLER_CALC_WITH_EVENTS
             MessageInterface::ShowMessage("    Use unramped DSNTwoWayDoppler calculation:\n");
             MessageInterface::ShowMessage("       frequency        : %.12lf Hz\n", frequency);
          #endif
        
-         currentMeasurement.value[0] = -turnaround*frequency*(interval - dtdt)/interval;                                 // made changes by TUAN NGUYEN
+         currentMeasurement.value[0] = -turnaround*frequency*(interval - dtdt)/interval;
       }
 
 

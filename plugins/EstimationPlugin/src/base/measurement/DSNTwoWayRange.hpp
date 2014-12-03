@@ -70,15 +70,15 @@ protected:
    /// Range rate of the downlink
    Real                 downlinkRangeRate;
 
-   /// Range modulo                                                                 // made changes by TUAN NGUYEN
-   Real                 rangeModulo;                                                // made changes by TUAN NGUYEN
+   /// Range modulo
+   Real                 rangeModulo;
 
-   virtual bool                  Evaluate(bool withEvents = false);
-   Real                          GetFrequencyFactor(Real frequency = 0.0);
+   virtual bool         Evaluate(bool withEvents = false);
+   Real                 GetFrequencyFactor(Real frequency = 0.0);
 
    // This function is different from  PhysicalMeasurement::IntegralRampedFrequency(Real t0, Real delta_t)
    // The difference is this function using frequency factor in its calculation instead of frequency  
-   virtual Real                  IntegralRampedFrequency(Real t0, Real delta_t, Integer& err);            // made changes by TUAN NGUYEN
+   virtual Real         IntegralRampedFrequency(Real t0, Real delta_t, Integer& err);
 
 
    /// Enumeration defining the DSNTwoWayRange's scriptable parameters
@@ -98,8 +98,6 @@ protected:
                 PARAMETER_TYPE[DSNTwoWayRangeParamCount -
                                TwoWayRangeParamCount];
 
-// private:
-//   Real GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);      // made changes by TUAN NGUYEN
 };
 
 #endif /* DSNTwoWayRange_hpp */

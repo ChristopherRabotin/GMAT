@@ -27,8 +27,8 @@
 #include "MeasurementException.hpp"
 #include <sstream>                  // for stringstream
 
-#include "GroundstationInterface.hpp"				// made changes by TUAN NGUYEN
-#include "Spacecraft.hpp"							// made changes by TUAN NGUYEN
+#include "GroundstationInterface.hpp"
+#include "Spacecraft.hpp"
 
 
 //#define DEBUG_CONSTRUCTOR
@@ -248,13 +248,12 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
             participantHardware.insert(participantHardware.begin(), hv);
             stationParticipant = true;
 		    
-			// add hardware to participantHardware list:				// made changes by TUAN NGUYEN
+			// add hardware to participantHardware list:
 			ObjectArray objList = obj->GetRefObjectArray(Gmat::HARDWARE);
 			int index = 0;
 			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
 			{
 				participantHardware[0].push_back((Hardware*)(*i));
-//				MessageInterface::ShowMessage("CoreMeasurement<'%s',%p>::SetRefObject():  set hardware to participantHardware[0][%d] = '%s'\n", GetName().c_str(), this, index, participantHardware[0][index]->GetName().c_str());
 				++index;
 			}
 
@@ -264,7 +263,7 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
             participants.push_back((SpacePoint*)obj);
             participantHardware.push_back(hv);
 			
-			// add hardware to participantHardware list:					// made changes by TUAN NGUYEN
+			// add hardware to participantHardware list:
 			Spacecraft* sc = (Spacecraft*)obj;
 			ObjectArray objList = sc->GetRefObjectArray(Gmat::HARDWARE);
 			int index1 = participantHardware.size() - 1;

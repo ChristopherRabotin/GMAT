@@ -76,7 +76,7 @@ public:
    void                    AddMeasurementName(std::string measName);
    GmatBase*               GetClone(GmatBase *obj);
    const StringArray&      GetMeasurementNames() const;
-   const IntegerArray      GetMeasurementId(const std::string &modelName) const;  // made changes by TUAN NGUYEN
+   const IntegerArray      GetMeasurementId(const std::string &modelName) const;
    const StringArray&      GetParticipantList();
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
@@ -88,32 +88,32 @@ public:
    bool                    WriteMeasurement(const Integer measurementToWrite);
 
 ///// TBD: Do we want something more generic here?
-   const StringArray&      GetRampTableDataStreamList();                            // made changes by TUAN NGUYEN
-   void                    SetRampTableDataStreamObject(DataFile *newStream);       // made changes by TUAN NGUYEN
+   const StringArray&      GetRampTableDataStreamList();
+   void                    SetRampTableDataStreamObject(DataFile *newStream);
 
    IntegerArray&           GetValidMeasurementList();
 
    // Observation reader methods needed for estimation
-   UnsignedInt             LoadObservations();                                      // made changes by TUAN NGUYEN
+   UnsignedInt             LoadObservations();
    
 ///// TBD: Do we want something more generic here?
-   // Ramp tables reader method needed for simulator                                // made changes by TUAN NGUYEN
-   void                    LoadRampTables();                                        // made changes by TUAN NGUYEN
+   // Ramp tables reader method needed for simulator
+   void                    LoadRampTables();
 
-   const std::vector<MeasurementModel*>& GetAllMeasurementModels();                 // made changes by TUAN NGUYEN
-   UnsignedInt             GetCurrentRecordNumber();                                // made changes by TUAN NGUYEN
+   const std::vector<MeasurementModel*>& GetAllMeasurementModels();
+   UnsignedInt             GetCurrentRecordNumber();
    
    GmatEpoch               GetEpoch();
    GmatEpoch               GetNextEpoch();
    const ObservationData * GetObsData(const Integer observationToGet = -1);
-   ObservationData*        GetObsDataObject(const Integer observationToGet = -1);   // made changes by TUAN NGUYEN
-   bool                    AdvanceObservation();                                    // made changes by TUAN NGUYEN      for Bug 8 in ticket GMT-4314
+   ObservationData*        GetObsDataObject(const Integer observationToGet = -1);
+   bool                    AdvanceObservation();                                    // made changes for Bug 8 in ticket GMT-4314
    void                    Reset();
    
-   std::vector<ObservationData>* GetObservationDataList();                          // made changes by TUAN NGUYEN
+   std::vector<ObservationData>* GetObservationDataList();
 
-   const std::vector<TrackingFileSet*>     GetTrackingSets() const ;                 // made changes by TUAN NGUYEN
-   const std::vector<TrackingDataAdapter*> GetTrackingDataAdapters() const;          // made changes by TUAN NGUYEN
+   const std::vector<TrackingFileSet*>     GetTrackingSets() const ;
+   const std::vector<TrackingDataAdapter*> GetTrackingDataAdapters() const;
 
 protected:
    /// List of the managed measurement models
@@ -158,15 +158,15 @@ protected:
 
 
 ///// TBD: Do we want something more generic here?
-   /// ramp table data stream names                                             // made changes by TUAN NGUYEN
-   StringArray                      rampTableDataStreamNames;                   // made changes by TUAN NGUYEN
-   /// Ramp table data stream objects                                           // made changes by TUAN NGUYEN
-   std::vector<DataFile*>           rampTableDataStreamList;                    // made changes by TUAN NGUYEN
-   /// Maping between unique IDs and the associated data files                  // made changes by TUAN NGUYEN
-   std::map<Integer,DataFile*>      idToRampTableStreamMap;                     // made changes by TUAN NGUYEN
-   /// Association between name of DataFile objects and frequency ramp tables   // made changes by TUAN NGUYEN
-   std::map<std::string,std::vector<RampTableData> >                            // made changes by TUAN NGUYEN
-                                    rampTables;                                 // made changes by TUAN NGUYEN
+   /// ramp table data stream names
+   StringArray                      rampTableDataStreamNames;
+   /// Ramp table data stream objects
+   std::vector<DataFile*>           rampTableDataStreamList;
+   /// Maping between unique IDs and the associated data files
+   std::map<Integer,DataFile*>      idToRampTableStreamMap;
+   /// Association between name of DataFile objects and frequency ramp tables
+   std::map<std::string,std::vector<RampTableData> >
+                                    rampTables;
 
 
    /// Temporary element used to manage events that are ready for processing

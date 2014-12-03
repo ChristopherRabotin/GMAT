@@ -83,7 +83,7 @@ public:
 
 
 ///// TBD: Do these go here like this?  We may want a more generic container here
-   // This section added by TUAN NGUYEN for DSNTwoWayRange measurement data
+   // This section added for DSNTwoWayRange measurement data
    /// Uplink band
    Integer uplinkBand;
    /// Uplink frequency
@@ -92,7 +92,7 @@ public:
    Real rangeModulo;
 
 ///// TBD: Do these go here like this?  We may want a more generic container here
-   // This section added by TUAN NGUYEN for DSNTwoWayDoppler measurement data
+   // This section added for DSNTwoWayDoppler measurement data
    // Doppler count interval
    Real dopplerCountInterval;
 

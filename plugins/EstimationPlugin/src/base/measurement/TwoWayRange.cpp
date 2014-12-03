@@ -244,8 +244,8 @@ bool TwoWayRange::Initialize()
                      participants[i]->GetStringParameter("Id");
             }
 
-            // SetHardwareDelays(false);		// made change by TUAN NGUYEN to fix receiver delay setting: 4/2/2013
-			SetHardwareDelays(true);			// made change by TUAN NGUYEN to fix receiver delay setting: 4/2/2013
+            // SetHardwareDelays(false);		// made change to fix receiver delay setting: 4/2/2013
+			   SetHardwareDelays(true);			// made change to fix receiver delay setting: 4/2/2013
             retval = true;
          }
          else
@@ -258,10 +258,8 @@ bool TwoWayRange::Initialize()
 
 	  // Set options to run relativity: // and ET-TAI corrections: 
 ///// TBD: Determine if there is a more generic way to add these
-      uplinkLeg.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
-	  downlinkLeg.SetRelativityCorrection(useRelativityCorrection);			// made changes by TUAN NGUYEN
-//    uplinkLeg.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
-//	  downlinkLeg.SetETMinusTAICorrection(useETminusTAICorrection);			// made changes by TUAN NGUYEN
+      uplinkLeg.SetRelativityCorrection(useRelativityCorrection);
+	   downlinkLeg.SetRelativityCorrection(useRelativityCorrection);
    }
 
 #ifdef DEBUG_INITIALIZE
@@ -382,12 +380,12 @@ void TwoWayRange::InitializeMeasurement()
    index = downlinkLeg.GetParticipantIndex(participants[1]);
    downlinkLeg.AddCoordinateSystem(F2, index); // Participant 2 CS for the event
 
-   // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system		// made changes by TUAN NGUYEN
-   if (solarSystem == NULL)																										// made changes by TUAN NGUYEN
-	   throw MeasurementException("Error in TwoWayRange::InitializeMeasurement() due to solar system object is NULL.\n");		// made changes by TUAN NGUYEN
+   // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system
+   if (solarSystem == NULL)
+	   throw MeasurementException("Error in TwoWayRange::InitializeMeasurement() due to solar system object is NULL.\n");
 
-   uplinkLeg.SetSolarSystem(solarSystem);								// made changes by TUAN NGUYEN
-   downlinkLeg.SetSolarSystem(solarSystem);								// made changes by TUAN NGUYEN
+   uplinkLeg.SetSolarSystem(solarSystem);
+   downlinkLeg.SetSolarSystem(solarSystem);
 }
 
 

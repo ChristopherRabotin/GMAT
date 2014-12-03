@@ -140,7 +140,7 @@ protected:
    enum
    {
       AveragingInterval = PhysicalMeasurementParamCount,
-      BuildInTurnAroundRatio,                           // made changes by TUAN NGUYEN
+      BuildInTurnAroundRatio,
       AveragedDopplerParamCount
    };
 
