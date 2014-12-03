@@ -357,7 +357,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             instanceName + " before the measurement was set");
    
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))   // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB))
    {
       std::vector<SignalBase*> paths = calcData->GetSignalPaths();
       std::string unfeasibilityReason;
@@ -415,38 +415,36 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                   values[i] += current->corrections[j];
             }// for j loop
 
-            // accumulate all hardware delays for signal path ith                          // made changes by TUAN NGUYEN
-            values[i] += ((current->tDelay + current->rDelay)*                             // made changes by TUAN NGUYEN
-                  GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);// made changes by TUAN NGUYEN
+            // accumulate all hardware delays for signal path ith
+            values[i] += ((current->tDelay + current->rDelay)*
+                  GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
 
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
 #ifdef USE_PRECISION_TIME
-               // cMeasurement.epoch = current->rPrecTime.GetMjd();                                                     // made changes by TUAN NGUYEN
-               if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
+               if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
-                  if (current->next == NULL)                                                                            // made changes by TUAN NGUYEN
-                     cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;// made changes by TUAN NGUYEN
+                  if (current->next == NULL)
+                     cMeasurement.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
                }
-               else                                                                                                     // made changes by TUAN NGUYEN
+               else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;       // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
 #else
-               //cMeasurement.epoch = current->rTime;                                                                   // made changes by TUAN NGUYEN
-               if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
+               if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
-                  if (current->next == NULL)                                                                            // made changes by TUAN NGUYEN
-                     cMeasurement.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;             // made changes by TUAN NGUYEN
+                  if (current->next == NULL)
+                     cMeasurement.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
                }
-               else                                                                                                     // made changes by TUAN NGUYEN
+               else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;                    // made changes by TUAN NGUYEN
+                  cMeasurement.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
 #endif
             }
@@ -499,17 +497,15 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
          // This section is only done when measurement type is 'Range'. For other types such as DSNRange or Doppler, it will be done in their adapters  
          if (measurementType == "Range")
          {
-            // Add noise to measurement value                                              // made changes by TUAN NGUYEN
-            if (addNoise)                                                                  // made changes by TUAN NGUYEN
-            {                                                                              // made changes by TUAN NGUYEN
-               // Add noise here                                                           // made changes by TUAN NGUYEN
-               RandomNumber* rn = RandomNumber::Instance();                                // made changes by TUAN NGUYEN
-               // Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
-               Real val = rn->Gaussian(measVal, noiseSigma[i]);                            // made changes by TUAN NGUYEN
-//             while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
-               val = rn->Gaussian(measVal, noiseSigma[i]);                                 // made changes by TUAN NGUYEN
-               measVal = val;                                                              // made changes by TUAN NGUYEN
-            }                                                                              // made changes by TUAN NGUYEN
+            // Add noise to measurement value
+            if (addNoise)
+            {
+               // Add noise here
+               RandomNumber* rn = RandomNumber::Instance();
+               Real val = rn->Gaussian(measVal, noiseSigma[i]);
+               val = rn->Gaussian(measVal, noiseSigma[i]);
+               measVal = val;
+            }
 
             // Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
             if (addBias)
@@ -518,7 +514,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // Apply multiplier for "Range" measurement model
             measVal = measVal*multiplier;
          }
-         cMeasurement.value[i] = measVal;                                               // made changes by TUAN NGUYEN
+         cMeasurement.value[i] = measVal;
 
          #ifdef DEBUG_RANGE_CALCULATION
             MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf km\n", cMeasurement.value[i]);
@@ -574,7 +570,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             instanceName + " before the measurement was set");
 
    // Fire the measurement model to build the collection of signal data
-   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))   // made changes by TUAN NGUYEN
+   if (calcData->CalculateMeasurement(withLighttime, forObservation, rampTB, dt))
    {
       std::vector<SignalData*> data = calcData->GetSignalData();
       std::string unfeasibilityReason;
@@ -627,38 +623,37 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
                   values[i] += current->corrections[j];
             }// for j loop
 
-            // accumulate all hardware delays for signal path ith                          // made changes by TUAN NGUYEN
-            values[i] += ((current->tDelay + current->rDelay)*                             // made changes by TUAN NGUYEN
-               GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);   // made changes by TUAN NGUYEN
+            // accumulate all hardware delays for signal path ith
+            values[i] += ((current->tDelay + current->rDelay)*
+               GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
 
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
 #ifdef USE_PRECISION_TIME
-               // offsetMeas.epoch = current->rPrecTime.GetMjd();                                                     // made changes by TUAN NGUYEN
-               if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
+               if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
-                  if (current->next == NULL)                                                                            // made changes by TUAN NGUYEN
-                     offsetMeas.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;// made changes by TUAN NGUYEN
+                  if (current->next == NULL)
+                     offsetMeas.epoch = current->rPrecTime.GetMjd() + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
                }
-               else                                                                                                     // made changes by TUAN NGUYEN
+               else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  offsetMeas.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;       // made changes by TUAN NGUYEN
+                  offsetMeas.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
 #else
-               //cMeasurement.epoch = current->rTime;                                                                   // made changes by TUAN NGUYEN
-               if (calcData->GetTimeTagFlag())                                                                          // made changes by TUAN NGUYEN
+               //cMeasurement.epoch = current->rTime;
+               if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
-                  if (current->next == NULL)                                                                            // made changes by TUAN NGUYEN
-                     offsetMeas.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;             // made changes by TUAN NGUYEN
+                  if (current->next == NULL)
+                     offsetMeas.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
                }
-               else                                                                                                     // made changes by TUAN NGUYEN
+               else
                {
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  offsetMeas.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;                    // made changes by TUAN NGUYEN
+                  offsetMeas.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
 #endif
             }
@@ -689,17 +684,17 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             MessageInterface::ShowMessage("      . No bias was implemented in this GMAT version.\n");
          #endif
 
-         // Add noise to measurement value                                              // made changes by TUAN NGUYEN
-         if (addNoise)                                                                  // made changes by TUAN NGUYEN
-         {                                                                              // made changes by TUAN NGUYEN
-            // Add noise here                                                           // made changes by TUAN NGUYEN
-            RandomNumber* rn = RandomNumber::Instance();                                // made changes by TUAN NGUYEN
-            Real val = rn->Gaussian(measVal, nsigma);                                   // made changes by TUAN NGUYEN
-            while (val <= 0.0)                                                          // made changes by TUAN NGUYEN
-               val = rn->Gaussian(measVal, nsigma);                                     // made changes by TUAN NGUYEN
-            measVal = val;                                                              // made changes by TUAN NGUYEN
-         }                                                                              // made changes by TUAN NGUYEN
-         offsetMeas.value[i] = measVal;                                               // made changes by TUAN NGUYEN
+         // Add noise to measurement value
+         if (addNoise)
+         {
+            // Add noise here
+            RandomNumber* rn = RandomNumber::Instance();
+            Real val = rn->Gaussian(measVal, nsigma);
+            while (val <= 0.0)
+               val = rn->Gaussian(measVal, nsigma);
+            measVal = val;
+         }
+         offsetMeas.value[i] = measVal;
 
       }
    }
@@ -757,9 +752,9 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
    #endif
 
    // Now assemble the derivative data into the requested derivative
-   Real factor = 1.0;                                           // made changes by TUAN NGUYEN
-   if (measurementType == "Range")                              // made changes by TUAN NGUYEN
-      factor = multiplier;                                      // made changes by TUAN NGUYEN
+   Real factor = 1.0;
+   if (measurementType == "Range")
+      factor = multiplier;
 
    UnsignedInt size = derivativeData->at(0).size();
    theDataDerivatives.clear();
@@ -884,9 +879,5 @@ Integer RangeAdapterKm::GetEventCount()
 void RangeAdapterKm::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("RangeAdapterKm<%p>::SetCorrection(correctionName = %s, correctionType = %s)\n", this, correctionName.c_str(), correctionType.c_str()); 
-#endif
-
-   TrackingDataAdapter::SetCorrection(correctionName, correctionType);            // made changes by TUAN NGUYEN
+   TrackingDataAdapter::SetCorrection(correctionName, correctionType);
 }

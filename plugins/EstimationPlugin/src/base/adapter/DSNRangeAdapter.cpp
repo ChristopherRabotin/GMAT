@@ -35,14 +35,14 @@
 const std::string
 DSNRangeAdapter::PARAMETER_TEXT[DSNRangeAdapterParamCount - RangeAdapterKmParamCount] =
 {
-   "RangeModuloConstant",                   // made changes by TUAN NGUYEN
+   "RangeModuloConstant",
 };
 
 
 const Gmat::ParameterType
 DSNRangeAdapter::PARAMETER_TYPE[DSNRangeAdapterParamCount - RangeAdapterKmParamCount] =
 {
-   Gmat::REAL_TYPE,                        // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,
 };
 
 
@@ -802,8 +802,6 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
 
 
    Real t0 = t1 - delta_t/GmatTimeConstants::SECS_PER_DAY; 
-   //Real time_min = (*rampTB)[0].epoch;
-   //Real time_max = (*rampTB)[(*rampTB).size() -1 ].epoch;
    Real time_min = (*rampTB)[beginIndex].epoch;
    Real time_max = (*rampTB)[endIndex-1].epoch;
 
@@ -869,15 +867,6 @@ Real DSNRangeAdapter::IntegralRampedFrequency(Real t1, Real delta_t, Integer& er
    }
 
    // search for end interval:
-   //UnsignedInt end_interval = 0;
-   //for (UnsignedInt i = 1; i < (*rampTB).size(); ++i)
-   //{
-   //   if (t1 < (*rampTB)[i].epoch)
-   //   {
-   //      end_interval = i-1;      
-   //      break;
-   //   }
-   //}
    UnsignedInt end_interval = beginIndex;
    for (UnsignedInt i = beginIndex+1; i < endIndex; ++i)
    {

@@ -291,10 +291,6 @@ std::string DopplerAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetStringParameter('%s', '%s')\n", this, GetParameterText(id).c_str(), value.c_str()); 
-#endif
-
    // Note that: measurement type of adapter is always "Range", so it does not need to change
    bool retval = true;
    if (id != MEASUREMENT_TYPE)
@@ -323,10 +319,6 @@ bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& val
 bool DopplerAdapter::SetStringParameter(const Integer id,
       const std::string& value, const Integer index)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetStringParameter('%s', '%s', %d)\n", this, GetParameterText(id).c_str(), value.c_str(), index); 
-#endif
-
    bool retval = adapterS->SetStringParameter(id, value, index);
    retval = RangeAdapterKm::SetStringParameter(id, value, index) && retval;
 
@@ -388,10 +380,6 @@ bool DopplerAdapter::SetStringParameter(const std::string& label,
 //------------------------------------------------------------------------------
 Integer DopplerAdapter::SetIntegerParameter(const Integer id, const Integer value)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetIntegerParameter('%s', %d)\n", this, GetParameterText(id).c_str(), value); 
-#endif
-
    adapterS->SetRealParameter(id, value);
    return RangeAdapterKm::SetRealParameter(id, value);
 }
@@ -449,10 +437,6 @@ Real DopplerAdapter::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real DopplerAdapter::SetRealParameter(const Integer id, const Real value)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetRealParameter('%s', %lf)\n", this, GetParameterText(id).c_str(), value); 
-#endif
-
    if (id == DOPPLER_COUNT_INTERVAL)
    {
       if (value <= 0.0)
@@ -506,10 +490,6 @@ Real DopplerAdapter::SetRealParameter(const std::string &label, const Real value
 
 bool DopplerAdapter::SetBooleanParameter(const Integer id, const bool value)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetBooleanParameter('%s', %s)\n", this, GetParameterText(id).c_str(), (value?"true":"false")); 
-#endif
-   
    // Note: for Start path, AddNoise always is set to false due to it calculation
    bool retval = true;
    if (id == ADD_NOISE)
@@ -546,10 +526,6 @@ bool DopplerAdapter::SetBooleanParameter(const std::string &label, const bool va
 bool DopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::RenameRefObject(%d, oldname = %s, newname = %s)\n", this, type, oldName.c_str(), newName.c_str()); 
-#endif
-
    // Handle additional renames specific to this adapter
    bool retval = adapterS->RenameRefObject(type, oldName, newName);
    retval = RangeAdapterKm::RenameRefObject(type, oldName, newName) && retval;
@@ -575,10 +551,6 @@ bool DopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
 bool DopplerAdapter::SetRefObject(GmatBase* obj,
       const Gmat::ObjectType type, const std::string& name)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetRefObject(obj = <%p>, type = %d, name = %s)\n", this, obj, type, name.c_str()); 
-#endif
-
    bool retval = adapterS->SetRefObject(obj, type, name);
    retval = RangeAdapterKm::SetRefObject(obj, type, name) && retval;
 
@@ -603,10 +575,6 @@ bool DopplerAdapter::SetRefObject(GmatBase* obj,
 bool DopplerAdapter::SetRefObject(GmatBase* obj,
       const Gmat::ObjectType type, const std::string& name, const Integer index)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetRefObject(obj = <%p>, type = %d, name = %s, index = %d)\n", this, obj, type, name.c_str(), index); 
-#endif
-
    bool retval = adapterS->SetRefObject(obj, type, name, index);
    retval = RangeAdapterKm::SetRefObject(obj, type, name, index) && retval;
 
@@ -626,11 +594,6 @@ bool DopplerAdapter::SetRefObject(GmatBase* obj,
 //------------------------------------------------------------------------------
 bool DopplerAdapter::SetMeasurement(MeasureModel* meas)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetMeasurement(meas = <%p,%s>)\n", this, meas, meas->GetName().c_str()); 
-#endif
-
-//   bool retval = adapter->SetMeasurement(meas);
    return RangeAdapterKm::SetMeasurement(meas);
 }
 
@@ -656,10 +619,6 @@ void DopplerAdapter::SetPropagator(PropSetup* ps)
       MessageInterface::ShowMessage("Setting propagator to %p in "
             "DopplerAdapter\n", ps);
    #endif
-
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetPropagator(ps = <%p,%s>)\n", this, ps, ps->GetName().c_str()); 
-#endif
 
    adapterS->SetPropagator(ps);
    RangeAdapterKm::SetPropagator(ps);
@@ -782,7 +741,7 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
    measDataS = adapterS->GetMeasurement();
    measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km
 
-   // 3.3. Specify uplink frequency and band for Start path
+   // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
    uplinkFreq = adapterS->GetMeasurementModel()->GetUplinkFrequency(0, rampTB);
    freqBand   = adapterS->GetMeasurementModel()->GetUplinkFrequencyBand(0, rampTB);
@@ -1011,20 +970,6 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
    else
    {
 
-      //if (obj->IsOfType(Gmat::GROUND_STATION))
-      //{
-      //   std::string paramName = ((GroundstationInterface*)obj)->GetParameterText(parmId);
-      //   if ((paramName == "RangeBias")||(paramName == "DSNRangeBias"))
-      //   {
-      //      //MessageInterface::ShowMessage(" object's name = <%s>, param's name = <%s>\n", obj->GetName().c_str(), paramName.c_str());
-      //      RealArray deriv;
-      //      deriv.assign(1, 0.0);
-      //      theDataDerivatives.clear();
-      //      theDataDerivatives.push_back(deriv);
-      //      return theDataDerivatives;
-      //   }
-      //}
-
       // Perform the calculations
       const std::vector<RealArray> *derivativeDataE =
          &(calcData->CalculateMeasurementDerivatives(obj, id));
@@ -1126,15 +1071,6 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       }
       MessageInterface::ShowMessage("] * multiplierS = %.12le\n", multiplierS);
       #endif
-
-      //// Get parameter name specified by id
-      //Integer parameterID;
-      //if (id > 250)
-      //   parameterID = id - obj->GetType() * 250; //GetParmIdFromEstID(id, obj);
-      //else
-      //   parameterID = id;
-      //std::string paramName = obj->GetParameterText(parameterID);
-
 
       // Now assemble the derivative data into the requested derivative
       size = derivativesE[0].size();
@@ -1289,10 +1225,6 @@ Integer DopplerAdapter::GetEventCount()
 void DopplerAdapter::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
-#ifdef DEBUG_SET_PARAMETER
-   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetCorrection(correctionName = %s, correctionType = %s)\n", this, correctionName.c_str(), correctionType.c_str()); 
-#endif
-
    adapterS->SetCorrection(correctionName, correctionType);
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
 }

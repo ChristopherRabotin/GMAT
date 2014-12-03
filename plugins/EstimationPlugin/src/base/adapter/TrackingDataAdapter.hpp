@@ -25,8 +25,8 @@
 #include "MeasureModel.hpp"
 #include "MeasurementData.hpp"
 #include "ProgressReporter.hpp"
-#include "RampTableData.hpp"                         // made changes by TUAN NGUYEN
-#include "ObservationData.hpp"                       // made changes by TUAN NGUYEN
+#include "RampTableData.hpp"
+#include "ObservationData.hpp"
 
 // Forward reference
 class SolarSystem;
@@ -171,17 +171,14 @@ public:
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
    virtual void         UsesLightTime(const bool tf);
 
-   // Multiplier Factor                                                // made changes by TUAN NGUYEN
-   virtual void         SetMultiplierFactor(Real mult);                // made changes by TUAN NGUYEN
-   virtual Real         GetMultiplierFactor();                         // made changes by TUAN NGUYEN
+   // Multiplier Factor
+   virtual void         SetMultiplierFactor(Real mult);
+   virtual Real         GetMultiplierFactor();
 
    // Get measurement model object
-   virtual MeasureModel * GetMeasurementModel();                       // made changes by TUAN NGUYEN
-   //// Get participants' names
-   //virtual const std::vector<StringArray*>                             // made changes by TUAN NGUYEN
-   //   GetParticipantNameLists() { return participantLists;}            // made changes by TUAN NGUYEN
+   virtual MeasureModel * GetMeasurementModel();
 
-   virtual void         AddBias(bool isAdd) {addBias = isAdd;}         // made changes by TUAN NGUYEN
+   virtual void         AddBias(bool isAdd) {addBias = isAdd;}
 
 protected:
    /// The ordered list of participants in the measurement
@@ -193,11 +190,11 @@ protected:
    /// Measurement derivatives
    std::vector<RealArray>    theDataDerivatives;
 
-   // Noise model paramters                                                                         // made changes by TUAN NGUYEN
-   /// Noise sigma (noiseSigma[i]) associated to measuremnet (cMeasurement.value[i])                // made changes by TUAN NGUYEN
-   RealArray                 noiseSigma;                                                            // made changes by TUAN NGUYEN
-   /// Measurement bias (measurementBias[i]) asociated to measurement (cMeasurement.value[i])       // made changes by TUAN NGUYEN
-   RealArray                 measurementBias;                                                       // made changes by TUAN NGUYEN
+   // Noise model paramters
+   /// Noise sigma (noiseSigma[i]) associated to measuremnet (cMeasurement.value[i])
+   RealArray                 noiseSigma;
+   /// Measurement bias (measurementBias[i]) asociated to measurement (cMeasurement.value[i])
+   RealArray                 measurementBias;
 
    /// Reporter for the adapter
    ProgressReporter          *navLog;
@@ -222,27 +219,27 @@ protected:
    PropSetup                 *thePropagator;
 
 
-   /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path
-   Real                      uplinkFreq;                           // unit is MHz                        // made changes by TUAN NGUYEN
-   /// Frequency band   (In DSNDoppler, it is used for S path)                                           // made changes by TUAN NGUYEN
-   Integer                   freqBand;                                                                   // made changes by TUAN NGUYEN
-   /// Observation data object containing an observation data record                                     // made changes by TUAN NGUYEN
-   ObservationData*          obsData;                                                                    // made changes by TUAN NGUYEN
+   /// Constant frequency value used in a physical measurement when needed (In DSNDoppler, it is used as uplink frequency for S path)
+   Real                      uplinkFreq;                           // unit is MHz
+   /// Frequency band   (In DSNDoppler, it is used for S path)
+   Integer                   freqBand;
+   /// Observation data object containing an observation data record
+   ObservationData*          obsData;
 
-   /// Ramped frequency table used to calculate ramped frequency measurements                            // made changes by TUAN NGUYEN
-   std::vector<RampTableData>*rampTB;                                                                    // made changes by TUAN NGUYEN
-   UnsignedInt               beginIndex;                                                                 // made changes by TUAN NGUYEN
-   UnsignedInt               endIndex;                                                                   // made changes by TUAN NGUYEN
+   /// Ramped frequency table used to calculate ramped frequency measurements
+   std::vector<RampTableData>*rampTB;
+   UnsignedInt               beginIndex;
+   UnsignedInt               endIndex;
 
-   /// Name of the frequency ramp table that supplied or receives data                                   // made changes by TUAN NGUYEN
-   StringArray               rampTableNames;                                                             // made changes by TUAN NGUYEN
-   /// Add noise to measurement (used only for simulation)                                               // made changes by TUAN NGUYEN
-   bool                      addNoise;                                                                   // made changes by TUAN NGUYEN
-   /// Add bias to measurement                                                                           // made changes by TUAN NGUYEN
-   bool                      addBias;                                                                    // made changes by TUAN NGUYEN
+   /// Name of the frequency ramp table that supplied or receives data
+   StringArray               rampTableNames;
+   /// Add noise to measurement (used only for simulation)
+   bool                      addNoise;
+   /// Add bias to measurement
+   bool                      addBias;
    
-   /// Measurement error covariance matrix                                                               // made changes by TUAN NGUYEN
-   Covariance                measErrorCovariance;                                                        // made changes by TUAN NGUYEN
+   /// Measurement error covariance matrix
+   Covariance                measErrorCovariance;
 
    /// Measurement type
    std::string               measurementType;  // it's value could be "Range", "DSNRange", "Doppler", etc
@@ -252,34 +249,34 @@ protected:
    enum
    {
       SIGNAL_PATH  = MeasurementModelBaseParamCount,
-      OBS_DATA,                                           // made changes by TUAN NGUYEN
-      RAMPTABLES,                                         // made changes by TUAN NGUYEN
-      MEASUREMENT_TYPE,                                   // made changes by TUAN NGUYEN
-      BIAS,                                               // made changes by TUAN NGUYEN
-      //NOISE_SIGMA,                                        // made changes by TUAN NGUYEN
-      //ERROR_MODEL,                                        // made changes by TUAN NGUYEN
-      ADD_NOISE,                                          // made changes by TUAN NGUYEN
-      UPLINK_FREQUENCY,                                   // made changes by TUAN NGUYEN
-      UPLINK_BAND,                                        // made changes by TUAN NGUYEN
-      AdapterParamCount,                                  // made changes by TUAN NGUYEN
+      OBS_DATA,
+      RAMPTABLES,
+      MEASUREMENT_TYPE,
+      BIAS,
+      //NOISE_SIGMA,
+      //ERROR_MODEL,
+      ADD_NOISE,
+      UPLINK_FREQUENCY,
+      UPLINK_BAND,
+      AdapterParamCount,
    };
 
 
    /// Strings describing the TrackingDataAdapter parameters
    static const std::string PARAMETER_TEXT[AdapterParamCount -
-                                           MeasurementModelBaseParamCount];                              // made changes by TUAN NGUYEN
+                                           MeasurementModelBaseParamCount];
    /// Types of the TrackingDataAdapter parameters
    static const Gmat::ParameterType PARAMETER_TYPE[AdapterParamCount -
-                                                   MeasurementModelBaseParamCount];                      // made changes by TUAN NGUYEN
+                                                   MeasurementModelBaseParamCount];
 
    StringArray*         DecomposePathString(const std::string &value);
    
-   void                 ComputeMeasurementBias(const std::string biasName);                              // made changes by TUAN NGUYEN
-   void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName);                  // made changes by TUAN NGUYEN
-   void                 ComputeMeasurementErrorCovarianceMatrix();                                       // made changes by TUAN NGUYEN
+   void                 ComputeMeasurementBias(const std::string biasName);
+   void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName);
+   void                 ComputeMeasurementErrorCovarianceMatrix();
 
-   void                 BeginEndIndexesOfRampTable(Integer & err);                                       // made changes by TUAN NGUYEN
-   virtual Real         IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);                    // made changes by TUAN NGUYEN
+   void                 BeginEndIndexesOfRampTable(Integer & err);
+   virtual Real         IntegralRampedFrequency(Real t1, Real delta_t, Integer& err);
 
 };
 

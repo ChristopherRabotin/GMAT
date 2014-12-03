@@ -120,12 +120,6 @@ protected:
    Real                 multiplierS;
    Real                 multiplierE;
 
-   /// Measurement model for Start path. Note that: calcData is used as End path's calculation data
-//   MeasureModel*       calcDataS;
-   /// Propagator of Start path used for light time solutions, when needed
-//   PropSetup           *thePropagatorS;
-
-
    /// Parameter IDs for the DopplerAdapter
    enum
    {

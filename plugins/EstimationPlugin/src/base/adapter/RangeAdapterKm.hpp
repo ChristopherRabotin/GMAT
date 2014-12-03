@@ -77,7 +77,7 @@ protected:
    /// Parameter IDs for the RangeAdapterKm
    enum
    {
-      RangeAdapterKmParamCount = AdapterParamCount,                                  // made changes by TUAN NGUYEN
+      RangeAdapterKmParamCount = AdapterParamCount,
    };
 
 
