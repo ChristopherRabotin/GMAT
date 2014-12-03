@@ -319,27 +319,27 @@ bool RunSimulator::Initialize()
    }
 
 ///// Check for generic approach here   
-   // Set the ramp table data streams for the measurement manager            // made changes by TUAN NGUYEN
-   streamList = measman->GetRampTableDataStreamList();                       // made changes by TUAN NGUYEN
-   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)                    // made changes by TUAN NGUYEN
-   {                                                                         // made changes by TUAN NGUYEN
-      GmatBase *obj = FindObject(streamList[ms]);                            // made changes by TUAN NGUYEN
-      if (obj != NULL)                                                       // made changes by TUAN NGUYEN
-      {                                                                      // made changes by TUAN NGUYEN
-         if (obj->IsOfType(Gmat::DATASTREAM))                                // made changes by TUAN NGUYEN
-         {                                                                   // made changes by TUAN NGUYEN
-            DataFile *df = (DataFile*)obj;                                   // made changes by TUAN NGUYEN
-            measman->SetRampTableDataStreamObject(df);                       // made changes by TUAN NGUYEN
-         }                                                                   // made changes by TUAN NGUYEN
+   // Set the ramp table data streams for the measurement manager
+   streamList = measman->GetRampTableDataStreamList();
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
+   {
+      GmatBase *obj = FindObject(streamList[ms]);
+      if (obj != NULL)
+      {
+         if (obj->IsOfType(Gmat::DATASTREAM))
+         {
+            DataFile *df = (DataFile*)obj;
+            measman->SetRampTableDataStreamObject(df);
+         }
          else
             MessageInterface::ShowMessage(" Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
-      }                                                                      // made changes by TUAN NGUYEN
-      else                                                                   // made changes by TUAN NGUYEN
-      {
-         throw CommandException("Error: Did not find the object named " +    // made changes by TUAN NGUYEN
-               streamList[ms]);                                              // made changes by TUAN NGUYEN
       }
-   }                                                                         // made changes by TUAN NGUYEN
+      else
+      {
+         throw CommandException("Error: Did not find the object named " + 
+               streamList[ms]);
+      }
+   }
 
    // Find the event manager and store its pointer
    if (triggerManagers == NULL)
@@ -700,7 +700,7 @@ void RunSimulator::PrepareToSimulate()
             "Measurement Manager was unable to prepare for processing");
 
    PrepareToPropagate();  // ?? Test return value here?
-   // measman->LoadRampTables();                     // This command is moved to Simulator::CompleteInitialization()            // made changes by TUAN NGUYEN
+   // measman->LoadRampTables();                     // This command is moved to Simulator::CompleteInitialization()
 
    theSimulator->UpdateCurrentEpoch(baseEpoch[0]);
    commandRunning  = true;

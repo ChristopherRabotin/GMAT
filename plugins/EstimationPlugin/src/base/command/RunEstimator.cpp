@@ -326,28 +326,27 @@ bool RunEstimator::Initialize()
    }
 
 ///// Check for generic approach here
-   // Set the ramp table data streams for the measurement manager               // made changes by TUAN NGUYEN
-   streamList = measman->GetRampTableDataStreamList();                          // made changes by TUAN NGUYEN
-   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)                       // made changes by TUAN NGUYEN
-   {                                                                            // made changes by TUAN NGUYEN
-      GmatBase *obj = FindObject(streamList[ms]);                               // made changes by TUAN NGUYEN
-      if (obj != NULL)                                                          // made changes by TUAN NGUYEN
-      {                                                                         // made changes by TUAN NGUYEN
-         if (obj->IsOfType(Gmat::DATASTREAM))                                   // made changes by TUAN NGUYEN
-         {                                                                      // made changes by TUAN NGUYEN
-            DataFile *df = (DataFile*)obj;                                      // made changes by TUAN NGUYEN
-            measman->SetRampTableDataStreamObject(df);                          // made changes by TUAN NGUYEN
-         }                                                                      // made changes by TUAN NGUYEN
+   // Set the ramp table data streams for the measurement manager
+   streamList = measman->GetRampTableDataStreamList();
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
+   {
+      GmatBase *obj = FindObject(streamList[ms]);
+      if (obj != NULL)
+      {
+         if (obj->IsOfType(Gmat::DATASTREAM))
+         {
+            DataFile *df = (DataFile*)obj;
+            measman->SetRampTableDataStreamObject(df);
+         }
          else
             MessageInterface::ShowMessage("Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
-      }                                                                         // made changes by TUAN NGUYEN
-      else                                                                      // made changes by TUAN NGUYEN
-      {
-//       MessageInterface::ShowMessage("Error: Did not find the object named '%s'\n",streamList[ms].c_str());
-         throw CommandException("Error: Did not find the object named " +       // made changes by TUAN NGUYEN
-               streamList[ms]);                                                 // made changes by TUAN NGUYEN
       }
-   }                                                                            // made changes by TUAN NGUYEN
+      else
+      {
+         throw CommandException("Error: Did not find the object named " + 
+               streamList[ms]);
+      }
+   }
 
    // Next initialize the estimation subsystem
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
@@ -608,7 +607,7 @@ bool RunEstimator::Execute()
          #endif
 
          // Why is Finalize commented out???  There is no command summary because of this change.
-//         Finalize();               // made changes by TUAN NGUYEN
+//         Finalize();
          // Adding in for now.
          BuildCommandSummary(true);
 
@@ -622,14 +621,14 @@ bool RunEstimator::Execute()
                " encountered in the RunEstimator command");
    }
 
-   if (state != Solver::FINISHED)                // made changes by TUAN NGUYEN
+   if (state != Solver::FINISHED)
       state = theEstimator->AdvanceState();
-   else                                          // made changes by TUAN NGUYEN
-   {                                             // made changes by TUAN NGUYEN
+   else
+   {
       // It has to run all work in AdvanceState() before Finalize()
-      state = theEstimator->AdvanceState();      // made changes by TUAN NGUYEN
-      Finalize();                                // made changes by TUAN NGUYEN
-   }                                             // made changes by TUAN NGUYEN
+      state = theEstimator->AdvanceState();
+      Finalize();
+   }
    
    #ifdef DEBUG_STATE
       MessageInterface::ShowMessage("*** Exit RunEstimator:Execute()\n");
