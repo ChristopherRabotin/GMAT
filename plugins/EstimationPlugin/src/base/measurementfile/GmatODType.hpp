@@ -50,8 +50,8 @@ public:
                      ReadObservation();
 
    /// GmatODType does not use ReadRampTableData() function
-   virtual RampTableData *						// made changes by TUAN NGUYEN
-	   ReadRampTableData(){return NULL;};		// made changes by TUAN NGUYEN
+   virtual RampTableData *
+	   ReadRampTableData(){return NULL;};
 
    virtual bool      Close();
    virtual bool      Finalize();

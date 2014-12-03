@@ -43,7 +43,7 @@ RampTableData::RampTableData() :
    rampType          (1),
    rampFrequency     (0.0),
    rampRate          (0.0),
-   indexkey          ("")                           // made changes by TUAN NGUYEN
+   indexkey          ("")
 {
 	dataFormat = "GMAT_RampTable"; 
 }
@@ -80,7 +80,7 @@ RampTableData::RampTableData(const RampTableData& rtd):
    rampType                (rtd.rampType),
    rampFrequency           (rtd.rampFrequency),
    rampRate                (rtd.rampRate),
-   indexkey                (rtd.indexkey)                      // made changes by TUAN NGUYEN
+   indexkey                (rtd.indexkey)
 {
    dataFormat = rtd.dataFormat;
 }
@@ -111,7 +111,7 @@ RampTableData& RampTableData::operator=(const RampTableData& rtd)
 	   rampType                = rtd.rampType;
       rampFrequency           = rtd.rampFrequency;
       rampRate                = rtd.rampRate;
-      indexkey                = rtd.indexkey;                              // made changes by TUAN NGUYEN
+      indexkey                = rtd.indexkey;
    }
 
    return *this;

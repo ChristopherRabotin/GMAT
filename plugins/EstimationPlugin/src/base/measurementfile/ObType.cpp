@@ -51,8 +51,7 @@ ObType::ObType(const std::string &obType, const std::string &name) :
 
    objectTypes.push_back(Gmat::OBTYPE);
    objectTypeNames.push_back("ObType");
-   objectTypeNames.push_back(obType);			// made changes by TUAN NGUYEN
-//   parameterCount = ObTypeParamCount;
+   objectTypeNames.push_back(obType);
 }
 
 

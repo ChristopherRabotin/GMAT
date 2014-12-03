@@ -35,8 +35,8 @@
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData() :
-   inUsed            (true),				// made changes by TUAN NGUYEN
-   removedReason     ("N"),					// made changes by TUAN NGUYEN
+   inUsed            (true),
+   removedReason     ("N"),
    typeName          (""),
    type              (Gmat::UNKNOWN_MEASUREMENT),
    uniqueID          (-1),
@@ -44,14 +44,14 @@ ObservationData::ObservationData() :
    epoch             (-1.0),
    noiseCovariance   (NULL),
 ///// TBD: Determine if there is a more generic way to add these, and if they go here
-   unit              ("km"),				// made changes by TUAN NGUYEN
-   uplinkBand        (0),					// made changes by TUAN NGUYEN
-   uplinkFreq        (0.0),					// made changes by TUAN NGUYEN
-   rangeModulo       (1.0),					// made changes by TUAN NGUYEN
-   dopplerCountInterval   (1.0e-10)			// made changes by TUAN NGUYEN
+   unit              ("km"),
+   uplinkBand        (0),
+   uplinkFreq        (0.0),
+   rangeModulo       (1.0),
+   dopplerCountInterval   (1.0e-10)
 {
 ///// TBD: This does not go here -- we'll be adding a new data type, so need to have a way to handle this
-   dataFormat = "GMATInternal";				// made changes by TUAN NGUYEN
+   dataFormat = "GMATInternal";
 }
 
 
@@ -77,8 +77,8 @@ ObservationData::~ObservationData()
  */
 //-----------------------------------------------------------------------------
 ObservationData::ObservationData(const ObservationData& od):
-   inUsed                  (od.inUsed),					// made changes by TUAN NGUYEN
-   removedReason           (od.removedReason),			// made changes by TUAN NGUYEN
+   inUsed                  (od.inUsed),
+   removedReason           (od.removedReason),
    typeName                (od.typeName),
    type                    (od.type),
    uniqueID                (od.uniqueID),
@@ -90,19 +90,19 @@ ObservationData::ObservationData(const ObservationData& od):
    strands                 (od.strands),
    value                   (od.value),
    dataMap                 (od.dataMap),
-   value_orig              (od.value_orig),				// made changes by TUAN NGUYEN
-   unit                    (od.unit),					// made changes by TUAN NGUYEN
+   value_orig              (od.value_orig),
+   unit                    (od.unit),
    noiseCovariance         (od.noiseCovariance),
    extraDataDescriptions   (od.extraDataDescriptions),
    extraTypes              (od.extraTypes),
    extraData               (od.extraData),
-//   dataFormat              (od.dataFormat),			// made changes by TUAN NGUYEN
-   uplinkBand              (od.uplinkBand),				// made changes by TUAN NGUYEN
-   uplinkFreq              (od.uplinkFreq),				// made changes by TUAN NGUYEN
-   rangeModulo             (od.rangeModulo),			// made changes by TUAN NGUYEN
-   dopplerCountInterval	   (od.dopplerCountInterval)	// made changes by TUAN NGUYEN
+//   dataFormat              (od.dataFormat),
+   uplinkBand              (od.uplinkBand),
+   uplinkFreq              (od.uplinkFreq),
+   rangeModulo             (od.rangeModulo),
+   dopplerCountInterval	   (od.dopplerCountInterval)
 {
-   dataFormat = od.dataFormat;							// made changes by TUAN NGUYEN
+   dataFormat = od.dataFormat;
 }
 
 
@@ -121,8 +121,8 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 {
    if (&od != this)
    {
-      inUsed                  = od.inUsed;			// made changes by TUAN NGUYEN
-      removedReason           = od.removedReason;	// made changes by TUAN NGUYEN
+      inUsed                  = od.inUsed;
+      removedReason           = od.removedReason;
       typeName                = od.typeName;
       type                    = od.type;
       uniqueID                = od.uniqueID;
@@ -134,17 +134,17 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
       strands                 = od.strands;
       value                   = od.value;
       dataMap                 = od.dataMap;
-      value_orig              = od.value_orig;      // made changes by TUAN NGUYEN
-      unit                    = od.unit;			// made changes by TUAN NGUYEN
+      value_orig              = od.value_orig;
+      unit                    = od.unit;
       noiseCovariance         = od.noiseCovariance;
       extraDataDescriptions   = od.extraDataDescriptions;
       extraTypes              = od.extraTypes;
       extraData               = od.extraData;
-      dataFormat              = od.dataFormat;		// made changes by TUAN NGUYEN
-      uplinkBand              = od.uplinkBand;		// made changes by TUAN NGUYEN
-      uplinkFreq              = od.uplinkFreq;		// made changes by TUAN NGUYEN
-      rangeModulo             = od.rangeModulo;		// made changes by TUAN NGUYEN
-      dopplerCountInterval    = od.dopplerCountInterval;	// made changes by TUAN NGUYEN
+      dataFormat              = od.dataFormat;
+      uplinkBand              = od.uplinkBand;
+      uplinkFreq              = od.uplinkFreq;
+      rangeModulo             = od.rangeModulo;
+      dopplerCountInterval    = od.dopplerCountInterval;
    }
 
    return *this;
@@ -160,8 +160,8 @@ ObservationData& ObservationData::operator=(const ObservationData& od)
 //-----------------------------------------------------------------------------
 void ObservationData::Clear()
 {
-   inUsed                  = true;					// made changes by TUAN NGUYEN
-   removedReason           = "N";					// made changes by TUAN NGUYEN
+   inUsed                  = true;
+   removedReason           = "N";
    typeName                = "";
    type                    = Gmat::UNKNOWN_MEASUREMENT;
    uniqueID                = -1;
@@ -170,13 +170,13 @@ void ObservationData::Clear()
    value.clear();
    dataMap.clear();
    strands.clear();
-   value_orig.clear();								// made changes by TUAN NGUYEN
+   value_orig.clear();
    extraDataDescriptions.clear();
    extraTypes.clear();
    extraData.clear();
 ///// TBD: Determine if there is a more generic way to add these
-   uplinkBand              = 0;						// made changes by TUAN NGUYEN
-   uplinkFreq              = 0.0;					// made changes by TUAN NGUYEN
-   rangeModulo             = 1.0;					// made changes by TUAN NGUYEN
-   dopplerCountInterval    = 1.0e-10;				// made changes by TUAN NGUYEN
+   uplinkBand              = 0;
+   uplinkFreq              = 0.0;
+   rangeModulo             = 1.0;
+   dopplerCountInterval    = 1.0e-10;
 }

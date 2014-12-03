@@ -374,7 +374,7 @@ ObservationData* GmatODDopplerType::ReadObservation()
 
    theLine << str;
    currentObs.Clear();
-   currentObs.dataFormat = "GMAT_ODDoppler";											// made changes by TUAN NGUYEN
+   currentObs.dataFormat = "GMAT_ODDoppler";
 
    // format: 21545.05439854615    Range    7000    GS2ID    ODSatID    2713.73185
    Real value;

@@ -98,8 +98,8 @@ public:
    virtual ObservationData*
                         ReadObservation();
 ///// TBD: Determine if there is a more generic way to add these
-   virtual RampTableData*                        // made changes by TUAN NGUYEN
-                        ReadRampTableData();     // made changes by TUAN NGUYEN
+   virtual RampTableData* 
+                        ReadRampTableData();
 
    virtual bool         CloseStream();
 
@@ -122,13 +122,13 @@ protected:
    StringArray selectedStationIDs;         // list of stationIDs included in data file
 
    /// Range of epoch is specified by start epoch and end epoch and format used by epoch
-   std::string         epochFormat;                       // made changes by TUAN NGUYEN
-   std::string         startEpoch;                        // made changes by TUAN NGUYEN
-   std::string         endEpoch;                          // made changes by TUAN NGUYEN
-   /// Start epoch for the estimation                     // made changes by TUAN NGUYEN
-   GmatEpoch           estimationStart;                   // made changes by TUAN NGUYEN
-   /// End epoch for the end of the estimation            // made changes by TUAN NGUYEN
-   GmatEpoch           estimationEnd;                     // made changes by TUAN NGUYEN
+   std::string         epochFormat;
+   std::string         startEpoch;
+   std::string         endEpoch;
+   /// Start epoch for the estimation
+   GmatEpoch           estimationStart;
+   /// End epoch for the end of the estimation
+   GmatEpoch           estimationEnd;
 
 
    /// Class parameter ID enumeration

@@ -59,7 +59,7 @@ public:
    /// Who is involved in the measurement.  First one is the "anchor" node
    StringArray       participantIDs;
    /// Uplink band
-   Integer           uplinkBand;				//-1: invalid, 0:unknown, 1:L-band, 2:S-Band, 
+   Integer           uplinkBand;				   //-1: invalid, 0:unknown, 1:L-band, 2:S-Band, 
    /// Ramp type
    Integer           rampType;					//0: snap, 1: start of new ramp, 2: media report, 3: periodic report, 4: end of ramp, 5: ramping terminated by operator, 6: invalid/unkown, 7: left blank in DSN file
    /// Ramp frequency
@@ -67,8 +67,8 @@ public:
    /// Ramp rate
    Real              rampRate;					// unit: Hz/s
 
-   /// Index key used for sorting records contains participantIDs and epoch        // made changes by TUAN NGUYEN
-   std::string       indexkey;                                                     // made changes by TUAN NGUYEN
+   /// Index key used for sorting records contains participantIDs and epoch
+   std::string       indexkey;
 
 };
 

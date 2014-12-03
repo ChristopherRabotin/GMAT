@@ -243,7 +243,7 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
 
    if (retval == false)
    {
-	  throw MeasurementException("GMATInternal Data File " + streamName + " could not be opened\n");		// made changes by TUAN NGUYEN
+	  throw MeasurementException("GMATInternal Data File " + streamName + " could not be opened\n");
    }
    return retval;
 }
@@ -302,30 +302,30 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
       dataLine << md->participantIDs[j] << "    ";
 
-   if (md->typeName == "Doppler")                                                          // made changes by TUAN NGUYEN
-   {                                                                                       // made changes by TUAN NGUYEN
-      dataLine << md->uplinkBand << "    ";                                                // made changes by TUAN NGUYEN
-      dataLine << md->dopplerCountInterval << "    ";                                      // made changes by TUAN NGUYEN
-   }                                                                                       // made changes by TUAN NGUYEN
+   if (md->typeName == "Doppler")
+   {
+      dataLine << md->uplinkBand << "    ";
+      dataLine << md->dopplerCountInterval << "    ";
+   }
 
    for (UnsignedInt k = 0; k < md->value.size(); ++k)
    {
-      if (md->typeName == "DSNRange")                                                      // made changes by TUAN NGUYEN
-         sprintf(databuffer, "%18.6lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));   // made changes by TUAN NGUYEN
-      else                                                                                 // made changes by TUAN NGUYEN
+      if (md->typeName == "DSNRange")
+         sprintf(databuffer, "%18.6lf",GmatMathUtil::Mod(md->value[k],md->rangeModulo));
+      else
          sprintf(databuffer, "%18.6lf", md->value[k]);
       dataLine << databuffer;
       if (k < md->value.size()-1)
          dataLine << "    ";
    }
 
-   // extended information:                                                                // made changes by TUAN NGUYEN
-   if (md->typeName == "DSNRange")                                                         // made changes by TUAN NGUYEN
-   {                                                                                       // made changes by TUAN NGUYEN
-      sprintf(databuffer, "    %d    %.15le    %.15le",                                    // made changes by TUAN NGUYEN
-         md->uplinkBand, md->uplinkFreq, md->rangeModulo);	                               // made changes by TUAN NGUYEN
-      dataLine << databuffer;				                                                    // made changes by TUAN NGUYEN
-   }                                                                                       // made changes by TUAN NGUYEN
+   // extended information:
+   if (md->typeName == "DSNRange")
+   {
+      sprintf(databuffer, "    %d    %.15le    %.15le",
+         md->uplinkBand, md->uplinkFreq, md->rangeModulo);
+      dataLine << databuffer;
+   }
 
    theStream << dataLine.str() << "\n";
 
@@ -383,7 +383,7 @@ ObservationData* GmatObType::ReadObservation()
 
    theLine << str;
    currentObs.Clear();
-   currentObs.dataFormat = "GMATInternal";											// made changes by TUAN NGUYEN
+   currentObs.dataFormat = "GMATInternal";
 
    // format: 21545.05439854615    Range    7000    GS2ID    ODSatID    2713.73185
    Real value;
@@ -466,13 +466,13 @@ ObservationData* GmatObType::ReadObservation()
       currentObs.participantIDs.push_back(str);
    }
 
-   currentObs.unit = "Km";                              // made changes by TUAN NGUYEN
-   if (currentObs.typeName == "Doppler")                // made changes by TUAN NGUYEN
-   {                                                    // made changes by TUAN NGUYEN
-      theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
-      theLine >> currentObs.dopplerCountInterval;       // made changes by TUAN NGUYEN
-      currentObs.unit = "Hz";                           // made changes by TUAN NGUYEN
-   }                                                    // made changes by TUAN NGUYEN
+   currentObs.unit = "Km";
+   if (currentObs.typeName == "Doppler")
+   {
+      theLine >> currentObs.uplinkBand;
+      theLine >> currentObs.dopplerCountInterval;
+      currentObs.unit = "Hz";
+   }
 
    for (Integer i = 0; i < dataSize; ++i)
    {
@@ -481,14 +481,14 @@ ObservationData* GmatObType::ReadObservation()
 	   currentObs.value_orig.push_back(value);
    }
 
-   // read extended infor from data record              // made changes by TUAN NGUYEN
-   if (currentObs.typeName == "DSNRange")               // made changes by TUAN NGUYEN
-   {                                                    // made changes by TUAN NGUYEN
-      theLine >> currentObs.uplinkBand;                 // made changes by TUAN NGUYEN
-      theLine >> currentObs.uplinkFreq;                 // made changes by TUAN NGUYEN
-      theLine >> currentObs.rangeModulo;                // made changes by TUAN NGUYEN
-      currentObs.unit = "RU";                           // made changes by TUAN NGUYEN
-   }                                                    // made changes by TUAN NGUYEN
+   // read extended infor from data record
+   if (currentObs.typeName == "DSNRange")
+   {
+      theLine >> currentObs.uplinkBand;
+      theLine >> currentObs.uplinkFreq;
+      theLine >> currentObs.rangeModulo;
+      currentObs.unit = "RU";
+   }
 
 /*
    Covariance *noise = new Covariance();

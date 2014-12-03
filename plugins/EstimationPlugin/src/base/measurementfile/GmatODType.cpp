@@ -312,8 +312,8 @@ bool GmatODType::AddMeasurement(MeasurementData *md)
          dataLine << "    ";
    }
    
-   sprintf(databuffer, "    %d    %.15le    %.15le", md->uplinkBand, md->uplinkFreq, md->rangeModulo);	// made changes by TUAN NGUYEN
-   dataLine << databuffer;				// made changes by TUAN NGUYEN
+   sprintf(databuffer, "    %d    %.15le    %.15le", md->uplinkBand, md->uplinkFreq, md->rangeModulo);
+   dataLine << databuffer;
    theStream << dataLine.str() << "\n";
 
 
