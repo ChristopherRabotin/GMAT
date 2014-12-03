@@ -218,7 +218,7 @@ Gmat::ParameterType RFHardware::GetParameterType(const Integer id) const
 std::string RFHardware::GetParameterUnit(const Integer id) const
 {
    if (PRIMARY_ANTENNA)
-      return "";               // It has no unit
+      return "";
 
    return Sensor::GetParameterUnit(id);
 }
@@ -304,13 +304,13 @@ bool RFHardware::SetStringParameter(const std::string &label,
 GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name)
 {
-        // return primary antenna when it is requested:
-        if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
-        {
-                return (GmatBase*)primaryAntenna;
-        }
+   // return primary antenna when it is requested:
+   if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
+   {
+      return (GmatBase*)primaryAntenna;
+   }
 
-        return Sensor::GetRefObject(type, name);
+   return Sensor::GetRefObject(type, name);
 }
 
 
@@ -331,13 +331,13 @@ GmatBase* RFHardware::GetRefObject(const Gmat::ObjectType type,
 bool RFHardware::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
-        if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
-        {
-                primaryAntenna = (Antenna *)obj;
-                return true;
-        }
+   if ((type == Gmat::HARDWARE)&&(name == primaryAntennaName))
+   {
+      primaryAntenna = (Antenna *)obj;
+      return true;
+   }
 
-        return Sensor::SetRefObject(obj, type, name);
+   return Sensor::SetRefObject(obj, type, name);
 }
 
 
@@ -392,8 +392,8 @@ const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type
 //------------------------------------------------------------------------------
 const ObjectTypeArray& RFHardware::GetRefObjectTypeArray()
 {
-        // Primary antenna is a referenced object of RFHardware. Primary antenna
-        // has type of Gmat:HARDWARE. We define it in refObjectTypes as shown below:
+   // Primary antenna is a referenced object of RFHardware. Primary antenna
+   // has type of Gmat:HARDWARE. We define it in refObjectTypes as shown below:
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::HARDWARE);
    return refObjectTypes;
@@ -407,8 +407,8 @@ const ObjectTypeArray& RFHardware::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 bool RFHardware::HasRefObjectTypeArray()
 {
-        // It has the referenced object type array as it was defined in
-        // RFHardware::GetRefObjectTypeArray() function.
+   // It has the referenced object type array as it was defined in
+   // RFHardware::GetRefObjectTypeArray() function.
    return true;
 }
 

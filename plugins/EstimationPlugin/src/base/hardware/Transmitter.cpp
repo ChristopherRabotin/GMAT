@@ -257,7 +257,7 @@ std::string Transmitter::GetParameterUnit(const Integer id) const
    switch (id)
    {
       case FREQUENCY_MODEL:
-         return "";                  // It has no unit
+         return "";
       case FREQUENCY:
          return "MHz";               // Unit of frequency is MHz
       default:
