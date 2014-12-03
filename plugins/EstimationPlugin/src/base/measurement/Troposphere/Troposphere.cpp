@@ -229,7 +229,7 @@ RealArray Troposphere::Correction()
 	  MessageInterface::ShowMessage("Troposphere::Correction: Cannot obtain Earth radius\n");
       throw MeasurementException("Troposphere::Correction: Cannot obtain Earth radius\n");
    }
-   Real Re = earth->GetEquatorialRadius()*GmatMathConstants::KM_TO_M;			// get Erath radius in meters
+   Real Re = earth->GetEquatorialRadius()*GmatMathConstants::KM_TO_M;			// get Earth radius in meters
 
 #ifdef DEBUG_TROPOSPHERE_CORRECTION
 //   MessageInterface::ShowMessage("Troposphere::Correction():\n");
