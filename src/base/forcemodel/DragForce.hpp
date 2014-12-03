@@ -203,8 +203,6 @@ protected:
    std::string          historicWSource;
    /// Predicted Weather data type
    std::string          predictedWSource;
-   /// Solar flux file name
-   std::string          fluxFile;
    /// Historic Weather File name
    std::string          cssiWFile;
    /// Schatten Weather File name
@@ -250,7 +248,6 @@ protected:
       SOURCE_TYPE,
       HISTORIC_WEATHER_SOURCE,
       PREDICTED_WEATHER_SOURCE,
-      FLUX_FILE,
       CSSI_WEATHER_FILE,
       SCHATTEN_WEATHER_FILE,
       FLUX,
