@@ -7522,17 +7522,17 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
 
    if (propName == "Format")
    {
-	  // GmatBase* obs = CreateObject(value, "", 0, false);								// made changes by TUAN NGUYEN
-	  std::string value1 = value;														// made changes by TUAN NGUYEN
-	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))		// made changes by TUAN NGUYEN
-		  value1 = value.substr(1,value.size()-2);										// made changes by TUAN NGUYEN
-      GmatBase* obs = CreateObject(value1, "", 0, false);								// made changes by TUAN NGUYEN		fix Bug 3, error 1 in ticket GMT-4314
+	  // GmatBase* obs = CreateObject(value, "", 0, false);
+	  std::string value1 = value;
+	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))
+		  value1 = value.substr(1,value.size()-2);
+      GmatBase* obs = CreateObject(value1, "", 0, false);								// fix Bug 3, error 1 in ticket GMT-4314
 
       if (obs != NULL)
       {
          if (obs->IsOfType(Gmat::OBTYPE))
 		 {
-			obj->SetStringParameter("Format", value1);									// made changes by TUAN NGUYEN		fix Bug 12 in ticket GMT-4314
+			obj->SetStringParameter("Format", value1);									   // fix Bug 12 in ticket GMT-4314
             retval = obj->SetRefObject(obs, Gmat::OBTYPE);
 		 }
       }
