@@ -30,7 +30,7 @@
 #include "ProgressReporter.hpp"
 #include "SignalData.hpp"
 #include "GmatTime.hpp"
-#include "RampTableData.hpp"                              // made changes by TUAN NGUYEN
+#include "RampTableData.hpp"
 
 class PropSetup;
 
@@ -78,28 +78,28 @@ public:
    virtual void         InitializeSignal(bool chainForwards = false);
 
 #ifdef USE_PRECISION_TIME
-   virtual bool         ModelSignal(const GmatTime atEpoch,                     // made changes by TUAN NGUYEN
-                                    bool EpochAtReceive = true) = 0;            // made changes by TUAN NGUYEN
+   virtual bool         ModelSignal(const GmatTime atEpoch,
+                                    bool EpochAtReceive = true) = 0;
 #else
    virtual bool         ModelSignal(const GmatEpoch atEpoch,
-                                    bool EpochAtReceive = true) = 0;            // This function will bw removed and replaced by ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true)
+                                    bool EpochAtReceive = true) = 0;            // This function will be removed and replaced by ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true)
 #endif
 
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
                               Integer forId) = 0;
    /// This function is used to add media correction to measurement model
-   virtual void         AddCorrection(const std::string& modelName,               // made changes by TUAN NGUYEN
-                             const std::string& mediaCorrectionType) = 0;         // made changes by TUAN NGUYEN
+   virtual void         AddCorrection(const std::string& modelName,
+                             const std::string& mediaCorrectionType) = 0;
 
-   virtual bool         MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL) = 0; // made changes by TUAN NGUYEN
-   /// This function is used to calculate total hardware delay                    // made changes by TUAN NGUYEN
-   virtual bool         HardwareDelayCalculation() = 0;                           // made changes by TUAN NGUYEN
+   virtual bool         MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL) = 0;
+   /// This function is used to calculate total hardware delay
+   virtual bool         HardwareDelayCalculation() = 0;
 
    virtual std::string  GetPathDescription(bool fullList = true);
 
    SignalData&          GetSignalData();
-   SignalData*          GetSignalDataObject();                                    // made changes by TUAN NGUYEN
+   SignalData*          GetSignalDataObject();
    void                 SetSignalData(const SignalData& newData);
    bool                 IsSignalFeasible();
    virtual void         UsesLighttime(const bool tf);
@@ -107,9 +107,9 @@ public:
    bool                 StepParticipant(Real stepToTake,
                                               bool forTransmitter);
 #ifdef USE_PRECISION_TIME
-   void                 MoveToEpoch(const GmatTime theEpoch,                     // made changes by TUAN NGUYEN
-                                          bool epochAtReceive,                   // made changes by TUAN NGUYEN
-                                          bool moveAll = true);                  // made changes by TUAN NGUYEN
+   void                 MoveToEpoch(const GmatTime theEpoch,
+                                          bool epochAtReceive,
+                                          bool moveAll = true);
 #else
    void                 MoveToEpoch(const GmatEpoch theEpoch,                    // This function will be removed and replaced by MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive, bool moveAll = true)
                                           bool epochAtReceive,
@@ -146,7 +146,7 @@ protected:
 
 #ifdef USE_PRECISION_TIME
    /// Epoch of most recent calculation
-   GmatTime                   satPrecEpoch;                        // made changes by TUAN NGUYEN
+   GmatTime                   satPrecEpoch;
 #else
    /// Epoch of most recent calculation
    GmatEpoch                  satEpoch;                            // This variable will be removed and replaced by variable satPrecEpoch

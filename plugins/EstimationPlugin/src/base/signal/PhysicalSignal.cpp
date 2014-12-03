@@ -23,11 +23,11 @@
 #include "MeasurementException.hpp"
 #include "PropSetup.hpp"
 #include "GroundstationInterface.hpp"
-#include "Barycenter.hpp"                        // made changes by TUAN NGUYEN
-#include "Spacecraft.hpp"                        // made changes by TUAN NGUYEN
-#include "Transmitter.hpp"                       // made changes by TUAN NGUYEN
-#include "Transponder.hpp"                       // made changes by TUAN NGUYEN
-#include "Receiver.hpp"                          // made changes by TUAN NGUYEN
+#include "Barycenter.hpp"
+#include "Spacecraft.hpp"
+#include "Transmitter.hpp"
+#include "Transponder.hpp"
+#include "Receiver.hpp"
 
 #include <sstream>                  // For stringstream
 
@@ -63,8 +63,8 @@ PhysicalSignal::PhysicalSignal(const std::string &typeStr,
 #ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
    ionosphere                 (NULL),
 #endif
-   useRelativity              (false),            // made changes by TUAN NGUYEN
-   useETTAI                   (false)             // made changes by TUAN NGUYEN
+   useRelativity              (false),
+   useETTAI                   (false)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: default construction\n");
@@ -110,7 +110,7 @@ PhysicalSignal::~PhysicalSignal()
 PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
    SignalBase                 (ps),
    physicalSignalInitialized  (false),
-   useRelativity              (ps.useRelativity),               // made changes by TUAN NGUYEN
+   useRelativity              (ps.useRelativity),
    relCorrection              (ps.relCorrection),
    useETTAI                   (ps.useETTAI),
 #ifdef IONOSPHERE
@@ -512,40 +512,40 @@ bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
    return retval;
 }
 #else
-// made changes by TUAN NGUYEN
+
 bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 {
    bool retval = false;
    
-   //satPrecEpoch = atEpoch;                    // made changes by TUAN NGUYEN
-   if (epochAtReceive)                                                                 // made changes by TUAN NGUYEN
-   {                                                                                   // made changes by TUAN NGUYEN
-      // time tag is at the end of signal path                                         // made changes by TUAN NGUYEN
-      if (next == NULL)                                                                // made changes by TUAN NGUYEN
-      {                                                                                // made changes by TUAN NGUYEN
-         // for the last signal leg, rDelay = hardware delay                           // made changes by TUAN NGUYEN
-         satPrecEpoch = atEpoch - theData.rDelay/GmatTimeConstants::SECS_PER_DAY;      // made changes by TUAN NGUYEN
-      }                                                                                // made changes by TUAN NGUYEN
-      else                                                                             // made changes by TUAN NGUYEN
-      {                                                                                // made changes by TUAN NGUYEN
-         // for other leg, rDelay = 1/2 hardware delay                                 // made changes by TUAN NGUYEN
-         satPrecEpoch = atEpoch - 2*theData.rDelay/GmatTimeConstants::SECS_PER_DAY;    // made changes by TUAN NGUYEN
-      }                                                                                // made changes by TUAN NGUYEN
-   }                                                                                   // made changes by TUAN NGUYEN
-   else                                                                                // made changes by TUAN NGUYEN
-   {                                                                                   // made changes by TUAN NGUYEN
-      // time tag is at the beginning of signal path                                   // made changes by TUAN NGUYEN
-      if (previous == NULL)                                                            // made changes by TUAN NGUYEN
-      {                                                                                // made changes by TUAN NGUYEN
-         // for the first signal leg, tDelay = hardware delay                          // made changes by TUAN NGUYEN
-         satPrecEpoch = atEpoch + theData.tDelay/GmatTimeConstants::SECS_PER_DAY;      // made changes by TUAN NGUYEN
-      }                                                                                // made changes by TUAN NGUYEN
-      else                                                                             // made changes by TUAN NGUYEN
-      {                                                                                // made changes by TUAN NGUYEN
-         // for other leg, tDelay = 1/2 hardware delay                                 // made changes by TUAN NGUYEN
-         satPrecEpoch = atEpoch + 2*theData.tDelay/GmatTimeConstants::SECS_PER_DAY;    // made changes by TUAN NGUYEN
-      }                                                                                // made changes by TUAN NGUYEN
-   }                                                                                   // made changes by TUAN NGUYEN
+   //satPrecEpoch = atEpoch;
+   if (epochAtReceive)
+   {
+      // time tag is at the end of signal path
+      if (next == NULL)
+      {
+         // for the last signal leg, rDelay = hardware delay
+         satPrecEpoch = atEpoch - theData.rDelay/GmatTimeConstants::SECS_PER_DAY;
+      }
+      else
+      {
+         // for other leg, rDelay = 1/2 hardware delay
+         satPrecEpoch = atEpoch - 2*theData.rDelay/GmatTimeConstants::SECS_PER_DAY;
+      }
+   }
+   else
+   {
+      // time tag is at the beginning of signal path
+      if (previous == NULL)
+      {
+         // for the first signal leg, tDelay = hardware delay
+         satPrecEpoch = atEpoch + theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
+      }
+      else
+      {
+         // for other leg, tDelay = 1/2 hardware delay
+         satPrecEpoch = atEpoch + 2*theData.tDelay/GmatTimeConstants::SECS_PER_DAY;
+      }
+   }
 
 
    relCorrection = 0.0;
@@ -663,9 +663,9 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.tNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasible = (elData[2] > 0.0);
-            theData.feasibility = signalIsFeasible;                                                 // made changes by TUAN NGUYEN
-            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked  // made changes by TUAN NGUYEN
-            theData.feasibilityValue = elData[0];                                                   // made changes by TUAN NGUYEN
+            theData.feasibility = signalIsFeasible;
+            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked; "N": normal state
+            theData.feasibilityValue = elData[0];
 
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At transmit node: Obs vector = [%.12lf,  %.12lf,  %.12lf]km "
@@ -682,9 +682,9 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             elData = ((GroundstationInterface*)(theData.rNode))->
                   IsValidElevationAngle(state_sez);
             signalIsFeasible = (elData[2] > 0.0);
-            theData.feasibility = signalIsFeasible;                                                 // made changes by TUAN NGUYEN
-            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked  // made changes by TUAN NGUYEN
-            theData.feasibilityValue = elData[0];                                                   // made changes by TUAN NGUYEN
+            theData.feasibility = signalIsFeasible;
+            theData.feasibilityReason = (theData.feasibility?"N":"B");   // "B": signal is blocked; "N": normal state
+            theData.feasibilityValue = elData[0];
 
             #ifdef DEBUG_FEASIBILITY
             MessageInterface::ShowMessage("At receive node: Obs vector = [%.12lf,  %.12lf,  %.12lf]km "
@@ -727,7 +727,7 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
             Real range = theData.rangeVecInertial.GetMagnitude();
             if (range >= 0.0)
                data << "   " << GetPathDescription(false)
-                    << " Range at A.1 epoch " << satPrecEpoch.GetMjd()               // made changes by TUAN NGUYEN
+                    << " Range at A.1 epoch " << satPrecEpoch.GetMjd()
                     << " = " << range << "\n";
             else
                data << "   Range not valid\n";
@@ -753,7 +753,7 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
       // 6. Run ModelSignal for the next leg in signal path:
       // if epoctAtReceive was true, transmitter moved and we need its epoch,
       // if false, we need the receiver epoch
-      GmatTime nextPrecEpoch = (epochAtReceive ? theData.tPrecTime : theData.rPrecTime);      // made changes by TUAN NGUYEN
+      GmatTime nextPrecEpoch = (epochAtReceive ? theData.tPrecTime : theData.rPrecTime);
       //// Assumption: theData.tDelay and theData.rDelay have to be specified before running ModelSignal() function
       //GmatTime nextPrecEpoch;
       //if (epochAtReceive)
@@ -774,7 +774,7 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 
             /// @todo: If there is a transponder delay, apply it here, moving
             /// nextEpoch back by the delay time
-            nodePassed = previous->ModelSignal(nextPrecEpoch, nextFixed);                  // made changes by TUAN NGUYEN
+            nodePassed = previous->ModelSignal(nextPrecEpoch, nextFixed);
          }
       }
       else
@@ -785,7 +785,7 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 
             /// @todo: If there is a transponder delay, apply it here, moving
             /// nextEpoch ahead by the delay time
-            nodePassed = next->ModelSignal(nextPrecEpoch, nextFixed);                     // made changes by TUAN NGUYEN
+            nodePassed = next->ModelSignal(nextPrecEpoch, nextFixed);
          }
       }
      
@@ -1070,8 +1070,8 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
       MoveToEpoch(atEpoch, epochAtReceive, true);
 
       // Then compute the initial data
-      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;                                              // Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)      // made changes by TUAN NGUYEN 
-      Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());   // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)      // made changes by TUAN NGUYEN 
+      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;                                              // Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)
+      Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());   // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)
 
       Real deltaR = displacement.GetMagnitude();
       Real deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
@@ -1109,7 +1109,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
                (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
          Rvector3 rLocSSB = theData.rLoc + theData.rOStateSSB.GetR();
          Rvector3 tLocSSB = theData.tLoc + theData.tOStateSSB.GetR();
-         // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)      // made changes by TUAN NGUYEN 
+         // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)
          displacement = rLocSSB - tLocSSB;
        
          #ifdef DEBUG_LIGHTTIME
@@ -1142,7 +1142,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
 
    // Temporary check on data flow
    // Build the other data vectors
-   CalculateRangeVectorInertial();                           // made changes by TUAN NGUYEN
+   CalculateRangeVectorInertial();
    CalculateRangeVectorObs();
    CalculateRangeRateVectorObs();
 
@@ -1150,7 +1150,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
 }
 #else
 
-// made changes by TUAN NGUYEN
+
 bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
       const bool epochAtReceive)
 {
@@ -1162,7 +1162,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
    #endif
 
    // It is equivalant to range tolerance = time tolerance * speed of light = (1.0e-12 s)x(299792458.0 m/s) = 0.0002998 m = 0.3 mm 
-   Real timeTolerance = 1.0e-12;                                                   // made changes by TUAN NGUYEN
+   Real timeTolerance = 1.0e-12;
 
    bool retval = false;
 
@@ -1172,8 +1172,8 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
       MoveToEpoch(atEpoch, epochAtReceive, true);
 
       // Then compute the initial data
-      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;                                              // Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)      // made changes by TUAN NGUYEN 
-      Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());   // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)      // made changes by TUAN NGUYEN 
+      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;                                              // Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)
+      Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());   // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)
 
       Real deltaR = displacement.GetMagnitude();
       Real deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
@@ -1188,7 +1188,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
       Integer loopCount = 0;
 
       // Epoch difference, in seconds
-      Real deltaE = (theData.rPrecTime - theData.tPrecTime).GetTimeInSec();                     // made changes by TUAN NGUYEN
+      Real deltaE = (theData.rPrecTime - theData.tPrecTime).GetTimeInSec();
 
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("      Starting: dEpoch = %.12le, dR = "
@@ -1199,7 +1199,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
       #endif
 
       // Loop to half microsecond precision or 10 times, whichever comes first
-      while ((GmatMathUtil::Abs(deltaE - deltaT) > timeTolerance) && (loopCount < 10))            // made changes by TUAN NGUYEN
+      while ((GmatMathUtil::Abs(deltaE - deltaT) > timeTolerance) && (loopCount < 10))
       {
          #ifdef DEBUG_LIGHTTIME
             MessageInterface::ShowMessage("      Loop iteration %d\n",
@@ -1208,10 +1208,10 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
          MoveToEpoch(atEpoch + deltaT / GmatTimeConstants::SECS_PER_DAY,
                !epochAtReceive, false);
          deltaE = (epochAtReceive ? -1.0 : 1.0) *
-          (theData.rPrecTime - theData.tPrecTime).GetTimeInSec();                                 // made changes by TUAN NGUYEN 
+          (theData.rPrecTime - theData.tPrecTime).GetTimeInSec();
          Rvector3 rLocSSB = theData.rLoc + theData.rOStateSSB.GetR();
          Rvector3 tLocSSB = theData.tLoc + theData.tOStateSSB.GetR();
-         // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)      // made changes by TUAN NGUYEN 
+         // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)
          displacement = rLocSSB - tLocSSB;
        
          #ifdef DEBUG_LIGHTTIME
@@ -1243,7 +1243,7 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
 
    // Temporary check on data flow
    // Build the other data vectors
-   CalculateRangeVectorInertial();                           // made changes by TUAN NGUYEN
+   CalculateRangeVectorInertial();
    CalculateRangeVectorObs();
    CalculateRangeRateVectorObs();
 
@@ -1377,7 +1377,7 @@ bool PhysicalSignal::HardwareDelayCalculation()
 }
 
 
-// made changes by TUAN NGUYEN
+
 //---------------------------------------------------------------------------------------------
 // bool MediaCorrectionCalculation(std::vector<RampTableData>* rampTB)
 //---------------------------------------------------------------------------------------------
@@ -2104,7 +2104,7 @@ Real PhysicalSignal::RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, R
 }
 
 
-/// Calculate ET - TAI at a ground station on Earth or a spacecraft:                              // made changes by TUAN NGUYEN
+/// Calculate ET - TAI at a ground station on Earth or a spacecraft
 Real PhysicalSignal::ETminusTAI(Real tA1MJD, SpacePoint* participant)
 {
    // Step 2:

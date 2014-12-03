@@ -69,8 +69,8 @@ public:
 
 #ifdef USE_PRECISION_TIME
    /// Transmitter epoch
-   GmatTime tPrecTime;                                       // made changes by TUAN NGUYEN
-   GmatTime rPrecTime;                                       // made changes by TUAN NGUYEN
+   GmatTime tPrecTime;
+   GmatTime rPrecTime;
 #else
    /// Transmitter epoch
    GmatEpoch tTime;                                // tTime will be removed and replaced by tPrecTime
@@ -80,14 +80,14 @@ public:
 
    /// MJ2000Eq location of the transmit node
    Rvector3 tLoc;
-   /// SSBMJ2000 state of the transmit node's origin                  // made changes by TUAN NGUYEN
-   Rvector6 tOStateSSB;                                               // made changes by TUAN NGUYEN
+   /// SSBMJ2000 state of the transmit node's origin
+   Rvector6 tOStateSSB;
    /// Location of the transmit node in its coordinate system
    Rvector3 tLocTcs;
    /// MJ2000Eq location of the receive node
    Rvector3 rLoc;
-   /// SSBMJ2000 state of the receive node's origin                  // made changes by TUAN NGUYEN
-   Rvector6 rOStateSSB;                                              // made changes by TUAN NGUYEN
+   /// SSBMJ2000 state of the receive node's origin
+   Rvector6 rOStateSSB;
    /// Location of the receive node in its coordinate system
    Rvector3 rLocRcs;
    /// MJ2000Eq transmitter velocity
@@ -105,16 +105,16 @@ public:
    /// The SSBMj2000 equatorial range vector from transmit at time tTime to receive node at time rTime
    Rvector3 rangeVecInertial;
    /// Relative velocity of the receive node at time rTime w.r.t. the transmit node at time tTime
-   Rvector3 rangeRateVecInertial;                                   // made changes by TUAN NGUYEN
+   Rvector3 rangeRateVecInertial;
    /// The range vector from transmit to receive node in obs coordinates
    Rvector3 rangeVecObs;
    /// The range rate vector from transmit to receive node in obs coordinates
    Rvector3 rangeRateVecObs;
 
    /// feasibility
-   bool        feasibility;            // Flag indicate signal is feasible          // made changes by TUAN NGUYEN
-   std::string feasibilityReason;      // reason why signal is unfeasible           // made changes by TUAN NGUYEN
-   Real        feasibilityValue;       // Contain elevation angle                   // made changes by TUAN NGUYEN
+   bool        feasibility;            // Flag indicate signal is feasible
+   std::string feasibilityReason;      // reason why signal is unfeasible
+   Real        feasibilityValue;       // Contain elevation angle
 
    // State Transition Matrices for derivatives of light time measurements
    /// The STM of transmit participant at transmit time t1
@@ -122,12 +122,12 @@ public:
    /// The STM of receive participant at receive time t2
    Rmatrix66 rSTM;
 
-   /// The STM of transmit participant at measurement time tm                                                          // made changes by TUAN NGUYEN
-   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)   // made changes by TUAN NGUYEN
-   Rmatrix66 tSTMtm;                                                                                                   // made changes by TUAN NGUYEN
-   /// The STM of receive participant at  measurement time tm                                                          // made changes by TUAN NGUYEN
-   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)   // made changes by TUAN NGUYEN
-   Rmatrix66 rSTMtm;                                                                                                   // made changes by TUAN NGUYEN
+   /// The STM of transmit participant at measurement time tm
+   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)
+   Rmatrix66 tSTMtm;
+   /// The STM of receive participant at  measurement time tm
+   ///(note that : measurement time tm is different from transmit time t1 and receive time t2 due to hardware delay)
+   Rmatrix66 rSTMtm;
 
    /// Rotation matrix from J2K to transmitter coordinate system
    Rmatrix33 tJ2kRotation;
@@ -143,10 +143,10 @@ public:
    /// Flag for light time solution
    bool solveLightTime;
 
-   /// Hardware delay associated with transmit participant           // made changes by TUAN NGUYEN
-   Real tDelay;                                                      // made changes by TUAN NGUYEN
-   /// Hardware delay associated with receive participant            // made changes by TUAN NGUYEN
-   Real rDelay;                                                      // made changes by TUAN NGUYEN
+   /// Hardware delay associated with transmit participant
+   Real tDelay;
+   /// Hardware delay associated with receive participant
+   Real rDelay;
 
 
    /// Linked list so separate signal paths are clear
