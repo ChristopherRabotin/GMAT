@@ -569,7 +569,7 @@ protected:
                                         bool otherHardware);
    void              CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
                                        const ObjectArray &thrs, PowerSystem *pwr,
-                                       const ObjectArray &otherHw);        // made changes by TUAN NGUYEN      09/23/2014
+                                       const ObjectArray &otherHw);        // made changes on 09/23/2014
    void              AttachTanksToThrusters();
    bool              SetHardware(GmatBase *obj, StringArray &hwNames,
                                  ObjectArray &hwArray);

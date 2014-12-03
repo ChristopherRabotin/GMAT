@@ -618,7 +618,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //   hardwareList      = a.hardwareList;
 
    // set cloned hardware
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes by TUAN NGUYEN      09/23/2014
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes on 09/23/2014
 
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -736,7 +736,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
       #endif
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes by TUAN NGUYEN      09/23/2014
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes on 09/23/2014
 
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -5400,7 +5400,7 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
 //------------------------------------------------------------------------------
 void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
                                    const ObjectArray &thrs, PowerSystem *pwrSys,
-                                   const ObjectArray &otherHardware)   // made changes by TUAN NGUYEN    09/23/2014
+                                   const ObjectArray &otherHardware)   // made changes on 09/23/2014
 {
    #ifdef DEBUG_OBJ_CLONE
    MessageInterface::ShowMessage
@@ -5525,7 +5525,7 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
        " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
    #endif
 
-   // made changes by TUAN NGUYEN         09/23/2014
+   // made changes on 09/23/2014
    // Clone other hardware
    for (UnsignedInt i = 0; i < otherHardware.size(); ++i)
    {
@@ -6875,7 +6875,7 @@ bool Spacecraft::VerifyAddHardware()
             if (primaryAntenna == NULL)
             {
                MessageInterface::ShowMessage
-                  ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",					// made changes by TUAN NGUYEN
+                  ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",
                    obj->GetName().c_str(), this->GetName().c_str());
                check = false;
             }
