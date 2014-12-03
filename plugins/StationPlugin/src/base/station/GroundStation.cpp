@@ -50,46 +50,46 @@ const std::string
 GroundStation::PARAMETER_TEXT[GroundStationParamCount - BodyFixedPointParamCount] =
    {
       "Id",
-      "AddHardware",            // made changes by Tuan Nguyen
-      "IonosphereModel",        // made changes by Tuan Nguyen
-      "TroposphereModel",       // made changes by Tuan Nguyen
-      "DataSource",             // made changes by Tuan Nguyen
+      "AddHardware",
+      "IonosphereModel",
+      "TroposphereModel",
+      "DataSource",
       "Temperature",            // K- degree
       "Pressure",               // hPa
       "Humidity",               // percentage
       "MinimumElevationAngle",  // degree
-      "RangeNoiseSigma",               // RANGE_NOISESIGMA           // made changes by TUAN NGUYEN
-      "RangeErrorModel",               // RANGE_ERRORMODEL           // made changes by TUAN NGUYEN
-      "DSNRangeNoiseSigma",            // DSNRANGE_NOISESIGMA        // made changes by TUAN NGUYEN
-      "DSNRangeErrorModel",            // DSNRANGE_ERRORMODEL        // made changes by TUAN NGUYEN
-      "DopplerNoiseSigma",             // DOPPLER_NOISESIGMA         // made changes by TUAN NGUYEN
-      "DopplerErrorModel",             // DOPPLER_ERRORMODEL         // made changes by TUAN NGUYEN
-      "RangeBias",                     // RANGE_BIAS                 // made changes by TUAN NGUYEN
-      "DSNRangeBias",                  // DSNRANGE_BIAS              // made changes by TUAN NGUYEN
-      "DopplerBias",                   // DOPPLER_BIAS               // made changes by TUAN NGUYEN
+      "RangeNoiseSigma",               // RANGE_NOISESIGMA
+      "RangeErrorModel",               // RANGE_ERRORMODEL
+      "DSNRangeNoiseSigma",            // DSNRANGE_NOISESIGMA
+      "DSNRangeErrorModel",            // DSNRANGE_ERRORMODEL
+      "DopplerNoiseSigma",             // DOPPLER_NOISESIGMA
+      "DopplerErrorModel",             // DOPPLER_ERRORMODEL
+      "RangeBias",                     // RANGE_BIAS
+      "DSNRangeBias",                  // DSNRANGE_BIAS
+      "DopplerBias",                   // DOPPLER_BIAS
    };
 
 const Gmat::ParameterType
 GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount] =
    {
       Gmat::STRING_TYPE,
-      Gmat::OBJECTARRAY_TYPE,      // made changes by Tuan Nguyen
-      Gmat::STRING_TYPE,           // made changes by Tuan Nguyen
-      Gmat::STRING_TYPE,           // made changes by Tuan Nguyen
-      Gmat::STRING_TYPE,           // made changes by Tuan Nguyen
+      Gmat::OBJECTARRAY_TYPE,
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE,
+      Gmat::STRING_TYPE,
       Gmat::REAL_TYPE,      // Temperature
       Gmat::REAL_TYPE,      // Pressure
       Gmat::REAL_TYPE,      // Humidity
       Gmat::REAL_TYPE,      // MinimumElevationAngle
-      Gmat::REAL_TYPE,             // RANGE_NOISESIGMA          // made changes by TUAN NGUYEN
-      Gmat::STRING_TYPE,           // RANGE_ERROR_MODEL         // made changes by TUAN NGUYEN
-      Gmat::REAL_TYPE,             // DSNRANGE_NOISESIGMA       // made changes by TUAN NGUYEN
-      Gmat::STRING_TYPE,           // DSNRANGE_ERROR_MODEL      // made changes by TUAN NGUYEN
-      Gmat::REAL_TYPE,             // DOPPLER_NOISESIGMA        // made changes by TUAN NGUYEN
-      Gmat::STRING_TYPE,           // DOPPLER_ERROR_MODEL       // made changes by TUAN NGUYEN
-      Gmat::REAL_TYPE,             // RANGE_BIAS                // made changes by TUAN NGUYEN
-      Gmat::REAL_TYPE,             // DSNRANGE_BIAS             // made changes by TUAN NGUYEN
-      Gmat::REAL_TYPE,             // DOPPLER_BIAS              // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,             // RANGE_NOISESIGMA
+      Gmat::STRING_TYPE,           // RANGE_ERROR_MODEL
+      Gmat::REAL_TYPE,             // DSNRANGE_NOISESIGMA
+      Gmat::STRING_TYPE,           // DSNRANGE_ERROR_MODEL
+      Gmat::REAL_TYPE,             // DOPPLER_NOISESIGMA
+      Gmat::STRING_TYPE,           // DOPPLER_ERROR_MODEL
+      Gmat::REAL_TYPE,             // RANGE_BIAS
+      Gmat::REAL_TYPE,             // DSNRANGE_BIAS
+      Gmat::REAL_TYPE,             // DOPPLER_BIAS
    };
 
 
@@ -114,21 +114,19 @@ GroundStation::GroundStation(const std::string &itsName) :
    temperature               (295.1),                // 295.1 K-degree
    pressure                  (1013.5),               // 1013.5 hPa
    humidity                  (55.0),                 // 55%
-   dataSource                ("Constant"),           // made changes by Tuan Nguyen
+   dataSource                ("Constant"),
    minElevationAngle         (7.0),                  // 7 degree
-   rangeNoiseSigma           (1.0),              // made changes by TUAN NGUYEN
-   rangeErrorModel           ("RandomConstant"), // made changes by TUAN NGUYEN
-   dsnrangeNoiseSigma        (1.0),              // made changes by TUAN NGUYEN
-   dsnrangeErrorModel        ("RandomConstant"), // made changes by TUAN NGUYEN
-   dopplerNoiseSigma         (1.0),              // made changes by TUAN NGUYEN
-   dopplerErrorModel         ("RandomConstant"), // made changes by TUAN NGUYEN
-   rangeBias                 (0.0),                  // unit: km         // made changes by TUAN NGUYEN
-   dsnrangeBias              (0.0),                  // unit: RU         // made changes by TUAN NGUYEN
-   dopplerBias               (0.0),                  // unit: Hz         // made changes by TUAN NGUYEN
-   troposphereModel          ("None"),               // made changes by Tuan Nguyen
-   ionosphereModel           ("None")                // made changes by Tuan Nguyen
-//   troposphereObj            (NULL),
-//   ionosphereObj             (NULL)
+   rangeNoiseSigma           (1.0),                  // 1 Km
+   rangeErrorModel           ("RandomConstant"),
+   dsnrangeNoiseSigma        (1.0),                  // 1 RU
+   dsnrangeErrorModel        ("RandomConstant"),
+   dopplerNoiseSigma         (1.0),                  // 1 Hz
+   dopplerErrorModel         ("RandomConstant"),
+   rangeBias                 (0.0),                  // unit: km
+   dsnrangeBias              (0.0),                  // unit: RU
+   dopplerBias               (0.0),                  // unit: Hz
+   troposphereModel          ("None"),
+   ionosphereModel           ("None")
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GroundStation default constructor\n");
@@ -174,27 +172,25 @@ GroundStation::GroundStation(const GroundStation& gs) :
    temperature           (gs.temperature),
    pressure              (gs.pressure),
    humidity              (gs.humidity),
-   dataSource            (gs.dataSource),          // made changes by Tuan Nguyen
+   dataSource            (gs.dataSource),
    minElevationAngle     (gs.minElevationAngle),
-   rangeNoiseSigma       (gs.rangeNoiseSigma),           // made changes by TUAN NGUYEN
-   rangeErrorModel       (gs.rangeErrorModel),           // made changes by TUAN NGUYEN
-   dsnrangeNoiseSigma    (gs.dsnrangeNoiseSigma),        // made changes by TUAN NGUYEN
-   dsnrangeErrorModel    (gs.dsnrangeErrorModel),        // made changes by TUAN NGUYEN
-   dopplerNoiseSigma     (gs.dopplerNoiseSigma),         // made changes by TUAN NGUYEN
-   dopplerErrorModel     (gs.dopplerErrorModel),         // made changes by TUAN NGUYEN
-   rangeBias             (gs.rangeBias),                 // made changes by TUAN NGUYEN
-   dsnrangeBias          (gs.dsnrangeBias),              // made changes by TUAN NGUYEN
-   dopplerBias           (gs.dopplerBias),               // made changes by TUAN NGUYEN
-   ionosphereModel       (gs.ionosphereModel),     // made changes by Tuan Nguyen
-   troposphereModel      (gs.troposphereModel)     // made changes by Tuan Nguyen
-//   troposphereObj        (NULL),
-//   ionosphereObj         (NULL)
+   rangeNoiseSigma       (gs.rangeNoiseSigma),
+   rangeErrorModel       (gs.rangeErrorModel),
+   dsnrangeNoiseSigma    (gs.dsnrangeNoiseSigma),
+   dsnrangeErrorModel    (gs.dsnrangeErrorModel),
+   dopplerNoiseSigma     (gs.dopplerNoiseSigma),
+   dopplerErrorModel     (gs.dopplerErrorModel),
+   rangeBias             (gs.rangeBias),
+   dsnrangeBias          (gs.dsnrangeBias),
+   dopplerBias           (gs.dopplerBias),
+   ionosphereModel       (gs.ionosphereModel),
+   troposphereModel      (gs.troposphereModel)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GroundStation copy constructor start\n");
 #endif
 
-   hardwareNames       = gs.hardwareNames;      // made changes by Tuan Nguyen
+   hardwareNames       = gs.hardwareNames;
 // hardwareList        = gs.hardwareList;       // should it be cloned ????
 
 #ifdef DEBUG_CONSTRUCTION
@@ -225,29 +221,27 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
       GroundstationInterface::operator=(gs);
 
       stationId       = gs.stationId;
-      hardwareNames   = gs.hardwareNames;      // made changes by Tuan Nguyen
+      hardwareNames   = gs.hardwareNames;
 //    hardwareList    = gs.hardwareList;       // should it be cloned ????
 
       temperature     = gs.temperature;
       pressure        = gs.pressure;
       humidity        = gs.humidity;
-      dataSource      = gs.dataSource;              // made changes by Tuan Nguyen
+      dataSource      = gs.dataSource;
 
-      minElevationAngle = gs.minElevationAngle;
-      rangeNoiseSigma    = gs.rangeNoiseSigma;           // made changes by TUAN NGUYEN
-      rangeErrorModel    = gs.rangeErrorModel;           // made changes by TUAN NGUYEN
-      dsnrangeNoiseSigma = gs.dsnrangeNoiseSigma;        // made changes by TUAN NGUYEN
-      dsnrangeErrorModel = gs.dsnrangeErrorModel;        // made changes by TUAN NGUYEN
-      dopplerNoiseSigma  = gs.dopplerNoiseSigma;         // made changes by TUAN NGUYEN
-      dopplerErrorModel  = gs.dopplerErrorModel;         // made changes by TUAN NGUYEN
-      rangeBias          = gs.rangeBias;                 // made changes by TUAN NGUYEN
-      dsnrangeBias       = gs.dsnrangeBias;              // made changes by TUAN NGUYEN
-      dopplerBias        = gs.dopplerBias;               // made changes by TUAN NGUYEN
+      minElevationAngle  = gs.minElevationAngle;
+      rangeNoiseSigma    = gs.rangeNoiseSigma;
+      rangeErrorModel    = gs.rangeErrorModel;
+      dsnrangeNoiseSigma = gs.dsnrangeNoiseSigma;
+      dsnrangeErrorModel = gs.dsnrangeErrorModel;
+      dopplerNoiseSigma  = gs.dopplerNoiseSigma;
+      dopplerErrorModel  = gs.dopplerErrorModel;
+      rangeBias          = gs.rangeBias;
+      dsnrangeBias       = gs.dsnrangeBias;
+      dopplerBias        = gs.dopplerBias;
 
-      troposphereModel  = gs.troposphereModel;      // made changes by Tuan Nguyen
-      ionosphereModel   = gs.ionosphereModel;       // made changes by Tuan Nguyen
-//      troposphereObj    = NULL;
-//      ionosphereObj     = NULL;
+      troposphereModel  = gs.troposphereModel;
+      ionosphereModel   = gs.ionosphereModel;
    }
 
    return *this;
@@ -615,7 +609,6 @@ std::string GroundStation::GetStringParameter(const Integer id,
       throw ex;
    }
 
-   // made changes by Tuan Nguyen
    switch (id)
    {
       case ADD_HARDWARE:
@@ -698,7 +691,7 @@ bool GroundStation::SetStringParameter(const Integer id,
 
    switch (id)
    {
-   case ADD_HARDWARE:            // made changes by Tuan Nguyen
+   case ADD_HARDWARE:
       // Only add the hardware if it is not in the list already
       if (find(hardwareNames.begin(), hardwareNames.end(), value) ==
                   hardwareNames.end())
@@ -1143,7 +1136,6 @@ const ObjectTypeArray& GroundStation::GetRefObjectTypeArray()
 //
 // return true if there is no error, false otherwise.
 //-------------------------------------------------------------------------
-// made changes by Tuan Nguyen
 bool GroundStation::VerifyAddHardware()
 {
    Gmat::ObjectType type;
@@ -1197,7 +1189,7 @@ bool GroundStation::VerifyAddHardware()
             if (primaryAntenna == NULL)
             {
                MessageInterface::ShowMessage
-                ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",            // made changes by TUAN NGUYEN
+                ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",
                  obj->GetName().c_str(), this->GetName().c_str());
                check = false;
             }
@@ -1294,7 +1286,6 @@ bool GroundStation::Initialize()
    }
 
 
-   // made changes by Tuan Nguyen
    // verify GroundStation's referenced objects
    if (VerifyAddHardware() == false)   // verify add hardware
       return false;
@@ -1354,9 +1345,7 @@ Real* GroundStation::GetEstimationParameterValue(const Integer item)
  * @return true if input is a valid ID; false otherwise.
  */
 //------------------------------------------------------------------------------
-// Note: stationID can be any string  TUAN NGUYEN. StationID and spacecraftID in 
-//       Stereo-A data are strings containing number.
-//
+// Note: stationID can be any string.
 bool GroundStation::IsValidID(const std::string &id)
 {
 //   // first character must be a letter
