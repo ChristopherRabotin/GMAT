@@ -60,7 +60,7 @@ public:
    virtual Real               SetRealParameter(const std::string &label,
                                          const Real value);
 
-//   virtual bool	 VerifyRefObject(std::string subTypeName, GmatBase* obj); // made changes by Tuan Nguyen
+//   virtual bool	 VerifyRefObject(std::string subTypeName, GmatBase* obj);
 
    DEFAULT_TO_NO_CLONES
 
