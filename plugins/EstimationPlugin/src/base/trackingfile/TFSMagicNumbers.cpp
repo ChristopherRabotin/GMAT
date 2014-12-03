@@ -102,12 +102,12 @@ Integer TFSMagicNumbers::GetMagicNumber(
          if (find(uniqueNodes.begin(), uniqueNodes.end(), nodelist[i][j]) ==
                uniqueNodes.end())
          {
-            // ++nodeCount;                     // made changes by TUAN NGUYEN
+            // ++nodeCount;
             uniqueNodes.push_back(nodelist[i][j]);
          }
       }
    }
-   nodeCount = uniqueNodes.size();               // made changes by TUAN NGUYEN
+   nodeCount = uniqueNodes.size();
 
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
    {
@@ -141,10 +141,10 @@ Integer TFSMagicNumbers::GetMagicNumber(
    }
 
    // This code is moved to default constructor fucntion
-   //// Build the factor map                                                   // made changes by TUAN NGUYEN
-   //factorMap.clear();                                                        // made changes by TUAN NGUYEN
-   //for (UnsignedInt i = 0; i < lookupTable.size(); ++i)                      // made changes by TUAN NGUYEN
-   //   factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;   // made changes by TUAN NGUYEN
+   //// Build the factor map
+   //factorMap.clear();
+   //for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
+   //   factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;
 
    if (retval == -1)
       retval = arbitraryMagicNumber;
@@ -468,7 +468,6 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
-   // Added by TUAN NGUYEN
    // DSN two way range
    lue = new LookupEntry;
    lue->arbitraryCount = false;
@@ -489,7 +488,6 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
-   // Added by TUAN NGUYEN
    // Generic doppler entry.  Other doppler entries take precedence
    lue = new LookupEntry;
    lue->arbitraryCount = true;
@@ -506,7 +504,6 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
-   // Added by TUAN NGUYEN
    // DSN two way doppler
    lue = new LookupEntry;
    lue->arbitraryCount = false;
@@ -609,10 +606,10 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
-   // Build the factor map                                                      // made changes by TUAN NGUYEN
-   factorMap.clear();                                                           // made changes by TUAN NGUYEN
-   for (UnsignedInt i = 0; i < lookupTable.size(); ++i)                         // made changes by TUAN NGUYEN
-      factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;      // made changes by TUAN NGUYEN
+   // Build the factor map
+   factorMap.clear();
+   for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
+      factorMap[lookupTable[i]->magicNumber] = lookupTable[i]->multFactor;
 
 }
 

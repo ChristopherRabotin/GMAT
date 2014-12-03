@@ -27,7 +27,6 @@
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
-//#include "USNRangeAdapter.hpp"
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
@@ -39,30 +38,30 @@
 
 /// Strings describing the BatchEstimator parameters
 const std::string TrackingFileSet::PARAMETER_TEXT[
-                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =      // made changes by TUAN NGUYEN
+                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =
 {
    "AddTrackingConfig",             // TRACKINGCONFIG
    "Filename",                      // FILENAME
-   "RampedTable",                   // RAMPED_TABLE               // made changes by TUAN NGUYEN
+   "RampedTable",                   // RAMPED_TABLE
    "UseLighttime",                  // USELIGHTTIME
-   "UseRelativityCorrection",       // USE_RELATIVITY             // made changes by TUAN NGUYEN
-   "UseETminusTAI",                 // USE_ETMINUSTAI             // made changes by TUAN NGUYEN
-   "RangeModuloConstant",           // RANGE_MODULO               // made changes by TUAN NGUYEN
-   "DopplerCountInterval",          // DOPPLER_COUNT_INTERVAL     // made changes by TUAN NGUYEN
+   "UseRelativityCorrection",       // USE_RELATIVITY
+   "UseETminusTAI",                 // USE_ETMINUSTAI
+   "RangeModuloConstant",           // RANGE_MODULO
+   "DopplerCountInterval",          // DOPPLER_COUNT_INTERVAL
 };
 
 /// Types of the BatchEstimator parameters
 const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
-                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =      // made changes by TUAN NGUYEN
+                             TrackingFileSetParamCount - MeasurementModelBaseParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,          // TRACKINGCONFIG
    Gmat::STRINGARRAY_TYPE,          // FILENAME, but it's a list of names...
    Gmat::STRINGARRAY_TYPE,          // RAMPED_TABLE, but it's a list of names...
    Gmat::BOOLEAN_TYPE,              // USELIGHTTIME
-   Gmat::BOOLEAN_TYPE,              // USE_RELATIVITY            // made changes by TUAN NGUYEN
-   Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI            // made changes by TUAN NGUYEN
-   Gmat::REAL_TYPE,                 // RANGE_MODULO              // made changes by TUAN NGUYEN
-   Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL    // made changes by TUAN NGUYEN
+   Gmat::BOOLEAN_TYPE,              // USE_RELATIVITY
+   Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI
+   Gmat::REAL_TYPE,                 // RANGE_MODULO
+   Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL
 };
 
 
@@ -76,14 +75,14 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
  */
 //------------------------------------------------------------------------------
 TrackingFileSet::TrackingFileSet(const std::string &name) :
-   MeasurementModelBase (name, "TrackingFileSet"),
-   useLighttime         (false),    // Default to true once implemented
-   solarsystem          (NULL),
-   thePropagator        (NULL),
-   useRelativityCorrection   (false),            // made changes by TUAN NGUYEN
-   useETminusTAICorrection   (false),            // made changes by TUAN NGUYEN
-   rangeModulo               (1.0e18),           // made changes by TUAN NGUYEN
-   dopplerCountInterval      (1.0)               // made changes by TUAN NGUYEN
+   MeasurementModelBase      (name, "TrackingFileSet"),
+   useLighttime              (true),          //(false),    // Default to true once implemented
+   solarsystem               (NULL),
+   thePropagator             (NULL),
+   useRelativityCorrection   (false),
+   useETminusTAICorrection   (false),
+   rangeModulo               (1.0e18),
+   dopplerCountInterval      (1.0)
 {
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
@@ -129,16 +128,16 @@ TrackingFileSet::~TrackingFileSet()
 TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    MeasurementModelBase      (tfs),
    filenames                 (tfs.filenames),
-   rampedTablenames          (tfs.rampedTablenames),          // made changes by TUAN NGUYEN
+   rampedTablenames          (tfs.rampedTablenames),
    useLighttime              (tfs.useLighttime),
    solarsystem               (tfs.solarsystem),
    thePropagator             (tfs.thePropagator),
    references                (tfs.references),
    datafiles                 (tfs.datafiles),
-   useRelativityCorrection   (tfs.useRelativityCorrection),   // made changes by TUAN NGUYEN
-   useETminusTAICorrection   (tfs.useETminusTAICorrection),   // made changes by TUAN NGUYEN
-   rangeModulo               (tfs.rangeModulo),               // made changes by TUAN NGUYEN
-   dopplerCountInterval      (tfs.dopplerCountInterval)       // made changes by TUAN NGUYEN
+   useRelativityCorrection   (tfs.useRelativityCorrection),
+   useETminusTAICorrection   (tfs.useETminusTAICorrection),
+   rangeModulo               (tfs.rangeModulo),
+   dopplerCountInterval      (tfs.dopplerCountInterval)
 {
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
@@ -164,12 +163,12 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
    {
       MeasurementModelBase::operator=(tfs);
 
-      for (UnsignedInt i = 0; i < measurements.size(); ++i)    // made changes by TUAN NGUYEN
-      {                                                        // made changes by TUAN NGUYEN
-         if (measurements[i])                                  // made changes by TUAN NGUYEN
-            delete measurements[i];                            // made changes by TUAN NGUYEN
-      }                                                        // made changes by TUAN NGUYEN
-      measurements.clear();                                    // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < measurements.size(); ++i)
+      {
+         if (measurements[i])
+            delete measurements[i];
+      }
+      measurements.clear();
 
       trackingConfigs.clear();
 
@@ -177,17 +176,17 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
          trackingConfigs.push_back(tfs.trackingConfigs[i]);
 
       filenames               = tfs.filenames;
-      rampedTablenames        = tfs.rampedTablenames;          // made changes by TUAN NGUYEN
+      rampedTablenames        = tfs.rampedTablenames;
       useLighttime            = tfs.useLighttime;
       solarsystem             = tfs.solarsystem;
       thePropagator           = tfs.thePropagator;
       references              = tfs.references;
       datafiles               = tfs.datafiles;
-      useRelativityCorrection = tfs.useRelativityCorrection;   // made changes by TUAN NGUYEN
-      useETminusTAICorrection = tfs.useETminusTAICorrection;   // made changes by TUAN NGUYEN
-      rangeModulo             = tfs.rangeModulo;               // made changes by TUAN NGUYEN
-      dopplerCountInterval    = tfs.dopplerCountInterval;      // made changes by TUAN NGUYEN
-      dopplerInterval             = tfs.dopplerInterval;         
+      useRelativityCorrection = tfs.useRelativityCorrection;
+      useETminusTAICorrection = tfs.useETminusTAICorrection;
+      rangeModulo             = tfs.rangeModulo;
+      dopplerCountInterval    = tfs.dopplerCountInterval;
+//      dopplerInterval         = tfs.dopplerInterval;         
 
       isInitialized = false;
    }
@@ -243,13 +242,21 @@ std::string TrackingFileSet::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer TrackingFileSet::GetParameterID(const std::string& str) const
 {
+   // process all changes of parameter name
+   std::string str1 = str;
+   if (str1 == "DopplerInterval")
+   {
+      MessageInterface::ShowMessage("Warning: name of parameter 'DopplerInterval' was changed to 'DopplerCountInterval' in this version. Please change its name in your script file.\n"); 
+      str1 = "DopplerCountInterval";
+   }
+
    for (Integer i = MeasurementModelBaseParamCount; i < TrackingFileSetParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - MeasurementModelBaseParamCount])
+      if (str1 == PARAMETER_TEXT[i - MeasurementModelBaseParamCount])
          return i;
    }
 
-   return MeasurementModelBase::GetParameterID(str);
+   return MeasurementModelBase::GetParameterID(str1);
 }
 
 
@@ -430,15 +437,15 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return false;
    }
 
-   if (id == RAMPED_TABLENAME)                                                                          // made changes by TUAN NGUYEN
-   {                                                                                                    // made changes by TUAN NGUYEN
-      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())      // made changes by TUAN NGUYEN
-      {                                                                                                 // made changes by TUAN NGUYEN
-         rampedTablenames.push_back(value);                                                             // made changes by TUAN NGUYEN
-         return true;                                                                                   // made changes by TUAN NGUYEN
-      }                                                                                                 // made changes by TUAN NGUYEN
-      return false;                                                                                     // made changes by TUAN NGUYEN
-   }                                                                                                    // made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)
+   {
+      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
+      {
+         rampedTablenames.push_back(value);
+         return true;
+      }
+      return false;
+   }
 
    return MeasurementModelBase::SetStringParameter(id, value);
 }
@@ -477,14 +484,14 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
                "a tracking data file name");
    }
 
-   if (id == RAMPED_TABLENAME)                                                     // made changes by TUAN NGUYEN
-   {                                                                               // made changes by TUAN NGUYEN
-      if (((Integer)rampedTablenames.size() > index) && (index >= 0))              // made changes by TUAN NGUYEN
-         return rampedTablenames[index];                                           // made changes by TUAN NGUYEN
-      else                                                                         // made changes by TUAN NGUYEN
-         throw MeasurementException("Index out of bounds when trying to access "   // made changes by TUAN NGUYEN
-               "a ramped table file name");                                        // made changes by TUAN NGUYEN
-   }                                                                               // made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)
+   {
+      if (((Integer)rampedTablenames.size() > index) && (index >= 0))
+         return rampedTablenames[index];
+      else
+         throw MeasurementException("Index out of bounds when trying to access "
+               "a ramped table file name");
+   }
 
    return MeasurementModelBase::GetStringParameter(id, index);
 }
@@ -590,26 +597,26 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return true;
    }
 
-   if (id == RAMPED_TABLENAME)                                                       // made changes by TUAN NGUYEN
-   {                                                                                 // made changes by TUAN NGUYEN
-      if (((Integer)rampedTablenames.size() > index) && (index >= 0))                // made changes by TUAN NGUYEN
-         rampedTablenames[index] = value;                                            // made changes by TUAN NGUYEN
-      else if ((Integer)rampedTablenames.size() == index)                            // made changes by TUAN NGUYEN
-      {                                                                              // made changes by TUAN NGUYEN
-         rampedTablenames.push_back(value);                                          // made changes by TUAN NGUYEN
-      }                                                                              // made changes by TUAN NGUYEN
-      else                                                                           // made changes by TUAN NGUYEN
-         throw MeasurementException("Index out of bounds when trying to "            // made changes by TUAN NGUYEN
-               "set a ramped table file name");                                      // made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)
+   {
+      if (((Integer)rampedTablenames.size() > index) && (index >= 0))
+         rampedTablenames[index] = value;
+      else if ((Integer)rampedTablenames.size() == index)
+      {
+         rampedTablenames.push_back(value);
+      }
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+               "set a ramped table file name");
 
-      #ifdef DEBUG_INITIALIZATION                                                    // made changes by TUAN NGUYEN
-         MessageInterface::ShowMessage("%d members in config:\n",                    // made changes by TUAN NGUYEN
-               rampedTablenames.size());                                             // made changes by TUAN NGUYEN
-         for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)                   // made changes by TUAN NGUYEN
-            MessageInterface::ShowMessage("   %s\n", rampedTablenames[i].c_str());   // made changes by TUAN NGUYEN
-      #endif                                                                         // made changes by TUAN NGUYEN
-      return true;                                                                   // made changes by TUAN NGUYEN
-   }                                                                                 // made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d members in config:\n",
+               rampedTablenames.size());
+         for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)
+            MessageInterface::ShowMessage("   %s\n", rampedTablenames[i].c_str());
+      #endif
+      return true;
+   }
 
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
@@ -646,8 +653,8 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
    if (id == FILENAME)
       return filenames;
 
-   if (id == RAMPED_TABLENAME)                        // made changes by TUAN NGUYEN
-      return rampedTablenames;                        // made changes by TUAN NGUYEN
+   if (id == RAMPED_TABLENAME)
+      return rampedTablenames;
 
    return MeasurementModelBase::GetStringArrayParameter(id);
 }
@@ -1355,14 +1362,33 @@ bool TrackingFileSet::Initialize()
          }
       #endif
 
+      // Check for observation data file 
+      if (filenames.size() == 0)
+         throw MeasurementException("No observation data file is set to " + GetName() + " object.\n");
+
+      // Check for ramp table 
+      if (rampedTablenames.size() == 0)
+         throw MeasurementException("No ramp table is set to " + GetName() + " object.\n");
+
       // Build the adapters
+      if (trackingConfigs.size() == 0)
+         throw MeasurementException("No TrackingConfig is defined for " + GetName() + " object.\n");
+
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       {
+         // Check to make sure only one strand defined in TrackingConfig
+         if (trackingConfigs[i].strands.size() != 1)
+            throw MeasurementException("Multiple strands and empty strands "
+                     "are not yet implemented");
+         // Check to make sure at least one measurement type defined in TrackingConfig
+         if (trackingConfigs[i].types.size() == 0)
+            throw MeasurementException("No measurement type is defined in " + GetName() + ".AddTrackingConfig.\n");
+
          for (UnsignedInt j = 0; j < trackingConfigs[i].types.size(); ++j)
          {
-            if (trackingConfigs[i].strands.size() != 1)
-               throw MeasurementException("Multiple strands and empty strands "
-                     "are not yet implemented");
+            //if (trackingConfigs[i].strands.size() != 1)
+            //   throw MeasurementException("Multiple strands and empty strands "
+            //         "are not yet implemented");
             
             TrackingDataAdapter *tda =
                   BuildAdapter(trackingConfigs[i].strands[0],
@@ -1434,33 +1460,34 @@ bool TrackingFileSet::Initialize()
          if (thePropagator)
             measurements[i]->SetPropagator(thePropagator);
 
-         // Set measurement corrections to TrackingDataAdapter                                 // made changes by TUAN NGUYEN
-         if (useRelativityCorrection)                                                          // made changes by TUAN NGUYEN
-            measurements[i]->SetCorrection("Moyer","Relativity");                              // made changes by TUAN NGUYEN
-         if (useETminusTAICorrection)                                                          // made changes by TUAN NGUYEN
-            measurements[i]->SetCorrection("Moyer","ET-TAI");                                  // made changes by TUAN NGUYEN
+         // Set measurement corrections to TrackingDataAdapter
+         if (useRelativityCorrection)
+            measurements[i]->SetCorrection("Moyer","Relativity");
+         if (useETminusTAICorrection)
+            measurements[i]->SetCorrection("Moyer","ET-TAI");
 
-         // Set ramped frequency tables to TrackingDataAdapter                                 // made changes by TUAN NGUYEN
-         for (UnsignedInt k = 0; k < rampedTablenames.size(); ++k)                             // made changes by TUAN NGUYEN
-         {                                                                                     // made changes by TUAN NGUYEN
-            measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);         // made changes by TUAN NGUYEN
-         }                                                                                     // made changes by TUAN NGUYEN
+         // Set ramped frequency tables to TrackingDataAdapter
+         for (UnsignedInt k = 0; k < rampedTablenames.size(); ++k)
+         {
+            measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);
+         }
 
-         // Set range modulo constant for DSNRange                                             // made changes by TUAN NGUYEN
-         if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")             // made changes by TUAN NGUYEN
-         {                                                                                     // made changes by TUAN NGUYEN
-            measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);             // made changes by TUAN NGUYEN
-         }                                                                                     // made changes by TUAN NGUYEN
+         // Set range modulo constant for DSNRange
+         if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")
+         {
+            measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
+         }
 
-         // Set doppler count interval for Doppler                                             // made changes by TUAN NGUYEN
-         if (measurements[i]->GetStringParameter("MeasurementType") == "Doppler")              // made changes by TUAN NGUYEN
-         {                                                                                     // made changes by TUAN NGUYEN
-            measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);   // made changes by TUAN NGUYEN
-         }                                                                                     // made changes by TUAN NGUYEN
+         // Set doppler count interval for Doppler
+         if (measurements[i]->GetStringParameter("MeasurementType") == "Doppler")
+         {
+            measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
+         }
          // Set range modulo constant for RangeRate
          if (measurements[i]->GetStringParameter("MeasurementType") == "RangeRate")
          {
-            measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
+            //measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
+            measurements[i]->SetRealParameter("DopplerInterval", dopplerCountInterval);      // unit: second
          }
 
          // Initialize TrackingDataAdapter
@@ -1528,18 +1555,18 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    // 1. Set value for designators map:
    for (UnsignedInt i = 0; i < strand.size(); ++i)
    {
-      //designator.str() = "";                                          // made changes by TUAN NGUYEN
+      //designator.str() = "";
       // Search for a referent object with the same name of node strand[i]
-      UnsignedInt j = 0;                                                // made changes by TUAN NGUYEN
-      for (; j < references.size(); ++j)                                // made changes by TUAN NGUYEN
-      {                                                                 // made changes by TUAN NGUYEN
-         if (references[j]->GetName() == strand[i])                     // made changes by TUAN NGUYEN
-            break;                                                      // made changes by TUAN NGUYEN
-      }                                                                 // made changes by TUAN NGUYEN
+      UnsignedInt j = 0;
+      for (; j < references.size(); ++j)
+      {
+         if (references[j]->GetName() == strand[i])
+            break;
+      }
 
       // If found then add value to designators map
-      if (j < references.size())                                        // made changes by TUAN NGUYEN
-      {                                                                 // made changes by TUAN NGUYEN
+      if (j < references.size())
+      {
          Gmat::ObjectType pType = references[j]->GetType();
 
          switch(pType)
@@ -1569,7 +1596,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
                            "the tracking file set strand mapping code");
                break;  // No effect, but it avoids a warning message
          }
-      }                                                                 // made changes by TUAN NGUYEN
+      }
    }
 
    // And now build the node list
@@ -1595,26 +1622,26 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       if (retval)
       {
          retval->UsesLightTime(useLighttime);
-         retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN
+         retval->SetStringParameter("MeasurementType", type);
       }
    }
-   else if (type == "DSNRange")                                       // made changes by TUAN NGUYEN
-   {                                                                  // made changes by TUAN NGUYEN
-      retval = new DSNRangeAdapter(adapterName);                      // made changes by TUAN NGUYEN
-      if (retval)                                                     // made changes by TUAN NGUYEN
+   else if (type == "DSNRange")
+   {
+      retval = new DSNRangeAdapter(adapterName);
+      if (retval)
       {
-         retval->UsesLightTime(useLighttime);                         // made changes by TUAN NGUYEN
-         retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
       }
-   }                                                                  // made changes by TUAN NGUYEN
-   else if (type == "Doppler")                                        // made changes by TUAN NGUYEN
-   {                                                                  // made changes by TUAN NGUYEN
-      retval = new DopplerAdapter(adapterName);                       // made changes by TUAN NGUYEN
-      if (retval)                                                     // made changes by TUAN NGUYEN
+   }
+   else if (type == "Doppler")
+   {
+      retval = new DopplerAdapter(adapterName);
+      if (retval)
       {
          ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex); 
-         retval->UsesLightTime(useLighttime);                         // made changes by TUAN NGUYEN
-         retval->SetStringParameter("MeasurementType", type);         // made changes by TUAN NGUYEN         
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
       }
    }                                                                  
    else if (type == "RangeRate")                                       
@@ -1637,7 +1664,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    }
    else                                                               
       throw MeasurementException("Error: '"+ type +"' measurement type was "
-            "not implemented in this version of EstimationPlugin.\n");    // made changes by TUAN NGUYEN
+            "not implemented in this version of EstimationPlugin.\n");
 
    if (retval)
    {
@@ -1678,10 +1705,10 @@ TrackingFileSet::MeasurementDefinition::MeasurementDefinition()
 //------------------------------------------------------------------------------
 TrackingFileSet::MeasurementDefinition::~MeasurementDefinition()
 {
-   for (UnsignedInt i = 0; i < strands.size(); ++i)                 // made changes by TUAN NGUYEN
-      strands[i].clear();                                           // made changes by TUAN NGUYEN
-   strands.clear();                                                 // made changes by TUAN NGUYEN
-   types.clear();                                                   // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < strands.size(); ++i)
+      strands[i].clear();
+   strands.clear();
+   types.clear();
 }
 
 //------------------------------------------------------------------------------

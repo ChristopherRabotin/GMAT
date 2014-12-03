@@ -163,23 +163,23 @@ protected:
    std::vector<TrackingDataAdapter*> measurements;
    /// Name of the associate tracking data file
    StringArray filenames;
-   /// Name of the associate ramped table                      // made changes by TUAN NGUYEN
-   StringArray rampedTablenames;                               // made changes by TUAN NGUYEN
+   /// Name of the associate ramped table
+   StringArray rampedTablenames;
    /// Flag for the inclusion of light time solution
    bool useLighttime;
 
-   /// Flag for the inclusion of relativity correction         // made changes by TUAN NGUYEN
-   bool useRelativityCorrection;                               // made changes by TUAN NGUYEN
-   /// Flag for the inclusion of ET-TAI correction             // made changes by TUAN NGUYEN
-   bool useETminusTAICorrection;                               // made changes by TUAN NGUYEN
+   /// Flag for the inclusion of relativity correction
+   bool useRelativityCorrection;
+   /// Flag for the inclusion of ET-TAI correction
+   bool useETminusTAICorrection;
 
-   /// Range modulo constant                                   // made changes by TUAN NGUYEN
-   Real rangeModulo;                                           // made changes by TUAN NGUYEN
-   /// Doppler count interval                                  // made changes by TUAN NGUYEN
-   Real dopplerCountInterval;                                  // made changes by TUAN NGUYEN
+   /// Range modulo constant
+   Real rangeModulo;
+   /// Doppler count interval
+   Real dopplerCountInterval;
 
    // Doppler interval
-   Real dopplerInterval;
+   //Real dopplerInterval;
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -194,23 +194,23 @@ protected:
    /// Parameter IDs for the TrackingFileSets
    enum
    {
-      TRACKINGCONFIG = MeasurementModelBaseParamCount,      // made changes by TUAN NGUYEN
+      TRACKINGCONFIG = MeasurementModelBaseParamCount,
       FILENAME,
-      RAMPED_TABLENAME,                                     // made changes by TUAN NGUYEN
+      RAMPED_TABLENAME,
       USELIGHTTIME,
-      USE_RELATIVITY,                                       // made changes by TUAN NGUYEN
-      USE_ETMINUSTAI,                                       // made changes by TUAN NGUYEN
-      RANGE_MODULO,                                         // made changes by TUAN NGUYEN
-      DOPPLER_COUNT_INTERVAL,                               // made changes by TUAN NGUYEN
+      USE_RELATIVITY,
+      USE_ETMINUSTAI,
+      RANGE_MODULO,
+      DOPPLER_COUNT_INTERVAL,
       TrackingFileSetParamCount,
    };
 
    /// Strings describing the BatchEstimator parameters
    static const std::string PARAMETER_TEXT[TrackingFileSetParamCount -
-                                           MeasurementModelBaseParamCount];              // made changes by TUAN NGUYEN
+                                           MeasurementModelBaseParamCount];
    /// Types of the BatchEstimator parameters
    static const Gmat::ParameterType PARAMETER_TYPE[TrackingFileSetParamCount -
-                                                   MeasurementModelBaseParamCount];      // made changes by TUAN NGUYEN
+                                                   MeasurementModelBaseParamCount];
 
    TrackingDataAdapter *BuildAdapter(const StringArray &strand,
          const std::string &type, Integer configIndex);
