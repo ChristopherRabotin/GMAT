@@ -81,10 +81,10 @@ public:
       //    Notes: Don't add general planet potential files here. They are handled
       //    when gmat_startup_file are read by following naming convention.
       DE405_FILE,
-      DE421_FILE,							// made change by TUAN NGUYEN
-      DE424_FILE,							// made change by TUAN NGUYEN
-      IAUSOFA_FILE,                 // made change by TUAN NGUYEN
-      ICRF_FILE,							// made change by TUAN NGUYEN
+      DE421_FILE,
+      DE424_FILE,
+      IAUSOFA_FILE,
+      ICRF_FILE,
       PLANETARY_SPK_FILE,
       JGM2_FILE,
       JGM3_FILE,
