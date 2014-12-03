@@ -55,7 +55,7 @@ LightTimeCorrection::LightTimeCorrection(const std::string &name) :
 {
    // Need to convert to km/s here
    lightSpeed = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / GmatMathConstants::KM_TO_M;
-   relativityCorrection = 0.0;								// made changes by TUAN NGUYEN
+   relativityCorrection = 0.0;
 }
 
 
@@ -89,7 +89,7 @@ LightTimeCorrection::LightTimeCorrection(const LightTimeCorrection& ltc) :
    oldRange             (0.0),
    numIter              (0)
 {
-   relativityCorrection = 0.0;						// made changes by TUAN NGUYEN
+   relativityCorrection = 0.0;
 }
 
 
@@ -353,59 +353,59 @@ Real LightTimeCorrection::CalculateRange()
          t1 = t2;
       if (t2 == -1.0)
          t2 = t1;
-	  t1 = ((fixedParticipant == 0) ? fixedEpoch : t1);
-	  t2 = ((fixedParticipant == 1) ? fixedEpoch : t2);
+	   t1 = ((fixedParticipant == 0) ? fixedEpoch : t1);
+	   t2 = ((fixedParticipant == 1) ? fixedEpoch : t2);
 	  
       #ifdef DEBUG_CALCULATE_RANGE
 	     MessageInterface::ShowMessage("fixedParticipant = %d\n", fixedParticipant);
       #endif
 
-	  // Specify vector from Participant.j2000Body position to participant position: 
-	  r1 = (fixedParticipant == 0 ? positionBuffer :
+	   // Specify vector from Participant.j2000Body position to participant position: 
+	   r1 = (fixedParticipant == 0 ? positionBuffer :
             ((SpacePoint*)participants[0])->GetMJ2000Position(t1));
       r2 = (fixedParticipant == 1 ? positionBuffer :
             ((SpacePoint*)participants[1])->GetMJ2000Position(t2));
 	  
-	  // Specify vector from solar system bary center to particpant position:						// made changes by TUAN NGUYEN
+	   // Specify vector from solar system bary center to particpant position:
       if (solarSystem == NULL)
          throw EventException("Error: no solar system is set to solarSystem variable of "+ GetName() + " object\n");
 
-	  SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");			// made changes by TUAN NGUYEN
-	  std::string cbName1 = ((SpacePoint*)participants[0])->GetJ2000BodyName();						// made changes by TUAN NGUYEN
-	  CelestialBody* cb1 = solarSystem->GetBody(cbName1);											// made changes by TUAN NGUYEN
-	  Rvector3 ssb2cb1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);					// made changes by TUAN NGUYEN
-	  std::string cbName2 = ((SpacePoint*)participants[1])->GetJ2000BodyName();						// made changes by TUAN NGUYEN
-	  CelestialBody* cb2 = solarSystem->GetBody(cbName2);											// made changes by TUAN NGUYEN
-      Rvector3 ssb2cb2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);					// made changes by TUAN NGUYEN
+	   SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
+	   std::string cbName1 = ((SpacePoint*)participants[0])->GetJ2000BodyName();
+	   CelestialBody* cb1 = solarSystem->GetBody(cbName1);
+	   Rvector3 ssb2cb1 = cb1->GetMJ2000Position(t1) - ssb->GetMJ2000Position(t1);
+	   std::string cbName2 = ((SpacePoint*)participants[1])->GetJ2000BodyName();
+	   CelestialBody* cb2 = solarSystem->GetBody(cbName2);
+      Rvector3 ssb2cb2 = cb2->GetMJ2000Position(t2) - ssb->GetMJ2000Position(t2);
 
-	  Rvector3 r1B = ssb2cb1 + r1;																	// made changes by TUAN NGUYEN
-	  Rvector3 r2B = ssb2cb2 + r2;																	// made changes by TUAN NGUYEN
+	   Rvector3 r1B = ssb2cb1 + r1;
+	   Rvector3 r2B = ssb2cb2 + r2;
 
       #ifdef DEBUG_CALCULATE_RANGE
-	     MessageInterface::ShowMessage("Participant1: Epoch = %.15lf CB  Pos: (%.12lf  %.12lf  %.12lf)km\n", t1, r1.GetElement(0), r1.GetElement(1), r1.GetElement(2));
-	     MessageInterface::ShowMessage("Participant2: Epoch = %.15lf CB  Pos: (%.12lf  %.12lf  %.12lf)km\n", t2, r2.GetElement(0), r2.GetElement(1), r2.GetElement(2));
-	     MessageInterface::ShowMessage("Participant1: Epoch = %.15lf SSB Pos: (%.12lf  %.12lf  %.12lf)km\n", t1, r1B.GetElement(0), r1B.GetElement(1), r1B.GetElement(2));
-	     MessageInterface::ShowMessage("Participant2: Epoch = %.15lf SSB Pos: (%.12lf  %.12lf  %.12lf)km\n", t2, r2B.GetElement(0), r2B.GetElement(1), r2B.GetElement(2));
-		 MessageInterface::ShowMessage("  ssb2cb1 (%.12lf  %.12lf  %.12lf)km\n", ssb2cb1.GetElement(0), ssb2cb1.GetElement(1), ssb2cb1.GetElement(2));
-		 MessageInterface::ShowMessage("  ssb2cb2 (%.12lf  %.12lf  %.12lf)km\n", ssb2cb2.GetElement(0), ssb2cb2.GetElement(1), ssb2cb2.GetElement(2));
+	      MessageInterface::ShowMessage("Participant1: Epoch = %.15lf CB  Pos: (%.12lf  %.12lf  %.12lf)km\n", t1, r1.GetElement(0), r1.GetElement(1), r1.GetElement(2));
+	      MessageInterface::ShowMessage("Participant2: Epoch = %.15lf CB  Pos: (%.12lf  %.12lf  %.12lf)km\n", t2, r2.GetElement(0), r2.GetElement(1), r2.GetElement(2));
+	      MessageInterface::ShowMessage("Participant1: Epoch = %.15lf SSB Pos: (%.12lf  %.12lf  %.12lf)km\n", t1, r1B.GetElement(0), r1B.GetElement(1), r1B.GetElement(2));
+	      MessageInterface::ShowMessage("Participant2: Epoch = %.15lf SSB Pos: (%.12lf  %.12lf  %.12lf)km\n", t2, r2B.GetElement(0), r2B.GetElement(1), r2B.GetElement(2));
+		   MessageInterface::ShowMessage("  ssb2cb1 (%.12lf  %.12lf  %.12lf)km\n", ssb2cb1.GetElement(0), ssb2cb1.GetElement(1), ssb2cb1.GetElement(2));
+		   MessageInterface::ShowMessage("  ssb2cb2 (%.12lf  %.12lf  %.12lf)km\n", ssb2cb2.GetElement(0), ssb2cb2.GetElement(1), ssb2cb2.GetElement(2));
       #endif
       
 #ifdef USE_EARTHMJ2000EQ_CS
-      rangeVec = r2 - r1;																			// made changes by TUAN NGUYEN
+      rangeVec = r2 - r1;
 #else
-      rangeVec = r2B - r1B;																			// made changes by TUAN NGUYEN
+      rangeVec = r2B - r1B;
 #endif
 
-      precisionRange = rangeVec.GetMagnitude();														// made changes by TUAN NGUYEN
+      precisionRange = rangeVec.GetMagnitude();
 
-	  relativityCorrection = 0.0;																	// made changes by TUAN NGUYEN
-	  if (useRelativityCorrection)																	// made changes by TUAN NGUYEN
-	     relativityCorrection = RelativityCorrection(r1B, r2B, t1, t2);								// made changes by TUAN NGUYEN
+	   relativityCorrection = 0.0;
+	   if (useRelativityCorrection)
+	      relativityCorrection = RelativityCorrection(r1B, r2B, t1, t2);
 
-	  range = precisionRange + relativityCorrection;												// made changes by TUAN NGUYEN
+	   range = precisionRange + relativityCorrection;
 
-	  #ifdef DEBUG_CALCULATE_RANGE
-		 MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km\n", GetName().c_str(), precisionRange, relativityCorrection);
+	   #ifdef DEBUG_CALCULATE_RANGE
+		   MessageInterface::ShowMessage("############# Event %s: precision range = %.12lf km,      relativity correction = %.12lf km\n", GetName().c_str(), precisionRange, relativityCorrection);
       #endif
 
       // Store the rest of the data used in the other measurement calculations
@@ -505,20 +505,20 @@ Real LightTimeCorrection::RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real 
 		CelestialBody* planet = solarSystem->GetBody(planetList[i]);
 		Real planetMu = planet->GetRealParameter(planet->GetParameterID("Mu"));
 
-		P1 = planet->GetMJ2000Position(t1);				// Planet's position in SSB coordinate system at time t1
-		P2 = planet->GetMJ2000Position(t2);				// Planet's position in SSB coordinate system at time t2
-		BP1 = P1 - B1;									// vector from SSB to planet in  SSB coordinate system at time t1
-		BP2 = P2 - B2;									// vector from SSB to planet in  SSB coordinate system at time t2
+		P1 = planet->GetMJ2000Position(t1);			// Planet's position in SSB coordinate system at time t1
+		P2 = planet->GetMJ2000Position(t2);			// Planet's position in SSB coordinate system at time t2
+		BP1 = P1 - B1;									   // vector from SSB to planet in  SSB coordinate system at time t1
+		BP2 = P2 - B2;									   // vector from SSB to planet in  SSB coordinate system at time t2
 
 		r1 = r1B - BP1;									// position of the first participant in the local inertial coordinate system of the planet at time t1
 		r2 = r2B - BP2;									// position of the first participant in the local inertial coordinate system of the planet at time t2
-		r12 = r2 - r1;									// range vector in the local inertial coordinate system of the planet 
+		r12 = r2 - r1;									   // range vector in the local inertial coordinate system of the planet 
 		r1Mag = r1.Norm();								// unit: km
 		r2Mag = r2.Norm();								// unit: km
-		r12Mag = r12.Norm();							// unit: km
+		r12Mag = r12.Norm();							   // unit: km
 
-		Real c = lightSpeed;							// unit: km/s
-		Real term1 = (1+gammar)*(planetMu/c)/c;			// unit: km
+		Real c = lightSpeed;							   // unit: km/s
+		Real term1 = (1+gammar)*(planetMu/c)/c;	// unit: km
 		Real correction;
 		if (planet == sun)
 		{
@@ -537,21 +537,21 @@ Real LightTimeCorrection::RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real 
 }
 
 
-// Get relativity coorection (in Km)						// made changes by TUAN NGUYEN
+// Get relativity coorection (in Km)
 Real LightTimeCorrection::GetRelativityCorrection()
 {
 	return relativityCorrection;
 }
 
 
-// Get light trip range	(in Km)								// made changes by TUAN NGUYEN
+// Get light trip range	(in Km)
 Real LightTimeCorrection::GetLightTripRange()
 {
 	return precisionRange;
 }
 
 
-/// Calculate ET - TAI at a ground station on Earth or a spacecraft:							// made changes by TUAN NGUYEN
+/// Calculate ET - TAI at a ground station on Earth or a spacecraft:
 Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
 {
    // Step 2:
@@ -592,21 +592,21 @@ Real LightTimeCorrection::ETminusTAI(Real tA1MJD, GmatBase* participant)
    Rvector3 lunaVel = luna->GetMJ2000Velocity(tA1MJD);
 
    // Step 3:
-   // Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD);																// made changes by TUAN NGUYEN
-   // Note that: position vector participant->GetMJ2000Position(tA1MJD) is pointing from j2kBody to participant (not from SSB nor Earth)		// made changes by TUAN NGUYEN
-   SpacePoint* j2kBody = ((SpacePoint*)participant)->GetJ2000Body();																						// made changes by TUAN NGUYEN
-   Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD) + j2kBody->GetMJ2000Position(tA1MJD) - earth->GetMJ2000Position(tA1MJD);		// made changes by TUAN NGUYEN
-   Rvector3 Earth2GS_Vel = ((SpacePoint*)participant)->GetMJ2000Velocity(tA1MJD) + j2kBody->GetMJ2000Velocity(tA1MJD) - earth->GetMJ2000Velocity(tA1MJD);	// made changes by TUAN NGUYEN
+   // Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD);
+   // Note that: position vector participant->GetMJ2000Position(tA1MJD) is pointing from j2kBody to participant (not from SSB nor Earth)
+   SpacePoint* j2kBody = ((SpacePoint*)participant)->GetJ2000Body();
+   Rvector3 Earth2GS = ((SpacePoint*)participant)->GetMJ2000Position(tA1MJD) + j2kBody->GetMJ2000Position(tA1MJD) - earth->GetMJ2000Position(tA1MJD);
+   Rvector3 Earth2GS_Vel = ((SpacePoint*)participant)->GetMJ2000Velocity(tA1MJD) + j2kBody->GetMJ2000Velocity(tA1MJD) - earth->GetMJ2000Velocity(tA1MJD);
 
 
    // Step 4:
    //Define constants
    Real c = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM * GmatMathConstants::M_TO_KM;			// light speed (unit: km/s)
-   Real muEarth   = earth->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 398600.4415 for Earth
-   Real muSun     = sun->GetRealParameter(earth->GetParameterID("Mu"));							// mu = 132712440017.99 for Sun
+   Real muEarth   = earth->GetRealParameter(earth->GetParameterID("Mu"));						   // mu = 398600.4415 for Earth
+   Real muSun     = sun->GetRealParameter(earth->GetParameterID("Mu"));							   // mu = 132712440017.99 for Sun
    Real muJupiter = jupiter->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 126712767.8578 for Jupiter
-   Real muSaturn  = saturn->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 37940626.061137 for Saturn
-   Real muMars    = mars->GetRealParameter(earth->GetParameterID("Mu"));						// mu = 42828.314258067 for Mars
+   Real muSaturn  = saturn->GetRealParameter(earth->GetParameterID("Mu"));						   // mu = 37940626.061137 for Saturn
+   Real muMars    = mars->GetRealParameter(earth->GetParameterID("Mu"));						   // mu = 42828.314258067 for Mars
 
    Rvector3 Sun_wrt_SSB_Vel = sunVel - ssbVel;
    Rvector3 EM_wrt_Sun_Pos = emPos - sunPos;
