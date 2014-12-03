@@ -707,8 +707,6 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    MessageInterface::ShowMessage("Copy constructor: ss.theCurrentPlanetarySource = '%s'\n", ss.theCurrentPlanetarySource.c_str());
    #endif
 
-//   Initialize();							// made changes by TUAN NGUYEN
-   
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now DONE with the Solar System copy constructor ...\n");
    #endif
@@ -782,8 +780,6 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    DeleteBodiesInUse(true);
    CloneBodiesInUse(ss, true);
    SetJ2000Body();
-
-//   Initialize();					// made changes by TUAN NGUYEN
 
    return *this;
 }
@@ -862,7 +858,7 @@ bool SolarSystem::Initialize()
    #endif
    #endif
 
-   // set source for bodies in use:													/ made change by TUAN NGUYEN
+   // set source for bodies in use:
    if (!bodiesInUse.empty())
    {
 		#ifdef DEBUG_SS_INIT
@@ -1332,12 +1328,12 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             if (SetSourceFile(theDefaultDeFile))
                retCode = 1;
          break;
-      case Gmat::DE421:								// made changes by TUAN NGUYEN
+      case Gmat::DE421:
          if (SetSource(Gmat::DE421))
             if (SetSourceFile(theDefaultDeFile))	// Does it need to set to the default DE file?
                retCode = 1;
          break;
-      case Gmat::DE424:								// made changes by TUAN NGUYEN
+      case Gmat::DE424:
          if (SetSource(Gmat::DE424))
             if (SetSourceFile(theDefaultDeFile))	// Does it need to set to the default DE file?
                retCode = 1;
