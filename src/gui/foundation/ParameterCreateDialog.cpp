@@ -61,8 +61,11 @@ BEGIN_EVENT_TABLE(ParameterCreateDialog, GmatDialog)
    EVT_BUTTON(ID_CLEAR_ARR_BUTTON, ParameterCreateDialog::OnClearButtonClick)
    EVT_BUTTON(ID_CLEAR_STR_BUTTON, ParameterCreateDialog::OnClearButtonClick)
    EVT_TEXT(ID_VARTEXTCTRL, ParameterCreateDialog::OnVarTextUpdate)
+   EVT_TEXT_ENTER(ID_VARTEXTCTRL, ParameterCreateDialog::OnTextEnter)
    EVT_TEXT(ID_ARYTEXTCTRL, ParameterCreateDialog::OnAryTextUpdate)
+   EVT_TEXT_ENTER(ID_ARYTEXTCTRL, ParameterCreateDialog::OnTextEnter)
    EVT_TEXT(ID_STRTEXTCTRL, ParameterCreateDialog::OnStrTextUpdate)
+   EVT_TEXT_ENTER(ID_STRTEXTCTRL, ParameterCreateDialog::OnTextEnter)
    EVT_NOTEBOOK_PAGE_CHANGED(ID_NOTEBOOK, ParameterCreateDialog::OnPageChanged)
    EVT_LISTBOX(ID_LISTBOX, ParameterCreateDialog::OnListboxClick)
 END_EVENT_TABLE()
@@ -241,12 +244,12 @@ void ParameterCreateDialog::Create()
    mVarClearButton->SetToolTip(pConfig->Read(_T("ClearVariableHint"), "Clear Variable Fields"));
    
    mVarNameTextCtrl = new wxTextCtrl(varPanel, ID_VARTEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(130,20), 0);
+                                     wxDefaultPosition, wxSize(130,20), wxTE_PROCESS_ENTER);
    mVarNameTextCtrl->SetToolTip(pConfig->Read(_T("VariableNameHint")));
 
    // Only numeric value is allowed (LOJ: 2010.11.24)
    mVarValueTextCtrl = new wxTextCtrl(varPanel, ID_VARTEXTCTRL, wxT(""),
-                                  wxDefaultPosition, wxSize(280,20), 0,
+                                  wxDefaultPosition, wxSize(280,20), wxTE_PROCESS_ENTER,
                                   wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mVarValueTextCtrl->SetToolTip(pConfig->Read(_T("VariableValueHint")));
    
@@ -256,14 +259,14 @@ void ParameterCreateDialog::Create()
    mArrClearButton->SetToolTip(pConfig->Read(_T("ClearArrayHint"), "Clear Array Fields"));
    
    mArrNameTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(102,20), 0);
+                                     wxDefaultPosition, wxSize(102,20), wxTE_PROCESS_ENTER);
    mArrNameTextCtrl->SetToolTip(pConfig->Read(_T("ArrayNameHint")));
    mArrRowTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(50,20), 0, 
+                                    wxDefaultPosition, wxSize(50,20), wxTE_PROCESS_ENTER, 
                                     wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mArrRowTextCtrl->SetToolTip(pConfig->Read(_T("ArrayRowValueHint")));
    mArrColTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(50,20), 0,
+                                    wxDefaultPosition, wxSize(50,20), wxTE_PROCESS_ENTER,
                                     wxTextValidator(wxGMAT_FILTER_NUMERIC));
    mArrColTextCtrl->SetToolTip(pConfig->Read(_T("ArrayColumnValueHint")));
 
@@ -273,10 +276,10 @@ void ParameterCreateDialog::Create()
    mStrClearButton->SetToolTip(pConfig->Read(_T("ClearStringHint"), "Clear String Fields"));
    
    mStringNameTextCtrl = new wxTextCtrl(strPanel, ID_STRTEXTCTRL, wxT(""),
-                                        wxDefaultPosition, wxSize(80,20), 0);
+                                        wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
    mStringNameTextCtrl->SetToolTip(pConfig->Read(_T("StringNameHint")));
    mStringValueTextCtrl = new wxTextCtrl(strPanel, ID_STRTEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(110,20), 0);
+                                     wxDefaultPosition, wxSize(110,20), wxTE_PROCESS_ENTER);
    mStringValueTextCtrl->SetToolTip(pConfig->Read(_T("StringValueHint")));
    
    // wxButton
@@ -670,6 +673,14 @@ void ParameterCreateDialog::OnVarTextUpdate(wxCommandEvent& event)
 }
 
 
+//------------------------------------------------------------------------------
+// void OnTextEnter(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnTextEnter(wxCommandEvent& event)
+{
+	((wxWindow *) event.GetEventObject())->GetNextSibling()->SetFocus();
+}
+ 
 //------------------------------------------------------------------------------
 // void OnAryTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
