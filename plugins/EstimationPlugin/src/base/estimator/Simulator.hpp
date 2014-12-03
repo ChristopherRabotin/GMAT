@@ -78,9 +78,9 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   virtual std::string  GetOnOffParameter(const Integer id) const;                   // made changes by TUAN NGUYEN
-   virtual bool         SetOnOffParameter(const Integer id,                          // made changes by TUAN NGUYEN
-                                         const std::string &value);                  // made changes by TUAN NGUYEN
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id,
+                                         const std::string &value);
 
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;

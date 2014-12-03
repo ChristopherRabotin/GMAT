@@ -24,12 +24,11 @@
 #include "GmatState.hpp"
 #include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
-//#include "TimeSystemConverter.hpp"
-#include "SpaceObject.hpp"                                    // made changes by TUAN NGUYEN
+#include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
-#include "EstimatorException.hpp"                            // made changes by TUAN NGUYEN
-#include "Spacecraft.hpp"                                    // made changes by TUAN NGUYEN
-#include "GroundstationInterface.hpp"                        // made changes by TUAN NGUYEN
+#include "EstimatorException.hpp"
+#include "Spacecraft.hpp"
+#include "GroundstationInterface.hpp"
 
 #include <sstream>
 
@@ -51,11 +50,11 @@ Estimator::PARAMETER_TEXT[] =
    "Propagator",
    "ShowAllResiduals",
    "AddResidualsPlot ",
-   "OLSEInitialRMSSigma",                       // made changes by TUAN NGUYEN  for data sigma editting
-   "OLSEMultiplicativeConstant",                // made changes by TUAN NGUYEN  for data sigma editting
-   "OLSEAdditiveConstant",                      // made changes by TUAN NGUYEN  for data sigma editting
-   "ConvergentStatus",                          // made changes by TUAN NGUYEN
-//   "SolveForState",                             // made changes by TUAN NGUYEN
+   "OLSEInitialRMSSigma",
+   "OLSEMultiplicativeConstant",
+   "OLSEAdditiveConstant",
+   "ConvergentStatus",
+//   "SolveForState",
 };
 
 const Gmat::ParameterType
@@ -68,11 +67,11 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   Gmat::REAL_TYPE,                            // made changes by TUAN NGUYEN  for data sigma editting
-   Gmat::REAL_TYPE,                            // made changes by TUAN NGUYEN  for data sigma editting
-   Gmat::REAL_TYPE,                            // made changes by TUAN NGUYEN  for data sigma editting
-   Gmat::STRING_TYPE,                          // made changes by TUAN NGUYEN
-//   Gmat::STRING_TYPE,                          // made changes by TUAN NGUYEN
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+//   Gmat::STRING_TYPE,
 };
 
 
@@ -105,14 +104,14 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    stateCovariance      (NULL),
    estimationState      (NULL),
    stateSize            (0),
-   estimationStatus     (UNKNOWN),                                         // made changes by TUAN NGUYEN
+   estimationStatus     (UNKNOWN),
    showAllResiduals     (true),
    showSpecificResiduals(false),
    showErrorBars        (false),
    locatingEvent        (false),
-   maxResidualMult      (3000.0),                                          // made changes by TUAN NGUYEN
-   constMult            (3.0),                                             // made changes by TUAN NGUYEN
-   additiveConst        (0.0)                                              // made changes by TUAN NGUYEN
+   maxResidualMult      (3000.0),
+   constMult            (3.0),
+   additiveConst        (0.0)
 {
 
    objectTypeNames.push_back("Estimator");
@@ -169,14 +168,14 @@ Estimator::Estimator(const Estimator& est) :
    stateCovariance      (est.stateCovariance),
    estimationState      (NULL),
    stateSize            (0),
-   estimationStatus     (UNKNOWN),                              // made changes by TUAN NGUYEN
+   estimationStatus     (UNKNOWN),
    showAllResiduals     (est.showAllResiduals),
    showSpecificResiduals(est.showSpecificResiduals),
    showErrorBars        (est.showErrorBars),
    locatingEvent        (false),
-   maxResidualMult      (est.maxResidualMult),                  // made changes by TUAN NGUYEN
-   constMult            (est.constMult),                        // made changes by TUAN NGUYEN
-   additiveConst        (est.additiveConst)                     // made changes by TUAN NGUYEN
+   maxResidualMult      (est.maxResidualMult),
+   constMult            (est.constMult),
+   additiveConst        (est.additiveConst)
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -230,7 +229,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       covariance           = NULL;
       estimationState      = NULL;
       stateSize            = 0;
-      estimationStatus     = UNKNOWN;                      // made changes by TUAN NGUYEN
+      estimationStatus     = UNKNOWN;
       showAllResiduals     = est.showAllResiduals;
       showSpecificResiduals= est.showSpecificResiduals;
       showErrorBars        = est.showErrorBars;
@@ -238,9 +237,9 @@ Estimator& Estimator::operator=(const Estimator& est)
 
       locatingEvent        = false;
 
-      maxResidualMult      = est.maxResidualMult;              // made changes by TUAN NGUYEN
-      constMult            = est.constMult;                    // made changes by TUAN NGUYEN
-      additiveConst        = est.additiveConst;                // made changes by TUAN NGUYEN
+      maxResidualMult      = est.maxResidualMult;
+      constMult            = est.constMult;
+      additiveConst        = est.additiveConst;
    }
 
    return *this;
@@ -263,8 +262,8 @@ bool Estimator::Initialize()
 
    if (retval)
    {
-      // Set estimation status to UNKNOWN                           // made changes by TUAN NGUYEN
-      estimationStatus = UNKNOWN;                                   // made changes by TUAN NGUYEN      // This code is moved from BatchEstimator
+      // Set estimation status to UNKNOWN
+      estimationStatus = UNKNOWN;
 
       // Check to make sure required objects have been set
       if (!propagator)
@@ -420,9 +419,8 @@ std::string Estimator::GetParameterTypeString(const Integer id) const
  *         throws if the parameter is out of the valid range of values.
  */
 //---------------------------------------------------------------------------
-bool Estimator::IsParameterReadOnly(const Integer id) const                  // made changes by TUAN NGUYEN
+bool Estimator::IsParameterReadOnly(const Integer id) const
 {
-   //if ((id == CONVERGENT_STATUS)||(id == SOLVEFOR_STATE))
    if (id == CONVERGENT_STATUS)
       return true;
 
@@ -1374,7 +1372,6 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
  * @return return an integer to tell status of estimation
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
 Integer Estimator::TestForConvergence(std::string &reason)
 {
     return UNKNOWN;
@@ -1417,7 +1414,7 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
 /**
  * Creates an OwnedPlot instance that is used for plotting residuals
  *
- * @param plotName The name of the plot.  This name needs to ne unique in the
+ * @param plotName The name of the plot.  This name needs to be unique in the
  *                 Sandbox
  * @param measurementNames The names of the measurement models that are sources
  *                         for the residuals being plotted
@@ -1439,8 +1436,8 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
             break;
 
       if (k == tfs.size())
-      //if (id.size() == 1)
       {
+         // processing for old measurement model
          IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
 
          rPlot = new OwnedPlot(plotName);
@@ -1455,6 +1452,7 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
       }
       else
       {
+         // processing for tracking data adapter 
          std::vector<TrackingDataAdapter*>* adapters = tfs[k]->GetAdapters(); 
          for (UnsignedInt j = 0; j < adapters->size(); ++j)
          {
@@ -1480,45 +1478,10 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
             residualPlots.push_back(rPlot);
          }
       }
-      // todo: Register participants for this curve
-      //rPlot->SetUsedObjectID(Integer id);
    }
 
 }
 
-//void Estimator::BuildResidualPlot(const std::string &plotName,
-//      const StringArray &measurementNames)
-//{
-//   IntegerArray arrayid;
-//
-//   OwnedPlot *rPlot = new OwnedPlot(plotName);
-//
-//   rPlot->SetStringParameter("PlotTitle", plotName);
-//   rPlot->SetBooleanParameter("UseLines", false);
-//   rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
-//   for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
-//   {
-//      std::string curveName = measurementNames[i] + " Residuals";
-//      rPlot->SetStringParameter("Add", curveName);
-//      // Register measurement ID for this curve
-//      arrayid = measManager.GetMeasurementId(measurementNames[i]);
-////      if (id[0] < 1000)
-////      {
-//         // processing for MeasurementModel
-//         rPlot->SetUsedDataID(arrayid[0]);
-////      }
-//      //else
-//      //{
-//      //   // processing for TrackingFileSet
-//
-//      //}
-//
-//      // todo: Register participants for this curve
-//      //rPlot->SetUsedObjectID(Integer id);
-//   }
-//   rPlot->Initialize();
-//   residualPlots.push_back(rPlot);
-//}
 
 //------------------------------------------------------------------------------
 // void PlotResiduals()
@@ -1670,7 +1633,6 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
 //                    Real inputStateElement, Real* outputStateElement)
@@ -1679,10 +1641,10 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
  * Method used to convert result of a state's element in A1mjd to participant's 
  * coordinate system
  *
- * @param infor                    information about state's element
- * @param epoch                    the epoch at which the state is converted it's 
+ * @param infor                 information about state's element
+ * @param epoch                 the epoch at which the state is converted it's 
  *                              coordinate system
- * @param inputStateElement        state's element in GMAT internal coordinate system
+ * @param inputStateElement     state's element in GMAT internal coordinate system
  *                              (A1Mjd)
  * @param outputStateElemnet    state's element in participant's coordinate system
  *
@@ -1724,7 +1686,7 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 
          (*outputStateElement) = outState[index]; 
          delete cv;
-         delete gmatcs;                             // made changes by TUAN NGUYEN
+         delete gmatcs;
       }
    }
 
@@ -1732,7 +1694,6 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 }
 
 
-// made changes by TUAN NGUYEN
 //-------------------------------------------------------------------------
 // void Estimator::GetEstimationState(GmatState& outputState)
 //-------------------------------------------------------------------------
@@ -1757,5 +1718,4 @@ void Estimator::GetEstimationState(GmatState& outputState)
         outputState[i] = outputStateElement;
     }
 }
-
 

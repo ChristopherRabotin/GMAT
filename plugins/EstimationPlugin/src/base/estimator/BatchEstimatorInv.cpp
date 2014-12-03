@@ -341,9 +341,9 @@ void BatchEstimatorInv::Accumulate()
          {
             RealArray hTrow;
             hTrow.assign(stateSize, 0.0);
-            UnsignedInt rowCount = calculatedMeas->value.size();                  // change int to UnsignedInt         // made changes by TUAN NGUYEN
+            UnsignedInt rowCount = calculatedMeas->value.size();
 
-            for (UnsignedInt i = 0; i < rowCount; ++i)                            // change int to UnsignedInt         // made changes by TUAN NGUYEN
+            for (UnsignedInt i = 0; i < rowCount; ++i)
                hTilde.push_back(hTrow);
             
             // Now walk the state vector and get elements of H-tilde for each piece
@@ -360,14 +360,14 @@ void BatchEstimatorInv::Accumulate()
                         (*stateMap)[i]->elementID);
                      MessageInterface::ShowMessage("object = <%p '%s'>\n", (*stateMap)[i]->object, (*stateMap)[i]->object->GetName().c_str());
                   #endif
-                  // Partial derivatives at measurement time tm                                     // add comments by TUAN NGUYEN
+                  // Partial derivatives at measurement time tm
                   stateDeriv = measManager.CalculateDerivatives(
                      (*stateMap)[i]->object, (*stateMap)[i]->elementID,
                      modelsToAccess[0]);
                   
                   // Fill in the corresponding elements of hTilde
                   for (UnsignedInt j = 0; j < rowCount; ++j)
-                     for (UnsignedInt k = 0; k < (*stateMap)[i]->length; ++k)                       // change Integer to UnsignedInt   // made changes by TUAN NGUYEN
+                     for (UnsignedInt k = 0; k < (*stateMap)[i]->length; ++k)
                         hTilde[j][i+k] = stateDeriv[j][k];                                          // hTilde is partial derivates at measurement time tm (not at aprioi time t0)
 
                   #ifdef DEBUG_ACCUMULATION
@@ -454,8 +454,8 @@ void BatchEstimatorInv::Accumulate()
                #endif
 
                measurementEpochs.push_back(currentEpoch);
-               OData.push_back(currentObs->value[k]);                   // made changes by TUAN NGUYEN
-               CData.push_back(calculatedMeas->value[k]);               // made changes by TUAN NGUYEN
+               OData.push_back(currentObs->value[k]);
+               CData.push_back(calculatedMeas->value[k]);
                measurementResiduals.push_back(ocDiff);
                measurementResidualID.push_back(calculatedMeas->uniqueID);
             
@@ -596,18 +596,18 @@ void BatchEstimatorInv::Accumulate()
 
    // Advance to the next measurement and get its epoch
    bool isEndOfTable = measManager.AdvanceObservation();
-   if (isEndOfTable)                                 // made changes by TUAN NGUYEN
-      currentState = ESTIMATING;                     // made changes by TUAN NGUYEN
-   else                                              // made changes by TUAN NGUYEN
-   {                                                 // made changes by TUAN NGUYEN
+   if (isEndOfTable)
+      currentState = ESTIMATING;
+   else
+   {
       nextMeasurementEpoch = measManager.GetEpoch();
       FindTimeStep();
 
-      if (currentEpoch <= (nextMeasurementEpoch + 5.0e-12))       // It needs to add 5.0e-12 in order to avoid accuracy limit of double   // made changes by TUAN NGUYEN
+      if (currentEpoch <= (nextMeasurementEpoch + 5.0e-12))       // It needs to add 5.0e-12 in order to avoid accuracy limit of double
          currentState = PROPAGATING;
       else
          currentState = ESTIMATING;
-   }                                                // made changes by TUAN NGUYEN
+   }
 
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Exit BatchEstimatorInv::Accumulate()\n");
@@ -631,9 +631,9 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("BatchEstimator state is ESTIMATING\n");
    #endif
 
-   // Plot all residuals                          // made changes by TUAN NGUYEN
-   if (showAllResiduals)                          // made changes by TUAN NGUYEN
-      PlotResiduals();                            // made changes by TUAN NGUYEN
+   // Plot all residuals
+   if (showAllResiduals)
+      PlotResiduals();
 
    // Display number of removed records for each type of filters
    if (!numRemovedRecords.empty())
@@ -659,11 +659,11 @@ void BatchEstimatorInv::Estimate()
    }
 
    // Apriori state (initial state for 0th iteration) and initial state for current iteration: 
-   if (iterationsTaken == 0)                                  // made changes by TUAN NGUYEN
-      initialEstimationState = (*estimationState);            // made changes by TUAN NGUYEN
+   if (iterationsTaken == 0)
+      initialEstimationState = (*estimationState);
    oldEstimationState = (*estimationState);
    // Convert previous state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(previousSolveForState);                 // made changes by TUAN NGUYEN
+   GetEstimationState(previousSolveForState);
 
 
    // Specify previous, current, and the best weighted RMS:
@@ -850,7 +850,7 @@ void BatchEstimatorInv::Estimate()
       (*estimationState)[i] += delta;
    }
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(currentSolveForState);               // made changes by TUAN NGUYEN
+   GetEstimationState(currentSolveForState);
 
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");

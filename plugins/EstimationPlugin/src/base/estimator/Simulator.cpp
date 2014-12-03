@@ -729,7 +729,19 @@ const StringArray& Simulator::GetStringArrayParameter(const Integer id) const
 }
 
 
-// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// std::string GetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns On/Off parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  On/Off value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string Simulator::GetOnOffParameter(const Integer id) const
 {
    if (id == ADD_NOISE)
@@ -738,7 +750,21 @@ std::string Simulator::GetOnOffParameter(const Integer id) const
    return Solver::GetOnOffParameter(id);
 }
 
-// made changes by TUAN NGUYEN
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets On/Off value to a parameter, given the input
+ * parameter ID.
+ *
+ * @param <id>    ID for the requested parameter.
+ * @param value   On/Off value used to set to the parameter
+ *
+ * @return  true if value id On, false otherwise.
+ *
+ */
+//------------------------------------------------------------------------------
 bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
 {
    if (id == ADD_NOISE)
@@ -811,11 +837,11 @@ Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
    // The change below breaks sample missions, so I'm backing it out.  A
    // different change committed today fixes the issue.
 //   if (id == MEASUREMENTS)
-////      return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
-//      return Gmat::TRACKING_SYSTEM;            // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+////      return Gmat::MEASUREMENT_MODEL;         // made change to pass interpreter validation 4/2/2013
+//      return Gmat::TRACKING_SYSTEM;            // made change to pass interpreter validation 4/2/2013
 
    if (id == MEASUREMENTS)
-      return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+      return Gmat::MEASUREMENT_MODEL;         // made change to pass interpreter validation 4/2/2013
 
    if (id == PROPAGATOR)
       return Gmat::PROP_SETUP;
@@ -1368,7 +1394,7 @@ void Simulator::CompleteInitialization()
             "MeasurementManager.\n");
 
    // Load ramped table
-   measManager.LoadRampTables();                                 // made changes by TUAN NGUYEN
+   measManager.LoadRampTables();
 
    nextSimulationEpoch = simulationStart;
    simEpochCounter     = 0;
@@ -1420,7 +1446,7 @@ void Simulator::FindTimeStep()
 //               GmatTimeConstants::SECS_PER_DAY * 1000000))/1000000.0;
 
       timeStep = (nextSimulationEpoch - currentEpoch) *
-               GmatTimeConstants::SECS_PER_DAY;               // made change by TUAN NGUYEN for Bug GMT-3700
+               GmatTimeConstants::SECS_PER_DAY;               // fixed Bug GMT-3700
 
       #ifdef DEBUG_TIMESTEP
          MessageInterface::ShowMessage("Simulator time step = %.15lf based on "
@@ -1446,7 +1472,7 @@ void Simulator::FindTimeStep()
 void Simulator::CalculateData()
 {
    // Tell the measurement manager to calculate the simulation data
-   if (measManager.CalculateMeasurements(true, false) == false)               // made changes by TUAN NGUYEN  for Bug 8 in ticket GMT-4314
+   if (measManager.CalculateMeasurements(true, false) == false)               // fixed Bug 8 in ticket GMT-4314
    {
       // No measurements were possible
       FindNextSimulationEpoch();
