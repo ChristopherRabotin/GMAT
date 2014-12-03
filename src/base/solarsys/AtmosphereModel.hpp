@@ -72,7 +72,7 @@ public:
    void         SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
    virtual void SetCentralBody(CelestialBody *cb);
-   std::string  GetCentralBodyName();						// made changes by TUAN NGUYEN
+   std::string  GetCentralBodyName();
 
    void         SetUpdateParameters(Real interval, GmatEpoch epoch = -1.0);
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
@@ -176,8 +176,8 @@ protected:
    Real                    geoLat;
    /// Most recent geodetic longitude calculated
    Real                    geoLong;
-   /// Specify geodetic coordinate system or gecentric to be used for calculation		// made changes by TUAN NGUYEN
-   bool                    useGeodetic;													// made changes by TUAN NGUYEN
+   /// Specify geodetic coordinate system or gecentric to be used for calculation
+   bool                    useGeodetic;
    /// Most recent GHA calculated
    Real                    gha;
    /// GHA epoch

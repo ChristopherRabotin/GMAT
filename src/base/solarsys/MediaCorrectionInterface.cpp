@@ -31,7 +31,7 @@
 MediaCorrectionInterface::MediaCorrectionInterface(const std::string &typeStr,
 											const std::string &nomme) :
 	GmatBase		 (Gmat::MEDIA_CORRECTION, typeStr, nomme),
-	solarSystem      (NULL),												// made changes by TUAN NGUYEN
+	solarSystem      (NULL),
 	temperature      (295.1),		// 295.1K
 	pressure         (1013.5),		// 1013.5 kPa
 	humidityFraction (0.55),		// 55%
@@ -41,15 +41,8 @@ MediaCorrectionInterface::MediaCorrectionInterface(const std::string &typeStr,
    objectTypes.push_back(Gmat::MEDIA_CORRECTION);
 //   objectTypeNames.push_back("MediaCorrection");
 
-//   solarSystem  = Moderator::Instance()->GetSolarSystemInUse();		// made changes by TUAN NGUYEN
    modelName	= typeStr;
    model 		= 0;
-
-//   temperature = 295.1;		// 295.1K
-//   pressure = 1013.5;		// 938.0 hPa = 93800 Pa = 0.926 atm
-//   humidityFraction = 0.55;	// 55 %
-   
-//   waveLength = 0.0;          // wave length of the signal
 }
 
 //------------------------------------------------------------------------------
@@ -72,8 +65,8 @@ MediaCorrectionInterface::~MediaCorrectionInterface()
 //------------------------------------------------------------------------------
 MediaCorrectionInterface::MediaCorrectionInterface(const MediaCorrectionInterface& mdc):
 	GmatBase           (mdc),
-	pressure 		   (mdc.pressure),
-	temperature 	   (mdc.temperature),
+	pressure 		    (mdc.pressure),
+	temperature 	    (mdc.temperature),
 	humidityFraction   (mdc.humidityFraction),
 	waveLength         (mdc.waveLength),
 	range              (mdc.range)
