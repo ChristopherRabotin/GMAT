@@ -32,9 +32,9 @@
 #endif
 
 /// TBD: Are these needed?
-#include "GmatODType.hpp"						// made change by TUAN NGUYEN
-#include "GmatODDopplerType.hpp"				// made change by TUAN NGUYEN
-#include "RampTableType.hpp"                    // made change by TUAN NGUYEN
+#include "GmatODType.hpp"
+#include "GmatODDopplerType.hpp"
+#include "RampTableType.hpp"
 
 
 
@@ -51,9 +51,9 @@ ObTypeFactory::ObTypeFactory() :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
-	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
-	  creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
-	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
+	   creatables.push_back("GMAT_OD");
+	   creatables.push_back("GMAT_ODDoppler");
+	   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
       creatables.push_back("TDM");
 #endif
@@ -88,9 +88,9 @@ ObTypeFactory::ObTypeFactory(StringArray createList) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
-	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
-	  creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
-	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
+	   creatables.push_back("GMAT_OD");
+	   creatables.push_back("GMAT_ODDoppler");
+	   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
       creatables.push_back("TDM");
 #endif
@@ -113,9 +113,9 @@ ObTypeFactory::ObTypeFactory(const ObTypeFactory& fact) :
    if (creatables.empty())
    {
       creatables.push_back("GMATInternal");
-	  creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
-	  creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
-	  creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
+	   creatables.push_back("GMAT_OD");
+	   creatables.push_back("GMAT_ODDoppler");
+	   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
       creatables.push_back("TDM");
 #endif
@@ -143,9 +143,9 @@ ObTypeFactory& ObTypeFactory::operator= (const ObTypeFactory& fact)
       if (creatables.empty())
       {
          creatables.push_back("GMATInternal");
-		 creatables.push_back("GMAT_OD");				// made change by TUAN NGUYEN
-		 creatables.push_back("GMAT_ODDoppler");		// made change by TUAN NGUYEN
-		 creatables.push_back("GMAT_RampTable");		// made change by TUAN NGUYEN
+		   creatables.push_back("GMAT_OD");
+		   creatables.push_back("GMAT_ODDoppler");
+		   creatables.push_back("GMAT_RampTable");
 #ifdef INCLUDE_TDM
          creatables.push_back("TDM");
 #endif
@@ -175,12 +175,12 @@ ObType* ObTypeFactory::CreateObType(const std::string &ofType,
 
    if (ofType == "GMATInternal")
       retval = new GmatObType(withName);
-   else if (ofType == "GMAT_OD")				// made change by TUAN NGUYEN
-      retval = new GmatODType(withName);		// made change by TUAN NGUYEN
-   else if (ofType == "GMAT_ODDoppler")			// made change by TUAN NGUYEN
-      retval = new GmatODDopplerType(withName);	// made change by TUAN NGUYEN
-   else if (ofType == "GMAT_RampTable")			// made change by TUAN NGUYEN
-      retval = new RampTableType(withName);		// made change by TUAN NGUYEN
+   else if (ofType == "GMAT_OD")
+      retval = new GmatODType(withName);
+   else if (ofType == "GMAT_ODDoppler")
+      retval = new GmatODDopplerType(withName);
+   else if (ofType == "GMAT_RampTable")
+      retval = new RampTableType(withName);
 #ifdef INCLUDE_TDM
    if (ofType == "TDM")
       retval = new TdmObType(withName);
