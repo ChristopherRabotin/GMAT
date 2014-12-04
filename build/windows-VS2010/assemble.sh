@@ -61,7 +61,7 @@ cp -av "$binfiles"/* "$dest"
 
 # Copy support libraries
 cp -av \
-    "$netpath"/Builds/windows/vc_lib/wx2.8.12/*.dll \
+    "$netpath"/Builds/windows/vc_lib/wx3.0.2/*.dll \
     "$dest"/bin
 cp -av \
     "$netpath"/Builds/windows/vc_lib/*.dll \
