@@ -1230,7 +1230,8 @@ void MeasurementManager::LoadRampTables()
                while (rtd != NULL)
                {
                   // Data records containing rampType = 0(snap), 6(invalid/unknown) , and 7(left bank in DSN file) will be removed from ramp table  
-                  if ((rtd_old.epoch < rtd->epoch)&&(rtd->rampType >= 1)&&(rtd->rampType <= 5))
+                  //if ((rtd_old.epoch < rtd->epoch)&&(rtd->rampType >= 1)&&(rtd->rampType <= 5))
+                  if ((rtd->rampType >= 1)&&(rtd->rampType <= 5))
                   {
                      // Specify keyindex
                      std::stringstream ss;
@@ -1256,7 +1257,8 @@ void MeasurementManager::LoadRampTables()
                   else
                   {
                      #ifdef DEBUG_LOAD_FREQUENCY_RAMP_TABLE
-                        MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time or rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
+                        //MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to the order of time or rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
+                        MessageInterface::ShowMessage(" epoch: %.15lf   participants: %s   %s   frequency band = %d    ramp type = %d    ramp frequency = %.12le     ramp rate = : %.12le: throw away this record due to rampType = 0, 6, or 7\n", rtd->epoch, rtd->participantIDs[0].c_str(), rtd->participantIDs[1].c_str(), rtd->uplinkBand, rtd->rampType, rtd->rampFrequency, rtd->rampRate);
                      #endif
                   }
 
