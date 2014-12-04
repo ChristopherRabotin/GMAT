@@ -1366,9 +1366,10 @@ bool TrackingFileSet::Initialize()
       if (filenames.size() == 0)
          throw MeasurementException("No observation data file is set to " + GetName() + " object.\n");
 
-      // Check for ramp table 
-      if (rampedTablenames.size() == 0)
-         throw MeasurementException("No ramp table is set to " + GetName() + " object.\n");
+      // Note: No ramp table is accepted when frequency is got from transmiter
+//      // Check for ramp table 
+//      if (rampedTablenames.size() == 0)
+//         throw MeasurementException("No ramp table is set to " + GetName() + " object.\n");
 
       // Build the adapters
       if (trackingConfigs.size() == 0)
