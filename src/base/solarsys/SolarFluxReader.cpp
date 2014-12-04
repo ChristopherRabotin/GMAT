@@ -294,7 +294,7 @@ bool SolarFluxReader::LoadPredictData()
          fD.F107a[l+6] = atof(tokens[l+10].c_str());
       fD.apSchatten[2] = atof(tokens[13].c_str());
      
-      obsFluxData.push_back(fD);
+      predictFluxData.push_back(fD);
 
    }
 
