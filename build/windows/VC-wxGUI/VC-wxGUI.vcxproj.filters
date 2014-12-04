@@ -2346,6 +2346,21 @@
     <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
       <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPreferences.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPrintout.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\FindReplaceDialog.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4471,6 +4486,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
       <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPreferences.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPrintout.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\FindReplaceDialog.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
+      <Filter>Source Files\gui\view</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
