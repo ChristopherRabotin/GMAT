@@ -31,9 +31,12 @@
 
 //#define DEBUG_OBTYPE_CREATION_INITIALIZATION
 //#define DEBUG_FILE_WRITE
-//#define DEBUG_FILE_READ
+#define DEBUG_FILE_READ
 //#define DEBUG_FILE_ACCESS
 //#define DEBUG_SIGNAL_READ
+
+
+#define  USE_OLD_GMDFILE_FORMAT
 
 //-----------------------------------------------------------------------------
 // GmatObType(const std::string withName)
@@ -299,8 +302,22 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    sprintf(epochbuffer, "%18.12lf", taiEpoch);
    dataLine << epochbuffer << "    " << md->typeName
             << "    " << md->type << "    ";
+#ifdef USE_OLD_GMDFILE_FORMAT
+   if (md->type < 9000)
+   {
+      for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
+         dataLine << md->participantIDs[j] << "    ";
+   }
+   else
+   {
+      for (UnsignedInt j = 0; j < md->participantIDs.size()-1; ++j)
+         dataLine << md->participantIDs[j] << "    ";
+   }
+
+#else
    for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
       dataLine << md->participantIDs[j] << "    ";
+#endif
 
    if (md->typeName == "Doppler")
    {
@@ -441,17 +458,21 @@ ObservationData* GmatObType::ReadObservation()
       }
    }
    else
-   /// @todo to here, and clean up
    {
       #ifdef DEBUG_FILE_READ
          MessageInterface::ShowMessage("   Processing measurement type %d\n",
                type);
       #endif
+#ifdef USE_OLD_GMDFILE_FORMAT
+     participantSize = 2;           // In this version, measurement type is always 2-ways
+#else
+      // In this version, measurement type could be 1, 2, or multiple ways measurement
       if (!ProcessSignals(str, participantSize, dataSize))
       {
          MessageInterface::ShowMessage("Signal based measurement of type %d "
                "not processed successfully for line %s\n", type, str.c_str());
       }
+#endif
 
       if ((currentObs.typeName == "Range")||(currentObs.typeName == "DSNRange")
          ||(currentObs.typeName == "Doppler"))
@@ -460,11 +481,17 @@ ObservationData* GmatObType::ReadObservation()
       }
    }
 
+
    for (Integer i = 0; i < participantSize; ++i)
    {
       theLine >> str;
       currentObs.participantIDs.push_back(str);
    }
+#ifdef USE_OLD_GMDFILE_FORMAT
+   if (type >= 9000)
+      currentObs.participantIDs.push_back(currentObs.participantIDs[0]);
+#endif
+
 
    currentObs.unit = "Km";
    if (currentObs.typeName == "Doppler")
