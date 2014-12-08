@@ -212,7 +212,6 @@ JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const std::string &name) :
    cbPolarRadius        (6356.766),       // for initialization only. Reset in SetCentralBody()
    cbPolarSquared       (40408473.978756)
 {
-   fileReader = new SolarFluxReader();
 }
 
 
@@ -225,15 +224,6 @@ JacchiaRobertsAtmosphere::JacchiaRobertsAtmosphere(const std::string &name) :
 //------------------------------------------------------------------------------
 JacchiaRobertsAtmosphere::~JacchiaRobertsAtmosphere()
 {
-   if (fileReader)
-   {
-      if (!fileReader->Close())
-         throw AtmosphereException("Error closing Solar Flux data files.\n");
-
-      delete fileReader;
-      fileReader = NULL;
-   }
-
 }
 
 //------------------------------------------------------------------------------
@@ -457,8 +447,8 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    
    // Read F10.7 and F10.7a to calculate the geo.xtemp
    SolarFluxReader::FluxData fD = fileReader->GetInputs(a1_time);
-   //Observed or Adj ????
-   geo.xtemp = 379.0 + 3.24 * fD.adjCtrF107a + 1.3 * (fD.adjF107 - fD.adjCtrF107a);
+   //Observed
+   geo.xtemp = 379.0 + 3.24 * fD.obsCtrF107a + 1.3 * (fD.obsF107 - fD.obsCtrF107a);
    geo.tkp   = fD.kp[0];
 
    #ifdef DEBUG_JR_DRAG

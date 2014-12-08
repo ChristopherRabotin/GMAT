@@ -68,7 +68,6 @@ Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     for (Integer i = 0; i < 7; i++)
        ap[i] = 0.0;
 
-    fileReader = new SolarFluxReader();
 }
 
 //------------------------------------------------------------------------------
@@ -79,15 +78,7 @@ Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
  */
 //------------------------------------------------------------------------------
 Msise90Atmosphere::~Msise90Atmosphere()
-{
-   if (fileReader)
-   {
-      if (!fileReader->Close())
-         throw AtmosphereException("Error closing Solar Flux data file.\n");
-
-      delete fileReader;
-      fileReader = NULL;
-   }
+{ 
 }
 
 //------------------------------------------------------------------------------

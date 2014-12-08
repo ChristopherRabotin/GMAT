@@ -63,6 +63,37 @@ SolarFluxReader::~SolarFluxReader(void)
    delete[] line;
 }
 
+//------------------------------------------------------------------------------
+// SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=()
+//------------------------------------------------------------------------------
+/**
+* Operator=() for FluxData data structure
+*/
+//------------------------------------------------------------------------------
+inline SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
+{
+   if (this == &fD)
+      return *this;
+
+   epoch = fD.epoch;
+   for (Integer i = 0; i < 8; i++)
+   {
+      kp[i] = fD.kp[i];
+      ap[i] = fD.ap[i];
+   }
+   adjF107 = fD.adjF107;
+   adjCtrF107a = fD.adjCtrF107a;
+   obsF107 = fD.obsF107;
+   obsCtrF107a = fD.obsCtrF107a;
+   for (Integer i = 0; i < 9; i++)
+      F107a[i] = fD.F107a[i];
+   for (Integer i = 0; i < 3; i++)
+      apSchatten[i] = fD.apSchatten[i];
+   index = fD.index;
+
+   return *this;
+}
+
 
 //------------------------------------------------------------------------------
 // bool Open()
@@ -275,6 +306,11 @@ bool SolarFluxReader::LoadPredictData()
    while (!inPredict.eof())
    {
       inPredict.getline(line, 256, '\n');
+      //last line in file may or may not have "END DATA" tag,
+      // if it has, break 
+      if(strcmp(line, "END DATA") == 0)
+         break;
+
       std::istringstream buf(line);
       std::istream_iterator<std::string> beg(buf), end;
       std::vector<std::string> tokens(beg, end);
@@ -296,6 +332,13 @@ bool SolarFluxReader::LoadPredictData()
      
       predictFluxData.push_back(fD);
 
+   }
+
+   std::vector<FluxData>::iterator it = predictFluxData.begin();
+   it->index = 0;
+   for ( it = it+1; it != predictFluxData.end(); it++)
+   {
+      it->index = (Integer) (it->epoch - (it-1)->epoch);
    }
 
    return true;
@@ -327,17 +370,28 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    // use closest data from the requested epoch and issue a single warning message 
    // that data was not available so using closest data and from which file source.
    epoch_1st = obsFluxData.at(0).epoch;
-   index = epoch - epoch_1st;
+   index = (Integer) (epoch - epoch_1st);
    // if the requested epoch fall beyond the 
    // last item in the obsFluxData, then search in predictFluxData
-   if (index > obsFluxData.size())
+   if (index > (Integer) obsFluxData.size())
    {
       epoch_1st = predictFluxData.at(0).epoch;
-      index = epoch - epoch_1st;
-   }
+      index = (Integer) (epoch - epoch_1st);
+      std::vector<FluxData>::iterator it;
+      for ( it = predictFluxData.begin(); it != predictFluxData.end(); it++)
+      {
+         if ( index == it->index)
+         {
+            fD = predictFluxData[index];
+            break;
+         }
+      }
 
-  
-   // do some calculation off the epoch passed to index to the obsFluxData
+   }
+   else
+   {
+      fD = obsFluxData[index];
+   }
 
    return fD;
 }

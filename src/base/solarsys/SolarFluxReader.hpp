@@ -57,6 +57,11 @@ public:
       Real F107a[9];
       // the first is NOMINAL, the second is EARLY, and the last is LATE TIMING.
       Real apSchatten[3];
+
+      // Assignment operator
+      inline FluxData &operator=(const FluxData &fD);
+      // Used in Schatten file indexing
+      Integer index;
    };
   
 private:

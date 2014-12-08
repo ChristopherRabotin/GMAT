@@ -107,6 +107,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    angVel[1]      = 0.0;
    angVel[2]      = 7.29211585530e-5;
 
+   fileReader = new SolarFluxReader();
+
    #ifdef CHECK_KP2AP
       MessageInterface::ShowMessage("K_p to A_p conversions:\n");
       for (Integer i = 0; i < 28; ++i)
@@ -124,6 +126,7 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
 //------------------------------------------------------------------------------
 AtmosphereModel::~AtmosphereModel()
 {
+   delete fileReader;
 }
 
 //------------------------------------------------------------------------------
