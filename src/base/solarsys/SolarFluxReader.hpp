@@ -59,7 +59,7 @@ public:
       Real apSchatten[3];
 
       // Assignment operator
-      inline FluxData &operator=(const FluxData &fD);
+      FluxData &operator=(const FluxData &fD);
       // Used in Schatten file indexing
       Integer index;
    };
