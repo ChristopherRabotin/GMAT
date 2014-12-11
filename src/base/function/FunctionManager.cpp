@@ -2184,6 +2184,7 @@ void FunctionManager::Cleanup()
          ////Edwin's MMS script failed, so commented out (loj: 2008.12.03)
          ////We need to delete this somewhere though.
          ////f->ClearAutomaticObjects();
+         // They are deleted in the Function destructor (LOJ: 2014.12.09)
          #ifdef DEBUG_CLEANUP
          MessageInterface::ShowMessage("   Calling f->Finalize()\n");
          #endif

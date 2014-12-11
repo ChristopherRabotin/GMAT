@@ -48,7 +48,7 @@
 
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
-//#define DEBUG_HANDLE_ERROR
+#define DEBUG_HANDLE_ERROR
 //#define DEBUG_INIT
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_COMMAND_VALIDATION
@@ -58,11 +58,11 @@
 //#define DEBUG_CREATE_CELESTIAL_BODY
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
-//#define DEBUG_CREATE_COMMAND
+#define DEBUG_CREATE_COMMAND
 //#define DEBUG_CREATE_CALL_FUNCTION
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_WRAPPERS
-//#define DEBUG_MAKE_ASSIGNMENT
+#define DEBUG_MAKE_ASSIGNMENT
 //#define DEBUG_ASSEMBLE_COMMAND
 //#define DEBUG_ASSEMBLE_CREATE
 //#define DEBUG_ASSEMBLE_CONDITION
@@ -957,9 +957,9 @@ GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
  *  
  * @param  type  Type for the requested object.
  * @param  name  Name for the object
- * @param  manage   0, if parameter is not managed
- *                  1, if parameter is added to configuration (default)
- *                  2, if Parameter is added to function object map
+ * @param  manage   0, if object is not managed
+ *                  1, if object is added to configuration (default)
+ *                  2, if object is added to function object map
  * @param <createDefault> set to true if default object to be created (false)
  *
  * @return object pointer on success, NULL on failure.
@@ -1818,7 +1818,15 @@ GmatBase* Interpreter::FindObject(const char *name, const std::string &ofType)
 GmatBase* Interpreter::FindObject(const std::string &name, 
                                   const std::string &ofType)
 {
-   return theValidator->FindObject(name, ofType);
+   MessageInterface::ShowMessage
+      ("==> Interpreter::FindObject() entered, name='%s', currentFunction=<%p>\n",
+       name.c_str(), currentFunction);
+   
+   // If parsing a function, use current function to find an object (LOJ: 2014.12.10)
+   if (currentFunction == NULL)
+      return theValidator->FindObject(name, ofType);
+   else
+      return currentFunction->FindFunctionObject(name);
 }
 
 
@@ -10165,7 +10173,7 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
-      ("Interpreter::BuildFunctionDefinition() str=<%s>\n", str.c_str());
+      ("Interpreter::BuildFunctionDefinition() entered, str=<%s>\n", str.c_str());
    #endif
    
    std::string lhs;

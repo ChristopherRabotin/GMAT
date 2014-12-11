@@ -72,6 +72,11 @@ public:
    virtual WrapperArray&   GetWrappersToDelete();
    virtual void         ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs);
    
+   // Methods for objects created in the function via Create
+   virtual void         ClearFunctionObjects();
+   virtual void         AddFunctionObject(GmatBase *obj);
+   virtual GmatBase*    FindFunctionObject(const std::string &name);
+   
    // methods to set/get the automatic objects
    virtual void         ClearAutomaticObjects();
    virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj,
@@ -151,6 +156,8 @@ protected:
    GmatCommand          *fcs;
    /// have the commands in the FCS been finalized?
    bool                 fcsFinalized;
+   /// Map to hold objects created in function
+   ObjectMap            functionObjectMap;
    /// objects automatically created on parsing (but for whom a references object cannot be
    /// set at that time)
    ObjectMap            automaticObjectMap;
