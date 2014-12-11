@@ -65,10 +65,10 @@ public:
    RealArray    TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
 
 #ifdef IONOSPHERE
-   RealArray   IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);
+   RealArray   IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2);
 #endif
 
-   RealArray   CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);
+   RealArray   CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2);
 
 ///// TBD: Determine if there is a more generic way to add these
    void         SetFrequencyBand(Integer frequencyBand, Integer index=0);

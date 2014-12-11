@@ -475,19 +475,21 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
 
 
 //------------------------------------------------------------------------
-//RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
+//RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
 //------------------------------------------------------------------------
 /**
  * This function is used to calculate Ionosphere correction.
  *
  * @param freq    The frequency of signal                                     (unit: MHz)
- * @param r1      Position of ground station in SSBMJ2000 coordinate system   (unit: km)
- * @param r2      Position of spacecraft in SSBMJ2000 coordinate system       (unit: km)
- * @param epoch   Time at which the signal is transmitted or received from ground station      (unit: Julian day)
+ * @param r1B      Position of ground station in SSBMJ2000 coordinate system   (unit: km)
+ * @param r2B      Position of spacecraft in SSBMJ2000 coordinate system       (unit: km)
+ * @param epoch1   Time at which the signal is transmitted or received at ground station  (unit: Julian day)
+ * @param epoch2   Time at which the signal is transmitted or received at spacecraft      (unit: Julian day)
+ * return          An array containing results of Ionosphere corection
  */
 //------------------------------------------------------------------------
 #ifdef IONOSPHERE
-RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
+RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
 {
    RealArray ionoCorrection;
 
@@ -501,7 +503,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
       ionosphere->SetWaveLength(wavelength);
 
       // 2. Set time:
-      ionosphere->SetTime(epoch);                                                         // unit: Julian day
+      ionosphere->SetTime(epoch1);                                                         // unit: Julian day
 
       // 3. Set station and spacecraft positions:
       // Get Earthfixed coordinate system
@@ -519,17 +521,21 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
       Rvector inState(6, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
       Rvector outState(6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       CoordinateConverter* cv = new CoordinateConverter();
-      A1Mjd time(epoch);
-      cv->Convert(time, inState, cs, outState, fk5cs);
-      Rmatrix33 R_g_j2k    = cv->GetLastRotationMatrix().Transpose();
+      A1Mjd time1(epoch1);
+      A1Mjd time2(epoch2);
+      cv->Convert(time1, inState, fk5cs, outState, cs);                    // convert from fk5 to EarthBodifixed coordinate system at time when station transmits ro receives signal
+      Rmatrix33 R_g_j2k    = cv->GetLastRotationMatrix();                  // get rotation matrix to convert fk5 to EarthBodyfixed coordinate system at time epoch1 when station transmits ro receives signal
 
       // Specify location of ground station and spacecraft in EarthFixed coordinate system
       // Rvector3 r1_ebf = R_g_j2k*r1;
       // Rvector3 r2_ebf = R_g_j2k*r2;
       SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-      Rvector3 ssb2Earth = earthBody->GetMJ2000Position(time) - ssb->GetMJ2000Position(time);
-      Rvector3 r1_ebf = R_g_j2k*(r1 - ssb2Earth);
-      Rvector3 r2_ebf = R_g_j2k*(r2 - ssb2Earth);
+      Rvector3 ssb2Earth1 = earthBody->GetMJ2000Position(time1) - ssb->GetMJ2000Position(time1);
+      Rvector3 ssb2Earth2 = earthBody->GetMJ2000Position(time1) - ssb->GetMJ2000Position(time2);
+      Rvector3 r1 = r1B - ssb2Earth1;                         // ground station position at time epoch1 in EarthMJ2000 coordinate system at epoch1
+      Rvector3 r2 = r2B - ssb2Earth1;                         // spacecraft position at time epoch2 in EarthMJ2000 coordinate system at epoch1
+      Rvector3 r1_ebf = R_g_j2k*r1;                           // ground station position at time epoch 1 in EarthBodyFixed coordinate system at epoch1
+      Rvector3 r2_ebf = R_g_j2k*r2;                           // spacecraft position at time epoch2 in EarthBodyFixed coordinate system at epoch1
 
 
       ionosphere->SetStationPosition(r1_ebf);                                 // unit: km
@@ -544,7 +550,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
          MessageInterface::ShowMessage("      *Run Ionosphere media correction for:\n");
          MessageInterface::ShowMessage("         +Earth radius = %lf km\n", earthRadius);
          MessageInterface::ShowMessage("         +Wave length = %.12lf m\n", wavelength);
-         MessageInterface::ShowMessage("         +Time = %.12lf\n", epoch);
+         MessageInterface::ShowMessage("         +Time = %.12lf\n", epoch1);
          MessageInterface::ShowMessage("         +Station location in Earth body fixed coordinate system (km)   : (%.12lf,  %.12lf,   %.12lf)\n", r1_ebf[0], r1_ebf[1], r1_ebf[2]); 
          MessageInterface::ShowMessage("         +Spacecraft location in Earth body fixed coordinate system (km): (%.12lf,  %.12lf,   %.12lf)\n", r2_ebf[0], r2_ebf[1], r2_ebf[2]);
       #endif
@@ -577,18 +583,19 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1, Rvec
 #endif
 
 //------------------------------------------------------------------------
-// RealArray CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
+// RealArray CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
 //------------------------------------------------------------------------
 /**
  * This function is used to calculate media corrections.
  *
- * @param freq      The frequency of signal   (unit: MHz)
- * @param r1        Position of ground station in SSB FK5 coordinate system
- * @param r2        Position of spacecraft in SSB FK5 coordinate system
- * @param epoch     The time at which signal is transmitted from or received at ground station
+ * @param freq       The frequency of signal   (unit: MHz)
+ * @param r1B        Position of ground station in SSB FK5 coordinate system
+ * @param r2B        Position of spacecraft in SSB FK5 coordinate system
+ * @param epoch1     The time at which signal is transmitted or received at ground station
+ * @param epoch2     The time at which signal is transmitted or received at spacecraft
  */
 //------------------------------------------------------------------------
-RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch)
+RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
 {
    #ifdef DEBUG_MEDIA_CORRECTION
       MessageInterface::ShowMessage("start PhysicalMeasurement::CalculateMediaCorrection()\n");
@@ -597,23 +604,23 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1, 
    RealArray mediaCorrection;
 
    // 1. Run Troposphere correction:
-   UpdateRotationMatrix(epoch, "o_j2k");
-   Rvector3 rangeVector = r2 - r1;                                         // vector pointing from ground station to spacecraft
-   Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2)); 
+   UpdateRotationMatrix(epoch1, "o_j2k");                                    // calculate rotation matrix from j2k to o at time ground station transmits or reveives signal
+   Rvector3 rangeVector = r2B - r1B;                                         // vector pointing from ground station to spacecraft in SSB FK5
+   Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2));       // unit: radian
+   //MessageInterface::ShowMessage("CalculateMediaCorrection():   elevationAngle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
 
    if (elevationAngle > 0.0)
    {
       mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
 
       #ifdef DEBUG_MEASUREMENT_CORRECTION
-         Rvector3 r = r2-r1;
-         MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2-r1 = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, r[0], r[1], r[2]);
+         MessageInterface::ShowMessage(" frequency = %le MHz, epoch = %lf,     r2B-r1B = ('%.8lf   %.8lf   %.8lf')km\n", freq, epoch, rangeVector[0], rangeVector[1], rangeVector[2]);
          MessageInterface::ShowMessage(" TroposhereCorrection = (%lf m,  %lf arcsec,   %le s)\n", mediaCorrection[0], mediaCorrection[1], mediaCorrection[2]);
       #endif
 
       #ifdef IONOSPHERE
       // 2. Run Ionosphere correction:
-      RealArray ionoCorrection = this->IonosphereCorrection(freq, r1, r2, epoch);
+      RealArray ionoCorrection = this->IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
 
       // 3. Combine effects:
       mediaCorrection[0] += ionoCorrection[0];
@@ -1088,7 +1095,7 @@ void PhysicalMeasurement::BeginEndIndexesOfRampTable(UnsignedInt& beginIndex, Un
       scID   = participants[0]->GetStringParameter("Id");
    }
    searchkey = gsID + " " + scID + " ";
-
+   //MessageInterface::ShowMessage("searchKey = <%s>\n", searchkey.c_str());
    // 2. Search for the beginning index
    beginIndex = 0;
    for(; beginIndex < (*rampTB).size(); ++beginIndex)
@@ -1104,7 +1111,7 @@ void PhysicalMeasurement::BeginEndIndexesOfRampTable(UnsignedInt& beginIndex, Un
       if (searchkey != (*rampTB)[endIndex].indexkey.substr(0,searchkey.size()))
          break;
    }
-
+   //MessageInterface::ShowMessage("beginIndex = %d   endIndex = %d\n", beginIndex, endIndex);
    // 4. Verify number of data records
    if ((endIndex - beginIndex) < 2)
    {

@@ -1136,7 +1136,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
 
       // 12.1. Calculate media correction for uplink leg:
       // r3SB and r4SB are location of station and spacecraft in SSB inertial coordinate system for uplink leg   for S path
-      RealArray uplinkCorrectionS = CalculateMediaCorrection(uplinkFreqS, r3SB, r4SB, t1TS);
+      RealArray uplinkCorrectionS = CalculateMediaCorrection(uplinkFreqS, r3SB, r4SB, t1TS, t2RS);
      
       Real uplinkRangeCorrectionS = uplinkCorrectionS[0]*GmatMathConstants::M_TO_KM + uplinkLegS.GetRelativityCorrection();
       Real uplinkRealRangeS = uplinkRangeS + uplinkRangeCorrectionS;
@@ -1192,7 +1192,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          MessageInterface::ShowMessage("       Downlink Doppler shift frequency = (1 - downlink range rate / c)x Downlink frequency = %.12le MHz\n", downlinkDSFreqS);
       #endif
       // r1SB and r2SB are location of station and spacecraft in central body inertial coordinate system for downlink leg   for S path
-      RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1SB, r2SB, t3RS);
+      RealArray downlinkCorrectionS = CalculateMediaCorrection(downlinkDSFreqS, r1SB, r2SB, t3RS, t2TS);
 
       Real downlinkRangeCorrectionS = downlinkCorrectionS[0]*GmatMathConstants::M_TO_KM + downlinkLegS.GetRelativityCorrection();
       Real downlinkRealRangeS = downlinkRangeS + downlinkRangeCorrectionS;
@@ -1211,7 +1211,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       #endif
       // 13.1. Calculate media correction for uplink leg:
       // r3EB and r4EB are location of station and spacecraft in SSB inertial coordinate system for uplink leg   for E path
-      RealArray uplinkCorrectionE = CalculateMediaCorrection(uplinkFreqE, r3EB, r4EB, t1TE);
+      RealArray uplinkCorrectionE = CalculateMediaCorrection(uplinkFreqE, r3EB, r4EB, t1TE, t2RE);
 
       Real uplinkRangeCorrectionE = uplinkCorrectionE[0]*GmatMathConstants::M_TO_KM + uplinkLegE.GetRelativityCorrection();
       Real uplinkRealRangeE = uplinkRangeE + uplinkRangeCorrectionE;
@@ -1268,7 +1268,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       #endif
 
       // r1EB and r2EB are location of station and spacecraft in SSB inertial coordinate system for downlink leg   for E path
-      RealArray downlinkCorrectionE = CalculateMediaCorrection(downlinkDSFreqE, r1EB, r2EB, t3RE);
+      RealArray downlinkCorrectionE = CalculateMediaCorrection(downlinkDSFreqE, r1EB, r2EB, t3RE, t2TE);
 
       Real downlinkRangeCorrectionE = downlinkCorrectionE[0]*GmatMathConstants::M_TO_KM + downlinkLegE.GetRelativityCorrection();
       Real downlinkRealRangeE = downlinkRangeE + downlinkRangeCorrectionE;
