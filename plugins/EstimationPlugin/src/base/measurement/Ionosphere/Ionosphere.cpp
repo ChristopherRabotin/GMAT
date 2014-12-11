@@ -359,14 +359,23 @@ float Ionosphere::ElectronDensity1(Rvector3 pos2, Rvector3 pos1)
 //
 //  return value: tec  (unit: number of electorns per 1 meter square)
 //---------------------------------------------------------------------------
+#define IONOSPHERE_MAX_ATTITUDE  2000
 Real Ionosphere::TEC()
 {
 #ifdef DEBUG_IONOSPHERE_TEC
-	MessageInterface::ShowMessage("         It performs calculation electron density along the path\n");
-	MessageInterface::ShowMessage("            from ground station location: (%lf,  %lf,  %lf)km\n", stationLoc[0], stationLoc[1], stationLoc[2]);
-	MessageInterface::ShowMessage("            to spacecraft location:       (%lf,  %lf,  %lf)km\n", spacecraftLoc[0], spacecraftLoc[1], spacecraftLoc[2]);
+   MessageInterface::ShowMessage("         It performs calculation electron density along the path\n");
+   MessageInterface::ShowMessage("            from ground station location: (%lf,  %lf,  %lf)km\n", stationLoc[0], stationLoc[1], stationLoc[2]);
+   MessageInterface::ShowMessage("            to spacecraft location:       (%lf,  %lf,  %lf)km\n", spacecraftLoc[0], spacecraftLoc[1], spacecraftLoc[2]);
+   MessageInterface::ShowMessage("         Earth radius : %lf\n", earthRadius);
 #endif
-   Rvector3 dR = (spacecraftLoc - stationLoc) / NUM_OF_INTERVALS;
+   Rvector3 sR;
+   if (spacecraftLoc.GetMagnitude() - earthRadius > IONOSPHERE_MAX_ATTITUDE)
+      sR = spacecraftLoc.GetUnitVector() * (IONOSPHERE_MAX_ATTITUDE + earthRadius); 
+   else
+      sR = spacecraftLoc;
+
+   //Rvector3 dR = (spacecraftLoc - stationLoc) / NUM_OF_INTERVALS;
+   Rvector3 dR = (sR - stationLoc) / NUM_OF_INTERVALS;
    Rvector3 p1 = stationLoc;
    Rvector3 p2;
    Real electdensity, ds;
@@ -374,8 +383,8 @@ Real Ionosphere::TEC()
    for(int i = 0; i < NUM_OF_INTERVALS; ++i)
    {
       p2 = p1 + dR;
-	  electdensity = ElectronDensity(p2, p1);					// unit: electron per m-3
-	  ds = (p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;	// unit: m
+      electdensity = ElectronDensity(p2, p1);               // unit: electron per m-3
+      ds = (p2-p1).GetMagnitude()*GmatMathConstants::KM_TO_M;   // unit: m
       tec += electdensity*ds;
       p1 = p2;
    }
@@ -437,15 +446,15 @@ Real Ionosphere::BendingAngle()
 RealArray Ionosphere::Correction()
 {
 #ifdef DEBUG_IONOSPHERE_CORRECTION
-	MessageInterface::ShowMessage("Ionosphere::Correction() start\n");
+   MessageInterface::ShowMessage("Ionosphere::Correction() start\n");
 #endif
 
    Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
    Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL
-   Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL		// unit: meter
+   Real drho = 40.3*tec/(freq*freq);  // Equation 6.69 of MONTENBRUCK and GILL      // unit: meter
    Real dphi = 0;                     //BendingAngle()*180/GmatConstants::PI;
                                       // It has not been defined yet
-   Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;				// unit: s
+   Real dtime = drho/GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM;            // unit: s
 
 #ifdef DEBUG_IONOSPHERE_CORRECTION
    MessageInterface::ShowMessage
