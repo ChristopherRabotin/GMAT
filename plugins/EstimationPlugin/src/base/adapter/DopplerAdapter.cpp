@@ -826,7 +826,8 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       }
       else
       {       
-         cMeasurement.value[i] = -turnaround*uplinkFreq*(interval - dtdt)/interval;
+         //cMeasurement.value[i] = -turnaround*uplinkFreq*(interval - dtdt)/interval;
+         cMeasurement.value[i] = -turnaround*(uplinkFreq*1.0e6)*(interval - dtdt)/interval;         // convert uplinkFreq from MHz to Hz
       }
       
       Real C_idealVal = cMeasurement.value[i];
