@@ -222,7 +222,9 @@ void PropagatePanel::Create()
    
    propGrid->SetMargins(0, 0);
    propGrid->SetRowLabelSize(0);
-   propGrid->SetScrollbars(5, 8, 15, 15);
+   // Grubb 2014-12-15: Commented out, scroll area will be calculated automatically
+   // based on size
+ //  propGrid->SetScrollbars(5, 8, 15, 15);
    
    for (Integer i = 0; i < MAX_PROP_ROW; i++)
    {
@@ -268,7 +270,9 @@ void PropagatePanel::Create()
    
    stopCondGrid->SetMargins(0, 0);
    stopCondGrid->SetRowLabelSize(0);
-   stopCondGrid->SetScrollbars(5, 8, 15, 15);
+   // Grubb 2014-12-15: Commented out, scroll area will be calculated automatically
+   // based on size
+//   stopCondGrid->SetScrollbars(5, 8, 15, 15);
    
    wxFlexGridSizer *propModeSizer = new wxFlexGridSizer(6, 0, 0);
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
