@@ -441,11 +441,15 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
    *aControl = BuildControl(this, theObject, index, labelText, config);
    (*aControl)->Enable(theObject->IsParameterEnabled(index));
    
-   if (theObject->GetParameterType(index) == Gmat::FILENAME_TYPE)
+   Gmat::ParameterType pt = theObject->GetParameterType(index);
+   if (pt == Gmat::FILENAME_TYPE)
    {
       *aUnit =
          new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
                             wxSize(buttonWidth, 20));
+	  //BrowseButtonWildcard = BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png|All Files (*.*)|*.*;
+      idInfoMap[(wxObject *) *aUnit] = config->Read(_T("BrowseButtonWildcard"), "All Files (*.*)|*.*");
+      (*aUnit)->SetToolTip(config->Read(_T("BrowseButtonHint")));
    }
    else
       *aUnit =
@@ -1300,7 +1304,11 @@ void GmatBaseSetupPanel::OnBrowseButton(wxCommandEvent& event)
    wxBitmapButton *bb = (wxBitmapButton *) event.GetEventObject();
    wxTextCtrl *control = (wxTextCtrl *) bb->GetPrevSibling();
    wxString oldname = control->GetValue();
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+   std::string wildCard = "All Files (*.*)|*.*";
+   if (idInfoMap.find((wxObject *) bb) != idInfoMap.end())
+	 wildCard = idInfoMap.find((wxObject *) bb)->second;
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), 
+	   wildCard);
    
    if (dialog.ShowModal() == wxID_OK)
    {
