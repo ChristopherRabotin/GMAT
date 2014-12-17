@@ -59,6 +59,7 @@ OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" OFF)
 # Optional GMAT plugins
 OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
 OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
+OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" ON)
 OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
 OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
 OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
@@ -232,6 +233,10 @@ if(UNIX)
     SET(CMAKE_INSTALL_RPATH "\$ORIGIN/")
   endif()
 endif()
+
+# Declare global vars for header directories
+# These will be defined in the base/gui CMakeLists.txt files
+SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
 
 # ====================================================================
 # Go to src directory and look for CMake instructions there

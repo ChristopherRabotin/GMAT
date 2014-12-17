@@ -75,35 +75,42 @@ SET(MSISE_SRCS "solarsys/msise90_sub.c")
 
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES("./include")
-INCLUDE_DIRECTORIES("./foundation")
-INCLUDE_DIRECTORIES("./hardware")
-INCLUDE_DIRECTORIES("./executive")
-INCLUDE_DIRECTORIES("./attitude")
-INCLUDE_DIRECTORIES("./spacecraft")
-INCLUDE_DIRECTORIES("./asset")
-INCLUDE_DIRECTORIES("./forcemodel")
-INCLUDE_DIRECTORIES("./forcemodel/harmonic")
-INCLUDE_DIRECTORIES("./propagator")
-INCLUDE_DIRECTORIES("./subscriber")
-INCLUDE_DIRECTORIES("./command")
-INCLUDE_DIRECTORIES("./solarsys")
-INCLUDE_DIRECTORIES("./factory")
-INCLUDE_DIRECTORIES("./stopcond")
-INCLUDE_DIRECTORIES("./interpreter")
-INCLUDE_DIRECTORIES("./util")
-INCLUDE_DIRECTORIES("./interpolator")
-INCLUDE_DIRECTORIES("./interface")
-INCLUDE_DIRECTORIES("./parameter")
-INCLUDE_DIRECTORIES("./configs")
-INCLUDE_DIRECTORIES("./burn")
-INCLUDE_DIRECTORIES("./solver")
-INCLUDE_DIRECTORIES("./function")
-INCLUDE_DIRECTORIES("./coordsystem")
-INCLUDE_DIRECTORIES("./math")
-INCLUDE_DIRECTORIES("./plugin")
-INCLUDE_DIRECTORIES("./event")
+# Include directories for header files
+# Use absolute path so other GMAT dependencies can refer to them
+
+SET(GMAT_BASE_INCLUDE_DIRECTORIES
+  "${CMAKE_CURRENT_SOURCE_DIR}/asset"
+  "${CMAKE_CURRENT_SOURCE_DIR}/attitude"
+  "${CMAKE_CURRENT_SOURCE_DIR}/burn"
+  "${CMAKE_CURRENT_SOURCE_DIR}/command"
+  "${CMAKE_CURRENT_SOURCE_DIR}/configs"
+  "${CMAKE_CURRENT_SOURCE_DIR}/coordsystem"
+  "${CMAKE_CURRENT_SOURCE_DIR}/event"
+  "${CMAKE_CURRENT_SOURCE_DIR}/executive"
+  "${CMAKE_CURRENT_SOURCE_DIR}/factory"
+  "${CMAKE_CURRENT_SOURCE_DIR}/forcemodel"
+  "${CMAKE_CURRENT_SOURCE_DIR}/forcemodel/harmonic"
+  "${CMAKE_CURRENT_SOURCE_DIR}/foundation"
+  "${CMAKE_CURRENT_SOURCE_DIR}/function"
+  "${CMAKE_CURRENT_SOURCE_DIR}/hardware"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${CMAKE_CURRENT_SOURCE_DIR}/interface"
+  "${CMAKE_CURRENT_SOURCE_DIR}/interpolator"
+  "${CMAKE_CURRENT_SOURCE_DIR}/interpreter"
+  "${CMAKE_CURRENT_SOURCE_DIR}/math"
+  "${CMAKE_CURRENT_SOURCE_DIR}/parameter"
+  "${CMAKE_CURRENT_SOURCE_DIR}/plugin"
+  "${CMAKE_CURRENT_SOURCE_DIR}/propagator"
+  "${CMAKE_CURRENT_SOURCE_DIR}/solarsys"
+  "${CMAKE_CURRENT_SOURCE_DIR}/solver"
+  "${CMAKE_CURRENT_SOURCE_DIR}/spacecraft"
+  "${CMAKE_CURRENT_SOURCE_DIR}/stopcond"
+  "${CMAKE_CURRENT_SOURCE_DIR}/subscriber"
+  "${CMAKE_CURRENT_SOURCE_DIR}/util"
+  CACHE INTERNAL "base includes"
+  )
+
+INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
 # source files
