@@ -194,6 +194,10 @@ protected:
    Integer F107AID;
    /// ID used to set Geomagnetic index
    Integer KPID;
+   /// ID used to set Historic Weather File name
+   Integer cssiWFileID;
+   /// ID used to set Schatten Weather File name
+   Integer schattenWFileID;
 
 
    // Optional input parameters used by atmospheric models

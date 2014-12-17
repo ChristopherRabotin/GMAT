@@ -877,14 +877,19 @@ bool DragForce::Initialize()
             F107ID = atmos->GetParameterID("F107");
             F107AID = atmos->GetParameterID("F107A");
             KPID = atmos->GetParameterID("MagneticIndex");
+            cssiWFileID = atmos->GetParameterID("CSSISpaceWeatherFile");
+            schattenWFileID = atmos->GetParameterID("SchattenFile");
 
-            if (schattenWFile == "" || cssiWFile == "")
+            if (schattenWFile != "" || cssiWFile != "")
             {
                if (F107ID < 0)
                   throw ODEModelException("Atmosphere model initialization is incomplete");
                atmos->SetRealParameter(F107ID, fluxF107);
                atmos->SetRealParameter(F107AID, fluxF107A);
                atmos->SetRealParameter(KPID, kp);
+               atmos->SetStringParameter(cssiWFileID, cssiWFile);
+               atmos->SetStringParameter(schattenWFileID, schattenWFile);
+
             }
 
 			   if (cbFixed != NULL)										// made changes by TUAN NGUYEN
@@ -898,6 +903,7 @@ bool DragForce::Initialize()
 			      atmos->SetStringParameter("InputFile", inputFile);		// made changes by TUAN NGUYEN		for GMT-4299
 			   } 
             catch (...){}
+
 
 			   atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
             
