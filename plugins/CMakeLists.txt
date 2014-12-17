@@ -27,9 +27,18 @@ if (PLUGIN_CINTERFACE)
 endif()
 
 # ====================================================================
-# CInterface Plugin binary
+# DataInterface Plugin binary
 if (PLUGIN_DATAINTERFACE)
   SET(PLUGINDIR "DataInterfacePlugin/src")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
+# DataCallback Plugin binary
+if (PLUGIN_DATACALLBACK)
+  SET(PLUGINDIR "DataCallbackPlugin/src")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
