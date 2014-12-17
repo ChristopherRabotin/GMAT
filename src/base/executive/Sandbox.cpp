@@ -1099,38 +1099,45 @@ void Sandbox::Clear()
    // Delete the all cloned objects
    std::map<std::string, GmatBase *>::iterator omi;
    
-   #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-   MessageInterface::ShowMessage("Sandbox OMI List\n");
-   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
-   {
-      MessageInterface::ShowMessage("   %s", (omi->first).c_str());
-      MessageInterface::ShowMessage(" of type %s\n",
-         (omi->second)->GetTypeName().c_str());
-   }
-   MessageInterface::ShowMessage("Sandbox GOMI List\n");
-   for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
-   {
-      MessageInterface::ShowMessage("   %s", (omi->first).c_str());
-      MessageInterface::ShowMessage(" of type %s\n",
-         (omi->second)->GetTypeName().c_str());
-   }
-   #endif
+   // #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+   // MessageInterface::ShowMessage("Sandbox OMI List\n");
+   // for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   // {
+   //    MessageInterface::ShowMessage("   %s", (omi->first).c_str());
+   //    MessageInterface::ShowMessage(" of type %s\n",
+   //       (omi->second)->GetTypeName().c_str());
+   // }
+   // MessageInterface::ShowMessage("Sandbox GOMI List\n");
+   // for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
+   // {
+   //    MessageInterface::ShowMessage("   %s", (omi->first).c_str());
+   //    MessageInterface::ShowMessage(" of type %s\n",
+   //       (omi->second)->GetTypeName().c_str());
+   // }
+   // #endif
    
    #ifdef DEBUG_SANDBOX_CLEAR
    ShowObjectMap(objectMap, "Sandbox::Clear() clearing objectMap\n");
+   ShowObjectMap(globalObjectMap, "Sandbox::Clear() clearing globalObjectMap\n");
    #endif
    
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
    {
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("Sandbox clearing <%p>'%s'\n", omi->second,
+         MessageInterface::ShowMessage("Sandbox clearing <%p>'%s' from objectMap\n", omi->second,
             (omi->first).c_str());
       #endif
 
+      if (omi->second != NULL)
+      {
       // if object is a SUBSCRIBER, let's unsubscribe it first
       if ((omi->second != NULL) && (omi->second)->GetType() == Gmat::SUBSCRIBER)
          publisher->Unsubscribe((Subscriber*)(omi->second));
       
+      // If not PropSetup since PropSetup::GetOwnedObject() starts from count 1
+      // @note How should we handle this in other object?
+      if ((omi->second)->GetType() != Gmat::PROP_SETUP)
+      {
       // Unsubscribe owned Subscribers too
       Integer count = (omi->second)->GetOwnedObjectCount();
       for (Integer i = 0; i < count; ++i)
@@ -1139,7 +1146,8 @@ void Sandbox::Clear()
             publisher->Unsubscribe((Subscriber*)
                   ((omi->second)->GetOwnedObject(i)));
       }
-
+      }
+      
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
             (omi->second)->GetName().c_str());
@@ -1151,7 +1159,8 @@ void Sandbox::Clear()
       #endif
       delete omi->second;
       omi->second = NULL;
-      //objectMap.erase(omi);
+      }
+      objectMap.erase(omi); //LOJ: uncommented 2014.12.16
    }
    #ifdef DEBUG_SANDBOX_CLEAR
    MessageInterface::ShowMessage
@@ -1161,23 +1170,32 @@ void Sandbox::Clear()
    for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
    {
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("Sandbox clearing <%p>%s\n", omi->second,
-            (omi->first).c_str());
+         MessageInterface::ShowMessage("Sandbox clearing <%p>'%s' from globalObjectMap\n",
+            omi->second, (omi->first).c_str());
       #endif
 
+      if (omi->second != NULL)
+      {
       // if object is a SUBSCRIBER, let's unsubscribe it first
-      if ((omi->second != NULL) && (omi->second)->GetType() == Gmat::SUBSCRIBER)
+      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
          publisher->Unsubscribe((Subscriber*)(omi->second));
       
       // Unsubscribe owned Subscribers too
+      // If not PropSetup since PropSetup::GetOwnedObject() starts from count 1
+      // @note How should we handle this in other object?
+      //if (!((omi->second)->IsOfType(Gmat::PROP_SETUP)))
+      if ((omi->second)->GetType() != Gmat::PROP_SETUP)
+      {
       Integer count = (omi->second)->GetOwnedObjectCount();
+      MessageInterface::ShowMessage("==> ownedObjectCount = %d\n", count);
       for (Integer i = 0; i < count; ++i)
       {
          if ((omi->second)->GetOwnedObject(i)->IsOfType(Gmat::SUBSCRIBER))
             publisher->Unsubscribe((Subscriber*)
                   ((omi->second)->GetOwnedObject(i)));
       }
-
+      }
+      
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("   Deleting <%p>'%s'\n", omi->second,
             (omi->second)->GetName().c_str());
@@ -1189,7 +1207,8 @@ void Sandbox::Clear()
       #endif
       delete omi->second;
       omi->second = NULL;
-      //globalObjectMap.erase(omi);
+      }
+      globalObjectMap.erase(omi);  //LOJ: uncommented 2014.12.16
    }
    
    #ifdef DEBUG_SANDBOX_CLEAR

@@ -288,7 +288,7 @@ bool GmatFunction::Initialize()
          }
          catch (BaseException &e)
          {
-            MessageInterface::ShowMessage(e.GetFullMessage());             
+            MessageInterface::ShowMessage("%s\n", e.GetFullMessage().c_str());             
          }
          #endif
          
@@ -320,8 +320,13 @@ bool GmatFunction::Initialize()
          }
          catch (BaseException &e)
          {
-            MessageInterface::ShowMessage(e.GetFullMessage());             
+            MessageInterface::ShowMessage("%s\n", e.GetFullMessage().c_str());             
          }
+         #endif
+         
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   Adding autoObj <%p>'%s' to objectStore\n", autoObj, autoObjName.c_str());
          #endif
          
          autoObj->SetIsLocal(true);
@@ -422,7 +427,7 @@ bool GmatFunction::Initialize()
    fcsFinalized = false;
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
-      ("GmatFunction::Initialize() exiting for function '%s' with true\n",
+      ("GmatFunction::Initialize() exiting for function '%s' with true\n\n",
        functionName.c_str());
    #endif
    
@@ -568,7 +573,11 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                 e.GetFullMessage());
             //throw;
          }
-         
+
+
+         // Since GmatFunction is parsed in object and command modes,
+         // we may not need this section (LOJ: 2014.12.16)
+         #if 0
          // Let's try initialzing local objects here again (2008.10.14)
          try
          {
@@ -602,6 +611,7 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                 current->GetGeneratingString(Gmat::NO_COMMENTS) + "\", " +
                 e.GetFullMessage());
          }
+         #endif
       }
       
       // If current command is BranchCommand and still executing, continue to next

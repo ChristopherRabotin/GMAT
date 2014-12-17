@@ -10,7 +10,6 @@
 //
 // Author: Waka Waktola
 // Created: 2006/08/25
-// Copyright: (c) 2006 NASA/GSFC. All rights reserved.
 //
 //------------------------------------------------------------------------------
 /**
@@ -35,17 +34,17 @@
 
 //#define DEBUG_READ_FIRST_PASS
 //#define DEBUG_DELAYED_BLOCK
-#define DEBUG_PARSE
-#define DEBUG_PARSE_ASSIGNMENT
+//#define DEBUG_PARSE
+//#define DEBUG_PARSE_ASSIGNMENT
 //#define DEBUG_PARSE_FOOTER
 //#define DEBUG_SET_COMMENTS
 //#define DEBUG_SCRIPT_WRITING
 //#define DEBUG_SCRIPT_WRITING_PARAMETER
 //#define DEBUG_SECTION_DELIMITER
 //#define DEBUG_SCRIPT_WRITING_COMMANDS
-#define DBGLVL_SCRIPT_READING 1
-#define DBGLVL_GMAT_FUNCTION 2
-#define DEBUG_COMMAND_MODE_TOGGLE
+//#define DBGLVL_SCRIPT_READING 1
+//#define DBGLVL_GMAT_FUNCTION 2
+//#define DEBUG_COMMAND_MODE_TOGGLE
 //#define DEBUG_ENCODING_CHAR
 
 
@@ -1832,7 +1831,10 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          
          // If creating insise a function, add it to function object map
          if (currentFunction != NULL)
+         {
+            obj->SetIsLocal(true);
             currentFunction->AddFunctionObject(obj);
+         }
       }
       
       // if not all objectes are created, return false

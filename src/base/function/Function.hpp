@@ -76,13 +76,14 @@ public:
    virtual void         ClearFunctionObjects();
    virtual void         AddFunctionObject(GmatBase *obj);
    virtual GmatBase*    FindFunctionObject(const std::string &name);
+   virtual ObjectMap*   GetFunctionObjectMap();
    
    // methods to set/get the automatic objects
    virtual void         ClearAutomaticObjects();
    virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj,
                                            bool alreadyManaged);
    virtual GmatBase*    FindAutomaticObject(const std::string &name);
-   virtual ObjectMap&   GetAutomaticObjects();
+   virtual ObjectMap*   GetAutomaticObjectMap();
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,

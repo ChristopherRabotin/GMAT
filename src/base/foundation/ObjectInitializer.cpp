@@ -182,7 +182,7 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    #endif
    
    #ifdef DEBUG_OBJECT_MAP
-   ShowObjectMaps("In InitializeObjects");
+   ShowObjectMaps("In ObjectInitializer::InitializeObjects()");
    #endif
    
    // First check for NULL object pointer in the map to avoid crash down the road

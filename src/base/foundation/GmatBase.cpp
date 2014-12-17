@@ -1003,6 +1003,10 @@ Integer GmatBase::GetOwnedObjectCount()
 //---------------------------------------------------------------------------
 GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 {
+   MessageInterface::ShowMessage
+      ("GmatBase::GetOwnedObject() entered, this=<%p>'%s', whichOne = %d\n",
+       this, this->GetName().c_str(), whichOne);
+   
    throw GmatBaseException
       ("No owned objects for this instance \"" + instanceName + "\" of type \"" +
        typeName + "\"");

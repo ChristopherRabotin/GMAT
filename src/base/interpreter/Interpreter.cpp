@@ -48,7 +48,7 @@
 
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
-#define DEBUG_HANDLE_ERROR
+//#define DEBUG_HANDLE_ERROR
 //#define DEBUG_INIT
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_COMMAND_VALIDATION
@@ -58,11 +58,11 @@
 //#define DEBUG_CREATE_CELESTIAL_BODY
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
-#define DEBUG_CREATE_COMMAND
+//#define DEBUG_CREATE_COMMAND
 //#define DEBUG_CREATE_CALL_FUNCTION
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_WRAPPERS
-#define DEBUG_MAKE_ASSIGNMENT
+//#define DEBUG_MAKE_ASSIGNMENT
 //#define DEBUG_ASSEMBLE_COMMAND
 //#define DEBUG_ASSEMBLE_CREATE
 //#define DEBUG_ASSEMBLE_CONDITION
@@ -88,6 +88,9 @@
 //#define DEBUG_AXIS_SYSTEM
 //#define DEBUG_SET_MEASUREMENT_MODEL
 //#define DEBUG_ALL_OBJECTS
+
+// New way of creating objects
+#define __NEW_WAY_OF_CREATE_OBJECT__
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -1059,6 +1062,16 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    
    // Set manage option to Moderator
    theModerator->SetObjectManageOption(manage);
+   // If creating function objects, set function object map to Moderator
+   if (manage == 2)
+   {
+      if (currentFunction == NULL)
+         throw InterpreterException
+            ("Parsing function object but current function pointer is NULL\n");
+      
+      ObjectMap *functionMap = currentFunction->GetFunctionObjectMap();
+      theModerator->SetObjectMap(functionMap);
+   }
    
    //======================================================================
    // This block of code is the future implementation of creating objects
@@ -1097,11 +1110,19 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
             celestialBodyList.end())
       obj = (GmatBase*)theModerator->CreateCelestialBody(type, name);
    
+   // Handle Functions
+   else if (find(functionList.begin(), functionList.end(), type) != 
+            functionList.end())
+      obj = (GmatBase*)theModerator->CreateFunction(type, name, manage);
+   
    // Handle CalculatedPoint
    else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
             calculatedPointList.end())
+   {
+      MessageInterface::ShowMessage
+         ("==> Interpreter::CreateObject() Calling CreateCalculatedPoint()\n");
       obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
-   
+   }
    // Handle Parameters
    else if (find(parameterList.begin(), parameterList.end(), type) != 
             parameterList.end())
@@ -1140,8 +1161,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    if (obj != NULL)
    {
       MessageInterface::ShowMessage
-         ("Interpreter::CreateObject() type=<%s>, name=<%s> successfully created\n",
-          obj->GetTypeName().c_str(), obj->GetName().c_str());
+         ("Interpreter::CreateObject() (new way) obj=<%p>, type=<%s>, name=<%s> "
+          "successfully created\n", obj, obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
    }
    #endif
    
@@ -1220,8 +1242,11 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Creates default Barycenter or LibrationPoint
       else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
                calculatedPointList.end())
+      {
+         MessageInterface::ShowMessage
+            ("==> Interpreter::CreateObject() Calling CreateCalculatedPoint()\n");
          obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
-      
+      }
       // Handle DataFiles
       else if (find(dataFileList.begin(), dataFileList.end(), type) != 
                dataFileList.end())
@@ -1302,8 +1327,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    if (obj != NULL)
    {
       MessageInterface::ShowMessage
-         ("Interpreter::CreateObject() type=<%s>, name=<%s> successfully created\n",
-          obj->GetTypeName().c_str(), obj->GetName().c_str());
+         ("Interpreter::CreateObject() (old way) obj=<%p>, type=<%s>, name=<%s> "
+          "successfully created\n", obj, obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
    }
    #endif
    
@@ -1818,9 +1844,11 @@ GmatBase* Interpreter::FindObject(const char *name, const std::string &ofType)
 GmatBase* Interpreter::FindObject(const std::string &name, 
                                   const std::string &ofType)
 {
+   #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("==> Interpreter::FindObject() entered, name='%s', currentFunction=<%p>\n",
+      ("Interpreter::FindObject() entered, name='%s', currentFunction=<%p>\n",
        name.c_str(), currentFunction);
+   #endif
    
    // If parsing a function, use current function to find an object (LOJ: 2014.12.10)
    if (currentFunction == NULL)
@@ -3893,8 +3921,9 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Interpreter::CreateSystemParameter() entered, str='%s', inFunctionMode=%d\n",
-       str.c_str(), inFunctionMode);
+      ("Interpreter::CreateSystemParameter() entered, str='%s', inFunctionMode=%d\n"
+       "   currentFunction=<%p>'%s'\n", str.c_str(), inFunctionMode, currentFunction,
+       currentFunction ? currentFunction->GetName().c_str() : "NULL");
    #endif
    
    Integer manage = 1;
@@ -3913,6 +3942,11 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
        (param == NULL) ? "NULL" : param->GetName().c_str());
    #endif
+   
+   // Set newly created Parameter inside function to local so it can be
+   // deleted when Function destructor is called (LOJ: 2014.12.17)
+   if (param && inFunctionMode)
+      param->SetIsLocal(true);
    
    return param;
 }
@@ -5018,7 +5052,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage("   '%s' is owned object\n", toProp.c_str());
             #endif
-            toObj->SetStringParameter(toProp, fromObj->GetName());
+            ////toObj->SetStringParameter(toProp, fromObj->GetName()); // LOJ: Commented out 2014.12.16
             toObj->SetRefObject(fromObj, fromObj->GetType(), fromObj->GetName());
             objPropType = toObj->GetPropertyObjectType(toId);
             if (objPropType == Gmat::UNKNOWN_OBJECT || 

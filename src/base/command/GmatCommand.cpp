@@ -2096,6 +2096,11 @@ void GmatCommand::SetRunState(Gmat::RunState newState)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
+   // Do not build summary if inside a function (LOJ: 2014.12.16)
+   if (currentFunction != NULL)
+      return;
+
+   
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
@@ -2291,6 +2296,11 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 {
+   // Do not build summary string if inside a function (LOJ: 2014.12.16)
+   if (currentFunction != NULL)
+      return;
+
+   
    #ifdef DEBUG_COMMAND_SUMMARY_TYPE
       MessageInterface::ShowMessage(
             "   Now entering BuildCommandSummaryString with commandCompleted = %s, summaryForEntireMission = %s, missionPhysicsBasedOnly = %s, for command %s of type %s which is %s a physics-based command.\n",

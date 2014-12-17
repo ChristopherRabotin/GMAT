@@ -81,6 +81,7 @@
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
+//#define DEBUG_CREATE_DEFAULT_RESOURCE
 //#define DEBUG_CREATE_COMMAND 1
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
@@ -101,7 +102,7 @@
 //#define DEBUG_CREATE_VAR 1
 //#define DEBUG_GMAT_FUNCTION 2
 //#define DEBUG_OBJECT_MAP 1
-//#define DEBUG_FIND_OBJECT 1
+//#define DEBUG_FIND_OBJECT 2
 //#define DEBUG_ADD_OBJECT 1
 //#define DEBUG_SOLAR_SYSTEM 1
 //#define DEBUG_SOLAR_SYSTEM_IN_USE 1
@@ -199,7 +200,8 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
 
       // Set trace flag globally
       #ifdef DEBUG_MEMORY
-      MemoryTracker::Instance()->SetShowTrace(false);
+         //MemoryTracker::Instance()->SetShowTrace(false);
+      MemoryTracker::Instance()->SetShowTrace(true);
       #endif
       
       // Create Managers
@@ -2222,8 +2224,13 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
                CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
 
                if (defBc == NULL)
+               {
+                  #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+                  MessageInterface::ShowMessage
+                     ("Moderator::CreateCalculatedPoint() Calling CreateCalculatedPoint()\n");
+                  #endif
                   defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
-
+               }
                obj->SetStringParameter("Secondary", "DefaultBC");
                obj->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");
             #endif
@@ -2236,7 +2243,7 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
             if (sun->GetJ2000Body() == NULL)
                sun->SetJ2000Body(earth);
             
-            #if DEBUG_CREATE_RESOURCE
+            #ifdef DEBUG_CREATE_CALC_POINT
             MessageInterface::ShowMessage
                ("Moderator::Setting sun <%p> and earth <%p> to LibrationPoint %s\n", sun, earth, name.c_str());
             #endif
@@ -2426,8 +2433,9 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateSpacecraft() type = '%s', name = '%s'\n",
-       type.c_str(), name.c_str());
+      ("Moderator::CreateSpacecraft() entered, type = '%s', name = '%s', "
+       "createDefault = %d, objectManageOption = %d\n",
+       type.c_str(), name.c_str(), createDefault, objectManageOption);
    #endif
    
    if (GetSpacecraft(name) == NULL)
@@ -2453,8 +2461,15 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
       // This change was made while looking at Bug 1532 (LOJ: 2009.11.13)
       if (theInternalCoordSystem == NULL)
          CreateInternalCoordSystem();
+      
+      #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateSpacecraft() Calling CreateDefaultCoordSystems() and "
+          "CreateDefaultBarycenter()\n");
+      #endif
+      
+      // Create the default coordinate systems and solar system barycenter
       CreateDefaultCoordSystems();
-      // Create the default Solar System barycenter
       CreateDefaultBarycenter();
       
       if (type == "Spacecraft")
@@ -3847,13 +3862,10 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name)
       }
       
       #ifdef DEBUG_MEMORY
-      if (propSetup)
-      {
-         std::string funcName;
-         funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
-         MemoryTracker::Instance()->Add
-            (propSetup, name, "Moderator::CreatePropSetup()", funcName);
-      }
+      std::string funcName;
+      funcName = currentFunction ? "function: " + currentFunction->GetName() : "";
+      MemoryTracker::Instance()->Add
+         (propSetup, name, "Moderator::CreatePropSetup()", funcName);
       #endif
       
       // PropSetup creates default Integrator(RungeKutta89)
@@ -7265,7 +7277,7 @@ void Moderator::PrepareNextScriptReading(bool clearObjs)
    
    // Need default CS's in case they are used in the script
    #if DEBUG_RUN
-   MessageInterface::ShowMessage(".....Creating Default CoordinateSystem...\n");
+   MessageInterface::ShowMessage(".....Creating Default CoordinateSystem and Barycenter...\n");
    #endif
    CreateDefaultCoordSystems();
    // Create the default Solar System barycenter
@@ -7509,11 +7521,22 @@ void Moderator::CreateInternalCoordSystem()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultCoordSystems()
 {
-   #if DEBUG_INITIALIZE
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage
-      ("Moderator checking if default coordinate systems should be created...\n");
+      ("Moderator::CreateDefaultCoordSystems() checking if default coordinate systems should be created...\n");
    #endif
+
+   // Do not create default barycenter inside a function (LOJ: 2014.12.17)
+   if (currentFunction != NULL)
+   {
+      #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultCoordSystems() just returning, it is inside a function\n");
+      #endif
+      return;
+   }
+   
    
    defaultCoordSystemNames.clear();
    
@@ -7529,14 +7552,14 @@ void Moderator::CreateDefaultCoordSystems()
       {
          eqcs = CreateCoordinateSystem("EarthMJ2000Eq", true);
          
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", eqcs, eqcs->GetName().c_str());
          #endif
       }
       else
       {
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", eqcs, eqcs->GetName().c_str());
          #endif
@@ -7550,7 +7573,7 @@ void Moderator::CreateDefaultCoordSystems()
       if (eccs == NULL)
       {
          eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", eccs, eccs->GetName().c_str());
          #endif
@@ -7573,7 +7596,7 @@ void Moderator::CreateDefaultCoordSystems()
       }
       else
       {
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", eccs, eccs->GetName().c_str());
          #endif
@@ -7587,7 +7610,7 @@ void Moderator::CreateDefaultCoordSystems()
       if (bfcs == NULL)
       {
          bfcs = CreateCoordinateSystem("EarthFixed", false);
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", bfcs, bfcs->GetName().c_str());
          #endif
@@ -7613,7 +7636,7 @@ void Moderator::CreateDefaultCoordSystems()
       }
       else
       {
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", bfcs, bfcs->GetName().c_str());
          #endif
@@ -7627,7 +7650,7 @@ void Moderator::CreateDefaultCoordSystems()
       if (earthICRFcs == NULL)
       {
          earthICRFcs = CreateCoordinateSystem("EarthICRF", false);
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", earthICRFcs, earthICRFcs->GetName().c_str());
          #endif
@@ -7646,14 +7669,14 @@ void Moderator::CreateDefaultCoordSystems()
          // Since CoordinateSystem clones AxisSystem, delete it from here
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Remove
-            (bfecAxis, "localAxes", "Moderator::CreateDefaultCoordSystems()",
+            (icrfAxis, "localAxes", "Moderator::CreateDefaultCoordSystems()",
              "deleting localAxes");
          #endif
          delete icrfAxis;
       }
       else
       {
-         #if DEBUG_INITIALIZE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", earthICRFcs, earthICRFcs->GetName().c_str());
          #endif
@@ -7680,12 +7703,23 @@ void Moderator::CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultBarycenter()
 {
-   #if DEBUG_CREATE_RESOURCE
+   #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
    MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage
-      ("Moderator checking if default barycenter should be created...\n");
+      ("Moderator::CreateDefaultBarycenter() Checking if default barycenter should be created...\n");
    #endif
-
+   
+   // Do not create default barycenter inside a function (LOJ: 2014.12.17)
+   if (currentFunction != NULL)
+   {
+      #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultBarycenter() just returning, it is inside a function\n");
+      #endif
+      return;
+   }
+   
+   
    try
    {
       SolarSystem *ss = GetSolarSystemInUse();
@@ -7694,16 +7728,21 @@ void Moderator::CreateDefaultBarycenter()
       Barycenter *bary = (Barycenter*) GetCalculatedPoint(GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME);
       if (bary == NULL)
       {
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
+         MessageInterface::ShowMessage
+            ("Moderator::CreateDefaultBarycenter() Calling CreateCalculatedPoint()\n");
+         #endif
+         
          bary = (Barycenter*) CreateCalculatedPoint("Barycenter", GmatSolarSystemDefaults::SOLAR_SYSTEM_BARYCENTER_NAME, false);
 
-         #if DEBUG_CREATE_RESOURCE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....created <%p>'%s'\n", bary, bary->GetName().c_str());
          #endif
       }
       else
       {
-         #if DEBUG_CREATE_RESOURCE
+         #ifdef DEBUG_CREATE_DEFAULT_RESOURCE
          MessageInterface::ShowMessage
             (".....found <%p>'%s'\n", bary, bary->GetName().c_str());
          #endif
@@ -8150,6 +8189,10 @@ void Moderator::CreateDefaultMission()
       // Create the default Solar System barycenter
       CreateDefaultBarycenter();
       
+      #if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage("-->default CoordinateSystem and Barycenter created\n");
+      #endif
+      
       // Spacecraft
       Spacecraft *sc = (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
       sc->SetInternalCoordSystem(theInternalCoordSystem);
@@ -8544,8 +8587,8 @@ GmatBase* Moderator::FindObject(const std::string &name)
 {
    #if DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Moderator::FindObject() entered, name='%s', objectMapInUse=<%p>\n",
-       name.c_str(), objectMapInUse);
+      ("Moderator::FindObject() entered, name='%s', objectMapInUse=<%p>, "
+       "objectManageOption=%d\n", name.c_str(), objectMapInUse, objectManageOption);
    #endif
    
    if (name == "")

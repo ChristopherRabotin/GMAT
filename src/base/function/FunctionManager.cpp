@@ -38,16 +38,16 @@
 
 //#define DEBUG_FUNCTION_MANAGER
 //#define DEBUG_FM_SET
-//#define DEBUG_FM_INIT
-//#define DEBUG_FM_REFRESH
+#define DEBUG_FM_INIT
+#define DEBUG_FM_REFRESH
 //#define DEBUG_FM_EVAL
-//#define DEBUG_FM_EXECUTE
+#define DEBUG_FM_EXECUTE
 //#define DEBUG_FM_RESULT
-//#define DEBUG_FM_FINALIZE
+#define DEBUG_FM_FINALIZE
 //#define DEBUG_FM_STACK
-//#define DEBUG_OBJECT_MAP
+#define DEBUG_OBJECT_MAP
 //#define DEBUG_WRAPPERS
-//#define DEBUG_CLEANUP
+#define DEBUG_CLEANUP
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -2268,6 +2268,10 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
 //------------------------------------------------------------------------------
 bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
 {   
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FM::EmptyObjectMap() entered, om = <%p>, mapID = '%s'\n", om, mapID.c_str());
+   #endif
    if (om == NULL)
    {
       #ifdef DEBUG_OBJECT_MAP
@@ -2356,21 +2360,44 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
                (omi->second, (omi->second)->GetName(), "FunctionManager::EmptyObjectMap()",
                 "deleting obj from ObjectMap");
             #endif
+            #ifdef DEBUG_CLEANUP
+            MessageInterface::ShowMessage("   Deleting <%p>'%s' from om\n", omi->second, (omi->first).c_str());
+            #endif
             delete omi->second;
             omi->second = NULL;
          }
       }
-      toDelete.push_back(omi->first); 
+      
+      if (omi->second != NULL)
+      {
+         #ifdef DEBUG_CLEANUP
+         MessageInterface::ShowMessage("   Adding <%p>'%s' to toDelete\n", omi->second, (omi->first).c_str());
+         #endif
+         toDelete.push_back(omi->first);
+      }
    }
+   #ifdef DEBUG_CLEANUP
+   MessageInterface::ShowMessage("   Before deleting from toDelete.size() = %d\n", toDelete.size());
+   #endif
    for (unsigned int kk = 0; kk < toDelete.size(); kk++)
    {
+      omi = om->find(toDelete.at(kk));
       #ifdef DEBUG_CLEANUP
       MessageInterface::ShowMessage
-         ("   Erasing element with name '%s'\n", (toDelete.at(kk)).c_str());
+         ("   Erasing <%p> object with name '%s'\n", omi->second, (omi->first).c_str());
+      //   ("   Erasing <%p> object with name '%s'\n", omi->second, (toDelete.at(kk)).c_str());
       #endif
-      om->erase(toDelete.at(kk));
+      //om->erase(toDelete.at(kk));
+      delete omi->second;
    }
+   #ifdef DEBUG_CLEANUP
+   MessageInterface::ShowMessage("   After deleting from toDelete.size() = %d\n", toDelete.size());
+   #endif
    om->clear();
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FM::EmptyObjectMap() returning true, om = <%p>, mapID = '%s'\n", om, mapID.c_str());
+   #endif
    return true;
 }
 
