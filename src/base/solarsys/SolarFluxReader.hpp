@@ -31,12 +31,15 @@
 #include <sstream>
 #include "DateUtil.hpp"
 #include "GmatConstants.hpp"
+#include "GmatBase.hpp"
 
-class GMAT_API SolarFluxReader
+class GMAT_API SolarFluxReader /*: public GmatBase*/
 {
 
 public:
    SolarFluxReader();
+   SolarFluxReader(const SolarFluxReader &sfr);
+   SolarFluxReader& operator=(const SolarFluxReader &sfr);
    ~SolarFluxReader(); 
    
    typedef struct FluxDataCSSI
@@ -65,8 +68,8 @@ public:
    };
   
 private:
-   const char *beg_ObsTag;
-   const char *end_ObsTag;
+   const char * beg_ObsTag;
+   const char * end_ObsTag;
    /// offset required to start reading observation (BEGIN OBSERVED) tag
    std::streamoff begObs;
    /// offset required to stop reading observation (END OBSERVED) tag
@@ -74,7 +77,7 @@ private:
    /// offset required to start reading Schatten data
    std::streamoff begData;
    /// each line in the file
-   char *line; 
+   char * line; 
 
    std::string obsFileName;
    std::string predictFileName;

@@ -46,7 +46,9 @@ AtmosphereModel::PARAMETER_TEXT[AtmosphereModelParamCount-GmatBaseParamCount] =
 {
    "F107",
    "F107A",
-   "MagneticIndex"                  // In GMAT, the "published" value is K_p.
+   "MagneticIndex",                  // In GMAT, the "published" value is K_p.
+   "CSSISpaceWeatherFile",
+   "SchattenFile"
 };
 
 const Gmat::ParameterType
@@ -54,7 +56,9 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::REAL_TYPE
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE
 };
 
 //------------------------------------------------------------------------------
@@ -69,7 +73,7 @@ AtmosphereModel::PARAMETER_TYPE[AtmosphereModelParamCount-GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &name) :
    GmatBase             (Gmat::ATMOSPHERE, typeStr, name),
-   fileReader           (NULL),
+   fluxReader           (NULL),
    solarSystem          (NULL),
    mCentralBody         (NULL),
    obsFileName          (""),        // Set to a default when working
@@ -107,7 +111,7 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    angVel[1]      = 0.0;
    angVel[2]      = 7.29211585530e-5;
 
-   fileReader = new SolarFluxReader();
+ //  fluxReader = new SolarFluxReader();
 
    #ifdef CHECK_KP2AP
       MessageInterface::ShowMessage("K_p to A_p conversions:\n");
@@ -126,7 +130,11 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
 //------------------------------------------------------------------------------
 AtmosphereModel::~AtmosphereModel()
 {
-   delete fileReader;
+   if(fluxReader != NULL)
+   {
+      delete fluxReader;
+      fluxReader = NULL;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -140,7 +148,6 @@ AtmosphereModel::~AtmosphereModel()
 //------------------------------------------------------------------------------
 AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    GmatBase             (am),
-   fileReader           (NULL),
    solarSystem          (am.solarSystem),
    mCentralBody         (am.mCentralBody),
    obsFileName          (am.obsFileName),
@@ -148,6 +155,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    sunVector            (NULL),
    centralBody          (am.centralBody),
    centralBodyLocation  (NULL),
+   fluxReader           (NULL),
    cbRadius             (am.cbRadius),
    cbFlattening         (am.cbFlattening),
    nominalF107          (am.nominalF107),
@@ -168,6 +176,11 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
 {
    parameterCount = AtmosphereModelParamCount;
    nominalAp = ConvertKpToAp(nominalKp);
+/*   if(am.fluxReader != NULL)
+   {
+      fluxReader = new SolarFluxReader();
+    
+   }*/
 }
 
 //------------------------------------------------------------------------------
@@ -188,7 +201,6 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
         
    GmatBase::operator=(am);
    
-   fileReader           = NULL;
    solarSystem          = am.solarSystem;
    mCentralBody         = am.mCentralBody;
    obsFileName          = am.obsFileName;
@@ -196,6 +208,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    sunVector            = NULL;
    centralBody          = am.centralBody;
    centralBodyLocation  = NULL;
+   fluxReader           = NULL;
    cbRadius             = am.cbRadius;
    cbFlattening         = am.cbFlattening;
    nominalF107          = am.nominalF107;
@@ -217,6 +230,16 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
 
    return *this;
 }
+
+
+bool AtmosphereModel::Initialize()
+{
+   fluxReader = new SolarFluxReader();
+
+   return true;
+
+}
+
 
 //------------------------------------------------------------------------------
 //  void SetSunVector(Real *sv)
@@ -766,7 +789,8 @@ bool AtmosphereModel::IsParameterReadOnly(const Integer id) const
    // Since these parameters are handled in the DragForce, make them
    // read only 
    if ((id == NOMINAL_FLUX) || (id == NOMINAL_AVERAGE_FLUX) ||
-       (id == NOMINAL_MAGNETIC_INDEX))
+       (id == NOMINAL_MAGNETIC_INDEX) || (id == SCHATTEN_WEATHER_FILE) ||
+       (id == CSSI_WEATHER_FILE) )
       return true;
    
    return GmatBase::IsParameterReadOnly(id);
@@ -929,6 +953,31 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
    /// @todo Throw exceptions when the values are unphysical here.
 
    return GmatBase::SetRealParameter(id, value);
+}
+
+
+bool AtmosphereModel::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == CSSI_WEATHER_FILE)
+   {
+      if (value != "")
+         obsFileName = value;
+      return true;
+   }
+
+   if (id == SCHATTEN_WEATHER_FILE)
+   {
+      if (value != "")
+         predictFileName = value;
+      return true;
+   }
+
+   return GmatBase::SetStringParameter(id, value);
+}
+
+bool AtmosphereModel::SetStringParameter(const std::string &label, const std::string &value)
+{
+   return GmatBase::SetStringParameter(label, value);
 }
 
 

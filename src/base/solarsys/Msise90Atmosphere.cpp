@@ -377,7 +377,7 @@ void Msise90Atmosphere::GetInputs(Real epoch)
 
    if (epoch)
    {
-      fileReader->GetInputs(epoch);
+      fluxReader->GetInputs(epoch);
    }
    else
    {

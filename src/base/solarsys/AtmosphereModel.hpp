@@ -68,6 +68,7 @@ public:
    virtual bool Density(Real *position, Real *density, Real epoch = GmatTimeConstants::MJD_OF_J2000,
                         Integer count = 1) = 0;
 
+   virtual bool Initialize();
    void         SetSunVector(Real *sv);
    void         SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
@@ -111,14 +112,20 @@ public:
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
+
+   virtual bool SetStringParameter(const Integer id,
+                                          const std::string &value);
+
+   virtual bool SetStringParameter(const std::string &label,
+                                  const std::string &value);
  
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   /// Solar flux binary file reader
-   SolarFluxReader         *fileReader;
+   /// Solar flux file reader
+   SolarFluxReader         *fluxReader;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
@@ -188,6 +195,8 @@ protected:
       NOMINAL_FLUX = GmatBaseParamCount,
       NOMINAL_AVERAGE_FLUX,
       NOMINAL_MAGNETIC_INDEX,
+      CSSI_WEATHER_FILE,
+      SCHATTEN_WEATHER_FILE,
       AtmosphereModelParamCount
    };
    

@@ -46,8 +46,11 @@ SolarFluxReader::SolarFluxReader():
 
    beg_ObsTag = "BEGIN OBSERVED";
    end_ObsTag = "END OBSERVED";
-   begObs = endObs = -1;
-   line = new char[256];;
+   begObs = endObs = begData = -1;
+   
+   line = new char[256];
+   memset(line, 0, 256);
+   
 }
 
 
@@ -60,8 +63,55 @@ SolarFluxReader::SolarFluxReader():
 //------------------------------------------------------------------------------
 SolarFluxReader::~SolarFluxReader(void)
 {
-   delete[] line;
+   obsFluxData.clear();
+   predictFluxData.clear();
+   begObs = endObs = begData = -1;
+   beg_ObsTag = end_ObsTag = "";
+   obsFileName = predictFileName = "";
+   delete [] line;
 }
+
+
+SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
+{
+   obsFileName = sfr.obsFileName;
+   predictFileName = sfr.predictFileName;
+   obsFluxData = sfr.obsFluxData;
+   predictFluxData = sfr.predictFluxData;
+   beg_ObsTag = sfr.beg_ObsTag;
+   end_ObsTag = sfr.end_ObsTag;
+   begObs = sfr.begObs;
+   endObs = sfr.endObs;
+   begData = sfr.begData;
+   line = sfr.line;
+
+   if(sfr.line != NULL)
+   {
+      line = new char[256];
+      strcpy(line, sfr.line);
+   }
+}
+
+
+SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
+{
+   if(this == &sfr)
+      return *this;
+
+   obsFileName = sfr.obsFileName;
+   predictFileName = sfr.predictFileName;
+   obsFluxData = sfr.obsFluxData;
+   predictFluxData = sfr.predictFluxData;
+   beg_ObsTag = sfr.beg_ObsTag;
+   end_ObsTag = sfr.end_ObsTag;
+   begObs = sfr.begObs;
+   endObs = sfr.endObs;
+   begData = sfr.begData;
+   line = sfr.line;
+
+   return *this;
+}
+
 
 //------------------------------------------------------------------------------
 // SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=()
@@ -190,8 +240,9 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFileName, const std::st
          {
             inPredict.getline(line, 256, '\n');
             inPredict.getline(line, 256, '\n');
+           
             begData = inPredict.tellg();
-
+           
             break;
          }
       }
@@ -308,7 +359,7 @@ bool SolarFluxReader::LoadPredictData()
       inPredict.getline(line, 256, '\n');
       //last line in file may or may not have "END DATA" tag,
       // if it has, break 
-      if(strcmp(line, "END DATA") == 0)
+      if(strcmp(line, "END_DATA ") == 0)
          break;
 
       std::istringstream buf(line);
