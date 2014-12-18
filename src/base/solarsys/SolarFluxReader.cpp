@@ -72,6 +72,13 @@ SolarFluxReader::~SolarFluxReader(void)
 }
 
 
+//------------------------------------------------------------------------------
+// SolarFluxReader(const SolarFluxReader &)
+//------------------------------------------------------------------------------
+/**
+ * copy constructor
+ */
+//------------------------------------------------------------------------------
 SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
 {
    obsFileName = sfr.obsFileName;
@@ -93,6 +100,13 @@ SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
 }
 
 
+//------------------------------------------------------------------------------
+// SolarFluxReader& SolarFluxReader::operator=()
+//------------------------------------------------------------------------------
+/**
+ * assignment operator
+ */
+//------------------------------------------------------------------------------
 SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
 {
    if(this == &sfr)
