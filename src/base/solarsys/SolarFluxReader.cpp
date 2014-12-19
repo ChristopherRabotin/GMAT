@@ -337,6 +337,7 @@ bool SolarFluxReader::LoadObsData()
       fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
       fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
       fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
+      fD.index = -1;
 
       obsFluxData.push_back(fD);
 
@@ -394,13 +395,14 @@ bool SolarFluxReader::LoadPredictData()
       for (Integer l=0; l<3; l++)
          fD.F107a[l+6] = atof(tokens[l+10].c_str());
       fD.apSchatten[2] = atof(tokens[13].c_str());
-     
+      fD.index = -1;
+
       predictFluxData.push_back(fD);
 
    }
 
    std::vector<FluxData>::iterator it = predictFluxData.begin();
-   it->index = 0;
+   
    for ( it = it+1; it != predictFluxData.end(); it++)
    {
       it->index = (Integer) (it->epoch - (it-1)->epoch);
