@@ -375,13 +375,14 @@ void Msise90Atmosphere::GetInputs(Real epoch)
 
    yd = year * 1000 + doy;
 
-   if (epoch)
+   if (!fluxReaderLoaded)
    {
-      bool ret = fluxReader->LoadFluxData(obsFileName, predictFileName);
-      if (ret)
-      {
-         fluxReader->GetInputs(epoch);
-      }
+      fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
+   }
+
+   if (fluxReaderLoaded)
+   {
+      fluxReader->GetInputs(epoch);
    }
    else
    {

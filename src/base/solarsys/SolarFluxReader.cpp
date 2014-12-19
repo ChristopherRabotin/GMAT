@@ -92,7 +92,7 @@ SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
    begData = sfr.begData;
    line = sfr.line;
 
-   if(sfr.line != NULL)
+   if (sfr.line != NULL)
    {
       line = new char[256];
       strcpy(line, sfr.line);
@@ -101,7 +101,7 @@ SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
 
 
 //------------------------------------------------------------------------------
-// SolarFluxReader& SolarFluxReader::operator=()
+// SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader& sfr)
 //------------------------------------------------------------------------------
 /**
  * assignment operator
@@ -109,7 +109,7 @@ SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
 //------------------------------------------------------------------------------
 SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
 {
-   if(this == &sfr)
+   if (this == &sfr)
       return *this;
 
    obsFileName = sfr.obsFileName;

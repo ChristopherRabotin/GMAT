@@ -78,6 +78,7 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    mCentralBody         (NULL),
    obsFileName          (""),        // Set to a default when working
    predictFileName      (""),
+   fluxReaderLoaded     (false),
    sunVector            (NULL),
    centralBody          ("Earth"),
    centralBodyLocation  (NULL),
@@ -152,6 +153,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    mCentralBody         (am.mCentralBody),
    obsFileName          (am.obsFileName),
    predictFileName      (am.predictFileName),
+   fluxReaderLoaded     (am.fluxReaderLoaded),
    sunVector            (NULL),
    centralBody          (am.centralBody),
    centralBodyLocation  (NULL),
@@ -205,6 +207,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    mCentralBody         = am.mCentralBody;
    obsFileName          = am.obsFileName;
    predictFileName      = am.predictFileName;
+   fluxReaderLoaded     = am.fluxReaderLoaded;
    sunVector            = NULL;
    centralBody          = am.centralBody;
    centralBodyLocation  = NULL;
@@ -231,6 +234,18 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+// bool AtmosphereModel::Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Initialize()
+ * 
+ * @param None
+ * 
+ * @return true
+ */
+//------------------------------------------------------------------------------
 
 bool AtmosphereModel::Initialize()
 {

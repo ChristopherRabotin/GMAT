@@ -446,9 +446,12 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    Real density, temperature, t_500, sun_dec, geo_lat;
    
    // Read F10.7 and F10.7a to calculate the geo.xtemp
-   bool ret = fluxReader->LoadFluxData(obsFileName, predictFileName);
+   if (!fluxReaderLoaded)
+   {
+      fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
+   }
 
-   if (ret)
+   if (fluxReaderLoaded)
    {
       SolarFluxReader::FluxData fD = fluxReader->GetInputs(a1_time);
    //Observed

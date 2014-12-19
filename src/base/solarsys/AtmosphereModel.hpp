@@ -144,7 +144,9 @@ protected:
    Real                    cbRadius;
    /// Central body flattening factor
    Real                    cbFlattening;
-    
+   /// SolarFlux files are loaded ?
+   bool fluxReaderLoaded;
+
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
    Real                    nominalF107;
