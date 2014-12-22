@@ -102,35 +102,35 @@ extern "C"
    //------------------------------------------------------------------------------
    int SetCallback(const char* subscriberName, void (*CBFcn)(const double*, int, void*), void* userData)
    {
-     int retval = -1;
-
+     // Get GMAT moderator
      Moderator *theModerator = Moderator::Instance();
      if (theModerator == NULL)
      {
        lastMsg = "Cannot find the Moderator";
-       return retval;
+       return -1;
      }
 
+     // Get subscriber with specified name
      Subscriber *sub = theModerator->GetSubscriber(subscriberName);
      if(sub == NULL)
      {
        lastMsg = "Subscriber not found";
-       return retval;
+       return -2;
      }
 
+     // Make sure subscriber is a DataCallback (so callback can be set)
      DataCallback *dc = dynamic_cast<DataCallback*>(sub);
      if(dc == NULL)
      {
        lastMsg = "Subscriber is not a data callback";
-       return retval;
+       return -3;
      }
 
+     // Set callback function
      dc->SetCallback(CBFcn, userData);
 
-     retval = 0;
      lastMsg = "Callback successfully set";
-
-     return retval;
+     return 0;
    }
 
    //---------------------------------------------------------------------------
