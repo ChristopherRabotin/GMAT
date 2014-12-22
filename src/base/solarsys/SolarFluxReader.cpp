@@ -176,11 +176,11 @@ bool SolarFluxReader::Open()
 {
    if (!obsFileName.empty())
    {
-      inObs.open(obsFileName, std::ios_base::in);
+      inObs.open(obsFileName.c_str(), std::ios_base::in);
    }
    if (!predictFileName.empty())
    {
-      inPredict.open(predictFileName, std::ios_base::in);
+      inPredict.open(predictFileName.c_str(), std::ios_base::in);
    }
 
    return true;
