@@ -380,7 +380,7 @@ void Msise90Atmosphere::GetInputs(Real epoch)
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
    }
 
-   if (fluxReaderLoaded)
+   if (fluxReaderLoaded && epoch > 0.0)
    {
       fluxReader->GetInputs(epoch);
    }

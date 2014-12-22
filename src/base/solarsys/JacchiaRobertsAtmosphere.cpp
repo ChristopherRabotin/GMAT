@@ -451,7 +451,7 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
    }
 
-   if (fluxReaderLoaded)
+   if (fluxReaderLoaded && a1_time > 0.0)
    {
       SolarFluxReader::FluxData fD = fluxReader->GetInputs(a1_time);
    //Observed
