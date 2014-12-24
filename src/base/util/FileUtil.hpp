@@ -36,18 +36,25 @@ namespace GmatFileUtil
    bool        GMAT_API SetCurrentWorkingDirectory(const std::string &newDir);
    std::string GMAT_API GetApplicationPath();
    std::string GMAT_API ParseFirstPathName(const std::string &fullPath, bool appendSep = true);
+   std::string GMAT_API ParsePathName(const char *fullPath, bool appendSep = true);
    std::string GMAT_API ParsePathName(const std::string &fullPath, bool appendSep = true);
+   std::string GMAT_API ParseFileName(const char *fullPath, bool removeExt = false);
    std::string GMAT_API ParseFileName(const std::string &fullPath, bool removeExt = false);
+   std::string GMAT_API ParseFileExtension(const char *fullPath, bool prependDot = false);
    std::string GMAT_API ParseFileExtension(const std::string &fullPath, bool prependDot = false);
    std::string GMAT_API GetInvalidFileNameMessage(Integer option = 1);
    
    bool GMAT_API IsOsWindows();
+   bool GMAT_API IsPathRelative(const char *fullPath);
    bool GMAT_API IsPathRelative(const std::string &fullPath);
    bool GMAT_API IsPathAbsolute(const std::string &fullPath);
    bool GMAT_API HasNoPath(const std::string &fullPath);
    bool GMAT_API IsValidFileName(const std::string &fname, bool isBlankOk = true);
+   bool GMAT_API IsSameFileName(const char *fname1, const char *fname2);
    bool GMAT_API IsSameFileName(const std::string &fname1, const std::string &fname2);
+   bool GMAT_API DoesDirectoryExist(const char *dirPath, bool isBlankOk = true);
    bool GMAT_API DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);
+   bool GMAT_API DoesFileExist(const char* filename);
    bool GMAT_API DoesFileExist(const std::string &filename);
    bool GMAT_API GetLine(std::istream *inStream, std::string &line);
    bool GMAT_API IsAppInstalled(const std::string &appName, std::string &appLoc);
@@ -76,6 +83,14 @@ namespace GmatFileUtil
                            Real tol = COMPARE_TOLERANCE);
    
    StringArray GMAT_API &CompareTextLines(Integer numDirsToCompare,
+                           const char *basefilename,
+                           const char *filename1,
+                           const char *filename2,
+                           const char *filename3,
+                           int &file1DiffCount, int &file2DiffCount,
+                           int &file3DiffCount);
+   
+   StringArray GMAT_API &CompareTextLines(Integer numDirsToCompare,
                            const std::string &basefilename,
                            const std::string &filename1,
                            const std::string &filename2,
@@ -84,12 +99,27 @@ namespace GmatFileUtil
                            int &file3DiffCount);
    
    StringArray GMAT_API &CompareNumericLines(Integer numDirsToCompare,
+                           const char *basefilename,
+                           const char *filename1,
+                           const char *filename2,
+                           const char *filename3,
+                           int &file1DiffCount, int &file2DiffCount,
+                           int &file3DiffCount, Real tol = COMPARE_TOLERANCE);
+   
+   StringArray GMAT_API &CompareNumericLines(Integer numDirsToCompare,
                            const std::string &basefilename,
                            const std::string &filename1,
                            const std::string &filename2,
                            const std::string &filename3,
                            int &file1DiffCount, int &file2DiffCount,
                            int &file3DiffCount, Real tol = COMPARE_TOLERANCE);
+   
+   StringArray GMAT_API &CompareNumericColumns(Integer numDirsToCompare,
+                           const char *basefilename,
+                           const char *filename1,
+                           const char *filename2,
+                           const char *filename3,
+                           Real tol = COMPARE_TOLERANCE);
    
    StringArray GMAT_API &CompareNumericColumns(Integer numDirsToCompare,
                            const std::string &basefilename,

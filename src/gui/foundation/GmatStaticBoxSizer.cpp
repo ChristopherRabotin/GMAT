@@ -36,34 +36,32 @@
  *
  */
 //------------------------------------------------------------------------------
-#ifdef __WXMAC__
-GmatStaticBoxSizer::GmatStaticBoxSizer(int orient, wxWindow *parent,
-                                       const wxString& label, long style)
-   : wxBoxSizer(orient)
-{
-//   wxStaticText *labelText =
-   labelText =
-      new wxStaticText(parent, -1, label, wxDefaultPosition, wxSize(220,20), style);
-   labelText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                             false, _T(""), wxFONTENCODING_SYSTEM));
-   Add(labelText);
-}
+#if wxCHECK_VERSION(3, 0, 0) || !defined( __WXMAC__)
+   GmatStaticBoxSizer::GmatStaticBoxSizer(int orient, wxWindow *parent,
+                                          const wxString& label, long style)
+      : wxStaticBoxSizer(orient, parent, label)
+   {
+   }
 
-void GmatStaticBoxSizer::SetLabel(const wxString& label)
-{
-   labelText->SetLabel(label);
-}
-
+   void GmatStaticBoxSizer::SetLabel(const wxString& label)
+   {
+      GetStaticBox()->SetLabel(label);
+   }
 #else
-GmatStaticBoxSizer::GmatStaticBoxSizer(int orient, wxWindow *parent,
-                                       const wxString& label, long style)
-   : wxStaticBoxSizer(orient, parent, label)
-{
-}
+   GmatStaticBoxSizer::GmatStaticBoxSizer(int orient, wxWindow *parent,
+                                          const wxString& label, long style)
+      : wxBoxSizer(orient)
+   {
+      labelText =
+         new wxStaticText(parent, -1, label, wxDefaultPosition, wxSize(220,20), style);
+      labelText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+                                false, _T(""), wxFONTENCODING_SYSTEM));
+      Add(labelText);
+   }
 
-void GmatStaticBoxSizer::SetLabel(const wxString& label)
-{
-   GetStaticBox()->SetLabel(label);
-}
-
+   void GmatStaticBoxSizer::SetLabel(const wxString& label)
+   {
+      labelText->SetLabel(label);
+   }
 #endif
+

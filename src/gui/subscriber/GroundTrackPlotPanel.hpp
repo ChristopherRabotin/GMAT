@@ -53,6 +53,8 @@ protected:
    bool mHasCentralBodyChanged;
    bool mHasTextureMapChanged;
 
+   wxString mCentralBody;
+   wxString mTextureFile;
    
    #ifdef __USE_COLOR_FROM_SUBSCRIBER__
    bool mHasOrbitColorChanged;

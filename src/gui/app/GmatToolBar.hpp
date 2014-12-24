@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2008/11/13
 /**
@@ -20,7 +18,7 @@
 #define GmatToolBar_hpp
 
 #include "gmatwxdefs.hpp"
-#include "GmatTreeItemData.hpp"  // for GmatTree::
+//#include "GmatTreeItemData.hpp"  // for GmatTree::
 
 class GmatToolBar : public wxToolBar
 {

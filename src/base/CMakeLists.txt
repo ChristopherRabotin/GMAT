@@ -467,6 +467,7 @@ SET(BASE_SRCS
     spacecraft/TextTrajectoryFile.cpp
     stopcond/StopCondition.cpp
     subscriber/EphemerisFile.cpp
+    subscriber/EphemManager.cpp
     subscriber/MessageWindow.cpp
     subscriber/TextEphemFile.cpp
     subscriber/OrbitView.cpp

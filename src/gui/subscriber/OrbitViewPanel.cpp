@@ -302,8 +302,8 @@ void OrbitViewPanel::Create()
    plotOptionSizer->Add(starOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxStaticText *numPointsToRedrawLabel1 =
-      new wxStaticText(this, -1, wxT("Number of points to redraw\n"
-                                     "(Enter 0 to redraw whole plot)"),
+      new wxStaticText(this, -1, gmatwxT("Number of points to redraw\n"
+                                         "(Enter 0 to redraw whole plot)"),
                        wxDefaultPosition, wxSize(-1, 30), 0);
    mNumPointsToRedrawTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -431,7 +431,7 @@ void OrbitViewPanel::Create()
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1), NULL, wxCB_READONLY);
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1), emptyList, wxCB_READONLY);
    
    // Get Solver Iteration option list from the Subscriber
    const std::string *solverIterList = Subscriber::GetSolverIterOptionList();
@@ -1622,7 +1622,7 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          // Add to excluded list
          mExcludedScList.Add(str);
          
-         mDrawObjectMap[str.c_str()] = true;
+         mDrawObjectMap[str.WX_TO_STD_STRING] = true;
          ShowSpacePointOption(str, true);
          mHasSpChanged = true;
          EnableUpdate(true);
@@ -1661,7 +1661,7 @@ void OrbitViewPanel::OnAddSpacePoint(wxCommandEvent& event)
          // Add to excluded list
          mExcludedCelesPointList.Add(str);
          
-         mDrawObjectMap[str.c_str()] = true;
+         mDrawObjectMap[str.WX_TO_STD_STRING] = true;
          ShowSpacePointOption(str, true, false);
          
          mHasSpChanged = true;

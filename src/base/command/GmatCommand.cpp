@@ -855,6 +855,20 @@ void GmatCommand::SetupSummary(const std::string &csName, bool entireMission,
 }
 
 //------------------------------------------------------------------------------
+// void SetSummaryName(const char *sumName)
+//------------------------------------------------------------------------------
+/**
+ * Sets the name of the command summary
+ *
+ * @param sumName The name
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetSummaryName(const char *sumName)
+{
+   SetSummaryName(std::string(sumName));
+}
+
+//------------------------------------------------------------------------------
 // void SetSummaryName(const std::string &sumName)
 //------------------------------------------------------------------------------
 /**
@@ -1334,6 +1348,25 @@ std::string GmatCommand::GetStringParameter(const std::string &label,
                                             const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value New value for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const std::string &label, 
+                                     const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 

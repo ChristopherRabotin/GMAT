@@ -349,9 +349,9 @@ void ScriptPanel::OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ScriptPanel::OnTextOverMaxLen(wxCommandEvent& event)
 {
-   wxMessageBox(wxT("Text control is already filled up to the maximum length.\n"
-                    "The extra input will be discarded."),
-                wxT("GMAT Warning"));
+   wxMessageBox("Text control is already filled up to the maximum length.\n"
+                "The extra input will be discarded.",
+                "GMAT Warning");
 }
 
 

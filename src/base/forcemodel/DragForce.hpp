@@ -86,7 +86,11 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, 
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
    virtual Integer      GetIntegerParameter(const Integer id) const;

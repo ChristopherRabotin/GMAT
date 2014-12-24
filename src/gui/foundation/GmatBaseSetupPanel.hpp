@@ -28,6 +28,7 @@
 
 typedef std::map<wxString, wxSizer*> SizerMapType;
 typedef std::map<wxString, int> SizerSizeType;
+typedef std::map<wxObject *, std::string> idInfoMapType;
 
 /**
  * Generic configuration panel for GmatBase derived objects
@@ -122,6 +123,8 @@ protected:
    std::map<wxString, wxCheckListBox*>  managedCheckListBoxMap;
    /// Number assigned to constructed wxCheckListBoxes
    Integer clbNumber;
+   /// map IDs to string (used for dialog wildcard)
+   idInfoMapType idInfoMap;
    
    /// IDs used for event management
    enum

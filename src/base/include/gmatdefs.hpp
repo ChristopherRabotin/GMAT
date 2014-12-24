@@ -180,6 +180,10 @@ namespace Gmat
       CHEMICAL_FUEL_TANK,
       ELECTRIC_FUEL_TANK,
 
+      POWER_SYSTEM,        // for PowerSystems
+      SOLAR_POWER_SYSTEM,
+      NUCLEAR_POWER_SYSTEM,
+
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,
@@ -208,10 +212,6 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
-      POWER_SYSTEM,        // for PowerSystems
-      SOLAR_POWER_SYSTEM,
-      NUCLEAR_POWER_SYSTEM,
-
       UNKNOWN_OBJECT
    };
 

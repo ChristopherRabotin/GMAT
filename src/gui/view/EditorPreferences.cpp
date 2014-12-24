@@ -364,7 +364,11 @@ const GmatEditor::LanguageInfoType GmatEditor::globalLanguagePrefs [] =
    //======================================================================
    // * (any)
    //======================================================================
+   #ifdef _UNICODE
+   {(wxChar *)(wxString(DEFAULT_LANGUAGE).wc_str()),
+   #else
    {(wxChar *)DEFAULT_LANGUAGE,
+   #endif
     _T("*.*"),
     wxSTC_LEX_PROPERTIES,
     {{GMAT_STC_TYPE_DEFAULT, NULL},

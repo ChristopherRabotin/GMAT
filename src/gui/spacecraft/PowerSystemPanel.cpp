@@ -108,7 +108,7 @@ void PowerSystemPanel::Create()
 
    // label for power system
    wxStaticText *powerSystemStaticText = new wxStaticText( this, ID_TEXT,
-      wxT(""GUI_ACCEL_KEY"Power System"), wxDefaultPosition, wxDefaultSize, 0 );
+      ""GUI_ACCEL_KEY"Power System", wxDefaultPosition, wxDefaultSize, 0 );
 
    int pwrSysWidth = 170;
    #ifdef __WXMAC__
@@ -141,7 +141,7 @@ void PowerSystemPanel::LoadData()
    try
    {
       std::string pwrSys = theSpacecraft->GetStringParameter("PowerSystem");
-      powerSystemComboBox->SetValue(wxT(pwrSys.c_str()));
+      powerSystemComboBox->SetValue(wxString(pwrSys.c_str()));
    }
    catch (BaseException &e)
    {
@@ -208,7 +208,7 @@ void PowerSystemPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == powerSystemComboBox)
    {
-      std::string pwrSysStr  = powerSystemComboBox->GetValue().c_str();
+      std::string pwrSysStr  = powerSystemComboBox->GetValue().WX_TO_STD_STRING;
       #ifdef DEBUG_POWER_SYSTEM_PANEL_COMBOBOX
       MessageInterface::ShowMessage
          ("PowerSystemPanel::OnComboBoxChange() pwrSysStr=%s\n",

@@ -134,7 +134,9 @@ void SolverVariablesPanel::Setup( wxWindow *parent)
     };
     
     // wxComboBox
-    solverComboBox = new wxComboBox( parent, ID_COMBO, wxT(strArray1[0]), wxDefaultPosition, wxSize(200,-1), 0, strArray1, wxCB_DROPDOWN|wxCB_READONLY );
+    solverComboBox =
+       new wxComboBox( parent, ID_COMBO, strArray1[0], wxDefaultPosition,
+                       wxSize(200,-1), 0, strArray1, wxCB_DROPDOWN|wxCB_READONLY );
     
     // wxButton
     editButton = new wxButton( parent, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0 );

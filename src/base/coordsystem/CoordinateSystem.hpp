@@ -148,6 +148,8 @@ public:
    virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
    virtual bool         SetStringParameter(const std::string &label, 
+                                           const char *value);
+   virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
    virtual bool         GetBooleanParameter(const Integer id) const; 
    virtual bool         GetBooleanParameter(const std::string &label) const; 
@@ -165,6 +167,8 @@ public:
                         GetRefObjectTypeArray();
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const char *name = "");
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
    

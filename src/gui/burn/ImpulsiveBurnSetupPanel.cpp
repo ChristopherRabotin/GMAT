@@ -87,9 +87,9 @@ void ImpulsiveBurnSetupPanel::Create()
    //-----------------------------------------------------------------
    // thrust vector items
    //-----------------------------------------------------------------
-   XLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"1"));
-   YLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"2"));
-   ZLabel->SetLabel(wxT("Element"GUI_ACCEL_KEY"3"));
+   XLabel->SetLabel("Element"GUI_ACCEL_KEY"1");
+   YLabel->SetLabel("Element"GUI_ACCEL_KEY"2");
+   ZLabel->SetLabel("Element"GUI_ACCEL_KEY"3");
    XUnitLabel->SetLabel(wxT("km/s"));
    YUnitLabel->SetLabel(wxT("km/s"));
    ZUnitLabel->SetLabel(wxT("km/s"));

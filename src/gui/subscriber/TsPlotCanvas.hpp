@@ -57,8 +57,8 @@ public:
    void Refresh(wxDC &dc, bool drawAll);
 
    void DumpData(const std::string &fn);
-   void SetLabel(const std::string &dataName, const PlotComponents which);
-   void SetDataName(const std::string &dataName);
+   void SetLabel(const wxString &dataName, const PlotComponents which);
+   void SetDataName(const wxString &dataName);
    void AddData(TsPlotCurve *curve, wxColour startColor = *wxWHITE);
    void DataUpdate(bool tf = true);
    int  GetCurveCount();
@@ -112,12 +112,11 @@ protected:
    
    wxPen *plotPens;
    std::vector <int> *plotDependent;
-   std::vector <std::string> names;
-   std::string xDataName;
+   std::vector <wxString> names;
    std::string filename;
-   std::string plotTitle;
-   std::string xLabel;
-   std::string yLabel;
+   wxString plotTitle;
+   wxString xLabel;
+   wxString yLabel;
    double plotXMin;
    double plotXMax;
    double plotYMin;
