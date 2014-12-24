@@ -222,15 +222,23 @@ if(NOT WIN32)
   ADD_DEFINITIONS("-DLINUX_MAC")
 endif()
 
-# Enable RPATH on Mac/Linux so that shared libraries' install names are
-# specified as relative paths instead of absolute paths. This is necessary
-# to distribute GMAT and use it from 3rd-party apps such as Matlab.
+# Enable RPATH on Mac/Linux so that GMAT shared libraries can be found
+# relative to each other. This is necessary to distribute GMAT and use it
+# from 3rd-party apps such as Matlab.
+# Assumes that shared libraries are stored in <GMAT>/bin or <GMAT>/plugins
 if(UNIX)
   if(APPLE)
+    # On Mac, @loader_path points to directory of current shared library
     SET(CMAKE_MACOSX_RPATH TRUE)
-    SET(CMAKE_INSTALL_RPATH "@loader_path/;@loader_path/../plugins/")
+    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../plugins/")
   else()
-    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/;\$ORIGIN/../plugins/")
+    # On Linux, $ORIGIN points to directory of current shared library
+    # Linux searches the RPATH before the system LD_LIBRARY_PATH, so enable
+    # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
+    # the Linux search order similar to Mac/Windows.
+    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../plugins/")
+    SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
+    SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
   endif()
 endif()
 
