@@ -27,7 +27,7 @@
 
 class Parameter;
 
-class GMAT_API DataCallback : public Subscriber
+class DATACALLBACK_API DataCallback : public Subscriber
 {
   public:
     DataCallback(const std::string &typeName, const std::string &name,

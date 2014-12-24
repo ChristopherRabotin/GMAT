@@ -25,6 +25,7 @@
 #include "DataCallbackFactory.hpp"
 #include "DataCallback.hpp"
 
+#include "Factory.hpp"
 #include "MessageInterface.hpp"
 #include "Moderator.hpp"
 

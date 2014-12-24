@@ -506,12 +506,14 @@ bool DataCallback::Distribute(const Real *dat, Integer len)
 {
   if((mCallbackFcn != NULL) && (len > 0))
   {
-    double data[len];
+    double *convertedData = new double[len];
     for(int i = 0; i < len; ++i)
     {
-      data[i] = yParamWrappers[i]->EvaluateReal();
+      // Need to convert input data to the right reference frame
+      convertedData[i] = yParamWrappers[i]->EvaluateReal();
     }
-    mCallbackFcn(data, len, mUserData);
+    mCallbackFcn(convertedData, len, mUserData);
+	delete convertedData;
   }
 
   return true;

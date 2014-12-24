@@ -24,8 +24,8 @@
 #define GmatPluginFunctions_hpp
 
 #include "datacallback_defs.hpp"
-#include "Factory.hpp"
 
+class Factory;
 class MessageReceiver;
 
 extern "C"
@@ -38,7 +38,7 @@ extern "C"
    int        DATACALLBACK_API SetCallback(const char* subscriberName, void (*CBFcn)(const double*, int, void*), void* userData);
 
    // Get last message from a CInterface function
-   const char* DATACALLBACK_API getLastMessage();
+   const char DATACALLBACK_API *getLastMessage();
 };
 
 
