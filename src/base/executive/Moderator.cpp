@@ -957,7 +957,7 @@ DynamicLibrary *Moderator::LoadLibrary(const std::string &libraryName)
    DynamicLibrary *theLib = new DynamicLibrary(libName, libPath);
    if (theLib->LoadDynamicLibrary())
    {
-      userLibraries[libraryName] = theLib;
+      userLibraries[libName] = theLib;
    }
    else
    {
@@ -1012,7 +1012,18 @@ void (*Moderator::GetDynamicFunction(const std::string &funName,
 {
    void (*theFunction)() = NULL;
    if (IsLibraryLoaded(libraryName))
-      theFunction = userLibraries[libraryName]->GetFunction(funName);
+   {
+     try
+     {
+       theFunction = userLibraries[libraryName]->GetFunction(funName);
+     }
+     catch (...)
+     { 
+       MessageInterface::ShowMessage("Moderator::GetDynamicFunction() error");
+       return NULL;
+     }
+   }
+
    return theFunction;
 }
 

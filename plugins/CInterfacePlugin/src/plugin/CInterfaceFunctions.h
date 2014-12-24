@@ -56,4 +56,6 @@ int CINTERFACE_API CountObjects();
 const char CINTERFACE_API *GetObjectName(int which);
 const char CINTERFACE_API *GetRunSummary();
 
+void CINTERFACE_API (*GetPluginFunction(const char* funName, const char* libraryName))();
+
 #endif /*GmatCInterfaceFunctions_hpp*/
