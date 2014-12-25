@@ -28,24 +28,6 @@ ADD_DEFINITIONS("-DGMATFUNCTION_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# specific compilation flags
-if (UNIX)
-	MESSAGE("-- Using a shared base library")
-	IF(APPLE) # mac
-		#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup")
-		SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -dylib -dynamiclib")
-
-		# snow leopard
-		#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -arch i386")
-	endif()
-endif (UNIX)
-
-# Unix type systems need a change in the stack size
-# Unix type systems include MAC, LINUX
-MESSAGE("-- Executing... ulimit -s 61440")
-execute_process(COMMAND ulimit -s 61440)
-
-# ====================================================================
 # include directories for header files
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 INCLUDE_DIRECTORIES("./base/command")

@@ -2,7 +2,7 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-# CMAKE script file for GMAT Project
+# CMAKE install script for GMAT Project
 # This file must be installed in the GMAT build/install directory
 #
 # Original Author: Ravi Mathur
@@ -34,8 +34,12 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
 # Requirements:
 #  - "matlab" command must exist on the system
 if(PLUGIN_CINTERFACE)
+  # Find the 'matlab' command.
+  # The current (CMake 3.0) FindMatlab module sucks. If its ever improved
+  # this can be changed to FIND_PACKAGE(Matlab)
   FIND_PROGRAM(matlab_bin matlab)
   if(NOT (matlab_bin MATCHES "matlab_bin-NOTFOUND"))
+    # Create the command to be executed by Matlab
     SET(MSTART "matlab -nodisplay -r")
     SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
     SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
@@ -44,9 +48,19 @@ if(PLUGIN_CINTERFACE)
     SET(MEXIT "exit;")
     SET(MATLAB_COMMAND "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MPREP} ${MEXIT}\"")
     MESSAGE(STATUS "Will install CInterface Matlab thunk files with command:\n${MATLAB_COMMAND}")
-    INSTALL(CODE "MESSAGE(\"Launching Matlab...patience is a virtue...\")")
+
+    # Running Matlab can take a while, so notify the user
+    if(WIN32)
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window...patience is a virtue...\")")
+    else()
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab...patience is a virtue...\")")
+    endif()
+
+    # Git 'er done!
     INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+
+  # Warn user if Matlab was not found
   else()
-    MESSAGE(WARNING "matlab command not found, cannot build Matlab prototype files for the GMAT CInterface Plugin. Please install Matlab, or create a symlink to the 'matlab' command in a searchable directory.")
+    MESSAGE(WARNING "Matlab not found, cannot build Matlab prototype files for the GMAT CInterface Plugin. Please make sure that a symlink to the 'matlab' command exists in a searchable directory.")
   endif()
 endif()

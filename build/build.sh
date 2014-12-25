@@ -63,7 +63,7 @@ else
 fi
 
 # Compile Gmat using all available cores
-make -j$((ncores+1))
+make -j$(ncores)
 status=$?
 
 # Change back to build directory

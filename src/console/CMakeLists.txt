@@ -12,7 +12,7 @@
 #
 
 MESSAGE("==============================")
-MESSAGE("Console building setup " ${VERSION})
+MESSAGE("GMAT console setup " ${VERSION})
 
 if (PROFILE_BUILD)
 	SET(CONSOLETARGET "gmatConsoleP")

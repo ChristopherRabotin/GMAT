@@ -361,15 +361,17 @@ if(APPLE)
 endif()
 
 # ====================================================================
-# add the icon, windows only.
+# add the icon information
+SET(GMAT_ICON_DIR "resource")
+SET(GMAT_ICON_O "GmatIcon.o")
 if(WIN32)
-    SET(GMAT_ICON_RC  "${CMAKE_CURRENT_SOURCE_DIR}/${GMAT_ICON_DIR}/${GMAT_ICON_RC}")
-    SET(GMAT_ICON_O  "${CMAKE_CURRENT_SOURCE_DIR}/${GMAT_ICON_DIR}/${GMAT_ICON_O}")
-    SET(GUI_SRCS "${GUI_SRCS};${GMAT_ICON_RC}")
+  SET(GMAT_ICON_RC "GmatIcon.rc")
 elseif(APPLE)
-# we can add an icon for mac/gmat
-
+  SET(GMAT_ICON_RC "GMATMac.icns")
 endif()
+SET(GMAT_ICON_RC "${CMAKE_CURRENT_SOURCE_DIR}/${GMAT_ICON_DIR}/${GMAT_ICON_RC}")
+SET(GMAT_ICON_O "${CMAKE_CURRENT_SOURCE_DIR}/${GMAT_ICON_DIR}/${GMAT_ICON_O}")
+SET(GUI_SRCS "${GUI_SRCS};${GMAT_ICON_RC}")
 
 # ====================================================================
 # compilation

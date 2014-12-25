@@ -22,7 +22,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Set Cmake project
-PROJECT(GMAT)
+PROJECT(GMAT C CXX)
 SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
@@ -32,26 +32,7 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
 endif()
 
-# Set default dependency directories
-if(WIN32)
-  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
-  SET(CSPICE_DIR "${PROJECT_SOURCE_DIR}/depends/cspice/windows" CACHE PATH "CSpice Root Directory")
-  # F2C_DIR will be set after validating CSPICE_DIR (further down)
-
-elseif(UNIX)
-  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
-  SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
-
-  if(APPLE)
-    SET(CSPICE_DIR "${PROJECT_SOURCE_DIR}/depends/cspice/macosx" CACHE PATH "CSpice Root Directory")
-  else()
-    SET(CSPICE_DIR "${PROJECT_SOURCE_DIR}/depends/cspice/linux" CACHE PATH "CSpice Root Directory")
-  endif()
-
-endif()
-
 # Set general build options
-OPTION(DEBUG_BUILD "DebugBuild" OFF)
 OPTION(PROFILE_BUILD "ProfileBuild" OFF)
 OPTION(GMAT_64_BIT "64-Bit Binaries" ON)
 OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" OFF)
@@ -86,11 +67,29 @@ if(PLUGIN_FMINCONOPTIMIZER OR PLUGIN_MATLABINTERFACE)
   endif()
 endif()
 
+# Set default dependency directories
+if(WIN32)
+  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/windows")
+  # F2C_DIR will be set after validating CSPICE_DIR (further down)
+
+elseif(UNIX)
+  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
+
+  if(APPLE)
+    SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/macosx")
+  else()
+    SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/linux")
+  endif()
+
+endif()
+
 # Find appropriate 32/64-bit SPICE directories
 if(GMAT_64_BIT)
-  SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
+  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice64" CACHE PATH "CSpice Root Directory")
 else()
-  SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
+  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice32" CACHE PATH "CSpice Root Directory")
 endif()
 
 if( IS_DIRECTORY ${CSPICE_DIR} )
@@ -99,15 +98,15 @@ else()
   MESSAGE(FATAL_ERROR "SPICE NOT FOUND in " ${CSPICE_DIR} " , Stopping build.")
 endif()
 
-# Set F2C directory
+# On Windows, use F2C version from CSpice
 if(WIN32)
   SET(F2C_DIR "${CSPICE_DIR}/include")
+endif()
+
+if( IS_DIRECTORY ${F2C_DIR} )
+  MESSAGE(STATUS "F2C FOUND in " ${F2C_DIR})
 else()
-  if( IS_DIRECTORY ${F2C_DIR} )
-    MESSAGE(STATUS "F2C FOUND in " ${F2C_DIR})
-  else()
-    MESSAGE(FATAL ERROR "F2C NOT FOUND in" ${F2C_DIR} " , Stopping build.")
-  endif()
+  MESSAGE(FATAL ERROR "F2C NOT FOUND in" ${F2C_DIR} " , Stopping build.")
 endif()
 
 # If building GUI, check if wxWidgets directory exists
@@ -120,31 +119,15 @@ if( GMAT_GUI )
   endif()
 endif()
 
-# Default to Release build on single-config generators
+# Default to Release configuration on single-config generators
 # e.g. make, but not VisualStudio
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release)
-endif()
-
-if (DEBUG_BUILD)
-  SET(CMAKE_BUILD_TYPE Debug)
-endif (DEBUG_BUILD)
-
-# ====================================================================
-# specific win32 ressources
-if(WIN32)
-  SET(GMAT_ICON_DIR "resource")  # relative to src/gui/
-  if(WIN32)
-    SET(GMAT_ICON_RC  "GmatIcon.rc")
-  elseif(APPLE) 
-    SET(GMAT_ICON_RC  "GMATMac.icns")       
-  endif()
-  SET(GMAT_ICON_O  "GmatIcon.o")
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (<empty>, Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
 endif()
 
 # ====================================================================
 #need to include Find****.cmake
-SET( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+#SET( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # ====================================================================
 # Common build options
@@ -205,7 +188,7 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
-# Set DevIL Proprocessor defs for linux
+# Set DevIL Proprocessor defs
 if (WIN32)
   ADD_DEFINITIONS("-DSKIP_DEVIL")
 endif()
@@ -218,7 +201,7 @@ if(APPLE)
   #LINK_DIRECTORIES("stdc++.6")
 endif()
 
-if(NOT WIN32)
+if(UNIX)
   ADD_DEFINITIONS("-DLINUX_MAC")
 endif()
 
@@ -242,8 +225,8 @@ if(UNIX)
   endif()
 endif()
 
-# Declare global vars for header directories
-# These will be defined in the base/gui CMakeLists.txt files
+# Declare global var for header directories
+# This will be defined in the base/gui CMakeLists.txt file
 SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
 
 # ====================================================================
@@ -255,5 +238,5 @@ ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(plugins)
 
 # ====================================================================
-# Set overall install instructions
+# Setup GMAT install process
 ADD_SUBDIRECTORY(build/install)
