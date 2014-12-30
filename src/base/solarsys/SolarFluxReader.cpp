@@ -63,11 +63,6 @@ SolarFluxReader::SolarFluxReader():
 //------------------------------------------------------------------------------
 SolarFluxReader::~SolarFluxReader(void)
 {
-   obsFluxData.clear();
-   predictFluxData.clear();
-   begObs = endObs = begData = -1;
-   beg_ObsTag = end_ObsTag = "";
-   obsFileName = predictFileName = "";
    delete [] line;
 }
 
@@ -338,6 +333,10 @@ bool SolarFluxReader::LoadObsData()
       fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
       fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
       fD.index = -1;
+      for (Integer l = 0; l<9; l++)
+         fD.F107a[l] = -1;
+      for (Integer l =0; l<3; l++)
+         fD.apSchatten[l] = -1;
 
       obsFluxData.push_back(fD);
 
@@ -382,7 +381,7 @@ bool SolarFluxReader::LoadPredictData()
       std::vector<std::string> tokens(beg, end);
 
       FluxData fD;
-      Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), 0, hour, minute, sec); 
+      Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()), atoi(tokens[0].c_str()), 0, hour, minute, sec); 
       // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
       fD.epoch = mjd - 0.5;
 
@@ -397,15 +396,27 @@ bool SolarFluxReader::LoadPredictData()
       fD.apSchatten[2] = atof(tokens[13].c_str());
       fD.index = -1;
 
+      for (Integer l = 0; l<8; l++)
+         fD.kp[l] = -1;
+      for (Integer l=0; l<8; l++)
+         fD.ap[l] = -1;
+      fD.adjF107 = -1;
+      fD.adjCtrF107a = -1;
+      fD.obsF107 = -1;
+      fD.obsCtrF107a = -1;
+
       predictFluxData.push_back(fD);
 
    }
 
    std::vector<FluxData>::iterator it = predictFluxData.begin();
-   
-   for ( it = it+1; it != predictFluxData.end(); it++)
+   it->index = 0;
+   it->i = 0;
+   for (it = it+1; it != predictFluxData.end(); it++)
    {
       it->index = (Integer) (it->epoch - (it-1)->epoch);
+      it->index += (it-1)->index;
+      it->i = (it-1)->i + 1;
    }
 
    return true;
@@ -443,13 +454,13 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    if (index > (Integer) obsFluxData.size())
    {
       epoch_1st = predictFluxData.at(0).epoch;
-      index = (Integer) (epoch - epoch_1st);
+      index = (Integer) (epoch - epoch_1st) - 1;
       std::vector<FluxData>::iterator it;
       for ( it = predictFluxData.begin(); it != predictFluxData.end(); it++)
       {
          if ( index == it->index)
          {
-            fD = predictFluxData[index];
+            fD = predictFluxData[it->i];
             break;
          }
       }

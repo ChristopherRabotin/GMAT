@@ -65,6 +65,7 @@ public:
       FluxData &operator=(const FluxData &fD);
       // Used in Schatten file indexing
       Integer index;
+      Integer i;
    };
   
 private:
