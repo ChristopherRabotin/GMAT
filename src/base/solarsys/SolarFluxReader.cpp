@@ -451,7 +451,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    index = (Integer) (epoch - epoch_1st);
    // if the requested epoch fall beyond the 
    // last item in the obsFluxData, then search in predictFluxData
-   if (index > (Integer) obsFluxData.size())
+   if (index >= (Integer) obsFluxData.size())
    {
       epoch_1st = predictFluxData.at(0).epoch;
       index = (Integer) (epoch - epoch_1st) - 1;
