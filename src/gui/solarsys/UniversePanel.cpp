@@ -163,7 +163,7 @@ void UniversePanel::Create()
    // ephemeris update interval
    //-------------------------------------------------------
    wxStaticText *intervalStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Ephemeris Update "GUI_ACCEL_KEY"Interval"),
+      new wxStaticText(this, ID_TEXT, wxString("Ephemeris Update "GUI_ACCEL_KEY"Interval"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mIntervalTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
                                  wxDefaultPosition, wxSize(50,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -176,7 +176,7 @@ void UniversePanel::Create()
    // ephemeris source
    //-------------------------------------------------------
    wxStaticText *fileTypeLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Ephemeris "GUI_ACCEL_KEY"Source"),
+      new wxStaticText(this, ID_TEXT, wxString("Ephemeris "GUI_ACCEL_KEY"Source"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mFileTypeComboBox = 
@@ -188,7 +188,7 @@ void UniversePanel::Create()
    // ephemeris file
    //-------------------------------------------------------
    fileNameLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Ephemeris "GUI_ACCEL_KEY"Filename"),
+      new wxStaticText(this, ID_TEXT, wxString("Ephemeris "GUI_ACCEL_KEY"Filename"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mFileNameTextCtrl =
@@ -207,7 +207,7 @@ void UniversePanel::Create()
    // SPICE Leap Second Kernel (LSK)
    //-------------------------------------------------------
    lskNameLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Leap Second Kernel"),
+      new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Leap Second Kernel"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
 
    mLSKFileNameTextCtrl =
@@ -226,7 +226,7 @@ void UniversePanel::Create()
    // use TT for ephemeris
    //-------------------------------------------------------
    mOverrideCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Use "GUI_ACCEL_KEY"TT for Ephemeris"),
+      new wxCheckBox(this, ID_CHECKBOX, wxString("Use "GUI_ACCEL_KEY"TT for Ephemeris"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    mOverrideCheckBox->SetToolTip(pConfig->Read(_T("UseTTForEphemerisHint")));
    
@@ -340,7 +340,7 @@ void UniversePanel::LoadData()
       
       if (mFileTypeComboBox->GetStringSelection() == "TwoBodyPropagation")
       {
-         fileNameLabel->SetLabel(wxT("Ephemeris "GUI_ACCEL_KEY"Filename"));
+         fileNameLabel->SetLabel(wxString("Ephemeris "GUI_ACCEL_KEY"Filename"));
          mBrowseButton->Disable();
          mFileNameTextCtrl->Disable();
          lskNameLabel->Show(false);
@@ -355,14 +355,14 @@ void UniversePanel::LoadData()
          mFileNameTextCtrl->Enable();
          if (mFileTypeComboBox->GetStringSelection() == "SPICE")
          {
-            fileNameLabel->SetLabel(wxT("SPK "GUI_ACCEL_KEY"Kernel"));
+            fileNameLabel->SetLabel(wxString("SPK "GUI_ACCEL_KEY"Kernel"));
             lskNameLabel->Show(true);
             mLSKBrowseButton->Show(true);
             mLSKFileNameTextCtrl->Show(true);
          }
          else
          {
-            fileNameLabel->SetLabel(wxT("DE "GUI_ACCEL_KEY"Filename"));
+            fileNameLabel->SetLabel(wxString("DE "GUI_ACCEL_KEY"Filename"));
             lskNameLabel->Show(false);
             mLSKBrowseButton->Show(false);
             wxWindow *windowWithFocus = FindFocus();
@@ -670,7 +670,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 
       if (type == "TwoBodyPropagation")
       {
-         fileNameLabel->SetLabel(wxT("Ephemeris "GUI_ACCEL_KEY"Filename"));
+         fileNameLabel->SetLabel(wxString("Ephemeris "GUI_ACCEL_KEY"Filename"));
          mBrowseButton->Disable();
          mFileNameTextCtrl->Disable();
          lskNameLabel->Show(false);
@@ -689,7 +689,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
          mFileNameTextCtrl->Enable();
          if (type == "SPICE")
          {
-            fileNameLabel->SetLabel(wxT("SPK "GUI_ACCEL_KEY"Kernel"));
+            fileNameLabel->SetLabel(wxString("SPK "GUI_ACCEL_KEY"Kernel"));
             lskNameLabel->Enable();
             mLSKBrowseButton->Enable();
             mLSKFileNameTextCtrl->Enable();
@@ -699,7 +699,7 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
          }
          else // "DE"
          {
-            fileNameLabel->SetLabel(wxT("DE "GUI_ACCEL_KEY"Filename"));
+            fileNameLabel->SetLabel(wxString("DE "GUI_ACCEL_KEY"Filename"));
             lskNameLabel->Disable();
             mLSKFileNameTextCtrl->Disable();
             mLSKBrowseButton->Disable();

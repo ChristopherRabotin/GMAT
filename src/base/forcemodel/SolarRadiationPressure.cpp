@@ -620,6 +620,18 @@ bool SolarRadiationPressure::SetStringParameter(const Integer id,
    return PhysicalModel::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool SolarRadiationPressure::SetStringParameter(const std::string &label,
+                                                const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
 bool SolarRadiationPressure::SetStringParameter(const std::string &label,
                                                 const std::string &value)
 {

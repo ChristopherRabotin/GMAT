@@ -78,9 +78,19 @@ std::string GmatFileUtil::GetGmatPath()
    std::string retval = "";
 
 #ifdef _MSC_VER  // if Microsoft Visual C++
-   char buffer[GmatFile::MAX_PATH_LEN];
-   GetModuleFileName(NULL, buffer, GmatFile::MAX_PATH_LEN);
-
+   // Changed to dynamic allocation
+   //char buffer[GmatFile::MAX_PATH_LEN];
+   char *buffer = new char[GmatFile::MAX_PATH_LEN];
+   
+   #ifdef _UNICODE
+      wchar_t wbuffer[GmatFile::MAX_PATH_LEN];
+      GetModuleFileName(NULL, wbuffer, GmatFile::MAX_PATH_LEN);
+      std::string str = GmatStringUtil::WideStringToString(wbuffer);
+      buffer = (char*)str.c_str();
+   #else
+      GetModuleFileName(NULL, buffer, GmatFile::MAX_PATH_LEN);
+   #endif
+   
    #ifdef DEBUG_ABSOLUTE_PATH
       MessageInterface::ShowMessage("EXE path: %s\n", buffer);
    #endif
@@ -89,6 +99,8 @@ std::string GmatFileUtil::GetGmatPath()
    Integer end = currDir.find_last_of("\\");
    if (end != std::string::npos)
       retval = currDir.substr(0, end+1);
+   
+   delete [] buffer;
    
    #ifdef DEBUG_ABSOLUTE_PATH
       MessageInterface::ShowMessage("EXE dir: %s\n", retval.c_str());
@@ -165,16 +177,27 @@ std::string GmatFileUtil::GetCurrentWorkingDirectory()
    std::string currDir;
    
 #ifdef _MSC_VER  // if Microsoft Visual C++
-   char buffer[GmatFile::MAX_PATH_LEN];
 
-   //if (_getcwd(buffer, sizeof(buffer) / sizeof(TCHAR)))
-   if (GetCurrentDirectory(GmatFile::MAX_PATH_LEN, buffer) > 0)
-      currDir = buffer;
-   else
-      MessageInterface::ShowMessage
-         ("*** WARNING *** GmatFileUtil::GetCurrentWorkingDirectory() \n"
-          "Cannot get current directory, so jsut returning empty directory\n");
-   
+   #ifdef _UNICODE
+      wchar_t *wbuffer = new wchar_t[GmatFile::MAX_PATH_LEN];
+      if (GetCurrentDirectory(GmatFile::MAX_PATH_LEN, wbuffer) > 0)
+         currDir = GmatStringUtil::WideStringToString(wbuffer);
+      else
+         MessageInterface::ShowMessage
+            ("*** WARNING *** GmatFileUtil::GetCurrentWorkingDirectory() \n"
+             "Cannot get current directory, so jsut returning empty directory\n");
+      
+      delete [] wbuffer;
+   #else
+      //if (_getcwd(buffer, sizeof(buffer) / sizeof(TCHAR)))
+      char buffer[GmatFile::MAX_PATH_LEN];
+      if (GetCurrentDirectory(GmatFile::MAX_PATH_LEN, buffer) > 0)
+         currDir = buffer;
+      else
+         MessageInterface::ShowMessage
+            ("*** WARNING *** GmatFileUtil::GetCurrentWorkingDirectory() \n"
+             "Cannot get current directory, so jsut returning empty directory\n");
+   #endif
 #else
    
    char buffer[GmatFile::MAX_PATH_LEN];
@@ -204,10 +227,18 @@ std::string GmatFileUtil::GetCurrentWorkingDirectory()
 bool GmatFileUtil::SetCurrentWorkingDirectory(const std::string &newDir)
 {
 #ifdef _MSC_VER  // if Microsoft Visual C++
-   if (SetCurrentDirectory(newDir.c_str()) > 0)
-      return true;
-   else
-      return false;
+   #ifdef _UNICODE
+      std::wstring newDirW = GmatStringUtil::StringToWideString(newDir);
+      if (SetCurrentDirectory(newDirW.c_str()) > 0)
+         return true;
+      else
+         return false;
+   #else
+      if (SetCurrentDirectory(newDir.c_str()) > 0)
+         return true;
+      else
+         return false;
+   #endif
 #else
    if (chdir(newDir.c_str()) == -1)
       return false;
@@ -228,7 +259,20 @@ bool GmatFileUtil::SetCurrentWorkingDirectory(const std::string &newDir)
 std::string GmatFileUtil::GetApplicationPath()
 {
 #if defined (__WIN32__) || defined(_MSC_VER)
-   
+
+   #ifdef _UNICODE
+   std::string appPath;
+   wchar_t *wbuffer = new wchar_t[GmatFile::MAX_PATH_LEN];
+   int bytes = GetModuleFileName(NULL, wbuffer, GmatFile::MAX_PATH_LEN);
+   if (bytes > 0)
+      appPath = GmatStringUtil::WideStringToString(wbuffer);
+   else
+      MessageInterface::ShowMessage
+         ("*** WARNING *** GmatFileUtil::GetApplicationPath() \n"
+          "Cannot get module file path, so jsut returning empty directory\n");
+   delete [] wbuffer;
+   return appPath;
+   #else
    std::string appPath;
    char buffer[GmatFile::MAX_PATH_LEN];
    int bytes = GetModuleFileName(NULL, buffer, GmatFile::MAX_PATH_LEN);
@@ -236,6 +280,7 @@ std::string GmatFileUtil::GetApplicationPath()
       appPath = buffer;
    
    return appPath;
+   #endif
    
 #elif __linux__
 
@@ -321,6 +366,25 @@ std::string GmatFileUtil::ParseFirstPathName(const std::string &fullPath,
 
 
 //------------------------------------------------------------------------------
+// std::string ParsePathName(const char *fullPath, bool appendSep = true)
+//------------------------------------------------------------------------------
+/*
+ * This function parses whole path name from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @param  appendSep appends path separator if true
+ * @return  The file name from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParsePathName(const char *fullPath,
+                                        bool appendSep)
+{
+   return ParsePathName(std::string(fullPath), appendSep);
+}
+
+
+//------------------------------------------------------------------------------
 // std::string ParsePathName(const std::string &fullPath, bool appendSep = true)
 //------------------------------------------------------------------------------
 /*
@@ -371,6 +435,24 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath,
 
 
 //------------------------------------------------------------------------------
+// std::string ParseFileName(const char *fullPath, bool removeExt = false)
+//------------------------------------------------------------------------------
+/*
+ * This function parses file name from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @param  removeExt  Set this flag to true if file extension to be removed [false]
+ * @return  The file name from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParseFileName(const char *fullPath, bool removeExt)
+{
+   return ParseFileName(std::string(fullPath), removeExt);
+}
+
+
+//------------------------------------------------------------------------------
 // std::string ParseFileName(const std::string &fullPath, bool removeExt = false)
 //------------------------------------------------------------------------------
 /*
@@ -414,6 +496,23 @@ std::string GmatFileUtil::ParseFileName(const std::string &fullPath, bool remove
    return fileName;
 }
 
+//------------------------------------------------------------------------------
+// std::string ParseFileExtension(const char *fullPath, bool prependDot)
+//------------------------------------------------------------------------------
+/*
+ * This function parses file extension (string after .) from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @param  prependDot  prepends dot(.) if this is true [false]
+ * @return  The file extension from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParseFileExtension(const char *fullPath,
+                                             bool prependDot)
+{
+   return ParseFileExtension(std::string(fullPath), prependDot);
+}
 
 //------------------------------------------------------------------------------
 // std::string ParseFileExtension(const std::string &fullPath, bool prependDot)
@@ -516,6 +615,19 @@ bool GmatFileUtil::IsOsWindows()
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool GMAT_API IsPathRelative(const char *fullPath)
+//------------------------------------------------------------------------------
+/**
+ * Checks if given path name has relative path.
+ *
+ * @return true if input path has relative path, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsPathRelative(const char *fullPath)
+{
+   return IsPathRelative(std::string(fullPath));
+}
 
 //------------------------------------------------------------------------------
 // bool GMAT_API IsPathRelative(const std::string &fullPath)
@@ -624,6 +736,18 @@ bool GmatFileUtil::IsValidFileName(const std::string &fname, bool isBlankOk)
 
 
 //------------------------------------------------------------------------------
+// bool GmatFileUtil::IsSameFileName(const char *fname1, const char *fname2)
+//------------------------------------------------------------------------------
+/*
+ * @return  true  If two file names are same, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::IsSameFileName(const char *fname1, const char *fname2)
+{
+   return IsSameFileName(std::string(fname1), std::string(fname2));
+}
+
+//------------------------------------------------------------------------------
 // bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &fname2)
 //------------------------------------------------------------------------------
 /*
@@ -647,6 +771,17 @@ bool GmatFileUtil::IsSameFileName(const std::string &fname1, const std::string &
       return false;
 }
 
+//------------------------------------------------------------------------------
+// bool DoesDirectoryExist(const char *fullPath, bool isBlankOk = true)
+//------------------------------------------------------------------------------
+/*
+ * @return  true  If directory exist, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::DoesDirectoryExist(const char *fullPath, bool isBlankOk)
+{
+   return DoesDirectoryExist(std::string(fullPath), isBlankOk);
+}
 
 //------------------------------------------------------------------------------
 // bool DoesDirectoryExist(const std::string &fullPath, bool isBlankOk = true)
@@ -686,8 +821,16 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool isBlankO
    TCHAR currDir[GmatFile::MAX_PATH_LEN];
    // Save current directory
    DWORD ret = GetCurrentDirectory(GmatFile::MAX_PATH_LEN, currDir);
+   
+   #ifdef _UNICODE
+   std::wstring dirNameW = GmatStringUtil::StringToWideString(dirName);
+   // Try setting to requested direcotry
+   dirExist = (SetCurrentDirectory(dirNameW.c_str()) == 0 ? false : true);
+   #else
    // Try setting to requested direcotry
    dirExist = (SetCurrentDirectory(dirName.c_str()) == 0 ? false : true);
+   #endif
+   
    // Set back to current directory
    SetCurrentDirectory(currDir);
 
@@ -709,6 +852,34 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &fullPath, bool isBlankO
    #endif
    
    return dirExist;
+}
+
+
+bool GmatFileUtil::DoesFileExist(const char* filename)
+{
+   #ifdef DEBUG_FILE_CHECK
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::DoesFileExist(const char* filename) filename=<%s>\n",
+       filename);
+   #endif
+   
+   std::ifstream aFile(filename);
+
+   bool fileExist = false;
+   //if (pFile!=NULL)
+   if (aFile)
+   {
+	  aFile.close();
+      //fclose (pFile);
+      fileExist = true;
+   }
+   
+   #ifdef DEBUG_FILE_CHECK
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::DoesFileExist() returning %d\n", fileExist);
+   #endif
+   
+   return fileExist;
 }
 
 
@@ -823,7 +994,13 @@ bool GmatFileUtil::IsAppInstalled(const std::string &appName, std::string &appLo
    #endif
    
    // Open location
+   #ifdef _UNICODE
+   std::wstring folderW = GmatStringUtil::StringToWideString(folder);
+   lRet = RegOpenKeyEx(tree, folderW.c_str(), 0, KEY_QUERY_VALUE, &hKey);
+   #else
    lRet = RegOpenKeyEx(tree, folder.c_str(), 0, KEY_QUERY_VALUE, &hKey);
+   #endif
+   
    if (lRet != ERROR_SUCCESS)
    {
       #ifdef DEBUG_APP_INSTALLATION
@@ -842,7 +1019,13 @@ bool GmatFileUtil::IsAppInstalled(const std::string &appName, std::string &appLo
    
    // Get key
    dwBufLen = sizeof(temp);
+   #ifdef _UNICODE
+   std::wstring keyW = GmatStringUtil::StringToWideString(key);
+   lRet = RegQueryValueEx( hKey, keyW.c_str(), NULL, NULL, (BYTE*)&temp, &dwBufLen );
+   #else
    lRet = RegQueryValueEx( hKey, key.c_str(), NULL, NULL, (BYTE*)&temp, &dwBufLen );
+   #endif
+   
    if (lRet != ERROR_SUCCESS)
    {
       #ifdef DEBUG_APP_INSTALLATION
@@ -1161,7 +1344,12 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
    int errorCode;
    bool hasError = false;
    
+   #ifdef _UNICODE
+   std::wstring dirNameW = GmatStringUtil::StringToWideString(dirName);
+   hFind = FindFirstFile(dirNameW.c_str(), &findData);
+   #else
    hFind = FindFirstFile(dirName.c_str(), &findData);
+   #endif
    
    if(hFind == INVALID_HANDLE_VALUE)
    {
@@ -1182,13 +1370,21 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
    }
    else
    {
+      #ifdef _UNICODE
+      outFile = GmatStringUtil::WideStringToString(findData.cFileName);
+      #else
       outFile = findData.cFileName;
-
+      #endif
+      
       // add if the file matches exact file extension (i.e, no backup files allowed)
       if (ParseFileExtension(outFile) == fileExt)
       {
          if (addPath)
+            #ifdef _UNICODE
+            outFile = pathName + GmatStringUtil::WideStringToString(findData.cFileName);
+            #else
             outFile = pathName + findData.cFileName;
+            #endif
          fileList.push_back(outFile);
          
          #ifdef DEBUG_FILELIST
@@ -1202,11 +1398,19 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
    {
       while (FindNextFile(hFind, &findData))
       {
+         #ifdef _UNICODE
+         outFile = GmatStringUtil::WideStringToString(findData.cFileName);
+         #else
          outFile = findData.cFileName;
+         #endif
          if (ParseFileExtension(outFile) == fileExt)
          {
             if (addPath)
+               #ifdef _UNICODE
+               outFile = pathName + GmatStringUtil::WideStringToString(findData.cFileName);
+               #else
                outFile = pathName + findData.cFileName;
+               #endif
             fileList.push_back(outFile);
             
             #ifdef DEBUG_FILELIST
@@ -1493,6 +1697,27 @@ bool GmatFileUtil::CompareLines(const std::string &line1, const std::string &lin
       ("GmatFileUtil::CompareLines() returning true, diff=%f\n", diff);
    #endif
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& CompareNumericColumns(Integer numDirsToCompare, const char *basefilename,
+//                      const char *filename1, const char *filename2,
+//                      const char *filename3, Real tol = COMPARE_TOLERANCE);
+//------------------------------------------------------------------------------
+/**
+ * Numerically compares base file with up to three other files. It will compare
+ * the smallest number of columns among compare files.
+ */
+//------------------------------------------------------------------------------
+StringArray& GmatFileUtil::CompareNumericColumns(Integer numDirsToCompare,
+                                   const char *basefilename,
+                                   const char *filename1, const char *filename2,
+                                   const char *filename3, Real tol)
+{
+   return CompareNumericColumns(numDirsToCompare, std::string(basefilename),
+                                std::string(filename1), std::string(filename2),
+                                std::string(filename3), tol);
 }
 
 
@@ -1932,10 +2157,31 @@ StringArray& GmatFileUtil::CompareNumericColumns(Integer numDirsToCompare,
    in1.close();
    in2.close();
    in3.close();
-
+   
    return textBuffer;
 }
-   
+
+
+//------------------------------------------------------------------------------
+// StringArray& CompareTextLines(Integer numDirsToCompare, ...)
+//------------------------------------------------------------------------------
+/**
+ * Compares ascii files line by line with the same file name in different directory.
+ */
+//------------------------------------------------------------------------------
+StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
+                                            const char *basefilename,
+                                            const char *filename1,
+                                            const char *filename2,
+                                            const char *filename3,
+                                            int &file1DiffCount, int &file2DiffCount,
+                                            int &file3DiffCount)
+{
+   return CompareTextLines(numDirsToCompare, std::string(basefilename), std::string(filename1),
+                           std::string(filename2), std::string(filename3),
+                           file1DiffCount, file2DiffCount, file3DiffCount);
+}
+
 
 //------------------------------------------------------------------------------
 // StringArray& CompareTextLines(Integer numDirsToCompare, ...)
@@ -2112,6 +2358,29 @@ StringArray& GmatFileUtil::CompareTextLines(Integer numDirsToCompare,
    in3.close();
    
    return textBuffer;
+}
+
+//------------------------------------------------------------------------------
+// StringArray& CompareNumericLines(Integer numDirsToCompare, ... )
+//------------------------------------------------------------------------------
+/**
+ * Compares files line by line numerically using tolerance. String embeded in
+ * a text line or blank line is ignored and continued with next item in the line.
+ * 
+ */
+//------------------------------------------------------------------------------
+StringArray& GmatFileUtil::CompareNumericLines(Integer numDirsToCompare,
+                                               const char *basefilename,
+                                               const char *filename1,
+                                               const char *filename2,
+                                               const char *filename3,
+                                               int &file1DiffCount, int &file2DiffCount,
+                                               int &file3DiffCount, Real tol)
+{
+   return CompareNumericLines(numDirsToCompare, std::string(basefilename),
+                              std::string(filename1), std::string(filename2),
+                              std::string(filename3), file1DiffCount, file2DiffCount,
+                              file3DiffCount, tol);
 }
 
 

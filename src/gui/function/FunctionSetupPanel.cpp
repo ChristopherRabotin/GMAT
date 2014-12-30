@@ -312,11 +312,16 @@ void FunctionSetupPanel::OnSaveAs(wxCommandEvent &event)
    wxString defaultFile;
    defaultFile = mFunctionName + ".gmf";
    
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(defaultFile),
-         _T("GmatFunction files (*.gmf)|*.gmf|"\
-            "Text files (*.txt, *.text)|*.txt;*.text|"\
-            "All files (*.*)|*.*"), wxSAVE);
-   
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), defaultFile,
+                       "GmatFunction files (*.gmf)|*.gmf|"
+                       "Text files (*.txt, *.text)|*.txt;*.text|"
+                       "All files (*.*)|*.*",
+                       #ifdef __USE_WX28__
+                       wxSAVE);
+                       #else
+                       wxFD_SAVE);
+                       #endif
+
    if (dialog.ShowModal() == wxID_OK)
    {
       wxString path = dialog.GetPath().c_str();

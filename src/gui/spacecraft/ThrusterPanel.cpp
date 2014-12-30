@@ -77,22 +77,22 @@ void ThrusterPanel::Create()
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
-   pConfig->SetPath(wxT("/Spacecraft Thrusters"));
+   pConfig->SetPath(wxString("/Spacecraft Thrusters"));
 
    // wxButton
-   selectButton = new wxButton( this, ID_BUTTON, wxT("-"GUI_ACCEL_KEY">"),
+   selectButton = new wxButton( this, ID_BUTTON, wxString("-"GUI_ACCEL_KEY">"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectButton->SetToolTip(pConfig->Read(_T("AddThrusterHint")));
 
-   removeButton = new wxButton( this, ID_BUTTON, wxT(GUI_ACCEL_KEY"<-"),
+   removeButton = new wxButton( this, ID_BUTTON, wxString(GUI_ACCEL_KEY"<-"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeButton->SetToolTip(pConfig->Read(_T("RemoveThrusterHint")));
 
-   selectAllButton = new wxButton( this, ID_BUTTON, wxT("=>"),
+   selectAllButton = new wxButton( this, ID_BUTTON, wxString("=>"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectAllButton->SetToolTip(pConfig->Read(_T("AddAllThrustersHint")));
 
-   removeAllButton = new wxButton( this, ID_BUTTON, wxT("<"GUI_ACCEL_KEY"="),
+   removeAllButton = new wxButton( this, ID_BUTTON, wxString("<"GUI_ACCEL_KEY"="),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeAllButton->SetToolTip(pConfig->Read(_T("ClearThrustersHint")));
 
@@ -123,9 +123,9 @@ void ThrusterPanel::Create()
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
-   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Available Thrusters") );
+   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxString(GUI_ACCEL_KEY"Available Thrusters") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxHORIZONTAL );
-   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Selected Thrusters") );
+   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxString(GUI_ACCEL_KEY"Selected Thrusters") );
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxHORIZONTAL );
 
    // Add to wx*Sizers   

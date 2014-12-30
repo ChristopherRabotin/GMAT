@@ -1799,7 +1799,7 @@ bool SolarSystem::AddBody(CelestialBody* cb)
 }
 
 //------------------------------------------------------------------------------
-//  CelestialBody* GetBody(std::string withName)
+//  CelestialBody* GetBody(const char *withName)
 //------------------------------------------------------------------------------
 /**
  * This method returns a pointer to the requested celestial body.
@@ -1810,7 +1810,24 @@ bool SolarSystem::AddBody(CelestialBody* cb)
  *
  */
 //------------------------------------------------------------------------------
-CelestialBody* SolarSystem::GetBody(std::string withName)
+CelestialBody* SolarSystem::GetBody(const char *withName)
+{
+   return FindBody(std::string(withName));
+}
+
+//------------------------------------------------------------------------------
+//  CelestialBody* GetBody(const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method returns a pointer to the requested celestial body.
+ *
+ * @param <withName>  name of the requested body.
+ *
+ * @return a pointer to the requested body.
+ *
+ */
+//------------------------------------------------------------------------------
+CelestialBody* SolarSystem::GetBody(const std::string &withName)
 {
    return FindBody(withName);
 }
@@ -3306,7 +3323,7 @@ bool SolarSystem::SaveParameterAsDefault(const Integer id)
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// CelestialBody* FindBody(std::string withName)
+// CelestialBody* FindBody(const std::string &withName)
 //------------------------------------------------------------------------------
 /**
 * Return a pointer to a CelestialBody with the name withName.
@@ -3316,7 +3333,7 @@ bool SolarSystem::SaveParameterAsDefault(const Integer id)
  * @return pointer to a CelestialBody with the requested name.
  */
 //------------------------------------------------------------------------------
-CelestialBody* SolarSystem::FindBody(std::string withName)
+CelestialBody* SolarSystem::FindBody(const std::string &withName)
 {
    #ifdef DEBUG_SS_FIND_BODY
       MessageInterface::ShowMessage("In SS::FindBody (%s) at location <%p>, there are %d bodiesInUse\n",

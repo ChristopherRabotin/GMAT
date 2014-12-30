@@ -113,24 +113,24 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
    #ifdef DEBUG_LOAD_ICON
    MessageInterface::ShowMessage
       ("GuiItemManager::LoadIcon() entered, filename='%s', bitmap=<%p>\n",
-       filename.c_str(), bitmap);
+       filename.WX_TO_C_STRING, bitmap);
    #endif
    
    if (bitmapType == wxBITMAP_TYPE_PNG && !mPngHandlerLoaded)
    {
       FileManager *fm = FileManager::Instance();
       std::string loc = fm->GetFullPathname("ICON_PATH");
-      wxString    locWx = loc.c_str();
+      wxString    locWx = STD_TO_WX_STRING(loc.c_str());
       
-      #ifdef DEBUG_TOOLBAR
+      #ifdef DEBUG_LOAD_ICON
       MessageInterface::ShowMessage("   loc = '%s'\n", loc.c_str());
       #endif
       
       // Check if icon file directory exist
-      if (GmatFileUtil::DoesDirectoryExist(loc.c_str(), false))
+      if (GmatFileUtil::DoesDirectoryExist(loc, false))
       {
-         #ifdef DEBUG_TOOLBAR
-         MessageInterface::ShowMessage("   Loadinig images from '%s'\n", loc.c_str());
+         #ifdef DEBUG_LOAD_ICON
+         MessageInterface::ShowMessage("   Loading images from '%s'\n", loc.c_str());
          MessageInterface::ShowMessage("   Loading .png files\n");
          #endif
          
@@ -139,11 +139,13 @@ void GuiItemManager::LoadIcon(const wxString &filename, long bitmapType,
          mPngIconLocation = locWx;
       }
    }
-   
-   
+      
    wxImage iconImage;
    wxString fileType = ".png";
    wxString fullFileName = mPngIconLocation + filename + fileType;
+   #ifdef DEBUG_LOAD_ICON
+   MessageInterface::ShowMessage("   fullFileName = '%s'\n", fullFileName.WX_TO_C_STRING);
+   #endif
    if (mPngHandlerLoaded && GmatFileUtil::DoesFileExist(fullFileName.c_str()))
    {
       iconImage.LoadFile(fullFileName, bitmapType);
@@ -1940,7 +1942,7 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    {
       MessageInterface::ShowMessage
          ("*** WARNING *** Property list for '%s' is not available at this time.\n",
-          objTypeName.c_str());
+          objTypeName.WX_TO_C_STRING);
       
       #if DBGLVL_GUI_ITEM_PROPERTY
       MessageInterface::ShowMessage
@@ -1999,7 +2001,7 @@ wxArrayString GuiItemManager::GetCoordSystemWithAxesOf(const std::string &axesTy
    GmatBase      *cs;
    for (int i=0; i<theNumCoordSys; i++)
    {
-      std::string csName     = theCoordSysList[i].c_str();
+      std::string csName     = theCoordSysList[i].WX_TO_STD_STRING;
       cs                     = theGuiInterpreter->GetConfiguredObject(csName);
       if (cbOriginOnly)
       {
@@ -2249,7 +2251,7 @@ wxComboBox* GuiItemManager::GetCoordSystemComboBox(wxWindow *parent, wxWindowID 
       wxArrayString mj2000AxisList;
       for (int i=0; i<theNumCoordSys; i++)
       {
-         std::string csName = theCoordSysList[i].c_str();
+         std::string csName = theCoordSysList[i].WX_TO_STD_STRING;
          // check for axis type
          GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName);
          if (cs)
@@ -3474,7 +3476,7 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       {
          for (int i=0; i<theNumScProperty; i++)
          {
-            std::string paramName = theScPropertyList[i].c_str();
+            std::string paramName = theScPropertyList[i].WX_TO_STD_STRING;
             add = false;
             #ifdef DEBUG_PROPERTY_LISTBOX
             MessageInterface::ShowMessage
@@ -3506,7 +3508,7 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       {
          for (int i=0; i<theNumScProperty; i++)
          {
-            std::string paramName = theScPropertyList[i].c_str();
+            std::string paramName = theScPropertyList[i].WX_TO_STD_STRING;
             add = false;
             if (theParamInfo->IsPlottable(paramName))
             {
@@ -3574,6 +3576,8 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
       for (int i=0; i<theNumFiniteBurnProperty; i++)
          propertyListBox->Append(theFiniteBurnPropertyList[i]);
    }
+   else if (objType == "Array") ;
+   else if (objType == "Variable") ;
    else
    {
       throw GmatBaseException("There are no properties associated with " +
@@ -4094,11 +4098,11 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Object type and list
    //-----------------------------------------------------------------
    wxStaticText *objectTypeStaticText =
-      new wxStaticText(parent, -1, wxT("Object "GUI_ACCEL_KEY"Type"),
+      new wxStaticText(parent, -1, "Object "GUI_ACCEL_KEY"Type",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    *entireObjCheckBox =
-      new wxCheckBox(parent, entireObjCheckBoxId, wxT("Select "GUI_ACCEL_KEY"Entire Object"));
+      new wxCheckBox(parent, entireObjCheckBoxId, "Select "GUI_ACCEL_KEY"Entire Object");
    (*entireObjCheckBox)->SetToolTip(pConfig->Read(_T("SelectEntireObjectHint")));
 
    if (showObjectOption == 0)
@@ -4142,7 +4146,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    (*objectTypeComboBox)->SetValue(objectType);
    
    wxStaticText *objectStaticText =
-      new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Object List"),
+      new wxStaticText(parent, -1, GUI_ACCEL_KEY"Object List",
                        wxDefaultPosition, wxDefaultSize, 0);   
    
    if (objectType == "Spacecraft")
@@ -4206,7 +4210,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Spacecraft attached hardware list
    //-----------------------------------------------------------------
    *hardwareStaticText =
-      new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Attached Hardware List"),
+      new wxStaticText(parent, -1, GUI_ACCEL_KEY"Attached Hardware List",
                        wxDefaultPosition, wxDefaultSize, 0);
    *hardwareListBox =
       GetAttachedHardwareListBox(parent, hardwareListBoxId, wxSize(170, 63), "");
@@ -4224,8 +4228,8 @@ wxSizer* GuiItemManager::CreateParameterSizer
    wxFlexGridSizer *arrayIndexSizer = new wxFlexGridSizer(3);
    if (showArrayElement)
    {
-      *rowStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Row [xx]"));
-      *colStaticText = new wxStaticText(parent, -1, wxT(GUI_ACCEL_KEY"Col [xx]"));
+      *rowStaticText = new wxStaticText(parent, -1, GUI_ACCEL_KEY"Row [xx]");
+      *colStaticText = new wxStaticText(parent, -1, GUI_ACCEL_KEY"Col [xx]");
       
       *rowTextCtrl =
          new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
@@ -4276,7 +4280,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    else
    {
       wxStaticText *propertyStaticText =
-         new wxStaticText(parent, -1, wxT("Object "GUI_ACCEL_KEY"Properties"),
+         new wxStaticText(parent, -1, "Object "GUI_ACCEL_KEY"Properties",
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *propertyListBox = 
@@ -4285,7 +4289,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*propertyListBox)->SetToolTip(pConfig->Read(_T("ObjectPropertiesHint")));
       
       *coordSysLabel =
-         new wxStaticText(parent, -1, wxT("Coordinate "GUI_ACCEL_KEY"System"),
+         new wxStaticText(parent, -1, "Coordinate "GUI_ACCEL_KEY"System",
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *coordSysComboBox =
@@ -4320,23 +4324,23 @@ wxSizer* GuiItemManager::CreateParameterSizer
    #endif
    
    *upButton = new wxButton
-      (parent, addButtonId, wxT(GUI_ACCEL_KEY"UP"), wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, GUI_ACCEL_KEY"UP", wxDefaultPosition, buttonSize, 0);
    (*upButton)->SetToolTip(pConfig->Read(_T("MoveUpHint"),"Move Up"));
    if (!allowMultiSelect)
       (*upButton)->Disable();
    
    *downButton = new wxButton
-      (parent, addButtonId, wxT(GUI_ACCEL_KEY"DN"), wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, GUI_ACCEL_KEY"DN", wxDefaultPosition, buttonSize, 0);
    (*downButton)->SetToolTip(pConfig->Read(_T("MoveDownHint"),"Move Down"));
    if (!allowMultiSelect)
       (*downButton)->Disable();
    
    *addButton = new wxButton
-      (parent, addButtonId, wxT("-"GUI_ACCEL_KEY">"), wxDefaultPosition, buttonSize, 0);
+      (parent, addButtonId, "-"GUI_ACCEL_KEY">", wxDefaultPosition, buttonSize, 0);
    (*addButton)->SetToolTip(pConfig->Read(_T("AddSelectedHint"),"Add Selected Item(s)"));
    
    *removeButton = new wxButton
-      (parent, removeButtonId, wxT(GUI_ACCEL_KEY"<-"), wxDefaultPosition, buttonSize, 0);
+      (parent, removeButtonId, GUI_ACCEL_KEY"<-", wxDefaultPosition, buttonSize, 0);
    (*removeButton)->SetToolTip(pConfig->Read(_T("RemoveSelectedHint"),"Remove Selected Item"));
    
    *addAllButton = new wxButton
@@ -4346,7 +4350,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       (*addAllButton)->Disable();
    
    *removeAllButton = new wxButton
-      (parent, removeAllButtonId, wxT("<"GUI_ACCEL_KEY"="), wxDefaultPosition, buttonSize, 0);
+      (parent, removeAllButtonId, "<"GUI_ACCEL_KEY"=", wxDefaultPosition, buttonSize, 0);
    (*removeAllButton)->SetToolTip(pConfig->Read(_T("RemoveAllHint"),"Remove All Items"));
    
    //----- arrowButtonsBoxSizer
@@ -4364,7 +4368,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
    // Selected values
    //-----------------------------------------------------------------
    wxStaticText *selectedLabel =
-      new wxStaticText(parent, -1, wxT("Selected "GUI_ACCEL_KEY"Value(s)"),
+      new wxStaticText(parent, -1, "Selected "GUI_ACCEL_KEY"Value(s)",
                        wxDefaultPosition, wxDefaultSize, 0);
    
    wxArrayString emptyList;
@@ -4483,7 +4487,7 @@ wxArrayString GuiItemManager::BuildSpacePointList(const wxString &spTypeNames)
    #endif
    
    wxArrayString spacePointArray;
-   std::string typeNames = spTypeNames.c_str();
+   std::string typeNames = spTypeNames.WX_TO_STD_STRING;
    StringArray objTypes = GmatStringUtil::SeparateBy(typeNames, "+", false, false, false);
    
    #if DBGLVL_GUI_ITEM_SP > 1
@@ -5610,7 +5614,7 @@ void GuiItemManager::UpdateCoordSystemList()
             (*pos)->Clear();
             for (unsigned int i = 0; i < theCoordSysList.size(); i++)
             {
-               std::string csName = theCoordSysList[i].c_str();
+               std::string csName = theCoordSysList[i].WX_TO_STD_STRING;
                GmatBase *cs = theGuiInterpreter->GetConfiguredObject(csName.c_str());
                if (cs)
                {

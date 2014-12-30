@@ -28,7 +28,7 @@
 class TsPlotOptionsDialog : public wxDialog
 {
 public:
-	TsPlotOptionsDialog(const std::string xLabel, const std::string yLabel,
+	TsPlotOptionsDialog(const wxString &xLabel, const wxString &yLabel,
                      wxWindow* parent, wxWindowID id, 
                      const wxString& title = "TS Plot Options", 
                      const wxPoint& pos = wxDefaultPosition, 
@@ -38,14 +38,14 @@ public:
 	virtual ~TsPlotOptionsDialog();
    
    // Accessors
-   std::string       GetPlotTitle();
-   std::string       GetXLabel();
-   std::string       GetYLabel();
+   wxString          GetPlotTitle();
+   wxString          GetXLabel();
+   wxString          GetYLabel();
    int               GetWidth();
    int               GetStyle();
-   void              SetPlotTitle(const std::string &str);
-   void              SetXLabel(const std::string &str);
-   void              SetYLabel(const std::string &str);
+   void              SetPlotTitle(const wxString &str);
+   void              SetXLabel(const wxString &str);
+   void              SetYLabel(const wxString &str);
    void              SetWidth(int lw);
    void              SetStyle(int ls);
    
@@ -74,8 +74,8 @@ public:
    void              SetYMin(double st);
    void              SetYMax(double st);
    
-   void              SetXName(std::string nomme);
-   void              SetYName(std::string nomme);
+   void              SetXName(const wxString &nomme);
+   void              SetYName(const wxString &nomme);
    void              UpdateLabels();
 
    void              SetXTickCount(int count);
@@ -122,8 +122,8 @@ protected:
    wxCheckBox           *yMinorTickLines;
    wxSpinCtrl           *yPrecision;
    
-   std::string          xName;
-   std::string          yName;
+   wxString             xName;
+   wxString             yName;
    
    void OnSettableXMinimum(wxCommandEvent &event);
    void OnSettableXMaximum(wxCommandEvent &event);

@@ -33,16 +33,16 @@ LATEST_DOCS_BUILD_DIR = Y:/Builds/DevDocs
 # compiles the latest build
 all: 
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GmatVS2010.sln //p:Configuration=Release //t:Rebuild //fl ;
+	msbuild.exe GmatVS2010.sln //p:Configuration=Release-wx3-unicode //t:Rebuild //fl ;
 	cd $(GMAT_PLUGIN_BUILD_DIR); \
-	msbuild.exe GmatPlugins.sln //p:Configuration=Release //t:Rebuild //fl ;
+	msbuild.exe GmatPlugins.sln //p:Configuration=Release-Unicode //m //t:Rebuild //fl ;
 
 # cleans up the compiled source code and docs files
 clean:
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GmatVS2010.sln //p:Configuration=Release //fl //target:Clean;
+	msbuild.exe GmatVS2010.sln //p:Configuration=Release-wx3-unicode //m //fl //target:Clean;
 	cd $(GMAT_PLUGIN_BUILD_DIR); \
-	msbuild.exe GmatPlugins.sln //p:Configuration=Release //fl //target:Clean;
+	msbuild.exe GmatPlugins.sln //p:Configuration=Release-Unicode //m //fl //target:Clean;
 	cd $(GMAT_BIN_DIR) && rm -rf *.dll
 	cd $(GMAT_PLUGIN_BIN_DIR) && rm -rf *.dll
 	rm -f $(GMAT_PROPRIETARY_BIN_DIR)/*.dll

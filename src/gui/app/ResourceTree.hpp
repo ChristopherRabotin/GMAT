@@ -40,8 +40,8 @@ public:
                 long style);
    
    void SetMainFrame(GmatMainFrame *gmf);
-   void ClearResource(bool leaveScripts);
-   void UpdateResource(bool resetCounter);
+   void ClearResource(bool leaveScripts, bool onlyChildNodes = true);
+   void UpdateResource(bool resetCounter, bool onlyChildNodes = true);
    void SetActiveScript(const wxString &script);
    void AddScript(wxString path);
    bool AddScriptItem(wxString path);
@@ -123,8 +123,11 @@ protected:
    //void InitializeIcons();
    
    // objects
+   GmatBase* CreateObject(const std::string &objType, const char *objName,
+                          bool createDefault = false);
    GmatBase* CreateObject(const std::string &objType, const std::string &objName,
                           bool createDefault = false);
+   GmatBase* GetObject(const char *name);
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
    
@@ -154,10 +157,11 @@ protected:
    void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
                                 bool resetCounter = true);
    void AddUserObjects();
-
+   
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
+   void OnItemExpanded(wxTreeEvent &event);
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
    void OnRename(wxCommandEvent &event);

@@ -22,16 +22,14 @@
 //------------------------------------------------------------------------------
 
 #include "CelestialBodyPropertiesPanel.hpp"
-//#include "GmatBaseException.hpp"
-//#include "GmatAppData.hpp"
 #include "GmatColorPanel.hpp"
 #include "MessageInterface.hpp"
-//#include "StringUtil.hpp"
 #include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
 #include <fstream>
 
 //#define DEBUG_CB_PROP_PANEL
+//#define DEBUG_LOAD_DATA
 //#define DEBUG_CB_PROP_SAVE
 
 
@@ -111,12 +109,10 @@ void CelestialBodyPropertiesPanel::SaveData()
    bool        realsOK   = true;
    bool        stringsOK = true;
    
-   
    // don't do anything if no data has been changed.
    // note that dataChanged will be true if the user modified any combo box or
    // text ctrl, whether or not he/she actually changed the value
    #ifdef DEBUG_CB_PROP_SAVE
-
       MessageInterface::ShowMessage("Entering CBPropPanel::SaveData, dataChanged = %s\n",
          (dataChanged? "true" : "false"));
       MessageInterface::ShowMessage("    muChanged = %s\n",
@@ -174,24 +170,39 @@ void CelestialBodyPropertiesPanel::SaveData()
    if (textureChanged)
    {
       strval = textureTextCtrl->GetValue();
+      textureMap = strval;
       #ifdef DEBUG_CB_PROP_PANEL
-         MessageInterface::ShowMessage("textureChanged is true : %s\n",
-               strval.c_str());       
+      MessageInterface::ShowMessage
+         ("textureChanged is true : %s\n", strval.c_str());
       #endif
-      std::ifstream filename(strval.c_str());
       
-      if (!filename)
+      // Checking for texture file existance will not work since valid
+      // texture file can be just file name without full path such as Sun.jpg.
+      // Usually validation of new value is done in the base code when setting
+      // the value and we don't want to partially set the value when any of new
+      // value fails validation. Since cloned body is not used here for setting
+      // texture file name, IsParameterValid() is called before setting actual
+      // valid value to the body. (Fix for GMT-4189 LOJ: 2014.10.31)
+      if (!theBody->IsParameterValid("TextureMapFileName", textureMap))
       {
-         std::string errmsg = "File \"" + strval;
-         errmsg += "\" does not exist.\n";
-         MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+         std::string errmsg = theBody->GetLastErrorMessage();
          stringsOK = false;
+         MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
       }
-      else
-      {
-         textureMap = strval;
-         filename.close();
-      } 
+      
+      // std::ifstream filename(strval.c_str());
+      // if (!filename)
+      // {
+      //    std::string errmsg = "File \"" + strval;
+      //    errmsg += "\" does not exist.\n";
+      //    MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
+      //    stringsOK = false;
+      // }
+      // else
+      // {
+      //    textureMap = strval;
+      //    filename.close();
+      // }
    }
 
    if (realsOK && stringsOK)
@@ -207,8 +218,15 @@ void CelestialBodyPropertiesPanel::SaveData()
       theBody->SetGravitationalConstant(mu);
       theBody->SetEquatorialRadius(eqRad);
       theBody->SetFlattening(flat);
-      theBody->SetStringParameter(theBody->GetParameterID("TextureMapFileName"),
-                                  textureMap);
+      Integer textureId = theBody->GetParameterID("TextureMapFileName");
+      theBody->SetStringParameter(textureId, textureMap);
+      // If texture map file is blank, display default one
+      if (textureMap == "")
+      {
+         wxString wxDefMap = STD_TO_WX_STRING(theBody->GetStringParameter(textureId).c_str());
+         textureTextCtrl->SetValue(wxDefMap);
+      }
+      
       dataChanged = false;
       ResetChangeFlags(true);
    }
@@ -217,7 +235,6 @@ void CelestialBodyPropertiesPanel::SaveData()
       canClose = false;
    }
    #ifdef DEBUG_CB_PROP_SAVE
-
       MessageInterface::ShowMessage("At end of CBPropPanel::SaveData, canClose = %s\n",
          (canClose? "true" : "false"));
    #endif
@@ -234,6 +251,11 @@ void CelestialBodyPropertiesPanel::SaveData()
 //------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::LoadData()
 {
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage
+      ("CelestialBodyPropertiesPanel::LoadData() entered, body = '%s'\n",
+       theBody->GetName().c_str());
+   #endif
    try
    {
       mu         = theBody->GetGravitationalConstant();
@@ -257,6 +279,12 @@ void CelestialBodyPropertiesPanel::LoadData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage
+      ("CelestialBodyPropertiesPanel::LoadData() leaving, body = '%s'\n",
+       theBody->GetName().c_str());
+   #endif
 }
 
 
@@ -296,7 +324,7 @@ void CelestialBodyPropertiesPanel::Create()
    textureString = "";
    
    // mu
-   muStaticText      = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Mu"),
+   muStaticText      = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Mu"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    muTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_MU, wxT(""),
                        wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -304,7 +332,7 @@ void CelestialBodyPropertiesPanel::Create()
    muUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km^3/sec^2"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    // eq. radius
-   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxT("Equatorial "GUI_ACCEL_KEY"Radius"),
+   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxString("Equatorial "GUI_ACCEL_KEY"Radius"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    eqRadTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_EQRAD, wxT(""),
                           wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -312,7 +340,7 @@ void CelestialBodyPropertiesPanel::Create()
    eqRadUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    // flattening
-   flatStaticText      = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Flattening"),
+   flatStaticText      = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Flattening"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    flatTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_FLAT, wxT(""),
                          wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -320,7 +348,7 @@ void CelestialBodyPropertiesPanel::Create()
    flatUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT(""), // unitless
                          wxDefaultPosition, wxSize(-1,-1), 0);
    // texture map
-   textureStaticText = new wxStaticText(this, ID_TEXT, wxT("Te"GUI_ACCEL_KEY"xture Map File"),
+   textureStaticText = new wxStaticText(this, ID_TEXT, wxString("Te"GUI_ACCEL_KEY"xture Map File"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    textureTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_TEXTURE, wxT(""),
                        wxDefaultPosition, wxSize(300,-1), 0);

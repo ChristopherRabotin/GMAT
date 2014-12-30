@@ -242,10 +242,10 @@ void ConditionPanel::SaveData()
       if (itemMissing == 0)
       {
          mNumberOfConditions++;
-         mLogicalOpStrings.push_back(conditionGrid->GetCellValue(i, COMMAND_COL).c_str());
-         mLhsList.push_back(conditionGrid->GetCellValue(i, LHS_COL).c_str());
-         mEqualityOpStrings.push_back(conditionGrid->GetCellValue(i, COND_COL).c_str());
-         mRhsList.push_back(conditionGrid->GetCellValue(i, RHS_COL).c_str());         
+         mLogicalOpStrings.push_back(std::string(conditionGrid->GetCellValue(i, COMMAND_COL).c_str()));
+         mLhsList.push_back(std::string(conditionGrid->GetCellValue(i, LHS_COL).c_str()));
+         mEqualityOpStrings.push_back(std::string(conditionGrid->GetCellValue(i, COND_COL).c_str()));
+         mRhsList.push_back(std::string(conditionGrid->GetCellValue(i, RHS_COL).c_str()));         
       }
       else if (itemMissing < 4)
       {

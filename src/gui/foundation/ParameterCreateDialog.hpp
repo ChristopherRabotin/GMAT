@@ -30,7 +30,7 @@ class ParameterCreateDialog : public GmatDialog
 {
 public:
    
-   // parameter type to create
+   // parameter type to create 
    enum ParameterType
    {
       VARIABLE,
@@ -111,6 +111,7 @@ protected:
    void OnPageChanged(wxNotebookEvent& event);
    void OnPageChanging(wxNotebookEvent& event);
    void OnListboxClick(wxCommandEvent& event);
+   void OnTextEnter(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
    

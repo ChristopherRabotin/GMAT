@@ -65,7 +65,7 @@ public:
 
    virtual ~SpiceInterface();
    
-   virtual SpiceInterface* Clone() const = 0;
+   virtual SpiceInterface* Clone() const;     //  = 0; making non-abstract for use by EphemManager
 
    virtual bool        LoadKernel(const std::string &fileName);
    virtual bool        LoadKernels(const StringArray &fileNames);

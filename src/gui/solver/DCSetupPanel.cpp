@@ -392,7 +392,8 @@ void DCSetupPanel::OnBrowse(wxCommandEvent &event)
       
       fileDialog = new wxFileDialog(this, caption, 
                                     defaultDir, defaultFile, 
-                                    wildcard, wxOPEN); 
+                                    wildcard,
+                                    gmatFD_OPEN);
    }
    else
    {

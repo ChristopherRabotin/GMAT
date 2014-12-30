@@ -65,6 +65,8 @@ public:
                                            const bool value);
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id,
+                                          const char *value);
+   virtual bool        SetStringParameter(const Integer id,
                                           const std::string &value);
    virtual const StringArray&
                        GetStringArrayParameter(const Integer id) const;

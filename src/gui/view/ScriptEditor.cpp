@@ -1529,7 +1529,7 @@ bool ScriptEditor::LoadFile()
    // get filname
    if (!mFileName) {
       wxFileDialog dlg(this, _T("Open file"), wxEmptyString, wxEmptyString,
-                        _T("Any file(*)|*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
+                        _T("Any file(*)|*"), gmatFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR);
       if (dlg.ShowModal() != wxID_OK) return false;
       mFileName = dlg.GetPath();
    }

@@ -369,7 +369,7 @@ void SpicePanel::LoadData()
       spkFileArrayWX           = new wxString[spkListSz];
       for (unsigned int jj = 0; jj < spkListSz; jj++)
       {
-         spkFileArrayWX[jj] = wxT(spkKernelNames[jj].c_str());
+         spkFileArrayWX[jj] = wxString(spkKernelNames[jj].c_str());
       }
       spkFileListBox->InsertItems(spkListSz, spkFileArrayWX, 0);
       spkFileListBox->SetSelection(spkListSz-1); // Select the last item
@@ -380,7 +380,7 @@ void SpicePanel::LoadData()
       fkFileArrayWX           = new wxString[fkListSz];
       for (unsigned int jj = 0; jj < fkListSz; jj++)
       {
-         fkFileArrayWX[jj] = wxT(fkKernelNames[jj].c_str());
+         fkFileArrayWX[jj] = wxString(fkKernelNames[jj].c_str());
       }
       fkFileListBox->InsertItems(fkListSz, fkFileArrayWX, 0);
       fkFileListBox->SetSelection(fkListSz-1); // Select the last item
@@ -391,7 +391,7 @@ void SpicePanel::LoadData()
       ckFileArrayWX           = new wxString[ckListSz];
       for (unsigned int jj = 0; jj < ckListSz; jj++)
       {
-         ckFileArrayWX[jj] = wxT(ckKernelNames[jj].c_str());
+         ckFileArrayWX[jj] = wxString(ckKernelNames[jj].c_str());
       }
       ckFileListBox->InsertItems(ckListSz, ckFileArrayWX, 0);
       ckFileListBox->SetSelection(ckListSz-1); // Select the last item
@@ -402,7 +402,7 @@ void SpicePanel::LoadData()
       sclkFileArrayWX           = new wxString[sclkListSz];
       for (unsigned int jj = 0; jj < sclkListSz; jj++)
       {
-         sclkFileArrayWX[jj] = wxT(sclkKernelNames[jj].c_str());
+         sclkFileArrayWX[jj] = wxString(sclkKernelNames[jj].c_str());
       }
       sclkFileListBox->InsertItems(sclkListSz, sclkFileArrayWX, 0);
       sclkFileListBox->SetSelection(sclkListSz-1); // Select the last item
@@ -459,7 +459,7 @@ void SpicePanel::Create()
    wxBoxSizer *fkButtonSizer   = NULL;
 
    // naif ID for spacecraft
-   naifIdStaticText   = new wxStaticText(this, ID_TEXT,wxT(GUI_ACCEL_KEY"NAIF ID"),
+   naifIdStaticText   = new wxStaticText(this, ID_TEXT,GUI_ACCEL_KEY"NAIF ID",
                         wxDefaultPosition, wxSize(-1,-1), 0);
    naifIdTextCtrl     = new wxTextCtrl(this, ID_TEXT_CTRL_NAIF_ID, wxT(""),
                         wxDefaultPosition, wxSize(80, -1), 0);
@@ -467,7 +467,7 @@ void SpicePanel::Create()
    naifIdBlankText    = new wxStaticText(this, ID_TEXT,wxT(""),
                         wxDefaultPosition, wxSize(-1,-1), 0);
    // naif ID of the reference frame for the spacecraft
-   naifIdRefFrameStaticText   = new wxStaticText(this, ID_TEXT,wxT("F"GUI_ACCEL_KEY"rame\nNAIF ID"),
+   naifIdRefFrameStaticText   = new wxStaticText(this, ID_TEXT,"F"GUI_ACCEL_KEY"rame\nNAIF ID",
                         wxDefaultPosition, wxSize(-1,-1), 0);
    naifIdRefFrameTextCtrl     = new wxTextCtrl(this, ID_TEXT_CTRL_NAIF_ID_REF_FRAME, wxT(""),
                         wxDefaultPosition, wxSize(80, -1), 0);
@@ -476,15 +476,15 @@ void SpicePanel::Create()
                         wxDefaultPosition, wxSize(-1,-1), 0);
    // SPK file(s)
    wxArrayString emptyList;
-   spkFileStaticText   = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"SPK Files"),
+   spkFileStaticText   = new wxStaticText(this, ID_TEXT, GUI_ACCEL_KEY"SPK Files",
                          wxDefaultPosition, wxSize(-1,-1), 0);
    spkFileListBox      = new wxListBox(this, ID_LIST_BOX_SPK_FILE, wxDefaultPosition, wxSize(150, 100),
                          emptyList, wxLB_EXTENDED|wxLB_NEEDED_SB|wxLB_HSCROLL);
    spkFileListBox->SetToolTip(pConfig->Read(_T("SPKFileListHint")));
-   spkFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_SPK_FILE, wxT(GUI_ACCEL_KEY"Add"),
+   spkFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_SPK_FILE, wxString(GUI_ACCEL_KEY"Add"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    spkFileBrowseButton->SetToolTip(pConfig->Read(_T("AddSPKFileHint")));
-   spkFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_SPK_FILE, wxT(GUI_ACCEL_KEY"Remove"),
+   spkFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_SPK_FILE, wxString(GUI_ACCEL_KEY"Remove"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    spkFileRemoveButton->SetToolTip(pConfig->Read(_T("RemoveSPKFileHint")));
    spkButtonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -492,15 +492,15 @@ void SpicePanel::Create()
    spkButtonSizer->Add(spkFileRemoveButton,0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
 
    // FK file(s)
-   fkFileStaticText   = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"FK Files"),
+   fkFileStaticText   = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"FK Files"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    fkFileListBox      = new wxListBox(this, ID_LIST_BOX_FK_FILE, wxDefaultPosition, wxSize(150, 100),
                          emptyList, wxLB_EXTENDED|wxLB_NEEDED_SB|wxLB_HSCROLL);
    fkFileListBox->SetToolTip(pConfig->Read(_T("FKFileListHint")));
-   fkFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_FK_FILE, wxT(GUI_ACCEL_KEY"Add"),
+   fkFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_FK_FILE, wxString(GUI_ACCEL_KEY"Add"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    fkFileBrowseButton->SetToolTip(pConfig->Read(_T("AddFKFileHint")));
-   fkFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_FK_FILE, wxT(GUI_ACCEL_KEY"Remove"),
+   fkFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_FK_FILE, wxString(GUI_ACCEL_KEY"Remove"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    fkFileRemoveButton->SetToolTip(pConfig->Read(_T("RemoveFKFileHint")));
    fkButtonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -508,15 +508,15 @@ void SpicePanel::Create()
    fkButtonSizer->Add(fkFileRemoveButton,0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
 
    // CK file(s)
-   ckFileStaticText   = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"CK Files"),
+   ckFileStaticText   = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"CK Files"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    ckFileListBox      = new wxListBox(this, ID_LIST_BOX_CK_FILE, wxDefaultPosition, wxSize(150, 100),
                          emptyList, wxLB_EXTENDED|wxLB_NEEDED_SB|wxLB_HSCROLL);
    ckFileListBox->SetToolTip(pConfig->Read(_T("CKFileListHint")));
-   ckFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_CK_FILE, wxT(GUI_ACCEL_KEY"Add"),
+   ckFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_CK_FILE, wxString(GUI_ACCEL_KEY"Add"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    ckFileBrowseButton->SetToolTip(pConfig->Read(_T("AddCKFileHint")));
-   ckFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_CK_FILE, wxT(GUI_ACCEL_KEY"Remove"),
+   ckFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_CK_FILE, wxString(GUI_ACCEL_KEY"Remove"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    ckFileRemoveButton->SetToolTip(pConfig->Read(_T("RemoveCKFileHint")));
    ckButtonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -524,15 +524,15 @@ void SpicePanel::Create()
    ckButtonSizer->Add(ckFileRemoveButton,0, wxGROW|wxALIGN_CENTRE|wxALL, bSize);
 
    // SCLK file(s)
-   sclkFileStaticText   = new wxStaticText(this, ID_TEXT, wxT("SC"GUI_ACCEL_KEY"LK Files"),
+   sclkFileStaticText   = new wxStaticText(this, ID_TEXT, wxString("SC"GUI_ACCEL_KEY"LK Files"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    sclkFileListBox      = new wxListBox(this, ID_LIST_BOX_SCLK_FILE, wxDefaultPosition, wxSize(150, 100),
                          emptyList, wxLB_EXTENDED|wxLB_NEEDED_SB|wxLB_HSCROLL);
    sclkFileListBox->SetToolTip(pConfig->Read(_T("SCLKFileListHint")));
-   sclkFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_SCLK_FILE, wxT(GUI_ACCEL_KEY"Add"),
+   sclkFileBrowseButton = new wxButton(this, ID_BROWSE_BUTTON_SCLK_FILE, wxString(GUI_ACCEL_KEY"Add"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    sclkFileBrowseButton->SetToolTip(pConfig->Read(_T("AddSCLKFileHint")));
-   sclkFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_SCLK_FILE, wxT(GUI_ACCEL_KEY"Remove"),
+   sclkFileRemoveButton = new wxButton(this, ID_REMOVE_BUTTON_SCLK_FILE, wxString(GUI_ACCEL_KEY"Remove"),
                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    sclkFileRemoveButton->SetToolTip(pConfig->Read(_T("RemoveSCLKFileHint")));
    sclkButtonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -720,7 +720,7 @@ void SpicePanel::OnSpkFileRemoveButton(wxCommandEvent &event)
    for (int i = numSelect-1; i >= 0; i--)
    {
       fileSelected = spkFileListBox->GetString(selections[i]);
-      spkFilesToDelete.push_back(fileSelected.c_str());
+      spkFilesToDelete.push_back(std::string(fileSelected.c_str()));
       spkFileListBox->Delete(selections[i]);
    }
    spkFilesDeleted = true;
@@ -812,7 +812,7 @@ void SpicePanel::OnCkFileRemoveButton(wxCommandEvent &event)
    for (int i = numSelect-1; i >= 0; i--)
    {
       fileSelected = ckFileListBox->GetString(selections[i]);
-      ckFilesToDelete.push_back(fileSelected.c_str());
+      ckFilesToDelete.push_back(std::string(fileSelected.c_str()));
       ckFileListBox->Delete(selections[i]);
    }
    ckFilesDeleted  = true;
@@ -904,7 +904,7 @@ void SpicePanel::OnSclkFileRemoveButton(wxCommandEvent &event)
    for (int i = numSelect-1; i >= 0; i--)
    {
       fileSelected = sclkFileListBox->GetString(selections[i]);
-      sclkFilesToDelete.push_back(fileSelected.c_str());
+      sclkFilesToDelete.push_back(std::string(fileSelected.c_str()));
       sclkFileListBox->Delete(selections[i]);
    }
    sclkFilesDeleted = true;
@@ -997,7 +997,7 @@ void SpicePanel::OnFkFileRemoveButton(wxCommandEvent &event)
    for (int i = numSelect-1; i >= 0; i--)
    {
       fileSelected = fkFileListBox->GetString(selections[i]);
-      fkFilesToDelete.push_back(fileSelected.c_str());
+      fkFilesToDelete.push_back(std::string(fileSelected.c_str()));
       fkFileListBox->Delete(selections[i]);
    }
    fkFilesDeleted  = true;

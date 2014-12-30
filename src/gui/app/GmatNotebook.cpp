@@ -21,6 +21,10 @@
 #include "UndockedMissionPanel.hpp"
 #include "MessageInterface.hpp"
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
 
 //#define DEBUG_NOTEBOOK
 //#define DEBUG_RESTORE
@@ -63,7 +67,9 @@ GmatNotebook::GmatNotebook(wxWindow *parent, wxWindowID id,
    mMissionPagePanel = NULL;
    mUndockedMissionPanel = NULL;
    mMissionTreeToolBar = NULL;
-
+   
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
    // Create and add Resource, Mission, and Output Tabs
    wxPanel *panel = (wxPanel *)NULL;
    #ifdef DEBUG_NOTEBOOK
@@ -134,6 +140,11 @@ void GmatNotebook::CreateUndockedMissionPanel()
       ("   mUndockedMissionPanel=<%p>\n", mUndockedMissionPanel);
    #endif
    
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
+   #endif
+   
    // Create panel as MDIChildFrame
    GmatTreeItemData item("Mission", GmatTree::MISSION_TREE_UNDOCKED);
    item.SetTitle("Mission");
@@ -148,6 +159,10 @@ void GmatNotebook::CreateUndockedMissionPanel()
    mMissionPagePanel = NULL;
    missionTree = NULL;
    mMissionTreeToolBar = NULL;
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
+   #endif
    
    #ifdef DEBUG_UNDOCK_MISSION_PAGE
    MessageInterface::ShowMessage
@@ -164,6 +179,11 @@ void GmatNotebook::RestoreMissionPage()
 {
    #ifdef DEBUG_RESTORE
    MessageInterface::ShowMessage("GmatNotebook::RestoreMissionPage() entered\n");
+   #endif
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
    #endif
    
    if (mMissionPagePanel)
@@ -191,6 +211,10 @@ void GmatNotebook::RestoreMissionPage()
    #endif
    mUndockedMissionPanel = NULL;
    
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
+   #endif
+   
    #ifdef DEBUG_RESTORE
    MessageInterface::ShowMessage("GmatNotebook::RestoreMissionPage() leaving\n");
    #endif
@@ -217,7 +241,7 @@ wxPanel *GmatNotebook::CreateResourcePage()
    
    resourceTree = new ResourceTree(panel, -1, wxDefaultPosition,
                                    wxDefaultSize, style);
-   
+      
    // set to GmatAppData
    GmatAppData::Instance()->SetResourceTree(resourceTree);
    

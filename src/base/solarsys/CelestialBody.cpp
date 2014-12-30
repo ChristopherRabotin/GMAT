@@ -74,6 +74,7 @@
 //#define DEBUG_CB_DESTRUCT
 //#define DEBUG_CB_EPOCH
 //#define DEBUG_TEXTURE_FILE
+//#define DEBUG_VALIDATION
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -259,11 +260,11 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    //    textureMapFileName = textureLoc + textureMapFileName;
    // }
    
-   // Call SetTextureFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
+   // Call SetTextureMapFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
    #ifdef DEBUG_TEXTURE_FILE
-   MessageInterface::ShowMessage("1 Calling SetTextureFileName()\n");
+   MessageInterface::ShowMessage("1 Calling SetTextureMapFileName()\n");
    #endif
-   SetTextureFileName(textureMapFileName);
+   SetTextureMapFileName(textureMapFileName);
    
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
    #ifdef __USE_SPICE__
@@ -360,11 +361,11 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    //    textureMapFileName = textureLoc + textureMapFileName;
    // }
    
-   // Call SetTextureFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
+   // Call SetTextureMapFileName() to use FileManager::FindPath() (LOJ: 2014.06.18)
    #ifdef DEBUG_TEXTURE_FILE
-   MessageInterface::ShowMessage("2 Calling SetTextureFileName()\n");
+   MessageInterface::ShowMessage("2 Calling SetTextureMapFileName()\n");
    #endif
-   SetTextureFileName(textureMapFileName);
+   SetTextureMapFileName(textureMapFileName);
    
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
@@ -3385,7 +3386,10 @@ bool CelestialBody::SetStringParameter(const Integer id,
       potentialFileNameFullPath =
          GmatBase::GetFullPathFileName(potentialFileName, GetName(), value, potFile, true,
                                        "", false, true);
-      MessageInterface::ShowMessage("==> potentialFileNameFullPath = '%s'\n", potentialFileNameFullPath.c_str());
+      #ifdef DEBUG_CB_SET_STRING
+      MessageInterface::ShowMessage
+         ("   potentialFileNameFullPath = '%s'\n", potentialFileNameFullPath.c_str());
+      #endif
       // if (!(GmatFileUtil::DoesFileExist(value)))
       if (potentialFileNameFullPath == "")
       {
@@ -3498,9 +3502,9 @@ bool CelestialBody::SetStringParameter(const Integer id,
          textureMapFileName = value;
          #ifdef DEBUG_TEXTURE_FILE
          MessageInterface::ShowMessage
-            ("3 Calling SetTextureFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
+            ("3 Calling SetTextureMapFileName() textureMapFileName = '%s'\n", textureMapFileName.c_str());
          #endif
-         SetTextureFileName(textureMapFileName, true);
+         SetTextureMapFileName(textureMapFileName, true);
       }
       
       // Question: Do we want to throw an exception during the setting?
@@ -4173,6 +4177,52 @@ bool CelestialBody::IsParameterEqualToDefault(const Integer id) const
    }
    
    return SpacePoint::IsParameterEqualToDefault(id);
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::IsParameterValid(const Integer id,
+                                     const std::string &value)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() entered, id=%d, value='%s'\n", id, value.c_str());
+   #endif
+   bool retval = true;
+   if (id == TEXTURE_MAP_FILE_NAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating TEXTURE_MAP_FILE_NAME\n");
+      #endif
+      if (value == "" || value == "GenericCelestialBody.jpg")
+         retval = true;
+      else if (!SetTextureMapFileName(value, false, true))
+         retval = false;
+   }
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::IsParameterValid(const std::string &label,
+                                     const std::string &value)
+{
+   return IsParameterValid(GetParameterID(label), value);
 }
 
 //------------------------------------------------------------------------------
@@ -4962,37 +5012,68 @@ bool CelestialBody::NeedsOnlyMainSPK()
 
 
 //------------------------------------------------------------------------------
-// void SetTextureFileName(const std::string &filename, bool writeInfo)
+// bool SetTextureMapFileName(const std::string &filename, bool writeWarning = false,
+//                            bool validateOnly = false)
 //------------------------------------------------------------------------------
-void CelestialBody::SetTextureFileName(const std::string &filename, bool writeInfo)
+/**
+ * Sets full texture file name. If filename is non-blank and does not exist, it
+ * will throw an exception. If filename is generic texture file name or blank, it
+ * will set to generic texture file name.
+ *
+ * @return true if input fileName is valid texture file, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetTextureMapFileName(const std::string &fileName, bool writeWarning,
+                                          bool validateOnly)
 {
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage
-      ("\nCelestialBody::SetTextureFileName() '%s' entered\n   filename = '%s'\n   "
-       "writeInfo = %d\n", GetName().c_str(), filename.c_str(), writeInfo);
+      ("\nCelestialBody::SetTextureMapFileName() '%s' entered\n   fileName = '%s'\n   "
+       "writeWarning = %d\n", GetName().c_str(), fileName.c_str(), writeWarning);
    #endif
    
-   std::string whichMap = GmatStringUtil::ToUpper(GetName()) + "_TEXTURE_FILE";   
-   textureMapFullPath =
-      FileManager::Instance()->FindPath(filename, whichMap,
-                                        true, false, writeInfo, GetName());
+   bool retval = true;
+   lastErrorMessage = "";
+   FileManager *fm = FileManager::Instance();
+   std::string actualFile = fileName;
+   std::string actualPath;
+   std::string bodyName = GetName();
+   bool success = fm->GetTextureMapFile(fileName, bodyName, bodyName, actualFile, actualPath, writeWarning);
+   lastErrorMessage = fm->GetLastFilePathMessage() + " texture map file";
    
-   if (textureMapFullPath == "")
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("   After call to fm->GetTextureMapFile(), success = %d\n   lastErrorMessage = '%s'\n",
+       success, lastErrorMessage.c_str());
+   #endif
+   
+   if (success)
    {
-      MessageInterface::ShowMessage
-         ("*** WARNING *** There is no default texture map file specified for %s, "
-          "so using 'GenericCelestialBody.jpg'\n", whichMap.c_str());
-      textureMapFullPath =
-         FileManager::Instance()->FindPath(filename, "TEXTURE_PATH",
-                                           true, false, true, GetName());
+      if (!validateOnly)
+      {
+         textureMapFileName = actualFile;
+         textureMapFullPath = actualPath;
+      }
+   }
+   else
+   {
+      retval = false;
+      textureMapFullPath = "";
+      std::string errMsg = lastErrorMessage;
+      lastErrorMessage = "**** ERROR *** " + lastErrorMessage;
+      if (writeWarning && !validateOnly)
+         throw SolarSystemException(errMsg);
    }
    
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage
       ("   textureMapFileName = '%s'\n   textureMapFullPath = '%s'\n",
        textureMapFileName.c_str(), textureMapFullPath.c_str());
-   MessageInterface::ShowMessage("CelestialBody::SetTextureFileName() leaving\n");
+   MessageInterface::ShowMessage
+      ("CelestialBody::SetTextureMapFileName() returning %d\n", retval);
    #endif
+   
+   return retval;
 }
 
 

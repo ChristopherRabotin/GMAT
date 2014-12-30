@@ -271,6 +271,23 @@ SpiceInterface::~SpiceInterface()
 }
 
 //------------------------------------------------------------------------------
+//  GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns a clone of the SpiceInterface.
+ *
+ * @return clone of the SpiceInterface.
+ *
+ */
+//------------------------------------------------------------------------------
+SpiceInterface* SpiceInterface::Clone() const
+{
+   return (new SpiceInterface(*this));
+}
+
+
+
+//------------------------------------------------------------------------------
 //  bool LoadKernel(const std::string &fileName)
 //------------------------------------------------------------------------------
 /**

@@ -87,7 +87,7 @@ void AssignmentPanel::Create()
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 0, 0);
    
    wxStaticText *mLhsLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Left-Hand Side") );
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Left-Hand Side" );
    mLhsTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0);
@@ -98,7 +98,7 @@ void AssignmentPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    wxStaticText *mRhsLabel =
-      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Right-Hand Side") );
+      new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Right-Hand Side" );
    mRhsTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(400,-1), 0);
@@ -159,8 +159,8 @@ void AssignmentPanel::SaveData()
 		mLhsTextCtrl->SetValue(mLhsTextCtrl->GetValue().Trim(true).Trim(false));
 		mRhsTextCtrl->SetValue(mRhsTextCtrl->GetValue().Trim(true).Trim(false));
    }
-   std::string newLhs = mLhsTextCtrl->GetValue().c_str();
-   std::string newRhs = mRhsTextCtrl->GetValue().c_str();
+   std::string newLhs = mLhsTextCtrl->GetValue().WX_TO_STD_STRING;
+   std::string newRhs = mRhsTextCtrl->GetValue().WX_TO_STD_STRING;
    
    #if DEBUG_ASSIGNMENT_PANEL_SAVE
    MessageInterface::ShowMessage

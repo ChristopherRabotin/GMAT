@@ -43,8 +43,8 @@ private:
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-   void OnPageChange(wxCommandEvent &event);
-    
+   void OnPageChange(wxNotebookEvent &event);
+   
    CelestialBody *theCelestialBody;
    CelestialBody *origCelestialBody;
    //Planet *thePlanet;
