@@ -30,6 +30,8 @@
 //#define DEBUG_SOLAR_POWER_SYSTEM_SET
 //#define DEBUG_SOLAR_RENAME
 //#define DEBUG_SOLAR_POWER_OBJECT
+//#define DEBUG_SET
+
 
 //---------------------------------
 // static data
@@ -81,7 +83,8 @@ SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    solarCoeff4          (0.10843),
    solarCoeff5          (-0.01279),
    shadowModel          ("DualCone"),
-   shadowState          (NULL)
+   shadowState          (NULL),
+   settingNoBodies      (false)
 {
    objectTypes.push_back(Gmat::SOLAR_POWER_SYSTEM);
    objectTypeNames.push_back("SolarPowerSystem");
@@ -94,7 +97,9 @@ SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    defaultShadowBodyNames.clear();
    defaultShadowBodyNames.push_back("Earth");
 
-
+   // we need to make sure the shadow bodies are written correctly to the
+   // script (even if it's empty)
+   writeEmptyStringArray = true;
    shadowState    = new ShadowState();
 }
 
@@ -131,7 +136,8 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    solarCoeff4          (copy.solarCoeff4),
    solarCoeff5          (copy.solarCoeff5),
    shadowModel          (copy.shadowModel),
-   shadowState          (NULL)
+   shadowState          (NULL),
+   settingNoBodies      (copy.settingNoBodies)
 {
    parameterCount = copy.parameterCount;
 //   isInitialized  = Initialize();
@@ -179,6 +185,8 @@ SolarPowerSystem& SolarPowerSystem::operator=(const SolarPowerSystem& copy)
       solarCoeff3       = copy.solarCoeff3;
       solarCoeff4       = copy.solarCoeff4;
       solarCoeff5       = copy.solarCoeff5;
+
+      settingNoBodies   = copy.settingNoBodies;
 
       shadowBodyNames.clear();
       // copy the list of body names
@@ -245,7 +253,7 @@ bool SolarPowerSystem::Initialize()
 
    // if no names were added to the ShadowBodies list, add the Default body
    // This will cause "ShadowBodies = {'Earth'} to be written to the script <<
-   if (shadowBodyNames.empty())
+   if ((shadowBodyNames.empty()) && (!settingNoBodies))
       shadowBodyNames = defaultShadowBodyNames;
 //      shadowBodyNames.push_back("Earth");
 
@@ -384,7 +392,7 @@ Real SolarPowerSystem::GetPowerGenerated() const
    Integer   numOcculted   = 0;
    Real percentSun         = 1;
    Real percentSunAll = 1;
-   if (shadowModel != "None")
+   if ((shadowModel != "None") && !shadowBodies.empty())
    {
       bool lit           = true;
       bool dark          = false;
@@ -821,8 +829,26 @@ bool SolarPowerSystem::SetStringParameter(const Integer id,
                                           const std::string &value,
                                           const Integer index)
 {
+   #ifdef DEBUG_SET
+      MessageInterface::ShowMessage(
+            "Entering SetStringParameter with id = %d, value = %s, and index = %d\n",
+            id, value.c_str(), index);
+   #endif
    if (id == SHADOW_BODIES)
    {
+      // Check to see if we are setting a blank list here; if we are,
+      // then we do NOT want to use the default list of bodies
+      Integer sz = value.length();
+      if ((sz <= 0) || (GmatStringUtil::IsBlank(value)) ||
+          ((value[0] == '{') && (value[sz-1] == '}')))
+      {
+         settingNoBodies = true;
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage(
+                  "In SetStringParameter, settingNoBodies = true!!\n");
+         #endif
+         return true;
+      }
       if ((index < 0) || (index > (Integer) shadowBodyNames.size()))
       {
          std::string errmsg = "For PowerSystem ";
@@ -843,12 +869,22 @@ bool SolarPowerSystem::SetStringParameter(const Integer id,
          if (find(shadowBodyNames.begin(), shadowBodyNames.end(), value) == shadowBodyNames.end())
          {
                shadowBodyNames.push_back(value);
+               settingNoBodies = false;
+               #ifdef DEBUG_SET
+                  MessageInterface::ShowMessage(
+                        "In SetStringParameter, settingNoBodies = false\n");
+               #endif
          }
       }
       // ... or, replace current name
       else
       {
          shadowBodyNames.at(index) = value;
+         settingNoBodies = false;
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage(
+                  "In SetStringParameter, settingNoBodies = false (2)\n");
+         #endif
       }
       return true;
    }
@@ -873,7 +909,7 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(const Integer id) c
 {
    if (id == SHADOW_BODIES)
    {
-      if (shadowBodyNames.empty())
+      if ((shadowBodyNames.empty()) && (!settingNoBodies))
       {
          return defaultShadowBodyNames;
       }
@@ -1059,6 +1095,22 @@ bool SolarPowerSystem::RenameRefObject(const Gmat::ObjectType type,
    return true;  // why doesn't this call the parent class?
 }
 
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringArray
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a StringArray to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool SolarPowerSystem::WriteEmptyStringArray(Integer id)
+{
+   if (id == SHADOW_BODIES)
+      return true;
+   return PowerSystem::WriteEmptyStringArray(id);
+}
 
 ////------------------------------------------------------------------------------
 //// virtual bool HasRefObjectTypeArray()
