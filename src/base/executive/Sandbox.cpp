@@ -890,9 +890,11 @@ bool Sandbox::Execute()
                
                // Write out event data, if any
                for (UnsignedInt i = 0; i < events.size(); ++i)
-                  events[i]->ReportEventData("Execution was interrupted; the "
+                  events[i]->LocateEvents("Execution was interrupted; the "
                      "event list may be incomplete");
-
+//                  events[i]->ReportEventData("Execution was interrupted; the "
+//                     "event list may be incomplete");
+//
                throw SandboxException("Execution interrupted");
                //return rv;
             }
@@ -1030,7 +1032,8 @@ bool Sandbox::Execute()
    
    // Write out event data, if any
    for (UnsignedInt i = 0; i < events.size(); ++i)
-      events[i]->ReportEventData();
+      events[i]->LocateEvents();
+//      events[i]->ReportEventData();
 
    return rv;
 }
@@ -1610,7 +1613,6 @@ void Sandbox::SetGlobalRefObject(GmatCommand *cmd)
    #endif
    cmd->SetSolarSystem(solarSys);
    cmd->SetTransientForces(&transientForces);
-   cmd->SetEventLocators(&events);
    cmd->SetInternalCoordSystem(internalCoordSys);
    cmd->SetPublisher(publisher);
 }

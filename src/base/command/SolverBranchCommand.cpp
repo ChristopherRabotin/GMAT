@@ -26,7 +26,6 @@
 #include "Vary.hpp"                // For SetInitialValue() method
 #include "Subscriber.hpp"
 #include "MessageInterface.hpp"
-#include "EventLocator.hpp"
 #include "FormationInterface.hpp"
 
 #include <sstream>                 // for <<
@@ -258,19 +257,6 @@ void SolverBranchCommand::StoreLoopData()
          
          localStore.push_back(form);
       }
-      if (obj->GetType() == Gmat::EVENT_LOCATOR)
-      {
-         EventLocator *orig = (EventLocator*)(obj);
-         EventLocator *el  = (EventLocator*)orig->Clone();
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            ((GmatBase*)el, "cloned local eventLocator",
-             "SolverBranchCommand::StoreLoopData()",
-             "EventLocator *el  = new EventLocator(*orig)");
-         #endif
-
-         localStore.push_back(el);
-      }
       ++pair;
    }
    // Check the Global Object Store next
@@ -318,19 +304,6 @@ void SolverBranchCommand::StoreLoopData()
          #endif
          localStore.push_back(form);
       }
-      if (obj->GetType() == Gmat::EVENT_LOCATOR)
-      {
-         EventLocator *orig = (EventLocator*)(obj);
-         EventLocator *el  = (EventLocator*)orig->Clone();
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Add
-            ((GmatBase*)el, "cloned local eventLocator",
-             "SolverBranchCommand::StoreLoopData()",
-             "EventLocator *el  = new EventLocator(*orig)");
-         #endif
-
-         localStore.push_back(el);
-      }
       ++globalPair;
    }
 }
@@ -347,7 +320,6 @@ void SolverBranchCommand::ResetLoopData()
 {
    Spacecraft *sc;
    FormationInterface *fm;
-   EventLocator *el;
    std::string name;
     
    for (std::vector<GmatBase *>::iterator i = localStore.begin();
@@ -366,11 +338,6 @@ void SolverBranchCommand::ResetLoopData()
          {
             fm = (FormationInterface*)gb;
             *fm = *((FormationInterface*)(*i));
-         }
-         else if (gb->GetType() == Gmat::EVENT_LOCATOR)
-         {
-            el = (EventLocator*)gb;
-            *el = *((EventLocator*)(*i));
          }
       }
    }
