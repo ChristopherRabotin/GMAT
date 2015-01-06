@@ -25,7 +25,7 @@
 
 
 #include "EventLocator.hpp"
-#include "Contact.hpp"
+#include "EventLocatorDefs.hpp"
 
 
 /**
@@ -42,7 +42,7 @@
  * which has untested initialization but is missing the reference object
  * methods.
  */
-class ContactLocator : public EventLocator
+class LOCATOR_API ContactLocator : public EventLocator
 {
 public:
    ContactLocator(const std::string &name);
@@ -84,13 +84,35 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
 
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
+   virtual const ObjectTypeArray&
+                        GetTypesForList(const Integer id);
+   virtual const ObjectTypeArray&
+                        GetTypesForList(const std::string &label);
+
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name);
+
+   virtual bool         HasRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
 
    virtual GmatBase*    Clone() const;
    virtual bool         Initialize();
-   virtual void         ClearContacts();
+   virtual void         ReportEventData(const std::string &reportNotice = "");
 
    DEFAULT_TO_NO_CLONES
 
@@ -99,19 +121,15 @@ protected:
    StringArray stationNames;
    /// Collection of stations
    ObjectArray stations;
-   /// List of line of sight obstructors
-   StringArray bodyNames;
-   /// Collection of bodies
-   ObjectArray bodies;
+   /// Light time Direction
+   std::string lightTimeDirection;
 
-   /// The Contact event functions
-   std::vector<Contact*>     contacts;
 
    /// Published parameters for contact locators
     enum
     {
        STATIONS = EventLocatorParamCount,
-       BODIES,
+       LIGHT_TIME_DIRECTION,
        ContactLocatorParamCount
     };
 
@@ -121,6 +139,9 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[ContactLocatorParamCount - EventLocatorParamCount];
+
+    virtual void         FindEvents(Real fromTime, Real toTime);
+    virtual std::string  GetAbcorrString();
 };
 
 #endif /* ContactLocator_hpp */
