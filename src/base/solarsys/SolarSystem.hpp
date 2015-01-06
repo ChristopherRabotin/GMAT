@@ -79,6 +79,7 @@ public:
 
 #ifdef __USE_SPICE__
    void                    LoadSpiceKernels();
+   void                    LoadPCKs();
    SpiceOrbitKernelReader* GetSpiceOrbitKernelReader();
 #endif
    
