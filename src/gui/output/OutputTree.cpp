@@ -38,6 +38,7 @@
 
 #include "GuiInterpreter.hpp"
 #include "Subscriber.hpp"
+#include "EventLocator.hpp"
 #include "ReportFile.hpp"
 #include "FileUtil.hpp"       // for GmatFileUtil::CompareTextLines()
 #include "MessageInterface.hpp"

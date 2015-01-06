@@ -552,15 +552,6 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    #endif
 
 
-	#ifdef DEBUG_EVENTLOCATION
-      if (pPhysicalModel->IsOfType("EventModel"))
-      {
-         MessageInterface::ShowMessage("Adding an EventModel at \n");
-         MessageInterface::ShowMessage("                        <%p>\n",
-            pPhysicalModel);
-      }
-   #endif
-
    pPhysicalModel->SetDimension(dimension);
    isInitialized = false;
    
@@ -1389,11 +1380,6 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
-   }
-
-   if (id == Gmat::EVENT_FUNCTION_STATE)
-   {
-      // todo Fill this in?
    }
 
    #ifdef DEBUG_BUILDING_MODELS
