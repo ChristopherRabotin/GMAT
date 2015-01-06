@@ -195,12 +195,12 @@ bool SolarFluxReader::Open()
  * @return bool
  */
 //------------------------------------------------------------------------------
-bool SolarFluxReader::LoadFluxData(const std::string &obsFileName, const std::string &predictFileName)
+bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string &predictFile)
 {
-   if (!obsFileName.empty())
-      this->obsFileName = obsFileName;
-   if (!predictFileName.empty())
-      this->predictFileName = predictFileName;
+   if (!obsFile.empty())
+      obsFileName = obsFile;
+   if (!predictFile.empty())
+      predictFileName = predictFile;
 
    // Open the files to load
    Open();
@@ -213,11 +213,11 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFileName, const std::st
       {
          inObs.getline(line, 256, '\n');
       
-         if (strcmp(line, beg_ObsTag) == 0)
+         if (std::string(line).find(beg_ObsTag) != std::string::npos)
          {
             begObs = inObs.tellg();
          }
-         else if (strcmp(line, end_ObsTag) == 0)
+         else if (std::string(line).find(end_ObsTag) != std::string::npos)
          {
             endObs = inObs.tellg();
             endObs = endObs - strlen(line) - 2 ;
@@ -373,7 +373,7 @@ bool SolarFluxReader::LoadPredictData()
       inPredict.getline(line, 256, '\n');
       //last line in file may or may not have "END DATA" tag,
       // if it has, break 
-      if(strcmp(line, "END_DATA ") == 0)
+      if(std::string(line).find("END_DATA") != std::string::npos)
          break;
 
       std::istringstream buf(line);
@@ -471,5 +471,41 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
       fD = obsFluxData[index];
    }
 
+
+   //need to be called only for MSISE model (to do later)
+   PrepareApData(epoch, index, fD);
+
    return fD;
+}
+
+//------------------------------------------------------------------------------
+// PrepareApData(GmatEpoch epoch, Integer index, FluxData &fD)
+//------------------------------------------------------------------------------
+/**
+ * Function that replaces the ap data with data MSISE models need
+ * @param epoch The epoch of the needed data
+ * @param index The index of the data that filled in fD
+ * @param fD The data record that contains raw data for the requested epoch
+*/
+//------------------------------------------------------------------------------
+void SolarFluxReader::PrepareApData(GmatEpoch epoch, Integer index, 
+                                      SolarFluxReader::FluxData &fD)
+{
+   Integer subIndex = (Integer)((epoch - obsFluxData.at(index).epoch) * 8);
+  
+   Real apToUse[7];
+
+   // Fill in fD.ap so it contains these data:
+   /*  (1) DAILY AP */
+   /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
+   /*  (3) 3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME */   
+   /*  (4) 3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME */
+   /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
+   /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
+   /*        TO CURRENT TIME */
+   /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 59 HRS PRIOR */
+   /*        TO CURRENT TIME */
+
+
+
 }

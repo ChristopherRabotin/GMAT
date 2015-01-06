@@ -94,6 +94,7 @@ private:
 
    bool LoadObsData();
    bool LoadPredictData();
+   void PrepareApData(GmatEpoch epoch, Integer index, FluxData &fD);
 
 public:
    /// Open CSSI and Schatten files if opened
