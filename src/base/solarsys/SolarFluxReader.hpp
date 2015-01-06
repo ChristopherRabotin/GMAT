@@ -47,6 +47,7 @@ public:
       GmatEpoch epoch;
       Real kp[8];
       Real ap[8];
+      Real apAvg;
       Real adjF107;
       Real adjCtrF107a;
       Real obsF107;
@@ -65,7 +66,7 @@ public:
       FluxData &operator=(const FluxData &fD);
       // Used in Schatten file indexing
       Integer index;
-      Integer i;
+      Integer id;
    };
   
 private:
@@ -94,7 +95,6 @@ private:
 
    bool LoadObsData();
    bool LoadPredictData();
-   void PrepareApData(GmatEpoch epoch, Integer index, FluxData &fD);
 
 public:
    /// Open CSSI and Schatten files if opened
@@ -105,6 +105,9 @@ public:
    bool LoadFluxData(const std::string &obsFileName = "", const std::string &predictFileName = "");
    /// Get Flux data from either of two vectors filled in during LoadFluxData
    FluxData GetInputs(GmatEpoch epoch);
+   /// Change Ap data for MSISE model
+   void PrepareApData(FluxData &fD);
+
 };
 
 

@@ -382,7 +382,8 @@ void Msise90Atmosphere::GetInputs(Real epoch)
 
    if (fluxReaderLoaded && epoch > 0.0)
    {
-      fluxReader->GetInputs(epoch);
+      SolarFluxReader::FluxData fD = fluxReader->GetInputs(epoch);
+      fluxReader->PrepareApData(fD);
    }
    else
    {

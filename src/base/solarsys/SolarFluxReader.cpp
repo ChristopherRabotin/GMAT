@@ -135,20 +135,22 @@ inline SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const Sol
       return *this;
 
    epoch = fD.epoch;
-   for (Integer i = 0; i < 8; i++)
+   for (Integer j = 0; j < 8; j++)
    {
-      kp[i] = fD.kp[i];
-      ap[i] = fD.ap[i];
+      kp[j] = fD.kp[j];
+      ap[j] = fD.ap[j];
    }
+   apAvg = fD.apAvg;
    adjF107 = fD.adjF107;
    adjCtrF107a = fD.adjCtrF107a;
    obsF107 = fD.obsF107;
    obsCtrF107a = fD.obsCtrF107a;
-   for (Integer i = 0; i < 9; i++)
-      F107a[i] = fD.F107a[i];
-   for (Integer i = 0; i < 3; i++)
-      apSchatten[i] = fD.apSchatten[i];
+   for (Integer j = 0; j < 9; j++)
+      F107a[j] = fD.F107a[j];
+   for (Integer j = 0; j < 3; j++)
+      apSchatten[j] = fD.apSchatten[j];
    index = fD.index;
+   id = fD.id;
 
    return *this;
 }
@@ -211,7 +213,7 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
   
       while (true)
       {
-         inObs.getline(line, 256, '\n');
+         inObs.getline(line, 256);
       
          if (std::string(line).find(beg_ObsTag) != std::string::npos)
          {
@@ -240,15 +242,15 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
 
       while (true)
       {
-         inPredict.getline(line, 256, '\n');
+         inPredict.getline(line, 256);
          
          strLine = line;
          // if we read the line with "Nominal Timing" and "Early Timing" content, continue reading two more lines to get
          // into the data lines.
          if (strLine.find("NOMINAL TIMING") != std::string::npos && strLine.find("EARLY TIMING") != std::string::npos)
          {
-            inPredict.getline(line, 256, '\n');
-            inPredict.getline(line, 256, '\n');
+            inPredict.getline(line, 256);
+            inPredict.getline(line, 256);
            
             begData = inPredict.tellg();
            
@@ -314,7 +316,7 @@ bool SolarFluxReader::LoadObsData()
    inObs.seekg(begObs, std::ios_base::beg);
    while (true)
    {
-      inObs.getline(line, 256, '\n');
+      inObs.getline(line, 256);
       std::istringstream buf(line);
       std::istream_iterator<std::string> beg(buf), end;
       std::vector<std::string> tokens(beg, end);
@@ -328,6 +330,7 @@ bool SolarFluxReader::LoadObsData()
          fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str());
       for (Integer l=0; l<8; l++)
          fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
+      fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
       fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
       fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
       fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
@@ -370,7 +373,7 @@ bool SolarFluxReader::LoadPredictData()
 
    while (!inPredict.eof())
    {
-      inPredict.getline(line, 256, '\n');
+      inPredict.getline(line, 256);
       //last line in file may or may not have "END DATA" tag,
       // if it has, break 
       if(std::string(line).find("END_DATA") != std::string::npos)
@@ -395,11 +398,13 @@ bool SolarFluxReader::LoadPredictData()
          fD.F107a[l+6] = atof(tokens[l+10].c_str());
       fD.apSchatten[2] = atof(tokens[13].c_str());
       fD.index = -1;
+      fD.id = -1;
 
       for (Integer l = 0; l<8; l++)
          fD.kp[l] = -1;
       for (Integer l=0; l<8; l++)
          fD.ap[l] = -1;
+      fD.apAvg = -1;
       fD.adjF107 = -1;
       fD.adjCtrF107a = -1;
       fD.obsF107 = -1;
@@ -411,12 +416,12 @@ bool SolarFluxReader::LoadPredictData()
 
    std::vector<FluxData>::iterator it = predictFluxData.begin();
    it->index = 0;
-   it->i = 0;
+   it->id = 0;
    for (it = it+1; it != predictFluxData.end(); it++)
    {
       it->index = (Integer) (it->epoch - (it-1)->epoch);
       it->index += (it-1)->index;
-      it->i = (it-1)->i + 1;
+      it->id = (it-1)->id + 1;
    }
 
    return true;
@@ -460,7 +465,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
       {
          if ( index == it->index)
          {
-            fD = predictFluxData[it->i];
+            fD = predictFluxData[it->id];
             break;
          }
       }
@@ -469,11 +474,8 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    else
    {
       fD = obsFluxData[index];
+      fD.index = index;
    }
-
-
-   //need to be called only for MSISE model (to do later)
-   PrepareApData(epoch, index, fD);
 
    return fD;
 }
@@ -483,17 +485,17 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 //------------------------------------------------------------------------------
 /**
  * Function that replaces the ap data with data MSISE models need
- * @param epoch The epoch of the needed data
- * @param index The index of the data that filled in fD
+ *
  * @param fD The data record that contains raw data for the requested epoch
+ *
+ * @return void
 */
 //------------------------------------------------------------------------------
-void SolarFluxReader::PrepareApData(GmatEpoch epoch, Integer index, 
-                                      SolarFluxReader::FluxData &fD)
+void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD )
 {
-   Integer subIndex = (Integer)((epoch - obsFluxData.at(index).epoch) * 8);
-  
-   Real apToUse[7];
+   FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+   FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
+   FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
 
    // Fill in fD.ap so it contains these data:
    /*  (1) DAILY AP */
@@ -503,9 +505,34 @@ void SolarFluxReader::PrepareApData(GmatEpoch epoch, Integer index,
    /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
    /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
    /*        TO CURRENT TIME */
-   /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 59 HRS PRIOR */
+   /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
    /*        TO CURRENT TIME */
 
+//# yy mm dd BSRN ND Kp Kp Kp Kp Kp Kp Kp Kp Sum Ap  Ap  Ap  Ap  Ap  Ap  Ap  Ap  Avg Cp C9 ISN F10.7 Q Ctr81 Lst81 F10.7 Ctr81 Lst81
+//# --------------------------------------------------------------------------------------------------------------------------------
+//2009 01 12 2394 12  0  0  0  0  0  0  3  0   3   0   0   0   0   0   0   ((2   0)   0 0.0 0   8  67.0 0  66.7  66.2  69.3  68.8  67.9
+//2009 01 13 2394 13 10 20 17  0 10 10 13 10  90   (4   7   6   0   4   4))   ((5   4)   4 0.1 0   0  68.2 0  66.7  66.2  70.5  68.8  68.0
+//2009 01 14 2394 14 23 20 10 17 23  7 13 13 127   (9   7   4   6   9   3))   (5) (5)   6 0.3 1   0  68.9 0  66.7  66.2  71.2  68.8  68.0
+//2009 01 15 2394 15 13 20 10 13  7 20 23 23 130   (5) (7)   4   5   3   7   9  9 (6) 0.3 1   0  68.8 0  66.8  66.2  71.1  68.8  68.1
 
+   fD.ap[2] = fD.ap[0];
+   fD.ap[0] = fD.apAvg;
+   fD.ap[1] = fD.ap[1];
+   
+   fD.ap[3] = fD_OneBefore.ap[7];
+   fD.ap[4] = fD_OneBefore.ap[6];
 
+   for (Integer i =0; i<6; i++)
+      fD.ap[5] += fD_OneBefore.ap[i];
+   for (Integer i=0; i<2; i++)
+      fD.ap[5] += fD_TwoBefore.ap[i+6];
+   fD.ap[5] /= 8;
+
+   for (Integer i =0; i<6; i++)
+      fD.ap[6] += fD_TwoBefore.ap[i];
+   for (Integer i=0; i<2; i++)
+      fD.ap[6] += fD_ThreeBefore.ap[i+6];
+   fD.ap[6] /= 8;
+
+   return;
 }
