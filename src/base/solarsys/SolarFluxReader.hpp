@@ -42,7 +42,7 @@ public:
    SolarFluxReader& operator=(const SolarFluxReader &sfr);
    ~SolarFluxReader(); 
    
-   typedef struct FluxDataCSSI
+   struct FluxDataCSSI
    {
       GmatEpoch epoch;
       Real kp[8];
@@ -54,7 +54,7 @@ public:
       Real obsCtrF107a;
    };
 
-   typedef struct FluxData : FluxDataCSSI
+   struct FluxData : FluxDataCSSI
    {
       // the first three items is NOMINAL, the second three items
       // is EARLY, and the last three items is LATE TIMING.
