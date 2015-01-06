@@ -102,7 +102,7 @@ public:
    /// Close CSSI and Schatten files if opened
    bool Close();
    /// Load data from both opened files
-   bool LoadFluxData(const std::string &obsFileName = "", const std::string &predictFileName = "");
+   bool LoadFluxData(const std::string &obsFile = "", const std::string &predictFile = "");
    /// Get Flux data from either of two vectors filled in during LoadFluxData
    FluxData GetInputs(GmatEpoch epoch);
    /// Change Ap data for MSISE model
