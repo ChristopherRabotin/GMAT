@@ -33,7 +33,7 @@ class GMAT_API EventException : public BaseException
 {
 public:
    EventException(const std::string &details = "");
-   virtual ~EventException();
+//   virtual ~EventException();
    EventException(const EventException &be);
 };
 
