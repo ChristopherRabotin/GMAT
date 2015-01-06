@@ -400,6 +400,7 @@ public:
    virtual const ObjectTypeArray& GetTypesForList(const Integer id);
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
+   virtual bool         WriteEmptyStringArray(Integer id);
    virtual const std::string&
                         GetGeneratingString(
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -584,6 +585,9 @@ protected:
    IntegerArray        covarianceSizes;
    // Covariance matrix for parameters identified in covarianceList
    Covariance          covariance;
+
+   // Some string arrays need to be written even if they are empty
+   bool                writeEmptyStringArray;
 
    // Scripting interfaces
    void                CopyParameters(const GmatBase &a);
