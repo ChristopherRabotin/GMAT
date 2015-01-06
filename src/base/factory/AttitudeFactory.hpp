@@ -28,9 +28,12 @@
 class GMAT_API AttitudeFactory : public Factory
 {
 public:
-   Attitude*  CreateAttitude(const std::string &ofType,
-                             const std::string &withName = "");
-
+   // method to create Solver object
+   virtual GmatBase*    CreateObject(const std::string &ofType,
+                                     const std::string &withName = "");        
+   virtual Attitude*    CreateAttitude(const std::string &ofType,
+                                       const std::string &withName = "");
+   
    // default constructor
    AttitudeFactory();
    // constructor

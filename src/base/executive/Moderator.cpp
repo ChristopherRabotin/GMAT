@@ -81,7 +81,8 @@
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
-//#define DEBUG_CREATE_DEFAULT_RESOURCE
+//#define DEBUG_CREATE_DEFAULT_RESOURCE 1
+//#define DEBUG_CREATE_OTHER_RESOURCE 1
 //#define DEBUG_CREATE_COMMAND 1
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
@@ -2096,7 +2097,7 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objType, const std::string &type,
                                        const std::string &name, bool createDefault)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_OTHER_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateOtherObject() objType=%d, type='%s', name='%s', createDefault=%d, "
        "objectManageOption=%d\n", objType, type.c_str(), name.c_str(), createDefault,
@@ -2141,7 +2142,7 @@ GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objType, const std::stri
                                        e.GetFullMessage());
       }
       
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_OTHER_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateOtherObject() returning <%p>\n", obj);
       #endif
@@ -2149,7 +2150,7 @@ GmatBase* Moderator::CreateOtherObject(Gmat::ObjectType objType, const std::stri
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_OTHER_RESOURCE
       MessageInterface::ShowMessage
          ("Moderator::CreateOtherObject() Unable to create an object "
           "name: %s already exist\n", name.c_str());
@@ -2377,7 +2378,8 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
       
       // Manually set configuration changed to true here since
       // SolarSystem is not configured yet
-      theConfigManager->ConfigurationChanged(true);
+      if (objectManageOption == 1)
+         theConfigManager->ConfigurationChanged(true);
       
       return obj;
    }
@@ -2868,6 +2870,10 @@ Propagator* Moderator::GetPropagator(const std::string &name)
 //------------------------------------------------------------------------------
 PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
 {
+   #ifdef DEBUG_CREATE_PHYSICAL_MODEL
+   MessageInterface::ShowMessage
+      ("Moderator::CreateDefaultPhysicalModel() entered, name='%s'\n", name.c_str());
+   #endif
    std::string type = "GravityField";
    
    if (GetPhysicalModel(name) == NULL)
@@ -2882,6 +2888,10 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
       
       // set the EOP file, since it's a GravityField object
       HarmonicField *hf = (HarmonicField*) obj;
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
+      MessageInterface::ShowMessage
+         ("   Settng EopFile<%p> to HarmonicField<%p>\n", theEopFile, hf);
+      #endif
       hf->SetEopFile(theEopFile);
 
       #ifdef DEBUG_MEMORY
@@ -2898,7 +2908,7 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
       obj->SetBodyName("Earth");
       
       std::string potFile = GetFileName("JGM2_FILE");
-      #ifdef DEBUG_DEFAULT_PM
+      #ifdef DEBUG_DEFAULT_PHYSICAL_MODEL
       MessageInterface::ShowMessage
          ("Moderator::CreateDefaultPhysicalModel() "
           "calling %s->SetStringParameter(PotentialFile, %s)\n", obj->GetName().c_str(),
@@ -2920,13 +2930,18 @@ PhysicalModel* Moderator::CreateDefaultPhysicalModel(const std::string &name)
                                        e.GetFullMessage());
       }
       
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
+      MessageInterface::ShowMessage
+         ("Moderator::CreateDefaultPhysicalModel() returning new PhysicalModel<%p>'%s'\n",
+          obj, obj->GetName().c_str());
+      #endif
       return obj;
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
       MessageInterface::ShowMessage
-         ("Moderator::CreatePhysicalModel() Unable to create PhysicalModel "
+         ("Moderator::CreateDefaultPhysicalModel() Unable to create PhysicalModel "
           "name: %s already exist\n", name.c_str());
       #endif
       return GetPhysicalModel(name);
@@ -2988,7 +3003,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
       MessageInterface::ShowMessage
          ("Moderator::CreatePhysicalModel() Unable to create PhysicalModel "
           "name: %s already exist\n", name.c_str());
@@ -2998,6 +3013,10 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
    if ((obj != NULL) && obj->IsOfType("HarmonicField"))
    {
       HarmonicField *hf = (HarmonicField*) obj;
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
+      MessageInterface::ShowMessage
+         ("   Settng EopFile<%p> to HarmonicField<%p>\n", theEopFile, hf);
+      #endif
       hf->SetEopFile(theEopFile);
    }
    if ((obj != NULL) && obj->IsOfType("RelativisticCorrection"))
@@ -3005,6 +3024,12 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
       RelativisticCorrection *rc = (RelativisticCorrection*) obj;
       rc->SetEopFile(theEopFile);
    }
+   
+   #ifdef DEBUG_CREATE_PHYSICAL_MODEL
+   MessageInterface::ShowMessage
+      ("Moderator::CreatePhysicalModel() returning new PhysicalModel<%p>'%s'\n",
+       obj, obj->GetName().c_str());
+   #endif
    return obj;
 }
 
@@ -3553,7 +3578,7 @@ Parameter* Moderator::GetParameter(const std::string &name)
 ODEModel* Moderator::CreateODEModel(const std::string &type,
                                     const std::string &name)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #ifdef DEBUG_CREATE_PHYSICAL_MODEL
    MessageInterface::ShowMessage
       ("Moderator::CreateODEModel() name='%s', objectManageOption=%d\n",
        name.c_str(), objectManageOption);
@@ -3599,7 +3624,7 @@ ODEModel* Moderator::CreateODEModel(const std::string &type,
                                        e.GetFullMessage() + "\n");
       }
       
-      #if DEBUG_CREATE_RESOURCE
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
       MessageInterface::ShowMessage
          ("Moderator::CreateODEModel() returning new ODEModel, <%p> '%s'\n",
           obj, obj->GetName().c_str());
@@ -3608,7 +3633,7 @@ ODEModel* Moderator::CreateODEModel(const std::string &type,
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #ifdef DEBUG_CREATE_PHYSICAL_MODEL
       MessageInterface::ShowMessage
          ("Moderator::CreateODEModel() Unable to create ODEModel "
           "name: %s already exist <%p>\n", name.c_str(), obj);
@@ -3633,7 +3658,7 @@ ODEModel* Moderator::GetODEModel(const std::string &name)
       {
          fm = (ODEModel*)obj;
          
-         #if DEBUG_CREATE_RESOURCE
+         #ifdef DEBUG_CREATE_PHYSICAL_MODEL
          MessageInterface::ShowMessage
             ("Moderator::GetODEModel() name='%s', returning <%p>\n", name.c_str(), fm);
          #endif
@@ -3642,7 +3667,7 @@ ODEModel* Moderator::GetODEModel(const std::string &name)
       }
    }
    
-   #if DEBUG_CREATE_RESOURCE
+   #ifdef DEBUG_CREATE_PHYSICAL_MODEL
    MessageInterface::ShowMessage
       ("Moderator::GetODEModel() name='%s', returning <%p>\n", name.c_str(), fm);
    #endif
@@ -5371,6 +5396,11 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
    if (fileName != "")
       cmd =  theScriptInterpreter->InterpretGmatFunction(fileName);
    
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
+   #endif
+   
    ResetConfigurationChanged();
    
    #if DEBUG_GMAT_FUNCTION
@@ -5455,6 +5485,13 @@ GmatCommand* Moderator::InterpretGmatFunction(Function *funct, ObjectMap *objMap
    
    GmatCommand *cmd = NULL;
    cmd = theScriptInterpreter->InterpretGmatFunction(funct);
+   
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretGmatFunction() resetting configurationchanged\n");
+   #endif
+   
+   ResetConfigurationChanged();
    
    // reset current function to NULL
    currentFunction = NULL;

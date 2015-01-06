@@ -1050,7 +1050,7 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
                    internalCS->GetTypeName().c_str(), internalCS->GetName().c_str());
                #endif
                // if things have already been moved to the globalObjectStore, put it there
-               if ((GOS->size() > 0) && (fixedCS->GetIsGlobal()))
+               if ((GOS->size() > 0) && (fixedCS->IsGlobal()))
                   (*GOS)[*i] = fixedCS;
                // otherwise, put it in the Sandbox object map - it will be moved to the GOS later
                else

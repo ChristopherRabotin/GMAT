@@ -1053,7 +1053,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
 }
 
 //------------------------------------------------------------------------------
-//  bool GetIsGlobal()
+//  bool tIsGlobal()
 //------------------------------------------------------------------------------
 /**
  * Method to return the isGlobal flag for an object.
@@ -1061,7 +1061,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
  * @return value of isGlobal flag (i.e. whether or not this object is Global)
  */
 //------------------------------------------------------------------------------
-bool GmatBase::GetIsGlobal() const
+bool GmatBase::IsGlobal() const
 {
    return isGlobal;
 }

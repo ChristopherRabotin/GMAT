@@ -38,16 +38,16 @@
 
 //#define DEBUG_FUNCTION_MANAGER
 //#define DEBUG_FM_SET
-#define DEBUG_FM_INIT
-#define DEBUG_FM_REFRESH
+//#define DEBUG_FM_INIT
+//#define DEBUG_FM_REFRESH
 //#define DEBUG_FM_EVAL
-#define DEBUG_FM_EXECUTE
+//#define DEBUG_FM_EXECUTE
 //#define DEBUG_FM_RESULT
-#define DEBUG_FM_FINALIZE
+//#define DEBUG_FM_FINALIZE
 //#define DEBUG_FM_STACK
-#define DEBUG_OBJECT_MAP
+//#define DEBUG_OBJECT_MAP
 //#define DEBUG_WRAPPERS
-#define DEBUG_CLEANUP
+//#define DEBUG_CLEANUP
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY

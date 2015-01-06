@@ -624,7 +624,7 @@ bool Sandbox::Initialize()
             (omi->first).c_str(), (obj->GetTypeName()).c_str());
       #endif
       // Check the isGlobal flag
-      if (obj->GetIsGlobal())
+      if (obj->IsGlobal())
       {
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
@@ -1187,7 +1187,10 @@ void Sandbox::Clear()
       if ((omi->second)->GetType() != Gmat::PROP_SETUP)
       {
       Integer count = (omi->second)->GetOwnedObjectCount();
-      MessageInterface::ShowMessage("==> ownedObjectCount = %d\n", count);
+      #ifdef DEBUG_SANDBOX_CLEAR
+      MessageInterface::ShowMessage
+         ("   ownedObjectCount of '%s' = %d\n", (omi->second)->GetName().c_str(), count);
+      #endif
       for (Integer i = 0; i < count; ++i)
       {
          if ((omi->second)->GetOwnedObject(i)->IsOfType(Gmat::SUBSCRIBER))

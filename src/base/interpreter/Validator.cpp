@@ -1091,6 +1091,10 @@ bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
             isLeftValid = false;
             theErrorMsg = "Failed to set ElementWrapper for LHS object \"" + lhs +
                "\" in Assignment";
+            std::string lastMsg = cmd->GetLastErrorMessage();
+            //MessageInterface::ShowMessage("lastMsg = '%s'\n", lastMsg.c_str());
+            if (lastMsg != "")
+               theErrorMsg = theErrorMsg + "\n(" + lastMsg + ")";
             // Do not return to handle LHS error and continue on RHS (LOJ: 2013.02.27)
             //return HandleError();
             HandleError();
@@ -1485,7 +1489,7 @@ ElementWrapper* Validator::CreateSolarSystemWrapper(GmatBase *obj,
       #endif
       #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage
-         ("Validator::CreateSolarSystemWrapper() returning <%p>\n", ew);
+         ("Validator::CreateSolarSystemWrapper() 1 returning <%p>\n", ew);
       #endif
       return ew;
    }
@@ -1548,7 +1552,7 @@ ElementWrapper* Validator::CreateSolarSystemWrapper(GmatBase *obj,
    
    #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
-      ("Validator::CreateSolarSystemWrapper() returning <%p>\n", ew);
+      ("Validator::CreateSolarSystemWrapper() 2 returning <%p>\n", ew);
    #endif
    
    return ew;
@@ -1707,7 +1711,7 @@ ElementWrapper* Validator::CreateWrapperWithDot(bool parametersFirst, Integer ma
       
       #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage
-         ("Validator::CreateSolarSystemWrapper() returning <%p>\n", ew);
+         ("Validator::CreateWrapperWithDot() returning <%p>\n", ew);
       #endif
       
       return ew;
@@ -1993,7 +1997,14 @@ GmatBase* Validator::FindObject(const std::string &name, const std::string &ofTy
       return NULL;
    
    if (name == "SolarSystem")
+   {
+      #ifdef DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("Validator::FindObject() returning SolarSystem <%p>'%s'\n", theSolarSystem,
+          theSolarSystem->GetName().c_str());
+      #endif
       return theSolarSystem;
+   }
    
    GmatBase *obj = NULL;
    std::string newName = name;
@@ -2006,7 +2017,7 @@ GmatBase* Validator::FindObject(const std::string &name, const std::string &ofTy
       
       #ifdef DEBUG_FIND_OBJECT
       MessageInterface::ShowMessage
-         ("Validator::FindObject() entered: newName=%s\n", newName.c_str());
+         ("Validator::FindObject() newName=%s\n", newName.c_str());
       #endif
    }
    
@@ -2036,7 +2047,7 @@ GmatBase* Validator::FindObject(const std::string &name, const std::string &ofTy
    
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::FindObject() returning <%p><%s><%s>\n", obj,
+      ("Validator::FindObject() returning <%p><%s>'%s'\n", obj,
        (obj == NULL) ? "NULL" : obj->GetTypeName().c_str(),
        (obj == NULL) ? "NULL" : obj->GetName().c_str());
    #endif

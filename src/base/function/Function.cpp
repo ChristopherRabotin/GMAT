@@ -27,7 +27,7 @@
 //#define DEBUG_FUNCTION_SET
 //#define DEBUG_FUNCTION_IN_OUT
 //#define DEBUG_WRAPPER_CODE
-//#define DEBUG_FUNCTION_OBJ
+#define DEBUG_FUNCTION_OBJ
 //#define DEBUG_AUTO_OBJ
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_FIND_OBJECT
@@ -980,22 +980,24 @@ void Function::ClearFunctionObjects()
          #ifdef DEBUG_FUNCTION_OBJ
          MessageInterface::ShowMessage
             ("   isLocal = %d, isGlobal = %d, isAutomaticGlobal = %d, \n",
-             obj->IsLocal(), obj->GetIsGlobal(), obj->IsAutomaticGlobal());
+             obj->IsLocal(), obj->IsGlobal(), obj->IsAutomaticGlobal());
          #endif
-         if ((omi->second)->IsLocal())
+         // @note CelestialBody is added to SolarSystem and it will be deleted when
+         // when SolarSystem in use is deleted (LOJ: 2014.12.23)
+         if ((omi->second)->IsLocal() && !((omi->second)->IsOfType(Gmat::CELESTIAL_BODY)))
          {
-         #ifdef DEBUG_MEMORY
-         GmatBase *obj = omi->second;
-         MemoryTracker::Instance()->Remove
-            (obj, obj->GetName(), "Function::ClearFunctionObjects()",
-             "deleting functionObj");
-         #endif
-         #ifdef DEBUG_FUNCTION_OBJ
-         MessageInterface::ShowMessage("   Deleting since it is a local object\n");
-         #endif
-         delete omi->second;
-         omi->second = NULL;
-         functionObjectMap.erase(omi);
+            #ifdef DEBUG_MEMORY
+            GmatBase *obj = omi->second;
+            MemoryTracker::Instance()->Remove
+               (obj, obj->GetName(), "Function::ClearFunctionObjects()",
+                "deleting functionObj");
+            #endif
+            #ifdef DEBUG_FUNCTION_OBJ
+            MessageInterface::ShowMessage("   Deleting since it is a local object\n");
+            #endif
+            delete omi->second;
+            omi->second = NULL;
+            functionObjectMap.erase(omi);
          }
       }
    }

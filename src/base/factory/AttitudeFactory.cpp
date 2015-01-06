@@ -39,6 +39,27 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
+//GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Returns a GmatBase object pointer to a new object. 
+ *
+ * @param <ofType>   specific type of object to create.
+ * @param <withName> name to give to the newly created object.
+ *
+ * @return pointer to a new object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of the requested type.
+ */
+//------------------------------------------------------------------------------
+GmatBase* AttitudeFactory::CreateObject(const std::string &ofType,
+                                        const std::string &withName)
+{
+   return CreateAttitude(ofType, withName);
+}
+
+//------------------------------------------------------------------------------
 //  CreateAttitude(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**

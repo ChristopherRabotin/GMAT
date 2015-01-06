@@ -1396,8 +1396,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
 {
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("Assignment::SetElementWrapper() toWrapper=<%p>, name='%s'\n   lhs='%s'\n   rhs='%s', "
-       "mathTree=<%p>\n", toWrapper,withName.c_str(), lhs.c_str(), rhs.c_str(), mathTree);
+      ("Assignment::SetElementWrapper() entered, toWrapper=<%p>, name='%s'\n   "
+       "lhs='%s'\n   rhs='%s', mathTree=<%p>\n", toWrapper,withName.c_str(),
+       lhs.c_str(), rhs.c_str(), mathTree);
    #endif
    
    if (toWrapper == NULL)
@@ -1454,7 +1455,14 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
             settabilityError = "The field " +
                   toWrapper->GetDescription() + " cannot be set after "
                   "the Mission Sequence has started";
+            lastErrorMessage = settabilityError;
             omitLHSBecauseOfSettability = true;
+            #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage
+               ("Assignment::SetElementWrapper() returning false, %s\n",
+                settabilityError.c_str());
+            #endif
+            
             return false;
          }
       }
@@ -1470,7 +1478,13 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
             settabilityError = "Object Assignment is not allowed in "
                   "the Mission Sequence for " + obj->GetTypeName() +
                   " objects";
+            lastErrorMessage = settabilityError;
             omitLHSBecauseOfSettability = true;
+            #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage
+               ("Assignment::SetElementWrapper() returning false, %s\n",
+                settabilityError.c_str());
+            #endif
             return false;
          }
       }

@@ -56,6 +56,14 @@ using namespace GmatMathConstants;      // for RAD_PER_ARCSEC, etc.
 //#define DEBUG_TIME_CALC
 //#define DEBUG_ROT_MATRIX
 
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -373,7 +381,21 @@ void BodySpinSunAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    #endif
 
    if (mj2kcs != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (mj2kcs, "mj2kcs", "BodySpinSunAxes::CalculateRotationMatrix()",
+          "deleting localCoordSystem");
+      #endif
       delete mj2kcs;
+   }
    if (bfcs != NULL)
+   {
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (bfcs, "bfcs", "BodySpinSunAxes::CalculateRotationMatrix()",
+          "deleting localCoordSystem");
+      #endif
       delete bfcs;
+   }
 }

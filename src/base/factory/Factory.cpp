@@ -34,10 +34,10 @@
 /**
  * Returns a GmatBase object pointer to a new object. 
  *
- * @param <ofType>   specific type of Spacecraft object to create.
- * @param <withName> name to give to the newly created Spacecraft object.
+ * @param <ofType>   specific type of object to create.
+ * @param <withName> name to give to the newly created object.
  *
- * @return pointer to a new Spacecraft object.
+ * @return pointer to a new object.
  *
  * @exception <FactoryException> thrown if the factory does not create
  * objects of the requested type.

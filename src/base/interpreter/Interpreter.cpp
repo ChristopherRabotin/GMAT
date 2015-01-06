@@ -54,7 +54,7 @@
 //#define DEBUG_COMMAND_VALIDATION
 //#define DEBUG_OBJECT_LIST
 //#define DEBUG_ARRAY_GET
-//#define DEBUG_CREATE_OBJECT
+#define DEBUG_CREATE_OBJECT
 //#define DEBUG_CREATE_CELESTIAL_BODY
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
@@ -88,9 +88,6 @@
 //#define DEBUG_AXIS_SYSTEM
 //#define DEBUG_SET_MEASUREMENT_MODEL
 //#define DEBUG_ALL_OBJECTS
-
-// New way of creating objects
-#define __NEW_WAY_OF_CREATE_OBJECT__
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -1039,7 +1036,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
 //             (name != "EarthFixed")    &&
 //             (name != "EarthICRF"))
 //         {
-            obj = FindObject(name);
+            obj = FindObject(name, type);
             // Since System Parameters are created automatically as they are referenced,
             // do not give warning if creating a system parameter
             if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
@@ -1072,107 +1069,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       ObjectMap *functionMap = currentFunction->GetFunctionObjectMap();
       theModerator->SetObjectMap(functionMap);
    }
-   
-   //======================================================================
-   // This block of code is the future implementation of creating objects
-   // of non-special object types in general way. This will avoid adding
-   // specific methods to the Moderator when we create new object type
-   // through the plug-in code. This is just initial coding and needs
-   // thorough testing. (LOJ: 2010.05.05)
-   //======================================================================
-   #ifdef __NEW_WAY_OF_CREATE_OBJECT__
-   //======================================================================
-   
-   // Handle container or special object type creation
-   if (type == "PropSetup")
-      obj = (GmatBase*)theModerator->CreatePropSetup(name);
-   
-   // Handle Spacecraft
-   else if (type == "Spacecraft" || type == "Formation")
-      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
-   
-   // Handle AxisSystem
-   else if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
-            axisSystemList.end())
-      obj =(GmatBase*) theModerator->CreateAxisSystem(type, name);
-   
-   // Handle Burns
-   else if (find(burnList.begin(), burnList.end(), type) != 
-            burnList.end())
-      obj = (GmatBase*)theModerator->CreateBurn(type, name, createDefault);
-   
-   // Handle CoordinateSystem
-   else if (type == "CoordinateSystem")
-      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, false, false, manage);
-   
-   // Handle CelestialBody
-   else if (find(celestialBodyList.begin(), celestialBodyList.end(), type) != 
-            celestialBodyList.end())
-      obj = (GmatBase*)theModerator->CreateCelestialBody(type, name);
-   
-   // Handle Functions
-   else if (find(functionList.begin(), functionList.end(), type) != 
-            functionList.end())
-      obj = (GmatBase*)theModerator->CreateFunction(type, name, manage);
-   
-   // Handle CalculatedPoint
-   else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
-            calculatedPointList.end())
-   {
-      MessageInterface::ShowMessage
-         ("==> Interpreter::CreateObject() Calling CreateCalculatedPoint()\n");
-      obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
-   }
-   // Handle Parameters
-   else if (find(parameterList.begin(), parameterList.end(), type) != 
-            parameterList.end())
-      obj = (GmatBase*)CreateParameter(type, name, "", "");
-   
-   // Handle Subscribers
-   else if (find(subscriberList.begin(), subscriberList.end(), type) != 
-            subscriberList.end())
-      obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
-   
-   // Handle EventLocators
-   else if (find(eventLocatorList.begin(), eventLocatorList.end(), type) !=
-            eventLocatorList.end())
-      obj = (GmatBase*)theModerator->CreateEventLocator(type, name);
 
-   // Handle other registered creatable object types
-   else if (find(allObjectTypeList.begin(), allObjectTypeList.end(), type) != 
-            allObjectTypeList.end())
-   {
-      Gmat::ObjectType objType = GetObjectType(type);
-      if (objType != Gmat::UNKNOWN_OBJECT)
-         obj = theModerator->CreateOtherObject(objType, type, name);
-      else
-         obj = NULL;
-   }
-   else
-   {
-      obj = NULL;
-   }
    
-   //@note
-   // Do not throw exception if obj == NULL, since caller uses return pointer
-   // to test further.
-   
-   #ifdef DEBUG_CREATE_OBJECT
-   if (obj != NULL)
-   {
-      MessageInterface::ShowMessage
-         ("Interpreter::CreateObject() (new way) obj=<%p>, type=<%s>, name=<%s> "
-          "successfully created\n", obj, obj->GetTypeName().c_str(),
-          obj->GetName().c_str());
-   }
-   #endif
-   
-   return obj;
-   
-   //======================================================================
-   #else
-   //======================================================================
-   
+   // Create objects by type names
    if (type == "Spacecraft") 
       obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
    
@@ -1195,6 +1094,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       //obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, true);
       obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, false, false, manage);
    
+   // Create objects by creatable list
    else
    {
       #ifdef DEBUG_CREATE_CELESTIAL_BODY
@@ -1209,7 +1109,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          obj = (GmatBase*)theModerator->CreatePropagator(type, name);
       
       // Handle ODEModel
-      if (find(odeModelList.begin(), odeModelList.end(), type) != 
+      else if (find(odeModelList.begin(), odeModelList.end(), type) != 
           odeModelList.end())
          obj = (GmatBase*)theModerator->CreateODEModel(type, name);
       
@@ -1242,11 +1142,8 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Creates default Barycenter or LibrationPoint
       else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
                calculatedPointList.end())
-      {
-         MessageInterface::ShowMessage
-            ("==> Interpreter::CreateObject() Calling CreateCalculatedPoint()\n");
          obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
-      }
+
       // Handle DataFiles
       else if (find(dataFileList.begin(), dataFileList.end(), type) != 
                dataFileList.end())
@@ -1316,7 +1213,28 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(interfaceList.begin(), interfaceList.end(), type) !=
                interfaceList.end())
          obj = theModerator->CreateOtherObject(Gmat::INTERFACE, type, name);
+      
+      // Handle other registered creatable object types
+      //======================================================================
+      // This block of code is the future implementation of creating objects
+      // of non-special object types in general way. This will avoid adding
+      // specific methods to the Moderator when we create new object type
+      // through the plug-in code. This is just initial coding and needs
+      // thorough testing. (LOJ: 2010.05.05)
+      // @todo 
+      // Add a generic CreateObject() method and call specific Create*() method
+      // in each factory class.
+      else if (find(allObjectTypeList.begin(), allObjectTypeList.end(), type) != 
+               allObjectTypeList.end())
+      {
+         Gmat::ObjectType objType = GetObjectType(type);
+         if (objType != Gmat::UNKNOWN_OBJECT)
+            obj = theModerator->CreateOtherObject(objType, type, name);
+         else
+            obj = NULL;
+      }
    }
+   
    
    //@note
    // Do not throw exception if obj == NULL, since caller uses return pointer
@@ -1334,7 +1252,6 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    #endif
    
    return obj;
-   #endif
 }
 
 
@@ -1846,15 +1763,31 @@ GmatBase* Interpreter::FindObject(const std::string &name,
 {
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Interpreter::FindObject() entered, name='%s', currentFunction=<%p>\n",
-       name.c_str(), currentFunction);
+      ("Interpreter::FindObject() entered, name='%s', ofType='%s', currentFunction=<%p>\n",
+       name.c_str(), ofType.c_str(), currentFunction);
    #endif
+
+   GmatBase *objFound = NULL;
    
    // If parsing a function, use current function to find an object (LOJ: 2014.12.10)
    if (currentFunction == NULL)
-      return theValidator->FindObject(name, ofType);
+   {
+      objFound = theValidator->FindObject(name, ofType);
+   }
    else
-      return currentFunction->FindFunctionObject(name);
+   {
+      // Check for SolarSystem since it is global and not added to function map
+      if (name == "SolarSystem")
+         objFound = theSolarSystem;
+      else
+         objFound = currentFunction->FindFunctionObject(name);
+   }
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Interpreter::FindObject() returning <%p>'%s'\n", objFound,
+       objFound ? objFound->GetName().c_str() : "NULL");
+   #endif
+   return objFound;
 }
 
 
@@ -3691,7 +3624,7 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
       else
       {
          GmatBase *obj1 = FindObject(name1, objTypeStrToUse);
-         if (obj1 != NULL && obj1->GetIsGlobal())
+         if (obj1 != NULL && obj1->IsGlobal())
          {
             globalObjFound = true;
             globalObjNames = globalObjNames + name1 + " ";
@@ -4462,7 +4395,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    
    #ifdef DEBUG_MAKE_ASSIGNMENT
    MessageInterface::ShowMessage
-      ("Interpreter::MakeAssignment() returning lhsObj=%p\n", lhsObj);
+      ("Interpreter::MakeAssignment() returning lhsObj=<%p>\n", lhsObj);
    #endif
    
    if (retval)

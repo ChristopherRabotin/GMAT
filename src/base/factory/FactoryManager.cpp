@@ -1069,7 +1069,13 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
                objType = GmatStringUtil::Capitalize(objType);
             
             if (find(listObj.begin(), listObj.end(), objType) != listObj.end())
+            {
+               #ifdef DEBUG_FACTORY_CREATE
+               MessageInterface::ShowMessage
+                  ("FactoryManager::FindFactory() found factory and returning <%p>\n", (*f));
+               #endif
                return (*f);
+            }
          }
       }
       ++f;

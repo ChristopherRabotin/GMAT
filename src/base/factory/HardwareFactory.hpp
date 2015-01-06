@@ -28,9 +28,12 @@
 class GMAT_API HardwareFactory : public Factory
 {
 public:
-   Hardware* CreateHardware(const std::string &ofType,
-                            const std::string &withName = "");
-
+   // method to create Solver object
+   virtual GmatBase*    CreateObject(const std::string &ofType,
+                                     const std::string &withName = "");        
+   virtual Hardware*    CreateHardware(const std::string &ofType,
+                                       const std::string &withName = "");
+   
    // default constructor
    HardwareFactory();
    // constructor
