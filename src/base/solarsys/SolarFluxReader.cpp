@@ -207,65 +207,72 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
    // Open the files to load
    Open();
    
-   if (inObs.is_open())
+   if (obsFileName != "")
    {
-      inObs.seekg(0, std::ios_base::beg);
-  
-      while (true)
+      if (inObs.is_open())
       {
-         inObs.getline(line, 256);
-      
-         if (std::string(line).find(beg_ObsTag) != std::string::npos)
+         inObs.seekg(0, std::ios_base::beg);
+
+         while (true)
          {
-            begObs = inObs.tellg();
+            inObs.getline(line, 256);
+
+            if (std::string(line).find(beg_ObsTag) != std::string::npos)
+            {
+               begObs = inObs.tellg();
+            }
+            else if (std::string(line).find(end_ObsTag) != std::string::npos)
+            {
+               endObs = inObs.tellg();
+               endObs = endObs - strlen(line) - 2 ;
+               break;
+            }
          }
-         else if (std::string(line).find(end_ObsTag) != std::string::npos)
-         {
-            endObs = inObs.tellg();
-            endObs = endObs - strlen(line) - 2 ;
-            break;
-         }
+
+         LoadObsData();
       }
-     
-      LoadObsData();
-   }
-   else
-   {
-      //throw an exception
-      throw SolarSystemException("SolarFluxReader: Historic/Observed File is NOT opened.\n");
-   }
-
-   if (inPredict.is_open())
-   {
-      inPredict.seekg(0, std::ios_base::beg);
-      std::string strLine = "";
-
-      while (true)
+      else
       {
-         inPredict.getline(line, 256);
-         
-         strLine = line;
-         // if we read the line with "Nominal Timing" and "Early Timing" content, continue reading two more lines to get
-         // into the data lines.
-         if (strLine.find("NOMINAL TIMING") != std::string::npos && strLine.find("EARLY TIMING") != std::string::npos)
+         //throw an exception
+         throw SolarSystemException("SolarFluxReader: Historic/Observed File " +
+               obsFileName + " could not be opened.\n");
+      }
+   }
+
+   if (predictFileName != "")
+   {
+      if (inPredict.is_open())
+      {
+         inPredict.seekg(0, std::ios_base::beg);
+         std::string strLine = "";
+
+         while (true)
          {
             inPredict.getline(line, 256);
-            inPredict.getline(line, 256);
-           
-            begData = inPredict.tellg();
-           
-            break;
+
+            strLine = line;
+            // if we read the line with "Nominal Timing" and "Early Timing" content, continue reading two more lines to get
+            // into the data lines.
+            if (strLine.find("NOMINAL TIMING") != std::string::npos && strLine.find("EARLY TIMING") != std::string::npos)
+            {
+               inPredict.getline(line, 256);
+               inPredict.getline(line, 256);
+
+               begData = inPredict.tellg();
+
+               break;
+            }
          }
+
+         LoadPredictData();
       }
-
-      LoadPredictData();
+      else
+      {
+         //throw an exception
+         throw SolarSystemException("SolarFluxReader: The Schatten predict "
+               "file " + predictFileName + " could not be opened.\n");
+      }
    }
-   else
-   {
-      //throw an exception
-      throw SolarSystemException("SolarFluxReader: Predicted File is NOT opened.\n");
-   }
-
 
    return(Close());
 }
@@ -317,34 +324,37 @@ bool SolarFluxReader::LoadObsData()
    while (true)
    {
       inObs.getline(line, 256);
-      std::istringstream buf(line);
-      std::istream_iterator<std::string> beg(buf), end;
-      std::vector<std::string> tokens(beg, end);
-
-      FluxData fD;
-      Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), atoi(tokens[2].c_str()), hour, minute, sec); 
-      // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
-      fD.epoch = mjd - 0.5;
-    
-      for (Integer l=0; l<8; l++)
-         fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str());
-      for (Integer l=0; l<8; l++)
-         fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
-      fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
-      fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
-      fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
-      fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
-      fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
-      fD.index = -1;
-      for (Integer l = 0; l<9; l++)
-         fD.F107a[l] = -1;
-      for (Integer l =0; l<3; l++)
-         fD.apSchatten[l] = -1;
-
-      obsFluxData.push_back(fD);
-
-      if (inObs.tellg() == endObs)
+      if (inObs.tellg() >= endObs)
          break;
+
+      if (strlen(line) > 8)
+      {
+         std::istringstream buf(line);
+         std::istream_iterator<std::string> beg(buf), end;
+         std::vector<std::string> tokens(beg, end);
+
+         FluxData fD;
+         Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), atoi(tokens[2].c_str()), hour, minute, sec);
+         // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
+         fD.epoch = mjd - 0.5;
+
+         for (Integer l=0; l<8; l++)
+            fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str());
+         for (Integer l=0; l<8; l++)
+            fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
+         fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
+         fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
+         fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
+         fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
+         fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
+         fD.index = -1;
+         for (Integer l = 0; l<9; l++)
+            fD.F107a[l] = -1;
+         for (Integer l =0; l<3; l++)
+            fD.apSchatten[l] = -1;
+
+         obsFluxData.push_back(fD);
+      }
    }
 
    return true;
