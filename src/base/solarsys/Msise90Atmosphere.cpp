@@ -28,6 +28,8 @@
 #include "TimeTypes.hpp"
 
 
+#define DEBUG_NAN_CONDITIONS
+
 #ifndef __SKIP_MSISE90__
 extern "C" 
 { 
@@ -330,6 +332,46 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       #ifdef DEBUG_MSISE90_ATMOSPHERE
          MessageInterface::ShowMessage(
             "   Altitude = %15.9lf  Density = %15.9le\n", alt, density[i]);
+      #endif
+
+      #ifdef DEBUG_NAN_CONDITIONS
+         if (GmatMathUtil::IsNaN(xden[5]))
+         {
+            MessageInterface::ShowMessage("NAN found in MSISE90 "
+                  "density element %d, Value is %lf at epoch %.12lf\n", j,
+                  xden[5], epoch);
+            MessageInterface::ShowMessage(
+               "   Position:   %16.9le  %16.9le  %16.9le\n",
+               pos[i6], pos[i6+1], pos[i6+2]);
+            MessageInterface::ShowMessage("   Epoch                  = %le \n", epoch);
+            MessageInterface::ShowMessage("   Year & Days            = %d \n", xyd);
+            MessageInterface::ShowMessage("   Seconds                = %le \n", xsod);
+            MessageInterface::ShowMessage("   Altitude               = %le \n", xalt);
+            MessageInterface::ShowMessage("   Latitude               = %le \n", xlat);
+            MessageInterface::ShowMessage("   Longitude              = %le \n", xlon);
+            MessageInterface::ShowMessage("   Solar Time             = %le \n", xlst);
+            MessageInterface::ShowMessage("   F107 Average           = %le \n", xf107a);
+            MessageInterface::ShowMessage("   F107                   = %le \n", xf107);
+            MessageInterface::ShowMessage("   Geomagnetic index[0]   = %le \n", xap[0]);
+            MessageInterface::ShowMessage("   Geomagnetic index[1]   = %le \n", xap[1]);
+            MessageInterface::ShowMessage("   Geomagnetic index[2]   = %le \n", xap[2]);
+            MessageInterface::ShowMessage("   Geomagnetic index[3]   = %le \n", xap[3]);
+            MessageInterface::ShowMessage("   Geomagnetic index[4]   = %le \n", xap[4]);
+            MessageInterface::ShowMessage("   Geomagnetic index[5]   = %le \n", xap[5]);
+            MessageInterface::ShowMessage("   Geomagnetic index[6]   = %le \n", xap[6]);
+            MessageInterface::ShowMessage("   Mass                   = %d \n", xmass);
+            MessageInterface::ShowMessage("   HE Number Density      = %le \n", xden[0]);
+            MessageInterface::ShowMessage("   O Number Density       = %le \n", xden[1]);
+            MessageInterface::ShowMessage("   N2 Number Density      = %le \n", xden[2]);
+            MessageInterface::ShowMessage("   O2 Number Density      = %le \n", xden[3]);
+            MessageInterface::ShowMessage("   AR Number Density      = %le \n", xden[4]);
+            MessageInterface::ShowMessage("   Total Mass Density     = %le \n", xden[5]);
+            MessageInterface::ShowMessage("   H Number Density       = %le \n", xden[6]);
+            MessageInterface::ShowMessage("   N Number Density       = %le \n", xden[7]);
+            MessageInterface::ShowMessage("   EXOSPHERIC Temperature = %le \n", xtemp[0]);
+            MessageInterface::ShowMessage("   Temperature at Alt     = %le \n", xtemp[1]);
+            MessageInterface::ShowMessage("\n");
+         }
       #endif
    }
    
