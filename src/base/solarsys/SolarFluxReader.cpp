@@ -533,12 +533,14 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD )
    fD.ap[3] = fD_OneBefore.ap[7];
    fD.ap[4] = fD_OneBefore.ap[6];
 
+   fD.ap[5] = 0.0;
    for (Integer i =0; i<6; i++)
       fD.ap[5] += fD_OneBefore.ap[i];
    for (Integer i=0; i<2; i++)
       fD.ap[5] += fD_TwoBefore.ap[i+6];
    fD.ap[5] /= 8;
 
+   fD.ap[6] = 0.0;
    for (Integer i =0; i<6; i++)
       fD.ap[6] += fD_TwoBefore.ap[i];
    for (Integer i=0; i<2; i++)
