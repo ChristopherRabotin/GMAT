@@ -38,6 +38,7 @@
 //#define DEBUG_DRAGFORCE_REFOBJ
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
+#define DEBUG_NAN_CONDITIONS
 
 //#define DUMP_DERIVATIVE
 //#define DUMP_DENSITY
@@ -1224,6 +1225,28 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                      "   Density:    %16.9le\n", density[i]);
                }
             #endif
+
+         #ifdef DEBUG_NAN_CONDITIONS
+            for (Integer j = 0; j < 6; ++j)
+            if (GmatMathUtil::IsNaN(deriv[j6+j]))
+            {
+               MessageInterface::ShowMessage("NAN found in drag force"
+                     " element %d, Value is %lf at epoch %.12lf\n", j,
+                     deriv[j], now);
+               MessageInterface::ShowMessage(
+                  "   Position:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6], state[i6+1], state[i6+2]);
+               MessageInterface::ShowMessage(
+                  "   Velocity:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6+3], state[i6+4], state[i6+5]);
+               MessageInterface::ShowMessage(
+                  "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                  deriv[3+i6], deriv[4+i6], deriv[5+i6]);
+               MessageInterface::ShowMessage(
+                  "   Density:    %16.9le\n", density[i]);
+            }
+         #endif
+
          }
          else
          {
