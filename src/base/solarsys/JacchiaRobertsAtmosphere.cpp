@@ -457,6 +457,8 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    //Observed
       geo.xtemp = 379.0 + 3.24 * fD.obsCtrF107a + 1.3 * (fD.obsF107 - fD.obsCtrF107a);
       geo.tkp   = fD.kp[0];
+      nominalF107 = fD.obsF107;
+      nominalF107a = fD.obsCtrF107a;
    }
 
    #ifdef DEBUG_JR_DRAG
