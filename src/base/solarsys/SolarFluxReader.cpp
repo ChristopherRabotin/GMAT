@@ -338,8 +338,9 @@ bool SolarFluxReader::LoadObsData()
          // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
          fD.epoch = mjd - 0.5;
 
+         // The CSSI fole conains Kp * 10, then rouded to an int.  Undo that here.
          for (Integer l=0; l<8; l++)
-            fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str());
+            fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str()) / 10.0;
          for (Integer l=0; l<8; l++)
             fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
          fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
