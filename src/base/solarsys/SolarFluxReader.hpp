@@ -106,7 +106,7 @@ public:
    /// Get Flux data from either of two vectors filled in during LoadFluxData
    FluxData GetInputs(GmatEpoch epoch);
    /// Change Ap data for MSISE model
-   void PrepareApData(FluxData &fD);
+   void PrepareApData(FluxData &fD, GmatEpoch epoch);
 
 };
 

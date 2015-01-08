@@ -293,12 +293,19 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
 //------------------------------------------------------------------------------
 bool SolarFluxReader::Close()
 {
+   bool ret = false;
    if (inObs.is_open())
+   {
       inObs.close();
+      ret = true;
+   }
    if (inPredict.is_open())
+   {
       inPredict.close();
+      ret = true;
+   }
 
-   return true;
+   return ret;
 }
 
 
@@ -511,7 +518,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
  * @return void
 */
 //------------------------------------------------------------------------------
-void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD )
+void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epoch )
 {
    if (fD.index < (Integer)obsFluxData.size())
    {
@@ -537,26 +544,42 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD )
    //2009 01 14 2394 14 23 20 10 17 23  7 13 13 127   (9   7   4   6   9   3))   (5) (5)   6 0.3 1   0  68.9 0  66.7  66.2  71.2  68.8  68.0
    //2009 01 15 2394 15 13 20 10 13  7 20 23 23 130   (5) (7)   4   5   3   7   9  9 (6) 0.3 1   0  68.8 0  66.8  66.2  71.1  68.8  68.1
 
-      fD.ap[2] = fD.ap[0];
-      fD.ap[0] = fD.apAvg;
-      fD.ap[1] = fD.ap[1];
-   
-      fD.ap[3] = fD_OneBefore.ap[7];
-      fD.ap[4] = fD_OneBefore.ap[6];
+      Real fracEpoch = (epoch - 0.5) - fD.epoch;
+      Integer subIndex = (Integer)(fracEpoch * 8);
 
-      fD.ap[5] = 0.0;
-      for (Integer i =0; i<6; i++)
-         fD.ap[5] += fD_OneBefore.ap[i];
-      for (Integer i=0; i<2; i++)
-         fD.ap[5] += fD_TwoBefore.ap[i+6];
-      fD.ap[5] /= 8;
+      Real apValues[32];
+      Integer i = 0,j = 0;
+      for (i = subIndex, j = 0; i >= 0; i--, j++)
+         apValues[j] = fD.ap[i];
+      for (i = 7; i >= 0; j++,i--)
+         apValues[j] = fD_OneBefore.ap[i];
+      for (i = 7; i >= 0; j++,i--)
+         apValues[j] = fD_TwoBefore.ap[i];
+      for (i = 7; i >= 0; j++,i--)
+         apValues[j] = fD_ThreeBefore.ap[i];
 
-      fD.ap[6] = 0.0;
-      for (Integer i =0; i<6; i++)
-         fD.ap[6] += fD_TwoBefore.ap[i];
-      for (Integer i=0; i<2; i++)
-         fD.ap[6] += fD_ThreeBefore.ap[i+6];
-      fD.ap[6] /= 8;
+     for (i = 0; i < 7; i++)
+     {
+        if (i == 0)
+           fD.ap[i] = fD.apAvg;
+        if (i >= 1 && i <= 4)
+           fD.ap[i] = apValues[i-1];
+        if (i == 5)
+        {
+           fD.ap[i] = 0;
+           for (Integer l = 0; l < 8; l++)
+              fD.ap[i] += apValues[i+l-1];
+           fD.ap[i] /= 8.0;
+              
+        }
+        if (i == 6)
+        {
+           fD.ap[i] = 0;
+           for (Integer l = 8; l < 16; l++)
+              fD.ap[i] += apValues[i+l-2];
+           fD.ap[i] /= 8.0;
+        }
+     }
    }
 
    return;
