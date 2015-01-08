@@ -324,9 +324,9 @@ bool SolarFluxReader::LoadObsData()
    while (true)
    {
       inObs.getline(line, 256);
-      if (inObs.tellg() >= endObs)
-         break;
-
+      if (std::string(line).find(end_ObsTag) != std::string::npos)
+            break; 
+      
       if (strlen(line) > 8)
       {
          std::istringstream buf(line);
@@ -355,6 +355,7 @@ bool SolarFluxReader::LoadObsData()
             fD.apSchatten[l] = -1;
 
          obsFluxData.push_back(fD);
+
       }
    }
 
@@ -465,22 +466,30 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    // that data was not available so using closest data and from which file source.
    epoch_1st = obsFluxData.at(0).epoch;
    index = (Integer) (epoch - epoch_1st);
+   if (index < 0)
+      //throw an exception
+         throw SolarSystemException("\"SolarFluxReader::GetInputs()\" Index can not be less than zero.\n");
+
    // if the requested epoch fall beyond the 
    // last item in the obsFluxData, then search in predictFluxData
    if (index >= (Integer) obsFluxData.size())
    {
       epoch_1st = predictFluxData.at(0).epoch;
       index = (Integer) (epoch - epoch_1st) - 1;
+      if (index < 0)
+         throw SolarSystemException("\"SolarFluxReader::GetInputs()\" Index can not be less than zero.\n");
+
       std::vector<FluxData>::iterator it;
       for ( it = predictFluxData.begin(); it != predictFluxData.end(); it++)
       {
-         if ( index == it->index)
+         if ( index >= it->index && (it+1) != predictFluxData.end() && index < (it+1)->index)
          {
             fD = predictFluxData[it->id];
             break;
          }
+         else if ( (it+1) == predictFluxData.end())
+            fD = predictFluxData[it->id];
       }
-
    }
    else
    {
@@ -504,48 +513,51 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 //------------------------------------------------------------------------------
 void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD )
 {
-   FluxData fD_OneBefore = obsFluxData[fD.index - 1];
-   FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
-   FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
+   if (fD.index < (Integer)obsFluxData.size())
+   {
+      FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+      FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
+      FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
 
-   // Fill in fD.ap so it contains these data:
-   /*  (1) DAILY AP */
-   /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
-   /*  (3) 3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME */   
-   /*  (4) 3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME */
-   /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
-   /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
-   /*        TO CURRENT TIME */
-   /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
-   /*        TO CURRENT TIME */
+      // Fill in fD.ap so it contains these data:
+      /*  (1) DAILY AP */
+      /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
+      /*  (3) 3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME */   
+      /*  (4) 3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME */
+      /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
+      /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
+      /*        TO CURRENT TIME */
+      /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
+      /*        TO CURRENT TIME */
 
-//# yy mm dd BSRN ND Kp Kp Kp Kp Kp Kp Kp Kp Sum Ap  Ap  Ap  Ap  Ap  Ap  Ap  Ap  Avg Cp C9 ISN F10.7 Q Ctr81 Lst81 F10.7 Ctr81 Lst81
-//# --------------------------------------------------------------------------------------------------------------------------------
-//2009 01 12 2394 12  0  0  0  0  0  0  3  0   3   0   0   0   0   0   0   ((2   0)   0 0.0 0   8  67.0 0  66.7  66.2  69.3  68.8  67.9
-//2009 01 13 2394 13 10 20 17  0 10 10 13 10  90   (4   7   6   0   4   4))   ((5   4)   4 0.1 0   0  68.2 0  66.7  66.2  70.5  68.8  68.0
-//2009 01 14 2394 14 23 20 10 17 23  7 13 13 127   (9   7   4   6   9   3))   (5) (5)   6 0.3 1   0  68.9 0  66.7  66.2  71.2  68.8  68.0
-//2009 01 15 2394 15 13 20 10 13  7 20 23 23 130   (5) (7)   4   5   3   7   9  9 (6) 0.3 1   0  68.8 0  66.8  66.2  71.1  68.8  68.1
+   //# yy mm dd BSRN ND Kp Kp Kp Kp Kp Kp Kp Kp Sum Ap  Ap  Ap  Ap  Ap  Ap  Ap  Ap  Avg Cp C9 ISN F10.7 Q Ctr81 Lst81 F10.7 Ctr81 Lst81
+   //# --------------------------------------------------------------------------------------------------------------------------------
+   //2009 01 12 2394 12  0  0  0  0  0  0  3  0   3   0   0   0   0   0   0   ((2   0)   0 0.0 0   8  67.0 0  66.7  66.2  69.3  68.8  67.9
+   //2009 01 13 2394 13 10 20 17  0 10 10 13 10  90   (4   7   6   0   4   4))   ((5   4)   4 0.1 0   0  68.2 0  66.7  66.2  70.5  68.8  68.0
+   //2009 01 14 2394 14 23 20 10 17 23  7 13 13 127   (9   7   4   6   9   3))   (5) (5)   6 0.3 1   0  68.9 0  66.7  66.2  71.2  68.8  68.0
+   //2009 01 15 2394 15 13 20 10 13  7 20 23 23 130   (5) (7)   4   5   3   7   9  9 (6) 0.3 1   0  68.8 0  66.8  66.2  71.1  68.8  68.1
 
-   fD.ap[2] = fD.ap[0];
-   fD.ap[0] = fD.apAvg;
-   fD.ap[1] = fD.ap[1];
+      fD.ap[2] = fD.ap[0];
+      fD.ap[0] = fD.apAvg;
+      fD.ap[1] = fD.ap[1];
    
-   fD.ap[3] = fD_OneBefore.ap[7];
-   fD.ap[4] = fD_OneBefore.ap[6];
+      fD.ap[3] = fD_OneBefore.ap[7];
+      fD.ap[4] = fD_OneBefore.ap[6];
 
-   fD.ap[5] = 0.0;
-   for (Integer i =0; i<6; i++)
-      fD.ap[5] += fD_OneBefore.ap[i];
-   for (Integer i=0; i<2; i++)
-      fD.ap[5] += fD_TwoBefore.ap[i+6];
-   fD.ap[5] /= 8;
+      fD.ap[5] = 0.0;
+      for (Integer i =0; i<6; i++)
+         fD.ap[5] += fD_OneBefore.ap[i];
+      for (Integer i=0; i<2; i++)
+         fD.ap[5] += fD_TwoBefore.ap[i+6];
+      fD.ap[5] /= 8;
 
-   fD.ap[6] = 0.0;
-   for (Integer i =0; i<6; i++)
-      fD.ap[6] += fD_TwoBefore.ap[i];
-   for (Integer i=0; i<2; i++)
-      fD.ap[6] += fD_ThreeBefore.ap[i+6];
-   fD.ap[6] /= 8;
+      fD.ap[6] = 0.0;
+      for (Integer i =0; i<6; i++)
+         fD.ap[6] += fD_TwoBefore.ap[i];
+      for (Integer i=0; i<2; i++)
+         fD.ap[6] += fD_ThreeBefore.ap[i+6];
+      fD.ap[6] /= 8;
+   }
 
    return;
 }
