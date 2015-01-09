@@ -24,7 +24,7 @@
 #include "ContactLocator.hpp"
 #include "EclipseLocator.hpp"
 
-//#define INCLUDE_CONTACT
+#define INCLUDE_CONTACT
 
 //------------------------------------------------------------------------------
 // EventLocatorFactory()

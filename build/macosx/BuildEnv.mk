@@ -4,7 +4,8 @@
 #    Snow Leopard (10.6)
 #    Lion (10.7)
 #
-# NOTES to user - changes may be necessary where you see the "*** EDIT THIS ***" notes
+# NOTES to user - changes may be necessary where you see the "*** EDIT THIS ***" or 
+# "*** EDIT THESE ***" notes
 # -------------------------------------------------------------------------------------------
 
 # ------> FLAGS USED TO CONTROL THE BUILD
@@ -16,14 +17,15 @@ TOP_DIR = <path-to-your-GMAT-directory>
 
 ## *** EDIT THIS ***
 # ------> WX version
-# select the wx version (wx2.8.12 will be 32-bit; wx 3.0.1 will be 64-bit)
+# select the wx version (wx2.8.12 will be 32-bit; wx 3.0.2 will be 64-bit)
 # WX_VERSION must be in this format
 WX_VERSION = 3
 #WX_VERSION = 2
 
 ## *** EDIT THESE ***
 # ------> WX installed location
-WX3_INSTALLED = /Applications/wxWidgets-3.0.1/build-cocoa-debug
+#WX3_INSTALLED = /Applications/wxWidgets-3.0.1/build-cocoa-debug
+WX3_INSTALLED = /Applications/wxWidgets-3.0.2/build-cocoa
 WX2_INSTALLED = /Applications/wxMac-2.8.12/shared
 
 ## *** EDIT THIS ***
@@ -38,12 +40,11 @@ USE_F2C_VERSION = 1
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 
-
 ## *** EDIT THIS ***
 # ------> CSPICE
 # this is where you installed the version of CSPICE that you're using 
-# NOTE: it is assumed that inside this folder, there is a cspice folder for 32-bit and
-# a cspice64 folder for 64-bit
+# NOTE: it is assumed that inside this folder, there is a 'cspice' folder for 32-bit and
+# a 'cspice64' folder for 64-bit
 ifeq ($(USE_SPICE), 1)
 SPICE_DIR = /Applications/CSPICE_N0065
 # 0 -> use cpspice.a, 1 -> use libcspice.dylib (NOT CURRENTLY SUPPORTED) in bin directory
@@ -55,7 +56,8 @@ endif
 ## *** EDIT THIS ***
 # ------> F2C
 # If you are using F2C, say where it is located; if not, point to fortran libraries
-# This assumes that, in the f2c location you specify, you have f2c32 and f2c64 folders
+# This assumes that, in the f2c location you specify, you have 'f2c32' and 'f2c64' 
+# folders
 ifeq ($(USE_F2C_VERSION), 1)
 F2C_LOC = <path-to-your-F2C-directory>
 else
@@ -69,7 +71,9 @@ endif
 PCRE_LIB_LOC = /Applications/pcre-8.12/.libs
 
 
+# ****************************************************************************************
 # *************************** DO NOT EDIT BELOW THIS LINE ********************************
+# ****************************************************************************************
 LINUX_MAC = 1
 MAC_SPECIFIC = 1
 
@@ -77,9 +81,8 @@ ifeq ($(WX_VERSION),3)
 WX_INSTALLED = $(WX3_INSTALLED)
 WX_LIB_LOC = $(WX_INSTALLED)/lib
 WX_LIB = -lwx_osx_cocoau_gl-3.0 -lwx_osx_cocoau_stc-3.0
-#WX_LIB_2 = -lwx_osx_cocoau_stc-3.0
 BUILD_64BIT = 1
-# STC_EDITOR now available on Mac (wx 3.0.1) - set this to 0 for Console version
+# STC_EDITOR now available on Mac (wx 3.0.n) - set this to 0 for Console version
 USE_STC_EDITOR = 1
 INSTALL_LIBS_INTO_BUNDLE = install_libs_into_bundle
 else
@@ -233,10 +236,6 @@ LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
                -headerpad_max_install_names \
                -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
              -L$(WX_LIB_LOC) $(WX_LIB) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
-#LINK_FLAGS =  /usr/lib/libstdc++.6.dylib \
-#               -framework OpenGL -framework AGL  -headerpad_max_install_names \
-#               -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) $(FORTRAN_LIB) -lm\
-#             -L$(WX_LIB_LOC) -l$(WX_LIB) -l$(WX_LIB_2) $(DEBUG_FLAGS) $(MAC_ARCHITECTURE_FLAGS)
 
 # removed
 # AGL is unneeded and OpenGL is included automatically

@@ -67,7 +67,9 @@ struct GMAT_API ListItem
    EXPIMP_TEMPLATE template struct DECLSPECIFIER std::pair<GmatBase*, StringArray>;
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::pair<GmatBase*, StringArray const>>;
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::_Tmap_traits<GmatBase*, StringArray, std::less<GmatBase*>, std::allocator<std::pair<GmatBase*, StringArray const>>, false>;
+#if _MSC_VER < 1700
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::_Tree_nod<std::_Tmap_traits<GmatBase*, StringArray, std::less<GmatBase*>, std::allocator<std::pair<GmatBase*, StringArray const>>, false>>;
+#endif
 //   EXPIMP_TEMPLATE template class DECLSPECIFIER std::allocator<std::_Tree_nod<std::_Tmap_traits<GmatBase *,StringArray,std::less<GmatBase *>,std::allocator<std::pair<GmatBase *,const StringArray>>,false>>::_Node >;
    EXPIMP_TEMPLATE template class DECLSPECIFIER std::map<GmatBase*, StringArray*>;
    

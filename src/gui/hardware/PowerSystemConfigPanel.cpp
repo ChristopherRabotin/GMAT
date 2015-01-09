@@ -723,8 +723,16 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
          {
             paramID = theObject->GetParameterID("ShadowBodies");
             theObject->TakeAction("ClearShadowBodies");
-            for (unsigned int ii = 0; ii < shadowBodiesList.size(); ii++)
-               theObject->SetStringParameter(paramID, shadowBodiesList[ii], ii);
+            // An empty list is allowed
+            if (shadowBodiesList.empty())
+            {
+               theObject->SetStringParameter(paramID, "{}", 0);
+            }
+            else
+            {
+               for (unsigned int ii = 0; ii < shadowBodiesList.size(); ii++)
+                  theObject->SetStringParameter(paramID, shadowBodiesList[ii], ii);
+            }
          }
       }
    }
