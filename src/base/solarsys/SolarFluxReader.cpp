@@ -472,7 +472,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    // use closest data from the requested epoch and issue a single warning message 
    // that data was not available so using closest data and from which file source.
    epoch_1st = obsFluxData.at(0).epoch;
-   index = (Integer) (epoch - epoch_1st);
+   index = (Integer) (epoch - 0.5 - epoch_1st);
    if (index < 0)
       //throw an exception
          throw SolarSystemException("\"SolarFluxReader::GetInputs()\" Index can not be less than zero.\n");
@@ -520,11 +520,13 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 //------------------------------------------------------------------------------
 void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epoch )
 {
-   if (fD.index < (Integer)obsFluxData.size())
+   if (fD.index < (Integer)obsFluxData.size() && (fD.index - 2) >= 0 )
    {
       FluxData fD_OneBefore = obsFluxData[fD.index - 1];
       FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
-      FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
+      FluxData fD_ThreeBefore;
+      if (fD.index > 2)
+         FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
 
       // Fill in fD.ap so it contains these data:
       /*  (1) DAILY AP */
@@ -555,8 +557,11 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
          apValues[j] = fD_OneBefore.ap[i];
       for (i = 7; i >= 0; j++,i--)
          apValues[j] = fD_TwoBefore.ap[i];
-      for (i = 7; i >= 0; j++,i--)
-         apValues[j] = fD_ThreeBefore.ap[i];
+      if ( fD.index > 2)
+      {
+         for (i = 7; i >= 0; j++,i--)
+            apValues[j] = fD_ThreeBefore.ap[i];
+      }
 
      for (i = 0; i < 7; i++)
      {
@@ -576,7 +581,8 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
         {
            fD.ap[i] = 0;
            for (Integer l = 8; l < 16; l++)
-              fD.ap[i] += apValues[i+l-2];
+              if ( apValues[i+l-2] >= 0)
+                 fD.ap[i] += apValues[i+l-2];
            fD.ap[i] /= 8.0;
         }
      }
