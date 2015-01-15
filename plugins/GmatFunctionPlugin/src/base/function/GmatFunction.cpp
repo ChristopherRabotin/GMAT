@@ -458,7 +458,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    MessageInterface::ShowMessage
       ("======================================================================\n"
        "GmatFunction::Execute() entered for '%s'\n   internalCS is <%p>, "
-       "reinitialize = %d\n", functionName.c_str(), internalCoordSys, reinitialize);
+       "reinitialize = %d, fcs=<%p><%s>\n", functionName.c_str(), internalCoordSys,
+       reinitialize, fcs, fcs ? fcs->GetTypeName().c_str() : "NULL");
    #endif
    
    GmatCommand *current = fcs;
@@ -470,13 +471,27 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    if (reinitialize)
       objectsInitialized = false;
    
-   // Reinitialize CoordinateSystem to fix bug 1599 (LOJ: 2009.11.05)
+   // For two modes function parsing, some ref objects are not set without
+   // reinitialization
+   // Reinitialize Buns (LOJ:2015.01.09) - Function_TargetCheck.script
+   // Reinitialize CalculatedPoints (LOJ:2015.01.08)
+   // Reinitialize CoordinateSystems to fix bug 1599 (LOJ: 2009.11.05)
    // Reinitialize Parameters to fix bug 1519 (LOJ: 2009.09.16)
    if (objectsInitialized)
    {
+      #ifdef DEBUG_FUNCTION_EXEC
+      MessageInterface::ShowMessage
+         ("   Re-initializing CalculatedPointes, CoordinateSystems, Burns, and Parameters\n");
+      #endif
+      if (!objInit->InitializeObjects(true, Gmat::CALCULATED_POINT))
+         throw FunctionException
+            ("Failed to re-initialize CalculatedPoints in the \"" + functionName + "\"");
       if (!objInit->InitializeObjects(true, Gmat::COORDINATE_SYSTEM))
          throw FunctionException
-            ("Failed to re-initialize Parameters in the \"" + functionName + "\"");
+            ("Failed to re-initialize CoordinateSystems in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::BURN))
+         throw FunctionException
+            ("Failed to re-initialize Burns in the \"" + functionName + "\"");
       if (!objInit->InitializeObjects(true, Gmat::PARAMETER))
          throw FunctionException
             ("Failed to re-initialize Parameters in the \"" + functionName + "\"");
@@ -548,6 +563,11 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       }
       catch (BaseException &e)
       {
+         #ifdef DEBUG_FUNCTION_EXEC
+         MessageInterface::ShowMessage
+            ("Caught CommandException:\n%s\n", e.GetFullMessage().c_str());
+         #endif
+         
          // If it is user interrupt, rethrow (loj: 2008.10.16)
          // How can we tell if it is thrown by Stop command?
          // For now just find the phrase "interrupted by Stop command"
@@ -803,6 +823,9 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
    {
    case FUNCTION_PATH:
       {
+         return SetGmatFunctionPath(value);
+         
+         #if 0
          FileManager *fm = FileManager::Instance();
          
          // Compose full path if it has relative path.
@@ -847,6 +870,7 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
          #endif
          
          return true;
+         #endif
       }
    case FUNCTION_NAME:
       {
@@ -977,6 +1001,69 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       ("============================ End   initialization of local objects\n");
    #endif
    
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetGmatFunctionPath(const std::string &path)
+//------------------------------------------------------------------------------
+bool GmatFunction::SetGmatFunctionPath(const std::string &path)
+{
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("GmatFunction::SetGmatFunctionPath() entered, path='%s'\n", path.c_str());
+   #endif
+   
+   FileManager *fm = FileManager::Instance();
+   
+   // Compose full path if it has relative path.
+   // Assuming if first char has '.', it has relative path.
+   std::string temp = GmatStringUtil::Trim(path);
+   if (temp[0] == '.')
+   {
+      // Follow new file path implementation (LOJ: 2014.01.13)
+      //std::string currPath = fm->GetCurrentWorkingDirectory();
+      std::string currPath = fm->GetGmatWorkingDirectory();
+      
+      #ifdef DEBUG_FUNCTION_SET
+      MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
+      #endif
+      
+      if (temp[1] != '.')
+         functionPath = currPath + temp.substr(1);
+      else
+      {
+         functionPath = currPath + '/';
+         functionPath = functionPath + temp;
+      }
+   }
+   else
+   {
+      functionPath = path;
+   }
+   
+   // Add to GmatFunction path
+   fm->AddGmatFunctionPath(functionPath);
+   
+   // Remove path
+   functionName = GmatFileUtil::ParseFileName(functionPath);
+   
+   // Remove .gmf for GmatFunction name
+   std::string::size_type dotIndex = functionName.find(".gmf");
+   functionName = functionName.substr(0, dotIndex);
+   
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("   functionPath=<%s>\n", functionPath.c_str());
+   MessageInterface::ShowMessage
+      ("   functionName=<%s>\n", functionName.c_str());
+   #endif
+   
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("GmatFunction::SetGmatFunctionPath() returning true\n");
+   #endif
    return true;
 }
 

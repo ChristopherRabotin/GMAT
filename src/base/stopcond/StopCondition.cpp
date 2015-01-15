@@ -1204,10 +1204,10 @@ bool StopCondition::Validate()
    #ifdef DEBUG_STOPCOND_INIT   
    MessageInterface::ShowMessage
       ("StopCondition::Validate() entered, mUseInternalEpoch=%d, mEpochParam=<%p>, "
-       "mStopParam=<%p>\n   mAllowGoalParam=%d, mGoalParam=<%p>'%s', rhsWrapper=<%p>'%s'\n",
-       mUseInternalEpoch, mEpochParam, mStopParam, mAllowGoalParam, mGoalParam,
-       mGoalParam ? mGoalParam->GetName().c_str() : "NULL", rhsWrapper,
-       rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL");
+       "mStopParam=<%p>\n   mAllowGoalParam=%d, mGoalParam=<%p>'%s', rhsWrapper=<%p>'%s', "
+       "mSolarSystem=<%p>\n", mUseInternalEpoch, mEpochParam, mStopParam, mAllowGoalParam,
+       mGoalParam, mGoalParam ? mGoalParam->GetName().c_str() : "NULL", rhsWrapper,
+       rhsWrapper ? rhsWrapper->GetDescription().c_str() : "NULL", mSolarSystem);
    #endif
    
    // check on epoch parameter

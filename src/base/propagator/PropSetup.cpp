@@ -631,7 +631,6 @@ bool PropSetup::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 GmatBase* PropSetup::GetOwnedObject(Integer whichOne)
 {
-   MessageInterface::ShowMessage("==> PropSetup::GetOwnedObject() entered, whichOne = %d\n", whichOne);
    // Propagator is named or unnamed owned object(loj: 2008.11.05)
    if (whichOne == ownedObjectCount - 1)   // If this works, make it more usable
       return mPropagator;

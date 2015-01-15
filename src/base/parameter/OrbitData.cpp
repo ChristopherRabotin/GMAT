@@ -564,6 +564,22 @@ Rvector6 OrbitData::GetCartState()
       if ((mParameterCS->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
       {
          GmatBase *objRefOrigin = mParameterCS->GetOrigin();
+         if (objRefOrigin == NULL)
+         {
+            std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
+            errmsg += mParameterCS->GetName() + " coordinate system. \n";
+            errmsg += "The origin of " + mParameterCS->GetName() + " is NULL\n";
+            ParameterException pe(errmsg);
+            pe.SetFatal(true);
+            throw pe;
+         }
+         
+         #ifdef DEBUG_ORBITDATA_CONVERT
+         MessageInterface::ShowMessage
+            ("   Origin of '%s' is '%s'\n", mParameterCS->GetName().c_str(),
+             objRefOrigin->GetName().c_str());
+         #endif
+         
          if (objRefOrigin->IsOfType("Spacecraft"))
          {
             std::string objRefScName = ((Spacecraft*) objRefOrigin)->GetName();
@@ -606,13 +622,17 @@ Rvector6 OrbitData::GetCartState()
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
-             mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
+         // MessageInterface::ShowMessage
+         //    ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
+         //     mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
          std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
          errmsg += mParameterCS->GetName() + " coordinate system.\n";
          errmsg += "Message: " + e.GetFullMessage() + "\n";
-         throw ParameterException(errmsg);
+         // Set fatal to true so that caller can handle fatal exception (LOJ: 2015.01.06)
+         //throw ParameterException(errmsg);
+         ParameterException pe(errmsg);
+         pe.SetFatal(true);
+         throw pe;
       }
    }
    
@@ -2091,13 +2111,18 @@ void OrbitData::InitializeRefObjects()
       {
          #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
-            ("OrbitData::InitializeRefObjects() origin not found: " +
-             mParameterCS->GetOriginName() + "\n");
+            ("OrbitData::InitializeRefObjects() The origin '%s' of CS '%s' is NULL, "
+             "so try to find it again...\n",
+             mParameterCS->GetOriginName().c_str(), mParameterCS->GetName().c_str());
          #endif
-      
-         throw ParameterException
-            ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
-             mParameterCS->GetOriginName() + "\" is NULL");
+         
+         // Try to find origin again for GmatFunction (LOJ: 2014.01.12)
+         mOrigin = (SpacePoint*)FindObject(Gmat::SPACE_POINT, mParameterCS->GetOriginName());
+         
+         if (!mOrigin)
+            throw ParameterException
+               ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
+                mParameterCS->GetOriginName() + "\" is NULL");
       }
       
       // get gravity constant if out coord system origin is CelestialBody

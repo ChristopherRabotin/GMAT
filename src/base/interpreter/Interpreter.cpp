@@ -54,7 +54,7 @@
 //#define DEBUG_COMMAND_VALIDATION
 //#define DEBUG_OBJECT_LIST
 //#define DEBUG_ARRAY_GET
-#define DEBUG_CREATE_OBJECT
+//#define DEBUG_CREATE_OBJECT
 //#define DEBUG_CREATE_CELESTIAL_BODY
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
@@ -8311,9 +8311,10 @@ bool Interpreter::FinalPass()
          }
       }
       
-      // check Function separately since it has inputs that can be any object type,
+      // Check Function separately since it has inputs that can be any object type,
       // including Real number (1234.5678) and String literal ('abc')
       //
+      // Remove this comment since it is called in FinalPass()? (LOJ: 2015.01.13)
       // We don't want to check this in the FinalPass(), since it will be checked
       // when ScriptInterpreter::InterpretGmatFunction() is called
       else if (obj->GetType() == Gmat::FUNCTION)

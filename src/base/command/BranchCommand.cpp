@@ -1292,6 +1292,8 @@ bool BranchCommand::ExecuteBranch(Integer which)
       {
          // Use exception to remove Visual C++ warning
          e.GetMessageType();
+         // Set as fatal exception so that it can be caught in GmatFunction (LOJ: 2015.01.09)
+         e.SetFatal(true);
          #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
          MessageInterface::ShowMessage
             ("   BranchCommand rethrowing %s\n", e.GetFullMessage().c_str());

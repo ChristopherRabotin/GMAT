@@ -48,6 +48,7 @@
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_WRAPPERS
 //#define DEBUG_CLEANUP
+//#define DEBUG_FIND_OBJ
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -1292,8 +1293,8 @@ bool FunctionManager::CreatePassingArgWrappers()
       {
          #ifdef DEBUG_FM_INIT
          MessageInterface::ShowMessage(
-            "   passed input object \"%s\" of type \"%s\" found in LOS/GOS \n",
-            (passedIns.at(ii)).c_str(), (obj->GetTypeName()).c_str());
+            "   passed input object <%p>\"%s\" of type \"%s\" found in LOS/GOS \n",
+            obj, (passedIns.at(ii)).c_str(), (obj->GetTypeName()).c_str());
          #endif
          objFOS = obj->Clone();
          objFOS->SetName(formalName);
@@ -1388,7 +1389,7 @@ bool FunctionManager::CreatePassingArgWrappers()
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
       ("Exiting  FM::CreatePassingArgWrappers() for '%s'\n", fName.c_str());
-   ShowObjectMap(functionObjectStore, "in CreatePassingArgWrappers()\n");
+   ShowObjectMap(functionObjectStore, "in CreatePassingArgWrappers()");
    #endif
    
    return true;

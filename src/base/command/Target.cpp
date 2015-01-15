@@ -27,6 +27,7 @@
 //#define DEBUG_TARGETER
 //#define DEBUG_START_MODE
 //#define DEBUG_TARGET_COMMANDS
+//#define DEBUG_TARGET_EXEC
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -589,7 +590,7 @@ bool Target::Execute()
 {
    #ifdef DEBUG_TARGET_EXEC
    MessageInterface::ShowMessage
-      ("Target::Execute() entered, theSolver=<%p>'%s'\n", (GmatBase*)theSolver,
+      ("\nTarget::Execute() entered, theSolver=<%p>'%s', ", (GmatBase*)theSolver,
        theSolver->GetName().c_str());
    MessageInterface::ShowMessage
       ("maxIter=%d\n",
@@ -597,6 +598,8 @@ bool Target::Execute()
    MessageInterface::ShowMessage
       ("currentFunction=<%p>'%s'\n",
        currentFunction, currentFunction ? ((GmatBase*)currentFunction)->GetName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("targeterInFunctionInitialized=%d\n", targeterInFunctionInitialized);
    #endif
    
    // If targeting inside a function, we need to reinitialize since the local solver is

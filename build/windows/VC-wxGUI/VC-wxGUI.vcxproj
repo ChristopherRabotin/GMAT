@@ -108,7 +108,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(F2C_VC32)\include;$(CSPICE_VC32)\include;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\plugins\DataInterfacePlugin\src\base\include;..\..\..\plugins\DataInterfacePlugin\src\base\factory;..\..\..\plugins\DataInterfacePlugin\src\base\datainterface;..\..\..\plugins\DataInterfacePlugin\src\base\datareader;..\..\..\plugins\DataInterfacePlugin\src\base\command;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN_30)\include\msvc;$(WXWIN_30)\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\plugin;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__INCLUDE_BUILTIN_PLUGINS__;__USE_MATLAB__;__USE_SPICE__;__USE_STC_EDITOR__;__DISABLE_EMAIL__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WIN32__;__WXMSW__;wxUSE_GLCANVAS;__INCLUDE_BUILTIN_PLUGINS__;__USE_MATLAB__;__USE_SPICE__;__USE_STC_EDITOR__;__DISABLE_EMAIL__;DEBUG_MEMORY_DISABLE;DEBUG_TRACE_DISABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -211,7 +211,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\Event.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.cpp" />
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\LightTimeCorrection.cpp" />
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\factory\DataFileFactory.cpp" />
@@ -396,12 +395,11 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\TOEEqAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\Brent.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp" />
@@ -433,7 +431,6 @@
     <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
@@ -895,7 +892,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\Event.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.hpp" />
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\LightTimeCorrection.hpp" />
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\factory\DataFileFactory.hpp" />
@@ -1083,12 +1079,11 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\TOEEqAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\Brent.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp" />
@@ -1120,7 +1115,6 @@
     <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />

@@ -264,6 +264,24 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  6. Subscribers
    //  7. Remaining Objects
       
+   // Calculated Points
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::CALCULATED_POINT)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize CalculatedPoints in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::CALCULATED_POINT);
+      
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize CalculatedPoints in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::CALCULATED_POINT, true, unusedGOL);
+      }
+   }
+   
+
    // Coordinate Systems
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::COORDINATE_SYSTEM)
    {
@@ -278,6 +296,23 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          MessageInterface::ShowMessage("--- Initialize CoordinateSystems in GOS\n");
          #endif
          InitializeObjectsInTheMap(GOS, Gmat::COORDINATE_SYSTEM, true, unusedGOL);
+      }
+   }
+   
+   // Coordinate Systems
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::BURN)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize Burns in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::BURN);
+      
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize Burns in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::BURN, true, unusedGOL);
       }
    }
    

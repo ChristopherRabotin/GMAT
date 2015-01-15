@@ -58,7 +58,7 @@ using namespace GmatStringUtil;
 //#define DBGLVL_COMPARE_FILES 1
 //#define DBGLVL_FUNCTION_OUTPUT 2
 //#define DEBUG_ABSOLUTE_PATH
-
+//#define DEBUG_FILE_CHECK
 
 //------------------------------------------------------------------------------
 // std::string GetGmatPath()
