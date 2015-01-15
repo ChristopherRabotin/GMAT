@@ -2322,18 +2322,6 @@
     <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
       <Filter>Source Files\gui\view</Filter>
     </ClCompile>
@@ -2351,6 +2339,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
       <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -4454,18 +4454,6 @@
     <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
       <Filter>Source Files\gui\view</Filter>
     </ClInclude>
@@ -4483,6 +4471,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
       <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

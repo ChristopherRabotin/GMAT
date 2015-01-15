@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug-wx3|Win32">
@@ -180,10 +180,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.c" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.cpp" />
@@ -861,10 +861,10 @@
     <ClCompile Include="..\BuiltinPluginManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.h" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.hpp" />
