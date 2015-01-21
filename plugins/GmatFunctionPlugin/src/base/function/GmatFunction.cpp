@@ -440,7 +440,7 @@ bool GmatFunction::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
+// bool Execute(ObjectInitializer *objInit, bool reinitialize)
 //------------------------------------------------------------------------------
 bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
 {
@@ -473,7 +473,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    
    // For two modes function parsing, some ref objects are not set without
    // reinitialization
-   // Reinitialize Buns (LOJ:2015.01.09) - Function_TargetCheck.script
+   // Reinitialize Spacecrafts (LOJ: 2015.01.21) - /MonteCarlo/TestCalcOfGSEtime.script
+   // Reinitialize Burns (LOJ:2015.01.09) - Function_TargetCheck.script
    // Reinitialize CalculatedPoints (LOJ:2015.01.08)
    // Reinitialize CoordinateSystems to fix bug 1599 (LOJ: 2009.11.05)
    // Reinitialize Parameters to fix bug 1519 (LOJ: 2009.09.16)
@@ -481,14 +482,17 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    {
       #ifdef DEBUG_FUNCTION_EXEC
       MessageInterface::ShowMessage
-         ("   Re-initializing CalculatedPointes, CoordinateSystems, Burns, and Parameters\n");
+         ("   Re-initializing CoordinateSystems, CalculatedPointes, Spacecrafts, Burns, and Parameters\n");
       #endif
-      if (!objInit->InitializeObjects(true, Gmat::CALCULATED_POINT))
-         throw FunctionException
-            ("Failed to re-initialize CalculatedPoints in the \"" + functionName + "\"");
       if (!objInit->InitializeObjects(true, Gmat::COORDINATE_SYSTEM))
          throw FunctionException
             ("Failed to re-initialize CoordinateSystems in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::CALCULATED_POINT))
+         throw FunctionException
+            ("Failed to re-initialize CalculatedPoints in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::SPACECRAFT))
+         throw FunctionException
+            ("Failed to re-initialize Spacecrafts in the \"" + functionName + "\"");
       if (!objInit->InitializeObjects(true, Gmat::BURN))
          throw FunctionException
             ("Failed to re-initialize Burns in the \"" + functionName + "\"");
