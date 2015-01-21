@@ -2815,9 +2815,22 @@ bool MathParser::IsMathElement(const std::string &str)
    {
       // If input is enclosed with single quote the it is a String so return true
       if (GmatStringUtil::IsEnclosedWith(str, "'"))
-         return true; // Is string allowed?
+      {
+         #ifdef DEBUG_MATH_ELEMENT
+         MessageInterface::ShowMessage
+            ("MathParser::IsMathElement(<%s>) returning false, string literal found\n", str.c_str());
+         #endif
+         //return true; // Is string allowed?
+         return false; // LOJ: Changed to return false (2015.01.21)
+      }
       else
+      {
+         #ifdef DEBUG_MATH_ELEMENT
+         MessageInterface::ShowMessage
+            ("MathParser::IsMathElement(<%s>) returning false, transpose ' found\n", str.c_str());
+         #endif
          return false;
+      }
    }
    else if (str.find(inverseOpStr) != str.npos)
    {
