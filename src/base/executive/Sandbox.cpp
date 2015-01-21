@@ -1476,7 +1476,8 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
    
    SetGlobalRefObject(cmd);
    
-   if (cmd->IsOfType("CallFunction"))
+   // Check for CallGmatFunction
+   if (cmd->IsOfType("CallGmatFunction"))
    {
       std::string cfName = cmd->GetStringParameter("FunctionName");
       gfList.push_back(cfName);
@@ -1543,6 +1544,8 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
          ((f->IsFunctionControlSequenceSet())? "already" : "NOT"));
       MessageInterface::ShowMessage
          ("script errors were %sfound.\n", f->ScriptErrorFound() ? "" : "not ");
+      MessageInterface::ShowMessage
+         ("Function type is %s\n", f->GetTypeName().c_str());
       #endif
       
       // if function is GmatFunction and no FCS has built and no script error found,
