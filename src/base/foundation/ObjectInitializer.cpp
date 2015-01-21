@@ -264,24 +264,6 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  6. Subscribers
    //  7. Remaining Objects
       
-   // Calculated Points
-   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::CALCULATED_POINT)
-   {
-      #ifdef DEBUG_INITIALIZE_OBJ
-      MessageInterface::ShowMessage("--- Initialize CalculatedPoints in LOS\n");
-      #endif
-      InitializeObjectsInTheMap(LOS, Gmat::CALCULATED_POINT);
-      
-      if (includeGOS)
-      {
-         #ifdef DEBUG_INITIALIZE_OBJ
-         MessageInterface::ShowMessage("--- Initialize CalculatedPoints in GOS\n");
-         #endif
-         InitializeObjectsInTheMap(GOS, Gmat::CALCULATED_POINT, true, unusedGOL);
-      }
-   }
-   
-
    // Coordinate Systems
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::COORDINATE_SYSTEM)
    {
@@ -299,7 +281,24 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
-   // Coordinate Systems
+   // Calculated Points
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::CALCULATED_POINT)
+   {
+      #ifdef DEBUG_INITIALIZE_OBJ
+      MessageInterface::ShowMessage("--- Initialize CalculatedPoints in LOS\n");
+      #endif
+      InitializeObjectsInTheMap(LOS, Gmat::CALCULATED_POINT);
+      
+      if (includeGOS)
+      {
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage("--- Initialize CalculatedPoints in GOS\n");
+         #endif
+         InitializeObjectsInTheMap(GOS, Gmat::CALCULATED_POINT, true, unusedGOL);
+      }
+   }
+   
+   // Burns
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::BURN)
    {
       #ifdef DEBUG_INITIALIZE_OBJ
@@ -316,7 +315,7 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       }
    }
    
-   // Spacecraft
+   // Spacecrafts
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::SPACECRAFT ||
        objType == Gmat::GROUND_STATION)
    {
@@ -558,6 +557,12 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
       {
          GmatBase *obj = omi->second;
          
+         #ifdef DEBUG_INITIALIZE_OBJ
+         MessageInterface::ShowMessage
+            ("   obj = <%p><%s>'%s'\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+             obj ? obj->GetName().c_str() : "NULL");
+         #endif
+         
          if (obj == NULL)
             throw GmatBaseException
                ("Cannot initialize NULL pointer of \"" + omi->first + "\" object");
@@ -612,6 +617,10 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
    }
    catch (BaseException &be)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+      MessageInterface::ShowMessage
+         ("==> Caught an exception '%s'\n", be.GetFullMessage().c_str());
+      #endif
       // Check if undefined ref objects can be ignored
       if (usingGOS && unusedGOL != NULL)
       {
@@ -635,6 +644,13 @@ void ObjectInitializer::InitializeObjectsInTheMap(ObjectMap *objMap,
          throw;
       }
    }
+   
+   #ifdef DEBUG_INITIALIZE_OBJ
+   MessageInterface::ShowMessage
+      ("InitializeObjectsInTheMap() leaving, objMap=<%p>, objType=%d, "
+       "objTypeStr='%s', inFunction=%d\n", objMap, objType, objTypeStr.c_str(),
+       inFunction);
+   #endif
 }
 
 
