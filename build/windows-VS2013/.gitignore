@@ -1,2 +1,5 @@
 *.sdf
 *.v12.suo
+/*.opensdf
+/*.suo
+/ipch/
