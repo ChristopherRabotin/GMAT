@@ -912,9 +912,21 @@ const StringArray& Function::GetStringArrayParameter(const Integer id) const
    }
 }
 
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string &value)
+ */
+//------------------------------------------------------------------------------
+bool Function::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
 
 //------------------------------------------------------------------------------
-//  bool SetStringParameter(const Integer id, const Real value)
+//  bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 /**
  * Sets the value for a std::string parameter.
@@ -967,6 +979,15 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool Function::SetStringParameter(const std::string &label,
+                                  const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)

@@ -25,11 +25,11 @@
 #include "gmatwxdefs.hpp"
 #include <wx/sizer.h>
 
-#ifdef __WXMAC__
-class GmatStaticBoxSizer : public wxBoxSizer
- #else
- class GmatStaticBoxSizer : public wxStaticBoxSizer
- #endif
+#if wxCHECK_VERSION(3, 0, 0) || !defined( __WXMAC__)
+   class GmatStaticBoxSizer : public wxStaticBoxSizer
+#else
+   class GmatStaticBoxSizer : public wxBoxSizer
+#endif
 {
 public:
    
@@ -40,7 +40,7 @@ public:
 
 protected:
    
-   wxWindow     *theParent;
+//   wxWindow     *theParent;
    wxStaticText *labelText;
    
 };

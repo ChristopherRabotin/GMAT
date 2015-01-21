@@ -187,7 +187,7 @@ void SetPathDialog::SaveData()
    // Log file path
    if (mOutputPathPanel->HasDataChanged())
    {
-      std::string pathName = mOutputPathPanel->GetFullPathName().c_str();
+      std::string pathName = mOutputPathPanel->GetFullPathName().WX_TO_STD_STRING;
       if (wxDir::Exists(pathName.c_str()))
       {
          #ifdef DEBUG_SETPATH_DIALOG_SAVE

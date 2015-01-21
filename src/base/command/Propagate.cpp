@@ -31,8 +31,6 @@
 #include "AngleUtil.hpp"        // for PutAngleInDegRange()
 #include "ColorTypes.hpp"       // for GmatColor::
 #include "MessageInterface.hpp"
-#include "EventLocator.hpp"
-#include "EventModel.hpp"
 #include "RgbColor.hpp"         // for ToIntColor()
 #include <sstream>
 #include <cmath>
@@ -1086,6 +1084,22 @@ std::string Propagate::GetStringParameter(const Integer id) const
    return PropagationEnabledCommand::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -3386,9 +3400,6 @@ bool Propagate::Initialize()
 
             AddToBuffer(so);
 
-            // Add any locator that uses so to the PSM for step size control
-            LocateObjectEvents(mapObj, els);
-
             if (so->GetType() == Gmat::FORMATION)
                ((FormationInterface*)(so))->BuildState();
 //            FillFormation(so, owners, elements);
@@ -3397,12 +3408,6 @@ bool Propagate::Initialize()
 //               SetNames(so->GetName(), owners, elements);
 //            }
          }
-      }
-
-      if (els.size() != 0)
-      {
-         AddLocators(psm, els);
-         els.clear();
       }
 
       // Check for finite thrusts and update the force model if there are any
@@ -3464,9 +3469,6 @@ bool Propagate::Initialize()
 
       ++index;
    } // End of loop through PropSetups
-
-   // Prepare the locator buffers and data structures
-   InitializeForEventLocation();
 
    // Prep the publisher
    StringArray owners, elements;
@@ -4320,7 +4322,6 @@ bool Propagate::Execute()
             // Set segment orbit color (LOJ: 2013.12.16 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
             
-            CheckForEvents();
             break;
          }
 
@@ -4357,7 +4358,6 @@ bool Propagate::Execute()
             // Set segment orbit color (LOJ: 2013.11.29 Added for propagation segment color)
             publisher->SetSegmentOrbitColor(this, overrideSegmentColor, segmentOrbitColor, fullSatList);
             publisher->Publish(this, streamID, pubdata, dim+1, direction);
-            CheckForEvents();
          }
          else
          {

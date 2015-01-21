@@ -25,6 +25,7 @@
 #include "GmatBaseException.hpp"
 #include "MessageInterface.hpp"
 #include "MessageReceiver.hpp"
+#include "StringUtil.hpp"          // for StringToWideString()
 
 // Platform specific library loader routines
 #ifdef _WIN32
@@ -139,7 +140,13 @@ bool DynamicLibrary::LoadDynamicLibrary()
    nameWithPath = libPath + libName;
 
    #ifdef __WIN32__
-      libHandle = LoadLibrary(libName.c_str());
+      #ifdef _UNICODE
+         std::wstring libNameW = GmatStringUtil::StringToWideString(libName);
+         libHandle = LoadLibrary(libNameW.c_str());
+      #else
+         libHandle = LoadLibrary(libName.c_str());
+      #endif
+      
       #ifdef DEBUG_LIBRARY_LOAD
          if (libHandle == NULL)
          {

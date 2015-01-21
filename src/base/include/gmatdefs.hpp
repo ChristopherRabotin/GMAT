@@ -180,6 +180,10 @@ namespace Gmat
       CHEMICAL_FUEL_TANK,
       ELECTRIC_FUEL_TANK,
 
+      POWER_SYSTEM,        // for PowerSystems
+      SOLAR_POWER_SYSTEM,
+      NUCLEAR_POWER_SYSTEM,
+
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,
@@ -208,10 +212,6 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
-      POWER_SYSTEM,        // for PowerSystems
-      SOLAR_POWER_SYSTEM,
-      NUCLEAR_POWER_SYSTEM,
-
       UNKNOWN_OBJECT
    };
 
@@ -299,7 +299,6 @@ namespace Gmat
       ORBIT_STATE_TRANSITION_MATRIX,   // 6x6 STM for the orbit
       ORBIT_A_MATRIX,
       MASS_FLOW,                       // m dot
-      EVENT_FUNCTION_STATE,            // For event location
       PREDEFINED_STATE_MAX,
       USER_DEFINED_BEGIN = 3800,
       USER_DEFINED_END = 3999          // Allow up to 200 dynamic entries

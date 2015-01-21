@@ -80,19 +80,19 @@ void TankPanel::Create()
    pConfig->SetPath(wxT("/Spacecraft Tanks"));
 
    // wxButton
-   selectButton = new wxButton( this, ID_BUTTON, wxT("-"GUI_ACCEL_KEY">"),
+   selectButton = new wxButton( this, ID_BUTTON, wxString("-"GUI_ACCEL_KEY">"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectButton->SetToolTip(pConfig->Read(_T("AddTankHint")));
 
-   removeButton = new wxButton( this, ID_BUTTON, wxT(GUI_ACCEL_KEY"<-"),
+   removeButton = new wxButton( this, ID_BUTTON, wxString(GUI_ACCEL_KEY"<-"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeButton->SetToolTip(pConfig->Read(_T("RemoveTankHint")));
 
-   selectAllButton = new wxButton( this, ID_BUTTON, wxT("=>"),
+   selectAllButton = new wxButton( this, ID_BUTTON, wxString("=>"),
                               wxDefaultPosition, wxDefaultSize, 0 );
    selectAllButton->SetToolTip(pConfig->Read(_T("AddAllTanksHint")));
 
-   removeAllButton = new wxButton( this, ID_BUTTON, wxT("<"GUI_ACCEL_KEY"="),
+   removeAllButton = new wxButton( this, ID_BUTTON, wxString("<"GUI_ACCEL_KEY"="),
                               wxDefaultPosition, wxDefaultSize, 0 );
    removeAllButton->SetToolTip(pConfig->Read(_T("ClearTanksHint")));
 
@@ -124,9 +124,9 @@ void TankPanel::Create()
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
-   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Available Tanks") );
+   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxString(GUI_ACCEL_KEY"Available Tanks") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxHORIZONTAL );
-   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Selected Tanks") );
+   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxString(GUI_ACCEL_KEY"Selected Tanks") );
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxHORIZONTAL );
    
    // Add to wx*Sizers   

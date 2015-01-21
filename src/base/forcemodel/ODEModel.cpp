@@ -553,15 +553,6 @@ void ODEModel::AddForce(PhysicalModel *pPhysicalModel)
    #endif
 
 
-	#ifdef DEBUG_EVENTLOCATION
-      if (pPhysicalModel->IsOfType("EventModel"))
-      {
-         MessageInterface::ShowMessage("Adding an EventModel at \n");
-         MessageInterface::ShowMessage("                        <%p>\n",
-            pPhysicalModel);
-      }
-   #endif
-
    pPhysicalModel->SetDimension(dimension);
    isInitialized = false;
    
@@ -1390,11 +1381,6 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
-   }
-
-   if (id == Gmat::EVENT_FUNCTION_STATE)
-   {
-      // todo Fill this in?
    }
 
    #ifdef DEBUG_BUILDING_MODELS
@@ -4035,12 +4021,20 @@ bool ODEModel::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label,const std::string &value)
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool ODEModel::SetStringParameter(const std::string &label, const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
 //------------------------------------------------------------------------------
 bool ODEModel::SetStringParameter(const std::string &label,
-                                    const std::string &value)
+                                  const std::string &value)
 {
-    return SetStringParameter(GetParameterID(label), value);
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 //---------------------------------------------------------------------------

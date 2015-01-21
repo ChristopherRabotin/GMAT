@@ -44,7 +44,7 @@ wxConnectionBase* GmatServer::OnAcceptConnection(const wxString& topic)
 {
    #ifdef DEBUG_SERVER
    MessageInterface::ShowMessage
-      ("GmatServer::OnAcceptConnection() topic=%s\n", topic.c_str());
+      ("GmatServer::OnAcceptConnection() entered, topic=%s\n", topic.WX_TO_C_STRING);
    #endif
    
    if ( topic == IPC_TOPIC )
@@ -53,7 +53,7 @@ wxConnectionBase* GmatServer::OnAcceptConnection(const wxString& topic)
       
       #ifdef DEBUG_SERVER
       MessageInterface::ShowMessage
-         ("GmatServer::OnAcceptConnection() mConnection=%p\n", mConnection);
+         ("GmatServer::OnAcceptConnection() returning, mConnection=<%p>\n", mConnection);
       #endif
       
       return mConnection;

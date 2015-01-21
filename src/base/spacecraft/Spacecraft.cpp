@@ -39,6 +39,8 @@
 #include "CCSDSAttitude.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
+#include "EphemManager.hpp"
+
 #ifdef __USE_SPICE__
 #include "SpiceAttitude.hpp"         // for SpiceAttitude - to set object name and ID
 #endif
@@ -362,6 +364,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    spadSRPScaleFactor   (1.0),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
+   ephemMgr             (NULL),
    includeCartesianState(0)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -517,6 +520,11 @@ Spacecraft::~Spacecraft()
 
    if (spadSRPReader)  delete spadSRPReader;
    if (spadBFCS)       delete spadBFCS;
+   if (ephemMgr)
+   {
+      ephemMgr->StopRecording();
+      delete ephemMgr;
+   }
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -588,6 +596,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spadSRPScaleFactor   (a.spadSRPScaleFactor),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
+   ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -750,6 +759,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
+   if (ephemMgr) delete ephemMgr;
+   ephemMgr           = NULL;
 
    includeCartesianState = a.includeCartesianState;
 
@@ -1225,6 +1236,36 @@ Real Spacecraft::GetSpacecraftBusPower()
       throw SpaceObjectException(errmsg);
    }
    return powerSystem->GetSpacecraftBusPower();
+}
+
+//------------------------------------------------------------------------------
+// RecordEphemeris()
+// Record the Spacecraft ephemeris in the background (needed by Event Location)
+//------------------------------------------------------------------------------
+void Spacecraft::RecordEphemerisData()
+// Set up the ephemMgr here - set the coord sys, obj ptr, etc.
+{
+   if (!ephemMgr)
+   {
+      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+      ephemMgr->SetObject(this);
+      // @todo - do I need to resend this, if the internalCoordSys ever changes?
+      ephemMgr->SetCoordinateSystem(internalCoordSystem);
+   }
+   ephemMgr->RecordEphemerisData();
+}
+
+//------------------------------------------------------------------------------
+// ProvideEphemeris()
+// Load the recorded ephemeris and start up another file to continue recording
+//------------------------------------------------------------------------------
+void Spacecraft::ProvideEphemerisData()
+{
+   // @todo Fill this in
+   if (!ephemMgr)
+      throw SpaceObjectException(
+            "RecordEphemeris() must be called before ProvideEphemeris()\n");
+   ephemMgr->ProvideEphemerisData();
 }
 
 
@@ -1749,6 +1790,13 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
    return SpaceObject::GetRefObjectNameArray(type);
 }
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+//------------------------------------------------------------------------------
+bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const char *name)
+{
+   return SetRefObjectName(type, std::string(name));
+}
 
 // DJC: Not sure if we need this yet...
 //------------------------------------------------------------------------------
@@ -3672,6 +3720,24 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::SetStringParameter(const std::string &label,
+                                    const char *value)
+{
+   return SetStringParameter(label, std::string(value));
+}
+
+//---------------------------------------------------------------------------
 //  bool SetStringParameter(const std::string &label, const std::string &value)
 //---------------------------------------------------------------------------
 /**
@@ -4543,6 +4609,10 @@ bool Spacecraft::Initialize()
       isInitialized = true;
       retval = true;
    }
+
+   // *********** testing ************************
+//   RecordEphemerisData();    // ******************<<<<<<<<<<<<<<< for testing
+   // *********** testing ************************
 
    return retval;
 }
@@ -7054,7 +7124,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
             MessageInterface::ShowMessage
                ("'%s' not found, so removing the type '%s' from possible input types\n", label.c_str(), (*iter).c_str());
             #endif
-            possibleInputTypes.erase(iter);
+            iter = possibleInputTypes.erase(iter);
          }
       }
       

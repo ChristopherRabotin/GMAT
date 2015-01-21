@@ -1546,7 +1546,7 @@ void ParameterSelectDialog::ShowCoordSystem(bool showBlank)
    MessageInterface::ShowMessage("ShowCoordSystem() entered\n");
    #endif
    
-   std::string property = GetPropertySelection().c_str();
+   std::string property = GetPropertySelection().WX_TO_STD_STRING;
    
    if (property == "")
    {
@@ -2019,7 +2019,7 @@ wxString ParameterSelectDialog::FormArrayElement()
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Row index \"%s\" is out of range.\n"
-          "Valid range is between 1 and %d\n", rowStr.c_str(), mNumRow);
+          "Valid range is between 1 and %d\n", rowStr.WX_TO_C_STRING, mNumRow);
       valid = false;
    }
    
@@ -2028,7 +2028,7 @@ wxString ParameterSelectDialog::FormArrayElement()
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Column index \"%s\" is out of range.\n"
-          "Valid range is between 1 and %d\n", colStr.c_str(), mNumCol);
+          "Valid range is between 1 and %d\n", colStr.WX_TO_C_STRING, mNumCol);
       valid = false;
    }
    
@@ -2205,6 +2205,6 @@ void ParameterSelectDialog::DisplayWarning(const wxString &arg1, const wxString 
    if (arg2 == "")
       MessageInterface::PopupMessage(Gmat::WARNING_, arg1.c_str());
    else
-      MessageInterface::PopupMessage(Gmat::WARNING_, arg1.c_str(), arg2.c_str());
+      MessageInterface::PopupMessage(Gmat::WARNING_, arg1.WX_TO_C_STRING, arg2.WX_TO_C_STRING);
 }
 

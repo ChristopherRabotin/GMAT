@@ -101,7 +101,7 @@ then
 
     # Copy support libraries
     cp -pRv \
-        "$winbuildspath"/../vc_lib/wx2.8.12/*.dll \
+        "$winbuildspath"/../vc_lib/wx3.0.2/*.dll \
         "$dest"/bin
     cp -pRv \
         "$winbuildspath"/../vc_lib/*.dll \
