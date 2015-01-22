@@ -283,7 +283,7 @@ bool MeasurementManager::Initialize()
       adapterFromTFSMap[trackingSets[i]] = names;
       
       // Step 3: Set stream objects for all observation data files in trackingSet[i] 
-      StringArray filenames = trackingSets[i]->GetStringArrayParameter("Filename");
+      StringArray filenames = trackingSets[i]->GetStringArrayParameter("FileName");
       //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index as the outer loop
       for (UnsignedInt k = 0; k < filenames.size(); ++k)
       {
@@ -323,11 +323,11 @@ bool MeasurementManager::Initialize()
       }// for k loop
       
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
-      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampedTable");
+      StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampTable");
       for (UnsignedInt k1 = 0; k1 < rampedTablenames.size(); ++k1)
       {
 //         std::stringstream fn;
-//         fn << trackingSets[i]->GetName() << "RampedTable" << k1;
+//         fn << trackingSets[i]->GetName() << "RampTable" << k1;
 //         DataFile *newStream = new DataFile(fn.str());
          DataFile *newStream = new DataFile(rampedTablenames[k1]);
          newStream->SetStringParameter("Filename", rampedTablenames[k1]);
@@ -1548,7 +1548,8 @@ const StringArray& MeasurementManager::GetParticipantList()
    {
       /// @todo: This part will need changes
       // Walk through the participant list for the model
-      StringArray parts = (*i)->GetStringArrayParameter("AddTrackingConfig");
+      //StringArray parts = (*i)->GetStringArrayParameter("AddTrackingConfig");           // made changes by TUAN NGUYEN
+      StringArray parts = (*i)->GetParticipants();                                        // made changes by TUAN NGUYEN
       for (UnsignedInt j = 0; j < parts.size(); ++j)
       {
          // If the participant is not in the list yet, add it
@@ -2612,7 +2613,7 @@ Integer MeasurementManager::AddMeasurement(TrackingFileSet* tfs)
 //         AddMeasurement((*setAdapters)[i]);
 //
 //      // And the stream objects
-//      StringArray filenames = tfs->GetStringArrayParameter("Filename");
+//      StringArray filenames = tfs->GetStringArrayParameter("FileName");
 //      for (UnsignedInt i = 0; i < filenames.size(); ++i)
 //      {
 //         std::stringstream fn;
@@ -2678,6 +2679,16 @@ Integer MeasurementManager::AddMeasurement(TrackingDataAdapter* adapter)
 const std::vector<MeasurementModel*>& MeasurementManager::GetAllMeasurementModels()
 {
    return models;
+}
+
+const std::vector<TrackingSystem*>& MeasurementManager::GetAllTrackingSystems()
+{
+   return systems;
+}
+
+const std::vector<TrackingFileSet*>& MeasurementManager::GetAllTrackingFileSets()
+{
+   return trackingSets;
 }
 
 UnsignedInt MeasurementManager::GetCurrentRecordNumber()
