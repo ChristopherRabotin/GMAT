@@ -272,7 +272,7 @@ bool Estimator::Initialize()
                /*" named %s.", GetName().c_str()*/);
 
       if (measurementNames.empty())
-         throw SolverException("Estimator error - no measurements set.\n");
+         throw EstimatorException("Error: no measurements are set for estimation.\n");
    }
    
    return retval;
@@ -1152,7 +1152,8 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& Estimator::GetRefObjectArray(const std::string & typeString)
 {
-   return Solver::GetRefObjectArray(typeString);
+   return GetRefObjectArray(GetObjectType(typeString));                  // made changes by TUAN NGUYEN
+   //return Solver::GetRefObjectArray(typeString);                       // made changes by TUAN NGUYEN
 }
 
 
