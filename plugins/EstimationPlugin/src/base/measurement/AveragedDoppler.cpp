@@ -294,6 +294,26 @@ std::string AveragedDoppler::GetParameterTypeString(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method is used to specify a parameter is read only or not.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return   true if parameter read only, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool AveragedDoppler::IsParameterReadOnly(const Integer id) const      // made changes by TUAN NGUYEN
+{                                                                      // made changes by TUAN NGUYEN
+   if (id == BuildInTurnAroundRatio)                                   // made changes by TUAN NGUYEN
+      return true;                                                     // made changes by TUAN NGUYEN
+
+   return PhysicalMeasurement::IsParameterReadOnly(id);                // made changes by TUAN NGUYEN
+}                                                                      // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
