@@ -375,7 +375,8 @@ private:
    StringArray   celestialBodyList;
    StringArray   eventLocatorList;
    StringArray   interfaceList;
-   
+   StringArray   errorModelList;                   // made changes by TUAN NGUYEN
+
    StringArray   matlabFunctionNames;
    
    static StringArray   allObjectTypeList;
