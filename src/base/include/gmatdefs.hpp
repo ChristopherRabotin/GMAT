@@ -190,6 +190,7 @@ namespace Gmat
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
       CORE_MEASUREMENT,    // For the measurement primitives
+      ERROR_MODEL,         // Error model used in a measurement            // made changes by TUAN NGUYEN  
       
       TRACKING_DATA,
       TRACKING_SYSTEM,
