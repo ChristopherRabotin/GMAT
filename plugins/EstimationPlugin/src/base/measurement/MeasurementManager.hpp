@@ -101,6 +101,9 @@ public:
    void                    LoadRampTables();
 
    const std::vector<MeasurementModel*>& GetAllMeasurementModels();
+   const std::vector<TrackingSystem*>&   GetAllTrackingSystems();
+   const std::vector<TrackingFileSet*>&  GetAllTrackingFileSets();
+
    UnsignedInt             GetCurrentRecordNumber();
    
    GmatEpoch               GetEpoch();
