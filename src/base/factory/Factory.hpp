@@ -20,8 +20,8 @@
  */
 //------------------------------------------------------------------------------
 #ifndef Factory_hpp
-#define Factory_hpp
 
+#define Factory_hpp
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 
@@ -40,8 +40,8 @@ class CelestialBody;
 class SolarSystem;
 class Solver;
 class Subscriber;
-class EphemerisFile;
 class GmatCommand;
+class EphemerisFile;
 class AtmosphereModel;
 class Function;
 class Hardware;
@@ -56,6 +56,7 @@ class Interface;
 
 class MeasurementModelBase;
 class CoreMeasurement;
+class ErrorModel;                   // made changes by TUAN NGUYEN
 class DataFile;
 class ObType;
 class TrackingSystem;
@@ -125,6 +126,8 @@ public:
                                            const std::string &withName = "");
    virtual CoreMeasurement* CreateMeasurement(const std::string &ofType,
                                            const std::string &withName = "");
+   virtual ErrorModel*      CreateErrorModel(const std::string &ofType,                    // made changes by TUAN NGUYEN
+                                           const std::string &withName = "");              // made changes by TUAN NGUYEN
    virtual DataFile*        CreateDataFile(const std::string &ofType,
                                            const std::string &withName = "");
    virtual ObType*          CreateObType(const std::string &ofType,

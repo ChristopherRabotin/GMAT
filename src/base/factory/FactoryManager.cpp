@@ -107,6 +107,7 @@ GmatBase* FactoryManager::CreateObject(const Gmat::ObjectType generalType,
                                        const std::string &withName)
 {
    Factory* f = FindFactory(generalType, ofType);
+   
    if (f != NULL)
       return f->CreateObject(ofType,withName);
    return NULL;
@@ -636,6 +637,31 @@ CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
       return f->CreateMeasurement(ofType, withName);
    return NULL;
 }
+
+
+//------------------------------------------------------------------------------
+// ErrorModel* FactoryManager::CreateErrorModel(const std::string &ofType,
+//                                          const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates the measurement primitive used in a ErrorModel
+ *
+ * @param ofType The type of measurement primitive
+ * @param withName The name of the measurement prinitive.  This should be an
+ *                 empty string in the current implementation.
+ *
+ * @return The pointer to the new object
+ */
+//------------------------------------------------------------------------------
+ErrorModel* FactoryManager::CreateErrorModel(const std::string &ofType,                 // made changes by TUAN NGUYEN
+                                         const std::string &withName)                   // made changes by TUAN NGUYEN
+{                                                                                       // made changes by TUAN NGUYEN
+   Factory* f = FindFactory(Gmat::ERROR_MODEL, ofType);                                 // made changes by TUAN NGUYEN
+   if (f != NULL)                                                                       // made changes by TUAN NGUYEN
+      return f->CreateErrorModel(ofType, withName);                                     // made changes by TUAN NGUYEN
+   return NULL;                                                                         // made changes by TUAN NGUYEN
+}                                                                                       // made changes by TUAN NGUYEN
+
 
 TrackingSystem* FactoryManager::CreateTrackingSystem(const std::string &ofType,
          const std::string &withName)
