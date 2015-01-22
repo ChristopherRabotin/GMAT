@@ -100,6 +100,9 @@
     <Filter Include="Source Files\event">
       <UniqueIdentifier>{fcf2b7f5-d884-4bd8-8313-e12c935430e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\errormodel">
+      <UniqueIdentifier>{88b8d9d7-2554-4ac2-aea5-0fda27e1e4f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp">
@@ -1361,6 +1364,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\errormodel\ErrorModel.cpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\ErrorModelFactory.cpp">
+      <Filter>Source Files\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2680,6 +2689,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\errormodel\ErrorModel.hpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\ErrorModelFactory.hpp">
+      <Filter>Source Files\factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
