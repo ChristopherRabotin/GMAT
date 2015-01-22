@@ -404,9 +404,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
    {
       if ((estEpochFormat == "FromParticipants") && (value != ""))
       {
-         MessageInterface::ShowMessage("Setting estimation epoch has no "
-               "effect; EstimationEpochFormat is \"%s\"\n",
-               estEpochFormat.c_str());
+         MessageInterface::ShowMessage("Setting value for %s.EstimationEpoch has no "
+               "effect due to %s.EstimationEpochFormat to be \"%s\"\n", 
+               GetName().c_str(), GetName().c_str(), estEpochFormat.c_str());
       }
       if (estEpochFormat != "FromParticipants")
       {
@@ -414,6 +414,7 @@ bool BatchEstimator::SetStringParameter(const Integer id,
          // Convert to a.1 time for internal processing
          estimationEpoch = ConvertToRealEpoch(estEpoch, estEpochFormat);
       }
+
       return true;
    }
 
@@ -680,7 +681,7 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-      //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()
+      //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()      
       retval    = true;
    }
 
