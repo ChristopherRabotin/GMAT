@@ -28,6 +28,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_STATE
+//#define DEBUG_STATE_RESETS
 //#define DEBUG_EVENT_STATE
 
 
@@ -621,6 +622,10 @@ bool RunEstimator::Execute()
                " encountered in the RunEstimator command");
    }
 
+   #ifdef DEBUG_STATE
+      MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
+   #endif
+
    if (state != Solver::FINISHED)
       state = theEstimator->AdvanceState();
    else
@@ -652,6 +657,10 @@ void RunEstimator::RunComplete()
    commandRunning = false;
 
    RunSolver::RunComplete();
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::RunComplete()\n");
+   #endif
+
 }
 
 
@@ -768,6 +777,11 @@ void RunEstimator::PrepareToEstimate()
    }
 
    estimationOffset = fm[0]->GetTime();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage(
+            "Exit RunEstimator::PrepareToEstimate()\n");
+   #endif
 }
 
 
@@ -794,14 +808,14 @@ void RunEstimator::Propagate()
       #ifdef DEBUG_STATE_RESETS
          MessageInterface::ShowMessage("Calling UpdateFromSpaceObject()\n");
          Real* oldState = fm[0]->GetState();
-         MessageInterface::ShowMessage("   Old state[0] element:  %.12lf\n", oldState[0]);
+         MessageInterface::ShowMessage("   Old state:  (%.12lf   %.12lf   %.12lf)\n", oldState[0], oldState[1], oldState[2]);
       #endif
-
+      
       fm[0]->UpdateFromSpaceObject();
-
+      
       #ifdef DEBUG_STATE_RESETS
          Real* newState = fm[0]->GetState();
-         MessageInterface::ShowMessage("   New state[0] element:  %.12lf\n", newState[0]);
+         MessageInterface::ShowMessage("   New state:  (%.12lf   %.12lf   %.12lf\n", newState[0], newState[1], newState[2]);
       #endif
    }
 
@@ -813,9 +827,9 @@ void RunEstimator::Propagate()
       fm[0]->SetTime(estimationOffset);
       startNewPass = false;
    }
-
+   
    Real dt = theEstimator->GetTimeStep();
-
+   
    // todo: This is a temporary fix; need to evaluate to find a more elegant
    //       solution here
    Real maxStep = 600.0;
@@ -823,8 +837,12 @@ void RunEstimator::Propagate()
       dt = (dt > 0.0 ? maxStep : -maxStep);
    Step(dt);
    bufferFilled = false;
-
+   
    theEstimator->UpdateCurrentEpoch(currEpoch[0]);
+   
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Propagate()\n");
+   #endif
 }
 
 
@@ -843,6 +861,10 @@ void RunEstimator::Calculate()
    #endif
 
    bufferFilled = false;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Calculate()\n");
+   #endif
 }
 
 
@@ -1020,6 +1042,10 @@ void RunEstimator::LocateEvent()
    propagators[0]->GetODEModel()->UpdateFromSpaceObject();
    fm[0]->SetTime(dt);
 
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::LocateEvent()\n");
+   #endif
+
 }
 
 
@@ -1038,6 +1064,10 @@ void RunEstimator::Accumulate()
    #endif
 
    CleanUpEvents();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Accumulate()\n");
+   #endif
 }
 
 
@@ -1055,6 +1085,10 @@ void RunEstimator::Estimate()
    #endif
 
    CleanUpEvents();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Estimate()\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1072,6 +1106,10 @@ void RunEstimator::CheckConvergence()
    #endif
 
    startNewPass = true;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::CheckConvergence()\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1101,6 +1139,10 @@ void RunEstimator::Finalize()
    commandComplete = true;
    commandRunning  = false;
    propPrepared    = false;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Finalize()\n");
+   #endif
 }
 
 
