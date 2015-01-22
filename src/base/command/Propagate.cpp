@@ -998,7 +998,7 @@ Integer Propagate::GetParameterID(const std::string &str) const
 Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 {
    if (id >= GmatCommandParamCount && id < PropagateCommandParamCount)
-      return PARAMETER_TYPE[id - GmatBaseParamCount];
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
 
    return PropagationEnabledCommand::GetParameterType(id);
 }
