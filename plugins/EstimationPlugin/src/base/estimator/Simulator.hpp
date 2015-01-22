@@ -65,6 +65,8 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;            // made changes by TUAN NGUYEN
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -128,9 +130,10 @@ protected:
    {
       MEASUREMENTS = SolverParamCount,
       PROPAGATOR,
-      INITIAL_EPOCH_FORMAT,
+      EPOCH_FORMAT,
+//      INITIAL_EPOCH_FORMAT,
       INITIAL_EPOCH,
-      FINAL_EPOCH_FORMAT,
+//      FINAL_EPOCH_FORMAT,
       FINAL_EPOCH,
       MEASUREMENT_TIME_STEP,
       ADD_NOISE,
@@ -162,12 +165,14 @@ protected:
    /// The current epoch (typically as determined via propagation)
    GmatEpoch           currentEpoch;
 
-   /// Format of the scripted simulation start time
-   std::string         initialEpochFormat;
+   /// Format of the scripted simulation start time and end time
+   std::string         epochFormat;
+//   /// Format of the scripted simulation start time
+//   std::string         initialEpochFormat;
    /// The string specifying the simulation start time
    std::string         initialEpoch;      // ??? is this simulationStart
-   /// Format of the scripted simulation end time
-   std::string         finalEpochFormat;
+//   /// Format of the scripted simulation end time
+//   std::string         finalEpochFormat;
    /// The string specifying the simulation end time
    std::string         finalEpoch;      // ??? is this simulationEnd
 
@@ -196,6 +201,7 @@ protected:
    MeasurementManager  measManager;
    /// The list of measurement models that the measurement manager is managing
    StringArray         measList;   // temporary - may get list from MeasManager;
+   ObjectArray         measModelList;                                             // made changes by TUAN NGUYEN
 
    /// Local storage element for ref object names
    StringArray         refObjectList;
