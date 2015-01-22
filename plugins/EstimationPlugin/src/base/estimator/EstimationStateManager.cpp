@@ -289,6 +289,9 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
 
          // Set the property ID
          Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
+         if (id == -1)                                                                                                                      // made changes by TUAN NGUYEN
+            throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
+
          solveForIDs[i] = id;
          elements[obj]->push_back(solveForIDNames[i]);
          retval = true;
@@ -642,8 +645,11 @@ bool EstimationStateManager::BuildState()
    {
       std::stringstream sizeVal;
       sizeVal << stateSize;
-      throw EstimatorException("Estimation state vector size is " +
-            sizeVal.str() + "; estimation is not possible.");
+      throw EstimatorException("No solve-for parameter is defined for estimator;"     // made changes by TUAN NGUYEN
+            " estimation is not possible.\n");                                         // made changes by TUAN NGUYEN
+
+      //throw EstimatorException("Estimation state vector size is " +                // made changes by TUAN NGUYEN
+      //      sizeVal.str() + "; estimation is not possible.");                      // made changes by TUAN NGUYEN
    }
 
    std::map<std::string,Integer> associateMap;
