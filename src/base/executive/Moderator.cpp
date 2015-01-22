@@ -47,6 +47,9 @@
 #include "SubscriberFactory.hpp"
 #include "CalculatedPointFactory.hpp"
 #include "MathFactory.hpp"
+
+#include "ErrorModelFactory.hpp"                                     // made changes by TUAN NGUYEN
+
 #include "Interface.hpp"
 #include "XyPlot.hpp"
 #include "OrbitPlot.hpp"
@@ -233,6 +236,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
+      theFactoryManager->RegisterFactory(new ErrorModelFactory());                   // made changes by TUAN NGUYEN
       
       #ifdef __INCLUDE_BUILTIN_PLUGINS__
       ForStaticLinkBuild::RegisterBuiltinPluginFactories(theFactoryManager);
