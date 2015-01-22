@@ -117,7 +117,7 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "EphemerisFile", "PropSetup",        "Function",         "FuelTank",         "Thruster",
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
-   "MeasurementModel","CoreMeasurement","TrackingData",     "TrackingSystem",   "DataStream",       
+   "MeasurementModel","CoreMeasurement","ErrorModel",       "TrackingData",     "TrackingSystem",   "DataStream",       // made changes by TUAN NGUYEN.      // add ErrorModel type
    "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
    "RFHardware",    "Antenna",          "PowerSystem",      "SolarPowerSystem", "NuclearPowerSystem",
    "UnknownObject"
@@ -143,7 +143,7 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     true,      true,      false,     false,
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
-   false,     false,     false,     false,     false,
+   false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add ErrorModel type
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,
    false
