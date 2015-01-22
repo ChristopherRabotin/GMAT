@@ -48,6 +48,7 @@ public:
 
    // methods overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
+   virtual std::string  GetParameterUnit(const Integer id) const;            // made changes by TUAN NGUYEN
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
@@ -134,6 +135,8 @@ public:
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetPropagator(PropSetup *ps);
    virtual bool         Initialize();
+
+   const StringArray& TrackingFileSet::GetParticipants() const;           // made changes by TUAN NGUYEN
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
 protected:
@@ -151,9 +154,9 @@ protected:
 
       std::string GetDefinitionString() const;
 
-      /// The strings describing the tracking configs
+      /// The strings describing signal paths                             // made changes by TUAN NGUYEN
       std::vector<StringArray> strands;
-      /// The measurement types associated with each tracking config
+      /// The measurement types associated with the signal paths          // made changes by TUAN NGUYEN
       StringArray types;
    };
 
