@@ -267,10 +267,9 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
 
 bool AtmosphereModel::Initialize()
 {
-   fluxReader = new SolarFluxReader();
-
+   if (fluxReader == NULL)
+      fluxReader = new SolarFluxReader();
    return true;
-
 }
 
 
