@@ -160,6 +160,7 @@ void ForPanel::Create()
    conditionGrid->SetReadOnly(0, START_SEL_COL, true);
    conditionGrid->SetReadOnly(0, INCR_SEL_COL, true);
    conditionGrid->SetReadOnly(0, END_SEL_COL, true);
+   conditionGrid->SetTabBehaviour(wxGrid::Tab_Leave);
    
    // wx*Sizers
    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
