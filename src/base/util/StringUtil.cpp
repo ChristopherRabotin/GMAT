@@ -54,6 +54,7 @@
 //#define DEBUG_REMOVE_MATH_SYMBOLS
 //#define DEBUG_NUMBER_WITH_NAME
 //#define DEBUG_SCI_NOTATION
+//#define DEBUG_SINGLE_ITEM 1
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -3817,7 +3818,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    //-----------------------------------------------------------------
    std::string str2 = str1.substr(index1+1, index2-index1-1);
    #if DEBUG_STRING_UTIL_ARRAY
-   MessageInterface::ShowMessage("   str1=<%s>/n", str1.c_str());
+   MessageInterface::ShowMessage("   str1=<%s>\n", str1.c_str());
    #endif
    
    if (str2 == "")
@@ -3863,7 +3864,8 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    //-----------------------------------------------------------------
    // It's double dimension array
    //-----------------------------------------------------------------
-   substr = str2.substr(0, comma-1);
+   //substr = str2.substr(0, comma-1);
+   substr = str2.substr(0, comma);
    
    #if DEBUG_STRING_UTIL_ARRAY
    MessageInterface::ShowMessage("   1st substr=%s\n", substr.c_str());
@@ -4254,9 +4256,11 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
    
    for (int i=0; i<length; i++)
    {
-      if (isalnum(str[i]) || str[i] == '.')
+      // Added check for underscore _ (LOJ: 2015.01.21)
+      //if (isalnum(str[i]) || str[i] == '.')
+      if (isalnum(str[i]) || str[i] == '.' || str[i] == '_')
          continue;
-
+      
       if (str[i] == '-')
       {
          minusSignCounter++;
