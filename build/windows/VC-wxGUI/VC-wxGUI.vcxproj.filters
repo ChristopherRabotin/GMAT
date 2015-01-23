@@ -1755,9 +1755,6 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp">
       <Filter>Source Files\gui\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
-      <Filter>Source Files\base\forcemodel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp">
       <Filter>Source Files\gui\spacecraft</Filter>
     </ClCompile>
@@ -1959,9 +1956,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\LightTimeCorrection.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\Brent.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
@@ -1975,9 +1969,6 @@
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Antumbra.cpp">
@@ -2334,18 +2325,6 @@
     <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
       <Filter>Source Files\gui\view</Filter>
     </ClCompile>
@@ -2360,6 +2339,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
       <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3890,9 +3884,6 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp">
       <Filter>Source Files\gui\subscriber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
-      <Filter>Source Files\base\forcemodel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp">
       <Filter>Source Files\gui\spacecraft</Filter>
     </ClInclude>
@@ -4093,12 +4084,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\Brent.hpp">
-      <Filter>Source Files\base\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.hpp">
       <Filter>Source Files\base\event</Filter>
@@ -4475,18 +4460,6 @@
     <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
-      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
       <Filter>Source Files\gui\view</Filter>
     </ClInclude>
@@ -4501,6 +4474,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
       <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
