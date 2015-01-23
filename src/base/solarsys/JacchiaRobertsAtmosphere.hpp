@@ -93,6 +93,9 @@ private:
    // Constants required for altitude greater than 125 km
    /// Polynomial coefficients for constituent densities of each atmospheric gas
    static const Real CON_DEN[5][7];
+   /// Struct used to hold F107, Kp, temp
+   GEOPARMS geo;
+
 
 
    Real JacchiaRoberts(Real height, Real space_craft[3], Real sun[3],

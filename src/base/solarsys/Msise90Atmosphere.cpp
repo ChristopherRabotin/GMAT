@@ -28,7 +28,8 @@
 #include "TimeTypes.hpp"
 
 
-#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_NAN_CONDITIONS
+#define DEBUG_FIRSTCALL
 
 #ifndef __SKIP_MSISE90__
 extern "C" 
@@ -139,6 +140,10 @@ Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
 bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch, 
                                 Integer count)
 {
+   #ifdef DEBUG_FIRSTCALL
+      static bool firstcall = true;
+   #endif
+
    Integer i, i6;
 
    #ifdef DEBUG_GEODETICS
@@ -317,6 +322,27 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       
       density[i] = xden[5] * 1000.0;
 
+      #ifdef DEBUG_FIRSTCALL
+         if (firstcall)
+         {
+            MessageInterface::ShowMessage("==================================\n");
+            MessageInterface::ShowMessage("MSISE90 Model, First call data:\n");
+            MessageInterface::ShowMessage("   Year/DOY:    %d\n", xyd);
+            MessageInterface::ShowMessage("   SOD:         %.12lf\n", xsod);
+            MessageInterface::ShowMessage("   MJD:         %.12lf\n", epoch);
+            MessageInterface::ShowMessage("   Altitude:    %.12lf\n", xalt);
+            MessageInterface::ShowMessage("   Density:     %.12le\n", density[0]*1e9);
+            MessageInterface::ShowMessage("   F10.7:       %.12lf\n", xf107);
+            MessageInterface::ShowMessage("   F10.7a:      %.12lf\n", xf107a);
+            MessageInterface::ShowMessage("   Ap:          [%lf %lf %lf %lf "
+                  "%lf %lf %lf]\n", xap[0], xap[1], xap[2], xap[3], xap[4],
+                  xap[5], xap[6]);
+            MessageInterface::ShowMessage("==================================\n");
+
+            firstcall = false;
+         }
+      #endif
+
       #ifdef DEBUG_MSISE90_ATMOSPHERE
          MessageInterface::ShowMessage(
             "   Altitude = %15.9lf  Density = %15.9le\n", alt, density[i]);
@@ -371,62 +397,6 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    return true;
 }
 
-////------------------------------------------------------------------------------
-////  void GetInputs(Real epoch)
-////------------------------------------------------------------------------------
-///**
-// *  Sets the input global data for the model, either from a file or from user
-// *  input constants.
-// *
-// *  @param epoch The current TAIJulian epoch
-// */
-////------------------------------------------------------------------------------
-//void Msise90Atmosphere::GetInputs(Real epoch)
-//{
-//   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
-//   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
-//   Integer year   = 1941 + yearOffset;
-//   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
-//
-//
-//   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
-//   if (sod < 0.0)
-//   {
-//      sod += GmatTimeConstants::SECS_PER_DAY;
-//      doy -= 1;
-//   }
-//
-//
-//   if (sod > GmatTimeConstants::SECS_PER_DAY)
-//   {
-//      sod -= GmatTimeConstants::SECS_PER_DAY;
-//      doy += 1;
-//   }
-//
-//   yd = year * 1000 + doy;
-//
-//   if (!fluxReaderLoaded)
-//   {
-//      fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
-//   }
-//
-//   if (fluxReaderLoaded && epoch > 0.0)
-//   {
-//      SolarFluxReader::FluxData fD = fluxReader->GetInputs(epoch);
-//      fluxReader->PrepareApData(fD, epoch);
-//      f107 = fD.obsF107;
-//      f107a = fD.obsCtrF107a;
-//      for (Integer i = 0; i < 7; i++)
-//          ap[i] = fD.ap[i];
-//   }
-//   else
-//   {
-//      f107 = nominalF107;
-//      f107a = nominalF107a;
-//      for (Integer i = 0; i < 7; i++)
-//         ap[i] = nominalAp;
-//   }
-//}
 
 //------------------------------------------------------------------------------
 // GmatBase* Clone() const

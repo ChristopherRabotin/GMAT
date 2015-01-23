@@ -31,6 +31,8 @@
 //#define UNIT_TEST
 //#define UNIT_TEST_90km
 //#define DEBUG_SHOW_DENSITY
+#define DEBUG_FIRSTCALL
+
 
 //------------------------------------------------------------------------------
 // static data
@@ -318,6 +320,10 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
          ("JacchiaRobertsAtmosphere::Density() epoch=%g, sc count=%d\n", epoch,
           count);
    #endif
+   #ifdef DEBUG_FIRSTCALL
+      static bool firstcall = true;
+   #endif
+
    Real height;
    Real utc_time;
    A1Mjd a1mjd_time(epoch);
@@ -330,7 +336,7 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
          ("   UTC time = %lf\n", utc_time);
    #endif
 
-   for (Integer i=0; i<count; i++)
+   for (Integer i = 0; i < count; ++i)
    {
       height = CalculateGeodetics(&pos[i*6], epoch, true);
 
@@ -362,6 +368,23 @@ bool JacchiaRobertsAtmosphere::Density(Real *pos, Real *density, Real epoch,
          // Output density in units of kg/m3
          density[i] = 1.0e3 * RHO_ZERO;
       }
+
+      #ifdef DEBUG_FIRSTCALL
+         if (firstcall)
+         {
+            MessageInterface::ShowMessage("==================================\n");
+            MessageInterface::ShowMessage("Jacchia-Roberts Model, First call data:\n");
+            MessageInterface::ShowMessage("   MJD:         %.12lf\n", epoch);
+            MessageInterface::ShowMessage("   Altitude:    %.12lf\n", height);
+            MessageInterface::ShowMessage("   Density:     %.12le\n", density[0]);
+            MessageInterface::ShowMessage("   F10.7:       %.12lf\n", nominalF107);
+            MessageInterface::ShowMessage("   F10.7a:      %.12lf\n", nominalF107a);
+            MessageInterface::ShowMessage("   Kp:          %lf\n", geo.tkp);
+            MessageInterface::ShowMessage("==================================\n");
+
+            firstcall = false;
+         }
+      #endif
 
       #ifdef DEBUG_JR_DRAG
          MessageInterface::ShowMessage
@@ -442,7 +465,6 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
           sun[0], sun[1], sun[2], a1_time);
    #endif
 
-   GEOPARMS geo;
    Real density, temperature, t_500, sun_dec, geo_lat;
    
    // Read F10.7 and F10.7a to calculate the geo.xtemp
