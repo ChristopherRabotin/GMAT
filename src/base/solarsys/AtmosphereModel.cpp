@@ -99,7 +99,11 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
 //   useGeodetic          (false),							// made changes by TUAN NGUYEN
    useGeodetic          (true),							// made changes by TUAN NGUYEN
    gha                  (0.0),
-   ghaEpoch             (0.0)
+   ghaEpoch             (0.0),
+   sod                  (0.0),
+   yd                   (0),
+   f107                 (0.0),
+   f107a                (0.0)
 {
    objectTypes.push_back(Gmat::ATMOSPHERE);
    objectTypeNames.push_back("AtmosphereModel");
@@ -174,7 +178,11 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    geoLong              (0.0),
    useGeodetic          (am.useGeodetic),						// made changes by TUAN NGUYEN
    gha                  (0.0),
-   ghaEpoch             (0.0)
+   ghaEpoch             (0.0),
+   sod                  (am.sod),
+   yd                   (am.yd),
+   f107                 (am.f107),
+   f107a                (am.f107a)
 {
    parameterCount = AtmosphereModelParamCount;
    nominalAp = ConvertKpToAp(nominalKp);
@@ -230,6 +238,16 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    useGeodetic          = am.useGeodetic;							// made changes by TUAN NGUYEN
    gha                  = 0.0;
    ghaEpoch             = 0.0;
+
+   sod                  = am.sod;
+   yd                   = am.yd;
+   f107                 = am.f107;
+   f107a                = am.f107a;
+
+   for (Integer i = 0; i < 7; i++)
+      ap[i] = am.ap[i];
+
+
 
    return *this;
 }
@@ -1201,6 +1219,65 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
 
    return geoHeight;
 }
+
+
+//------------------------------------------------------------------------------
+//  void GetInputs(Real epoch)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the input global data for the model, either from a file or from user
+ *  input constants.
+ *
+ *  @param epoch The current TAIJulian epoch
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::GetInputs(GmatEpoch epoch)
+{
+   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
+   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
+   Integer year   = 1941 + yearOffset;
+   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
+
+
+   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
+   if (sod < 0.0)
+   {
+      sod += GmatTimeConstants::SECS_PER_DAY;
+      doy -= 1;
+   }
+
+
+   if (sod > GmatTimeConstants::SECS_PER_DAY)
+   {
+      sod -= GmatTimeConstants::SECS_PER_DAY;
+      doy += 1;
+   }
+
+   yd = year * 1000 + doy;
+
+   if (!fluxReaderLoaded)
+   {
+      fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
+   }
+
+   if (fluxReaderLoaded && epoch > 0.0)
+   {
+      SolarFluxReader::FluxData fD = fluxReader->GetInputs(epoch);
+      fluxReader->PrepareApData(fD, epoch);
+      f107 = fD.obsF107;
+      f107a = fD.obsCtrF107a;
+      for (Integer i = 0; i < 7; i++)
+          ap[i] = fD.ap[i];
+   }
+   else
+   {
+      f107 = nominalF107;
+      f107a = nominalF107a;
+      for (Integer i = 0; i < 7; i++)
+         ap[i] = nominalAp;
+   }
+}
+
 
 
 std::string AtmosphereModel::GetCentralBodyName()

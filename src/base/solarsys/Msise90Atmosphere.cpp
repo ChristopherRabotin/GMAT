@@ -58,10 +58,6 @@ static FILE *logFile;  // Temp log file
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     AtmosphereModel     ("MSISE90", name),
-    sod                 (0.0),
-    yd                  (0),
-    f107                (0.0),
-    f107a               (0.0),
     mass                (0)
 {
     #ifdef DEBUG_MSISE90_ATMOSPHERE
@@ -94,10 +90,6 @@ Msise90Atmosphere::~Msise90Atmosphere()
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
    AtmosphereModel     (msise),
-   sod                 (msise.sod),
-   yd                  (msise.yd),
-   f107                (msise.f107),
-   f107a               (msise.f107a),
    mass                (msise.mass)
 {
    for (Integer i = 0; i < 7; i++)
@@ -123,10 +115,6 @@ Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
 
    AtmosphereModel::operator=(msise);
    
-   sod          = msise.sod;
-   yd           = msise.yd;
-   f107         = msise.f107;
-   f107a        = msise.f107a;
    mass         = msise.mass;
    
    for (Integer i = 0; i < 7; i++)
@@ -383,62 +371,62 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    return true;
 }
 
-//------------------------------------------------------------------------------
-//  void GetInputs(Real epoch)
-//------------------------------------------------------------------------------
-/**
- *  Sets the input global data for the model, either from a file or from user
- *  input constants.
- *
- *  @param epoch The current TAIJulian epoch
- */
-//------------------------------------------------------------------------------
-void Msise90Atmosphere::GetInputs(Real epoch)
-{
-   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
-   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
-   Integer year   = 1941 + yearOffset;
-   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
-
-
-   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
-   if (sod < 0.0)
-   {
-      sod += GmatTimeConstants::SECS_PER_DAY;
-      doy -= 1;
-   }
-
-
-   if (sod > GmatTimeConstants::SECS_PER_DAY)
-   {
-      sod -= GmatTimeConstants::SECS_PER_DAY;
-      doy += 1;
-   }
-
-   yd = year * 1000 + doy;
-
-   if (!fluxReaderLoaded)
-   {
-      fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
-   }
-
-   if (fluxReaderLoaded && epoch > 0.0)
-   {
-      SolarFluxReader::FluxData fD = fluxReader->GetInputs(epoch);
-      fluxReader->PrepareApData(fD, epoch);
-      f107 = fD.obsF107;
-      f107a = fD.obsCtrF107a;
-      for (Integer i = 0; i < 7; i++)
-          ap[i] = fD.ap[i];
-   }
-   else
-   {
-      f107 = nominalF107;
-      f107a = nominalF107a;
-      for (Integer i = 0; i < 7; i++)
-         ap[i] = nominalAp;
-   }
-}
+////------------------------------------------------------------------------------
+////  void GetInputs(Real epoch)
+////------------------------------------------------------------------------------
+///**
+// *  Sets the input global data for the model, either from a file or from user
+// *  input constants.
+// *
+// *  @param epoch The current TAIJulian epoch
+// */
+////------------------------------------------------------------------------------
+//void Msise90Atmosphere::GetInputs(Real epoch)
+//{
+//   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
+//   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
+//   Integer year   = 1941 + yearOffset;
+//   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
+//
+//
+//   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
+//   if (sod < 0.0)
+//   {
+//      sod += GmatTimeConstants::SECS_PER_DAY;
+//      doy -= 1;
+//   }
+//
+//
+//   if (sod > GmatTimeConstants::SECS_PER_DAY)
+//   {
+//      sod -= GmatTimeConstants::SECS_PER_DAY;
+//      doy += 1;
+//   }
+//
+//   yd = year * 1000 + doy;
+//
+//   if (!fluxReaderLoaded)
+//   {
+//      fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
+//   }
+//
+//   if (fluxReaderLoaded && epoch > 0.0)
+//   {
+//      SolarFluxReader::FluxData fD = fluxReader->GetInputs(epoch);
+//      fluxReader->PrepareApData(fD, epoch);
+//      f107 = fD.obsF107;
+//      f107a = fD.obsCtrF107a;
+//      for (Integer i = 0; i < 7; i++)
+//          ap[i] = fD.ap[i];
+//   }
+//   else
+//   {
+//      f107 = nominalF107;
+//      f107a = nominalF107a;
+//      for (Integer i = 0; i < 7; i++)
+//         ap[i] = nominalAp;
+//   }
+//}
 
 //------------------------------------------------------------------------------
 // GmatBase* Clone() const

@@ -183,6 +183,23 @@ protected:
    /// GHA epoch
    Real                    ghaEpoch;
 
+
+   // Fields used when retrieving data from a flux file
+
+   /// Second of day
+   Real                    sod;
+   /// Year + Day of year, in the form YYYYDDD
+   Integer                 yd;
+   /// Value of F10.7 to use
+   Real                    f107;
+   /// 3 month average of the F10.7 data
+   Real                    f107a;
+   /// Geomagnetic index (Ap, not Kp)
+   Real                    ap[7];
+
+
+   // Input method shared by all MSISE models
+   void                    GetInputs(GmatEpoch epoch);
    
    Real                    CalculateGeodetics(Real *position,
                                  GmatEpoch when = -1.0,
