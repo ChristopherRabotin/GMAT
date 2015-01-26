@@ -305,15 +305,15 @@ void GmatSavePanel::OnSaveAs(wxCommandEvent &event)
    #endif
    
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
-         _T("Script files (*.script, *.m)|*.script;*.m|"\
-            "Text files (*.txt, *.text)|*.txt;*.text|"\
-            "All files (*.*)|*.*"), wxSAVE);
+                       "Script files (*.script, *.m)|*.script;*.m|"
+                       "Text files (*.txt, *.text)|*.txt;*.text|"
+                       "All files (*.*)|*.*", wxFD_SAVE);
    
    bool saveScript = false;
    if (dialog.ShowModal() == wxID_OK)
    {
       wxString path = dialog.GetPath().c_str();
-	  mSaveCanceled = false;
+      mSaveCanceled = false;
       
       if(DoesFileExist(path.c_str()))
       {
@@ -428,17 +428,18 @@ bool GmatSavePanel::UpdateStatusOnClose()
       {
 		  if (GmatAppData::Instance()->GetMainFrame()->IsMissionRunning())
 		  {
-				wxMessageBox(wxT("GMAT is running the mission.\n"
-								"Please stop the mission first."),
-							wxT("Warning"), wxOK);
-			   return false;
+           wxMessageBox("GMAT is running the mission.\n"
+								"Please stop the mission first.",
+                        wxT("Warning"), wxOK);
+           return false;
 		  }
 		  //else
 		  {
 			 // clean up the status since we are going away
 			 theGuiManager->SetActiveScriptStatus(1);
 			 GmatAppData::Instance()->GetMainFrame()->
-				 UpdateGuiScriptSyncStatus(theGuiManager->GetGuiStatus(), theGuiManager->GetActiveScriptStatus());
+				 UpdateGuiScriptSyncStatus(theGuiManager->GetGuiStatus(),
+                                       theGuiManager->GetActiveScriptStatus());
 		  }
       }
 	  return true;
@@ -505,11 +506,18 @@ void GmatSavePanel::SetEditorModified(bool modified, bool updateSyncStatus)
    #endif
 }
 
+//------------------------------------------------------------------------------
+// bool DoesFileExist(const char *scriptFilename)
+//------------------------------------------------------------------------------
+bool GmatSavePanel::DoesFileExist(const char *scriptFilename)
+{
+   return DoesFileExist(std::string(scriptFilename));
+}
 
 //------------------------------------------------------------------------------
-// bool DoesFileExist(std::string scriptFilename)
+// bool DoesFileExist(const std::string &scriptFilename)
 //------------------------------------------------------------------------------
-bool GmatSavePanel::DoesFileExist(std::string scriptFilename)
+bool GmatSavePanel::DoesFileExist(const std::string &scriptFilename)
 {
    FILE * pFile;
    pFile = fopen (scriptFilename.c_str(),"rt+");
@@ -581,8 +589,8 @@ void GmatSavePanel::MakeScriptActive(wxCommandEvent &event, bool isScriptModifie
          #else
          //===========================================================
         
-         wxMessageBox(wxT("GMAT is running the animation.\n"
-                          "Please stop the animation first."),
+         wxMessageBox("GMAT is running the animation.\n"
+                      "Please stop the animation first.",
                       wxT("Warning"), wxOK);
          return;
          

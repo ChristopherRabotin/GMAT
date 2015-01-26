@@ -148,7 +148,7 @@ void ReportPanel::Create()
    //-------------------------------------------------------
    // put in the order
    //-------------------------------------------------------
-   wxFlexGridSizer *panelSizer = new wxFlexGridSizer(2, 1);
+   wxFlexGridSizer *panelSizer = new wxFlexGridSizer(2, 1, 0, 0);
    panelSizer->Add(reportFileSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    panelSizer->Add(20, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
    panelSizer->Add(selectedSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
@@ -235,7 +235,7 @@ void ReportPanel::SaveData()
    
    canClose = true;
    
-   std::string rfName = mReportFileComboBox->GetValue().c_str();
+   std::string rfName = mReportFileComboBox->GetValue().WX_TO_STD_STRING;
    
    ReportFile *reportFile =
       (ReportFile*)theGuiInterpreter->GetConfiguredObject(rfName);

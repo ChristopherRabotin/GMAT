@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 
 #include "GmatGlobal.hpp"
+#include "MessageInterface.hpp"
 #include <algorithm>                    // Required for GCC 4.3
 
 //---------------------------------
@@ -219,7 +220,55 @@ void GmatGlobal::SetRunInterrupted(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// Gmat::RunState GetRunState()
+//------------------------------------------------------------------------------
+Gmat::RunState GmatGlobal::GetRunState()
+{
+   return runState;
+}
+
+//------------------------------------------------------------------------------
+// void GmatGlobal::SetRunState(Gmat::RunState rs)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetRunState(Gmat::RunState rs)
+{
+   #ifdef DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("GmatGlobal::SetRunState() setting runstate to %d\n", rs);
+   #endif
+   runState = rs;
+}
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetDetailedRunState()
+//------------------------------------------------------------------------------
+Gmat::RunState GmatGlobal::GetDetailedRunState()
+{
+   return detailedRunState;
+}
+
+//------------------------------------------------------------------------------
+// void GmatGlobal::SetDetailedRunState(Gmat::RunState drs)
+//------------------------------------------------------------------------------
+void GmatGlobal::SetDetailedRunState(Gmat::RunState drs)
+{
+   #ifdef DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("GmatGlobal::SetDetailedRunState() setting detailedRunstate to %d\n", drs);
+   #endif
+   detailedRunState = drs;
+}
+
+//------------------------------------------------------------------------------
 // Integer GetRunMode()
+//------------------------------------------------------------------------------
+/**
+ * Returns current run mode:
+ *    NORMAL - Normal run
+ *    EXIT_AFTER_RUN - GMAT closes after run complete
+ *    TESTING - GMAT shows extra menu options for testing with plots
+ *    TESTING_NO_PLOTS - GMAT shows extra menu options for testing without plots
+ */
 //------------------------------------------------------------------------------
 Integer GmatGlobal::GetRunMode()
 {
@@ -730,6 +779,19 @@ void GmatGlobal::ClearHiddenCommands()
    mHiddenCommands.clear();
 }
 
+//------------------------------------------------------------------------------
+// void  IsHiddenCommand(const char *cmd)
+//------------------------------------------------------------------------------
+/*
+ * returns true if this command should not be shown in menu
+ *
+ * @return  true to hide
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsHiddenCommand(const char *cmd)
+{
+   return IsHiddenCommand(std::string(cmd));
+}
 
 //------------------------------------------------------------------------------
 // void  IsHiddenCommand(const std::string &cmd)
@@ -807,6 +869,7 @@ GmatGlobal::GmatGlobal()
    isWritingFilePathInfo = false;
    isWritingGmatKeyword = true;
    runMode = NORMAL;
+   runState = Gmat::IDLE;
    guiMode = NORMAL_GUI;
    plotMode = NORMAL_PLOT;
    matlabMode = SHARED;

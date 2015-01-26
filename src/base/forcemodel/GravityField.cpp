@@ -816,10 +816,12 @@ std::string GravityField::GetParameterTypeString(const Integer id) const
 }
 
 
-
-// All read only for now except degree and order
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
 bool GravityField::IsParameterReadOnly(const Integer id) const
 {
+   // All read only for now except degree and order
    if (id < HarmonicFieldParamCount)
       return HarmonicField::IsParameterReadOnly(id);
 
@@ -964,6 +966,22 @@ std::string GravityField::GetStringParameter(const std::string &label) const
 {
    Integer id = GetParameterID(label);
    return GetStringParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// std::string SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Accessor method used to set a parameter value
+ *
+ * @param    label    string ID for the requested parameter
+ * @param    value    The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool GravityField::SetStringParameter(const std::string &label,
+                                      const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 //------------------------------------------------------------------------------

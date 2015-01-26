@@ -123,7 +123,7 @@ void BallisticsMassPanel::Create()
     item2->AddGrowableCol(1);
 
     wxStaticText *dryMassStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Dry "GUI_ACCEL_KEY"Mass"), 
+                            "Dry "GUI_ACCEL_KEY"Mass", 
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dryMassStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -138,7 +138,7 @@ void BallisticsMassPanel::Create()
     item2->Add( dryMassUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coefficient of "GUI_ACCEL_KEY"Drag"), wxDefaultPosition, 
+                            "Coefficient of "GUI_ACCEL_KEY"Drag", wxDefaultPosition, 
                             wxDefaultSize, 0 );
     item2->Add( dragCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -149,7 +149,7 @@ void BallisticsMassPanel::Create()
     item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *reflectCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coefficient of "GUI_ACCEL_KEY"Reflectivity"), 
+                            "Coefficient of "GUI_ACCEL_KEY"Reflectivity", 
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( reflectCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -160,7 +160,7 @@ void BallisticsMassPanel::Create()
     item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Drag "GUI_ACCEL_KEY"Area"), 
+                            "Drag "GUI_ACCEL_KEY"Area", 
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( dragAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -174,7 +174,7 @@ void BallisticsMassPanel::Create()
     item2->Add( dragAreaUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *srpAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT(GUI_ACCEL_KEY"SRP Area"), 
+                            GUI_ACCEL_KEY"SRP Area", 
                             wxDefaultPosition, wxDefaultSize, 0 );
     item2->Add( srpAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -191,7 +191,7 @@ void BallisticsMassPanel::Create()
     spadFlexSizer->AddGrowableCol(1);
 
     wxStaticText *srpFileStaticText = new wxStaticText( this, ID_TEXT,
-                            wxT(GUI_ACCEL_KEY"SPAD SRP File"),
+                            GUI_ACCEL_KEY"SPAD SRP File",
                             wxDefaultPosition, wxDefaultSize, 0 );
     spadFlexSizer->Add( srpFileStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -206,7 +206,7 @@ void BallisticsMassPanel::Create()
     spadFlexSizer->Add( spadBrowseButton, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *srpScaleFactorStaticText = new wxStaticText( this, ID_TEXT,
-                            wxT(GUI_ACCEL_KEY"SPAD SRP Scale Factor"),
+                            GUI_ACCEL_KEY"SPAD SRP Scale Factor",
                             wxDefaultPosition, wxDefaultSize, 0 );
     spadFlexSizer->Add( srpScaleFactorStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
@@ -392,7 +392,7 @@ void BallisticsMassPanel::SaveData()
 
             wxString str    = spadSrpFileTextCtrl->GetValue();
             theSpadSrpFile  = str.c_str();
-            std::ifstream filename(str.c_str());
+            std::ifstream filename(str.WX_TO_C_STRING);
 
             // Check if the file doesn't exist then stop
             if (!filename)

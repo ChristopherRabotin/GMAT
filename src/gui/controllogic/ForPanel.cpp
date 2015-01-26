@@ -332,9 +332,17 @@ void ForPanel::SaveData()
 void ForPanel::GetNewValue(Integer row, Integer col)
 {
    bool settableOnly = (col == INDEX_COL);
-   ParameterSelectDialog paramDlg(this, mObjectTypeList,
-         GuiItemManager::SHOW_PLOTTABLE,0, false, false,
-         true, true, true, true, "Spacecraft", true, settableOnly);
+
+   wxArrayString mParamObjectTypeList;
+   wxString DefaultType = "Variable";
+   if (!settableOnly)
+   {
+	   DefaultType = "Spacecraft";
+	   mParamObjectTypeList = mObjectTypeList;
+   }
+   ParameterSelectDialog paramDlg(this, mParamObjectTypeList,
+			 GuiItemManager::SHOW_PLOTTABLE, 0, false, false,
+			 !settableOnly, true, !settableOnly, !settableOnly, DefaultType, true, settableOnly);
    paramDlg.ShowModal();
    
    if (paramDlg.IsParamSelected())

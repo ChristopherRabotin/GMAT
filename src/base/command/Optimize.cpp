@@ -721,6 +721,17 @@ bool Optimize::ExecuteCallback()
          "Optimize::ExecuteCallback is invalid call for non-ExternalOptimizer");
    }
    
+   // Check for user interruption here (LOJ: 2014.09.08)
+   if (GmatGlobal::Instance()->GetRunInterrupted())
+   {
+      #ifdef DEBUG_CALLBACK
+      MessageInterface::ShowMessage
+         ("Optimize command '%s' interrupted by user\n", generatingString.c_str());
+      #endif
+      
+      throw CommandException
+         ("Optimize command \"" + generatingString + "\" interrupted!");
+   }
    
    std::string sourceType = theSolver->GetStringParameter("SourceType");
    std::vector<Real> vars;

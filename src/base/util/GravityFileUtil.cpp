@@ -61,7 +61,17 @@ const std::string GravityFileUtil::GRAVITY_MODEL_NAMES[GmatGrav::NumGravityModel
       "None"
 };
 
-
+//------------------------------------------------------------------------------
+// GmatGrav::GravityFileType GetFileType(const char *filename)
+//------------------------------------------------------------------------------
+/*
+ * @see GravityFileType GetFileType(const std::string &filename)
+ */
+//------------------------------------------------------------------------------
+GmatGrav::GravityFileType GravityFileUtil::GetFileType(const char *filename)
+{
+   return GetFileType(std::string(filename));
+}
 
 //------------------------------------------------------------------------------
 // GmatGrav::GravityFileType GetFileType(const std::string &filename)
@@ -144,6 +154,14 @@ GmatGrav::GravityFileType GravityFileUtil::GetFileType(const std::string &filena
          ("Gravity file \"" + filename + " is of unknown format");
 
    return gft;
+}
+
+//------------------------------------------------------------------------------
+// GmatGrav::GravityModelType GetModelType(const char *filename, const char *forBody)
+//------------------------------------------------------------------------------
+GmatGrav::GravityModelType GravityFileUtil::GetModelType(const char *filename, const char *forBody)
+{
+   return GetModelType(std::string(filename), std::string(forBody));
 }
 
 //------------------------------------------------------------------------------

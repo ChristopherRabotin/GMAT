@@ -100,11 +100,14 @@ public:
                                       const std::string &depName = "");
    
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
+   const StringArray& GetListOfObjects(const char *typeName);
    const StringArray& GetListOfObjects(const std::string &typeName);
    const StringArray& GetListOfViewableSubtypesOf(Gmat::ObjectType type);
    const StringArray& GetListOfViewableCommands();
    
+   GmatBase* GetConfiguredObject(const char *name);
    GmatBase* GetConfiguredObject(const std::string &name);
+   GmatBase* FindObject(const char *name, const std::string &ofType = "");
    GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
    GmatBase* CreateObject(const std::string &type, const std::string &name,
                           Integer manage = 1, bool createDefault = false,
@@ -127,7 +130,9 @@ public:
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
    void SetFooterComment(const std::string &comment){footerComment = comment;}
    
+   bool IsObjectType(const char *type);
    bool IsObjectType(const std::string &type);
+   bool IsCommandType(const char *type);
    bool IsCommandType(const std::string &type);
    
    Gmat::ObjectType GetObjectType(const std::string &type);

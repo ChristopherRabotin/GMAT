@@ -24,6 +24,8 @@
 #include "HardwareException.hpp"
 #include <string.h>
 
+//#define DEBUG_HW_SET
+
 
 //---------------------------------
 // static data
@@ -281,7 +283,12 @@ Real Hardware::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Hardware::SetRealParameter(const Integer id, const Real value)
 {
-   switch (id) {
+   #ifdef DEBUG_HW_SET
+      MessageInterface::ShowMessage("In HW::SetReal, id = %d (%s), value = %12.10f\n",
+            id, GetParameterText(id).c_str(), value);
+   #endif
+   switch (id)
+   {
       case DIRECTION_X:
          return direction[0] = value;
          

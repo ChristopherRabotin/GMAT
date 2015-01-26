@@ -445,6 +445,19 @@ std::string DifferentialCorrector::GetStringParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+//  Integer SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string &value)
+ */
+//------------------------------------------------------------------------------
+bool DifferentialCorrector::SetStringParameter(const Integer id,
+                                               const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
+//------------------------------------------------------------------------------
 //  Integer SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 /**

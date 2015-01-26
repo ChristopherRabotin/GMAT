@@ -53,6 +53,7 @@
 //#define DEBUG_MAPPING
 //#define DEBUG_STARTUP_WITH_ABSOLUTE_PATH
 //#define DEBUG_BIN_DIR
+//#define DEBUG_TEXTURE_FILE
 //#define DEBUG_FIND_PATH
 //#define DEBUG_FIND_INPUT_PATH
 //#define DEBUG_FIND_OUTPUT_PATH
@@ -378,14 +379,16 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
 //                      const std::string &objName = "")
 //------------------------------------------------------------------------------
 /**
- * Finds path for requested fileName using the following file path search order.
+ * Finds path for requested fileName. If fileName has a absolute path, it will
+ * return fileName or blank if path not found. If fileName has a relative path or
+ * no path, it will find path using the following file path search order.
  * For Input:
  *    1) Current GMAT working directory
  *    2) Directory from the startup file in the application directory
  * For Output:
  *    1) Current GMAT working directory if it has relative path
  *    2) Directory from the startup file in the application directory
- *       if no absolute path found or filename has no path
+ *       if no path found
  *    3) Application directory
  *
  * It returns blank if filename is blank
@@ -397,7 +400,7 @@ std::string FileManager::FindPath(const std::string &fileName, const FileType ty
  * @param  fileType     The file type name of the input file
  * @param  forInput     Set to true if filename is for input
  * @param  writeWarning Set to true if warning should be written when no path found
- * @param  writeInfo    Set to true if information should be written for output path
+ * @param  writeInfo    Set to true if information should be written for output path (currently not used)
  * @param  objName      The name of the calling object to be written to informational message
  *
  * @return full path name using search order
@@ -413,8 +416,13 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
        "writeWarning = %d, writeInfo = %d, objName = '%s'\n", fileName.c_str(), fileType.c_str(),
        forInput, writeWarning, writeInfo, objName.c_str());
    #endif
-   
+
+   mLastFilePathMessage = "";
    std::string fullname = fileName;
+   bool writeFilePathInfo = GmatGlobal::Instance()->IsWritingFilePathInfo();
+   #ifdef DEBUG_FIND_PATH
+   MessageInterface::ShowMessage("   writeFilePathInfo = %d\n", writeFilePathInfo);
+   #endif
    
    // If input filename is blank, get default name using type
    try
@@ -492,23 +500,41 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       else
       {
          #ifdef DEBUG_FIND_PATH
-         MessageInterface::ShowMessage("   The file does not exist\n");
+         MessageInterface::ShowMessage("   The filename does not exist\n");
          #endif
          if (forInput)
          {
             pathToReturn = "";
-            if (writeWarning && gmatPath != "")
+            if (writeWarning && gmatPath != "" && writeFilePathInfo)
             {
                MessageInterface::ShowMessage
-                  ("*** WARNING *** The input file '%s' does not exist\n", fullname.c_str());
+                  ("The input file '%s' does not exist\n", fullname.c_str());
             }
          }
          else // for output
          {
-            if (GmatFileUtil::DoesFileExist(defaultPath))
-               pathToReturn = defaultPath + fullname;
+            #ifdef DEBUG_FIND_PATH
+            MessageInterface::ShowMessage
+               ("   It is for output, so checking if directory '%s' exist\n",
+                pathOnly.c_str());
+            #endif
+            if (DoesDirectoryExist(pathOnly, false))
+            {
+               #ifdef DEBUG_FIND_PATH
+               MessageInterface::ShowMessage("   The directory exist\n");
+               #endif
+               pathToReturn = fullname;
+            }
             else
-               pathToReturn = mAbsBinDir + fullname;
+            {
+               pathToReturn = "";
+               if (writeWarning && gmatPath != "" && writeFilePathInfo)
+               {
+                  mLastFilePathMessage = "Cannot open output file '" + fullname +
+                     "', the path '" + pathOnly + "' does not exist.";
+                  MessageInterface::ShowMessage(mLastFilePathMessage + "\n");
+               }
+            }
          }
       }
    }
@@ -556,9 +582,9 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
                ("   => next search path = '%s' \n", tempPath2.c_str());
             #endif
             
-            if (writeWarning && gmatPath != "")
+            if (writeWarning && gmatPath != "" && writeFilePathInfo)
                MessageInterface::ShowMessage
-                  ("*** WARNING *** The input file '%s' does not exist in GMAT "
+                  ("The input file '%s' does not exist in GMAT "
                    "working directory\n   '%s', so trying default path from the "
                    "startup file\n   '%s'\n", fullname.c_str(), tempPath1.c_str(),
                    tempPath2.c_str());
@@ -570,7 +596,7 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
             else
             {
                pathToReturn = "";
-               if (writeWarning && gmatPath != "")
+               if (writeWarning && gmatPath != "" && writeFilePathInfo)
                   MessageInterface::ShowMessage
                      ("*** WARNING *** The input file '%s' does not exist in default "
                       "path from the startup file '%s'\n", fullname.c_str(), tempPath2.c_str());
@@ -633,36 +659,41 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
       }
    }
    
+   // Write info only if file path debug is on from the startup file (LOJ: 2014.09.22)
    // Write information about file location if file path debug mode is on
-   if (mWriteFilePathInfo == "ON" && writeInfo)
+   
+   std::string ioType = "output";
+   std::string fType = "";
+   std::string rwType = "written to";
+   std::string oName = "";
+   
+   if (fileType.find("_FILE") != fileType.npos)
+      fType = fileType + " ";
+   
+   if (forInput)
    {
-      std::string ioType = "output";
-      std::string fType = "";
-      std::string rwType = "written to";
-      std::string oName = "";
-      
-      if (fileType.find("_FILE") != fileType.npos)
-         fType = fileType + " ";
-      
-      if (forInput)
-      {
-         ioType = "input";
-         rwType = "read from";
-      }
-
-      if (objName != "")
-         oName = " for the object '" + objName + "'";
-      
-      // Write message where output goes or input from
-      if (pathToReturn != "")
+      ioType = "input";
+      rwType = "read from";
+   }
+   
+   if (objName != "")
+      oName = " for the object '" + objName + "'";
+   
+   // Write message where output goes or input from
+   if (pathToReturn != "")
+   {
+      if (writeFilePathInfo)
          MessageInterface::ShowMessage
             ("*** The %s %sfile '%s'%s will be %s \n                    '%s'\n",
              ioType.c_str(), fType.c_str(), fullname.c_str(), oName.c_str(),
              rwType.c_str(), pathToReturn.c_str());
-      else
-         MessageInterface::ShowMessage
-            ("*** The %s %sfile '%s' cannot be located\n", ioType.c_str(),
-             fType.c_str(), fullname.c_str());
+   }
+   else
+   {
+      mLastFilePathMessage = "Cannot open " + ioType + " " + fType +
+         "'" + fullname + "'";
+      if (writeFilePathInfo)
+         MessageInterface::ShowMessage(mLastFilePathMessage + "\n");
    }
    
    #ifdef DEBUG_FIND_PATH
@@ -679,11 +710,15 @@ std::string FileManager::FindPath(const std::string &fileName, const std::string
 //------------------------------------------------------------------------------
 std::string FileManager::FindMainIconFile(bool writeInfo)
 {
+   // Changed not to write warning per GMAT session (LOJ: 2014.10.29)
+   #ifdef __WRITE_WARNING_PER_SESSION_
    static bool writeWarning = true;
-   
    std::string fullpath = FindPath("", MAIN_ICON_FILE, true, writeWarning, writeInfo);
    if (mGmatWorkingDir != "")
       writeWarning = false;
+   #else
+   std::string fullpath = FindPath("", MAIN_ICON_FILE, true, false, writeInfo);
+   #endif
    
    return fullpath;
 }
@@ -825,6 +860,12 @@ std::string FileManager::GetFullStartupFilePath()
       mStartupFileDir = GmatFileUtil::GetCurrentWorkingDirectory() + mPathSeparator;
       return mStartupFileDir + mStartupFileName;
    }
+}
+
+
+void FileManager::ReadStartupFile(const char *fileName)
+{
+   ReadStartupFile(std::string(fileName));
 }
 
 
@@ -1132,6 +1173,10 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    #endif
 }
 
+void FileManager::WriteStartupFile(const char *fileName)
+{
+   WriteStartupFile(std::string(fileName));
+}
 
 //------------------------------------------------------------------------------
 // void WriteStartupFile(const std::string &fileName = "")
@@ -1675,6 +1720,117 @@ std::string FileManager::GetRootPath()
 
 
 //------------------------------------------------------------------------------
+// bool GetTextureMapFile(const std::string &inFileName, const std::string &bodyName,
+//                        const std::string &objName, std::string &outFileName,
+//                        std::string &outFullPathName, bool writeWarning)
+//------------------------------------------------------------------------------
+bool FileManager::GetTextureMapFile(const std::string &inFileName, const std::string &bodyName,
+                                    const std::string &objName, std::string &outFileName,
+                                    std::string &outFullPathName, bool writeWarning)
+{
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("\nFileManager::GetTextureMapFile() entered\n   inFileName = '%s'\n   "
+       "bodyName = '%s', objName = '%s', writeWarning = %d\n", inFileName.c_str(),
+       bodyName.c_str(), objName.c_str(), writeWarning);
+   #endif
+   
+   bool retval = true;
+   std::string actualFile = inFileName;
+   std::string fullPath;
+   std::string mapFileType = GmatStringUtil::ToUpper(bodyName) + "_TEXTURE_FILE";
+   mLastFilePathMessage = "";
+   bool writeInfo = false;
+   
+   outFileName = inFileName;
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage("   actualFile  = '%s'\n", actualFile.c_str());
+   MessageInterface::ShowMessage("   mapFileType = '%s'\n", mapFileType.c_str());
+   #endif
+   
+   try
+   {
+      if (inFileName == "")
+         actualFile = GetFilename(mapFileType);
+      
+      fullPath =
+         FindPath(actualFile, mapFileType, true, writeWarning, writeInfo, objName);
+      
+      #ifdef DEBUG_TEXTURE_FILE
+      MessageInterface::ShowMessage("   actualFile = '%s'\n", actualFile.c_str());
+      MessageInterface::ShowMessage("   fullPath   = '%s'\n", fullPath.c_str());
+      #endif
+      
+      // If fullPath is blank, try with TEXTURE_PATH since non-standard bodies'
+      // texture map file may not be available such as SOMECOMET1_TEXTURE_FILE
+      if (fullPath == "")
+      {
+         fullPath = 
+            FindPath(actualFile, "TEXTURE_PATH", true, false, writeInfo, objName);
+      }
+      
+      if (fullPath == "")
+      {
+         if (inFileName == "")
+         {
+            mLastFilePathMessage = GetLastFilePathMessage() + ", so using " + actualFile + ".";
+         }
+         else
+         {
+            mLastFilePathMessage = GetLastFilePathMessage();
+            retval = false;
+         }
+      }
+      else if (inFileName == "")
+      {
+         outFileName = actualFile;
+         std::string msg = "*** WARNING *** There is no texture map file "
+            "specified for " + objName + ", so using " + actualFile;
+         mLastFilePathMessage = msg;
+         if (writeWarning)
+            MessageInterface::ShowMessage(msg + "\n");
+      }
+      
+      outFullPathName = fullPath;
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_TEXTURE_FILE
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+      #endif
+      if (inFileName == "")
+      {
+         actualFile = "GenericCelestialBody.jpg";
+         std::string msg = "*** WARNING *** There is no texture map file "
+            "specified for " + objName + ", so using " + actualFile;
+         mLastFilePathMessage = msg;
+         if (writeWarning)
+            MessageInterface::ShowMessage(msg + "\n");
+         fullPath = 
+            FileManager::Instance()->FindPath(actualFile, "TEXTURE_PATH", true, false,
+                                              writeInfo, objName);
+         outFileName = actualFile;
+         outFullPathName = fullPath;
+      }
+      else
+      {
+         outFullPathName = "";
+         retval = false;
+      }
+   }
+   
+   #ifdef DEBUG_TEXTURE_FILE
+   MessageInterface::ShowMessage
+      ("   outFileName = '%s'\n   outFullPathName = '%s'\n   mLastFilePathMessage = '%s'\n",
+       outFileName.c_str(), outFullPathName.c_str(), mLastFilePathMessage.c_str());
+   MessageInterface::ShowMessage("FileManager::GetTextureMapFile() returnng %d\n\n", retval);
+   #endif
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetPathname(const FileType type)
 //------------------------------------------------------------------------------
 /**
@@ -2074,6 +2230,23 @@ std::string FileManager::ConvertToAbsPath(const std::string &relPath, bool appen
    return absPath;
 }
 
+//------------------------------------------------------------------------------
+// void SetAbsPathname(const FileType type, const char *newpath)
+//------------------------------------------------------------------------------
+/**
+ * Sets absoulute pathname for the type.
+ *
+ * @param <type> file type of which path to be set.
+ * @param <newpath> new pathname.
+ *
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetAbsPathname(const FileType type, const char *newpath)
+{
+   SetAbsPathname(type, std::string(newpath));
+}
+
 
 //------------------------------------------------------------------------------
 // void SetAbsPathname(const FileType type, const std::string &newpath)
@@ -2103,6 +2276,22 @@ void FileManager::SetAbsPathname(const FileType type, const std::string &newpath
    }
 }
 
+//------------------------------------------------------------------------------
+// void SetAbsPathname(const std::string &type, const char *newpath)
+//------------------------------------------------------------------------------
+/**
+ * Sets absolute pathname for the type.
+ *
+ * @param <type> type name of which path to be set.
+ * @param <newpath> new pathname.
+ *
+ * @exception thrown if enum type is out of bounds
+ */
+//------------------------------------------------------------------------------
+void FileManager::SetAbsPathname(const std::string &type, const char *newpath)
+{
+   SetAbsPathname(type, std::string(newpath));
+}
 
 //------------------------------------------------------------------------------
 // void SetAbsPathname(const std::string &type, const std::string &newpath)
@@ -2159,6 +2348,12 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
 void FileManager::ClearGmatFunctionPath()
 {
    mGmatFunctionPaths.clear();
+}
+
+
+void FileManager::AddGmatFunctionPath(const char *path, bool addFront)
+{
+   return AddGmatFunctionPath(std::string(path), addFront);
 }
 
 
@@ -2234,6 +2429,12 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
 }
 
 
+std::string FileManager::GetGmatFunctionPath(const char *funcName)
+{
+   return GetFunctionPath(GMAT_FUNCTION, mGmatFunctionPaths, std::string(funcName));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetGmatFunctionPath(const std::string &funcName)
 //------------------------------------------------------------------------------
@@ -2276,6 +2477,12 @@ const StringArray& FileManager::GetAllGmatFunctionPaths()
 void FileManager::ClearMatlabFunctionPath()
 {
    mMatlabFunctionPaths.clear();
+}
+
+
+void FileManager::AddMatlabFunctionPath(const char *path, bool addFront)
+{
+   return AddMatlabFunctionPath(std::string(path), addFront);
 }
 
 
@@ -2333,6 +2540,12 @@ void FileManager::AddMatlabFunctionPath(const std::string &path, bool addFront)
 }
 
 
+std::string FileManager::GetMatlabFunctionPath(const char *name)
+{
+   return GetMatlabFunctionPath(std::string(name));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetMatlabFunctionPath(const std::string &name)
 //------------------------------------------------------------------------------
@@ -2381,6 +2594,17 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
    return mMatlabFunctionFullPaths;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetLastFilePathMessage()
+//------------------------------------------------------------------------------
+/**
+ * Returns the last file path message set from FindPath().
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetLastFilePathMessage()
+{
+   return mLastFilePathMessage;
+}
 
 //------------------------------------------------------------------------------
 // const StringArray& GetPluginList()
@@ -2758,6 +2982,7 @@ void FileManager::RefreshFiles()
    mWriteParameterInfo = "";
    mWriteFilePathInfo = "";
    mWriteGmatKeyword = "";
+   mLastFilePathMessage = "";
    mPathMap.clear();
    mGmatFunctionPaths.clear();
    mMatlabFunctionPaths.clear();

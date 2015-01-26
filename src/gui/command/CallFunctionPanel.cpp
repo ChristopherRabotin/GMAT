@@ -230,7 +230,7 @@ void CallFunctionPanel::LoadData()
    std::string functionName = theCommand->GetStringParameter(id);
    
    // If function name is not in the ComboBox list, add blank
-   if (!theFunctionComboBox->SetStringSelection(wxT(functionName.c_str())))
+   if (!theFunctionComboBox->SetStringSelection(wxString(functionName.c_str())))
    {
       theFunctionComboBox->Append("");
       theFunctionComboBox->SetStringSelection("");

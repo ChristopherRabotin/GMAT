@@ -124,7 +124,7 @@ void FormationSetupPanel::Create()
    // available SpaceObject list (1st column)
    //------------------------------------------------------
    GmatStaticBoxSizer *availableBoxSizer = new GmatStaticBoxSizer( wxVERTICAL, this, 
-      wxT("Space"GUI_ACCEL_KEY"craft") );
+      "Space"GUI_ACCEL_KEY"craft" );
    
    mSoExcList.Add(mFormationName.c_str());
    
@@ -138,15 +138,15 @@ void FormationSetupPanel::Create()
    //------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //------------------------------------------------------
-   wxButton *addScButton = new wxButton(this, ADD_BUTTON, wxT("--"GUI_ACCEL_KEY">"),
+   wxButton *addScButton = new wxButton(this, ADD_BUTTON, "--"GUI_ACCEL_KEY">",
                                wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    addScButton->SetToolTip(pConfig->Read(_T("AddSpacecraftHint")));
    
-   wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, wxT(GUI_ACCEL_KEY"<--"),
+   wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, GUI_ACCEL_KEY"<--",
                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    removeScButton->SetToolTip(pConfig->Read(_T("RemoveSpacecraftHint")));
    
-   wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, wxT("<"GUI_ACCEL_KEY"="),
+   wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, "<"GUI_ACCEL_KEY"=",
                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
    clearScButton->SetToolTip(pConfig->Read(_T("ClearSpacecraftHint")));
    
@@ -159,7 +159,7 @@ void FormationSetupPanel::Create()
    // selected spacecraft list (3rd column)
    //------------------------------------------------------
    GmatStaticBoxSizer *mSoSelectedBoxSizer = new GmatStaticBoxSizer( wxVERTICAL, this, 
-      wxT("Spacecraft in "GUI_ACCEL_KEY"Formation") );
+      "Spacecraft in "GUI_ACCEL_KEY"Formation" );
    
    mSoSelectedListBox =
       new wxListBox(this, SEL_LISTBOX, wxDefaultPosition, wxSize(150,200),

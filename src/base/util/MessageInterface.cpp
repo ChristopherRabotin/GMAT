@@ -257,6 +257,22 @@ void MessageInterface::SetLogEnable(bool flag)
 }
 
 //------------------------------------------------------------------------------
+// void SetLogPath(const char *pathname, bool append = false)
+//------------------------------------------------------------------------------
+/*
+ * Sends log file path and append state to the MessageReceiver.
+ *
+ * @param  pathname  log file path name, such as "/newpath/test1/"
+ * @param  append  true if appending log message (false)
+ */
+//------------------------------------------------------------------------------
+void MessageInterface::SetLogPath(const char *pathname, bool append)
+{
+   if (theMessageReceiver != NULL)
+      theMessageReceiver->SetLogPath(std::string(pathname), append);
+}
+
+//------------------------------------------------------------------------------
 // void SetLogPath(const std::string &pathname, bool append = false)
 //------------------------------------------------------------------------------
 /*

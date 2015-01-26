@@ -890,9 +890,11 @@ bool Sandbox::Execute()
                
                // Write out event data, if any
                for (UnsignedInt i = 0; i < events.size(); ++i)
-                  events[i]->ReportEventData("Execution was interrupted; the "
+                  events[i]->LocateEvents("Execution was interrupted; the "
                      "event list may be incomplete");
-
+//                  events[i]->ReportEventData("Execution was interrupted; the "
+//                     "event list may be incomplete");
+//
                throw SandboxException("Execution interrupted");
                //return rv;
             }
@@ -931,56 +933,79 @@ bool Sandbox::Execute()
          }
          else
             cloneIndex = -1;
-
-         rv = current->Execute();
          
-         if (!rv)
+         //================================================================
+         // @note: This section is just testing out how the run can be
+         // paused by user when branch command is running, such as Optimize.
+         // Catch exception when BranchCommand throws with "RUN PAUSED"
+         // so that catch block can just continue.
+         // Need more work on this (LOJ: 2014.09.10)
+         // Added try/catch block to catch exception when user paused the run
+         try
          {
-            std::string str = "\"" + current->GetTypeName() +
-               "\" Command failed to run to completion\n";
-            
-            #if DBGLVL_SANDBOX_RUN > 1
-            MessageInterface::ShowMessage
-               ("%sCommand Text is\n\"%s\n", str.c_str(),
-                current->GetGeneratingString().c_str());
-            #endif
-            
-            throw SandboxException(str);
-         }
+            rv = current->Execute();
          
-         if (current->AffectsClones())
-         {
-            // Manage owned clones
-            GmatBase *obj = current->GetUpdatedObject();
-            cloneIndex = current->GetUpdatedObjectParameterIndex();
-
-            if (obj != NULL)
+            if (!rv)
             {
-               runMode retState = state;
-               state = REFRESH;
-               UpdateClones(obj, cloneIndex);
-               state = retState;
-
-               if (obj->IsInitialized() == false)
+               std::string str = "\"" + current->GetTypeName() +
+                  "\" Command failed to run to completion\n";
+               
+               #if DBGLVL_SANDBOX_RUN > 1
+               MessageInterface::ShowMessage
+                  ("%sCommand Text is\n\"%s\n", str.c_str(),
+                   current->GetGeneratingString().c_str());
+               #endif
+               
+               throw SandboxException(str);
+            }
+            
+            if (current->AffectsClones())
+            {
+               // Manage owned clones
+               GmatBase *obj = current->GetUpdatedObject();
+               cloneIndex = current->GetUpdatedObjectParameterIndex();
+               
+               if (obj != NULL)
                {
-                  #ifdef DEBUG_CLONE_UPDATES
+                  runMode retState = state;
+                  state = REFRESH;
+                  UpdateClones(obj, cloneIndex);
+                  state = retState;
+                  
+                  if (obj->IsInitialized() == false)
+                  {
+                     #ifdef DEBUG_CLONE_UPDATES
                      bool retval =
-                  #endif
-
-                  obj->Initialize();
-
-                  #ifdef DEBUG_CLONE_UPDATES
-                     if (retval == false)
-                        MessageInterface::ShowMessage("%s needs initialization"
-                              ", but initialization fails\n", 
-                              obj->GetName().c_str());
-                  #endif
+                     #endif
+                        
+                     obj->Initialize();
+                     
+                     #ifdef DEBUG_CLONE_UPDATES
+                         if (retval == false)
+                            MessageInterface::ShowMessage("%s needs initialization"
+                                  ", but initialization fails\n", 
+                                  obj->GetName().c_str());
+                     #endif
+                  }
                }
             }
+            
+            current = current->GetNext();
          }
-
-         current = current->GetNext();
-      }
+         catch (BaseException &e)
+         {
+            #ifdef __ENABLE_PAUSE_IN_BRANCH_COMMAND__
+            //================================================================
+            // Just continue when BranchCommand throws with "RUN PAUSED"
+            if (e.GetFullMessage().find("RUN PAUSED") != std::string::npos)
+               continue;
+            
+            #else
+            throw;
+            
+            #endif
+         }
+      } // while (current)
    }
    catch (BaseException &e)
    {
@@ -1007,7 +1032,8 @@ bool Sandbox::Execute()
    
    // Write out event data, if any
    for (UnsignedInt i = 0; i < events.size(); ++i)
-      events[i]->ReportEventData();
+      events[i]->LocateEvents();
+//      events[i]->ReportEventData();
 
    return rv;
 }
@@ -1587,7 +1613,6 @@ void Sandbox::SetGlobalRefObject(GmatCommand *cmd)
    #endif
    cmd->SetSolarSystem(solarSys);
    cmd->SetTransientForces(&transientForces);
-   cmd->SetEventLocators(&events);
    cmd->SetInternalCoordSystem(internalCoordSys);
    cmd->SetPublisher(publisher);
 }

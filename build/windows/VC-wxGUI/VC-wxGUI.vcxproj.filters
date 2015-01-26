@@ -169,9 +169,6 @@
     <Filter Include="Source Files\plugins\EstimationPlugin">
       <UniqueIdentifier>{1d44d2f2-7927-41b1-a9d6-d1a5abe44c9a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\plugins\Vf13OptimizerPlugin">
-      <UniqueIdentifier>{094a21d9-b5cb-4800-b53f-ebf0d58efed0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\plugins\EventLocatorPlugin">
       <UniqueIdentifier>{a284cb33-d95d-4b26-9eb4-442ae5a3a87e}</UniqueIdentifier>
     </Filter>
@@ -232,12 +229,6 @@
     <Filter Include="Source Files\plugins\GmatFunctionPlugin\function">
       <UniqueIdentifier>{b7fd501a-3532-430c-a9fd-242798cf351b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\plugins\Vf13OptimizerPlugin\factory">
-      <UniqueIdentifier>{7fa71910-2973-4df6-a829-fc033cd3f29d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\plugins\Vf13OptimizerPlugin\solver">
-      <UniqueIdentifier>{940fd6e5-5687-40de-bfff-8159be1495ac}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\plugins\StationPlugin\factory">
       <UniqueIdentifier>{26e18eea-6dc7-4393-8f0d-24858a8717bd}</UniqueIdentifier>
     </Filter>
@@ -294,6 +285,15 @@
     </Filter>
     <Filter Include="Source Files\plugins\EphemPropagatorPlugin\propagator">
       <UniqueIdentifier>{2c731ecc-0090-4eb0-b235-188ddcd42c1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\VF13OptimizerPlugin">
+      <UniqueIdentifier>{5f9e7078-db74-416b-bffc-1a0e3e4a1d6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\VF13OptimizerPlugin\factory">
+      <UniqueIdentifier>{e47ef762-fdb4-4159-ae88-20d9db96d631}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\VF13OptimizerPlugin\solver">
+      <UniqueIdentifier>{4430f3a6-34e0-44dc-88e8-c08af67682a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1755,9 +1755,6 @@
     <ClCompile Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.cpp">
       <Filter>Source Files\gui\subscriber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
-      <Filter>Source Files\base\forcemodel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp">
       <Filter>Source Files\gui\spacecraft</Filter>
     </ClCompile>
@@ -1959,9 +1956,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\LightTimeCorrection.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\Brent.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
@@ -1975,9 +1969,6 @@
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
       <Filter>Source Files\base\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\Antumbra.cpp">
@@ -2283,17 +2274,23 @@
     <ClCompile Include="..\..\..\src\base\parameter\RvectorVar.cpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\factory</Filter>
+    <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    <ClCompile Include="..\..\..\src\base\hardware\PowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    <ClCompile Include="..\..\..\src\base\hardware\SolarPowerSystem.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.cpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\hardware\NuclearPowerSystem.cpp">
       <Filter>Source Files\base\hardware</Filter>
@@ -2312,6 +2309,51 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
       <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPanel.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPreferences.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\EditorPrintout.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\FindReplaceDialog.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\view\ScriptEditor.cpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.c">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
+      <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3842,9 +3884,6 @@
     <ClInclude Include="..\..\..\src\gui\subscriber\GroundTrackCanvas.hpp">
       <Filter>Source Files\gui\subscriber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
-      <Filter>Source Files\base\forcemodel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp">
       <Filter>Source Files\gui\spacecraft</Filter>
     </ClInclude>
@@ -4045,12 +4084,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
-      <Filter>Source Files\base\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\Brent.hpp">
-      <Filter>Source Files\base\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EstimationRootFinder.hpp">
       <Filter>Source Files\base\event</Filter>
@@ -4376,17 +4409,23 @@
     <ClInclude Include="..\..\..\src\base\parameter\RvectorVar.hpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\factory</Filter>
+    <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    <ClInclude Include="..\..\..\src\base\hardware\PowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
-      <Filter>Source Files\plugins\Vf13OptimizerPlugin\solver</Filter>
+    <ClInclude Include="..\..\..\src\base\hardware\SolarPowerSystem.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\hardware\PowerSystemConfigPanel.hpp">
+      <Filter>Source Files\gui\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp">
+      <Filter>Source Files\gui\spacecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\hardware\NuclearPowerSystem.hpp">
       <Filter>Source Files\base\hardware</Filter>
@@ -4405,6 +4444,51 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
       <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
+      <Filter>Source Files\base\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
+      <Filter>Source Files\base\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPanel.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPreferences.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\EditorPrintout.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\FindReplaceDialog.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\view\ScriptEditor.hpp">
+      <Filter>Source Files\gui\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp">
+      <Filter>Source Files\base\event</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

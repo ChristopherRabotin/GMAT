@@ -30,6 +30,8 @@
 //#define DEBUG_SOLAR_POWER_SYSTEM_SET
 //#define DEBUG_SOLAR_RENAME
 //#define DEBUG_SOLAR_POWER_OBJECT
+//#define DEBUG_SET
+
 
 //---------------------------------
 // static data
@@ -73,7 +75,7 @@ bool SolarPowerSystem::occultationWarningWritten = false;
  * @param nomme Name for the power system.
  */
 //------------------------------------------------------------------------------
-SolarPowerSystem::SolarPowerSystem(std::string nomme) :
+SolarPowerSystem::SolarPowerSystem(const std::string &nomme) :
    PowerSystem          ("SolarPowerSystem",nomme),
    solarCoeff1          (1.32077),
    solarCoeff2          (-0.10848),
@@ -81,7 +83,8 @@ SolarPowerSystem::SolarPowerSystem(std::string nomme) :
    solarCoeff4          (0.10843),
    solarCoeff5          (-0.01279),
    shadowModel          ("DualCone"),
-   shadowState          (NULL)
+   shadowState          (NULL),
+   settingNoBodies      (false)
 {
    objectTypes.push_back(Gmat::SOLAR_POWER_SYSTEM);
    objectTypeNames.push_back("SolarPowerSystem");
@@ -91,6 +94,12 @@ SolarPowerSystem::SolarPowerSystem(std::string nomme) :
    shadowBodyNames.clear();
    shadowBodies.clear();
 
+   defaultShadowBodyNames.clear();
+   defaultShadowBodyNames.push_back("Earth");
+
+   // we need to make sure the shadow bodies are written correctly to the
+   // script (even if it's empty)
+   writeEmptyStringArray = true;
    shadowState    = new ShadowState();
 }
 
@@ -127,7 +136,8 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    solarCoeff4          (copy.solarCoeff4),
    solarCoeff5          (copy.solarCoeff5),
    shadowModel          (copy.shadowModel),
-   shadowState          (NULL)
+   shadowState          (NULL),
+   settingNoBodies      (copy.settingNoBodies)
 {
    parameterCount = copy.parameterCount;
 //   isInitialized  = Initialize();
@@ -138,6 +148,11 @@ SolarPowerSystem::SolarPowerSystem(const SolarPowerSystem& copy) :
    for (unsigned int i = 0; i < (copy.shadowBodyNames).size(); i++)
    {
       shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
+   }
+   defaultShadowBodyNames.clear();
+   for (unsigned int j = 0; j < (copy.defaultShadowBodyNames).size(); j++)
+   {
+      defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(j));
    }
 
    shadowState    = new ShadowState();
@@ -171,18 +186,26 @@ SolarPowerSystem& SolarPowerSystem::operator=(const SolarPowerSystem& copy)
       solarCoeff4       = copy.solarCoeff4;
       solarCoeff5       = copy.solarCoeff5;
 
+      settingNoBodies   = copy.settingNoBodies;
+
       shadowBodyNames.clear();
       // copy the list of body names
       for (unsigned int i = 0; i < (copy.shadowBodyNames).size(); i++)
       {
          shadowBodyNames.push_back((copy.shadowBodyNames).at(i));
       }
-      shadowBodies.clear();
-      // copy the list of body pointers
-      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+      defaultShadowBodyNames.clear();
+      // copy the list of body names
+      for (unsigned int i = 0; i < (copy.defaultShadowBodyNames).size(); i++)
       {
-         shadowBodies.push_back((copy.shadowBodies).at(i));
+         defaultShadowBodyNames.push_back((copy.defaultShadowBodyNames).at(i));
       }
+      shadowBodies.clear();
+//      // copy the list of body pointers - do I want to do this???
+//      for (unsigned int i = 0; i < (copy.shadowBodies).size(); i++)
+//      {
+//         shadowBodies.push_back((copy.shadowBodies).at(i));
+//      }
 
       shadowModel = copy.shadowModel;
 
@@ -216,7 +239,7 @@ bool SolarPowerSystem::Initialize()
       MessageInterface::ShowMessage("Calling Initialization on %s\n",
             instanceName.c_str());
       MessageInterface::ShowMessage("number of shadow bodies = %d\n",
-            (Integer) shadowBodies.size());
+            (Integer) shadowBodyNames.size());
    #endif
    PowerSystem::Initialize();
 
@@ -230,8 +253,9 @@ bool SolarPowerSystem::Initialize()
 
    // if no names were added to the ShadowBodies list, add the Default body
    // This will cause "ShadowBodies = {'Earth'} to be written to the script <<
-   if (shadowBodyNames.empty())
-      shadowBodyNames.push_back("Earth");
+   if ((shadowBodyNames.empty()) && (!settingNoBodies))
+      shadowBodyNames = defaultShadowBodyNames;
+//      shadowBodyNames.push_back("Earth");
 
    // Set up the list of shadowBodies using current solarSystem
    shadowBodies.clear();
@@ -247,6 +271,10 @@ bool SolarPowerSystem::Initialize()
          throw HardwareException(errmsg);
       }
       shadowBodies.push_back(body);
+      #ifdef DEBUG_SOLAR_POWER
+         MessageInterface::ShowMessage("Adding shadow body %s to %s\n",
+               body->GetName().c_str(), instanceName.c_str());
+      #endif
    }
 
    if (!shadowState)
@@ -364,7 +392,7 @@ Real SolarPowerSystem::GetPowerGenerated() const
    Integer   numOcculted   = 0;
    Real percentSun         = 1;
    Real percentSunAll = 1;
-   if (shadowModel != "None")
+   if ((shadowModel != "None") && !shadowBodies.empty())
    {
       bool lit           = true;
       bool dark          = false;
@@ -462,6 +490,9 @@ Real SolarPowerSystem::GetPowerGenerated() const
 
    // Englander Eq. 17
    generatedPower = percentSunAll * basePower * solarScaleFactor;
+   #ifdef DEBUG_SOLAR_POWER
+      MessageInterface::ShowMessage("   generatedPower    = %12.10f\n", generatedPower);
+   #endif
 
    return generatedPower;
 }
@@ -798,8 +829,26 @@ bool SolarPowerSystem::SetStringParameter(const Integer id,
                                           const std::string &value,
                                           const Integer index)
 {
+   #ifdef DEBUG_SET
+      MessageInterface::ShowMessage(
+            "Entering SetStringParameter with id = %d, value = %s, and index = %d\n",
+            id, value.c_str(), index);
+   #endif
    if (id == SHADOW_BODIES)
    {
+      // Check to see if we are setting a blank list here; if we are,
+      // then we do NOT want to use the default list of bodies
+      Integer sz = value.length();
+      if ((sz <= 0) || (GmatStringUtil::IsBlank(value)) ||
+          ((value[0] == '{') && (value[sz-1] == '}')))
+      {
+         settingNoBodies = true;
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage(
+                  "In SetStringParameter, settingNoBodies = true!!\n");
+         #endif
+         return true;
+      }
       if ((index < 0) || (index > (Integer) shadowBodyNames.size()))
       {
          std::string errmsg = "For PowerSystem ";
@@ -820,12 +869,22 @@ bool SolarPowerSystem::SetStringParameter(const Integer id,
          if (find(shadowBodyNames.begin(), shadowBodyNames.end(), value) == shadowBodyNames.end())
          {
                shadowBodyNames.push_back(value);
+               settingNoBodies = false;
+               #ifdef DEBUG_SET
+                  MessageInterface::ShowMessage(
+                        "In SetStringParameter, settingNoBodies = false\n");
+               #endif
          }
       }
       // ... or, replace current name
       else
       {
          shadowBodyNames.at(index) = value;
+         settingNoBodies = false;
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage(
+                  "In SetStringParameter, settingNoBodies = false (2)\n");
+         #endif
       }
       return true;
    }
@@ -850,7 +909,12 @@ const StringArray& SolarPowerSystem::GetStringArrayParameter(const Integer id) c
 {
    if (id == SHADOW_BODIES)
    {
-      return shadowBodyNames;
+      if ((shadowBodyNames.empty()) && (!settingNoBodies))
+      {
+         return defaultShadowBodyNames;
+      }
+      else
+         return shadowBodyNames;
    }
 
    return PowerSystem::GetStringArrayParameter(id);
@@ -1031,6 +1095,22 @@ bool SolarPowerSystem::RenameRefObject(const Gmat::ObjectType type,
    return true;  // why doesn't this call the parent class?
 }
 
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringArray
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a StringArray to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool SolarPowerSystem::WriteEmptyStringArray(Integer id)
+{
+   if (id == SHADOW_BODIES)
+      return true;
+   return PowerSystem::WriteEmptyStringArray(id);
+}
 
 ////------------------------------------------------------------------------------
 //// virtual bool HasRefObjectTypeArray()

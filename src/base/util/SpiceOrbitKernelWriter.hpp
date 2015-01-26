@@ -78,8 +78,6 @@ public:
    void        AddMetaData(const std::string &line,  bool done = false);
    void        AddMetaData(const StringArray &lines, bool done = false);
    void        FinalizeKernel();
-   // Write bogus data to the file, in order to close it
-   void    WriteDataToClose();
 
 protected:
    /// the name of the spacecraft or body for which the SPK is created
@@ -109,6 +107,10 @@ protected:
    /// flag indicating whether or not a file handle has been obtained, and the file is
    /// open for writing
    bool            fileOpen;
+   /// Has the file been finalized and closed?
+   bool            fileFinalized;
+   /// Has data been written to the file?
+   bool            dataWritten;
    /// the name of the temporary text file
    std::string     tmpTxtFileName;
    /// the temporary text file
@@ -125,6 +127,9 @@ protected:
    /// method used to create the temporary text file, to use to set metadata (comments)
    /// on the SPK file
    void     WriteMetaData();
+   /// Opens the file for writing - this should not be done until we are ready
+   /// to write the data
+   bool     OpenFileForWriting();
 
 private:
    // default constructor

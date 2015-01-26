@@ -30,7 +30,7 @@ class GMAT_API SolarPowerSystem : public PowerSystem
 {
 public:
 
-   SolarPowerSystem(std::string nomme);
+   SolarPowerSystem(const std::string &nomme);
    virtual ~SolarPowerSystem();
    SolarPowerSystem(const SolarPowerSystem& copy);
    SolarPowerSystem&            operator=(const SolarPowerSystem& copy);
@@ -91,6 +91,7 @@ public:
 //   virtual const StringArray&
 //                        GetRefObjectNameArray(const Gmat::ObjectType type);
 
+   virtual bool         WriteEmptyStringArray(Integer id);
 
 protected:
    /// Published parameters for solar power systems
@@ -122,12 +123,16 @@ protected:
    std::string         shadowModel;
    /// list of body names
    StringArray         shadowBodyNames;
+   /// list of default body names
+   StringArray         defaultShadowBodyNames;
    /// Array of shadow bodies
    std::vector<CelestialBody*> shadowBodies;
 
    /// a pointer to an instance of the ShadowState class, to
    /// compute shadow states at a given epoch
    ShadowState         *shadowState;
+   /// Did the user set zero bodies (allowed)?
+   bool                settingNoBodies;
 
    static bool    occultationWarningWritten;
 

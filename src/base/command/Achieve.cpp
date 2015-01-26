@@ -432,6 +432,24 @@ std::string Achieve::GetStringParameter(const Integer id) const
    return SolverSequenceCommand::GetStringParameter(id);
 }
 
+//------------------------------------------------------------------------------
+//  std::string  SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param id    ID for the requested parameter.
+ * @param value string value for the requested parameter.
+ *
+ * @return  success flag.
+ */
+//------------------------------------------------------------------------------
+bool Achieve::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string  SetStringParameter(const Integer id, const std::string value)

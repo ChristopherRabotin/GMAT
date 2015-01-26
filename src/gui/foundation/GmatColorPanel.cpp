@@ -130,15 +130,6 @@ void GmatColorPanel::Create()
    
    Integer bsize = 2; // border size
    
-   //-----------------------------------------------------------------
-   // Platform dependent button size
-   //-----------------------------------------------------------------
-   #ifdef __WXMAC__
-   int buttonWidth = 40;
-   #else
-   int buttonWidth = 25;
-   #endif
-   
    // Add override color CheckBox
    mOverrideOrbitColorCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Override Color For This Segment"),
@@ -150,14 +141,14 @@ void GmatColorPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
    mOrbitColorCtrl =
       new wxColourPickerCtrl(this, ID_COLOR_CTRL, *wxRED,
-                             wxDefaultPosition, wxSize(buttonWidth, 20), 0);
+                             wxDefaultPosition, wxDefaultSize, 0);
    mTargetColorLabel =
       new wxStaticText(this, -1, wxT("Target Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);   
    wxColour targColor = wxTheColourDatabase->Find("STEEL BLUE");
    mTargetColorCtrl =
       new wxColourPickerCtrl(this, ID_COLOR_CTRL, targColor,
-                             wxDefaultPosition, wxSize(buttonWidth, 20), 0);
+                             wxDefaultPosition, wxDefaultSize, 0);
    
    wxBoxSizer *colorBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    colorBoxSizer->Add(mOverrideOrbitColorCheckBox, 0, wxALIGN_CENTER, bsize);

@@ -47,6 +47,8 @@ public:
    
    // methods for parameters
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterValid(const Integer id, const std::string &value);
+   virtual bool         IsParameterValid(const std::string &label, const std::string &value);
    virtual bool         IsParameterCommandModeSettable(const Integer id) const;
    
    virtual std::string  GetParameterText(const Integer id) const;
@@ -58,6 +60,8 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id, const std::string &value);
    virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual const StringArray&
@@ -131,8 +135,8 @@ public:
    static const std::string* GetFootPrintOptionList();
    
 private:
-   void SetTextureMapFileName(const std::string &mapName, const std::string &whichMap,
-                              bool writeWarning, bool writeInfo);
+   bool SetTextureMapFileName(const std::string &fileName, bool writeWarning,
+                              bool validateOnly = false);
    
    static const std::string FOOT_PRINT_OPTION_TEXT[FootPrintOptionCount];
 };

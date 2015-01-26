@@ -924,7 +924,7 @@ void CoordPanel::Create()
    pConfig->SetPath(wxT("/Coordinate System"));
 
     // wxStaticText
-   originStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Origin"),
+   originStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Origin",
       wxDefaultPosition, wxDefaultSize, 0 );
 
    //causing VC++ error => wxString emptyList[] = {};
@@ -934,36 +934,36 @@ void CoordPanel::Create()
    originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(150,-1), false);
    originComboBox->SetToolTip(pConfig->Read(_T("OriginHint")));
-   typeStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Type"),
+   typeStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Type",
       wxDefaultPosition, wxDefaultSize, 0 );
    typeComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    typeComboBox->SetToolTip(pConfig->Read(_T("TypeHint")));
-   primaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Primary"),
+   primaryStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Primary",
       wxDefaultPosition, wxDefaultSize, 0 );
    primaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    primaryComboBox->SetToolTip(pConfig->Read(_T("PrimaryHint")));
-   secondaryStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Secondary"),
+   secondaryStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Secondary",
       wxDefaultPosition, wxDefaultSize, 0 );
    secondaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    secondaryComboBox->SetToolTip(pConfig->Read(_T("SecondaryHint")));
 //   refObjectComboBox->SetToolTip(pConfig->Read(_T("RefObjectHint")));  // TBD
-   xStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"X: "),
+   xStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"X: ",
       wxDefaultPosition, wxDefaultSize, 0 );
    xComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    xComboBox->SetToolTip(pConfig->Read(_T("XHint")));
-   yStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Y: "),
+   yStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Y: ",
       wxDefaultPosition, wxDefaultSize, 0 );
    yComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
         emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    yComboBox->SetToolTip(pConfig->Read(_T("YHint")));
-   zStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Z: "),
+   zStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Z: ",
       wxDefaultPosition, wxDefaultSize, 0 );
    zComboBox = new wxComboBox
       ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(60,-1), //0,
@@ -971,65 +971,65 @@ void CoordPanel::Create()
    zComboBox->SetToolTip(pConfig->Read(_T("ZHint")));
 
    //wxTextCtrl
-   epochStaticText = new wxStaticText( this, ID_TEXT, wxT("A1MJD "GUI_ACCEL_KEY"Epoch"),
+   epochStaticText = new wxStaticText( this, ID_TEXT, "A1MJD "GUI_ACCEL_KEY"Epoch",
       wxDefaultPosition, wxDefaultSize, 0 );
    epochTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
    epochTextCtrl->SetToolTip(pConfig->Read(_T("EpochHint")));
 
-   alignXStaticText = new wxStaticText( this, ID_TEXT, wxT("AlignmentVector"GUI_ACCEL_KEY"X"),
+   alignXStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector"GUI_ACCEL_KEY"X",
       wxDefaultPosition, wxDefaultSize, 0 );
    alignXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   alignXTextCtrl->SetToolTip(pConfig->Read(_T("AlignXHint")));
-   alignYStaticText = new wxStaticText( this, ID_TEXT, wxT("AlignmentVector"GUI_ACCEL_KEY"Y"),
+   alignYStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector"GUI_ACCEL_KEY"Y",
       wxDefaultPosition, wxDefaultSize, 0 );
    alignYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   alignYTextCtrl->SetToolTip(pConfig->Read(_T("AlignYHint")));
-   alignZStaticText = new wxStaticText( this, ID_TEXT, wxT("AlignmentVector"GUI_ACCEL_KEY"Z"),
+   alignZStaticText = new wxStaticText( this, ID_TEXT, "AlignmentVector"GUI_ACCEL_KEY"Z",
       wxDefaultPosition, wxDefaultSize, 0 );
    alignZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   alignZTextCtrl->SetToolTip(pConfig->Read(_T("AlignZHint")));
-   refObjectStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"ReferenceObject"),
+   refObjectStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"ReferenceObject",
       wxDefaultPosition, wxDefaultSize, 0 );
    refObjectComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
 
    //Get CordinateSystem ComboBox from the GuiItemManager.
-   constraintCSStaticText = new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Constraint Coord. Sys."),
+   constraintCSStaticText = new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Constraint Coord. Sys.",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintCSComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
       constraintCSComboBox->SetToolTip(pConfig->Read(_T("ConstraintCSHint")));  // TBD
 
-   constraintXStaticText = new wxStaticText( this, ID_TEXT, wxT("ConstraintVector"GUI_ACCEL_KEY"X"),
+   constraintXStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector"GUI_ACCEL_KEY"X",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintXTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintXHint")));
-   constraintYStaticText = new wxStaticText( this, ID_TEXT, wxT("ConstraintVector"GUI_ACCEL_KEY"Y"),
+   constraintYStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector"GUI_ACCEL_KEY"Y",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintYTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintYHint")));
-   constraintZStaticText = new wxStaticText( this, ID_TEXT, wxT("ConstraintVector"GUI_ACCEL_KEY"Z"),
+   constraintZStaticText = new wxStaticText( this, ID_TEXT, "ConstraintVector"GUI_ACCEL_KEY"Z",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintZTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintZHint")));
-   constraintRefXStaticText = new wxStaticText( this, ID_TEXT, wxT("Constraint Ref. Vector"GUI_ACCEL_KEY"X"),
+   constraintRefXStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector"GUI_ACCEL_KEY"X",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintRefXTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintRefXTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefXHint")));
-   constraintRefYStaticText = new wxStaticText( this, ID_TEXT, wxT("Constraint Ref. Vector"GUI_ACCEL_KEY"Y"),
+   constraintRefYStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector"GUI_ACCEL_KEY"Y",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintRefYTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
 //   constraintRefYTextCtrl->SetToolTip(pConfig->Read(_T("ConstraintRefYHint")));
-   constraintRefZStaticText = new wxStaticText( this, ID_TEXT, wxT("Constraint Ref. Vector"GUI_ACCEL_KEY"Z"),
+   constraintRefZStaticText = new wxStaticText( this, ID_TEXT, "Constraint Ref. Vector"GUI_ACCEL_KEY"Z",
       wxDefaultPosition, wxDefaultSize, 0 );
    constraintRefZTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(120,-1), 0 );
@@ -1143,8 +1143,8 @@ void CoordPanel::Create()
    {
       wxStaticText *msg =
          new wxStaticText(this, ID_TEXT,
-                          wxT("This is a default Coordinate "
-                              "System and cannot be modified."),
+                          "This is a default Coordinate "
+                          "System and cannot be modified.",
                           wxDefaultPosition, wxDefaultSize, 0);
       msg->SetForegroundColour(*wxRED);
       theMainSizer->Add(msg, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -1526,15 +1526,15 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       //-------------------------------------------------------
       // set X value if exist
       if (xComboBox->IsEnabled())
-         axis->SetXAxis(xComboBox->GetValue().Trim().c_str());
+         axis->SetXAxis(std::string(xComboBox->GetValue().Trim().c_str()));
       
       // set Y value if exist
       if (yComboBox->IsEnabled())
-         axis->SetYAxis(yComboBox->GetValue().Trim().c_str());
+         axis->SetYAxis(std::string(yComboBox->GetValue().Trim().c_str()));
       
       // set z value if exist
       if (zComboBox->IsEnabled())
-         axis->SetZAxis(zComboBox->GetValue().Trim().c_str());
+         axis->SetZAxis(std::string(zComboBox->GetValue().Trim().c_str()));
       
       //-------------------------------------------------------
       // set new epoch format and epoch
@@ -1542,7 +1542,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       if (epochTextCtrl->IsEnabled())
       {     
          Real epoch, a1mjd;
-         std::string savedEpoch = epochValue.c_str();
+         std::string savedEpoch = epochValue.WX_TO_STD_STRING;
          #ifdef DEBUG_COORD_PANEL_SAVE
             MessageInterface::ShowMessage("In CoordPanel::SaveData, saving current epoch value (%s)\n",
                   savedEpoch.c_str());
