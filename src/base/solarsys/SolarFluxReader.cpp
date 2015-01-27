@@ -24,6 +24,8 @@
 
 #include "MessageInterface.hpp"
 
+//#define DEBUG_FILE_INDEXING
+
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -38,7 +40,9 @@
 //------------------------------------------------------------------------------
 SolarFluxReader::SolarFluxReader():
    obsFileName       (""),
-   predictFileName   ("")
+   predictFileName   (""),
+   warnEpochBefore   (true),
+   warnEpochAfter    (true)
 {
    if (!obsFluxData.empty())
       obsFluxData.clear();
@@ -76,7 +80,9 @@ SolarFluxReader::~SolarFluxReader(void)
  * copy constructor
  */
 //------------------------------------------------------------------------------
-SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr)
+SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr) :
+   warnEpochBefore   (true),
+   warnEpochAfter    (true)
 {
    obsFileName = sfr.obsFileName;
    predictFileName = sfr.predictFileName;
@@ -119,6 +125,9 @@ SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
    endObs = sfr.endObs;
    begData = sfr.begData;
    line = sfr.line;
+   
+   warnEpochBefore = true;
+   warnEpochAfter = true;
 
    return *this;
 }
@@ -131,7 +140,7 @@ SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
 * Operator=() for FluxData data structure
 */
 //------------------------------------------------------------------------------
-inline SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
+SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
 {
    if (this == &fD)
       return *this;
@@ -480,9 +489,13 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    if (index < 0)
    {
       // Warn the user that the epoch is too early
-      MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
+      if (warnEpochBefore)
+      {
+         MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
             "data is earlier than the starting epoch on the flux file.  GMAT "
             "is using the first file entry.\n");
+         warnEpochBefore = false;
+      }
       index = 0;
    }
 
@@ -490,21 +503,50 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    // last item in the obsFluxData, then search in predictFluxData
    if (index >= (Integer) obsFluxData.size())
    {
-      epoch_1st = predictFluxData.at(0).epoch;
-      index = (Integer) (epoch - epoch_1st) - 1;
-      if (index < 0)
-         throw SolarSystemException("\"SolarFluxReader::GetInputs()\" Index can not be less than zero.\n");
-
-      std::vector<FluxData>::iterator it;
-      for ( it = predictFluxData.begin(); it != predictFluxData.end(); it++)
+      if ((predictFluxData.size() > 0))
       {
-         if ( index >= it->index && (it+1) != predictFluxData.end() && index < (it+1)->index)
+         epoch_1st = predictFluxData.at(0).epoch;
+         index = (Integer) (epoch - epoch_1st) - 1;
+      
+         /// @todo: if earlier than 1st use 1st
+         if (index < 0)
+            throw SolarSystemException("\"SolarFluxReader::GetInputs()\" Index can not be less than zero.\n");
+   
+         std::vector<FluxData>::iterator it;
+         for ( it = predictFluxData.begin(); it != predictFluxData.end(); ++it)
          {
-            fD = predictFluxData[it->id];
-            break;
+            if ( index >= it->index && (it+1) != predictFluxData.end() && index < (it+1)->index)
+            {
+               fD = predictFluxData[it->id];
+               break;
+            }
+            else if ( (it+1) == predictFluxData.end())
+            {
+               // Warn the user that the epoch is too late
+               if (warnEpochAfter)
+               {
+                  MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
+                     "data is later than the ending epoch on the flux file.  GMAT "
+                     "is using the last file entry.\n");
+                  warnEpochAfter = false;
+               }
+               fD = predictFluxData[it->id];
+            }
          }
-         else if ( (it+1) == predictFluxData.end())
-            fD = predictFluxData[it->id];
+      }
+      else // Off the CSSI file and there is no predict data read
+      {
+         // Warn the user that the epoch is too late
+         if (warnEpochAfter)
+         {
+            MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
+               "data is later than the ending epoch on the flux file.  GMAT "
+               "is using the last file entry.\n");
+            warnEpochAfter = false;
+            index = obsFluxData.size() - 1;
+            fD = obsFluxData[index];
+            fD.index = index;
+         }
       }
    }
    else
@@ -532,14 +574,15 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 //------------------------------------------------------------------------------
 void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epoch )
 {
-   if (fD.index < (Integer)obsFluxData.size() && (fD.index - 2) >= 0 )
+   #ifdef DEBUG_FILE_INDEXING
+      MessageInterface::ShowMessage("Reading flux data; epoch = %12lf, "
+         "fD.Epoch = %.12lf, index = %d\n", epoch, fD.epoch, fD.index);
+   #endif
+   
+   Integer f107index = fD.index;
+   
+   if (fD.index < (Integer)obsFluxData.size())
    {
-      FluxData fD_OneBefore = obsFluxData[fD.index - 1];
-      FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
-      FluxData fD_ThreeBefore;
-      if (fD.index > 2)
-         FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
-
       // Fill in fD.ap so it contains these data:
       /*  (1) DAILY AP */
       /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
@@ -551,21 +594,62 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
       /*        TO CURRENT TIME */
       Real fracEpoch = (epoch - 0.5) - fD.epoch;
-      Integer subIndex = (Integer)(fracEpoch * 8);
+      Integer subIndex = (Integer)floor(fracEpoch * 8);
+      
+      // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for 
+      // data from 8 am on the current day to 8 am the next day.  f107index is 
+      // used to track that piece.
+      if (fracEpoch < 8.0/24.0)
+         f107index = (f107index > 0 ? f107index - 1 : 0);
+      
+      if (subIndex >= 8) // Off the end of the array
+      {
+         subIndex = 7;
+      }
 
       Real apValues[32];
       Integer i = 0,j = 0;
+      
+      #ifdef DEBUG_FILE_INDEXING
+         MessageInterface::ShowMessage("   subindex = %d\n", subIndex);
+      #endif
       for (i = subIndex, j = 0; i >= 0; --i, ++j)
          apValues[j] = fD.ap[i];
-      for (i = 7; i >= 0; j++,i--)
-         apValues[j] = fD_OneBefore.ap[i];
-      for (i = 7; i >= 0; j++,i--)
-         apValues[j] = fD_TwoBefore.ap[i];
+      if (fD.index > 0)
+      {
+         FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+         for (i = 7; i >= 0; j++,i--)
+            apValues[j] = fD_OneBefore.ap[i];
+      }
+      else
+      {
+         for (i = 7; i >= 0; j++,i--)
+            apValues[j] = obsFluxData[0].ap[0];
+      }
+      if (fD.index > 1)
+      {
+         FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
+         for (i = 7; i >= 0; j++,i--)
+            apValues[j] = fD_TwoBefore.ap[i];
+      }
+      else
+      {
+         for (i = 7; i >= 0; j++,i--)
+            apValues[j] = obsFluxData[0].ap[0];
+      }
+      
       if ( fD.index > 2)
       {
+         FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
          for (i = 7; i >= 0; j++,i--)
             apValues[j] = fD_ThreeBefore.ap[i];
       }
+      else
+      {
+         for (i = 7; i >= 0; j++,i--)
+            apValues[j] = obsFluxData[0].ap[0];
+      }
+            
 
       for (i = 0; i < 7; i++)
       {
@@ -589,10 +673,13 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
             fD.ap[i] /= 8.0;
          }
       }
-
+      
       // Update the F10.7 data
-      fD.obsF107 = fD_OneBefore.obsF107;
-//      fD.obsCtrF107a = fD_OneBefore.obsCtrF107a;
+      // Daily value from previous day
+      fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 : 
+                                    obsFluxData[f107index].obsF107);
+      // Average value from detected day
+      fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
    }
 
    return;
@@ -612,7 +699,8 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
 //------------------------------------------------------------------------------
 void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch )
 {
-   if (fD.index < (Integer)obsFluxData.size() && (fD.index - 2) >= 0 )
+   Integer f107index = fD.index;
+   if ((fD.index < (Integer)obsFluxData.size()) && ((fD.index - 2) >= 0))
    {
       FluxData fD_OneBefore = obsFluxData[fD.index - 1];
 
@@ -620,6 +708,15 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       // Vallado and Finkleman
       Real fracEpoch = (epoch - 0.5) - fD.epoch - 6.7/24.0;
       Integer subIndex = (Integer)floor(fracEpoch * 8);
+      
+      // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for 
+      // data from 8 am on the current day to 8 am the next day.  f107index is 
+      // used to track that piece.
+      if (fracEpoch < 8.0/24.0)
+         f107index = (f107index > 0 ? f107index - 1 : 0);
+      
+      if (subIndex >= 8)
+         subIndex = 7;
 
       if (subIndex > 0)
          fD.kp[0] = fD.kp[subIndex];
@@ -627,8 +724,8 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       if (subIndex < 0)
          fD.kp[0] = fD_OneBefore.kp[8+subIndex];
 
-      fD.adjF107 = fD_OneBefore.adjF107;
-      fD.adjCtrF107a = fD_OneBefore.adjCtrF107a;
+      fD.adjF107 = obsFluxData[f107index].adjF107;
+      fD.adjCtrF107a = obsFluxData[f107index].adjCtrF107a;
    }
 
    return;

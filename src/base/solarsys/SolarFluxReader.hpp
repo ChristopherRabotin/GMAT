@@ -92,6 +92,11 @@ private:
    std::vector<FluxData> obsFluxData;
    /// Schatten data array
    std::vector<FluxData> predictFluxData;
+      
+   /// Flag used to indicate that the "Too early" warning not yet issued
+   bool warnEpochBefore;
+   /// Flag used to indicate that the "Too late" warning not yet issued
+   bool warnEpochAfter;
 
    bool LoadObsData();
    bool LoadPredictData();
