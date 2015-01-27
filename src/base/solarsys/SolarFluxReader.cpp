@@ -22,6 +22,8 @@
 #include "SolarFluxReader.hpp"
 #include "SolarSystemException.hpp"
 
+#include "MessageInterface.hpp"
+
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -466,16 +468,23 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    FluxData fD;
 
    // Requirement list in google docs:
-   // HistoricAndNearTerm source is always given precedence if requested epoch is in the historic data section.  
+   // HistoricAndNearTerm source is always given precedence if requested epoch
+   // is in the historic data section.
    // Otherwise, predicted data is used from the predicted source.
    // If requested data is not on a file (regardless of the file type), 
    // use closest data from the requested epoch and issue a single warning message 
    // that data was not available so using closest data and from which file source.
    epoch_1st = obsFluxData.at(0).epoch;
    index = (Integer) (epoch - 0.5 - epoch_1st);
+
    if (index < 0)
-      //throw an exception
-         throw SolarSystemException("\"SolarFluxReader::GetInputs()\" Index can not be less than zero.\n");
+   {
+      // Warn the user that the epoch is too early
+      MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
+            "data is earlier than the starting epoch on the flux file.  GMAT "
+            "is using the first file entry.\n");
+      index = 0;
+   }
 
    // if the requested epoch fall beyond the 
    // last item in the obsFluxData, then search in predictFluxData
@@ -511,7 +520,10 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 // PrepareApData(GmatEpoch epoch, Integer index, FluxData &fD)
 //------------------------------------------------------------------------------
 /**
- * Function that replaces the ap data with data MSISE models need
+ * Prepares the data used by the MSISE models
+ *
+ * Function that replaces the ap data with data MSISE models need, and the F10.7
+ * obs value with the value from the previous day
  *
  * @param fD The data record that contains raw data for the requested epoch
  *
@@ -538,20 +550,12 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       /*        TO CURRENT TIME */
       /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
       /*        TO CURRENT TIME */
-
-   //# yy mm dd BSRN ND Kp Kp Kp Kp Kp Kp Kp Kp Sum Ap  Ap  Ap  Ap  Ap  Ap  Ap  Ap  Avg Cp C9 ISN F10.7 Q Ctr81 Lst81 F10.7 Ctr81 Lst81
-   //# --------------------------------------------------------------------------------------------------------------------------------
-   //2009 01 12 2394 12  0  0  0  0  0  0  3  0   3   0   0   0   0   0   0   ((2   0)   0 0.0 0   8  67.0 0  66.7  66.2  69.3  68.8  67.9
-   //2009 01 13 2394 13 10 20 17  0 10 10 13 10  90   (4   7   6   0   4   4))   ((5   4)   4 0.1 0   0  68.2 0  66.7  66.2  70.5  68.8  68.0
-   //2009 01 14 2394 14 23 20 10 17 23  7 13 13 127   (9   7   4   6   9   3))   (5) (5)   6 0.3 1   0  68.9 0  66.7  66.2  71.2  68.8  68.0
-   //2009 01 15 2394 15 13 20 10 13  7 20 23 23 130   (5) (7)   4   5   3   7   9  9 (6) 0.3 1   0  68.8 0  66.8  66.2  71.1  68.8  68.1
-
       Real fracEpoch = (epoch - 0.5) - fD.epoch;
       Integer subIndex = (Integer)(fracEpoch * 8);
 
       Real apValues[32];
       Integer i = 0,j = 0;
-      for (i = subIndex, j = 0; i >= 0; i--, j++)
+      for (i = subIndex, j = 0; i >= 0; --i, ++j)
          apValues[j] = fD.ap[i];
       for (i = 7; i >= 0; j++,i--)
          apValues[j] = fD_OneBefore.ap[i];
@@ -563,29 +567,68 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
             apValues[j] = fD_ThreeBefore.ap[i];
       }
 
-     for (i = 0; i < 7; i++)
-     {
-        if (i == 0)
-           fD.ap[i] = fD.apAvg;
-        if (i >= 1 && i <= 4)
-           fD.ap[i] = apValues[i-1];
-        if (i == 5)
-        {
-           fD.ap[i] = 0;
-           for (Integer l = 0; l < 8; l++)
-              fD.ap[i] += apValues[i+l-1];
-           fD.ap[i] /= 8.0;
-              
-        }
-        if (i == 6)
-        {
-           fD.ap[i] = 0;
-           for (Integer l = 8; l < 16; l++)
-              if ( apValues[i+l-2] >= 0)
-                 fD.ap[i] += apValues[i+l-2];
-           fD.ap[i] /= 8.0;
-        }
-     }
+      for (i = 0; i < 7; i++)
+      {
+         if (i == 0)
+            fD.ap[i] = fD.apAvg;
+         if (i >= 1 && i <= 4)
+            fD.ap[i] = apValues[i-1];
+         if (i == 5)
+         {
+            fD.ap[i] = 0;
+            for (Integer l = 0; l < 8; l++)
+               fD.ap[i] += apValues[i+l-1];
+            fD.ap[i] /= 8.0;
+         }
+         if (i == 6)
+         {
+            fD.ap[i] = 0;
+            for (Integer l = 8; l < 16; l++)
+               if ( apValues[i+l-2] >= 0)
+                  fD.ap[i] += apValues[i+l-2];
+            fD.ap[i] /= 8.0;
+         }
+      }
+
+      // Update the F10.7 data
+      fD.obsF107 = fD_OneBefore.obsF107;
+//      fD.obsCtrF107a = fD_OneBefore.obsCtrF107a;
+   }
+
+   return;
+}
+
+
+//------------------------------------------------------------------------------
+// PrepareKpData(GmatEpoch epoch, Integer index, FluxData &fD)
+//------------------------------------------------------------------------------
+/**
+ * Function that replaces the Kp data with data the Jacchia Roberts model needs
+ *
+ * @param fD The data record that contains raw data for the requested epoch
+ *
+ * @return void
+*/
+//------------------------------------------------------------------------------
+void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch )
+{
+   if (fD.index < (Integer)obsFluxData.size() && (fD.index - 2) >= 0 )
+   {
+      FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+
+      // Fill in fD.kp[0] so it contains the reading at epoch - 6.7 Hrs, per
+      // Vallado and Finkleman
+      Real fracEpoch = (epoch - 0.5) - fD.epoch - 6.7/24.0;
+      Integer subIndex = (Integer)floor(fracEpoch * 8);
+
+      if (subIndex > 0)
+         fD.kp[0] = fD.kp[subIndex];
+
+      if (subIndex < 0)
+         fD.kp[0] = fD_OneBefore.kp[8+subIndex];
+
+      fD.adjF107 = fD_OneBefore.adjF107;
+      fD.adjCtrF107a = fD_OneBefore.adjCtrF107a;
    }
 
    return;

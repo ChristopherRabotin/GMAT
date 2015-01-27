@@ -107,7 +107,7 @@ public:
    FluxData GetInputs(GmatEpoch epoch);
    /// Change Ap data for MSISE model
    void PrepareApData(FluxData &fD, GmatEpoch epoch);
-
+   void PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch);
 };
 
 
