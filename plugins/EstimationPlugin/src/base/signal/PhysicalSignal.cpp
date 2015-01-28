@@ -123,16 +123,6 @@ PhysicalSignal::PhysicalSignal(const PhysicalSignal& ps) :
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("PhysicalSignal:: copy construction\n");
 #endif
-
-//   if (troposphere !=NULL)
-//      delete troposphere;
-//   troposphere = (Troposphere*)(ps.troposphere->Clone());
-//
-//#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
-//   if (ionosphere !=NULL)
-//      delete ionosphere;
-//   ionosphere = (Ionosphere*)(ps.ionosphere->Clone());
-//#endif
 }
 
 
@@ -161,16 +151,6 @@ PhysicalSignal& PhysicalSignal::operator=(const PhysicalSignal& ps)
 
       relCorrection             = ps.relCorrection;
       useETTAI                  = ps.useETTAI;
-
-//      if (troposphere !=NULL)
-//         delete troposphere;
-//      troposphere = (Troposphere*)(ps.troposphere->Clone());
-//
-//#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
-//      if (ionosphere !=NULL)
-//         delete ionosphere;
-//      ionosphere = (Ionosphere*)(ps.ionosphere->Clone());
-//#endif
    }
 
    return *this;
@@ -211,6 +191,7 @@ void PhysicalSignal::InitializeSignal(bool chainForwards)
 {
    if (!physicalSignalInitialized)
    {
+      // Initialize signal base
       SignalBase::InitializeSignal(chainForwards);
       physicalSignalInitialized = true;
    }
