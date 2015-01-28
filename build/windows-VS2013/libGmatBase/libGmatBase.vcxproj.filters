@@ -1362,6 +1362,9 @@
     <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2680,6 +2683,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
       <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

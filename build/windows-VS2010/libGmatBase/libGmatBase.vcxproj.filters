@@ -1359,6 +1359,8 @@
     <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
       <Filter>Source Files\hardware</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
+      <Filter>Source Files\solarsys</Filter>
     <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
@@ -2678,6 +2680,8 @@
     <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
+      <Filter>Source Files\solarsys</Filter>
     <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
