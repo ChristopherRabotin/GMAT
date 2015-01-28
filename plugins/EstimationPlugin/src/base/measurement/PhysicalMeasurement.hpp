@@ -60,9 +60,9 @@ public:
    void        SetConstantFrequency(Real newFreq, Integer index=0);
    Real        GetConstantFrequency(Integer index=0);
 
-   void       AddCorrection(const std::string& modelName, const std::string& mediaCorrectionType);
+   void        AddCorrection(const std::string& modelName, const std::string& mediaCorrectionType);
 //   RealArray   TroposphereCorrection(Real freq, Rvector3 rVec, Rmatrix33 Ro_j2k);
-   RealArray    TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
+   RealArray   TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
 
 #ifdef IONOSPHERE
    RealArray   IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2);
