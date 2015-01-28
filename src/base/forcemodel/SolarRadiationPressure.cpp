@@ -1055,7 +1055,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             std::string shModel = "DualCone";
             if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
             percentSun = shadowState->FindShadowState(inSunlight, inShadow,
-                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  // shModel, &state[i6], cbSunVector, sunSat, forceVector,            // made changes by TUAN NGUYEN
+                  shModel, &state[associate], cbSunVector, sunSat, forceVector,        // made changes by TUAN NGUYEN
                   sunRadius, bodyRadius, psunrad);
 //            FindShadowState(inSunlight, inShadow, &state[i6]);
          }
@@ -1228,7 +1229,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             std::string shModel = "DualCone";
             if (shadowModel == CYLINDRICAL_MODEL) shModel = "Cylindrical";
             percentSun = shadowState->FindShadowState(inSunlight, inShadow,
-                  shModel, &state[i6], cbSunVector, sunSat, forceVector,
+                  //shModel, &state[i6], cbSunVector, sunSat, forceVector,                   // made changes by TUAN NGUYEN
+                  shModel, &state[associate], cbSunVector, sunSat, forceVector,              // made changes by TUAN NGUYEN
                   sunRadius, bodyRadius, psunrad);
 //            FindShadowState(inSunlight, inShadow, &state[i6]);
          }
