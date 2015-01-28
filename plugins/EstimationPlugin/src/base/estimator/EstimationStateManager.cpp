@@ -509,6 +509,40 @@ bool EstimationStateManager::SetProperty(std::string prop, Integer loc)
 }
 
 
+bool EstimationStateManager::IsPropertiesSetupCorrect()
+{
+   if (solveForNames.size() == 0)
+      throw EstimatorException("Error: No solvefor parameters are set to estimation.\n");
+
+   for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
+   {
+      if (solveForObjectNames[i] == "")
+         throw EstimatorException("Error: '" + solveForNames[i] +"' has an empty object name.\n");
+
+      if (i >= solveForObjects.size()) 
+         throw EstimatorException("Error: '" + solveForNames[i] +"' object which is specified in AddSolverFor was not defined in your script.\n");
+      else
+      {
+         if(solveForObjects[i] == NULL)
+            throw EstimatorException("Error: '" + solveForNames[i] +"' object which is specified in AddSolverFor was not defined in your script.\n");
+      }
+
+      if (solveForIDNames[i] == "")
+         throw EstimatorException("Error: '" + solveForNames[i] +"' has an empty parameter name.\n");
+
+      if (i >= solveForIDs.size()) 
+         throw EstimatorException("Error: '" + solveForNames[i] +"' parameter which is specified in AddSolverFor was not defined in your script.\n");
+      else
+      {
+         if(solveForIDs[i] == NULL)
+            throw EstimatorException("Error: '" + solveForNames[i] +"' paramter which is specified in AddSolverFor was not defined in your script.\n");
+      }
+   }
+
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // bool SetProperty(std::string sf, GmatBase *obj)
 //------------------------------------------------------------------------------
