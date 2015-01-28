@@ -291,8 +291,11 @@ bool Estimator::Initialize()
 //------------------------------------------------------------------------------
 void Estimator::CompleteInitialization()
 {
-   stm = esm.GetSTM();
-   stateCovariance = esm.GetCovariance();
+   if (esm.IsPropertiesSetupCorrect())       // Verify solve-for parameters setting up correctly 
+   {
+      stm = esm.GetSTM();
+      stateCovariance = esm.GetCovariance();
+   }
 }
 
 
