@@ -23,15 +23,19 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
+#include <fstream>                           // made changes by TUAN NGUYEN
+#include <sstream>                           // made changes by TUAN NGUYEN
 
 //#define DEBUG_IONOSPHERE_ELECT_DENSITY
 //#define DEBUG_IONOSPHERE_TEC
 //#define DEBUG_IONOSPHERE_CORRECTION
 
+
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
 const Real Ionosphere::NUM_OF_INTERVALS = 20;
+const Real Ionosphere::IONOSPHERE_MAX_ATTITUDE = 2000.0;   // made changes by TUAN NGUYEN
 
 //------------------------------------------------------------------------------
 // Ionosphere(const std::string& nomme)
@@ -41,7 +45,9 @@ const Real Ionosphere::NUM_OF_INTERVALS = 20;
  */
 //------------------------------------------------------------------------------
 Ionosphere::Ionosphere(const std::string &nomme):
-   MediaCorrection("Ionosphere", nomme)
+   MediaCorrection("Ionosphere", nomme),
+   yyyymmddMin      (20000101),          // year 2000, month 01, day 01                        // made changes by TUAN NGUYEN
+   yyyymmddMax      (20000101)           // year 2000, month 01, day 01                           // made changes by TUAN NGUYEN
 {
    objectTypeNames.push_back("Ionosphere");
    model = 2;                 // 2 for IRI2007 ionosphere model
@@ -75,11 +81,13 @@ Ionosphere::~Ionosphere()
 //------------------------------------------------------------------------------
 Ionosphere::Ionosphere(const Ionosphere& ions):
    MediaCorrection(ions),
-   waveLength (ions.waveLength),
-   epoch      (ions.epoch),
-   yyyy       (ions.yyyy),
-   mmdd       (ions.mmdd),
-   hours      (ions.hours)
+   yyyymmddMin  (ions.yyyymmddMin),                           // made changes by TUAN NGUYEN
+   yyyymmddMax  (ions.yyyymmddMax),                           // made changes by TUAN NGUYEN
+   waveLength   (ions.waveLength),
+   epoch        (ions.epoch),
+   yyyy         (ions.yyyy),
+   mmdd         (ions.mmdd),
+   hours        (ions.hours)
 {
    stationLoc    = ions.stationLoc;
    spacecraftLoc = ions.spacecraftLoc;
@@ -103,6 +111,9 @@ Ionosphere& Ionosphere::operator=(const Ionosphere& ions)
    {
       MediaCorrection::operator=(ions);
       
+      yyyymmddMin     = ions.yyyymmddMin;               // made changes by TUAN NGUYEN
+      yyyymmddMax     = ions.yyyymmddMax;               // made changes by TUAN NGUYEN
+
       waveLength      = ions.waveLength;
       epoch           = ions.epoch;
       yyyy            = ions.yyyy;
@@ -125,6 +136,102 @@ Ionosphere& Ionosphere::operator=(const Ionosphere& ions)
 GmatBase* Ionosphere::Clone() const
 {
    return new Ionosphere(*this);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs any pre-run initialization that the object needs.
+ *
+ * @return true unless initialization fails.
+ */
+//------------------------------------------------------------------------------
+bool Ionosphere::Initialize()
+{
+   if (IsInitialized())
+      return true;
+
+   if (MediaCorrectionInterface::Initialize())
+   {
+      // Get time range from ap.dat file
+      GetTimeRange();
+
+      isInitialized = true;
+   }
+
+   return true;
+}
+
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+//  void GetTimeRange()
+//------------------------------------------------------------------------------
+/**
+ * This function is used to specify time range for Ionosphere model. 
+ * The range is set to yyyymmdMin and yyyymmddMax variables.
+ *
+ */
+//------------------------------------------------------------------------------
+void Ionosphere::GetTimeRange()
+{
+   Integer year, month, day;
+   std::fstream fs;
+   std::stringstream ss;
+   std::string theLine, oldLine;
+   
+   // 1. Open ap.data file
+   std::string filename = dataPath + "/IonosphereData/ap.dat";
+   try
+   {
+      fs.open(filename, std::fstream::in);
+   }
+   catch(...)
+   {
+      throw MeasurementException("Error: " + filename + " file does not exist or cannot open.\n");
+   }
+      
+   // 2. Get time lower bound (It is shown in the first line of ap.dat file)
+   // 2.1. Get the first line in ap.dat file
+   std::getline(fs,theLine);
+   // 2.2. Extract year, month, and day from this line
+   ss << theLine;
+   ss >> year >> month >> day;
+   if (year >= 58)
+      year = 1900 + year;
+   else
+      year = 2000 + year;
+   yyyymmddMin = year*10000 + month*100 + day;
+
+   // 3. Get time upper bound (It is shown in the last line of ap.dat file)
+   // 3.1. Get the last line in ap.dat file
+   while(!fs.eof())
+   {
+      oldLine = theLine;
+      std::getline(fs,theLine);
+   }
+   if (theLine == "")
+      theLine = oldLine;
+   //MessageInterface::ShowMessage("last line = %s\n", theLine.c_str());
+
+   // 3.2. Extract year, month, and day from this line
+   ss.str("");
+   ss << theLine;
+   ss >> year >> month >> day;
+   if (year >= 58)
+      year = 1900 + year;
+   else
+      year = 2000 + year;
+   yyyymmddMax = year*10000 + month*100 + day;
+
+   // 4. Close ap.data file
+   fs.close();
+
+   // 5. Verify the range:
+   if (yyyymmddMax <= yyyymmddMin)
+      throw MeasurementException("Error: time range specified from " + filename + " file is invalid.\n");
 }
 
 
@@ -228,12 +335,12 @@ bool Ionosphere::SetEarthRadius(Real r)
 float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 {
    // the fisrt position's latitude and longitude (unit: degree):
-   //real latitude = (real)(GmatMathConstants::PI_OVER_TWO_DEG - acos(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);	// unit: degree
-   real latitude = (real)(asin(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);	// unit: degree
-   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);			// unit: degree
+   //real latitude = (real)(GmatMathConstants::PI_OVER_TWO_DEG - acos(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);   // unit: degree
+   real latitude = (real)(asin(pos1.Get(2)/pos1.GetMagnitude())*GmatMathConstants::DEG_PER_RAD);   // unit: degree
+   real longitude = (real)(atan2(pos1.Get(1),pos1.Get(0))*GmatMathConstants::DEG_PER_RAD);         // unit: degree
    
    // mmag  = 0 geographic   =1 geomagnetic coordinates
-   integer jmag = 0;	// 1;
+   integer jmag = 0;   // 1;
    
    // jf(1:30)     =.true./.false. flags; explained in IRISUB.FOR
    logical jf[31];
@@ -258,7 +365,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    // Upper and lower integration limits
    real hbeg = (real)(pos1.GetMagnitude() - earthRadius); // 0
    if (hbeg < 1.0)
-	   hbeg = 1.0;			// If height is less than 1.0km then set it to 1.0km
+      hbeg = 1.0;         // If height is less than 1.0km then set it to 1.0km
 
    real hend = hbeg;
    real hstp = 1.0;
@@ -272,8 +379,8 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
 //   iri_sub(&jf[1], &jmag, &latitude, &longitude, &iy, &md, &hour,
 //           &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
 
-   integer ivar = 1;		// get attitude result
-   integer iut = 1;			// 1 for universal time; 0 for local time
+   integer ivar = 1;        // get attitude result
+   integer iut = 1;         // 1 for universal time; 0 for local time
 
 # ifdef DEBUG_IONOSPHERE_ELECT_DENSITY
    MessageInterface::ShowMessage("           .At time = %lf A1Mjd:",epoch);
@@ -283,7 +390,7 @@ float Ionosphere::ElectronDensity(Rvector3 pos2, Rvector3 pos1)
    MessageInterface::ShowMessage("coordinate system type = %s)\n",(jmag?"Geomagetic":"Geographic"));
 #endif
    iri_web(&jmag, &jf[1], &latitude, &longitude, &iy, &md, &iut, &hour, &hbeg, &hbeg, 
-	   &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
+      &ivar, &hbeg, &hend, &hstp, &outf[21], &oarr[1], &error);
 
    if (error != 0)
       throw MeasurementException("Ionosphere data files not found\n");
@@ -359,7 +466,6 @@ float Ionosphere::ElectronDensity1(Rvector3 pos2, Rvector3 pos1)
 //
 //  return value: tec  (unit: number of electorns per 1 meter square)
 //---------------------------------------------------------------------------
-#define IONOSPHERE_MAX_ATTITUDE  2000
 Real Ionosphere::TEC()
 {
 #ifdef DEBUG_IONOSPHERE_TEC
@@ -443,11 +549,40 @@ Real Ionosphere::BendingAngle()
 //    . Angle correction (unit: radian)
 //    . Time correction  (unit: s)
 //---------------------------------------------------------------------------
+#include "StringUtil.hpp"
 RealArray Ionosphere::Correction()
 {
 #ifdef DEBUG_IONOSPHERE_CORRECTION
    MessageInterface::ShowMessage("Ionosphere::Correction() start\n");
 #endif
+   // Initialize before doing calculation                        // made changes by TUAN NGUYEN
+   if (!IsInitialized())                                         // made changes by TUAN NGUYEN
+      Initialize();                                              // made changes by TUAN NGUYEN
+
+   // Verify time having a valid value                           // made changes by TUAN NGUYEN
+   Integer mjdate = yyyy*10000 + mmdd;                           // made changes by TUAN NGUYEN
+   if ((yyyymmddMin > mjdate)||(mjdate >= yyyymmddMax))          // made changes by TUAN NGUYEN
+   {                                                             // made changes by TUAN NGUYEN
+      Integer year, month, day, md;                              // made changes by TUAN NGUYEN
+
+      year = yyyymmddMin/10000;                                  // made changes by TUAN NGUYEN
+      md = yyyymmddMin - year*10000;                             // made changes by TUAN NGUYEN
+      month = md/100;                                            // made changes by TUAN NGUYEN
+      day = md - month*100;                                      // made changes by TUAN NGUYEN
+      std::string dateMin = GmatStringUtil::ToString(month) +    // made changes by TUAN NGUYEN
+         "/" + GmatStringUtil::ToString(day) +                   // made changes by TUAN NGUYEN
+         "/" + GmatStringUtil::ToString(year);                   // made changes by TUAN NGUYEN
+
+      year = yyyymmddMax/10000;                                  // made changes by TUAN NGUYEN
+      md = yyyymmddMax - year*10000;                             // made changes by TUAN NGUYEN
+      month = md/100;                                            // made changes by TUAN NGUYEN
+      day = md - month*100;                                      // made changes by TUAN NGUYEN
+      std::string dateMax = GmatStringUtil::ToString(month) +    // made changes by TUAN NGUYEN
+         "/" + GmatStringUtil::ToString(day) +                   // made changes by TUAN NGUYEN
+         "/" + GmatStringUtil::ToString(year);                   // made changes by TUAN NGUYEN
+
+      throw MeasurementException("Error: Epoch is out of range. Time range for Ionosphere calculation is from "+ dateMin + " to " + dateMax + ".\n");   // made changes by TUAN NGUYEN
+   }
 
    Real freq = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / waveLength;
    Real tec = TEC();                  // Equation 6.70 of MONTENBRUCK and GILL
