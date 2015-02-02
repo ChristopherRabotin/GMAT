@@ -145,6 +145,7 @@ private:
    void OnCellValueChange(wxGridEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent &event);
+   void OnGridTabbing(wxGridEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();

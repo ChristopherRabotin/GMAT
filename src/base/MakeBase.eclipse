@@ -486,6 +486,7 @@ OBJECTS = \
     solarsys/ShadowState.o \
     solarsys/SlpFile.o \
     solarsys/SolarFluxFileReader.o \
+    solarsys/SolarFluxReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
     solarsys/SpecialCelestialPoint.o \
