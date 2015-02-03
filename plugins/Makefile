@@ -19,6 +19,7 @@ endif
 ifeq ($(PLATFORM), nomatlab)
 
 all: 
+	cd CInterfacePlugin; make all;
 	cd EphemPropagatorPlugin; make all;
 	cd EstimationPlugin; make all;
 	cd GeometricMeasurementPlugin; make all;
@@ -32,6 +33,7 @@ all:
 	cd DataInterfacePlugin; make all;
 
 rebuild: 
+	cd CInterfacePlugin; make rebuild;
 	cd EphemPropagatorPlugin; make rebuild;
 	cd EstimationPlugin; make rebuild;
 	cd GeometricMeasurementPlugin; make rebuild;
@@ -45,6 +47,7 @@ rebuild:
 	cd DataInterfacePlugin; make rebuild;
 
 clean:
+	cd CInterfacePlugin; make clean;
 	cd EphemPropagatorPlugin; make clean;
 	cd EstimationPlugin; make clean;
 	cd GeometricMeasurementPlugin; make clean;

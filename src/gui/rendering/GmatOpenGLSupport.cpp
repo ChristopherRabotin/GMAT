@@ -69,7 +69,7 @@ bool SetPixelFormatDescriptor()
       0,                     // reserved
       0, 0, 0                // layer masks ignored
    };
-   /*
+
    // get the device context's best-available-match pixel format
    int pixelFormatId = ChoosePixelFormat(hdc, &pfd);
 
@@ -101,7 +101,7 @@ bool SetPixelFormatDescriptor()
          return false;
       #endif
    }
-   */
+   
    #ifdef DEBUG_INIT_GL
    MessageInterface::ShowMessage("SetPixelFormatDescriptor() returning true\n");
    #endif
