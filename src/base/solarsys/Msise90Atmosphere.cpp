@@ -28,6 +28,9 @@
 #include "TimeTypes.hpp"
 
 
+//#define DEBUG_NAN_CONDITIONS
+#define DEBUG_FIRSTCALL
+
 #ifndef __SKIP_MSISE90__
 extern "C" 
 { 
@@ -56,12 +59,6 @@ static FILE *logFile;  // Temp log file
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     AtmosphereModel     ("MSISE90", name),
-    fileData            (false),
-    fluxfilename        (""),
-    sod                 (0.0),
-    yd                  (0),
-    f107                (0.0),
-    f107a               (0.0),
     mass                (0)
 {
     #ifdef DEBUG_MSISE90_ATMOSPHERE
@@ -69,6 +66,7 @@ Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
     #endif
     for (Integer i = 0; i < 7; i++)
        ap[i] = 0.0;
+
 }
 
 //------------------------------------------------------------------------------
@@ -79,7 +77,7 @@ Msise90Atmosphere::Msise90Atmosphere(const std::string &name) :
  */
 //------------------------------------------------------------------------------
 Msise90Atmosphere::~Msise90Atmosphere()
-{
+{ 
 }
 
 //------------------------------------------------------------------------------
@@ -93,12 +91,6 @@ Msise90Atmosphere::~Msise90Atmosphere()
 //------------------------------------------------------------------------------
 Msise90Atmosphere::Msise90Atmosphere(const Msise90Atmosphere& msise) :
    AtmosphereModel     (msise),
-   fileData            (false),  // is this correct?
-   fluxfilename        (msise.fluxfilename),
-   sod                 (msise.sod),
-   yd                  (msise.yd),
-   f107                (msise.f107),
-   f107a               (msise.f107a),
    mass                (msise.mass)
 {
    for (Integer i = 0; i < 7; i++)
@@ -124,12 +116,6 @@ Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
 
    AtmosphereModel::operator=(msise);
    
-   fileData     = false;  // is this correct?
-   fluxfilename = msise.fluxfilename;
-   sod          = msise.sod;
-   yd           = msise.yd;
-   f107         = msise.f107;
-   f107a        = msise.f107a;
    mass         = msise.mass;
    
    for (Integer i = 0; i < 7; i++)
@@ -154,6 +140,10 @@ Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
 bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch, 
                                 Integer count)
 {
+   #ifdef DEBUG_FIRSTCALL
+      static bool firstcall = true;
+   #endif
+
    Integer i, i6;
 
    #ifdef DEBUG_GEODETICS
@@ -332,9 +322,70 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       
       density[i] = xden[5] * 1000.0;
 
+      #ifdef DEBUG_FIRSTCALL
+         if (firstcall)
+         {
+            MessageInterface::ShowMessage("==================================\n");
+            MessageInterface::ShowMessage("MSISE90 Model, First call data:\n");
+            MessageInterface::ShowMessage("   Year/DOY:    %d\n", xyd);
+            MessageInterface::ShowMessage("   SOD:         %.12lf\n", xsod);
+            MessageInterface::ShowMessage("   MJD:         %.12lf\n", epoch);
+            MessageInterface::ShowMessage("   Altitude:    %.12lf\n", xalt);
+            MessageInterface::ShowMessage("   Density:     %.12le\n", density[0]*1e9);
+            MessageInterface::ShowMessage("   F10.7:       %.12lf\n", xf107);
+            MessageInterface::ShowMessage("   F10.7a:      %.12lf\n", xf107a);
+            MessageInterface::ShowMessage("   Ap:          [%lf %lf %lf %lf "
+                  "%lf %lf %lf]\n", xap[0], xap[1], xap[2], xap[3], xap[4],
+                  xap[5], xap[6]);
+            MessageInterface::ShowMessage("==================================\n");
+
+            firstcall = false;
+         }
+      #endif
+
       #ifdef DEBUG_MSISE90_ATMOSPHERE
          MessageInterface::ShowMessage(
             "   Altitude = %15.9lf  Density = %15.9le\n", alt, density[i]);
+      #endif
+
+      #ifdef DEBUG_NAN_CONDITIONS
+         if (GmatMathUtil::IsNaN(xden[5]))
+         {
+            MessageInterface::ShowMessage("NAN found in MSISE90 "
+                  "density element %d, Value is %lf at epoch %.12lf\n", j,
+                  xden[5], epoch);
+            MessageInterface::ShowMessage(
+               "   Position:   %16.9le  %16.9le  %16.9le\n",
+               pos[i6], pos[i6+1], pos[i6+2]);
+            MessageInterface::ShowMessage("   Epoch                  = %le \n", epoch);
+            MessageInterface::ShowMessage("   Year & Days            = %d \n", xyd);
+            MessageInterface::ShowMessage("   Seconds                = %le \n", xsod);
+            MessageInterface::ShowMessage("   Altitude               = %le \n", xalt);
+            MessageInterface::ShowMessage("   Latitude               = %le \n", xlat);
+            MessageInterface::ShowMessage("   Longitude              = %le \n", xlon);
+            MessageInterface::ShowMessage("   Solar Time             = %le \n", xlst);
+            MessageInterface::ShowMessage("   F107 Average           = %le \n", xf107a);
+            MessageInterface::ShowMessage("   F107                   = %le \n", xf107);
+            MessageInterface::ShowMessage("   Geomagnetic index[0]   = %le \n", xap[0]);
+            MessageInterface::ShowMessage("   Geomagnetic index[1]   = %le \n", xap[1]);
+            MessageInterface::ShowMessage("   Geomagnetic index[2]   = %le \n", xap[2]);
+            MessageInterface::ShowMessage("   Geomagnetic index[3]   = %le \n", xap[3]);
+            MessageInterface::ShowMessage("   Geomagnetic index[4]   = %le \n", xap[4]);
+            MessageInterface::ShowMessage("   Geomagnetic index[5]   = %le \n", xap[5]);
+            MessageInterface::ShowMessage("   Geomagnetic index[6]   = %le \n", xap[6]);
+            MessageInterface::ShowMessage("   Mass                   = %d \n", xmass);
+            MessageInterface::ShowMessage("   HE Number Density      = %le \n", xden[0]);
+            MessageInterface::ShowMessage("   O Number Density       = %le \n", xden[1]);
+            MessageInterface::ShowMessage("   N2 Number Density      = %le \n", xden[2]);
+            MessageInterface::ShowMessage("   O2 Number Density      = %le \n", xden[3]);
+            MessageInterface::ShowMessage("   AR Number Density      = %le \n", xden[4]);
+            MessageInterface::ShowMessage("   Total Mass Density     = %le \n", xden[5]);
+            MessageInterface::ShowMessage("   H Number Density       = %le \n", xden[6]);
+            MessageInterface::ShowMessage("   N Number Density       = %le \n", xden[7]);
+            MessageInterface::ShowMessage("   EXOSPHERIC Temperature = %le \n", xtemp[0]);
+            MessageInterface::ShowMessage("   Temperature at Alt     = %le \n", xtemp[1]);
+            MessageInterface::ShowMessage("\n");
+         }
       #endif
    }
    
@@ -346,52 +397,6 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
    return true;
 }
 
-//------------------------------------------------------------------------------
-//  void GetInputs(Real epoch)
-//------------------------------------------------------------------------------
-/**
- *  Sets the input global data for the model, either from a file or from user
- *  input constants.
- *
- *  @param epoch The current TAIJulian epoch
- */
-//------------------------------------------------------------------------------
-void Msise90Atmosphere::GetInputs(Real epoch)
-{
-   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
-   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
-   Integer year   = 1941 + yearOffset;
-   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
-
-
-   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
-   if (sod < 0.0)
-   {
-      sod += GmatTimeConstants::SECS_PER_DAY;
-      doy -= 1;
-   }
-
-
-   if (sod > GmatTimeConstants::SECS_PER_DAY)
-   {
-      sod -= GmatTimeConstants::SECS_PER_DAY;
-      doy += 1;
-   }
-
-   yd = year * 1000 + doy;
-
-   if (fileData)
-   {
-      /// @todo Implement the file reader
-   }
-   else
-   {
-      f107 = nominalF107;
-      f107a = nominalF107a;
-      for (Integer i = 0; i < 7; i++)
-         ap[i] = nominalAp;
-   }
-}
 
 //------------------------------------------------------------------------------
 // GmatBase* Clone() const

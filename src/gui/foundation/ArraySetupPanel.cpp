@@ -40,6 +40,7 @@ BEGIN_EVENT_TABLE(ArraySetupPanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupPanel::OnTextUpdate)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ArraySetupPanel::OnTextEnter)
    EVT_GRID_CELL_CHANGE(ArraySetupPanel::OnGridCellChange)
+   EVT_GRID_TABBING(ArraySetupPanel::OnGridTabbing)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -155,22 +156,23 @@ void ArraySetupPanel::Create()
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
+   mArrGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
    
    wxBoxSizer *arrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrValBoxSizer->Add(singleValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   arrValBoxSizer->Add(mArrGrid, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrValBoxSizer->Add(mArrGrid, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    GmatStaticBoxSizer *arrStaticBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Array");
    arrStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   arrStaticBoxSizer->Add(arrValBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   arrStaticBoxSizer->Add(arrValBoxSizer, 1, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(arrStaticBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(arrStaticBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageBoxSizer, 1, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
 }
 
@@ -274,7 +276,7 @@ void ArraySetupPanel::LoadData()
       }
       catch (BaseException &e)
       {
-         wxLogError(wxT(e.GetFullMessage().c_str()));
+         wxLogError(wxString(e.GetFullMessage().c_str()));
          wxLog::FlushActive();
       }
    }
@@ -435,6 +437,14 @@ void ArraySetupPanel::UpdateCellValue()
    }   
 }
 
+//------------------------------------------------------------------------------
+// bool CheckCellValue(Real &rval, int row, int col, const char *str)
+//------------------------------------------------------------------------------
+bool ArraySetupPanel::CheckCellValue(Real &rval, int row, int col,
+                                     const char *str)
+{
+   return CheckCellValue(rval, row, col, std::string(str));
+}
 
 //------------------------------------------------------------------------------
 // bool CheckCellValue(Real &rval, int row, int col, const std::string &str)
@@ -458,4 +468,32 @@ bool ArraySetupPanel::CheckCellValue(Real &rval, int row, int col,
    }
 }
 
+//------------------------------------------------------------------------------
+// void OnGridTabbing(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user tabs in the grid
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void ArraySetupPanel::OnGridTabbing(wxGridEvent& event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    if (!event.ShiftDown() &&
+        (row == (mArrGrid->GetNumberRows() - 1)) &&
+        (col == (mArrGrid->GetNumberCols() - 1)))
+    {
+        mArrGrid->Navigate( wxNavigationKeyEvent::IsForward );
+    }
+    else if (event.ShiftDown() &&
+        (row == 0) &&
+        (col == 0))
+    {
+        mArrGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+    }
+    else
+        event.Skip();
+} 
 

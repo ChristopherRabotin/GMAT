@@ -35,6 +35,7 @@
 #include <wx/splash.h>
 #include <wx/image.h>
 #include <wx/config.h>
+#include <wx/log.h>
 
 #include "MessageInterface.hpp"
 #include "PlotInterface.hpp"
@@ -44,8 +45,14 @@
 #include "FileUtil.hpp"
 #include "StringUtil.hpp"          // for ToIntegerArray()
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
+
 //#define DEBUG_GMATAPP
 //#define DEBUG_CMD_LINE
+
 
 // In single window mode, don't have any child windows; use
 // main window.
@@ -70,12 +77,12 @@ GmatApp::GmatApp()
    GuiPlotReceiver *thePlotReceiver = GuiPlotReceiver::Instance();
    PlotInterface::SetPlotReceiver(thePlotReceiver);
    
-   theModerator = (Moderator *)NULL;
-   scriptToRun = "";
-   showMainFrame = true;
-   buildScript = false;
-   runScript = false;
-   runBatch = false;
+   theModerator      = (Moderator *)NULL;
+   scriptToRun       = "";
+   showMainFrame     = true;
+   buildScript       = false;
+   runScript         = false;
+   runBatch          = false;
    startMatlabServer = false;
 }
 
@@ -174,6 +181,9 @@ bool GmatApp::OnInit()
          // set default size
          wxSize size = wxSize(800, 600);
          wxPoint position = wxDefaultPosition;
+         #ifdef __WXMAC__
+         position = wxPoint(0,25); // put the main frame in the upper left corner
+         #endif
          
          // for Windows
          #ifdef __WXMSW__
@@ -277,9 +287,13 @@ bool GmatApp::OnInit()
          if (!showMainFrame)
             return false;
          
+         #ifdef __IGNORE_PNG_WARNING__
+         wxLogLevel logLevel = wxLog::GetLogLevel();
+         wxLog::SetLogLevel(0);
+         #endif
          
          if (GmatGlobal::Instance()->GetGuiMode() != GmatGlobal::MINIMIZED_GUI)
-         {
+         {            
             // Initializes all available image handlers.
             ::wxInitAllImageHandlers();
             
@@ -311,9 +325,10 @@ bool GmatApp::OnInit()
                else
                {
                   MessageInterface::ShowMessage
-                    ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
+//                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
                }
-                  // Changed to time out in 4 sec (LOJ: 2009.10.07)
+               // Changed to time out in 4 sec (LOJ: 2009.10.07)
                if (bitmap != NULL)
                {
                   long splashStyle;
@@ -333,7 +348,7 @@ bool GmatApp::OnInit()
             else
             {
                MessageInterface::ShowMessage
-                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.c_str());
+                  ("*** WARNING *** Can't load SPLASH_FILE from '%s'\n", splashFile.WX_TO_C_STRING);
             }
          }
          
@@ -348,6 +363,10 @@ bool GmatApp::OnInit()
                               _T("GMAT - General Mission Analysis Tool"),
                               position, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
+         
+         #ifdef __IGNORE_PNG_WARNING__
+         wxLog::SetLogLevel(logLevel);
+         #endif
          
          WriteMessage("GMAT GUI successfully launched.\n", "");
          
@@ -576,8 +595,9 @@ bool GmatApp::ProcessCommandLineOptions()
          "-x, \t--exit        \t\tExit GMAT after running the specified script\n"
          "    \t              \t\t[has no effect if no script is specified]\n";
    
-   wxString commandLineOptions = wxT(gmatHelp.c_str());
-
+   //wxString commandLineOptions = wxT(gmatHelp.c_str());
+   wxString commandLineOptions = wxString(gmatHelp.c_str());
+   
    #ifdef DEBUG_CMD_LINE
    MessageInterface::PutMessage("argc = %d\n", argc);
    #endif
@@ -587,7 +607,12 @@ bool GmatApp::ProcessCommandLineOptions()
    {
       for (int i = 1; i < argc; ++i)
       {
+         #if wxCHECK_VERSION(3, 0, 0)
+         std::string arg = argv[i].WX_TO_STD_STRING;
+         #else
          std::string arg = argv[i];
+         #endif
+         
          #ifdef DEBUG_CMD_LINE
          MessageInterface::PutMessage("arg = %s\n", arg.c_str());
          #endif
@@ -642,9 +667,9 @@ bool GmatApp::ProcessCommandLineOptions()
             if (find(commands.begin(), commands.end(), "SendMessage") == commands.end())
             {
                wxBusyCursor bc;
-               wxLogError(wxT("GMAT was started as a NITS client, but the "
+               wxLogError("GMAT was started as a NITS client, but the "
                   "NITS plugin was not loaded.\n"
-                  "The error occurred during the initialization.  GMAT will exit."));
+                  "The error occurred during the initialization.  GMAT will exit.");
                wxLog::FlushActive();
                retval = false;
             }
@@ -851,18 +876,23 @@ void GmatApp::BuildAndRunScript(bool runScript)
          WriteMessage("Failed to build the script\n   ", scriptToRun + "\n");
    }
    
+   #ifndef __WXMAC__
    wxSafeYield();
+   #endif
    // Close GMAT on option
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
    {
-#ifdef linux
-      exit(0);
-#endif
+      #ifdef __LINUX__
+         // Linux needs this to run in the test system successfully
+         exit(0);
+      #endif
 
       //Set auto exit mode to GmatMainFrame
       theMainFrame->SetAutoExitAfterRun(true);
       theMainFrame->Close();
+      #ifndef __WXMAC__
       wxSafeYield();
+      #endif
       #ifdef __LINUX__
       // Linux needs this to complete shutdown
       MessageInterface::ShowMessage("\n");
@@ -887,7 +917,8 @@ void GmatApp::WriteMessage(const std::string &msg1, const std::string &msg2,
 {
    wxDateTime now = wxDateTime::Now();
    wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-   std::string nowStr = wxNowStr.c_str();
+//   std::string nowStr = wxNowStr.c_str();
+   std::string nowStr = wxNowStr.WX_TO_STD_STRING;
    
    MessageInterface::LogMessage(nowStr + msg1 + msg2 + msg3);
 }

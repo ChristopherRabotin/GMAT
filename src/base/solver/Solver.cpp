@@ -1029,6 +1029,17 @@ std::string Solver::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string &value)
+ */
+//---------------------------------------------------------------------------
+bool Solver::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
 
 //---------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)

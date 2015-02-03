@@ -83,6 +83,8 @@ public:
    inline std::string   GetName() const;
    virtual bool         SetName(const std::string &who,
                                 const std::string &oldName = "");
+   virtual bool         SetName(const char *who,
+                                const std::string &oldName = "");
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
@@ -122,6 +124,8 @@ public:
                         GetRefObjectTypeArray();
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const char *name);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                          const std::string &name);
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
@@ -198,6 +202,10 @@ public:
    virtual bool         IsParameterCloaked(const std::string &label) const;
    virtual bool         IsParameterEqualToDefault(const Integer id) const;
    virtual bool         IsParameterEqualToDefault(const std::string &label) const;
+   virtual bool         IsParameterValid(const Integer id,
+                                         const std::string &value);
+   virtual bool         IsParameterValid(const std::string &label,
+                                         const std::string &value);
    virtual bool         IsParameterVisible(const Integer id) const;
    virtual bool         IsParameterVisible(const std::string &label) const;
 
@@ -269,9 +277,14 @@ public:
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value,
+                                           const Integer index);
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
@@ -343,6 +356,8 @@ public:
 
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
+   virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual std::string  GetStringParameter(const std::string &label,
                                            const Integer index) const;
@@ -385,6 +400,7 @@ public:
    virtual const ObjectTypeArray& GetTypesForList(const Integer id);
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
+   virtual bool         WriteEmptyStringArray(Integer id);
    virtual const std::string&
                         GetGeneratingString(
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -569,6 +585,9 @@ protected:
    IntegerArray        covarianceSizes;
    // Covariance matrix for parameters identified in covarianceList
    Covariance          covariance;
+
+   // Some string arrays need to be written even if they are empty
+   bool                writeEmptyStringArray;
 
    // Scripting interfaces
    void                CopyParameters(const GmatBase &a);

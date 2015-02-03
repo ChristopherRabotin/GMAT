@@ -632,6 +632,19 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
+//  bool  SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string value)
+ */
+//------------------------------------------------------------------------------
+bool CoordinateBase::SetStringParameter(const Integer id, 
+                                        const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
+
+//------------------------------------------------------------------------------
 //  bool  SetStringParameter(const Integer id, const std::string value)
 //------------------------------------------------------------------------------
 /**
@@ -645,8 +658,8 @@ std::string CoordinateBase::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
- bool CoordinateBase::SetStringParameter(const Integer id, 
-                                         const std::string &value)
+bool CoordinateBase::SetStringParameter(const Integer id, 
+                                        const std::string &value)
 {
    #ifdef DEBUG_CB_SET
       MessageInterface::ShowMessage("Entering CB::SetStringParameter for %s with id = %d, values = %s, allowModify = %s\n",
@@ -701,6 +714,24 @@ std::string CoordinateBase::GetStringParameter(const std::string &label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+* Accessor method used to get a parameter value
+ *
+ * @param    label  String label for the parameter
+ * @param    value  The new value for the parameter
+ */
+//------------------------------------------------------------------------------
+bool CoordinateBase::SetStringParameter(const std::string &label,
+                                        const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)

@@ -137,13 +137,13 @@ void CelesBodySelectDialog::Create()
    
    // arrow buttons
    mAddBodyButton =
-      new wxButton( this, ID_BUTTON, wxT("-"GUI_ACCEL_KEY">"), wxDefaultPosition, wxSize(20,20), 0 );
+      new wxButton( this, ID_BUTTON, wxString("-"GUI_ACCEL_KEY">"), wxDefaultPosition, wxSize(20,20), 0 );
    mAddBodyButton->SetToolTip(pConfig->Read(_T("AddBodyHint")));
    mRemoveBodyButton =
-      new wxButton( this, ID_BUTTON, wxT(GUI_ACCEL_KEY"<-"), wxDefaultPosition, wxSize(20,20), 0 );
+      new wxButton( this, ID_BUTTON, wxString(GUI_ACCEL_KEY"<-"), wxDefaultPosition, wxSize(20,20), 0 );
    mRemoveBodyButton->SetToolTip(pConfig->Read(_T("RemoveBodyHint")));
    mClearBodyButton =
-      new wxButton( this, ID_BUTTON, wxT("<"GUI_ACCEL_KEY"="), wxDefaultPosition, wxSize(20,20), 0 );
+      new wxButton( this, ID_BUTTON, wxString("<"GUI_ACCEL_KEY"="), wxDefaultPosition, wxSize(20,20), 0 );
    mClearBodyButton->SetToolTip(pConfig->Read(_T("ClearBodiesHint")));
    
    // add buttons to sizer
@@ -316,7 +316,7 @@ void CelesBodySelectDialog::LoadData()
       {
          for (Integer j = 0; j < (Integer)mBodyListBox->GetCount(); j++)
          {
-            std::string bName = mBodyListBox->GetString(j).c_str();
+            std::string bName = mBodyListBox->GetString(j).WX_TO_STD_STRING;
             if (strcmp(mBodiesToHide[i].c_str(), bName.c_str()) == 0)
                mBodyListBox->Delete(j);
          }
@@ -327,7 +327,7 @@ void CelesBodySelectDialog::LoadData()
       {
          for (Integer j = 0; j < (Integer)mBodySelectedListBox->GetCount(); j++)
          {
-            std::string bName = mBodySelectedListBox->GetString(j).c_str();
+            std::string bName = mBodySelectedListBox->GetString(j).WX_TO_STD_STRING;
             if (strcmp(mBodiesToHide[i].c_str(), bName.c_str()) == 0)
                mBodySelectedListBox->Delete(j);
          }    

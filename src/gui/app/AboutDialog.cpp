@@ -99,7 +99,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    {
       MessageInterface::ShowMessage
          ("About GMAT icon file '%s' does not exist.\n", iconFile.c_str());
-      aboutButton = new wxBitmapButton(this, -1, NULL, wxDefaultPosition,
+      wxBitmap nullBitmap;
+      aboutButton = new wxBitmapButton(this, -1, nullBitmap, wxDefaultPosition,
                                        wxSize(100, 100));
    }
    

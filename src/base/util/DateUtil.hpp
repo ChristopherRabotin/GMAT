@@ -23,6 +23,7 @@
 #define DateUtil_hpp
 
 #include "TimeTypes.hpp" // for ElapsedDays, YearNumber, MonthOfYear, DayOfMonth
+#include "GmatConstants.hpp"
 
 class GMAT_API DateUtil
 {

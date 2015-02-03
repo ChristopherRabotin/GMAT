@@ -115,7 +115,7 @@ protected:
    
    /// ephemeris output path from the startup file
    std::string outputPath;
-   /// ephmeris full file name including the path
+   /// ephemeris full file name including the path
    std::string fullPathFileName;
    std::string spacecraftName;
    std::string fileName;

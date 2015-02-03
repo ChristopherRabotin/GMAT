@@ -355,7 +355,7 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
 
 
 //------------------------------------------------------------------------------
-//  bool SetFilename(const std::string &fn)
+//  bool SetFilename(const std::string &fn, bool validateOnly = false)
 //------------------------------------------------------------------------------
 /**
  * This method sets the filename for this HarmonicField object.
@@ -365,13 +365,13 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
  * @return flag indicating success of the operation.
  */
 //------------------------------------------------------------------------------
-bool HarmonicField::SetFilename(const std::string &fn)
+bool HarmonicField::SetFilename(const std::string &fn, bool validateOnly)
 {
    #ifdef DEBUG_HARMONIC_FIELD_FILENAME
    MessageInterface::ShowMessage
       ("HarmonicField::SetFilename() entered for %s\n   filenameFullPath = %s\n   "
-       "filename = %s\n   newname  = %s\n", bodyName.c_str(),
-       filenameFullPath.c_str(), filename.c_str(), fn.c_str());
+       "filename = %s\n   newname  = %s\n   validateOnly = %s\n", bodyName.c_str(),
+       filenameFullPath.c_str(), filename.c_str(), fn.c_str(), validateOnly ? "true" : "false");
    MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
    #endif
    
@@ -416,26 +416,33 @@ bool HarmonicField::SetFilename(const std::string &fn)
       //    filename = newfn;
       // }
       
-      filename = newfn;
+      std::string newFile = newfn;
+      std::string fullPath;
       std::string potFileType = GmatStringUtil::ToUpper(GetBodyName()) + "_POT_PATH";
       
       // Do not write informational file location message if default file (LOJ: 2014.06.25)
-      filenameFullPath =
-         GmatBase::GetFullPathFileName(filename, GetName(), newfn, potFileType,
+      fullPath =
+         GmatBase::GetFullPathFileName(newFile, GetName(), newfn, potFileType,
                                        true, "", false, !hasDefaultIndicator);
       
       // std::ifstream potfile(filename.c_str());
       //std::ifstream potfile(filenameFullPath.c_str());
       //if (!potfile) 
-      if (filenameFullPath == "") 
+      if (fullPath == "") 
       {
-         throw ODEModelException
-            ("The file name \"" + filename + "\" does not exist.");
+         lastErrorMessage = "The file name \"" + newFile + "\" does not exist";
+         if (!validateOnly)
+            throw ODEModelException(lastErrorMessage);
       }
       
-      if (body != NULL)
-         //body->SetPotentialFilename(filename);
-         body->SetPotentialFilename(filenameFullPath);
+      if (!validateOnly)
+      {
+         filename = newfn;
+         filenameFullPath = fullPath;
+         if (body != NULL)
+            //body->SetPotentialFilename(filename);
+            body->SetPotentialFilename(filenameFullPath);
+      }
    }
    
    #ifdef DEBUG_HARMONIC_FIELD_FILENAME
@@ -687,7 +694,7 @@ bool HarmonicField::SetStringParameter(const Integer id,
          throw ome;
       }
 
-      #ifdef DEBUG_FILENAME
+      #ifdef DEBUG_HARMONIC_FIELD_FILENAME
       MessageInterface::ShowMessage
          ("HarmonicField::SetStringParameter() new PotentialFile = '%s'\n", value.c_str());
       #endif
@@ -1020,6 +1027,53 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
    
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::IsParameterValid(const Integer id,
+                                     const std::string &value)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("HarmonicField::IsParameterValid() entered, id=%d, value='%s'\n", id, value.c_str());
+   #endif
+   
+   bool retval = true;
+   if (id == FILENAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating FILE_NAME\n");
+      #endif
+      if (!SetFilename(value, true))
+         retval = false;
+   }
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool IsParameterValid(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool HarmonicField::IsParameterValid(const std::string &label,
+                                     const std::string &value)
+{
+   return IsParameterValid(GetParameterID(label), value);
+}
+
 
 //---------------------------------
 // protected methods

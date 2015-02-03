@@ -122,7 +122,7 @@ void CompareFilesDialog::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mBaseStrTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mBaseString),
+      new wxTextCtrl(this, ID_TEXTCTRL, mBaseString, //wxT(mBaseString),
                      wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
    
    wxStaticText *numFilesBaseDirLabel =
@@ -176,7 +176,8 @@ void CompareFilesDialog::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mCompareStrTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mCompareStrings[0]),
+      //new wxTextCtrl(this, ID_TEXTCTRL, wxT(mCompareStrings[0]),
+      new wxTextCtrl(this, ID_TEXTCTRL, mCompareStrings[0],
                      wxDefaultPosition, wxSize(80,20), wxTE_PROCESS_ENTER);
    
    wxStaticText *numFilesInCompareDirLabel =
@@ -387,9 +388,12 @@ void CompareFilesDialog::SaveData()
    mCompareFiles = true;
    if (mNumFilesToCompare <= 0)
    {
-      wxMessageBox(wxT("There are no specific report files to compare.\n"
-                       "Please check file names to compare."),
-                   wxT("GMAT Warning"));
+      // wxMessageBox(wxT("There are no specific report files to compare.\n"
+      //                  "Please check file names to compare."),
+      //              wxT("GMAT Warning"));
+      wxMessageBox("There are no specific report files to compare.\n"
+                   "Please check file names to compare.",
+                   "GMAT Warning");
       canClose = false;
       mCompareFiles = false;
    }
@@ -495,7 +499,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       wxString filename =
          wxFileSelector("Choose a file to save", mBaseDirectory, "", "txt",
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
-                        wxSAVE);
+                        wxFD_SAVE); //wxSAVE);
       
       if (!filename.empty())
       {

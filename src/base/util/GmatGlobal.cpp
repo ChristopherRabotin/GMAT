@@ -779,6 +779,19 @@ void GmatGlobal::ClearHiddenCommands()
    mHiddenCommands.clear();
 }
 
+//------------------------------------------------------------------------------
+// void  IsHiddenCommand(const char *cmd)
+//------------------------------------------------------------------------------
+/*
+ * returns true if this command should not be shown in menu
+ *
+ * @return  true to hide
+ */
+//------------------------------------------------------------------------------
+bool GmatGlobal::IsHiddenCommand(const char *cmd)
+{
+   return IsHiddenCommand(std::string(cmd));
+}
 
 //------------------------------------------------------------------------------
 // void  IsHiddenCommand(const std::string &cmd)

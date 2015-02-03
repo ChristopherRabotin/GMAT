@@ -54,6 +54,9 @@ public:
    virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
    virtual bool         SetStringParameter(const Integer id,
+                                           const char *value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value,
                                            const Integer index);
    virtual const StringArray&

@@ -97,7 +97,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
                const std::string &xAxisTitle, const std::string &yAxisTitle) :
    Subscriber("XYPlot", name),
    mNumCollected(0),  
-   mUpdatePlotFrequency(10)
+   mUpdatePlotFrequency(50)
 {
    // GmatBase data
    objectTypes.push_back(Gmat::XY_PLOT);
@@ -121,7 +121,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
    
    mIsXyPlotWindowSet = false;
    mDataCollectFrequency = 1;
-   mUpdatePlotFrequency = 10;
+   mUpdatePlotFrequency = 50;
    mNumDataPoints = 0;           // Found by Bob Wiegand w/ Valgrind
 
    useLines = true;
@@ -1757,13 +1757,14 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
             
             if ((mNumDataPoints % mDataCollectFrequency) == 0)
             {
-               mNumDataPoints = 0;
+               //mNumDataPoints = 0;
                mNumCollected++;
                bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
                
                #if DEBUG_XYPLOT_UPDATE > 1
                MessageInterface::ShowMessage
-                  ("XyPlot::Distribute() calling PlotInterface::UpdateXyPlot()\n");
+                  ("XyPlot::Distribute() calling PlotInterface::UpdateXyPlot(), "
+                   "update = %d, mNumDataPoints = %d, \n", update, mNumDataPoints);
                #endif
                
                // return flag is ignored here since it needs to return true

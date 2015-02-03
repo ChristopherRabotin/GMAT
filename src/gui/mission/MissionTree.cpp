@@ -283,6 +283,18 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    // Now this is called from GmatNotebook after MissionTreeToolBar is created
    //AddDefaultMission();
    
+   // Set default font
+   SetFont(GmatAppData::Instance()->GetFont());
+   
+   #ifdef DEBUG_FONT
+   wxFont currFont = GetFont();
+   MessageInterface::ShowMessage
+      ("In MissionTree() constructor, currFont.FaceName = '%s'\ncurrFont.NativeFontInfoDesc = '%s'\n"
+       "currFont.NativeFontInfoUserDesc = '%s'\ncurrFont.GetPointSize = %d\n",
+       currFont.GetFaceName().WX_TO_C_STRING, currFont.GetNativeFontInfoDesc().WX_TO_C_STRING,
+       currFont.GetNativeFontInfoUserDesc().WX_TO_C_STRING, currFont.GetPointSize());
+   #endif
+   
    // for auto-testing of MissionTree actions
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    mSaveActions = false;
@@ -2315,7 +2327,7 @@ void MissionTree::InsertBefore(const wxString &cmdTypeName)
       ShowCommands("Before Insert: " + cmdTypeName);
       MessageInterface::ShowMessage
          ("InsertBefore('%s') currCmd='%s', addr=%p\n",
-          cmdTypeName.c_str(), currCmd->GetTypeName().c_str(), currCmd);
+          cmdTypeName.WX_TO_C_STRING, currCmd->GetTypeName().c_str(), currCmd);
       
       return;
    }
@@ -2576,7 +2588,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
       // write error message
       MessageInterface::ShowMessage
          ("\n*** ERROR *** could not delete '%s' due to NULL item\n",
-         cmdName.c_str());
+         cmdName.WX_TO_C_STRING);
       return;
    }
    
@@ -2586,7 +2598,7 @@ void MissionTree::DeleteCommand(const wxString &cmdName)
       // write error message
       MessageInterface::ShowMessage
          ("\n*** ERROR *** could not delete '%s' due to NULL command\n",
-         cmdName.c_str());
+         cmdName.WX_TO_C_STRING);
       return;
    }
    
@@ -3543,7 +3555,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
    if (cmd == NULL)
    {
       MessageInterface::ShowMessage
-         ("**** INTERNAL ERROR **** Command for item '%s' is NULL\n", oldName.c_str());
+         ("**** INTERNAL ERROR **** Command for item '%s' is NULL\n", oldName.WX_TO_C_STRING);
       return;
    }
    
@@ -3645,7 +3657,7 @@ void MissionTree::OnRename(wxCommandEvent &event)
             {
                MessageInterface::ShowMessage
                   ("**** INTERNAL ERROR **** BranchEnd of '%s' not found\n",
-                   newName.c_str());
+                   newName.WX_TO_C_STRING);
             }
          }
       }
@@ -4644,7 +4656,7 @@ int MissionTree::GetCommandCounter(GmatCommand *cmd)
 int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
                                  const wxString &msg, const wxString &caption)
 {
-   newName = wxGetTextFromUser(wxT(msg), wxT(caption), oldName, this);
+   newName = wxGetTextFromUser(msg, caption, oldName, this);
    
    // @note
    // There is no way of kwowing whether user entered blank and clicked OK
@@ -4655,7 +4667,7 @@ int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
    
    // Remove leading and trailing white spaces
    newName = newName.Strip(wxString::both);
-   std::string stdNewName = newName.c_str();
+   std::string stdNewName = newName.WX_TO_STD_STRING;
    std::string::size_type index1 = stdNewName.find('\'', 0);
    
    // single quote is not allowd, so check it first
@@ -4663,7 +4675,7 @@ int MissionTree::GetNameFromUser(wxString &newName, const wxString &oldName,
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "\"%s\" - Single quotes within a command name is not allowed.\n"
-          "Please reenter without single quotes.", newName.c_str());
+          "Please reenter without single quotes.", newName.WX_TO_C_STRING);
       
       return GetNameFromUser(newName, newName, msg, caption);
    }
@@ -5031,7 +5043,7 @@ void MissionTree::ChangeCommandNodeColor(GmatCommand *cmd, wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void MissionTree::ShowCommands(const wxString &msg)
 {
-   MessageInterface::ShowMessage("-------------------->%s\n", msg.c_str());
+   MessageInterface::ShowMessage("-------------------->%s\n", msg.WX_TO_C_STRING);
    
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();;
    
@@ -5108,18 +5120,18 @@ void MissionTree::WriteNode(int itemCount, const std::string &prefix, bool appen
    if (itemCount == 1)
       MessageInterface::ShowMessage
          ("%s%s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).WX_TO_C_STRING : "Unknown Node");
    else if (itemCount == 2)
       MessageInterface::ShowMessage
          ("%s%s = '%s', %s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node",
-          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Unknown Node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).WX_TO_C_STRING : "Unknown Node",
+          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).WX_TO_C_STRING : "Unknown Node");
    else if (itemCount == 3)
       MessageInterface::ShowMessage
          ("%s%s = '%s', %s = '%s', %s = '%s'\n", prefix.c_str(),
-          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).c_str() : "Unknown Node",
-          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).c_str() : "Unknown Node",
-          title3.c_str(), itemId3.IsOk() ? GetItemText(itemId3).c_str() : "Unknown Node");
+          title1.c_str(), itemId1.IsOk() ? GetItemText(itemId1).WX_TO_C_STRING : "Unknown Node",
+          title2.c_str(), itemId2.IsOk() ? GetItemText(itemId2).WX_TO_C_STRING : "Unknown Node",
+          title3.c_str(), itemId3.IsOk() ? GetItemText(itemId3).WX_TO_C_STRING : "Unknown Node");
    if (appendEol)
       MessageInterface::ShowMessage("\n");
 }

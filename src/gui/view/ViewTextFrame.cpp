@@ -168,14 +168,14 @@ void ViewTextFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event))
    {
       filename =
          wxFileSelector("Choose a file to save", "", "", "script",
-                        "Script files (*.script)|*.script", wxSAVE);
+                        "Script files (*.script)|*.script", gmatFD_SAVE);
    }
    else
    {
       filename =
          wxFileSelector("Choose a file to save", "", "", "txt",
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
-                        wxSAVE);
+                        gmatFD_SAVE);
    }
 
    if (!filename.empty())

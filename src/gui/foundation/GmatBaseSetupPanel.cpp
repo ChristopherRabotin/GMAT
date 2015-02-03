@@ -103,7 +103,7 @@ GmatBaseSetupPanel::GmatBaseSetupPanel(wxWindow *parent, const wxString &name,
    else
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.c_str());
+         (Gmat::WARNING_, "The object named \"%s\" does not exist\n", name.WX_TO_C_STRING);
    }
 
 }
@@ -216,7 +216,7 @@ SizerMapType* GmatBaseSetupPanel::CreateGroups(wxFlexGridSizer *mainSizer,
    for (item = groups->begin(); item != groups->end(); ++item)
    {
 		groupName = item->first;
-		groupNames.push_back(groupName.Lower().c_str());
+		groupNames.push_back(std::string(groupName.Lower().c_str()));
 
    }
    SortGroups(&groupNames, config);
@@ -422,14 +422,14 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
    #endif
    
    wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
-    #if __WXMAC__
+   #if __WXMAC__
    int buttonWidth = 40;
-    #else
+   #else
    int buttonWidth = 25;
-    #endif
+   #endif
    std::string labelText;
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+theObject->GetParameterText(index)).c_str()));
+   config->SetPath(wxString(("/"+theObject->GetParameterText(index)).c_str()));
    labelText = GetParameterLabel(theObject, index, config);
    labelText = AssignAcceleratorKey(labelText);
    
@@ -441,16 +441,20 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
    *aControl = BuildControl(this, theObject, index, labelText, config);
    (*aControl)->Enable(theObject->IsParameterEnabled(index));
    
-   if (theObject->GetParameterType(index) == Gmat::FILENAME_TYPE)
+   Gmat::ParameterType pt = theObject->GetParameterType(index);
+   if (pt == Gmat::FILENAME_TYPE)
    {
       *aUnit =
          new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
                             wxSize(buttonWidth, 20));
+	  //BrowseButtonWildcard = BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png|All Files (*.*)|*.*;
+      idInfoMap[(wxObject *) *aUnit] = config->Read(_T("BrowseButtonWildcard"), "All Files (*.*)|*.*");
+      (*aUnit)->SetToolTip(config->Read(_T("BrowseButtonHint")));
    }
    else
       *aUnit =
          new wxStaticText(this, ID_TEXT,
-                          wxT(GetParameterUnit(theObject, index, config).c_str()));
+                          wxString(GetParameterUnit(theObject, index, config).c_str()));
    
    #ifdef DEBUG_CREATE_CONTROL
    MessageInterface::ShowMessage("GmatBaseSetupPanel::CreateControls() leaving\n");
@@ -524,7 +528,7 @@ void GmatBaseSetupPanel::CreateProperties(wxFlexGridSizer *mainSizer,
       itemSizer->Add(propertyControls[j], 0, wxALL|wxALIGN_LEFT, border);
       itemSizer->Add(propertyUnits[j], 0, wxALL|wxALIGN_LEFT, border);
       // set the path to the section that contains the parameter's items
-      config->SetPath(wxT(("/"+(*propertyNames)[j])).c_str());
+      config->SetPath(STD_TO_WX_STRING(("/"+(*propertyNames)[j])).WX_TO_STD_STRING);
       groupProp = "Parent";
       doDefaultAction = !(config->Read(groupProp, &groupProp));
       if (!doDefaultAction)
@@ -660,7 +664,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
       break;
    case Gmat::BOOLEAN_TYPE:
       {
-         wxCheckBox *cbControl = new wxCheckBox( this, ID_CHECKBOX, wxT(label.c_str()));
+         wxCheckBox *cbControl = new wxCheckBox( this, ID_CHECKBOX, wxString(label.c_str()));
          cbControl->SetToolTip(config->Read(_T("Hint")));
          control = cbControl;
       }
@@ -771,7 +775,7 @@ wxControl *GmatBaseSetupPanel::BuildControl(wxWindow *parent, GmatBase *theObjec
                StringArray objs = theGuiInterpreter->GetListOfObjects(types[i]);
                for (UnsignedInt j = 0; j < objs.size(); ++j)
                {
-                  theList.Add(wxT(objs[j].c_str()));
+                  theList.Add(wxString(objs[j].c_str()));
                }
             }
             control = new wxCheckListBox(parent, ID_CHECKLISTBOX+clbNumber, wxDefaultPosition,
@@ -862,8 +866,8 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
    {
       case Gmat::ON_OFF_TYPE:
          ((wxComboBox*)(theControl))->
-            SetValue(wxT(theObject->GetOnOffParameter
-                         (theObject->GetParameterID(label)).c_str()));
+            SetValue(wxString(theObject->GetOnOffParameter
+                              (theObject->GetParameterID(label)).c_str()));
          break;
       case Gmat::BOOLEAN_TYPE:
           ((wxCheckBox*) theControl)->SetValue(theObject->
@@ -877,7 +881,7 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
             valstr.precision(16);
             valstr << val;
             std::string cvtr = valstr.str();
-            valueString << wxT(cvtr.c_str());
+            valueString << wxString(cvtr.c_str());
             ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          }
          break;
@@ -893,7 +897,7 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
 
       case Gmat::FILENAME_TYPE:
       case Gmat::STRING_TYPE:
-         valueString = wxT(theObject->GetStringParameter(label).c_str());
+         valueString = wxString(theObject->GetStringParameter(label).c_str());
          ((wxTextCtrl*)theControl)->ChangeValue(valueString);
 			((wxTextCtrl*)theControl)->SetInsertionPointEnd();
          break;
@@ -931,7 +935,7 @@ void GmatBaseSetupPanel::LoadControl(GmatBase *theObject, const std::string &lab
             wxString theList;
             for (UnsignedInt i = 0; i < strings.size(); i++)
             {
-               theList += wxT(strings[i].c_str());
+               theList += wxString(strings[i].c_str());
                if (i < strings.size() - 1)
                   theList += wxT(", ");
             }
@@ -1051,7 +1055,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          {
             if (clb->IsChecked(i))
             {
-               std::string objName =  clb->GetString(i).c_str();
+               std::string objName =  clb->GetString(i).WX_TO_STD_STRING;
                #ifdef DEBUG_SAVE_CONTROL
                MessageInterface::ShowMessage("   objName = '%s'\n", objName.c_str());
                #endif
@@ -1067,7 +1071,7 @@ bool GmatBaseSetupPanel::SaveControl(GmatBase *theObject, const std::string &lab
          wxString theList;
          for (UnsignedInt i = 0; i < strings.size(); i++)
          {
-            theList += wxT(strings[i].c_str());
+            theList += wxString(strings[i].c_str());
             if (i < strings.size() - 1)
                theList += wxT(", ");
          }
@@ -1225,8 +1229,8 @@ std::string GmatBaseSetupPanel::GetParameterLabel(GmatBase *theObject, Integer i
    
    // first, see if the parameter is in the object's INI file
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+text).c_str()));
-   if (config->Read(wxT("Label"), &str))
+   config->SetPath(wxString(("/"+text).c_str()));
+   if (config->Read("Label", &str))
    {
       titleText = str.c_str();
       return titleText;
@@ -1278,9 +1282,9 @@ std::string GmatBaseSetupPanel::GetParameterUnit(GmatBase *theObject, Integer i,
    
    // first, see if the parameter is in the object's INI file
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+text).c_str()));
-   if (config->Read(wxT("Unit"), &str))
-      return str.c_str();
+   config->SetPath(wxString(("/"+text).c_str()));
+   if (config->Read("Unit", &str))
+      return std::string(str.c_str());
    else
       return theObject->GetParameterUnit(i);
 }
@@ -1300,7 +1304,11 @@ void GmatBaseSetupPanel::OnBrowseButton(wxCommandEvent& event)
    wxBitmapButton *bb = (wxBitmapButton *) event.GetEventObject();
    wxTextCtrl *control = (wxTextCtrl *) bb->GetPrevSibling();
    wxString oldname = control->GetValue();
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+   std::string wildCard = "All Files (*.*)|*.*";
+   if (idInfoMap.find((wxObject *) bb) != idInfoMap.end())
+	 wildCard = idInfoMap.find((wxObject *) bb)->second;
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), 
+	   wildCard);
    
    if (dialog.ShowModal() == wxID_OK)
    {
@@ -1770,7 +1778,7 @@ void GmatBaseSetupPanel::RefreshProperty(GmatBase *theObject, Integer index, wxC
    #endif
    
    // set the path to the section that contains the parameter's items
-   config->SetPath(wxT(("/"+labelText).c_str()));
+   config->SetPath(wxString(("/"+labelText).c_str()));
    
    // refresh value
    LoadControl(theObject, labelText);
@@ -1790,7 +1798,7 @@ void GmatBaseSetupPanel::RefreshProperty(GmatBase *theObject, Integer index, wxC
    }
    
    // refresh units
-   control->GetNextSibling()->SetLabel(wxT(GetParameterUnit(theObject, index, config).c_str()));
+   control->GetNextSibling()->SetLabel(wxString(GetParameterUnit(theObject, index, config).c_str()));
    
    #ifdef DEBUG_REFRESH_PROPERTY
    MessageInterface::ShowMessage("GmatBaseSetupPanel::RefreshProperty() leaving\n");

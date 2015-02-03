@@ -162,7 +162,7 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 
    #ifdef DEBUG_PRECESSING_SPINNER
       MessageInterface::ShowMessage(
-      "Entering PrecessingSpinner::BodySpinAxis = [ %.10f %.10f %.10f]\n",
+      "Entering PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity, BodySpinAxis = [ %.10f %.10f %.10f]\n",
       bodySpinAxis(0), bodySpinAxis(1), bodySpinAxis(2));
 
       MessageInterface::ShowMessage("NutationReferenceVector = [ %.10f %.10f %.10f]\n",
@@ -191,8 +191,7 @@ void PrecessingSpinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    nutationReferenceVectorNormalized = nutationReferenceVector / nrMag;
 
    #ifdef DEBUG_PRECESSING_SPINNER
-      MessageInterface::ShowMessage(
-      "Entering PrecessingSpinner::BodySpinAxis = [ %.10f %.10f %.10f]\n",
+      MessageInterface::ShowMessage("BodySpinAxis = [ %.10f %.10f %.10f]\n",
       bodySpinAxisNormalized(0), bodySpinAxisNormalized(1), bodySpinAxisNormalized(2));
 
       MessageInterface::ShowMessage("NutationReferenceVector = [ %.10f %.10f %.10f]\n",
