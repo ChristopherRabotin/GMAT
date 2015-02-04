@@ -91,7 +91,7 @@ public:
 protected:
    void                 TransformDeltaVToJ2kFrame(Real *deltaV, Real epoch);
    bool                 SetTankFromSpacecraft();
-   void                 DecrementMass();
+   void                 DecrementMass(bool backwards);
    
    /// Isp value in seconds
    Real                    isp;

@@ -266,7 +266,7 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch, bool backwards)
    #endif
    
    if (decrementMass)
-      DecrementMass();
+      DecrementMass(backwards);
       
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage("ImpulsiveBurn::Fire() returning true\n");
@@ -1055,7 +1055,7 @@ bool ImpulsiveBurn::SetTankFromSpacecraft()
 //------------------------------------------------------------------------------
 // void DecrementMass()
 //------------------------------------------------------------------------------
-void ImpulsiveBurn::DecrementMass()
+void ImpulsiveBurn::DecrementMass(bool backwards)
 {
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage
@@ -1071,7 +1071,10 @@ void ImpulsiveBurn::DecrementMass()
    #endif
    
    Real dv = sqrt( deltaV[0]*deltaV[0] + deltaV[1]*deltaV[1] + deltaV[2]*deltaV[2]);
-   deltaTankMass = totalTankMass * (exp(-dv * 1000/(isp * gravityAccel)) - 1.0);
+   if (!backwards)
+      deltaTankMass = totalTankMass * (exp(-dv * 1000/(isp * gravityAccel)) - 1.0);
+   else
+      deltaTankMass = totalTankMass * (exp(dv * 1000/(isp * gravityAccel)) - 1.0);
    
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage
