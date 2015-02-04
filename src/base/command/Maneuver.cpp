@@ -38,6 +38,7 @@ const std::string
    {
       "Burn",
       "Spacecraft",
+      "Backprop",
    };
 
 
@@ -46,6 +47,7 @@ const Gmat::ParameterType
    {
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE,
+      Gmat::BOOLEAN_TYPE,
    };
 
 
@@ -58,19 +60,20 @@ const Gmat::ParameterType
  */
 //------------------------------------------------------------------------------
 Maneuver::Maneuver() :
-   GmatCommand ("Maneuver"),
-   burnName    (""),
-   burn        (NULL),
-   satName     (""),
-   sat         (NULL),
-   firedOnce   (false),
-   localCS     (false),
-   scNameM     (""),
-   csNameM     (""),
-   originNameM (""),
-   axesNameM   (""),
-   decMassM    (false),
-   elementIspMassData (NULL)
+   GmatCommand          ("Maneuver"),
+   burnName             (""),
+   burn                 (NULL),
+   satName              (""),
+   sat                  (NULL),
+   firedOnce            (false),
+   localCS              (false),
+   scNameM              (""),
+   csNameM              (""),
+   originNameM          (""),
+   axesNameM            (""),
+   decMassM             (false),
+   maneuverBackwards    (false),
+   elementIspMassData   (NULL)
 {
    objectTypeNames.push_back("BurnCommand");
    parameterCount      = ManeuverCommandParamCount;
@@ -119,6 +122,7 @@ Maneuver::Maneuver(const Maneuver& m) :
    originNameM          (m.originNameM),
    axesNameM            (m.axesNameM),
    decMassM             (m.decMassM),
+   maneuverBackwards    (m.maneuverBackwards),
    elementIspMassData   (NULL)
 {
    parameterCount = ManeuverCommandParamCount;
@@ -156,6 +160,7 @@ Maneuver& Maneuver::operator=(const Maneuver& m)
    axesNameM          = m.axesNameM;
    decMassM           = m.decMassM;
    elementIspMassData = NULL;
+   maneuverBackwards = m.maneuverBackwards;
    tankNamesM.clear();
 
    return *this;
@@ -244,6 +249,8 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &useName)
 {
    generatingString = prefix + "Maneuver ";
+   if (maneuverBackwards)
+      generatingString += "Backprop ";
    generatingString += burnName + "(" + satName + ");";
    
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
@@ -490,6 +497,34 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
    return GmatCommand::SetStringParameter(id, value);
 }
 
+bool Maneuver::GetBooleanParameter(const Integer id) const
+{
+   if (id == backPropID)
+      return maneuverBackwards;
+
+   return GmatCommand::GetBooleanParameter(id);
+}
+
+bool Maneuver::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == backPropID)
+   {
+      maneuverBackwards = value;
+      return maneuverBackwards;
+   }
+
+   return GmatCommand::SetBooleanParameter(id, value);
+}
+
+bool Maneuver::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+bool Maneuver::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
 
 //------------------------------------------------------------------------------
 //  bool InterpretAction()
@@ -514,8 +549,37 @@ bool Maneuver::InterpretAction()
 {
    StringArray chunks = InterpretPreface();
 
+   #ifdef DEBUG_MANEUVER_PARSE
+      MessageInterface::ShowMessage("Maneuver command chunks:\n");
+      for (UnsignedInt i = 0; i < chunks.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", chunks[i].c_str());
+   #endif
+
+      StringArray subchunks = parser.SeparateSpaces(chunks[1]);
+
+   #ifdef DEBUG_MANEUVER_PARSE
+      MessageInterface::ShowMessage("Maneuver command subchunks:\n");
+      for (UnsignedInt i = 0; i < subchunks.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", subchunks[i].c_str());
+   #endif
+
+   std::string burnChunk = chunks[1];
+   if (subchunks.size() == 2)
+   {
+      if (subchunks[0] == "Backprop")
+      {
+         maneuverBackwards = true;
+         burnChunk = subchunks[1];
+      }
+   }
+   else if (subchunks.size() != 1)
+      throw CommandException("Maneuver command is malformed; expecting "
+                             "\"Maneuver ImpulsiveBurnName(SpacecraftName)\" or"
+                             " \"Maneuver Backprop ImpulsiveBurnName"
+                             "(SpacecraftName)\"\n");
+
    // Find and set the burn object name ...
-   StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   StringArray currentChunks = parser.Decompose(burnChunk, "()", false);
 
    if (currentChunks.size() < 2)
       throw CommandException("Missing Maneuver parameter. Expecting "
@@ -527,7 +591,7 @@ bool Maneuver::InterpretAction()
       MessageInterface::ShowMessage("In Maneuver, after Decompose, "
             "currentChunks = \n");
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
-         MessageInterface::ShowMessage("    %s\n",currentChunks.at(ii).c_str());
+         MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
    #endif
 
    // ... and the spacecraft that is maneuvered
@@ -648,7 +712,7 @@ bool Maneuver::Execute()
    // Set maneuvering to Publisher so that any subscriber can do its own action
    publisher->SetManeuvering(this, true, epoch, satName, "ImpulsiveBurn");
    
-   bool retval = burn->Fire(NULL, epoch);
+   bool retval = burn->Fire(NULL, epoch, maneuverBackwards);
    
    // Reset maneuvering to Publisher so that any subscriber can do its action
    publisher->SetManeuvering(this, false, epoch, satName, "ImpulsiveBurn");

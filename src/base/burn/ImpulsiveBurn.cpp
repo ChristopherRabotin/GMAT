@@ -196,11 +196,12 @@ void ImpulsiveBurn::SetSpacecraftToManeuver(Spacecraft *sat)
  * 
  * @param <burnData>    Array of data specific to the derived burn class.
  * @param <epoch>       Epoch of the burn fire
+ * @param backwards     Flag used by to indicate application as if in backprop
  *
  * @return true on success, throws on failure.
  */
 //------------------------------------------------------------------------------
-bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
+bool ImpulsiveBurn::Fire(Real *burnData, Real epoch, bool backwards)
 {
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage
@@ -249,10 +250,12 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    
    // The returned vector here is not rotated correctly because one of the bodies is not centered correctly
    ConvertDeltaVToInertial(deltaV, deltaVInertial, epoch);
+
+   Real direction = (backwards ? -1.0 : 1.0);
    
-   satState[3] += deltaVInertial[0];
-   satState[4] += deltaVInertial[1];
-   satState[5] += deltaVInertial[2];
+   satState[3] += direction * deltaVInertial[0];
+   satState[4] += direction * deltaVInertial[1];
+   satState[5] += direction * deltaVInertial[2];
       
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage

@@ -39,7 +39,8 @@ public:
    
    // inherited from Burn
    virtual void         SetSpacecraftToManeuver(Spacecraft *sat);
-   virtual bool         Fire(Real *burnData = NULL, Real epoch = GmatTimeConstants::MJD_OF_J2000);
+   virtual bool         Fire(Real *burnData = NULL, Real epoch = GmatTimeConstants::MJD_OF_J2000,
+                             bool backwards = false);
    
    // inherited from GmatBase
    virtual bool         Validate();
