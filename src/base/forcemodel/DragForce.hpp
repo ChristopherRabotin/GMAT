@@ -198,13 +198,23 @@ protected:
    Integer F107AID;
    /// ID used to set Geomagnetic index
    Integer KPID;
+   /// ID used to set Historic Weather File name
+   Integer cssiWFileID;
+   /// ID used to set Schatten Weather File name
+   Integer schattenWFileID;
 
 
    // Optional input parameters used by atmospheric models
    /// Type of input data -- "File" or "Constant"
    std::string          dataType;
-   /// Solar flux file name
-   std::string          fluxFile;
+   /// Historic Weather data type
+   std::string          historicWSource;
+   /// Predicted Weather data type
+   std::string          predictedWSource;
+   /// Historic Weather File name
+   std::string          cssiWFile;
+   /// Schatten Weather File name
+   std::string          schattenWFile;
    /// "Current" value of F10.7
    Real                 fluxF107;
    /// Running average of the F10.7
@@ -213,6 +223,10 @@ protected:
    Real                 ap;
    /// Magnetic field index, Kp (user specified)
    Real                 kp;
+   /// Schatten Error Model
+   std::string          schattenErrorModel;
+   /// Schatten Timing Model
+   std::string          schattenTimingModel;
 
    /// Start index for the Cartesian state
    Integer              cartIndex;
@@ -240,10 +254,15 @@ protected:
       ATMOSPHERE_MODEL = PhysicalModelParamCount, 
       ATMOSPHERE_BODY,
       SOURCE_TYPE,
-      FLUX_FILE,
+      HISTORIC_WEATHER_SOURCE,
+      PREDICTED_WEATHER_SOURCE,
+      CSSI_WEATHER_FILE,
+      SCHATTEN_WEATHER_FILE,
       FLUX,
       AVERAGE_FLUX,
       MAGNETIC_INDEX,
+      SCHATTEN_ERROR_MODEL,
+      SCHATTEN_TIMING_MODEL,
       FIXED_COORD_SYSTEM,
       W_UPDATE_INTERVAL,
       KP2AP_METHOD,

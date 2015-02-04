@@ -42,6 +42,7 @@ BEGIN_EVENT_TABLE(ArraySetupDialog, GmatDialog)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupDialog::OnTextUpdate)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ArraySetupDialog::OnTextEnter)
    EVT_GRID_CELL_CHANGE(ArraySetupDialog::OnGridCellChange)
+   EVT_GRID_TABBING(ArraySetupDialog::OnGridTabbing)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -159,6 +160,7 @@ void ArraySetupDialog::Create()
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
+   mArrGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
    
    mArrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    mArrValBoxSizer->Add(singleValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -496,4 +498,31 @@ bool ArraySetupDialog::CheckCellValue(Real &rval, int row, int col,
    }
 }
 
-
+//------------------------------------------------------------------------------
+// void OnGridTabbing(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user tabs in the grid
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void ArraySetupDialog::OnGridTabbing(wxGridEvent& event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    if (!event.ShiftDown() &&
+        (row == (mArrGrid->GetNumberRows() - 1)) &&
+        (col == (mArrGrid->GetNumberCols() - 1)))
+    {
+        mArrGrid->Navigate( wxNavigationKeyEvent::IsForward );
+    }
+    else if (event.ShiftDown() &&
+        (row == 0) &&
+        (col == 0))
+    {
+        mArrGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+    }
+    else
+        event.Skip();
+} 
