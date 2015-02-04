@@ -189,7 +189,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    showPrefaceComment         (true),
    showInlineComment          (true),
    cloaking                   (false),
-   blockCommandModeAssignment (true)
+   blockCommandModeAssignment (true),
+   writeEmptyStringArray      (false)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -286,7 +287,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     covarianceList            (a.covarianceList),
     covarianceIds             (a.covarianceIds),
     covarianceSizes           (a.covarianceSizes),
-    covariance                (a.covariance)
+    covariance                (a.covariance),
+    writeEmptyStringArray     (a.writeEmptyStringArray)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -341,6 +343,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    covarianceIds             = a.covarianceIds;
    covarianceSizes           = a.covarianceSizes;
    covariance                = a.covariance;
+   writeEmptyStringArray     = a.writeEmptyStringArray;
 
    return *this;
 }
@@ -3556,6 +3559,21 @@ const ObjectTypeArray& GmatBase::GetTypesForList(const std::string &label)
    return GetTypesForList(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringArray
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a StringArray to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::WriteEmptyStringArray(Integer id)
+{
+   return false;
+}
+
 
 //------------------------------------------------------------------------------
 // const std::string& GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -4398,7 +4416,7 @@ void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
                                      std::stringstream &stream)
 {   
    StringArray sar = GetStringArrayParameter(id);
-   if (sar.size() > 0)
+   if ((sar.size() > 0) || WriteEmptyStringArray(id))
    {
       std::string attCmtLn = GetAttributeCommentLine(id);
       

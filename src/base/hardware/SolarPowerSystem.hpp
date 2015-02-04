@@ -91,6 +91,7 @@ public:
 //   virtual const StringArray&
 //                        GetRefObjectNameArray(const Gmat::ObjectType type);
 
+   virtual bool         WriteEmptyStringArray(Integer id);
 
 protected:
    /// Published parameters for solar power systems
@@ -130,6 +131,8 @@ protected:
    /// a pointer to an instance of the ShadowState class, to
    /// compute shadow states at a given epoch
    ShadowState         *shadowState;
+   /// Did the user set zero bodies (allowed)?
+   bool                settingNoBodies;
 
    static bool    occultationWarningWritten;
 
