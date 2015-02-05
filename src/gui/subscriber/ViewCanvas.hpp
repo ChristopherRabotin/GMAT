@@ -185,7 +185,8 @@ protected:
    wxString mPlotName;
    bool mGlInitialized;
    bool mViewPointInitialized;
-   bool mModelsAreLoaded;
+   bool mSatModelsAreLoaded;
+   bool mOtherModelsAreLoaded;
    bool mIsNewFrame;
    
    // Performance
@@ -361,6 +362,7 @@ protected:
    
    // Model
    virtual bool LoadSpacecraftModels(bool writeWarning);
+   virtual bool LoadOtherObjectModels(bool writeWarning);
    
    // View objects
    virtual void SetupProjection();
