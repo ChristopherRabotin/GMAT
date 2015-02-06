@@ -217,7 +217,7 @@ void LocatedEventTable::SetRunState(Gmat::RunState rs)
 }
 
 //------------------------------------------------------------------------------
-// void Activate(bool state)
+// bool Activate(bool state)
 //------------------------------------------------------------------------------
 /**
  * Turns the table data collection on or off
@@ -225,9 +225,9 @@ void LocatedEventTable::SetRunState(Gmat::RunState rs)
  * @param state true to turn on data collection, false to turn it off
  */
 //------------------------------------------------------------------------------
-void LocatedEventTable::Activate(bool state)
+bool LocatedEventTable::Activate(bool state)
 {
-   Subscriber::Activate(state);
+   bool retval = Subscriber::Activate(state);
 
    // Set a marker for activation if the state changed
    if (isDataStateChanged)
@@ -238,6 +238,8 @@ void LocatedEventTable::Activate(bool state)
       #endif
       toggleIndices.push_back(events.size());
    }
+
+   return retval;
 }
 
 
