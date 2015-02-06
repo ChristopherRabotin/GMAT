@@ -881,13 +881,14 @@ bool DragForce::Initialize()
             cssiWFileID = atmos->GetParameterID("CSSISpaceWeatherFile");
             schattenWFileID = atmos->GetParameterID("SchattenFile");
 
+            if (F107ID < 0)
+               throw ODEModelException("Atmosphere model initialization is incomplete");
+            atmos->SetRealParameter(F107ID, fluxF107);
+            atmos->SetRealParameter(F107AID, fluxF107A);
+            atmos->SetRealParameter(KPID, kp);
+
             if (schattenWFile != "" || cssiWFile != "")
             {
-               if (F107ID < 0)
-                  throw ODEModelException("Atmosphere model initialization is incomplete");
-               atmos->SetRealParameter(F107ID, fluxF107);
-               atmos->SetRealParameter(F107AID, fluxF107A);
-               atmos->SetRealParameter(KPID, kp);
                atmos->SetStringParameter(cssiWFileID, cssiWFile);
                atmos->SetStringParameter(schattenWFileID, schattenWFile);
 
