@@ -260,6 +260,7 @@ OBJECTS = \
     solarsys/CelestialBodyOrientationPanel.o \
     solarsys/CelestialBodyPanel.o \
     solarsys/CelestialBodyPropertiesPanel.o \
+    solarsys/CelestialBodyVisualizationPanel.o \
     solarsys/LibrationPointPanel.o \
     solarsys/UniversePanel.o \
     solver/DCSetupPanel.o \

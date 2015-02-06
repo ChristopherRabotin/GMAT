@@ -235,6 +235,12 @@ public:
    virtual bool           SetRotationDataSource(Gmat::RotationDataSource src);
    virtual bool           SetUserDefined(bool userDefinedBody);
    
+   // Methods for 3D modles for Orbit View
+   std::string          Get3dViewModelFile();
+   std::string          Get3dViewModelFileFullPath();
+   int                  Get3dViewModelId();
+   void                 Set3dViewModelId(int id);
+   
    // methods inherited from SpacePoint, that must be implemented here (and/or
    // in the derived classes
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
@@ -314,6 +320,7 @@ public:
    virtual bool        IsParameterEqualToDefault(const Integer id) const;
    virtual bool        IsParameterValid(const Integer id, const std::string &value);
    virtual bool        IsParameterValid(const std::string &label, const std::string &value);
+   virtual bool        WriteEmptyStringParameter(const Integer id) const;
    
    virtual bool        SaveAllAsDefault();
    virtual bool        SaveParameterAsDefault(const Integer id);
@@ -382,6 +389,15 @@ protected:
       //
       TEXTURE_MAP_FILE_NAME,
       TEXTURE_MAP_FULL_PATH,
+      VIEW_3D_MODEL_FILE_NAME,
+      VIEW_3D_MODEL_FILE_FULL_PATH,
+      VIEW_3D_MODEL_OFFSET_X,
+      VIEW_3D_MODEL_OFFSET_Y,
+      VIEW_3D_MODEL_OFFSET_Z,
+      VIEW_3D_MODEL_ROTATION_X,
+      VIEW_3D_MODEL_ROTATION_Y,
+      VIEW_3D_MODEL_ROTATION_Z,
+      VIEW_3D_MODEL_SCALE,
       // @todo - add Shape Models, etc.
       CelestialBodyParamCount
    };
@@ -540,10 +556,26 @@ protected:
    bool                   naifIdSet;
    /// name to use when requesting data from an SPK kernel
    std::string            naifName;
+   
    /// Name of the texture map file
    std::string            textureMapFileName;
    /// Full path of the texture map file to use when plotting
    std::string            textureMapFullPath;
+   /// Name of the 3d model file
+   std::string            view3dModelFileName;
+   /// Full path of the 3d model file to use when plotting in 3d view
+   std::string            view3dModelFileFullPath;
+   /// The ID of the 3d model that the celestial body uses
+   int                    view3dModelId;
+   //  3d model offser/rotation/scale values
+   Real                   view3dModelOffsetX;
+   Real                   view3dModelOffsetY;
+   Real                   view3dModelOffsetZ;
+   Real                   view3dModelRotationX;
+   Real                   view3dModelRotationY;
+   Real                   view3dModelRotationZ;
+   Real                   view3dModelScale;
+   
    /// has message about possible needed SPKs been written
    bool                   msgWritten;
    /// date and time of start of source file
@@ -571,8 +603,11 @@ protected:
    virtual bool     SetUpSPICE();
    virtual bool     NeedsOnlyMainSPK();
    
+   bool IsRealParameterValid(Integer id, Real realval, bool throwError = true);
    bool SetTextureMapFileName(const std::string &fileName,
                               bool writeWarning = false, bool validateOnly = false);
+   bool Set3dModelFileName(const std::string &fileName,
+                           bool writeWarning = false, bool validateOnly = false);
    
 private:
 

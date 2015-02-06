@@ -74,6 +74,12 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
                        Spacecraft *spacecraft, SolarSystem *solarsystem)
    : wxPanel(parent)
 {
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel() constructor entered, spacecraft=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
+   
    // initalize data members
    theScPanel = scPanel;
    theGuiManager = GuiItemManager::GetInstance();
@@ -81,10 +87,27 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
    theSolarSystem = solarsystem;
    
    FileManager *fm = FileManager::Instance();
-   modelPath = wxString(fm->GetPathname("MODEL_PATH").c_str());
+   try
+   {
+      modelPath = wxString(fm->GetPathname("VEHICLE_MODEL_PATH").c_str());
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+   }
+   
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage("   modelPath = '%s'\n", modelPath.WX_TO_C_STRING);
+   #endif
    
    Create();
    LoadData();
+   
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel() constructor leaving, spacecraft=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
 }
 
 
@@ -411,7 +434,7 @@ void VisualModelPanel::LoadData()
    #ifdef DEBUG_PANEL_LOAD
    MessageInterface::ShowMessage
       ("VisualModelPanel::LoadData() entered.   modelFile() = '%s'\n",
-       modelFile().c_str());
+       modelFile.c_str());
    #endif
    
    modelTextCtrl->SetValue(wxString(modelFile.c_str()));

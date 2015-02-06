@@ -98,15 +98,17 @@ void CelestialBodyPanel::Create()
       cbNotebook->SetBackgroundColour(GetBackgroundColour());
       cbNotebook->SetForegroundColour(GetForegroundColour());
       
-      // create properties, orbit, and orientation panels
+      // create properties, orbit, orientation, and visualization panels
       properties       = new CelestialBodyPropertiesPanel(this, cbNotebook, theCelestialBody);
       orbit            = new CelestialBodyOrbitPanel(this, cbNotebook, theCelestialBody);
       orientation      = new CelestialBodyOrientationPanel(this, cbNotebook, theCelestialBody);
+      visualization    = new CelestialBodyVisualizationPanel(this, cbNotebook, theCelestialBody);
       
       // add panels to notebook
       cbNotebook->AddPage(properties, wxT("Properties"));
       cbNotebook->AddPage(orbit, wxT("Orbit"));
       cbNotebook->AddPage(orientation, wxT("Orientation"));
+      cbNotebook->AddPage(visualization, wxT("Visualization"));
       
       theMiddleSizer->Add(cbNotebook, 1, wxGROW, 1);  // 3?
    }
@@ -131,6 +133,7 @@ void CelestialBodyPanel::LoadData()
       properties->LoadData();
       orbit->LoadData();
       orientation->LoadData();
+      visualization->LoadData();
    }
    catch (BaseException &e)
    {
@@ -175,6 +178,11 @@ void CelestialBodyPanel::SaveData()
    {
       orientation->SaveData();
       canClose = canClose && orientation->CanClosePanel();
+   }
+   if (visualization->IsDataChanged())
+   {
+      visualization->SaveData();
+      canClose = canClose && visualization->CanClosePanel();
    }
    
    if (!canClose)   // why do this???? spacecraft panel did this ....
@@ -227,6 +235,10 @@ void CelestialBodyPanel::OnPageChange(wxNotebookEvent &event)
    {
       //orientation->LoadData();
       orientation->Navigate();
+   }
+   else if (selectedPage == 3)
+   {
+      visualization->Navigate();
    }
 }
 
