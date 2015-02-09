@@ -42,7 +42,7 @@ public:
    void                 SetShowObject(const std::string &name, bool value);
    
    // methods inherited from Subscriber
-   virtual void         Activate(bool state = true);
+   virtual bool         Activate(bool state = true);
    
    // methods inherited from GmatBase
    virtual bool         Validate();
