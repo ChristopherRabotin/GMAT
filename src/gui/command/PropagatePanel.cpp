@@ -48,6 +48,9 @@ BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
    EVT_CHECKBOX(ID_CHECKBOX, PropagatePanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, PropagatePanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, PropagatePanel::OnTextChange)
+   #if wxCHECK_VERSION(3, 0, 0)
+   EVT_GRID_TABBING(PropagatePanel::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -219,6 +222,9 @@ void PropagatePanel::Create()
    propGrid->SetColSize(PROP_NAME_COL, 340);
    propGrid->SetColSize(PROP_SOS_SEL_COL, 25);
    propGrid->SetColSize(PROP_SOS_COL, 340);
+   #if wxCHECK_VERSION(3, 0, 0)
+   propGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
    
    propGrid->SetMargins(0, 0);
    propGrid->SetRowLabelSize(0);
@@ -236,6 +242,17 @@ void PropagatePanel::Create()
       propGrid->SetCellBackgroundColour(i, PROP_SOS_SEL_COL, *wxLIGHT_GREY);
    }
    
+   // Stop tolerance
+   wxStaticText *stopTolStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Stop Tolerance: "), 
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   mStopTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(150,-1), 0);
+   wxBoxSizer *stopTolSizer = new wxBoxSizer(wxHORIZONTAL);
+   
+   stopTolSizer->Add(stopTolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   stopTolSizer->Add(mStopTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+ 
    // Stopping Condition Grid
    stopCondGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(750,100), 
@@ -270,6 +287,10 @@ void PropagatePanel::Create()
    
    stopCondGrid->SetMargins(0, 0);
    stopCondGrid->SetRowLabelSize(0);
+   #if wxCHECK_VERSION(3, 0, 0)
+   stopCondGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
+   
    // Grubb 2014-12-15: Commented out, scroll area will be calculated automatically
    // based on size
 //   stopCondGrid->SetScrollbars(5, 8, 15, 15);
@@ -289,17 +310,6 @@ void PropagatePanel::Create()
    
    propSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   // Stop tolerance
-   wxStaticText *stopTolStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Stop Tolerance: "), 
-                       wxDefaultPosition, wxSize(-1, -1), 0);
-   mStopTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(150,-1), 0);
-   wxBoxSizer *stopTolSizer = new wxBoxSizer(wxHORIZONTAL);
-   
-   stopTolSizer->Add(stopTolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   stopTolSizer->Add(mStopTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // Stopping conditions
    GmatStaticBoxSizer *stopSizer =
@@ -1503,6 +1513,53 @@ void PropagatePanel::SaveData()
    }
 }
 
-
+//------------------------------------------------------------------------------
+// void OnGridTabbing(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user tabs in the grid
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void PropagatePanel::OnGridTabbing(wxGridEvent& event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    if (event.GetEventObject() == propGrid)
+    {
+        if (!event.ShiftDown() &&
+            (row == (propGrid->GetNumberRows() - 1)) &&
+            (col == (propGrid->GetNumberCols() - 1)))
+        {
+            propGrid->Navigate( wxNavigationKeyEvent::IsForward );
+        }
+        else if (event.ShiftDown() &&
+            (row == 0) &&
+            (col == 0))
+        {
+            propGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+        }
+        else
+            event.Skip();
+    }
+    else if (event.GetEventObject() == stopCondGrid)
+    {
+        if (!event.ShiftDown() &&
+            (row == (stopCondGrid->GetNumberRows() - 1)) &&
+            (col == (stopCondGrid->GetNumberCols() - 1)))
+        {
+            stopCondGrid->Navigate( wxNavigationKeyEvent::IsForward );
+        }
+        else if (event.ShiftDown() &&
+            (row == 0) &&
+            (col == 0))
+        {
+            stopCondGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+        }
+        else
+            event.Skip();
+    }
+} 
    
 

@@ -882,6 +882,11 @@ void GmatApp::BuildAndRunScript(bool runScript)
    // Close GMAT on option
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
    {
+      #ifdef __LINUX__
+         // Linux needs this to run in the test system successfully
+         exit(0);
+      #endif
+
       //Set auto exit mode to GmatMainFrame
       theMainFrame->SetAutoExitAfterRun(true);
       theMainFrame->Close();

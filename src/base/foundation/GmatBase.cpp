@@ -189,7 +189,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    showPrefaceComment         (true),
    showInlineComment          (true),
    cloaking                   (false),
-   blockCommandModeAssignment (true)
+   blockCommandModeAssignment (true),
+   writeEmptyStringArray      (false)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -286,7 +287,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     covarianceList            (a.covarianceList),
     covarianceIds             (a.covarianceIds),
     covarianceSizes           (a.covarianceSizes),
-    covariance                (a.covariance)
+    covariance                (a.covariance),
+    writeEmptyStringArray     (a.writeEmptyStringArray)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -341,6 +343,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    covarianceIds             = a.covarianceIds;
    covarianceSizes           = a.covarianceSizes;
    covariance                = a.covariance;
+   writeEmptyStringArray     = a.writeEmptyStringArray;
 
    return *this;
 }
@@ -3556,6 +3559,35 @@ const ObjectTypeArray& GmatBase::GetTypesForList(const std::string &label)
    return GetTypesForList(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringArray
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a StringArray to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::WriteEmptyStringArray(Integer id)
+{
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringParameter
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag specifying whether or not to write out a string to
+ * the script even if it is empty
+ *
+ * @param id    ID of the parameter
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::WriteEmptyStringParameter(const Integer id) const
+{
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // const std::string& GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -4398,7 +4430,7 @@ void GmatBase::WriteStringArrayValue(Gmat::WriteMode mode, std::string &prefix,
                                      std::stringstream &stream)
 {   
    StringArray sar = GetStringArrayParameter(id);
-   if (sar.size() > 0)
+   if ((sar.size() > 0) || WriteEmptyStringArray(id))
    {
       std::string attCmtLn = GetAttributeCommentLine(id);
       
@@ -4512,8 +4544,21 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    case Gmat::FILENAME_TYPE:
    case Gmat::STRING_TYPE:
       {
+         // Check if empty string parameter can be written (LOJ: 2015.01.30)
+         bool writeString = false;
          std::string strVal = GetStringParameter(id);
-         if (inMatlabMode || (!inMatlabMode && strVal != ""))
+         if (inMatlabMode)
+            writeString = true;
+         else if (strVal != "")
+            writeString = true;
+         else if (WriteEmptyStringParameter(id))
+            writeString = true;
+         
+         #ifdef DEBUG_WRITE_PARAM
+         MessageInterface::ShowMessasge("   writeString = %d\n", writeString);
+         #endif
+         //if (inMatlabMode || (!inMatlabMode && strVal != ""))
+         if (writeString)
             stream << "'" << strVal << "'";
          
          break;

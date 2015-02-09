@@ -59,7 +59,7 @@ public:
    virtual bool         FlushData(bool endOfDataBlock = true);
    virtual bool         SetEndOfRun();
    virtual void         SetRunState(Gmat::RunState rs);
-   virtual void         Activate(bool state = true);
+   virtual bool         Activate(bool state = true);
 
    void AddEvent(LocatedEvent *theEvent);
    void AddEvent(GmatEpoch epoch, std::string boundaryType, 

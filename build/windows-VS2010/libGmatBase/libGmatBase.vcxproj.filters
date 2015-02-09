@@ -1227,15 +1227,6 @@
     <ClCompile Include="..\..\..\src\base\command\PlotCommand.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\Brent.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
-      <Filter>Source Files\forcemodel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -1368,6 +1359,8 @@
     <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
       <Filter>Source Files\hardware</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
+      <Filter>Source Files\solarsys</Filter>
     <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
       <Filter>Source Files\subscriber</Filter>
     </ClCompile>
@@ -2555,15 +2548,6 @@
     <ClInclude Include="..\..\..\src\base\command\PlotCommand.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\Brent.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
-      <Filter>Source Files\forcemodel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
@@ -2696,12 +2680,13 @@
     <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
       <Filter>Source Files\hardware</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
+      <Filter>Source Files\solarsys</Filter>
     <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
       <Filter>Source Files\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="..\..\..\src\base\solarsys\msise90_sub.for">
       <Filter>Source Files\solarsys</Filter>
     </None>

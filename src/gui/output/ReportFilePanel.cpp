@@ -107,7 +107,7 @@ void ReportFilePanel::Create()
                         wxMouseEventHandler(ReportFilePanel::OnRightMouseDown), NULL, this);
    
    // set font
-   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetScriptFont() );
    // create popup menu
    mPopupMenu = new wxMenu();
    mPopupMenu->Append(ID_MENU_COPY, "Copy\tCtrl+C");

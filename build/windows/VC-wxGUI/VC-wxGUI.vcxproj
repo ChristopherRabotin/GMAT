@@ -180,10 +180,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.c" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.c" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp" />
+    <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.cpp" />
@@ -396,12 +396,11 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\TOEEqAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\Brent.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\EventException.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventFunction.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventLocator.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEvent.cpp" />
     <ClCompile Include="..\..\..\src\base\event\LocatedEventTable.cpp" />
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\Moderator.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotInterface.cpp" />
     <ClCompile Include="..\..\..\src\base\executive\PlotReceiver.cpp" />
@@ -433,7 +432,6 @@
     <ClCompile Include="..\..\..\src\base\factory\StopConditionFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\SubscriberFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\DragForce.cpp" />
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\FiniteThrust.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityBase.cpp" />
     <ClCompile Include="..\..\..\src\base\forcemodel\GravityField.cpp" />
@@ -548,6 +546,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp" />
@@ -797,6 +796,7 @@
     <ClCompile Include="..\..\..\src\gui\output\OutputTree.cpp" />
     <ClCompile Include="..\..\..\src\gui\output\ReportFilePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\rendering\ThreeDSLoader.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.cpp" />
@@ -864,10 +864,10 @@
     <ClCompile Include="..\BuiltinPluginManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13.h" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.hpp" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.h" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp" />
+    <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.hpp" />
@@ -1083,12 +1083,11 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\TOEEqAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\Brent.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\EventException.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventFunction.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventLocator.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEvent.hpp" />
     <ClInclude Include="..\..\..\src\base\event\LocatedEventTable.hpp" />
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\Moderator.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotInterface.hpp" />
     <ClInclude Include="..\..\..\src\base\executive\PlotReceiver.hpp" />
@@ -1120,7 +1119,6 @@
     <ClInclude Include="..\..\..\src\base\factory\StopConditionFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\SubscriberFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\DragForce.hpp" />
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\FiniteThrust.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityBase.hpp" />
     <ClInclude Include="..\..\..\src\base\forcemodel\GravityField.hpp" />
@@ -1235,6 +1233,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp" />
@@ -1501,6 +1500,7 @@
     <ClInclude Include="..\..\..\src\gui\output\OutputTree.hpp" />
     <ClInclude Include="..\..\..\src\gui\output\ReportFilePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\rendering\ThreeDSLoader.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitDesignerDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\OrbitSummaryDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\spacecraft\PowerSystemPanel.hpp" />
