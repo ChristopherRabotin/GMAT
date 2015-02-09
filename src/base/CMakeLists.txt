@@ -199,13 +199,13 @@ SET(BASE_SRCS
     coordsystem/ITRFAxes.cpp
     coordsystem/IAUFile.cpp
     coordsystem/BodySpinSunAxes.cpp
-    event/Brent.cpp
+    #event/Brent.cpp
     event/EventException.cpp
     event/EventFunction.cpp
     event/EventLocator.cpp
     event/LocatedEvent.cpp
     event/LocatedEventTable.cpp
-    event/RootFinder.cpp
+    #event/RootFinder.cpp
     executive/Moderator.cpp
     executive/PlotInterface.cpp
     executive/PlotReceiver.cpp
@@ -247,7 +247,7 @@ SET(BASE_SRCS
     forcemodel/PhysicalModel.cpp
     forcemodel/PointMassForce.cpp
     forcemodel/SolarRadiationPressure.cpp
-    forcemodel/EventModel.cpp
+    #forcemodel/EventModel.cpp
     forcemodel/RelativisticCorrection.cpp
     forcemodel/harmonic/Harmonic.cpp
     forcemodel/harmonic/HarmonicGravity.cpp
@@ -429,6 +429,7 @@ SET(BASE_SRCS
     solarsys/ShadowState.cpp
     solarsys/SlpFile.cpp
     solarsys/SolarFluxFileReader.cpp
+    solarsys/SolarFluxReader.cpp
     solarsys/SolarSystemException.cpp
     solarsys/SolarSystem.cpp
     solarsys/Star.cpp
