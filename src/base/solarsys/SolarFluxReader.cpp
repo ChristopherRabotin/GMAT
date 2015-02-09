@@ -346,11 +346,19 @@ bool SolarFluxReader::LoadObsData()
    char s1[92], s2[38];
    const char * format = "%92c %38c";
    // first section
-   char s11[4], s12[2], s13[2], s6[8][2], s8[8][2], s9[3];
+   char s11[4], s12[2], s13[2], *s6[8], *s8[8], s9[3];
    const char * format1 = "%4c %2c %2c %*7c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
+   for (Integer i = 0; i < 8; i++)
+   {
+	   s6[i] = new char[2];
+	   s8[i] = new char[3];
+   }
+	  
    // second section
-   char s21[5], s22[5][5];
+   char s21[5], *s22[5];
    const char * format2 = "%5c %*1c %5c %5c %5c %5c %5c";
+   for (Integer i = 0; i < 5; i++)
+	   s22[i] = new char[5];
 
    inObs.seekg(begObs, std::ios_base::beg);
    while (true)
@@ -409,6 +417,17 @@ bool SolarFluxReader::LoadObsData()
             fD.F107a[l] = -1;
          for (Integer l =0; l<3; l++)
             fD.apSchatten[l] = -1;
+	
+		 //delete newed array
+		 for (Integer i = 0; i < 8; i++)
+		 {
+			 delete[] s6[i];
+			 delete[] s8[i];
+		 }
+
+		 //delete newed array
+		 for (Integer i = 0; i < 5; i++)
+			 delete[] s22[i];
 
          obsFluxData.push_back(fD);
 
