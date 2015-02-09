@@ -115,7 +115,7 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
    
-   bool                 Activate();
+   virtual bool         Activate(bool state = true);
    bool                 Deactivate();
 
    // Methods used to access the plot
