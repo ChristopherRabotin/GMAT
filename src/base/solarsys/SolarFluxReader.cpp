@@ -338,6 +338,20 @@ bool SolarFluxReader::LoadObsData()
    Integer hour = 0, minute = 0;
    Real sec = 0.0;
 
+   // FORMAT(I4, I3, I3, I5, I3, 8I3, I4, 8I4, I4, F4.1, I2, I4, F6.1, I2, 5F6.1)
+   //-------------------------------------------------------------------------------------------Adj     Adj   Adj   Obs   Obs   Obs---
+   //yy mm dd BSRN ND Kp Kp Kp Kp Kp Kp Kp Kp Sum Ap  Ap  Ap  Ap Ap  Ap  Ap  Ap  Avg Cp C9 ISN F10.7 Q Ctr81 Lst81 F10.7 Ctr81 Lst81
+   //--------------------------------------------------------------------------------------------------------------------------------- 
+   // Divide each line to two sections : Geomagnetics (s1) and F107 (s2) data 
+   char s1[92], s2[38];
+   const char * format = "%92c %38c";
+   // first section
+   char s11[4], s12[2], s13[2], s6[8][2], s8[8][2], s9[3];
+   const char * format1 = "%4c %2c %2c %*7c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
+   // second section
+   char s21[5], s22[5][5];
+   const char * format2 = "%5c %*1c %5c %5c %5c %5c %5c";
+
    inObs.seekg(begObs, std::ios_base::beg);
    while (true)
    {
@@ -347,11 +361,18 @@ bool SolarFluxReader::LoadObsData()
       
       if (strlen(line) > 8)
       {
-         std::istringstream buf(line);
-         std::istream_iterator<std::string> beg(buf), end;
-         std::vector<std::string> tokens(beg, end);
+		 // Read geomagnetic and F107 data
+		 sscanf(line, format, s1, s2);
+		 // s1 corresponds to geomagnetics data with formatted string (format1) defined above.
+		 sscanf(s1, format1, s11, s12, s13, s6[0], s6[1], s6[2], s6[3], s6[4], s6[5], s6[6], s6[7], s8[0], s8[1], s8[2], s8[3], s8[4], s8[5], s8[6], s8[7], s9);
+		 // s2 corresponds to F107 data with formatted string (format2) defined above.
+		 sscanf(s2, format2, s21, s22[0], s22[1], s22[2], s22[3], s22[4]);
 
-         FluxData fD;
+		 /*
+		 std::istringstream buf(line);
+		 std::istream_iterator<std::string> beg(buf), end;
+		 std::vector<std::string> tokens(beg, end);
+
          Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), atoi(tokens[2].c_str()), hour, minute, sec);
          // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
          fD.epoch = mjd - 0.5;
@@ -366,6 +387,23 @@ bool SolarFluxReader::LoadObsData()
          fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
          fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
          fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
+		 */
+
+		 FluxData fD;
+		 Real mjd = ModifiedJulianDate((YearNumber)atof(s11), (MonthOfYear)atof(s12), (DayOfMonth)atof(s13), hour, minute, sec);
+		 // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
+		 fD.epoch = mjd - 0.5;
+
+		 // The CSSI fole conains Kp * 10, then rouded to an int. Undo that here.
+		 for (Integer l = 0; l < 8; l++)
+			 fD.kp[l] = atof(s6[l]) / 10.0;
+		 for (Integer l = 0; l < 8; l++)
+			 fD.ap[l] = atof(s8[l]);
+		 fD.apAvg = atof(s9);
+		 fD.adjF107 = atof(s21);
+		 fD.adjCtrF107a = atof(s22[0]);
+		 fD.obsF107 = atof(s22[2]);
+		 fD.obsCtrF107a = atof(s22[3]);
          fD.index = -1;
          for (Integer l = 0; l<9; l++)
             fD.F107a[l] = -1;
