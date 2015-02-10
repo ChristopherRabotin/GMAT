@@ -64,11 +64,6 @@ GmatToolBar::GmatToolBar(wxWindow* parent, long style, wxWindowID id,
    CreateToolBar(this);
    AddAnimationTools(this);
    AddGuiScriptSyncStatus(this);
-   
-   // Now realize to make tools appear
-   // The toolbar icon mapping doesn't work when Realize() is called multiple times
-   // with wx3.0, so do this only once here (LOJ: 2015.02.09)
-   Realize();
 }
 
 
@@ -175,7 +170,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    toolBar->AddTool(MENU_HELP_ABOUT, _T("About GMAT"), *bitmaps[7], _T("About GMAT"));
    toolBar->AddTool(MENU_HELP_CONTENTS, _T("Help"), *bitmaps[15], _T("Help"));
 
-   // Moved to consturcotr so it can be realized only once (LOJ: 2015.02.09)
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
    //toolBar->Realize();
    
@@ -268,7 +263,7 @@ void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
                     _T("Show Animation Options"));
    #endif
    
-   // Moved to consturcotr so it can be realized only once (LOJ: 2015.02.09)
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
    //toolBar->Realize();
    
@@ -324,9 +319,8 @@ void GmatToolBar::AddGuiScriptSyncStatus(wxToolBar* toolBar)
 #endif
    toolBar->AddControl(theSyncStatus);
    
-   // Moved to consturcotr so it can be realized only once (LOJ: 2015.02.09)
    // now realize to make tools appear
-   //toolBar->Realize();
+   toolBar->Realize();
 }
 
 
