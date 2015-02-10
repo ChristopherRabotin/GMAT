@@ -351,14 +351,19 @@ bool SolarFluxReader::LoadObsData()
    for (Integer i = 0; i < 8; i++)
    {
 	   s6[i] = new char[2];
+	   memset(s6[i], 0, 2);
 	   s8[i] = new char[3];
+	   memset(s8[i], 0, 3);
    }
 	  
    // second section
    char s21[5], *s22[5];
    const char * format2 = "%5c %*1c %5c %5c %5c %5c %5c";
    for (Integer i = 0; i < 5; i++)
+   {
 	   s22[i] = new char[5];
+	   memset(s22[i], 0, 5);
+   }
 
    inObs.seekg(begObs, std::ios_base::beg);
    while (true)
@@ -404,34 +409,59 @@ bool SolarFluxReader::LoadObsData()
 
 		 // The CSSI fole conains Kp * 10, then rouded to an int. Undo that here.
 		 for (Integer l = 0; l < 8; l++)
+		 {
 			 fD.kp[l] = atof(s6[l]) / 10.0;
+			 memset(s6[l], 0, 2);
+		 }
 		 for (Integer l = 0; l < 8; l++)
+		 {
 			 fD.ap[l] = atof(s8[l]);
+			 memset(s8[l], 0, 3);
+		 }
 		 fD.apAvg = atof(s9);
 		 fD.adjF107 = atof(s21);
 		 fD.adjCtrF107a = atof(s22[0]);
 		 fD.obsF107 = atof(s22[2]);
 		 fD.obsCtrF107a = atof(s22[3]);
+		 memset(s22[0], 0, 5);
+		 memset(s22[2], 0, 5);
+		 memset(s22[3], 0, 5);
+		 memset(s9, 0, 3);
+		 memset(s21, 0, 5);
          fD.index = -1;
          for (Integer l = 0; l<9; l++)
             fD.F107a[l] = -1;
          for (Integer l =0; l<3; l++)
             fD.apSchatten[l] = -1;
 	
-		 //delete newed array
-		 for (Integer i = 0; i < 8; i++)
-		 {
-			 delete[] s6[i];
-			 delete[] s8[i];
-		 }
-
-		 //delete newed array
-		 for (Integer i = 0; i < 5; i++)
-			 delete[] s22[i];
-
          obsFluxData.push_back(fD);
 
       }
+   }
+
+   //delete newed array
+   for (Integer i = 0; i < 8; i++)
+   {
+	   if (s6[i] != NULL)
+	   {
+		   delete[] s6[i];
+		   s6[i] = NULL;
+	   }
+	   if (s8[i] != NULL)
+	   {
+		   delete[] s8[i];
+		   s8[i] = NULL;
+	   }
+   }
+
+   //delete newed array
+   for (Integer i = 0; i < 5; i++)
+   {
+	   if (s22[i] != NULL)
+	   {
+		   delete[] s22[i];
+		   s22[i] = NULL;
+	   }
    }
 
    return true;
