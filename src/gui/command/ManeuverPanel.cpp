@@ -32,6 +32,7 @@ BEGIN_EVENT_TABLE(ManeuverPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_COMBOBOX(ID_BURN_COMBOBOX, ManeuverPanel::OnBurnComboBoxChange)
    EVT_COMBOBOX(ID_SAT_COMBOBOX, ManeuverPanel::OnSatComboBoxChange)
+   EVT_CHECKBOX(ID_BACKPROP_CHECKBOX, ManeuverPanel::OnBackpropCheckBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -93,6 +94,15 @@ void ManeuverPanel::OnSatComboBoxChange(wxCommandEvent& event)
    EnableUpdate(true);
 }
 
+
+//------------------------------------------------------------------------------
+// void OnCheckBoxChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ManeuverPanel::OnBackpropCheckBoxChange(wxCommandEvent& event)
+{
+   EnableUpdate(true);
+}
+
 //----------------------------------
 // methods inherited from GmatPanel
 //----------------------------------
@@ -150,6 +160,14 @@ void ManeuverPanel::Create()
    // create spacecraft combo box
    satCB = theGuiManager->GetSpacecraftComboBox(this, ID_SAT_COMBOBOX, wxSize(150,-1));
    
+   //----------------------------------------------------------------------
+   // Backprop
+   //----------------------------------------------------------------------
+   backpropCheckBox =
+      new wxCheckBox(this, ID_BACKPROP_CHECKBOX, gmatwxT(GUI_ACCEL_KEY"Backprop"),
+      wxDefaultPosition, wxSize(-1, -1), bsize);
+   backpropCheckBox->SetToolTip(_T("Apply maneuver backwards in time"));
+
    // add burn label and combobox to burn sizer
    pageFlexGridSizer->Add( burnLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    pageFlexGridSizer->Add( burnCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -157,7 +175,10 @@ void ManeuverPanel::Create()
    // add spacecraft label and combobox to spacecraft sizer
    pageFlexGridSizer->Add( spacecraftLabel, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    pageFlexGridSizer->Add( satCB, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-    
+
+   // Add the backprop toggle
+   pageFlexGridSizer->Add(backpropCheckBox, 0, wxGROW | wxALIGN_LEFT | wxALL, bsize);
+
    // add to middle sizer
    theMiddleSizer->Add(pageFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);     
     
@@ -232,7 +253,7 @@ void ManeuverPanel::LoadData()
           satCB->SetStringSelection("");
    }
    
-
+   backpropCheckBox->SetValue((wxVariant(theCommand->GetBooleanParameter("Backprop"))));
 }
 
 //------------------------------------------------------------------------------
@@ -260,6 +281,12 @@ void ManeuverPanel::SaveData()
            id = theCommand->GetParameterID("Spacecraft");
            std::string spacecraft = std::string (satString.c_str());
            theCommand->SetStringParameter(id, spacecraft);
+
+           if (backpropCheckBox->IsChecked())
+              theCommand->SetBooleanParameter("Backprop", true);
+           else
+              theCommand->SetBooleanParameter("Backprop", false);
+
    }
    catch (BaseException &e)
    {
