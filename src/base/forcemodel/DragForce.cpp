@@ -38,7 +38,7 @@
 //#define DEBUG_DRAGFORCE_REFOBJ
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
-#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_NAN_CONDITIONS
 
 //#define DUMP_DERIVATIVE
 //#define DUMP_DENSITY
@@ -881,19 +881,17 @@ bool DragForce::Initialize()
             cssiWFileID = atmos->GetParameterID("CSSISpaceWeatherFile");
             schattenWFileID = atmos->GetParameterID("SchattenFile");
 
-            if (schattenWFile != "" || cssiWFile != "")
-            {
-               if (F107ID < 0)
-                  throw ODEModelException("Atmosphere model initialization is incomplete");
-               atmos->SetRealParameter(F107ID, fluxF107);
-               atmos->SetRealParameter(F107AID, fluxF107A);
-               atmos->SetRealParameter(KPID, kp);
-               atmos->SetStringParameter(cssiWFileID, cssiWFile);
-               atmos->SetStringParameter(schattenWFileID, schattenWFile);
+            if (F107ID < 0)
+               throw ODEModelException("Atmosphere model initialization is incomplete");
+            atmos->SetRealParameter(F107ID, fluxF107);
+            atmos->SetRealParameter(F107AID, fluxF107A);
+            atmos->SetRealParameter(KPID, kp);
 
-            }
+            // Set the file names
+            atmos->SetStringParameter(cssiWFileID, cssiWFile);
+            atmos->SetStringParameter(schattenWFileID, schattenWFile);
 
-			   if (cbFixed != NULL)										// made changes by TUAN NGUYEN
+            if (cbFixed != NULL)										// made changes by TUAN NGUYEN
                atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
             if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
                atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN

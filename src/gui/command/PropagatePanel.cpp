@@ -48,7 +48,9 @@ BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
    EVT_CHECKBOX(ID_CHECKBOX, PropagatePanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, PropagatePanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, PropagatePanel::OnTextChange)
+   #if wxCHECK_VERSION(3, 0, 0)
    EVT_GRID_TABBING(PropagatePanel::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -220,7 +222,9 @@ void PropagatePanel::Create()
    propGrid->SetColSize(PROP_NAME_COL, 340);
    propGrid->SetColSize(PROP_SOS_SEL_COL, 25);
    propGrid->SetColSize(PROP_SOS_COL, 340);
+   #if wxCHECK_VERSION(3, 0, 0)
    propGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
    
    propGrid->SetMargins(0, 0);
    propGrid->SetRowLabelSize(0);
@@ -283,7 +287,10 @@ void PropagatePanel::Create()
    
    stopCondGrid->SetMargins(0, 0);
    stopCondGrid->SetRowLabelSize(0);
+   #if wxCHECK_VERSION(3, 0, 0)
    stopCondGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
+   
    // Grubb 2014-12-15: Commented out, scroll area will be calculated automatically
    // based on size
 //   stopCondGrid->SetScrollbars(5, 8, 15, 15);

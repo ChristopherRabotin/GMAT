@@ -196,11 +196,12 @@ void ImpulsiveBurn::SetSpacecraftToManeuver(Spacecraft *sat)
  * 
  * @param <burnData>    Array of data specific to the derived burn class.
  * @param <epoch>       Epoch of the burn fire
+ * @param backwards     Flag used by to indicate application as if in backprop
  *
  * @return true on success, throws on failure.
  */
 //------------------------------------------------------------------------------
-bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
+bool ImpulsiveBurn::Fire(Real *burnData, Real epoch, bool backwards)
 {
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage
@@ -249,10 +250,12 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    
    // The returned vector here is not rotated correctly because one of the bodies is not centered correctly
    ConvertDeltaVToInertial(deltaV, deltaVInertial, epoch);
+
+   Real direction = (backwards ? -1.0 : 1.0);
    
-   satState[3] += deltaVInertial[0];
-   satState[4] += deltaVInertial[1];
-   satState[5] += deltaVInertial[2];
+   satState[3] += direction * deltaVInertial[0];
+   satState[4] += direction * deltaVInertial[1];
+   satState[5] += direction * deltaVInertial[2];
       
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage
@@ -263,7 +266,7 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    #endif
    
    if (decrementMass)
-      DecrementMass();
+      DecrementMass(backwards);
       
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage("ImpulsiveBurn::Fire() returning true\n");
@@ -1052,7 +1055,7 @@ bool ImpulsiveBurn::SetTankFromSpacecraft()
 //------------------------------------------------------------------------------
 // void DecrementMass()
 //------------------------------------------------------------------------------
-void ImpulsiveBurn::DecrementMass()
+void ImpulsiveBurn::DecrementMass(bool backwards)
 {
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage
@@ -1068,7 +1071,10 @@ void ImpulsiveBurn::DecrementMass()
    #endif
    
    Real dv = sqrt( deltaV[0]*deltaV[0] + deltaV[1]*deltaV[1] + deltaV[2]*deltaV[2]);
-   deltaTankMass = totalTankMass * (exp(-dv * 1000/(isp * gravityAccel)) - 1.0);
+   if (!backwards)
+      deltaTankMass = totalTankMass * (exp(-dv * 1000/(isp * gravityAccel)) - 1.0);
+   else
+      deltaTankMass = totalTankMass * (exp(dv * 1000/(isp * gravityAccel)) - 1.0);
    
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage
