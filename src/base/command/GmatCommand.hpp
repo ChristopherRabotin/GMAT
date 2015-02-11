@@ -341,8 +341,6 @@ protected:
    virtual void         BuildCommandSummaryString(bool commandCompleted = true);
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
-   virtual const std::string
-                        BuildNumber(Real value, bool useExp = false, Integer length = 17);
    // for command name
    virtual void         InsertCommandName(std::string &genString);
    
