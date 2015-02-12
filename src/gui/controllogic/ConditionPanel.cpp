@@ -405,11 +405,11 @@ void ConditionPanel::OnCellDoubleClick(wxGridEvent& event)
    else if (col == COND_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      wxString strArray[] = {wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
+      wxString strArray[] = {wxT(""), wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
                              wxT(">="), wxT("<=")};        
       
       wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
-                                        _T("Relational Operators"), 6, strArray);
+                                        _T("Relational Operators"), 7, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -582,7 +582,7 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
                              wxT(">="), wxT("<=")};        
       
       wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
-                                        _T("Relational Operators"), 6, strArray);
+                                        _T("Relational Operators"), 7, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
