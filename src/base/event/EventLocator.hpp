@@ -28,8 +28,11 @@
 #include "GmatBase.hpp"
 #include "Spacecraft.hpp"
 #include "CelestialBody.hpp"
+#include "LocatedEvent.hpp"
+
 //#include "LocatedEventTable.hpp"  // may need this
 
+//class EphemManager;
 
 ///**
 // * Base class for the event locators.
@@ -116,6 +119,9 @@ public:
    virtual void         SetAppend(bool appendIt);
 
    virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual bool         HasRefObjectTypeArray();
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
@@ -135,6 +141,9 @@ public:
    virtual bool         FileWasWritten();
 
 protected:
+   /// We need to store vector of Events
+   typedef std::vector<LocatedEvent*>    EventList;
+
    /// Name of the event data file
    std::string                 filename;
    /// Flag set when a run writes data to the event report
@@ -164,14 +173,12 @@ protected:
    Real                        initialEp;
    /// Last epoch to search for events (as Real)
    Real                        finalEp;
-   /// The start time of the entire data set
-   Real                        satStartEpoch;
    /// The start epoch of the interval (depends on useEntireInterval flag)
    Real                        fromEpoch;
    /// The end epoch of the interval (depends on useEntireInterval flag)
    Real                        toEpoch;
-   /// The number of events found in the current specified time range
-   Integer                     numEventsFound;
+//   /// The number of events found in the current specified time range
+//   Integer                     numEventsFound;
 
 //   /// Names of the "target" spacecraft in the location  <future>
 //   StringArray satNames;
@@ -181,9 +188,11 @@ protected:
 //   std::vector<SpaceObject*> targets;
    /// Pointer to the target spacecraft
    Spacecraft                  *sat;
+//   /// Pointer to the spacecraft's ephem manager
+//   EphemManager                *ephemMgr;
    /// The space environment
    SolarSystem                 *solarSys;
-   // The occulting body names
+   /// The occulting body names
    StringArray                 occultingBodyNames;
    /// The occulting bodies
    std::vector<CelestialBody*> occultingBodies;
@@ -219,7 +228,7 @@ protected:
     Real                 EpochToReal(const std::string &ep);
     bool                 OpenReportFile(bool renameOld = true);
     virtual std::string  GetAbcorrString();
-    virtual void         FindEvents(Real fromTime, Real toTime) = 0;
+    virtual void         FindEvents() = 0;
 };
 
 #endif /* EventLocator_hpp */

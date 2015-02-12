@@ -36,12 +36,14 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ConditionPanel, GmatPanel)
-    EVT_GRID_CELL_LEFT_CLICK(ConditionPanel::OnCellLeftClick)
-    EVT_GRID_CELL_RIGHT_CLICK(ConditionPanel::OnCellRightClick)
+   EVT_GRID_CELL_LEFT_CLICK(ConditionPanel::OnCellLeftClick)
+   EVT_GRID_CELL_RIGHT_CLICK(ConditionPanel::OnCellRightClick)
 	EVT_GRID_CELL_LEFT_DCLICK(ConditionPanel::OnCellDoubleClick)
-    EVT_GRID_CELL_CHANGE(ConditionPanel::OnCellValueChange)  
+   EVT_GRID_CELL_CHANGE(ConditionPanel::OnCellValueChange)  
 	EVT_KEY_DOWN(ConditionPanel::OnKeyDown)
+   #if wxCHECK_VERSION(3, 0, 0)
 	EVT_GRID_TABBING(ConditionPanel::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -132,8 +134,10 @@ void ConditionPanel::Create()
    conditionGrid->SetColSize(RHS_SEL_COL, 25);
    conditionGrid->SetColSize(RHS_COL, 165);
    conditionGrid->SetCellValue(0, COMMAND_COL, theCommand->GetTypeName().c_str());
+   #if wxCHECK_VERSION(3, 0, 0)
    conditionGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
-
+   #endif
+   
    UpdateSpecialColumns();
 
    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 0 );

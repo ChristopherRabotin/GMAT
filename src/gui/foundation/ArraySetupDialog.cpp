@@ -42,7 +42,9 @@ BEGIN_EVENT_TABLE(ArraySetupDialog, GmatDialog)
    EVT_TEXT(ID_TEXTCTRL, ArraySetupDialog::OnTextUpdate)
    EVT_TEXT_ENTER(ID_TEXTCTRL, ArraySetupDialog::OnTextEnter)
    EVT_GRID_CELL_CHANGE(ArraySetupDialog::OnGridCellChange)
+   #if wxCHECK_VERSION(3, 0, 0)
    EVT_GRID_TABBING(ArraySetupDialog::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -160,7 +162,9 @@ void ArraySetupDialog::Create()
    mArrGrid->SetColLabelSize(20);
    mArrGrid->SetScrollbars(5, 8, 15, 15);
    mArrGrid->EnableEditing(true);
+   #if wxCHECK_VERSION(3, 0, 0)
    mArrGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
    
    mArrValBoxSizer = new wxBoxSizer(wxVERTICAL);
    mArrValBoxSizer->Add(singleValBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
