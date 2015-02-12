@@ -133,6 +133,7 @@ protected:
    bool                 HasObjectType(const std::string &type) const;
    GmatBase*            FindFirstObject(const std::string &type) const;
    GmatBase*            FindFirstObject(const Gmat::ObjectType type) const;
+   std::string          FindFirstObjectName(const std::string &type) const;
    std::string          FindFirstObjectName(const Gmat::ObjectType type) const;
    
    StringArray          FindObjectNames(const Gmat::ObjectType type) const;

@@ -265,10 +265,21 @@ bool GmatFunction::Initialize()
    validator->SetSolarSystem(solarSys);
    std::map<std::string, GmatBase *>::iterator omi;
    
+   #ifdef DEBUG_FUNCTION_INIT
+   MessageInterface::ShowMessage
+      ("   functionObjectMap.size()  = %d\n   automaticObjectMap.size() = %d\n",
+       functionObjectMap.size(), automaticObjectMap.size());
+   #endif
+   
    // Add clones of objects created in the function to the FOS (LOJ: 2014.12.09)
    for (omi = functionObjectMap.begin(); omi != functionObjectMap.end(); ++omi)
    {
       std::string funcObjName = omi->first;
+      
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("   Add if funcObj '%s' is not already in objectStore\n", funcObjName.c_str());
+      #endif
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
       if (objectStore->find(funcObjName) == objectStore->end())
@@ -280,11 +291,12 @@ bool GmatFunction::Initialize()
              "funcObj = (omi->second)->Clone()");
          #endif
          
-         #ifdef DEBUG_FUNCTION_INIT
+         #ifdef DEBUG_FUNCTION_INIT_MORE
          try
          {
             MessageInterface::ShowMessage
-               ("   funcObj->EvaluateReal() = %f\n", funcObj->GetRealParameter("Value"));
+               ("   funcObj(%s)->EvaluateReal() = %f\n", funcObjName.c_str(),
+                funcObj->GetRealParameter("Value"));
          }
          catch (BaseException &e)
          {
@@ -292,6 +304,10 @@ bool GmatFunction::Initialize()
          }
          #endif
          
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   Adding clone of funcObj <%p>'%s' to objectStore\n", funcObj, funcObjName.c_str());
+         #endif
          funcObj->SetIsLocal(true);
          objectStore->insert(std::make_pair(funcObjName, funcObj));
       }
@@ -301,6 +317,10 @@ bool GmatFunction::Initialize()
    for (omi = automaticObjectMap.begin(); omi != automaticObjectMap.end(); ++omi)
    {
       std::string autoObjName = omi->first;
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("   Add if autoObj '%s' is not already in objectStore\n", autoObjName.c_str());
+      #endif
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
       if (objectStore->find(autoObjName) == objectStore->end())
@@ -312,11 +332,12 @@ bool GmatFunction::Initialize()
              "autoObj = (omi->second)->Clone()");
          #endif
          
-         #ifdef DEBUG_FUNCTION_INIT
+         #ifdef DEBUG_FUNCTION_INIT_MORE
          try
          {
             MessageInterface::ShowMessage
-               ("   autoObj->EvaluateReal() = %f\n", autoObj->GetRealParameter("Value"));
+               ("   autoObj(%s)->EvaluateReal() = %f\n", autoObjName.c_str(),
+                autoObj->GetRealParameter("Value"));
          }
          catch (BaseException &e)
          {
@@ -326,7 +347,7 @@ bool GmatFunction::Initialize()
          
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   Adding autoObj <%p>'%s' to objectStore\n", autoObj, autoObjName.c_str());
+            ("   Adding clone of autoObj <%p>'%s' to objectStore\n", autoObj, autoObjName.c_str());
          #endif
          
          autoObj->SetIsLocal(true);
@@ -484,6 +505,12 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       MessageInterface::ShowMessage
          ("   Re-initializing CoordinateSystems, CalculatedPointes, Spacecrafts, Burns, and Parameters\n");
       #endif
+      
+      // if (!objInit->InitializeObjects(true, Gmat::UNKNOWN_OBJECT,
+      //                                 unusedGlobalObjectList))
+      //    throw FunctionException
+      //       ("Failed to re-initialize all objects in the \"" + functionName + "\"");
+      
       if (!objInit->InitializeObjects(true, Gmat::COORDINATE_SYSTEM))
          throw FunctionException
             ("Failed to re-initialize CoordinateSystems in the \"" + functionName + "\"");

@@ -758,6 +758,19 @@ GmatBase* RefData::FindFirstObject(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
+// std::string FindFirstObjectName(const std::string &typeName) const
+//------------------------------------------------------------------------------
+/**
+ * @return first object name found for given object type name.
+ */
+//------------------------------------------------------------------------------
+std::string RefData::FindFirstObjectName(const std::string &typeName) const
+{   
+   return FindFirstObjectName(GmatBase::GetObjectType(typeName));
+}
+
+
+//------------------------------------------------------------------------------
 // std::string FindFirstObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 /**

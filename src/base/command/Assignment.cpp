@@ -1344,7 +1344,9 @@ const StringArray& Assignment::GetWrapperObjectNameArray(bool completeSet)
       {
          // If LHS has more than 1 dot add to the list and Interpreter::ValidateCommand()
          // will figure out if it is settable Parameter or not.(LOJ: 2009.12.22)
-         if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1) || completeSet)
+         // Changed to use > 0 (LOJ: 2015.02.10)
+         //if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 1) || completeSet)
+         if ((GmatStringUtil::NumberOfOccurrences(lhs, '.') > 0) || completeSet)
             wrapperObjectNames.push_back(lhs);
       }
       

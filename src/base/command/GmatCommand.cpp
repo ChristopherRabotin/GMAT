@@ -50,6 +50,7 @@
 //#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_FIND_OBJECT
+//#define DEBUG_OBJECT_MAP
 //#define DEBUG_SEPARATE
 //#define DEBUG_GEN_STRING 1
 //#define DEBUG_IS_FUNCTION

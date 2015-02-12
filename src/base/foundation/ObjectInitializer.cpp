@@ -1419,6 +1419,9 @@ void ObjectInitializer::BuildAssociations(GmatBase * obj)
          // all hardware are cloned in the Spacecraft::SetRefObject() method. (LOJ: 2009.07.24)
          GmatBase *newElem = elem;
          
+         // Now a function is parsed in resource and command mode, so we don't
+         // need to check this (LOJ: 2015.02.06)
+         #if 0
          // If hardware is local object inside a function then skip
          if (inFunction && obj->IsLocal() && newElem->IsLocal())
          {
@@ -1429,6 +1432,7 @@ void ObjectInitializer::BuildAssociations(GmatBase * obj)
             #endif
             continue;
          }
+         #endif
          
          // now set Hardware to Spacecraft
          if (!obj->SetRefObject(newElem, newElem->GetType(), newElem->GetName()))

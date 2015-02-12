@@ -394,34 +394,47 @@ void BurnData::InitializeRefObjects()
 //       throw ParameterException
 //          ("BurnData::InitializeRefObjects() Cannot find SolarSystem object\n");
    
-    if (mInternalCoordSystem == NULL)
-    {
-       std::string errmsg = "**** ERROR **** Missing, invalid, or ";
-       errmsg            += "nonexistent internal CoordinateSystem object, ";
-       errmsg            += "for parameter \"" + mActualParamName + "\"\n";
-       throw ParameterException(errmsg);
-    }
-
+   if (mInternalCoordSystem == NULL)
+   {
+      std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+      errmsg            += "nonexistent internal CoordinateSystem object, ";
+      errmsg            += "for parameter \"" + mActualParamName + "\"\n";
+      throw ParameterException(errmsg);
+   }
+   
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
       ("BurnData::InitializeRefObjects() Found internal coordinate system\n");
    #endif
    
-    mOutCoordSystem =
-       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
-   
-    if (mOutCoordSystem == NULL)
-    {
-       std::string errmsg = "**** ERROR **** Missing, invalid, or ";
-       errmsg            += "nonexistent output CoordinateSystem object, ";
-       errmsg            += "for parameter \"" + mActualParamName + "\"\n";
-       throw ParameterException(errmsg);
-    }
+   std::string outCoordSysName = FindFirstObjectName(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
-      ("BurnData::InitializeRefObjects() Found OUT coordinate system\n");
+      ("BurnData::InitializeRefObjects() looking for output coordinate system: '%s'\n",
+       outCoordSysName.c_str());
    #endif
-
+   
+   // Check for blank coordinate system first (LOJ: 2015.02.11)
+   if (outCoordSysName == "")
+      mOutCoordSystem = NULL;
+   else
+   {
+      mOutCoordSystem =
+         (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
+      
+      if (mOutCoordSystem == NULL)
+      {
+         std::string errmsg = "**** ERROR **** Missing, invalid, or ";
+         errmsg            += "nonexistent output CoordinateSystem object, ";
+         errmsg            += "for parameter \"" + mActualParamName + "\"\n";
+         throw ParameterException(errmsg);
+      }
+      #if DEBUG_BURNDATA_INIT
+      MessageInterface::ShowMessage
+         ("BurnData::InitializeRefObjects() Found OUT coordinate system\n");
+      #endif
+   }
+   
 //    // get Burn CoordinateSystem
 //    std::string csName = mImpBurn->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
 //    CoordinateSystem *cs = (CoordinateSystem*)mImpBurn->

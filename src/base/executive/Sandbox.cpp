@@ -1554,6 +1554,9 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
           (!(f->IsFunctionControlSequenceSet())) &&
           (!(f->ScriptErrorFound())))
       {
+         // Set SolarSystem first for parsing in two modes (LOJ: 2015.02.06)
+         f->SetSolarSystem(solarSys);
+         
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
          MessageInterface::ShowMessage(
             "About to call InterpretGmatFunction for function %s\n",

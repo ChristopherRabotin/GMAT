@@ -862,26 +862,46 @@ bool Function::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 GmatBase* Function::FindObject(const std::string &name)
 {
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindObject() '%s' entered, name = '%s'\n", functionName.c_str(),
+       name.c_str());
+   #endif
+   
    std::string newName = name;
+   GmatBase *obj = NULL;
    
    // Ignore array indexing of Array
    std::string::size_type index = name.find('(');
    if (index != name.npos)
       newName = name.substr(0, index);
-   
+
    // Check for the object in the Local Object Store (LOS) first
    if (objectStore && objectStore->find(newName) != objectStore->end())
-      return (*objectStore)[newName];
+      //return (*objectStore)[newName];
+      obj = (*objectStore)[newName];
    
    // If not found in the LOS, check the Global Object Store (GOS)
-   if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
-      return (*globalObjectStore)[newName];
-
-   // Let's try SolarSystem (loj: 2008.06.12)
-   if (solarSys && solarSys->GetBody(newName))
-      return (GmatBase*)(solarSys->GetBody(newName));
+   else if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
+      //return (*globalObjectStore)[newName];
+      obj = (*globalObjectStore)[newName];
    
-   return NULL;
+   // Let's try SolarSystem (loj: 2008.06.12)
+   else if (solarSys && solarSys->GetBody(newName))
+      //return (GmatBase*)(solarSys->GetBody(newName));
+      obj = (GmatBase*)(solarSys->GetBody(newName));
+   
+   // If still not found, try functionObjectMap
+   // Should this moved to top?
+   else if (functionObjectMap.find(newName) != functionObjectMap.end())
+      obj = functionObjectMap[newName];
+   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindObject() returning <%p>\n", obj);
+   #endif
+   //return NULL;
+   return obj;
 }
 
 
@@ -1041,7 +1061,8 @@ GmatBase* Function::FindFunctionObject(const std::string &name)
 {
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Function::FindFunctionObject() entered, name=%s\n", name.c_str());
+      ("Function::FindFunctionObject() entered, name=%s, solarSys=<%p>\n",
+       name.c_str(), solarSys);
    #endif
    
    // Ignore array index
@@ -1058,6 +1079,10 @@ GmatBase* Function::FindFunctionObject(const std::string &name)
    
    if (functionObjectMap.find(newName) != functionObjectMap.end())
       obj = functionObjectMap[newName];
+   
+   // try SolarSystem if obj is still NULL
+   if (obj == NULL && solarSys != NULL)
+      obj = (GmatBase*)(solarSys->GetBody(newName));
    
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
@@ -1296,10 +1321,12 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
    
    #ifdef DEBUG_AUTO_OBJ
    MessageInterface::ShowMessage
-      ("Function::AddAutomaticObject() <%p>'%s' leaving, <%p>'%s' inserted to "
+      ("Function::AddAutomaticObject() <%p>'%s' leaving\n   <%p>'%s' inserted to "
        "automaticObjectMap\n", this, GetName().c_str(), obj, withName.c_str());
    #endif
-   
+
+   // Objects in automaticObjectMap are cloned and add to function objectStore
+   // in GmatFunction
    automaticObjectMap.insert(std::make_pair(withName,obj));
    
    #ifdef DEBUG_AUTO_OBJ
