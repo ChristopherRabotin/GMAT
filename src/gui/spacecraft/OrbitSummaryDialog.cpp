@@ -37,7 +37,7 @@ END_EVENT_TABLE()
 OrbitSummaryDialog::OrbitSummaryDialog(wxWindow *parent, wxString &summary)
    : GmatDialog(parent, -1, wxString(_T("Orbit Summary")))
 {
-   orbitSummaryString = wxT(summary);
+   orbitSummaryString = wxString(summary);
 
    theCancelButton->Show(false);
    theHelpButton->Show(false);

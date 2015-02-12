@@ -83,7 +83,7 @@ public:
    bool                 Add(Subscriber *s);
    bool                 Remove(Subscriber *s, const bool del);
    
-   virtual void         Activate(bool state = true);
+   virtual bool         Activate(bool state = true);
    virtual bool         IsActive();
    
    virtual void         SetProviderId(Integer id);
@@ -127,6 +127,8 @@ public:
                                             const Integer value);
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value);
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
    virtual bool         SetStringParameter(const std::string &label,

@@ -32,6 +32,8 @@
 #include <algorithm>             // Required for GCC 4.3
 #include <sstream>
 #include <cerrno>
+#include <limits.h>
+#include <wchar.h>
 
 //#define DEBUG_STRING_UTIL 1
 //#define DEBUG_TOREAL
@@ -52,6 +54,7 @@
 //#define DEBUG_REMOVE_MATH_SYMBOLS
 //#define DEBUG_NUMBER_WITH_NAME
 //#define DEBUG_SCI_NOTATION
+//#define DEBUG_SINGLE_ITEM 1
 
 //------------------------------------------------------------------------------
 // std::string RemoveAll(const std::string &str, char ch, Integer start = 0)
@@ -537,6 +540,108 @@ std::string GmatStringUtil::RemoveMathSymbols(const std::string &str, bool remov
    
    return str1;
 }
+
+//------------------------------------------------------------------------------
+// std::string PadWithBlanks(const std::string &str, Integer toSize,
+//                           StripType whichEnd = TRAILING)
+//------------------------------------------------------------------------------
+/*
+ * Pads leading or trailing end of string with blanks.
+ *
+ * @param  str        input string to be padded
+ * @param  toSize     total length desired
+ * @param  whichEnd   option of padding front or end
+ *
+ * @note if the input string is already of size toSize or less, it will just
+ *       return the string as is
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::PadWithBlanks(const std::string &str, Integer toSize,
+                            StripType whichEnd)
+{
+   Integer     len     = (Integer) str.length();
+   std::string blanks("");
+   for (Integer ii= 0; ii < (toSize - len);  ii++)
+      blanks += " ";
+   if (whichEnd == LEADING)
+   {
+      return blanks + str;
+   }
+   else if (whichEnd == TRAILING)
+   {
+      return str + blanks;
+   }
+   else // ignore "BOTH" for now
+   {
+      return str;
+   }
+}
+
+//------------------------------------------------------------------------------
+// const std::string BuildNumber(Real value,  bool useExp = false,
+//       Integer length)
+//------------------------------------------------------------------------------
+/**
+ * Builds a formatted string containing a Real, so the Real can be serialized to
+ * the display
+ *
+ * @param value  The Real that needs to be serialized
+ * @param useExp Use scientific notation
+ * @param length The size of the desired string
+ *
+ * @return The formatted string
+ * @note   This was moved from GmatCommand
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::BuildNumber(Real value, bool useExp,
+                                        Integer length)
+{
+   std::string retval = "Invalid number";
+
+   if (length < 100)
+   {
+      char temp[100], defstr[40];
+      Integer fraction = 1;
+
+      // check for a NaN first
+      if ((!GmatMathUtil::IsEqual(value, 0.0)) &&
+         (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
+          GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
+          GmatMathUtil::IsNaN(value)))
+      {
+         sprintf(defstr, "%%%ds", length);
+         sprintf(temp, defstr, "NaN");
+      }
+      else
+      {
+         Real shift = GmatMathUtil::Abs(value);
+         if (useExp || (shift > GmatMathUtil::Exp10((Real)length-3)))
+         {
+            fraction = length - 8;
+            sprintf(defstr, "%%%d.%de", length, fraction);
+         }
+         else
+         {
+            while (shift > 10.0)
+            {
+               ++fraction;
+               shift *= 0.1;
+            }
+            fraction = length - 3 - fraction;
+            sprintf(defstr, "%%%d.%dlf", length, fraction);
+         }
+         #ifdef DEBUG_DEFSTR
+            MessageInterface::ShowMessage("defstr = %s\n", defstr);
+            if (fraction < 0) MessageInterface::ShowMessage("   and fraction = %d\n", fraction);
+         #endif
+         sprintf(temp, defstr, value);
+      }
+      retval = temp;
+   }
+
+   return retval;
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1211,6 +1316,35 @@ std::string GmatStringUtil::ToStringNoZeros(const Real &val)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string ToOrdinal(Integer i, bool textOnly = false)
+//------------------------------------------------------------------------------
+/**
+ * Returns the ordinal number, given the input integer.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToOrdinal(Integer i, bool textOnly)
+{
+   std::string num  = ToString(i, 1);
+   if (textOnly)
+   {
+      // TBD
+//      return num;
+   }
+
+   // Get the digit in the ones place
+   char        ones = num[num.length() - 1];
+   if (ones == '1')
+      return num + "st";
+   else if (ones == '2')
+      return num + "nd";
+   else if (ones == '3')
+      return num + "rd";
+   else
+      return num + "th";
+}
+
+
 //-------------------------------------------------------------------------------
 // char GetClosingBracket(const char &openBracket)
 //-------------------------------------------------------------------------------
@@ -1838,6 +1972,19 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool ToReal(const char *str, Real *value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToReal(const std::string &str, Real &value)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToReal(const char *str, Real *value, bool trimParens,
+                            bool allowOverflow)
+{
+   return ToReal(std::string(str), *value, trimParens, allowOverflow);
+}
+
 
 //------------------------------------------------------------------------------
 // bool ToReal(const std::string &str, Real *value, bool trimParens = false)
@@ -1847,11 +1994,23 @@ bool GmatStringUtil::IsValidReal(const std::string &str, Real &value, Integer &e
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens,
-	bool allowOverflow)
+                            bool allowOverflow)
 {
    return ToReal(str, *value, trimParens, allowOverflow);
 }
 
+//------------------------------------------------------------------------------
+// bool ToReal(const char *str, Real &value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToReal(const std::string &str, Real &value, ...)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToReal(const char *str, Real &value, bool trimParens,
+                            bool allowOverflow)
+{
+   return ToReal(std::string(str), value, trimParens, allowOverflow);
+}
 
 //------------------------------------------------------------------------------
 // bool ToReal(const std::string &str, Real &value, bool trimParens = false)
@@ -1868,7 +2027,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens,
-	bool allowOverflow)
+                            bool allowOverflow)
 {
    #ifdef DEBUG_TOREAL
    MessageInterface::ShowMessage
@@ -1896,6 +2055,18 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trim
    return ToInteger(str, *value, trimParens, allowOverflow);
 }
 
+//------------------------------------------------------------------------------
+// bool ToInteger(const char *str, Integer &value, bool trimParens = false)
+//------------------------------------------------------------------------------
+/*
+ * @see ToInteger(const std::string &str, Integer &value, ...)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::ToInteger(const char *str, Integer &value, bool trimParens,
+                               bool allowOverflow)
+{
+   return ToInteger(std::string(str), value, trimParens, allowOverflow);
+}
 
 //------------------------------------------------------------------------------
 // bool ToInteger(const std::string &str, Integer &value, bool trimParens = false)
@@ -1919,7 +2090,7 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trim
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trimParens,
-	bool allowOverflow)
+                               bool allowOverflow)
 {
    std::string str2 = Trim(str, BOTH);
    if (trimParens)
@@ -2194,6 +2365,13 @@ RealArray GmatStringUtil::ToRealArray(const std::string &str, bool allowOverflow
    return realArray;
 }
 
+//------------------------------------------------------------------------------
+// IntegerArray ToIntegerArray(const char *str, bool allowOverflow)
+//------------------------------------------------------------------------------
+IntegerArray GmatStringUtil::ToIntegerArray(const char *str, bool allowOverflow)
+{
+   return ToIntegerArray(std::string(str), allowOverflow);
+}
 
 //------------------------------------------------------------------------------
 // IntegerArray ToIntegerArray(const std::string &str)
@@ -3771,7 +3949,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    //-----------------------------------------------------------------
    std::string str2 = str1.substr(index1+1, index2-index1-1);
    #if DEBUG_STRING_UTIL_ARRAY
-   MessageInterface::ShowMessage("   str1=<%s>/n", str1.c_str());
+   MessageInterface::ShowMessage("   str1=<%s>\n", str1.c_str());
    #endif
    
    if (str2 == "")
@@ -3817,7 +3995,8 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    //-----------------------------------------------------------------
    // It's double dimension array
    //-----------------------------------------------------------------
-   substr = str2.substr(0, comma-1);
+   //substr = str2.substr(0, comma-1);
+   substr = str2.substr(0, comma);
    
    #if DEBUG_STRING_UTIL_ARRAY
    MessageInterface::ShowMessage("   1st substr=%s\n", substr.c_str());
@@ -4208,9 +4387,11 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
    
    for (int i=0; i<length; i++)
    {
-      if (isalnum(str[i]) || str[i] == '.')
+      // Added check for underscore _ (LOJ: 2015.01.21)
+      //if (isalnum(str[i]) || str[i] == '.')
+      if (isalnum(str[i]) || str[i] == '.' || str[i] == '_')
          continue;
-
+      
       if (str[i] == '-')
       {
          minusSignCounter++;
@@ -4814,6 +4995,19 @@ bool GmatStringUtil::IsValidNumber(const std::string &str, bool allowOverflow)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool IsValidName(const char *str, bool ignoreBracket = false,
+//                  bool blankNameIsOk = false)
+//------------------------------------------------------------------------------
+/*
+ * @see IsValidName(const std::string &str, ...)
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidName(const char *str, bool ignoreBracket,
+                                 bool blankNameIsOk)
+{
+   return IsValidName(std::string(str), ignoreBracket, blankNameIsOk);
+}
 
 //------------------------------------------------------------------------------
 // bool IsValidName(const std::string &str, bool ignoreBracket = false,
@@ -5338,4 +5532,82 @@ void GmatStringUtil::WriteStringArray(const StringArray &strArray,
 }
 
 
+//------------------------------------------------------------------------------
+// std::wstring StringToWideString(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Converts narrow string (std::string) to wide string (std::wstring).
+ */
+//------------------------------------------------------------------------------
+std::wstring GmatStringUtil::StringToWideString(const std::string &str)
+{
+   // Convert an ASCII string to a Unicode String
+   // Method 1 (cross-platform):
+   std::wstring wstrTo;
+   wchar_t *wszTo = new wchar_t[str.length() + 1];
+   wszTo[str.size()] = L'\0';
+   int num = std::mbstowcs(wszTo, str.c_str(), str.length());
+   wstrTo = wszTo;
+   delete[] wszTo;
+   return wstrTo;
+   
+   // Method 2 (Windows only):
+   // int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+   // std::wstring wstr(size_needed, 0);
+   // MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstr[0], size_needed);
+   // return wstr;
+
+   // Method 3 (Windows only):
+   // int len;
+   // int slength = (int)s.length() + 1;
+   // len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0); 
+   // wchar_t* buf = new wchar_t[len];
+   // MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+   // std::wstring wstr(buf);
+   // delete[] buf;
+   // return wstr;
+
+}
+
+
+//------------------------------------------------------------------------------
+// std::string WideStringToString(const std::wstring &wstr)
+//------------------------------------------------------------------------------
+/**
+ * Converts wide string (std::wstring) to narrow string (std::string).
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::WideStringToString(const std::wstring &wstr)
+{
+   // Convert a Unicode string to an ASCII String
+   // Method 1 (cross-platform):
+   std::string strTo;
+   char *szTo = new char[wstr.length() + 1];
+   szTo[wstr.size()] = '\0';
+   int num = std::wcstombs(szTo, wstr.c_str(), wstr.length());
+
+   strTo = szTo;
+   delete[] szTo;
+   return strTo;
+   
+   // Method 2 (Windows only):
+   // int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+   // std::string strTo(size_needed, 0);
+   // WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &strTo[0], size_needed, NULL, NULL);
+   // return strTo;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string WideStringToString(const wchar_t *wchar)
+//------------------------------------------------------------------------------
+/**
+ * Converts wide string (wchar_t*) to narrow string (std::string).
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::WideStringToString(const wchar_t *wchar)
+{
+   std::wstring wstr(wchar);
+   return WideStringToString(wstr);
+}
 

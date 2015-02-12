@@ -48,6 +48,9 @@ BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
    EVT_CHECKBOX(ID_CHECKBOX, PropagatePanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, PropagatePanel::OnComboBoxChange)
    EVT_TEXT(ID_TEXTCTRL, PropagatePanel::OnTextChange)
+   #if wxCHECK_VERSION(3, 0, 0)
+   EVT_GRID_TABBING(PropagatePanel::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -183,7 +186,7 @@ void PropagatePanel::Create()
       propModeList[0] = "None";
 
    mPropModeComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(propModeList[0].c_str()), 
+      new wxComboBox(this, ID_COMBOBOX, wxString(propModeList[0].c_str()), 
          wxDefaultPosition, wxSize(150,-1), mPropModeCount, propModeList,
          wxCB_DROPDOWN|wxCB_READONLY);
    
@@ -219,10 +222,15 @@ void PropagatePanel::Create()
    propGrid->SetColSize(PROP_NAME_COL, 340);
    propGrid->SetColSize(PROP_SOS_SEL_COL, 25);
    propGrid->SetColSize(PROP_SOS_COL, 340);
+   #if wxCHECK_VERSION(3, 0, 0)
+   propGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
    
    propGrid->SetMargins(0, 0);
    propGrid->SetRowLabelSize(0);
-   propGrid->SetScrollbars(5, 8, 15, 15);
+   // Grubb 2014-12-15: Commented out, scroll area will be calculated automatically
+   // based on size
+ //  propGrid->SetScrollbars(5, 8, 15, 15);
    
    for (Integer i = 0; i < MAX_PROP_ROW; i++)
    {
@@ -234,6 +242,17 @@ void PropagatePanel::Create()
       propGrid->SetCellBackgroundColour(i, PROP_SOS_SEL_COL, *wxLIGHT_GREY);
    }
    
+   // Stop tolerance
+   wxStaticText *stopTolStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Stop Tolerance: "), 
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   mStopTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(150,-1), 0);
+   wxBoxSizer *stopTolSizer = new wxBoxSizer(wxHORIZONTAL);
+   
+   stopTolSizer->Add(stopTolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   stopTolSizer->Add(mStopTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+ 
    // Stopping Condition Grid
    stopCondGrid =
       new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(750,100), 
@@ -268,7 +287,13 @@ void PropagatePanel::Create()
    
    stopCondGrid->SetMargins(0, 0);
    stopCondGrid->SetRowLabelSize(0);
-   stopCondGrid->SetScrollbars(5, 8, 15, 15);
+   #if wxCHECK_VERSION(3, 0, 0)
+   stopCondGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
+   
+   // Grubb 2014-12-15: Commented out, scroll area will be calculated automatically
+   // based on size
+//   stopCondGrid->SetScrollbars(5, 8, 15, 15);
    
    wxFlexGridSizer *propModeSizer = new wxFlexGridSizer(6, 0, 0);
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
@@ -285,17 +310,6 @@ void PropagatePanel::Create()
    
    propSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   // Stop tolerance
-   wxStaticText *stopTolStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Stop Tolerance: "), 
-                       wxDefaultPosition, wxSize(-1, -1), 0);
-   mStopTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(150,-1), 0);
-   wxBoxSizer *stopTolSizer = new wxBoxSizer(wxHORIZONTAL);
-   
-   stopTolSizer->Add(stopTolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   stopTolSizer->Add(mStopTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // Stopping conditions
    GmatStaticBoxSizer *stopSizer =
@@ -443,9 +457,9 @@ void PropagatePanel::UpdateStopCondition(Integer stopRow)
          stopCondGrid->GetCellValue(stopRow, STOPCOND_RIGHT_COL);
    }
 
-   std::string nameStr = mTempStopCond[stopRow].name.c_str();
-   std::string stopStr = mTempStopCond[stopRow].varName.c_str();
-   std::string goalStr = mTempStopCond[stopRow].goalStr.c_str();
+   std::string nameStr = mTempStopCond[stopRow].name.WX_TO_STD_STRING;
+   std::string stopStr = mTempStopCond[stopRow].varName.WX_TO_STD_STRING;
+   std::string goalStr = mTempStopCond[stopRow].goalStr.WX_TO_STD_STRING;
    
    #ifdef DEBUG_PROPAGATE_PANEL_STOPCOND
    MessageInterface::ShowMessage
@@ -480,7 +494,7 @@ void PropagatePanel::UpdateStopCondition(Integer stopRow)
       {
          MessageInterface::ShowMessage
             ("PropagatePanel::UpdateStopCondition() Unable to create "
-             "StopCondition: name=%s\n", mTempStopCond[stopRow].name.c_str());
+             "StopCondition: name=%s\n", mTempStopCond[stopRow].name.WX_TO_C_STRING);
       }
    }
    
@@ -988,7 +1002,7 @@ void PropagatePanel::LoadData()
    
    for (Integer i=0; i<mPropCount; i++)
    {
-      mTempProp[i].propName = wxT(propNames[i].c_str());
+      mTempProp[i].propName = wxString(propNames[i].c_str());
       
       // Get the list of spacecraft and formations
       soList = thePropCmd->GetStringArrayParameter(scId, i);
@@ -1083,9 +1097,9 @@ void PropagatePanel::LoadData()
       if (stopCond != NULL)
       {
          mTempStopCond[i].stopCondPtr = stopCond;
-         mTempStopCond[i].name = wxT(stopCond->GetName().c_str());
+         mTempStopCond[i].name = wxString(stopCond->GetName().c_str());
          mTempStopCond[i].varName = 
-            wxT(stopCond->GetStringParameter("StopVar").c_str());
+            wxString(stopCond->GetStringParameter("StopVar").c_str());
          mTempStopCond[i].goalStr = 
             stopCond->GetStringParameter("Goal").c_str();
          wxString str = FormatStopCondDesc(mTempStopCond[i].varName,
@@ -1136,8 +1150,8 @@ void PropagatePanel::SaveData()
 
    for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
-      std::string propagator = propGrid->GetCellValue(i, PROP_NAME_COL).c_str();
-      std::string satNames = propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
+      std::string propagator = propGrid->GetCellValue(i, PROP_NAME_COL).WX_TO_STD_STRING;
+      std::string satNames = propGrid->GetCellValue(i, PROP_SOS_COL).WX_TO_STD_STRING;
       StringArray sats;
 
       if (propagator != "")
@@ -1222,7 +1236,7 @@ void PropagatePanel::SaveData()
       for (UnsignedInt i=0; i<emptyProps.GetCount(); i++)
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Please select a Propagator for "
-             "Spacecraft \"%s\"\n", emptyProps[i].c_str());
+             "Spacecraft \"%s\"\n", emptyProps[i].WX_TO_C_STRING);
       
       canClose = false;
    }
@@ -1233,7 +1247,7 @@ void PropagatePanel::SaveData()
       for (UnsignedInt i=0; i<emptySos.GetCount(); i++)
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Please select Spacecraft for "
-             "Propagator \"%s\"\n", emptySos[i].c_str());
+             "Propagator \"%s\"\n", emptySos[i].WX_TO_C_STRING);
       
       canClose = false;
    }
@@ -1349,7 +1363,7 @@ void PropagatePanel::SaveData()
                
                // saving spacecraft
                std::string spacecraftStr = 
-                  propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
+                  propGrid->GetCellValue(i, PROP_SOS_COL).WX_TO_STD_STRING;
                StringArray parts = 
                   GmatStringUtil::SeparateBy(spacecraftStr, ", ");
                
@@ -1434,9 +1448,9 @@ void PropagatePanel::SaveData()
                UpdateStopCondition(i);
 
                StopCondition *currStop = mTempStopCond[mStopCondCount].stopCondPtr;
-               std::string nameStr = mTempStopCond[i].name.c_str();
-               std::string stopStr = mTempStopCond[i].varName.c_str();
-               std::string goalStr = mTempStopCond[i].goalStr.c_str();
+               std::string nameStr = mTempStopCond[i].name.WX_TO_STD_STRING;
+               std::string stopStr = mTempStopCond[i].varName.WX_TO_STD_STRING;
+               std::string goalStr = mTempStopCond[i].goalStr.WX_TO_STD_STRING;
                
                #ifdef DEBUG_PROPAGATE_PANEL_SAVE
                MessageInterface::ShowMessage
@@ -1499,6 +1513,53 @@ void PropagatePanel::SaveData()
    }
 }
 
-
+//------------------------------------------------------------------------------
+// void OnGridTabbing(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user tabs in the grid
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void PropagatePanel::OnGridTabbing(wxGridEvent& event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    if (event.GetEventObject() == propGrid)
+    {
+        if (!event.ShiftDown() &&
+            (row == (propGrid->GetNumberRows() - 1)) &&
+            (col == (propGrid->GetNumberCols() - 1)))
+        {
+            propGrid->Navigate( wxNavigationKeyEvent::IsForward );
+        }
+        else if (event.ShiftDown() &&
+            (row == 0) &&
+            (col == 0))
+        {
+            propGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+        }
+        else
+            event.Skip();
+    }
+    else if (event.GetEventObject() == stopCondGrid)
+    {
+        if (!event.ShiftDown() &&
+            (row == (stopCondGrid->GetNumberRows() - 1)) &&
+            (col == (stopCondGrid->GetNumberCols() - 1)))
+        {
+            stopCondGrid->Navigate( wxNavigationKeyEvent::IsForward );
+        }
+        else if (event.ShiftDown() &&
+            (row == 0) &&
+            (col == 0))
+        {
+            stopCondGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+        }
+        else
+            event.Skip();
+    }
+} 
    
 

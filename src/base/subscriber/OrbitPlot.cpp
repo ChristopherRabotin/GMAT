@@ -333,7 +333,7 @@ void OrbitPlot::SetShowObject(const std::string &name, bool value)
  * This methods is called from the Toggle command.
  */
 //------------------------------------------------------------------------------
-void OrbitPlot::Activate(bool state)
+bool OrbitPlot::Activate(bool state)
 {
    #ifdef DEBUG_ACTIVATE
    MessageInterface::ShowMessage
@@ -341,7 +341,7 @@ void OrbitPlot::Activate(bool state)
        this, GetName().c_str(), state, isInitialized);
    #endif
    
-   Subscriber::Activate(state);
+   return Subscriber::Activate(state);
 }
 
 

@@ -24,10 +24,9 @@
 #define EclipseLocator_hpp
 
 #include "EventLocator.hpp"
-#include "Umbra.hpp"
-#include "Penumbra.hpp"
-#include "Antumbra.hpp"
-
+#include "EventLocatorDefs.hpp"
+#include "Star.hpp"
+#include "EclipseTotalEvent.hpp"
 
 /**
  * The EventLocator used for shadow entry and exit location
@@ -46,6 +45,9 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -76,34 +78,35 @@ public:
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData);
 
-   virtual bool         RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
-
    const ObjectTypeArray& GetTypesForList(const Integer id);
    const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual GmatBase*    Clone() const;
    virtual bool         Initialize();
+   virtual void         ReportEventData(const std::string &reportNotice = "");
 
    DEFAULT_TO_NO_CLONES
 
 protected:
-   /// List of occulting bodies
-   StringArray occulters;
-
-   // Member event functions
-   /// The Umbra event functions
-   std::vector<Umbra*>        umbras;
-   /// The Penumbra event functions
-   std::vector<Penumbra*>     penumbras;
-   /// The Antumbra event functions
-   std::vector<Antumbra*>     antumbras;
+   // List of requested eclipse types
+   StringArray eclipseTypes;
+   /// The Sun
+   Star        *sun;
+   /// The stored events
+   std::vector<EclipseTotalEvent*> theEvents;
+   /// the start time of the current FindEvents
+   Real        findStart;
+   /// the stop time of the current FindEvents
+   Real        findStop;
+   /// the maximum index of the stored events
+   Integer     maxIndex;
+   /// The maximum duration of the found events
+   Real        maxDuration;
 
    /// Published parameters for eclipse locators
     enum
     {
-       OCCULTERS = EventLocatorParamCount,
+       ECLIPSE_TYPES = EventLocatorParamCount,
        EclipseLocatorParamCount
     };
 
@@ -113,6 +116,8 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[EclipseLocatorParamCount - EventLocatorParamCount];
+
+    virtual void FindEvents();
 };
 
 #endif /* EclipseLocator_hpp */

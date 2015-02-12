@@ -48,6 +48,7 @@ public:
    
    static std::string GetLogFileName();
    static void SetLogEnable(bool flag);
+   static void SetLogPath(const char *pathname, bool append = false);
    static void SetLogPath(const std::string &pathname, bool append = false);
    static void SetLogFile(const std::string &filename);
 

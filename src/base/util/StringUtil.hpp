@@ -48,6 +48,10 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveScientificNotation(const std::string &str);
    GMAT_API std::string RemoveMathSymbols(const std::string &str, bool removeMathOperator = false);
    
+   GMAT_API std::string PadWithBlanks(const std::string &str, Integer toSize, StripType whichEnd = TRAILING);
+   GMAT_API std::string BuildNumber(Real value, bool useExp = false, Integer length = 17);
+
+
    GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
                            bool removeSemicolon = false, bool removeEol = false);
    GMAT_API std::string Strip(const std::string &str, StripType stype = BOTH);
@@ -75,6 +79,8 @@ namespace GmatStringUtil
                            Integer width = GmatGlobal::INTEGER_WIDTH);
    GMAT_API std::string ToStringNoZeros(const Real &val);
    
+   GMAT_API std::string ToOrdinal(Integer i, bool textOnly = false);
+
    GMAT_API std::string RemoveExtraParen(const std::string &str, bool ignoreComma = false,
                                          bool ignoreSingleQuotes = false);
    GMAT_API std::string RemoveOuterParen(const std::string &str);
@@ -99,9 +105,12 @@ namespace GmatStringUtil
    GMAT_API bool IsNumber(const std::string &str);
    GMAT_API bool IsValidReal(const std::string &str, Real &value, Integer &errorCode,
                              bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToReal(const char *str, Real *value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToReal(const std::string &str, Real *value, bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToReal(const char *str, Real &value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToReal(const std::string &str, Real &value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToInteger(const std::string &str, Integer *value, bool trimParens = false, bool allowOverflow = true);
+   GMAT_API bool ToInteger(const char *str, Integer &value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToInteger(const std::string &str, Integer &value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToUnsignedInt(const std::string &str, UnsignedInt *value, bool trimParens = false, bool allowOverflow = true);
    GMAT_API bool ToUnsignedInt(const std::string &str, UnsignedInt &value, bool trimParens = false, bool allowOverflow = true);
@@ -110,11 +119,12 @@ namespace GmatStringUtil
    GMAT_API bool ToOnOff(const std::string &str, std::string &value, bool trimParens = false);
    
    GMAT_API RealArray ToRealArray(const std::string &str, bool allowOverflow = true);
+   GMAT_API IntegerArray ToIntegerArray(const char *str, bool allowOverflow = true);
    GMAT_API IntegerArray ToIntegerArray(const std::string &str, bool allowOverflow = true);
    GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);
    GMAT_API StringArray ToStringArray(const std::string &str);
    GMAT_API BooleanArray ToBooleanArray(const std::string &str);
-   
+
    GMAT_API void ParseParameter(const std::string &str, std::string &type,
                            std::string &owner, std::string &dep);
    GMAT_API void GetArrayCommaIndex(const std::string &str, Integer &comma,
@@ -168,6 +178,8 @@ namespace GmatStringUtil
    GMAT_API bool EndsWith(const std::string &str, const std::string &value);
    GMAT_API bool EndsWithPathSeparator(const std::string &str);
    GMAT_API bool IsValidNumber(const std::string &str, bool allowOverflow = true);
+   GMAT_API bool IsValidName(const char *str, bool ignoreBracket = false,
+                             bool blankNameIsOk = false);
    GMAT_API bool IsValidName(const std::string &str, bool ignoreBracket = false,
                              bool blankNameIsOk = false);
    GMAT_API bool IsValidParameterName(const std::string &str);
@@ -187,6 +199,10 @@ namespace GmatStringUtil
                                   const std::string &desc = "",
                                   const std::string &prefix = "");
    
+   // Wide string handling
+   GMAT_API std::wstring StringToWideString(const std::string &str);
+   GMAT_API std::string  WideStringToString(const std::wstring &wstr);
+   GMAT_API std::string  WideStringToString(const wchar_t *wchar);
 }
 
 #endif // StringUtil_hpp

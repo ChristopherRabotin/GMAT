@@ -8,8 +8,6 @@
 // Administrator of The National Aeronautics and Space Administration.
 // All Other Rights Reserved.
 //
-// ** Legal **
-//
 // Author: Linda Jun
 // Created: 2008/11/13
 /**
@@ -46,7 +44,7 @@
 #include "bitmaps/SlowerAnimation.xpm"
 #include "bitmaps/screenshot.xpm"
 
-//#define DEBUG_TOOLBAR
+//#define DEBUG_CREATE_TOOLBAR
 //#define DEBUG_LOAD_ICON
 //#define DEBUG_SYNC_STATUS
 
@@ -74,7 +72,7 @@ GmatToolBar::GmatToolBar(wxWindow* parent, long style, wxWindowID id,
 //------------------------------------------------------------------------------
 void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
 {
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("GmatToolBar::CreateToolBar() entered\n");
    #endif
    
@@ -88,6 +86,9 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    
    // Do not change the order, this order is how it appears in the toolbar
    
+   #ifdef DEBUG_CREATE_TOOLBAR
+   MessageInterface::ShowMessage("   Loading icons\n");
+   #endif
    guiManager->LoadIcon("NewScript", bitmapType, &bitmaps[0], NewScript_xpm);
    guiManager->LoadIcon("OpenScript", bitmapType, &bitmaps[1], OpenScript_xpm);
    guiManager->LoadIcon("SaveMission", bitmapType, &bitmaps[2], SaveMission_xpm);
@@ -109,7 +110,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    // Changed from wxSize(18, 15) (LOJ: 2011.02.04)
    toolBar->SetToolBitmapSize(wxSize(16, 16));
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding mission tools\n");
    #endif
    
@@ -124,7 +125,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
                     _T("New Mission"));
    toolBar->AddSeparator();
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding edit tools\n");
    #endif
    
@@ -140,7 +141,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    toolBar->AddSeparator();
    #endif
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding run tools\n");
    #endif
    
@@ -151,7 +152,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    toolBar->AddTool(TOOL_SCREENSHOT, _T("Screenshot"), *bitmaps[16], _T("Screenshot (F10)"));
    toolBar->AddSeparator();
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding window tools\n");
    #endif
    
@@ -161,16 +162,17 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
                     _T("Close"));
    toolBar->AddSeparator();
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding help tools\n");
    #endif
    
    // add help tool
    toolBar->AddTool(MENU_HELP_ABOUT, _T("About GMAT"), *bitmaps[7], _T("About GMAT"));
    toolBar->AddTool(MENU_HELP_CONTENTS, _T("Help"), *bitmaps[15], _T("Help"));
-   
+
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(MENU_EDIT_COPY, FALSE);
@@ -188,7 +190,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    for (int i = 0; i < NUM_ICONS; i++)
       delete bitmaps[i];
    
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("GmatToolBar::CreateToolBar() exiting\n");
    #endif
 }
@@ -205,7 +207,7 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
 //------------------------------------------------------------------------------
 void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
 {
-   #ifdef DEBUG_TOOLBAR
+   #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("GmatToolBar::AddAnimationTools() entered\n");
    #endif
    
@@ -261,8 +263,9 @@ void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
                     _T("Show Animation Options"));
    #endif
    
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(TOOL_ANIMATION_PLAY, FALSE);

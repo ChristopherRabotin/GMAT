@@ -259,13 +259,11 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
-    event/Brent.o \
     event/EventException.o \
     event/EventFunction.o \
     event/EventLocator.o \
-    event/LocatedEventTable.o \
     event/LocatedEvent.o \
-    event/RootFinder.o \
+    event/LocatedEventTable.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
     executive/PlotReceiver.o \
@@ -298,7 +296,6 @@ OBJECTS = \
     factory/StopConditionFactory.o \
     factory/SubscriberFactory.o \
     forcemodel/DragForce.o \
-    forcemodel/EventModel.o \
     forcemodel/FiniteThrust.o \
     forcemodel/GravityBase.o \
     forcemodel/GravityField.o \
@@ -489,6 +486,7 @@ OBJECTS = \
     solarsys/ShadowState.o \
     solarsys/SlpFile.o \
     solarsys/SolarFluxFileReader.o \
+    solarsys/SolarFluxReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
     solarsys/SpecialCelestialPoint.o \
@@ -509,6 +507,7 @@ OBJECTS = \
     spacecraft/TextTrajectoryFile.o \
     stopcond/StopCondition.o \
     subscriber/EphemerisFile.o \
+    subscriber/EphemManager.o \
     subscriber/MessageWindow.o \
     subscriber/TextEphemFile.o \
     subscriber/OrbitPlot.o \
@@ -583,6 +582,10 @@ OBJECTS = \
 #    spacecraft/StateConverter.o \
 #    spacecraft/Converter.o \
 #    util/Cartesian.o \
+#    event/Brent.o \
+#    event/RootFinder.o \
+#    forcemodel/EventModel.o \
+
 
 #    parameter/OrbitAMatrixParameters.o \
 #    forcemodel/harmonic/EarthTide.o \

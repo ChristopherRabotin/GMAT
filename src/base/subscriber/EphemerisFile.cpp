@@ -69,11 +69,12 @@
 //#define DEBUG_INTERPOLATOR_TRACE
 //#define DEBUG_EPHEMFILE_CONVERT_STATE
 //#define DEBUG_FILE_PATH
-//#define DBGLVL_EPHEMFILE_DATA 1
+//#define DBGLVL_EPHEMFILE_DATA 2
 //#define DBGLVL_EPHEMFILE_DATA_LABELS 1
 //#define DBGLVL_EPHEMFILE_MANEUVER 2
 //#define DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE 2
 //#define DBGLVL_EPHEMFILE_SC_PROPERTY_CHANGE 2
+//#define DBGLVL_EPHEMFILE_REF_OBJ 1
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -341,8 +342,6 @@ EphemerisFile::~EphemerisFile()
          (spkWriter, "SPK writer", "EphemerisFile::~EphemerisFile()()",
           "deleting local SPK writer");
       #endif
-      if (numSPKSegmentsWritten == 0)
-         spkWriter->WriteDataToClose();
       delete spkWriter;
    }
    #endif
@@ -2271,6 +2270,9 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData, bool timeToWrite)
          // Convert if necessary
          if (!writeDataInDataCS)
             ConvertState(currEpochInDays, currState, outState);
+         else
+            for (unsigned int ii = 0; ii < 6; ii++)
+              outState[ii] = currState[ii];
 
 //         BufferOrbitData(currEpochInDays, currState);
          BufferOrbitData(currEpochInDays, outState);
@@ -4522,10 +4524,6 @@ void EphemerisFile::FinalizeSpkFile()
          WriteSpkOrbitDataSegment();
       }
 
-      // SPICE will not close a file that has no segments, so if we
-      // haven't written any segments, write a bogus one now
-      if (numSPKSegmentsWritten == 0)
-         spkWriter->WriteDataToClose();
       spkWriter->FinalizeKernel();
    }
    catch (BaseException &e)

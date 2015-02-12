@@ -221,7 +221,8 @@ void CompareTextDialog::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mToleranceTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(ToWxString(mTolerance)),
+      //new wxTextCtrl(this, ID_TEXTCTRL, wxT(ToWxString(mTolerance)),
+      new wxTextCtrl(this, ID_TEXTCTRL, ToWxString(mTolerance),
                      wxDefaultPosition, wxSize(80,20), 0);
    
    //---------- sizer
@@ -351,8 +352,8 @@ void CompareTextDialog::SaveData()
    mCompareFiles = true;
    if (mNumFilesToCompare <= 0)
    {
-      wxMessageBox(wxT("There are no specific report files to compare.\n"
-                       "Please check file names to compare."),
+      wxMessageBox("There are no specific report files to compare.\n"
+                   "Please check file names to compare.",
                    wxT("GMAT Warning"));
       canClose = false;
       mCompareFiles = false;
@@ -455,7 +456,7 @@ void CompareTextDialog::OnButtonClick(wxCommandEvent& event)
       wxString filename =
          wxFileSelector("Choose a file to save", mBaseDirectory, "", "txt",
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
-                        wxSAVE);
+                        wxFD_SAVE); //wxSAVE);
       
       if (!filename.empty())
       {

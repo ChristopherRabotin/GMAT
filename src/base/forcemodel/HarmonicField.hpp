@@ -96,10 +96,10 @@ public:
     virtual bool            CheckQualifier(const std::string &qualifier,
                                            const std::string &forType = "");
     virtual bool            SetDegreeOrder(Integer degree, Integer order);
-    virtual bool            SetFilename(const std::string &fn);
+    virtual bool            SetFilename(const std::string &fn, bool validateOnly = false);
     virtual void            SetEopFile(EopFile *eopF);
 
-   // inherited from GmatBase
+    // inherited from GmatBase
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer     GetParameterID(const std::string &str) const;
     virtual Gmat::ParameterType
@@ -124,8 +124,10 @@ public:
     virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
     virtual void        SetForceOrigin(CelestialBody* toBody);
-                                     
-    bool                IsParameterReadOnly(const Integer id) const;
+    
+    virtual bool        IsParameterReadOnly(const Integer id) const;
+    virtual bool        IsParameterValid(const Integer id, const std::string &value);
+    virtual bool        IsParameterValid(const std::string &label, const std::string &value);
     
     // constants defining maximum degree and order
     static const Integer HF_MAX_DEGREE = 360;

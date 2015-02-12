@@ -36,6 +36,7 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(CelestialBodyPanel, GmatPanel)
+   EVT_NOTEBOOK_PAGE_CHANGED (-1, CelestialBodyPanel::OnPageChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -53,13 +54,13 @@ CelestialBodyPanel::CelestialBodyPanel(wxWindow *parent, const wxString &name)
 {
    origCelestialBody = (CelestialBody*)
       theGuiInterpreter->GetConfiguredObject(name.c_str());
-           
+   
    bodyName = name.c_str();
    
    if (origCelestialBody)
    {
       isUserDefined = origCelestialBody->IsUserDefined();
-            
+      
       Create();
       Show();
    }
@@ -97,15 +98,17 @@ void CelestialBodyPanel::Create()
       cbNotebook->SetBackgroundColour(GetBackgroundColour());
       cbNotebook->SetForegroundColour(GetForegroundColour());
       
-      // create properties, orbit, and orientation panels
+      // create properties, orbit, orientation, and visualization panels
       properties       = new CelestialBodyPropertiesPanel(this, cbNotebook, theCelestialBody);
       orbit            = new CelestialBodyOrbitPanel(this, cbNotebook, theCelestialBody);
       orientation      = new CelestialBodyOrientationPanel(this, cbNotebook, theCelestialBody);
+      visualization    = new CelestialBodyVisualizationPanel(this, cbNotebook, theCelestialBody);
       
       // add panels to notebook
       cbNotebook->AddPage(properties, wxT("Properties"));
       cbNotebook->AddPage(orbit, wxT("Orbit"));
       cbNotebook->AddPage(orientation, wxT("Orientation"));
+      cbNotebook->AddPage(visualization, wxT("Visualization"));
       
       theMiddleSizer->Add(cbNotebook, 1, wxGROW, 1);  // 3?
    }
@@ -130,6 +133,7 @@ void CelestialBodyPanel::LoadData()
       properties->LoadData();
       orbit->LoadData();
       orientation->LoadData();
+      visualization->LoadData();
    }
    catch (BaseException &e)
    {
@@ -175,6 +179,11 @@ void CelestialBodyPanel::SaveData()
       orientation->SaveData();
       canClose = canClose && orientation->CanClosePanel();
    }
+   if (visualization->IsDataChanged())
+   {
+      visualization->SaveData();
+      canClose = canClose && visualization->CanClosePanel();
+   }
    
    if (!canClose)   // why do this???? spacecraft panel did this ....
    {
@@ -188,7 +197,7 @@ void CelestialBodyPanel::SaveData()
 }
 
 //------------------------------------------------------------------------------
-// void OnPageChange(wxCommandEvent &event)
+// void OnPageChange(wxNotebookEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Handles the event triggered when the user change the page.
@@ -196,10 +205,40 @@ void CelestialBodyPanel::SaveData()
  * @param <event>  the handled event
  */
 //------------------------------------------------------------------------------
-void CelestialBodyPanel::OnPageChange(wxCommandEvent &event)
+void CelestialBodyPanel::OnPageChange(wxNotebookEvent &event)
 {
-   properties->LoadData();
-   orbit->LoadData();
-   orientation->LoadData();
+   // Changed wxCommandEvent to wxNotebookEvent so that this method can be
+   // called when user changes the page. (LOJ: 2014.10.03)
+   
+   int selectedPage = event.GetSelection();
+   #ifdef DEBUG_PAGE_CHANGE
+   MessageInterface::ShowMessage
+      ("CelestialBodyPanel::OnPageChange() called, selection = %d\n", selectedPage);
+   MessageInterface::ShowMessage
+      ("   page: %s\n", cbNotebook->GetPageText(selectedPage).WX_TO_C_STRING);
+   #endif
+   
+   // Commented out calling LoadData() since it is only needed when this panel is loaded.
+   // Added Navigate() so that the first editable item is not highlighed with wx3.0
+   // (Fix for GMT-4723 LOJ:2014.10.03)
+   if (selectedPage == 0)
+   {
+      //properties->LoadData();
+      properties->Navigate();
+   }
+   else if (selectedPage == 1)
+   {
+      //orbit->LoadData();
+      orbit->Navigate();
+   }
+   else if (selectedPage == 2)
+   {
+      //orientation->LoadData();
+      orientation->Navigate();
+   }
+   else if (selectedPage == 3)
+   {
+      visualization->Navigate();
+   }
 }
 

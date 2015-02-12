@@ -73,7 +73,7 @@ ReportFilePanel::ReportFilePanel(wxWindow *parent, wxString reportName)
       // show error message
       MessageInterface::ShowMessage
          ("**** ERROR **** ReportFilePanel:Create() the running ReportFile "
-          "\"%s\" is NULL\n", reportName.c_str());
+          "\"%s\" is NULL\n", reportName.WX_TO_C_STRING);
    }
    
 }
@@ -107,7 +107,7 @@ void ReportFilePanel::Create()
                         wxMouseEventHandler(ReportFilePanel::OnRightMouseDown), NULL, this);
    
    // set font
-   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetScriptFont() );
    // create popup menu
    mPopupMenu = new wxMenu();
    mPopupMenu->Append(ID_MENU_COPY, "Copy\tCtrl+C");

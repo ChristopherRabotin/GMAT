@@ -13,7 +13,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "TsPlotCanvas.hpp"
 #include "MessageInterface.hpp"
 #include "TsPlotOptionsDialog.hpp"
@@ -64,7 +63,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    axisLabelSize  (12),
    plotPens       (NULL),
    plotDependent  (NULL),
-   xDataName      ("X Data"),
+   //xDataName      ("X Data"),
    filename       ("PlotData.txt"),
    plotTitle      (name),
    xLabel         (""),
@@ -165,12 +164,17 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 
 void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 {
+   #ifdef DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("==> TsPlotCanvas::OnPaint() entered, dataUpdated = %d\n", dataUpdated);
+   #endif
+   
    // On linux, this line floods the processor with messages.  So for
    // platforms that are not using GTK, refresh here
    #ifndef __WXGTK__
       wxWindow::Refresh(false);
    #endif
-
+   
    wxPaintDC dc(this);
    wxCoord w, h;
    dc.GetSize(&w, &h);
@@ -182,12 +186,17 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
       legendRect.y = h - 5;
 
    bool drawAll = false;
-
-   wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
+   
+   // wxRegionIterator is not used here so commented out (LOJ: 2014.10.10)
+   //wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
    if (!dataUpdated)
       drawAll = true;
-
+   
    Refresh(dc, drawAll);
+   
+   #ifdef DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage("==> TsPlotCanvas::OnPaint() leaving\n");
+   #endif
 }
 
 
@@ -264,7 +273,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       }
       if (event.Dragging())
       {
+         #if wxCHECK_VERSION(3, 0, 0)
+         wxRasterOperationMode logfun = dc.GetLogicalFunction();
+         #else
          int logfun = dc.GetLogicalFunction();
+         #endif
+         
          dc.SetLogicalFunction(wxINVERT);
          if (zooming)
          {
@@ -335,7 +349,11 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          if (zooming)
          {
             // First clear the rubberband, in case no zoom is made
+            #if wxCHECK_VERSION(3, 0, 0)
+            wxRasterOperationMode logfun = dc.GetLogicalFunction();
+            #else
             int logfun = dc.GetLogicalFunction();
+            #endif
             dc.SetLogicalFunction(wxINVERT);
             dc.DrawLine(mouseRect.x, mouseRect.y, mouseRect.x, oldY);
             dc.DrawLine(mouseRect.x, mouseRect.y, oldX, mouseRect.y);
@@ -388,9 +406,14 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
       top = 30;
    else
       top = 20;
-
+   
    Rescale(dc);
-
+   
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("TsPlotCanvas::Refresh() rescaled = %d\n", rescaled);
+   #endif
+   
    // Set region colors
    if (rescaled || drawAll)
    {
@@ -432,7 +455,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 
    if (hasGrid && (rescaled || drawAll))
       DrawGrid(dc);
-
+   
    PlotData(dc);
 
    if (rescaled || drawAll)
@@ -728,8 +751,8 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 
    for (j = 0; j < labelCount; ++j)
    {
-	  dc.SetTextForeground(data[j]->GetColour(0));
-      label = _T(names[j].c_str());
+      dc.SetTextForeground(data[j]->GetColour(0));
+      label = names[j];
       xloc = legendRect.x + markerReserve + 6;
       yloc = legendRect.y + (h+1)*j + 4;
       dc.DrawText(label, xloc, yloc);
@@ -752,17 +775,17 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
 // Data manipulation methods
 //==============================================================================
 
-void TsPlotCanvas::SetDataName(const std::string &dataName)
+void TsPlotCanvas::SetDataName(const wxString &dataName)
 {
    #ifdef DEBUG_INTERFACE
-      MessageInterface::ShowMessage("Adding data named %s\n", dataName.c_str());
+   MessageInterface::ShowMessage("Adding data named %s\n", dataName.c_str());
    #endif
-
+   
    names.push_back(dataName);
 }
 
 
-void TsPlotCanvas::SetLabel(const std::string &dataName,
+void TsPlotCanvas::SetLabel(const wxString &dataName,
                             const PlotComponents which)
 {
    switch (which)
@@ -1119,7 +1142,7 @@ void TsPlotCanvas::ToggleLegend(wxCommandEvent& event)
 
 void TsPlotCanvas::SetOptions(wxCommandEvent& event)
 {
-   TsPlotOptionsDialog dlg(xName, yName, this, -1, "Plot options");
+   TsPlotOptionsDialog dlg(xName.c_str(),yName.c_str(),this, -1, "Plot options");
    dlg.SetPlotTitle(plotTitle);
    dlg.SetXLabel(xLabel);
    dlg.SetYLabel(yLabel);

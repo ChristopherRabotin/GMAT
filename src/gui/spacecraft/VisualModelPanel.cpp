@@ -74,6 +74,12 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
                        Spacecraft *spacecraft, SolarSystem *solarsystem)
    : wxPanel(parent)
 {
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel() constructor entered, spacecraft=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
+   
    // initalize data members
    theScPanel = scPanel;
    theGuiManager = GuiItemManager::GetInstance();
@@ -81,10 +87,27 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
    theSolarSystem = solarsystem;
    
    FileManager *fm = FileManager::Instance();
-   modelPath = wxT(fm->GetPathname("MODEL_PATH").c_str());
+   try
+   {
+      modelPath = wxString(fm->GetPathname("VEHICLE_MODEL_PATH").c_str());
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+   }
+   
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage("   modelPath = '%s'\n", modelPath.WX_TO_C_STRING);
+   #endif
    
    Create();
    LoadData();
+   
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel() constructor leaving, spacecraft=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
 }
 
 
@@ -145,7 +168,7 @@ void VisualModelPanel::Create()
 
    // A box containing the file loader
    wxStaticBox *filenameBox =
-      new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("File Name"));
+      new wxStaticBox(this, ID_STATIC_ELEMENT, wxString("File Name"));
    wxStaticBoxSizer *filenameSizer =
       new wxStaticBoxSizer(filenameBox, wxVERTICAL);
 
@@ -164,23 +187,23 @@ void VisualModelPanel::Create()
 
    // Box and sizer containing the rotation sizer
    wxStaticBox *rotationBox =
-      new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Rotation"));
+      new wxStaticBox(this, ID_STATIC_ELEMENT, wxString("Rotation"));
    wxStaticBoxSizer *rotationOuterSizer =
       new wxStaticBoxSizer(rotationBox, wxVERTICAL);
    // Box and sizer containing the translation sizer
    wxStaticBox *translationBox =
-      new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Translation"));
+      new wxStaticBox(this, ID_STATIC_ELEMENT, wxString("Translation"));
    wxStaticBoxSizer *translationOuterSizer =
       new wxStaticBoxSizer(translationBox, wxVERTICAL);
    // Box and sizer containing the scale sizer
    wxStaticBox *scaleBox =
-      new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Scale"));
+      new wxStaticBox(this, ID_STATIC_ELEMENT, wxString("Scale"));
    wxStaticBoxSizer *scaleOuterSizer =
       new wxStaticBoxSizer(scaleBox, wxVERTICAL);
 
    // Box, panel, and sizers for the canvas on the right
    wxStaticBox *canvasBox =
-      new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Display"));
+      new wxStaticBox(this, ID_STATIC_ELEMENT, wxString("Display"));
    wxStaticBoxSizer *rightSizer =
       new wxStaticBoxSizer(canvasBox, wxVERTICAL);
    wxPanel *canvasPanel =
@@ -191,14 +214,14 @@ void VisualModelPanel::Create()
    canvasPanel->SetSizer(canvasSizer);
    modelCanvas =
       new VisualModelCanvas(canvasPanel, currentSpacecraft, ID_CANVAS, wxDefaultPosition, wxDefaultSize,
-      wxT("Visual Model Canvas"), WX_GL_DOUBLEBUFFER);
+      wxString("Visual Model Canvas"), WX_GL_DOUBLEBUFFER);
    // Add the canvas to the sizer and set its size
    modelCanvas->SetSizeHints(300, 350);
 
    // The "Show Earth" button
    showEarthButton =
-      new wxButton(this, ID_EARTH_BUTTON, wxT("Show Earth"));
-	showEarthButton->SetToolTip(wxT("Show a wireframe Earth for size reference"));
+      new wxButton(this, ID_EARTH_BUTTON, wxString("Show Earth"));
+	showEarthButton->SetToolTip(wxString("Show a wireframe Earth for size reference"));
 
    // Text and button for the file loader
    modelTextCtrl =
@@ -411,10 +434,10 @@ void VisualModelPanel::LoadData()
    #ifdef DEBUG_PANEL_LOAD
    MessageInterface::ShowMessage
       ("VisualModelPanel::LoadData() entered.   modelFile() = '%s'\n",
-       modelFile().c_str());
+       modelFile.c_str());
    #endif
    
-   modelTextCtrl->SetValue(wxT(modelFile.c_str()));
+   modelTextCtrl->SetValue(wxString(modelFile.c_str()));
    
    Real x,y,z;
    x = currentSpacecraft->GetRealParameter(currentSpacecraft->GetParameterID("ModelOffsetX"));
@@ -807,8 +830,9 @@ void VisualModelPanel::OnBrowseButton(wxCommandEvent& event)
 //   wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
 //      wxT("3DS and POV files (*.3ds;*.pov)|*.3ds;*.pov"), wxOPEN);
    wxFileDialog fileDialog(this, wxT("Please select a model."), modelPath, wxEmptyString,
-      wxT("3DS files (*.3ds)|*.3ds"), wxOPEN);
-   
+                           wxT("3DS files (*.3ds)|*.3ds"),
+                           gmatFD_OPEN);
+
    // If it succeeded...
    if (fileDialog.ShowModal() == wxID_OK)
    {

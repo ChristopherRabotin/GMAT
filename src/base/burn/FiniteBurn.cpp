@@ -187,7 +187,7 @@ void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
 
 
 //------------------------------------------------------------------------------
-//  bool Fire(Real *burnData, Real epoch)
+//  bool Fire(Real *burnData, Real epoch, bool backwards)
 //------------------------------------------------------------------------------
 /**
  * Fire does not currently perform any action for FiniteBurn objects.  The 
@@ -202,11 +202,13 @@ void FiniteBurn::SetSpacecraftToManeuver(Spacecraft *sat)
  *                     burnData[2]  dVz/dt
  *                     burnData[3]  dM/dt
  * @param <epoch>    Epoch of the burn fire
+ * @param backwards  Flag used by impulsive burns to indicate application as if
+ *                   in a backprop
  *
  * @return true on success; throws on failure.
  */
 //------------------------------------------------------------------------------
-bool FiniteBurn::Fire(Real *burnData, Real epoch)
+bool FiniteBurn::Fire(Real *burnData, Real epoch, bool /*backwards*/)
 {
    #ifdef DEBUG_FINITEBURN_FIRE
       MessageInterface::ShowMessage
@@ -574,7 +576,28 @@ bool FiniteBurn::SetStringParameter(const Integer id, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-//  Real SetStringParameter(const Integer id, const Real value,
+//  Real SetStringParameter(const Integer id, const char *value,
+//                          const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a specific std::string element in an array.
+ *
+ * @param <id>    Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * @param <index> Index for the element
+ *
+ * @return true on success
+ */
+//------------------------------------------------------------------------------
+bool FiniteBurn::SetStringParameter(const Integer id, const char *value,
+                                    const Integer index)
+{
+   return SetStringParameter(id, std::string(value), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real SetStringParameter(const Integer id, const std::string &value,
 //                          const Integer index)
 //------------------------------------------------------------------------------
 /**

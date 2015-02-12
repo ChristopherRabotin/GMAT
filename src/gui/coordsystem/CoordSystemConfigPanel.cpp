@@ -178,7 +178,7 @@ void CoordSystemConfigPanel::SaveData()
       ("Entering CoordSystemConfigPanel::SaveData() .....\n");
    #endif
    canClose = true;
-   std::string originName = originComboBox->GetValue().Trim().c_str();
+   std::string originName = originComboBox->GetValue().Trim().WX_TO_STD_STRING;
    
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
@@ -190,9 +190,9 @@ void CoordSystemConfigPanel::SaveData()
       //-------------------------------------------------------
       if ((mEpochChanged) && (mCoordPanel->GetEpochTextCtrl()->IsEnabled()))
       {
-         std::string savedEpoch = (mCoordPanel->epochValue).c_str();
+         std::string savedEpoch = (mCoordPanel->epochValue).WX_TO_STD_STRING;
          Real epoch;
-         std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
+         std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().WX_TO_STD_STRING;
          #if DEBUG_COORD_PANEL_SAVE
          MessageInterface::ShowMessage("Epoch data has been changed!!!!\n");
          MessageInterface::ShowMessage

@@ -683,8 +683,8 @@ void MdiChildViewFrame::OnPlotClose(wxCloseEvent &event)
    else
    {
       int answer =
-         wxMessageBox(wxT("GMAT is running the the animation.\n"
-                          "Are you sure you want to stop the animation and close?"),
+         wxMessageBox(wxString("GMAT is running the the animation.\n"
+                               "Are you sure you want to stop the animation and close?"),
                       wxT("GMAT Warning"), wxYES_NO);
       
       if (answer == wxYES)

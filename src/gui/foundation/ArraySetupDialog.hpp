@@ -69,8 +69,10 @@ private:
    void OnComboBoxChange(wxCommandEvent& event);
    void OnButtonClick(wxCommandEvent& event);
    void OnGridCellChange(wxGridEvent& event);
+   void OnGridTabbing(wxGridEvent& event);
    
    void UpdateCellValue();
+   bool CheckCellValue(Real &rval, int row, int col, const char *str);
    bool CheckCellValue(Real &rval, int row, int col, const std::string &str);
    
    DECLARE_EVENT_TABLE();

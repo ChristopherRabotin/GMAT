@@ -170,6 +170,7 @@ public:
    // hidden commands (not in menu)
    void ClearHiddenCommands();
    void AddHiddenCommand(const std::string &cmd);
+   bool IsHiddenCommand(const char *cmd);
    bool IsHiddenCommand(const std::string &cmd);
    void RemoveHiddenCommand(const std::string &cmd);
    const StringArray& GetHiddenCommands();

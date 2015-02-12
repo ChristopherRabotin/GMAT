@@ -129,10 +129,8 @@ void BurnThrusterPanel::Create()
    #endif
 
    #if __WXMAC__
-   int buttonWidth = 40;
    int otherTextWidth = 150;
    #else
-   int buttonWidth = 25;
    int otherTextWidth = 150;
    #endif
 
@@ -142,14 +140,14 @@ void BurnThrusterPanel::Create()
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
-   pConfig->SetPath(wxT("/Burn Thruster"));
+   pConfig->SetPath(gmatwxT("/Burn Thruster"));
    
    //-----------------------------------------------------------------
    // coordinate system items
    //-----------------------------------------------------------------
    // Coordinate Systems 
    wxStaticText *coordSysLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Coordinate System"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Coordinate System"));
    coordSysComboBox  =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
@@ -158,7 +156,7 @@ void BurnThrusterPanel::Create()
    coordSysComboBox->Insert("Local", 0);
    
    // Origin
-   originLabel = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Origin"));
+   originLabel = new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Origin"));
    originComboBox =
       theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX,
                                               wxSize(150,-1));
@@ -168,10 +166,10 @@ void BurnThrusterPanel::Create()
    StringArray axesLabels = theObject->GetPropertyEnumStrings("Axes");
    wxArrayString wxAxesLabels = ToWxArrayString(axesLabels);
    
-   axisLabel = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Axes"));
+   axisLabel = new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Axes"));
    
    axesComboBox = 
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+      new wxComboBox(this, ID_COMBOBOX, gmatwxT(""), wxDefaultPosition, 
                      wxSize(150,-1), wxAxesLabels, wxCB_DROPDOWN|wxCB_READONLY);
    axesComboBox->SetSelection(0);
    axesComboBox->SetToolTip(pConfig->Read(_T("AxesHint")));
@@ -199,29 +197,29 @@ void BurnThrusterPanel::Create()
    //-----------------------------------------------------------------
    
    // ThrustDirection1
-   XUnitLabel = new wxStaticText(this, ID_TEXT, wxT(""));
-   XLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"1"));
+   XUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
+   XLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"1"));
    elem1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    elem1TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection1Hint")));
    
    // ThrustDirection2
    YUnitLabel =
-      new wxStaticText(this, ID_TEXT, wxT(""));
+      new wxStaticText(this, ID_TEXT, gmatwxT(""));
    YLabel =
-      new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"2"),
+      new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"2"),
                         wxDefaultPosition,wxDefaultSize, 0);
    elem2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    elem2TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection2Hint")));
    
    // ThrustDirection3
-   ZUnitLabel = new wxStaticText(this, ID_TEXT, wxT(""));
-   ZLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"3"));
+   ZUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
+   ZLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"3"));
    elem3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    elem3TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection3Hint")));
    
@@ -232,17 +230,17 @@ void BurnThrusterPanel::Create()
    {
       // Thruster Duty Cycle
       dutyCycleLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Duty "GUI_ACCEL_KEY"Cycle"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Duty "GUI_ACCEL_KEY"Cycle"));
       dutyCycleTextCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       dutyCycleTextCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
       
       // Thruster Scale Factor
       scaleFactorLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Thrust "GUI_ACCEL_KEY"Scale Factor"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Scale Factor"));
       scaleFactorTextCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       scaleFactorTextCtrl->SetToolTip(pConfig->Read(_T("ThrustScaleFactorHint")));
    }
@@ -281,13 +279,13 @@ void BurnThrusterPanel::Create()
    //-----------------------------------------------------------------
    // Decrement mass
    decMassCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT(GUI_ACCEL_KEY"Decrement Mass"),
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT(GUI_ACCEL_KEY"Decrement Mass"),
                      wxDefaultPosition, wxSize(-1, -1), bsize);
    decMassCheckBox->SetToolTip(pConfig->Read(_T("DecrementMassHint")));
    
    //Tank
    tankLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Tank"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Tank"));
    tankComboBox =
       theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    tankComboBox->SetToolTip(pConfig->Read(_T("TankHint")));
@@ -299,33 +297,33 @@ void BurnThrusterPanel::Create()
    if (theObject->IsOfType(Gmat::IMPULSIVE_BURN))
    {
       ispLabel =
-         new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Isp"));
+         new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Isp"));
       ispTextCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       ispTextCtrl->SetToolTip(pConfig->Read(_T("IspHint")));
       ispUnit =
-         new wxStaticText(this, ID_TEXT, wxT(" s"));
+         new wxStaticText(this, ID_TEXT, gmatwxT(" s"));
    }
    
    // Gravitational Acceleration
    gravityAccelLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"GravitationalAccel"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"GravitationalAccel"));
    gravityAccelTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    gravityAccelTextCtrl->SetToolTip(pConfig->Read(_T("GravitationalAccelHint")));
    gravityAccelUnit =
-      new wxStaticText(this, ID_TEXT, wxT(" m/s^2"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(" m/s^2"));
    
    // Coefficients for Thruster only
    if (theObject->IsOfType(Gmat::THRUSTER))
    {
-//      cCoefButton = new wxButton(this, ID_BUTTON, wxT("Edit "GUI_ACCEL_KEY"Thruster Coef."));
+//      cCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Thruster Coef."));
 //      cCoefButton->SetToolTip(pConfig->Read(_T("EditThrusterCoefficientHint")));
-//      kCoefButton = new wxButton(this, ID_BUTTON, wxT("Edit "GUI_ACCEL_KEY"Impulse Coef."));
+//      kCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Impulse Coef."));
 //      kCoefButton->SetToolTip(pConfig->Read(_T("EditImpulseCoefficientHint")));
-      configButton = new wxButton(this, ID_BUTTON, wxT(""GUI_ACCEL_KEY"Configure Polynomials"));
+      configButton = new wxButton(this, ID_BUTTON, gmatwxT(""GUI_ACCEL_KEY"Configure Polynomials"));
       configButton->SetToolTip(pConfig->Read(_T("ConfigPolynomialsHint")));
    }
    
@@ -376,7 +374,7 @@ void BurnThrusterPanel::Create()
       electricBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Config.");
       // Thrust Model
       thrustModelTxt =
-         new wxStaticText( this, ID_TEXT, wxT("Thrust "GUI_ACCEL_KEY"Model"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Model"),
                            wxDefaultPosition, wxDefaultSize, 0);
       StringArray thrustModels = theObject->GetPropertyEnumStrings("ThrustModel");
       Integer numModels = thrustModels.size();
@@ -385,56 +383,56 @@ void BurnThrusterPanel::Create()
          thrustModelArray[ii] = thrustModels[ii].c_str();
 
       thrustModelCB =
-         new wxComboBox( this, ID_COMBOBOX, wxT(thrustModelArray[0]),
+         new wxComboBox( this, ID_COMBOBOX, gmatwxT(thrustModelArray[0]),
             wxDefaultPosition, wxSize(180,-1), numModels, thrustModelArray,
             wxCB_DROPDOWN|wxCB_READONLY );
       thrustModelCB->SetToolTip(pConfig->Read(_T("ThrustModelHint")));
 
       // Minimum and Maximum Usable Power
       minPowerTxt =
-         new wxStaticText( this, ID_TEXT, wxT("Mi"GUI_ACCEL_KEY"nimum Usable Power"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Mi"GUI_ACCEL_KEY"nimum Usable Power"),
                            wxDefaultPosition, wxDefaultSize, 0);
       maxPowerTxt =
-         new wxStaticText( this, ID_TEXT, wxT("Ma"GUI_ACCEL_KEY"ximum Usable Power"),
+         new wxStaticText( this, ID_TEXT, gmatwxT("Ma"GUI_ACCEL_KEY"ximum Usable Power"),
                            wxDefaultPosition, wxDefaultSize, 0);
       minPowerTxtCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
                         wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       maxPowerTxtCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
                         wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
       minPowerUnits =
-         new wxStaticText(this, ID_TEXT, wxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
+         new wxStaticText(this, ID_TEXT, gmatwxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
       maxPowerUnits =
-         new wxStaticText(this, ID_TEXT, wxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
+         new wxStaticText(this, ID_TEXT, gmatwxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
 
       // Efficiency and ISP and Constant Thrust
       efficiencyTxt =
-         new wxStaticText( this, ID_TEXT, wxT(""GUI_ACCEL_KEY"Fixed Efficiency"),
+         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Fixed Efficiency"),
                            wxDefaultPosition, wxDefaultSize, 0);
       ispTxt =
-         new wxStaticText( this, ID_TEXT, wxT(""GUI_ACCEL_KEY"Isp"),
+         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Isp"),
                            wxDefaultPosition, wxDefaultSize, 0);
       constantThrustTxt =
-         new wxStaticText( this, ID_TEXT, wxT(""GUI_ACCEL_KEY"Constant Thrust"),
+         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Constant Thrust"),
                            wxDefaultPosition, wxDefaultSize, 0);
       efficiencyTxtCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
                         wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       ispTxtCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
                         wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       constantThrustTxtCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
                         wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
       efficiencyUnits =
-         new wxStaticText(this, ID_TEXT, wxT(""), wxDefaultPosition, wxDefaultSize, 0);
+         new wxStaticText(this, ID_TEXT, gmatwxT(""), wxDefaultPosition, wxDefaultSize, 0);
       ispUnits =
-         new wxStaticText(this, ID_TEXT, wxT("s"), wxDefaultPosition, wxDefaultSize, 0);
+         new wxStaticText(this, ID_TEXT, gmatwxT("s"), wxDefaultPosition, wxDefaultSize, 0);
       constantThrustUnits =
-         new wxStaticText(this, ID_TEXT, wxT("N"), wxDefaultPosition, wxDefaultSize, 0);
+         new wxStaticText(this, ID_TEXT, gmatwxT("N"), wxDefaultPosition, wxDefaultSize, 0);
 
       wxFlexGridSizer *electricSizer = new wxFlexGridSizer(3, 0, 0);
       electricSizer->Add(thrustModelTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
@@ -557,7 +555,7 @@ void BurnThrusterPanel::LoadData()
       else
       {
          tankName = tanks[0];
-         tankComboBox->SetValue(tankName.c_str());
+         tankComboBox->SetValue(STD_TO_WX_STRING(tankName.c_str()));
          isTankEmpty = false;
       }
       
@@ -754,13 +752,13 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
       {
          // Origin
          paramID = theObject->GetParameterID("Origin");
-         theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
+         theObject->SetStringParameter(paramID, originComboBox->GetValue().WX_TO_STD_STRING);
          
          // Axes
          paramID = theObject->GetParameterID("Axes");
-         theObject->SetStringParameter(paramID, axesComboBox->GetValue().c_str());
+         theObject->SetStringParameter(paramID, axesComboBox->GetValue().WX_TO_STD_STRING);
 
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -805,7 +803,7 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
          
          if (theObject->TakeAction("ClearTanks", ""))
             if (tankName != "")
-               theObject->SetStringParameter(paramID, tankName.c_str());
+               theObject->SetStringParameter(paramID, tankName);
       }
 
       if (theObject->IsOfType(Gmat::THRUSTER))
@@ -951,7 +949,7 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    else if (event.GetEventObject() == tankComboBox)
    {
       isTankChanged = true;
-      tankName = tankComboBox->GetStringSelection().c_str();
+      tankName = tankComboBox->GetStringSelection().WX_TO_STD_STRING;
       if (tankName == "No Fuel Tank Selected")
          tankName = "";
       
@@ -964,11 +962,11 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    }
    else if (event.GetEventObject() == axesComboBox)
    {
-      std::string csName = coordSysComboBox->GetStringSelection().c_str();
-
+      std::string csName = coordSysComboBox->GetStringSelection().WX_TO_STD_STRING;
+      
       if (csName == "Local")
       {
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -1094,7 +1092,7 @@ void BurnThrusterPanel::UpdateOriginAxes()
       axisLabel->Enable();
       axesComboBox->Enable();
 
-      std::string axisValue = axesComboBox->GetValue().c_str();
+      std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
 
       if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
       {

@@ -1272,6 +1272,15 @@ bool OrbitView::SetStringParameter(const Integer id, const std::string &value)
    }
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool OrbitView::SetStringParameter(const std::string &label,
+                                   const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const std::string &label, const std::string &value)

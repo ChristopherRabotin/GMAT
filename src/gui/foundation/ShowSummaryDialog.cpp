@@ -109,7 +109,7 @@ void ShowSummaryDialog::Create()
 
    // label for coordinate system
    wxStaticText *coordSysStaticText = new wxStaticText( this, ID_CS_TEXT,
-      wxT(GUI_ACCEL_KEY"Coordinate System"), wxDefaultPosition, wxDefaultSize, 0 );
+      GUI_ACCEL_KEY"Coordinate System", wxDefaultPosition, wxDefaultSize, 0 );
    coordSysComboBox =theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
 
@@ -150,7 +150,7 @@ void ShowSummaryDialog::Create()
       // increase text size on Windows(loj: 2009.02.05)
       theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                                   wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
-      theSummary->SetFont(GmatAppData::Instance()->GetFont() );
+      theSummary->SetFont(GmatAppData::Instance()->GetScriptFont() );
       theMiddleSizer->Add(coordSizer, 0, wxGROW|wxALL, 3);
       theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
    }
@@ -214,7 +214,7 @@ void ShowSummaryDialog::ResetData()
 //------------------------------------------------------------------------------
 void ShowSummaryDialog::OnComboBoxChange(wxCommandEvent& event)
 {
-   std::string coordSysStr  = coordSysComboBox->GetValue().c_str();
+   std::string coordSysStr  = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    wxString    text         = "Summary not yet available for this panel";
 
    #ifdef DEBUG_CMD_SUMMARY_COMBOBOX
@@ -267,7 +267,7 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
 {
    CoordinateSystem *tmpCS = NULL;
    SpacePoint       *origin = NULL;
-   std::string      currentCS = coordSysComboBox->GetValue().c_str();
+   std::string      currentCS = coordSysComboBox->GetValue().WX_TO_STD_STRING;
    std::string      newCS     = currentCS;
    Integer          sz;
 
@@ -279,7 +279,7 @@ void ShowSummaryDialog::BuildValidCoordinateSystemList()
    StringArray coordSystemNames;
    wxArrayString csNames = coordSysComboBox->GetStrings();
    for (Integer ii = 0; ii < (Integer) csNames.GetCount(); ii++)
-      coordSystemNames.push_back((csNames.Item(ii)).c_str());
+      coordSystemNames.push_back(std::string((csNames.Item(ii)).c_str()));
    sz = (Integer) coordSystemNames.size();
 
    coordSysComboBox->Clear();

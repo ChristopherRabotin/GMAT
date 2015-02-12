@@ -22,16 +22,14 @@
 //------------------------------------------------------------------------------
 
 #include "CelestialBodyPropertiesPanel.hpp"
-//#include "GmatBaseException.hpp"
-//#include "GmatAppData.hpp"
 #include "GmatColorPanel.hpp"
 #include "MessageInterface.hpp"
-//#include "StringUtil.hpp"
 #include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
 #include <fstream>
 
 //#define DEBUG_CB_PROP_PANEL
+//#define DEBUG_LOAD_DATA
 //#define DEBUG_CB_PROP_SAVE
 
 
@@ -39,11 +37,9 @@
 // event tables for wxMac/Widgets
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(CelestialBodyPropertiesPanel, wxPanel)
-   EVT_BUTTON(ID_BUTTON_BROWSE, CelestialBodyPropertiesPanel::OnBrowseButton)
    EVT_TEXT(ID_TEXT_CTRL_MU, CelestialBodyPropertiesPanel::OnMuTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_EQRAD, CelestialBodyPropertiesPanel::OnEqRadTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_FLAT, CelestialBodyPropertiesPanel::OnFlatTextCtrlChange)
-   EVT_TEXT(ID_TEXT_CTRL_TEXTURE, CelestialBodyPropertiesPanel::OnTextureTextCtrlChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -71,11 +67,9 @@ CelestialBodyPropertiesPanel::CelestialBodyPropertiesPanel(GmatPanel *cbPanel,
    mu             (0.0),
    eqRad          (0.0),
    flat           (0.0),
-   textureMap     (""),
    muChanged      (false),
    eqRadChanged   (false),
    flatChanged    (false),
-   textureChanged (false),
    theCBPanel     (cbPanel)
 {
    guiManager     = GuiItemManager::GetInstance();
@@ -109,14 +103,11 @@ void CelestialBodyPropertiesPanel::SaveData()
    std::string strval;
    Real        tmpval;
    bool        realsOK   = true;
-   bool        stringsOK = true;
-   
    
    // don't do anything if no data has been changed.
    // note that dataChanged will be true if the user modified any combo box or
    // text ctrl, whether or not he/she actually changed the value
    #ifdef DEBUG_CB_PROP_SAVE
-
       MessageInterface::ShowMessage("Entering CBPropPanel::SaveData, dataChanged = %s\n",
          (dataChanged? "true" : "false"));
       MessageInterface::ShowMessage("    muChanged = %s\n",
@@ -125,8 +116,6 @@ void CelestialBodyPropertiesPanel::SaveData()
          (eqRadChanged? "true" : "false"));
       MessageInterface::ShowMessage("    flatChanged = %s\n",
          (flatChanged? "true" : "false"));
-      MessageInterface::ShowMessage("    textureChanged = %s\n",
-         (textureChanged? "true" : "false"));
    #endif
    if (!dataChanged) return;
    
@@ -170,45 +159,24 @@ void CelestialBodyPropertiesPanel::SaveData()
       std::string errmsg = "Please enter valid Real values before saving data.\n";
       MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
    }
-
-   if (textureChanged)
-   {
-      strval = textureTextCtrl->GetValue();
-      #ifdef DEBUG_CB_PROP_PANEL
-         MessageInterface::ShowMessage("textureChanged is true : %s\n",
-               strval.c_str());       
-      #endif
-      std::ifstream filename(strval.c_str());
-      
-      if (!filename)
-      {
-         std::string errmsg = "File \"" + strval;
-         errmsg += "\" does not exist.\n";
-         MessageInterface::PopupMessage(Gmat::ERROR_, errmsg);
-         stringsOK = false;
-      }
-      else
-      {
-         textureMap = strval;
-         filename.close();
-      } 
-   }
-
-   if (realsOK && stringsOK)
+   
+   if (realsOK)
    {
       #ifdef DEBUG_CB_PROP_PANEL
-         MessageInterface::ShowMessage("Reals and Strings are OK - setting them\n");
-         MessageInterface::ShowMessage(
-               "mu = %12.4f, eqRad = %12.4f, flat = %12.4f, textureMap = %s\n",
-               mu, eqRad, flat, textureMap.c_str());
+         MessageInterface::ShowMessage("Reals are OK - setting them\n");
+         MessageInterface::ShowMessage("mu = %12.4f, eqRad = %12.4f, flat = %12.4f\n",
+               mu, eqRad, flat);
          MessageInterface::ShowMessage("in Properties panel, body pointer is %p\n",
                theBody);
       #endif
-      theBody->SetGravitationalConstant(mu);
-      theBody->SetEquatorialRadius(eqRad);
-      theBody->SetFlattening(flat);
-      theBody->SetStringParameter(theBody->GetParameterID("TextureMapFileName"),
-                                  textureMap);
+
+      if (muChanged)
+         theBody->SetGravitationalConstant(mu);
+      if (eqRadChanged)
+         theBody->SetEquatorialRadius(eqRad);
+      if (flatChanged)
+         theBody->SetFlattening(flat);
+      
       dataChanged = false;
       ResetChangeFlags(true);
    }
@@ -217,7 +185,6 @@ void CelestialBodyPropertiesPanel::SaveData()
       canClose = false;
    }
    #ifdef DEBUG_CB_PROP_SAVE
-
       MessageInterface::ShowMessage("At end of CBPropPanel::SaveData, canClose = %s\n",
          (canClose? "true" : "false"));
    #endif
@@ -234,6 +201,11 @@ void CelestialBodyPropertiesPanel::SaveData()
 //------------------------------------------------------------------------------
 void CelestialBodyPropertiesPanel::LoadData()
 {
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage
+      ("CelestialBodyPropertiesPanel::LoadData() entered, body = '%s'\n",
+       theBody->GetName().c_str());
+   #endif
    try
    {
       mu         = theBody->GetGravitationalConstant();
@@ -247,16 +219,19 @@ void CelestialBodyPropertiesPanel::LoadData()
       flat       = theBody->GetFlattening();
       flatString = guiManager->ToWxString(flat);
       flatTextCtrl->SetValue(flatString);
-      
-      textureMap = theBody->GetStringParameter(theBody->GetParameterID("TextureMapFileName"));
-      textureTextCtrl->SetValue(textureMap.c_str());
-      
+            
       ResetChangeFlags();
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+   
+   #ifdef DEBUG_LOAD_DATA
+   MessageInterface::ShowMessage
+      ("CelestialBodyPropertiesPanel::LoadData() leaving, body = '%s'\n",
+       theBody->GetName().c_str());
+   #endif
 }
 
 
@@ -276,27 +251,19 @@ void CelestialBodyPropertiesPanel::LoadData()
 void CelestialBodyPropertiesPanel::Create()
 {
    int bSize     = 2;
-   #if __WXMAC__
-   int buttonWidth = 40;
-   #else
-   int buttonWidth = 25;
-   #endif
-
-   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
-
+   
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
    pConfig->SetPath(wxT("/Celestial Body Properties"));
-
+   
    // empty the temporary value strings
-   muString      = "";
-   eqRadString   = "";
-   flatString    = "";
-   textureString = "";
+   // muString      = "";
+   // eqRadString   = "";
+   // flatString    = "";
    
    // mu
-   muStaticText      = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Mu"),
+   muStaticText      = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Mu"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    muTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_MU, wxT(""),
                        wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -304,7 +271,7 @@ void CelestialBodyPropertiesPanel::Create()
    muUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km^3/sec^2"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    // eq. radius
-   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxT("Equatorial "GUI_ACCEL_KEY"Radius"),
+   eqRadStaticText      = new wxStaticText(this, ID_TEXT, wxString("Equatorial "GUI_ACCEL_KEY"Radius"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    eqRadTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_EQRAD, wxT(""),
                           wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
@@ -312,32 +279,20 @@ void CelestialBodyPropertiesPanel::Create()
    eqRadUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("km"),
                           wxDefaultPosition, wxSize(-1,-1), 0);
    // flattening
-   flatStaticText      = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Flattening"),
+   flatStaticText      = new wxStaticText(this, ID_TEXT, wxString(GUI_ACCEL_KEY"Flattening"),
                          wxDefaultPosition, wxSize(-1,-1), 0);
    flatTextCtrl        = new wxTextCtrl(this, ID_TEXT_CTRL_FLAT, wxT(""),
                          wxDefaultPosition, wxSize(150, -1),0,wxTextValidator(wxGMAT_FILTER_NUMERIC));
    flatTextCtrl->SetToolTip(pConfig->Read(_T("FlatteningHint")));
    flatUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT(""), // unitless
-                         wxDefaultPosition, wxSize(-1,-1), 0);
-   // texture map
-   textureStaticText = new wxStaticText(this, ID_TEXT, wxT("Te"GUI_ACCEL_KEY"xture Map File"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   textureTextCtrl   = new wxTextCtrl(this, ID_TEXT_CTRL_TEXTURE, wxT(""),
-                       wxDefaultPosition, wxSize(300,-1), 0);
-   textureTextCtrl->SetToolTip(pConfig->Read(_T("TextureMapFileHint")));
-   browseButton      = new wxBitmapButton(this, ID_BUTTON_BROWSE, 
-                       openBitmap, wxDefaultPosition,
-                       wxSize(buttonWidth, 20));
-   browseButton->SetToolTip(pConfig->Read(_T("BrowseTextureMapFileHint"), "Browse for file"));
+                         wxDefaultPosition, wxSize(-1,-1), 0);   
    
    // set the min width for one of the labels for each GmatStaticBoxSizer
    int minLabelSize = muStaticText->GetBestSize().x;
    minLabelSize = (minLabelSize < eqRadStaticText->GetBestSize().x) ? eqRadStaticText->GetBestSize().x : minLabelSize;
    minLabelSize = (minLabelSize < flatStaticText->GetBestSize().x) ? flatStaticText->GetBestSize().x : minLabelSize;
-   minLabelSize = (minLabelSize < textureStaticText->GetBestSize().x) ? textureStaticText->GetBestSize().x : minLabelSize;
-
+   
    eqRadStaticText->SetMinSize(wxSize(minLabelSize, eqRadStaticText->GetMinHeight()));
-   textureStaticText->SetMinSize(wxSize(minLabelSize, textureStaticText->GetMinHeight()));
    
    wxFlexGridSizer *cbPropGridSizer = new wxFlexGridSizer(3,0,0);
    cbPropGridSizer->Add(muStaticText,0, wxALIGN_LEFT|wxALL, bSize);
@@ -352,23 +307,12 @@ void CelestialBodyPropertiesPanel::Create()
    cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
    cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
    cbPropGridSizer->Add(20,20,0,wxALIGN_LEFT|wxALL, bSize);
-
-   wxFlexGridSizer *cbPropGridSizer2 = new wxFlexGridSizer(3,0,0);
-   cbPropGridSizer2->AddGrowableCol(1);
-   cbPropGridSizer2->Add(textureStaticText,0, wxALIGN_LEFT|wxALL, bSize);
-   cbPropGridSizer2->Add(textureTextCtrl,0, wxALIGN_LEFT|wxGROW, bSize);
-   cbPropGridSizer2->Add(browseButton,0, wxALIGN_CENTRE|wxALL, bSize);
+   
    GmatStaticBoxSizer *optionsSizer    = new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
-   optionsSizer->Add(cbPropGridSizer, 0, wxALIGN_LEFT|wxALL, bSize); 
-   optionsSizer->Add(cbPropGridSizer2, 0, wxALIGN_LEFT|wxGROW, bSize); 
+   optionsSizer->Add(cbPropGridSizer, 0, wxALIGN_LEFT|wxGROW, bSize); 
    
    pageSizer    = new GmatStaticBoxSizer(wxVERTICAL, this, "");
-   
-   // Create color panel
-   GmatColorPanel *colorPanel = new GmatColorPanel(this, theCBPanel, theBody);
-   
    pageSizer->Add(optionsSizer, 1, wxALIGN_LEFT|wxGROW, bSize); 
-   pageSizer->Add(colorPanel, 1, wxALIGN_CENTER|wxGROW, bSize); 
    
    this->SetAutoLayout(true);
    this->SetSizer(pageSizer);
@@ -391,13 +335,11 @@ void CelestialBodyPropertiesPanel::ResetChangeFlags(bool discardMods)
    muChanged      = false;
    eqRadChanged   = false;
    flatChanged    = false;
-   textureChanged = false;
    if (discardMods)
    {
       muTextCtrl->DiscardEdits();
       eqRadTextCtrl->DiscardEdits();
       flatTextCtrl->DiscardEdits();
-      textureTextCtrl->DiscardEdits();
    }
    dataChanged = false;
 }
@@ -445,7 +387,6 @@ void CelestialBodyPropertiesPanel::OnEqRadTextCtrlChange(wxCommandEvent &event)
       dataChanged    = true;
       theCBPanel->EnableUpdate(true);
    }
-
 }
 
 //------------------------------------------------------------------------------
@@ -466,57 +407,6 @@ void CelestialBodyPropertiesPanel::OnFlatTextCtrlChange(wxCommandEvent &event)
       flatChanged   = true;
       dataChanged   = true;
       theCBPanel->EnableUpdate(true);
-   }
-
-}
-
-//------------------------------------------------------------------------------
-// void OnTextureTextCtrlChange(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-/**
- * Handle the event triggered when the user modifies the texture filename
- * text box.
- *
- * @param <event>    the handled event
- *
- */
-//------------------------------------------------------------------------------
-void CelestialBodyPropertiesPanel::OnTextureTextCtrlChange(wxCommandEvent &event)
-{
-   if (textureTextCtrl->IsModified())
-   {
-      textureChanged  = true;
-      dataChanged     = true;
-      theCBPanel->EnableUpdate(true);
-   }
-
-}
-
-
-//------------------------------------------------------------------------------
-// void OnBrowseButton(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-/**
- * Handle the event triggered when the user selects the browse button.
- *
- * @param <event>    the handled event
- *
- */
-//------------------------------------------------------------------------------
-void CelestialBodyPropertiesPanel::OnBrowseButton(wxCommandEvent &event)
-{
-   wxString oldTexture = textureTextCtrl->GetValue();
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
-   if (dialog.ShowModal() == wxID_OK)
-   {
-      wxString fileName = (dialog.GetPath()).c_str();
-      if (!fileName.IsSameAs(oldTexture))
-      {
-         textureTextCtrl->SetValue(fileName);
-         textureChanged = true;
-         theCBPanel->EnableUpdate(true);
-         dataChanged = true;
-      }
    }
 }
 

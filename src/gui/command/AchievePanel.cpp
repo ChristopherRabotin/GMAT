@@ -189,10 +189,10 @@ void AchievePanel::LoadData()
       MessageInterface::ShowMessage("   tolerance=%s\n", toleranceValue.c_str());
       #endif
       
-      mSolverName = wxT(solverName.c_str());      
-      mGoalName = wxT(goalName.c_str());
-      mGoalValue = wxT(goalValue.c_str());
-      mTolerance = wxT(toleranceValue.c_str());
+      mSolverName = wxString(solverName.c_str());      
+      mGoalName = wxString(goalName.c_str());
+      mGoalValue = wxString(goalValue.c_str());
+      mTolerance = wxString(toleranceValue.c_str());
       
       mSolverComboBox->SetValue(mSolverName);
       mGoalNameTextCtrl->SetValue(mGoalName);

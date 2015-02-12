@@ -146,8 +146,8 @@ void MinimizePanel::LoadData()
       MessageInterface::ShowMessage("variable=%s\n", loadedVariableName.c_str());
       #endif
       
-      solverName = wxT(loadedSolverName.c_str());      
-      variableName = wxT(loadedVariableName.c_str());
+      solverName = wxString(loadedSolverName.c_str());      
+      variableName = wxString(loadedVariableName.c_str());
       
    }
    catch (BaseException &e)
@@ -176,7 +176,7 @@ void MinimizePanel::SaveData()
    
    if (mVarNameChanged)
    {
-      std::string varName = variableName.c_str();
+      std::string varName = variableName.WX_TO_STD_STRING;
       
       ObjectTypeArray objTypes;
       objTypes.push_back(Gmat::SPACE_POINT);

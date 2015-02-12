@@ -56,7 +56,7 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage
       ("SpacecraftPanel::SpacecraftPanel() entered. scName='%s', theGuiInterpreter=<%p>\n",
-       scName.c_str(), theGuiInterpreter);
+       scName.WX_TO_C_STRING, theGuiInterpreter);
    #endif
    
    theSpacecraft =
@@ -184,14 +184,17 @@ void SpacecraftPanel::Create()
    #ifdef __USE_SPICE__
       theSpicePanel = new SpicePanel
          (this, spacecraftNotebook, currentSpacecraft);
-   #endif
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   SpicePanel created\n");
+   #endif
    #endif
 
    theVisualModelPanel = new VisualModelPanel
       (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
-   
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   VisualModelPanel created\n");
+   #endif
+
    // Adding panels to notebook
    actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
@@ -207,6 +210,10 @@ void SpacecraftPanel::Create()
    spacecraftNotebook->AddPage( theVisualModelPanel , wxT("Visualization") );
    
    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
+   
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("SpacecraftPanel::Create() leaving\n");
+   #endif
 }
 
 

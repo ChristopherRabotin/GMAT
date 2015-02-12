@@ -34,6 +34,9 @@
 #include "Attitude.hpp"
 #include "SPADFileReader.hpp"
 
+// Declare forward reference
+class EphemManager;
+
 class GMAT_API Spacecraft : public SpaceObject
 {
 public:
@@ -49,6 +52,8 @@ public:
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
    
+   EphemManager*        GetEphemManager();
+
    std::string          GetModelFile();
    std::string          GetModelFileFullPath();
    int                  GetModelId();
@@ -85,6 +90,11 @@ public:
    // Get the Required Bus Power
    Real                 GetSpacecraftBusPower();
 
+   // Record the Spacecraft ephemeris in the background (needed by Event Location)
+   virtual void         RecordEphemerisData();
+   /// Load the recorded ephemeris and start up another file to continue recording
+   virtual void         ProvideEphemerisData();
+
 
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;
@@ -107,6 +117,8 @@ public:
    virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const char *name);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
                                          const std::string &name);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
@@ -148,6 +160,8 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
    virtual bool         SetStringParameter(const Integer id,
@@ -558,6 +572,8 @@ protected:
    SPADFileReader    *spadSRPReader;
    /// Body-fixed coordinate system used for SPAD SRP calculations
    CoordinateSystem  *spadBFCS;
+   /// The manager for the hidden ephemeris recording needed by EventLocation
+   EphemManager      *ephemMgr;
 
    /// Toggle to making Cart state dynamic; Integer to handle multiple includes
    Integer           includeCartesianState;
