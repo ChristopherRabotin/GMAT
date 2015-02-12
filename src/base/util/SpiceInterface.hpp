@@ -48,9 +48,9 @@
 extern "C"  
 {
 #include "SpiceUsr.h"    // for CSPICE routines
-#include "SpiceGF.h"     // for occultation
-#include "SpiceZfc.h"
-#include "SpiceZmc.h"
+//#include "SpiceGF.h"     // for occultation
+//#include "SpiceZfc.h"
+//#include "SpiceZmc.h"
 }
 
 #define MAX_LONG_MESSAGE_VALUE 1840
