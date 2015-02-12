@@ -1480,7 +1480,9 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DragForce::IsParameterReadOnly(const Integer id) const
 {
-   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX ||
+       id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE ||
+       id == CSSI_WEATHER_FILE || id == SCHATTEN_WEATHER_FILE)
    {
       if (atmosphereType == "Exponential")
          return true;
