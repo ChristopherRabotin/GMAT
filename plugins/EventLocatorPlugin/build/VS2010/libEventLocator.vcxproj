@@ -235,7 +235,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\..\Gmat3rdParty\cspice\include;..\..\src\base\include;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\locator;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\event;..\..\..\..\src\base\factory;..\..\..\..\src\base\hardware;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\Gmat3rdParty\cspice\include;..\..\src\base\include;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\locator;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\event;..\..\..\..\src\base\factory;..\..\..\..\src\base\hardware;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
@@ -248,7 +248,7 @@
       <DisableSpecificWarnings>4231;4251;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
