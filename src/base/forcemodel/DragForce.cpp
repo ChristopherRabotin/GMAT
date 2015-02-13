@@ -1493,7 +1493,15 @@ bool DragForce::IsParameterReadOnly(const Integer id) const
       if (atmosphereType == "Exponential")
          return true;
       else
-         return false;
+      {
+         if (bodyName == "Earth")
+            return false;
+
+         // Only support the CSSI file and Schatten file at the Earth
+         if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+            return false;
+         return true;
+      }
    }
    
    if (id == ATMOSPHERE_BODY || id == SOURCE_TYPE ||
