@@ -84,6 +84,11 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label, const Real value);
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -123,10 +128,14 @@ protected:
    std::string          stationId;
 
    // Added hardware of the ground station
-   StringArray	        hardwareNames;       // made changes by Tuan Nguyen
+   StringArray	         hardwareNames;       // made changes by Tuan Nguyen
    ObjectArray          hardwareList;        // made changes by Tuan Nguyen
-	
-	
+
+   /// Minimum elevation angle, in degrees
+   Real minElevationAngle;             
+   /// Visibility vector
+   Real az_el_visible[3];
+
 public:
    /// Published parameters for ground stations
    enum
