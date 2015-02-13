@@ -106,11 +106,15 @@ public:
 
 //   virtual Integer         GetEstimationParameterID(const std::string &param);
 //   virtual Integer         SetEstimationParameter(const std::string &param);
-   virtual bool            IsEstimationParameterValid(const Integer id);
-   virtual Integer         GetEstimationParameterSize(const Integer id);
-   virtual Real*           GetEstimationParameterValue(const Integer id);
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
 
-   virtual bool            IsValidID(const std::string &id);
+   virtual bool         IsValidID(const std::string &id);
+
+
+   Real*                IsValidElevationAngle(const Rvector6 &state_sez,
+                                              const Real minElevationEngle);
 
    DEFAULT_TO_NO_CLONES
 
@@ -119,7 +123,7 @@ protected:
    std::string          stationId;
 
    // Added hardware of the ground station
-   StringArray	         hardwareNames;       // made changes by Tuan Nguyen
+   StringArray	        hardwareNames;       // made changes by Tuan Nguyen
    ObjectArray          hardwareList;        // made changes by Tuan Nguyen
 	
 	
@@ -129,6 +133,7 @@ public:
    {
       STATION_ID = BodyFixedPointParamCount,
       ADD_HARDWARE,								// made changes by Tuan Nguyen
+      MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying measurement feasibility
       GroundStationParamCount,
    };
 
