@@ -1196,7 +1196,7 @@ bool OwnedPlot::SetBooleanParameter(const Integer id, const bool value)
  * @return true
  */
 //------------------------------------------------------------------------------
-bool OwnedPlot::Activate()
+bool OwnedPlot::Activate(bool)
 {
    PlotInterface::ActivateXyPlot(instanceName);
    return true;

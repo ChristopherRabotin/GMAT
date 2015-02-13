@@ -32,8 +32,10 @@
 #include "MessageInterface.hpp"
 #include "SubscriberException.hpp"
 #include "FileUtil.hpp"
+#include "StringUtil.hpp"
 
 //#define DEBUG_EPHEM_MANAGER
+//#define DEBUG_EM_COVERAGE
 
 /**
  * Manager for ephemeris recording for the specified object
@@ -56,7 +58,8 @@ EphemManager::EphemManager(bool deleteFiles) :
    ephemCount             (0),
    fileName               (""),
    recording              (false),
-   deleteTmpFiles         (deleteFiles)
+   deleteTmpFiles         (deleteFiles),
+   cover                  (NULL)
 {
 }
 
@@ -98,6 +101,9 @@ EphemManager::~EphemManager()
    }
    fileList.clear();
 
+   if (cover)
+      delete cover;
+
    #ifdef DEBUG_EPHEM_MANAGER
       MessageInterface::ShowMessage("Destructing EphemManager ... deleting ephemFile\n");
    #endif
@@ -130,7 +136,8 @@ EphemManager::EphemManager(const EphemManager& copy) :
    ephemCount             (0),
    fileName               (copy.fileName),
    recording              (copy.recording),
-   deleteTmpFiles         (copy.deleteTmpFiles)
+   deleteTmpFiles         (copy.deleteTmpFiles),
+   cover                  (NULL)
 {
 }
 
@@ -156,6 +163,7 @@ EphemManager& EphemManager::operator=(const EphemManager& copy)
    fileName                 = "";
    recording                = copy.recording;
    deleteTmpFiles           = copy.deleteTmpFiles;
+   cover                    = NULL;
 
    // @todo - what to do with the files already created here ... and what if the copy
    // is in the middle of recording?  need to check deleteTmpFiles flag?
@@ -188,6 +196,11 @@ bool EphemManager::Initialize()
 //------------------------------------------------------------------------------
 bool EphemManager::RecordEphemerisData()
 {
+   #ifdef DEBUG_EPHEM_MANAGER
+      MessageInterface::ShowMessage(
+            "Entering EphemManager::RecordEphemerisData for SC %s\n",
+            theObj->GetName().c_str());
+   #endif
    // If it's already recording, continue
    if (!ephemFile)
    {
@@ -238,6 +251,10 @@ bool EphemManager::RecordEphemerisData()
 
       // Subscribe to the data
       Publisher *pub = Publisher::Instance();
+      #ifdef DEBUG_EPHEM_MANAGER
+         MessageInterface::ShowMessage(
+               "In EphemManager::RecordEphemerisData, subscribing to publisher\n");
+      #endif
       pub->Subscribe(ephemFile);
 
       ephemCount++;
@@ -279,6 +296,204 @@ void EphemManager::StopRecording()
    recording = false;
 }
 
+//------------------------------------------------------------------------------
+// void GetCoverageWindow(SpiceCell* w, bool includeAll = true)
+//------------------------------------------------------------------------------
+void EphemManager::GetCoverageWindow(SpiceCell* w, bool includeAll)
+{
+   // @todo - most of this should be moved to SpiceInterface and
+   // made very general (for SPK, CK, etc.)
+   // Set SPICEDOUBLE_CELL cover
+//   if (cover) delete cover;
+   if (!spice)
+      spice = new SpiceInterface();
+   Spacecraft *theSc = (Spacecraft*) theObj;
+   Integer    forNaifId = theSc->GetIntegerParameter("NAIFId");
+
+   // Which files do we need to check?
+   StringArray inKernels = fileList;
+   if (includeAll)
+   {
+      StringArray inputKernels = theSc->GetStringArrayParameter("OrbitSpiceKernelName");
+      for (Integer ii = 0; ii < inputKernels.size(); ii++)
+         inKernels.push_back(inputKernels.at(ii));
+   }
+   #ifdef DEBUG_EM_COVERAGE
+      MessageInterface::ShowMessage("Entering GetCoverageWindow:\n");
+      MessageInterface::ShowMessage("   forNaifId = %d\n", forNaifId);
+      MessageInterface::ShowMessage("   kernels are:\n");
+      if (inKernels.empty())  MessageInterface::ShowMessage("   EMPTY!!!!\n");
+      else
+      {
+         for (unsigned int ii = 0; ii < inKernels.size(); ii++)
+            MessageInterface::ShowMessage("   %d    %s\n", (Integer) ii, inKernels.at(ii).c_str());
+      }
+   #endif
+   // first check to see if a kernel specified is not loaded; if not,
+   // try to load it
+   for (unsigned int ii = 0; ii < inKernels.size(); ii++)
+      if (!spice->IsLoaded(inKernels.at(ii)))   spice->LoadKernel(inKernels.at(ii));
+
+   SpiceInt         idSpice     = forNaifId;
+   SpiceInt         arclen      = 4;
+   SpiceInt         typlen      = 5;
+   bool             firstInt    = true;
+   bool             idOnKernel  = false;
+   ConstSpiceChar   *kernelName = NULL;
+   SpiceInt         objId       = 0;
+   SpiceInt         numInt      = 0;
+   SpiceChar        *kernelType;
+   SpiceChar        *arch;
+   SpiceDouble      b;
+   SpiceDouble      e;
+   Real             bA1;
+   Real             eA1;
+   SPICEINT_CELL(ids, 200);
+   SPICEDOUBLE_CELL(cover, 200000);
+   char             kStr[5] = "    ";
+   char             aStr[4] = "   ";
+
+   // look through each kernel
+   for (unsigned int ii = 0; ii < inKernels.size(); ii++)
+   {
+      #ifdef DEBUG_SPK_COVERAGE
+         MessageInterface::ShowMessage("Checking coverage for ID %d on kernel %s\n",
+               forNaifId, (inKernels.at(ii)).c_str());
+      #endif
+      // SPICE expects forward slashes for directory separators
+      std::string kName = GmatStringUtil::Replace(inKernels.at(ii), "\\", "/");
+      #ifdef DEBUG_SPK_COVERAGE
+         MessageInterface::ShowMessage("--- Setting kernel name to %s\n", kName.c_str());
+      #endif
+      kernelName = kName.c_str();
+      // check the type of kernel
+      arch        = aStr;
+      kernelType  = kStr;
+      getfat_c(kernelName, arclen, typlen, arch, kernelType);
+      if (failed_c())
+      {
+         ConstSpiceChar option[] = "LONG";
+         SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+         //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+         SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+         getmsg_c(option, numChar, err);
+         std::string errStr(err);
+         std::string errmsg = "Error determining type of kernel \"";
+         errmsg += inKernels.at(ii) + "\".  Message received from CSPICE is: [";
+         errmsg += errStr + "]\n";
+         reset_c();
+         delete [] err;
+         throw SubscriberException(errmsg);
+      }
+      // start with an empty cell
+      scard_c(0, &cover);   // reset the coverage cell
+
+      #ifdef DEBUG_SPK_COVERAGE
+         MessageInterface::ShowMessage("Kernel is of type %s\n",
+               kernelType);
+      #endif
+      // only deal with SPK kernels
+      if (eqstr_c( kernelType, "spk" ))
+      {
+         spkobj_c(kernelName, &ids);
+         // get the list of objects (IDs) for which data exists in the SPK kernel
+         for (SpiceInt jj = 0;  jj < card_c(&ids);  jj++)
+         {
+            objId = SPICE_CELL_ELEM_I(&ids,jj);
+            #ifdef DEBUG_SPK_COVERAGE
+               MessageInterface::ShowMessage("Kernel contains data for object %d\n",
+                     (Integer) objId);
+            #endif
+            // look to see if this kernel contains data for the object we're interested in
+            if (objId == idSpice)
+            {
+               idOnKernel = true;
+               break;
+            }
+         }
+         // only deal with kernels containing data for the object we're interested in
+         if (idOnKernel)
+         {
+            #ifdef DEBUG_SPK_COVERAGE
+               MessageInterface::ShowMessage("Checking kernel %s for data for object %d\n",
+                     (kernels.at(ii)).c_str(), (Integer) objId);
+            #endif
+//            scard_c(0, &cover);   // reset the coverage cell
+            spkcov_c (kernelName, idSpice, &cover);
+            if (failed_c())
+            {
+               ConstSpiceChar option[] = "LONG";
+               SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+               //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+               SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+               getmsg_c(option, numChar, err);
+               std::string errStr(err);
+               std::string errmsg = "Error determining coverage for SPK kernel \"";
+               errmsg += inKernels.at(ii) + "\".  Message received from CSPICE is: [";
+               errmsg += errStr + "]\n";
+               reset_c();
+               delete [] err;
+               throw SubscriberException(errmsg);
+            }
+            numInt = wncard_c(&cover);
+            // We assume that the intervals contained in the resulting window
+            // are in time order
+            firstInt = false; // ******
+            #ifdef DEBUG_SPK_COVERAGE
+               MessageInterface::ShowMessage("Number of intervals found =  %d\n",
+                     (Integer) numInt);
+            #endif
+//            if ((firstInt) && (numInt > 0))
+//            {
+//               wnfetd_c(&cover, 0, &b, &e);
+//               if (failed_c())
+//               {
+//                  ConstSpiceChar option[] = "LONG";
+//                  SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+//                  //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+//                  SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
+//                  getmsg_c(option, numChar, err);
+//                  std::string errStr(err);
+//                  std::string errmsg = "Error getting interval times for SPK kernel \"";
+//                  errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: [";
+//                  errmsg += errStr + "]\n";
+//                  reset_c();
+//                  delete [] err;
+//                  throw SubscriberException(errmsg);
+//               }
+//               start    = SpiceTimeToA1(b);
+//               end      = SpiceTimeToA1(e);
+//               firstInt = false;
+//            }
+//            for (SpiceInt jj = 0; jj < numInt; jj++)
+//            {
+//               wnfetd_c(&cover, jj, &b, &e);
+//               bA1 = SpiceTimeToA1(b);
+//               eA1 = SpiceTimeToA1(e);
+//               if (bA1 < start)  start = bA1;
+//               if (eA1 > end)    end   = eA1;
+//            }
+//         }
+
+      }
+   }
+   if (firstInt)
+   {
+      std::stringstream errmsg("");
+      errmsg << "Error - no data available for body with NAIF ID " << forNaifId << " on specified SPK kernels\n";
+      throw SubscriberException(errmsg.str());
+   }
+   #ifdef DEBUG_SPK_COVERAGE
+      else
+      {
+         MessageInterface::ShowMessage("Number of intervals found for body with NAIF ID %d =  %d\n",
+               forNaifId, (Integer) numInt);
+      }
+   #endif
+
+   }
+   copy_c(&cover, w);
+}
 
 //------------------------------------------------------------------------------
 // SetObject()
