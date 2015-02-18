@@ -66,6 +66,15 @@
     <ClInclude Include="..\..\src\base\event\Contact.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\event\ContactEvent.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EclipseEvent.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\event\EclipseTotalEvent.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\event\Antumbra.cpp">
@@ -99,6 +108,15 @@
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\Contact.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\ContactEvent.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EclipseEvent.cpp">
+      <Filter>Source Files\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\event\EclipseTotalEvent.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
   </ItemGroup>
