@@ -81,38 +81,38 @@ ADD_DEFINITIONS("-DwxUSE_GLCANVAS")
 if(WIN32)
     LINK_LIBRARIES("glu32")
     LINK_LIBRARIES("opengl32")
+
 elseif(APPLE)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework Carbon -framework OpenGL -framework AGL")
+    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework Carbon -framework OpenGL -framework AGL")
     
-    INCLUDE_DIRECTORIES ( /System/Library/Frameworks/OpenGL.framework )
+    #INCLUDE_DIRECTORIES ( /System/Library/Frameworks/OpenGL.framework )
     
-    FIND_LIBRARY(GLU_LIBRARY Glu )
-    FIND_LIBRARY(OpenGL_LIBRARY OpenGL )
+    FIND_PACKAGE(OpenGL)
+    LINK_LIBRARIES(${OPENGL_LIBRARIES})
     
-    MESSAGE(${OpenGL_LIBRARY})
-    MESSAGE(${GLU_LIBRARY})
-    
-    LINK_LIBRARIES(${GLU_LIBRARY})
-	LINK_LIBRARIES(${OpenGL_LIBRARY})
+    MESSAGE(${OPENGL_gl_LIBRARY})
+    MESSAGE(${OPENGL_glu_LIBRARY})
     
     #SET(EXTRA_LIBS ${GLU_LIBRARY} ${OpenGL_LIBRARY})
     #target_link_libraries(${TargetName} ${EXTRA_LIBS})
     #LINK_LIBRARIES("GLU")
 else()
-	LINK_LIBRARIES("GL")
-	LINK_LIBRARIES("GLU")
+    FIND_LIBRARY(OpenGL)
+    LINK_LIBRARIES(${OPENGL_LIBRARIES})
 endif()
 
-ADD_DEFINITIONS("-D_DYNAMICLINK")
+#ADD_DEFINITIONS("-D_DYNAMICLINK")
 
 if(WIN32)
 	ADD_DEFINITIONS("-DWXUSINGDLL")
+
 elseif(APPLE)
-    SET (WX_COMPILE_FLAGS "-I/${WXWIDGET_DIR}/lib/wx/include/mac-ansi-release-2.8 -D__WXMAC__")
-	SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WX_COMPILE_FLAGS}")
+    SET (WX_COMPILE_FLAGS "-I/${WXWIDGET_DIR}/lib/wx/include/osx_cocoa-unicode-3.0 -D__WXMAC__")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WX_COMPILE_FLAGS}")
+
 else()
-	SET (WX_COMPILE_FLAGS "-I/${WXWIDGET_DIR}/lib/wx/include/gtk2-ansi-release-2.8 -D__WXGTK__")
-	SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WX_COMPILE_FLAGS}")
+    SET (WX_COMPILE_FLAGS "-I/${WXWIDGET_DIR}/lib/wx/include/gtk2-ansi-release-2.8 -D__WXGTK__")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WX_COMPILE_FLAGS}")
 endif()
 
 ADD_DEFINITIONS("-D_MBCS")
@@ -125,35 +125,7 @@ ADD_DEFINITIONS("-D__USE_SPICE__")
 
 # ====================================================================
 # include directories for header files
-INCLUDE_DIRECTORIES("../base/include")
-INCLUDE_DIRECTORIES("../base/asset")
-INCLUDE_DIRECTORIES("../base/attitude")
-INCLUDE_DIRECTORIES("../base/burn")
-INCLUDE_DIRECTORIES("../base/command")
-INCLUDE_DIRECTORIES("../base/configs")
-INCLUDE_DIRECTORIES("../base/coordsystem")
-INCLUDE_DIRECTORIES("../base/executive")
-INCLUDE_DIRECTORIES("../base/factory")
-INCLUDE_DIRECTORIES("../base/forcemodel")
-INCLUDE_DIRECTORIES("../base/foundation")
-INCLUDE_DIRECTORIES("../base/function")
-INCLUDE_DIRECTORIES("../base/hardware")
-INCLUDE_DIRECTORIES("../base/interface")
-INCLUDE_DIRECTORIES("../base/interpolator")
-INCLUDE_DIRECTORIES("../base/interpreter")
-INCLUDE_DIRECTORIES("../base/math")
-INCLUDE_DIRECTORIES("../base/parameter")
-INCLUDE_DIRECTORIES("../base/plugin")
-INCLUDE_DIRECTORIES("../base/propagator")
-INCLUDE_DIRECTORIES("../base/solarsys")
-INCLUDE_DIRECTORIES("../base/solver")
-INCLUDE_DIRECTORIES("../base/spacecraft")
-INCLUDE_DIRECTORIES("../base/stopcond")
-INCLUDE_DIRECTORIES("../base/subscriber")
-INCLUDE_DIRECTORIES("../base/util")
-INCLUDE_DIRECTORIES("../base/forcemodel")
-INCLUDE_DIRECTORIES("../base/forcemodel/harmonic")
-INCLUDE_DIRECTORIES("../base/event")
+INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 INCLUDE_DIRECTORIES("include")
 INCLUDE_DIRECTORIES("include/bitmaps")
 INCLUDE_DIRECTORIES("include/il")
@@ -176,10 +148,10 @@ INCLUDE_DIRECTORIES("solver")
 INCLUDE_DIRECTORIES("spacecraft")
 INCLUDE_DIRECTORIES("subscriber")
 INCLUDE_DIRECTORIES("view")
-INCLUDE_DIRECTORIES("./event")
+INCLUDE_DIRECTORIES("event")
 INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/include/)
 INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/include/msvc/)
-INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/contrib/include)
+#INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/contrib/include)
 
 # ====================================================================
 # source files
@@ -216,7 +188,7 @@ SET(GUI_SRCS
     command/CallFunctionPanel.cpp
     command/EndFiniteBurnPanel.cpp
     command/GmatCommandPanel.cpp
-	command/ManageObjectPanel.cpp
+    command/ManageObjectPanel.cpp
     command/ManeuverPanel.cpp
     command/MinimizePanel.cpp
     command/NonlinearConstraintPanel.cpp
@@ -234,7 +206,7 @@ SET(GUI_SRCS
     coordsystem/CoordSystemConfigPanel.cpp
     forcemodel/DragInputsDialog.cpp
     foundation/ArraySetupDialog.cpp
-	foundation/ArraySetupPanel.cpp
+    foundation/ArraySetupPanel.cpp
     foundation/GmatDialog.cpp
     foundation/GmatMdiChildFrame.cpp
     foundation/GmatPanel.cpp
@@ -257,11 +229,11 @@ SET(GUI_SRCS
     hardware/ThrusterConfigPanel.cpp
     mission/DecoratedTree.cpp
     mission/MissionTree.cpp
-	 mission/MissionTreeToolBar.cpp
-	mission/TreeViewOptionDialog.cpp
-	mission/UndockedMissionPanel.cpp
+    mission/MissionTreeToolBar.cpp
+    mission/TreeViewOptionDialog.cpp
+    mission/UndockedMissionPanel.cpp
     output/CompareReportPanel.cpp
-	output/EventFilePanel.cpp
+    output/EventFilePanel.cpp
     output/OutputTree.cpp
     output/ReportFilePanel.cpp
     propagator/PropagationConfigPanel.cpp
@@ -291,9 +263,9 @@ SET(GUI_SRCS
     spacecraft/AttitudePanel.cpp
     spacecraft/BallisticsMassPanel.cpp
     spacecraft/FormationSetupPanel.cpp
-	spacecraft/OrbitDesignerDialog.cpp
+    spacecraft/OrbitDesignerDialog.cpp
     spacecraft/OrbitPanel.cpp
-	spacecraft/OrbitSummaryDialog.cpp
+    spacecraft/OrbitSummaryDialog.cpp
     spacecraft/SpacecraftPanel.cpp
     spacecraft/SpaceObjectSelectDialog.cpp
     spacecraft/TankPanel.cpp
@@ -301,14 +273,14 @@ SET(GUI_SRCS
     spacecraft/VisualModelCanvas.cpp
     spacecraft/VisualModelPanel.cpp
     subscriber/EphemerisFilePanel.cpp
-	subscriber/GroundTrackCanvas.cpp
+    subscriber/GroundTrackCanvas.cpp
     subscriber/MdiChild3DViewFrame.cpp
-	subscriber/MdiChildGroundTrackFrame.cpp
+    subscriber/MdiChildGroundTrackFrame.cpp
     subscriber/MdiChildViewFrame.cpp
     subscriber/MdiChildTsFrame.cpp
     subscriber/MdiGlPlotData.cpp
     subscriber/MdiTsPlotData.cpp
-	subscriber/OrbitViewCanvas.cpp
+    subscriber/OrbitViewCanvas.cpp
     subscriber/OrbitViewPanel.cpp
     subscriber/ReportFileSetupPanel.cpp
     subscriber/SubscriberSetupPanel.cpp
@@ -318,11 +290,11 @@ SET(GUI_SRCS
     subscriber/TsPlotCurve.cpp
     subscriber/TsPlotOptionsDialog.cpp
     subscriber/XyPlotSetupPanel.cpp
-	view/Editor.cpp
-	view/EditorPanel.cpp
-	view/EditorPreferences.cpp
-	view/EditorPrintout.cpp
+    view/EditorPanel.cpp
+    view/EditorPreferences.cpp
+    view/EditorPrintout.cpp
     view/FindReplaceDialog.cpp
+    view/ScriptEditor.cpp
     view/ViewTextDialog.cpp
     view/ViewTextFrame.cpp
     ${STC_EDITOR_SRCS}
@@ -405,25 +377,25 @@ if(UNIX)
 	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_net-2.8.so")
 	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base-2.8.so")
 	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_gl-2.8.so")
-	#target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_netutils-2.8.so")	//Does not build on linux/mac
+
 elseif(APPLE)
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_core-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_richtext-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_aui-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_xrc-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_qa-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_html-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_adv-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_stc-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_carbon_xml-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_carbon_net-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_carbon-2.8.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_mac_gl-2.8.dylib")
-	#target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_netutils-2.8.dylib")	//Does not build on linux/mac
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_core-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_richtext-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_aui-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_xrc-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_qa-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_html-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_adv-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_stc-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_baseu_xml-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_baseu_net-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_baseu-3.0.dylib")
+	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_gl-3.0.dylib")
 endif()
 
 if(WIN32)
 	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}" LINK_FLAGS "/SUBSYSTEM:windows")
+
 else()
 	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
 endif()

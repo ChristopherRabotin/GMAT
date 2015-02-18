@@ -74,7 +74,7 @@ if(WIN32)
   # F2C_DIR will be set after validating CSPICE_DIR (further down)
 
 elseif(UNIX)
-  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-3.0.2" CACHE PATH "wxWidgets Root Directory")
   SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
 
   if(APPLE)
@@ -230,6 +230,23 @@ endif()
 SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
 
 # ====================================================================
+# Define macro that adds source/header files to appropriate groups
+# for IDE-based projects.
+MACRO(_ADDSOURCEGROUPS ALL_DIRS)
+	# Loop over each directory containing source/header files
+	FOREACH(currdir ${ALL_DIRS})
+		# Create the source group name from the current directory name
+		STRING(REPLACE "/" "\\\\" groupname ${currdir})
+
+		# Add source files (.c, .cpp) to IDE group
+		SOURCE_GROUP("Source Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.c(pp)?")
+
+		# Add header files (.hpp) to IDE group
+		SOURCE_GROUP("Header Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.hpp")
+	ENDFOREACH(currdir)
+ENDMACRO(_ADDSOURCEGROUPS)
+
+# ====================================================================
 # Go to src directory and look for CMake instructions there
 ADD_SUBDIRECTORY(src)
 
@@ -240,3 +257,4 @@ ADD_SUBDIRECTORY(plugins)
 # ====================================================================
 # Setup GMAT install process
 ADD_SUBDIRECTORY(build/install)
+

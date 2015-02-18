@@ -14,7 +14,7 @@ MESSAGE("==============================")
 MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET  "libCInterface")
+	SET(PLUGINTARGET "libCInterface")
 else()
 	SET(PLUGINTARGET "CInterface")
 endif()
@@ -27,24 +27,29 @@ ADD_DEFINITIONS("-DCINTERFACE_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./command")
-INCLUDE_DIRECTORIES("./factory")
-INCLUDE_DIRECTORIES("./include")
-INCLUDE_DIRECTORIES("./plugin")
+# list of directories containing source/header files
+SET(PLUGIN_DIRS command factory include plugin)
 
 # ====================================================================
-# source files
+# include directories for header files
+INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
+INCLUDE_DIRECTORIES(${PLUGIN_DIRS})
+
+# ====================================================================
+# specify source files to be compiled
 SET(PLUGIN_SRCS
     command/PrepareMissionSequence.cpp
-	factory/CCommandFactory.cpp
-	plugin/CInterfacePluginFunctions.cpp
+    factory/CCommandFactory.cpp
+    plugin/CInterfacePluginFunctions.cpp
 )
 
 # ====================================================================
+# Recursively find all include files, which will be added to IDE-based
+# projects (VS, XCode, etc.)
+FILE(GLOB_RECURSE PLUGIN_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
+
+# ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -53,7 +58,13 @@ endif()
 
 # ====================================================================
 # add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# headers are included here for IDE-based projects (VS, XCode, etc.)
+ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS} ${PLUGIN_HEADERS})
+
+# ====================================================================
+# Add source/header files to IDE-based project source groups
+# Macro defined in top-level CMakeLists.txt
+_ADDSOURCEGROUPS("${PLUGIN_DIRS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION bin
