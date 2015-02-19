@@ -23,6 +23,7 @@
 #include "Maneuver.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>                 // for <<
+#include "StringUtil.hpp"
 
 //#define DEBUG_MANEUVER 1
 //#define DEBUG_MANEUVER_PARSE
@@ -868,11 +869,11 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
 
       data << "\n        Delta V Vector:"
            << "\n           Element 1:  "
-           << BuildNumber(elementIspMassData[0]) << " km/s"
+           << GmatStringUtil::BuildNumber(elementIspMassData[0]) << " km/s"
            << "\n           Element 2:  "
-           << BuildNumber(elementIspMassData[1]) << " km/s"
+           << GmatStringUtil::BuildNumber(elementIspMassData[1]) << " km/s"
            << "\n           Element 3:  "
-           << BuildNumber(elementIspMassData[2]) << " km/s\n";
+           << GmatStringUtil::BuildNumber(elementIspMassData[2]) << " km/s\n";
 
       if (decMassM)
       {
@@ -900,11 +901,11 @@ void Maneuver::BuildCommandSummaryString(bool commandCompleted)
 
          data << "\n        Mass depletion from " << tanklist <<":  "
               << "\n           Delta V:      "
-              << BuildNumber(thrust) << " km/s"
+              << GmatStringUtil::BuildNumber(thrust) << " km/s"
               << "\n           Isp:          "
-              << BuildNumber(elementIspMassData[3]) << " s"
+              << GmatStringUtil::BuildNumber(elementIspMassData[3]) << " s"
               << "\n           Mass change:  "
-              << BuildNumber(elementIspMassData[4]) << " kg"
+              << GmatStringUtil::BuildNumber(elementIspMassData[4]) << " kg"
               << "\n";
 		 data << "\n";
 

@@ -60,6 +60,8 @@ public:
    /// at the end of the run for the last-written SPK to be loaded correctly
    virtual void         StopRecording();
 
+   void                 GetCoverageWindow(SpiceCell* w, bool includeAll = true);
+
    /// Set reference objects
    virtual void         SetObject(GmatBase *obj);
    virtual void         SetEphemType(ManagedEphemType eType);
@@ -101,6 +103,8 @@ protected:
    bool                 deleteTmpFiles;
    /// List of created files
    StringArray          fileList;
+   /// The window specifying the SPK coverage for this object
+   SpiceCell            *cover;
 
 };
 

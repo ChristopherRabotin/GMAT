@@ -208,6 +208,7 @@ protected:
       J2000_BODY_NAME = GmatBaseParamCount,
       NAIF_ID,
       NAIF_ID_REFERENCE_FRAME,
+      SPICE_FRAME_NAME,
       ORBIT_SPICE_KERNEL_NAME,
       ATTITUDE_SPICE_KERNEL_NAME,
       SC_CLOCK_SPICE_KERNEL_NAME,
@@ -241,6 +242,8 @@ protected:
    Integer         naifId;
    /// NAIF Id for the body/spacecraft reference frame
    Integer         naifIdRefFrame;
+   /// The name of the frame neede for SPICE calls
+   std::string     spiceFrameName;
    /// NAIF Id for the observer
    Integer         naifIdObserver;
 
