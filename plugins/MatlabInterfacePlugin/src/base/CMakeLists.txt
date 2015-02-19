@@ -16,7 +16,7 @@ MESSAGE("==============================")
 MESSAGE("GMAT MatlabInterface Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET  "libMatlabInterface")
+	SET(PLUGINTARGET "libMatlabInterface")
 else()
 	SET(PLUGINTARGET "MatlabInterface")
 endif()
@@ -24,39 +24,32 @@ endif()
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DMATLAB_EXPORTS")
-ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./base/command")
-INCLUDE_DIRECTORIES("./base/factory")
-INCLUDE_DIRECTORIES("./base/function")
-INCLUDE_DIRECTORIES("./base/include")
-INCLUDE_DIRECTORIES("./base/interface")
-INCLUDE_DIRECTORIES("./base/plugin")
-INCLUDE_DIRECTORIES("./base/subscriber")
+# list of directories containing source/header files
+SET(PLUGIN_DIRS command factory function include interface plugin subscriber)
+
+# ====================================================================
+# extra include directories for header files
 INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIRS})
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    base/command/CallMatlabFunction.cpp
-    base/factory/CallMatlabFunctionFactory.cpp
-    base/factory/MatlabFunctionFactory.cpp
-    base/factory/MatlabInterfaceFactory.cpp
-    base/factory/MatlabWorkspaceFactory.cpp
-    base/function/MatlabFunction.cpp
-    base/interface/MatlabInterface.cpp
-    base/plugin/GmatPluginFunctions.cpp
-    base/subscriber/MatlabWorkspace.cpp
+    command/CallMatlabFunction.cpp
+    factory/CallMatlabFunctionFactory.cpp
+    factory/MatlabFunctionFactory.cpp
+    factory/MatlabInterfaceFactory.cpp
+    factory/MatlabWorkspaceFactory.cpp
+    function/MatlabFunction.cpp
+    interface/MatlabInterface.cpp
+    plugin/GmatPluginFunctions.cpp
+    subscriber/MatlabWorkspace.cpp
 )
 
 # ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -64,8 +57,8 @@ else()
 endif()
 
 # ====================================================================
-# add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION plugins

@@ -14,6 +14,39 @@
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
+# Convenience macro used by plugins to enable common functionality
+# Inputs:
+#   TargetName:  Name of plugin target
+#   PLUGIN_DIRS: List of directories containing source/header files
+#   PLUGIN_SRCS: List of .c and .cpp source files
+# Note that all paths are relative to the plugin's CMakeLists.txt
+MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
+  # Add Preproccessor Definitions
+  ADD_DEFINITIONS("-D_DYNAMICLINK")
+  ADD_DEFINITIONS("-DEXP_STL")
+
+  # ====================================================================
+  # prepend include directories for header files
+  INCLUDE_DIRECTORIES(BEFORE ${GMAT_BASE_INCLUDE_DIRECTORIES})
+  INCLUDE_DIRECTORIES(BEFORE ${PLUGIN_DIRS})
+
+  # ====================================================================
+  # Recursively find all include files, which will be added to IDE-based
+  # projects (VS, XCode, etc.)
+  FILE(GLOB_RECURSE PLUGIN_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
+
+  # ====================================================================
+  # add the install targets
+  # headers are included here for IDE-based projects (VS, XCode, etc.)
+  ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS} ${PLUGIN_HEADERS})
+
+  # ====================================================================
+  # Add source/header files to IDE-based project source groups
+  # Macro defined in top-level CMakeLists.txt
+  _ADDSOURCEGROUPS("${PLUGIN_DIRS}")
+
+ENDMACRO(_SETUPPLUGIN)
+
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
 
@@ -29,7 +62,7 @@ endif()
 # ====================================================================
 # DataInterface Plugin binary
 if (PLUGIN_DATAINTERFACE)
-  SET(PLUGINDIR "DataInterfacePlugin/src")
+  SET(PLUGINDIR "DataInterfacePlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -38,7 +71,7 @@ endif()
 # ====================================================================
 # DataCallback Plugin binary
 if (PLUGIN_DATACALLBACK)
-  SET(PLUGINDIR "DataCallbackPlugin/src")
+  SET(PLUGINDIR "DataCallbackPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -47,7 +80,7 @@ endif()
 # ====================================================================
 # EphemPropagator Plugin binary
 if (PLUGIN_EPHEMPROPAGATOR)
-  SET(PLUGINDIR "EphemPropagatorPlugin/src")
+  SET(PLUGINDIR "EphemPropagatorPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -56,7 +89,7 @@ endif()
 # ====================================================================
 # Estimation Plugin binary
 if (PLUGIN_ESTIMATION)
-  SET(PLUGINDIR "EstimationPlugin/src")
+  SET(PLUGINDIR "EstimationPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -65,7 +98,7 @@ endif()
 # ====================================================================
 # EventLocator Plugin binary
 if (PLUGIN_EVENTLOCATOR)
-  SET(PLUGINDIR "EventLocatorPlugin/src")
+  SET(PLUGINDIR "EventLocatorPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -74,7 +107,7 @@ endif()
 # ====================================================================
 # ExtraPropagators Plugin binary
 if (PLUGIN_EXTRAPROPAGATORS)
-  SET(PLUGINDIR "ExtraPropagatorsPlugin/src")
+  SET(PLUGINDIR "ExtraPropagatorsPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -83,7 +116,7 @@ endif()
 # ====================================================================
 # FminconOptimizer Plugin binary
 if (PLUGIN_FMINCONOPTIMIZER)
-  SET(PLUGINDIR "FminconOptimizerPlugin/src")
+  SET(PLUGINDIR "FminconOptimizerPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -92,7 +125,7 @@ endif()
 # ====================================================================
 # Formation Plugin binary
 if (PLUGIN_FORMATION)
-  SET(PLUGINDIR "FormationPlugin/src")
+  SET(PLUGINDIR "FormationPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -101,7 +134,7 @@ endif()
 # ====================================================================
 # GeometricMeasurement Plugin binary
 if (PLUGIN_GEOMETRICMEASUREMENT)
-  SET(PLUGINDIR "GeometricMeasurementPlugin/src")
+  SET(PLUGINDIR "GeometricMeasurementPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -110,7 +143,7 @@ endif()
 # ====================================================================
 # GmatFunction Plugin binary
 if (PLUGIN_GMATFUNCTION)
-  SET(PLUGINDIR "GmatFunctionPlugin/src")
+  SET(PLUGINDIR "GmatFunctionPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -119,7 +152,7 @@ endif()
 # ====================================================================
 # MatlabInterface Plugin binary
 if (PLUGIN_MATLABINTERFACE)
-  SET(PLUGINDIR "MatlabInterfacePlugin/src")
+  SET(PLUGINDIR "MatlabInterfacePlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -128,7 +161,7 @@ endif()
 # ====================================================================
 # ProductionPropagators Plugin binary
 if (PLUGIN_PRODUCTIONPROPAGATORS)
-  SET(PLUGINDIR "ProductionPropagatorPlugin/src")
+  SET(PLUGINDIR "ProductionPropagatorPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -137,7 +170,7 @@ endif()
 # ====================================================================
 # SaveCommand Plugin binary
 if (PLUGIN_SAVECOMMAND)
-  SET(PLUGINDIR "SaveCommandPlugin/src")
+  SET(PLUGINDIR "SaveCommandPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
@@ -146,7 +179,7 @@ endif()
 # ====================================================================
 # Station Plugin binary
 if (PLUGIN_STATION)
-  SET(PLUGINDIR "StationPlugin/src")
+  SET(PLUGINDIR "StationPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})

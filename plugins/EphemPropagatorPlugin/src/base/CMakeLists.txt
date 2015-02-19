@@ -23,31 +23,27 @@ endif()
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DEPHEM_PROPAGATOR_EXPORTS")
-ADD_DEFINITIONS("-DEXP_STL")
+
+# ====================================================================
+# list of directories containing source/header files
+SET(PLUGIN_DIRS factory include plugin propagator)
 
 # ====================================================================
 # include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./base/factory")
-INCLUDE_DIRECTORIES("./base/include")
-INCLUDE_DIRECTORIES("./base/plugin")
-INCLUDE_DIRECTORIES("./base/propagator")
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    base/factory/EphemPropFactory.cpp
-    base/plugin/GmatPluginFunctions.cpp
-    base/propagator/EphemerisPropagator.cpp
-    base/propagator/SPKPropagator.cpp
+    factory/EphemPropFactory.cpp
+    plugin/GmatPluginFunctions.cpp
+    propagator/EphemerisPropagator.cpp
+    propagator/SPKPropagator.cpp
 )
 
 # ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -55,8 +51,8 @@ else()
 endif()
 
 # ====================================================================
-# add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION plugins

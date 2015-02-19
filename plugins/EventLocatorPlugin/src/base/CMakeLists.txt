@@ -23,38 +23,30 @@ endif()
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DLOCATOR_EXPORTS")
-ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./base/event")
-INCLUDE_DIRECTORIES("./base/factory")
-INCLUDE_DIRECTORIES("./base/include")
-INCLUDE_DIRECTORIES("./base/locator")
-INCLUDE_DIRECTORIES("./base/plugin")
+# list of directories containing source/header files
+SET(PLUGIN_DIRS event factory include locator plugin)
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    base/event/Antumbra.cpp
-    base/event/Contact.cpp
-    base/event/Eclipse.cpp
-    base/event/Elevation.cpp
-    base/event/LineOfSight.cpp
-    base/event/Penumbra.cpp
-    base/event/Umbra.cpp
-    base/factory/EventLocatorFactory.cpp
-    base/locator/ContactLocator.cpp
-    base/locator/EclipseLocator.cpp
-    base/plugin/GmatPluginFunctions.cpp
+    event/Antumbra.cpp
+    event/Contact.cpp
+    event/Eclipse.cpp
+    event/Elevation.cpp
+    event/LineOfSight.cpp
+    event/Penumbra.cpp
+    event/Umbra.cpp
+    factory/EventLocatorFactory.cpp
+    locator/ContactLocator.cpp
+    locator/EclipseLocator.cpp
+    plugin/GmatPluginFunctions.cpp
 )
 
 # ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -62,8 +54,8 @@ else()
 endif()
 
 # ====================================================================
-# add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION plugins

@@ -23,111 +23,96 @@ endif()
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
-ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./base/command")
-INCLUDE_DIRECTORIES("./base/estimator")
-INCLUDE_DIRECTORIES("./base/event")
-INCLUDE_DIRECTORIES("./base/factory")
-INCLUDE_DIRECTORIES("./base/hardware")
-INCLUDE_DIRECTORIES("./base/include")
-INCLUDE_DIRECTORIES("./base/measurement")
-INCLUDE_DIRECTORIES("./base/measurement/Ionosphere")
-INCLUDE_DIRECTORIES("./base/measurement/Troposphere")
-INCLUDE_DIRECTORIES("./base/measurementfile")
-INCLUDE_DIRECTORIES("./base/plugin")
-INCLUDE_DIRECTORIES("./base/trackingsystem")
+# list of directories containing source/header files
+SET(PLUGIN_DIRS command estimator event factory hardware include measurement measurement/Ionosphere measurement/Troposphere measurementfile plugin trackingsystem)
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    base/command/RunEstimator.cpp
-    base/command/RunSimulator.cpp
-    base/estimator/BatchEstimator.cpp
-    base/estimator/BatchEstimatorInv.cpp
-    base/estimator/BatchEstimatorSVD.cpp
-    base/estimator/EstimationStateManager.cpp
-    base/estimator/Estimator.cpp
-    base/estimator/EstimatorException.cpp
-    base/estimator/ExtendedKalmanInv.cpp
-    base/estimator/SequentialEstimator.cpp
-    base/estimator/Simulator.cpp
-    base/event/EstimationRootFinder.cpp
-    base/event/Event.cpp
-    base/event/EventData.cpp
-    base/event/EventException.cpp
-    base/event/EventManager.cpp
-    base/event/LightTimeCorrection.cpp
-    base/factory/DataFileFactory.cpp
-    base/factory/EstimationCommandFactory.cpp
-    base/factory/EstimatorFactory.cpp
-    base/factory/EstimatorHardwareFactory.cpp
-    base/factory/EventFactory.cpp
-    base/factory/MeasurementFactory.cpp
-    base/factory/MeasurementModelFactory.cpp
-    base/factory/ObTypeFactory.cpp
-    base/factory/TrackingDataFactory.cpp
-    base/factory/TrackingSystemFactory.cpp
-    base/hardware/Antenna.cpp
-    base/hardware/RFHardware.cpp
-    base/hardware/Receiver.cpp
-    base/hardware/Sensor.cpp
-    base/hardware/Signal.cpp
-    base/hardware/Transmitter.cpp
-    base/hardware/Transponder.cpp
-    base/measurement/AveragedDoppler.cpp
-    base/measurement/CoreMeasurement.cpp
-    base/measurement/DSNTwoWayDoppler.cpp
-    base/measurement/DSNTwoWayRange.cpp
-    base/measurement/MeasurementData.cpp
-    base/measurement/MeasurementManager.cpp
-    base/measurement/MeasurementModel.cpp
-    base/measurement/MediaCorrection.cpp
-    base/measurement/OpticalAngles.cpp
-    base/measurement/OpticalAzEl.cpp
-    base/measurement/PhysicalMeasurement.cpp
-    base/measurement/SnTwoWayRange.cpp
-    base/measurement/TDRSSTwoWayRange.cpp
-    base/measurement/TrackingData.cpp
-    base/measurement/TwoWayRange.cpp
-    base/measurement/USNTwoWayRange.cpp
-    base/measurement/Troposphere/Troposphere.cpp
-    base/measurementfile/B3_obtype.cpp
-    base/measurementfile/DataFile.cpp
-    base/measurementfile/DataFileAdapter.cpp
-    base/measurementfile/GmatObType.cpp
-    base/measurementfile/ObType.cpp
-    base/measurementfile/ObservationData.cpp
-    base/plugin/GmatPluginFunctions.cpp
-    base/trackingsystem/DSNTrackingSystem.cpp
-    base/trackingsystem/OpticalTrackingSystem.cpp
-    base/trackingsystem/TDRSSTrackingSystem.cpp
-    base/trackingsystem/TrackingSystem.cpp
-    base/trackingsystem/USNTrackingSystem.cpp
+    command/RunEstimator.cpp
+    command/RunSimulator.cpp
+    estimator/BatchEstimator.cpp
+    estimator/BatchEstimatorInv.cpp
+    estimator/BatchEstimatorSVD.cpp
+    estimator/EstimationStateManager.cpp
+    estimator/Estimator.cpp
+    estimator/EstimatorException.cpp
+    estimator/ExtendedKalmanInv.cpp
+    estimator/SequentialEstimator.cpp
+    estimator/Simulator.cpp
+    event/EstimationRootFinder.cpp
+    event/Event.cpp
+    event/EventData.cpp
+    event/EventException.cpp
+    event/EventManager.cpp
+    event/LightTimeCorrection.cpp
+    factory/DataFileFactory.cpp
+    factory/EstimationCommandFactory.cpp
+    factory/EstimatorFactory.cpp
+    factory/EstimatorHardwareFactory.cpp
+    factory/EventFactory.cpp
+    factory/MeasurementFactory.cpp
+    factory/MeasurementModelFactory.cpp
+    factory/ObTypeFactory.cpp
+    factory/TrackingDataFactory.cpp
+    factory/TrackingSystemFactory.cpp
+    hardware/Antenna.cpp
+    hardware/RFHardware.cpp
+    hardware/Receiver.cpp
+    hardware/Sensor.cpp
+    hardware/Signal.cpp
+    hardware/Transmitter.cpp
+    hardware/Transponder.cpp
+    measurement/AveragedDoppler.cpp
+    measurement/CoreMeasurement.cpp
+    measurement/DSNTwoWayDoppler.cpp
+    measurement/DSNTwoWayRange.cpp
+    measurement/MeasurementData.cpp
+    measurement/MeasurementManager.cpp
+    measurement/MeasurementModel.cpp
+    measurement/MediaCorrection.cpp
+    measurement/OpticalAngles.cpp
+    measurement/OpticalAzEl.cpp
+    measurement/PhysicalMeasurement.cpp
+    measurement/SnTwoWayRange.cpp
+    measurement/TDRSSTwoWayRange.cpp
+    measurement/TrackingData.cpp
+    measurement/TwoWayRange.cpp
+    measurement/USNTwoWayRange.cpp
+    measurement/Troposphere/Troposphere.cpp
+    measurementfile/B3_obtype.cpp
+    measurementfile/DataFile.cpp
+    measurementfile/DataFileAdapter.cpp
+    measurementfile/GmatObType.cpp
+    measurementfile/ObType.cpp
+    measurementfile/ObservationData.cpp
+    plugin/GmatPluginFunctions.cpp
+    trackingsystem/DSNTrackingSystem.cpp
+    trackingsystem/OpticalTrackingSystem.cpp
+    trackingsystem/TDRSSTrackingSystem.cpp
+    trackingsystem/TrackingSystem.cpp
+    trackingsystem/USNTrackingSystem.cpp
 )
 
 # Temporarily disable Ionosphere for Mac/Linux
 if(WIN32)
   INCLUDE_DIRECTORIES("${F2C_DIR}")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
-    base/measurement/Ionosphere/Ionosphere.cpp
-    base/measurement/Ionosphere/cira.c
-    base/measurement/Ionosphere/igrf.c
-    base/measurement/Ionosphere/iridreg.c
-    base/measurement/Ionosphere/irifun.c
-    base/measurement/Ionosphere/irisub.c
-    base/measurement/Ionosphere/iritec.c
+    measurement/Ionosphere/Ionosphere.cpp
+    measurement/Ionosphere/cira.c
+    measurement/Ionosphere/igrf.c
+    measurement/Ionosphere/iridreg.c
+    measurement/Ionosphere/irifun.c
+    measurement/Ionosphere/irisub.c
+    measurement/Ionosphere/iritec.c
     )
 endif()
 
 # ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -135,8 +120,8 @@ else()
 endif()
 
 # ====================================================================
-# add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION plugins

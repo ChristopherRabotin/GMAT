@@ -23,29 +23,22 @@ endif()
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DDATACALLBACK_EXPORTS")
-ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./base/factory")
-INCLUDE_DIRECTORIES("./base/include")
-INCLUDE_DIRECTORIES("./base/plugin")
-INCLUDE_DIRECTORIES("./base/subscriber")
+# list of directories containing source/header files
+SET(PLUGIN_DIRS factory include plugin subscriber)
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    base/factory/DataCallbackFactory.cpp
-    base/plugin/GmatPluginFunctions.cpp
-    base/subscriber/DataCallback.cpp
+    factory/DataCallbackFactory.cpp
+    plugin/GmatPluginFunctions.cpp
+    subscriber/DataCallback.cpp
 )
 
 # ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -53,8 +46,8 @@ else()
 endif()
 
 # ====================================================================
-# add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION plugins

@@ -23,39 +23,30 @@ endif()
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DDATAINTERFACE_EXPORTS")
-ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("./base/command")
-INCLUDE_DIRECTORIES("./base/datainterface")
-INCLUDE_DIRECTORIES("./base/datareader")
-INCLUDE_DIRECTORIES("./base/factory")
-INCLUDE_DIRECTORIES("./base/include")
-INCLUDE_DIRECTORIES("./base/plugin")
+# list of directories containing source/header files
+SET(PLUGIN_DIRS command datainterface datareader factory include plugin)
 
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
-    base/command/Set.cpp
-    base/datainterface/DataInterface.cpp
-    base/datainterface/FileInterface.cpp
-    base/datareader/DataReader.cpp
-    base/datareader/FileReader.cpp
-    base/datareader/TcopsVHFAscii.cpp
-    base/datareader/TcopsVHFData.cpp
-    base/factory/DataInterfaceCommandFactory.cpp
-    base/factory/DataInterfaceFactory.cpp
-    base/factory/ReaderFactory.cpp
-    base/plugin/GmatPluginFunctions.cpp
+    command/Set.cpp
+    datainterface/DataInterface.cpp
+    datainterface/FileInterface.cpp
+    datareader/DataReader.cpp
+    datareader/FileReader.cpp
+    datareader/TcopsVHFAscii.cpp
+    datareader/TcopsVHFData.cpp
+    factory/DataInterfaceCommandFactory.cpp
+    factory/DataInterfaceFactory.cpp
+    factory/ReaderFactory.cpp
+    plugin/GmatPluginFunctions.cpp
 )
 
 # ====================================================================
 # libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
@@ -63,8 +54,8 @@ else()
 endif()
 
 # ====================================================================
-# add the install targets
-ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
   DESTINATION plugins
