@@ -30,11 +30,18 @@ ADD_DEFINITIONS("-DLOCATOR_EXPORTS")
 SET(PLUGIN_DIRS event factory include locator plugin)
 
 # ====================================================================
+# extra include directories for header files
+INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
+
+# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     event/Antumbra.cpp
     event/Contact.cpp
+    event/ContactEvent.cpp
     event/Eclipse.cpp
+    event/EclipseEvent.cpp
+    event/EclipseTotalEvent.cpp
     event/Elevation.cpp
     event/LineOfSight.cpp
     event/Penumbra.cpp
