@@ -720,11 +720,16 @@ void  SpiceInterface::TryBogusCall()
       scard_c(0, &result);   // reset (empty) the coverage cell
       wninsd_c(21545.0, 21545.5, &window);
       wninsd_c(21545.0, 21545.5, &result);
+      SPICEDOUBLE_CELL(intersection, 2000);
+      scard_c(0, &intersection);   // reset (empty) the coverage cell
 
       MessageInterface::ShowMessage("****** In TryBogusCall, calling gfoclt ... \n");
 
       gfoclt_c("FULL", "EARTH", "ELLIPSOID", "IAU_EARTH", "SUN", "ELLIPSOID", "IAU_SUN", "NONE",
                "199", 60.0, &window, &result);
+
+      MessageInterface::ShowMessage("****** In TryBogusCall, calling wnintd_c ... \n");
+      wnintd_c(&window, &result, &intersection);
       if (failed_c())
       {
          #ifdef DEBUG_SPK_INIT
