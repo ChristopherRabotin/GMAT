@@ -783,33 +783,39 @@ void EclipseLocator::FindEvents()
    em->ProvideEphemerisData();
    em->StopRecording();
 
+   // coverage interval(s) in the loaded kernels
+   SPICEDOUBLE_CELL(coverage, 2000);
+   scard_c(0, &coverage);   // reset (empty) the coverage cell
+
+   // window we want to search
    SPICEDOUBLE_CELL(window, 2000);
    scard_c(0, &window);   // reset (empty) the coverage cell
 
    SpiceDouble  start0, end0, startN, endN;
    SpiceInt     numInt     = 0;
 
+   em->GetCoverageWindow(&coverage);
+
    if (useEntireInterval)
    {
-      em->GetCoverageWindow(&window); // this may need to be done either way
-      numInt     = wncard_c(&window);
-      wnfetd_c(&window, 0, &start0, &end0);
-      wnfetd_c(&window, (numInt-1), &startN, &endN);
-      findStart  = spice->SpiceTimeToA1(start0);
-      findStop   = spice->SpiceTimeToA1(endN);
+      copy_c(&coverage, &window);
    }
    else // create a window only over the specified time range
    {
-      // @todo - use intersection to get the actual coverage within the specified times
-      start0 = spice->A1ToSpiceTime(initialEp);
-      end0   = spice->A1ToSpiceTime(finalEp);   // ??
-      startN = spice->A1ToSpiceTime(initialEp); // ??
-      endN   = spice->A1ToSpiceTime(finalEp);
-      wninsd_c(start0, endN, &window);
-      numInt     = 1;
-      findStart  = initialEp;
-      findStop   = finalEp;
+      // create a window of the specified time span
+      SpiceDouble s = spice->A1ToSpiceTime(initialEp);
+      SpiceDouble e = spice->A1ToSpiceTime(finalEp);
+      SPICEDOUBLE_CELL(timespan, 2000);
+      scard_c(0, &window);   // reset (empty) the coverage cell
+      // Get the intersection of the timespan window and the coverage window
+      wninsd_c(s, e, &timespan);
+      wnintd_c(&coverage, &timespan, &window);
    }
+   numInt     = wncard_c(&window);
+   wnfetd_c(&window, 0, &start0, &end0);
+   wnfetd_c(&window, (numInt-1), &startN, &endN);
+   findStart  = spice->SpiceTimeToA1(start0);
+   findStop   = spice->SpiceTimeToA1(endN);
 
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Number of intervals = %d\n", (Integer) numInt);
