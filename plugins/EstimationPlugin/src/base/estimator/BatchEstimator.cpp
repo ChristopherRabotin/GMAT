@@ -290,6 +290,17 @@ std::string BatchEstimator::GetParameterTypeString(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns value of an integer parameter given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Integer BatchEstimator::GetIntegerParameter(const Integer id) const
 {
    if (id == MAX_CONSECUTIVE_DIVERGENCES)
@@ -298,6 +309,19 @@ Integer BatchEstimator::GetIntegerParameter(const Integer id) const
    return Estimator::GetIntegerParameter(id);
 }
 
+
+//------------------------------------------------------------------------------
+//  Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets value to an integer parameter specified by the input parameter ID.
+ *
+ * @param id       ID for the requested parameter.
+ * @param value    integer value used to set to the request parameter. 
+ *
+ * @return value set to the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Integer BatchEstimator::SetIntegerParameter(const Integer id, const Integer value)
 {
    if (id == MAX_CONSECUTIVE_DIVERGENCES)
@@ -316,6 +340,7 @@ Integer BatchEstimator::SetIntegerParameter(const Integer id, const Integer valu
 
    return Estimator::SetIntegerParameter(id, value);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -879,6 +904,18 @@ void BatchEstimator::CompleteInitialization()
                "BatchEstimator::CompleteInitialization - error initializing "
                "MeasurementManager.\n");
       
+      
+      // Set all solve-for and consider objects to tracking data adapters
+      // Note that: it only sets for tracking data adapters. For measurement models, 
+      // it does not has this option due to old GMAT Nav syntax will be removed, 
+      // so we do not need to implement this option.
+      ObjectArray objects;                                                                     // made changes by TUAN NGUYEN
+      esm.GetStateObjects(objects);                                                            // made changes by TUAN NGUYEN
+      std::vector<TrackingDataAdapter*> adapters = measManager.GetAllTrackingDataAdapters();   // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < adapters.size(); ++i)                                        // made changes by TUAN NGUYEN
+         adapters[i]->SetUsedForObjects(objects);                                              // made changes by TUAN NGUYEN
+
+
       // Now load up the observations
       measManager.PrepareForProcessing(false);
       UnsignedInt numRec = measManager.LoadObservations();
@@ -1222,9 +1259,9 @@ void BatchEstimator::CheckCompletion()
          PlotResiduals();
 
       // Reset to the new initial state, clear the processed data, etc
-      esm.RestoreObjects(&outerLoopBuffer);
-      esm.MapVectorToObjects();
-      esm.MapObjectsToSTM();
+      esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state 
+      esm.MapVectorToObjects();                                       // update objects state to current state
+      esm.MapObjectsToSTM();                                          // update object STM to current STM
       currentEpoch = estimationEpoch;
       measManager.Reset();                                            // set current observation data to be the first one in observation data table
       // Note that: all unused data records will be handled in BatchEstimatorInv::Accumulate() function
