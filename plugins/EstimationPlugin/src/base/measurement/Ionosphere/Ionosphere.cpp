@@ -23,19 +23,63 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
+#include "StringUtil.hpp"
 #include <fstream>                           // made changes by TUAN NGUYEN
 #include <sstream>                           // made changes by TUAN NGUYEN
 
 //#define DEBUG_IONOSPHERE_ELECT_DENSITY
 //#define DEBUG_IONOSPHERE_TEC
 //#define DEBUG_IONOSPHERE_CORRECTION
-
+//#define DEBUG_IONOSPHERE_CONSTRUCTION
+//#define DEBUG_IONOSPHERE_INITIALIZE
 
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
+IonosphereCorrectionModel* IonosphereCorrectionModel::instance = NULL;
+
 const Real Ionosphere::NUM_OF_INTERVALS = 20;
 const Real Ionosphere::IONOSPHERE_MAX_ATTITUDE = 2000.0;   // made changes by TUAN NGUYEN
+
+
+IonosphereCorrectionModel* IonosphereCorrectionModel::Instance() 
+{
+   if (instance == NULL)
+      instance = new IonosphereCorrectionModel;
+   return instance;
+}
+
+
+Ionosphere* IonosphereCorrectionModel::GetIonosphereInstance()
+{
+   if (ionosphereObj == NULL)
+      ionosphereObj = new Ionosphere("IRI2007");
+
+   return ionosphereObj;
+}
+
+
+IonosphereCorrectionModel::IonosphereCorrectionModel()
+{
+   ionosphereObj = NULL;
+}
+
+
+IonosphereCorrectionModel::~IonosphereCorrectionModel() 
+{
+   if (ionosphereObj)
+   {
+      delete ionosphereObj;
+      ionosphereObj = NULL;
+   }
+
+   if (instance)
+   {
+      delete instance;
+      instance = NULL;
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // Ionosphere(const std::string& nomme)
@@ -47,8 +91,12 @@ const Real Ionosphere::IONOSPHERE_MAX_ATTITUDE = 2000.0;   // made changes by TU
 Ionosphere::Ionosphere(const std::string &nomme):
    MediaCorrection("Ionosphere", nomme),
    yyyymmddMin      (20000101),          // year 2000, month 01, day 01                        // made changes by TUAN NGUYEN
-   yyyymmddMax      (20000101)           // year 2000, month 01, day 01                           // made changes by TUAN NGUYEN
+   yyyymmddMax      (20000101)           // year 2000, month 01, day 01                        // made changes by TUAN NGUYEN
 {
+#ifdef DEBUG_IONOSPHERE_CONSTRUCTION
+   MessageInterface::ShowMessage("Ionosphere default construction\n");
+#endif
+
    objectTypeNames.push_back("Ionosphere");
    model = 2;                 // 2 for IRI2007 ionosphere model
    
@@ -89,6 +137,10 @@ Ionosphere::Ionosphere(const Ionosphere& ions):
    mmdd         (ions.mmdd),
    hours        (ions.hours)
 {
+#ifdef DEBUG_IONOSPHERE_CONSTRUCTION
+   MessageInterface::ShowMessage("Ionosphere copy construction\n");
+#endif
+
    stationLoc    = ions.stationLoc;
    spacecraftLoc = ions.spacecraftLoc;
 }
@@ -152,6 +204,10 @@ bool Ionosphere::Initialize()
 {
    if (IsInitialized())
       return true;
+
+#ifdef DEBUG_IONOSPHERE_INITIALIZE
+   MessageInterface::ShowMessage("Ionosphere::Initialize()\n");
+#endif
 
    if (MediaCorrectionInterface::Initialize())
    {
@@ -549,7 +605,6 @@ Real Ionosphere::BendingAngle()
 //    . Angle correction (unit: radian)
 //    . Time correction  (unit: s)
 //---------------------------------------------------------------------------
-#include "StringUtil.hpp"
 RealArray Ionosphere::Correction()
 {
 #ifdef DEBUG_IONOSPHERE_CORRECTION
