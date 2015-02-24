@@ -35,7 +35,6 @@
 //#define DEBUG_CLONING
 //#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
-//#define DEBUG_ESM_LOADING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)
@@ -233,8 +232,8 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
 bool EstimationStateManager::SetObject(GmatBase *obj)
 {
    #ifdef DEBUG_ESM_LOADING
-      MessageInterface::ShowMessage("+++Adding %s to the ESM\n",
-            obj->GetName().c_str());
+      MessageInterface::ShowMessage("+++Adding <%s,%p> to the ESM\n",
+            obj->GetName().c_str(), obj);
    #endif
 
    bool retval = false;
@@ -382,7 +381,7 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
       else
          *(objects[i]) = *((*restoreBuffer)[i]);
       #ifdef DEBUG_CLONING
-         MessageInterface::ShowMessage("Object data:\n%s",
+         MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[i], objects[i]->GetName().c_str(),
                objects[i]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
       #endif
    }
@@ -826,8 +825,8 @@ bool EstimationStateManager::MapVectorToObjects()
          msg << stateMap[index]->subelement;
          std::string lbl = stateMap[index]->objectName + "." +
             stateMap[index]->elementName + "." + msg.str() + " = ";
-         MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(),
-               state[index]);
+         MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>\n", index, lbl.c_str(),
+            state[index], stateMap[index]->object->GetName().c_str(), stateMap[index]->object);
       #endif
 
       switch (stateMap[index]->parameterType)
@@ -857,7 +856,17 @@ bool EstimationStateManager::MapVectorToObjects()
             MessageInterface::ShowMessage(
                   "%s not set; Element type not handled\n",label.c_str());
       }
+
    }
+
+   #ifdef DEBUG_CLONING
+   MessageInterface::ShowMessage("After map vector to object:\n");
+   for (Integer index = 0; index < objects.size(); ++index)
+   {
+      MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[index], objects[index]->GetName().c_str(),
+         objects[index]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
+   }
+   #endif
 
    GmatEpoch theEpoch = state.GetEpoch();
    for (UnsignedInt i = 0; i < objects.size(); ++i)
