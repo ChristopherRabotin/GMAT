@@ -1598,13 +1598,13 @@ const StringArray& MeasurementManager::GetMeasurementNames() const
 
 
 
-const std::vector<TrackingFileSet*> MeasurementManager::GetTrackingSets() const
-{
-   return trackingSets;
-}
+//const std::vector<TrackingFileSet*> MeasurementManager::GetTrackingSets() const
+//{
+//   return trackingSets;
+//}
 
 
-const std::vector<TrackingDataAdapter*> MeasurementManager::GetTrackingDataAdapters() const
+const std::vector<TrackingDataAdapter*>& MeasurementManager::GetAllTrackingDataAdapters()
 {
    return adapters;
 }
