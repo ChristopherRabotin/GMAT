@@ -38,6 +38,7 @@ public:
    virtual ~ErrorModel();
    ErrorModel(const ErrorModel& em);
    ErrorModel& operator=(const ErrorModel& em);
+   bool operator==(const ErrorModel& em);
 
    virtual GmatBase* Clone() const;
    virtual bool Initialize();
@@ -54,24 +55,24 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
-//   virtual std::string  GetStringParameter(const Integer id,
-//                                           const Integer index) const;
-//   virtual bool         SetStringParameter(const Integer id,
-//                                           const std::string &value,
-//                                           const Integer index);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-//   virtual std::string  GetStringParameter(const std::string &label,
-//                                           const Integer index) const;
-//   virtual bool         SetStringParameter(const std::string &label,
-//                                           const std::string &value,
-//                                           const Integer index);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
 
-//   virtual const StringArray&
-//                        GetStringArrayParameter(const Integer id) const;
-//   virtual const StringArray&
-//                        GetStringArrayParameter(const std::string &label) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -90,6 +91,11 @@ public:
    //virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    //                                  const std::string &name = "");
 
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
+
+
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -99,8 +105,8 @@ protected:
    std::string   measurementType;               // Its value to be "Range_KM", "Range_RU", "Doppler_RangeRate", or "Doppler_Hz"
    /// Measurement trip
    Integer       measurementTrip;               // specify number of ways of a measurement. It would be 1 for one-way, 2 for two-ways, 3 for three-ways, and so on. It is 0 for all trips
-   /// Strand of a measurement signal
-   std::string   strand;                        // specify strand of a measurement
+   /// Participant name list
+   StringArray   participantNameList;           // It contains a list of participant name
    /// Measurement noise sigma
    Real          noiseSigma;                    // specify noise sigma of a measurement
    /// Noise Model
