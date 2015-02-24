@@ -248,7 +248,7 @@ std::string TrackingFileSet::GetParameterUnit(const Integer id) const           
    if (id == DOPPLER_COUNT_INTERVAL)                                             // made changes by TUAN NGUYEN
       return "sec";                                                              // made changes by TUAN NGUYEN
 
-   MeasurementModelBase::GetParameterUnit(id);                                   // made changes by TUAN NGUYEN
+   return MeasurementModelBase::GetParameterUnit(id);                            // made changes by TUAN NGUYEN
 }                                                                                // made changes by TUAN NGUYEN
 
 
@@ -1725,7 +1725,15 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    /// @todo Move this into a Factory so that plugin adapters work
    // 3. Create TrackingDataAdapter for a given measurement type
    std::stringstream ss;
-   ss << instanceName << "_Cfig" << configIndex+1 << "_" << type;
+   //ss << instanceName << "_Cfig" << configIndex+1 << "_" << type;
+   ss << instanceName << "_{";
+   for (UnsignedInt i = 0; i < strand.size(); ++i)
+   {
+      ss << strand[i];
+      if (i < strand.size()-1)
+         ss << ",";
+   }
+   ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    
    if (type == "Range")
