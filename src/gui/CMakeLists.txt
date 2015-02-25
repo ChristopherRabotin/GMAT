@@ -7,13 +7,13 @@
 #
 # Author: Joris T. Olympio
 # Modified For Production By: Josh Fisher
+# Modified For CMake Overhaul By: Ravi Mathur
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 # 
 
 MESSAGE("==============================")
-MESSAGE("GMAT GUI building setup " ${VERSION})
-
+MESSAGE("GMAT GUI setup " ${VERSION})
 
 # ====================================================================
 SET(GUITARGET "GmatGui")
@@ -59,99 +59,67 @@ endif()
 
 
 # ====================================================================
-# SPICE
+# SPICE specifics
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
+ADD_DEFINITIONS("-D__USE_SPICE__")
+
+# ====================================================================
+# wxWidgets
+FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl REQUIRED)
+INCLUDE(${wxWidgets_USE_FILE})
+LINK_LIBRARIES(${wxWidgets_LIBRARIES})
 
 # ====================================================================
 # other libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
 else()
 	LINK_LIBRARIES(GmatBase)
 endif()
 
-# Add Preprosser Definitions for wx widgets
-ADD_DEFINITIONS("-D__USE_WX280__")
-ADD_DEFINITIONS("-D__USE_WX280_GL__")
-ADD_DEFINITIONS("-DwxUSE_GLCANVAS")
+# Find OpenGL
+FIND_PACKAGE(OpenGL)
+INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
+LINK_LIBRARIES(${OPENGL_LIBRARIES})
 
-# need some opengl libs
-if(WIN32)
-    LINK_LIBRARIES("glu32")
-    LINK_LIBRARIES("opengl32")
-
-elseif(APPLE)
-    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework Carbon -framework OpenGL -framework AGL")
-    
-    #INCLUDE_DIRECTORIES ( /System/Library/Frameworks/OpenGL.framework )
-    
-    FIND_PACKAGE(OpenGL)
-    LINK_LIBRARIES(${OPENGL_LIBRARIES})
-    
-    MESSAGE(${OPENGL_gl_LIBRARY})
-    MESSAGE(${OPENGL_glu_LIBRARY})
-    
-    #SET(EXTRA_LIBS ${GLU_LIBRARY} ${OpenGL_LIBRARY})
-    #target_link_libraries(${TargetName} ${EXTRA_LIBS})
-    #LINK_LIBRARIES("GLU")
-else()
-    FIND_LIBRARY(OpenGL)
-    LINK_LIBRARIES(${OPENGL_LIBRARIES})
-endif()
-
-#ADD_DEFINITIONS("-D_DYNAMICLINK")
-
-if(WIN32)
-	ADD_DEFINITIONS("-DWXUSINGDLL")
-
-elseif(APPLE)
-    SET (WX_COMPILE_FLAGS "-I/${WXWIDGET_DIR}/lib/wx/include/osx_cocoa-unicode-3.0 -D__WXMAC__")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WX_COMPILE_FLAGS}")
-
-else()
-    SET (WX_COMPILE_FLAGS "-I/${WXWIDGET_DIR}/lib/wx/include/gtk2-ansi-release-2.8 -D__WXGTK__")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WX_COMPILE_FLAGS}")
-endif()
-
+# Add preprocessor definitions
+ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-D_MBCS")
 ADD_DEFINITIONS("-D__USE_STC_EDITOR__")
-if(WIN32)
-	ADD_DEFINITIONS("-D__ENABLE_EMAIL__")
-endif()
-ADD_DEFINITIONS("-D__USE_SPICE__")
 
+# ====================================================================
+# list of directories containing source/header files
+SET(GUI_DIRS
+  app
+  asset
+  burn
+  command
+  controllogic
+  coordsystem
+  event
+  forcemodel
+  foundation
+  function
+  hardware
+  include
+  include/bitmaps
+  include/il
+  mission
+  output
+  propagator
+  rendering
+  solarsys
+  solver
+  spacecraft
+  subscriber
+  view
+  )
 
 # ====================================================================
 # include directories for header files
+INCLUDE_DIRECTORIES(${GUI_DIRS})
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
-INCLUDE_DIRECTORIES("include")
-INCLUDE_DIRECTORIES("include/bitmaps")
-INCLUDE_DIRECTORIES("include/il")
-INCLUDE_DIRECTORIES("app")
-INCLUDE_DIRECTORIES("asset")
-INCLUDE_DIRECTORIES("burn")
-INCLUDE_DIRECTORIES("command")
-INCLUDE_DIRECTORIES("controllogic")
-INCLUDE_DIRECTORIES("coordsystem")
-INCLUDE_DIRECTORIES("forcemodel")
-INCLUDE_DIRECTORIES("foundation")
-INCLUDE_DIRECTORIES("function")
-INCLUDE_DIRECTORIES("hardware")
-INCLUDE_DIRECTORIES("mission")
-INCLUDE_DIRECTORIES("output")
-INCLUDE_DIRECTORIES("propagator")
-INCLUDE_DIRECTORIES("rendering")
-INCLUDE_DIRECTORIES("solarsys")
-INCLUDE_DIRECTORIES("solver")
-INCLUDE_DIRECTORIES("spacecraft")
-INCLUDE_DIRECTORIES("subscriber")
-INCLUDE_DIRECTORIES("view")
-INCLUDE_DIRECTORIES("event")
-INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/include/)
-INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/include/msvc/)
-#INCLUDE_DIRECTORIES(${WXWIDGET_DIR}/contrib/include)
 
 # ====================================================================
 # source files
@@ -207,6 +175,7 @@ SET(GUI_SRCS
     forcemodel/DragInputsDialog.cpp
     foundation/ArraySetupDialog.cpp
     foundation/ArraySetupPanel.cpp
+    foundation/GmatColorPanel.cpp
     foundation/GmatDialog.cpp
     foundation/GmatMdiChildFrame.cpp
     foundation/GmatPanel.cpp
@@ -225,6 +194,7 @@ SET(GUI_SRCS
     function/FunctionSetupPanel.cpp
     function/MatlabFunctionSetupPanel.cpp
     hardware/BurnThrusterPanel.cpp
+    hardware/PowerSystemConfigPanel.cpp
     hardware/ThrusterCoefficientDialog.cpp
     hardware/ThrusterConfigPanel.cpp
     mission/DecoratedTree.cpp
@@ -252,6 +222,7 @@ SET(GUI_SRCS
     solarsys/CelestialBodyOrientationPanel.cpp
     solarsys/CelestialBodyPanel.cpp
     solarsys/CelestialBodyPropertiesPanel.cpp
+    solarsys/CelestialBodyVisualizationPanel.cpp
     solarsys/LibrationPointPanel.cpp
     solarsys/UniversePanel.cpp
     solver/DCSetupPanel.cpp
@@ -266,6 +237,7 @@ SET(GUI_SRCS
     spacecraft/OrbitDesignerDialog.cpp
     spacecraft/OrbitPanel.cpp
     spacecraft/OrbitSummaryDialog.cpp
+    spacecraft/PowerSystemPanel.cpp
     spacecraft/SpacecraftPanel.cpp
     spacecraft/SpaceObjectSelectDialog.cpp
     spacecraft/TankPanel.cpp
@@ -274,6 +246,7 @@ SET(GUI_SRCS
     spacecraft/VisualModelPanel.cpp
     subscriber/EphemerisFilePanel.cpp
     subscriber/GroundTrackCanvas.cpp
+    subscriber/GroundTrackPlotPanel.cpp
     subscriber/MdiChild3DViewFrame.cpp
     subscriber/MdiChildGroundTrackFrame.cpp
     subscriber/MdiChildViewFrame.cpp
@@ -297,10 +270,13 @@ SET(GUI_SRCS
     view/ScriptEditor.cpp
     view/ViewTextDialog.cpp
     view/ViewTextFrame.cpp
-    ${STC_EDITOR_SRCS}
     ${SPICE_SRCS}
 )
 
+# ====================================================================
+# Recursively find all include files, which will be added to IDE-based
+# projects (VS, XCode, etc.)
+FILE(GLOB_RECURSE GUI_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # ====================================================================
 # TODO not sure I understand what are those mac specifics for... 
@@ -343,61 +319,21 @@ elseif(APPLE)
 endif()
 SET(GMAT_ICON_RC "${CMAKE_CURRENT_SOURCE_DIR}/${GMAT_ICON_DIR}/${GMAT_ICON_RC}")
 SET(GMAT_ICON_O "${CMAKE_CURRENT_SOURCE_DIR}/${GMAT_ICON_DIR}/${GMAT_ICON_O}")
-SET(GUI_SRCS "${GUI_SRCS};${GMAT_ICON_RC}")
+SET(GUI_SRCS ${GUI_SRCS} ${GMAT_ICON_RC})
 
 # ====================================================================
-# compilation
-
 # add the install targets
-if(WIN32)
-	if(64_BIT)
-		SET(WXCONTRIB_LIB_DIR "${WXWIDGET_DIR}/lib/vc_amd64_dll")
-		LINK_DIRECTORIES("${WXWIDGET_DIR}/lib/vc_amd64_dll")
-	else()
-		SET(WXCONTRIB_LIB_DIR "${WXWIDGET_DIR}/lib/vc_dll")
-		LINK_DIRECTORIES("${WXWIDGET_DIR}/lib/vc_dll")
-	endif()
 
-	LINK_LIBRARIES("${WXCONTRIB_LIB_DIR}/wxmsw28_netutils.lib")
-	LINK_LIBRARIES("${WXCONTRIB_LIB_DIR}/wxmsw28_stc.lib")
-endif()
+# Create GmatGui as an executable
+ADD_EXECUTABLE(${TargetName} ${GUI_SRCS} ${GUI_HEADERS})
 
-ADD_EXECUTABLE(${TargetName} ${GUI_SRCS})
-
-if(UNIX)
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_core-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_richtext-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_aui-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_xrc-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_qa-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_html-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_adv-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_stc-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_xml-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base_net-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_base-2.8.so")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_gtk2_gl-2.8.so")
-
-elseif(APPLE)
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_core-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_richtext-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_aui-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_xrc-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_qa-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_html-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_adv-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_stc-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_baseu_xml-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_baseu_net-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_baseu-3.0.dylib")
-	target_link_libraries(${TargetName} "/${WXWIDGET_DIR}/lib/libwx_osx_cocoau_gl-3.0.dylib")
-endif()
+# ====================================================================
+# Add source/header files to IDE-based project source groups
+# Macro defined in top-level CMakeLists.txt
+_ADDSOURCEGROUPS("${GUI_DIRS}")
 
 if(WIN32)
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}" LINK_FLAGS "/SUBSYSTEM:windows")
-
-else()
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/SUBSYSTEM:windows")
 endif()
 
 INSTALL( TARGETS ${TargetName}

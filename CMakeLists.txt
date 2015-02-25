@@ -69,12 +69,12 @@ endif()
 
 # Set default dependency directories
 if(WIN32)
-  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-2.8.12" CACHE PATH "wxWidgets Root Directory")
+  SET(wxWidgets_ROOT_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-3.0.2" CACHE PATH "wxWidgets Root Directory")
   SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/windows")
   # F2C_DIR will be set after validating CSPICE_DIR (further down)
 
 elseif(UNIX)
-  SET(WXWIDGET_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-3.0.2" CACHE PATH "wxWidgets Root Directory")
+  SET(wxWidgets_ROOT_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-3.0.2" CACHE PATH "wxWidgets Root Directory")
   SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
 
   if(APPLE)
@@ -106,15 +106,15 @@ endif()
 if( IS_DIRECTORY ${F2C_DIR} )
   MESSAGE(STATUS "F2C FOUND in " ${F2C_DIR})
 else()
-  MESSAGE(FATAL ERROR "F2C NOT FOUND in" ${F2C_DIR} " , Stopping build.")
+  MESSAGE(FATAL ERROR "F2C NOT FOUND in " ${F2C_DIR} " , Stopping build.")
 endif()
 
 # If building GUI, check if wxWidgets directory exists
 if( GMAT_GUI )
-  if( IS_DIRECTORY ${WXWIDGET_DIR} )
-    MESSAGE(STATUS "wxWidgets FOUND in" ${WXWIDGET_DIR})
+  if( IS_DIRECTORY ${wxWidgets_ROOT_DIR} )
+    MESSAGE(STATUS "wxWidgets FOUND in " ${wxWidgets_ROOT_DIR})
   else()
-    MESSAGE(WARNING "wxWidgets NOT FOUND in " ${WXWIDGET_DIR} " , GUI disabled.")
+    MESSAGE(WARNING "wxWidgets NOT FOUND in " ${wxWidgets_ROOT_DIR} " , GUI disabled.")
     SET(GMAT_GUI OFF CACHE BOOL "Disabled due to missing wxWidgets" FORCE)
   endif()
 endif()
@@ -191,14 +191,6 @@ endif()
 # Set DevIL Proprocessor defs
 if (WIN32)
   ADD_DEFINITIONS("-DSKIP_DEVIL")
-endif()
-
-# ====================================================================
-# Mac specifics (not tested)
-if(APPLE)
-  #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} current_version 0.5 -/#compatibility_version 0.5 -fvisibility=default")
-  #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -framework OpenGL -framework AGL -headerpad_max_install_names")
-  #LINK_DIRECTORIES("stdc++.6")
 endif()
 
 if(UNIX)

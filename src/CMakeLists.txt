@@ -46,3 +46,4 @@ endif()
 # Bulk changes to the src targets can be made here, using the
 # SET_TARGET_PROPERTIES(${SrcTargets} ...) function. This is cleaner
 # than applying the target properties at each subdirectory.
+SET_TARGET_PROPERTIES(${SrcTargets} PROPERTIES VERSION ${GMAT_VERSION})

@@ -22,7 +22,7 @@ endif()
 
 SET(TargetName ${BASETARGET})
 
-# Add Preproccessor Definitions
+# Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DGMAT_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
@@ -104,8 +104,6 @@ INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
 # source files
-
-# define the source files
 SET(BASE_SRCS
     asset/AssetException.cpp
     asset/BodyFixedPoint.cpp
@@ -544,9 +542,7 @@ _ADDSOURCEGROUPS("${BASE_DIRS}")
 
 # specify the version of the library. 
 if(WIN32)
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
-else()
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} )
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
 endif()
 
 INSTALL( TARGETS ${TargetName}

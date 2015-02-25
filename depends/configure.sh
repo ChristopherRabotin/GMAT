@@ -123,41 +123,40 @@ function download_depends() {
 		rm cspice.tar
 	fi	
 
-	# Create directories and download wxwidgets if needed
-	if [ ! -d "$wxWidgets_path" ] && [ build_wx == true ]
+	# Create directories and download wxWidgets if needed
+	if [ ! -d "$wxWidgets_path" ] && [ $build_wx == true ]
 	then
 		# Create Directories
 		mkdir "$wxWidgets_path"
 	
-		# Change to wxwidgets directory
+		# Change to wxWidgets directory
 		cd "$wxWidgets_path"
 	
-		# Checkout wxWidget source.
-		svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_2_8_12/ wxWidgets-2.8.12
+		# Checkout wxWidgets source.
+		svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_2/ wxWidgets-3.0.2
 		
 		# Copy modified configure scripts (This fixes the OpenGL location issue)
-		cp "$bin_path/wx/configure" "$wxWidgets_path/wxWidgets-2.8.12/configure"
+		#cp "$bin_path/wx/configure" "$wxWidgets_path/wxWidgets-3.0.2/configure"
 	
 		if [ $use_latest == true ]
 		then
-			# Change to wxwidgets directory
+			# Change to wxWidgets directory
 			cd "$wxWidgets_path"
 	
-			# Checkout latest wxWidget source.
+			# Checkout latest wxWidgets source.
 			svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/trunk/ wxWidgets-latest
 		
-			# Copy modified configure scripts (This fixes the OpenGL location issue)
-			cp "$bin_path/wx/configure" "$wxWidgets_path/wxWidgets-2.8.12/configure"
+			# Copy modified configure scripts (This fixes the OpenGL location issue) [NO LONGER NEEDED]
+			#cp "$bin_path/wx/configure" "$wxWidgets_path/wxWidgets-3.0.2/configure"
 		
 		fi
 	fi
 
 	# Create directories and download sofa if it does not already exist.
-	if [ ! -d "$sofa_path" ]
+	if [ ! -d "$sofa_path" ] && [ false == true ]
 	then
 		# Change to depends directory
 		cd "$gmat_path/depends/"
-:w
 
 		# Download and extract Sofa Source, finally remove archive
 		wget http://www.iausofa.org/2012_0301_C/sofa_c_a.zip
@@ -166,7 +165,7 @@ function download_depends() {
 	fi
 
 	# Create directories and download tsplot if it does not already exist.
-	if [ ! -d "$tsplot_path" ]
+	if [ ! -d "$tsplot_path" ] && [ false  == true ]
 	then
 		# Create Directories
 		mkdir "$tsplot_path"
@@ -179,7 +178,7 @@ function download_depends() {
 	fi
 
 	# Create directories and download pcre if it does not already exist.
-	if [ ! -d "$pcre_path" ]
+	if [ ! -d "$pcre_path" ] && [ false ]
 	then
 		# Create Directories
 		mkdir "$pcre_path"
@@ -208,16 +207,16 @@ function build_wxWidgets() {
 	then
 		wx_build_path=$gmat_path/depends/wxWidgets/latest
 	else
-		wx_build_path=$gmat_path/depends/wxWidgets/wxWidgets-2.8.12
+		wx_build_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2
 	fi
 
 	if [ $mac == true ]
     	then
         	# Check if dependencies have already been built
-        	depend_path=$gmat_path/depends/wxWidgets/wxWidgets-2.8.12/lib/libwx_mac_core-2.8.0.dylib
+        	depend_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2/lib/libwx_mac_core-3.0.0.dylib
     	else
         	# Check if dependencies have already been built
-        	depend_path=$gmat_path/depends/wxWidgets/wxWidgets-2.8.12/lib/libwx_gtk2_core-2.8.so
+        	depend_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2/lib/libwx_gtk2_core-2.8.so
     	fi
 
 	cd "$wx_build_path"
@@ -226,21 +225,16 @@ function build_wxWidgets() {
 	then
 		if [ $mac == true ]
         	then
-            		arch_flags="-arch i386"
-            		./configure CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --with-opengl --with-macosx-version-min=10.7 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk
+            		#arch_flags="-arch i386"
+            		#./configure CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --with-opengl --with-macosx-version-min=10.7 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk
+			./configure --enable-unicode --with-opengl --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
         	else
             		# Configure wxWidget build
-            		./configure --with-opengl
+            		./configure --enable-unicode --with-opengl
         	fi
 
 		# Compile wxWidget build
 		make 
-	
-		# Change to contrib directory
-		cd contrib
-	
-		# Compile wxWidget contrib
-		make
 	fi
 }
 
@@ -248,7 +242,8 @@ function build_wxWidgets() {
 download_depends
 if [ $build_wx == true ]
 then
-  build_wxWidgets
+  :
+  #build_wxWidgets
 fi
 
 # ***********************************
