@@ -142,8 +142,8 @@ DragForce::DragForce(const std::string &name) :
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
    kpApConversion          (0),
-   densityModel            (""),									// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile               ("")										// made changes by TUAN NGUYEN	for GMT-4299
+   densityModel            (""),									   // made changes for GMT-4299
+   inputFile               ("")										// made changes for GMT-4299
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce default construction <'%s',%p>\n", GetName().c_str(), this);
@@ -281,8 +281,8 @@ DragForce::DragForce(const DragForce& df) :
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
    kpApConversion          (df.kpApConversion),
-   densityModel            (df.densityModel),							// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile               (df.inputFile)								// made changes by TUAN NGUYEN	for GMT-4299
+   densityModel            (df.densityModel),					   // made changes for GMT-4299
+   inputFile               (df.inputFile)								// made changes for GMT-4299
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
@@ -321,15 +321,15 @@ DragForce::DragForce(const DragForce& df) :
    mass.clear();
    dragCoeff.clear();
 
-   if (internalAtmos != NULL)													// made changes by TUAN NGUYEN	for GMT-4299
-   {																			// made changes by TUAN NGUYEN	for GMT-4299
-	   try																		// made changes by TUAN NGUYEN	for GMT-4299
-	   {																		// made changes by TUAN NGUYEN	for GMT-4299
-	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes by TUAN NGUYEN	for GMT-4299
-		  inputFile    = internalAtmos->GetStringParameter("InputFile");		// made changes by TUAN NGUYEN	for GMT-4299
-	   }																		// made changes by TUAN NGUYEN	for GMT-4299
-	   catch(...){};															// made changes by TUAN NGUYEN	for GMT-4299
-   }																			// made changes by TUAN NGUYEN	for GMT-4299
+   if (internalAtmos != NULL)													            // made changes for GMT-4299
+   {																			                  // made changes for GMT-4299
+	   try																		               // made changes for GMT-4299
+	   {																		                  // made changes for GMT-4299
+	      densityModel = internalAtmos->GetStringParameter("DensityModel");		// made changes for GMT-4299
+		  inputFile    = internalAtmos->GetStringParameter("InputFile");		   // made changes for GMT-4299
+	   }																		                  // made changes for GMT-4299
+	   catch(...){};															               // made changes for GMT-4299
+   }																			                  // made changes for GMT-4299
    
 #ifdef DEBUG_CONSTRUCTION
    if (df.atmos == NULL)
@@ -453,8 +453,8 @@ DragForce& DragForce::operator=(const DragForce& df)
    cartIndex = df.cartIndex;
    fillCartesian = df.fillCartesian;
 
-   densityModel = df.densityModel;							// made changes by TUAN NGUYEN	for GMT-4299
-   inputFile    = df.inputFile;								// made changes by TUAN NGUYEN	for GMT-4299
+   densityModel = df.densityModel;							// made changes for GMT-4299
+   inputFile    = df.inputFile;								// made changes for GMT-4299
 
    return *this;
 }
@@ -863,18 +863,18 @@ bool DragForce::Initialize()
                atmos->SetRealParameter(KPID, kp);
             }
 
-			if (cbFixed != NULL)										// made changes by TUAN NGUYEN
-               atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
-            if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
-               atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
+			if (cbFixed != NULL)
+               atmos->SetFixedCoordinateSystem(cbFixed);
+            if (internalCoordSystem != NULL)
+               atmos->SetInternalCoordSystem(internalCoordSystem);
 			try
 			{
 //				MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
-			   atmos->SetStringParameter("DensityModel", densityModel);	// made changes by TUAN NGUYEN		for GMT-4299
-			   atmos->SetStringParameter("InputFile", inputFile);		// made changes by TUAN NGUYEN		for GMT-4299
+			   atmos->SetStringParameter("DensityModel", densityModel);	// made changes for GMT-4299
+			   atmos->SetStringParameter("InputFile", inputFile);		   // made changes for GMT-4299
 			} catch (...){}
 
-			atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
+			atmos->Initialize();										            // Note: it needs to initialize before use. Fixed bug GMT-4124
          }
          else
          {
@@ -1668,6 +1668,17 @@ std::string DragForce::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * @see SetStringParameter(const Integer id, const std::string &value)
+ */
+//------------------------------------------------------------------------------
+bool DragForce::SetStringParameter(const Integer id, const char *value)
+{
+   return SetStringParameter(id, std::string(value));
+}
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
@@ -1751,6 +1762,16 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
 
 
    return PhysicalModel::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+bool DragForce::SetStringParameter(const std::string &label,
+                                   const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 //------------------------------------------------------------------------------

@@ -39,6 +39,8 @@
 #include "CCSDSAttitude.hpp"
 #include "FileManager.hpp"           // for GetFullPathname()
 #include "AngleUtil.hpp"             // for PutAngleInDegRange()
+#include "EphemManager.hpp"
+
 #ifdef __USE_SPICE__
 #include "SpiceAttitude.hpp"         // for SpiceAttitude - to set object name and ID
 #endif
@@ -69,6 +71,7 @@
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_SC_OWNED_OBJECT
 //#define DEBUG_MASS_FLOW
+//#define DEBUG_UPDATE_TOTAL_MASS
 //#define DEBUG_SPICE_KERNELS
 //#define DEBUG_HARDWARE
 //#define DEBUG_GEN_STRING
@@ -361,6 +364,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    spadSRPScaleFactor   (1.0),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
+   ephemMgr             (NULL),
    includeCartesianState(0)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -516,6 +520,11 @@ Spacecraft::~Spacecraft()
 
    if (spadSRPReader)  delete spadSRPReader;
    if (spadBFCS)       delete spadBFCS;
+   if (ephemMgr)
+   {
+      ephemMgr->StopRecording();
+      delete ephemMgr;
+   }
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -587,6 +596,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spadSRPScaleFactor   (a.spadSRPScaleFactor),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
+   ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState)
 {
    #ifdef DEBUG_SPACECRAFT
@@ -618,7 +628,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
 //   hardwareList      = a.hardwareList;
 
    // set cloned hardware
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes by TUAN NGUYEN      09/23/2014
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);            // made changes on 09/23/2014
 
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -736,7 +746,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    MessageInterface::ShowMessage
       ("Spacecraft::Spacecraft(=) about to clone all owned objects\n");
       #endif
-   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes by TUAN NGUYEN      09/23/2014
+   CloneOwnedObjects(a.attitude, a.tanks, a.thrusters, a.powerSystem, a.hardwareList);              // made changes on 09/23/2014
 
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
@@ -749,6 +759,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
+   if (ephemMgr) delete ephemMgr;
+   ephemMgr           = NULL;
 
    includeCartesianState = a.includeCartesianState;
 
@@ -1181,6 +1193,79 @@ Rvector3 Spacecraft::GetSPADSRPArea(const Real ep, const Rvector3 &sunVector)
    Rvector3 result(resI[0], resI[1], resI[2]);
 
    return result;
+}
+
+
+//------------------------------------------------------------------------------
+//  Real GetPowerGenerated()
+//------------------------------------------------------------------------------
+Real Spacecraft::GetPowerGenerated()
+{
+   if (!powerSystem)
+   {
+      std::string errmsg = "No power system set for spacecraft ";
+      errmsg += instanceName + ".\n";
+      throw SpaceObjectException(errmsg);
+   }
+   return powerSystem->GetPowerGenerated();
+}
+
+//------------------------------------------------------------------------------
+//  Real GetThrustPower()
+//------------------------------------------------------------------------------
+Real Spacecraft::GetThrustPower()
+{
+   if (!powerSystem)
+   {
+      std::string errmsg = "No power system set for spacecraft ";
+      errmsg += instanceName + ".\n";
+      throw SpaceObjectException(errmsg);
+   }
+   return powerSystem->GetThrustPower();
+}
+
+//------------------------------------------------------------------------------
+//  Real GetSpacecraftBusPower()
+//------------------------------------------------------------------------------
+Real Spacecraft::GetSpacecraftBusPower()
+{
+   if (!powerSystem)
+   {
+      std::string errmsg = "No power system set for spacecraft ";
+      errmsg += instanceName + ".\n";
+      throw SpaceObjectException(errmsg);
+   }
+   return powerSystem->GetSpacecraftBusPower();
+}
+
+//------------------------------------------------------------------------------
+// RecordEphemeris()
+// Record the Spacecraft ephemeris in the background (needed by Event Location)
+//------------------------------------------------------------------------------
+void Spacecraft::RecordEphemerisData()
+// Set up the ephemMgr here - set the coord sys, obj ptr, etc.
+{
+   if (!ephemMgr)
+   {
+      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+      ephemMgr->SetObject(this);
+      // @todo - do I need to resend this, if the internalCoordSys ever changes?
+      ephemMgr->SetCoordinateSystem(internalCoordSystem);
+   }
+   ephemMgr->RecordEphemerisData();
+}
+
+//------------------------------------------------------------------------------
+// ProvideEphemeris()
+// Load the recorded ephemeris and start up another file to continue recording
+//------------------------------------------------------------------------------
+void Spacecraft::ProvideEphemerisData()
+{
+   // @todo Fill this in
+   if (!ephemMgr)
+      throw SpaceObjectException(
+            "RecordEphemeris() must be called before ProvideEphemeris()\n");
+   ephemMgr->ProvideEphemerisData();
 }
 
 
@@ -1705,6 +1790,13 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
    return SpaceObject::GetRefObjectNameArray(type);
 }
 
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const char *name)
+//------------------------------------------------------------------------------
+bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const char *name)
+{
+   return SetRefObjectName(type, std::string(name));
+}
 
 // DJC: Not sure if we need this yet...
 //------------------------------------------------------------------------------
@@ -1862,6 +1954,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
    // now work on hardware
    if (type == Gmat::HARDWARE || type == Gmat::FUEL_TANK || type == Gmat::THRUSTER ||
+       obj->IsOfType(Gmat::THRUSTER) || obj->IsOfType(Gmat::FUEL_TANK) ||
        type == Gmat::POWER_SYSTEM)
    {
       #ifdef DEBUG_SC_REF_OBJECT
@@ -1871,7 +1964,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       #endif
 
       // set fueltank
-      if (objType == "FuelTank")
+//      if (objType == "FuelTank")
+      if (obj->IsOfType("FuelTank"))
       {
          bool retval = SetHardware(obj, tankNames, tanks);
          if (retval)
@@ -1892,7 +1986,8 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
 
       // set thruster
-      if (objType == "Thruster")
+//      if (objType == "Thruster")
+      if (obj->IsOfType("Thruster"))
       {
          bool retval = SetHardware(obj, thrusterNames, thrusters);
          if (retval)
@@ -3625,6 +3720,24 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 }
 
 //---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::SetStringParameter(const std::string &label,
+                                    const char *value)
+{
+   return SetStringParameter(label, std::string(value));
+}
+
+//---------------------------------------------------------------------------
 //  bool SetStringParameter(const std::string &label, const std::string &value)
 //---------------------------------------------------------------------------
 /**
@@ -3973,11 +4086,20 @@ bool Spacecraft::TakeAction(const std::string &action,
       bool removeTank     = true, removeThruster = true;
       bool removePowerSys = true, removeAll      = false;
       if (action == "RemoveTank")
+      {
+         removePowerSys = false;
          removeThruster = false;
+      }
       if (action == "RemoveThruster")
-         removeTank = false;
+      {
+         removePowerSys = false;
+         removeTank     = false;
+      }
       if (action == "RemovePowerSystem")
-         removePowerSys = true;
+      {
+         removeThruster = false;
+         removeTank     = false;
+      }
       if (actionData == "")
          removeAll = true;
 
@@ -4487,6 +4609,10 @@ bool Spacecraft::Initialize()
       isInitialized = true;
       retval = true;
    }
+
+   // *********** testing ************************
+//   RecordEphemerisData();    // ******************<<<<<<<<<<<<<<< for testing
+   // *********** testing ************************
 
    return retval;
 }
@@ -5210,7 +5336,8 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
    Real massChange = newMass - UpdateTotalMass();
 
    #ifdef DEBUG_MASS_FLOW
-      MessageInterface::ShowMessage("Mass change = %.12le; depeting ", massChange);
+      MessageInterface::ShowMessage("newMass = %12le, Mass change = %.12le; depleting \n",
+            newMass, massChange);
    #endif
 
    // Find the active thruster(s)
@@ -5223,10 +5350,19 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
       {
          active.push_back(*i);
          rate = ((Thruster*)(*i))->CalculateMassFlow();
+         #ifdef DEBUG_MASS_FLOW
+            MessageInterface::ShowMessage("Thruster %s returned %12.10f\n",
+                  (*i)->GetName().c_str(), rate);
+         #endif
          flowrate.push_back(rate);
          totalFlow += rate;
       }
    }
+//   if (GmatMathUtil::IsEqual(totalFlow, 0.0))
+//   {
+////      MessageInterface::ShowMessage("Total Flow is zero!!!\n");  // temporary
+//      return true;
+//   }
 
    // Divide the mass flow evenly between the tanks on each active thruster
    Real numberFiring = active.size();
@@ -5245,9 +5381,14 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
    {
       // Change the mass in each attached tank
       ObjectArray usedTanks = active[i]->GetRefObjectArray(Gmat::HARDWARE);
+      // ******
+      if (!GmatMathUtil::IsEqual(totalFlow,0.0))
+      {
       dm = massChange * flowrate[i] / totalFlow;
 
       #ifdef DEBUG_MASS_FLOW
+         MessageInterface::ShowMessage("flowrate = %12.10f, totalFlow = %12.10f\n",
+               flowrate[i], totalFlow);
          MessageInterface::ShowMessage("%.12le from %s = [ ", dm, active[i]->GetName().c_str());
       #endif
 
@@ -5261,6 +5402,7 @@ bool Spacecraft::ApplyTotalMass(Real newMass)
          (*j)->SetRealParameter("FuelMass",
                (*j)->GetRealParameter("FuelMass") + dmt);
       }
+      } // *****************
       #ifdef DEBUG_MASS_FLOW
                MessageInterface::ShowMessage(" ] ");
       #endif
@@ -5400,7 +5542,7 @@ void Spacecraft::DeleteOwnedObjects(bool deleteAttitude, bool deleteTanks,
 //------------------------------------------------------------------------------
 void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
                                    const ObjectArray &thrs, PowerSystem *pwrSys,
-                                   const ObjectArray &otherHardware)   // made changes by TUAN NGUYEN    09/23/2014
+                                   const ObjectArray &otherHardware)   // made changes on 09/23/2014
 {
    #ifdef DEBUG_OBJ_CLONE
    MessageInterface::ShowMessage
@@ -5525,7 +5667,7 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
        " thruster count = %d\n", this, GetName().c_str(), att, powerSystem, tnks.size(), thrs.size());
    #endif
 
-   // made changes by TUAN NGUYEN         09/23/2014
+   // made changes on 09/23/2014
    // Clone other hardware
    for (UnsignedInt i = 0; i < otherHardware.size(); ++i)
    {
@@ -6875,7 +7017,7 @@ bool Spacecraft::VerifyAddHardware()
             if (primaryAntenna == NULL)
             {
                MessageInterface::ShowMessage
-                  ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",					// made changes by TUAN NGUYEN
+                  ("***Error***:primary antenna of %s in %s's AddHardware list is not set \n",
                    obj->GetName().c_str(), this->GetName().c_str());
                check = false;
             }
@@ -7000,7 +7142,7 @@ void  Spacecraft::SetPossibleInputTypes(const std::string& label, const std::str
       MessageInterface::ShowMessage
                ("'%s' not found, so removing the type '%s' from possible input types\n", label.c_str(), (*iter).c_str());
             #endif
-            possibleInputTypes.erase(iter);
+            iter = possibleInputTypes.erase(iter);
          }
       }
       

@@ -175,6 +175,15 @@ namespace Gmat
       FUEL_TANK,
       THRUSTER,
       
+      CHEMICAL_THRUSTER,
+      ELECTRIC_THRUSTER,
+      CHEMICAL_FUEL_TANK,
+      ELECTRIC_FUEL_TANK,
+
+      POWER_SYSTEM,        // for PowerSystems
+      SOLAR_POWER_SYSTEM,
+      NUCLEAR_POWER_SYSTEM,
+
       HARDWARE,            // Tanks, Thrusters, Antennae, Sensors, etc.
       COORDINATE_SYSTEM,
       AXIS_SYSTEM,
@@ -190,6 +199,7 @@ namespace Gmat
       // Estimation types
       MEASUREMENT_MODEL,   // May be replaced by TrackingSystem
       CORE_MEASUREMENT,    // For the measurement primitives
+      ERROR_MODEL,         // Error model used in a measurement            // made changes by TUAN NGUYEN  
       
       TRACKING_DATA,
       TRACKING_SYSTEM,
@@ -203,10 +213,6 @@ namespace Gmat
       RF_HARDWARE,
       ANTENNA,
       
-      POWER_SYSTEM,        // for PowerSystems
-      SOLAR_POWER_SYSTEM,
-      NUCLEAR_POWER_SYSTEM,
-
       GENERIC_OBJECT,      // Used for user defined objects that do not fall 
                            // into any of the above categories, and for 
                            // internal objects that users don't access
@@ -298,7 +304,6 @@ namespace Gmat
       ORBIT_STATE_TRANSITION_MATRIX,   // 6x6 STM for the orbit
       ORBIT_A_MATRIX,
       MASS_FLOW,                       // m dot
-      EVENT_FUNCTION_STATE,            // For event location
       PREDEFINED_STATE_MAX,
       USER_DEFINED_BEGIN = 3800,
       USER_DEFINED_END = 3999          // Allow up to 200 dynamic entries

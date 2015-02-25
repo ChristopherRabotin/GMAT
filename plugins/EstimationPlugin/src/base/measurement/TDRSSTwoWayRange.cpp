@@ -342,7 +342,7 @@ bool TDRSSTwoWayRange::Initialize()
    return retval;
 }
 
-// This function is added by TUAN NGUYEN
+
 //----------------------------------------------------------------------------------
 // void InitializeMeasurement()
 //----------------------------------------------------------------------------------

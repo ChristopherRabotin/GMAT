@@ -38,14 +38,13 @@
 const std::string EclipseLocator::PARAMETER_TEXT[
       EclipseLocatorParamCount - EventLocatorParamCount] =
 {
-   "OccultingBodies"          // OCCULTERS
+      "EclipseTypes",           // ECLIPSE_TYPES
 };
 
 const Gmat::ParameterType EclipseLocator::PARAMETER_TYPE[
       EclipseLocatorParamCount - EventLocatorParamCount] =
 {
-//   Gmat::STRINGARRAY_TYPE     // OCCULTERS
-   Gmat::OBJECTARRAY_TYPE     // OCCULTERS
+   Gmat::STRINGARRAY_TYPE     // OCCULTERS
 };
 
 
@@ -86,13 +85,6 @@ EclipseLocator::~EclipseLocator()
    #ifdef DEBUG_LOCATOR_DESTRUCTOR
       MessageInterface::ShowMessage("Deleting EclipseLocator at <%p>\n", this);
    #endif
-
-   for (UnsignedInt i = 0; i < umbras.size(); ++i)
-      delete umbras[i];
-   for (UnsignedInt i = 0; i < penumbras.size(); ++i)
-      delete penumbras[i];
-   for (UnsignedInt i = 0; i < antumbras.size(); ++i)
-      delete antumbras[i];
 }
 
 //------------------------------------------------------------------------------
@@ -106,23 +98,12 @@ EclipseLocator::~EclipseLocator()
 //------------------------------------------------------------------------------
 EclipseLocator::EclipseLocator(const EclipseLocator & el) :
    EventLocator         (el),
-   occulters            (el.occulters)
+   eclipseTypes         (el.eclipseTypes)
 {
    #ifdef DEBUG_LOCATOR_DESTRUCTOR
       MessageInterface::ShowMessage("Creating Eclipse locator %s at <%p> "
             "using the Copy constructor\n", instanceName.c_str(), this);
    #endif
-
-   for (UnsignedInt i = 0; i < umbras.size(); ++i)
-      delete umbras[i];
-   for (UnsignedInt i = 0; i < penumbras.size(); ++i)
-      delete penumbras[i];
-   for (UnsignedInt i = 0; i < antumbras.size(); ++i)
-      delete antumbras[i];
-
-   umbras.clear();
-   penumbras.clear();
-   antumbras.clear();
 
    isInitialized = false;
 }
@@ -144,36 +125,12 @@ EclipseLocator& EclipseLocator::operator=(const EclipseLocator & el)
    {
       EventLocator::operator=(el);
 
-      occulters = el.occulters;
-
-      for (UnsignedInt i = 0; i < umbras.size(); ++i)
-         delete umbras[i];
-      umbras.clear();
-      for (UnsignedInt i = 0; i < penumbras.size(); ++i)
-         delete penumbras[i];
-      penumbras.clear();
-      for (UnsignedInt i = 0; i < antumbras.size(); ++i)
-         delete antumbras[i];
-      antumbras.clear();
+      eclipseTypes = el.eclipseTypes;
 
       isInitialized = false;
    }
 
    return *this;
-}
-
-//------------------------------------------------------------------------------
-// GmatBase *Clone() const
-//------------------------------------------------------------------------------
-/**
- * Creates a replica of this instance
- *
- * @return A pointer to the new instance
- */
-//------------------------------------------------------------------------------
-GmatBase *EclipseLocator::Clone() const
-{
-   return new EclipseLocator(*this);
 }
 
 // Inherited (GmatBase) methods for parameters
@@ -252,10 +209,36 @@ Gmat::ParameterType EclipseLocator::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string EclipseLocator::GetParameterTypeString(const Integer id) const
 {
-   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   return EventLocator::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& EclipseLocator::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+   case ECLIPSE_TYPES:
+      enumStrings.clear();
+      enumStrings.push_back("Umbra");
+      enumStrings.push_back("Penumbra");
+      enumStrings.push_back("Antumbra");
+      return enumStrings;
+   default:
+      return EventLocator::GetPropertyEnumStrings(id);
+   }
+}
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -289,19 +272,19 @@ std::string EclipseLocator::GetStringParameter(const Integer id) const
 bool EclipseLocator::SetStringParameter(const Integer id,
       const std::string &value)
 {
-   if (id == OCCULTERS)
+   if (id == ECLIPSE_TYPES)
    {
-      if (find(satNames.begin(), satNames.end(), value) == satNames.end())
+      if ((value != "Umbra") && (value != "Penumbra") && (value != "Antumbra"))
       {
-         if (value != "Sun")
-            occulters.push_back(value);
-         else
-         {
-            MessageInterface::ShowMessage("The Sun was set as an occulting "
-            "body, but Stars cannot occult their own light.  The Sun is being "
-            "excluded from the list of occulters.\n");
-            return false;
-         }
+         EventException ee("");
+         ee.SetDetails(errorMessageFormat.c_str(),
+                       value.c_str(),
+                       "EclipseTypes", "1 or more of [Umbra, Penumbra, Antumbra]");
+         throw ee;
+      }
+      if (find(eclipseTypes.begin(), eclipseTypes.end(), value) == eclipseTypes.end())
+      {
+         eclipseTypes.push_back(value);
       }
       return true;
    }
@@ -325,13 +308,13 @@ bool EclipseLocator::SetStringParameter(const Integer id,
 std::string EclipseLocator::GetStringParameter(const Integer id,
       const Integer index) const
 {
-   if (id == OCCULTERS)
+   if (id == ECLIPSE_TYPES)
    {
-      if (index < (Integer)occulters.size())
-         return occulters[index];
+      if ((index >= 0) && (index < (Integer)eclipseTypes.size()))
+         return eclipseTypes.at(index);
       else
          throw EventException(
-               "Index out of range when trying to access occulting body list "
+               "Index out of range when trying to access eclipse type list "
                "for " + instanceName);
    }
 
@@ -356,16 +339,29 @@ std::string EclipseLocator::GetStringParameter(const Integer id,
 bool EclipseLocator::SetStringParameter(const Integer id,
       const std::string &value, const Integer index)
 {
-   if (id == OCCULTERS)
+   if (id == ECLIPSE_TYPES)
    {
-      if (index < (Integer)occulters.size())
+      if (index < 0)
       {
-         occulters[index] = value;
+         std::string errmsg = "Index for EclipseTypes is out-of-range\n";
+         throw EventException(errmsg);
+      }
+      if ((value != "Umbra") && (value != "Penumbra") && (value != "Antumbra"))
+      {
+         EventException ee("");
+         ee.SetDetails(errorMessageFormat.c_str(),
+                       value.c_str(),
+                       "EclipseTypes", "1 or more of [Umbra, Penumbra, Antumbra]");
+         throw ee;
+      }
+      if (index < (Integer) eclipseTypes.size())
+      {
+         eclipseTypes.at(index) = value;
          return true;
       }
       else
       {
-         occulters.push_back(value);
+         eclipseTypes.push_back(value);
          return true;
       }
    }
@@ -387,8 +383,8 @@ bool EclipseLocator::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 const StringArray& EclipseLocator::GetStringArrayParameter(const Integer id) const
 {
-   if (id == OCCULTERS)
-      return occulters;
+   if (id == ECLIPSE_TYPES)
+      return eclipseTypes;
 
    return EventLocator::GetStringArrayParameter(id);
 }
@@ -549,9 +545,9 @@ bool EclipseLocator::TakeAction(const std::string &action,
    {
       bool retval = false;
 
-      if ((actionData == "OccultingBodies") || (actionData == ""))
+      if ((actionData == "EclipseTypes") || (actionData == ""))
       {
-         occulters.clear();
+         eclipseTypes.clear();
          retval = true;
       }
 
@@ -576,21 +572,6 @@ bool EclipseLocator::TakeAction(const std::string &action,
 const ObjectTypeArray& EclipseLocator::GetTypesForList(const Integer id)
 {
    listedTypes.clear();
-
-   if (id == OCCULTERS)
-   {
-      if (find(listedTypes.begin(), listedTypes.end(), Gmat::CELESTIAL_BODY) ==
-            listedTypes.end())
-      {
-         #ifdef DEBUG_TYPELIST
-            MessageInterface::ShowMessage("Adding CelestialBody (%d) to the "
-               "list for Occulters\n", Gmat::CELESTIAL_BODY);
-         #endif
-         listedTypes.push_back(Gmat::CELESTIAL_BODY);
-      }
-      return listedTypes;
-   }
-
    return EventLocator::GetTypesForList(id);
 }
 
@@ -610,49 +591,19 @@ const ObjectTypeArray& EclipseLocator::GetTypesForList(const std::string &label)
    return GetTypesForList(GetParameterID(label));
 }
 
-
 //------------------------------------------------------------------------------
-// bool RenameRefObject(const Gmat::ObjectType type, 
-//       const std::string &oldName, const std::string &newName)
+// GmatBase *Clone() const
 //------------------------------------------------------------------------------
 /**
- * Interface used to support user renames of object references.
+ * Creates a replica of this instance
  *
- * @param type reference object type.
- * @param oldName object name to be renamed.
- * @param newName new object name.
- *
- * @return true if object name changed, false if not.
+ * @return A pointer to the new instance
  */
 //------------------------------------------------------------------------------
-bool EclipseLocator::RenameRefObject(const Gmat::ObjectType type, 
-   const std::string &oldName, const std::string &newName)
+GmatBase *EclipseLocator::Clone() const
 {
-   bool retval = false;
-
-   switch (type)
-   {
-      case Gmat::CELESTIAL_BODY:
-      case Gmat::UNKNOWN_OBJECT:
-         for (UnsignedInt i = 0; i < occulters.size(); ++i)
-         {
-            if (occulters[i] == oldName)
-            {
-               occulters[i] = newName;
-               retval = true;
-            }
-         }
-         break;
-
-      default:
-         ;        // Intentional drop-through
-   }
-   
-   retval = (retval || EventLocator::RenameRefObject(type, oldName, newName));
-
-   return retval;
+   return new EclipseLocator(*this);
 }
-
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -671,66 +622,76 @@ bool EclipseLocator::Initialize()
       MessageInterface::ShowMessage("Initializing %s\n", instanceName.c_str());
    #endif
 
-   // Clear old event function instances
-   for (UnsignedInt i = 0; i < umbras.size(); ++i)
-      delete umbras[i];
-   umbras.clear();
-   for (UnsignedInt i = 0; i < penumbras.size(); ++i)
-      delete penumbras[i];
-   penumbras.clear();
-   for (UnsignedInt i = 0; i < antumbras.size(); ++i)
-      delete antumbras[i];
-   antumbras.clear();
-
-   eventFunctions.clear();
-
    if (solarSys)
    {
-      CelestialBody *sun = solarSys->GetBody(SolarSystem::SUN_NAME);
-      // This needs to be extended to provide separate functions for each
-      // occulter.  Current code is just to get the data flow right
-
-      // Build the event functions: Umbra, Penumbra, Antumbra for each
-      // target-occulter combination
-      for (UnsignedInt j = 0; j < occulters.size(); ++j)
-      {
-         CelestialBody *cb = solarSys->GetBody(occulters[j]);
-         for (UnsignedInt i = 0; i < targets.size(); ++i)
-         {
-            SpacePoint *origin = targets[i]-> GetOrigin();
-
-            Penumbra *penumbra = new Penumbra;
-            penumbra->SetSol(sun);
-            penumbra->SetBody(cb);
-            penumbra->SetOrigin(origin);
-            penumbra->SetPrimary(targets[i]);
-
-            penumbras.push_back(penumbra);
-            eventFunctions.push_back(penumbra);
-
-            Umbra *umbra = new Umbra;
-            umbra->SetSol(sun);
-            umbra->SetBody(cb);
-            umbra->SetOrigin(origin);
-            umbra->SetPrimary(targets[i]);
-
-            umbras.push_back(umbra);
-            eventFunctions.push_back(umbra);
-
-            Antumbra *antumbra = new Antumbra;
-            antumbra->SetSol(sun);
-            antumbra->SetBody(cb);
-            antumbra->SetOrigin(origin);
-            antumbra->SetPrimary(targets[i]);
-
-            antumbras.push_back(antumbra);
-            eventFunctions.push_back(antumbra);
-         }
-      }
+      sun = (Star*) solarSys->GetBody(SolarSystem::SUN_NAME);
    }
 
    // NOW initialize the base class
    retval = EventLocator::Initialize();
 
    return retval;
+}
+
+//------------------------------------------------------------------------------
+// void ReportEventData()
+//------------------------------------------------------------------------------
+/**
+ * Writes the event data to file and optionally displays the event data plot.
+ */
+//------------------------------------------------------------------------------
+void EclipseLocator::ReportEventData(const std::string &reportNotice)
+{
+   bool openOK = OpenReportFile();
+
+   if (!openOK)
+   {
+      // TBD - do we want to throw an exception or just continue without writing?
+      return;
+   }
+
+   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string fromGregorian, toGregorian;
+   Real        resultMjd;
+
+
+   TimeConverterUtil::Convert("A1ModJulian", fromEpoch, "",
+                              outputFormat, resultMjd, fromGregorian);
+   TimeConverterUtil::Convert("A1ModJulian", toEpoch, "",
+                              outputFormat, resultMjd, toGregorian);
+
+   if (numEventsFound == 0)
+   {
+      theReport << "There are no Eclipse events in the time interval ";
+      theReport << fromGregorian << " to " << toGregorian + ".\n";
+   }
+   else
+   {
+      // *** REPLACE THIS WITH CODE TO WRITE THE REPORT ***
+      theReport << "There are no Eclipse events in the time interval ";
+      theReport << fromGregorian << " to " << toGregorian + ".\n";
+      // **************************************************
+   }
+
+   theReport.close();
+
+}
+
+//------------------------------------------------------------------------------
+// Protected methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// void FindEvents(Real fromTime, Real toTime)
+//------------------------------------------------------------------------------
+/**
+ * Find the eclipse events requested in the time range requested.
+ *
+ */
+//------------------------------------------------------------------------------
+void EclipseLocator::FindEvents(Real fromTime, Real toTime)
+{
+   // *** FILL THIS IN WITH CALLS TO SPICE AND OTHER CODE ***
+   // *** IT MAY BE USEFUL TO LOOK AT SOME OTHER SPICE CODE, IN UTIL,
+   // *** TO SEE HOW STRINGS, TIMES, ETC. ARE USED AND PASSED TO CSPICE
 }

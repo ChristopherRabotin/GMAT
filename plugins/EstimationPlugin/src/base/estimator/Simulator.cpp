@@ -47,9 +47,10 @@ Simulator::PARAMETER_TEXT[SimulatorParamCount -SolverParamCount] =
 {
    "AddData",
    "Propagator",
-   "InitialEpochFormat",
+   "EpochFormat",
+//   "InitialEpochFormat",
    "InitialEpoch",
-   "FinalEpochFormat",
+//   "FinalEpochFormat",
    "FinalEpoch",
    "MeasurementTimeStep",
    "AddNoise",
@@ -61,8 +62,9 @@ Simulator::PARAMETER_TYPE[SimulatorParamCount - SolverParamCount] =
    Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECT_TYPE,
    Gmat::ENUMERATION_TYPE,
+//   Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
-   Gmat::ENUMERATION_TYPE,
+//   Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,
@@ -90,8 +92,9 @@ Simulator::Simulator(const std::string& name) :
    nextSimulationEpoch (GmatTimeConstants::MJD_OF_J2000),
    simEpochCounter     (0),
    currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
-   initialEpochFormat  ("TAIModJulian"),
-   finalEpochFormat    ("TAIModJulian"),
+   epochFormat  ("TAIModJulian"),
+//   initialEpochFormat  ("TAIModJulian"),
+//   finalEpochFormat    ("TAIModJulian"),
    simulationStep      (60.0),
    locatingEvent       (false),
    timeStep            (60.0),
@@ -125,9 +128,10 @@ Simulator::Simulator(const Simulator& sim) :
    nextSimulationEpoch (sim.nextSimulationEpoch),
    simEpochCounter     (0),
    currentEpoch        (sim.currentEpoch),
-   initialEpochFormat  (sim.initialEpochFormat),
+   epochFormat         (sim.epochFormat),
+//   initialEpochFormat  (sim.initialEpochFormat),
    initialEpoch        (sim.initialEpoch),
-   finalEpochFormat    (sim.finalEpochFormat),
+//   finalEpochFormat    (sim.finalEpochFormat),
    finalEpoch          (sim.finalEpoch),
    simulationStep      (sim.simulationStep),
    locatingEvent       (false),
@@ -171,9 +175,10 @@ Simulator& Simulator::operator =(const Simulator& sim)
       nextSimulationEpoch = sim.nextSimulationEpoch;
       simEpochCounter     = sim.simEpochCounter;
       currentEpoch        = sim.currentEpoch;
-      initialEpochFormat  = sim.initialEpochFormat;
+      epochFormat  = sim.epochFormat;
+//      initialEpochFormat  = sim.initialEpochFormat;
       initialEpoch        = sim.initialEpoch;
-      finalEpochFormat    = sim.finalEpochFormat;
+//      finalEpochFormat    = sim.finalEpochFormat;
       finalEpoch          = sim.finalEpoch;
       simulationStep      = sim.simulationStep;
       timeStep            = sim.timeStep;
@@ -416,9 +421,27 @@ std::string Simulator::GetParameterUnit(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Simulator::GetParameterID(const std::string &str) const
 {
+   std::string str1 = str;
+
+   // @todo: This section will be remove after for a later GMAT version
+   if (str1 == "InitialEpochFormat")
+   {
+      MessageInterface::ShowMessage("Warning: parameter %s.InitialEpochFormat was renamed to %s.EpochFormat in this GMAT version. Please change its name in yours script file.\n", GetName().c_str(), GetName().c_str());
+      str1 = "EpochFormat";
+   }
+   else if (str1 == "FinalEpochFormat")
+   {
+      MessageInterface::ShowMessage("Warning: parameter %s.FinalEpochFormat was renamed to %s.EpochFormat in this GMAT version. Please change its name in yours script file.\n", GetName().c_str(), GetName().c_str());
+      str1 = "EpochFormat";
+   }
+
+   // This section is used to throw an exception for unused parameters
+   if ((str1 == "ShowProgress")||(str1 == "ReportFile")||(str1 == "ReportStyle")||(str1 == "MaximumIterations"))
+      throw SolverException("Syntax error: simulator '" + GetName() + "' does not has parameter '" + str1 + "'.\n");
+
    for (Integer i = SolverParamCount; i < SimulatorParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i - SolverParamCount])
+      if (str1 == PARAMETER_TEXT[i - SolverParamCount])
          return i;
    }
 
@@ -443,6 +466,27 @@ Gmat::ParameterType Simulator::GetParameterType(const Integer id) const
 
    return Solver::GetParameterType(id);
 }
+
+
+//------------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method is used to specify a parameter is read only or not.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return   true if parameter read only, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool Simulator::IsParameterReadOnly(const Integer id) const            // made changes by TUAN NGUYEN
+{                                                                      // made changes by TUAN NGUYEN
+   if ((id == ShowProgressID)||(id == ReportStyle)||                   // made changes by TUAN NGUYEN
+      (id == solverTextFileID)||(id == maxIterationsID))               // made changes by TUAN NGUYEN
+      return true;                                                     // made changes by TUAN NGUYEN
+
+   return Solver::IsParameterReadOnly(id);                             // made changes by TUAN NGUYEN
+}                                                                      // made changes by TUAN NGUYEN
 
 
 //------------------------------------------------------------------------------
@@ -524,9 +568,10 @@ Real Simulator::SetRealParameter(const Integer id, const Real value)
 std::string Simulator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)             return propagatorName;
-   if (id == INITIAL_EPOCH_FORMAT)   return initialEpochFormat;
+   if (id == EPOCH_FORMAT)           return epochFormat;
+//   if (id == INITIAL_EPOCH_FORMAT)   return initialEpochFormat;
    if (id == INITIAL_EPOCH)          return initialEpoch;
-   if (id == FINAL_EPOCH_FORMAT)     return finalEpochFormat;
+//   if (id == FINAL_EPOCH_FORMAT)     return finalEpochFormat;
    if (id == FINAL_EPOCH)            return finalEpoch;
 
    return Solver::GetStringParameter(id);
@@ -598,28 +643,35 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
       propagatorName = value;  // get propSetup here???
       return true;
    }
-   if (id == INITIAL_EPOCH_FORMAT)
+   if (id == EPOCH_FORMAT)
    {
-      initialEpochFormat = value;
+      epochFormat = value;
       return true;
    }
+   //if (id == INITIAL_EPOCH_FORMAT)
+   //{
+   //   initialEpochFormat = value;
+   //   return true;
+   //}
    if (id == INITIAL_EPOCH)
    {
       initialEpoch = value;
       // Convert to a.1 time for internal processing
-      simulationStart = ConvertToRealEpoch(initialEpoch, initialEpochFormat);
+      //simulationStart = ConvertToRealEpoch(initialEpoch, initialEpochFormat);
+      simulationStart = ConvertToRealEpoch(initialEpoch, epochFormat);
       return true;
    }
-   if (id == FINAL_EPOCH_FORMAT)
-   {
-      finalEpochFormat = value;
-      return true;
-   }
+   //if (id == FINAL_EPOCH_FORMAT)
+   //{
+   //   finalEpochFormat = value;
+   //   return true;
+   //}
    if (id == FINAL_EPOCH)
    {
       finalEpoch = value;
       // Convert to a.1 time for internal processing
-      simulationEnd = ConvertToRealEpoch(finalEpoch, finalEpochFormat);
+      //simulationEnd = ConvertToRealEpoch(finalEpoch, finalEpochFormat);
+      simulationEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
       return true;
    }
 
@@ -729,7 +781,19 @@ const StringArray& Simulator::GetStringArrayParameter(const Integer id) const
 }
 
 
-// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// std::string GetOnOffParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns On/Off parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ *
+ * @return  On/Off value of the requested parameter.
+ *
+ */
+//------------------------------------------------------------------------------
 std::string Simulator::GetOnOffParameter(const Integer id) const
 {
    if (id == ADD_NOISE)
@@ -738,7 +802,21 @@ std::string Simulator::GetOnOffParameter(const Integer id) const
    return Solver::GetOnOffParameter(id);
 }
 
-// made changes by TUAN NGUYEN
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets On/Off value to a parameter, given the input
+ * parameter ID.
+ *
+ * @param <id>    ID for the requested parameter.
+ * @param value   On/Off value used to set to the parameter
+ *
+ * @return  true if value id On, false otherwise.
+ *
+ */
+//------------------------------------------------------------------------------
 bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
 {
    if (id == ADD_NOISE)
@@ -778,7 +856,8 @@ const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
    enumStrings.clear();
 
    // todo This list should come from TimeSystemConverter in the util folder
-   if ((id == INITIAL_EPOCH_FORMAT) || (id == FINAL_EPOCH_FORMAT))
+   //if ((id == INITIAL_EPOCH_FORMAT) || (id == FINAL_EPOCH_FORMAT))
+   if (id == EPOCH_FORMAT)
    {
       enumStrings.push_back("A1ModJulian");
       enumStrings.push_back("TAIModJulian");
@@ -811,11 +890,11 @@ Gmat::ObjectType Simulator::GetPropertyObjectType(const Integer id) const
    // The change below breaks sample missions, so I'm backing it out.  A
    // different change committed today fixes the issue.
 //   if (id == MEASUREMENTS)
-////      return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
-//      return Gmat::TRACKING_SYSTEM;            // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+////      return Gmat::MEASUREMENT_MODEL;         // made change to pass interpreter validation 4/2/2013
+//      return Gmat::TRACKING_SYSTEM;            // made change to pass interpreter validation 4/2/2013
 
    if (id == MEASUREMENTS)
-      return Gmat::MEASUREMENT_MODEL;         // made change by TUAN NGUYEN to pass interpreter validation 4/2/2013
+      return Gmat::MEASUREMENT_MODEL;         // made change to pass interpreter validation 4/2/2013
 
    if (id == PROPAGATOR)
       return Gmat::PROP_SETUP;
@@ -842,6 +921,27 @@ bool Simulator::RenameRefObject(const Gmat::ObjectType type,
       const std::string & oldName, const std::string & newName)
 {
    /// @todo Simulator rename code needs to be implemented
+   if (type == Gmat::PROP_SETUP)                                        // made changes by TUAN NGUYEN
+   {                                                                    // made changes by TUAN NGUYEN
+      if (propagator->GetName() == oldName)                             // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         propagator->SetName(newName);                                  // made changes by TUAN NGUYEN
+         return true;                                                   // made changes by TUAN NGUYEN
+      }                                                                 // made changes by TUAN NGUYEN
+   }                                                                    // made changes by TUAN NGUYEN
+
+   if (type == Gmat::MEASUREMENT_MODEL)                                 // made changes by TUAN NGUYEN
+   {                                                                    // made changes by TUAN NGUYEN
+      for(UnsignedInt i = 0; i < measModelList.size(); ++i)             // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         if (measModelList[i]->GetName() == oldName)                    // made changes by TUAN NGUYEN
+         {                                                              // made changes by TUAN NGUYEN
+            measModelList[i]->SetName(newName);                         // made changes by TUAN NGUYEN
+            return true;                                                // made changes by TUAN NGUYEN
+         }                                                              // made changes by TUAN NGUYEN
+      }                                                                 // made changes by TUAN NGUYEN
+   }                                                                    // made changes by TUAN NGUYEN
+
    return Solver::RenameRefObject(type, oldName, newName);
 }
 
@@ -861,6 +961,13 @@ bool Simulator::RenameRefObject(const Gmat::ObjectType type,
 bool Simulator::SetRefObjectName(const Gmat::ObjectType type,
       const std::string & name)
 {
+   if (type == Gmat::PROP_SETUP)                                        // made changes by TUAN NGUYEN
+   {                                                                    // made changes by TUAN NGUYEN
+      propagator->SetName(name);                                        // made changes by TUAN NGUYEN
+      return true;                                                      // made changes by TUAN NGUYEN
+   }                                                                    // made changes by TUAN NGUYEN
+   // Note: this function is not applied for measurement List
+
    return Solver::SetRefObjectName(type, name);
 }
 
@@ -876,7 +983,13 @@ bool Simulator::SetRefObjectName(const Gmat::ObjectType type,
 //-----------------------------------------------------------------------------
 const ObjectTypeArray & Simulator::GetRefObjectTypeArray()
 {
-   return Solver::GetRefObjectTypeArray();
+   ObjectTypeArray objTypes = Solver::GetRefObjectTypeArray();         // made changes by TUAN NGUYEN
+   objTypes.push_back(Gmat::PROP_SETUP);                               // made changes by TUAN NGUYEN
+   objTypes.push_back(Gmat::MEASUREMENT_MODEL);                        // made changes by TUAN NGUYEN
+//   objTypes.push_back(Gmat::TRACKING_SYSTEM);                          // made changes by TUAN NGUYEN
+   return objTypes;                                                    // made changes by TUAN NGUYEN
+
+   //return Solver::GetRefObjectTypeArray();
 }
 
 //------------------------------------------------------------------------------
@@ -898,6 +1011,7 @@ const StringArray& Simulator::GetRefObjectNameArray(const Gmat::ObjectType type)
    #endif
 
    refObjectList.clear();
+   refObjectList = Solver::GetRefObjectNameArray(type);                      // made changes by TUAN NGUYEN
 
    if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::PROP_SETUP) ||
        (type == Gmat::MEASUREMENT_MODEL))
@@ -929,11 +1043,11 @@ const StringArray& Simulator::GetRefObjectNameArray(const Gmat::ObjectType type)
          }
       }
    }
-   else
-   {
-      // Fill in any base class needs
-      refObjectList = Solver::GetRefObjectNameArray(type);
-   }
+   //else                                                                      // made changes by TUAN NGUYEN
+   //{                                                                         // made changes by TUAN NGUYEN
+   //   // Fill in any base class needs                                        // made changes by TUAN NGUYEN
+   //   refObjectList = Solver::GetRefObjectNameArray(type);                   // made changes by TUAN NGUYEN
+   //}                                                                         // made changes by TUAN NGUYEN
 
    return refObjectList;
 }
@@ -952,6 +1066,11 @@ const StringArray& Simulator::GetRefObjectNameArray(const Gmat::ObjectType type)
 //-----------------------------------------------------------------------------
 std::string Simulator::GetRefObjectName(const Gmat::ObjectType type) const
 {
+   if (type == Gmat::PROP_SETUP)                                        // made changes by TUAN NGUYEN
+      return propagator->GetName();                                     // made changes by TUAN NGUYEN
+
+   // Note: this function is not applied for measurement List
+
    return Solver::GetRefObjectName(type);
 }
 
@@ -971,6 +1090,24 @@ std::string Simulator::GetRefObjectName(const Gmat::ObjectType type) const
 GmatBase* Simulator::GetRefObject(const Gmat::ObjectType type,
       const std::string & name)
 {
+   if (type == Gmat::PROP_SETUP)                                        // made changes by TUAN NGUYEN
+   {                                                                    // made changes by TUAN NGUYEN
+      if (propagator != NULL)                                           // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         if (propagator->GetName() == name)                             // made changes by TUAN NGUYEN
+            return propagator;                                          // made changes by TUAN NGUYEN
+      }                                                                 // made changes by TUAN NGUYEN
+   }                                                                    // made changes by TUAN NGUYEN
+
+   if (type == Gmat::MEASUREMENT_MODEL)                                 // made changes by TUAN NGUYEN
+   {                                                                    // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < measModelList.size(); ++i)            // made changes by TUAN NGUYEN
+      {                                                                 // made changes by TUAN NGUYEN
+         if (measModelList[i]->GetName() == name)                       // made changes by TUAN NGUYEN
+            return measModelList[i];                                    // made changes by TUAN NGUYEN
+      }                                                                 // made changes by TUAN NGUYEN
+   }                                                                    // made changes by TUAN NGUYEN
+
    return Solver::GetRefObject(type, name);
 }
 
@@ -1036,14 +1173,21 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (obj->IsOfType(Gmat::MEASUREMENT_MODEL) &&
           !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
+         #ifdef DEBUG_SIMULATOR_INITIALIZATION
+            MessageInterface::ShowMessage("SetRefObject for object type Gmat::MEASUREMENT_MODEL.\n");
+         #endif
+
          measManager.AddMeasurement((MeasurementModel *)obj);
          return true;
       }
       if (obj->IsOfType(Gmat::TRACKING_SYSTEM))
       {
          #ifdef DEBUG_SIMULATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Loading the measurement manager\n");
+            MessageInterface::ShowMessage("SetRefObject <%s> for object type Gmat::TRACKING_SYSTEM.\n", obj->GetName().c_str());
          #endif
+
+         // Add to tracking systems list
+         measManager.AddMeasurement((TrackingSystem*)obj);
 
          MeasurementModel *meas;
          // Retrieve each measurement model from the tracking system ...
@@ -1088,7 +1232,8 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //-----------------------------------------------------------------------------
 ObjectArray& Simulator::GetRefObjectArray(const std::string & typeString)
 {
-   return Solver::GetRefObjectArray(typeString);
+   return GetRefObjectArray(GetObjectType(typeString));                   // made changes by TUAN NGUYEN
+   // return Solver::GetRefObjectArray(typeString);                       // made changes by TUAN NGUYEN
 }
 
 
@@ -1132,6 +1277,11 @@ bool Simulator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //-----------------------------------------------------------------------------
 ObjectArray& Simulator::GetRefObjectArray(const Gmat::ObjectType type)
 {
+   #ifdef DEBUG_SIMULATOR_INITIALIZATION                                       // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("GetRefObjectArray(type = %d)\n", type);   // made changes by TUAN NGUYEN
+   #endif                                                                      // made changes by TUAN NGUYEN
+
+
    if (type == Gmat::EVENT)
    {
       activeEvents.clear();
@@ -1193,11 +1343,76 @@ bool Simulator::Initialize()
       throw SolverException(
             "Simulator error - simulation end time is before simulation start time.\n");
    // Check to make sure required objects have been set
+   if (propagatorName == "")
+      throw SolverException(
+            "Simulator error - " + GetName() + ".Propagator was not defined in your script.\n");
+
    if (!propagator)
       throw SolverException(
-            "Simulator error - no propagator set for simulator object.\n");
-//   if (measList.empty())
-//      throw SolverException("Simulator error - no measurements set.\n");
+            "Simulator error - Propagator '" + propagatorName + "' was not defined in your script.\n");
+
+   if (measList.empty())
+       throw SolverException(
+            "Simulator error - " + GetName() + ".AddData was not defined in your script.\n");
+
+
+   // Check the names of measurement models shown in sim.AddData have to be the names of created objects               // made changes by TUAN NGUYEN
+   std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();   // made changes by TUAN NGUYEN
+   std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();        // made changes by TUAN NGUYEN
+   std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
+   StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
+   
+   
+   for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
+   {                                                                            // made changes by TUAN NGUYEN
+      std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
+      //MessageInterface::ShowMessage("name = <%s>\n", name.c_str());
+      bool found = false;                                                       // made changes by TUAN NGUYEN
+      for(UnsignedInt j = 0; j < measModels.size(); ++j)                        // made changes by TUAN NGUYEN
+      {
+         //MessageInterface::ShowMessage("measModels[%d] = <%s>\n", j, measModels[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+         if (measModels[j]->GetName() == name)                                  // made changes by TUAN NGUYEN
+         {                                                                      // made changes by TUAN NGUYEN
+            found = true;                                                       // made changes by TUAN NGUYEN
+            break;                                                              // made changes by TUAN NGUYEN
+         }                                                                      // made changes by TUAN NGUYEN
+      }                                                                         // made changes by TUAN NGUYEN
+
+      if (!found)
+      {
+         for(UnsignedInt j = 0; j < tkSystems.size(); ++j)                      // made changes by TUAN NGUYEN
+         {
+            //MessageInterface::ShowMessage("tkSystems[%d] = <%s>\n", j, tkSystems[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+            if (tkSystems[j]->GetName() == name)                                // made changes by TUAN NGUYEN
+            {                                                                   // made changes by TUAN NGUYEN
+               found = true;                                                    // made changes by TUAN NGUYEN
+               break;                                                           // made changes by TUAN NGUYEN
+            }
+         }                                                                      // made changes by TUAN NGUYEN
+      }                                                                         // made changes by TUAN NGUYEN
+      
+      if (!found)
+      {
+         for(UnsignedInt j = 0; j < tfs.size(); ++j)                            // made changes by TUAN NGUYEN
+         {
+            //MessageInterface::ShowMessage("tfs[%d] = <%s>\n", j, tfs[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+            if (tfs[j]->GetName() == name)                                      // made changes by TUAN NGUYEN
+            {                                                                   // made changes by TUAN NGUYEN
+               found = true;                                                    // made changes by TUAN NGUYEN
+               break;                                                           // made changes by TUAN NGUYEN
+            }
+         }                                                                      // made changes by TUAN NGUYEN
+      }                                                                         // made changes by TUAN NGUYEN
+
+      if (!found)                                                               // made changes by TUAN NGUYEN
+         throw SolverException("Cannot initialize simulator; '" + name + "' object is not defined in script.\n");        // made changes by TUAN NGUYEN
+   }                                                                            // made changes by TUAN NGUYEN
+
+   measModels.clear();                                                          // made changes by TUAN NGUYEN
+   tkSystems.clear();                                                           // made changes by TUAN NGUYEN
+   tfs.clear();                                                                 // made changes by TUAN NGUYEN
+   measNames.clear();                                                           // made changes by TUAN NGUYEN
+
 
 #ifdef DEBUG_INITIALIZE
    MessageInterface::ShowMessage("Exit Simulator::Initialize()\n");
@@ -1368,7 +1583,7 @@ void Simulator::CompleteInitialization()
             "MeasurementManager.\n");
 
    // Load ramped table
-   measManager.LoadRampTables();                                 // made changes by TUAN NGUYEN
+   measManager.LoadRampTables();
 
    nextSimulationEpoch = simulationStart;
    simEpochCounter     = 0;
@@ -1420,7 +1635,7 @@ void Simulator::FindTimeStep()
 //               GmatTimeConstants::SECS_PER_DAY * 1000000))/1000000.0;
 
       timeStep = (nextSimulationEpoch - currentEpoch) *
-               GmatTimeConstants::SECS_PER_DAY;               // made change by TUAN NGUYEN for Bug GMT-3700
+               GmatTimeConstants::SECS_PER_DAY;               // fixed Bug GMT-3700
 
       #ifdef DEBUG_TIMESTEP
          MessageInterface::ShowMessage("Simulator time step = %.15lf based on "
@@ -1446,7 +1661,7 @@ void Simulator::FindTimeStep()
 void Simulator::CalculateData()
 {
    // Tell the measurement manager to calculate the simulation data
-   if (measManager.CalculateMeasurements(true, false) == false)               // made changes by TUAN NGUYEN  for Bug 8 in ticket GMT-4314
+   if (measManager.CalculateMeasurements(true, false) == false)               // fixed Bug 8 in ticket GMT-4314
    {
       // No measurements were possible
       FindNextSimulationEpoch();

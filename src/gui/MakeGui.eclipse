@@ -355,7 +355,7 @@ endif
 endif
 
 macrez:
-	@echo "linking Carbon and wx resource files ......."
+#	@echo "linking Carbon and wx resource files ......."
 	cp -f $(WXTARGET) ../../application/$(GMAT_BIN_DIR)/.
 
 # Used to be:

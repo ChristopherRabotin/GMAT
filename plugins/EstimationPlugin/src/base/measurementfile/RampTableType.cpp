@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "FileManager.hpp"
+#include "StringUtil.hpp"
 #include "MeasurementException.hpp"
 #include <sstream>
 
@@ -291,19 +292,25 @@ RampTableData* RampTableType::ReadRampTableData()
 
    Integer participantSize;
 
-   // Skip header and comment lines
-   std::getline (theStream, str);
+   // Do nothing when it is at the end of file
+   if (theStream.eof())
+      return NULL;
 
-   while ((str[0] == '%') || (!theStream.eof() && (str == "")))
+   // Read a line when it is not end of file
+   std::getline (theStream, str);
+   
+   // Skip header and comment lines or empty lines
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == ""))
    {
       std::getline(theStream, str);
+
+      // Do nothing when it is at the end of file
+      if (theStream.eof())
+         return NULL;
    }
 
-   if (theStream.eof())
-   {
-      return NULL;
-   }
 
+   // Processing data in the line
    theLine << str;
    currentRecord.Clear();
    currentRecord.dataFormat = "GMAT_RampTable";

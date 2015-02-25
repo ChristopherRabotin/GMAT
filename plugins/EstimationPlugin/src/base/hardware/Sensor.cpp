@@ -28,18 +28,18 @@
 /// Text strings used to script Sensor properties
 const std::string
 Sensor::PARAMETER_TEXT[SensorParamCount - HardwareParamCount] =
-   {
-      "SensorID",
-      "HardwareDelay",
-   };
+{
+   "SensorID",
+   "HardwareDelay",
+};
 
 /// Integer IDs associated with the RFHardware properties
 const Gmat::ParameterType
 Sensor::PARAMETER_TYPE[SensorParamCount - HardwareParamCount] =
-   {
-      Gmat::STRING_TYPE,
-      Gmat::REAL_TYPE,
-   };
+{
+   Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+};
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -56,14 +56,14 @@ Sensor::PARAMETER_TYPE[SensorParamCount - HardwareParamCount] =
  */
 //-----------------------------------------------------------------------------
 Sensor::Sensor(const std::string &type, const std::string &name) :
-        Hardware       (Gmat::HARDWARE, type, name),
-        signal1        (NULL),
-        signal2        (NULL),
-        hardwareDelay1 (0.0),
-        hardwareDelay2 (0.0),
-        isTransmitted1 (false),
-        isTransmitted2 (false),
-        sensorID       ("")
+   Hardware       (Gmat::HARDWARE, type, name),
+   signal1        (NULL),
+   signal2        (NULL),
+   hardwareDelay1 (0.0),
+   hardwareDelay2 (0.0),
+   isTransmitted1 (false),
+   isTransmitted2 (false),
+   sensorID       ("")
 {
    objectTypes.push_back(Gmat::SENSOR);
    objectTypeNames.push_back("Sensor");
@@ -650,6 +650,16 @@ Real Sensor::GetDelay(Integer whichOne)
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetDelay(Real delay, Integer whichOne)
+//------------------------------------------------------------------------------
+/**
+ * This function is used to set hardware delay.
+ *
+ * @return true if the delay is set successfully, false otherwise
+ */
+//------------------------------------------------------------------------------
 bool Sensor::SetDelay(Real delay, Integer whichOne)
 {
    switch(whichOne)
@@ -672,8 +682,8 @@ bool Sensor::SetDelay(Real delay, Integer whichOne)
  * Verify a given signal is feasible or not.
  *
  * @param whichOne      The index specifying a given signal.
- *                                              for Transponder; 1 for input signal, 2 for output signal
- *                                              for Transmitter or Receiver; only one signal is used
+ *                      for Transponder; 1 for input signal, 2 for output signal
+ *                      for Transmitter or Receiver; only one signal is used
  *
  * @return      true if it is feasible, false otherwise.
  */
@@ -754,7 +764,7 @@ Signal* Sensor::GetSignal(Integer whichOne)
 /**
  * Set a signal for a given index.
  *
- * @param s                     The signal needed to set to
+ * @param s             The signal needed to set to
  * @param whichOne      The index specifying a given signal.
  *
  * @return      true if signal is set, false otherwise.

@@ -93,8 +93,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-//   useGeodetic          (false),							// made changes by TUAN NGUYEN
-   useGeodetic          (true),							// made changes by TUAN NGUYEN
+//   useGeodetic          (false),
+   useGeodetic          (true),
    gha                  (0.0),
    ghaEpoch             (0.0)
 {
@@ -163,7 +163,7 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    geoHeight            (0.0),
    geoLat               (0.0),
    geoLong              (0.0),
-   useGeodetic          (am.useGeodetic),						// made changes by TUAN NGUYEN
+   useGeodetic          (am.useGeodetic),
    gha                  (0.0),
    ghaEpoch             (0.0)
 {
@@ -214,7 +214,7 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    geoHeight            = 0.0;
    geoLat               = 0.0;
    geoLong              = 0.0;
-   useGeodetic          = am.useGeodetic;							// made changes by TUAN NGUYEN
+   useGeodetic          = am.useGeodetic;
    gha                  = 0.0;
    ghaEpoch             = 0.0;
 
@@ -1158,12 +1158,12 @@ Real AtmosphereModel::CalculateGeocentrics(Real *position, GmatEpoch when,
    //
    Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
    geoLat = atan2(state[2], rxy);
-//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid		// made changes by TUAN NGUYEN
+//   geoHeight = rxy / cos(geoLat) - cbRadius;		// This equation is not correct for ellipsoid
 //
-//   Real cs = cos(geoLat);												// made changes by TUAN NGUYEN
-//   Real sn = sin(geoLat);												// made changes by TUAN NGUYEN
-//   Real f = cbFlattening;												// made changes by TUAN NGUYEN
-//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// made changes by TUAN NGUYEN    Fixed bug GMT-4184
+//   Real cs = cos(geoLat);
+//   Real sn = sin(geoLat);
+//   Real f = cbFlattening;
+//   geoHeight = rxy / cs - cbRadius*sqrt(cs*cs + (1-f)*(1-f)*sn*sn);		// Fixed bug GMT-4184
 
    Real delta = 1.0;
    Real tolerance = 1.0e-7;    // Better than 0.0001 degrees

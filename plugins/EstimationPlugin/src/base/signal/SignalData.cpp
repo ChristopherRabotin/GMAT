@@ -40,22 +40,22 @@ SignalData::SignalData() :
    rPropagator          (NULL),
    stationParticipant   (false),
 #ifdef USE_PRECISION_TIME
-   tPrecTime            (21545.0),                  // made changes by TUAN NGUYEN
-   rPrecTime            (21545.0),                  // made changes by TUAN NGUYEN
+   tPrecTime            (21545.0),
+   rPrecTime            (21545.0),
 #else
    tTime                (21545.0),
    rTime                (21545.0),
 #endif
-   //tSTM                 (true),         ?? tSTM is a Rmatrix66   // made changes by TUAN NGUYEN
-   //rSTM                 (true),         ?? rSTM is a Rmatrix66   // made changes by TUAN NGUYEN
-   tJ2kRotation         (true),
-   rJ2kRotation         (true),
-   tDelay               (0.0),                      // made changes by TUAN NGUYEN
-   rDelay               (0.0),                      // made changes by TUAN NGUYEN
+   tSTM                 (true),         //?? tSTM is a Rmatrix66        // Note that: Rmatrix66 A(true) is a contsructor of Rmatrix66. It defines matrix A to be a 6x6 identity matrix
+   rSTM                 (true),         //?? rSTM is a Rmatrix66        // Note that: Rmatrix66 A(true) is a contsructor of Rmatrix66. It defines matrix A to be a 6x6 identity matrix
+   tJ2kRotation         (true),                                         // Note that: Rmatrix33 B(true) is a contsructor of Rmatrix33. It defines matrix B to be a 3x3 identity matrix
+   rJ2kRotation         (true),                                         // Note that: Rmatrix33 B(true) is a contsructor of Rmatrix33. It defines matrix B to be a 3x3 identity matrix
+   tDelay               (0.0),
+   rDelay               (0.0),
    solveLightTime       (true),
-   feasibility          (true),                     // made changes by TUAN NGUYEN
-   feasibilityReason    ("N"),                      // made changes by TUAN NGUYEN
-   feasibilityValue     (90.0),                     // made changes by TUAN NGUYEN
+   feasibility          (true),
+   feasibilityReason    ("N"),
+   feasibilityValue     (90.0),
    next                 (NULL)
 {
 }
@@ -102,17 +102,17 @@ SignalData::SignalData(const SignalData& sd) :
    rPropagator          (sd.rPropagator),
    stationParticipant   (sd.stationParticipant),
 #ifdef USE_PRECISION_TIME
-   tPrecTime            (sd.tPrecTime),                  // made changes by TUAN NGUYEN
-   rPrecTime            (sd.rPrecTime),                  // made changes by TUAN NGUYEN
+   tPrecTime            (sd.tPrecTime),
+   rPrecTime            (sd.rPrecTime),
 #else
    tTime                (sd.tTime),
    rTime                (sd.rTime),
 #endif
    tLoc                 (sd.tLoc),
-   tOStateSSB           (sd.tOStateSSB),                // made changes by TUAN NGUYEN
+   tOStateSSB           (sd.tOStateSSB),
    tLocTcs              (sd.tLocTcs),
    rLoc                 (sd.rLoc),
-   rOStateSSB           (sd.rOStateSSB),                // made changes by TUAN NGUYEN
+   rOStateSSB           (sd.rOStateSSB),
    rLocRcs              (sd.rLocRcs),
    tVel                 (sd.tVel),
    tVelTcs              (sd.tVelTcs),
@@ -121,24 +121,24 @@ SignalData::SignalData(const SignalData& sd) :
    j2kOriginSep         (sd.j2kOriginSep),
    j2kOriginVel         (sd.j2kOriginVel),
    rangeVecInertial     (sd.rangeVecInertial),
-   rangeRateVecInertial (sd.rangeRateVecInertial),      // made changes by TUAN NGUYEN
+   rangeRateVecInertial (sd.rangeRateVecInertial),
    rangeVecObs          (sd.rangeVecObs),
    rangeRateVecObs      (sd.rangeRateVecObs),
    tSTM                 (sd.tSTM),
    rSTM                 (sd.rSTM),
-   tSTMtm               (sd.tSTMtm),                    // made changes by TUAN NGUYEN
-   rSTMtm               (sd.rSTMtm),                    // made changes by TUAN NGUYEN
+   tSTMtm               (sd.tSTMtm),
+   rSTMtm               (sd.rSTMtm),
    tJ2kRotation         (sd.tJ2kRotation),
    rJ2kRotation         (sd.rJ2kRotation),
    correctionIDs        (sd.correctionIDs),
    corrections          (sd.corrections),
    useCorrection        (sd.useCorrection),
-   tDelay               (sd.tDelay),                    // made changes by TUAN NGUYEN
-   rDelay               (sd.rDelay),                    // made changes by TUAN NGUYEN
+   tDelay               (sd.tDelay),
+   rDelay               (sd.rDelay),
    solveLightTime       (sd.solveLightTime),
-   feasibility          (sd.feasibility),               // made changes by TUAN NGUYEN
-   feasibilityReason    (sd.feasibilityReason),         // made changes by TUAN NGUYEN
-   feasibilityValue     (sd.feasibilityValue),          // made changes by TUAN NGUYEN
+   feasibility          (sd.feasibility),
+   feasibilityReason    (sd.feasibilityReason),
+   feasibilityValue     (sd.feasibilityValue),
    next                 (NULL)
 {
 }
@@ -168,18 +168,18 @@ SignalData& SignalData::operator=(const SignalData& sd)
       tPropagator          = sd.tPropagator;
       rPropagator          = sd.rPropagator;
 #ifdef USE_PRECISION_TIME
-      tPrecTime            = sd.tPrecTime;               // made changes by TUAN NGUYEN
-      rPrecTime            = sd.rPrecTime;               // made changes by TUAN NGUYEN
+      tPrecTime            = sd.tPrecTime;
+      rPrecTime            = sd.rPrecTime;
 #else
       tTime                = sd.tTime;
       rTime                = sd.rTime;
 #endif
       stationParticipant   = sd.stationParticipant;
       tLoc                 = sd.tLoc;
-      tOStateSSB           = sd.tOStateSSB;              // made changes by TUAN NGUYEN
+      tOStateSSB           = sd.tOStateSSB;
       tLocTcs              = sd.tLocTcs;
       rLoc                 = sd.rLoc;
-      rOStateSSB           = sd.rOStateSSB;              // made changes by TUAN NGUYEN
+      rOStateSSB           = sd.rOStateSSB;
       rLocRcs              = sd.rLocRcs;
       tVel                 = sd.tVel;
       tVelTcs              = sd.tVelTcs;
@@ -193,19 +193,19 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rangeRateVecObs      = sd.rangeRateVecObs;
       tSTM                 = sd.tSTM;
       rSTM                 = sd.rSTM;
-      tSTMtm               = sd.tSTMtm;                  // made changes by TUAN NGUYEN
-      rSTMtm               = sd.rSTMtm;                  // made changes by TUAN NGUYEN
+      tSTMtm               = sd.tSTMtm;
+      rSTMtm               = sd.rSTMtm;
       tJ2kRotation         = sd.tJ2kRotation;
       rJ2kRotation         = sd.rJ2kRotation;
       correctionIDs        = sd.correctionIDs;
       corrections          = sd.corrections;
       useCorrection        = sd.useCorrection;
-      tDelay               = sd.tDelay;                  // made changes by TUAN NGUYEN
-      rDelay               = sd.rDelay;                  // made changes by TUAN NGUYEN
+      tDelay               = sd.tDelay;
+      rDelay               = sd.rDelay;
       solveLightTime       = sd.solveLightTime;
-      feasibility          = sd.feasibility;             // made changes by TUAN NGUYEN
-      feasibilityReason    = sd.feasibilityReason;       // made changes by TUAN NGUYEN
-      feasibilityValue     = sd.feasibilityValue;        // made changes by TUAN NGUYEN
+      feasibility          = sd.feasibility;
+      feasibilityReason    = sd.feasibilityReason;
+      feasibilityValue     = sd.feasibilityValue;
       next                 = NULL;
    }
 

@@ -85,6 +85,15 @@ public:
    void SetFont(wxFont font);
    wxFont GetFont();
    
+   void SetScriptFont(wxFont font);
+   wxFont GetScriptFont();
+   
+   void SetFontSize(Integer size);
+   Integer GetFontSize();
+   
+   void SetScriptFontSize(Integer size);
+   Integer GetScriptFontSize();
+   
    void SetTempScriptName(const wxString &tempName);
    wxString GetTempScriptName();
    
@@ -117,6 +126,9 @@ private:
    ViewTextFrame *theCompareWindow;
    wxTextCtrl    *theMessageTextCtrl;
    wxFont        theFont;
+   wxFont        theScriptFont;
+   Integer       theFontSize;
+   Integer       theScriptFontSize;
    wxString      theTempScriptName;
    wxConfigBase  *thePersonalizationConfig;
    wxString      theIconFile;

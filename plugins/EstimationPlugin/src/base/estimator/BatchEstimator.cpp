@@ -58,9 +58,9 @@ BatchEstimator::PARAMETER_TEXT[] =
 {
    "EstimationEpochFormat",         // The epoch of the solution
    "EstimationEpoch",               // The epoch of the solution
-//   "UsePrioriEstimate",                                    // made changes by TUAN NGUYEN
+//   "UsePrioriEstimate",
    "InversionAlgorithm",
-   "MaxConsecutiveDivergences",                              // made changes by TUAN NGUYEN
+   "MaxConsecutiveDivergences",
    // todo Add useApriori here
 };
 
@@ -69,7 +69,7 @@ BatchEstimator::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
-//   Gmat::ON_OFF_TYPE,                                     // made changes by TUAN NGUYEN
+//   Gmat::ON_OFF_TYPE,        // "UsePrioriEstimate"
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
 };
@@ -95,10 +95,10 @@ BatchEstimator::BatchEstimator(const std::string &type,
    useApriori                 (false),                  // second term of Equation Eq8-184 in GTDS MathSpec is not used   
    advanceToEstimationEpoch   (false),
 //   converged                  (false),
-   estimationStatus           (UNKNOWN),
+//   estimationStatus           (UNKNOWN),
    chooseRMSP                 (true),
-   maxConsDivergences         (3),                     // made changes by TUAN NGUYEN
-   inversionType              ("Internal")   // ("")   // made changes by TUAN NGUYEN
+   maxConsDivergences         (3),
+   inversionType              ("Internal")
 {
    objectTypeNames.push_back("BatchEstimator");
    parameterCount = BatchEstimatorParamCount;
@@ -138,9 +138,9 @@ BatchEstimator::BatchEstimator(const BatchEstimator& est) :
    useApriori                 (est.useApriori),
    advanceToEstimationEpoch   (false),
 //   converged                  (false),
-   estimationStatus           (UNKNOWN),
+//   estimationStatus           (UNKNOWN),
    chooseRMSP                 (est.chooseRMSP),
-   maxConsDivergences        (est.maxConsDivergences),         // made changes by TUAN NGUYEN
+   maxConsDivergences         (est.maxConsDivergences),
    inversionType              (est.inversionType)
 {
    // Clear the loop buffer
@@ -176,10 +176,10 @@ BatchEstimator& BatchEstimator::operator=(const BatchEstimator& est)
 
       advanceToEstimationEpoch = false;
 //      converged                = false;
-      estimationStatus         = UNKNOWN;
+//      estimationStatus         = UNKNOWN;
 
       chooseRMSP               = est.chooseRMSP;
-      maxConsDivergences      = est.maxConsDivergences;      // made changes by TUAN NGUYEN
+      maxConsDivergences       = est.maxConsDivergences;
 
       // Clear the loop buffer
       for (UnsignedInt i = 0; i < outerLoopBuffer.size(); ++i)
@@ -404,9 +404,9 @@ bool BatchEstimator::SetStringParameter(const Integer id,
    {
       if ((estEpochFormat == "FromParticipants") && (value != ""))
       {
-         MessageInterface::ShowMessage("Setting estimation epoch has no "
-               "effect; EstimationEpochFormat is \"%s\"\n",
-               estEpochFormat.c_str());
+         MessageInterface::ShowMessage("Setting value for %s.EstimationEpoch has no "
+               "effect due to %s.EstimationEpochFormat to be \"%s\"\n", 
+               GetName().c_str(), GetName().c_str(), estEpochFormat.c_str());
       }
       if (estEpochFormat != "FromParticipants")
       {
@@ -414,6 +414,7 @@ bool BatchEstimator::SetStringParameter(const Integer id,
          // Convert to a.1 time for internal processing
          estimationEpoch = ConvertToRealEpoch(estEpoch, estEpochFormat);
       }
+
       return true;
    }
 
@@ -549,7 +550,6 @@ bool BatchEstimator::SetStringParameter(const std::string &label,
  * @return "On" or "Off" value
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
 std::string BatchEstimator::GetOnOffParameter(const Integer id) const
 {
 //   if (id == USE_PRIORI_ESTIMATE)
@@ -571,7 +571,6 @@ std::string BatchEstimator::GetOnOffParameter(const Integer id) const
  * @return true value when it successfully sets the value, false otherwise. 
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
 bool BatchEstimator::SetOnOffParameter(const Integer id, const std::string &value)
 {
 //   if (id == USE_PRIORI_ESTIMATE)
@@ -655,7 +654,6 @@ bool BatchEstimator::TakeAction(const std::string &action,
    {
       currentState = INITIALIZING;
       isInitialized = false;
-//      converged   = false;
       estimationStatus = UNKNOWN;
 
       return true;
@@ -683,8 +681,7 @@ bool BatchEstimator::Initialize()
 
    if (Estimator::Initialize())
    {
-//    converged = false;
-      estimationStatus = UNKNOWN;
+      //estimationStatus = UNKNOWN;          // This code is moved to Estimator::Initialize()      
       retval    = true;
    }
 
@@ -854,16 +851,16 @@ void BatchEstimator::CompleteInitialization()
    //      BuildResidualPlot(plotName, plotMeasurements);
    //   }
    //}
-
+   
    if (advanceToEstimationEpoch == false)
    {
       PropagationStateManager *psm = propagator->GetPropStateManager();
       GmatState               *gs  = psm->GetState();
       estimationState              = esm.GetState();
       stateSize = estimationState->GetSize();
-
+      
       Estimator::CompleteInitialization();
-
+      
       // If estimation epoch not set, use the epoch from the prop state
       if ((estEpochFormat == "FromParticipants") || (estimationEpoch <= 0.0))
       {
@@ -873,7 +870,7 @@ void BatchEstimator::CompleteInitialization()
             estimationEpoch   = ((SpaceObject *)(participants[i]))->GetEpoch();
       }
       currentEpoch         = gs->GetEpoch();
-
+      
       // Tell the measManager to complete its initialization
       bool measOK = measManager.SetPropagator(propagator);
       measOK = measOK && measManager.Initialize();
@@ -881,18 +878,17 @@ void BatchEstimator::CompleteInitialization()
          throw SolverException(
                "BatchEstimator::CompleteInitialization - error initializing "
                "MeasurementManager.\n");
-
+      
       // Now load up the observations
       measManager.PrepareForProcessing(false);
-      UnsignedInt numRec = measManager.LoadObservations();                           // made changes by TUAN NGUYEN
-      if (numRec == 0)                                                               // made changes by TUAN NGUYEN
+      UnsignedInt numRec = measManager.LoadObservations();
+      if (numRec == 0)
       {
-         throw EstimatorException("No observation data is used for estimation\n");   // made changes by TUAN NGUYEN
+         throw EstimatorException("No observation data is used for estimation\n");
       }
-     
+      
 ///// Check for more generic approach
-      measManager.LoadRampTables();                                                  // made changes by TUAN NGUYEN
-
+      measManager.LoadRampTables();
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
          advanceToEstimationEpoch = true;
@@ -901,7 +897,7 @@ void BatchEstimator::CompleteInitialization()
          return;
       }
    }
-
+   
    // Show all residuals plots
    if (showAllResiduals)
    {
@@ -915,12 +911,11 @@ void BatchEstimator::CompleteInitialization()
          BuildResidualPlot(plotName, plotMeasurements);
       }
    }
-
+   
    advanceToEstimationEpoch = false;
 
    // First measurement epoch is the epoch of the first measurement.  Duh.
    nextMeasurementEpoch = measManager.GetEpoch();
-
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
             "Init complete!\n   STM = %s\n   Covariance = %s\n",
@@ -945,30 +940,31 @@ void BatchEstimator::CompleteInitialization()
 
    measurementResiduals.clear();
    measurementEpochs.clear();
-
+   
    for (Integer i = 0; i < information.GetNumRows(); ++i)
    {
       residuals[i] = 0.0;
-//      if (useApriori)                                    // made changes by TUAN NGUYEN
-//         x0bar[i] = (*estimationState)[i];               // made changes by TUAN NGUYEN
-//      else                                               // made changes by TUAN NGUYEN         Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
+//      if (useApriori)
+//         x0bar[i] = (*estimationState)[i];
+//      else                                               // Note that: x0bar is set to zero-vector as shown in  page 195 Statistical Orbit Determination
            x0bar[i] = 0.0;
    }
 
    if (useApriori)
+   {
       for (Integer i = 0; i < information.GetNumRows(); ++i)
       {
          for (UnsignedInt j = 0; j < stateSize; ++j)
             residuals[i] += information(i,j) * x0bar[j];
       }
+   }
 
    esm.BufferObjects(&outerLoopBuffer);
    esm.MapObjectsToVector();
-
-//   converged   = false;
-   estimationStatus = UNKNOWN;                 // made changes by TUAN NGUYEN
+   
+   estimationStatus = UNKNOWN;
    // Convert estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(aprioriSolveForState);   // made changes by TUAN NGUYEN
+   GetEstimationState(aprioriSolveForState);
 
    isInitialized = true;
    numDivIterations = 0;                       // It need to reset it's value when starting estimatimation calculation
@@ -990,7 +986,6 @@ void BatchEstimator::CompleteInitialization()
             GmatTimeConstants::SECS_PER_DAY;
       currentState = PROPAGATING;
    }
-
 
 
    #ifdef DEBUG_INITIALIZATION
@@ -1060,7 +1055,8 @@ void BatchEstimator::FindTimeStep()
    #endif
 
    }
-   else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
+   //else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))       // value of accuray is set to 5.0e-12 due to the accuracy limit of double
+   else if (fabs((currentEpoch - nextMeasurementEpoch)/currentEpoch) < GmatRealConstants::REAL_EPSILON)
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
@@ -1099,7 +1095,7 @@ void BatchEstimator::CalculateData()
 
    // Update the STM
    esm.MapObjectsToSTM();
-
+   
    // Tell the measurement manager to calculate the simulation data
 //   measManager.CalculateMeasurements();
 
@@ -1107,17 +1103,17 @@ void BatchEstimator::CalculateData()
    //{
    //   // No measurements were possible
    //   bool endOfDataSet = measManager.AdvanceObservation();
-   //   if (endOfDataSet)                                 // made changes by TUAN NGUYEN
-   //      currentState = ESTIMATING;                     // made changes by TUAN NGUYEN
-     //else                                               // made changes by TUAN NGUYEN
-     //{                                                  // made changes by TUAN NGUYEN
+   //   if (endOfDataSet)
+   //      currentState = ESTIMATING;
+     //else
+     //{
    //      nextMeasurementEpoch = measManager.GetEpoch();
    //      FindTimeStep();
      //    if (currentEpoch <= nextMeasurementEpoch)
    //         currentState = PROPAGATING;
    //      else
    //         currentState = ESTIMATING;
-     //}                                                  // made changes by TUAN NGUYEN
+     //}
    //}
    if (measManager.CalculateMeasurements() == false)
    {
@@ -1130,7 +1126,6 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
-   
    #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
    #endif
@@ -1199,7 +1194,6 @@ void BatchEstimator::CheckCompletion()
    #endif
 
    convergenceReason = "";
-//   converged = TestForConvergence(convergenceReason);
    estimationStatus = TestForConvergence(convergenceReason);
    
    #ifdef RUN_SINGLE_PASS
@@ -1207,13 +1201,19 @@ void BatchEstimator::CheckCompletion()
    #endif
 
    ++iterationsTaken;
-//   if ((converged) || (iterationsTaken >= maxIterations))
    if ((estimationStatus == ABSOLUTETOL_CONVERGED) ||
       (estimationStatus == RELATIVETOL_CONVERGED) ||
       (estimationStatus == ABS_AND_REL_TOL_CONVERGED) ||
       (estimationStatus == MAX_CONSECUTIVE_DIVERGED) ||
       (estimationStatus == MAX_ITERATIONS_DIVERGED))
    {
+      if ((estimationStatus == ABSOLUTETOL_CONVERGED) ||
+         (estimationStatus == RELATIVETOL_CONVERGED) ||
+         (estimationStatus == ABS_AND_REL_TOL_CONVERGED))
+         status = CONVERGED;
+      else
+         status = EXCEEDED_ITERATIONS;
+      
       currentState = FINISHED;
    }
    else
@@ -1226,12 +1226,12 @@ void BatchEstimator::CheckCompletion()
       esm.MapVectorToObjects();
       esm.MapObjectsToSTM();
       currentEpoch = estimationEpoch;
-      measManager.Reset();                                            // set current observation data to be the first one in observation data table            // made changes by TUAN NGUYEN
+      measManager.Reset();                                            // set current observation data to be the first one in observation data table
       // Note that: all unused data records will be handled in BatchEstimatorInv::Accumulate() function
       // Therefore, there is no prblem when passing those records to Accumulate() 
-      //if (measManager.GetObsDataObject()->inUsed == false)         // if the first observation data is not in used, then go to the next in-used data record   // made changes by TUAN NGUYEN
+      //if (measManager.GetObsDataObject()->inUsed == false)         // if the first observation data is not in used, then go to the next in-used data record
       //{
-      //   measManager.AdvanceObservation();                         // made changes by TUAN NGUYEN
+      //   measManager.AdvanceObservation();
       //}
       nextMeasurementEpoch = measManager.GetEpoch();
 
@@ -1347,7 +1347,7 @@ std::string BatchEstimator::GetProgressString()
    progress.precision(12);
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
-   GmatState outputEstimationState;                                 // made changes by TUAN NGUYEN
+   GmatState outputEstimationState;
 
    if (isInitialized)
    {
@@ -1378,7 +1378,7 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
                }
 
-               GetEstimationState(outputEstimationState);                      // made changes by TUAN NGUYEN
+               GetEstimationState(outputEstimationState);
                
                for (UnsignedInt i = 0; i < map->size(); ++i)
                {
@@ -1386,7 +1386,7 @@ std::string BatchEstimator::GetProgressString()
                            //<< (*map)[i]->objectName << "."
                            //<< (*map)[i]->elementName << "."
                            //<< (*map)[i]->subelement << " = "
-                           << outputEstimationState[i] << "\n";               // made changes by TUAN NGUYEN
+                           << outputEstimationState[i] << "\n";
                };
 
                //progress << "\n a priori covariance:\n\n";
@@ -1440,7 +1440,7 @@ std::string BatchEstimator::GetProgressString()
             sprintf(&s[0], "%22.12lf", estimationEpoch);
             progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
 
-            GetEstimationState(outputEstimationState);                     // made changes by TUAN NGUYEN
+            GetEstimationState(outputEstimationState);
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -1448,7 +1448,7 @@ std::string BatchEstimator::GetProgressString()
                         //<< (*map)[i]->objectName << "."
                         //<< (*map)[i]->elementName << "."
                         //<< (*map)[i]->subelement << " = "
-                        << outputEstimationState[i] << "\n";               // made changes by TUAN NGUYEN
+                        << outputEstimationState[i] << "\n";
             }
 
             break;
@@ -1524,7 +1524,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
             }
 
-            GetEstimationState(outputEstimationState);                     // made changes by TUAN NGUYEN
+            GetEstimationState(outputEstimationState);
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -1532,7 +1532,7 @@ std::string BatchEstimator::GetProgressString()
                         //<< (*map)[i]->objectName << "."
                         //<< (*map)[i]->elementName << "."
                         //<< (*map)[i]->subelement << " = "
-                     << outputEstimationState[i] << "\n";                  // made changes by TUAN NGUYEN
+                     << outputEstimationState[i] << "\n";
             }
 
             { // Switch statement scoping
@@ -1597,7 +1597,6 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
    ss << infor->objectName << ".";
    if (infor->elementName == "CartesianState")
    {
-      //MessageInterface::ShowMessage("<<<<  Object name <%s>  coordinate system <%s>\n", infor->object->GetName().c_str(), ((Spacecraft*)(infor->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, "")->GetName().c_str());
       if (isInternalCS)
          ss << "EarthMJ2000Eq" << ".";
       else
@@ -1772,7 +1771,7 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 //   if ((textFileMode != "Normal")&&(textFileMode != "Verbose"))
 //      return;
 
-   GmatState outputEstimationState;                                 // made changes by TUAN NGUYEN
+   GmatState outputEstimationState;
 
    if (!showProgress)
       return;
@@ -2114,7 +2113,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 }
 
 
-// made changes by TUAN NGUYEN
+
 //-------------------------------------------------------------------------
 // void DataFilter()
 //-------------------------------------------------------------------------
@@ -2143,11 +2142,11 @@ bool BatchEstimator::DataFilter()
          //{
          //   measManager.GetObsDataObject()->inUsed = false;
          //   measManager.GetObsDataObject()->removedReason = "M";   // "M": represent for maximum residual limit
-         //   std::string filterName = measModel->GetName() + " maximum residual";            // made changes by TUAN NGUYEN
-         //   if (numRemovedRecords.find(filterName) == numRemovedRecords.end())              // made changes by TUAN NGUYEN
-         //      numRemovedRecords[filterName] = 1;                                           // made changes by TUAN NGUYEN
-         //   else                                                                            // made changes by TUAN NGUYEN
-         //      numRemovedRecords[filterName]++;                                             // made changes by TUAN NGUYEN
+         //   std::string filterName = measModel->GetName() + " maximum residual";
+         //   if (numRemovedRecords.find(filterName) == numRemovedRecords.end())
+         //      numRemovedRecords[filterName] = 1;
+         //   else
+         //      numRemovedRecords[filterName]++;
          //   retVal = true;      // IsReuseableType("ResidualMax");
          //   break;
          //}

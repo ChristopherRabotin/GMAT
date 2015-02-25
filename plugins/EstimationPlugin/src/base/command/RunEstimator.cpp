@@ -28,6 +28,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_STATE
+//#define DEBUG_STATE_RESETS
 //#define DEBUG_EVENT_STATE
 
 
@@ -326,28 +327,27 @@ bool RunEstimator::Initialize()
    }
 
 ///// Check for generic approach here
-   // Set the ramp table data streams for the measurement manager               // made changes by TUAN NGUYEN
-   streamList = measman->GetRampTableDataStreamList();                          // made changes by TUAN NGUYEN
-   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)                       // made changes by TUAN NGUYEN
-   {                                                                            // made changes by TUAN NGUYEN
-      GmatBase *obj = FindObject(streamList[ms]);                               // made changes by TUAN NGUYEN
-      if (obj != NULL)                                                          // made changes by TUAN NGUYEN
-      {                                                                         // made changes by TUAN NGUYEN
-         if (obj->IsOfType(Gmat::DATASTREAM))                                   // made changes by TUAN NGUYEN
-         {                                                                      // made changes by TUAN NGUYEN
-            DataFile *df = (DataFile*)obj;                                      // made changes by TUAN NGUYEN
-            measman->SetRampTableDataStreamObject(df);                          // made changes by TUAN NGUYEN
-         }                                                                      // made changes by TUAN NGUYEN
+   // Set the ramp table data streams for the measurement manager
+   streamList = measman->GetRampTableDataStreamList();
+   for (UnsignedInt ms = 0; ms < streamList.size(); ++ms)
+   {
+      GmatBase *obj = FindObject(streamList[ms]);
+      if (obj != NULL)
+      {
+         if (obj->IsOfType(Gmat::DATASTREAM))
+         {
+            DataFile *df = (DataFile*)obj;
+            measman->SetRampTableDataStreamObject(df);
+         }
          else
             MessageInterface::ShowMessage("Object '%s' is not Gmat::DATASTREAM\n", obj->GetName().c_str());
-      }                                                                         // made changes by TUAN NGUYEN
-      else                                                                      // made changes by TUAN NGUYEN
-      {
-//       MessageInterface::ShowMessage("Error: Did not find the object named '%s'\n",streamList[ms].c_str());
-         throw CommandException("Error: Did not find the object named " +       // made changes by TUAN NGUYEN
-               streamList[ms]);                                                 // made changes by TUAN NGUYEN
       }
-   }                                                                            // made changes by TUAN NGUYEN
+      else
+      {
+         throw CommandException("Error: Did not find the object named " + 
+               streamList[ms]);
+      }
+   }
 
    // Next initialize the estimation subsystem
    EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
@@ -608,7 +608,7 @@ bool RunEstimator::Execute()
          #endif
 
          // Why is Finalize commented out???  There is no command summary because of this change.
-//         Finalize();               // made changes by TUAN NGUYEN
+//         Finalize();
          // Adding in for now.
          BuildCommandSummary(true);
 
@@ -622,14 +622,18 @@ bool RunEstimator::Execute()
                " encountered in the RunEstimator command");
    }
 
-   if (state != Solver::FINISHED)                // made changes by TUAN NGUYEN
+   #ifdef DEBUG_STATE
+      MessageInterface::ShowMessage("*** Start AdvanceState ... RunEstimator:Execute()\n");
+   #endif
+
+   if (state != Solver::FINISHED)
       state = theEstimator->AdvanceState();
-   else                                          // made changes by TUAN NGUYEN
-   {                                             // made changes by TUAN NGUYEN
+   else
+   {
       // It has to run all work in AdvanceState() before Finalize()
-      state = theEstimator->AdvanceState();      // made changes by TUAN NGUYEN
-      Finalize();                                // made changes by TUAN NGUYEN
-   }                                             // made changes by TUAN NGUYEN
+      state = theEstimator->AdvanceState();
+      Finalize();
+   }
    
    #ifdef DEBUG_STATE
       MessageInterface::ShowMessage("*** Exit RunEstimator:Execute()\n");
@@ -653,6 +657,10 @@ void RunEstimator::RunComplete()
    commandRunning = false;
 
    RunSolver::RunComplete();
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::RunComplete()\n");
+   #endif
+
 }
 
 
@@ -769,6 +777,11 @@ void RunEstimator::PrepareToEstimate()
    }
 
    estimationOffset = fm[0]->GetTime();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage(
+            "Exit RunEstimator::PrepareToEstimate()\n");
+   #endif
 }
 
 
@@ -795,14 +808,14 @@ void RunEstimator::Propagate()
       #ifdef DEBUG_STATE_RESETS
          MessageInterface::ShowMessage("Calling UpdateFromSpaceObject()\n");
          Real* oldState = fm[0]->GetState();
-         MessageInterface::ShowMessage("   Old state[0] element:  %.12lf\n", oldState[0]);
+         MessageInterface::ShowMessage("   Old state:  (%.12lf   %.12lf   %.12lf)\n", oldState[0], oldState[1], oldState[2]);
       #endif
-
+      
       fm[0]->UpdateFromSpaceObject();
-
+      
       #ifdef DEBUG_STATE_RESETS
          Real* newState = fm[0]->GetState();
-         MessageInterface::ShowMessage("   New state[0] element:  %.12lf\n", newState[0]);
+         MessageInterface::ShowMessage("   New state:  (%.12lf   %.12lf   %.12lf\n", newState[0], newState[1], newState[2]);
       #endif
    }
 
@@ -814,9 +827,9 @@ void RunEstimator::Propagate()
       fm[0]->SetTime(estimationOffset);
       startNewPass = false;
    }
-
+   
    Real dt = theEstimator->GetTimeStep();
-
+   
    // todo: This is a temporary fix; need to evaluate to find a more elegant
    //       solution here
    Real maxStep = 600.0;
@@ -824,8 +837,12 @@ void RunEstimator::Propagate()
       dt = (dt > 0.0 ? maxStep : -maxStep);
    Step(dt);
    bufferFilled = false;
-
+   
    theEstimator->UpdateCurrentEpoch(currEpoch[0]);
+   
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Propagate()\n");
+   #endif
 }
 
 
@@ -844,6 +861,10 @@ void RunEstimator::Calculate()
    #endif
 
    bufferFilled = false;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Calculate()\n");
+   #endif
 }
 
 
@@ -1021,6 +1042,10 @@ void RunEstimator::LocateEvent()
    propagators[0]->GetODEModel()->UpdateFromSpaceObject();
    fm[0]->SetTime(dt);
 
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::LocateEvent()\n");
+   #endif
+
 }
 
 
@@ -1039,6 +1064,10 @@ void RunEstimator::Accumulate()
    #endif
 
    CleanUpEvents();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Accumulate()\n");
+   #endif
 }
 
 
@@ -1056,6 +1085,10 @@ void RunEstimator::Estimate()
    #endif
 
    CleanUpEvents();
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Estimate()\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1073,6 +1106,10 @@ void RunEstimator::CheckConvergence()
    #endif
 
    startNewPass = true;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::CheckConvergence()\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -1102,6 +1139,10 @@ void RunEstimator::Finalize()
    commandComplete = true;
    commandRunning  = false;
    propPrepared    = false;
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Exit RunEstimator::Finalize()\n");
+   #endif
 }
 
 

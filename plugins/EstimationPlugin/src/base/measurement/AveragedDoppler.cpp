@@ -37,7 +37,7 @@ AveragedDoppler::PARAMETER_TEXT[AveragedDopplerParamCount -
                                 PhysicalMeasurementParamCount] =
 {
      "AveragingInterval",
-     "BuildInTurnAroundRatio",                              // made changes by TUAN NGUYEN
+     "BuildInTurnAroundRatio",
 };
 
 const Gmat::ParameterType
@@ -45,7 +45,7 @@ AveragedDoppler::PARAMETER_TYPE[AveragedDopplerParamCount -
                                 PhysicalMeasurementParamCount] =
 {
       Gmat::REAL_TYPE,
-      Gmat::REAL_TYPE,                                    // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,
 };
 
 
@@ -69,7 +69,7 @@ AveragedDoppler::AveragedDoppler(const std::string &type,
    tm                         (GmatTimeConstants::MJD_OF_J2000),
    interval                   (1.0),  // 1 sec default interval
    turnaround                 (1.1),
-   M2R                    (0.0)                           // made changes by TUAN NGUYEN
+   M2R                        (0.0)
 {
    objectTypeNames.push_back("AveragedDoppler");
    parameterCount = AveragedDopplerParamCount;
@@ -120,7 +120,7 @@ AveragedDoppler::AveragedDoppler(const AveragedDoppler & ad) :
    tm                         (ad.tm),
    interval                   (ad.interval),
    turnaround                 (ad.turnaround),
-   M2R                        (ad.M2R),                        // made changes by TUAN NGUYEN
+   M2R                        (ad.M2R),
    uplinkLegS                 (ad.uplinkLegS),
    downlinkLegS               (ad.downlinkLegS),
    uplinkLegE                 (ad.uplinkLegE),
@@ -180,7 +180,7 @@ AveragedDoppler& AveragedDoppler::operator=(const AveragedDoppler& ad)
       t3R[1] = ad.t3R[1];
 
       turnaround = ad.turnaround;
-      M2R        = ad. M2R;                     // made changes by TUAN NGUYEN
+      M2R        = ad. M2R;
 
       uplinkLegS   = ad.uplinkLegS;
       downlinkLegS = ad.downlinkLegS;
@@ -291,6 +291,26 @@ std::string AveragedDoppler::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
+
+
+//------------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method is used to specify a parameter is read only or not.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return   true if parameter read only, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool AveragedDoppler::IsParameterReadOnly(const Integer id) const      // made changes by TUAN NGUYEN
+{                                                                      // made changes by TUAN NGUYEN
+   if (id == BuildInTurnAroundRatio)                                   // made changes by TUAN NGUYEN
+      return true;                                                     // made changes by TUAN NGUYEN
+
+   return PhysicalMeasurement::IsParameterReadOnly(id);                // made changes by TUAN NGUYEN
+}                                                                      // made changes by TUAN NGUYEN
 
 
 //------------------------------------------------------------------------------
@@ -763,15 +783,11 @@ bool AveragedDoppler::Initialize()
 
 ///// TBD: Should this always be done?
       // Set options to run relativity and ET-TAI corrections: 
-      uplinkLegS.SetRelativityCorrection(useRelativityCorrection);            // made changes by TUAN NGUYEN
-      downlinkLegS.SetRelativityCorrection(useRelativityCorrection);          // made changes by TUAN NGUYEN
-      uplinkLegE.SetRelativityCorrection(useRelativityCorrection);            // made changes by TUAN NGUYEN
-      downlinkLegE.SetRelativityCorrection(useRelativityCorrection);          // made changes by TUAN NGUYEN
+      uplinkLegS.SetRelativityCorrection(useRelativityCorrection);
+      downlinkLegS.SetRelativityCorrection(useRelativityCorrection);
+      uplinkLegE.SetRelativityCorrection(useRelativityCorrection);
+      downlinkLegE.SetRelativityCorrection(useRelativityCorrection);
 
-//     uplinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);            // made changes by TUAN NGUYEN
-//     downlinkLegS.SetETMinusTAICorrection(useETminusTAICorrection);          // made changes by TUAN NGUYEN
-//     uplinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);            // made changes by TUAN NGUYEN
-//     downlinkLegE.SetETMinusTAICorrection(useETminusTAICorrection);          // made changes by TUAN NGUYEN
    }
 
    return retval;
@@ -821,14 +837,14 @@ void AveragedDoppler::InitializeMeasurement()
    index = downlinkLegE.GetParticipantIndex(participants[1]);
    downlinkLegE.AddCoordinateSystem(F2, index);// Participant 2 CS for the event
 
-   // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system			// made changes by TUAN NGUYEN
-   if (solarSystem == NULL)														                     													// made changes by TUAN NGUYEN
-	   throw MeasurementException("Error in AveragedDoppler::InitializeMeasurement() due to solar system object is NULL.\n");		// made changes by TUAN NGUYEN
+   // Set solar system for uplinkLeg and downlinkLeg in order to calculate states of paticipants in SSB coordinate system
+   if (solarSystem == NULL)
+	   throw MeasurementException("Error in AveragedDoppler::InitializeMeasurement() due to solar system object is NULL.\n");
 
-   uplinkLegS.SetSolarSystem(solarSystem);									// made changes by TUAN NGUYEN
-   downlinkLegS.SetSolarSystem(solarSystem);								   // made changes by TUAN NGUYEN
-   uplinkLegE.SetSolarSystem(solarSystem);									// made changes by TUAN NGUYEN
-   downlinkLegE.SetSolarSystem(solarSystem);								   // made changes by TUAN NGUYEN
+   uplinkLegS.SetSolarSystem(solarSystem);
+   downlinkLegS.SetSolarSystem(solarSystem);
+   uplinkLegE.SetSolarSystem(solarSystem);
+   downlinkLegE.SetSolarSystem(solarSystem);
 
    SetupTimeIntervals();
 }
@@ -1005,9 +1021,9 @@ void AveragedDoppler::SetHardwareDelays(bool loadEvents)
 void AveragedDoppler::SetupTimeIntervals()
 {
    // Set 2 return epochs used as starting points in lighttime calcs
-//   t3E[0] = -interval / 2.0;					// made changes by TUAN NGUYEN
-//   t3E[1] =  interval / 2.0;					// made changes by TUAN NGUYEN
-   t3E[0] = -interval;							// made changes by TUAN NGUYEN    for requirement to set t3E of End path to be measurement time 
+//   t3E[0] = -interval / 2.0;
+//   t3E[1] =  interval / 2.0;
+   t3E[0] = -interval;							// made changes for requirement to set t3E of End path to be measurement time 
    t3E[1] =  0.0;
 
    // Set the receive offsets for the downlink signals

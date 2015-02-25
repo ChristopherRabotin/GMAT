@@ -85,9 +85,8 @@ public:
    virtual const Rvector3& GetVelocity(GmatBase* forParticipant);
    virtual EventData& GetEventData(GmatBase* forParticipant);
 
-   virtual void SetSolarSystem(SolarSystem* ss);				// made changes by TUAN NGUYEN
-   virtual void SetRelativityCorrection(bool useCorr);			// made changes by TUAN NGUYEN
-//   virtual void SetETMinusTAICorrection(bool useCorr);			// made changes by TUAN NGUYEN
+   virtual void SetSolarSystem(SolarSystem* ss);
+   virtual void SetRelativityCorrection(bool useCorr);
 
 protected:
    /// The names of the participants active in the Event
@@ -140,11 +139,10 @@ protected:
    /// Converter to convert different frames
    CoordinateConverter  converter;
 
-   /// Solar system which is used for calculating state in solar system barycenter inertial coordinate system		// made changes by TUAN NGUYEN
-   SolarSystem         *solarSystem;																				// made changes by TUAN NGUYEN
-   /// Flags to indicate using relativity correction and ET-TAI correction											// made changes by TUAN NGUYEN
-   bool                useRelativityCorrection;																		// made changes by TUAN NGUYEN
-//   bool                useETMinusTAICorrection;																		// made changes by TUAN NGUYEN
+   /// Solar system which is used for calculating state in solar system barycenter inertial coordinate system
+   SolarSystem         *solarSystem;
+   /// Flags to indicate using relativity correction
+   bool                useRelativityCorrection;
 
    virtual void EvaluateNyquist();
    virtual void CalculateTimestepEstimate();

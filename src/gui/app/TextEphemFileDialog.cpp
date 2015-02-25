@@ -229,13 +229,13 @@ void TextEphemFileDialog::LoadData()
       
       // set default ephemeris  file using spacecraft name
       wxString fname = scName + "_Ephem.txt";
-      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
+      mEphemFileTextCtrl->SetValue(mEphemDirectory + fname);
       
       theOkButton->Enable();
    }
    else
    {
-      mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() +
+      mEphemFileTextCtrl->SetValue(mEphemDirectory +
                                    wxString("/TextEphemHeader.txt"));
       
       theOkButton->Disable();
@@ -346,15 +346,15 @@ void TextEphemFileDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 bool TextEphemFileDialog::CreateTextEphem()
 {
-   std::string ephemFileName = mEphemFileTextCtrl->GetValue().c_str();
+   std::string ephemFileName = mEphemFileTextCtrl->GetValue().WX_TO_STD_STRING;
    
    TextEphemFile *ephemFile = (TextEphemFile*)(theGuiInterpreter->
       CreateSubscriber("TextEphemFile", "TextEphemFile", ephemFileName, false));
    
    // get first spacecraft from the list
-   std::string scName = mSelectedScListBox->GetString(0).c_str();
-   std::string epochFormat = mEpochFormatComboBox->GetValue().c_str();
-   std::string coordSys = mCoordSysComboBox->GetValue().c_str();
+   std::string scName = mSelectedScListBox->GetString(0).WX_TO_STD_STRING;
+   std::string epochFormat = mEpochFormatComboBox->GetValue().WX_TO_STD_STRING;
+   std::string coordSys = mCoordSysComboBox->GetValue().WX_TO_STD_STRING;
 
    // check interval
    Real interval;

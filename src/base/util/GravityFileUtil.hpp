@@ -82,9 +82,13 @@ public:
    static const std::string GRAVITY_MODEL_NAMES[GmatGrav::NumGravityModels];
 
    
+   static GmatGrav::GravityFileType  GetFileType(const char *filename);
    static GmatGrav::GravityFileType  GetFileType(const std::string &filename);
+   
    /// Method to return the gravity model name for a file with format COF only
+   static GmatGrav::GravityModelType GetModelType(const char *filename, const char *forBody);
    static GmatGrav::GravityModelType GetModelType(const std::string &filename, const std::string &forBody);
+   
    static bool GetFileInfo(const std::string &filename, Integer& degree, Integer& order,
                            Real &mu, Real &radius);
    static bool ReadFile(const std::string &filename, Integer& degree, Integer& order,

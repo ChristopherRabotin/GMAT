@@ -79,7 +79,6 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   // made changes by Tuan Nguyen
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
@@ -133,16 +132,12 @@ protected:
    std::string          stationId;
 
    /// Added hardware of the ground station
-   StringArray          hardwareNames;       // made changes by Tuan Nguyen
-   ObjectArray          hardwareList;        // made changes by Tuan Nguyen
+   StringArray          hardwareNames;
+   ObjectArray          hardwareList;
 
    /// Add ionosphere and troposphere correction modes
-   std::string ionosphereModel;             // made changes by Tuan Nguyen
-   std::string troposphereModel;            // made changes by Tuan Nguyen
-
-   /// Troposphere and Ionosphere objects
-   //MediaCorrectionInterface* troposphereObj;// made changes by Tuan Nguyen
-   //MediaCorrectionInterface* ionosphereObj; // made changes by Tuan Nguyen
+   std::string ionosphereModel;
+   std::string troposphereModel;
 
    /// Parameters needed for Troposphere correction
    Real                 temperature;                     // unit: Kelvin
@@ -155,20 +150,40 @@ protected:
    /// Visibility vector
    Real az_el_visible[3];
 
+   /// Noise
+   Real            rangeNoiseSigma;       // unit: Km
+   std::string     rangeErrorModel;
+   Real            dsnrangeNoiseSigma;    // unit: RU
+   std::string     dsnrangeErrorModel;
+   Real            dopplerNoiseSigma;     // unit: Hz
+   std::string     dopplerErrorModel;
    
+   /// Bias
+   Real            rangeBias;              // unit: Km
+   Real            dsnrangeBias;           // unit: RU
+   Real            dopplerBias;            // unit: Hz
 public:
    /// Published parameters for ground stations
    enum
    {
       STATION_ID = BodyFixedPointParamCount,
-      ADD_HARDWARE,                       // made changes by Tuan Nguyen
-      IONOSPHERE_MODEL,                   // made changes by Tuan Nguyen
-      TROPOSPHERE_MODEL,                  // made changes by Tuan Nguyen
-      DATA_SOURCE,                  // When DataSource is 'Constant', that means temperature, pressure, and humidity are read from script, otherwise they are read from a data base  // made changes by Tuan Nguyen        
+      ADD_HARDWARE,
+      IONOSPHERE_MODEL,
+      TROPOSPHERE_MODEL,
+      DATA_SOURCE,                  // When DataSource is 'Constant', that means temperature, pressure, and humidity are read from script, otherwise they are read from a data base 
       TEMPERATURE,                  // temperature (in K) at ground station. It is used for Troposphere correction
       PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
       HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
       MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
+      RANGE_NOISESIGMA,
+      RANGE_ERRORMODEL,
+      DSNRANGE_NOISESIGMA,
+      DSNRANGE_ERRORMODEL,
+      DOPPLER_NOISESIGMA,
+      DOPPLER_ERRORMODEL,
+      RANGE_BIAS,
+      DSNRANGE_BIAS,
+      DOPPLER_BIAS,
       GroundStationParamCount,
    };
 
@@ -178,7 +193,7 @@ public:
       PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount];
 
 private:
-   bool               VerifyAddHardware();         // made changes by Tuan Nguyen
+   bool               VerifyAddHardware();
 };
 
 #endif /*GroundStation_hpp*/

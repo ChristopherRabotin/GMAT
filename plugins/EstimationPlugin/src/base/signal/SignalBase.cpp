@@ -29,6 +29,7 @@
 #include "SpaceObject.hpp"
 #include <sstream>
 
+//#define DEBUG_SET_PARAMETER
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_LIGHTTIME
 //#define DEBUG_MOVETOEPOCH
@@ -66,7 +67,7 @@ SignalBase::SignalBase(const std::string &typeStr,
    ocs                  (NULL),
    j2k                  (NULL),
 #ifdef USE_PRECISION_TIME
-   satPrecEpoch         (21545.0),            // made changes by TUAN NGUYEN
+   satPrecEpoch         (21545.0),
 #else
    satEpoch             (21545.0),
 #endif
@@ -101,8 +102,8 @@ SignalBase::~SignalBase()
       delete ocs;
    if (j2k)
       delete j2k;
-
-   theData.CleanUp();              // made changes by TUAN NGUYEN
+   
+   theData.CleanUp();
 }
 
 
@@ -125,7 +126,7 @@ SignalBase::SignalBase(const SignalBase& sb) :
    ocs                  (NULL),
    j2k                  (NULL),
 #ifdef USE_PRECISION_TIME
-   satPrecEpoch         (21545.0),      // made changes by TUAN NGUYEN
+   satPrecEpoch         (21545.0),
 #else
    satEpoch             (21545.0),
 #endif
@@ -175,7 +176,7 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       j2k = NULL;
 
 #ifdef USE_PRECISION_TIME
-      satPrecEpoch        = 21545.0;            // made changes by TUAN NGUYEN
+      satPrecEpoch        = 21545.0;
 #else
       satEpoch            = 21545.0;
 #endif
@@ -241,6 +242,10 @@ bool SignalBase::SetProgressReporter(ProgressReporter* reporter)
 //------------------------------------------------------------------------------
 bool SignalBase::SetTransmitParticipantName(std::string name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetTransmitParticipantName('%s')\n", this, name.c_str());
+#endif
+
    bool retval = false;
    if (name != "")
    {
@@ -264,6 +269,10 @@ bool SignalBase::SetTransmitParticipantName(std::string name)
 //------------------------------------------------------------------------------
 bool SignalBase::SetReceiveParticipantName(std::string name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetReceivrParticipantName('%s')\n", this, name.c_str());
+#endif
+
    bool retval = false;
    if (name != "")
    {
@@ -315,6 +324,10 @@ const StringArray& SignalBase::GetRefObjectNameArray(
 bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetRefObject(obj = <%p>, type = %d, name = '%s')\n", this, obj, type, name.c_str());
+#endif
+
    bool retval = false;
 
    if (obj != NULL)
@@ -359,6 +372,10 @@ bool SignalBase::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 bool SignalBase::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::RenameRefObject(type = %d, oldName = '%s', newName = '%s')\n", this, type, oldName.c_str(), newName.c_str());
+#endif
+
    bool retval = false;
 
    if (oldName == theData.transmitParticipant)
@@ -485,16 +502,21 @@ bool SignalBase::Add(SignalBase* signalToAdd)
 //------------------------------------------------------------------------------
 void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("SignalBase<%p>::SetPropagator(propagator = <%p>, forObject = <%p,'%s'>)\n", this, propagator, forObj, forObj->GetName().c_str());
+#endif
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Setting a propagator <%p> in the Signal "
             "class for %s\n", propagator, (forObj == NULL ?
             "both participants" : forObj->GetName().c_str()));
    #endif
+   
    if (propagator == NULL)
       throw MeasurementException("The propagator passed in for the object " +
             forObj->GetName() + " is NULL, so the object cannot be propagated "
                   "for light time evaluation");
-
+   
    if (theData.solveLightTime)
    {
       if ((theData.tNode == forObj) || (forObj == NULL))
@@ -504,6 +526,7 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
             MessageInterface::ShowMessage("  Transmitter propagator set\n");
          #endif
       }
+      
       if ((theData.rNode == forObj) || (forObj == NULL))
       {
          theData.rPropagator = propagator;
@@ -511,7 +534,7 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
             MessageInterface::ShowMessage("  Receiver propagator set\n");
          #endif
       }
-
+      
       if (next)
          next->SetPropagator(propagator, forObj);
    }
@@ -529,6 +552,11 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
 //------------------------------------------------------------------------------
 bool SignalBase::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start SignalBase<%p>::Initialize()\n", this);
+#endif
+
+
    bool retval = false;
 
    if (GmatBase::Initialize())
@@ -547,17 +575,17 @@ bool SignalBase::Initialize()
 
          #ifdef USE_PRECISION_TIME
          // 2. Update theData.tPrecTime and theData.rPrecTime
-         theData.tPrecTime = theData.tNode->GetEpoch();                // made changes by TUAN NGUYEN
-         theData.rPrecTime = theData.rNode->GetEpoch();                // made changes by TUAN NGUYEN
+         theData.tPrecTime = theData.tNode->GetEpoch();
+         theData.rPrecTime = theData.rNode->GetEpoch();
          // Initially, ground station epoch is set the same at epoch for spacecraft
-         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))            // made changes by TUAN NGUYEN
-            theData.tPrecTime = theData.rPrecTime;                     // made changes by TUAN NGUYEN
-         else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))       // made changes by TUAN NGUYEN
-            theData.rPrecTime = theData.tPrecTime;                     // made changes by TUAN NGUYEN
+         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+            theData.tPrecTime = theData.rPrecTime;
+         else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+            theData.rPrecTime = theData.tPrecTime;
          #else
          // 2. Update theData.tTime and theData.rTime
-         theData.tTime = theData.tNode->GetEpoch();                    // made changes by TUAN NGUYEN
-         theData.rTime = theData.rNode->GetEpoch();                    // made changes by TUAN NGUYEN
+         theData.tTime = theData.tNode->GetEpoch();
+         theData.rTime = theData.rNode->GetEpoch();
          #endif
 
          retval = true;
@@ -570,6 +598,9 @@ bool SignalBase::Initialize()
       isInitialized = false;
    }
 
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("End SignalBase<%p>::Initialize()\n", this);
+#endif
    return retval;
 }
 
@@ -659,7 +690,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    if (theData.receiveParticipant == newData.receiveParticipant)
    {
 #ifdef USE_PRECISION_TIME
-      theData.rPrecTime = newData.rPrecTime;                     // made changes by TUAN NGUYEN
+      theData.rPrecTime = newData.rPrecTime;
 #else
       theData.rTime = newData.rTime;
 #endif
@@ -672,7 +703,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    if (theData.receiveParticipant == newData.transmitParticipant)
    {
 #ifdef USE_PRECISION_TIME
-      theData.rPrecTime = newData.tPrecTime;                     // made changes by TUAN NGUYEN
+      theData.rPrecTime = newData.tPrecTime;
 #else
       theData.rTime = newData.tTime;
 #endif
@@ -685,7 +716,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    if (theData.transmitParticipant == newData.receiveParticipant)
    {
 #ifdef USE_PRECISION_TIME
-      theData.tPrecTime = newData.rPrecTime;                     // made changes by TUAN NGUYEN
+      theData.tPrecTime = newData.rPrecTime;
 #else
       theData.tTime = newData.rTime;
 #endif
@@ -698,7 +729,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    if (theData.transmitParticipant == newData.transmitParticipant)
    {
 #ifdef USE_PRECISION_TIME
-      theData.tPrecTime = newData.tPrecTime;                     // made changes by TUAN NGUYEN
+      theData.tPrecTime = newData.tPrecTime;
 #else
       theData.tTime = newData.tTime;
 #endif
@@ -711,8 +742,8 @@ void SignalBase::SetSignalData(const SignalData& newData)
 
    #ifdef DEBUG_LIGHTTIME
       #ifdef USE_PRECISION_TIME
-      MessageInterface::ShowMessage("%d matching data sets updated; epochs "                        // made changes by TUAN NGUYEN
-            "%.12lf -> %.12lf\n", count, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());   // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("%d matching data sets updated; epochs "
+            "%.12lf -> %.12lf\n", count, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());
       #else
       MessageInterface::ShowMessage("%d matching data sets updated; epochs "
             "%.12lf -> %.12lf\n", count, theData.tTime, theData.rTime);
@@ -768,7 +799,7 @@ void SignalBase::UsesLighttime(const bool tf)
 void SignalBase::InitializeSignal(bool chainForwards)
 {
    #ifdef DEBUG_INITIALIZATION
-   MessageInterface::ShowMessage("SignalBase::InitializeSignal() for leg %s to %s\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
+   MessageInterface::ShowMessage("SignalBase<%p>::InitializeSignal() for leg %s to %s\n", this, theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
    #endif
 
    if (isInitialized)
@@ -781,14 +812,14 @@ void SignalBase::InitializeSignal(bool chainForwards)
    CelestialBody *earth = solarSystem->GetBody("Earth");
 
 #ifdef USE_PRECISION_TIME
-   GmatTime gsPrecEpoch = theData.tPrecTime;                  // made changes by TUAN NGUYEN
+   GmatTime gsPrecEpoch = theData.tPrecTime;
 #else
    GmatEpoch gsEpoch = theData.tTime;
 #endif
 
    #ifdef DEBUG_INITIALIZATION
 #ifdef USE_PRECISION_TIME
-      MessageInterface::ShowMessage("Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());      // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());
 #else
       MessageInterface::ShowMessage("Initializing with epoch %.12lf\n", satEpoch);
 #endif
@@ -821,7 +852,7 @@ void SignalBase::InitializeSignal(bool chainForwards)
    else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
    {
 #ifdef USE_PRECISION_TIME
-      gsPrecEpoch = theData.rPrecTime;                           // made changes by TUAN NGUYEN
+      gsPrecEpoch = theData.rPrecTime;
 #else
       gsEpoch = theData.rTime;
 #endif
@@ -874,7 +905,7 @@ void SignalBase::InitializeSignal(bool chainForwards)
    std::string updateAll = "All";
 
 #ifdef USE_PRECISION_TIME
-   UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);                  // made changes by TUAN NGUYEN
+   UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);
 #else
    UpdateRotationMatrix(gsEpoch, updateAll);
 #endif
@@ -927,10 +958,10 @@ void SignalBase::CalculateRangeVectorInertial()
    std::string updateAll = "All";
 
 #ifdef USE_PRECISION_TIME
-   GmatTime gsPrecEpoch = theData.tPrecTime;                     // made changes by TUAN NGUYEN
+   GmatTime gsPrecEpoch = theData.tPrecTime;
    if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-      gsPrecEpoch = theData.rPrecTime;                           // made changes by TUAN NGUYEN
-   UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);        // made changes by TUAN NGUYEN
+      gsPrecEpoch = theData.rPrecTime;
+   UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);
 #else
    GmatEpoch gsEpoch = theData.tTime;
    if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
@@ -989,20 +1020,20 @@ void SignalBase::CalculateRangeVectorObs()
 
    // 1. Update R_Transmitter_j2k, R_receiver_j2k, and R_Obs_j2k matrixes
 #ifdef USE_PRECISION_TIME
-   UpdateRotationMatrix(theData.tPrecTime.GetMjd(),"j2k_1");         // made changes by TUAN NGUYEN
-   UpdateRotationMatrix(theData.rPrecTime.GetMjd(),"j2k_2");         // made changes by TUAN NGUYEN
-   if (theData.stationParticipant)                                   // made changes by TUAN NGUYEN
-   {                                                                 // made changes by TUAN NGUYEN
-      if (theData.tNode->IsOfType(Gmat::GROUND_STATION))             // made changes by TUAN NGUYEN
-         UpdateRotationMatrix(theData.tPrecTime.GetMjd(),"o_j2k");   // made changes by TUAN NGUYEN
-      else                                                           // made changes by TUAN NGUYEN
-         UpdateRotationMatrix(theData.rPrecTime.GetMjd(),"o_j2k");   // made changes by TUAN NGUYEN
-   }                                                                 // made changes by TUAN NGUYEN
-   else                                                              // made changes by TUAN NGUYEN
-      R_Obs_j2k = I33;                                               // made changes by TUAN NGUYEN
+   UpdateRotationMatrix(theData.tPrecTime.GetMjd(),"j2k_1");
+   UpdateRotationMatrix(theData.rPrecTime.GetMjd(),"j2k_2");
+   if (theData.stationParticipant)
+   {
+      if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+         UpdateRotationMatrix(theData.tPrecTime.GetMjd(),"o_j2k");
+      else
+         UpdateRotationMatrix(theData.rPrecTime.GetMjd(),"o_j2k");
+   }
+   else
+      R_Obs_j2k = I33;
 #else
-   UpdateRotationMatrix(theData.tTime,"j2k_1");                      // made changes by TUAN NGUYEN
-   UpdateRotationMatrix(theData.rTime,"j2k_2");                      // made changes by TUAN NGUYEN
+   UpdateRotationMatrix(theData.tTime,"j2k_1");
+   UpdateRotationMatrix(theData.rTime,"j2k_2");
 #endif
 
    // 2. Compute the positions of the participants in their own frames
@@ -1045,8 +1076,8 @@ void SignalBase::CalculateRangeRateVectorObs()
 //   theData.j2kOriginVel = origin2->GetMJ2000PrecVelocity(theData.rPrecTime) -
 //                          origin1->GetMJ2000PrecVelocity(theData.tPrecTime);
 
-   theData.tVel = theData.tNode->GetMJ2000PrecVelocity(theData.tPrecTime);            // made changes by TUAN NGUYEN
-   theData.rVel = theData.rNode->GetMJ2000PrecVelocity(theData.rPrecTime);            // made changes by TUAN NGUYEN
+   theData.tVel = theData.tNode->GetMJ2000PrecVelocity(theData.tPrecTime);
+   theData.rVel = theData.rNode->GetMJ2000PrecVelocity(theData.rPrecTime);
 #else
    // Velocity of origin2 at time rTime w.r.t. origin1 at time tTime
    theData.j2kOriginVel = (origin1->GetMJ2000Velocity(theData.tTime) - ssb->GetMJ2000Velocity(theData.tTime)) -      // velocity of origin1 w.r.t SSB at transmit time tTime in MJ2000Eq coordinate system
@@ -1182,7 +1213,7 @@ void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
    if (wrtR)
    {
       // temp = dataToUse.rInertial2obj * A;
-      temp = body2FK5_matrix * A;    // made change by TUAN NGUYEN
+      temp = body2FK5_matrix * A;
 
       for (Integer i = 0; i < 3; ++i)
          for (Integer j = 0; j < 3; ++j)
@@ -1191,7 +1222,7 @@ void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
    if (wrtV)
    {
       // temp = dataToUse.rInertial2obj * B;
-     temp = body2FK5_matrix * B;    // made change by TUAN NGUYEN
+     temp = body2FK5_matrix * B;
 
       Integer offset = (wrtR ? 3 : 0);
       for (Integer i = 0; i < 3; ++i)
@@ -1273,13 +1304,13 @@ void SignalBase::UpdateRotationMatrix(Real atEpoch, const std::string& whichOne)
       // When both participants are spacecraft, all frames are inertial, so all
       // rotation matrices are I33 (which is the default on creation) and all
       // Rotation Dot matrices are zero33
-      R_j2k_Receiver       = I33;                        // made changes by TUAN NGUYEN
-      theData.rJ2kRotation = I33;                        // made changes by TUAN NGUYEN
-      R_j2k_Transmitter    = I33;                        // made changes by TUAN NGUYEN
-      theData.tJ2kRotation = I33;                        // made changes by TUAN NGUYEN
-      R_Obs_Receiver       = I33;                        // made changes by TUAN NGUYEN
-      R_Obs_Transmitter    = I33;                        // made changes by TUAN NGUYEN
-      R_Obs_j2k            = I33;                        // made changes by TUAN NGUYEN
+      R_j2k_Receiver       = I33;
+      theData.rJ2kRotation = I33;
+      R_j2k_Transmitter    = I33;
+      theData.tJ2kRotation = I33;
+      R_Obs_Receiver       = I33;
+      R_Obs_Transmitter    = I33;
+      R_Obs_j2k            = I33;
 
       RDot_Obs_Receiver    = zero33;
       RDot_Obs_Transmitter = zero33;
@@ -1354,9 +1385,9 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
          theData.rLoc = state.GetR();
          theData.rVel = state.GetV();
 
-         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");   // made changes by TUAN NGUYEN
-         theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000State(theData.rTime) -                // made changes by TUAN NGUYEN
-                            ssb->GetMJ2000State(theData.rTime);                                // made changes by TUAN NGUYEN
+         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
+         theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000State(theData.rTime) -
+                            ssb->GetMJ2000State(theData.rTime);
       }
    }
 
@@ -1386,9 +1417,9 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
          theData.tLoc = state.GetR();
          theData.tVel = state.GetV();
 
-         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");   // made changes by TUAN NGUYEN
-         theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) -                // made changes by TUAN NGUYEN
-                            ssb->GetMJ2000State(theData.tTime);                                // made changes by TUAN NGUYEN
+         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
+         theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) -
+                            ssb->GetMJ2000State(theData.tTime);
       }
    }
 
@@ -1398,7 +1429,7 @@ void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
 }
 
 #else
-// made changes by TUAN NGUYEN
+
 void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       bool moveAll)
 {
@@ -1423,7 +1454,7 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       else
       {
          Rvector6 state;
-         Rmatrix66 stm;         // state transition matrix. Its default value is I matrix      // made changes by TUAN NGUYEN
+         Rmatrix66 stm;         // state transition matrix. Its default value is I matrix
          if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
          {
             state = theData.rNode->GetMJ2000PrecState(theEpoch);
@@ -1437,19 +1468,19 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
 
             // set value for state and STM
             state.Set(pstate);
-            for (UnsignedInt i = 0; i < 6; ++i)                                                 // made changes by TUAN NGUYEN
-               for (UnsignedInt j = 0; j < 6; ++j)                                              // made changes by TUAN NGUYEN
-                  stm(i,j) = pstate[6 + i*6 + j];                                               // made changes by TUAN NGUYEN
+            for (UnsignedInt i = 0; i < 6; ++i)
+               for (UnsignedInt j = 0; j < 6; ++j)
+                  stm(i,j) = pstate[6 + i*6 + j];
          }
 
          theData.rLoc = state.GetR();
          theData.rVel = state.GetV();
          // Whenever updating participant's state in signal data, it needs to update participant's STM
-         theData.rSTM = stm;                                                                    // made changes by TUAN NGUYEN
+         theData.rSTM = stm;
 
-         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");    // made changes by TUAN NGUYEN
-         theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -         // made changes by TUAN NGUYEN
-                            ssb->GetMJ2000PrecState(theData.rPrecTime);                         // made changes by TUAN NGUYEN
+         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
+         theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) - 
+                            ssb->GetMJ2000PrecState(theData.rPrecTime);
       }
       #ifdef DEBUG_MOVETOEPOCH
       MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2]);
@@ -1469,7 +1500,7 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       else
       {
          Rvector6 state;
-         Rmatrix66 stm;         // state transition matrix. Its default value is I matrix      // made changes by TUAN NGUYEN
+         Rmatrix66 stm;         // state transition matrix. Its default value is I matrix
          if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
          {
             state = theData.tNode->GetMJ2000PrecState(theEpoch);
@@ -1483,19 +1514,19 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
 
             // set value for state and STM
             state.Set(pstate);
-            for (UnsignedInt i = 0; i < 6; ++i)                                                 // made changes by TUAN NGUYEN
-               for (UnsignedInt j = 0; j < 6; ++j)                                              // made changes by TUAN NGUYEN
-                  stm(i,j) = pstate[6 + i*6 + j];                                               // made changes by TUAN NGUYEN
+            for (UnsignedInt i = 0; i < 6; ++i)
+               for (UnsignedInt j = 0; j < 6; ++j)
+                  stm(i,j) = pstate[6 + i*6 + j];
          }
 
          theData.tLoc = state.GetR();
          theData.tVel = state.GetV();
          // Whenever updating participant's state in signal data, it needs to update participant's STM
-         theData.tSTM = stm;                                                                    // made changes by TUAN NGUYEN
+         theData.tSTM = stm;
 
-         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");    // made changes by TUAN NGUYEN
-         theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) -         // made changes by TUAN NGUYEN
-                            ssb->GetMJ2000PrecState(theData.tPrecTime);                         // made changes by TUAN NGUYEN
+         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
+         theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) - 
+                            ssb->GetMJ2000PrecState(theData.tPrecTime);
       }
       #ifdef DEBUG_MOVETOEPOCH
       MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2]);
@@ -1584,7 +1615,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("   ---> Before: %.12lf\n", state[0]);
       #endif
-
+      
       retval = prop->Step(stepToTake);
       if (retval == false)
       {
@@ -1644,41 +1675,39 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       // For ground station, its STM is I matrix
    }
 
-   
    // 3. Set value for SignalData object associated to transmiter node (or receiver node)
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
    if (forTransmitter)
    {
       theData.tLoc = state.GetR();
       theData.tVel = state.GetV();
-      // whenever updating participant's state, it needs to update its STM             // made changes by TUAN NGUYEN
-      theData.tSTM = stm;                                                              // made changes by TUAN NGUYEN
+      // whenever updating participant's state, it needs to update its STM
+      theData.tSTM = stm;
 
 #ifdef USE_PRECISION_TIME
-      theData.tPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;               // made changes by TUAN NGUYEN
-      theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) -   // made changes by TUAN NGUYEN
-                         ssb->GetMJ2000PrecState(theData.tPrecTime);                   // made changes by TUAN NGUYEN
+      theData.tPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
+      theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) - 
+                         ssb->GetMJ2000PrecState(theData.tPrecTime);
 #else
       theData.tTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
-      theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) -           // made changes by TUAN NGUYEN
-                         ssb->GetMJ2000State(theData.tTime);                           // made changes by TUAN NGUYEN
+      theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) - 
+                         ssb->GetMJ2000State(theData.tTime);
 #endif
    }
    else
    {
       theData.rLoc = state.GetR();
       theData.rVel = state.GetV();
-      // whenever updating participant's state, it needs to update its STM             // made changes by TUAN NGUYEN
-      theData.rSTM = stm;                                                              // made changes by TUAN NGUYEN
-
+      // whenever updating participant's state, it needs to update its STM
+      theData.rSTM = stm;
 #ifdef USE_PRECISION_TIME
-      theData.rPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;               // made changes by TUAN NGUYEN
-      theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) -   // made changes by TUAN NGUYEN
-                         ssb->GetMJ2000PrecState(theData.rPrecTime);                   // made changes by TUAN NGUYEN
+      theData.rPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
+      theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) - 
+                         ssb->GetMJ2000PrecState(theData.rPrecTime);
 #else
       theData.rTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
-      theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000State(theData.rTime) -           // made changes by TUAN NGUYEN
-                         ssb->GetMJ2000PrecState(theData.rTime);                       // made changes by TUAN NGUYEN
+      theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000State(theData.rTime) - 
+                         ssb->GetMJ2000PrecState(theData.rTime);
 #endif
    }
    

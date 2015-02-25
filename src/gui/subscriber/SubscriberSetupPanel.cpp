@@ -194,7 +194,7 @@ void SubscriberSetupPanel::Setup(wxWindow *parent)
       if (theSubscriber->IsParameterReadOnly(i) == false)
       {
          propertyDescriptors.push_back(new wxStaticText(parent, ID_TEXT,
-               wxT(theSubscriber->GetParameterText(i).c_str())));
+               STD_TO_WX_STRING(theSubscriber->GetParameterText(i).c_str())));
 
          controlMap[theSubscriber->GetParameterText(i)] = j++;
 
@@ -307,7 +307,7 @@ void SubscriberSetupPanel::LoadControl(const std::string &label)
          break;
 
       case Gmat::STRING_TYPE:
-         valueString = wxT(theSubscriber->GetStringParameter(label).c_str());
+         valueString = STD_TO_WX_STRING(theSubscriber->GetStringParameter(label).c_str());
          ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          break;
 

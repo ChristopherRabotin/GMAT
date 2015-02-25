@@ -100,6 +100,9 @@
     <Filter Include="Source Files\event">
       <UniqueIdentifier>{fcf2b7f5-d884-4bd8-8313-e12c935430e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\errormodel">
+      <UniqueIdentifier>{88b8d9d7-2554-4ac2-aea5-0fda27e1e4f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp">
@@ -1230,12 +1233,6 @@
     <ClCompile Include="..\..\..\src\base\event\Brent.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
-      <Filter>Source Files\forcemodel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\StateConversionUtil.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -1356,11 +1353,35 @@
     <ClCompile Include="..\..\..\src\base\solarsys\ShadowState.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalTank.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ChemicalThruster.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricTank.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\hardware\ElectricThruster.cpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\subscriber\EphemManager.cpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\errormodel\ErrorModel.cpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\ErrorModelFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp">
+      <Filter>Source Files\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2549,12 +2570,6 @@
     <ClInclude Include="..\..\..\src\base\event\Brent.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
-      <Filter>Source Files\forcemodel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\StateConversionUtil.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
@@ -2675,15 +2690,38 @@
     <ClInclude Include="..\..\..\src\base\solarsys\ShadowState.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalTank.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ChemicalThruster.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricTank.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\hardware\ElectricThruster.hpp">
+      <Filter>Source Files\hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\subscriber\EphemManager.hpp">
+      <Filter>Source Files\subscriber</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp">
       <Filter>Source Files\solarsys</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\errormodel\ErrorModel.hpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\ErrorModelFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp">
+      <Filter>Source Files\event</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="..\..\..\src\base\solarsys\msise90_sub.for">
       <Filter>Source Files\solarsys</Filter>
     </None>

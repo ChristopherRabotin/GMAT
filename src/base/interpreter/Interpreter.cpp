@@ -456,6 +456,13 @@ void Interpreter::BuildCreatableObjectMaps()
    for (UnsignedInt i = 0; i < interfaceList.size(); i++)
       objectTypeMap.insert(std::make_pair(interfaceList[i], Gmat::INTERFACE));
 
+   errorModelList.clear();                                                              // made changes by TUAN NGUYEN
+   StringArray erm = theModerator->GetListOfFactoryItems(Gmat::ERROR_MODEL);            // made changes by TUAN NGUYEN
+   copy(erm.begin(), erm.end(), back_inserter(errorModelList));                         // made changes by TUAN NGUYEN
+   copy(erm.begin(), erm.end(), back_inserter(allObjectTypeList));                      // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < errorModelList.size(); i++)                              // made changes by TUAN NGUYEN
+      objectTypeMap.insert(std::make_pair(errorModelList[i], Gmat::ERROR_MODEL));       // made changes by TUAN NGUYEN
+
    #ifdef DEBUG_OBJECT_LIST
       std::vector<std::string>::iterator pos;
       
@@ -546,6 +553,10 @@ void Interpreter::BuildCreatableObjectMaps()
       for (pos = itf.begin(); pos != itf.end(); ++pos)
          MessageInterface::ShowMessage(*pos + "\n   ");
 
+      MessageInterface::ShowMessage("\nErrorModels:\n   ");             // made changes by TUAN NGUYEN
+      for (pos = erm.begin(); pos != erm.end(); ++pos)                  // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage(*pos + "\n   ");                 // made changes by TUAN NGUYEN
+      
       MessageInterface::ShowMessage("\nOther SpacePoints:\n   ");
       for (pos = spl.begin(); pos != spl.end(); ++pos)
          MessageInterface::ShowMessage(*pos + "\n   ");
@@ -685,6 +696,10 @@ StringArray Interpreter::GetCreatableList(Gmat::ObjectType type,
       case Gmat::INTERFACE:
          clist = interfaceList;
          break;
+
+      case Gmat::ERROR_MODEL:                             // made changes by TUAN NGUYEN
+         clist = errorModelList;                          // made changes by TUAN NGUYEN
+         break;                                           // made changes by TUAN NGUYEN
 
       // These are all intentional fall-throughs:
       case Gmat::SPACECRAFT:
@@ -883,6 +898,22 @@ const StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
    return theModerator->GetListOfObjects(type);
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfObjects(const char *typeName)
+//------------------------------------------------------------------------------
+/**
+ * Returns names of all configured items of given object type name.
+ *
+ * @param  typeName  object type name
+ *
+ * @return array of configured item names; return empty array if none
+ */
+//------------------------------------------------------------------------------
+const StringArray& Interpreter::GetListOfObjects(const char *typeName)
+{
+   return theModerator->GetListOfObjects(std::string(typeName));
+}
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetListOfObjects(const std::string &typeName)
@@ -921,6 +952,15 @@ const StringArray& Interpreter::GetListOfViewableCommands()
 const StringArray& Interpreter::GetListOfViewableSubtypesOf(Gmat::ObjectType type)
 {
    return theModerator->GetListOfViewableItems(type);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetConfiguredObject(const char *name)
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::GetConfiguredObject(const char *name)
+{
+   return theModerator->GetConfiguredObject(std::string(name));
 }
 
 
@@ -1022,6 +1062,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
 //             (name != "EarthICRF"))
 //         {
             obj = FindObject(name);
+            
             // Since System Parameters are created automatically as they are referenced,
             // do not give warning if creating a system parameter
             if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
@@ -1135,7 +1176,6 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    //======================================================================
    #else
    //======================================================================
-   
    if (type == "Spacecraft") 
       obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
    
@@ -1172,7 +1212,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       if (find(odeModelList.begin(), odeModelList.end(), type) != 
           odeModelList.end())
          obj = (GmatBase*)theModerator->CreateODEModel(type, name);
-      
+
       // Handle AxisSystem
       else if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
                axisSystemList.end())
@@ -1223,16 +1263,16 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(measurementList.begin(), measurementList.end(), type) !=
                measurementList.end())
          obj = (GmatBase*)theModerator->CreateMeasurement(type, name);
-
+      
       else if (find(measurementModelList.begin(),
             measurementModelList.end(), type) != measurementModelList.end())
          obj = (GmatBase*)theModerator->CreateMeasurementModel(type, name);
-
+      
       // Handle Observations
       else if (find(obtypeList.begin(), obtypeList.end(), type) !=
             obtypeList.end())
          obj = (GmatBase*)theModerator->CreateObType(type, name);
-
+      
       // Handle Parameters
       else if (find(parameterList.begin(), parameterList.end(), type) != 
                parameterList.end())
@@ -1257,7 +1297,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(eventLocatorList.begin(), eventLocatorList.end(), type) !=
                eventLocatorList.end())
          obj = (GmatBase*)theModerator->CreateEventLocator(type, name);
-
+      
       // Handle EphemerisFile
       else if (find(ephemFileList.begin(), ephemFileList.end(), type) != 
                ephemFileList.end())
@@ -1267,16 +1307,22 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(spacePointList.begin(), spacePointList.end(), type) != 
                spacePointList.end())
          obj = (GmatBase*)theModerator->CreateSpacePoint(type, name);
-   
+      
       // Handle TrackingSystems
       else if (find(trackingSystemList.begin(), trackingSystemList.end(), type) !=
                trackingSystemList.end())
          obj = (GmatBase*)theModerator->CreateTrackingSystem(type, name);
-
+      
       // Handle Interfaces
       else if (find(interfaceList.begin(), interfaceList.end(), type) !=
                interfaceList.end())
          obj = theModerator->CreateOtherObject(Gmat::INTERFACE, type, name);
+      
+      // Handle ErrorModels
+      else if (find(errorModelList.begin(), errorModelList.end(), type) !=              // made changes by TUAN NGUYEN
+               errorModelList.end())                                                    // made changes by TUAN NGUYEN
+         obj = theModerator->CreateOtherObject(Gmat::ERROR_MODEL, type, name);          // made changes by TUAN NGUYEN
+
    }
    
    //@note
@@ -1770,6 +1816,23 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* FindObject(const char *name, const std::string &ofType = "")
+//------------------------------------------------------------------------------
+/**
+ * Finds the object from the current object map.
+ * (old method: Calls the Moderator to find a configured object.)
+ *
+ * @param  name    Name of the object.
+ * @param  ofType  Type of object required; leave blank for no checking
+ *
+ * @return  object pointer found
+ */
+//------------------------------------------------------------------------------
+GmatBase* Interpreter::FindObject(const char *name, const std::string &ofType)
+{
+   return FindObject(std::string(name), ofType);
+}
 
 //------------------------------------------------------------------------------
 // GmatBase* FindObject(const std::string &name, const std::string &ofType = "")
@@ -7522,17 +7585,17 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
 
    if (propName == "Format")
    {
-	  // GmatBase* obs = CreateObject(value, "", 0, false);								// made changes by TUAN NGUYEN
-	  std::string value1 = value;														// made changes by TUAN NGUYEN
-	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))		// made changes by TUAN NGUYEN
-		  value1 = value.substr(1,value.size()-2);										// made changes by TUAN NGUYEN
-      GmatBase* obs = CreateObject(value1, "", 0, false);								// made changes by TUAN NGUYEN		fix Bug 3, error 1 in ticket GMT-4314
+	  // GmatBase* obs = CreateObject(value, "", 0, false);
+	  std::string value1 = value;
+	  if ((value.size() != 0)&&(value[0] == '\'')&&(value[value.size()-1] == '\''))
+		  value1 = value.substr(1,value.size()-2);
+      GmatBase* obs = CreateObject(value1, "", 0, false);								// fix Bug 3, error 1 in ticket GMT-4314
 
       if (obs != NULL)
       {
          if (obs->IsOfType(Gmat::OBTYPE))
 		 {
-			obj->SetStringParameter("Format", value1);									// made changes by TUAN NGUYEN		fix Bug 12 in ticket GMT-4314
+			obj->SetStringParameter("Format", value1);									   // fix Bug 12 in ticket GMT-4314
             retval = obj->SetRefObject(obs, Gmat::OBTYPE);
 		 }
       }
@@ -9540,6 +9603,17 @@ void Interpreter::SetObjectInBranchCommand(GmatCommand *brCmd,
    }
 }
 
+//------------------------------------------------------------------------------
+// bool IsObjectType(const char *type)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if input string is one of Object type that can be created.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::IsObjectType(const char *type)
+{
+   return IsObjectType(std::string(type));
+}
 
 //------------------------------------------------------------------------------
 // bool IsObjectType(const std::string &type)
@@ -9578,6 +9652,17 @@ bool Interpreter::IsObjectType(const std::string &type)
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool IsCommandType(const char *type)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if input string is one of Command type that can be created.
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::IsCommandType(const char *type)
+{
+   return IsCommandType(std::string(type));
+}
 
 //------------------------------------------------------------------------------
 // bool IsCommandType(const std::string &type)

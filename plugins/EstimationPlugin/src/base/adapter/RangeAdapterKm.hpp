@@ -46,6 +46,7 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+   virtual bool         SetMeasurement(MeasureModel* meas);
 
    virtual bool         Initialize();
 
@@ -76,7 +77,7 @@ protected:
    /// Parameter IDs for the RangeAdapterKm
    enum
    {
-      RangeAdapterKmParamCount = AdapterParamCount,                                  // made changes by TUAN NGUYEN
+      RangeAdapterKmParamCount = AdapterParamCount,
    };
 
 

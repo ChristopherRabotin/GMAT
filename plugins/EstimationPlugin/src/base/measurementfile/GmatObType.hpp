@@ -51,8 +51,8 @@ public:
 
 ///// TBD: Determine if there is a more generic way to add these
    /// GmatObType does not use ReadRampTableData() function
-   virtual RampTableData *						// made changes by TUAN NGUYEN
-	   ReadRampTableData(){return NULL;};		// made changes by TUAN NGUYEN
+   virtual RampTableData *	
+	   ReadRampTableData(){return NULL;};
 
    virtual bool      Close();
    virtual bool      Finalize();

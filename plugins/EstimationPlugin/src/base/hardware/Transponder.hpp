@@ -92,6 +92,8 @@ public:
    virtual Signal*      GetSignal(Integer whichOne=0);
    virtual bool         SetSignal(Signal* s,Integer whichOne=0);
 
+   Real                 GetTurnAroundRatio();
+
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
@@ -116,10 +118,6 @@ protected:
       PARAMETER_TEXT[TransponderParamCount - RFHardwareParamCount];
    static const Gmat::ParameterType
       PARAMETER_TYPE[TransponderParamCount - RFHardwareParamCount];
-
-public:
-   Real          GetTurnAroundRatio();
-
 };
 
 #endif /* Transponder_hpp */

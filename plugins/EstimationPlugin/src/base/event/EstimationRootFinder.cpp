@@ -258,7 +258,7 @@ Real EstimationRootFinder::FindRoot(Integer whichOne)
 //            "%.15lf\n", ef, newEpoch);
 //   #endif
 
-   rootEpoch = newEpoch;													// made changes by TUAN NGUYEN
+   rootEpoch = newEpoch;
    return rootEpoch;
 }
 

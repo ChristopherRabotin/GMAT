@@ -341,11 +341,11 @@ void BatchEstimatorInv::Accumulate()
          {
             RealArray hTrow;
             hTrow.assign(stateSize, 0.0);
-            int rowCount = calculatedMeas->value.size();
+            UnsignedInt rowCount = calculatedMeas->value.size();
 
-            for (int i = 0; i < rowCount; ++i)
+            for (UnsignedInt i = 0; i < rowCount; ++i)
                hTilde.push_back(hTrow);
-
+            
             // Now walk the state vector and get elements of H-tilde for each piece
             for (UnsignedInt i = 0; i < stateMap->size(); ++i)
             {
@@ -360,21 +360,21 @@ void BatchEstimatorInv::Accumulate()
                         (*stateMap)[i]->elementID);
                      MessageInterface::ShowMessage("object = <%p '%s'>\n", (*stateMap)[i]->object, (*stateMap)[i]->object->GetName().c_str());
                   #endif
-              
+                  // Partial derivatives at measurement time tm
                   stateDeriv = measManager.CalculateDerivatives(
                      (*stateMap)[i]->object, (*stateMap)[i]->elementID,
                      modelsToAccess[0]);
-
+                  
                   // Fill in the corresponding elements of hTilde
                   for (UnsignedInt j = 0; j < rowCount; ++j)
-                     for (Integer k = 0; k < (*stateMap)[i]->length; ++k)
-                        hTilde[j][i+k] = stateDeriv[j][k];
+                     for (UnsignedInt k = 0; k < (*stateMap)[i]->length; ++k)
+                        hTilde[j][i+k] = stateDeriv[j][k];                                          // hTilde is partial derivates at measurement time tm (not at aprioi time t0)
 
                   #ifdef DEBUG_ACCUMULATION
                      MessageInterface::ShowMessage("      Result:\n         ");
                      for (UnsignedInt l = 0; l < stateDeriv.size(); ++l)
                      {
-                        for (Integer m = 0; m < (*stateMap)[i]->length; ++m)
+                        for (UnsignedInt m = 0; m < (*stateMap)[i]->length; ++m)
                            MessageInterface::ShowMessage("%.12lf   ",
                               stateDeriv[l][m]);
                         MessageInterface::ShowMessage("\n         ");
@@ -399,15 +399,19 @@ void BatchEstimatorInv::Accumulate()
             for (UnsignedInt i = 0; i < hTilde.size(); ++i)
             {
                hRow.assign(stateMap->size(), 0.0);
+
+               // hRow is partial derivaties at apriori time t0
                for (UnsignedInt j = 0; j < stateMap->size(); ++j)
                {
                   entry = 0.0;
                   for (UnsignedInt k = 0; k < stateMap->size(); ++k)
+                  {
                      entry += hTilde[i][k] * (*stm)(k, j);
+                  }
                   hRow[j] = entry;
                }
 
-               hAccum.push_back(hRow);
+               hAccum.push_back(hRow);                   // each element of hAccum is a vector partial derivative
                hMeas.push_back(hRow);
 
                #ifdef DEBUG_ACCUMULATION_RESULTS
@@ -450,8 +454,8 @@ void BatchEstimatorInv::Accumulate()
                #endif
 
                measurementEpochs.push_back(currentEpoch);
-               OData.push_back(currentObs->value[k]);                   // made changes by TUAN NGUYEN
-               CData.push_back(calculatedMeas->value[k]);               // made changes by TUAN NGUYEN
+               OData.push_back(currentObs->value[k]);
+               CData.push_back(calculatedMeas->value[k]);
                measurementResiduals.push_back(ocDiff);
                measurementResidualID.push_back(calculatedMeas->uniqueID);
             
@@ -592,18 +596,18 @@ void BatchEstimatorInv::Accumulate()
 
    // Advance to the next measurement and get its epoch
    bool isEndOfTable = measManager.AdvanceObservation();
-   if (isEndOfTable)                                 // made changes by TUAN NGUYEN
-      currentState = ESTIMATING;                     // made changes by TUAN NGUYEN
-   else                                              // made changes by TUAN NGUYEN
-   {                                                 // made changes by TUAN NGUYEN
+   if (isEndOfTable)
+      currentState = ESTIMATING;
+   else
+   {
       nextMeasurementEpoch = measManager.GetEpoch();
       FindTimeStep();
 
-      if (currentEpoch <= nextMeasurementEpoch)
+      if (currentEpoch <= (nextMeasurementEpoch + 5.0e-12))       // It needs to add 5.0e-12 in order to avoid accuracy limit of double
          currentState = PROPAGATING;
       else
          currentState = ESTIMATING;
-   }                                                // made changes by TUAN NGUYEN
+   }
 
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("Exit BatchEstimatorInv::Accumulate()\n");
@@ -627,6 +631,9 @@ void BatchEstimatorInv::Estimate()
       MessageInterface::ShowMessage("BatchEstimator state is ESTIMATING\n");
    #endif
 
+   // Plot all residuals
+   if (showAllResiduals)
+      PlotResiduals();
 
    // Display number of removed records for each type of filters
    if (!numRemovedRecords.empty())
@@ -652,11 +659,11 @@ void BatchEstimatorInv::Estimate()
    }
 
    // Apriori state (initial state for 0th iteration) and initial state for current iteration: 
-   if (iterationsTaken == 0)                                  // made changes by TUAN NGUYEN
-      initialEstimationState = (*estimationState);            // made changes by TUAN NGUYEN
+   if (iterationsTaken == 0)
+      initialEstimationState = (*estimationState);
    oldEstimationState = (*estimationState);
    // Convert previous state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(previousSolveForState);                 // made changes by TUAN NGUYEN
+   GetEstimationState(previousSolveForState);
 
 
    // Specify previous, current, and the best weighted RMS:
@@ -843,7 +850,7 @@ void BatchEstimatorInv::Estimate()
       (*estimationState)[i] += delta;
    }
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(currentSolveForState);               // made changes by TUAN NGUYEN
+   GetEstimationState(currentSolveForState);
 
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");

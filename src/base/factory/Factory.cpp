@@ -766,6 +766,35 @@ CoreMeasurement* Factory::CreateMeasurement(const std::string & ofType,
 
 
 //------------------------------------------------------------------------------
+// ErrorModel* CreateErrorModel(const std::string & ofType,
+//    const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a fundamental ErrorModel object.
+ *
+ * Must be implemented by derived classes that create ErrorModel objects -
+ * in that case, it returns a new ErrorModel object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type ErrorModel.
+ *
+ * @param <ofType>   specific type of ErrorModel object to create.
+ * @param <withName> name to give to the newly created ErrorModel object.
+ *
+ * @return pointer to a new ErrorModel object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type ErrorModel.
+ */
+//------------------------------------------------------------------------------
+ErrorModel* Factory::CreateErrorModel(const std::string & ofType,                         // made changes by TUAN NGUYEN
+                                        const std::string & withName)                     // made changes by TUAN NGUYEN
+{                                                                                         // made changes by TUAN NGUYEN
+   throw FactoryException                                                                 // made changes by TUAN NGUYEN
+   ("Factory::CreateErrorModel() must be implemented by a ErrorModelFactory\n");          // made changes by TUAN NGUYEN
+}                                                                                         // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
 // DataFile* Factory::CreateDataFile(const std::string & ofType,
 //                                   const std::string & withName)
 //------------------------------------------------------------------------------

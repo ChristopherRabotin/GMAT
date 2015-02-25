@@ -301,12 +301,12 @@ void SequentialEstimator::CompleteInitialization()
    // Now load up the observations
    measManager.PrepareForProcessing();
 //   measManager.LoadObservations();
-   UnsignedInt numRec = measManager.LoadObservations();					// made changes by TUAN NGUYEN
-   if (numRec == 0)														// made changes by TUAN NGUYEN
-     throw EstimatorException("No observation data is used for estimation\n");	// made changes by TUAN NGUYEN
+   UnsignedInt numRec = measManager.LoadObservations();
+   if (numRec == 0)
+     throw EstimatorException("No observation data is used for estimation\n");
 
 ///// Make more generic?
-   measManager.LoadRampTables();											// made changes by TUAN NGUYEN
+   measManager.LoadRampTables();
 
 
    // First measurement epoch is the epoch of the first measurement.  Duh.

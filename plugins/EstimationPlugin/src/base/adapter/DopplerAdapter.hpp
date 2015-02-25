@@ -35,6 +35,8 @@ public:
    DopplerAdapter(const DopplerAdapter& da);
    DopplerAdapter&      operator=(const DopplerAdapter& da);
 
+   virtual void SetSolarSystem(SolarSystem *ss);
+
    virtual GmatBase*    Clone() const;
 
    virtual std::string  GetParameterText(const Integer id) const;
@@ -52,10 +54,34 @@ public:
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
 
+   virtual bool         SetStringParameter(const Integer id, const std::string& value);
+   virtual bool         SetStringParameter(const Integer id, const std::string &value, const Integer index);
+   virtual bool         SetStringParameter(const std::string &label, const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, const std::string &value, const Integer index);
+
+   virtual Integer      SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer      SetIntegerParameter(const std::string &label, const Integer value);
+
+   virtual bool         SetBooleanParameter(const Integer id, const bool value);
+   virtual bool         SetBooleanParameter(const std::string &label, const bool value);
 
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+   virtual bool         SetRefObject(GmatBase* obj,
+                                     const Gmat::ObjectType type, 
+                                     const std::string& name);
+   virtual bool         SetRefObject(GmatBase* obj,
+                                     const Gmat::ObjectType type, 
+                                     const std::string& name, 
+                                     const Integer index);
+
+   virtual bool         SetMeasurement(MeasureModel* meas);
+   virtual void         SetPropagator(PropSetup* ps);
+
+   virtual void         SetCorrection(const std::string& correctionName,
+                                      const std::string& correctionType);
+
 
    virtual bool         Initialize();
 
@@ -74,8 +100,10 @@ public:
    virtual Integer      HasParameterCovariances(Integer parameterId);
 
    virtual Integer      GetEventCount();
-   virtual void         SetCorrection(const std::string& correctionName,
-         const std::string& correctionType);
+
+
+   /// RangeAdapterKm object for S-path
+   RangeAdapterKm* adapterS;
 
    DEFAULT_TO_NO_CLONES
 
@@ -91,9 +119,6 @@ protected:
    /// Multiplier for S-path and E-path
    Real                 multiplierS;
    Real                 multiplierE;
-   /// RangeAdapter for S-path
-   RangeAdapterKm       *adapterS;
-
 
    /// Parameter IDs for the DopplerAdapter
    enum
@@ -109,12 +134,13 @@ protected:
    static const Gmat::ParameterType PARAMETER_TYPE[DopplerAdapterParamCount -
                                                    RangeAdapterKmParamCount];
 
+   Real               GetTurnAroundRatio(Integer freqBand);
+
 private:
    /// MeasurementData for Start path
    MeasurementData measDataS;
    /// MeasurementData for End path
    MeasurementData measDataE;
-
 };
 
 #endif /* DopplerAdapter_hpp */

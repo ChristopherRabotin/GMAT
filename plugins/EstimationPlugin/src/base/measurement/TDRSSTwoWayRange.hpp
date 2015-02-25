@@ -76,7 +76,7 @@ protected:
 
    void                 SetHardwareDelays(bool loadEvents);
 
-   virtual void         InitializeMeasurement();					// made changes by TUAN NGUYEN
+   virtual void         InitializeMeasurement();
 };
 
 #endif /* TDRSSTwoWayRange_hpp */

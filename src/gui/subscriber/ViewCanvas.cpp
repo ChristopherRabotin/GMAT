@@ -15,6 +15,7 @@
  */
 //------------------------------------------------------------------------------
 #include "ViewCanvas.hpp"
+#include "gmatwxdefs.hpp"          // for WX_TO_STD_STRING, STD_TO_WX_STRING macros
 #include "MdiGlPlotData.hpp"       // for GmatPlot::MAX_SCS
 #include "Spacecraft.hpp"
 #include "ModelManager.hpp"
@@ -29,6 +30,10 @@
 #include "MessageInterface.hpp"
 #include "AttitudeConversionUtility.hpp"
 
+// Libpng-1.6 is more stringent about checking ICC profiles than previous versions.
+// You can ignore the warning. To get rid of it, remove the iCCP chunk from the PNG image.
+// For now just ignore warning (LOJ: 2014.09.23)
+#define __IGNORE_PNG_WARNING__
 
 //http://www.opengl.org/resources/features/KilgardTechniques/oglpitfall/
 // When you desire high-quality texture mapping, you will typically specify a
@@ -1497,7 +1502,7 @@ void ViewCanvas::ComputeRingBufferIndex()
          MessageInterface::ShowMessage
             ("*** WARNING *** %s: '%s' exceed the maximum data points, now "
              "showing %d most recent data points.\n", utcGregorian.c_str(),
-             mPlotName.c_str(), MAX_DATA);
+             mPlotName.WX_TO_C_STRING, MAX_DATA);
          mWriteWarning = false;
       }
       
@@ -1598,7 +1603,7 @@ bool ViewCanvas::LoadBodyTextures()
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadBodyTextures() '%s' entered, mObjectCount=%d\n",
-       mPlotName.c_str(), mObjectCount);
+       mPlotName.WX_TO_C_STRING, mObjectCount);
    #endif
    
    //--------------------------------------------------
@@ -1614,7 +1619,7 @@ bool ViewCanvas::LoadBodyTextures()
       
       #if DEBUG_TEXTURE
 		MessageInterface::ShowMessage
-			("   object = '%s', map id = %d\n", mObjectNames[i].c_str(),
+			("   object = '%s', map id = %d\n", mObjectNames[i].WX_TO_C_STRING,
 			 mTextureIdMap[mObjectNames[i]]);
       #endif
 		
@@ -1623,7 +1628,7 @@ bool ViewCanvas::LoadBodyTextures()
          #if DEBUG_TEXTURE > 1
          MessageInterface::ShowMessage
             ("ViewCanvas::LoadBodyTextures() object=<%p>'%s'\n",
-             mObjectArray[i], mObjectNames[i].c_str());
+             mObjectArray[i], mObjectNames[i].WX_TO_C_STRING);
          #endif
          
          mTextureIdMap[mObjectNames[i]] =
@@ -1634,7 +1639,7 @@ bool ViewCanvas::LoadBodyTextures()
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadBodyTextures() '%s' leaving, mObjectCount=%d\n",
-       mPlotName.c_str(), mObjectCount);
+       mPlotName.WX_TO_C_STRING, mObjectCount);
    #endif
    
    return true;   
@@ -1651,6 +1656,11 @@ bool ViewCanvas::LoadBodyTextures()
 //------------------------------------------------------------------------------
 GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
 {
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLogLevel logLevel = wxLog::GetLogLevel();
+   wxLog::SetLogLevel(0);
+   #endif
+   
    GLuint texId = UNINIT_TEXTURE;
    std::string textureFile;
    
@@ -1661,7 +1671,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::BindTexture() '%s' entered, objName='%s'\n   textureFile = '%s'\n",
-       mPlotName.c_str(), objName.c_str(), textureFile.c_str());
+       mPlotName.WX_TO_C_STRING, objName.WX_TO_C_STRING, textureFile.c_str());
    #endif
    
    try
@@ -1726,7 +1736,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          if (GmatFileUtil::DoesDirectoryExist(iconLoc.c_str(), false))
          {
             if (obj->IsOfType(Gmat::SPACECRAFT))
-                textureFile = iconLoc + "Spacecraft.png";
+               textureFile = iconLoc + "Spacecraft.png";
             else
                textureFile = iconLoc + "rt_GroundStation.png";
          }
@@ -1764,7 +1774,7 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
          {
             MessageInterface::ShowMessage
                ("*** WARNING *** ViewCanvas::BindTexture() Cannot load texture "
-                "image for '%s' from '%s'\n", objName.c_str(), textureFile.c_str());
+                "image for '%s' from '%s'\n", objName.WX_TO_C_STRING, textureFile.c_str());
          }
          texId = UNINIT_TEXTURE;
       }
@@ -1776,14 +1786,18 @@ GLuint ViewCanvas::BindTexture(SpacePoint *obj, const wxString &objName)
       {
          MessageInterface::ShowMessage
             ("*** WARNING *** ViewCanvas::BindTexture() Cannot bind texture "
-             "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
+             "image for %s.\n%s\n", objName.WX_TO_C_STRING, e.GetFullMessage().c_str());
       }
    }
    
    #if DEBUG_TEXTURE
    MessageInterface::ShowMessage
       ("ViewCanvas::BindTexture() '%s' leaving, objName='%s', texId=%d\n",
-		 mPlotName.c_str(), objName.c_str(), texId);
+		 mPlotName.WX_TO_C_STRING, objName.WX_TO_C_STRING, texId);
+   #endif
+   
+   #ifdef __IGNORE_PNG_WARNING__
+   wxLog::SetLogLevel(logLevel);
    #endif
    
    return texId;
@@ -1806,7 +1820,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
    #if DEBUG_LOAD_IMAGE
    MessageInterface::ShowMessage
       ("ViewCanvas::LoadImage() '%s' entered\n   file='%s', objUsingIcon=%d\n",
-       mPlotName.c_str(), fileName.c_str(), objUsingIcon);
+       mPlotName.WX_TO_C_STRING, fileName.c_str(), objUsingIcon);
    #endif
    
    if (fileName == "")
@@ -1916,7 +1930,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
          ("ViewCanvas::LoadImage() '%s' returning true, mipmapsStatus=%d\n",
-          mPlotName.c_str(), mipmapsStatus);
+          mPlotName.WX_TO_C_STRING, mipmapsStatus);
       #endif
       
       return true;
@@ -1926,7 +1940,7 @@ bool ViewCanvas::LoadImage(const std::string &fileName, int objUsingIcon)
       #if DEBUG_LOAD_IMAGE
       MessageInterface::ShowMessage
          ("ViewCanvas::LoadImage() '%s' returning false, mipmapsStatus=%d\n",
-          mPlotName.c_str(), mipmapsStatus);
+          mPlotName.WX_TO_C_STRING, mipmapsStatus);
       #endif
       return false;
    }
@@ -2449,9 +2463,9 @@ void ViewCanvas::UpdateOtherData(const Real &time)
             //LOJ: 2013.11.25
             // Set orbit or target color
             if (mIsSolving)
-               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.c_str()];
+               mObjectOrbitColor[colorIndex] = mObjectTargetColorMap[objName.WX_TO_STD_STRING];
             else
-               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.c_str()];
+               mObjectOrbitColor[colorIndex] = mObjectOrbitColorMap[objName.WX_TO_STD_STRING];
             
             Rvector6 objMjEqState;
             try
@@ -3127,12 +3141,13 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   //glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.c_str());
+   glCallLists(strlen(text.c_str()), GL_BYTE, (GLubyte*)text.WX_TO_C_STRING);
    
    if (label3 != "")
    {
       glRasterPos2i(xpos, 50);
-      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.c_str());
+      glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.WX_TO_C_STRING);
    }
    
    if (showCS)
@@ -3140,7 +3155,7 @@ void ViewCanvas::DrawStatus(const wxString &label1, unsigned int textColor,
       // Prepend space before coordinate system name (Bug 2318 fix)
       wxString viewCsName = "  " + mViewCoordSysName;
       glRasterPos2i(xpos, ypos+20);
-      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.c_str());
+      glCallLists(strlen(viewCsName.c_str()), GL_BYTE, (GLubyte*)viewCsName.WX_TO_C_STRING);
    }
    
    glEnable(GL_LIGHTING);
@@ -3169,7 +3184,7 @@ void ViewCanvas::DrawDebugMessage(const wxString &msg, unsigned int textColor,
    GlColorType *color = (GlColorType*)&textColor;
    glColor3ub(color->red, color->green, color->blue);
    glRasterPos2i(xpos, ypos);
-   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.c_str());
+   glCallLists(strlen(msg.c_str()), GL_BYTE, (GLubyte*)msg.WX_TO_C_STRING);
    
    SetupProjection();
 }

@@ -6,7 +6,8 @@ PCRE_LOC=$4
 BIN_LOC=$5
 WX_LIB_LOC=$6
 #SPICE_DIR=$7
-cp $WX_LIB_LOC/libwx*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+#cp $WX_LIB_LOC/libwx*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
+cp -R $WX_LIB_LOC/libwx*.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 #cp $SPICE_DIR/libcspice.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 cp $BASE_LOC/$BASE_LIB_NAME.dylib ../../application/$BIN_LOC/$LOC.app/Contents/Frameworks
 

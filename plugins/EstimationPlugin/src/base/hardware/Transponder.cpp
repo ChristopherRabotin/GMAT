@@ -272,7 +272,7 @@ std::string Transponder::GetParameterUnit(const Integer id) const
       case INPUT_FREQUENCY_MODEL:
       case TURN_AROUND_RATIO:
       case OUTPUT_FREQUENCY_MODEL:
-         return "";                  // They have no unit
+         return "";
 
       case INPUT_CENTER_FREQUENCY:
       case INPUT_BANDWIDTH:

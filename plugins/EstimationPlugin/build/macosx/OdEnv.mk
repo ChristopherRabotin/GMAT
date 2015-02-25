@@ -2,15 +2,14 @@
 # Architecture flags
 # Set to 0 for Windows, 1 for Linux or Mac - needed by Makefile
 LINUX_MAC = 1
-ifeq ($(BUILD_64BIT), 1)
-GMAT_BIN_DIR = bin64
-GMAT_LIB_DIR = lib64
-GMAT_PLUGIN_DIR = plugins64
-MAC_ARCHITECTURE_FLAGS = 
-else
+
 GMAT_BIN_DIR = bin
 GMAT_LIB_DIR = lib
 GMAT_PLUGIN_DIR = plugins
+
+ifeq ($(BUILD_64BIT), 1)
+MAC_ARCHITECTURE_FLAGS =
+else
 MAC_ARCHITECTURE_FLAGS = -arch i386
 endif
 
@@ -23,7 +22,7 @@ GMAT_Plugin_Location = ../../../../application/$(GMAT_PLUGIN_DIR)
 # Toggle for using the older datafile code or the plugin code
 USE_DATAFILE_PLUGIN = 0
 
-# Toggle for including the ionosphere code
+# Toggle for including the ionosphere code - currently OFF for Mac
 
 INCLUDE_IONOSPHERE = 0
 

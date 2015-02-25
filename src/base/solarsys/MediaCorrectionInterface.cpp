@@ -29,27 +29,21 @@
  */
 //------------------------------------------------------------------------------
 MediaCorrectionInterface::MediaCorrectionInterface(const std::string &typeStr,
-											const std::string &nomme) :
-	GmatBase		 (Gmat::MEDIA_CORRECTION, typeStr, nomme),
-	solarSystem      (NULL),												// made changes by TUAN NGUYEN
-	temperature      (295.1),		// 295.1K
-	pressure         (1013.5),		// 1013.5 kPa
-	humidityFraction (0.55),		// 55%
-	waveLength       (0.0),
-	range            (1.0)
+                                 const std::string &nomme) :
+   GmatBase         (Gmat::MEDIA_CORRECTION, typeStr, nomme),
+   dataPath         (""),                                             // made changes by TUAN NGUYEN
+   solarSystem      (NULL),
+   temperature      (295.1),      // 295.1K
+   pressure         (1013.5),     // 1013.5 kPa
+   humidityFraction (0.55),       // 55%
+   waveLength       (0.0),
+   range            (1.0)
 {
    objectTypes.push_back(Gmat::MEDIA_CORRECTION);
 //   objectTypeNames.push_back("MediaCorrection");
 
-//   solarSystem  = Moderator::Instance()->GetSolarSystemInUse();		// made changes by TUAN NGUYEN
-   modelName	= typeStr;
-   model 		= 0;
-
-//   temperature = 295.1;		// 295.1K
-//   pressure = 1013.5;		// 938.0 hPa = 93800 Pa = 0.926 atm
-//   humidityFraction = 0.55;	// 55 %
-   
-//   waveLength = 0.0;          // wave length of the signal
+   modelName   = typeStr;
+   model       = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -71,16 +65,17 @@ MediaCorrectionInterface::~MediaCorrectionInterface()
  */
 //------------------------------------------------------------------------------
 MediaCorrectionInterface::MediaCorrectionInterface(const MediaCorrectionInterface& mdc):
-	GmatBase           (mdc),
-	pressure 		   (mdc.pressure),
-	temperature 	   (mdc.temperature),
-	humidityFraction   (mdc.humidityFraction),
-	waveLength         (mdc.waveLength),
-	range              (mdc.range)
+   GmatBase           (mdc),
+   dataPath           (mdc.dataPath),                  // made changes by TUAN NGUYEN
+   pressure           (mdc.pressure),
+   temperature        (mdc.temperature),
+   humidityFraction   (mdc.humidityFraction),
+   waveLength         (mdc.waveLength),
+   range              (mdc.range)
 {
-	model		= mdc.model;
-	modelName   = mdc.modelName;
-	solarSystem = mdc.solarSystem;
+   model       = mdc.model;
+   modelName   = mdc.modelName;
+   solarSystem = mdc.solarSystem;
 }
 
 
@@ -101,15 +96,17 @@ MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrect
    {
       GmatBase::operator=(mc);
 
-   	  model = mc.model;
-   	  modelName = mc.modelName;
-	  solarSystem = mc.solarSystem;
+      model             = mc.model;
+      modelName         = mc.modelName;
+      solarSystem       = mc.solarSystem;
 
-   	  temperature 		= mc.temperature;
-   	  pressure 			= mc.pressure;
-   	  humidityFraction 	= mc.humidityFraction;
-	  waveLength        = mc.waveLength;
-	  range             = mc.range;
+      dataPath          = mc.dataPath;            // made changes by TUAN NGUYEN
+
+      temperature       = mc.temperature;
+      pressure          = mc.pressure;
+      humidityFraction  = mc.humidityFraction;
+      waveLength        = mc.waveLength;
+      range             = mc.range;
    }
 
    return *this;
@@ -125,8 +122,36 @@ MediaCorrectionInterface& MediaCorrectionInterface::operator=(const MediaCorrect
 //------------------------------------------------------------------------------
 GmatBase* MediaCorrectionInterface::Clone() const
 {
-	return new MediaCorrectionInterface(*this);
+   return new MediaCorrectionInterface(*this);
 }
+
+
+//------------------------------------------------------------------------------
+//  bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs any pre-run initialization that the object needs.
+ *
+ * @return true unless initialization fails.
+ */
+//------------------------------------------------------------------------------
+bool MediaCorrectionInterface::Initialize()
+{
+   if (IsInitialized())
+      return true;
+
+   if (IsOfType("Ionosphere"))
+   {
+      // Get path of data folder
+      FileManager* fm = FileManager::Instance();
+      dataPath = fm->GetPathname("DATA_PATH");
+
+      isInitialized = true;
+   }
+
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // bool SetModel(Integer mod)
@@ -137,8 +162,8 @@ GmatBase* MediaCorrectionInterface::Clone() const
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetModel(Integer mod)
 {
-	model = mod;
-	return true;
+   model = mod;
+   return true;
 }
 
 
@@ -151,8 +176,8 @@ bool MediaCorrectionInterface::SetModel(Integer mod)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetModelName(std::string modName)
 {
-	modelName = modName;
-	return true;
+   modelName = modName;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -178,8 +203,8 @@ void MediaCorrectionInterface::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetTemperature(Real T)
 {
-	temperature = T;
-	return true;
+   temperature = T;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -191,8 +216,8 @@ bool MediaCorrectionInterface::SetTemperature(Real T)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetPressure(Real P)
 {
-	pressure = P;
-	return true;
+   pressure = P;
+   return true;
 }
 
 
@@ -205,8 +230,8 @@ bool MediaCorrectionInterface::SetPressure(Real P)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetHumidityFraction(Real humFr)
 {
-	humidityFraction = humFr;
-	return true;
+   humidityFraction = humFr;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -218,8 +243,8 @@ bool MediaCorrectionInterface::SetHumidityFraction(Real humFr)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetElevationAngle(Real elevation)
 {
-	elevationAngle = elevation;
-	return true;
+   elevationAngle = elevation;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -231,8 +256,8 @@ bool MediaCorrectionInterface::SetElevationAngle(Real elevation)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetRange(Real r)
 {
-	range = r;
-	return true;
+   range = r;
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -244,8 +269,8 @@ bool MediaCorrectionInterface::SetRange(Real r)
 //------------------------------------------------------------------------------
 bool MediaCorrectionInterface::SetWaveLength(Real lambda)
 {
-	waveLength = lambda;
-	return true;
+   waveLength = lambda;
+   return true;
 }
 
 
@@ -258,7 +283,7 @@ bool MediaCorrectionInterface::SetWaveLength(Real lambda)
 //------------------------------------------------------------------------------
 RealArray MediaCorrectionInterface::Correction()
 {
-	RealArray result;
+   RealArray result;
 
-	return result;
+   return result;
 }

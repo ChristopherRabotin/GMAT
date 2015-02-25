@@ -42,7 +42,8 @@ RampTableData::RampTableData() :
    uplinkBand        (0),
    rampType          (1),
    rampFrequency     (0.0),
-   rampRate          (0.0)
+   rampRate          (0.0),
+   indexkey          ("")
 {
 	dataFormat = "GMAT_RampTable"; 
 }
@@ -78,7 +79,8 @@ RampTableData::RampTableData(const RampTableData& rtd):
    uplinkBand              (rtd.uplinkBand),
    rampType                (rtd.rampType),
    rampFrequency           (rtd.rampFrequency),
-   rampRate                (rtd.rampRate)
+   rampRate                (rtd.rampRate),
+   indexkey                (rtd.indexkey)
 {
    dataFormat = rtd.dataFormat;
 }
@@ -100,15 +102,16 @@ RampTableData& RampTableData::operator=(const RampTableData& rtd)
    if (&rtd != this)
    {
       dataFormat              = rtd.dataFormat;
-	  typeName                = rtd.typeName;
-	  type                    = rtd.type;
+	   typeName                = rtd.typeName;
+	   type                    = rtd.type;
       epochSystem             = rtd.epochSystem;
       epoch                   = rtd.epoch;
       participantIDs          = rtd.participantIDs;
       uplinkBand              = rtd.uplinkBand;
-	  rampType                = rtd.rampType;
+	   rampType                = rtd.rampType;
       rampFrequency           = rtd.rampFrequency;
       rampRate                = rtd.rampRate;
+      indexkey                = rtd.indexkey;
    }
 
    return *this;
@@ -134,4 +137,5 @@ void RampTableData::Clear()
    rampType                = 1;
    rampFrequency           = 0.0;
    rampRate                = 0.0;
+   indexkey                = ""; 
 }

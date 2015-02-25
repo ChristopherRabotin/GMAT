@@ -1,3 +1,4 @@
 /Debug/
 /Release/
 *.user
+/Release-wx3.0/

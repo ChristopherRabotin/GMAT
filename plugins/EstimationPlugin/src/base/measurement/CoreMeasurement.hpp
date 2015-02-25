@@ -193,7 +193,7 @@ protected:
    static const Rvector3      zUnit;             // [0,0,1]T
 
    /// Measuement noise sigma
-   Rvector*                   noiseSigma;									// made changes by TUAN NGUYEN
+   Rvector*                   noiseSigma;
 
    // Methods
    Integer                    GetParmIdFromEstID(Integer id, GmatBase *obj);

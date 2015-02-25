@@ -83,9 +83,9 @@ public:
                                            const std::string &value,
                                            const Integer index);
 
-   virtual std::string  GetOnOffParameter(const Integer id) const;                   // made changes by TUAN NGUYEN
-   virtual bool         SetOnOffParameter(const Integer id,                          // made changes by TUAN NGUYEN
-                                         const std::string &value);                  // made changes by TUAN NGUYEN
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id,
+                                         const std::string &value);
 
    virtual const StringArray& GetPropertyEnumStrings(const Integer id) const;
 
@@ -119,10 +119,9 @@ protected:
    Rmatrix                 weights;
    /// Flag used to indicate propagation to estimation epoch is executing
    bool                    advanceToEstimationEpoch;
-//   /// Flag indicating convergence                 // made changes by TUAN NGUYEN
-//   bool        converged;                          // made changes by TUAN NGUYEN
-   /// Estimation status                             // made changes by TUAN NGUYEN
-   Integer                 estimationStatus;         // made changes by TUAN NGUYEN
+
+//   /// Estimation status
+//   Integer                 estimationStatus;         // This variable is moved to Estimator class
 
    // String to show reason of convergence
    std::string convergenceReason;
@@ -139,9 +138,9 @@ protected:
    {
       ESTIMATION_EPOCH_FORMAT = EstimatorParamCount,
       ESTIMATION_EPOCH,
-//     USE_PRIORI_ESTIMATE,                        // made changes by TUAN NGUYEN
+//     USE_PRIORI_ESTIMATE,
       INVERSION_ALGORITHM,
-      MAX_CONSECUTIVE_DIVERGENCES,                 // made changes by TUAN NGUYEN
+      MAX_CONSECUTIVE_DIVERGENCES,
       BatchEstimatorParamCount,
    };
 
@@ -177,7 +176,7 @@ protected:
    Integer SchurInvert(Real *SUM1, Integer array_size);
    Integer CholeskyInvert(Real *SUM1, Integer array_size);
 
-   virtual bool            DataFilter();                    // made changes by TUAN NGUYEN
+   virtual bool            DataFilter();
 
 private:
 //   bool                    IsReuseableType(const std::string& value);

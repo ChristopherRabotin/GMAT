@@ -24,12 +24,11 @@
 #include "GmatState.hpp"
 #include "PropagationStateManager.hpp"
 #include "SolverException.hpp"
-//#include "TimeSystemConverter.hpp"
-#include "SpaceObject.hpp"                                    // made changes by TUAN NGUYEN
+#include "SpaceObject.hpp"
 #include "MessageInterface.hpp"
-#include "EstimatorException.hpp"                            // made changes by TUAN NGUYEN
-#include "Spacecraft.hpp"                                    // made changes by TUAN NGUYEN
-#include "GroundstationInterface.hpp"                        // made changes by TUAN NGUYEN
+#include "EstimatorException.hpp"
+#include "Spacecraft.hpp"
+#include "GroundstationInterface.hpp"
 
 #include <sstream>
 
@@ -51,12 +50,11 @@ Estimator::PARAMETER_TEXT[] =
    "Propagator",
    "ShowAllResiduals",
    "AddResidualsPlot ",
-//   "EpochFormat",                             // made changes by TUAN NGUYEN    for time span filter
-//   "StartEpoch",                              // made changes by TUAN NGUYEN    for time span filter
-//   "EndEpoch",                                // made changes by TUAN NGUYEN    for time span filter
-   "OLSEInitialRMSSigma",                       // made changes by TUAN NGUYEN  for data sigma editting
-   "OLSEMultiplicativeConstant",                // made changes by TUAN NGUYEN  for data sigma editting
-   "OLSEAdditiveConstant",                      // made changes by TUAN NGUYEN  for data sigma editting
+   "OLSEInitialRMSSigma",
+   "OLSEMultiplicativeConstant",
+   "OLSEAdditiveConstant",
+   "ConvergentStatus",
+//   "SolveForState",
 };
 
 const Gmat::ParameterType
@@ -69,12 +67,11 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::OBJECT_TYPE,
    Gmat::ON_OFF_TYPE,
    Gmat::STRINGARRAY_TYPE,
-//   Gmat::STRING_TYPE,                        // made changes by TUAN NGUYEN  for time span filter
-//   Gmat::STRING_TYPE,                        // made changes by TUAN NGUYEN  for time span filter
-//   Gmat::STRING_TYPE,                        // made changes by TUAN NGUYEN  for time span filter
-   Gmat::REAL_TYPE,                            // made changes by TUAN NGUYEN  for data sigma editting
-   Gmat::REAL_TYPE,                            // made changes by TUAN NGUYEN  for data sigma editting
-   Gmat::REAL_TYPE,                            // made changes by TUAN NGUYEN  for data sigma editting
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::STRING_TYPE,
+//   Gmat::STRING_TYPE,
 };
 
 
@@ -107,24 +104,18 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    stateCovariance      (NULL),
    estimationState      (NULL),
    stateSize            (0),
+   estimationStatus     (UNKNOWN),
    showAllResiduals     (true),
    showSpecificResiduals(false),
    showErrorBars        (false),
    locatingEvent        (false),
-//   startEpoch           (DateUtil::EARLIEST_VALID_MJD),                    // made changes by TUAN NGUYEN
-//   endEpoch             (DateUtil::LATEST_VALID_MJD),                      // made changes by TUAN NGUYEN
-//   epochFormat          ("TAIModJulian"),                                  // made changes by TUAN NGUYEN
-   maxResidualMult        (3000.0),                                        // made changes by TUAN NGUYEN
-   constMult            (3.0),                                             // made changes by TUAN NGUYEN
-   additiveConst        (0.0)                                              // made changes by TUAN NGUYEN
+   maxResidualMult      (3000.0),
+   constMult            (3.0),
+   additiveConst        (0.0)
 {
 
    objectTypeNames.push_back("Estimator");
    parameterCount = EstimatorParamCount;
-
-//   // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
-//   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);        // made changes by TUAN NGUYEN
-//   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);            // made changes by TUAN NGUYEN
 
    // Default value for Estimation.MaximumIterations = 15
    maxIterations = 15;
@@ -177,18 +168,14 @@ Estimator::Estimator(const Estimator& est) :
    stateCovariance      (est.stateCovariance),
    estimationState      (NULL),
    stateSize            (0),
+   estimationStatus     (UNKNOWN),
    showAllResiduals     (est.showAllResiduals),
    showSpecificResiduals(est.showSpecificResiduals),
    showErrorBars        (est.showErrorBars),
    locatingEvent        (false),
-//   estimationStart      (est.estimationStart),                // made changes by TUAN NGUYEN
-//   estimationEnd        (est.estimationEnd),                  // made changes by TUAN NGUYEN
-//   epochFormat          (est.epochFormat),                    // made changes by TUAN NGUYEN
-//   startEpoch           (est.startEpoch),                     // made changes by TUAN NGUYEN
-//   endEpoch             (est.endEpoch),                       // made changes by TUAN NGUYEN
-   maxResidualMult        (est.maxResidualMult),                // made changes by TUAN NGUYEN
-   constMult            (est.constMult),                        // made changes by TUAN NGUYEN
-   additiveConst        (est.additiveConst)                     // made changes by TUAN NGUYEN
+   maxResidualMult      (est.maxResidualMult),
+   constMult            (est.constMult),
+   additiveConst        (est.additiveConst)
 {
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
@@ -242,6 +229,7 @@ Estimator& Estimator::operator=(const Estimator& est)
       covariance           = NULL;
       estimationState      = NULL;
       stateSize            = 0;
+      estimationStatus     = UNKNOWN;
       showAllResiduals     = est.showAllResiduals;
       showSpecificResiduals= est.showSpecificResiduals;
       showErrorBars        = est.showErrorBars;
@@ -249,14 +237,9 @@ Estimator& Estimator::operator=(const Estimator& est)
 
       locatingEvent        = false;
 
-//      estimationStart      = est.estimationStart;              // made changes by TUAN NGUYEN
-//      estimationEnd        = est.estimationEnd;                // made changes by TUAN NGUYEN
-//      epochFormat          = est.epochFormat;                  // made changes by TUAN NGUYEN
-//      startEpoch           = est.startEpoch;                   // made changes by TUAN NGUYEN
-//      endEpoch             = est.endEpoch;                     // made changes by TUAN NGUYEN
-      maxResidualMult      = est.maxResidualMult;              // made changes by TUAN NGUYEN
-      constMult            = est.constMult;                    // made changes by TUAN NGUYEN
-      additiveConst        = est.additiveConst;                // made changes by TUAN NGUYEN
+      maxResidualMult      = est.maxResidualMult;
+      constMult            = est.constMult;
+      additiveConst        = est.additiveConst;
    }
 
    return *this;
@@ -279,10 +262,8 @@ bool Estimator::Initialize()
 
    if (retval)
    {
-//      // check the validity of the input start and end times
-//      if (estimationEnd < estimationStart)
-//         throw SolverException(
-//            "Estimator error - estimation end time is before estimation start time.\n");
+      // Set estimation status to UNKNOWN
+      estimationStatus = UNKNOWN;
 
       // Check to make sure required objects have been set
       if (!propagator)
@@ -291,7 +272,7 @@ bool Estimator::Initialize()
                /*" named %s.", GetName().c_str()*/);
 
       if (measurementNames.empty())
-         throw SolverException("Estimator error - no measurements set.\n");
+         throw EstimatorException("Error: no measurements are set for estimation.\n");
    }
    
    return retval;
@@ -310,8 +291,11 @@ bool Estimator::Initialize()
 //------------------------------------------------------------------------------
 void Estimator::CompleteInitialization()
 {
-   stm = esm.GetSTM();
-   stateCovariance = esm.GetCovariance();
+   if (esm.IsPropertiesSetupCorrect())       // Verify solve-for parameters setting up correctly 
+   {
+      stm = esm.GetSTM();
+      stateCovariance = esm.GetCovariance();
+   }
 }
 
 
@@ -425,6 +409,28 @@ std::string Estimator::GetParameterTypeString(const Integer id) const
    return Solver::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Estimator::IsParameterReadOnly(const Integer id) const
+{
+   if (id == CONVERGENT_STATUS)
+      return true;
+
+   return Solver::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -533,12 +539,40 @@ std::string Estimator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)
       return propagatorName;
-//   if (id == EPOCH_FORMAT)                                // made changes by TUAN NGUYEN
-//      return epochFormat;                                 // made changes by TUAN NGUYEN
-//   if (id == START_EPOCH)                                 // made changes by TUAN NGUYEN
-//      return startEpoch;                                  // made changes by TUAN NGUYEN
-//   if (id == END_EPOCH)                                   // made changes by TUAN NGUYEN
-//      return endEpoch;                                    // made changes by TUAN NGUYEN
+
+   if (id == CONVERGENT_STATUS)
+   {
+      switch (estimationStatus)
+      {
+      case UNKNOWN:  
+         return "Unknown";
+         break;
+      case ABSOLUTETOL_CONVERGED:
+         return "Meet Absolute Tolerance convergence criteria";
+         break;
+      case RELATIVETOL_CONVERGED:
+         return "Meet Relative Tolerance convergence criteria";
+         break;
+      case ABS_AND_REL_TOL_CONVERGED:
+         return "Meet Absolute and Relative Tolerance convergence criteria";
+         break;
+      case MAX_CONSECUTIVE_DIVERGED:
+         return "Exceed maximum number of consecutive diverged iterations"; 
+         break;
+      case MAX_ITERATIONS_DIVERGED:
+         return "Exceed maximum number of iterations";
+         break;
+      case CONVERGING:
+         return "Converging";
+         break;
+      case DIVERGING:
+         return "Diverging";
+         break;
+      }
+   }
+
+//   if (id == SOLVEFOR_STATE)
+//      return "";
 
    return Solver::GetStringParameter(id);
 }
@@ -592,25 +626,6 @@ bool Estimator::SetStringParameter(const Integer id,
       propagatorName = value;
       return true;
    }
-//   if (id == EPOCH_FORMAT)                                                // made changes by TUAN NGUYEN
-//   {                                                                      // made changes by TUAN NGUYEN
-//      epochFormat = value;                                                // made changes by TUAN NGUYEN
-//      return true;                                                        // made changes by TUAN NGUYEN
-//   }                                                                      // made changes by TUAN NGUYEN
-//   if (id == START_EPOCH)                                                 // made changes by TUAN NGUYEN
-//   {                                                                      // made changes by TUAN NGUYEN
-//      startEpoch = value;                                                 // made changes by TUAN NGUYEN
-//      // Convert to a.1 time for internal processing                      // made changes by TUAN NGUYEN
-//      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);      // made changes by TUAN NGUYEN
-//      return true;                                                        // made changes by TUAN NGUYEN
-//   }                                                                      // made changes by TUAN NGUYEN
-//   if (id == END_EPOCH)                                                   // made changes by TUAN NGUYEN
-//   {                                                                      // made changes by TUAN NGUYEN
-//      endEpoch = value;                                                   // made changes by TUAN NGUYEN
-//      // Convert to a.1 time for internal processing                      // made changes by TUAN NGUYEN
-//      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);          // made changes by TUAN NGUYEN
-//      return true;                                                        // made changes by TUAN NGUYEN
-//   }                                                                      // made changes by TUAN NGUYEN
 
    return Solver::SetStringParameter(id, value);
 }
@@ -1140,7 +1155,8 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& Estimator::GetRefObjectArray(const std::string & typeString)
 {
-   return Solver::GetRefObjectArray(typeString);
+   return GetRefObjectArray(GetObjectType(typeString));                  // made changes by TUAN NGUYEN
+   //return Solver::GetRefObjectArray(typeString);                       // made changes by TUAN NGUYEN
 }
 
 
@@ -1360,7 +1376,6 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
  * @return return an integer to tell status of estimation
  */
 //------------------------------------------------------------------------------
-// made changes by TUAN NGUYEN
 Integer Estimator::TestForConvergence(std::string &reason)
 {
     return UNKNOWN;
@@ -1403,7 +1418,7 @@ Real Estimator::ConvertToRealEpoch(const std::string &theEpoch,
 /**
  * Creates an OwnedPlot instance that is used for plotting residuals
  *
- * @param plotName The name of the plot.  This name needs to ne unique in the
+ * @param plotName The name of the plot.  This name needs to be unique in the
  *                 Sandbox
  * @param measurementNames The names of the measurement models that are sources
  *                         for the residuals being plotted
@@ -1425,8 +1440,8 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
             break;
 
       if (k == tfs.size())
-      //if (id.size() == 1)
       {
+         // processing for old measurement model
          IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
 
          rPlot = new OwnedPlot(plotName);
@@ -1441,6 +1456,7 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
       }
       else
       {
+         // processing for tracking data adapter 
          std::vector<TrackingDataAdapter*>* adapters = tfs[k]->GetAdapters(); 
          for (UnsignedInt j = 0; j < adapters->size(); ++j)
          {
@@ -1466,45 +1482,10 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
             residualPlots.push_back(rPlot);
          }
       }
-      // todo: Register participants for this curve
-      //rPlot->SetUsedObjectID(Integer id);
    }
 
 }
 
-//void Estimator::BuildResidualPlot(const std::string &plotName,
-//      const StringArray &measurementNames)
-//{
-//   IntegerArray arrayid;
-//
-//   OwnedPlot *rPlot = new OwnedPlot(plotName);
-//
-//   rPlot->SetStringParameter("PlotTitle", plotName);
-//   rPlot->SetBooleanParameter("UseLines", false);
-//   rPlot->SetBooleanParameter("UseHiLow", showErrorBars);
-//   for (UnsignedInt i = 0; i < measurementNames.size(); ++i)
-//   {
-//      std::string curveName = measurementNames[i] + " Residuals";
-//      rPlot->SetStringParameter("Add", curveName);
-//      // Register measurement ID for this curve
-//      arrayid = measManager.GetMeasurementId(measurementNames[i]);
-////      if (id[0] < 1000)
-////      {
-//         // processing for MeasurementModel
-//         rPlot->SetUsedDataID(arrayid[0]);
-////      }
-//      //else
-//      //{
-//      //   // processing for TrackingFileSet
-//
-//      //}
-//
-//      // todo: Register participants for this curve
-//      //rPlot->SetUsedObjectID(Integer id);
-//   }
-//   rPlot->Initialize();
-//   residualPlots.push_back(rPlot);
-//}
 
 //------------------------------------------------------------------------------
 // void PlotResiduals()
@@ -1656,7 +1637,6 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
 }
 
 
-// made changes by TUAN NGUYEN
 //------------------------------------------------------------------------------
 // bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, 
 //                    Real inputStateElement, Real* outputStateElement)
@@ -1665,10 +1645,10 @@ void Estimator::SetResultValue(Integer, Real, const std::string&)
  * Method used to convert result of a state's element in A1mjd to participant's 
  * coordinate system
  *
- * @param infor                    information about state's element
- * @param epoch                    the epoch at which the state is converted it's 
+ * @param infor                 information about state's element
+ * @param epoch                 the epoch at which the state is converted it's 
  *                              coordinate system
- * @param inputStateElement        state's element in GMAT internal coordinate system
+ * @param inputStateElement     state's element in GMAT internal coordinate system
  *                              (A1Mjd)
  * @param outputStateElemnet    state's element in participant's coordinate system
  *
@@ -1710,7 +1690,7 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 
          (*outputStateElement) = outState[index]; 
          delete cv;
-         delete gmatcs;                             // made changes by TUAN NGUYEN
+         delete gmatcs;
       }
    }
 
@@ -1718,7 +1698,6 @@ bool Estimator::ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Rea
 }
 
 
-// made changes by TUAN NGUYEN
 //-------------------------------------------------------------------------
 // void Estimator::GetEstimationState(GmatState& outputState)
 //-------------------------------------------------------------------------
@@ -1744,41 +1723,3 @@ void Estimator::GetEstimationState(GmatState& outputState)
     }
 }
 
-
-
-/*
-// made changes by TUAN NGUYEN
-void Estimator::ValidateModelToAccess()
-{
-   const ObservationData *currentObs =  measManager.GetObsData();
-
-   // Throw an exception when no measurement model is associated with the current observation data
-   if (modelsToAccess.size() == 0)
-   {
-      MessageInterface::ShowMessage("Current observation data: %.12lf   %s  %d  ", currentObs->epoch, currentObs->typeName.c_str(), currentObs->type);
-      for(UnsignedInt i=0; i < currentObs->participantIDs.size(); ++i)
-         MessageInterface::ShowMessage("%s  ", currentObs->participantIDs[i].c_str());
-      MessageInterface::ShowMessage("%.12lf\n", currentObs->value[0]);
-
-      MessageInterface::ShowMessage("List of measurement models used in '%s' estimator:\n", GetName().c_str());
-      MeasurementModel* mm;
-      for (UnsignedInt i=0; (mm = measManager.GetMeasurementObject(i)) != NULL; ++i)
-      {
-         ObjectArray participants = mm->GetRefObjectArray("SpaceObject");
-         MessageInterface::ShowMessage("  Measurement model '%s' has %d participants:\n", mm->GetName().c_str(), participants.size());
-         
-         for (UnsignedInt j=0; j < participants.size(); ++j)
-         {
-            if (participants[j]->IsOfType(Gmat::SPACECRAFT))
-               MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((Spacecraft*)participants[j])->GetStringParameter("Id").c_str());
-            else if (participants[j]->IsOfType(Gmat::GROUND_STATION))
-               MessageInterface::ShowMessage("     .Participant %d: Name:'%s', Id:'%s'\n", j, participants[j]->GetName().c_str(), ((GroundstationInterface*)participants[j])->GetStringParameter("Id").c_str());
-            else
-               throw EstimatorException("Error: participant '" + participants[j]->GetName() + "' is neither spacecraft nor ground station\n");
-         }
-      }
-      throw EstimatorException("Error: No measurement model used in estimator is associated with current observation data:\n");
-
-   }
-}
-*/

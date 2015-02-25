@@ -303,13 +303,13 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    
    if (atTime.Get() < mA1FileBeg)
    {
-	 std::stringstream ss;																// made changes by TUAN NGUYEN
-	  ss << "Attempting to read data for an epoch (" << atTime.Get()					// made changes by TUAN NGUYEN
-		  << ") earlier than the beginning of the current DE File (" << mA1FileBeg		// made changes by TUAN NGUYEN
-		  << "); exiting.\n";															// made changes by TUAN NGUYEN
-	  throw PlanetaryEphemException(ss.str());											// made changes by TUAN NGUYEN
-//      throw PlanetaryEphemException("Attempting to read data for an epoch "			// made changes by TUAN NGUYEN
-//            "earlier than the beginning of the current DE File; exiting.\n");			// made changes by TUAN NGUYEN
+	   std::stringstream ss;
+	   ss << "Attempting to read data for an epoch (" << atTime.Get()
+		   << ") earlier than the beginning of the current DE File (" << mA1FileBeg
+		   << "); exiting.\n";
+	   throw PlanetaryEphemException(ss.str());
+//      throw PlanetaryEphemException("Attempting to read data for an epoch "
+//            "earlier than the beginning of the current DE File; exiting.\n");
    }
    static Real      result[6];
    // if we're asking for the Earth state, return 0.0 (since we're

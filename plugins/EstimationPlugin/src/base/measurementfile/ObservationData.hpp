@@ -29,7 +29,7 @@
 #include "estimation_defs.hpp"
 #include "EstimationDefs.hpp"
 ///// TBD: Determine if there is a more generic way to add these
-#include "GmatData.hpp"										// made changes by TUAN NGUYEN
+#include "GmatData.hpp"
 #include "Covariance.hpp"
 #include "TimeSystemConverter.hpp"
 
@@ -37,7 +37,7 @@
 /**
  * Class used to set and retrieve observation data
  */
-class ESTIMATION_API ObservationData : public GmatData		// made changes by TUAN NGUYEN
+class ESTIMATION_API ObservationData : public GmatData
 {
 public:
    ObservationData();
@@ -45,12 +45,12 @@ public:
    ObservationData(const ObservationData& od);
    ObservationData&  operator=(const ObservationData& od);
 
-   virtual void      Clear();									// made changes by TUAN NGUYEN
+   virtual void      Clear();
 
 // Explicitly public so that this class acts like a struct
 public:
-   /// Flag to specify this data record is in use or not		// made changes by TUAN NGUYEN
-   bool inUsed;													// made changes by TUAN NGUYEN
+   /// Flag to specify this data record is in use or not
+   bool inUsed;
 
    /// Flag to specify reason the record not been used. 
    /// "N": Normal, "U": unused, "IRMS": OLSEInitialRMSSigma, 
@@ -82,11 +82,11 @@ public:
    /// Associated data element names for the data in the value array
    StringArray       dataMap;
 
-   /// The original observed value                    // made changes by TUAN NGUYEN
-   RealArray         value_orig;                      // made changes by TUAN NGUYEN
+   /// The original observed value
+   RealArray         value_orig;
 
-   /// Measurement unit                               // made changes by TUAN NGUYEN
-   std::string		   unit;                            // made changes by TUAN NGUYEN
+   /// Measurement unit
+   std::string		   unit;
    /// The associated noise covariance matrix
    Covariance*       noiseCovariance;
 
@@ -99,7 +99,6 @@ public:
    StringArray       extraData;
 
 ///// TBD: Determine if there is a more generic way to add these
-//   // This secsion added by TUAN NGUYEN
 //   std::string dataFormat;			// Flag indicating which data format is used. Its value is either "GMATInternal" or "GMAT_OD"
    /// Uplink band
    Integer uplinkBand;
@@ -108,7 +107,7 @@ public:
    /// Range modulo
    Real rangeModulo;
 
-   // This section is added by TUAN NGUYEN for Gmat_ODDoppler observation data
+   // This section is added for Gmat_ODDoppler observation data
    /// Time difference between the reception time at station for start path and end path  
    Real dopplerCountInterval;
 

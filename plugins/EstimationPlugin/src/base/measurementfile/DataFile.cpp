@@ -47,9 +47,9 @@ const std::string DataFile::PARAMETER_TEXT[] =
    "Format",
    "DataThinningRatio",
    "SelectedStationIDs",
-   "EpochFormat",				// made changes by TUAN NGUYEN  for time span filter
-   "StartEpoch",				// made changes by TUAN NGUYEN  for time span filter
-   "EndEpoch",					// made changes by TUAN NGUYEN  for time span filter
+   "EpochFormat",
+   "StartEpoch",
+   "EndEpoch",
 };
 
 const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
@@ -58,9 +58,9 @@ const Gmat::ParameterType DataFile::PARAMETER_TYPE[] =
    Gmat::STRING_TYPE,			// "Format"
    Gmat::REAL_TYPE,				// "DataThinningRatio"
    Gmat::STRINGARRAY_TYPE,		// "IncludedStations"
-   Gmat::STRING_TYPE,			// made changes by TUAN NGUYEN  for time span filter
-   Gmat::STRING_TYPE,			// made changes by TUAN NGUYEN  for time span filter
-   Gmat::STRING_TYPE,			// made changes by TUAN NGUYEN  for time span filter
+   Gmat::STRING_TYPE,			// "EpochFormat"
+   Gmat::STRING_TYPE,			// "StartEpoch"
+   Gmat::STRING_TYPE,			// "EndEpoch"
 };
 
 
@@ -80,9 +80,9 @@ DataFile::DataFile(const std::string name) :
    streamName        ("ObsData.gmd"),
    obsType           ("GMATInternal"),
    thinningRatio     (1.0),
-   startEpoch        (DateUtil::EARLIEST_VALID_MJD),				// made changes by TUAN NGUYEN
-   endEpoch          (DateUtil::LATEST_VALID_MJD),					// made changes by TUAN NGUYEN
-   epochFormat       ("TAIModJulian")								// made changes by TUAN NGUYEN
+   startEpoch        (DateUtil::EARLIEST_VALID_MJD),
+   endEpoch          (DateUtil::LATEST_VALID_MJD),
+   epochFormat       ("TAIModJulian")
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -95,8 +95,8 @@ DataFile::DataFile(const std::string name) :
    parameterCount = DataFileParamCount;
 
    // estimationStart and estimationEnd are in A1Mjd time format. Those specify timespan filer for observation data
-   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);		// made changes by TUAN NGUYEN
-   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);			// made changes by TUAN NGUYEN
+   estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);
+   estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);
 
 }
 
@@ -130,11 +130,11 @@ DataFile::DataFile(const DataFile& df) :
    obsType           (df.obsType),
    thinningRatio     (df.thinningRatio),
    selectedStationIDs(df.selectedStationIDs),
-   estimationStart   (df.estimationStart),				// made changes by TUAN NGUYEN
-   estimationEnd     (df.estimationEnd),				// made changes by TUAN NGUYEN
-   epochFormat       (df.epochFormat),					// made changes by TUAN NGUYEN
-   startEpoch        (df.startEpoch),					// made changes by TUAN NGUYEN
-   endEpoch          (df.endEpoch)						// made changes by TUAN NGUYEN
+   estimationStart   (df.estimationStart),
+   estimationEnd     (df.estimationEnd),
+   epochFormat       (df.epochFormat),
+   startEpoch        (df.startEpoch),
+   endEpoch          (df.endEpoch)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFile copy constructor from <%s,%p>  to  <%s,%p>\n", df.GetName().c_str(), &df, GetName().c_str(), this);
@@ -181,11 +181,11 @@ DataFile& DataFile::operator=(const DataFile& df)
       else
          theDatastream = NULL;
 
-	  estimationStart      = df.estimationStart;			// made changes by TUAN NGUYEN
-	  estimationEnd        = df.estimationEnd;				// made changes by TUAN NGUYEN
-	  epochFormat          = df.epochFormat;				// made changes by TUAN NGUYEN
-	  startEpoch           = df.startEpoch;					// made changes by TUAN NGUYEN
-	  endEpoch             = df.endEpoch;					// made changes by TUAN NGUYEN
+	  estimationStart      = df.estimationStart;
+	  estimationEnd        = df.estimationEnd;
+	  epochFormat          = df.epochFormat;
+	  startEpoch           = df.startEpoch;
+	  endEpoch             = df.endEpoch;
    }
 
    return *this;
@@ -227,7 +227,7 @@ bool DataFile::Initialize()
    if (theDatastream)
    {
       retval = theDatastream->Initialize();
-	  obsType = theDatastream->GetTypeName();			// made changes by TUAN NGUYEN
+	  obsType = theDatastream->GetTypeName();
       #ifdef DEBUG_INITIALIZATION
 	     MessageInterface::ShowMessage("DataFile::Initialize():   theDatastream = '%s'\n", theDatastream->GetStreamName().c_str());
 	     MessageInterface::ShowMessage("DataFile::Initialize():   obsType = '%s'\n", obsType.c_str());
@@ -430,25 +430,25 @@ bool DataFile::SetStringParameter(const Integer id, const std::string &value)
 	  return true;
    }
 
-   if (id == EpochFormat)												// made changes by TUAN NGUYEN
-   {																	// made changes by TUAN NGUYEN
-      epochFormat = value;												// made changes by TUAN NGUYEN
-      return true;														// made changes by TUAN NGUYEN
-   }																	// made changes by TUAN NGUYEN
-   if (id == StartEpoch)												// made changes by TUAN NGUYEN
-   {																	// made changes by TUAN NGUYEN
-      startEpoch = value;												// made changes by TUAN NGUYEN
-      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
-      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);	// made changes by TUAN NGUYEN
-      return true;														// made changes by TUAN NGUYEN
-   }																	// made changes by TUAN NGUYEN
-   if (id == EndEpoch)													// made changes by TUAN NGUYEN
-   {																	// made changes by TUAN NGUYEN
-      endEpoch = value;													// made changes by TUAN NGUYEN
-      // Convert to a.1 time for internal processing					// made changes by TUAN NGUYEN
-      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);		// made changes by TUAN NGUYEN
-      return true;														// made changes by TUAN NGUYEN
-   }																	// made changes by TUAN NGUYEN
+   if (id == EpochFormat)
+   {
+      epochFormat = value;
+      return true;
+   }
+   if (id == StartEpoch)
+   {
+      startEpoch = value;
+      // Convert to a.1 time for internal processing
+      estimationStart = ConvertToRealEpoch(startEpoch, epochFormat);
+      return true;
+   }
+   if (id == EndEpoch)
+   {
+      endEpoch = value;
+      // Convert to a.1 time for internal processing
+      estimationEnd = ConvertToRealEpoch(endEpoch, epochFormat);
+      return true;
+   }
 
 
    return GmatBase::SetStringParameter(id, value);
@@ -752,38 +752,38 @@ bool DataFile::OpenStream(bool simulate)
    if (theDatastream)
    {
       theDatastream->SetStreamName(streamName);
-	  obsType = theDatastream->GetTypeName();							// made changes by TUAN NGUYEN
-	  #ifdef DEBUG_INITIALIZATION
+	   obsType = theDatastream->GetTypeName();
+	   #ifdef DEBUG_INITIALIZATION
 		    MessageInterface::ShowMessage("DataFile::OpenStream():   obsType = '%s'\n", obsType.c_str());
       #endif
       // todo: Currently opens either to simulate or to estimate, but not both
       // at the same time.
-	  // For ramp table, it is opened for read only
+	   // For ramp table, it is opened for read only
 ///// TBD: Determine if there is a more generic way to add this
-	  if (obsType == "GMAT_RampTable")									// made changes by TUAN NGUYEN
-	  {
+	   if (obsType == "GMAT_RampTable")
+	   {
          #ifdef DEBUG_INITIALIZATION
-		    MessageInterface::ShowMessage("DataFile::OpenStream():   open ramp table '%s' for reading\n", GetName().c_str());
+		      MessageInterface::ShowMessage("DataFile::OpenStream():   open ramp table '%s' for reading\n", GetName().c_str());
          #endif
-	     retval = theDatastream->Open(true, false);						// made changes by TUAN NGUYEN
-	  }
-	  else																// made changes by TUAN NGUYEN
-	  {
+	      retval = theDatastream->Open(true, false);
+	   }
+	   else
+	   {
          if (simulate)
-		 {
+		   {
             #ifdef DEBUG_INITIALIZATION
-		       MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for writing\n", GetName().c_str());
+		         MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for writing\n", GetName().c_str());
             #endif
             retval = theDatastream->Open(false, true);
-		 }
+		   }
          else
-		 {
+		   {
             #ifdef DEBUG_INITIALIZATION
-		       MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for reading\n", GetName().c_str());
+		         MessageInterface::ShowMessage("DataFile::OpenStream():   open observation data file '%s' for reading\n", GetName().c_str());
             #endif
             retval = theDatastream->Open(true, false);
-		 }
-	  }
+		   }
+	   }
    }
 
    return retval;

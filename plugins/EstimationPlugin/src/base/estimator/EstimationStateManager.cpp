@@ -289,6 +289,9 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
 
          // Set the property ID
          Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
+         if (id == -1)                                                                                                                      // made changes by TUAN NGUYEN
+            throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
+
          solveForIDs[i] = id;
          elements[obj]->push_back(solveForIDNames[i]);
          retval = true;
@@ -506,6 +509,40 @@ bool EstimationStateManager::SetProperty(std::string prop, Integer loc)
 }
 
 
+bool EstimationStateManager::IsPropertiesSetupCorrect()
+{
+   if (solveForNames.size() == 0)
+      throw EstimatorException("Error: No solvefor parameters are set to estimation.\n");
+
+   for (UnsignedInt i = 0; i < solveForNames.size(); ++i)
+   {
+      if (solveForObjectNames[i] == "")
+         throw EstimatorException("Error: '" + solveForNames[i] +"' has an empty object name.\n");
+
+      if (i >= solveForObjects.size()) 
+         throw EstimatorException("Error: '" + solveForNames[i] +"' object which is specified in AddSolverFor was not defined in your script.\n");
+      else
+      {
+         if(solveForObjects[i] == NULL)
+            throw EstimatorException("Error: '" + solveForNames[i] +"' object which is specified in AddSolverFor was not defined in your script.\n");
+      }
+
+      if (solveForIDNames[i] == "")
+         throw EstimatorException("Error: '" + solveForNames[i] +"' has an empty parameter name.\n");
+
+      if (i >= solveForIDs.size()) 
+         throw EstimatorException("Error: '" + solveForNames[i] +"' parameter which is specified in AddSolverFor was not defined in your script.\n");
+      else
+      {
+         if(solveForIDs[i] == NULL)
+            throw EstimatorException("Error: '" + solveForNames[i] +"' paramter which is specified in AddSolverFor was not defined in your script.\n");
+      }
+   }
+
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // bool SetProperty(std::string sf, GmatBase *obj)
 //------------------------------------------------------------------------------
@@ -642,8 +679,11 @@ bool EstimationStateManager::BuildState()
    {
       std::stringstream sizeVal;
       sizeVal << stateSize;
-      throw EstimatorException("Estimation state vector size is " +
-            sizeVal.str() + "; estimation is not possible.");
+      throw EstimatorException("No solve-for parameter is defined for estimator;"     // made changes by TUAN NGUYEN
+            " estimation is not possible.\n");                                         // made changes by TUAN NGUYEN
+
+      //throw EstimatorException("Estimation state vector size is " +                // made changes by TUAN NGUYEN
+      //      sizeVal.str() + "; estimation is not possible.");                      // made changes by TUAN NGUYEN
    }
 
    std::map<std::string,Integer> associateMap;

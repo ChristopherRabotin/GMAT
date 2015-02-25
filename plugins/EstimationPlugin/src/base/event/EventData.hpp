@@ -51,9 +51,9 @@ public:
    /// Flag indicating is the participant is fixed during event calculation
    bool fixedState;
 
-   /// Inertial coordinate system used for this event data:			// made changes by TUAN NGUYEN
-   // the origin of the inertial coordinate system					// made changes by TUAN NGUYEN
-   SpacePoint* cs_origin;											// made changes by TUAN NGUYEN
+   /// Inertial coordinate system used for this event data:
+   // the origin of the inertial coordinate system
+   SpacePoint* cs_origin;
 
    /// Epoch associated with the data
    GmatEpoch epoch;

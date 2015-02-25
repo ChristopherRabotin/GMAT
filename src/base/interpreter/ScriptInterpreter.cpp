@@ -1534,6 +1534,16 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)
       WriteObjects(objs, "DataInterfaces", mode);
 
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   // ErrorModel Objects                                                         // made changes by TUAN NGUYEN
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   objs = theModerator->GetListOfObjects(Gmat::ERROR_MODEL);                     // made changes by TUAN NGUYEN
+   #ifdef DEBUG_SCRIPT_WRITING                                                   // made changes by TUAN NGUYEN
+   MessageInterface::ShowMessage("   Found %d ErrorModels\n", objs.size());      // made changes by TUAN NGUYEN
+   #endif                                                                        // made changes by TUAN NGUYEN
+   if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
+      WriteObjects(objs, "ErrorModels", mode);                                   // made changes by TUAN NGUYEN
+
    //---------------------------------------------
    // Measurement Models and Tracking Data/Systems
    //---------------------------------------------

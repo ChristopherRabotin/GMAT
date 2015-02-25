@@ -262,8 +262,8 @@ void EditorPanel::SaveData()
  */
 void EditorPanel::OnTextOverMaxLen(wxCommandEvent& event)
 {
-   wxMessageBox(wxT("Text control is already filled up to the maximum length.\n"
-                    "The extra input will be discarded."),
+   wxMessageBox(gmatwxT("Text control is already filled up to the maximum length.\n"
+                        "The extra input will be discarded."),
                 wxT("GMAT Warning"));
 }
 

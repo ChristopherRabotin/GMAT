@@ -124,26 +124,33 @@ public:
                                                         Integer forStrand = -1);
 
    const std::vector<SignalData*>& GetSignalData();
-   const std::vector<SignalBase*>& GetSignalPaths();                                                         // made changes by TUAN NGUYEN
+   const std::vector<SignalBase*>& GetSignalPaths();
    bool                 IsMeasurementFeasible();
    virtual void         UsesLightTime(const bool tf);
 
-   /// Set measurement (relativity, ET-TAI, ionosphere, or troposphere) correction to measurement model      // made changes by TUAN NGUYEN
-   virtual void         SetCorrection(const std::string& correctionName,                                     // made changes by TUAN NGUYEN
-                           const std::string& correctionType);                                               // made changes by TUAN NGUYEN
-   virtual void         AddCorrection(const std::string& correctionName,                                     // made changes by TUAN NGUYEN
-                           const std::string& correctionType);                                               // made changes by TUAN NGUYEN
-   /// Set flag to indicate measurement time tag is at the end of signal path                                // made changes by TUAN NGUYEN
-   void                 SetTimeTagFlag(const bool flag);                                                     // made changes by TUAN NGUYEN
-   /// Get flag to indicate measurement time tag                                                             // made changes by TUAN NGUYEN
-   bool                 GetTimeTagFlag();                                                                    // made changes by TUAN NGUYEN
+   /// Set measurement (relativity, ET-TAI, ionosphere, or troposphere) correction to measurement model
+   virtual void         SetCorrection(const std::string& correctionName,
+                           const std::string& correctionType);
+   virtual void         AddCorrection(const std::string& correctionName,
+                           const std::string& correctionType);
+   /// Set flag to indicate measurement time tag is at the end of signal path
+   void                 SetTimeTagFlag(const bool flag);
+   /// Get flag to indicate measurement time tag
+   bool                 GetTimeTagFlag();
 
    /// Get uplink frequency and uplink band for a given signal path
-   Real                 GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);       // made changes by TUAN NGUYEN
-   Integer              GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);   // made changes by TUAN NGUYEN
+   Real                 GetUplinkFrequency(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
+   Integer              GetUplinkFrequencyBand(UnsignedInt pathIndex, std::vector<RampTableData>* rampTB);
 
-   // Measurement Model Settings
+   /// Measurement Model Settings
    virtual bool         SetProgressReporter(ProgressReporter* reporter);
+
+   /// Set value for Doppler count interval. It is used to calculate measurement for Start path
+   void                 SetCountInterval(Real timeInterval);
+
+   /// Get paticipant objects lists
+   virtual const std::vector<ObjectArray*>&
+                        GetParticipantObjectLists();
 
 protected:
    /// The ordered list of participants in the signal path
@@ -169,13 +176,16 @@ protected:
    bool withLighttime;
    /// Flag used to indicate that the propagators need initialization
    bool propsNeedInit;
-   /// A list of measurement correction types                                 // made changes by TUAN NGUYEN
-   StringArray correctionTypeList;                                            // made changes by TUAN NGUYEN
-   /// A list of measurement correction models                                // made changes by TUAN NGUYEN
-   StringArray correctionModelList;                                           // made changes by TUAN NGUYEN
+   /// A list of measurement correction types
+   StringArray correctionTypeList;
+   /// A list of measurement correction models
+   StringArray correctionModelList;
 
-   /// Flag to indicate measurerment time tag to be at the end of signal path // made changes by TUAN NGUYEN
-   bool epochIsAtEnd;                                                         // made changes by TUAN NGUYEN
+   /// Flag to indicate measurerment time tag to be at the end of signal path
+   bool epochIsAtEnd;
+
+   /// Count interval is time interval (in seconds) between Start-path and End-path
+   Real countInterval;
 
    /// The reporter for status information
    ProgressReporter *navLog;

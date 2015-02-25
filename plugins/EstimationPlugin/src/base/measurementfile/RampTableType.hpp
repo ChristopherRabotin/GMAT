@@ -47,9 +47,9 @@ public:
                           bool append = false);
    virtual bool      IsOpen();
 
-   virtual bool      AddMeasurement(MeasurementData *md){ return true;};		// This function is not used in rap table
+   virtual bool      AddMeasurement(MeasurementData *md){ return true;};		// This function is not used in ramp table
    virtual ObservationData *
-					 ReadObservation(){ return NULL;};							// This function is not used in rap table
+					 ReadObservation(){ return NULL;};							         // This function is not used in ramp table
    virtual RampTableData *
                      ReadRampTableData();
 

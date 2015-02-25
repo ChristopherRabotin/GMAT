@@ -29,7 +29,7 @@
 #include "MeasurementData.hpp"
 #include "ObservationData.hpp"
 ///// TBD: Determine if there is a more generic way to add these
-#include "RampTableData.hpp"			// made changes by TUAN NGUYEN
+#include "RampTableData.hpp"
 
 
 /**
@@ -69,8 +69,8 @@ public:
 
 ///// TBD: Determine if there is a more generic way to add these
    /// Method used for frequency ramp table only: 
-   virtual RampTableData *									// made changes by TUAN NGUYEN
-                     ReadRampTableData() = 0;				// made changes by TUAN NGUYEN
+   virtual RampTableData *
+                     ReadRampTableData() = 0;
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES

@@ -58,7 +58,7 @@ public:
    virtual void InitializeSignal(bool chainForwards = false);
 
 #ifdef USE_PRECISION_TIME
-   virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true);       // made changes by TUAN NGUYEN
+   virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true);
 #else
    virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);      // This function will be removed and replaced by virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true)
 #endif
@@ -67,15 +67,15 @@ public:
                 ModelSignalDerivative(GmatBase *obj, Integer forId);
 
    /// This function is used to add media correction to measurement model
-   virtual void AddCorrection(const std::string& modelName,                           // made changes by TUAN NGUYEN
-                             const std::string& mediaCorrectionType);                 // made changes by TUAN NGUYEN
+   virtual void AddCorrection(const std::string& modelName,
+                             const std::string& mediaCorrectionType);
 
-   /// This function is used to get frequency at a given time from ramped frequency table          // made changes by TUAN NGUYEN
-   Real           GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);           // made changes by TUAN NGUYEN
-   /// This function is used to get frequency band at a given time from ramped frequency table     // made changes by TUAN NGUYEN
-   Integer        GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB);       // made changes by TUAN NGUYEN
-   /// This function is used to specify frequency band based range of each band                    // made changes by TUAN NGUYEN
-   Integer        FrequencyBand(Real frequency);                                                   // made changes by TUAN NGUYEN
+   /// This function is used to get frequency at a given time from ramped frequency table
+   Real           GetFrequencyFromRampTable(Real t, std::vector<RampTableData>* rampTB);
+   /// This function is used to get frequency band at a given time from ramped frequency table
+   Integer        GetFrequencyBandFromRampTable(Real t, std::vector<RampTableData>* rampTB);
+   /// This function is used to specify frequency band based range of each band
+   Integer        FrequencyBand(Real frequency);
 
 
 protected:
@@ -87,38 +87,45 @@ protected:
    /// Ionosphere model object
    Ionosphere* ionosphere;
 #endif
-   /// Flag indicating to use relativity correction                                 // made changes by TUAN NGUYEN
-   bool useRelativity;                                                              // made changes by TUAN NGUYEN
-   /// Correction (unit: km)                                                        // made changes by TUAN NGUYEN
-   Real relCorrection;                                                              // made changes by TUAN NGUYEN
+   /// Flag indicating to use relativity correction
+   bool useRelativity;
+   /// Correction (unit: km)
+   Real relCorrection;
    Real ettaiCorrection;
    Real mediaCorrection;
 
-   /// Flag indicating to use Et-TAI correction                                    // made changes by TUAN NGUYEN
-   bool useETTAI;                                                                  // made changes by TUAN NGUYEN
+   /// Flag indicating to use Et-TAI correction
+   bool useETTAI;
 
 #ifdef USE_PRECISION_TIME
-   bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive);        // made changes by TUAN NGUYEN
+   bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive);
 #else
    bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);       // This function will be removed and replaced by bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive)
 #endif
 
-   /// This function is used to compute relativity correction                                // made changes by TUAN NGUYEN
-   Real           RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, Real t2);        // made changes by TUAN NGUYEN
+   /// This function is used to compute relativity correction
+   Real           RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, Real t2);
 
-   /// This function is used to compute Et-TAI correction                                    // made changes by TUAN NGUYEN
-   Real           ETminusTAI(Real tA1MJD, SpacePoint* participant);                          // made changes by TUAN NGUYEN
+   /// This function is used to compute Et-TAI correction
+   Real           ETminusTAI(Real tA1MJD, SpacePoint* participant);
 
    /// These functions are used to compute midia correction
-   virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);     // made changes by TUAN NGUYEN
-   virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);     // made changes by TUAN NGUYEN
-   RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle);      // made changes by TUAN NGUYEN
-   RealArray      IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);     // made changes by TUAN NGUYEN
-   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch);          // made changes by TUAN NGUYEN
+   virtual bool   MediaCorrectionCalculation(std::vector<RampTableData>* rampTB = NULL);
+   virtual bool   MediaCorrectionCalculation1(std::vector<RampTableData>* rampTB = NULL);
+   RealArray      TroposphereCorrection(Real freq, Real distance, Real elevationAngle);
+   RealArray      IonosphereCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2);
+   RealArray      MediaCorrection(Real freq, Rvector3 r1, Rvector3 r2, Real epoch1, Real epoch2);
 
-   /// This function is used to calculate total hardware delay                               // made changes by TUAN NGUYEN
-   virtual bool   HardwareDelayCalculation();                                                // made changes by TUAN NGUYEN
+   /// This function is used to calculate total hardware delay
+   virtual bool   HardwareDelayCalculation();
 
+private:
+   /// ramp table and the beginning index and the ending index
+   std::vector<RampTableData>* rampTable;
+   UnsignedInt beginIndex;
+   UnsignedInt endIndex;
+
+   void           SpecifyBeginEndIndexesOfRampTable();
 };
 
 #endif /* PhysicalSignal_hpp */

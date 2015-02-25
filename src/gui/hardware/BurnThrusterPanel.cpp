@@ -20,6 +20,8 @@
  */
 //------------------------------------------------------------------------------
 #include "BurnThrusterPanel.hpp"
+#include "ChemicalThruster.hpp"
+#include "ElectricThruster.hpp"
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"
 #include "ThrusterCoefficientDialog.hpp"
@@ -77,12 +79,22 @@ BurnThrusterPanel::BurnThrusterPanel(wxWindow *parent, const wxString &name)
    tankName          = "";
 
    // thruster only
+   // chemical thruster
    areCCoefsChanged  = false;
    areKCoefsChanged  = false;
    cCoefs.clear();
    kCoefs.clear();
    cCoefNames.clear();
    kCoefNames.clear();
+   // electric thruster
+   areTCoefsChanged  = false;
+   areMFCoefsChanged = false;
+   tCoefs.clear();
+   mfCoefs.clear();
+   tCoefNames.clear();
+   mfCoefNames.clear();
+   thrustModel          = "";
+   isThrustModelChanged = false;
 }
 
 
@@ -116,20 +128,26 @@ void BurnThrusterPanel::Create()
    MessageInterface::ShowMessage("BurnThrusterPanel::Create() entered\n");
    #endif
 
+   #if __WXMAC__
+   int otherTextWidth = 150;
+   #else
+   int otherTextWidth = 150;
+   #endif
+
    localObject = NULL;
    
    Integer bsize = 2; // border size
    // get the config object
    wxConfigBase *pConfig = wxConfigBase::Get();
    // SetPath() understands ".."
-   pConfig->SetPath(wxT("/Burn Thruster"));
+   pConfig->SetPath(gmatwxT("/Burn Thruster"));
    
    //-----------------------------------------------------------------
    // coordinate system items
    //-----------------------------------------------------------------
    // Coordinate Systems 
    wxStaticText *coordSysLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Coordinate System"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Coordinate System"));
    coordSysComboBox  =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    coordSysComboBox->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
@@ -138,7 +156,7 @@ void BurnThrusterPanel::Create()
    coordSysComboBox->Insert("Local", 0);
    
    // Origin
-   originLabel = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Origin"));
+   originLabel = new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Origin"));
    originComboBox =
       theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX,
                                               wxSize(150,-1));
@@ -148,10 +166,10 @@ void BurnThrusterPanel::Create()
    StringArray axesLabels = theObject->GetPropertyEnumStrings("Axes");
    wxArrayString wxAxesLabels = ToWxArrayString(axesLabels);
    
-   axisLabel = new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Axes"));
+   axisLabel = new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Axes"));
    
    axesComboBox = 
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
+      new wxComboBox(this, ID_COMBOBOX, gmatwxT(""), wxDefaultPosition, 
                      wxSize(150,-1), wxAxesLabels, wxCB_DROPDOWN|wxCB_READONLY);
    axesComboBox->SetSelection(0);
    axesComboBox->SetToolTip(pConfig->Read(_T("AxesHint")));
@@ -179,29 +197,29 @@ void BurnThrusterPanel::Create()
    //-----------------------------------------------------------------
    
    // ThrustDirection1
-   XUnitLabel = new wxStaticText(this, ID_TEXT, wxT(""));
-   XLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"1"));
+   XUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
+   XLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"1"));
    elem1TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    elem1TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection1Hint")));
    
    // ThrustDirection2
    YUnitLabel =
-      new wxStaticText(this, ID_TEXT, wxT(""));
+      new wxStaticText(this, ID_TEXT, gmatwxT(""));
    YLabel =
-      new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"2"),
+      new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"2"),
                         wxDefaultPosition,wxDefaultSize, 0);
    elem2TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                       wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    elem2TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection2Hint")));
    
    // ThrustDirection3
-   ZUnitLabel = new wxStaticText(this, ID_TEXT, wxT(""));
-   ZLabel = new wxStaticText(this, ID_TEXT, wxT("ThrustDirection"GUI_ACCEL_KEY"3"));
+   ZUnitLabel = new wxStaticText(this, ID_TEXT, gmatwxT(""));
+   ZLabel = new wxStaticText(this, ID_TEXT, gmatwxT("ThrustDirection"GUI_ACCEL_KEY"3"));
    elem3TextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    elem3TextCtrl->SetToolTip(pConfig->Read(_T("ThrustDirection3Hint")));
    
@@ -212,17 +230,17 @@ void BurnThrusterPanel::Create()
    {
       // Thruster Duty Cycle
       dutyCycleLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Duty "GUI_ACCEL_KEY"Cycle"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Duty "GUI_ACCEL_KEY"Cycle"));
       dutyCycleTextCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       dutyCycleTextCtrl->SetToolTip(pConfig->Read(_T("DutyCycleHint")));
       
       // Thruster Scale Factor
       scaleFactorLabel =
-         new wxStaticText(this, ID_TEXT, wxT("Thrust "GUI_ACCEL_KEY"Scale Factor"));
+         new wxStaticText(this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Scale Factor"));
       scaleFactorTextCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""),
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       scaleFactorTextCtrl->SetToolTip(pConfig->Read(_T("ThrustScaleFactorHint")));
    }
@@ -261,13 +279,13 @@ void BurnThrusterPanel::Create()
    //-----------------------------------------------------------------
    // Decrement mass
    decMassCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT(GUI_ACCEL_KEY"Decrement Mass"),
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT(GUI_ACCEL_KEY"Decrement Mass"),
                      wxDefaultPosition, wxSize(-1, -1), bsize);
    decMassCheckBox->SetToolTip(pConfig->Read(_T("DecrementMassHint")));
    
    //Tank
    tankLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Tank"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Tank"));
    tankComboBox =
       theGuiManager->GetFuelTankComboBox(this, ID_COMBOBOX, wxSize(150,-1));
    tankComboBox->SetToolTip(pConfig->Read(_T("TankHint")));
@@ -279,39 +297,42 @@ void BurnThrusterPanel::Create()
    if (theObject->IsOfType(Gmat::IMPULSIVE_BURN))
    {
       ispLabel =
-         new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"Isp"));
+         new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"Isp"));
       ispTextCtrl =
-         new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                         wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       ispTextCtrl->SetToolTip(pConfig->Read(_T("IspHint")));
       ispUnit =
-         new wxStaticText(this, ID_TEXT, wxT(" s"));
+         new wxStaticText(this, ID_TEXT, gmatwxT(" s"));
    }
    
    // Gravitational Acceleration
    gravityAccelLabel =
-      new wxStaticText(this, ID_TEXT, wxT(GUI_ACCEL_KEY"GravitationalAccel"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(GUI_ACCEL_KEY"GravitationalAccel"));
    gravityAccelTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+      new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    gravityAccelTextCtrl->SetToolTip(pConfig->Read(_T("GravitationalAccelHint")));
    gravityAccelUnit =
-      new wxStaticText(this, ID_TEXT, wxT(" m/s^2"));
+      new wxStaticText(this, ID_TEXT, gmatwxT(" m/s^2"));
    
    // Coefficients for Thruster only
    if (theObject->IsOfType(Gmat::THRUSTER))
    {
-      cCoefButton = new wxButton(this, ID_BUTTON, wxT("Edit "GUI_ACCEL_KEY"Thruster Coef."));
-      cCoefButton->SetToolTip(pConfig->Read(_T("EditThrusterCoefficientHint")));
-      kCoefButton = new wxButton(this, ID_BUTTON, wxT("Edit "GUI_ACCEL_KEY"Impulse Coef."));
-      kCoefButton->SetToolTip(pConfig->Read(_T("EditImpulseCoefficientHint")));
+//      cCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Thruster Coef."));
+//      cCoefButton->SetToolTip(pConfig->Read(_T("EditThrusterCoefficientHint")));
+//      kCoefButton = new wxButton(this, ID_BUTTON, gmatwxT("Edit "GUI_ACCEL_KEY"Impulse Coef."));
+//      kCoefButton->SetToolTip(pConfig->Read(_T("EditImpulseCoefficientHint")));
+      configButton = new wxButton(this, ID_BUTTON, gmatwxT(""GUI_ACCEL_KEY"Configure Polynomials"));
+      configButton->SetToolTip(pConfig->Read(_T("ConfigPolynomialsHint")));
    }
    
    wxBoxSizer *coefSizer = new wxBoxSizer(wxHORIZONTAL);
    if (theObject->IsOfType(Gmat::THRUSTER))
    {
-      coefSizer->Add(cCoefButton, 0, wxALIGN_CENTER|wxALL, 5);
-      coefSizer->Add(kCoefButton, 0, wxALIGN_CENTER|wxALL, 5);
+//      coefSizer->Add(cCoefButton, 0, wxALIGN_CENTER|wxALL, 5);
+//      coefSizer->Add(kCoefButton, 0, wxALIGN_CENTER|wxALL, 5);
+      coefSizer->Add(configButton, 0, wxALIGN_CENTER|wxALL, 5);  // need anther one here?
    }
    
    //----- Add to sizer   
@@ -346,6 +367,96 @@ void BurnThrusterPanel::Create()
       new GmatStaticBoxSizer(wxVERTICAL, this, "Mass Change");
    massBoxSizer->Add(massSizer, 0, wxALIGN_CENTER|wxALL, 0);
    
+   // Handle ElectricThruster items
+   GmatStaticBoxSizer *electricBoxSizer = NULL;
+   if (theObject->IsOfType("ElectricThruster"))
+   {
+      electricBoxSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Thrust Config.");
+      // Thrust Model
+      thrustModelTxt =
+         new wxStaticText( this, ID_TEXT, gmatwxT("Thrust "GUI_ACCEL_KEY"Model"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      StringArray thrustModels = theObject->GetPropertyEnumStrings("ThrustModel");
+      Integer numModels = thrustModels.size();
+      thrustModelArray = new wxString[numModels];
+      for (Integer ii=0; ii<numModels; ii++)
+         thrustModelArray[ii] = thrustModels[ii].c_str();
+
+      thrustModelCB =
+         new wxComboBox( this, ID_COMBOBOX, gmatwxT(thrustModelArray[0]),
+            wxDefaultPosition, wxSize(180,-1), numModels, thrustModelArray,
+            wxCB_DROPDOWN|wxCB_READONLY );
+      thrustModelCB->SetToolTip(pConfig->Read(_T("ThrustModelHint")));
+
+      // Minimum and Maximum Usable Power
+      minPowerTxt =
+         new wxStaticText( this, ID_TEXT, gmatwxT("Mi"GUI_ACCEL_KEY"nimum Usable Power"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      maxPowerTxt =
+         new wxStaticText( this, ID_TEXT, gmatwxT("Ma"GUI_ACCEL_KEY"ximum Usable Power"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      minPowerTxtCtrl =
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
+                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      maxPowerTxtCtrl =
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
+                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+      minPowerUnits =
+         new wxStaticText(this, ID_TEXT, gmatwxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
+      maxPowerUnits =
+         new wxStaticText(this, ID_TEXT, gmatwxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
+
+      // Efficiency and ISP and Constant Thrust
+      efficiencyTxt =
+         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Fixed Efficiency"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      ispTxt =
+         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Isp"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      constantThrustTxt =
+         new wxStaticText( this, ID_TEXT, gmatwxT(""GUI_ACCEL_KEY"Constant Thrust"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      efficiencyTxtCtrl =
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
+                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      ispTxtCtrl =
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
+                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+      constantThrustTxtCtrl =
+         new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
+                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+
+      efficiencyUnits =
+         new wxStaticText(this, ID_TEXT, gmatwxT(""), wxDefaultPosition, wxDefaultSize, 0);
+      ispUnits =
+         new wxStaticText(this, ID_TEXT, gmatwxT("s"), wxDefaultPosition, wxDefaultSize, 0);
+      constantThrustUnits =
+         new wxStaticText(this, ID_TEXT, gmatwxT("N"), wxDefaultPosition, wxDefaultSize, 0);
+
+      wxFlexGridSizer *electricSizer = new wxFlexGridSizer(3, 0, 0);
+      electricSizer->Add(thrustModelTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(thrustModelCB, 0, wxALIGN_LEFT|wxALL, bsize);
+      electricSizer->Add(20,20);
+      electricSizer->Add(minPowerTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(minPowerTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(minPowerUnits, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(maxPowerTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(maxPowerTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(maxPowerUnits, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(efficiencyTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(efficiencyTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(efficiencyUnits, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(ispTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(ispTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(ispUnits, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(constantThrustTxt, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(constantThrustTxtCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+      electricSizer->Add(constantThrustUnits, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+
+      electricBoxSizer->Add(electricSizer, 0, wxALIGN_CENTER|wxALL, 0);
+   }
+
    //-----------------------------------------------------------------
    // add to page sizer
    //-----------------------------------------------------------------
@@ -355,7 +466,13 @@ void BurnThrusterPanel::Create()
    pageSizer->Add(massBoxSizer, 0, wxALIGN_CENTER|wxGROW|wxALL, bsize);
    
    if (theObject->IsOfType(Gmat::THRUSTER))
+   {
+      if (theObject->IsOfType("ElectricThruster"))
+      {
+         pageSizer->Add(electricBoxSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+      }
       pageSizer->Add(coefSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   }
    
    theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
@@ -438,7 +555,7 @@ void BurnThrusterPanel::LoadData()
       else
       {
          tankName = tanks[0];
-         tankComboBox->SetValue(tankName.c_str());
+         tankComboBox->SetValue(STD_TO_WX_STRING(tankName.c_str()));
          isTankEmpty = false;
       }
       
@@ -471,36 +588,73 @@ void BurnThrusterPanel::LoadData()
 
       if (theObject->IsOfType(Gmat::THRUSTER))
       {
-         // Get the initial values for the coefficients
-         Integer cParamID  = 0;
-         Integer kParamID  = 0;
-         Integer coefCount = Thruster::COEFFICIENT_COUNT;
-         std::stringstream cStrings("");
-         std::stringstream kStrings("");
-         Real cVal, kVal;
-         for (Integer ii = 0; ii < coefCount; ii++)
+         if (theObject->IsOfType("ChemicalThruster"))
          {
-            cStrings << "C" << ii + 1;
-            cParamID = theObject->GetParameterID(cStrings.str());
-            cVal     = theObject->GetRealParameter(cParamID);
-            #ifdef DEBUG_BURNPANEL_LOAD
-               MessageInterface::ShowMessage("Loading: %s =  %lf\n", cStrings.str().c_str(), cVal);
-            #endif
-            cCoefs.push_back(cVal);
-            cCoefNames.push_back(cStrings.str());
-            cStrings.str("");
+            // Get the initial values for the coefficients
+            Integer cParamID  = 0;
+            Integer kParamID  = 0;
+            Integer coefCount = ChemicalThruster::COEFFICIENT_COUNT;
+            std::stringstream cStrings("");
+            std::stringstream kStrings("");
+            Real cVal, kVal;
+            for (Integer ii = 0; ii < coefCount; ii++)
+            {
+               cStrings << "C" << ii + 1;
+               cParamID = theObject->GetParameterID(cStrings.str());
+               cVal     = theObject->GetRealParameter(cParamID);
+               #ifdef DEBUG_BURNPANEL_LOAD
+                  MessageInterface::ShowMessage("Loading: %s =  %lf\n", cStrings.str().c_str(), cVal);
+               #endif
+               cCoefs.push_back(cVal);
+               cCoefNames.push_back(cStrings.str());
+               cStrings.str("");
+            }
+            for (Integer ii = 0; ii < coefCount; ii++)
+            {
+               kStrings << "K" << ii + 1;
+               kParamID = theObject->GetParameterID(kStrings.str());
+               kVal     = theObject->GetRealParameter(kParamID);
+               #ifdef DEBUG_BURNPANEL_LOAD
+                  MessageInterface::ShowMessage("Loading: %s =  %lf\n", kStrings.str().c_str(), kVal);
+               #endif
+               kCoefs.push_back(kVal);
+               kCoefNames.push_back(kStrings.str());
+               kStrings.str("");
+            }
          }
-         for (Integer ii = 0; ii < coefCount; ii++)
+         else // Electric Thruster
          {
-            kStrings << "K" << ii + 1;
-            kParamID = theObject->GetParameterID(kStrings.str());
-            kVal     = theObject->GetRealParameter(kParamID);
-            #ifdef DEBUG_BURNPANEL_LOAD
-               MessageInterface::ShowMessage("Loading: %s =  %lf\n", kStrings.str().c_str(), kVal);
-            #endif
-            kCoefs.push_back(kVal);
-            kCoefNames.push_back(kStrings.str());
-            kStrings.str("");
+            // Get the initial values for the coefficients
+            Integer tParamID  = 0;
+            Integer mfParamID = 0;
+            Integer coefCount = ElectricThruster::ELECTRIC_COEFF_COUNT;
+            std::stringstream tStrings("");
+            std::stringstream mfStrings("");
+            Real tVal, mfVal;
+            for (Integer ii = 0; ii < coefCount; ii++)
+            {
+               tStrings << "ThrustCoeff" << ii + 1;
+               tParamID = theObject->GetParameterID(tStrings.str());
+               tVal     = theObject->GetRealParameter(tParamID);
+               #ifdef DEBUG_BURNPANEL_LOAD
+                  MessageInterface::ShowMessage("Loading: %s =  %lf\n", tStrings.str().c_str(), tVal);
+               #endif
+               tCoefs.push_back(tVal);
+               tCoefNames.push_back(tStrings.str());
+               tStrings.str("");
+            }
+            for (Integer ii = 0; ii < coefCount; ii++)
+            {
+               mfStrings << "MassFlowCoeff" << ii + 1;
+               mfParamID = theObject->GetParameterID(mfStrings.str());
+               mfVal     = theObject->GetRealParameter(mfParamID);
+               #ifdef DEBUG_BURNPANEL_LOAD
+                  MessageInterface::ShowMessage("Loading: %s =  %lf\n", mfStrings.str().c_str(), mfVal);
+               #endif
+               mfCoefs.push_back(mfVal);
+               mfCoefNames.push_back(mfStrings.str());
+               mfStrings.str("");
+            }
          }
       }
 
@@ -598,13 +752,13 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
       {
          // Origin
          paramID = theObject->GetParameterID("Origin");
-         theObject->SetStringParameter(paramID, originComboBox->GetValue().c_str());
+         theObject->SetStringParameter(paramID, originComboBox->GetValue().WX_TO_STD_STRING);
          
          // Axes
          paramID = theObject->GetParameterID("Axes");
-         theObject->SetStringParameter(paramID, axesComboBox->GetValue().c_str());
+         theObject->SetStringParameter(paramID, axesComboBox->GetValue().WX_TO_STD_STRING);
 
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -649,36 +803,69 @@ void BurnThrusterPanel::SaveData(GmatBase *theObject)
          
          if (theObject->TakeAction("ClearTanks", ""))
             if (tankName != "")
-               theObject->SetStringParameter(paramID, tankName.c_str());
+               theObject->SetStringParameter(paramID, tankName);
       }
 
       if (theObject->IsOfType(Gmat::THRUSTER))
       {
-         // Save C Coefficients
-         if (areCCoefsChanged)
+         if (theObject->IsOfType("ChemicalThruster"))
          {
-            unsigned int coefSize = cCoefs.size();
-            for (unsigned int i = 0; i < coefSize; i++)
+            // Save C Coefficients
+            if (areCCoefsChanged)
             {
-               #ifdef DEBUG_BURNPANEL_SAVE_COEFS
-                  MessageInterface::ShowMessage("Saving %s with value %lf\n", cCoefNames[i].c_str(), cCoefs[i]);
-               #endif
-               paramID = theObject->GetParameterID(cCoefNames[i]);
-               theObject->SetRealParameter(paramID, cCoefs[i]);
+               unsigned int coefSize = cCoefs.size();
+               for (unsigned int i = 0; i < coefSize; i++)
+               {
+                  #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+                     MessageInterface::ShowMessage("Saving %s with value %lf\n", cCoefNames[i].c_str(), cCoefs[i]);
+                  #endif
+                  paramID = theObject->GetParameterID(cCoefNames[i]);
+                  theObject->SetRealParameter(paramID, cCoefs[i]);
+               }
+            }
+
+            // Save K Coefficients
+            if (areKCoefsChanged)
+            {
+               unsigned int coefSize = kCoefs.size();
+               for (unsigned int i = 0; i < coefSize; i++)
+               {
+                  #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+                     MessageInterface::ShowMessage("Saving %s with value %lf\n", kCoefNames[i].c_str(), kCoefs[i]);
+                  #endif
+                  paramID = theObject->GetParameterID(kCoefNames[i]);
+                  theObject->SetRealParameter(paramID, kCoefs[i]);
+               }
             }
          }
-
-         // Save K Coefficients
-         if (areKCoefsChanged)
+         else // ElectricThruster
          {
-            unsigned int coefSize = kCoefs.size();
-            for (unsigned int i = 0; i < coefSize; i++)
+            // Save T Coefficients
+            if (areTCoefsChanged)
             {
-               #ifdef DEBUG_BURNPANEL_SAVE_COEFS
-                  MessageInterface::ShowMessage("Saving %s with value %lf\n", kCoefNames[i].c_str(), kCoefs[i]);
-               #endif
-               paramID = theObject->GetParameterID(kCoefNames[i]);
-               theObject->SetRealParameter(paramID, kCoefs[i]);
+               unsigned int coefSize = tCoefs.size();
+               for (unsigned int i = 0; i < coefSize; i++)
+               {
+                  #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+                     MessageInterface::ShowMessage("Saving %s with value %lf\n", tCoefNames[i].c_str(), tCoefs[i]);
+                  #endif
+                  paramID = theObject->GetParameterID(tCoefNames[i]);
+                  theObject->SetRealParameter(paramID, tCoefs[i]);
+               }
+            }
+
+            // Save MF Coefficients
+            if (areMFCoefsChanged)
+            {
+               unsigned int coefSize = mfCoefs.size();
+               for (unsigned int i = 0; i < coefSize; i++)
+               {
+                  #ifdef DEBUG_BURNPANEL_SAVE_COEFS
+                     MessageInterface::ShowMessage("Saving %s with value %lf\n", mfCoefNames[i].c_str(), mfCoefs[i]);
+                  #endif
+                  paramID = theObject->GetParameterID(mfCoefNames[i]);
+                  theObject->SetRealParameter(paramID, mfCoefs[i]);
+               }
             }
          }
       }
@@ -762,7 +949,7 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    else if (event.GetEventObject() == tankComboBox)
    {
       isTankChanged = true;
-      tankName = tankComboBox->GetStringSelection().c_str();
+      tankName = tankComboBox->GetStringSelection().WX_TO_STD_STRING;
       if (tankName == "No Fuel Tank Selected")
          tankName = "";
       
@@ -775,11 +962,11 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
    }
    else if (event.GetEventObject() == axesComboBox)
    {
-      std::string csName = coordSysComboBox->GetStringSelection().c_str();
-
+      std::string csName = coordSysComboBox->GetStringSelection().WX_TO_STD_STRING;
+      
       if (csName == "Local")
       {
-         std::string axisValue = axesComboBox->GetValue().c_str();
+         std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
          if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
          {
             originLabel->Disable();
@@ -792,6 +979,14 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
          }
       }
    }
+   // thrustModelCB will be NULL if the thruster is not Electric
+   else if (event.GetEventObject() == thrustModelCB)
+   {
+      thrustModel = thrustModelCB->GetStringSelection().c_str();
+      EnableDataForThrustModel(thrustModel);
+      isThrustModelChanged =  true;
+      EnableUpdate(true);
+   }
 }
 
 
@@ -800,34 +995,89 @@ void BurnThrusterPanel::OnComboBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void BurnThrusterPanel::OnButtonClick(wxCommandEvent &event)
 {  
-   bool isModified = false;
-   if (event.GetEventObject() == cCoefButton)
+//   bool isModified = false;
+//   if (event.GetEventObject() == cCoefButton)
+//   {
+//      ThrusterCoefficientDialog tcDlg(this, -1, "ThrusterCoefficientDialog", theObject, "C", cCoefs);
+//      tcDlg.ShowModal();
+//      isModified = tcDlg.AreCoefsSaved();
+//      if (isModified)
+//      {
+//         cCoefs.clear();
+//         cCoefs      = tcDlg.GetCoefValues();
+//
+//         EnableUpdate(true);
+//      }
+//      areCCoefsChanged = areCCoefsChanged || isModified;
+//   }
+//   else if (event.GetEventObject() == kCoefButton)
+//   {
+//      ThrusterCoefficientDialog tcDlg(this, -1, "ImpulseCoefficientDialog", theObject, "K", kCoefs);
+//      tcDlg.ShowModal();
+//      isModified = tcDlg.AreCoefsSaved();
+//      if (isModified)
+//      {
+//         kCoefs.clear();
+//         kCoefs      = tcDlg.GetCoefValues();
+//
+//         EnableUpdate(true);
+//      }
+//      areKCoefsChanged = areKCoefsChanged || isModified;
+//   }
+
+   if (theObject->IsOfType("ChemicalThruster"))
    {
-      ThrusterCoefficientDialog tcDlg(this, -1, "ThrusterCoefficientDialog", theObject, "C", cCoefs);
+      ThrusterCoefficientDialog tcDlg(this, -1, "Chemical Thruster Configuration",
+            theObject, ChemicalThruster::COEFFICIENT_COUNT, cCoefs, kCoefs);
       tcDlg.ShowModal();
-      isModified = tcDlg.AreCoefsSaved();
-      if (isModified)
+      bool cSaved = tcDlg.AreCoefs1Saved();
+      bool kSaved = tcDlg.AreCoefs2Saved();
+
+      if (cSaved)
       {
          cCoefs.clear();
-         cCoefs      = tcDlg.GetCoefValues();
+         cCoefs      = tcDlg.GetCoefs1Values();
 
          EnableUpdate(true);
       }
-      areCCoefsChanged = areCCoefsChanged || isModified;
-   }
-   else if (event.GetEventObject() == kCoefButton)
-   {
-      ThrusterCoefficientDialog tcDlg(this, -1, "ImpulseCoefficientDialog", theObject, "K", kCoefs);
-      tcDlg.ShowModal();
-      isModified = tcDlg.AreCoefsSaved();
-      if (isModified)
+      areCCoefsChanged = areCCoefsChanged || cSaved;
+
+      if (kSaved)
       {
          kCoefs.clear();
-         kCoefs      = tcDlg.GetCoefValues();
+         kCoefs      = tcDlg.GetCoefs2Values();
 
          EnableUpdate(true);
       }
-      areKCoefsChanged = areKCoefsChanged || isModified;
+      areKCoefsChanged = areKCoefsChanged || kSaved;
+   }
+   else // ElectricThruster
+   {
+//      MessageInterface::ShowMessage("Electric Thruster Configuration not yet implemented.\n");
+      ThrusterCoefficientDialog tcDlg(this, -1, "Electric Thruster Configuration",
+            theObject, ElectricThruster::ELECTRIC_COEFF_COUNT, tCoefs, mfCoefs);
+      tcDlg.ShowModal();
+
+      bool tSaved  = tcDlg.AreCoefs1Saved();
+      bool mfSaved = tcDlg.AreCoefs2Saved();
+
+      if (tSaved)
+      {
+         tCoefs.clear();
+         tCoefs      = tcDlg.GetCoefs1Values();
+
+         EnableUpdate(true);
+      }
+      areTCoefsChanged = areTCoefsChanged || tSaved;
+
+      if (mfSaved)
+      {
+         mfCoefs.clear();
+         mfCoefs      = tcDlg.GetCoefs2Values();
+
+         EnableUpdate(true);
+      }
+      areMFCoefsChanged = areMFCoefsChanged || mfSaved;
    }
 }
 
@@ -842,7 +1092,7 @@ void BurnThrusterPanel::UpdateOriginAxes()
       axisLabel->Enable();
       axesComboBox->Enable();
 
-      std::string axisValue = axesComboBox->GetValue().c_str();
+      std::string axisValue = axesComboBox->GetValue().WX_TO_STD_STRING;
 
       if ((axisValue == "MJ2000Eq") || (axisValue == "SpacecraftBody"))
       {
@@ -863,3 +1113,46 @@ void BurnThrusterPanel::UpdateOriginAxes()
       axesComboBox->Disable();
    }
 }
+
+//------------------------------------------------------------------------------
+// void EnableDataForThrustModel()
+//------------------------------------------------------------------------------
+void BurnThrusterPanel::EnableDataForThrustModel(const std::string &tModel)
+{
+   ispTxt->Enable();
+   ispTxtCtrl->Enable();
+   ispUnits->Enable();
+   constantThrustTxt->Enable();
+   constantThrustTxtCtrl->Enable();
+   constantThrustUnits->Enable();
+   efficiencyTxt->Enable();
+   efficiencyTxtCtrl->Enable();
+   efficiencyUnits->Enable();
+   configButton->Enable();
+
+   if (tModel != "ThrustMassPolynomial")
+      configButton->Disable();
+
+
+   if (tModel != "FixedEfficiency")
+   {
+      efficiencyTxt->Disable();
+      efficiencyTxtCtrl->Disable();
+      efficiencyUnits->Disable();
+   }
+
+   if (tModel != "ConstantThrustAndIsp")
+   {
+      constantThrustTxt->Disable();
+      constantThrustTxtCtrl->Disable();
+      constantThrustUnits->Disable();
+   }
+
+   if ((tModel != "FixedEfficiency") && (tModel != "ConstantThrustAndIsp"))
+   {
+      ispTxt->Disable();
+      ispTxtCtrl->Disable();
+      ispUnits->Disable();
+   }
+}
+

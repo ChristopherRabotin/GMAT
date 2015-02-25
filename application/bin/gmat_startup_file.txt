@@ -43,6 +43,7 @@
 #-----------------------------------------------------------
 # Default plugins
 PLUGIN                 = ../plugins/libEphemPropagator
+PLUGIN                 = ../plugins/libEventLocator
 PLUGIN                 = ../plugins/libFormation
 PLUGIN                 = ../plugins/libStation
 PLUGIN                 = ../plugins/libMatlabInterface
@@ -52,7 +53,6 @@ PLUGIN                 = ../plugins/libProductionPropagators
 
 # Alpha plugins
 PLUGIN                = ./libCInterface
-PLUGIN                = ../plugins/libEventLocator
 PLUGIN                = ../plugins/libExtraPropagators
 PLUGIN                = ../plugins/libGmatEstimation
 PLUGIN                = ../plugins/libGeometricMeasurements

@@ -81,10 +81,10 @@ public:
       //    Notes: Don't add general planet potential files here. They are handled
       //    when gmat_startup_file are read by following naming convention.
       DE405_FILE,
-      DE421_FILE,							// made change by TUAN NGUYEN
-      DE424_FILE,							// made change by TUAN NGUYEN
-      IAUSOFA_FILE,                 // made change by TUAN NGUYEN
-      ICRF_FILE,							// made change by TUAN NGUYEN
+      DE421_FILE,
+      DE424_FILE,
+      IAUSOFA_FILE,
+      ICRF_FILE,
       PLANETARY_SPK_FILE,
       JGM2_FILE,
       JGM3_FILE,
@@ -130,7 +130,7 @@ public:
    std::string FindPath(const std::string &fileName, const std::string &fileType,
                         bool forInput, bool writeWarning = false, bool writeInfo = false,
                         const std::string &objName = "");
-   std::string FindMainIconFile(bool writeInfo = true);
+   std::string FindMainIconFile(bool writeInfo = false);
    
    std::string GetPathSeparator();
    bool DoesDirectoryExist(const std::string &dirPath, bool isBlankOk = true);
@@ -138,13 +138,21 @@ public:
    bool RenameFile(const std::string &oldName, const std::string &newName,
                    Integer &retCode, bool overwriteIfExists = false);
    
+   // Methods for startup file
    std::string GetStartupFileDir();
    std::string GetStartupFileName();
    std::string GetFullStartupFilePath();
+   void ReadStartupFile(const char *fileName = "");
    void ReadStartupFile(const std::string &fileName = "");
+   void WriteStartupFile(const char *fileName = "");
    void WriteStartupFile(const std::string &fileName = "");
    
    std::string GetRootPath();
+   
+   // Methods for texture map file
+   bool GetTextureMapFile(const std::string &inFileName, const std::string &bodyName,
+                          const std::string &objName, std::string &outFileName,
+                          std::string &outFullPathName, bool writeWarning);
    
    // Methods returning path
    std::string GetPathname(const FileType type);
@@ -164,18 +172,27 @@ public:
    
    std::string ConvertToAbsPath(const std::string &relPath, bool appendPathSep = true);
    
+   void SetAbsPathname(const FileType type, const char *newpath);
    void SetAbsPathname(const FileType type, const std::string &newpath);
+   void SetAbsPathname(const std::string &type, const char *newpath);
    void SetAbsPathname(const std::string &type, const std::string &newpath);
    
    void ClearGmatFunctionPath();
+   void AddGmatFunctionPath(const char *path, bool addFront = true);
    void AddGmatFunctionPath(const std::string &path, bool addFront = true);
-   std::string GetGmatFunctionPath(const std::string &name);
+   std::string GetGmatFunctionPath(const char *funcName);
+   std::string GetGmatFunctionPath(const std::string &funcName);
    const StringArray& GetAllGmatFunctionPaths();
    
    void ClearMatlabFunctionPath();
+   void AddMatlabFunctionPath(const char* path, bool addFront = true);
    void AddMatlabFunctionPath(const std::string &path, bool addFront = true);
+   std::string GetMatlabFunctionPath(const char* name);
    std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
+   
+   // Warning/Error message
+   std::string GetLastFilePathMessage();
    
    // Plug-in code
    const StringArray& GetPluginList();
@@ -211,6 +228,8 @@ private:
    std::string mWriteParameterInfo;
    std::string mWriteFilePathInfo;
    std::string mWriteGmatKeyword;
+   std::string mLastFilePathMessage;
+   
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
    std::map<std::string, FileInfo*> mFileMap;

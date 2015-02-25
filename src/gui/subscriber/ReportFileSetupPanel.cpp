@@ -27,7 +27,9 @@
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
 #include <fstream>
-
+#if wxCHECK_VERSION(3, 0, 0)
+#include <wx/valnum.h>
+#endif
 
 //#define DEBUG_REPORTFILE_PANEL 1
 //#define DEBUG_REPORTFILE_PANEL_LOAD 1
@@ -252,14 +254,22 @@ void ReportFileSetupPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    colWidthTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(35, -1),  0);
+                                     wxDefaultPosition, wxSize(35, -1),  0
+#if wxCHECK_VERSION(3, 0, 0) 
+									 ,wxIntegerValidator<unsigned short>() 
+#endif
+									 );
    
    wxStaticText *precisionText =
       new wxStaticText(this, -1, wxT("Precision"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    precisionTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(35, -1),  0);
+                                     wxDefaultPosition, wxSize(35, -1),  0
+#if wxCHECK_VERSION(3, 0, 0) 
+									 , wxIntegerValidator<unsigned short>() 
+#endif
+									 );
    
    wxFlexGridSizer *option2Sizer = new wxFlexGridSizer(2);
    option2Sizer->Add(writeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -365,7 +375,8 @@ void ReportFileSetupPanel::LoadData()
       
       Integer id;
       
-      mFileTextCtrl->SetValue(wxT(filename.c_str()));
+      //mFileTextCtrl->SetValue(wxT(filename.c_str()));
+      mFileTextCtrl->SetValue(STD_TO_WX_STRING(filename.c_str()));
       
       #if DEBUG_REPORTFILE_PANEL_LOAD
       MessageInterface::ShowMessage
@@ -476,7 +487,6 @@ void ReportFileSetupPanel::SaveData()
        mHasParameterChanged, mHasBoolDataChanged);
    #endif
    
-   canClose = true;
    std::string str;
    Integer width, prec;
    char delimiter;
@@ -486,13 +496,21 @@ void ReportFileSetupPanel::SaveData()
    //-----------------------------------------------------------------
    
    str = colWidthTextCtrl->GetValue();
-   CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   width = reportFile->GetIntegerParameter(reportFile->GetParameterID("ColumnWidth"));
+   canClose = CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   if (!canClose)
+      return;
    
    str = precisionTextCtrl->GetValue();
-   CheckInteger(prec, str, "Precision", "Integer Number > 0");
+   prec = reportFile->GetIntegerParameter(reportFile->GetParameterID("Precision"));
+   canClose = CheckInteger(prec, str, "Precision", "Integer Number > 0");
+   if (!canClose)
+      return;
    
    str = mFileTextCtrl->GetValue();
-   CheckFileName(str, "Filename");
+   canClose = CheckFileName(str, "Filename");
+   if (!canClose)
+      return;
    
    str = delimiterComboBox->GetValue();
    str = GmatStringUtil::ToUpper(str);
@@ -504,6 +522,8 @@ void ReportFileSetupPanel::SaveData()
      str = ",";
    else if (str == "SEMICOLON") 
      str = ";";
+   else
+	 str = delimiterComboBox->GetValue();
    canClose = CheckLength(str, "Delimiter", "Length = 1", 1, 1);
    if (canClose)
 	 delimiter = str[0];
@@ -514,10 +534,10 @@ void ReportFileSetupPanel::SaveData()
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
+   GmatBase *clonedObj = reportFile->Clone();
    try
    {
       Integer id;
-      GmatBase *clonedObj = reportFile->Clone();
       
       if (mHasBoolDataChanged)
       {
@@ -583,7 +603,7 @@ void ReportFileSetupPanel::SaveData()
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "Appended .txt to file name '%s'\n", filename.c_str());
          filename = filename + ".txt";
-         mFileTextCtrl->SetValue(wxT(filename.c_str()));
+         mFileTextCtrl->SetValue(STD_TO_WX_STRING(filename.c_str()));
       }
       
       id = clonedObj->GetParameterID("Filename");
@@ -604,7 +624,7 @@ void ReportFileSetupPanel::SaveData()
             clonedObj->TakeAction("Clear");
             for (int i=0; i<mNumParameters; i++)
             {
-               std::string selYName = mSelectedListBox->GetString(i).c_str();
+               std::string selYName = mSelectedListBox->GetString(i).WX_TO_STD_STRING;
                clonedObj->SetStringParameter("Add", selYName, i);
             }
          }
@@ -613,14 +633,15 @@ void ReportFileSetupPanel::SaveData()
       }
       
       reportFile->Copy(clonedObj);
-      delete clonedObj;
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
-      return;
    }
+   
+   delete clonedObj;
+   return;
 }
 
 

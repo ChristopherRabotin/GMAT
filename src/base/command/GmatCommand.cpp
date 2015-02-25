@@ -137,7 +137,6 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    triggerManagers      (NULL),
    internalCoordSys     (NULL),
    forces               (NULL),
-   events               (NULL),
    publisher            (NULL),
    streamID             (-1),
    depthChange          (0),
@@ -292,7 +291,6 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    triggerManagers      (c.triggerManagers),
    internalCoordSys     (c.internalCoordSys),
    forces               (c.forces),
-   events               (c.events),
    publisher            (c.publisher),
    streamID             (c.streamID),
    depthChange          (c.depthChange),
@@ -360,11 +358,9 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    solarSys            = c.solarSys;
    internalCoordSys    = c.internalCoordSys;
    forces              = c.forces;
-   events              = c.events;
    publisher           = c.publisher;
    generatingString    = c.generatingString;
    streamID            = c.streamID;
-//   comment             = c.comment;
    commandChangedState = c.commandChangedState;
    commandSummary      = c.commandSummary;
    summaryCoordSysName = c.summaryCoordSysName;
@@ -855,6 +851,20 @@ void GmatCommand::SetupSummary(const std::string &csName, bool entireMission,
 }
 
 //------------------------------------------------------------------------------
+// void SetSummaryName(const char *sumName)
+//------------------------------------------------------------------------------
+/**
+ * Sets the name of the command summary
+ *
+ * @param sumName The name
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetSummaryName(const char *sumName)
+{
+   SetSummaryName(std::string(sumName));
+}
+
+//------------------------------------------------------------------------------
 // void SetSummaryName(const std::string &sumName)
 //------------------------------------------------------------------------------
 /**
@@ -952,23 +962,6 @@ void GmatCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 void GmatCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
-}
-
-
-//------------------------------------------------------------------------------
-//  void SetEventLocators(std::vector<EventLocator*> *els)
-//------------------------------------------------------------------------------
-/**
- * Passes the EventLocator collection into the commands that need them
- *
- * @param tf The vector of EventLocators
- *
- * @note The default behavior in the GmatCommands is to ignore the vector.
- */
-//------------------------------------------------------------------------------
-void GmatCommand::SetEventLocators(std::vector<EventLocator*> *els)
-{
-   events = els;
 }
 
 
@@ -1334,6 +1327,25 @@ std::string GmatCommand::GetStringParameter(const std::string &label,
                                             const Integer index) const
 {
    return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const char *value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ *
+ * @param label The (string) label for the parameter.
+ * @param value New value for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SetStringParameter(const std::string &label, 
+                                     const char *value)
+{
+   return SetStringParameter(GetParameterID(label), std::string(value));
 }
 
 
@@ -3061,24 +3073,33 @@ void GmatCommand::InsertCommandName(std::string &genString)
 //------------------------------------------------------------------------------
 void GmatCommand::ShowCommand(const std::string &prefix,
                               const std::string &title1, GmatCommand *cmd1,
-                              const std::string &title2, GmatCommand *cmd2)
+                              const std::string &title2, GmatCommand *cmd2,
+                              bool showDetail)
 {
    if (title2 == "")
    {
+      std::string cmdStr1;
+      if (showDetail)
+         cmdStr1 = cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
       MessageInterface::ShowMessage
          ("%s%s: %s<%p><%s>[%s]\n", prefix.c_str(), this->GetTypeName().c_str(),
-          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
-          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
+          title1.c_str(), cmd1, cmd1 ? cmd1->GetTypeName().c_str() : "NULL", cmdStr1.c_str());
    }
    else
    {
+      std::string cmdStr1, cmdStr2;
+      std::string sepStr = "";
+      if (showDetail)
+      {
+         cmdStr1 = cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
+         cmdStr2 = cmd2 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL";
+         sepStr = "\n";
+      }
       MessageInterface::ShowMessage
-         ("%s%s:\n   %s<%p><%s>[%s]\n   %s<%p><%s>[%s]\n", prefix.c_str(),
+         ("%s%s:\n   %s<%p><%s>[%s]%s   %s<%p><%s>[%s]\n", prefix.c_str(),
           this->GetTypeName().c_str(), title1.c_str(), cmd1,
-          cmd1 ? cmd1->GetTypeName().c_str() : "NULL",
-          cmd1 ? cmd1->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL",
-          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL",
-          cmd2 ? cmd2->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
+          cmd1 ? cmd1->GetTypeName().c_str() : "NULL", cmdStr1.c_str(), sepStr.c_str(),
+          title2.c_str(), cmd2, cmd2 ? cmd2->GetTypeName().c_str() : "NULL", cmdStr2.c_str());
    }
 }
 

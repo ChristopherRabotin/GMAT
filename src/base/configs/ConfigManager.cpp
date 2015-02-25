@@ -27,6 +27,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_SS 1
+//#define DEBUG_CONFIG_ADD
 //#define DEBUG_CONFIG_ADD_CLONE 1
 //#define DEBUG_CONFIG_REMOVE
 //#define DEBUG_CONFIG_REMOVE_MORE
@@ -695,6 +696,32 @@ void ConfigManager::AddMeasurement(CoreMeasurement *meas)
          "should be hidden inside of a MeasurementModel", name.c_str());
    AddObject(obj);
 }
+
+
+//------------------------------------------------------------------------------
+// void AddErrorModel(ErrorModel *errorModel)
+//------------------------------------------------------------------------------
+/**
+ * Adds a ErrorModel to the configuration.
+ *
+ * @param errorModel Pointer to the ErrorModel instance.
+ */
+//------------------------------------------------------------------------------
+void ConfigManager::AddErrorModel(ErrorModel *errorModel)                              // made changes by TUAN NGUYEN
+{                                                                                      // made changes by TUAN NGUYEN
+   if (errorModel == NULL)                                                             // made changes by TUAN NGUYEN
+      throw ConfigManagerException("Cannot add NULL ErrorModel object");               // made changes by TUAN NGUYEN
+
+   GmatBase *obj = (GmatBase*)errorModel;                                              // made changes by TUAN NGUYEN
+   std::string name = obj->GetName();                                                  // made changes by TUAN NGUYEN
+   if (name == "")                                                                     // made changes by TUAN NGUYEN
+      throw ConfigManagerException("Unnamed objects cannot be managed");               // made changes by TUAN NGUYEN
+
+   if (!obj->IsOfType(Gmat::ERROR_MODEL))                                              // made changes by TUAN NGUYEN
+      throw ConfigManagerException(name + " is not an ErrorModel");                    // made changes by TUAN NGUYEN
+
+   AddObject(obj);                                                                     // made changes by TUAN NGUYEN
+}                                                                                      // made changes by TUAN NGUYEN
 
 
 //------------------------------------------------------------------------------
@@ -2411,6 +2438,32 @@ MeasurementModelBase* ConfigManager::GetMeasurementModel(const std::string &name
    }
    return mm;
 }
+
+
+//------------------------------------------------------------------------------
+// ErrorModel* GetErrorModel(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an error model from the configuration
+ *
+ * @param name The name of the ErrorModel
+ *
+ * @return A pointer to the ErrorModel, or NULL if it was not found
+ */
+//------------------------------------------------------------------------------
+ErrorModel* ConfigManager::GetErrorModel(const std::string &name)                 // made changes by TUAN NGUYEN
+{                                                                                 // made changes by TUAN NGUYEN
+   ErrorModel *erm = NULL;                                                        // made changes by TUAN NGUYEN
+   if (mapping.find(name) != mapping.end())                                       // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      if (mapping[name]->IsOfType(Gmat::ERROR_MODEL))                             // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         erm = (ErrorModel *)mapping[name];                                       // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+   return erm;                                                                    // made changes by TUAN NGUYEN
+}                                                                                 // made changes by TUAN NGUYEN
+
 
 //------------------------------------------------------------------------------
 // TrackingSystem* GetTrackingSystem(const std::string &name)

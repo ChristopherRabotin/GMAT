@@ -81,6 +81,15 @@ void GuiInterpreter::Finalize()
 
 
 //------------------------------------------------------------------------------
+// GmatBase* GetRunningObject(const char *name)
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::GetRunningObject(const char *name)
+{
+   return theModerator->GetInternalObject(std::string(name));
+}
+
+
+//------------------------------------------------------------------------------
 // GmatBase* GetRunningObject(const std::string &name)
 //------------------------------------------------------------------------------
 GmatBase* GuiInterpreter::GetRunningObject(const std::string &name)
@@ -103,9 +112,8 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
    return theModerator->GetListOfAllFactoryItems();
 }
 
-
 //------------------------------------------------------------------------------
-// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type)
+// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type, const char *qualifier)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all creatable items of object type.
@@ -115,7 +123,27 @@ const StringArray& GuiInterpreter::GetListOfAllFactoryItems()
  * @return array of item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type, const std::string &qualifier)
+const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type,
+                                                         const char *qualifier)
+{
+   return theModerator->GetListOfFactoryItems(type, std::string(qualifier));
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type,
+//                                          const std::string &qualifier = "")
+//------------------------------------------------------------------------------
+/**
+ * Returns names of all creatable items of object type.
+ *
+ * @param <type> object type
+ *
+ * @return array of item names; return empty array if none
+ */
+//------------------------------------------------------------------------------
+const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type,
+                                                         const std::string &qualifier)
 {
    return theModerator->GetListOfFactoryItems(type, qualifier);
 }
@@ -222,6 +250,27 @@ GmatBase* GuiInterpreter::AddClone(const std::string &name, std::string &cloneNa
 
 
 //------------------------------------------------------------------------------
+// bool RenameObject(Gmat::ObjectType type, const char *oldName
+//                   const char *newName)
+//------------------------------------------------------------------------------
+/**
+ * Renames item from the configured list.
+ *
+ * @param <type> object type
+ * @param <oldName>  old object name
+ * @param <newName>  new object name
+ *
+ * @return true if the item has been removed; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::RenameObject(Gmat::ObjectType type, const char *oldName,
+                                  const char *newName)
+{
+   return theModerator->RenameObject(type, std::string(oldName), std::string(newName));
+}
+
+
+//------------------------------------------------------------------------------
 // bool RenameObject(Gmat::ObjectType type, const std::string &oldName
 //                   const std::string &newName)
 //------------------------------------------------------------------------------
@@ -261,6 +310,23 @@ bool GuiInterpreter::RemoveObject(Gmat::ObjectType type,
    return theModerator->RemoveObject(type, name, false);
 }
 
+//------------------------------------------------------------------------------
+// bool RemoveItemIfNotUsed(Gmat::ObjectType type, const char *name)
+//------------------------------------------------------------------------------
+/**
+ * Removes item from the configured list if it is not used in the mission
+ * sequence.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return true if the item has been removed; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::RemoveObjectIfNotUsed(Gmat::ObjectType type, const char *name)
+{
+   return theModerator->RemoveObject(type, std::string(name), true);
+}
 
 //------------------------------------------------------------------------------
 // bool RemoveItemIfNotUsed(Gmat::ObjectType type, const std::string &name)
@@ -330,6 +396,35 @@ void GuiInterpreter::ResetConfigurationChanged(bool resetResource,
    theModerator->ResetConfigurationChanged(resetResource, resetCommands, sandboxNum);
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const char *type, const std::string &name,
+//                        Integer manage, bool createDefault)
+//------------------------------------------------------------------------------
+/**
+ * @see CreateObject(const std::string &type, ...)
+ */
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::CreateObject(const char *type,
+                                       const std::string &name,
+                                       Integer manage, bool createDefault)
+{
+   return CreateObject(std::string(type), name, manage, createDefault);
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* CreateObject(const char *type, const char *name,
+//                        Integer manage, bool createDefault)
+//------------------------------------------------------------------------------
+/**
+ * @see CreateObject(const std::string &type, ...)
+ */
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::CreateObject(const char *type,
+                                       const char *name,
+                                       Integer manage, bool createDefault)
+{
+   return CreateObject(std::string(type), name, manage, createDefault);
+}
 
 //------------------------------------------------------------------------------
 // GmatBase* CreateObject(const std::string &type, const std::string &name,
@@ -406,6 +501,21 @@ SolarSystem* GuiInterpreter::GetSolarSystemInUse()
    return theModerator->GetSolarSystemInUse();
 }
 
+//------------------------------------------------------------------------------
+// Parameter* GetParameter(const char *name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a parameter object pointer by given name.
+ *
+ * @param <name> object name
+ *
+ * @return a parameter object pointer, return null if name not found
+ */
+//------------------------------------------------------------------------------
+Parameter* GuiInterpreter::GetParameter(const char *name)
+{
+   return theModerator->GetParameter(std::string(name));
+}
 
 //------------------------------------------------------------------------------
 // Parameter* GetParameter(const std::string &name)
@@ -726,6 +836,27 @@ GmatBase* GuiInterpreter::CreateStopCondition(const std::string &type,
 
 
 //------------------------------------------------------------------------------
+// GmatCommand* CreateDefaultCommand(const char *type,
+//                                   const std::string &name = "",
+//                                   const GmatCommand *refCmd = NULL)
+//------------------------------------------------------------------------------
+/**
+ * Creates a default command object by given type and name.
+ *
+ * @param <type> command type
+ * @param <name> command name
+ *
+ * @return a command object pointer
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GuiInterpreter::CreateDefaultCommand(const char *type,
+                                                  const std::string &name,
+                                                  GmatCommand *refCmd)
+{
+   return CreateDefaultCommand(std::string(type), name, refCmd);
+}
+
+//------------------------------------------------------------------------------
 // GmatCommand* CreateDefaultCommand(const std::string &type,
 //                                   const std::string &name = "",
 //                                   const GmatCommand *refCmd = NULL)
@@ -901,12 +1032,49 @@ Integer GuiInterpreter::RunMission(Integer sandboxNum)
  * @param <snadobxNum> sandbox number
  *
  * @return a status code
- *    0 = successful, <0 = error (tbd)
+ *    1 = successful, <0 = error (tbd)
  */
 //------------------------------------------------------------------------------
 Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
    return theModerator->ChangeRunState(state, sandboxNum);
+}
+
+
+//------------------------------------------------------------------------------
+// bool InterpretScript(const char *filename, bool readBack = false,
+//                      const char *newPath = "")
+//------------------------------------------------------------------------------
+/**
+ * Creates objects from script file.
+ *
+ * @param <filename> input script file name
+ * @param <readBack> true will read scripts, save, and read back in
+ * @param <newPath> new path to be used for saving scripts
+ *
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::InterpretScript(const char *filename, bool readBack,
+                                     const char *newPath)
+{
+   return theModerator->InterpretScript(std::string(filename), readBack,
+                                        std::string(newPath));
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::RunState GetDetailedRunState(Integer sandboxNum)
+//------------------------------------------------------------------------------
+/**
+ * Calls Moderator to to get detailed run state.
+ *
+ * @return detailed run state
+ */
+//------------------------------------------------------------------------------
+Gmat::RunState GuiInterpreter::GetDetailedRunState(Integer sandboxNum)
+{
+   return theModerator->GetDetailedRunState(sandboxNum);
 }
 
 

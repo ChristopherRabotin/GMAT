@@ -44,7 +44,7 @@ Event::Event(const std::string &type, const std::string &name) :
    GmatBase             (Gmat::EVENT, type, name),
    depth                (2),
    nyquist              (1.0e-99),
-   tolerance            (1.0e-5),		// (1.0e-7),		// made changes by TUAN NGUYEN: Notice that: when tolerance is small, the result of light time range may oscillate.
+   tolerance            (1.0e-5),		// (1.0e-7),		// Notice that: when tolerance is small, the result of light time range may oscillate.
    maxAttempts          (50),
    estimatedEpoch       (0.0),
    status               (SEEKING),
@@ -55,9 +55,9 @@ Event::Event(const std::string &type, const std::string &name) :
    bufferIndex          (0),
    bufferFillCount      (0),
    j2k                  (NULL),
-   useRelativityCorrection (false),							// made changes by TUAN NGUYEN
-//   useETMinusTAICorrection (false),							// made changes by TUAN NGUYEN
-   solarSystem			(NULL)								// made changes by TUAN NGUYEN
+   useRelativityCorrection (false),
+//   useETMinusTAICorrection (false),
+   solarSystem			(NULL)
 {
 }
 
@@ -100,9 +100,9 @@ Event::Event(const Event& ev) :
    bufferIndex          (0),
    bufferFillCount      (0),
    j2k                  (NULL),
-   useRelativityCorrection (ev.useRelativityCorrection),	// made changes by TUAN NGUYEN
-//   useETMinusTAICorrection (ev.useETMinusTAICorrection),	// made changes by TUAN NGUYEN
-   solarSystem			(ev.solarSystem)					// made changes by TUAN NGUYEN
+   useRelativityCorrection (ev.useRelativityCorrection),
+//   useETMinusTAICorrection (ev.useETMinusTAICorrection),
+   solarSystem			(ev.solarSystem)
 {
    for (UnsignedInt i = 0; i < ev.participantCS.size(); ++i)
       participantCS.push_back(ev.participantCS[i]);
@@ -134,9 +134,9 @@ Event& Event::operator=(const Event& ev)
       bufferIndex          = 0;
       bufferFillCount      = 0;
       j2k                  = NULL;
-	  useRelativityCorrection = ev.useRelativityCorrection;		// made changes by TUAN NGUYEN
-//	  useETMinusTAICorrection = ev.useETMinusTAICorrection;		// made changes by TUAN NGUYEN
-	  solarSystem          = ev.solarSystem;					// made changes by TUAN NGUYEN
+	  useRelativityCorrection = ev.useRelativityCorrection;
+//	  useETMinusTAICorrection = ev.useETMinusTAICorrection;
+	  solarSystem          = ev.solarSystem;
       nyquist              = ev.nyquist;
       tolerance            = ev.tolerance;
       maxAttempts          = ev.maxAttempts;
@@ -193,13 +193,29 @@ bool Event::Initialize()
 }
 
 
-// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem* ss)
+//------------------------------------------------------------------------------
+/**
+ * Set solar system to this Event object
+ *
+ * @param ss    a pointer to SolarSystem object
+ */
+//------------------------------------------------------------------------------
 void Event::SetSolarSystem(SolarSystem* ss)
 {
 	solarSystem = ss;
 }
 
-// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// void SetRelativityCorrection(bool useCorr)
+//------------------------------------------------------------------------------
+/**
+ * Set relativity correct option to this Event object
+ *
+ * @param useCorr    the option to use relativity correction
+ */
+//------------------------------------------------------------------------------
 void Event::SetRelativityCorrection(bool useCorr)
 {
 #ifdef DEBUG_SET_RELATIVITY_CORRECTION
@@ -212,19 +228,6 @@ void Event::SetRelativityCorrection(bool useCorr)
 #endif
 }
 
-//// made changes by TUAN NGUYEN
-//void Event::SetETMinusTAICorrection(bool useCorr)
-//{
-//#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
-//	MessageInterface::ShowMessage("Start Event::SetETMinusTAICorrection(%s)\n", (useCorr?"true":"false"));
-//#endif
-//
-//   useETMinusTAICorrection = useCorr;
-//
-//#ifdef DEBUG_SET_ETMINUSTAI_CORRECTION
-//	MessageInterface::ShowMessage("Exit Event::SetETMinusTAICorrection()\n");
-//#endif
-//}
 
 //------------------------------------------------------------------------------
 // void FixState(GmatBase* obj, bool lockState)
@@ -374,8 +377,8 @@ bool Event::CheckZero()
    // Implement the epoch guess; the default, here, just linear interpolates
    if (bufferFillCount == 1)
       for (UnsignedInt i = 0; i < value[0].size(); ++i)
-         //if (GmatMathUtil::Abs(value[0][i] < tolerance))  // "at" a zero			// made changes my TUAN NGUYEN
-		 if (GmatMathUtil::Abs(value[0][i]) < tolerance)  // "at" a zero			// made changes my TUAN NGUYEN
+         //if (GmatMathUtil::Abs(value[0][i] < tolerance))  // "at" a zero
+		 if (GmatMathUtil::Abs(value[0][i]) < tolerance)  // "at" a zero
             retval = true;
 
    if (bufferFillCount > 1)
@@ -755,7 +758,7 @@ void Event::StoreParticipantData(Integer whichOne, SpacePoint *obj,
       MessageInterface::ShowMessage("Event(%s)::StoreParticipantData(%d, <%p>, "
             "%.12lf)\n", instanceName.c_str(), whichOne, obj, when);
    #endif
-   participantData[whichOne].cs_origin = obj->GetJ2000Body();				// made changes by TUAN NGUYEN
+   participantData[whichOne].cs_origin = obj->GetJ2000Body();
    participantData[whichOne].epoch = when;
    participantData[whichOne].position = obj->GetMJ2000Position(when);
    participantData[whichOne].velocity = obj->GetMJ2000Velocity(when);

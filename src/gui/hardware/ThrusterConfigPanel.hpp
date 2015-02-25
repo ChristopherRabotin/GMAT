@@ -33,6 +33,8 @@ public:
    
 protected:
    
+   bool    isElectric;
+
    virtual void LoadData();
    virtual void SaveData();
    

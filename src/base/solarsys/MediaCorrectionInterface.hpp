@@ -29,11 +29,13 @@ class GMAT_API MediaCorrectionInterface: public GmatBase
 {
 public:
    MediaCorrectionInterface(const std::string &typeStr,
-						const std::string &nomme = "");
+                  const std::string &nomme = "");
    virtual ~MediaCorrectionInterface();
    MediaCorrectionInterface(const MediaCorrectionInterface& mdc);
    MediaCorrectionInterface& operator=(const MediaCorrectionInterface& mc);
    virtual GmatBase*    Clone() const;
+
+   virtual bool Initialize();                         // made changes by TUAN NGUYEN
 
    virtual bool SetModel(Integer mod);
    virtual bool SetModelName(std::string modName);
@@ -54,17 +56,20 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-	Integer model;
-	std::string modelName;
+   Integer model;
+   std::string modelName;
 
-	SolarSystem *solarSystem;
+   SolarSystem *solarSystem;
 
-	Real temperature;					// unit: K
-	Real pressure;						// unit: hPa
-	Real humidityFraction;				// unit: no unit. It's range is from 0 to 1
-	Real waveLength;					// unit: m
-	Real elevationAngle;				// unit: radian
-	Real range;							// unit: m
+   Real temperature;               // unit: K
+   Real pressure;                  // unit: hPa
+   Real humidityFraction;          // unit: no unit. It's range is from 0 to 1
+   Real waveLength;                // unit: m
+   Real elevationAngle;            // unit: radian
+   Real range;                     // unit: m
+
+   /// Contain path name of data folder. It needs for Ionosphere code to read ap.dat file and specify the epoch range   // made changes by TUAN NGUYEN
+   std::string     dataPath;                                                                                            // made changes by TUAN NGUYEN
 
 };
 

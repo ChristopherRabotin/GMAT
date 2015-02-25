@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "GmatConstants.hpp"
 #include "FileManager.hpp"
+#include "StringUtil.hpp"
 #include "MeasurementException.hpp"
 #include <sstream>
 
@@ -359,22 +360,29 @@ ObservationData* GmatODDopplerType::ReadObservation()
 
    Real defaultNoiseCovariance = 0.1;
 
-   // Skip header and comment lines
-   std::getline (theStream, str);
 
-   while ((str[0] == '%') || (!theStream.eof() && (str == "")))
+   // Do nothing when it is at the end of file
+   if (theStream.eof())
+      return NULL;
+
+   // Read a line when it is not end of file
+   std::getline (theStream, str);
+   
+   // Skip header and comment lines or empty lines
+   while ((str[0] == '%') || (GmatStringUtil::RemoveAllBlanks(str) == ""))
    {
       std::getline(theStream, str);
+
+      // Do nothing when it is at the end of file
+      if (theStream.eof())
+         return NULL;
    }
 
-   if (theStream.eof())
-   {
-      return NULL;
-   }
 
+   // Processing data in the line
    theLine << str;
    currentObs.Clear();
-   currentObs.dataFormat = "GMAT_ODDoppler";											// made changes by TUAN NGUYEN
+   currentObs.dataFormat = "GMAT_ODDoppler";
 
    // format: 21545.05439854615    Range    7000    GS2ID    ODSatID    2713.73185
    Real value;

@@ -278,18 +278,18 @@ void XyPlotSetupPanel::Create()
    // plot option
    //------------------------------------------------------
    showPlotCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Show "GUI_ACCEL_KEY"Plot"),
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show "GUI_ACCEL_KEY"Plot"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    showPlotCheckBox->SetToolTip(pConfig->Read(_T("ShowPlotHint")));
    
    showGridCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Show "GUI_ACCEL_KEY"Grid"),
+      new wxCheckBox(this, ID_CHECKBOX, gmatwxT("Show "GUI_ACCEL_KEY"Grid"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    showGridCheckBox->SetToolTip(pConfig->Read(_T("ShowGridHint")));
    
    //----- Solver Iteration ComboBox
    wxStaticText *solverIterLabel =
-      new wxStaticText(this, -1, wxT(GUI_ACCEL_KEY"Solver Iterations"),
+      new wxStaticText(this, -1, gmatwxT(GUI_ACCEL_KEY"Solver Iterations"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
    mSolverIterComboBox =
@@ -474,7 +474,7 @@ void XyPlotSetupPanel::SaveData()
       clonedObj->Activate(showPlotCheckBox->IsChecked());
       clonedObj->SetBooleanParameter(XyPlot::SHOW_GRID, showGridCheckBox->IsChecked());
       clonedObj->SetStringParameter(Subscriber::SOLVER_ITERATIONS,
-                                  mSolverIterComboBox->GetValue().c_str());
+                                    mSolverIterComboBox->GetValue().c_str());
       
       // set X parameter
       if (mXParamChanged)

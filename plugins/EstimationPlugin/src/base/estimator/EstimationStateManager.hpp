@@ -49,6 +49,9 @@ public:
    virtual bool               SetObject(GmatBase* obj);
    virtual bool               SetProperty(std::string prop);
    virtual bool               SetProperty(std::string, Integer);
+
+   virtual bool               IsPropertiesSetupCorrect();                      // made changes by TUAN NGUYEN
+
    virtual bool               SetProperty(std::string, GmatBase*);
    virtual bool               SetConsider(std::string prop);
    virtual bool               SetConsider(std::string, Integer);
@@ -73,7 +76,6 @@ public:
 
 //   void                       SolveFor(std::string whichOne = "");
 //   void                       Consider(std::string whichOne = "");
-
 
 protected:
    // Attributes

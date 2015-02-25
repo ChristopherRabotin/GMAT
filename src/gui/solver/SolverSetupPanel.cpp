@@ -193,7 +193,7 @@ void SolverSetupPanel::Setup(wxWindow *parent)
       if (theSolver->IsParameterReadOnly(i) == false)
       {
          propertyDescriptors.push_back(new wxStaticText(parent, ID_TEXT, 
-               wxT(theSolver->GetParameterText(i).c_str())));
+               wxString(theSolver->GetParameterText(i).c_str())));
          
          controlMap[theSolver->GetParameterText(i)] = j++;
 
@@ -305,7 +305,7 @@ void SolverSetupPanel::LoadControl(const std::string &label)
          break;
       
       case Gmat::STRING_TYPE:
-         valueString = wxT(theSolver->GetStringParameter(label).c_str());
+         valueString = wxString(theSolver->GetStringParameter(label).c_str());
          ((wxTextCtrl*)theControl)->ChangeValue(valueString);
          break;
 

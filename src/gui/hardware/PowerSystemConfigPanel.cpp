@@ -21,6 +21,7 @@
 #include "GmatStaticBoxSizer.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "TimeSystemConverter.hpp"
+#include "PowerSystem.hpp"
 #include "GmatDefaults.hpp"
 //#include <wx/variant.h>  // ??
 #include <wx/config.h>   // ??
@@ -155,7 +156,7 @@ void PowerSystemConfigPanel::Create()
    //-----------------------------------------------------------------
    // label for epoch format
    epochFormatTxt = new wxStaticText( this, ID_TEXT,
-      wxT("Epoch "GUI_ACCEL_KEY"Format"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+      "Epoch "GUI_ACCEL_KEY"Format", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
 
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox
@@ -165,7 +166,7 @@ void PowerSystemConfigPanel::Create()
 
    // label for epoch
    epochTxt = new wxStaticText( this, ID_TEXT,
-      wxT(""GUI_ACCEL_KEY"Initial Epoch"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+      ""GUI_ACCEL_KEY"Initial Epoch", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
 
    // textfield for the epoch value
    epochTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -174,7 +175,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for initial max power
    initPowerTxt = new wxStaticText( this, ID_TEXT,
-           wxT("Initial "GUI_ACCEL_KEY"Max Power"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+           "Initial "GUI_ACCEL_KEY"Max Power", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
    // textfield
    initPowerTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -185,7 +186,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for decay rate
    decayRateTxt = new wxStaticText( this, ID_TEXT,
-           wxT(""GUI_ACCEL_KEY"Decay Rate"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+           ""GUI_ACCEL_KEY"Decay Rate", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
    // textfield
    decayRateTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -196,7 +197,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for margin
    powerMarginTxt = new wxStaticText( this, ID_TEXT,
-           wxT(""GUI_ACCEL_KEY"Margin"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+           ""GUI_ACCEL_KEY"Margin", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
    // textfield
    powerMarginTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -207,7 +208,7 @@ void PowerSystemConfigPanel::Create()
 
    // static text for bus coeff1
    busCoeff1Txt = new wxStaticText( this, ID_TEXT,
-           wxT(""GUI_ACCEL_KEY"Bus Coeff1"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+           ""GUI_ACCEL_KEY"Bus Coeff1", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
    // textfield
    busCoeff1TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -216,7 +217,7 @@ void PowerSystemConfigPanel::Create()
    busCoeff1Units = new wxStaticText( this, ID_TEXT, wxT("kW"));
    // static text for bus coeff2
    busCoeff2Txt = new wxStaticText( this, ID_TEXT,
-           wxT(""GUI_ACCEL_KEY"Bus Coeff2"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+           ""GUI_ACCEL_KEY"Bus Coeff2", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
    // textfield
    busCoeff2TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -225,7 +226,7 @@ void PowerSystemConfigPanel::Create()
    busCoeff2Units = new wxStaticText( this, ID_TEXT, wxT("kW*AU"));
    // static text for bus coeff3
    busCoeff3Txt = new wxStaticText( this, ID_TEXT,
-           wxT(""GUI_ACCEL_KEY"Bus Coeff3"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+           ""GUI_ACCEL_KEY"Bus Coeff3", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
    // textfield
    busCoeff3TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -238,7 +239,7 @@ void PowerSystemConfigPanel::Create()
    {
       // label for power shadow model
       shadowModelTxt = new wxStaticText( this, ID_TEXT,
-         wxT(""GUI_ACCEL_KEY"Shadow Model"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Shadow Model", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
 
       // combo box for the shadow model
       shadowModelComboBox = new wxComboBox
@@ -247,9 +248,9 @@ void PowerSystemConfigPanel::Create()
       shadowModelComboBox->SetToolTip(pConfig->Read(_T("ShadowModelHint")));
 
       shadowBodiesTxt = new wxStaticText( this, ID_TEXT,
-         wxT("Shadow "GUI_ACCEL_KEY"Bodies"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         "Shadow "GUI_ACCEL_KEY"Bodies", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       shadowBodiesTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-         wxDefaultPosition, wxSize(epochWidth,-1), 0 );
+         wxDefaultPosition, wxSize(epochWidth,-1), wxTE_READONLY  );
       shadowBodiesTxtCtrl->SetToolTip(pConfig->Read(_T("ShadowBodiesHint")));
       shadowBodiesButton =
          new wxButton( this, ID_BUTTON_BODIES, wxT("Select"),
@@ -258,7 +259,7 @@ void PowerSystemConfigPanel::Create()
 
       // static text for solar coeff1
       solarCoeff1Txt = new wxStaticText( this, ID_TEXT,
-              wxT(""GUI_ACCEL_KEY"Solar Coeff1"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+              ""GUI_ACCEL_KEY"Solar Coeff1", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       // textfield
       solarCoeff1TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -268,7 +269,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,20), 0 );
       // static text for solar coeff2
       solarCoeff2Txt = new wxStaticText( this, ID_TEXT,
-              wxT(""GUI_ACCEL_KEY"Solar Coeff2"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+              ""GUI_ACCEL_KEY"Solar Coeff2", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       // textfield
       solarCoeff2TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -278,7 +279,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,20), 0 );
       // static text for solar coeff3
       solarCoeff3Txt = new wxStaticText( this, ID_TEXT,
-              wxT(""GUI_ACCEL_KEY"Solar Coeff3"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+              ""GUI_ACCEL_KEY"Solar Coeff3", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       // textfield
       solarCoeff3TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -288,7 +289,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,20), 0 );
       // static text for solar coeff4
       solarCoeff4Txt = new wxStaticText( this, ID_TEXT,
-              wxT(""GUI_ACCEL_KEY"Solar Coeff4"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+              ""GUI_ACCEL_KEY"Solar Coeff4", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       // textfield
       solarCoeff4TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -298,7 +299,7 @@ void PowerSystemConfigPanel::Create()
             wxSize(staticTextWidth,20), 0 );
       // static text for solar coeff5
       solarCoeff5Txt = new wxStaticText( this, ID_TEXT,
-              wxT(""GUI_ACCEL_KEY"Solar Coeff5"), wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+              ""GUI_ACCEL_KEY"Solar Coeff5", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
       // textfield
       solarCoeff5TxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(epochWidth,-1), 0 );
@@ -403,20 +404,24 @@ void PowerSystemConfigPanel::LoadData()
       ("   epochFormatComboBox has loaded its data ...\n");
    #endif
 
+   PowerSystem *thePowerSystem = (PowerSystem*) theObject;
+
    // load the epoch
    std::string epochFormat = theObject->GetStringParameter("EpochFormat");
-   std::string theEpochStr = theObject->GetStringParameter("InitialEpoch");
-
-   epochTxtCtrl->SetValue(theEpochStr.c_str());
+   std::string theEpochStr = thePowerSystem->GetEpochString();
 
    #ifdef DEBUG_POWERPANEL_LOAD
    MessageInterface::ShowMessage
       ("   epochFormat=%s, theEpochStr=%s\n", epochFormat.c_str(), theEpochStr.c_str());
    #endif
 
-   epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
+   epochFormatComboBox->SetValue(wxString(epochFormat.c_str()));
    fromEpochFormat = epochFormat;
 
+   #ifdef DEBUG_POWERPANEL_LOAD
+   MessageInterface::ShowMessage
+      ("   loaded the epoch format ...\n");
+   #endif
    // Save to TAIModJulian string to avoid keep reading the field
    // and convert to proper format when ComboBox is changed.
    if (epochFormat == "TAIModJulian")
@@ -428,6 +433,11 @@ void PowerSystemConfigPanel::LoadData()
       Real fromMjd = -999.999;
       Real outMjd;
       std::string outStr;
+      #ifdef DEBUG_POWERPANEL_LOAD
+      MessageInterface::ShowMessage
+         ("  about to convert from the epoch format %s to TAIModJulian ...\n",
+               fromEpochFormat.c_str());
+      #endif
       TimeConverterUtil::Convert(fromEpochFormat, fromMjd, theEpochStr,
                                  "TAIModJulian", outMjd, outStr);
       taiMjdStr = outStr;
@@ -437,6 +447,7 @@ void PowerSystemConfigPanel::LoadData()
       #endif
    }
    epochStr = theEpochStr;
+   epochTxtCtrl->SetValue(theEpochStr.c_str());
 
    // Initial Max Power
    Real initPower = theObject->GetRealParameter("InitialMaxPower");
@@ -468,7 +479,7 @@ void PowerSystemConfigPanel::LoadData()
       for (unsigned int i = 0; i < sModels.size(); i++)
          shadowModelComboBox->Append(sModels[i].c_str());
       std::string sModelStr    = theObject->GetStringParameter("ShadowModel");
-      shadowModelComboBox->SetValue(wxT(sModelStr.c_str()));
+      shadowModelComboBox->SetValue(wxString(sModelStr.c_str()));
 
       // Shadow Bodies
       shadowBodiesList = theObject->GetStringArrayParameter("ShadowBodies");
@@ -572,10 +583,12 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
       if (isValid)
          isValid = CheckRealRange(str, decayRate, "AnnualDecayRate", 0.0, 100.0, true, true, true, true);
 
+
       str = powerMarginTxtCtrl->GetValue();
       isValid = CheckReal(margin, str, "Margin", "0 <= Real Number <= 100");
       if (isValid)
-         isValid = CheckRealRange(str, decayRate, "Margin", 0.0, 100.0, true, true, true, true);
+         isValid = CheckRealRange(str, margin, "Margin", 0.0, 100.0, true, true, true, true);
+
 
       str = busCoeff1TxtCtrl->GetValue();
       isValid = CheckReal(bus1, str, "BusCoeff1", "Real Number");
@@ -583,6 +596,7 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
       isValid = CheckReal(bus2, str, "BusCoeff2", "Real Number");
       str = busCoeff3TxtCtrl->GetValue();
       isValid = CheckReal(bus3, str, "BusCoeff3", "Real Number");
+
 
       #ifdef DEBUG_POWERPANEL_SAVE
       MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData(obj) - isSolar = %s!!\n",
@@ -612,19 +626,51 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
    {
       Integer paramID;
 
+      std::string newEpoch    = epochTxtCtrl->GetValue().WX_TO_STD_STRING;
+      std::string epochFormat = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
+      Real        fromMjd     = -999.999;
+      Real        a1mjd       = -999.999;
+      std::string outStr;
+
+      #ifdef DEBUG_POWERPANEL_SAVE
+      MessageInterface::ShowMessage
+         ("   newEpoch=%s, epochFormat=%s\n", newEpoch.c_str(), epochFormat.c_str());
+      #endif
+
       // Save epoch format and epoch
       if (isEpochFormatChanged || isEpochChanged || isEpochTextChanged)
       {
-         std::string toEpochFormat  = epochFormatComboBox->GetValue().c_str();
-         std::string toEpochStr     = epochTxtCtrl->GetValue().c_str();
-
-         #ifdef DEBUG_POWERPANEL_SAVE
-         MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData(obj) - attempting to set epoch!!\n");
-         #endif
-         paramID = theObject->GetParameterID("EpochFormat");
-         theObject->SetStringParameter(paramID, toEpochFormat);
-         paramID = theObject->GetParameterID("InitialEpoch");
-         theObject->SetStringParameter(paramID, toEpochStr);
+            bool timeOK = CheckTimeFormatAndValue(epochFormat, newEpoch,
+                  "InitialEpoch", true);
+            #ifdef DEBUG_POWERPANEL_SAVE
+            MessageInterface::ShowMessage
+               ("   timeOK = %s\n", (timeOK? "YES!" : "no"));
+            #endif
+            if (timeOK)
+            {
+               #ifdef DEBUG_POWERPANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   About to set format and time on the object ---------\n");
+               #endif
+               paramID = theObject->GetParameterID("EpochFormat");
+               theObject->SetStringParameter(paramID, epochFormat);
+               paramID = theObject->GetParameterID("InitialEpoch");
+               theObject->SetStringParameter(paramID, newEpoch);
+               #ifdef DEBUG_POWERPANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   DONE setting format and time on the object ---------\n");
+               #endif
+               isEpochFormatChanged = false;
+               isEpochChanged       = false;
+               isEpochTextChanged   = false;
+            }
+            else
+            {
+               #ifdef DEBUG_POWERPANEL_SAVE
+                  MessageInterface::ShowMessage("PowerSystemConfigPanel::SaveData() setting canClose to false inside (epoch) try\n");
+               #endif
+               canClose = false;
+            }
       }
       // Save Real Data
       if (realDataChanged)
@@ -669,7 +715,7 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
          #endif
          if (isShadowModelChanged)
          {
-            std::string toShadowModel  = shadowModelComboBox->GetValue().c_str();
+            std::string toShadowModel  = shadowModelComboBox->GetValue().WX_TO_STD_STRING;
             paramID = theObject->GetParameterID("ShadowModel");
             theObject->SetStringParameter(paramID, toShadowModel);
          }
@@ -677,8 +723,16 @@ void PowerSystemConfigPanel::SaveData(GmatBase *theObject)
          {
             paramID = theObject->GetParameterID("ShadowBodies");
             theObject->TakeAction("ClearShadowBodies");
-            for (unsigned int ii = 0; ii < shadowBodiesList.size(); ii++)
-               theObject->SetStringParameter(paramID, shadowBodiesList[ii], ii);
+            // An empty list is allowed
+            if (shadowBodiesList.empty())
+            {
+               theObject->SetStringParameter(paramID, "{}", 0);
+            }
+            else
+            {
+               for (unsigned int ii = 0; ii < shadowBodiesList.size(); ii++)
+                  theObject->SetStringParameter(paramID, shadowBodiesList[ii], ii);
+            }
          }
       }
    }
@@ -725,7 +779,7 @@ void PowerSystemConfigPanel::OnTextChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
 {
-   std::string toEpochFormat  = epochFormatComboBox->GetValue().c_str();
+   std::string toEpochFormat  = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
 
    #ifdef DEBUG_POWERSYSTEM_PANEL_COMBOBOX
    MessageInterface::ShowMessage
@@ -753,7 +807,7 @@ void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
          // if modified by user, check if epoch is valid first
          if (isEpochTextChanged)
          {
-            std::string theEpochStr = epochTxtCtrl->GetValue().c_str();
+            std::string theEpochStr = epochTxtCtrl->GetValue().WX_TO_STD_STRING;
 
             // Save to TAIModJulian string to avoid keep reading the field
             // and convert to proper format when ComboBox is changed.
@@ -803,7 +857,7 @@ void PowerSystemConfigPanel::OnComboBoxChange(wxCommandEvent &event)
    {
       if (event.GetEventObject() == shadowModelComboBox)
       {
-         std::string toShadowModel  = shadowModelComboBox->GetValue().c_str();
+         std::string toShadowModel  = shadowModelComboBox->GetValue().WX_TO_STD_STRING;
          isShadowModelChanged = true;
       }
    }
@@ -860,7 +914,7 @@ void PowerSystemConfigPanel::OnBodiesEditButton(wxCommandEvent &event)
       for (Integer i=0; i < (Integer)names.GetCount(); i++)
       {
          bodyName = names[i];
-         shadowBodiesList.push_back(bodyName.c_str());
+         shadowBodiesList.push_back(std::string(bodyName.c_str()));
       }
 
       if (!shadowBodiesList.empty())

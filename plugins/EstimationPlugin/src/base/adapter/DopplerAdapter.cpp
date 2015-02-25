@@ -23,12 +23,17 @@
 #include "MessageInterface.hpp"
 #include "SignalBase.hpp"
 #include "Transponder.hpp"
-
+#include "PropSetup.hpp"
+#include "RandomNumber.hpp"
+#include <sstream>
 
 //#define DEBUG_ADAPTER_EXECUTION
 //#define DEBUG_ADAPTER_DERIVATIVES
 //#define DEBUG_DERIVATIVE_CALCULATION
-#define DEBUG_DOPPLER_CALCULATION
+//#define DEBUG_SET_PARAMETER
+//#define DEBUG_CONSTRUCTION
+//#define DEBUG_INITIALIZE
+//#define DEBUG_DOPPLER_CALCULATION
 
 //------------------------------------------------------------------------------
 // Static data
@@ -66,6 +71,9 @@ DopplerAdapter::DopplerAdapter(const std::string& name) :
    freqBandE              (1),
    dopplerCountInterval   (1.0)        // 1 second
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("DopplerAdapter default constructor <%p>\n", this);
+#endif
    typeName = "Doppler";              // change type name from "RangeKm" to "Doppler"
 }
 
@@ -79,6 +87,10 @@ DopplerAdapter::DopplerAdapter(const std::string& name) :
 //------------------------------------------------------------------------------
 DopplerAdapter::~DopplerAdapter()
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("DopplerAdapter default destructor <%p>\n", this);
+#endif
+
    if (adapterS)
       delete adapterS;
 }
@@ -101,6 +113,10 @@ DopplerAdapter::DopplerAdapter(const DopplerAdapter& da) :
    freqBandE              (da.freqBandE),
    dopplerCountInterval   (da.dopplerCountInterval)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("DopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
+#endif
+
 }
 
 
@@ -117,6 +133,10 @@ DopplerAdapter::DopplerAdapter(const DopplerAdapter& da) :
 //------------------------------------------------------------------------------
 DopplerAdapter& DopplerAdapter::operator=(const DopplerAdapter& da)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("DopplerAdapter operator =   set <%p> = <%p>\n", this, &da);
+#endif
+
    if (this != &da)
    {
       RangeAdapterKm::operator=(da);
@@ -126,10 +146,37 @@ DopplerAdapter& DopplerAdapter::operator=(const DopplerAdapter& da)
       freqBandE            = da.freqBandE;
       dopplerCountInterval = da.dopplerCountInterval;
 
-      adapterS             = NULL;
+      if (adapterS)
+      {
+         delete adapterS;
+         adapterS = NULL;
+      }
+      if (da.adapterS)
+         adapterS = (RangeAdapterKm*)da.adapterS->Clone();
    }
 
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Sets the solar system pointer
+ *
+ * @param ss The pointer
+ */
+//------------------------------------------------------------------------------
+void DopplerAdapter::SetSolarSystem(SolarSystem *ss)
+{
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("DopplerAdapter<%p>::SetSolarSystem('%s')\n", this, ss->GetName().c_str()); 
+#endif
+
+   adapterS->SetSolarSystem(ss);
+
+   RangeAdapterKm::SetSolarSystem(ss);
 }
 
 
@@ -144,6 +191,10 @@ DopplerAdapter& DopplerAdapter::operator=(const DopplerAdapter& da)
 //------------------------------------------------------------------------------
 GmatBase* DopplerAdapter::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("DopplerAdapter::Clone()   clone this <%p>\n", this);
+#endif
+
    return new DopplerAdapter(*this);
 }
 
@@ -226,6 +277,131 @@ std::string DopplerAdapter::GetParameterTypeString(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a string parameter
+ *
+ * @param id The ID for the parameter
+ * @param value The value for the parameter
+ *
+ * @return true if the paramter was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
+{
+   // Note that: measurement type of adapter is always "Range", so it does not need to change
+   bool retval = true;
+   if (id != MEASUREMENT_TYPE)
+      retval = adapterS->SetStringParameter(id, value);
+
+   retval = RangeAdapterKm::SetStringParameter(id, value) && retval;
+
+   return retval; 
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter in an array of strings
+ *
+ * @param id The ID for the parameter
+ * @param value The new value for the parameter
+ * @index The desired location of the parameter in the array
+ *
+ * @return true if the parameter was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetStringParameter(const Integer id,
+      const std::string& value, const Integer index)
+{
+   bool retval = adapterS->SetStringParameter(id, value, index);
+   retval = RangeAdapterKm::SetStringParameter(id, value, index) && retval;
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a string parameter
+ *
+ * @param label The scriptable name of the parameter
+ * @param value The value for the parameter
+ *
+ * @return true if the paramter was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetStringParameter(const std::string& label,
+      const std::string& value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter in an array of strings
+ *
+ * @param label The scriptable name of the parameter
+ * @param value The new value for the parameter
+ * @index The desired location of the parameter in the array
+ *
+ * @return true if the parameter was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetStringParameter(const std::string& label,
+      const std::string& value, const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer parameter
+ *
+ * @param id The ID for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Integer DopplerAdapter::SetIntegerParameter(const Integer id, const Integer value)
+{
+   adapterS->SetRealParameter(id, value);
+   return RangeAdapterKm::SetRealParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer parameter
+ *
+ * @param label The name for the parameter
+ * @param value The value for the parameter
+ *
+ * @return setting value
+ */
+//------------------------------------------------------------------------------
+Integer DopplerAdapter::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetRealParameter(const Integer id) const
@@ -270,7 +446,10 @@ Real DopplerAdapter::SetRealParameter(const Integer id, const Real value)
       return dopplerCountInterval;
    }
 
-   return RangeAdapterKm::SetRealParameter(id, value);
+   bool retval = adapterS->SetRealParameter(id, value);
+   retval = RangeAdapterKm::SetRealParameter(id, value) && retval;
+
+   return retval;
 }
 
 
@@ -309,6 +488,26 @@ Real DopplerAdapter::SetRealParameter(const std::string &label, const Real value
 }
 
 
+bool DopplerAdapter::SetBooleanParameter(const Integer id, const bool value)
+{
+   // Note: for Start path, AddNoise always is set to false due to it calculation
+   bool retval = true;
+   if (id == ADD_NOISE)
+      retval = adapterS->SetBooleanParameter(id, false);
+   else
+      retval = adapterS->SetBooleanParameter(id, value);
+
+   retval = RangeAdapterKm::SetBooleanParameter(id, value) && retval;
+
+   return retval;
+}
+
+
+bool DopplerAdapter::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 // bool RenameRefObject(const Gmat::ObjectType type, const std::string& oldName,
@@ -327,11 +526,102 @@ Real DopplerAdapter::SetRealParameter(const std::string &label, const Real value
 bool DopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
-   bool retval = RangeAdapterKm::RenameRefObject(type, oldName, newName);
-
    // Handle additional renames specific to this adapter
+   bool retval = adapterS->RenameRefObject(type, oldName, newName);
+   retval = RangeAdapterKm::RenameRefObject(type, oldName, newName) && retval;
 
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+//       const std::string& name)
+//------------------------------------------------------------------------------
+/**
+ * Sets pointers to the model's reference objects
+ *
+ * @param obj The object pointer
+ * @param type The type of the object (not used)
+ * @param name The name of the object  (not used)
+ *
+ * @return true if the pointer was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetRefObject(GmatBase* obj,
+      const Gmat::ObjectType type, const std::string& name)
+{
+   bool retval = adapterS->SetRefObject(obj, type, name);
+   retval = RangeAdapterKm::SetRefObject(obj, type, name) && retval;
+
+   return retval; 
+}
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
+//       const std::string& name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets the pointers for the reference object
+ *
+ * @param obj The object pointer
+ * @param type The type of the object (not used)
+ * @param name The name of the object  (not used)
+ * @param index Index for the object's location
+ *
+ * @return true if the pointer was set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetRefObject(GmatBase* obj,
+      const Gmat::ObjectType type, const std::string& name, const Integer index)
+{
+   bool retval = adapterS->SetRefObject(obj, type, name, index);
+   retval = RangeAdapterKm::SetRefObject(obj, type, name, index) && retval;
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// bool SetMeasurement(MeasureModel* meas)
+//------------------------------------------------------------------------------
+/**
+ * Sets the measurement model pointer
+ *
+ * @param meas The pointer
+ *
+ * @return true if set, false if not
+ */
+//------------------------------------------------------------------------------
+bool DopplerAdapter::SetMeasurement(MeasureModel* meas)
+{
+   return RangeAdapterKm::SetMeasurement(meas);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetPropagator(PropSetup* ps)
+//------------------------------------------------------------------------------
+/**
+ * Passes a propagator to the adapter for use in light time iterations.  The
+ * propagator is cloned so that propagation of single spacecraft can be
+ * performed.
+ *
+ * @param ps The PropSetup that is being set
+ *
+ * @todo The current call takes a single propagator.  Once the estimation system
+ *       supports multiple propagators, this should be changed to a vector of
+ *       PropSetup objects.
+ */
+//------------------------------------------------------------------------------
+void DopplerAdapter::SetPropagator(PropSetup* ps)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Setting propagator to %p in "
+            "DopplerAdapter\n", ps);
+   #endif
+
+   adapterS->SetPropagator(ps);
+   RangeAdapterKm::SetPropagator(ps);
 }
 
 
@@ -346,67 +636,22 @@ bool DopplerAdapter::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool DopplerAdapter::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("DopplerAdapter::Initialize() <%p> start\n", this);
+#endif
+
    bool retval = false;
 
    if (RangeAdapterKm::Initialize())
    {
-      retval = true;
-
       // @todo: initialize all needed variables
-      // 1. Create S-path measurement model;
 
-      adapterS =  new RangeAdapterKm("adapterS");
-      *adapterS = *this;
-
-      // 2. Set all needed parameters
-      // 2.1. Set for participantLists
-      for (UnsignedInt i = 0; i < participantLists.size(); ++i)
-      {
-         MessageInterface::ShowMessage("i = %d\n", i);
-         for (UnsignedInt j = 0; j < participantLists[i]->size(); ++j)
-         {
-            MessageInterface::ShowMessage("j = %d\n", j);
-            MessageInterface::ShowMessage("adapterS->SetStringParameter('SignalPath', '%s', %d)\n", participantLists[i]->at(j).c_str(), i);
-            adapterS->SetStringParameter("SignalPath", participantLists[i]->at(j), i);
-         }
-      }
-      // 2.2. Set for all Reference objects
-      StringArray refObjNames = adapterS->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-      MessageInterface::ShowMessage(" Reference object names:\n");
-      for (UnsignedInt i = 0; i < refObjNames.size(); ++i)
-         MessageInterface::ShowMessage(" .%s\n", refObjNames[i].c_str());
-
-      ObjectArray objs = GetRefObjectArray(Gmat::UNKNOWN_OBJECT);
-      MessageInterface::ShowMessage(" Reference objects: size = %d\n", objs.size());
-      for (UnsignedInt i = 0; i < objs.size(); ++i)
-         MessageInterface::ShowMessage(" .<%p,%s>\n", objs[i], objs[i]->GetName().c_str());
-
-      for (UnsignedInt i = 0; i < refObjNames.size(); ++i)
-      {
-         // search for object with name refObjNames[i]
-         GmatBase* obj = NULL;
-         for (UnsignedInt j = 0; j < objs.size(); ++j)
-         {
-            if (objs[j]->GetName() == refObjNames[i])
-            {
-               obj = objs[j];
-               break;
-            }
-         }
-
-         // set reference object obj to adapterS
-         adapterS->SetRefObject(obj, obj->GetType(), obj->GetName());
-      }
-      
-      // 2.3. Set propagator
-      if (thePropagator)
-      {
-         adapterS->SetPropagator(thePropagator);
-      }
-
-      adapterS->Initialize();
+      retval = adapterS->Initialize();
    }
 
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("DopplerAdapter::Initialize() <%p> exit\n", this);
+#endif
    return retval;
 }
 
@@ -438,51 +683,76 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
             rampTable);
    #endif
 
-   // 1. Set ramp table and observation data for adapter before doing something
+   // 1. Set value for local variables
    rampTB = rampTable;
+   Integer err = 0;
+   if (rampTable != NULL)
+   {
+      BeginEndIndexesOfRampTable(err);
+   }
+
    obsData = forObservation;
+   // 1.2. Reset value for range modulo constant
+   if (obsData)
+      dopplerCountInterval = obsData->dopplerCountInterval;          // unit: Hz
 
 
-   // 3. Compute for End path
-   // 3.1. Propagate all space objects to time tm
+   // 2. Compute for End path
+   // 2.1. Propagate all space objects to time tm
    // This step is not needed due to measurement time tm is set to t3RE
    
-   // 3.2. Compute range in km for End Path
+   // 2.2. Compute range in km for End Path
+   #ifdef DEBUG_DOPPLER_CALCULATION
+      MessageInterface::ShowMessage("Compute range for E-Path...\n");
+   #endif
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataE = cMeasurement;
-   
-   // 3.3. Specify uplink frequency
+
+   // 2.3. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
    uplinkFreqE = calcData->GetUplinkFrequency(0, rampTB);
    freqBandE = calcData->GetUplinkFrequencyBand(0, rampTB);
-
    
+
    // 3. Compute for Start path
-   // 3.1. Propagate all space objects to time tm-Tc
-   MeasureModel* measModel = adapterS->GetMeasurementModel();
-   std::vector<SignalBase*> paths = measModel->GetSignalPaths();
-   for (UnsignedInt i = 0; i < paths.size(); ++i)
-   {
-      SignalBase* leg = paths[i];
-      while (leg != NULL)
-         leg->MoveToEpoch(cMeasurement.epoch, true, true);
-      leg = leg->GetNext();
-   }
+   #ifdef DEBUG_DOPPLER_CALCULATION
+      MessageInterface::ShowMessage("Compute range for S-Path...\n");
+   #endif
+   // 3.1. Measurement time is the same as the one for End-path
+   GmatTime tm = cMeasurement.epoch;                                                      // Get measurement time
+   ObservationData* obData = NULL;
+   if (forObservation)
+      obData = new ObservationData(*forObservation);
+   else
+      obData = new ObservationData();
+   obData->epoch = tm.GetMjd();
+   
+   // Set doppler count interval to MeasureModel object due to the Start-path 
+   // is measured earlier by number of seconds shown in doppler count interval   
+   adapterS->GetMeasurementModel()->SetCountInterval(dopplerCountInterval);
+   // For Start-path, range calculation does not add bias and noise to calculated value
+   // Note that: default option is no adding noise
+   adapterS->AddBias(false);
 
-   // 3.2. Compute range in km for End Path
-   adapterS->CalculateMeasurement(withEvents, forObservation, rampTB);
-   measDataS = cMeasurement;
+   adapterS->CalculateMeasurement(withEvents, obData, rampTB);
+   if (obData)
+      delete obData;
 
-   // 3.3. Specify uplink frequency
+   measDataS = adapterS->GetMeasurement();
+   measDataS.value[0] = measDataS.value[0] / adapterS->GetMultiplierFactor();      // convert to full range in km
+
+   // 3.2. Specify uplink frequency and band for Start path
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
-   uplinkFreq = measModel->GetUplinkFrequency(0, rampTB);
-   freqBand   = measModel->GetUplinkFrequencyBand(0, rampTB);
+   uplinkFreq = adapterS->GetMeasurementModel()->GetUplinkFrequency(0, rampTB);
+   freqBand   = adapterS->GetMeasurementModel()->GetUplinkFrequencyBand(0, rampTB);
 
-      
    // 4. Convert range from km to Hz and store in cMeasurement:
-   Real dtS, dtE, dtdt, t1TE, t3RE;
+   Real dtS, dtE, dtdt;
+   GmatTime t1TE, t3RE;
    Real interval = dopplerCountInterval;
-
+   Real speedoflightkm = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;
+   
+   std::vector<SignalBase*> paths = calcData->GetSignalPaths();
    for (UnsignedInt i = 0; i < paths.size(); ++i)          // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths.
    {
       // 4.1. Calculate total turn around ratio for paths[i]
@@ -500,25 +770,37 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
             {
                if (hw[j]->IsOfType("Transponder"))
                {
-                  turnaround *= ((Transponder*)hw[j])->GetRealParameter("TurnAroundRatio");
+                  // Get turn around ratio from spacrcraft transponder
+                  Real ratio = ((Transponder*)hw[j])->GetTurnAroundRatio();
+                  // if ramp table is used, get it from table (Moyer's) based on uplink frequency band
+                  if (rampTB != NULL)
+                     ratio = this->GetTurnAroundRatio(freqBand);
+                  // Acummulate all turn around ratio
+                  turnaround = turnaround * ratio;
+
                   break;
                }
             }// for j
          }
 
+         // move to the next leg
          leg = leg->GetNext();
       }// while
 
       // 4.2. Specify multiplier for S-path and E-path
-      multiplierS = turnaround*(uplinkFreq*1.0e6)/interval;
-      multiplierE = turnaround*(uplinkFreqE*1.0e6)/interval;
+      multiplierS = turnaround*(uplinkFreq*1.0e6)/(interval*speedoflightkm);
+      multiplierE = turnaround*(uplinkFreqE*1.0e6)/(interval*speedoflightkm);
 
       // 4.3. Time travel for S-path and E-path
-      dtS = measDataS.value[i] / (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
-      dtE = measDataE.value[i] / (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
-      dtdt = dtE - dtS;
+      dtS = measDataS.value[i] / speedoflightkm;    // unit: second
+      dtE = measDataE.value[i] / speedoflightkm;    // unit: second
+      dtdt = dtE - dtS;                             // unit: second
       t3RE = measDataE.epoch;
-      t1TE = t3RE - dtE;
+      t1TE = t3RE - dtE/GmatTimeConstants::SECS_PER_DAY;
+
+      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
+      cMeasurement.uplinkBand = freqBand;
+      cMeasurement.dopplerCountInterval = interval;
 
       // 4.4. Calculate Frequency Doppler Shift
       if (rampTB != NULL)
@@ -527,13 +809,12 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
          try
          {
 //           currentMeasurement.value[0] = (M2R*IntegralRampedFrequency(t3RE, interval) - turnaround*IntegralRampedFrequency(t1TE, interval + dtS-dtE))/ interval;
-            
-            cMeasurement.value[i] = - turnaround*IntegralRampedFrequency(t1TE, interval - dtdt, errnum)/ interval;
+            cMeasurement.value[i] = - turnaround*IntegralRampedFrequency(t1TE.GetMjd(), interval - dtdt, errnum)/ interval;
          } catch (MeasurementException exp)
          {
             cMeasurement.value[i] = 0.0;                     // It has no C-value due to the failure of calculation of IntegralRampedFrequency()
-            cMeasurement.uplinkFreq = uplinkFreqE;           // unit: Hz
-            cMeasurement.uplinkBand = freqBandE;
+//            cMeasurement.uplinkFreq = uplinkFreqE;           // unit: Hz
+//            cMeasurement.uplinkBand = freqBandE;
             cMeasurement.dopplerCountInterval = interval;    // unit: second
             cMeasurement.isFeasible = false;
             cMeasurement.unfeasibleReason = "R";
@@ -545,12 +826,36 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       }
       else
       {       
-         cMeasurement.value[i] = -turnaround*uplinkFreq*(interval - dtdt)/interval;
+         //cMeasurement.value[i] = -turnaround*uplinkFreq*(interval - dtdt)/interval;
+         cMeasurement.value[i] = -turnaround*(uplinkFreq*1.0e6)*(interval - dtdt)/interval;         // convert uplinkFreq from MHz to Hz
       }
       
-      cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
-      cMeasurement.uplinkBand = freqBand;
-      cMeasurement.dopplerCountInterval = interval;
+      Real C_idealVal = cMeasurement.value[i];
+      
+      if (measurementType == "Doppler")
+      {
+         // Compute bias, noise sigma, and measurement error covariance matrix
+         ComputeMeasurementBias("DopplerBias");
+         ComputeMeasurementNoiseSigma("DopplerNoiseSigma");
+         ComputeMeasurementErrorCovarianceMatrix();
+         
+         // Add noise to measurement value
+         if (addNoise)
+         {
+            // Add noise here
+            if (cMeasurement.unfeasibleReason != "R")
+            {
+               RandomNumber* rn = RandomNumber::Instance();
+               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
+               cMeasurement.value[i] = val;
+            }
+         }
+         //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+         #ifdef DEBUG_RANGE_CALCULATION
+            MessageInterface::ShowMessage("      . Add bias...\n");
+         #endif
+         cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
+      }
 
 
       #ifdef DEBUG_DOPPLER_CALCULATION
@@ -562,13 +867,37 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Doppler count interval      : %.12lf seconds\n", interval);
          MessageInterface::ShowMessage("      . Real travel time for S-path : %.12lf seconds\n", dtS);
          MessageInterface::ShowMessage("      . Real travel time for E-path : %.12lf seconds\n", dtE);
+         MessageInterface::ShowMessage("      . Travel time difference dtd  : %.12lf seconds\n", dtdt);
+         MessageInterface::ShowMessage("      . Turn around ratio           : %.12lf\n", turnaround);
+         MessageInterface::ShowMessage("      . Ramp table is %s used\n", (rampTable?"":"not"));
          MessageInterface::ShowMessage("      . Multiplier factor for S-path: %.12lf\n", multiplierS);
          MessageInterface::ShowMessage("      . Multiplier factor for E-path: %.12lf\n", multiplierE);
-         MessageInterface::ShowMessage("      . C-value (with noise)        : %.12lf Hz\n", cMeasurement.value[i]);
+         MessageInterface::ShowMessage("      . C-value w/o noise and bias  : %.12lf Hz\n", C_idealVal);
+         if (measurementType == "Doppler")
+         {
+            MessageInterface::ShowMessage("      . Doppler noise sigma  : %.12lf Hz \n", noiseSigma[i]);
+            MessageInterface::ShowMessage("      . Doppler bias         : %.12lf Hz \n", measurementBias[i]);
+         }
+
+         MessageInterface::ShowMessage("      . C-value with noise and bias : %.12lf Hz\n", cMeasurement.value[i]);
          MessageInterface::ShowMessage("      . Measurement epoch A1Mjd     : %.12lf\n", cMeasurement.epoch); 
          MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
          MessageInterface::ShowMessage("      . Feasibility reason          : %s\n", cMeasurement.unfeasibleReason.c_str());
          MessageInterface::ShowMessage("      . Elevation angle             : %.12lf degree\n", cMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("      . Covariance matrix           : <%p>\n", cMeasurement.covariance);
+         if (cMeasurement.covariance)
+         {
+            MessageInterface::ShowMessage("      . Covariance matrix size = %d\n", cMeasurement.covariance->GetDimension());
+            MessageInterface::ShowMessage("     [ ");
+            for (UnsignedInt i = 0; i < cMeasurement.covariance->GetDimension(); ++i)
+            {
+               if ( i > 0)
+                  MessageInterface::ShowMessage("\n");
+               for (UnsignedInt j = 0; j < cMeasurement.covariance->GetDimension(); ++j)
+                  MessageInterface::ShowMessage("%lf   ", cMeasurement.covariance->GetCovariance()->GetElement(i,j));
+            }
+            MessageInterface::ShowMessage("]\n");
+         }
          MessageInterface::ShowMessage("===================================================================\n");
       #endif
 
@@ -597,30 +926,186 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
  * @return The derivative vector
  */
 //------------------------------------------------------------------------------
+#include "GroundstationInterface.hpp"
 const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       GmatBase* obj, Integer id)
 {
+   if (!calcData)
+      throw MeasurementException("Measurement derivative data was requested "
+            "for " + instanceName + " before the measurement was set");
+
+   Integer parmId = GetParmIdFromEstID(id, obj);
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      Integer parmId = GetParmIdFromEstID(id, obj);
       MessageInterface::ShowMessage("Enter DopplerAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
-
    
-   // Compute measurement derivatives in km for E-path:
-   std::vector<RealArray> derivativesE = RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   // Get parameter name specified by id
+   Integer parameterID;
+   if (id > 250)
+      parameterID = id - obj->GetType() * 250; // GetParmIdFromEstID(id, obj);
+   else
+      parameterID = id;
+   std::string paramName = obj->GetParameterText(parameterID);
 
-   // Compute measurement derivatives in km for S-path:
-   std::vector<RealArray> derivativesS = adapterS->CalculateMeasurementDerivatives(obj, id);
+   #ifdef DEBUG_DERIVATIVE_CALCULATION
+      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+   #endif
 
-   // Convert measurement derivatives from km/s to Hz
-   for (UnsignedInt i = 0; i < derivativesE.size(); ++i)
+   if (paramName.substr(paramName.size()-4) == "Bias")
    {
-      for (UnsignedInt j = 0; j < derivativesE[i].size(); ++j)
+      // Compute measurement derivatives w.r.t Bias:
+      if (paramName == "DopplerBias")
       {
-         theDataDerivatives[i][j] = derivativesE[i][j] * multiplierE - derivativesS[i][j] * multiplierS;
+         RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+      }
+      else
+      {
+         // for RangeBias and DSNRangeBias, derivative is 0.0
+         Integer size = obj->GetEstimationParameterSize(id);
+         theDataDerivatives.clear();
+         RealArray val;
+         val.assign(size, 0.0);
+         theDataDerivatives.push_back(val);
       }
    }
+   else
+   {
+
+      // Perform the calculations
+      const std::vector<RealArray> *derivativeDataE =
+         &(calcData->CalculateMeasurementDerivatives(obj, id));
+
+      const std::vector<RealArray> *derivativeDataS =
+         &(adapterS->CalculateMeasurementDerivatives(obj, id));
+
+      #ifdef DEBUG_ADAPTER_DERIVATIVES
+      MessageInterface::ShowMessage("   Derivatives E-path: [");
+      for (UnsignedInt i = 0; i < derivativeDataE->size(); ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage("]\n                [");
+         for (UnsignedInt j = 0; j < derivativeDataE->at(i).size(); ++j)
+         {
+            if (j > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", (derivativeDataE->at(i))[j]);
+         }
+      }
+      MessageInterface::ShowMessage("]\n");
+      MessageInterface::ShowMessage("   Haft of Derivatives S-path: [");
+      for (UnsignedInt i = 0; i < derivativeDataS->size(); ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage("]\n                [");
+         for (UnsignedInt j = 0; j < derivativeDataS->at(i).size(); ++j)
+         {
+            if (j > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", (derivativeDataS->at(i))[j]);
+         }
+      }
+      MessageInterface::ShowMessage("]\n");
+      #endif
+
+      // copy S and E paths' derivatives
+      UnsignedInt size = derivativeDataE->at(0).size();
+      std::vector<RealArray> derivativesE;
+      for (UnsignedInt i = 0; i < derivativeDataE->size(); ++i)
+      {
+         RealArray oneRow;
+         oneRow.assign(size, 0.0);
+         derivativesE.push_back(oneRow);
+
+         if (derivativeDataE->at(i).size() != size)
+            throw MeasurementException("Derivative data size is a different size "
+               "than expected");
+
+         for (UnsignedInt j = 0; j < size; ++j)
+         {
+            derivativesE[i][j] = (derivativeDataE->at(i))[j];
+         }
+      }
    
+      size = derivativeDataS->at(0).size();
+      std::vector<RealArray> derivativesS;
+      for (UnsignedInt i = 0; i < derivativeDataS->size(); ++i)
+      {
+         RealArray oneRow;
+         oneRow.assign(size, 0.0);
+         derivativesS.push_back(oneRow);
+
+         if (derivativeDataS->at(i).size() != size)
+            throw MeasurementException("Derivative data size is a different size "
+               "than expected");
+
+         for (UnsignedInt j = 0; j < size; ++j)
+         {
+            derivativesS[i][j] = (derivativeDataS->at(i))[j] / adapterS->GetMultiplierFactor();       // convert to full range derivatives
+         }
+      }
+
+      #ifdef DEBUG_ADAPTER_DERIVATIVES
+      MessageInterface::ShowMessage("   Derivatives E-path: [");
+      for (UnsignedInt i = 0; i < derivativesE.size(); ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage("]\n                [");
+         for (UnsignedInt j = 0; j < derivativesE[i].size(); ++j)
+         {
+            if (j > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", derivativesE[i][j]);
+         }
+      }
+      MessageInterface::ShowMessage("] * multiplierE = %.12le\n", multiplierE);
+      MessageInterface::ShowMessage("   Derivatives S-path: [");
+      for (UnsignedInt i = 0; i < derivativesS.size(); ++i)
+      {
+         if (i > 0)
+            MessageInterface::ShowMessage("]\n                [");
+         for (UnsignedInt j = 0; j < derivativesS[i].size(); ++j)
+         {
+            if (j > 0)
+               MessageInterface::ShowMessage(", ");
+            MessageInterface::ShowMessage("%.12le", derivativesS[i][j]);
+         }
+      }
+      MessageInterface::ShowMessage("] * multiplierS = %.12le\n", multiplierS);
+      #endif
+
+      // Now assemble the derivative data into the requested derivative
+      size = derivativesE[0].size();
+
+      theDataDerivatives.clear();
+      for (UnsignedInt i = 0; i < derivativesE.size(); ++i)
+      {
+         RealArray oneRow;
+         oneRow.assign(size, 0.0);
+         theDataDerivatives.push_back(oneRow);
+
+         if (derivativesE[i].size() != size)
+            throw MeasurementException("Derivative data size for E path is a different size "
+               "than expected");
+         if (derivativesS[i].size() != size)
+            throw MeasurementException("Derivative data size for S path is a different size "
+               "than expected");
+
+         for (UnsignedInt j = 0; j < size; ++j)
+         {
+            if ((paramName == "Position")||(paramName == "Velocity")||(paramName == "CartesianX"))
+            {
+               // Convert measurement derivatives from km/s to Hz for velocity and position 
+               theDataDerivatives[i][j] = derivativesE[i][j] * multiplierE - derivativesS[i][j] * multiplierS;
+            }
+            else
+            {
+               // set the same E path 's derivatives for Bias an other solve-for variables
+               theDataDerivatives[i][j] = derivativesE[i][j];
+            }
+         }
+      }
+   }
+
    #ifdef DEBUG_DERIVATIVE_CALCULATION
       for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
       {
@@ -741,5 +1226,36 @@ Integer DopplerAdapter::GetEventCount()
 void DopplerAdapter::SetCorrection(const std::string& correctionName,
       const std::string& correctionType)
 {
+   adapterS->SetCorrection(correctionName, correctionType);
    RangeAdapterKm::SetCorrection(correctionName, correctionType);
 }
+
+
+
+//------------------------------------------------------------------------------
+// Real GetTurnAroundRatio(Integer freqBand)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves turn around ratio
+ *
+ * @param freqBand   frequency band
+ *
+ * return   the value of trun around ratio associated with frequency band 
+ */
+//------------------------------------------------------------------------------
+Real DopplerAdapter::GetTurnAroundRatio(Integer freqBand)
+{
+   switch (freqBand)
+   {
+      case 1:            // for S-band, turn around ratio is 240/221
+         return 240.0/221.0;
+      case 2:            // for X-band, turn around ratio is 880/749
+         return 880.0/749.0;
+   }
+
+   // Display an error message when frequency band is not specified 
+   std::stringstream ss;
+   ss << "Error: frequency band " << freqBand << " is not specified.\n";
+   throw MeasurementException(ss.str());
+}
+
