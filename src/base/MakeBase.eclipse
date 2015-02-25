@@ -301,7 +301,6 @@ OBJECTS = \
     factory/StopConditionFactory.o \
     factory/SubscriberFactory.o \
     forcemodel/DragForce.o \
-    forcemodel/EventModel.o \
     forcemodel/FiniteThrust.o \
     forcemodel/GravityBase.o \
     forcemodel/GravityField.o \
