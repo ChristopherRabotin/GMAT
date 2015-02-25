@@ -190,8 +190,10 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
    
    // wxRegionIterator is not used here so commented out (LOJ: 2014.10.10)
    //wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
-//   if (!dataUpdated)
-//      drawAll = true;
+   #ifdef __WXMAC__
+   if (!dataUpdated)
+      drawAll = true;
+   #endif
    
    Refresh(dc, drawAll);
    

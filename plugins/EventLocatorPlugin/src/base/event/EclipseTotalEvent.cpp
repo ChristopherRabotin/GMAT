@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include <sstream>
+#include <iomanip>
 #include "EclipseTotalEvent.hpp"
 #include "EventException.hpp"
 #include "StringUtil.hpp"
@@ -109,8 +110,6 @@ EclipseEvent* EclipseTotalEvent::GetEvent(Integer atIndex)
 std::string EclipseTotalEvent::GetReportString()
 {
    std::stringstream totalString("");
-   // write headers or whatever needs to be written here, if anything
-   // TBD
 
    Integer sz = theEvents.size();
    // Loop over the total events list
@@ -119,9 +118,11 @@ std::string EclipseTotalEvent::GetReportString()
       EclipseEvent* ev = theEvents.at(ii);
       std::string eventString = ev->GetReportString();
       Real        totalD      = GetDuration();
-      totalString <<  eventString << "    "  <<
-            (theIndex + 1) << "           " <<
-            GmatStringUtil::BuildNumber(totalD, false, 14) << "\n";
+      totalString <<  eventString << "    ";
+      totalString.setf(std::ios::left);
+      totalString.width(5);
+      totalString << (theIndex + 1)   << "       " <<
+                     GmatStringUtil::BuildNumber(totalD, false, 14) << "\n";
    }
    return totalString.str();
 }
