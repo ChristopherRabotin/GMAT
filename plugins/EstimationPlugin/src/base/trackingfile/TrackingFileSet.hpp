@@ -136,7 +136,7 @@ public:
    virtual void         SetPropagator(PropSetup *ps);
    virtual bool         Initialize();
 
-   const StringArray& TrackingFileSet::GetParticipants() const;           // made changes by TUAN NGUYEN
+   const StringArray&   GetParticipants() const;           // made changes by TUAN NGUYEN
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
 protected:
