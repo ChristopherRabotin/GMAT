@@ -479,11 +479,7 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurement(
       cMeasurement.isFeasible = true;
 
       // Get measurement epoch in the first signal path. It will apply for all other paths
-      #ifdef USE_PRECISION_TIME
-         cMeasurement.epoch = cMeasurement1.epoch;
-      #else
-         cMeasurement.epoch = cMeasurement1.epoch;
-      #endif
+      cMeasurement.epoch = cMeasurement1.epoch;
 
 
       #ifdef DEBUG_RANGE_CALCULATION
@@ -887,13 +883,8 @@ const MeasurementData& RangeRateAdapterKps::CalculateMeasurementAtOffset(
          }// for j loop
 
          // Get measurement epoch from the first member
-         #ifdef USE_PRECISION_TIME
-            offsetMeas.epoch = first->tPrecTime.GetMjd() -
+         offsetMeas.epoch = first->tPrecTime.GetMjd() -
                   first->tDelay/GmatTimeConstants::SECS_PER_DAY;
-         #else
-            offsetMeas.epoch = first->tTime -
-                  first->tDelay/GmatTimeConstants::SECS_PER_DAY;
-         #endif
 
          current = current->next;
       }
