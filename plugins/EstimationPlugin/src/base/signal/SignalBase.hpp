@@ -77,13 +77,8 @@ public:
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
 
-#ifdef USE_PRECISION_TIME
    virtual bool         ModelSignal(const GmatTime atEpoch,
                                     bool EpochAtReceive = true) = 0;
-#else
-   virtual bool         ModelSignal(const GmatEpoch atEpoch,
-                                    bool EpochAtReceive = true) = 0;            // This function will be removed and replaced by ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true)
-#endif
 
    virtual const std::vector<RealArray>&
                         ModelSignalDerivative(GmatBase *obj,
@@ -106,20 +101,14 @@ public:
 
    bool                 StepParticipant(Real stepToTake,
                                               bool forTransmitter);
-#ifdef USE_PRECISION_TIME
    void                 MoveToEpoch(const GmatTime theEpoch,
                                           bool epochAtReceive,
                                           bool moveAll = true);
-#else
-   void                 MoveToEpoch(const GmatEpoch theEpoch,                    // This function will be removed and replaced by MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive, bool moveAll = true)
-                                          bool epochAtReceive,
-                                          bool moveAll = true);
-#endif
 
 protected:
    /// The next node in the list of signals (NULL at the end of the list)
    SignalBase                 *next;
-   /// The next node in the list of signals (NULL at the start of the list)
+   /// The previous node in the list of signals (NULL at the start of the list)
    SignalBase                 *previous;
 
    /// State data for the transmitting participant
@@ -144,13 +133,8 @@ protected:
 
    // Storage buffers
 
-#ifdef USE_PRECISION_TIME
    /// Epoch of most recent calculation
    GmatTime                   satPrecEpoch;
-#else
-   /// Epoch of most recent calculation
-   GmatEpoch                  satEpoch;                            // This variable will be removed and replaced by variable satPrecEpoch
-#endif
    /// Parameter ID used to retrieve internal epoch data
    Integer                    satEpochID;
    /// Rotation matrix from receiver to J2K (Identity by default)

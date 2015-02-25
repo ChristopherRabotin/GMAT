@@ -57,11 +57,7 @@ public:
 
    virtual void InitializeSignal(bool chainForwards = false);
 
-#ifdef USE_PRECISION_TIME
    virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true);
-#else
-   virtual bool ModelSignal(const GmatEpoch atEpoch, bool EpochAtReceive = true);      // This function will be removed and replaced by virtual bool ModelSignal(const GmatTime atEpoch, bool EpochAtReceive = true)
-#endif
    
    virtual const std::vector<RealArray>&
                 ModelSignalDerivative(GmatBase *obj, Integer forId);
@@ -97,11 +93,7 @@ protected:
    /// Flag indicating to use Et-TAI correction
    bool useETTAI;
 
-#ifdef USE_PRECISION_TIME
    bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive);
-#else
-   bool GenerateLightTimeData(const GmatEpoch atEpoch, bool epochAtReceive);       // This function will be removed and replaced by bool GenerateLightTimeData(const GmatTime atEpoch, bool epochAtReceive)
-#endif
 
    /// This function is used to compute relativity correction
    Real           RelativityCorrection(Rvector3 r1B, Rvector3 r2B, Real t1, Real t2);

@@ -39,13 +39,8 @@ SignalData::SignalData() :
    tPropagator          (NULL),
    rPropagator          (NULL),
    stationParticipant   (false),
-#ifdef USE_PRECISION_TIME
    tPrecTime            (21545.0),
    rPrecTime            (21545.0),
-#else
-   tTime                (21545.0),
-   rTime                (21545.0),
-#endif
    tSTM                 (true),         //?? tSTM is a Rmatrix66        // Note that: Rmatrix66 A(true) is a contsructor of Rmatrix66. It defines matrix A to be a 6x6 identity matrix
    rSTM                 (true),         //?? rSTM is a Rmatrix66        // Note that: Rmatrix66 A(true) is a contsructor of Rmatrix66. It defines matrix A to be a 6x6 identity matrix
    tJ2kRotation         (true),                                         // Note that: Rmatrix33 B(true) is a contsructor of Rmatrix33. It defines matrix B to be a 3x3 identity matrix
@@ -101,13 +96,8 @@ SignalData::SignalData(const SignalData& sd) :
    tPropagator          (sd.tPropagator),
    rPropagator          (sd.rPropagator),
    stationParticipant   (sd.stationParticipant),
-#ifdef USE_PRECISION_TIME
    tPrecTime            (sd.tPrecTime),
    rPrecTime            (sd.rPrecTime),
-#else
-   tTime                (sd.tTime),
-   rTime                (sd.rTime),
-#endif
    tLoc                 (sd.tLoc),
    tOStateSSB           (sd.tOStateSSB),
    tLocTcs              (sd.tLocTcs),
@@ -167,13 +157,8 @@ SignalData& SignalData::operator=(const SignalData& sd)
       rMovable             = sd.rMovable;
       tPropagator          = sd.tPropagator;
       rPropagator          = sd.rPropagator;
-#ifdef USE_PRECISION_TIME
       tPrecTime            = sd.tPrecTime;
       rPrecTime            = sd.rPrecTime;
-#else
-      tTime                = sd.tTime;
-      rTime                = sd.rTime;
-#endif
       stationParticipant   = sd.stationParticipant;
       tLoc                 = sd.tLoc;
       tOStateSSB           = sd.tOStateSSB;

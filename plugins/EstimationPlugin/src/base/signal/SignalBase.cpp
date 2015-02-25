@@ -66,11 +66,7 @@ SignalBase::SignalBase(const std::string &typeStr,
    rcs                  (NULL),
    ocs                  (NULL),
    j2k                  (NULL),
-#ifdef USE_PRECISION_TIME
    satPrecEpoch         (21545.0),
-#else
-   satEpoch             (21545.0),
-#endif
    satEpochID           (-1),
    signalIsFeasible     (false),       // Not feasible until calculated!
    includeLightTime     (true),
@@ -125,11 +121,7 @@ SignalBase::SignalBase(const SignalBase& sb) :
    rcs                  (NULL),
    ocs                  (NULL),
    j2k                  (NULL),
-#ifdef USE_PRECISION_TIME
    satPrecEpoch         (21545.0),
-#else
-   satEpoch             (21545.0),
-#endif
    satEpochID           (-1),
    signalIsFeasible     (false),       // Never feasible until calculated!
    includeLightTime     (sb.includeLightTime),
@@ -175,11 +167,7 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
          delete j2k;
       j2k = NULL;
 
-#ifdef USE_PRECISION_TIME
       satPrecEpoch        = 21545.0;
-#else
-      satEpoch            = 21545.0;
-#endif
       satEpochID          = -1;
       signalIsFeasible    = false;     // Never feasible until calculated!
       includeLightTime    = sb.includeLightTime;
@@ -573,7 +561,6 @@ bool SignalBase::Initialize()
                ((theData.tNode->IsOfType(Gmat::GROUND_STATION)) ||
                 (theData.rNode->IsOfType(Gmat::GROUND_STATION)));
 
-         #ifdef USE_PRECISION_TIME
          // 2. Update theData.tPrecTime and theData.rPrecTime
          theData.tPrecTime = theData.tNode->GetEpoch();
          theData.rPrecTime = theData.rNode->GetEpoch();
@@ -582,11 +569,6 @@ bool SignalBase::Initialize()
             theData.tPrecTime = theData.rPrecTime;
          else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
             theData.rPrecTime = theData.tPrecTime;
-         #else
-         // 2. Update theData.tTime and theData.rTime
-         theData.tTime = theData.tNode->GetEpoch();
-         theData.rTime = theData.rNode->GetEpoch();
-         #endif
 
          retval = true;
       }
@@ -689,11 +671,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    // Pass in the current computed data
    if (theData.receiveParticipant == newData.receiveParticipant)
    {
-#ifdef USE_PRECISION_TIME
       theData.rPrecTime = newData.rPrecTime;
-#else
-      theData.rTime = newData.rTime;
-#endif
       theData.rLoc  = newData.rLoc;
       theData.rVel  = newData.rVel;
       #ifdef DEBUG_LIGHTTIME
@@ -702,11 +680,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
    if (theData.receiveParticipant == newData.transmitParticipant)
    {
-#ifdef USE_PRECISION_TIME
       theData.rPrecTime = newData.tPrecTime;
-#else
-      theData.rTime = newData.tTime;
-#endif
       theData.rLoc  = newData.tLoc;
       theData.rVel  = newData.tVel;
       #ifdef DEBUG_LIGHTTIME
@@ -715,11 +689,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
    if (theData.transmitParticipant == newData.receiveParticipant)
    {
-#ifdef USE_PRECISION_TIME
       theData.tPrecTime = newData.rPrecTime;
-#else
-      theData.tTime = newData.rTime;
-#endif
       theData.tLoc  = newData.rLoc;
       theData.tVel  = newData.rVel;
       #ifdef DEBUG_LIGHTTIME
@@ -728,11 +698,7 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
    if (theData.transmitParticipant == newData.transmitParticipant)
    {
-#ifdef USE_PRECISION_TIME
       theData.tPrecTime = newData.tPrecTime;
-#else
-      theData.tTime = newData.tTime;
-#endif
       theData.tLoc  = newData.tLoc;
       theData.tVel  = newData.tVel;
       #ifdef DEBUG_LIGHTTIME
@@ -741,13 +707,8 @@ void SignalBase::SetSignalData(const SignalData& newData)
    }
 
    #ifdef DEBUG_LIGHTTIME
-      #ifdef USE_PRECISION_TIME
       MessageInterface::ShowMessage("%d matching data sets updated; epochs "
             "%.12lf -> %.12lf\n", count, theData.tPrecTime.GetMjd(), theData.rPrecTime.GetMjd());
-      #else
-      MessageInterface::ShowMessage("%d matching data sets updated; epochs "
-            "%.12lf -> %.12lf\n", count, theData.tTime, theData.rTime);
-      #endif
    #endif
 }
 
@@ -811,18 +772,10 @@ void SignalBase::InitializeSignal(bool chainForwards)
    SpacePoint  *origin = NULL;
    CelestialBody *earth = solarSystem->GetBody("Earth");
 
-#ifdef USE_PRECISION_TIME
    GmatTime gsPrecEpoch = theData.tPrecTime;
-#else
-   GmatEpoch gsEpoch = theData.tTime;
-#endif
 
    #ifdef DEBUG_INITIALIZATION
-#ifdef USE_PRECISION_TIME
       MessageInterface::ShowMessage("Initializing with epoch %.12lf\n", satPrecEpoch.GetMjd());
-#else
-      MessageInterface::ShowMessage("Initializing with epoch %.12lf\n", satEpoch);
-#endif
    #endif
 
 
@@ -851,11 +804,7 @@ void SignalBase::InitializeSignal(bool chainForwards)
    }
    else if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
    {
-#ifdef USE_PRECISION_TIME
       gsPrecEpoch = theData.rPrecTime;
-#else
-      gsEpoch = theData.rTime;
-#endif
       BodyFixedPoint *bf = (BodyFixedPoint*)theData.rNode;
       rcs = bf->GetBodyFixedCoordinateSystem();
 
@@ -904,11 +853,7 @@ void SignalBase::InitializeSignal(bool chainForwards)
    // 3. Update all rotation matrixes at gs time (or at transmit time when both nodes are spacecrafts
    std::string updateAll = "All";
 
-#ifdef USE_PRECISION_TIME
    UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);
-#else
-   UpdateRotationMatrix(gsEpoch, updateAll);
-#endif
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Late Binding Initialization complete:\n"
             "   SolarSystem pointer:  %p\n"
@@ -957,38 +902,22 @@ void SignalBase::CalculateRangeVectorInertial()
    // 1. Update all rotation matrixes at time of ground station. If both tnode and rNode are spacecrafts, update at transmit time
    std::string updateAll = "All";
 
-#ifdef USE_PRECISION_TIME
    GmatTime gsPrecEpoch = theData.tPrecTime;
    if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
       gsPrecEpoch = theData.rPrecTime;
    UpdateRotationMatrix(gsPrecEpoch.GetMjd(), updateAll);
-#else
-   GmatEpoch gsEpoch = theData.tTime;
-   if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-      gsEpoch = theData.rTime;
-   UpdateRotationMatrix(gsEpoch, updateAll);
-#endif
 
    // 2. Compute range vector in MJ2000 coordinate system 
    SpacePoint *origin1 = tcs->GetOrigin();
    SpacePoint *origin2 = rcs->GetOrigin();
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
 
-#ifdef USE_PRECISION_TIME
    theData.tOStateSSB = origin1->GetMJ2000PrecState(theData.tPrecTime) - ssb->GetMJ2000PrecState(theData.tPrecTime);
    theData.rOStateSSB = origin2->GetMJ2000PrecState(theData.rPrecTime) - ssb->GetMJ2000PrecState(theData.rPrecTime);
    theData.j2kOriginSep = (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());
    theData.j2kOriginVel = (theData.rOStateSSB.GetV() - theData.tOStateSSB.GetV());
 //   theData.j2kOriginSep        = origin2->GetMJ2000PrecPosition(theData.rPrecTime) -
 //                                 origin1->GetMJ2000PrecPosition(theData.tPrecTime);
-#else
-   theData.tOStateSSB = origin1->GetMJ2000PrecState(theData.tTime) - ssb->GetMJ2000PrecState(theData.tTime);
-   theData.rOStateSSB = origin2->GetMJ2000PrecState(theData.rTime) - ssb->GetMJ2000PrecState(theData.rTime);
-   theData.j2kOriginSep = (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());
-   theData.j2kOriginVel = (theData.rOStateSSB.GetV() - theData.tOStateSSB.GetV());
-//   theData.j2kOriginSep        = origin2->GetMJ2000Position(theData.rTime) -
-//                                 origin1->GetMJ2000Position(theData.tTime);
-#endif
    
 //   theData.rangeVecInertial = theData.rLoc - theData.j2kOriginSep -
 //         theData.tLoc;                                       // GMAT MathSpec Eq. 6.12
@@ -1019,7 +948,6 @@ void SignalBase::CalculateRangeVectorObs()
    CalculateRangeVectorInertial();
 
    // 1. Update R_Transmitter_j2k, R_receiver_j2k, and R_Obs_j2k matrixes
-#ifdef USE_PRECISION_TIME
    UpdateRotationMatrix(theData.tPrecTime.GetMjd(),"j2k_1");
    UpdateRotationMatrix(theData.rPrecTime.GetMjd(),"j2k_2");
    if (theData.stationParticipant)
@@ -1031,10 +959,6 @@ void SignalBase::CalculateRangeVectorObs()
    }
    else
       R_Obs_j2k = I33;
-#else
-   UpdateRotationMatrix(theData.tTime,"j2k_1");
-   UpdateRotationMatrix(theData.rTime,"j2k_2");
-#endif
 
    // 2. Compute the positions of the participants in their own frames
    theData.tLocTcs = theData.tJ2kRotation * theData.tLoc;
@@ -1069,7 +993,6 @@ void SignalBase::CalculateRangeRateVectorObs()
    SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
 
    // 1. Compute tVel, rVel, j2kOriginVel, rangeRateVecInertial
-#ifdef USE_PRECISION_TIME
    // Velocity of origin2 at time rPrecTime w.r.t. origin1 at time tPrecTime
    theData.j2kOriginVel = (origin1->GetMJ2000PrecVelocity(theData.tPrecTime) - ssb->GetMJ2000PrecVelocity(theData.tPrecTime)) -      // velocity of origin1 w.r.t SSB at transmit time tPrecTime in MJ2000Eq coordinate system
                           (origin2->GetMJ2000PrecVelocity(theData.rPrecTime) - ssb->GetMJ2000PrecVelocity(theData.rPrecTime));       // velocity of origin2 w.r.t SSB at receive time rPrecTime in MJ2000Eq coordinate system
@@ -1078,16 +1001,6 @@ void SignalBase::CalculateRangeRateVectorObs()
 
    theData.tVel = theData.tNode->GetMJ2000PrecVelocity(theData.tPrecTime);
    theData.rVel = theData.rNode->GetMJ2000PrecVelocity(theData.rPrecTime);
-#else
-   // Velocity of origin2 at time rTime w.r.t. origin1 at time tTime
-   theData.j2kOriginVel = (origin1->GetMJ2000Velocity(theData.tTime) - ssb->GetMJ2000Velocity(theData.tTime)) -      // velocity of origin1 w.r.t SSB at transmit time tTime in MJ2000Eq coordinate system
-                          (origin2->GetMJ2000Velocity(theData.rTime) - ssb->GetMJ2000Velocity(theData.rTime));       // velocity of origin2 w.r.t SSB at receive time rTime in MJ2000Eq coordinate system   
-//   theData.j2kOriginVel = origin2->GetMJ2000Velocity(theData.rTime) -
-//                          origin1->GetMJ2000Velocity(theData.tTime);
-
-   theData.tVel = theData.tNode->GetMJ2000Velocity(theData.tTime);
-   theData.rVel = theData.rNode->GetMJ2000Velocity(theData.rTime);
-#endif
    theData.rangeRateVecInertial = theData.rVel - theData.j2kOriginVel - theData.tVel;
 
    // 2. Compute the velocities of the participants in their own frames
@@ -1336,99 +1249,6 @@ Integer SignalBase::GetParmIdFromEstID(Integer forId, GmatBase *obj)
    return forId - obj->GetType() * 250;
 }
 
-#ifndef USE_PRECISION_TIME 
-//------------------------------------------------------------------------------
-// void MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive, bool moveAll)
-//------------------------------------------------------------------------------
-/**
- * Moves participants to a specified epoch
- *
- * @param theEpoch The desired epoch
- * @param epochAtReceive Flag indicating that desired epoch is for receiver
- * @param moveAll true to move both participants
- */
-//------------------------------------------------------------------------------
-void SignalBase::MoveToEpoch(const GmatEpoch theEpoch, bool epochAtReceive,
-      bool moveAll)
-{
-   #ifdef DEBUG_LIGHTTIME
-      MessageInterface::ShowMessage("Called MoveToEpoch(%.12lf, %s%s)\n",
-            theEpoch,
-            (epochAtReceive ? "Epoch at Receive" : "Epoch at Transmit"),
-            (moveAll ? ", Moving all participants" : ""));
-   #endif
-
-   // 1. Propagate receive node at time theEpoch and update it's SignalData
-   if (epochAtReceive || moveAll)
-   {
-      Real dt = (theEpoch - theData.rTime) * GmatTimeConstants::SECS_PER_DAY;
-
-      #ifdef DEBUG_LIGHTTIME
-         MessageInterface::ShowMessage("   dt = (%.12lf - %.12lf)*86400 => %.12le\n",
-               theEpoch, theData.rTime, dt);
-      #endif
-
-      if (dt != 0.0)
-         StepParticipant(dt, false);
-      else
-      {
-         Rvector6 state;
-         if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-            state = theData.rNode->GetMJ2000State(theEpoch);
-         else // Retrieve spacecraft data from the propagator
-         {
-            const Real *pstate =
-                  theData.rPropagator->GetPropagator()->AccessOutState();
-            state.Set(pstate);
-         }
-
-         theData.rLoc = state.GetR();
-         theData.rVel = state.GetV();
-
-         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-         theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000State(theData.rTime) -
-                            ssb->GetMJ2000State(theData.rTime);
-      }
-   }
-
-   // 2. Propagate transmit node at time theEpoch and update it's SignalData
-   if (!epochAtReceive || moveAll)
-   {
-      Real dt = (theEpoch - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
-
-      #ifdef DEBUG_LIGHTTIME
-         MessageInterface::ShowMessage("   dt = (%.12lf - %.12lf)*86400 => %.12le\n",
-               theEpoch, theData.rTime, dt);
-      #endif
-
-      if (dt != 0.0)
-         StepParticipant(dt, true);
-      else
-      {
-         Rvector6 state;
-         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-            state = theData.tNode->GetMJ2000State(theEpoch);
-         else // Retrieve spacecraft data from the propagator
-         {
-            const Real *pstate =
-                  theData.tPropagator->GetPropagator()->AccessOutState();
-            state.Set(pstate);
-         }
-         theData.tLoc = state.GetR();
-         theData.tVel = state.GetV();
-
-         SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-         theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) -
-                            ssb->GetMJ2000State(theData.tTime);
-      }
-   }
-
-   #ifdef DEBUG_LIGHTTIME
-      MessageInterface::ShowMessage("MoveToEpoch complete\n");
-   #endif
-}
-
-#else
 
 void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       bool moveAll)
@@ -1533,7 +1353,6 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
       #endif
    }
 }
-#endif
 
 //------------------------------------------------------------------------------
 // void SetPrevious(SignalBase* prev)
@@ -1649,7 +1468,6 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("Propagating analytically\n");
       #endif
-#ifdef USE_PRECISION_TIME
       if (forTransmitter)
       {
          state = theData.tNode->GetMJ2000PrecState(theData.tPrecTime +
@@ -1660,18 +1478,6 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
          state = theData.rNode->GetMJ2000PrecState(theData.rPrecTime +
                stepToTake / GmatTimeConstants::SECS_PER_DAY);
       }
-#else
-      if (forTransmitter)
-      {
-         state = theData.tNode->GetMJ2000State(theData.tTime +
-               stepToTake / GmatTimeConstants::SECS_PER_DAY);
-      }
-      else
-      {
-         state = theData.rNode->GetMJ2000State(theData.rTime +
-               stepToTake / GmatTimeConstants::SECS_PER_DAY);
-      }
-#endif
       // For ground station, its STM is I matrix
    }
 
@@ -1684,15 +1490,9 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       // whenever updating participant's state, it needs to update its STM
       theData.tSTM = stm;
 
-#ifdef USE_PRECISION_TIME
       theData.tPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
       theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000PrecState(theData.tPrecTime) - 
                          ssb->GetMJ2000PrecState(theData.tPrecTime);
-#else
-      theData.tTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
-      theData.tOStateSSB = tcs->GetOrigin()->GetMJ2000State(theData.tTime) - 
-                         ssb->GetMJ2000State(theData.tTime);
-#endif
    }
    else
    {
@@ -1700,15 +1500,9 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
       theData.rVel = state.GetV();
       // whenever updating participant's state, it needs to update its STM
       theData.rSTM = stm;
-#ifdef USE_PRECISION_TIME
       theData.rPrecTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
       theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000PrecState(theData.rPrecTime) - 
                          ssb->GetMJ2000PrecState(theData.rPrecTime);
-#else
-      theData.rTime += stepToTake / GmatTimeConstants::SECS_PER_DAY;
-      theData.rOStateSSB = rcs->GetOrigin()->GetMJ2000State(theData.rTime) - 
-                         ssb->GetMJ2000PrecState(theData.rTime);
-#endif
    }
    
    retval = true;
