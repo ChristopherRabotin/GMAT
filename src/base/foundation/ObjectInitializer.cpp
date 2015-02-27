@@ -921,7 +921,7 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
 {   
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-		("--- Calling BuildReferences(), obj = <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+		("--- In BuildReferencesAndInitialize, Calling BuildReferences(), obj = <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
 		 obj->GetName().c_str());
 	#endif
 	
@@ -1288,6 +1288,9 @@ void ObjectInitializer::SetRefFromName(GmatBase *obj, const std::string &oName)
    
    if ((refObj = FindObject(oName)) != NULL)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+         MessageInterface::ShowMessage("FindObject found %s\n", oName.c_str());
+      #endif
       // Do not set if object and its associated hardware in function
       if (refObj->IsOfType(Gmat::HARDWARE) && obj->IsLocal() && refObj->IsLocal())
       {
@@ -1299,11 +1302,17 @@ void ObjectInitializer::SetRefFromName(GmatBase *obj, const std::string &oName)
       }
       else
       {
+         #ifdef DEBUG_OBJECT_INITIALIZER
+            MessageInterface::ShowMessage("Calling SetRefObject .... \n");
+         #endif
          obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
       }
    }
    else
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+         MessageInterface::ShowMessage("FindObject did NOT find %s\n", oName.c_str());
+      #endif
       // look in the SolarSystem
       refObj = FindSpacePoint(oName);
       

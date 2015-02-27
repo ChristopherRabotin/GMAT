@@ -260,6 +260,8 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
 
       troposphereModel  = gs.troposphereModel;
       ionosphereModel   = gs.ionosphereModel;
+
+	  minElevationAngle = gs.minElevationAngle;
    }
 
    return *this;

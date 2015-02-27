@@ -36,11 +36,14 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ConditionPanel, GmatPanel)
-    EVT_GRID_CELL_LEFT_CLICK(ConditionPanel::OnCellLeftClick)
-    EVT_GRID_CELL_RIGHT_CLICK(ConditionPanel::OnCellRightClick)
+   EVT_GRID_CELL_LEFT_CLICK(ConditionPanel::OnCellLeftClick)
+   EVT_GRID_CELL_RIGHT_CLICK(ConditionPanel::OnCellRightClick)
 	EVT_GRID_CELL_LEFT_DCLICK(ConditionPanel::OnCellDoubleClick)
-    EVT_GRID_CELL_CHANGE(ConditionPanel::OnCellValueChange)  
+   EVT_GRID_CELL_CHANGE(ConditionPanel::OnCellValueChange)  
 	EVT_KEY_DOWN(ConditionPanel::OnKeyDown)
+   #if wxCHECK_VERSION(3, 0, 0)
+	EVT_GRID_TABBING(ConditionPanel::OnGridTabbing)
+   #endif
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -131,7 +134,10 @@ void ConditionPanel::Create()
    conditionGrid->SetColSize(RHS_SEL_COL, 25);
    conditionGrid->SetColSize(RHS_COL, 165);
    conditionGrid->SetCellValue(0, COMMAND_COL, theCommand->GetTypeName().c_str());
-
+   #if wxCHECK_VERSION(3, 0, 0)
+   conditionGrid->SetTabBehaviour(wxGrid::Tab_Wrap);
+   #endif
+   
    UpdateSpecialColumns();
 
    item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 0 );
@@ -403,11 +409,11 @@ void ConditionPanel::OnCellDoubleClick(wxGridEvent& event)
    else if (col == COND_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      wxString strArray[] = {wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
+      wxString strArray[] = {wxT(""), wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
                              wxT(">="), wxT("<=")};        
       
       wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
-                                        _T("Relational Operators"), 6, strArray);
+                                        _T("Relational Operators"), 7, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -576,11 +582,11 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
    else if (col == COND_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
-      wxString strArray[] = {wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
+      wxString strArray[] = {wxT(""), wxT("=="), wxT("~="), wxT(">"), wxT("<"), 
                              wxT(">="), wxT("<=")};        
       
       wxSingleChoiceDialog dialog(this, _T("Relational Operator Selection:"),
-                                        _T("Relational Operators"), 6, strArray);
+                                        _T("Relational Operators"), 7, strArray);
       dialog.SetSelection(0);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -610,4 +616,33 @@ void ConditionPanel::OnCellRightClick(wxGridEvent& event)
 void ConditionPanel::OnCellValueChange(wxGridEvent& event)
 {
    EnableUpdate(true);
+}
+
+//------------------------------------------------------------------------------
+// void OnGridTabbing(wxGridEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles the event triggered when the user tabs in the grid
+ *
+ * @param  event   grid event to handle
+ */
+//------------------------------------------------------------------------------
+void ConditionPanel::OnGridTabbing(wxGridEvent& event)
+{
+    int row = event.GetRow();
+    int col = event.GetCol();
+    if (!event.ShiftDown() &&
+        (row == (conditionGrid->GetNumberRows() - 1)) &&
+        (col == (conditionGrid->GetNumberCols() - 1)))
+    {
+        conditionGrid->Navigate( wxNavigationKeyEvent::IsForward );
+    }
+    else if (event.ShiftDown() &&
+        (row == 0) &&
+        (col == 0))
+    {
+        conditionGrid->Navigate( wxNavigationKeyEvent::IsBackward );
+    }
+    else
+        event.Skip();
 } 
