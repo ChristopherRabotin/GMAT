@@ -224,6 +224,8 @@ protected:
    wxRect  legendRect;
    /// Number of columns in the legend (0 to make it 1 row)
    int legendColumns;
+   /// Flag triggered by a size event
+   bool resized;
 
 //private:
    DECLARE_EVENT_TABLE()

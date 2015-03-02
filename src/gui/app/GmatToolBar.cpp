@@ -169,9 +169,10 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    // add help tool
    toolBar->AddTool(MENU_HELP_ABOUT, _T("About GMAT"), *bitmaps[7], _T("About GMAT"));
    toolBar->AddTool(MENU_HELP_CONTENTS, _T("Help"), *bitmaps[15], _T("Help"));
-   
+
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(MENU_EDIT_COPY, FALSE);
@@ -262,8 +263,9 @@ void GmatToolBar::AddAnimationTools(wxToolBar* toolBar)
                     _T("Show Animation Options"));
    #endif
    
+   // Commented out for wx3.0 (LOJ: 2015.02.09)
    // now realize to make tools appear
-   toolBar->Realize();
+   //toolBar->Realize();
    
    // disable tools
    toolBar->EnableTool(TOOL_ANIMATION_PLAY, FALSE);

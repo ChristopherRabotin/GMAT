@@ -650,8 +650,10 @@ bool Subscriber::Remove(Subscriber *s, const bool del)
 //------------------------------------------------------------------------------
 // void Activate(bool state)
 //------------------------------------------------------------------------------
-void Subscriber::Activate(bool state)
+bool Subscriber::Activate(bool state)
 {
+   bool retval = true;
+
    #ifdef DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage
       ("Subscriber::Activate() entered, state=%d, active=%d, isDataOn=%d, "
@@ -674,6 +676,7 @@ void Subscriber::Activate(bool state)
        isDataStateChanged, isInitialized);
    #endif
    
+   return retval;
 }
 
 

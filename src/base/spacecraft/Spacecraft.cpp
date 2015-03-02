@@ -817,6 +817,14 @@ CoordinateSystem* Spacecraft::GetInternalCoordSystem()
    return internalCoordSystem;
 }
 
+//---------------------------------------------------------------------------
+// EphemManager* GetEphemManager()
+//---------------------------------------------------------------------------
+EphemManager* Spacecraft::GetEphemManager()
+{
+   return ephemMgr;
+}
+
 
 //---------------------------------------------------------------------------
 // std::string GetModelFile()

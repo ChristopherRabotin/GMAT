@@ -104,7 +104,9 @@ public:
     * @return true on success, false or throw on failure.
     */
    //---------------------------------------------------------------------------
-   virtual bool         Fire(Real *burnData = NULL, Real epoch = GmatTimeConstants::MJD_OF_J2000) = 0;
+   virtual bool         Fire(Real *burnData = NULL,
+                             Real epoch = GmatTimeConstants::MJD_OF_J2000,
+                             bool backwards = false) = 0;
 
    DEFAULT_TO_NO_CLONES
     

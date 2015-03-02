@@ -171,25 +171,24 @@ void CallFunctionPanel::Create()
                      new wxStaticText( this, ID_TEXT, wxT("  Function  "),
                      wxDefaultPosition, wxDefaultSize, 0 );
    
+   theOutputTextCtrl =
+      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(50, -1),
+                      wxTE_MULTILINE|wxTE_READONLY);
+   theOutputTextCtrl->SetBackgroundColour( *wxLIGHT_GREY );
+   
+   theOutputViewButton = new
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
+   
    // Get available function ComboBox from theGuiManager
    theFunctionComboBox =
       theGuiManager->GetFunctionComboBox(this, ID_COMBO, wxSize(300, -1));
-
 
    theInputTextCtrl =
       new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(50, -1),
                       wxTE_MULTILINE|wxTE_READONLY);
    theInputTextCtrl->SetBackgroundColour( *wxLIGHT_GREY );
    
-   theOutputTextCtrl =
-      new wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(50, -1),
-                      wxTE_MULTILINE|wxTE_READONLY);
-   theOutputTextCtrl->SetBackgroundColour( *wxLIGHT_GREY );
-   
    theInputViewButton = new
-      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
-   
-   theOutputViewButton = new
       wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
    
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer( 5, 0, 0 );
