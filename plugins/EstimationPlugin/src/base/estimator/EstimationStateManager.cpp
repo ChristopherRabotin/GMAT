@@ -564,6 +564,52 @@ bool EstimationStateManager::SetProperty(std::string sf, GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
+// bool SetProperty(GmatBase *obj)                                                // made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+/**
+ * Sets a SolveFor parameter associated with a specific object. Assume that the 
+ * object obj has SolveFors paramter containing object's solve-for names. Example: 
+ * Sat.SolveFors = Cartesian. The solve-for parameter for this case is Sat.Cartisian
+ *
+ * @param obj The object that supplies solve-for parameter
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool EstimationStateManager::SetProperty(GmatBase *obj)
+{
+   StringArray solforNames;
+
+   try
+   {
+      // Get solve-for parameters
+      solforNames = obj->GetStringArrayParameter("SolveFors");
+   }
+   catch(...)
+   {
+      // If it does not have SolveFors parameter, do nothing
+   }
+
+   // Save the property elements and fill out the vectors
+   std::string prop;
+   for (UnsignedInt i = 0; i < solforNames.size(); ++i)
+   {
+      prop = obj->GetName() + "." + solforNames[i];
+      // MessageInterface::ShowMessage("prop = %s\n", prop.c_str()); 
+      SetProperty(prop);
+      //// Save the property elements and fill out the vectors
+      //solveForNames.push_back(prop);
+      //solveForObjectNames.push_back(obj->GetName());
+      //solveForObjects.push_back(NULL);
+      //solveForIDNames.push_back(solforNames[i]);
+      //solveForIDs.push_back(-1);
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetConsider(std::string prop)
 //------------------------------------------------------------------------------
 /**
@@ -679,7 +725,7 @@ bool EstimationStateManager::BuildState()
       std::stringstream sizeVal;
       sizeVal << stateSize;
       throw EstimatorException("No solve-for parameter is defined for estimator;"     // made changes by TUAN NGUYEN
-            " estimation is not possible.\n");                                         // made changes by TUAN NGUYEN
+            " estimation is not possible.\n");                                        // made changes by TUAN NGUYEN
 
       //throw EstimatorException("Estimation state vector size is " +                // made changes by TUAN NGUYEN
       //      sizeVal.str() + "; estimation is not possible.");                      // made changes by TUAN NGUYEN
