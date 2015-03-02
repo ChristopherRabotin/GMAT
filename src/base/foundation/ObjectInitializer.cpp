@@ -258,6 +258,7 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  NOTE: Measurement participant pointers must initialize before models.
    //        In the current code, that means spacecraft and ground stations, but
    //        the list might grow
+   //  3. Error Models                                                       // made changes by TUAN NGUYEN
    //  3. Measurement Models
    //  4. System Parameters
    //  5. Parameters
@@ -299,7 +300,25 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          InitializeObjectsInTheMap(GOS, Gmat::GROUND_STATION);
       }
    }
-   
+
+   // ErrorModel                                                                  // made changes by TUAN NGUYEN
+   // Handle ErrorModel objects                                                   // made changes by TUAN NGUYEN
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)           // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZE_OBJ                                                 // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("--- Initialize ErrorModel in LOS\n");        // made changes by TUAN NGUYEN
+      #endif                                                                      // made changes by TUAN NGUYEN
+      InitializeObjectsInTheMap(LOS, Gmat::ERROR_MODEL);                          // made changes by TUAN NGUYEN
+
+      if (includeGOS)                                                             // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         #ifdef DEBUG_INITIALIZE_OBJ                                              // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");     // made changes by TUAN NGUYEN
+         #endif                                                                   // made changes by TUAN NGUYEN
+         InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);                       // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+
    // MeasurementModel
    // Measurement Models must init before the Estimators/Simulator, so do next
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::MEASUREMENT_MODEL)
