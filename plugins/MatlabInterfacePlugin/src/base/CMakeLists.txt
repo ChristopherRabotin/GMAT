@@ -15,6 +15,20 @@
 MESSAGE("==============================")
 MESSAGE("GMAT MatlabInterface Plugin setup " ${VERSION}) 
 
+# ====================================================================
+# Major error checks
+if(NOT Matlab_FOUND)
+  MESSAGE(WARNING "Skipping due to missing Matlab")
+  RETURN()
+endif()
+
+if(NOT wxWidgets_FOUND)
+  MESSAGE(WARNING "Skipping due to missing wxWidgets")
+  RETURN()
+endif()
+
+# ====================================================================
+# Define plugin target
 if(WIN32)
 	SET(PLUGINTARGET "libMatlabInterface")
 else()
@@ -29,10 +43,14 @@ ADD_DEFINITIONS("-DMATLAB_EXPORTS")
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command factory function include interface plugin subscriber)
+#SET(PLUGIN_DIRS ${PLUGIN_DIRS} "../matlab/gmat_mex/src")
 
 # ====================================================================
 # extra include directories for header files
-INCLUDE_DIRECTORIES(${MATLAB_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
+#INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/include")
+#INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/app")
+INCLUDE(${wxWidgets_USE_FILE})
 
 # ====================================================================
 # source files
@@ -46,6 +64,8 @@ SET(PLUGIN_SRCS
     interface/MatlabInterface.cpp
     plugin/GmatPluginFunctions.cpp
     subscriber/MatlabWorkspace.cpp
+    #../matlab/gmat_mex/src/MatlabClient.cpp
+    #../matlab/gmat_mex/src/MatlabConnection.cpp
 )
 
 # ====================================================================
@@ -55,6 +75,8 @@ if(WIN32)
 else()
 	LINK_LIBRARIES(GmatBase)
 endif()
+LINK_LIBRARIES(${Matlab_LIBRARIES})
+LINK_LIBRARIES(${wxWidgets_LIBRARIES})
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

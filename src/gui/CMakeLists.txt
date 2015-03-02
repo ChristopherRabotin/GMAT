@@ -16,6 +16,13 @@ MESSAGE("==============================")
 MESSAGE("GMAT GUI setup " ${VERSION})
 
 # ====================================================================
+# Major error checks
+if(NOT wxWidgets_FOUND)
+  MESSAGE(WARNING "Skipping due to missing wxWidgets")
+  RETURN()
+endif()
+
+# ====================================================================
 SET(GUITARGET "GmatGui")
 SET(TargetName ${GUITARGET})
 
@@ -65,8 +72,7 @@ SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
 ADD_DEFINITIONS("-D__USE_SPICE__")
 
 # ====================================================================
-# wxWidgets
-FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl REQUIRED)
+# wxWidgets specifics
 INCLUDE(${wxWidgets_USE_FILE})
 LINK_LIBRARIES(${wxWidgets_LIBRARIES})
 
@@ -85,7 +91,6 @@ LINK_LIBRARIES(${OPENGL_LIBRARIES})
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
-ADD_DEFINITIONS("-D_MBCS")
 ADD_DEFINITIONS("-D__USE_STC_EDITOR__")
 
 # ====================================================================

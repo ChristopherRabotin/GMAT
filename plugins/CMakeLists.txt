@@ -23,7 +23,7 @@
 MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
   # Add Preproccessor Definitions
   ADD_DEFINITIONS("-D_DYNAMICLINK")
-  ADD_DEFINITIONS("-DEXP_STL")
+  #ADD_DEFINITIONS("-DEXP_STL")
 
   # ====================================================================
   # prepend include directories for header files
@@ -31,13 +31,18 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
   INCLUDE_DIRECTORIES(BEFORE ${PLUGIN_DIRS})
 
   # ====================================================================
-  # Recursively find all include files, which will be added to IDE-based
-  # projects (VS, XCode, etc.)
-  FILE(GLOB_RECURSE PLUGIN_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
+  # Recursively find all include files in specified directories
+  FOREACH(I_DIR ${PLUGIN_DIRS})
+    FILE(GLOB_RECURSE IDIR_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${I_DIR}/*.hpp ${I_DIR}/*.h)
+    SET(PLUGIN_HEADERS ${PLUGIN_HEADERS} ${IDIR_HEADERS})
+  ENDFOREACH()
 
   # ====================================================================
   # add the install targets
   # headers are included here for IDE-based projects (VS, XCode, etc.)
+  if(SETUPPLUGIN_VERBOSE)
+    MESSAGE("HEADERS: ${PLUGIN_HEADERS}")
+  endif()
   ADD_LIBRARY(${TargetName} SHARED ${PLUGIN_SRCS} ${PLUGIN_HEADERS})
 
   # ====================================================================

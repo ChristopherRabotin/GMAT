@@ -23,7 +23,7 @@ cmake_minimum_required(VERSION 2.8)
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2014a" CACHE STRING "Build version")
+SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Set default GMAT installation location
@@ -35,7 +35,7 @@ endif()
 # Set general build options
 OPTION(PROFILE_BUILD "ProfileBuild" OFF)
 OPTION(GMAT_64_BIT "64-Bit Binaries" ON)
-OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" OFF)
+OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 
 # Optional GMAT plugins
 OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
@@ -45,89 +45,105 @@ OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
 OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
 OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
 OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
-OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" ON)
 OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
 OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
 OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
-OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" OFF)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
 OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
 OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
 OPTION(PLUGIN_STATION "Station Plugin" ON)
 
+# Path to custom Find****.cmake files
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
+
 # Optional Jazz Plugin Inputs
 # to-do
 
-# The FMinConOptimizer and MatlabInterface require Matlab installed
-if(PLUGIN_FMINCONOPTIMIZER OR PLUGIN_MATLABINTERFACE)
-  FIND_PACKAGE(Matlab)
-  if(NOT MATLAB_FOUND)
-    MESSAGE(WARNING "MATLAB not found, FminconOptimizer and MatlabInterface plugins disabled.")
-    SET(PLUGIN_FMINCONOPTIMIZER OFF CACHE BOOL "Disabled due to missing Matlab" FORCE)
-    SET(PLUGIN_MATLABINTERFACE OFF CACHE BOOL "Disabled due to missing Matlab" FORCE)
-  endif()
-endif()
-
-# Set default dependency directories
+# Set default wxWidgets directory based on OS
+SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
 if(WIN32)
-  SET(wxWidgets_ROOT_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxMSW-3.0.2" CACHE PATH "wxWidgets Root Directory")
-  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/windows")
-  # F2C_DIR will be set after validating CSPICE_DIR (further down)
+  # On Windows, FindwxWidgets searches the wxWidgets_ROOT_DIR path
+  SET(wxWidgets_ROOT_DIR "${wxWidgets_PARTIAL_DIR}/wxMSW-3.0.2" CACHE PATH "wxWidgets Root Directory")
 
 elseif(UNIX)
-  SET(wxWidgets_ROOT_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets/wxWidgets-3.0.2" CACHE PATH "wxWidgets Root Directory")
-  SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
-
-  if(APPLE)
-    SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/macosx")
-  else()
-    SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/linux")
+  # On Mac/Linux, FindwxWidgets uses the wx-config utility which must be
+  # accessible from the system PATH environment variable. 
+  # So first save PATH (just the first time to avoid recursive setting)...
+  if(NOT wxWidgets_ROOT_DIR)
+    SET(SYS_PATH "$ENV{PATH}" CACHE INTERNAL "System PATH environment variable")
   endif()
 
+  # ... then get the expected path to the wx-config utility ...
+  if(APPLE)
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-build" CACHE PATH "wxWidgets Root Directory")
+  else()
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-build" CACHE PATH "wxWidgets Root Directory")
+  endif()
+
+  # ... then append that to the PATH environment variable
+  SET(ENV{PATH} "${SYS_PATH}:${wxWidgets_ROOT_DIR}")
 endif()
 
-# Find appropriate 32/64-bit SPICE directories
-if(GMAT_64_BIT)
-  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice64" CACHE PATH "CSpice Root Directory")
-else()
-  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice32" CACHE PATH "CSpice Root Directory")
+# Find wxWidgets if needed
+if(GMAT_GUI OR PLUGIN_MATLABINTERFACE)
+  FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 endif()
 
-if( IS_DIRECTORY ${CSPICE_DIR} )
-  MESSAGE(STATUS "SPICE FOUND in " ${CSPICE_DIR})
-else()
-  MESSAGE(FATAL_ERROR "SPICE NOT FOUND in " ${CSPICE_DIR} " , Stopping build.")
-endif()
-
-# On Windows, use F2C version from CSpice
+# Set default CSPICE directory based on OS
 if(WIN32)
-  SET(F2C_DIR "${CSPICE_DIR}/include")
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/windows")
+elseif(APPLE)
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/macosx")
+else()
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/linux")
 endif()
 
+# Use appropriate 32/64-bit CSPICE directories
+if(GMAT_64_BIT)
+  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice64" CACHE PATH "CSPICE Root Directory")
+else()
+  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice32" CACHE PATH "CSPICE Root Directory")
+endif()
+
+# Make sure CSPICE exists
+if( IS_DIRECTORY ${CSPICE_DIR} )
+  MESSAGE(STATUS "CSPICE FOUND in " ${CSPICE_DIR})
+else()
+  MESSAGE(FATAL_ERROR "CSPICE NOT FOUND in " ${CSPICE_DIR} " , Stopping build.")
+endif()
+
+# Set default F2C directory based on OS
+if(WIN32)
+  # On Windows, use F2C version from CSPICE
+  SET(F2C_DIR "${CSPICE_DIR}/include" CACHE PATH "f2c Root Directory")
+elseif(UNIX)
+  SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
+endif()
+
+# Make sure F2C exists
 if( IS_DIRECTORY ${F2C_DIR} )
   MESSAGE(STATUS "F2C FOUND in " ${F2C_DIR})
 else()
   MESSAGE(FATAL ERROR "F2C NOT FOUND in " ${F2C_DIR} " , Stopping build.")
 endif()
 
-# If building GUI, check if wxWidgets directory exists
-if( GMAT_GUI )
-  if( IS_DIRECTORY ${wxWidgets_ROOT_DIR} )
-    MESSAGE(STATUS "wxWidgets FOUND in " ${wxWidgets_ROOT_DIR})
-  else()
-    MESSAGE(WARNING "wxWidgets NOT FOUND in " ${wxWidgets_ROOT_DIR} " , GUI disabled.")
-    SET(GMAT_GUI OFF CACHE BOOL "Disabled due to missing wxWidgets" FORCE)
-  endif()
+# Find Matlab if needed
+if(PLUGIN_FMINCONOPTIMIZER OR PLUGIN_MATLABINTERFACE OR PLUGIN_CINTERFACE)
+  # Additional (future) Matlab versions should be included here
+  SET(MATLAB_ADDITIONAL_VERSIONS
+    "R2015a=8.5"
+    "R2014b=8.4"
+    )
+  FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 endif()
+
 
 # Default to Release configuration on single-config generators
 # e.g. make, but not VisualStudio
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (<empty>, Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
 endif()
-
-# ====================================================================
-#need to include Find****.cmake
-#SET( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 # ====================================================================
 # Common build options
@@ -162,6 +178,7 @@ endif()
 
 # some definitions
 ADD_DEFINITIONS("-DNO_GCC_PRAGMA")
+ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 
 # Linker Flags
 if(UNIX)
@@ -188,7 +205,7 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
-# Set DevIL Proprocessor defs
+# Set DevIL Preprocessor defs
 if (WIN32)
   ADD_DEFINITIONS("-DSKIP_DEVIL")
 endif()
@@ -200,42 +217,42 @@ endif()
 # Enable RPATH on Mac/Linux so that GMAT shared libraries can be found
 # relative to each other. This is necessary to distribute GMAT and use it
 # from 3rd-party apps such as Matlab.
-# Assumes that shared libraries are stored in <GMAT>/bin or <GMAT>/plugins
+# Assumes that GMAT libraries are stored in bin/, plugins/, or proprietary/
 if(UNIX)
   if(APPLE)
     # On Mac, @loader_path points to directory of current shared library
     SET(CMAKE_MACOSX_RPATH TRUE)
-    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../plugins/")
+    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/")
   else()
     # On Linux, $ORIGIN points to directory of current shared library
     # Linux searches the RPATH before the system LD_LIBRARY_PATH, so enable
     # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
     # the Linux search order similar to Mac/Windows.
-    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../plugins/")
+    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
     SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
     SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
   endif()
 endif()
 
-# Declare global var for header directories
-# This will be defined in the base/gui CMakeLists.txt file
+# Declare global var for GmatBase header directories
+# This will be defined in the GmatBase CMakeLists.txt file
 SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
 
 # ====================================================================
 # Define macro that adds source/header files to appropriate groups
-# for IDE-based projects.
+# for IDE-based projects (e.g. VisualStudio, XCode, ...).
 MACRO(_ADDSOURCEGROUPS ALL_DIRS)
-	# Loop over each directory containing source/header files
-	FOREACH(currdir ${ALL_DIRS})
-		# Create the source group name from the current directory name
-		STRING(REPLACE "/" "\\\\" groupname ${currdir})
+  # Loop over each directory containing source/header files
+  FOREACH(currdir ${ALL_DIRS})
+    # Create the source group name from the current directory name
+    STRING(REPLACE "/" "\\\\" groupname ${currdir})
 
-		# Add source files (.c, .cpp) to IDE group
-		SOURCE_GROUP("Source Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.c(pp)?")
+    # Add source files (.c, .cpp) to IDE group
+    SOURCE_GROUP("Source Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.c(pp)?")
 
-		# Add header files (.hpp) to IDE group
-		SOURCE_GROUP("Header Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.hpp")
-	ENDFOREACH(currdir)
+    # Add header files (.hpp) to IDE group
+    SOURCE_GROUP("Header Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.h(pp)?")
+  ENDFOREACH(currdir)
 ENDMACRO(_ADDSOURCEGROUPS)
 
 # ====================================================================

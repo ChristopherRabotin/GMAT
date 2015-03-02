@@ -132,23 +132,13 @@ function download_depends() {
 		# Change to wxWidgets directory
 		cd "$wxWidgets_path"
 	
-		# Checkout wxWidgets source.
-		svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_2/ wxWidgets-3.0.2
-		
-		# Copy modified configure scripts (This fixes the OpenGL location issue)
-		#cp "$bin_path/wx/configure" "$wxWidgets_path/wxWidgets-3.0.2/configure"
-	
 		if [ $use_latest == true ]
 		then
-			# Change to wxWidgets directory
-			cd "$wxWidgets_path"
-	
-			# Checkout latest wxWidgets source.
-			svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/trunk/ wxWidgets-latest
-		
-			# Copy modified configure scripts (This fixes the OpenGL location issue) [NO LONGER NEEDED]
-			#cp "$bin_path/wx/configure" "$wxWidgets_path/wxWidgets-3.0.2/configure"
-		
+		  # Checkout latest development wxWidgets source.
+		  svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/trunk/ wxWidgets-latest
+		else
+		  # Checkout latest stable wxWidgets 3.0 source.
+		  svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_2/ wxWidgets-3.0.2
 		fi
 	fi
 
@@ -205,36 +195,52 @@ function build_wxWidgets() {
 	# Set build path based on version
 	if [ $use_latest == true ]
 	then
-		wx_build_path=$gmat_path/depends/wxWidgets/latest
+	  wx_build_path=$gmat_path/depends/wxWidgets/latest
 	else
-		wx_build_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2
+	  wx_build_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2
 	fi
 
+	# OS-specific vars
 	if [ $mac == true ]
     	then
-        	# Check if dependencies have already been built
-        	depend_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2/lib/libwx_mac_core-3.0.0.dylib
+	  # Out-of-source build location
+	  wx_build_path=$wx_build_path/cocoa-build
+
+	  # Test file to see if wxWidgets has already been built
+	  wx_test_file=$wx_build_path/lib/libwx_osx_cocoau_core-3.0.dylib
     	else
-        	# Check if dependencies have already been built
-        	depend_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2/lib/libwx_gtk2_core-2.8.so
+	  # Out-of-source build location
+	  wx_build_path=$wx_build_path/gtk-build
+
+	  # Test file to see if wxWidgets has already been built
+	  wx_test_file=$wx_build_path/lib/libwx_gtk3u_core-3.0.so
     	fi
 
-	cd "$wx_build_path"
-
-	if [ ! -d "$depend_path" ]
+	# Build wxWidgets if the test library doesn't already exist
+	if [ -f "$wx_test_file" ]
 	then
-		if [ $mac == true ]
-        	then
-            		#arch_flags="-arch i386"
-            		#./configure CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --with-opengl --with-macosx-version-min=10.7 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk
-			./configure --enable-unicode --with-opengl --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
-        	else
-            		# Configure wxWidget build
-            		./configure --enable-unicode --with-opengl
-        	fi
+	  echo "wxWidgets already built"
+	else
+	  echo "Building wxWidgets..."
+	  mkdir -p "$wx_build_path"
+	  cd "$wx_build_path"
 
-		# Compile wxWidget build
-		make 
+	  if [ $mac == true ]
+	  then
+	    #arch_flags="-arch i386"
+	    #./configure CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --with-opengl --with-macosx-version-min=10.7 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk
+
+	    # Extra compile/link flags are required for an incompatibility between wx3 and OSX 10.9+
+	    ../configure --enable-unicode --with-opengl --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
+	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
+	  else
+	    # Configure wxWidget build
+	    ../configure --enable-unicode --with-opengl
+	    ncores=$(nproc)
+	  fi
+
+	  # Compile wxWidget build
+	  make -j$ncores
 	fi
 }
 
@@ -242,8 +248,7 @@ function build_wxWidgets() {
 download_depends
 if [ $build_wx == true ]
 then
-  :
-  #build_wxWidgets
+  build_wxWidgets
 fi
 
 # ***********************************

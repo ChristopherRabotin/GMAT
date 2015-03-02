@@ -15,6 +15,20 @@
 MESSAGE("==============================")
 MESSAGE("GMAT FminconOptimizer Plugin setup " ${VERSION}) 
 
+# ====================================================================
+# Major error checks
+if(NOT Matlab_FOUND)
+  MESSAGE(WARNING "Skipping due to missing Matlab")
+  RETURN()
+endif()
+
+if(NOT WIN32)
+  MESSAGE(WARNING "Skipping on Mac/Linux")
+  RETURN()
+endif()
+
+# ====================================================================
+# Define plugin target
 if(WIN32)
 	SET(PLUGINTARGET  "libFminconOptimizer")
 else()
@@ -34,6 +48,7 @@ SET(PLUGIN_DIRS factory include plugin solver)
 # extra include directories for header files
 INCLUDE_DIRECTORIES("../../../MatlabInterfacePlugin/src/base/include")
 INCLUDE_DIRECTORIES("../../../MatlabInterfacePlugin/src/base/interface")
+INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
 
 # ====================================================================
 # source files
@@ -47,9 +62,12 @@ SET(PLUGIN_SRCS
 # libraries
 if(WIN32)
 	LINK_LIBRARIES(libGmatBase)
+	LINK_LIBRARIES(libMatlabInterface)
 else()
 	LINK_LIBRARIES(GmatBase)
+	LINK_LIBRARIES(MatlabInterface)
 endif()
+LINK_LIBRARIES(${Matlab_LIBRARIES})
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

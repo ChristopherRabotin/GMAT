@@ -31,16 +31,10 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
   )
 
 # Create the CInterface Matlab thunk files if Matlab exists
-# Requirements:
-#  - "matlab" command must exist on the system
 if(PLUGIN_CINTERFACE)
-  # Find the 'matlab' command.
-  # The current (CMake 3.0) FindMatlab module sucks. If its ever improved
-  # this can be changed to FIND_PACKAGE(Matlab)
-  FIND_PROGRAM(matlab_bin matlab)
-  if(NOT (matlab_bin MATCHES "matlab_bin-NOTFOUND"))
+  if(Matlab_FOUND)
     # Create the command to be executed by Matlab
-    SET(MSTART "matlab -nodisplay -r")
+    SET(MSTART "\"${Matlab_MAIN_PROGRAM}\" -nodisplay -r")
     SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
     SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
     SET(MCD "cd('${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/build/matlab');")
@@ -61,6 +55,6 @@ if(PLUGIN_CINTERFACE)
 
   # Warn user if Matlab was not found
   else()
-    MESSAGE(WARNING "Matlab not found, cannot build Matlab prototype files for the GMAT CInterface Plugin. Please make sure that a symlink to the 'matlab' command exists in a searchable directory.")
+    MESSAGE(WARNING "Matlab not found, will not build Matlab prototype files for the GMAT CInterface Plugin.")
   endif()
 endif()
