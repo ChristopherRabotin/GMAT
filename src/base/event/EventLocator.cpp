@@ -1402,7 +1402,9 @@ bool EventLocator::Initialize()
    }
 
    // For now, call this method here to load the planetary PCKs
-   solarSys->LoadPCKs();
+   #ifdef __USE_SPICE__
+      solarSys->LoadPCKs();
+   #endif
 
    // Tell the spacecraft to start recording its data
    sat->RecordEphemerisData();

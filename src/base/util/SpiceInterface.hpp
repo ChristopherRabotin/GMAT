@@ -83,8 +83,6 @@ public:
    virtual Real        SpiceTimeToA1(SpiceDouble spiceTime);
    virtual SpiceDouble A1ToSpiceTime(Real a1Time);
 
-   virtual void  TryBogusCall();
-
    static const Integer     DEFAULT_NAIF_ID;
    static const Integer     DEFAULT_NAIF_ID_REF_FRAME;
 

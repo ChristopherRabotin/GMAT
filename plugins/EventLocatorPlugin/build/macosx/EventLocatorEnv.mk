@@ -12,13 +12,13 @@ MAC_ARCHITECTURE_FLAGS = -arch i386
 F2C_DIR = f2c32
 endif
 
-ifeq ($(BUILD_64BIT), 1)
-CSPICE_VER = cspice64
-MAC_ARCHITECTURE_FLAGS =
-else
-CSPICE_VER = cspice
-MAC_ARCHITECTURE_FLAGS = -arch i386
-endif
+# ifeq ($(BUILD_64BIT), 1)
+# CSPICE_VER = cspice64
+# MAC_ARCHITECTURE_FLAGS =
+# else
+# CSPICE_VER = cspice
+# MAC_ARCHITECTURE_FLAGS = -arch i386
+# endif
 
 # Environment settings for the EventLocator plugin
 # location of GMAT base headers and libraries
@@ -27,7 +27,7 @@ GMAT_BIN_LOCATION = ../../../../application/$(GMAT_BIN_DIR)
 
 DEBUG_BUILD = 0
 
-USE_SPICE = 1
+USE_SPICE = 0
 
 ifeq ($(USE_SPICE), 1)
 # location of CSPICE headers and libraries
