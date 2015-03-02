@@ -278,6 +278,7 @@ const std::string& RunEstimator::GetGeneratingString(Gmat::WriteMode mode,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
+#include "Moderator.hpp"
 bool RunEstimator::Initialize()
 {
    bool retval = false;
@@ -354,6 +355,41 @@ bool RunEstimator::Initialize()
    // Load the participant list into the esm
    StringArray participants = measman->GetParticipantList();
    esm->SetParticipantList(participants);
+
+
+   // Load solve for objects to esm                                               // made changes by TUAN NGUYEN
+   // Get list of solve-for objects                                               // made changes by TUAN NGUYEN
+   ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();        // made changes by TUAN NGUYEN
+   ObjectArray solveforObjList;                                                   // made changes by TUAN NGUYEN
+   for (ObjectMap::iterator i = objectmap->begin(); i != objectmap->end(); ++i)   // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      StringArray solveforNames;                                                  // made changes by TUAN NGUYEN
+      try                                                                         // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");       // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+      catch(...)                                                                  // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         // If object has no SolveFors parameter, skip it                         // made changes by TUAN NGUYEN
+         continue;                                                                // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+
+      // Initialize the object before processing                                  // made changes by TUAN NGUYEN
+      if ((*i).second->IsInitialized() == false)                                  // made changes by TUAN NGUYEN
+         (*i).second->Initialize();                                               // made changes by TUAN NGUYEN
+
+      solveforNames = (*i).second->GetStringArrayParameter("SolveFors");          // made changes by TUAN NGUYEN
+      if (solveforNames.empty())                                                  // made changes by TUAN NGUYEN
+         continue;                                                                // made changes by TUAN NGUYEN
+      
+      // if object has solve-for, push object to solveforNames object array for processing    // made changes by TUAN NGUYEN
+      solveforObjList.push_back((*i).second);                                     // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+
+   // Setup solve-for parameters                                                  // made changes by TUAN NGUYEN
+   for(UnsignedInt i= 0; i < solveforObjList.size(); ++i)                         // made changes by TUAN NGUYEN
+      esm->SetProperty(solveforObjList[i]);                                       // made changes by TUAN NGUYEN
+
 
    // Pass in the objects
    StringArray objList = esm->GetObjectList("");
