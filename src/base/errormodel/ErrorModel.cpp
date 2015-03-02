@@ -41,7 +41,8 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
    "NoiseSigma",
    "NoiseModel",
    "Bias",
-   "SolveMode",
+//   "SolveMode",
+   "SolveFors",
 };
 
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
@@ -52,7 +53,8 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
    Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
-   Gmat::STRING_TYPE,			// SOLVEMODE             // Specify what mode that bias used for. If SolveMode = 'Estimation', bias is used as a solve-for variable. If SolveMode = 'Model', bias is used as a consider
+//   Gmat::STRING_TYPE,			// SOLVEMODE             // Specify what mode that bias used for. If SolveMode = 'Estimation', bias is used as a solve-for variable. If SolveMode = 'Model', bias is used as a consider
+   Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
 };
 
 
@@ -73,8 +75,8 @@ ErrorModel::ErrorModel(const std::string name) :
 //   strand            (""),
    noiseSigma        (0.01),                   // 0.01 Km
    noiseModel        ("NoiseConstant"), 
-   bias              (0.0),                    // 0.0 Km
-   solveMode         ("Model")
+   bias              (0.0)                    // 0.0 Km
+//   solveMode         ("Model")
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -116,7 +118,8 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
    noiseSigma            (em.noiseSigma),
    noiseModel            (em.noiseModel),
    bias                  (em.bias),
-   solveMode             (em.solveMode)
+//   solveMode             (em.solveMode),
+   solveforNames         (em.solveforNames)                 // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel copy constructor from <%s,%p>  to  <%s,%p>\n", em.GetName().c_str(), &em, GetName().c_str(), this);
@@ -152,7 +155,8 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       noiseSigma          = em.noiseSigma;
       noiseModel          = em.noiseModel;
       bias                = em.bias;
-      solveMode           = em.solveMode;
+//      solveMode           = em.solveMode;
+      solveforNames       = em.solveforNames;               // made changes by TUAN NGUYEN
    }
 
    return *this;
@@ -220,8 +224,16 @@ bool ErrorModel::Initialize()
 #ifdef DEBUG_INITIALIZATION
 	MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   entered\n", GetName().c_str(), this);
 #endif
+   if (isInitialized)
+      return true;
 
-   bool retval = false;
+   bool retval = true;
+   //if (solveMode == "Estimation")                                                           // made changes by TUAN NGUYEN
+   //{
+//      MessageInterface::ShowMessage("I am here 1\n");
+//      retval = ErrorModel::SetStringParameter(SOLVEFORS, "Bias", solveforNames.size());     // made changes by TUAN NGUYEN
+//      MessageInterface::ShowMessage("I am here 2: return true\n");
+//   }
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -365,8 +377,8 @@ std::string ErrorModel::GetStringParameter(const Integer id) const
    if (id == NOISE_MODEL)
       return noiseModel;
 
-   if (id == SOLVE_MODE)
-      return solveMode;
+   //if (id == SOLVE_MODE)
+   //   return solveMode;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -406,20 +418,17 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
       }
    }
 
-   if (id == SOLVE_MODE)
-   {
-      if ((value != "Estimation")&&(value != "Model"))
-      {
-         //throw MeasurementException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-         throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-         return false;
-      }
-      else
-      {
-         this->solveMode = value;
-         return true;
-      }
-   }
+   //if (id == SOLVE_MODE)
+   //{
+   //   if ((value != "Estimation")&&(value != "Model"))
+   //   {
+   //      //throw MeasurementException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
+   //      throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
+   //      return false;
+   //   }
+   //   solveMode = value;
+   //   return true;
+   //}
 
    return GmatBase::SetStringParameter(id, value);
 }
@@ -487,6 +496,18 @@ std::string ErrorModel::GetStringParameter(const Integer id, const Integer index
       return participantNameList[index];
    }
 
+   if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
+   {                                                                                // made changes by TUAN NGUYEN
+      if ((index < 0)||(index >= (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         std::stringstream ss;                                                      // made changes by TUAN NGUYEN
+         ss << "Error: solve-for index (" << index << ") is out of bound.\n";       // made changes by TUAN NGUYEN
+         throw GmatBaseException(ss.str());                                         // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+
+      return solveforNames[index];                                                  // made changes by TUAN NGUYEN
+   }                                                                                // made changes by TUAN NGUYEN
+
    return GmatBase::GetStringParameter(id, index);
 }
 
@@ -528,6 +549,29 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
          }
       }
    }
+
+   if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
+   {                                                                                // made changes by TUAN NGUYEN
+      if ((0 <= index)&&(index < (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         solveforNames[index] = value;                                              // made changes by TUAN NGUYEN
+         return true;                                                               // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+      else                                                                          // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
+         {                                                                          // made changes by TUAN NGUYEN
+            solveforNames.push_back(value);                                         // made changes by TUAN NGUYEN
+            return true;                                                            // made changes by TUAN NGUYEN
+         }                                                                          // made changes by TUAN NGUYEN
+         else                                                                       // made changes by TUAN NGUYEN
+         {                                                                          // made changes by TUAN NGUYEN
+            std::stringstream ss;                                                   // made changes by TUAN NGUYEN
+            ss << "Error: solve-for's index (" << index << ") is out of bound.\n";  // made changes by TUAN NGUYEN
+            throw GmatBaseException(ss.str());                                      // made changes by TUAN NGUYEN
+         }                                                                          // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+   }                                                                                // made changes by TUAN NGUYEN
 
    return GmatBase::SetStringParameter(id, value, index);
 }
@@ -585,6 +629,9 @@ const StringArray& ErrorModel::GetStringArrayParameter(const Integer id) const
 {
    if (id == STRAND)
       return participantNameList;
+
+   if (id == SOLVEFORS)                           // made changes by TUAN NGUYEN
+      return solveforNames;                       // made changes by TUAN NGUYEN
 
    return GmatBase::GetStringArrayParameter(id);
 }

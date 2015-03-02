@@ -113,9 +113,10 @@ protected:
    std::string   noiseModel;                    // specify noise model. It will be "RandomConstant" for Gausian noise model.
    /// Measurement bias
    Real          bias;                          // specify bias of a measurement
-   /// Bias solve mode
-   std::string   solveMode;                     // specify bias solve mode. It would be "Estimate" when bias is used as a solve-for variable or "Model" when bias is used as a consider variable
-   
+   ///// Bias solve mode
+   //std::string   solveMode;                     // specify bias solve mode. It would be "Estimate" when bias is used as a solve-for variable or "Model" when bias is used as a consider variable
+   /// Solve-for parameters
+   StringArray   solveforNames;                 // It contains a name list of solve-for parameters
 
    /// Class parameter ID enumeration
    enum
@@ -126,7 +127,8 @@ protected:
       NOISE_SIGMA,
       NOISE_MODEL,
       BIAS,
-      SOLVE_MODE,
+//      SOLVE_MODE,
+      SOLVEFORS,                              // made changes by TUAN NGUYEN
       ErrorModelParamCount
    };
 
