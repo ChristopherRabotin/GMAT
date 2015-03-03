@@ -12,11 +12,19 @@ function [Flow,Fupp,iGfun,jGvar] = prepSNOPT(objname,x,d)
 
 %-----  Call the constraint function to determine constraint dimensions
 conname                     = ['CON_' objname];
+try
 [ci,ce,Ji,Je,ciGfun,cjGvar] = feval(conname,x);
+catch
+  [ci,ce,Ji,Je] = feval(conname,x); 
+  ciGfun = [];
+  cjGvar = [];
+end
 
 %-----  Call the objective function  
 objname       = ['OBJ_' objname];
 [f,g, fiGfun, fjGvar] = feval(objname,x);
+fiGfun = [];
+fjGvar = [];
 
 %-----  Detemine constraint dimensions
 mNLI = size(ci,1);              %  Number of nonlin. ineq. constraints

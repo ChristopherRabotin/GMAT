@@ -21,6 +21,7 @@ A = [1 0 2 0 0 0;
     0 0 0 0 0 1;
     0 0 1 0 0 1;
     1 0 0 0 0 1];
+
 %  Compute sparsity pattern
 [jacRowIdx,jacColIdx,s] = find(A);
 sparseJac               = sparse(jacRowIdx,jacColIdx,s);
@@ -63,7 +64,7 @@ disp('The scaled Jacobian is')
 disp(scaledJac)
 
 %%  Example test results.  See if we got the right answers
-if max(decVecTest) ~= 0
+if max(decVecTest) >= 1e-14
     disp('Error in scaling or unscaling of Decision Vector')
 else
     disp('Decision vector scaling passed example 1 test')

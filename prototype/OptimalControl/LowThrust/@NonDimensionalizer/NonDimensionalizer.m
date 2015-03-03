@@ -9,7 +9,8 @@ classdef NonDimensionalizer < handle
     %   the different quantities to be scaled such as decision vector,
     %   constraint vector, cost function, and Jacobian.
     %   Function: Initialize(), SetDecVecScaling_Bounds,
-    %   SetConstraintScaling_UserDefined(), SetCostScaling_UserDefined()
+    %   SetConstraintScaling_UserDefined(), SetCostScaling_UserDefined().
+    %   SetConstraintScaling_Jacobian()
     %
     %   Scale and unscale the decision vector.
     %   Functions: ScaleDecisionVector(), UnScaleDecisionVector()
@@ -82,9 +83,9 @@ classdef NonDimensionalizer < handle
             %  data if necessary.
             
             % Initialize scaling parameters to ones and zeros.
-            obj.decVecWeight = ones(obj.numVars);
+            obj.decVecWeight = ones(obj.numVars)*2;
             obj.decVecShift  = zeros(obj.numVars);
-            obj.conVecWeight = ones(obj.numCons);
+            obj.conVecWeight = ones(obj.numCons)*.5;
             obj.costWeight   = 1;
         end
         

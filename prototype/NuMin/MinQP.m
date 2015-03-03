@@ -137,7 +137,7 @@ if mE + mI > 0 && Phase == 2
         %  constraint violations.  When minimized, the cost function should
         %  be zero, or there is not a feasible solution.
         [x0_I, A_I, G_I, d_I, b_I]   = SetUpPhaseI(x0,A,b,eqInd,ineqInd,W);
-        [x, q, lambda, Converged, W] = minQP(x0_I, G_I, d_I, A_I, b_I,...
+        [x, q, lambda, Converged, W] = MinQP(x0_I, G_I, d_I, A_I, b_I,...
             eqInd, [ineqInd;m+1],W, Options, 1);
 
         %  Extract data from the Phase I solution.  First check to see
@@ -218,9 +218,10 @@ while Converged == 0
         Y     = Q(:,1:mA);              % an n x m  ([Y|Z] is non singular)
         Z     = Q(:,mA+1:n);              % n x ( n - m ) Null Space Matrix
         h     = A([eqInd;W],:)*x - b([eqInd;W],:);
-        [L,U] = lu(A([eqInd;W],:)*Y);
-        py    = -U\(L\ h);                         %N&W 2nd Ed.,  Eq. 16.18
+
         if Phase == 2
+           [L,U] = lu(A([eqInd;W],:)*Y);
+            py    = -U\(L\ h);                         %N&W 2nd Ed.,  Eq. 16.18
             [L,U] = lu(Z'*G*Z);
             pz    = -U\(L\ (Z'*G*Y*py + Z'*g));    %N&W 2nd Ed.,  Eq. 16.19
             p     =  Y*py + Z*pz;
@@ -483,7 +484,7 @@ if ~isempty(ineqInd)
     end
 end
 %  Are sets of inequality and equality constraint sets consistent with the A matrix?
-if mE + mI ~= m
+if mE + mI > m
     disp('The number constraints in the equality and inequality sets exceeds the number of constraints in the A matrix.')
     return
 end

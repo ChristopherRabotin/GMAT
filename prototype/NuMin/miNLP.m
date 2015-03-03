@@ -93,10 +93,12 @@ numfEval = 0;                         %  The number of function evaluations
 n        = length(x0);                  %  Number of optimization variables
 
 %----- Evaluate the function and gradient at the initial guess
-[f,gradF,numGEval]     = GetDerivatives(costFunc,x0,Options,varargin{:});
+[f,gradF,numGEval]     = GetDerivatives(...
+    costFunc,x0,Options,varargin{:});
 numfEval               = numfEval + numGEval;
 if ~isempty(nlconstFunc)
-    [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x0,Options,varargin{:});
+    [ci,ce,Ji,Je,numGEval] = GetConDerivatives(...
+        nlconstFunc,x0,Options,varargin{:});
 else
     ci= []; ce = []; Ji =[]; Je = [];
 end
@@ -137,9 +139,6 @@ if ~isempty(ub)
 end
 A = [A;Ab];
 b = [b;bb];
-
-
-
 
 %----- Determine dimensionality of the problem and
 mNLI = size(ci,1);              %  Number of nonlin. ineq. constraints
@@ -206,6 +205,7 @@ sigma = 1.0;
 tau   = 0.5;
 eta   = 0.4;
 mu    = 1;
+noHessUpdateCount = 0;
 for i = 1:m
     muvec(i,1) = norm(gradF)/norm(J(:,i));
 end
@@ -214,7 +214,8 @@ end
 %--------------------------------------------------------------------------
 
 %----- Perform the iteration
-while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
+while ~Converged && iter <= Options.MaxIter && ...
+        numfEval <= Options.MaxFunEvals
     
     %----- Increment the counter
     iter = iter + 1;
@@ -269,11 +270,14 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
         srchCount   = srchCount + 1;
         x           = xk + alpha*px;
         
-        %-----  Evaluate objective,constraints, and merit at at x = x + alpha*p
-        [f,gradF,numGEval]     = GetDerivatives(costFunc,x,Options,varargin{:});
+        %-----  Evaluate objective,constraints, and merit 
+        %       at at x = x + alpha*p
+        [f,gradF,numGEval]     = GetDerivatives(...
+            costFunc,x,Options,varargin{:});
         numfEval               = numfEval + numGEval;
         if ~isempty(nlconstFunc)
-            [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x,Options,varargin{:});
+            [ci,ce,Ji,Je,numGEval] = GetConDerivatives(...
+                nlconstFunc,x,Options,varargin{:});
         else
             ci= []; ce = []; Ji =[]; Je = [];
         end
@@ -282,7 +286,8 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
         meritFalpha = CalcMeritFunction(f, cviol, mu, Options);
         
         %-----  Check sufficient decrease condition
-        if (meritFalpha > meritF + eta*alpha*dirDeriv && abs(dirDeriv) > 1.e-8)
+        if (meritFalpha > meritF + eta*alpha*dirDeriv && ...
+                abs(dirDeriv) > 1.e-8)
             alpha = alpha*tau;
         else
             foundStep = 1;
@@ -314,11 +319,13 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
     if isempty(maxConViolation);
         maxConViolation = 0;
     end
-    iterdata = sprintf(formatstr,iter,numfEval,f,maxConViolation,alpha,dirDeriv,norm(gradLagrangian),method);
+    iterdata = sprintf(formatstr,iter,numfEval,f,maxConViolation,alpha,...
+        dirDeriv,norm(gradLagrangian),method);
     disp(iterdata);
     
     %-----  Check for Convergence
-    [Converged] = CheckConvergence(gradLagrangian, fold, f, x, xold, alpha, maxConViolation, Options);
+    [Converged] = CheckConvergence(gradLagrangian, fold, f, x, xold,...
+        alpha, maxConViolation, Options);
     
     %-----  Update the Hessian of the Lagrangian
     if Converged == 0
@@ -336,10 +343,11 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
             else
                 theta = ( 0.9*projHess) / (projHess - s'*y);
                 method = '   Damped BFGS Update';
+                
             end
             r   = theta*y + (1 - theta)*W*s;            %  Ref 1. Eq. 18.14
             W   = W - W*s*s'*W/projHess + r*r'/(s'*r);  %  Ref 1. Eq. 18.16
-            W   = (W' + W)*0.5;
+            noHessUpdateCount = 0;
             
         elseif strcmp(Options.DescentMethod,'SelfScaledBFGS')
             
@@ -349,52 +357,27 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
             if s'*y >= projHess;
                 gamma = 1;
                 method = '   BFGS Update';
-                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  %  Ref 1. Eq. 18.16
-                W   = (W' + W)*0.5;
+                noHessUpdateCount = 0;
+                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  
             elseif 0 < s'*y &&  s'*y <= projHess
                 gamma = y'*s/(projHess);
                 method = '   Self Scaled BFGS ';
-                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  %  Ref 1. Eq. 18.16
-                W   = (W' + W)*0.5;
-            end
-            
-%         elseif strcmp(Options.DescentMethod,'ModifiedBFGS')
-%             
-%             %  This method is documented in Matlab's spec for constrained
-%             %  optimization under the section "Updating the Hessian
-%             %  Matrix."
-%             AN = J';
-%             
-%             if y'*s < alpha^2*1e-3
-%                 while t'*s < -1e-5
-%                     [yMax,yInd] = min(y.*s);
-%                     y(yInd) = y(yInd)/2;
-%                 end
-%                 if y'*s < (eps*norm(W,'fro'))
-%                     method = ' Modified twice';
-%                     fac = AN'*c - OLDAN'*OLDC;
-%                     fac = fac.*(s.*fac>0).*(y.*s<=eps);
-%                     WT = 1e-2;
-%                     if max(abs(fac))==0
-%                         fac = 1e-5*sign(s);
-%                     end
-%                     while y'*s < (eps*norm(HESS,'fro')) && WT < 1/eps
-%                         y = y + WT*fac;
-%                         WT = WT*2;
-%                     end
-%                 else
-%                     how = ' Hessian modified';
-%                 end
-%             end
-%             
-%             if s'*y > 1e-10
-%                 W = W +(y*y')/(y'*s)-((W*s)*(s'*W'))/(s'*W*s);
-%             else
-%                 method = '   No Update';
-%             end
-            
+                noHessUpdateCount = 0;
+                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  
+            else
+                
+                noHessUpdateCount = noHessUpdateCount + 1;
+                if noHessUpdateCount == 10
+                    method = '   Hess Reset ';
+                    W = eye(size(W,1));
+                    noHessUpdateCount = 0;
+                else
+                    method = '   No Update ';
+                end
+                    
+            end            
         end
-        
+        W   = (W' + W)*0.5;
     end
     
 end
@@ -404,11 +387,13 @@ if Converged == 0
     
     if numfEval == Options.MaxFunEvals
         field = sprintf(['\n Optimization Failed \n' ...
-            ' Solution was not found within maximum number \n of allowed function evaluations \n']);
+            ' Solution was not found within maximum number \n of ' ...
+            'allowed function evaluations \n']);
         disp(field)
     else
         field = sprintf(['\n Optimization Failed \n' ...
-            ' Solution was not found within maximum number \n of allowed iterations \n']);
+            ' Solution was not found within maximum number \n ' ...
+            'of allowed iterations \n']);
         disp(field)
     end
     
@@ -491,7 +476,8 @@ end
 cviol = [eqViol;ineqViol];
 
 %==========================================================================
-function Converged = CheckConvergence(gradLagrangian, f, fnew, x, xnew, alpha, maxConViolation, Options)
+function Converged = CheckConvergence(gradLagrangian, f, fnew, x, xnew,...
+    alpha, maxConViolation, Options)
 
 if ~isempty(maxConViolation)
     if maxConViolation > Options.TolCon
@@ -534,7 +520,41 @@ else
     
 end
 
-
+%  B
+%         elseif strcmp(Options.DescentMethod,'ModifiedBFGS')
+%             
+%             %  This method is documented in Matlab's spec for constrained
+%             %  optimization under the section "Updating the Hessian
+%             %  Matrix."
+%             AN = J';
+%             
+%             if y'*s < alpha^2*1e-3
+%                 while t'*s < -1e-5
+%                     [yMax,yInd] = min(y.*s);
+%                     y(yInd) = y(yInd)/2;
+%                 end
+%                 if y'*s < (eps*norm(W,'fro'))
+%                     method = ' Modified twice';
+%                     fac = AN'*c - OLDAN'*OLDC;
+%                     fac = fac.*(s.*fac>0).*(y.*s<=eps);
+%                     WT = 1e-2;
+%                     if max(abs(fac))==0
+%                         fac = 1e-5*sign(s);
+%                     end
+%                     while y'*s < (eps*norm(HESS,'fro')) && WT < 1/eps
+%                         y = y + WT*fac;
+%                         WT = WT*2;
+%                     end
+%                 else
+%                     how = ' Hessian modified';
+%                 end
+%             end
+%             
+%             if s'*y > 1e-10
+%                 W = W +(y*y')/(y'*s)-((W*s)*(s'*W'))/(s'*W*s);
+%             else
+%                 method = '   No Update';
+%             end
 
 
 

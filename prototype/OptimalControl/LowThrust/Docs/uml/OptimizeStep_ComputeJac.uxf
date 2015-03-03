@@ -6,47 +6,31 @@
     <coordinates>
       <x>90</x>
       <y>0</y>
-      <w>990</w>
-      <h>980</h>
+      <w>680</w>
+      <h>680</h>
     </coordinates>
-    <panel_attributes>title: InitializeSteps
-Trajectory~traj|Phase~phas|Linkage~link|NonDimensionalizer~nondim|Optimizer~opt
+    <panel_attributes>title: ComputeJacobian
+Optimizer~opt|Trajectory~traj|Phase~phas|JacobianUtil~link|
+opt-&gt;&gt;traj:opt,traj:GetJacobian()
 iframe{:Loop numPhases
-traj-&gt;&gt;phas:traj,phas:InitializeLinkages()
-phas-&gt;&gt;link:phas,link:Initialize()
-link-&gt;&gt;phas:phas,link:
-phas-&gt;&gt;traj:traj,phas:
+traj-&gt;&gt;phas:traj,phas:GetJacobian()
+phas-&gt;&gt;link:phas,link:ComputePartials()
+link-&gt;&gt;phas:phas,link:GetAnalyticDerivs()
+phas-&gt;&gt;link:phas,link:
+iframe{:Loop numIndexSets
+link-&gt;&gt;phas:phas,link:SetDecisionVector()
+phas-&gt;&gt;link:phas,link
+link-&gt;&gt;phas:phas,link:GetConstraints()
+phas-&gt;&gt;link:phas,link
+link-&gt;&gt;phas:phas,link:GetCostFunction()
+phas-&gt;&gt;link:phas,link
+link-&gt;&gt;link:ComputeFiniteDiffs()
+link-&gt;&gt;phas:phas,link:return J
 iframe}
-
-iframe{:Loop numPhases
-traj-&gt;&gt;phas:traj,phas:GetConstraintBounds()
-phas-&gt;&gt;traj:traj,phas:
+phas-&gt;&gt;traj:traj,phas:return J
 iframe}
-
-iframe{:Loop numPhases
-traj-&gt;&gt;phas:traj,phas:GetDecVecBounds()
-phas-&gt;&gt;traj:traj,phas:
-iframe}
-
-iframe{:Loop numPhases
-traj-&gt;&gt;phas:traj,phas:GetInitialGuess()
-phas-&gt;&gt;traj:traj,phas:
-iframe}
-
-traj-&gt;&gt;traj:SetSparsityPattern()
-traj-&gt;&gt;traj:InitializeSparseFiniteDiff()
-
-iframe{:Loop numPhases
-traj-&gt;&gt;phas:traj,phas:InitializeLinkages()
-phas-&gt;&gt;nondim:phas,nondim:Initialize()
-nondim-&gt;&gt;phas:phas,nondim:
-phas-&gt;&gt;traj:traj,phas:
-iframe}
-
-traj-&gt;&gt;opt:traj,opt:GetDecVecBounds()
-opt-&gt;&gt;traj:traj,opt:
-
-traj-&gt;&gt;traj:WriteSummaryReport()</panel_attributes>
+traj-&gt;&gt;opt:opt,traj:return J
+</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>

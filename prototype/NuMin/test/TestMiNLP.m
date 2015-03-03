@@ -24,10 +24,12 @@ Options.TolStep           = 1e-8;
 Options.MaxStepLength     = 1000;
 Options.QPMethod          = 'minQP';
 Options.ConstraintMode    = 'MiNLP';
-opt                       = optimset('Display','iter','GradObj','On','GradCon','On', 'MaxIter',Options.MaxIter ,...
-                                     'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','Off','TolFun',Options.TolF,'TolCon',Options.TolF);
+opt                       = optimoptions('fmincon','Display','iter','GradObj','On','GradCon','On', 'MaxIter',Options.MaxIter ,...
+                                     'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','Off','TolFun',Options.TolF,'TolCon',Options.TolF,'Algorithm','active-set');
+                                 
 
-ProblemSet = {'Sample1' ; 'TP6'; 'PQR_P1_4'; 'PLR_T1_4'; 'TP220';'QLR_T1_1'; ...
+
+ProblemSet = {'TP_320';'Sample1' ; 'TP6'; 'PQR_P1_4'; 'PLR_T1_4'; 'TP220';'QLR_T1_1'; ...
               'SGR_P1_2';'LQR_T1_4'; 'TP1';  'TP218';'TP369';  ...
               'TP242'; 'TP225';'TP254'; 'PQR_T1_6' ; 'LQR_T1_4';...
               'LPR_T1_1'; 'LPR_T1_5';  'SGR_P1_2'; 'PLR_T1_2';...
@@ -50,7 +52,7 @@ for i = 1:size(ProblemSet,1);
     RunData{i}.func = objname;
     
     %----- Call miNLP and save data
-    [x,f,exitFlag,OutPut]      = miNLPWithGraphs(objname,d.x0,d.A,d.b,d.Aeq,d.beq,d.lb,d.ub,conname,Options);
+    [x,f,exitFlag,OutPut]      = miNLP(objname,d.x0,d.A,d.b,d.Aeq,d.beq,d.lb,d.ub,conname,Options);
     RunData{i}.miNLP.x         = x;
     RunData{i}.miNLP.f         = f;
     RunData{i}.miNLP.exitFlag  = exitFlag;
@@ -60,16 +62,16 @@ for i = 1:size(ProblemSet,1);
     RunData{i}.fstar           = d.fstar;
     
     %----- Call fmincon and save data
-    [x,f,exitFlag,OutPut]        = fmincon(objname,d.x0,-d.A,-d.b,d.Aeq,d.beq,d.lb,d.ub,'fminconstraint',opt,conname);
+    [x,f,exitFlag,OutPut]        = fmincon(objname,d.x0,-d.A,-d.b,d.Aeq,d.beq,d.lb,d.ub,'Fminconstraint',opt,conname);
     RunData{i}.fmincon.x         = x;
     RunData{i}.fmincon.f         = f;
     RunData{i}.fmincon.exitFlag  = exitFlag;
     RunData{i}.fmincon.iter      = OutPut.iterations;
     RunData{i}.fmincon.fevals    = OutPut.funcCount;
     
-    %[Flow,Fupp,iGfun,jGvar] = prepSNOPT(name,x,d);
-    %[x,F,inform] = snopt(d.x0,d.lb,d.ub,Flow,Fupp,'SNOPTdummy',[],[], [],iGfun,jGvar);
-    return
+%     [Flow,Fupp,iGfun,jGvar] = prepSNOPT(name,x,d);
+%     [x,F,inform] = snopt(d.x0,d.lb,d.ub,Flow,Fupp,'SNOPTdummy',[],[], [],iGfun,jGvar);
+
     
 end
 
