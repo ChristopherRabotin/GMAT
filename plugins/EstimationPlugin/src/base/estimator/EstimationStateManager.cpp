@@ -595,14 +595,7 @@ bool EstimationStateManager::SetProperty(GmatBase *obj)
    for (UnsignedInt i = 0; i < solforNames.size(); ++i)
    {
       prop = obj->GetName() + "." + solforNames[i];
-      // MessageInterface::ShowMessage("prop = %s\n", prop.c_str()); 
       SetProperty(prop);
-      //// Save the property elements and fill out the vectors
-      //solveForNames.push_back(prop);
-      //solveForObjectNames.push_back(obj->GetName());
-      //solveForObjects.push_back(NULL);
-      //solveForIDNames.push_back(solforNames[i]);
-      //solveForIDs.push_back(-1);
    }
 
    return true;
