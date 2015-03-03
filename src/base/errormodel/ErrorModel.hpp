@@ -23,14 +23,11 @@
 #ifndef ErrorModel_hpp
 #define ErrorModel_hpp
 
-//#include "estimation_defs.hpp"
 #include "GmatBase.hpp"
-
 
 /**
  * DataFile is defined error model for a measurement model.
  */
-//class ESTIMATION_API ErrorModel : public GmatBase
 class GMAT_API ErrorModel : public GmatBase
 {
 public:
@@ -127,7 +124,6 @@ protected:
       NOISE_SIGMA,
       NOISE_MODEL,
       BIAS,
-//      SOLVE_MODE,
       SOLVEFORS,                              // made changes by TUAN NGUYEN
       ErrorModelParamCount
    };

@@ -41,7 +41,6 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
    "NoiseSigma",
    "NoiseModel",
    "Bias",
-//   "SolveMode",
    "SolveFors",
 };
 
@@ -53,7 +52,6 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
    Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
-//   Gmat::STRING_TYPE,			// SOLVEMODE             // Specify what mode that bias used for. If SolveMode = 'Estimation', bias is used as a solve-for variable. If SolveMode = 'Model', bias is used as a consider
    Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
 };
 
@@ -76,7 +74,6 @@ ErrorModel::ErrorModel(const std::string name) :
    noiseSigma        (0.01),                   // 0.01 Km
    noiseModel        ("NoiseConstant"), 
    bias              (0.0)                    // 0.0 Km
-//   solveMode         ("Model")
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -118,8 +115,7 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
    noiseSigma            (em.noiseSigma),
    noiseModel            (em.noiseModel),
    bias                  (em.bias),
-//   solveMode             (em.solveMode),
-   solveforNames         (em.solveforNames)                 // made changes by TUAN NGUYEN
+   solveforNames         (em.solveforNames)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel copy constructor from <%s,%p>  to  <%s,%p>\n", em.GetName().c_str(), &em, GetName().c_str(), this);
@@ -155,8 +151,7 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       noiseSigma          = em.noiseSigma;
       noiseModel          = em.noiseModel;
       bias                = em.bias;
-//      solveMode           = em.solveMode;
-      solveforNames       = em.solveforNames;               // made changes by TUAN NGUYEN
+      solveforNames       = em.solveforNames;
    }
 
    return *this;
@@ -228,12 +223,6 @@ bool ErrorModel::Initialize()
       return true;
 
    bool retval = true;
-   //if (solveMode == "Estimation")                                                           // made changes by TUAN NGUYEN
-   //{
-//      MessageInterface::ShowMessage("I am here 1\n");
-//      retval = ErrorModel::SetStringParameter(SOLVEFORS, "Bias", solveforNames.size());     // made changes by TUAN NGUYEN
-//      MessageInterface::ShowMessage("I am here 2: return true\n");
-//   }
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -377,9 +366,6 @@ std::string ErrorModel::GetStringParameter(const Integer id) const
    if (id == NOISE_MODEL)
       return noiseModel;
 
-   //if (id == SOLVE_MODE)
-   //   return solveMode;
-
    return GmatBase::GetStringParameter(id);
 }
 
@@ -407,7 +393,6 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
    {
       if (value != "RandomConstant")
       {
-         //throw MeasurementException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
          throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
          return false;
       }
@@ -417,18 +402,6 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
 	      return true;
       }
    }
-
-   //if (id == SOLVE_MODE)
-   //{
-   //   if ((value != "Estimation")&&(value != "Model"))
-   //   {
-   //      //throw MeasurementException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-   //      throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-   //      return false;
-   //   }
-   //   solveMode = value;
-   //   return true;
-   //}
 
    return GmatBase::SetStringParameter(id, value);
 }
@@ -672,7 +645,6 @@ Real ErrorModel::SetRealParameter(const Integer id, const Real value)
    if (id == NOISE_SIGMA)
    {
       if (value <= 0.0)
-         //throw MeasurementException("Error: value of "+ GetName() +".NoiseSigma has to be a positive number.\n");
          throw GmatBaseException("Error: value of "+ GetName() +".NoiseSigma has to be a positive number.\n");
 
 	  noiseSigma = value;
@@ -715,7 +687,6 @@ Integer ErrorModel::SetIntegerParameter(const Integer id, const Integer value)
    if (id == TRIP)
    {
       if (value < 0)
-         //throw MeasurementException("Error: value of "+ GetName() +".Trip has to be a non-positive integer.\n");
          throw GmatBaseException("Error: value of "+ GetName() +".Trip has to be a non-positive integer.\n");
 
 	   measurementTrip = value;
