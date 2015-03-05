@@ -176,17 +176,13 @@ function download_depends() {
 		# Change to pcre directory
 		cd "$pcre_path"
 	
-		# Checkout pcre source.
-		svn co svn://vcs.exim.org/pcre/code/tags/pcre-8.31 pcre-8.31
-	
 		if [ $use_latest == true ]
 		then
-		
-			# Change to pcre directory
-			cd "$pcre_path"
-	
-			# Checkout latest pcre source.
-			svn co svn://vcs.exim.org/pcre/code/trunk pcre-latest
+		  # Checkout latest pcre source.
+		  svn co svn://vcs.exim.org/pcre/code/trunk pcre-latest
+		else
+		  # Checkout release pcre source.
+		  svn co svn://vcs.exim.org/pcre/code/tags/pcre-8.31 pcre-8.31
 		fi
 	fi
 }
@@ -195,31 +191,33 @@ function build_wxWidgets() {
 	# Set build path based on version
 	if [ $use_latest == true ]
 	then
-	  wx_build_path=$gmat_path/depends/wxWidgets/latest
+	  wx_path=$gmat_path/depends/wxWidgets/latest
 	else
-	  wx_build_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2
+	  wx_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2
 	fi
 
 	# OS-specific vars
 	if [ $mac == true ]
     	then
-	  # Out-of-source build location
-	  wx_build_path=$wx_build_path/cocoa-build
+	  # Out-of-source build/install locations
+	  wx_build_path=$wx_path/cocoa-build
+	  wx_install_path=$wx_path/cocoa-install
 
-	  # Test file to see if wxWidgets has already been built
-	  wx_test_file=$wx_build_path/lib/libwx_osx_cocoau_core-3.0.dylib
+	  # Test file to see if wxWidgets has already been installed
+	  wx_test_file=$wx_install_path/lib/libwx_osx_cocoau_core-3.0.dylib
     	else
-	  # Out-of-source build location
-	  wx_build_path=$wx_build_path/gtk-build
+	  # Out-of-source build/install locations
+	  wx_build_path=$wx_path/gtk-build
+	  wx_install_path=$wx_path/gtk-install
 
-	  # Test file to see if wxWidgets has already been built
-	  wx_test_file=$wx_build_path/lib/libwx_gtk3u_core-3.0.so
+	  # Test file to see if wxWidgets has already been installed
+	  wx_test_file=$wx_install_path/lib/libwx_gtk3u_core-3.0.so
     	fi
 
 	# Build wxWidgets if the test library doesn't already exist
 	if [ -f "$wx_test_file" ]
 	then
-	  echo "wxWidgets already built"
+	  echo "wxWidgets already installed"
 	else
 	  echo "Building wxWidgets..."
 	  mkdir -p "$wx_build_path"
@@ -227,20 +225,24 @@ function build_wxWidgets() {
 
 	  if [ $mac == true ]
 	  then
-	    #arch_flags="-arch i386"
-	    #./configure CFLAGS="$arch_flags" CXXFLAGS="$arch_flags" CPPFLAGS="$arch_flags" LDFLAGS="$arch_flags" OBJCFLAGS="$arch_flags" OBJCXXFLAGS="$arch_flags" --with-opengl --with-macosx-version-min=10.7 --with-macosx-sdk=/Developer/SDKs/MacOSX10.6.sdk
-
 	    # Extra compile/link flags are required for an incompatibility between wx3 and OSX 10.9+
-	    ../configure --enable-unicode --with-opengl --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
+	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
 	    # Configure wxWidget build
-	    ../configure --enable-unicode --with-opengl
+	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_pah"
 	    ncores=$(nproc)
 	  fi
 
 	  # Compile wxWidget build
 	  make -j$ncores
+	  make install
+
+	  if [ $mac == true ]
+	  then
+	    ./change_install_names "$wx_install_path/lib" "$wx_install_path/bin" "@rpath" "$wx_install_path/lib"
+	  fi
+
 	fi
 }
 

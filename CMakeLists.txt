@@ -32,12 +32,15 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
 endif()
 
+# Path to custom Find****.cmake files
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
+
 # Set general build options
 OPTION(PROFILE_BUILD "ProfileBuild" OFF)
 OPTION(GMAT_64_BIT "64-Bit Binaries" ON)
 OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 
-# Optional GMAT plugins
+# Public GMAT plugins
 OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
 OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
 OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" ON)
@@ -45,7 +48,7 @@ OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
 OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
 OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
 OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
-OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" ON)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
 OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
 OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
 OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
@@ -53,9 +56,6 @@ OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
 OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
 OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
 OPTION(PLUGIN_STATION "Station Plugin" ON)
-
-# Path to custom Find****.cmake files
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
 
 # Optional Jazz Plugin Inputs
 # to-do
@@ -72,23 +72,25 @@ elseif(UNIX)
   # So first save PATH (just the first time to avoid recursive setting)...
   if(NOT wxWidgets_ROOT_DIR)
     SET(SYS_PATH "$ENV{PATH}" CACHE INTERNAL "System PATH environment variable")
+    MESSAGE("SYS_PATH: ${SYS_PATH}")
   endif()
 
   # ... then get the expected path to the wx-config utility ...
   if(APPLE)
-    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-build" CACHE PATH "wxWidgets Root Directory")
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-install" CACHE PATH "wxWidgets Root Directory")
   else()
-    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-build" CACHE PATH "wxWidgets Root Directory")
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-install" CACHE PATH "wxWidgets Root Directory")
   endif()
 
   # ... then append that to the PATH environment variable
   SET(ENV{PATH} "${SYS_PATH}:${wxWidgets_ROOT_DIR}")
+
+  # Clear wxWidgets_CONFIG_EXECUTABLE in case user changed wxWidgets_ROOT_DIR
+  UNSET(wxWidgets_CONFIG_EXECUTABLE CACHE) 
 endif()
 
-# Find wxWidgets if needed
-if(GMAT_GUI OR PLUGIN_MATLABINTERFACE)
-  FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
-endif()
+# Find wxWidgets
+FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 
 # Set default CSPICE directory based on OS
 if(WIN32)
@@ -101,43 +103,60 @@ endif()
 
 # Use appropriate 32/64-bit CSPICE directories
 if(GMAT_64_BIT)
-  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice64" CACHE PATH "CSPICE Root Directory")
+  SET(CSPICE_DEPENDS_DIR "${CSPICE_DIR_TEMP}/cspice64")
 else()
-  SET(CSPICE_DIR "${CSPICE_DIR_TEMP}/cspice32" CACHE PATH "CSPICE Root Directory")
+  SET(CSPICE_DEPENDS_DIR "${CSPICE_DIR_TEMP}/cspice32")
 endif()
 
+# Search for CSPICE folder in default paths
+# User can change this via CMake GUI or command line
+FIND_PATH(CSPICE_DIR
+  NAMES include/SpiceUsr.h
+  PATHS
+    ${CSPICE_DEPENDS_DIR}
+  DOC "Path to CSpice root directory"
+  NO_DEFAULT_PATH
+  )
+
 # Make sure CSPICE exists
-if( IS_DIRECTORY ${CSPICE_DIR} )
-  MESSAGE(STATUS "CSPICE FOUND in " ${CSPICE_DIR})
+if(EXISTS ${CSPICE_DIR})
+  MESSAGE(STATUS "Found CSPICE: " ${CSPICE_DIR})
 else()
-  MESSAGE(FATAL_ERROR "CSPICE NOT FOUND in " ${CSPICE_DIR} " , Stopping build.")
+  MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR variable and re-configure.")
 endif()
 
 # Set default F2C directory based on OS
 if(WIN32)
   # On Windows, use F2C version from CSPICE
-  SET(F2C_DIR "${CSPICE_DIR}/include" CACHE PATH "f2c Root Directory")
+  SET(F2C_DEPENDS_DIR "${CSPICE_DIR}/include")
 elseif(UNIX)
-  SET(F2C_DIR "${PROJECT_SOURCE_DIR}/depends/f2c" CACHE PATH "f2c Root Directory")
+  SET(F2C_DEPENDS_DIR "${PROJECT_SOURCE_DIR}/depends/f2c")
 endif()
+
+# Search for F2C folder in default paths
+# User can change this via CMake GUI or command line
+FIND_PATH(F2C_DIR
+  NAMES f2c.h
+  PATHS 
+    ${F2C_DEPENDS_DIR}
+  DOC "Path to F2C directory"
+  NO_DEFAULT_PATH
+  )
 
 # Make sure F2C exists
-if( IS_DIRECTORY ${F2C_DIR} )
-  MESSAGE(STATUS "F2C FOUND in " ${F2C_DIR})
+if(EXISTS ${F2C_DIR})
+  MESSAGE(STATUS "Found F2C: " ${F2C_DIR})
 else()
-  MESSAGE(FATAL ERROR "F2C NOT FOUND in " ${F2C_DIR} " , Stopping build.")
+  MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR variable and re-configure.")
 endif()
 
-# Find Matlab if needed
-if(PLUGIN_FMINCONOPTIMIZER OR PLUGIN_MATLABINTERFACE OR PLUGIN_CINTERFACE)
-  # Additional (future) Matlab versions should be included here
-  SET(MATLAB_ADDITIONAL_VERSIONS
-    "R2015a=8.5"
-    "R2014b=8.4"
-    )
-  FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
-endif()
-
+# Find Matlab
+SET(MATLAB_ADDITIONAL_VERSIONS
+  # Additional Matlab versions should be included here
+  "R2015a=8.5"
+  "R2014b=8.4"
+  )
+FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 
 # Default to Release configuration on single-config generators
 # e.g. make, but not VisualStudio

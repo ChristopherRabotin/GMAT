@@ -191,6 +191,28 @@ if (PLUGIN_STATION)
 endif()
 
 # ====================================================================
+# Proprietary plugins
+
+# Search for proprietary plugin folder in default paths
+# User can change this via CMake GUI or command line
+FIND_PATH(GMAT_PROPRIETARYPLUGINS_PATH
+  NAMES code/CMakeLists.txt
+  PATHS
+    ${PROJECT_SOURCE_DIR}/../gmatinternal-git
+    ${PROJECT_SOURCE_DIR}/plugins/gmatinternal-git
+  DOC "Path to GMAT proprietary plugins"
+  NO_DEFAULT_PATH
+  )
+
+# Load CMakeLists.txt file from top-level proprietary plugins folder
+if(GMAT_PROPRIETARYPLUGINS_PATH)
+  SET(PLUGINDIR "${GMAT_PROPRIETARYPLUGINS_PATH}/code")
+  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/internal")
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
 # Set plugin properties all at once
 if(PluginTargets)
   # Specify the library version

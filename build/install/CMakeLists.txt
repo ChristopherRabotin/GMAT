@@ -14,6 +14,9 @@
 # Set overall install instructions
 # executed when running "make install" or building the VS "INSTALL" target
 
+MESSAGE("==============================")
+MESSAGE("Setting up steps to install GMAT " ${VERSION})
+
 # Install the default application/ directory structure
 MESSAGE(STATUS "Will install GMAT to " ${CMAKE_INSTALL_PREFIX})
 INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"

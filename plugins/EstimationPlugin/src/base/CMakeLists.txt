@@ -14,6 +14,13 @@
 MESSAGE("==============================")
 MESSAGE("GMAT Estimation Plugin setup " ${VERSION}) 
 
+# ====================================================================
+# Major error checks
+if(NOT EXISTS ${F2C_DIR})
+  MESSAGE(WARNING "Skipping due to missing F2C")
+  RETURN()
+endif()
+
 if(WIN32)
 	SET(PLUGINTARGET  "libGmatEstimation")
 else()
@@ -28,6 +35,10 @@ ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command estimator event factory hardware include measurement measurement/Ionosphere measurement/Troposphere measurementfile plugin trackingsystem)
+
+# ====================================================================
+# Include F2C
+INCLUDE_DIRECTORIES(${F2C_DIR})
 
 # ====================================================================
 # source files
@@ -99,7 +110,6 @@ SET(PLUGIN_SRCS
 
 # Temporarily disable Ionosphere for Mac/Linux
 if(WIN32)
-  INCLUDE_DIRECTORIES("${F2C_DIR}")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
     measurement/Ionosphere/cira.c
