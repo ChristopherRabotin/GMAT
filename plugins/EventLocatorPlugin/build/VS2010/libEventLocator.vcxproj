@@ -136,7 +136,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\locator;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\event;..\..\..\..\src\base\factory;..\..\..\..\src\base\hardware;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\Gmat3rdParty\cspice\include;..\..\src\base\include;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\locator;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\event;..\..\..\..\src\base\factory;..\..\..\..\src\base\hardware;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;LOCATOR_EXPORTS;_DYNAMICLINK;_ITERATOR_DEBUG_LEVEL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4231;4251;4996</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -144,8 +144,8 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\..\..\application\debug</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libGmatBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\application\debug;..\..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -235,7 +235,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\Gmat3rdParty\cspice\include;..\..\src\base\include;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\locator;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\event;..\..\..\..\src\base\factory;..\..\..\..\src\base\hardware;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\locator;..\..\src\base\plugin;..\..\..\..\src\base\include;..\..\..\..\src\base\util;..\..\..\..\src\base\foundation;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\event;..\..\..\..\src\base\factory;..\..\..\..\src\base\hardware;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\subscriber;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
@@ -248,8 +248,8 @@
       <DisableSpecificWarnings>4231;4251;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
