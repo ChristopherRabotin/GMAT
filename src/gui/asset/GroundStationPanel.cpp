@@ -304,7 +304,7 @@ void GroundStationPanel::LoadData()
    
    // Set object pointer for "Show Script"
    mObject = theGroundStation;
-   MessageInterface::ShowMessage("TheGS:\n%s\n\nlocalGS:\n%s\n", theGroundStation->GetGeneratingString(Gmat::NO_COMMENTS).c_str(), localGroundStation->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+
    try
    {
    // Since Groundstation is now in plugin, this no longer works:
