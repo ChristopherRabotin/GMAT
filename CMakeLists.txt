@@ -113,7 +113,7 @@ FIND_PATH(CSPICE_DIR
   NAMES include/SpiceUsr.h
   PATHS
     ${CSPICE_DEPENDS_DIR}
-  DOC "Path to CSpice root directory"
+  DOC "Path to CSpice root directory (containing include/SpiceUsr.h)"
   NO_DEFAULT_PATH
   )
 
@@ -138,7 +138,7 @@ FIND_PATH(F2C_DIR
   NAMES f2c.h
   PATHS 
     ${F2C_DEPENDS_DIR}
-  DOC "Path to F2C directory"
+  DOC "Path to F2C directory (containing f2c.h)"
   NO_DEFAULT_PATH
   )
 
