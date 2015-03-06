@@ -118,6 +118,7 @@ GroundStation::~GroundStation()
 //---------------------------------------------------------------------------
 GroundStation::GroundStation(const GroundStation& gs) :
    GroundstationInterface        (gs),
+   stationId             (gs.stationId),
    minElevationAngle     (gs.minElevationAngle)
 {
 	hardwareNames 		= gs.hardwareNames;		// made changes by Tuan Nguyen
