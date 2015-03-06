@@ -58,12 +58,14 @@ private:
    std::string currentStateType;
    std::string currentHorizonReference;
    Real        location1, location2, location3;
+   Real        minElevation;
 
    // Event Handling
    DECLARE_EVENT_TABLE();
    void OnLocationTextChange(wxCommandEvent &event);
    void OnStationIDTextChange(wxCommandEvent &event);
    void OnHardwareTextChange(wxCommandEvent &event);
+   void OnElevationTextChange(wxCommandEvent &event);
    void OnComboBoxChange(wxCommandEvent &event);
    void OnStateTypeComboBoxChange(wxCommandEvent &event);
    void OnHorizonReferenceComboBoxChange(wxCommandEvent &event);
@@ -82,6 +84,8 @@ private:
    wxStaticText *location3Label;
    wxTextCtrl *location3TextCtrl;
    wxStaticText *location3Unit;
+
+   wxTextCtrl *minElevationCtrl;
    
    wxComboBox *centralBodyComboBox;
    wxComboBox *stateTypeComboBox;
@@ -95,8 +99,9 @@ private:
       ID_TEXT = 39010,
       ID_LOCATION_TEXTCTRL,
       ID_STATION_ID_TEXTCTRL,
-      ID_HARDWARE_TEXTCTRL,
-      ID_BUTTON,
+	  ID_HARDWARE_TEXTCTRL,
+	  ID_ELEVATION_TEXTCTRL,
+	  ID_BUTTON,
       ID_COMBOBOX,
       ID_STATE_TYPE_COMBOBOX,
       ID_HORIZON_REFERENCE_COMBOBOX
