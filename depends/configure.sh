@@ -225,7 +225,7 @@ function build_wxWidgets() {
 
 	  if [ $mac == true ]
 	  then
-	    # Extra compile/link flags are required for an incompatibility between wx3 and OSX 10.9+
+	    # Extra compile/link flags are required because OSX 10.9+ uses libc++ instead of libstdc++ by default. There should be a version check here to handle OSX 10.8 and lower
 	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
@@ -237,14 +237,6 @@ function build_wxWidgets() {
 	  # Compile wxWidget build
 	  make -j$ncores
 	  make install
-
-	  # On Mac, set wxWidgets shared library install names using rpath
-	  # This allows wxWidgets libs to be more easily redistributed
-	  if [ $mac == true ]
-	  then
-	    ./change_install_names "$wx_install_path/lib" "$wx_install_path/bin" "@rpath" "$wx_install_path/lib"
-	  fi
-
 	fi
 }
 

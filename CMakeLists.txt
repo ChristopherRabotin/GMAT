@@ -121,7 +121,7 @@ FIND_PATH(CSPICE_DIR
 if(EXISTS ${CSPICE_DIR})
   MESSAGE(STATUS "Found CSPICE: " ${CSPICE_DIR})
 else()
-  MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR variable and re-configure.")
+  MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
 endif()
 
 # Set default F2C directory based on OS
@@ -146,7 +146,7 @@ FIND_PATH(F2C_DIR
 if(EXISTS ${F2C_DIR})
   MESSAGE(STATUS "Found F2C: " ${F2C_DIR})
 else()
-  MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR variable and re-configure.")
+  MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR to path to f2c.h and re-configure.")
 endif()
 
 # Find Matlab
@@ -243,13 +243,13 @@ if(UNIX)
   if(APPLE)
     # On Mac, @loader_path points to directory of current shared library
     SET(CMAKE_MACOSX_RPATH TRUE)
-    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/")
+    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../bin/libwx/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/")
   else()
     # On Linux, $ORIGIN points to directory of current shared library
     # Linux searches the RPATH before the system LD_LIBRARY_PATH, so enable
     # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
     # the Linux search order similar to Mac/Windows.
-    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
+    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../bin/libwx/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
     SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
     SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
   endif()
