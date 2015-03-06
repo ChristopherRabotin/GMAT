@@ -709,52 +709,6 @@ SpiceDouble SpiceInterface::A1ToSpiceTime(Real a1Time)
 }
 
 
-void  SpiceInterface::TryBogusCall()
-{
-   try
-   {
-      // Add 'fake' calls to force these methods to be loaded
-      SPICEDOUBLE_CELL(window, 2000);
-      scard_c(0, &window);   // reset (empty) the coverage cell
-      SPICEDOUBLE_CELL(result, 2000);
-      scard_c(0, &result);   // reset (empty) the coverage cell
-      wninsd_c(21545.0, 21545.5, &window);
-      wninsd_c(21545.0, 21545.5, &result);
-      SPICEDOUBLE_CELL(intersection, 2000);
-      scard_c(0, &intersection);   // reset (empty) the coverage cell
-
-      MessageInterface::ShowMessage("****** In TryBogusCall, calling gfoclt ... \n");
-
-      gfoclt_c("FULL", "EARTH", "ELLIPSOID", "IAU_EARTH", "SUN", "ELLIPSOID", "IAU_SUN", "NONE",
-               "199", 60.0, &window, &result);
-
-      MessageInterface::ShowMessage("****** In TryBogusCall, calling wnintd_c ... \n");
-      wnintd_c(&window, &result, &intersection);
-      if (failed_c())
-      {
-         #ifdef DEBUG_SPK_INIT
-            MessageInterface::ShowMessage(
-                  "In SpiceInterface::InitializeInterface, CSPICE reports an error!!!\n");
-         #endif
-         ConstSpiceChar option[] = "LONG"; // retrieve long error message, for now
-         SpiceInt       numChar  = MAX_LONG_MESSAGE;
-         SpiceChar      err[MAX_LONG_MESSAGE];
-         getmsg_c(option, numChar, err);
-         std::string errStr(err);
-         std::string errmsg = "Message received from CSPICE is: ";
-         errmsg += errStr + "\n";
-         reset_c();
-         throw UtilityException(errmsg);
-      }
-      MessageInterface::ShowMessage("****** In TryBogusCall, AFTER gfoclt ... \n");
-   }
-   catch (...)
-   {
-      MessageInterface::ShowMessage("ERROR!!!!!!!!!!\n");
-   }
-
-}
-
 //---------------------------------
 // protected methods
 //---------------------------------
