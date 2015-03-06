@@ -43,7 +43,7 @@ OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 # Public GMAT plugins
 OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
 OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
-OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" ON)
+OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
 OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
 OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
 OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
@@ -72,14 +72,13 @@ elseif(UNIX)
   # So first save PATH (just the first time to avoid recursive setting)...
   if(NOT wxWidgets_ROOT_DIR)
     SET(SYS_PATH "$ENV{PATH}" CACHE INTERNAL "System PATH environment variable")
-    MESSAGE("SYS_PATH: ${SYS_PATH}")
   endif()
 
   # ... then get the expected path to the wx-config utility ...
   if(APPLE)
-    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-install" CACHE PATH "wxWidgets Root Directory")
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-install/bin" CACHE PATH "wxWidgets Root Directory")
   else()
-    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-install" CACHE PATH "wxWidgets Root Directory")
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-install/bin" CACHE PATH "wxWidgets Root Directory")
   endif()
 
   # ... then append that to the PATH environment variable
@@ -151,12 +150,14 @@ else()
 endif()
 
 # Find Matlab
+SET(MATLAB_USER_ROOT "" CACHE PATH "Path to user-specified MATLAB location. Leave empty to auto-find MATLAB.")
 SET(MATLAB_ADDITIONAL_VERSIONS
   # Additional Matlab versions should be included here
   "R2015a=8.5"
   "R2014b=8.4"
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
+MARK_AS_ADVANCED(CLEAR MATLAB_USER_ROOT)
 
 # Default to Release configuration on single-config generators
 # e.g. make, but not VisualStudio
@@ -211,9 +212,10 @@ if (PROFILE_BUILD)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
-# Warning Supression Definitions
+# Warning suppression definitions
+# Note that warning C4430 presents as an error in the MatlabInterface plugin
 if(WIN32)
-  ADD_DEFINITIONS("/wd4005 /wd4251 /wd4231 /wd4996 /nologo")
+  ADD_DEFINITIONS("/wd4430 /wd4251 /wd4231 /wd4996 /nologo")
 endif()
 
 # Set 64 bit Definitions and directories

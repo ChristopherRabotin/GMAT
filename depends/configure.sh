@@ -230,7 +230,7 @@ function build_wxWidgets() {
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
 	    # Configure wxWidget build
-	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_pah"
+	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path"
 	    ncores=$(nproc)
 	  fi
 
@@ -238,6 +238,8 @@ function build_wxWidgets() {
 	  make -j$ncores
 	  make install
 
+	  # On Mac, set wxWidgets shared library install names using rpath
+	  # This allows wxWidgets libs to be more easily redistributed
 	  if [ $mac == true ]
 	  then
 	    ./change_install_names "$wx_install_path/lib" "$wx_install_path/bin" "@rpath" "$wx_install_path/lib"
