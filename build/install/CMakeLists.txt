@@ -39,7 +39,12 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
 if(PLUGIN_CINTERFACE)
   if(Matlab_FOUND)
     # Create the command to be executed by Matlab
-    SET(MSTART "\"${Matlab_MAIN_PROGRAM}\" -nodisplay -r")
+    SET(MSTART "\"${Matlab_MAIN_PROGRAM}\"")
+    if(WIN32)
+      # Need -wait on Windows so matlab call doesn't immediately return
+      SET(MSTART "${MSTART} -wait")
+    endif()
+    SET(MSTART "${MSTART} -nosplash -nodesktop -nodisplay -r")
     SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
     SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
     SET(MCD "cd('${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/build/matlab');")
@@ -67,14 +72,15 @@ endif()
 # ====================================================================
 # Install wxWidgets libraries
 if(wxWidgets_FOUND)
-  # Install the libraries
+  # For Windows, dlls must be next to executables in bin
   if(WIN32)
-    INSTALL(DIRECTORY ${wxWidgets_LIB_NAMES}/
+    INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*.dylib"
+      FILES_MATCHING PATTERN "*.dll"
       PATTERN "msw*" EXCLUDE
       )
+  # For Mac/Linux, dylib/so can be in subdirectory of bin
   else()
     INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
       DESTINATION bin/libwx
@@ -83,7 +89,8 @@ if(wxWidgets_FOUND)
       PATTERN "wx" EXCLUDE
       )
 
-    # On Mac, change wx lib install names to use RPATH
+    # On Mac, change dylib install names to use RPATH
+    # This is done using the wxmac_change_install_names.sh script
     if(APPLE)
       # Create command for wxmac_change_install_names script
       SET(CHNM "./wxmac_change_install_names.sh")
