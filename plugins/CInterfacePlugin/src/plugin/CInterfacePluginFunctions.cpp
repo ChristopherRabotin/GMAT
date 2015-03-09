@@ -809,6 +809,21 @@ extern "C"
       return lastMsg.c_str();
    }
 
+   //---------------------------------------------------------------------------
+   // void (*GetPluginFunction(const char* funName, const char* libName))()
+   //---------------------------------------------------------------------------
+   /**
+    * Retrieves a function from the specified GMAT library.
+    *
+    * @return The requested function with signature void (*)(). Must recast
+    *         to correct signature before using.
+    */
+   //---------------------------------------------------------------------------
+   void (*GetPluginFunction(const char* funName, const char* libraryName))()
+   {
+      Moderator *theModerator = Moderator::Instance();
+      return theModerator->GetDynamicFunction(funName, libraryName);
+   }
 };  // End of extern "C"
 
 

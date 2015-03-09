@@ -943,10 +943,24 @@ void Moderator::LoadAPlugin(std::string pluginName)
 //------------------------------------------------------------------------------
 DynamicLibrary *Moderator::LoadLibrary(const std::string &libraryName)
 {
-   DynamicLibrary *theLib = new DynamicLibrary(libraryName);
+   // libraryName may be a filename or a pathname. If the latter, split
+   // it into its actual filename and path components. 
+   std::string libName, libPath;
+   unsigned int leafloc = libraryName.find_last_of("/\\"); // *nix or Windows
+   if(leafloc != std::string::npos) // libraryName is a path
+   {
+      libPath = libraryName.substr(0, leafloc+1);
+      libName = libraryName.substr(leafloc+1);
+   }
+   else // libraryName is a filename
+   {
+      libName = libraryName;
+   }
+
+   DynamicLibrary *theLib = new DynamicLibrary(libName, libPath);
    if (theLib->LoadDynamicLibrary())
    {
-      userLibraries[libraryName] = theLib;
+      userLibraries[libName] = theLib;
    }
    else
    {
@@ -1001,7 +1015,18 @@ void (*Moderator::GetDynamicFunction(const std::string &funName,
 {
    void (*theFunction)() = NULL;
    if (IsLibraryLoaded(libraryName))
-      theFunction = userLibraries[libraryName]->GetFunction(funName);
+   {
+     try
+     {
+       theFunction = userLibraries[libraryName]->GetFunction(funName);
+     }
+     catch (...)
+     { 
+       MessageInterface::ShowMessage("Moderator::GetDynamicFunction() error");
+       return NULL;
+     }
+   }
+
    return theFunction;
 }
 
