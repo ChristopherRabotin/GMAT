@@ -1432,7 +1432,8 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
    {
       // Register measurement ID for this curve
       IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
-      std::vector<TrackingFileSet*> tfs = measManager.GetTrackingSets();
+      //std::vector<TrackingFileSet*> tfs = measManager.GetTrackingSets();
+      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();
 
       UnsignedInt k;
       for (k = 0; k < tfs.size(); ++k)

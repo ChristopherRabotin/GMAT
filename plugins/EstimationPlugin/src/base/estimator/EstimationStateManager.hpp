@@ -53,6 +53,7 @@ public:
    virtual bool               IsPropertiesSetupCorrect();                      // made changes by TUAN NGUYEN
 
    virtual bool               SetProperty(std::string, GmatBase*);
+   virtual bool               SetProperty(GmatBase* solveforObj);              // made changes by TUAN NGUYEN
    virtual bool               SetConsider(std::string prop);
    virtual bool               SetConsider(std::string, Integer);
    virtual bool               SetConsider(std::string, GmatBase*);

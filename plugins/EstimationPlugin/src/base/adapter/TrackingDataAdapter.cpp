@@ -24,6 +24,8 @@
 #include "MessageInterface.hpp"
 #include "PropSetup.hpp"
 #include "SignalBase.hpp"
+#include "ErrorModel.hpp" 
+#include "GroundstationInterface.hpp"
 #include <sstream>
 
 //#define DEBUG_CONSTRUCTION
@@ -40,7 +42,6 @@ TrackingDataAdapter::PARAMETER_TEXT[AdapterParamCount - MeasurementModelBasePara
    "ObservationData",
    "RampTables",
    "MeasurementType",
-   "Bias",
    "AddNoise",
    "UplinkFrequency",
    "UplinkBand",
@@ -50,11 +51,10 @@ TrackingDataAdapter::PARAMETER_TEXT[AdapterParamCount - MeasurementModelBasePara
 const Gmat::ParameterType
 TrackingDataAdapter::PARAMETER_TYPE[AdapterParamCount - MeasurementModelBaseParamCount] =
 {
-   Gmat::OBJECTARRAY_TYPE,
+   Gmat::OBJECTARRAY_TYPE,          // SIGNAL_PATH
    Gmat::OBJECTARRAY_TYPE,          // OBS_DATA
    Gmat::OBJECTARRAY_TYPE,          // RAMPED_TABLE
    Gmat::STRING_TYPE,               // MEASUREMENT_TYPE
-   Gmat::RVECTOR_TYPE,              // BIAS
    Gmat::BOOLEAN_TYPE,              // ADD_NOISE
    Gmat::REAL_TYPE,                 // UPLINK_FREQUENCY
    Gmat::INTEGER_TYPE,              // UPLINK_BAND
@@ -91,6 +91,7 @@ TrackingDataAdapter::TrackingDataAdapter(const std::string &typeStr,
    obsData              (NULL),
    addNoise             (false),
    addBias              (true),
+   rangeOnly            (false),                    // made changes by TUAN NGUYEN
    rampTB               (NULL),
    beginIndex           (0),
    endIndex             (0)
@@ -139,6 +140,8 @@ TrackingDataAdapter::~TrackingDataAdapter()
    theDataDerivatives.clear();
 
    refObjects.clear();
+
+   forObjects.clear();
 }
 
 
@@ -170,10 +173,12 @@ TrackingDataAdapter::TrackingDataAdapter(const TrackingDataAdapter& ma) :
    obsData              (ma.obsData),
    addNoise             (ma.addNoise),
    addBias              (ma.addBias),
+   rangeOnly            (ma.rangeOnly),                         // made changes by TUAN NGUYEN
    rampTB               (ma.rampTB),
    beginIndex           (ma.beginIndex),
    endIndex             (ma.endIndex),
-   rampTableNames       (ma.rampTableNames)
+   rampTableNames       (ma.rampTableNames),
+   forObjects           (ma.forObjects)                         // made changes by TUAN NGUYEN
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingDataAdapter copy constructor  from <%p> to <%p>\n", &ma, this);
@@ -219,10 +224,12 @@ TrackingDataAdapter& TrackingDataAdapter::operator=(
       obsData            = ma.obsData;
       addNoise           = ma.addNoise;
       addBias            = ma.addBias;
+      rangeOnly          = ma.rangeOnly;                // made changes by TUAN NGUYEN
       rampTB             = ma.rampTB;
       beginIndex         = ma.beginIndex;
       endIndex           = ma.endIndex;
       rampTableNames     = ma.rampTableNames;
+      forObjects         = ma.forObjects;              // made changes by TUAN NGUYEN
 
       if (calcData)
       {
@@ -1496,7 +1503,7 @@ Real TrackingDataAdapter::GetMultiplierFactor()
 }
 
 
-void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName)
+void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, const std::string measType, Integer numTrip)
 {
    // Get signal data
    std::vector<SignalData*> data = calcData->GetSignalData();
@@ -1504,6 +1511,13 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName)
 
    // Calculate bias for each measurement (signal path)
    measurementBias.clear();
+   if (rangeOnly)                                             // made changes by TUAN NGUYEN
+   {                                                          // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < measurementSize; ++i)       // made changes by TUAN NGUYEN
+         measurementBias.push_back(0.0);                      // made changes by TUAN NGUYEN
+      return;                                                 // made changes by TUAN NGUYEN
+   }                                                          // made changes by TUAN NGUYEN
+
    Real val, bias;
    for (UnsignedInt i = 0; i < measurementSize; ++i)
    {
@@ -1512,22 +1526,67 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName)
       SignalData* last = data[i];
       while (last->next != NULL)
          last = last->next;
+      
+      // Specify ground station
+      SpacePoint* gs = NULL;
+      if ((first->tNode->IsOfType(Gmat::GROUND_STATION)) && (last->rNode->IsOfType(Gmat::GROUND_STATION) == false))
+         gs = first->tNode;
+      else if (last->rNode->IsOfType(Gmat::GROUND_STATION))
+         gs = last->rNode;
+
+      // Search for ErrorModel associated with measType and numTrip
+      ObjectArray errmodels = ((GroundstationInterface*)gs)->GetRefObjectArray("ErrorModel");
+      if (errmodels.size() == 0)
+         throw MeasurementException("Error: ErrorModel mismatched. No error model was set to GroundStation " + gs->GetName() + ".ErrorModels\n");
+
+      UnsignedInt k;
+      for (k = 0; k < errmodels.size(); ++k)
+      {
+         if ((errmodels[k]->GetStringParameter("Type") == measType)&&(errmodels[k]->GetIntegerParameter("Trip") == numTrip))
+            break;
+      }
+      if (k >= errmodels.size())
+      {
+         std::stringstream ss;
+         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         throw MeasurementException(ss.str());
+      }
 
       bias = 0.0;
-      if ((first->tNode->IsOfType(Gmat::GROUND_STATION)) && (last->rNode->IsOfType(Gmat::GROUND_STATION) == false))
-         bias = first->tNode->GetRealParameter(biasName);
-      else if (last->rNode->IsOfType(Gmat::GROUND_STATION))
-         bias = last->rNode->GetRealParameter(biasName);
+      if (forObjects.size() > 0)
+      {
+         // This is case for running estimation: solve-for objects are stored in forObjects array
+         // Search for object with the same name with errmodels[k]
+         UnsignedInt j;
+         for (j = 0; j < forObjects.size(); ++j)
+         {
+            if (forObjects[j]->GetName() == errmodels[k]->GetName())
+               break;
+         }
 
+         // Get Bias from that error model
+         if (j >= forObjects.size())
+            bias = errmodels[k]->GetRealParameter(biasName);          // bias is a consider parameter
+         else
+            bias = forObjects[j]->GetRealParameter(biasName);         // bias is a solve-for parameter
+         //MessageInterface::ShowMessage("TrackingDataAdapter::GetMeasurementBias(...): ErrorModel <%p>   Bias = %lf\n", forObjects[j], bias);
+      }
+      else
+      {
+         // This is case for running simulation. no solve-for objects are stored in forObjects
+         // For this case, bias value is gotten from GroundStation.ErrorModels parameter
+         bias = errmodels[k]->GetRealParameter(biasName);             // bias is consider parameter
+      }
+      
       measurementBias.push_back(bias);
    }
-
+   
    // Clean up memmory
    data.clear();
 }
 
 
-void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSigmaName)
+void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, const std::string measType, Integer numTrip)
 {
    // Get signal data
    std::vector<SignalData*> data = calcData->GetSignalData();
@@ -1535,6 +1594,13 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
 
    // Calculate noise sigma for each signal path
    noiseSigma.clear();
+   if (rangeOnly)                                              // made changes by TUAN NGUYEN
+   {                                                           // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < measurementSize; ++i)        // made changes by TUAN NGUYEN
+         noiseSigma.push_back(0.0);                            // made changes by TUAN NGUYEN
+      return;                                                  // made changes by TUAN NGUYEN
+   }                                                           // made changes by TUAN NGUYEN
+
    Real val, noise;
    for (UnsignedInt i = 0; i < measurementSize; ++i)
    {
@@ -1544,12 +1610,34 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
       while (last->next != NULL)
          last = last->next;
 
-      noise = 0.0;
+      // Specify ground station
+      SpacePoint* gs = NULL;
       if ((first->tNode->IsOfType(Gmat::GROUND_STATION)) && (last->rNode->IsOfType(Gmat::GROUND_STATION) == false))
-         noise = first->tNode->GetRealParameter(noiseSigmaName);
+         gs = first->tNode;
       else if (last->rNode->IsOfType(Gmat::GROUND_STATION))
-         noise = last->rNode->GetRealParameter(noiseSigmaName);
+         gs = first->tNode;
 
+      // Search for ErrorModel associated with measType and numTrip
+      ObjectArray errmodels = ((GroundstationInterface*)gs)->GetRefObjectArray("ErrorModel");
+      if (errmodels.size() == 0)
+         throw MeasurementException("Error: ErrorModel mismached. No error model was set to GroundStation " + gs->GetName() + ".ErrorModels\n");
+
+      UnsignedInt k;
+      for (k = 0; k < errmodels.size(); ++k)
+      {
+         if ((errmodels[k]->GetStringParameter("Type") == measType)&&(errmodels[k]->GetIntegerParameter("Trip") == numTrip))
+            break;
+      }
+      if (k >= errmodels.size())
+      {
+         std::stringstream ss;
+         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         throw MeasurementException(ss.str());
+      }
+
+      // Get NoiseSigma from that error model
+      noise = errmodels[k]->GetRealParameter(noiseSigmaName);
+      //MessageInterface::ShowMessage("TrackingDataAdapter::GetMeasurementBias(...): ErrorModel <%p>   noise = %lf\n", errmodels[k], noise);
 
       noiseSigma.push_back(noise);
    }// for i

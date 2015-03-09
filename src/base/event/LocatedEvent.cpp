@@ -13,59 +13,87 @@
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: Sep 2, 2011
+// Heavily Modified: Wendy Shoan/GSFC  2015.01.09
 //
 /**
- * Definition of the ...
+ * Implementation for the LocatedEvent base class.
  */
 //------------------------------------------------------------------------------
 
-
 #include "LocatedEvent.hpp"
+#include "GmatConstants.hpp"
+
+//------------------------------------------------------------------------------
+// public methods
+//------------------------------------------------------------------------------
 
 LocatedEvent::LocatedEvent() :
-   epoch       (0.0),
-   boundary    (""),
-   isEntry     (false),
-   type        (""),
-   eventValue  (999.999),
-   participants(""),
-   partner     (NULL),
-   duration    (0.0),
-   dataName    ("")
+   start     (0.0),
+   end       (0.0),
+   duration  (0.0)
+{
+}
+
+LocatedEvent::LocatedEvent(Real startEpoch, Real endEpoch) :
+   start     (startEpoch),
+   end       (endEpoch),
+   duration  (0.0)
 {
 }
 
 LocatedEvent::~LocatedEvent()
 {
+   // nothing to do here
 }
 
-LocatedEvent::LocatedEvent(const LocatedEvent& le) :
-   epoch       (le.epoch),
-   boundary    (le.boundary),
-   isEntry     (le.isEntry),
-   type        (le.type),
-   eventValue  (le.eventValue),
-   participants(le.participants),
-   partner     (NULL),
-   duration    (le.duration),
-   dataName    (le.dataName)
+LocatedEvent::LocatedEvent(const LocatedEvent& copy) :
+   start        (copy.start),
+   end          (copy.end),
+   duration     (copy.duration)
 {
 }
 
-LocatedEvent& LocatedEvent::operator=(const LocatedEvent& le)
+LocatedEvent& LocatedEvent::operator=(const LocatedEvent& copy)
 {
-   if (this != &le)
+   if (&copy != this)
    {
-      epoch        = le.epoch;
-      boundary     = le.boundary;
-      isEntry      = le.isEntry;
-      type         = le.type;
-      eventValue   = le.eventValue;
-      participants = le.participants;
-      partner      = NULL;
-      duration     = 0.0;
-      dataName     = le.dataName;
+      start     = copy.start;
+      end       = copy.end;
+      duration  = copy.duration;
    }
 
    return *this;
 }
+
+
+Real LocatedEvent::GetDuration()
+{
+   duration = (end - start) * GmatTimeConstants::SECS_PER_DAY;
+   return duration;
+}
+
+Real LocatedEvent::GetStart()
+{
+   return start;
+}
+
+Real LocatedEvent::GetEnd()
+{
+   return end;
+}
+
+//std::string LocatedEvent::GetReportString()
+//{
+//   // Abstract for now
+//}
+
+void LocatedEvent::SetStart(Real epoch1)
+{
+   start = epoch1;
+}
+
+void LocatedEvent::SetEnd(Real epoch2)
+{
+   end = epoch2;
+}
+

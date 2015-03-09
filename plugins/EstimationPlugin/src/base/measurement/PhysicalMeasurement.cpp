@@ -83,10 +83,10 @@ PhysicalMeasurement::~PhysicalMeasurement()
    if (troposphere != NULL)
       delete troposphere;
 
-   #ifdef IONOSPHERE
-      if (ionosphere != NULL)
-         delete ionosphere;
-   #endif
+   //#ifdef IONOSPHERE
+   //   if (ionosphere != NULL)
+   //      delete ionosphere;
+   //#endif
 }
 
 
@@ -115,10 +115,13 @@ PhysicalMeasurement::PhysicalMeasurement(const PhysicalMeasurement& pm) :
       troposphere = NULL;
 
    #ifdef IONOSPHERE
-      if (pm.ionosphere != NULL)
-         ionosphere = new Ionosphere(*(pm.ionosphere));
-      else
-         ionosphere = NULL;
+      //if (pm.ionosphere != NULL)                                                   // made changes by TUAN NGUYEN
+      //   ionosphere = new Ionosphere(*(pm.ionosphere));                            // made changes by TUAN NGUYEN
+      //else                                                                         // made changes by TUAN NGUYEN
+      //   ionosphere = NULL;                                                        // made changes by TUAN NGUYEN
+      ionosphere = pm.ionosphere;
+      //if (ionosphere == NULL)                                                           // made changes by TUAN NGUYEN
+      //   ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();   // made changes by TUAN NGUYEN
    #endif
 }
 
@@ -159,13 +162,16 @@ PhysicalMeasurement& PhysicalMeasurement::operator=(
          troposphere = NULL;
 
       #ifdef IONOSPHERE
-         if (ionosphere != NULL)
-            delete ionosphere;
+         //if (ionosphere != NULL)                                      // made changes by TUAN NGUYEN
+         //   delete ionosphere;                                        // made changes by TUAN NGUYEN
 
-         if (pm.ionosphere != NULL)
-            ionosphere = new Ionosphere(*(pm.ionosphere));
-         else
-            ionosphere = NULL;
+         //if (pm.ionosphere != NULL)                                   // made changes by TUAN NGUYEN
+         //   ionosphere = new Ionosphere(*(pm.ionosphere));            // made changes by TUAN NGUYEN
+         //else                                                         // made changes by TUAN NGUYEN
+         //   ionosphere = NULL;                                        // made changes by TUAN NGUYEN
+         ionosphere = pm.ionosphere;
+         //if (ionosphere == NULL)                                                           // made changes by TUAN NGUYEN
+         //   ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();   // made changes by TUAN NGUYEN
       #endif
    }
 
@@ -343,7 +349,9 @@ void PhysicalMeasurement::AddCorrection(const std::string& modelName,
 ///// TBD: Determine if there is a more generic way to add these
          // Create IRI2007 ionosphere correction model
          #ifdef IONOSPHERE
-            ionosphere = new Ionosphere(modelName);
+            // ionosphere = new Ionosphere(modelName);                                       // made changes by TUAN NGUYEN
+            if (ionosphere == NULL)                                                          // made changes by TUAN NGUYEN
+               ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();  // made changes by TUAN NGUYEN
          #else
             MessageInterface::ShowMessage("Ionosphere IRI2007 model currently is not "
                      "available.\nIt will be be added to GMAT in a future release.\n");
@@ -492,19 +500,18 @@ RealArray PhysicalMeasurement::TroposphereCorrection(Real freq, Real distance, R
 RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rvector3 r2B, Real epoch1, Real epoch2)
 {
    RealArray ionoCorrection;
-
    if (ionosphere != NULL)
    {
       // 0. Set ionosphere's ref objects
       ionosphere->SetSolarSystem(solarSystem);
-
+      
       // 1. Set wave length:
       Real wavelength = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / (freq*1.0e6);      // unit: meter
       ionosphere->SetWaveLength(wavelength);
-
+      
       // 2. Set time:
       ionosphere->SetTime(epoch1);                                                         // unit: Julian day
-
+      
       // 3. Set station and spacecraft positions:
       // Get Earthfixed coordinate system
       GroundstationInterface* gs    = (GroundstationInterface*)participants[0];
@@ -540,7 +547,7 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
 
       ionosphere->SetStationPosition(r1_ebf);                                 // unit: km
       ionosphere->SetSpacecraftPosition(r2_ebf);                              // unit: km
-
+      
       // 4. Set earth radius:
       SpacePoint* earth    = (SpacePoint*)gs->GetRefObject(Gmat::SPACE_POINT, "Earth");
       Real earthRadius    = earth->GetRealParameter("EquatorialRadius");
@@ -577,7 +584,6 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
       ionoCorrection.push_back(0.0);
       ionoCorrection.push_back(0.0);
    }
-
    return ionoCorrection;
 }
 #endif
@@ -603,14 +609,16 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
 
    RealArray mediaCorrection;
 
-   // 1. Run Troposphere correction:
+   // 1. Specify elevation angle before calculate media correction:
    UpdateRotationMatrix(epoch1, "o_j2k");                                    // calculate rotation matrix from j2k to o at time ground station transmits or reveives signal
    Rvector3 rangeVector = r2B - r1B;                                         // vector pointing from ground station to spacecraft in SSB FK5
    Real elevationAngle = asin((R_o_j2k*(rangeVector.GetUnitVector())).GetElement(2));       // unit: radian
-   //MessageInterface::ShowMessage("CalculateMediaCorrection():   elevationAngle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
+   // MessageInterface::ShowMessage("CalculateMediaCorrection():   elevationAngle = %.12lf degree\n", elevationAngle*GmatMathConstants::DEG_PER_RAD);
 
    if (elevationAngle > 0.0)
    {
+      // 2. Run Troposphere correction:
+      // MessageInterface::ShowMessage("Calculate Troposphere correction\n");
       mediaCorrection = TroposphereCorrection(freq, rangeVector.GetMagnitude(), elevationAngle);
 
       #ifdef DEBUG_MEASUREMENT_CORRECTION
@@ -619,10 +627,11 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       #endif
 
       #ifdef IONOSPHERE
-      // 2. Run Ionosphere correction:
+      // 3. Run Ionosphere correction:
+      // MessageInterface::ShowMessage("Calculate Ionosphere correction\n");
       RealArray ionoCorrection = this->IonosphereCorrection(freq, r1B, r2B, epoch1, epoch2);
 
-      // 3. Combine effects:
+      // 4. Combine effects:
       mediaCorrection[0] += ionoCorrection[0];
       mediaCorrection[1] += ionoCorrection[1];
       mediaCorrection[2] += ionoCorrection[2];
@@ -636,6 +645,9 @@ RealArray PhysicalMeasurement::CalculateMediaCorrection(Real freq, Rvector3 r1B,
       mediaCorrection.push_back(0.0);
    }
 
+   #ifdef DEBUG_MEDIA_CORRECTION
+      MessageInterface::ShowMessage("exit PhysicalMeasurement::CalculateMediaCorrection()\n");
+   #endif
    return mediaCorrection;
 }
 

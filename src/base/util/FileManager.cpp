@@ -54,6 +54,7 @@
 //#define DEBUG_STARTUP_WITH_ABSOLUTE_PATH
 //#define DEBUG_BIN_DIR
 //#define DEBUG_TEXTURE_FILE
+//#define DEBUG_3DMODEL_FILE
 //#define DEBUG_FIND_PATH
 //#define DEBUG_FIND_INPUT_PATH
 //#define DEBUG_FIND_OUTPUT_PATH
@@ -83,12 +84,13 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "MARS_POT_PATH",
    "OTHER_POT_PATH",
    "TEXTURE_PATH",
+   "BODY_MODEL_PATH",
    "MEASUREMENT_PATH",
    "GUI_CONFIG_PATH",
    "SPLASH_PATH",
    "ICON_PATH",
    "STAR_PATH",
-   "MODEL_PATH",
+   "VEHICLE_MODEL_PATH",
    "SPAD_PATH",
    "ATMOSPHERE_PATH",
    
@@ -1637,7 +1639,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    // write the VEHICLE_EPHEM_SPK_PATH and files next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
-   MessageInterface::ShowMessage("   .....Writing MODEL_PATH path\n");
+   MessageInterface::ShowMessage("   .....Writing VEHICLE_EPHEM_SPK_PATH path\n");
    #endif
    outStream << std::setw(22) << "VEHICLE_EPHEM_SPK_PATH" << " = "
              << mPathMap["VEHICLE_EPHEM_SPK_PATH"] << "\n";
@@ -1645,16 +1647,16 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    mPathWrittenOuts.push_back("VEHICLE_EPHEM_SPK_PATH");
    
    //---------------------------------------------
-   // write the MODEL_PATH and files next
+   // write the VEHICLE_MODEL_PATH and files next
    //---------------------------------------------
    #ifdef DEBUG_WRITE_STARTUP_FILE
-   MessageInterface::ShowMessage("   .....Writing MODEL_PATH path\n");
+   MessageInterface::ShowMessage("   .....Writing VEHICLE_MODEL_PATH path\n");
    #endif
-   outStream << std::setw(22) << "MODEL_PATH" << " = "
-             << mPathMap["MODEL_PATH"] << "\n";
+   outStream << std::setw(22) << "VEHICLE_MODEL_PATH" << " = "
+             << mPathMap["VEHICLE_MODEL_PATH"] << "\n";
    WriteFiles(outStream, "SPACECRAFT_MODEL_FILE");
    outStream << "#-----------------------------------------------------------\n";
-   mPathWrittenOuts.push_back("MODEL_PATH");
+   mPathWrittenOuts.push_back("VEHICLE_MODEL_PATH");
    
    //---------------------------------------------
    // write the HELP_FILE next
@@ -1831,6 +1833,117 @@ bool FileManager::GetTextureMapFile(const std::string &inFileName, const std::st
 
 
 //------------------------------------------------------------------------------
+// bool GetBody3dModelFile(const std::string &inFileName, const std::string &bodyName,
+//                         const std::string &objName, std::string &outFileName,
+//                         std::string &outFullPathName, bool writeWarning)
+//------------------------------------------------------------------------------
+bool FileManager::GetBody3dModelFile(const std::string &inFileName, const std::string &bodyName,
+                                     const std::string &objName, std::string &outFileName,
+                                     std::string &outFullPathName, bool writeWarning)
+{
+   #ifdef DEBUG_3DMODEL_FILE
+   MessageInterface::ShowMessage
+      ("\nFileManager::GetBody3dModelFile() entered\n   inFileName = '%s'\n   "
+       "bodyName = '%s', objName = '%s', writeWarning = %d\n", inFileName.c_str(),
+       bodyName.c_str(), objName.c_str(), writeWarning);
+   #endif
+   
+   bool retval = true;
+   std::string actualFile = inFileName;
+   std::string fullPath;
+   std::string modelFileType = GmatStringUtil::ToUpper(bodyName) + "3D_MODEL_FILE";
+   mLastFilePathMessage = "";
+   bool writeInfo = false;
+   
+   outFileName = inFileName;
+   
+   #ifdef DEBUG_3DMODEL_FILE
+   MessageInterface::ShowMessage("   actualFile  = '%s'\n", actualFile.c_str());
+   MessageInterface::ShowMessage("   modelFileType = '%s'\n", modelFileType.c_str());
+   #endif
+   
+   try
+   {
+      if (inFileName == "")
+         actualFile = GetFilename(modelFileType);
+      
+      fullPath =
+         FindPath(actualFile, modelFileType, true, writeWarning, writeInfo, objName);
+      
+      #ifdef DEBUG_3DMODEL_FILE
+      MessageInterface::ShowMessage("   actualFile = '%s'\n", actualFile.c_str());
+      MessageInterface::ShowMessage("   fullPath   = '%s'\n", fullPath.c_str());
+      #endif
+      
+      // If fullPath is blank, try with BODY_3D_MODEL_PATH since non-standard bodies'
+      // 3d file may not be available such as SOMECOMET1_3D_MODEL_FILE
+      if (fullPath == "")
+      {
+         fullPath = 
+            FindPath(actualFile, "BODY_3D_MODEL_PATH", true, false, writeInfo, objName);
+      }
+      
+      if (fullPath == "")
+      {
+         if (inFileName == "")
+         {
+            mLastFilePathMessage = GetLastFilePathMessage() + ", so using " + actualFile + ".";
+         }
+         else
+         {
+            mLastFilePathMessage = GetLastFilePathMessage();
+            retval = false;
+         }
+      }
+      else if (inFileName == "")
+      {
+         outFileName = actualFile;
+         std::string msg = "*** WARNING *** There is no 3D model file "
+            "specified for " + objName + ", so using " + actualFile;
+         mLastFilePathMessage = msg;
+         if (writeWarning)
+            MessageInterface::ShowMessage(msg + "\n");
+      }
+      
+      outFullPathName = fullPath;
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_3DMODEL_FILE
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+      #endif
+      if (inFileName == "")
+      {
+         actualFile = "";
+         std::string msg = "*** WARNING *** There is no 3d model file "
+            "specified for " + objName + ", so using " + actualFile;
+         mLastFilePathMessage = msg;
+         if (writeWarning)
+            MessageInterface::ShowMessage(msg + "\n");
+         fullPath = 
+            FileManager::Instance()->FindPath(actualFile, "BODY_3D_MODEL_PATH", true, false,
+                                              writeInfo, objName);
+         outFileName = actualFile;
+         outFullPathName = fullPath;
+      }
+      else
+      {
+         outFullPathName = "";
+         retval = false;
+      }
+   }
+   
+   #ifdef DEBUG_3DMODEL_FILE
+   MessageInterface::ShowMessage
+      ("   outFileName = '%s'\n   outFullPathName = '%s'\n   mLastFilePathMessage = '%s'\n",
+       outFileName.c_str(), outFullPathName.c_str(), mLastFilePathMessage.c_str());
+   MessageInterface::ShowMessage("FileManager::GetBody3dModelFile() returnng %d\n\n", retval);
+   #endif
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetPathname(const FileType type)
 //------------------------------------------------------------------------------
 /**
@@ -1900,6 +2013,10 @@ std::string FileManager::GetPathname(const std::string &typeName)
    
    if (nameFound)
    {
+      #ifdef DEBUG_FILE_PATH
+      MessageInterface::ShowMessage("   pathname = '%s'\n", pathname.c_str());
+      #endif
+      
       // Replace relative path with absolute path
       std::string abspath = ConvertToAbsPath(pathname);
       
@@ -1988,7 +2105,7 @@ std::string FileManager::GetFilename(const std::string &typeName)
       MessageInterface::ShowMessage
          ("FileManager::GetFilename() returning '%s'\n", name.c_str());
       #endif
-      return name;
+      return name;
    }
    
    throw UtilityException("FileManager::GetFilename() file type: " + typeName +
@@ -3116,8 +3233,8 @@ void FileManager::RefreshFiles()
    AddFileType("CONSTELLATION_FILE", "STAR_PATH/inp_Constellation.txt");
    
    // models
-   AddFileType("MODEL_PATH", "DATA_PATH/vehicle/models/");
-   AddFileType("SPACECRAFT_MODEL_FILE", "MODEL_PATH/aura.3ds");
+   AddFileType("VEHICLE_MODEL_PATH", "DATA_PATH/vehicle/models/");
+   AddFileType("SPACECRAFT_MODEL_FILE", "VEHICLE_MODEL_PATH/aura.3ds");
    
    // help file
    AddFileType("HELP_FILE", "");

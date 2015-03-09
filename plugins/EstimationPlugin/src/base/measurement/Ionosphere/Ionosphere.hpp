@@ -300,5 +300,22 @@ private:
    static const Real NUM_OF_INTERVALS;
    static const Real IONOSPHERE_MAX_ATTITUDE;             // made changes by TUAN NGUYEN
 };
+
+
+class IonosphereCorrectionModel
+{
+public:
+   static IonosphereCorrectionModel* Instance(); 
+   Ionosphere* GetIonosphereInstance();
+
+private:
+   IonosphereCorrectionModel();
+   virtual ~IonosphereCorrectionModel();
+
+   static IonosphereCorrectionModel* instance;
+   Ionosphere* ionosphereObj;
+};
+
+
 #endif //Ionosphere_hpp_
 

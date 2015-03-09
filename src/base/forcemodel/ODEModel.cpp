@@ -88,7 +88,8 @@
 //#define DEBUG_DERIVATIVES_FOR_SPACECRAFT
 //#define DEBUG_SATELLITE_PARAMETER_UPDATES
 //#define DEBUG_FORMATION_PROPERTIES
-
+//#define DEBUG_NAN_CONDITIONS
+ 
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
 //#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
@@ -2551,6 +2552,14 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
       for (Integer j = 0; j < dimension; ++j)
       {
+         #ifdef DEBUG_NAN_CONDITIONS
+            if (GmatMathUtil::IsNaN(ddt[j]))
+               MessageInterface::ShowMessage("NAN found in derivative for %s "
+                     "force element %d, Value is %lf\n",
+                     (*i)->GetTypeName().c_str(), j, ddt[j]);
+
+         #endif
+
          deriv[j] += ddt[j];
          #ifdef DEBUG_ODEMODEL_EXE
             MessageInterface::ShowMessage(" %16.14le ", ddt[j]);

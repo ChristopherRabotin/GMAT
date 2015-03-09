@@ -58,15 +58,16 @@ GroundStation::PARAMETER_TEXT[GroundStationParamCount - BodyFixedPointParamCount
       "Pressure",               // hPa
       "Humidity",               // percentage
       "MinimumElevationAngle",  // degree
-      "RangeNoiseSigma",               // RANGE_NOISESIGMA
-      "RangeErrorModel",               // RANGE_ERRORMODEL
-      "DSNRangeNoiseSigma",            // DSNRANGE_NOISESIGMA
-      "DSNRangeErrorModel",            // DSNRANGE_ERRORMODEL
-      "DopplerNoiseSigma",             // DOPPLER_NOISESIGMA
-      "DopplerErrorModel",             // DOPPLER_ERRORMODEL
-      "RangeBias",                     // RANGE_BIAS
-      "DSNRangeBias",                  // DSNRANGE_BIAS
-      "DopplerBias",                   // DOPPLER_BIAS
+      "ErrorModels",                   // ERROR_MODELS                    // made changes by TUAN NGUYEN
+      //"RangeNoiseSigma",               // RANGE_NOISESIGMA
+      //"RangeErrorModel",               // RANGE_ERRORMODEL
+      //"DSNRangeNoiseSigma",            // DSNRANGE_NOISESIGMA
+      //"DSNRangeErrorModel",            // DSNRANGE_ERRORMODEL
+      //"DopplerNoiseSigma",             // DOPPLER_NOISESIGMA
+      //"DopplerErrorModel",             // DOPPLER_ERRORMODEL
+      //"RangeBias",                     // RANGE_BIAS
+      //"DSNRangeBias",                  // DSNRANGE_BIAS
+      //"DopplerBias",                   // DOPPLER_BIAS
    };
 
 const Gmat::ParameterType
@@ -81,15 +82,16 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
       Gmat::REAL_TYPE,      // Pressure
       Gmat::REAL_TYPE,      // Humidity
       Gmat::REAL_TYPE,      // MinimumElevationAngle
-      Gmat::REAL_TYPE,             // RANGE_NOISESIGMA
-      Gmat::STRING_TYPE,           // RANGE_ERROR_MODEL
-      Gmat::REAL_TYPE,             // DSNRANGE_NOISESIGMA
-      Gmat::STRING_TYPE,           // DSNRANGE_ERROR_MODEL
-      Gmat::REAL_TYPE,             // DOPPLER_NOISESIGMA
-      Gmat::STRING_TYPE,           // DOPPLER_ERROR_MODEL
-      Gmat::REAL_TYPE,             // RANGE_BIAS
-      Gmat::REAL_TYPE,             // DSNRANGE_BIAS
-      Gmat::REAL_TYPE,             // DOPPLER_BIAS
+      Gmat::OBJECTARRAY_TYPE,      // ERROR_MODEL                          // made changes by TUAN NGUYEN
+      //Gmat::REAL_TYPE,             // RANGE_NOISESIGMA
+      //Gmat::STRING_TYPE,           // RANGE_ERROR_MODEL
+      //Gmat::REAL_TYPE,             // DSNRANGE_NOISESIGMA
+      //Gmat::STRING_TYPE,           // DSNRANGE_ERROR_MODEL
+      //Gmat::REAL_TYPE,             // DOPPLER_NOISESIGMA
+      //Gmat::STRING_TYPE,           // DOPPLER_ERROR_MODEL
+      //Gmat::REAL_TYPE,             // RANGE_BIAS
+      //Gmat::REAL_TYPE,             // DSNRANGE_BIAS
+      //Gmat::REAL_TYPE,             // DOPPLER_BIAS
    };
 
 
@@ -116,15 +118,17 @@ GroundStation::GroundStation(const std::string &itsName) :
    humidity                  (55.0),                 // 55%
    dataSource                ("Constant"),
    minElevationAngle         (7.0),                  // 7 degree
-   rangeNoiseSigma           (1.0),                  // 1 Km
-   rangeErrorModel           ("RandomConstant"),
-   dsnrangeNoiseSigma        (1.0),                  // 1 RU
-   dsnrangeErrorModel        ("RandomConstant"),
-   dopplerNoiseSigma         (1.0),                  // 1 Hz
-   dopplerErrorModel         ("RandomConstant"),
-   rangeBias                 (0.0),                  // unit: km
-   dsnrangeBias              (0.0),                  // unit: RU
-   dopplerBias               (0.0),                  // unit: Hz
+
+   //rangeNoiseSigma           (1.0),                  // 1 Km            // This will be removed when code for ErrorModel is completed
+   //rangeErrorModel           ("RandomConstant"),                        // This will be removed when code for ErrorModel is completed
+   //dsnrangeNoiseSigma        (1.0),                  // 1 RU            // This will be removed when code for ErrorModel is completed
+   //dsnrangeErrorModel        ("RandomConstant"),                        // This will be removed when code for ErrorModel is completed
+   //dopplerNoiseSigma         (1.0),                  // 1 Hz            // This will be removed when code for ErrorModel is completed
+   //dopplerErrorModel         ("RandomConstant"),                        // This will be removed when code for ErrorModel is completed
+   //rangeBias                 (0.0),                  // unit: km        // This will be removed when code for ErrorModel is completed
+   //dsnrangeBias              (0.0),                  // unit: RU        // This will be removed when code for ErrorModel is completed
+   //dopplerBias               (0.0),                  // unit: Hz        // This will be removed when code for ErrorModel is completed
+
    troposphereModel          ("None"),
    ionosphereModel           ("None")
 {
@@ -153,7 +157,14 @@ GroundStation::~GroundStation()
 {
    // delete all hardware
    for (UnsignedInt i = 0; i < hardwareList.size(); ++i)
-      delete hardwareList[i];
+      if (hardwareList[i] != NULL)                          // made changes by TUAN NGUYEN
+         delete hardwareList[i];
+
+   // delete all error models                               // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < errorModels.size(); ++i)     // made changes by TUAN NGUYEN
+      if (errorModels[i] != NULL)                           // made changes by TUAN NGUYEN
+         delete errorModels[i];                             // made changes by TUAN NGUYEN
+
 }
 
 //---------------------------------------------------------------------------
@@ -174,15 +185,19 @@ GroundStation::GroundStation(const GroundStation& gs) :
    humidity              (gs.humidity),
    dataSource            (gs.dataSource),
    minElevationAngle     (gs.minElevationAngle),
-   rangeNoiseSigma       (gs.rangeNoiseSigma),
-   rangeErrorModel       (gs.rangeErrorModel),
-   dsnrangeNoiseSigma    (gs.dsnrangeNoiseSigma),
-   dsnrangeErrorModel    (gs.dsnrangeErrorModel),
-   dopplerNoiseSigma     (gs.dopplerNoiseSigma),
-   dopplerErrorModel     (gs.dopplerErrorModel),
-   rangeBias             (gs.rangeBias),
-   dsnrangeBias          (gs.dsnrangeBias),
-   dopplerBias           (gs.dopplerBias),
+
+   errorModelNames       (gs.errorModelNames),             // made changes by TUAN NGUYEN
+
+   //rangeNoiseSigma       (gs.rangeNoiseSigma),             // This will be removed when code for ErrorModel is completed
+   //rangeErrorModel       (gs.rangeErrorModel),             // This will be removed when code for ErrorModel is completed
+   //dsnrangeNoiseSigma    (gs.dsnrangeNoiseSigma),          // This will be removed when code for ErrorModel is completed
+   //dsnrangeErrorModel    (gs.dsnrangeErrorModel),          // This will be removed when code for ErrorModel is completed
+   //dopplerNoiseSigma     (gs.dopplerNoiseSigma),           // This will be removed when code for ErrorModel is completed
+   //dopplerErrorModel     (gs.dopplerErrorModel),           // This will be removed when code for ErrorModel is completed
+   //rangeBias             (gs.rangeBias),                   // This will be removed when code for ErrorModel is completed
+   //dsnrangeBias          (gs.dsnrangeBias),                // This will be removed when code for ErrorModel is completed
+   //dopplerBias           (gs.dopplerBias),                 // This will be removed when code for ErrorModel is completed
+   
    ionosphereModel       (gs.ionosphereModel),
    troposphereModel      (gs.troposphereModel)
 {
@@ -230,18 +245,23 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
       dataSource      = gs.dataSource;
 
       minElevationAngle  = gs.minElevationAngle;
-      rangeNoiseSigma    = gs.rangeNoiseSigma;
-      rangeErrorModel    = gs.rangeErrorModel;
-      dsnrangeNoiseSigma = gs.dsnrangeNoiseSigma;
-      dsnrangeErrorModel = gs.dsnrangeErrorModel;
-      dopplerNoiseSigma  = gs.dopplerNoiseSigma;
-      dopplerErrorModel  = gs.dopplerErrorModel;
-      rangeBias          = gs.rangeBias;
-      dsnrangeBias       = gs.dsnrangeBias;
-      dopplerBias        = gs.dopplerBias;
+
+      errorModelNames    = gs.errorModelNames;                // made changes by TUAN NGUYEN
+
+      //rangeNoiseSigma    = gs.rangeNoiseSigma;                // This will be removed when code for ErrorModel is completed
+      //rangeErrorModel    = gs.rangeErrorModel;                // This will be removed when code for ErrorModel is completed
+      //dsnrangeNoiseSigma = gs.dsnrangeNoiseSigma;             // This will be removed when code for ErrorModel is completed
+      //dsnrangeErrorModel = gs.dsnrangeErrorModel;             // This will be removed when code for ErrorModel is completed
+      //dopplerNoiseSigma  = gs.dopplerNoiseSigma;              // This will be removed when code for ErrorModel is completed
+      //dopplerErrorModel  = gs.dopplerErrorModel;              // This will be removed when code for ErrorModel is completed
+      //rangeBias          = gs.rangeBias;                      // This will be removed when code for ErrorModel is completed
+      //dsnrangeBias       = gs.dsnrangeBias;                   // This will be removed when code for ErrorModel is completed
+      //dopplerBias        = gs.dopplerBias;                    // This will be removed when code for ErrorModel is completed
 
       troposphereModel  = gs.troposphereModel;
       ionosphereModel   = gs.ionosphereModel;
+
+	  minElevationAngle = gs.minElevationAngle;
    }
 
    return *this;
@@ -300,6 +320,12 @@ GmatBase* GroundStation::Clone() const
 //------------------------------------------------------------------------------
 Integer GroundStation::GetParameterID(const std::string & str) const
 {
+   //if ((str == "RangeErrorModel")||(str == "DSNRangeErrorModel")||(str == "DopplerErrorModel")||
+   //    (str == "RangeBias")||(str == "DSNRangeBias")||(str == "DopplerBias")||
+   //    (str == "RangeNoiseSigma")||(str == "DSNRangeNoiseSigma")||(str == "DopplerNoiseSigma")
+   //   )
+   //   throw GmatBaseException("Error: GroundStation has no parameter with name '" + str + "'\n");
+
    for (Integer i = BodyFixedPointParamCount; i < GroundStationParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - BodyFixedPointParamCount])
@@ -441,14 +467,14 @@ std::string GroundStation::GetStringParameter(const Integer id) const
    if (id == DATA_SOURCE)
       return dataSource;
 
-   if (id == RANGE_ERRORMODEL)
-      return rangeErrorModel;
+   //if (id == RANGE_ERRORMODEL)                 // This will be removed when code for ErrorModel is completed
+   //   return rangeErrorModel;                  // This will be removed when code for ErrorModel is completed
 
-   if (id == DSNRANGE_ERRORMODEL)
-      return dsnrangeErrorModel;
+   //if (id == DSNRANGE_ERRORMODEL)              // This will be removed when code for ErrorModel is completed
+   //   return dsnrangeErrorModel;               // This will be removed when code for ErrorModel is completed
 
-   if (id == DOPPLER_ERRORMODEL)
-      return dopplerErrorModel;
+   //if (id == DOPPLER_ERRORMODEL)               // This will be removed when code for ErrorModel is completed
+   //   return dopplerErrorModel;                // This will be removed when code for ErrorModel is completed
 
    return GroundstationInterface::GetStringParameter(id);
 }
@@ -524,29 +550,41 @@ bool GroundStation::SetStringParameter(const Integer id,
       return true;
    }
 
-   if (id == RANGE_ERRORMODEL)
-   {
-      if (value != "RandomConstant")
-         throw GmatBaseException("Error: '"+ value + "' is invalid value for " + GetName() + ".RangeErrorModel\n");
-      rangeErrorModel = value;
-      return true;
-   }
+   if (id == ERROR_MODELS)                                                      // made changes by TUAN NGUYEN
+   {                                                                            // made changes by TUAN NGUYEN
+      // Only add error model if it is not in the list already                  // made changes by TUAN NGUYEN
+      if (find(errorModelNames.begin(), errorModelNames.end(), value) ==        // made changes by TUAN NGUYEN
+                  errorModelNames.end())                                        // made changes by TUAN NGUYEN
+      {                                                                         // made changes by TUAN NGUYEN
+         errorModelNames.push_back(value);                                      // made changes by TUAN NGUYEN
+      }                                                                         // made changes by TUAN NGUYEN
+      return true;                                                              // made changes by TUAN NGUYEN
+   }                                                                            // made changes by TUAN NGUYEN
 
-   if (id == DSNRANGE_ERRORMODEL)
-   {
-      if (value != "RandomConstant")
-         throw GmatBaseException("Error: '"+ value + "' is invalid value for " + GetName() + ".DSNRangeErrorModel\n");
-      dsnrangeErrorModel = value;
-      return true;
-   }
+   //// @todo: This section will be removed when code for ErrorModel is completed
+   //if (id == RANGE_ERRORMODEL)
+   //{                                                                                                                    
+   //   if (value != "RandomConstant")
+   //      throw GmatBaseException("Error: '"+ value + "' is invalid value for " + GetName() + ".RangeErrorModel\n");
+   //   rangeErrorModel = value;
+   //   return true;
+   //}
 
-   if (id == DOPPLER_ERRORMODEL)
-   {
-      if (value != "RandomConstant")
-         throw GmatBaseException("Error: '" + value + "' is invalid value for " + GetName() + ".DopplerErrorModel\n");
-      dopplerErrorModel = value;
-      return true;
-   }
+   //if (id == DSNRANGE_ERRORMODEL)
+   //{
+   //   if (value != "RandomConstant")
+   //      throw GmatBaseException("Error: '"+ value + "' is invalid value for " + GetName() + ".DSNRangeErrorModel\n");
+   //   dsnrangeErrorModel = value;
+   //   return true;
+   //}
+
+   //if (id == DOPPLER_ERRORMODEL)
+   //{
+   //   if (value != "RandomConstant")
+   //      throw GmatBaseException("Error: '" + value + "' is invalid value for " + GetName() + ".DopplerErrorModel\n");
+   //   dopplerErrorModel = value;
+   //   return true;
+   //}
 
 
    return GroundstationInterface::SetStringParameter(id, value);
@@ -612,12 +650,19 @@ std::string GroundStation::GetStringParameter(const Integer id,
    switch (id)
    {
       case ADD_HARDWARE:
-      {
          if ((0 <= index)&&(index < (Integer)hardwareNames.size()))
             return hardwareNames[index];
          else
             return "";
-      }
+         break;
+
+      case ERROR_MODELS:
+         if ((0 <= index)&&(index < (Integer)errorModelNames.size()))
+            return errorModelNames[index];
+         else
+            return "";
+         break;
+
       default:
          break;      // intentional drop through
    }
@@ -696,10 +741,18 @@ bool GroundStation::SetStringParameter(const Integer id,
       if (find(hardwareNames.begin(), hardwareNames.end(), value) ==
                   hardwareNames.end())
       {
-         //hardwareNames[index] = value;      // This line causes system collapse due to index beyond array's size
          hardwareNames.push_back(value);
       }
       return true;
+
+   case ERROR_MODELS:                                                           // made changes by TUAN NGUYEN
+      // Only add the error model if it is not in the list already              // made changes by TUAN NGUYEN
+      if (find(errorModelNames.begin(), errorModelNames.end(), value) ==        // made changes by TUAN NGUYEN
+                  errorModelNames.end())                                        // made changes by TUAN NGUYEN
+      {                                                                         // made changes by TUAN NGUYEN
+         errorModelNames.push_back(value);                                      // made changes by TUAN NGUYEN
+      }                                                                         // made changes by TUAN NGUYEN
+      return true;                                                              // made changes by TUAN NGUYEN
 
    default:
       break;      // intentional drop through
@@ -724,6 +777,9 @@ const StringArray& GroundStation::GetStringArrayParameter(const Integer id) cons
 {
    if (id == ADD_HARDWARE)
       return hardwareNames;
+
+   if (id == ERROR_MODELS)                                                // made changes by TUAN NGUYEN
+      return errorModelNames;                                             // made changes by TUAN NGUYEN
 
    return GroundstationInterface::GetStringArrayParameter(id);
 }
@@ -771,23 +827,23 @@ Real GroundStation::GetRealParameter(const Integer id) const
    if (id == MINIMUM_ELEVATION_ANGLE)
       return minElevationAngle;
 
-   if (id == RANGE_NOISESIGMA)
-      return rangeNoiseSigma;
+   //if (id == RANGE_NOISESIGMA)                       // This will be removed when code for ErrorModel is completed
+   //   return rangeNoiseSigma;                        // This will be removed when code for ErrorModel is completed
 
-   if (id == DSNRANGE_NOISESIGMA)
-      return dsnrangeNoiseSigma;
+   //if (id == DSNRANGE_NOISESIGMA)                    // This will be removed when code for ErrorModel is completed
+   //   return dsnrangeNoiseSigma;                     // This will be removed when code for ErrorModel is completed
 
-   if (id == DOPPLER_NOISESIGMA)
-      return dopplerNoiseSigma;
+   //if (id == DOPPLER_NOISESIGMA)                     // This will be removed when code for ErrorModel is completed
+   //   return dopplerNoiseSigma;                      // This will be removed when code for ErrorModel is completed
 
-   if (id == RANGE_BIAS)
-      return rangeBias;
+   //if (id == RANGE_BIAS)                             // This will be removed when code for ErrorModel is completed
+   //   return rangeBias;                              // This will be removed when code for ErrorModel is completed
 
-   if (id == DSNRANGE_BIAS)
-      return dsnrangeBias;
+   //if (id == DSNRANGE_BIAS)                          // This will be removed when code for ErrorModel is completed
+   //   return dsnrangeBias;                           // This will be removed when code for ErrorModel is completed
 
-   if (id == DOPPLER_BIAS)
-      return dopplerBias;
+   //if (id == DOPPLER_BIAS)                           // This will be removed when code for ErrorModel is completed
+   //   return dopplerBias;                            // This will be removed when code for ErrorModel is completed
 
    return GroundstationInterface::GetRealParameter(id);
 }
@@ -838,60 +894,62 @@ Real GroundStation::SetRealParameter(const Integer id,
       return minElevationAngle;
    }
    
-   if (id == RANGE_NOISESIGMA)
-   {
-      if (value <= 0.0)
-      {
-         std::stringstream ss;
-         ss << "Error: value of " << GetName() << ".RangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
-         throw GmatBaseException(ss.str());
-      }
-      rangeNoiseSigma = value;
-      return rangeNoiseSigma;
-   }
 
-   if (id == DSNRANGE_NOISESIGMA)
-   {
-      if (value <= 0.0)
-      {
-         std::stringstream ss;
-         ss << "Error: value of " << GetName() << ".DSNRangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
-         throw GmatBaseException(ss.str());
-      }
-      dsnrangeNoiseSigma = value;
-      return dsnrangeNoiseSigma;
-   }
+   //// @todo: This section will be removed when code for ErrorModel is completed
+   //if (id == RANGE_NOISESIGMA)
+   //{
+   //   if (value <= 0.0)
+   //   {
+   //      std::stringstream ss;
+   //      ss << "Error: value of " << GetName() << ".RangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
+   //      throw GmatBaseException(ss.str());
+   //   }
+   //   rangeNoiseSigma = value;
+   //   return rangeNoiseSigma;
+   //}
 
-   if (id == DOPPLER_NOISESIGMA)
-   {
-      if (value <= 0.0)
-      {
-         std::stringstream ss;
-         ss << "Error: value of " << GetName() << ".DopplerNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
-         throw GmatBaseException(ss.str());
-      }
-      dopplerNoiseSigma = value;
-      return dopplerNoiseSigma;
-   }
+   //if (id == DSNRANGE_NOISESIGMA)
+   //{
+   //   if (value <= 0.0)
+   //   {
+   //      std::stringstream ss;
+   //      ss << "Error: value of " << GetName() << ".DSNRangeNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
+   //      throw GmatBaseException(ss.str());
+   //   }
+   //   dsnrangeNoiseSigma = value;
+   //   return dsnrangeNoiseSigma;
+   //}
+
+   //if (id == DOPPLER_NOISESIGMA)
+   //{
+   //   if (value <= 0.0)
+   //   {
+   //      std::stringstream ss;
+   //      ss << "Error: value of " << GetName() << ".DopplerNoiseSigma (" << value << ") is invalid. It value should be a positive number.\n";
+   //      throw GmatBaseException(ss.str());
+   //   }
+   //   dopplerNoiseSigma = value;
+   //   return dopplerNoiseSigma;
+   //}
 
 
-   if (id == RANGE_BIAS)
-   {
-      rangeBias = value;
-      return rangeBias;
-   }
+   //if (id == RANGE_BIAS)
+   //{
+   //   rangeBias = value;
+   //   return rangeBias;
+   //}
 
-   if (id == DSNRANGE_BIAS)
-   {
-      dsnrangeBias = value;
-      return dsnrangeBias;
-   }
+   //if (id == DSNRANGE_BIAS)
+   //{
+   //   dsnrangeBias = value;
+   //   return dsnrangeBias;
+   //}
 
-   if (id == DOPPLER_BIAS)
-   {
-      dopplerBias = value;
-      return dopplerBias;
-   }
+   //if (id == DOPPLER_BIAS)
+   //{
+   //   dopplerBias = value;
+   //   return dopplerBias;
+   //}
 
 
    return GroundstationInterface::SetRealParameter(id, value);
@@ -918,8 +976,9 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
-   if (type == Gmat::HARDWARE)
-   {
+   switch (type)                                            // made changes by TUAN NGUYEN
+   {                                                        // made changes by TUAN NGUYEN
+   case Gmat::HARDWARE:                                     // made changes by TUAN NGUYEN
       for (UnsignedInt i=0; i<hardwareNames.size(); i++)
       {
          if (hardwareNames[i] == oldName)
@@ -929,6 +988,19 @@ bool GroundStation::RenameRefObject(const Gmat::ObjectType type,
          }
       }
       return true;
+      break;
+
+   case Gmat::ERROR_MODEL:                                  // made changes by TUAN NGUYEN
+      for (UnsignedInt i=0; i<errorModelNames.size(); i++)  // made changes by TUAN NGUYEN
+      {                                                     // made changes by TUAN NGUYEN
+         if (errorModelNames[i] == oldName)                 // made changes by TUAN NGUYEN
+         {                                                  // made changes by TUAN NGUYEN
+            errorModelNames[i] = newName;                   // made changes by TUAN NGUYEN
+            break;                                          // made changes by TUAN NGUYEN
+         }                                                  // made changes by TUAN NGUYEN
+      }                                                     // made changes by TUAN NGUYEN
+      return true;                                          // made changes by TUAN NGUYEN
+      break;                                                // made changes by TUAN NGUYEN
    }
 
    return GroundstationInterface::RenameRefObject(type, oldName, newName);
@@ -958,22 +1030,36 @@ GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
    static StringArray retval;
    retval.clear();
 
-   switch(type)
+   // for hardware
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::HARDWARE))
    {
-      case Gmat::UNKNOWN_OBJECT:
-      case Gmat::HARDWARE:
-         retval = hardwareNames;
-         if (type == Gmat::HARDWARE)
-            break;
-
-      default:
-         break;
+      // Add all hardware names to retval array
+      for (UnsignedInt i = 0; i < hardwareNames.size(); ++i)
+      {
+         if (find(retval.begin(), retval.end(), hardwareNames[i]) == retval.end())        // made changes by TUAN NGUYEN
+            retval.push_back(hardwareNames[i]);
+      }
    }
+   
+   // for error model
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))                       // made changes by TUAN NGUYEN
+   {                                                                                      // made changes by TUAN NGUYEN
+      // Add all error model names to retval array                                        // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < errorModelNames.size(); ++i)                            // made changes by TUAN NGUYEN
+      {                                                                                   // made changes by TUAN NGUYEN
+         if (find(retval.begin(), retval.end(), errorModelNames[i]) == retval.end())      // made changes by TUAN NGUYEN
+            retval.push_back(errorModelNames[i]);                                         // made changes by TUAN NGUYEN
+      }                                                                                   // made changes by TUAN NGUYEN
+   }                                                                                      // made changes by TUAN NGUYEN
+
 
    // Now pick up the objects that the base classes need
    StringArray baseNames = GroundstationInterface::GetRefObjectNameArray(type);
    for (UnsignedInt i = 0; i < baseNames.size(); ++i)
-      retval.push_back(baseNames[i]);
+   {
+      if (find(retval.begin(), retval.end(), baseNames[i]) == retval.end())              // made changes by TUAN NGUYEN
+         retval.push_back(baseNames[i]);
+   }
 
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage("Groundstation Ref Object Name Array:\n");
@@ -1001,21 +1087,26 @@ GroundStation::GetRefObjectNameArray(const Gmat::ObjectType type)
 GmatBase* GroundStation::GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name)
 {
-   switch (type)
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::HARDWARE))
    {
-      case Gmat::UNKNOWN_OBJECT:
-      case Gmat::HARDWARE:
-       for(ObjectArray::iterator i = hardwareList.begin();
+      for(ObjectArray::iterator i = hardwareList.begin();
                i < hardwareList.end(); ++i)
-       {
-          if ((*i)->GetName() == name)
+      {
+         if ((*i)->GetName() == name)
             return (*i);
-       }
-       break;
-
-      default:
-        break;
+      }
    }
+
+   if ((type == Gmat::UNKNOWN_OBJECT)||(type == Gmat::ERROR_MODEL))                 // made changes by TUAN NGUYEN
+   {                                                                                // made changes by TUAN NGUYEN
+      for(ObjectArray::iterator i = errorModels.begin();                            // made changes by TUAN NGUYEN
+               i < errorModels.end(); ++i)                                          // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         if ((*i)->GetName() == name)                                               // made changes by TUAN NGUYEN
+            return (*i);                                                            // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+   }                                                                                // made changes by TUAN NGUYEN
+
    return GroundstationInterface::GetRefObject(type, name);
 }
 
@@ -1045,8 +1136,9 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    if (obj == NULL)
       return false;
 
-   if (type == Gmat::HARDWARE)   // work for hardware
-   {
+   switch (type)                                                                           // made changes by TUAN NGUYEN
+   {                                                                                       // made changes by TUAN NGUYEN
+   case Gmat::HARDWARE:   // work for hardware                                             // made changes by TUAN NGUYEN
       if (obj->GetType() == Gmat::HARDWARE)
       {
          // Don't add if it's already there
@@ -1065,8 +1157,30 @@ bool GroundStation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          }
          return true;
       }
-
       return false;      // <-- throw here; It was supposed to be hardware, but isn't.
+      break;
+
+   case Gmat::ERROR_MODEL:   // work for error model                                        // made changes by TUAN NGUYEN
+      if (obj->GetType() == Gmat::ERROR_MODEL)                                              // made changes by TUAN NGUYEN
+      {                                                                                     // made changes by TUAN NGUYEN
+         // Don't add if it's already there                                                 // made changes by TUAN NGUYEN
+         bool errormodelRegistered = false;                                                 // made changes by TUAN NGUYEN
+         for (UnsignedInt i=0; i < errorModels.size(); ++i)                                 // made changes by TUAN NGUYEN
+         {                                                                                  // made changes by TUAN NGUYEN
+            if (errorModels[i]->GetName() == obj->GetName())                                // made changes by TUAN NGUYEN
+            {                                                                               // made changes by TUAN NGUYEN
+               errormodelRegistered = true;                                                 // made changes by TUAN NGUYEN
+               break;                                                                       // made changes by TUAN NGUYEN
+            }                                                                               // made changes by TUAN NGUYEN
+         }                                                                                  // made changes by TUAN NGUYEN
+         if (!errormodelRegistered)                                                         // made changes by TUAN NGUYEN
+         {                                                                                  // made changes by TUAN NGUYEN
+            errorModels.push_back(obj->Clone());   // a error model needs to be cloned      // made changes by TUAN NGUYEN
+         }                                                                                  // made changes by TUAN NGUYEN
+         return true;                                                                       // made changes by TUAN NGUYEN
+      }                                                                                     // made changes by TUAN NGUYEN
+      return false;      // <-- throw here; It was supposed to be error model, but isn't.   // made changes by TUAN NGUYEN
+      break;                                                                                // made changes by TUAN NGUYEN
    }
 
    return GroundstationInterface::SetRefObject(obj, type, name);
@@ -1078,7 +1192,10 @@ ObjectArray& GroundStation::GetRefObjectArray(const Gmat::ObjectType type)
    {
    case Gmat::HARDWARE:
       return hardwareList;
-
+   
+   case Gmat::ERROR_MODEL:                   // made changes by TUAN NGUYEN
+      return errorModels;                    // made changes by TUAN NGUYEN
+   
    default:
       break;
    }
@@ -1093,6 +1210,11 @@ ObjectArray& GroundStation::GetRefObjectArray(const std::string& typeString)
    {
       return hardwareList;
    }
+
+   if (typeString == "ErrorModel")                // made changes by TUAN NGUYEN
+   {                                              // made changes by TUAN NGUYEN
+      return errorModels;                         // made changes by TUAN NGUYEN
+   }                                              // made changes by TUAN NGUYEN
 
    return GroundstationInterface::GetRefObjectArray(typeString);
 }
@@ -1124,8 +1246,12 @@ bool GroundStation::HasRefObjectTypeArray()
 const ObjectTypeArray& GroundStation::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
+
    GroundstationInterface::GetRefObjectTypeArray();
+
    refObjectTypes.push_back(Gmat::HARDWARE);
+   refObjectTypes.push_back(Gmat::ERROR_MODEL);                            // made changes by TUAN NGUYEN
+   
    return refObjectTypes;
 }
 
@@ -1419,140 +1545,3 @@ Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez)
    return az_el_visible;
 }
 
-
-//----------------------------------------------------------------------------------------
-// RealArray CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
-//----------------------------------------------------------------------------------------
-/**
-* This function is used to calculate troposphere correction for a signal from a space point
-* to ground station at a given time.
-*
-* @param atTime     the time at which the signal is received at ground station
-* @param sp         the space point at which the signal is send
-* @param frequency  frequency of the signal at ground station
-*
-* return an array containing results of troposphere correction
-*/
-//----------------------------------------------------------------------------------------
-/*
-RealArray GroundStation::CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
-{
-   // Convert state of space point sp into topocentric coordinate system
-   // 1. Create topocentric coordinate system at ground station
-   CoordinateSystem* topoCS = CoordinateSystem::CreateLocalCoordinateSystem("topoCS", "Topocentric", 
-       this,                 // origin of this coordinate system is the ground station 
-       NULL, NULL,           // primary and secondary space points do not need to specify for this case  
-       j2000Body,            // j2000Body is specified by the station's j2000Body
-       theSolarSystem);      // solar system is specified by the station's solar system
-
-   // 2. Create SSBMJ2000
-   SpecialCelestialPoint* ssb = solarSystem->GetSpecialPoint("SolarSystemBarycenter");
-   CoordinateSystem* spacePointCS = CoordinateSystem::CreateLocalCoordinateSystem("sp_j2K", "MJ2000Eq", 
-      this, NULL, NULL, ssb, solarSystem);
-
-   Rvector6 inState =  sp->GetMJ2000State(atTime);
-   Rvector6 outState;
-   CoordinateConverter* cv = new CoordinateConverter();
-   cv->Convert(atTime, inState, spacePointCS, outState, topoCS);
-   delete cv;
-   delete topoCS;
-   delete spacePointCS;
-
-   Rvector3 rVec(outState[0],outState[1],outState[2]) ;                  // in topo coordinate system
-
-
-   Real lambda = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM/frequency ;
-   Real range = rVec.GetMagnitude();   // range in m
-   Real angle = asin(rVec[2]/range);   // elevation angle in radians
-
-   troposphereObj->SetTemperature(temperature);
-   troposphereObj->SetPressure(pressure);
-   troposphereObj->SetHumidityFraction(humidity/100);
-   
-   troposphereObj->SetWaveLength(lambda);
-   troposphereObj->SetElevationAngle(angle);
-   troposphereObj->SetRange(range);
-   RealArray result = troposphereObj->Correction();
-
-   return result;
-}
-*/
-
-//----------------------------------------------------------------------------------------
-// RealArray CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
-//----------------------------------------------------------------------------------------
-/**
-* This function is used to calculate ionosphere correction for a signal from a space point
-* to ground station at a given time.
-*
-* @param atTime     the time at which the signal is received at ground station
-* @param sp         the space point at which the signal is send
-* @param frequency  frequency of the signal at ground station
-*
-* return an array containing results of ionosphere correction
-*/
-//----------------------------------------------------------------------------------------
-/*
-RealArray GroundStation::CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
-{
-   RealArray result;
-   return result;
-}
-*/
-
-//----------------------------------------------------------------------------------------
-// RealArray CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
-//----------------------------------------------------------------------------------------
-/**
-* This function is used to calculate media corrections for a signal from a space point
-* to ground station at a given time.
-*
-* @param atTime     the time at which the signal is received at ground station
-* @param sp         the space point at which the signal is send
-* @param frequency  frequency of the signal at ground station
-*
-* return an array containing results of media corrections
-*/
-//----------------------------------------------------------------------------------------
-/*
-RealArray GroundStation::CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency)
-{
-   RealArray result, result1;
-   
-   result = CalculateTroposphereCorrection(atTime, sp, frequency);
-   result1 = CalculateIonosphereCorrection(atTime, sp, frequency);
-   result = result + result1;
-
-   return result;
-}
-*/
-
-
-/*
-void GroundStation::CreateTroposphereObject(const std::string& modelName)
-{
-   if (troposphereObj)
-      delete troposphereObj;
-
-   // Create troposphere correction model
-   troposphereObj = new Troposphere(modelName);
-
-   #ifdef DEBUG_MEDIA_CORRECTION
-      MessageInterface::ShowMessage("   Set as troposphere model:   troposphere(%p)\n", troposphereObj);
-   #endif
-}
-
-void GroundStation::CreateIonosphereObject(const std::string& modelName)
-{
-   if (ionosphereObjNULL)
-      delete ionosphereObj;
-
-   // Create troposphere correction model
-   ionosphereObj = new Ionosphere(modelName);
-
-   #ifdef DEBUG_MEDIA_CORRECTION
-      MessageInterface::ShowMessage("   Set as ionosphere model:   ionosphere(%p)\n", ionosphereObj);
-   #endif
-}
-
-*/

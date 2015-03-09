@@ -55,12 +55,10 @@ private:
    Real           mu;
    Real           eqRad;
    Real           flat;
-   std::string    textureMap;
    
    bool           muChanged;
    bool           eqRadChanged;
    bool           flatChanged;
-   bool           textureChanged;
    
    GmatPanel      *theCBPanel;
    
@@ -73,7 +71,6 @@ private:
    void     OnMuTextCtrlChange(wxCommandEvent &event);
    void     OnEqRadTextCtrlChange(wxCommandEvent &event);
    void     OnFlatTextCtrlChange(wxCommandEvent &event);
-   void     OnTextureTextCtrlChange(wxCommandEvent &event);
    void     OnBrowseButton(wxCommandEvent &event);
    
    wxString ToString(Real rval);
@@ -83,7 +80,6 @@ private:
    wxStaticText *muStaticText;
    wxStaticText *eqRadStaticText;
    wxStaticText *flatStaticText;
-   wxStaticText *textureStaticText;
 
    wxStaticText *muUnitsStaticText;
    wxStaticText *eqRadUnitsStaticText;
@@ -92,15 +88,11 @@ private:
    wxTextCtrl   *muTextCtrl;
    wxTextCtrl   *eqRadTextCtrl;
    wxTextCtrl   *flatTextCtrl;
-   wxTextCtrl   *textureTextCtrl;
-   
-   wxBitmapButton *browseButton;
    
    /// string versions of current data
    wxString     muString;
    wxString     eqRadString;
    wxString     flatString;
-   wxString     textureString;
    
    GmatStaticBoxSizer *pageSizer;
    
@@ -112,7 +104,6 @@ private:
       ID_TEXT_CTRL_MU,
       ID_TEXT_CTRL_EQRAD,
       ID_TEXT_CTRL_FLAT,
-      ID_TEXT_CTRL_TEXTURE,
    };
 };
 #endif // CelestialBodyPropertiesPanel_hpp

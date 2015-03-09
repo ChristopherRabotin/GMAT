@@ -208,7 +208,7 @@ public:
                                          const std::string &value);
    virtual bool         IsParameterVisible(const Integer id) const;
    virtual bool         IsParameterVisible(const std::string &label) const;
-
+   
    virtual bool         ParameterAffectsDynamics(const Integer id) const;
    virtual bool         ParameterDvInitializesNonzero(const Integer id,
                               const Integer r = 0, const Integer c = 0) const;
@@ -401,6 +401,8 @@ public:
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual bool         WriteEmptyStringArray(Integer id);
+   virtual bool         WriteEmptyStringParameter(const Integer id) const;
+   
    virtual const std::string&
                         GetGeneratingString(
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -585,10 +587,10 @@ protected:
    IntegerArray        covarianceSizes;
    // Covariance matrix for parameters identified in covarianceList
    Covariance          covariance;
-
+   
    // Some string arrays need to be written even if they are empty
    bool                writeEmptyStringArray;
-
+   
    // Scripting interfaces
    void                CopyParameters(const GmatBase &a);
    virtual void        WriteParameters(Gmat::WriteMode mode,

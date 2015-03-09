@@ -74,6 +74,7 @@
 //#define DEBUG_CB_DESTRUCT
 //#define DEBUG_CB_EPOCH
 //#define DEBUG_TEXTURE_FILE
+//#define DEBUG_3D_MODEL_FILE
 //#define DEBUG_VALIDATION
 
 //#ifndef DEBUG_MEMORY
@@ -132,6 +133,15 @@ CelestialBody::PARAMETER_TEXT[CelestialBodyParamCount - SpacePointParamCount] =
    "RotationRate",
    "TextureMapFileName",
    "TextureMapFullPath",
+   "3DModelFile",
+   "3DModelFileFullPath",
+   "3DModelOffsetX",
+   "3DModelOffsetY",
+   "3DModelOffsetZ",
+   "3DModelRotationX",
+   "3DModelRotationY",
+   "3DModelRotationZ",
+   "3DModelScale",
 };
 
 const Gmat::ParameterType
@@ -176,6 +186,15 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::REAL_TYPE,     //"RotationRate", 
    Gmat::FILENAME_TYPE, //"TextureMapFileName"
    Gmat::FILENAME_TYPE, //"TextureMapFullPath"
+   Gmat::FILENAME_TYPE, //"3DModelFileName"
+   Gmat::FILENAME_TYPE, //"3DModelFileFullPath"
+   Gmat::REAL_TYPE,     //"3DModelOffsetX"
+   Gmat::REAL_TYPE,     //"3DModelOffsetY"
+   Gmat::REAL_TYPE,     //"3DModelOffsetZ"
+   Gmat::REAL_TYPE,     //"3DModelRotationX"
+   Gmat::REAL_TYPE,     //"3DModelRotationY"
+   Gmat::REAL_TYPE,     //"3DModelRotationZ"
+   Gmat::REAL_TYPE,     //"3DModelScale"
 };
 
 const Real    CelestialBody::dDot                       = 1.0;
@@ -239,7 +258,17 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    naifName           (name),
    textureMapFileName ("GenericCelestialBody.jpg"),
    textureMapFullPath ("GenericCelestialBody.jpg"),
-   msgWritten         (false)
+   view3dModelFileName     (""),
+   view3dModelFileFullPath (""),
+   view3dModelId        (-1),
+   view3dModelOffsetX   (0.0),
+   view3dModelOffsetY   (0.0),
+   view3dModelOffsetZ   (0.0),
+   view3dModelRotationX (0.0),
+   view3dModelRotationY (0.0),
+   view3dModelRotationZ (0.0),   
+   view3dModelScale     (10.0),
+   msgWritten           (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -342,7 +371,17 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    naifName           (name),
    textureMapFileName ("GenericCelestialBody.jpg"),
    textureMapFullPath ("GenericCelestialBody.jpg"),
-   msgWritten         (false)
+   view3dModelFileName     (""),
+   view3dModelFileFullPath (""),
+   view3dModelId        (-1),
+   view3dModelOffsetX   (0.0),
+   view3dModelOffsetY   (0.0),
+   view3dModelOffsetZ   (0.0),
+   view3dModelRotationX (0.0),
+   view3dModelRotationY (0.0),
+   view3dModelRotationZ (0.0),   
+   view3dModelScale     (10.0),
+   msgWritten           (false)
 {
    objectTypes.push_back(Gmat::CELESTIAL_BODY);
    objectTypeNames.push_back("CelestialBody");
@@ -461,7 +500,17 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    naifName            (cBody.naifName),
    textureMapFileName  (cBody.textureMapFileName),
    textureMapFullPath  (cBody.textureMapFullPath),
-   msgWritten          (cBody.msgWritten)
+   view3dModelFileName     (cBody.view3dModelFileName),
+   view3dModelFileFullPath (cBody.view3dModelFileFullPath),
+   view3dModelId        (cBody.view3dModelId),
+   view3dModelOffsetX   (cBody.view3dModelOffsetX),
+   view3dModelOffsetY   (cBody.view3dModelOffsetY),
+   view3dModelOffsetZ   (cBody.view3dModelOffsetZ),
+   view3dModelRotationX (cBody.view3dModelRotationX),
+   view3dModelRotationY (cBody.view3dModelRotationY),
+   view3dModelRotationZ (cBody.view3dModelRotationZ),   
+   view3dModelScale     (cBody.view3dModelScale),
+   msgWritten           (cBody.msgWritten)
 {
    state                  = cBody.state;
    stateTime              = cBody.stateTime;
@@ -607,9 +656,21 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    
    naifIdSet           = cBody.naifIdSet;
    naifName            = cBody.naifName;
+   
    textureMapFileName  = cBody.textureMapFileName;
    textureMapFullPath  = cBody.textureMapFullPath;
-   msgWritten          = cBody.msgWritten;
+   view3dModelFileName     = cBody.view3dModelFileName;
+   view3dModelFileFullPath = cBody.view3dModelFileFullPath;
+   view3dModelId        = cBody.view3dModelId;
+   view3dModelScale     = cBody.view3dModelScale;
+   view3dModelOffsetX   = cBody.view3dModelOffsetX;
+   view3dModelOffsetY   = cBody.view3dModelOffsetY;
+   view3dModelOffsetZ   = cBody.view3dModelOffsetZ;
+   view3dModelRotationX = cBody.view3dModelRotationX;
+   view3dModelRotationY = cBody.view3dModelRotationY;
+   view3dModelRotationZ = cBody.view3dModelRotationZ;   
+   view3dModelScale     = cBody.view3dModelScale;
+   msgWritten           = cBody.msgWritten;
    
    for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
 
@@ -2534,6 +2595,42 @@ bool CelestialBody::SetUserDefined(bool userDefinedBody)
 
 
 //------------------------------------------------------------------------------
+// std::string Get3dViewModelFile()
+//------------------------------------------------------------------------------
+std::string CelestialBody::Get3dViewModelFile()
+{
+   return view3dModelFileName;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Get3dViewModelFileFullPath()
+//------------------------------------------------------------------------------
+std::string CelestialBody::Get3dViewModelFileFullPath()
+{
+   return view3dModelFileFullPath;
+}
+
+
+//------------------------------------------------------------------------------
+// int Get3dViewModelId()
+//------------------------------------------------------------------------------
+int CelestialBody::Get3dViewModelId()
+{
+   return view3dModelId;
+}
+
+
+//------------------------------------------------------------------------------
+// void Set3dViewModelId(int id)
+//------------------------------------------------------------------------------
+void CelestialBody::Set3dViewModelId(int id)
+{
+   view3dModelId = id;
+}
+
+
+//------------------------------------------------------------------------------
 // const Rvector6 GetMJ2000State(const A1Mjd &atTime)
 //------------------------------------------------------------------------------
 /*
@@ -2943,7 +3040,15 @@ Real CelestialBody::GetRealParameter(const Integer id) const
    if (id == SPIN_AXIS_DEC_RATE)      return orientation[3];
    if (id == ROTATION_CONSTANT)       return orientation[4];
    if (id == ROTATION_RATE)           return orientation[5];
-
+   
+   if (id == VIEW_3D_MODEL_OFFSET_X)   return view3dModelOffsetX;
+   if (id == VIEW_3D_MODEL_OFFSET_Y)   return view3dModelOffsetY;
+   if (id == VIEW_3D_MODEL_OFFSET_Z)   return view3dModelOffsetZ;
+   if (id == VIEW_3D_MODEL_ROTATION_X) return view3dModelRotationX;
+   if (id == VIEW_3D_MODEL_ROTATION_Y) return view3dModelRotationY;
+   if (id == VIEW_3D_MODEL_ROTATION_Z) return view3dModelRotationZ;
+   if (id == VIEW_3D_MODEL_SCALE)      return view3dModelScale;
+   
    return SpacePoint::GetRealParameter(id);
 }
 
@@ -3003,6 +3108,70 @@ Real CelestialBody::SetRealParameter(const Integer id, const Real value)
       hourAngle           = value;
       return true;
    }
+   if (id == VIEW_3D_MODEL_OFFSET_X)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelOffsetX = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_OFFSET_Y)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelOffsetY = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_OFFSET_Z)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelOffsetZ = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_ROTATION_X)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelRotationX = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_ROTATION_Y)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelRotationY = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_ROTATION_Z)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelRotationZ = value;
+         return true;
+      }
+      return false;
+   }
+   if (id == VIEW_3D_MODEL_SCALE)
+   {
+      if (IsRealParameterValid(id, value))
+      {
+         view3dModelScale = value;
+         return true;
+      }
+      return false;
+   }
+   
    // 2012.01/24 - wcs - two body propagation disallowed for now
    if ((id == TWO_BODY_INITIAL_EPOCH) || (id == TWO_BODY_SMA)  || (id == TWO_BODY_ECC) ||
        (id == TWO_BODY_INC)           || (id == TWO_BODY_RAAN) || (id == TWO_BODY_AOP) ||
@@ -3264,6 +3433,8 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
    
    if (id == TEXTURE_MAP_FILE_NAME)    return textureMapFileName;
    if (id == TEXTURE_MAP_FULL_PATH)    return textureMapFullPath;
+   if (id == VIEW_3D_MODEL_FILE_NAME)       return view3dModelFileName;
+   if (id == VIEW_3D_MODEL_FILE_FULL_PATH)  return view3dModelFileFullPath;
    
    return SpacePoint::GetStringParameter(id);
 }
@@ -3543,7 +3714,22 @@ bool CelestialBody::SetStringParameter(const Integer id,
       // }
       return true;
    }
-
+   
+   if (id == VIEW_3D_MODEL_FILE_NAME)
+   {
+      if (view3dModelFileName != value)
+      {
+         view3dModelFileName = value;
+         #ifdef DEBUG_TEXTURE_FILE
+         MessageInterface::ShowMessage
+            ("3 Calling Set3dModelFileName() view3dModelFileName = '%s'\n", view3dModelFileName.c_str());
+         #endif
+         Set3dModelFileName(view3dModelFileName, true);
+      }
+      
+      return true;
+   }
+   
    return SpacePoint::SetStringParameter(id, value);
 }
    
@@ -4053,7 +4239,7 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
-   if (id == TEXTURE_MAP_FULL_PATH)
+   if (id == TEXTURE_MAP_FULL_PATH || id == VIEW_3D_MODEL_FILE_FULL_PATH)
       return true;
    
    return SpacePoint::IsParameterReadOnly(id);
@@ -4172,9 +4358,23 @@ bool CelestialBody::IsParameterEqualToDefault(const Integer id) const
       return (default_orientation == orientation);
    }
    if (id == TEXTURE_MAP_FILE_NAME)
-   {
       return (default_textureMapFileName == textureMapFileName);
-   }
+   if (id == VIEW_3D_MODEL_FILE_NAME)
+      return (view3dModelFileName == "");
+   if (id == VIEW_3D_MODEL_OFFSET_X)
+      return view3dModelOffsetX == 0.0;
+   if (id == VIEW_3D_MODEL_OFFSET_Y)
+      return view3dModelOffsetY == 0.0;
+   if (id == VIEW_3D_MODEL_OFFSET_Z)
+      return view3dModelOffsetZ == 0.0;
+   if (id == VIEW_3D_MODEL_ROTATION_X)
+      return view3dModelRotationX == 0.0;
+   if (id == VIEW_3D_MODEL_ROTATION_Y)
+      return view3dModelRotationY == 0.0;
+   if (id == VIEW_3D_MODEL_ROTATION_Z)
+      return view3dModelRotationZ == 0.0;
+   if (id == VIEW_3D_MODEL_SCALE)
+      return view3dModelScale == 10.0;
    
    return SpacePoint::IsParameterEqualToDefault(id);
 }
@@ -4194,7 +4394,26 @@ bool CelestialBody::IsParameterValid(const Integer id,
       ("CelestialBody::IsParameterValid() entered, id=%d, value='%s'\n", id, value.c_str());
    #endif
    bool retval = true;
-   if (id == TEXTURE_MAP_FILE_NAME)
+   Real realval;
+   lastErrorMessage = "";
+   
+   if (id == VIEW_3D_MODEL_OFFSET_X || id == VIEW_3D_MODEL_OFFSET_Y || id == VIEW_3D_MODEL_OFFSET_Y ||
+       id == VIEW_3D_MODEL_ROTATION_X || id == VIEW_3D_MODEL_ROTATION_Y || id == VIEW_3D_MODEL_ROTATION_Z ||
+       id == VIEW_3D_MODEL_SCALE)
+   {
+      if (GmatStringUtil::ToReal(value, realval))
+      {
+         retval = IsRealParameterValid(id, realval, false);
+      }
+      else
+      {
+         retval = false;
+         lastErrorMessage = "*** ERROR *** The value of " + value + " for field \"" +
+            GetParameterText(id) + "\" on object \"" + instanceName + "\" is not valid.  "
+            "The allowed values are Real number.\n";
+      }
+   }
+   else if (id == TEXTURE_MAP_FILE_NAME)
    {
       #ifdef DEBUG_VALIDATION
       MessageInterface::ShowMessage("   Validating TEXTURE_MAP_FILE_NAME\n");
@@ -4202,6 +4421,16 @@ bool CelestialBody::IsParameterValid(const Integer id,
       if (value == "" || value == "GenericCelestialBody.jpg")
          retval = true;
       else if (!SetTextureMapFileName(value, false, true))
+         retval = false;
+   }
+   else if (id == VIEW_3D_MODEL_FILE_NAME)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage("   Validating VIEW_3D_MODEL_FILE_NAME\n");
+      #endif
+      if (value == "")
+         retval = true;
+      else if (!Set3dModelFileName(value, false, true))
          retval = false;
    }
    
@@ -4222,7 +4451,23 @@ bool CelestialBody::IsParameterValid(const Integer id,
 bool CelestialBody::IsParameterValid(const std::string &label,
                                      const std::string &value)
 {
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsParameterValid() entered, label='%s', value='%s'\n",
+       label.c_str(), value.c_str());
+   #endif
    return IsParameterValid(GetParameterID(label), value);
+}
+
+//------------------------------------------------------------------------------
+// bool WriteEmptyStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+bool CelestialBody::WriteEmptyStringParameter(const Integer id) const
+{
+   if (id == VIEW_3D_MODEL_FILE_NAME)
+      return true;
+   else
+      return SpacePoint::WriteEmptyStringParameter(id);
 }
 
 //------------------------------------------------------------------------------
@@ -5010,6 +5255,83 @@ bool CelestialBody::NeedsOnlyMainSPK()
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool IsRealParameterValid(Integer id, Real realval, bool throwError = true)
+//------------------------------------------------------------------------------
+/**
+ * Chekcs if input real value is valid.
+ *
+ * @param id  The Parameter ID
+ * @param realval The real value
+ * @param throwError  Throws an exception if this flag is true [true]
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::IsRealParameterValid(Integer id, Real realval, bool throwError)
+{
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsRealParameterValid() entered, id=%d, realval=%f\n", id, realval);
+   #endif
+   
+   bool retval = true;
+   lastErrorMessage = "";
+   
+   if (id == VIEW_3D_MODEL_OFFSET_X || id == VIEW_3D_MODEL_OFFSET_Y || id == VIEW_3D_MODEL_OFFSET_Y)
+   {
+      if (realval < -3.5 || realval > 3.5)
+         retval = false;
+      
+      if (retval == false)
+      {
+         std::string strval = GmatStringUtil::ToString(realval, GetDataPrecision());
+         lastErrorMessage = "*** ERROR *** The value of " + strval + " for field \"" + GetParameterText(id) +
+            "\" on object \"" + instanceName + "\" is out of bounds.  "
+            "The allowed values are: [-3.5 <= Real <= 3.5].\n";
+      }
+   }
+   else if (id == VIEW_3D_MODEL_ROTATION_X || id == VIEW_3D_MODEL_ROTATION_Y || id == VIEW_3D_MODEL_ROTATION_Z)
+   {
+      if (realval < -180.0 || realval > 180.0)
+         retval = false;
+      
+      if (retval == false)
+      {
+         std::string strval = GmatStringUtil::ToString(realval, GetDataPrecision());
+         lastErrorMessage = "*** ERROR *** The value of " + strval + " for field \"" + GetParameterText(id) +
+            "\" on object \"" + instanceName + "\" is out of bounds.  "
+            "The allowed values are: [-180 <= Real <= 180].\n";
+      }
+   }
+   else if (id == VIEW_3D_MODEL_SCALE)
+   {
+      if (realval < 0.001 || realval > 1000)
+         retval = false;
+      
+      if (retval == false)
+      {
+         std::string strval = GmatStringUtil::ToString(realval, GetDataPrecision());
+         lastErrorMessage = "*** ERROR *** The value of " + strval + " for field \"" + GetParameterText(id) +
+            "\" on object \"" + instanceName + "\" is out of bounds.  "
+            "The allowed values are: [0.001 <= Real <= 1000].\n";
+      }
+   }
+   
+   if (retval == false && throwError)
+   {
+      #ifdef DEBUG_VALIDATION
+      MessageInterface::ShowMessage
+         ("CelestialBody::IsRealParameterValid() throwing error:\n",
+          lastErrorMessage.c_str());
+      #endif
+      throw SolarSystemException(lastErrorMessage);
+   }
+   
+   #ifdef DEBUG_VALIDATION
+   MessageInterface::ShowMessage
+      ("CelestialBody::IsRealParameterValid() returning %d\n", retval);
+   #endif
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // bool SetTextureMapFileName(const std::string &filename, bool writeWarning = false,
@@ -5029,7 +5351,8 @@ bool CelestialBody::SetTextureMapFileName(const std::string &fileName, bool writ
    #ifdef DEBUG_TEXTURE_FILE
    MessageInterface::ShowMessage
       ("\nCelestialBody::SetTextureMapFileName() '%s' entered\n   fileName = '%s'\n   "
-       "writeWarning = %d\n", GetName().c_str(), fileName.c_str(), writeWarning);
+       "writeWarning = %d, validateOnly = %d\n", GetName().c_str(), fileName.c_str(),
+       writeWarning, validateOnly);
    #endif
    
    bool retval = true;
@@ -5071,6 +5394,89 @@ bool CelestialBody::SetTextureMapFileName(const std::string &fileName, bool writ
        textureMapFileName.c_str(), textureMapFullPath.c_str());
    MessageInterface::ShowMessage
       ("CelestialBody::SetTextureMapFileName() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Set3dModelFileName(const std::string &filename, bool writeWarning = false,
+//                        bool validateOnly = false)
+//------------------------------------------------------------------------------
+/**
+ * Sets full model file name. If filename is non-blank and does not exist, it
+ * will throw an exception. If filename is blank, it will do nothing since
+ * model file is optional.
+ *
+ * @return true if input fileName is valid texture file, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::Set3dModelFileName(const std::string &fileName, bool writeWarning,
+                                       bool validateOnly)
+{
+   #ifdef DEBUG_3D_MODEL_FILE
+   MessageInterface::ShowMessage
+      ("\nCelestialBody::Set3dModelFileName() '%s' entered\n   fileName = '%s'\n   "
+       "writeWarning = %d, validateOnly = %d\n", GetName().c_str(), fileName.c_str(),
+       writeWarning, validateOnly);
+   #endif
+   
+   if (fileName == "")
+   {
+      if (!validateOnly)
+         view3dModelFileFullPath = "";
+      
+      #ifdef DEBUG_3D_MODEL_FILE
+      MessageInterface::ShowMessage
+      ("   view3dModelFileName = '%s'\n   view3dModelFileFullPath = '%s'\n",
+       view3dModelFileName.c_str(), view3dModelFileFullPath.c_str());
+      MessageInterface::ShowMessage
+         ("CelestialBody::Set3dModelFileName() returning true, fileName is blank and it's OK\n");
+      #endif
+      
+      return true;
+   }
+   
+   bool retval = true;
+   lastErrorMessage = "";
+   FileManager *fm = FileManager::Instance();
+   std::string actualFile = fileName;
+   std::string actualPath;
+   std::string bodyName = GetName();
+   bool success = fm->GetBody3dModelFile(fileName, bodyName, bodyName, actualFile, actualPath, writeWarning);
+   lastErrorMessage = fm->GetLastFilePathMessage() + " 3d model file";
+   
+   #ifdef DEBUG_3D_MODEL_FILE
+   MessageInterface::ShowMessage
+      ("   After call to fm->GetModelFile(), success = %d\n   lastErrorMessage = '%s'\n",
+       success, lastErrorMessage.c_str());
+   #endif
+   
+   if (success)
+   {
+      if (!validateOnly)
+      {
+         view3dModelFileName = actualFile;
+         view3dModelFileFullPath = actualPath;
+      }
+   }
+   else
+   {
+      retval = false;
+      view3dModelFileFullPath = "";
+      std::string errMsg = lastErrorMessage;
+      lastErrorMessage = "**** ERROR *** " + lastErrorMessage;
+      if (writeWarning && !validateOnly)
+         throw SolarSystemException(errMsg);
+   }
+   
+   #ifdef DEBUG_3D_MODEL_FILE
+   MessageInterface::ShowMessage
+      ("   view3dModelFileName = '%s'\n   view3dModelFileFullPath = '%s'\n",
+       view3dModelFileName.c_str(), view3dModelFileFullPath.c_str());
+   MessageInterface::ShowMessage
+      ("CelestialBody::Set3dModelFileName() returning %d\n", retval);
    #endif
    
    return retval;

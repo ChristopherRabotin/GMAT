@@ -83,7 +83,7 @@ public:
    bool                 Add(Subscriber *s);
    bool                 Remove(Subscriber *s, const bool del);
    
-   virtual void         Activate(bool state = true);
+   virtual bool         Activate(bool state = true);
    virtual bool         IsActive();
    
    virtual void         SetProviderId(Integer id);

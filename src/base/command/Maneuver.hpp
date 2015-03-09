@@ -86,6 +86,13 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+
    
    // Methods used to run the command
    virtual bool         InterpretAction();
@@ -124,6 +131,8 @@ protected:
    StringArray             tankNamesM;
    /// Flag indicating if mass was depleted
    bool                    decMassM;
+   /// Flag indicating if the maneuver should be applied as if in backprop
+   bool                    maneuverBackwards;
 
    /// Maneuver data used in the summary
    Real                    *elementIspMassData;
@@ -133,6 +142,7 @@ protected:
    {
       burnNameID = GmatCommandParamCount,
       satNameID,
+      backPropID,
       ManeuverCommandParamCount
    };
    static const std::string

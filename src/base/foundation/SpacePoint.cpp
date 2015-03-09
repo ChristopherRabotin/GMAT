@@ -72,6 +72,7 @@ SpacePoint::PARAMETER_TEXT[SpacePointParamCount - GmatBaseParamCount] =
    "J2000BodyName",
    "NAIFId",
    "NAIFIdReferenceFrame",
+   "SpiceFrameName",
    "OrbitSpiceKernelName",
    "AttitudeSpiceKernelName",
    "SCClockSpiceKernelName",
@@ -87,6 +88,7 @@ SpacePoint::PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount] =
    Gmat::STRING_TYPE,       // "J2000BodyName"
    Gmat::INTEGER_TYPE,      // "NAIFId"
    Gmat::INTEGER_TYPE,      // "NAIFIdReferenceFrame"
+   Gmat::STRING_TYPE,       // "SpiceFrameName"
    Gmat::STRINGARRAY_TYPE,  // "OrbitSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "AttitudeSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "SCClockSpiceKernelName"
@@ -157,6 +159,7 @@ j2000Body          (NULL),
 j2000BodyName      ("Earth"),
 naifId             (UNDEFINED_NAIF_ID),
 naifIdRefFrame     (UNDEFINED_NAIF_ID),
+spiceFrameName     (""),
 naifIdObserver     (UNDEFINED_NAIF_ID),
 spiceSetupDone     (false),
 hasAttitude        (false),
@@ -209,6 +212,7 @@ j2000Body                (sp.j2000Body), //(NULL),
 j2000BodyName            (sp.j2000BodyName),
 naifId                   (sp.naifId),
 naifIdRefFrame           (sp.naifIdRefFrame),
+spiceFrameName           (sp.spiceFrameName),
 naifIdObserver           (sp.naifIdObserver),
 default_j2000BodyName    (sp.default_j2000BodyName),
 default_naifId           (sp.default_naifId),
@@ -252,6 +256,7 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    j2000BodyName            = sp.j2000BodyName;
    naifId                   = sp.naifId;
    naifIdRefFrame           = sp.naifIdRefFrame;
+   spiceFrameName           = sp.spiceFrameName;
    spiceSetupDone           = sp.spiceSetupDone;
    orbitSpiceKernelNames.clear();
    attitudeSpiceKernelNames.clear();
@@ -1031,6 +1036,8 @@ bool SpacePoint::IsParameterReadOnly(const Integer id) const
       return true;
    if (id == NAIF_ID_REFERENCE_FRAME) // set to false in appropriate derived classes
       return true;
+   if (id == SPICE_FRAME_NAME) // set to false in appropriate derived classes
+      return true;
 
    // Turn off parameters for string arrays if they are empty
    if (id == ORBIT_SPICE_KERNEL_NAME)
@@ -1183,6 +1190,10 @@ std::string SpacePoint::GetStringParameter(const Integer id) const
       if (j2000Body) return j2000Body->GetName();
       else           return j2000BodyName;
    }
+   if (id == SPICE_FRAME_NAME)
+   {
+      return spiceFrameName;
+   }
 
    // return entire brace-enclosed array for the kernel name arrays
    // (needed so that assignments will work inside of GmatFunctions) wcs 2010.05.19
@@ -1279,6 +1290,13 @@ bool SpacePoint::SetStringParameter(const Integer id,
       return true;
    }
    
+   if (id == SPICE_FRAME_NAME)
+   {
+      // @todo - add validation here <<<<<<<<
+      spiceFrameName = value;
+      return true;
+   }
+
 //   bool alreadyInList = false;
    if (id == ORBIT_SPICE_KERNEL_NAME)
    {

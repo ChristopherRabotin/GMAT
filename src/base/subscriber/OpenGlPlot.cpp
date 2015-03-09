@@ -964,7 +964,7 @@ bool OpenGlPlot::Initialize()
 //------------------------------------------------------------------------------
 // void Activate(bool state)
 //------------------------------------------------------------------------------
-void OpenGlPlot::Activate(bool state)
+bool OpenGlPlot::Activate(bool state)
 {
    #ifdef DEBUG_OPENGL_ACTIVATE
    MessageInterface::ShowMessage
@@ -972,7 +972,7 @@ void OpenGlPlot::Activate(bool state)
        this, GetName().c_str(), state, isInitialized);
    #endif
    
-   Subscriber::Activate(state);
+   return Subscriber::Activate(state);
 }
 
 

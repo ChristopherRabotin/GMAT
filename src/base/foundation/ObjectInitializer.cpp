@@ -258,6 +258,7 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //  NOTE: Measurement participant pointers must initialize before models.
    //        In the current code, that means spacecraft and ground stations, but
    //        the list might grow
+   //  3. Error Models                                                       // made changes by TUAN NGUYEN
    //  3. Measurement Models
    //  4. System Parameters
    //  5. Parameters
@@ -299,7 +300,25 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          InitializeObjectsInTheMap(GOS, Gmat::GROUND_STATION);
       }
    }
-   
+
+   // ErrorModel                                                                  // made changes by TUAN NGUYEN
+   // Handle ErrorModel objects                                                   // made changes by TUAN NGUYEN
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::ERROR_MODEL)           // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZE_OBJ                                                 // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("--- Initialize ErrorModel in LOS\n");        // made changes by TUAN NGUYEN
+      #endif                                                                      // made changes by TUAN NGUYEN
+      InitializeObjectsInTheMap(LOS, Gmat::ERROR_MODEL);                          // made changes by TUAN NGUYEN
+
+      if (includeGOS)                                                             // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         #ifdef DEBUG_INITIALIZE_OBJ                                              // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");     // made changes by TUAN NGUYEN
+         #endif                                                                   // made changes by TUAN NGUYEN
+         InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);                       // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+
    // MeasurementModel
    // Measurement Models must init before the Estimators/Simulator, so do next
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::MEASUREMENT_MODEL)
@@ -921,7 +940,7 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
 {   
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-		("--- Calling BuildReferences(), obj = <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+		("--- In BuildReferencesAndInitialize, Calling BuildReferences(), obj = <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
 		 obj->GetName().c_str());
 	#endif
 	
@@ -1288,6 +1307,9 @@ void ObjectInitializer::SetRefFromName(GmatBase *obj, const std::string &oName)
    
    if ((refObj = FindObject(oName)) != NULL)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+         MessageInterface::ShowMessage("FindObject found %s\n", oName.c_str());
+      #endif
       // Do not set if object and its associated hardware in function
       if (refObj->IsOfType(Gmat::HARDWARE) && obj->IsLocal() && refObj->IsLocal())
       {
@@ -1299,11 +1321,17 @@ void ObjectInitializer::SetRefFromName(GmatBase *obj, const std::string &oName)
       }
       else
       {
+         #ifdef DEBUG_OBJECT_INITIALIZER
+            MessageInterface::ShowMessage("Calling SetRefObject .... \n");
+         #endif
          obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
       }
    }
    else
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+         MessageInterface::ShowMessage("FindObject did NOT find %s\n", oName.c_str());
+      #endif
       // look in the SolarSystem
       refObj = FindSpacePoint(oName);
       

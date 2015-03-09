@@ -525,6 +525,9 @@
     <ClCompile Include="..\..\..\src\gui\controllogic\ForPanel.cpp">
       <Filter>Source Files\controllogic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -988,6 +991,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\controllogic\ForPanel.hpp">
       <Filter>Source Files\controllogic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

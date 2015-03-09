@@ -265,8 +265,8 @@ OBJECTS = \
     event/EventException.o \
     event/EventFunction.o \
     event/EventLocator.o \
-    event/LocatedEventTable.o \
     event/LocatedEvent.o \
+    event/LocatedEventTable.o \
     event/RootFinder.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
@@ -492,6 +492,7 @@ OBJECTS = \
     solarsys/ShadowState.o \
     solarsys/SlpFile.o \
     solarsys/SolarFluxFileReader.o \
+    solarsys/SolarFluxReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
     solarsys/SpecialCelestialPoint.o \

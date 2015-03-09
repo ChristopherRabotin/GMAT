@@ -651,6 +651,7 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SlpFile.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxFileReader.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystem.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SolarSystemException.cpp" />
     <ClCompile Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.cpp" />
@@ -1082,6 +1083,7 @@
     <ClInclude Include="..\..\..\src\base\solarsys\SimpleExponentialAtmosphere.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SlpFile.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxFileReader.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystem.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SolarSystemException.hpp" />
     <ClInclude Include="..\..\..\src\base\solarsys\SpecialCelestialPoint.hpp" />

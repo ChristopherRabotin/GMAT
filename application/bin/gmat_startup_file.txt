@@ -147,12 +147,14 @@ URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
 NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
 PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
 #-----------------------------------------------------------
+BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
+#-----------------------------------------------------------
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
 #-----------------------------------------------------------
-MODEL_PATH             = DATA_PATH/vehicle/models/
-SPACECRAFT_MODEL_FILE  = MODEL_PATH/aura.3ds
+VEHICLE_MODEL_PATH     = DATA_PATH/vehicle/models/
+SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
 #-----------------------------------------------------------
 SPAD_PATH              = DATA_PATH/vehicle/spad/
 SPAD_SRP_FILE          = SPAD_PATH/SphericalModel.spo

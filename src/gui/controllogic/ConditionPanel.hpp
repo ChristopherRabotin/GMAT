@@ -66,6 +66,7 @@ private:
    void OnCellLeftClick(wxGridEvent& event);
    void OnCellRightClick(wxGridEvent& event);
    void OnCellValueChange(wxGridEvent& event);
+   void OnGridTabbing(wxGridEvent& event);
    void OnKeyDown(wxKeyEvent& event);
    
    // any class wishing to process wxWindows events must use this macro

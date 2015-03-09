@@ -67,16 +67,10 @@ public:
    /// Flag indicating if one of the participants is a ground station
    bool stationParticipant;
 
-#ifdef USE_PRECISION_TIME
    /// Transmitter epoch
    GmatTime tPrecTime;
-   GmatTime rPrecTime;
-#else
-   /// Transmitter epoch
-   GmatEpoch tTime;                                // tTime will be removed and replaced by tPrecTime
    /// Receiver epoch
-   GmatEpoch rTime;                                // rTime will be removed and replaced by rPrecTime
-#endif
+   GmatTime rPrecTime;
 
    /// MJ2000Eq location of the transmit node
    Rvector3 tLoc;

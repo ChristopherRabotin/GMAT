@@ -69,7 +69,7 @@
 //#define DEBUG_INTERPOLATOR_TRACE
 //#define DEBUG_EPHEMFILE_CONVERT_STATE
 //#define DEBUG_FILE_PATH
-//#define DBGLVL_EPHEMFILE_DATA 1
+//#define DBGLVL_EPHEMFILE_DATA 2
 //#define DBGLVL_EPHEMFILE_DATA_LABELS 1
 //#define DBGLVL_EPHEMFILE_MANEUVER 2
 //#define DBGLVL_EPHEMFILE_PROPAGATOR_CHANGE 2
@@ -2270,6 +2270,9 @@ void EphemerisFile::HandleSpkOrbitData(bool writeData, bool timeToWrite)
          // Convert if necessary
          if (!writeDataInDataCS)
             ConvertState(currEpochInDays, currState, outState);
+         else
+            for (unsigned int ii = 0; ii < 6; ii++)
+              outState[ii] = currState[ii];
 
 //         BufferOrbitData(currEpochInDays, currState);
          BufferOrbitData(currEpochInDays, outState);

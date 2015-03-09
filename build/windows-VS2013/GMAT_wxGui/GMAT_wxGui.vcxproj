@@ -149,7 +149,7 @@
       <AdditionalDependencies>opengl32.lib;glu32.lib;wxmsw28_netutils.lib;wxmsw28_stc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3-unicode|Win32'">
@@ -171,7 +171,7 @@
       <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -234,7 +234,7 @@
       <Version>2014b</Version>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -388,6 +388,7 @@
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\LibrationPointPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\UniversePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solver\DCSetupPanel.cpp" />
@@ -596,6 +597,7 @@
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\LibrationPointPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\UniversePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solver\DCSetupPanel.hpp" />

@@ -11,6 +11,7 @@
 # wcs - 2010.04.13 - updated to work for all 3 platforms
 
 BUILD_GUI_WITH_WX = 1
+BUILD_THREADS=1
 
 include BuildEnv.mk
 
@@ -69,11 +70,11 @@ endif
 
 ifeq ($(BUILD_GUI_WITH_WX), 1)
 gui/$(PROGRAM):
-	cd base; make -f MakeBase.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
 	cd gui; make -f MakeGui.eclipse all
 else
 gui/$(PROGRAM):
-	cd base; make -f MakeBase.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
 endif
 
 console/$(PROGRAM):
@@ -81,4 +82,4 @@ console/$(PROGRAM):
 	cd console; make -f MakeConsole.eclipse all
 
 $(LIBRARY):
-	cd base; make -f MakeBase.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all

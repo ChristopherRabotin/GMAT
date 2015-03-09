@@ -35,7 +35,6 @@
 //#define DEBUG_CLONING
 //#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
-//#define DEBUG_ESM_LOADING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)
@@ -233,8 +232,8 @@ const StringArray& EstimationStateManager::GetObjectList(std::string ofType)
 bool EstimationStateManager::SetObject(GmatBase *obj)
 {
    #ifdef DEBUG_ESM_LOADING
-      MessageInterface::ShowMessage("+++Adding %s to the ESM\n",
-            obj->GetName().c_str());
+      MessageInterface::ShowMessage("+++Adding <%s,%p> to the ESM\n",
+            obj->GetName().c_str(), obj);
    #endif
 
    bool retval = false;
@@ -382,7 +381,7 @@ void EstimationStateManager::RestoreObjects(ObjectArray *fromBuffer)
       else
          *(objects[i]) = *((*restoreBuffer)[i]);
       #ifdef DEBUG_CLONING
-         MessageInterface::ShowMessage("Object data:\n%s",
+         MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[i], objects[i]->GetName().c_str(),
                objects[i]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
       #endif
    }
@@ -565,6 +564,45 @@ bool EstimationStateManager::SetProperty(std::string sf, GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
+// bool SetProperty(GmatBase *obj)                                                // made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+/**
+ * Sets a SolveFor parameter associated with a specific object. Assume that the 
+ * object obj has SolveFors paramter containing object's solve-for names. Example: 
+ * Sat.SolveFors = Cartesian. The solve-for parameter for this case is Sat.Cartisian
+ *
+ * @param obj The object that supplies solve-for parameter
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool EstimationStateManager::SetProperty(GmatBase *obj)
+{
+   StringArray solforNames;
+
+   try
+   {
+      // Get solve-for parameters
+      solforNames = obj->GetStringArrayParameter("SolveFors");
+   }
+   catch(...)
+   {
+      // If it does not have SolveFors parameter, do nothing
+   }
+
+   // Save the property elements and fill out the vectors
+   std::string prop;
+   for (UnsignedInt i = 0; i < solforNames.size(); ++i)
+   {
+      prop = obj->GetName() + "." + solforNames[i];
+      SetProperty(prop);
+   }
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetConsider(std::string prop)
 //------------------------------------------------------------------------------
 /**
@@ -680,7 +718,7 @@ bool EstimationStateManager::BuildState()
       std::stringstream sizeVal;
       sizeVal << stateSize;
       throw EstimatorException("No solve-for parameter is defined for estimator;"     // made changes by TUAN NGUYEN
-            " estimation is not possible.\n");                                         // made changes by TUAN NGUYEN
+            " estimation is not possible.\n");                                        // made changes by TUAN NGUYEN
 
       //throw EstimatorException("Estimation state vector size is " +                // made changes by TUAN NGUYEN
       //      sizeVal.str() + "; estimation is not possible.");                      // made changes by TUAN NGUYEN
@@ -826,8 +864,8 @@ bool EstimationStateManager::MapVectorToObjects()
          msg << stateMap[index]->subelement;
          std::string lbl = stateMap[index]->objectName + "." +
             stateMap[index]->elementName + "." + msg.str() + " = ";
-         MessageInterface::ShowMessage("   %d: %s%.12lf\n", index, lbl.c_str(),
-               state[index]);
+         MessageInterface::ShowMessage("   %d: %s%.12lf  for object <%s, %p>\n", index, lbl.c_str(),
+            state[index], stateMap[index]->object->GetName().c_str(), stateMap[index]->object);
       #endif
 
       switch (stateMap[index]->parameterType)
@@ -857,7 +895,17 @@ bool EstimationStateManager::MapVectorToObjects()
             MessageInterface::ShowMessage(
                   "%s not set; Element type not handled\n",label.c_str());
       }
+
    }
+
+   #ifdef DEBUG_CLONING
+   MessageInterface::ShowMessage("After map vector to object:\n");
+   for (Integer index = 0; index < objects.size(); ++index)
+   {
+      MessageInterface::ShowMessage("Object <%p,%s> data:\n%s", objects[index], objects[index]->GetName().c_str(),
+         objects[index]->GetGeneratingString(Gmat::SHOW_SCRIPT, "   ").c_str());
+   }
+   #endif
 
    GmatEpoch theEpoch = state.GetEpoch();
    for (UnsignedInt i = 0; i < objects.size(); ++i)

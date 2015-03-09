@@ -10,10 +10,12 @@
 //
 // Author: Wendy C. Shoan (original author: Allison Greene 2005.07.06)
 // Created: 2009.01.26
+// Modification:
+// 2015.02.02 Linda Jun - Added visualization tab
 //
 /**
  * Declares CelestialBodyPanel class.  This panel contains a notebook with
- * three tabs for Properties, Orbit, and Orientation.
+ * three tabs for Properties, Orbit, Orientation, and Visualization
  */
 //------------------------------------------------------------------------------
 
@@ -26,7 +28,7 @@
 #include "CelestialBodyPropertiesPanel.hpp"
 #include "CelestialBodyOrbitPanel.hpp"
 #include "CelestialBodyOrientationPanel.hpp"
-#include "GuiInterpreter.hpp"
+#include "CelestialBodyVisualizationPanel.hpp"
 #include "gmatdefs.hpp"
 
 class CelestialBodyPanel: public GmatPanel
@@ -53,10 +55,10 @@ private:
    
    wxNotebook    *cbNotebook;
    
-   CelestialBodyPropertiesPanel  *properties;
-   CelestialBodyOrbitPanel       *orbit;
-   CelestialBodyOrientationPanel *orientation;
-   
+   CelestialBodyPropertiesPanel    *properties;
+   CelestialBodyOrbitPanel         *orbit;
+   CelestialBodyOrientationPanel   *orientation;
+   CelestialBodyVisualizationPanel *visualization;
    
    void EnableAll(bool enable);
 

@@ -103,6 +103,7 @@ public:
    const std::vector<MeasurementModel*>& GetAllMeasurementModels();
    const std::vector<TrackingSystem*>&   GetAllTrackingSystems();
    const std::vector<TrackingFileSet*>&  GetAllTrackingFileSets();
+   const std::vector<TrackingDataAdapter*>& GetAllTrackingDataAdapters();
 
    UnsignedInt             GetCurrentRecordNumber();
    
@@ -115,8 +116,7 @@ public:
    
    std::vector<ObservationData>* GetObservationDataList();
 
-   const std::vector<TrackingFileSet*>     GetTrackingSets() const ;
-   const std::vector<TrackingDataAdapter*> GetTrackingDataAdapters() const;
+   //const std::vector<TrackingFileSet*>     GetTrackingSets() const ;              // It is the same as GetAllTrackingFileSets() function
 
 protected:
    /// List of the managed measurement models

@@ -441,27 +441,37 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       
       if (measurementType == "DSNRange")
       {
-         // Compute bias, noise sigma, and measurement error covariance matrix
-         ComputeMeasurementBias("DSNRangeBias");
-         ComputeMeasurementNoiseSigma("DSNRangeNoiseSigma");
+         // Compute bias
+         ComputeMeasurementBias("Bias", "Range_RU", 2);
+         // Compute noise sigma
+         ComputeMeasurementNoiseSigma("NoiseSigma", "Range_RU", 2);
+         // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
-         // Add noise to measurement value
-         if (addNoise)
+         // if need range value only, skip this section, otherwise add noise and bias as possible
+         if (!rangeOnly)
          {
-            // Add noise here
-            if (cMeasurement.unfeasibleReason != "R")
+            // Add noise to measurement value
+            if (addNoise)
             {
-               RandomNumber* rn = RandomNumber::Instance();
-               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
-               cMeasurement.value[i] = val;
+               // Add noise here
+               if (cMeasurement.unfeasibleReason != "R")
+               {
+                  RandomNumber* rn = RandomNumber::Instance();
+                  Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
+                  cMeasurement.value[i] = val;
+               }
+            }
+
+            //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+            if (addBias)
+            {
+               #ifdef DEBUG_RANGE_CALCULATION
+                  MessageInterface::ShowMessage("      . Add bias...\n");
+               #endif
+               cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
             }
          }
-         //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . Add bias...\n");
-         #endif
-         cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
       }
 
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
@@ -541,23 +551,8 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
    #endif
 
    
-   if (paramName.substr(paramName.size()-4) == "Bias")
-   {
-      // Compute measurement derivatives w.r.t Bias:
-      if (paramName == "DSNRangeBias")
-      {
-         RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-      }
-      else
-      {
-         // for RangeBias and DopplerBias, derivative is 0.0
-         Integer size = obj->GetEstimationParameterSize(id);
-         theDataDerivatives.clear();
-         RealArray val;
-         val.assign(size, 0.0);
-         theDataDerivatives.push_back(val);
-      }
-   }
+   if (paramName == "Bias")
+      RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
    else
    {
       // Compute measurement derivatives w.r.t position and velocity in km:

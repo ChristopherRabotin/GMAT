@@ -23,7 +23,7 @@
 #include "ErrorModel.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
-//#include "MeasurementException.hpp"
+#include <sstream>
 
 
 //#define DEBUG_CONSTRUCTION
@@ -41,18 +41,18 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
    "NoiseSigma",
    "NoiseModel",
    "Bias",
-   "SolveMode",
+   "SolveFors",
 };
 
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_Hz"
    Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
-   Gmat::STRING_TYPE,		   // STRAND                // Its value is a string containing signal path of measurement
+   Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
    Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
-   Gmat::STRING_TYPE,			// SOLVEMODE             // Specify what mode that bias used for. If SolveMode = 'Estimation', bias is used as a solve-for variable. If SolveMode = 'Model', bias is used as a consider
+   Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
 };
 
 
@@ -70,11 +70,10 @@ ErrorModel::ErrorModel(const std::string name) :
    GmatBase          (Gmat::ERROR_MODEL, "ErrorModel", name),
    measurementType   ("Range_KM"),
    measurementTrip   (2),
-   strand            (""),
+//   strand            (""),
    noiseSigma        (0.01),                   // 0.01 Km
    noiseModel        ("NoiseConstant"), 
-   bias              (0.0),                    // 0.0 Km
-   solveMode         ("Model")
+   bias              (0.0)                    // 0.0 Km
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -109,14 +108,14 @@ ErrorModel::~ErrorModel()
  */
 //------------------------------------------------------------------------------
 ErrorModel::ErrorModel(const ErrorModel& em) :
-   GmatBase          (em),
-   measurementType   (em.measurementType),
-   measurementTrip   (em.measurementTrip),
-   strand            (em.strand),
-   noiseSigma        (em.noiseSigma),
-   noiseModel        (em.noiseModel),
-   bias              (em.bias),
-   solveMode         (em.solveMode)
+   GmatBase              (em),
+   measurementType       (em.measurementType),
+   measurementTrip       (em.measurementTrip),
+   participantNameList   (em.participantNameList),
+   noiseSigma            (em.noiseSigma),
+   noiseModel            (em.noiseModel),
+   bias                  (em.bias),
+   solveforNames         (em.solveforNames)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("ErrorModel copy constructor from <%s,%p>  to  <%s,%p>\n", em.GetName().c_str(), &em, GetName().c_str(), this);
@@ -146,16 +145,48 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
    {
       GmatBase::operator=(em);
 
-      measurementType = em.measurementType;
-      measurementTrip = em.measurementTrip;
-      strand          = em.strand;
-      noiseSigma      = em.noiseSigma;
-      noiseModel      = em.noiseModel;
-      bias            = em.bias;
-      solveMode       = em.solveMode;
+      measurementType     = em.measurementType;
+      measurementTrip     = em.measurementTrip;
+      participantNameList = em.participantNameList;
+      noiseSigma          = em.noiseSigma;
+      noiseModel          = em.noiseModel;
+      bias                = em.bias;
+      solveforNames       = em.solveforNames;
    }
 
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// bool operator==(const ErrorModel& em)
+//------------------------------------------------------------------------------
+/**
+ * ErrorModel equal comparing operator
+ *
+ * @param em    The ErrorModel object that provides data for the this one
+ *
+ * @return      true if both error model objects having the same measurement 
+ *              type, trip, and strand; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ErrorModel::operator==(const ErrorModel& em)
+{
+#ifdef DEBUG_CONSTRUCTION
+	MessageInterface::ShowMessage("ErrorModel operator == <%s,%p>\n", GetName().c_str(), this);
+#endif
+
+   if (this != &em)
+   {
+      //retVal = GmatBase::operator==(em);
+
+      if ((GetName() != em.GetName())||
+          (measurementType != em.measurementType)||
+          (measurementTrip != em.measurementTrip)||
+          (participantNameList != em.participantNameList))
+         return false;
+   }
+   return true;
 }
 
 
@@ -188,8 +219,10 @@ bool ErrorModel::Initialize()
 #ifdef DEBUG_INITIALIZATION
 	MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   entered\n", GetName().c_str(), this);
 #endif
+   if (isInitialized)
+      return true;
 
-   bool retval = false;
+   bool retval = true;
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("ErrorModel<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -249,6 +282,7 @@ std::string ErrorModel::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ErrorModel::GetParameterUnit(const Integer id) const
 {
+   // @Todo: It needs to add code to specify unit used for each parameter
    return GmatBase::GetParameterUnit(id);
 }
 
@@ -312,11 +346,12 @@ std::string ErrorModel::GetParameterTypeString(const Integer id) const
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
+
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
- * Retrieves a string property of a DataFile
+ * Retrieves a string property
  *
  * @param id The ID of the property
  *
@@ -328,14 +363,8 @@ std::string ErrorModel::GetStringParameter(const Integer id) const
    if (id == TYPE)
       return measurementType;
 
-   if (id == STRAND)
-      return strand;
-
    if (id == NOISE_MODEL)
       return noiseModel;
-
-   if (id == SOLVE_MODE)
-      return solveMode;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -360,17 +389,10 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
-   if (id == STRAND)
-   {
-      strand = value;
-      return true;
-   }
-
    if (id == NOISE_MODEL)
    {
       if (value != "RandomConstant")
       {
-         //throw MeasurementException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
          throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
          return false;
       }
@@ -378,21 +400,6 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
       {
          noiseModel = value;    
 	      return true;
-      }
-   }
-
-   if (id == SOLVE_MODE)
-   {
-      if ((value != "Estimation")&&(value != "Model"))
-      {
-         //throw MeasurementException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-         throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-         return false;
-      }
-      else
-      {
-         this->solveMode = value;
-         return true;
       }
    }
 
@@ -436,6 +443,191 @@ bool ErrorModel::SetStringParameter(const std::string &label,
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string property from a StringArray object
+ *
+ * @param id      The ID of the property
+ * @param index   The index of the property of StringArray type 
+ *
+ * @return The property value
+ */
+//------------------------------------------------------------------------------
+std::string ErrorModel::GetStringParameter(const Integer id, const Integer index) const
+{
+   if (id == STRAND)
+   {
+      if ((index < 0)||(index >= (Integer)participantNameList.size()))
+      {
+         std::stringstream ss;
+         ss << "Error: participant index (" << index << ") is out of bound.\n";
+         throw GmatBaseException(ss.str());
+      }
+
+      return participantNameList[index];
+   }
+
+   if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
+   {                                                                                // made changes by TUAN NGUYEN
+      if ((index < 0)||(index >= (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         std::stringstream ss;                                                      // made changes by TUAN NGUYEN
+         ss << "Error: solve-for index (" << index << ") is out of bound.\n";       // made changes by TUAN NGUYEN
+         throw GmatBaseException(ss.str());                                         // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+
+      return solveforNames[index];                                                  // made changes by TUAN NGUYEN
+   }                                                                                // made changes by TUAN NGUYEN
+
+   return GmatBase::GetStringParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Set value to a property of StringArray type
+ *
+ * @param id      The ID of the property
+ * @param index   The index of the property of StringArray type 
+ *
+ * @return true if the setting successes and false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
+                                           const Integer index)
+{
+   if (id == STRAND)
+   {
+      if ((0 <= index)&&(index < (Integer)participantNameList.size()))
+      {
+         participantNameList[index] = value;
+         return true;
+      }
+      else
+      {
+         if (index == participantNameList.size())
+         {
+            participantNameList.push_back(value);
+            return true;
+         }
+         else
+         {
+            std::stringstream ss;
+            ss << "Error: participant name's index (" << index << ") is out of bound.\n"; 
+            throw GmatBaseException(ss.str());
+         }
+      }
+   }
+
+   if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
+   {                                                                                // made changes by TUAN NGUYEN
+      if ((0 <= index)&&(index < (Integer)solveforNames.size()))                    // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         solveforNames[index] = value;                                              // made changes by TUAN NGUYEN
+         return true;                                                               // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+      else                                                                          // made changes by TUAN NGUYEN
+      {                                                                             // made changes by TUAN NGUYEN
+         if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
+         {                                                                          // made changes by TUAN NGUYEN
+            solveforNames.push_back(value);                                         // made changes by TUAN NGUYEN
+            return true;                                                            // made changes by TUAN NGUYEN
+         }                                                                          // made changes by TUAN NGUYEN
+         else                                                                       // made changes by TUAN NGUYEN
+         {                                                                          // made changes by TUAN NGUYEN
+            std::stringstream ss;                                                   // made changes by TUAN NGUYEN
+            ss << "Error: solve-for's index (" << index << ") is out of bound.\n";  // made changes by TUAN NGUYEN
+            throw GmatBaseException(ss.str());                                      // made changes by TUAN NGUYEN
+         }                                                                          // made changes by TUAN NGUYEN
+      }                                                                             // made changes by TUAN NGUYEN
+   }                                                                                // made changes by TUAN NGUYEN
+
+   return GmatBase::SetStringParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string property from a StringArray object
+ *
+ * @param labe    The name of the property
+ * @param index   The index of the property of StringArray type 
+ *
+ * @return The property value
+ */
+//------------------------------------------------------------------------------
+std::string ErrorModel::GetStringParameter(const std::string &label, const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Set value to a property of StringArray type
+ *
+ * @param label   The name of the property
+ * @param index   The index of the property of StringArray type 
+ *
+ * @return true if the setting successes and false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ErrorModel::SetStringParameter(const std::string &label, const std::string &value,
+                                           const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// const std::string GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a StringArray property
+ *
+ * @param id The ID of the property
+ *
+ * @return The property value
+ */
+//------------------------------------------------------------------------------
+const StringArray& ErrorModel::GetStringArrayParameter(const Integer id) const
+{
+   if (id == STRAND)
+      return participantNameList;
+
+   if (id == SOLVEFORS)                           // made changes by TUAN NGUYEN
+      return solveforNames;                       // made changes by TUAN NGUYEN
+
+   return GmatBase::GetStringArrayParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// const std::string GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a StringArray property
+ *
+ * @param label   The name of the property
+ *
+ * @return The property value
+ */
+//------------------------------------------------------------------------------
+const StringArray& ErrorModel::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+
 Real ErrorModel::GetRealParameter(const Integer id) const
 {
    if (id == NOISE_SIGMA)
@@ -453,7 +645,6 @@ Real ErrorModel::SetRealParameter(const Integer id, const Real value)
    if (id == NOISE_SIGMA)
    {
       if (value <= 0.0)
-         //throw MeasurementException("Error: value of "+ GetName() +".NoiseSigma has to be a positive number.\n");
          throw GmatBaseException("Error: value of "+ GetName() +".NoiseSigma has to be a positive number.\n");
 
 	  noiseSigma = value;
@@ -496,7 +687,6 @@ Integer ErrorModel::SetIntegerParameter(const Integer id, const Integer value)
    if (id == TRIP)
    {
       if (value < 0)
-         //throw MeasurementException("Error: value of "+ GetName() +".Trip has to be a non-positive integer.\n");
          throw GmatBaseException("Error: value of "+ GetName() +".Trip has to be a non-positive integer.\n");
 
 	   measurementTrip = value;
@@ -517,4 +707,84 @@ Integer ErrorModel::SetIntegerParameter(const std::string& label, const Integer 
 {
 	return SetIntegerParameter(GetParameterID(label), value);
 }
+
+
+
+//------------------------------------------------------------------------------
+// bool IsEstimationParameterValid(const Integer item)
+//------------------------------------------------------------------------------
+bool ErrorModel::IsEstimationParameterValid(const Integer item)
+{
+   bool retval = false;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   switch (id)
+   {
+   case BIAS:
+         retval = true;
+         break;
+
+      // All other values call up the hierarchy
+      default:
+         retval = GmatBase::IsEstimationParameterValid(item);
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetEstimationParameterSize(const Integer item)
+//------------------------------------------------------------------------------
+Integer ErrorModel::GetEstimationParameterSize(const Integer item)
+{
+   Integer retval = 1;
+
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   #ifdef DEBUG_ESTIMATION
+      MessageInterface::ShowMessage("ErrorModel::GetEstimationParameterSize(%d)"
+            " called; parameter ID is %d\n", item, id);
+   #endif
+
+
+   switch (id)
+   {
+      case BIAS:
+         retval = 1;
+         break;
+
+      // All other values call up the hierarchy
+      default:
+         retval = GmatBase::GetEstimationParameterSize(item);
+   }
+
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// Real* GetEstimationParameterValue(const Integer item)
+//------------------------------------------------------------------------------
+Real* ErrorModel::GetEstimationParameterValue(const Integer item)
+{
+   Real* retval = NULL;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   switch (id)
+   {
+      case BIAS:
+         retval = &bias;
+         break;
+
+      // All other values call up the class heirarchy
+      default:
+         retval = GmatBase::GetEstimationParameterValue(item);
+   }
+
+   return retval;
+}
+
 

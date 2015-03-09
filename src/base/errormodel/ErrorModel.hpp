@@ -23,14 +23,11 @@
 #ifndef ErrorModel_hpp
 #define ErrorModel_hpp
 
-//#include "estimation_defs.hpp"
 #include "GmatBase.hpp"
-
 
 /**
  * DataFile is defined error model for a measurement model.
  */
-//class ESTIMATION_API ErrorModel : public GmatBase
 class GMAT_API ErrorModel : public GmatBase
 {
 public:
@@ -38,6 +35,7 @@ public:
    virtual ~ErrorModel();
    ErrorModel(const ErrorModel& em);
    ErrorModel& operator=(const ErrorModel& em);
+   bool operator==(const ErrorModel& em);
 
    virtual GmatBase* Clone() const;
    virtual bool Initialize();
@@ -54,24 +52,24 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
-//   virtual std::string  GetStringParameter(const Integer id,
-//                                           const Integer index) const;
-//   virtual bool         SetStringParameter(const Integer id,
-//                                           const std::string &value,
-//                                           const Integer index);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-//   virtual std::string  GetStringParameter(const std::string &label,
-//                                           const Integer index) const;
-//   virtual bool         SetStringParameter(const std::string &label,
-//                                           const std::string &value,
-//                                           const Integer index);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
 
-//   virtual const StringArray&
-//                        GetStringArrayParameter(const Integer id) const;
-//   virtual const StringArray&
-//                        GetStringArrayParameter(const std::string &label) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
@@ -90,6 +88,11 @@ public:
    //virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    //                                  const std::string &name = "");
 
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
+
+
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -99,17 +102,18 @@ protected:
    std::string   measurementType;               // Its value to be "Range_KM", "Range_RU", "Doppler_RangeRate", or "Doppler_Hz"
    /// Measurement trip
    Integer       measurementTrip;               // specify number of ways of a measurement. It would be 1 for one-way, 2 for two-ways, 3 for three-ways, and so on. It is 0 for all trips
-   /// Strand of a measurement signal
-   std::string   strand;                        // specify strand of a measurement
+   /// Participant name list
+   StringArray   participantNameList;           // It contains a list of participant name
    /// Measurement noise sigma
    Real          noiseSigma;                    // specify noise sigma of a measurement
    /// Noise Model
    std::string   noiseModel;                    // specify noise model. It will be "RandomConstant" for Gausian noise model.
    /// Measurement bias
    Real          bias;                          // specify bias of a measurement
-   /// Bias solve mode
-   std::string   solveMode;                     // specify bias solve mode. It would be "Estimate" when bias is used as a solve-for variable or "Model" when bias is used as a consider variable
-   
+   ///// Bias solve mode
+   //std::string   solveMode;                     // specify bias solve mode. It would be "Estimate" when bias is used as a solve-for variable or "Model" when bias is used as a consider variable
+   /// Solve-for parameters
+   StringArray   solveforNames;                 // It contains a name list of solve-for parameters
 
    /// Class parameter ID enumeration
    enum
@@ -120,7 +124,7 @@ protected:
       NOISE_SIGMA,
       NOISE_MODEL,
       BIAS,
-      SOLVE_MODE,
+      SOLVEFORS,                              // made changes by TUAN NGUYEN
       ErrorModelParamCount
    };
 

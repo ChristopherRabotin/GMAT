@@ -1139,11 +1139,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage("2. Find the measurement epoch needed for the computation\n");
    #endif
 
-#ifdef USE_PRECISION_TIME
    GmatTime forEpoch;
-#else
-   GmatEpoch forEpoch;
-#endif
    if (forObservation)
       forEpoch = forObservation->epoch;
    else // Grab epoch from the first SpaceObject in the participant data
@@ -1173,11 +1169,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
-      #ifdef USE_PRECISION_TIME
       MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch.GetMjd());
-      #else
-      MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch);
-      #endif
    #endif
 
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
@@ -1186,20 +1178,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       if (i->first->IsOfType(Gmat::SPACEOBJECT) && (i->second != NULL))
       {
          GmatEpoch satTime = ((SpaceObject*)i->first)->GetEpoch();
-#ifdef USE_PRECISION_TIME
          Real dt = (forEpoch - satTime).GetTimeInSec();
-#else
-         Real dt = (forEpoch - satTime) * GmatTimeConstants::SECS_PER_DAY;
-#endif
 
          #ifdef DEBUG_EXECUTION
-#ifdef USE_PRECISION_TIME
             MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
                   "dt = %le\n", forEpoch.GetMjd(), satTime, dt);
-#else
-            MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
-                  "dt = %le\n", forEpoch, satTime, dt);
-#endif
          #endif
 
          // Make sure the propagators are set to the spacecraft data
@@ -1219,11 +1202,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    #ifdef DEBUG_CALCULATE_MEASUREMENT
       MessageInterface::ShowMessage("*************************************************************\n");
 
-      #ifdef USE_PRECISION_TIME
       MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch.GetMjd());
-      #else
-      MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch);
-      #endif
      
       MessageInterface::ShowMessage("*************************************************************\n");
    #endif
@@ -1291,11 +1270,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       {
          SignalData *sdObj = leg->GetSignalDataObject();
 
-         #ifdef USE_PRECISION_TIME
             sdObj->tPrecTime = sdObj->rPrecTime = forEpoch;
-         #else
-            sdObj->tTime = sdObj->rTime = forEpoch;
-         #endif
          if (sdObj->tNode->IsOfType(Gmat::SPACECRAFT))
          {
             const Real* propState =

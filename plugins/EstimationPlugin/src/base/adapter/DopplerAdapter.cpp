@@ -700,14 +700,24 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
    // 2. Compute for End path
    // 2.1. Propagate all space objects to time tm
    // This step is not needed due to measurement time tm is set to t3RE
-   
    // 2.2. Compute range in km for End Path
    #ifdef DEBUG_DOPPLER_CALCULATION
       MessageInterface::ShowMessage("Compute range for E-Path...\n");
    #endif
+   bool addNoiseOption  = addNoise;
+   bool addBiasOption   = addBias;
+   bool rangeOnlyOption = rangeOnly; 
+
+   addNoise = false;
+   addBias = false;
+   rangeOnly = true;
    RangeAdapterKm::CalculateMeasurement(withEvents, forObservation, rampTB);
    measDataE = cMeasurement;
-
+   
+   addNoise = addNoiseOption;
+   addBias = addBiasOption;
+   rangeOnly = rangeOnlyOption;
+   
    // 2.3. Specify uplink frequency
    // Note that: In the current version, only one signal path is used in AdapterConfiguration. Therefore, path index is 0 
    uplinkFreqE = calcData->GetUplinkFrequency(0, rampTB);
@@ -733,6 +743,8 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
    // For Start-path, range calculation does not add bias and noise to calculated value
    // Note that: default option is no adding noise
    adapterS->AddBias(false);
+   adapterS->AddNoise(false);                                                    // made changes by TUAN NGUYEN
+   adapterS->SetRangeOnly(true);                                                 // made changes by TUAN NGUYEN
 
    adapterS->CalculateMeasurement(withEvents, obData, rampTB);
    if (obData)
@@ -833,28 +845,38 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       Real C_idealVal = cMeasurement.value[i];
       
       if (measurementType == "Doppler")
-      {
-         // Compute bias, noise sigma, and measurement error covariance matrix
-         ComputeMeasurementBias("DopplerBias");
-         ComputeMeasurementNoiseSigma("DopplerNoiseSigma");
+      {         
+         // Compute bias
+         ComputeMeasurementBias("Bias", "Doppler_HZ", 2);
+         // Compute noise sigma
+         ComputeMeasurementNoiseSigma("NoiseSigma", "Doppler_HZ", 2);
+         // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
-         
-         // Add noise to measurement value
-         if (addNoise)
+
+         // if need range value only, skip this section, otherwise add noise and bias as possible
+         if (!rangeOnly)
          {
-            // Add noise here
-            if (cMeasurement.unfeasibleReason != "R")
+            // Add noise to measurement value
+            if (addNoise)
             {
-               RandomNumber* rn = RandomNumber::Instance();
-               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
-               cMeasurement.value[i] = val;
+               // Add noise here
+               if (cMeasurement.unfeasibleReason != "R")
+               {
+                  RandomNumber* rn = RandomNumber::Instance();
+                  Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
+                  cMeasurement.value[i] = val;
+               }
+            }
+         
+            //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+            if (addBias)
+            {
+               #ifdef DEBUG_RANGE_CALCULATION
+                  MessageInterface::ShowMessage("      . Add bias...\n");
+               #endif
+               cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
             }
          }
-         //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . Add bias...\n");
-         #endif
-         cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
       }
 
 
@@ -951,23 +973,8 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
    #endif
 
-   if (paramName.substr(paramName.size()-4) == "Bias")
-   {
-      // Compute measurement derivatives w.r.t Bias:
-      if (paramName == "DopplerBias")
-      {
-         RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-      }
-      else
-      {
-         // for RangeBias and DSNRangeBias, derivative is 0.0
-         Integer size = obj->GetEstimationParameterSize(id);
-         theDataDerivatives.clear();
-         RealArray val;
-         val.assign(size, 0.0);
-         theDataDerivatives.push_back(val);
-      }
-   }
+   if (paramName == "Bias")
+      RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
    else
    {
 

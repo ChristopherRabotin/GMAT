@@ -46,7 +46,8 @@ HEADERS = -Ievent \
           -I$(GMAT_CODE_LOCATION)/base/spacecraft \
           -I$(GMAT_CODE_LOCATION)/base/foundation \
           -I$(GMAT_CODE_LOCATION)/base/factory \
-          -I$(GMAT_CODE_LOCATION)/base/subscriber 
+          -I$(GMAT_CODE_LOCATION)/base/subscriber \
+          $(SPICE_INCLUDE)
 
 
 clean : archclean
@@ -62,7 +63,10 @@ CPP_OBJECTS = \
     plugin/GmatPluginFunctions.o \
     event/Elevation.o \
     event/Contact.o \
+    event/ContactEvent.o \
     event/Eclipse.o \
+    event/EclipseEvent.o \
+    event/EclipseTotalEvent.o \
     event/Antumbra.o \
     event/Penumbra.o \
     event/Umbra.o \

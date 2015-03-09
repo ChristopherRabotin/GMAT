@@ -41,25 +41,9 @@ public:
                                    Integer count = 1);
 
    virtual GmatBase*       Clone() const; // inherited from GmatBase
-protected:
-   /// Flag to indicate if data comes from a file
-   bool                    fileData;
-   /// Name of the file
-   std::string             fluxfilename;
-   /// Second of day
-   Real                    sod;
-   /// Year + Day of year, in the form YYYYDDD
-   Integer                 yd;
-   /// Value of F10.7 to use
-   Real                    f107;
-   /// 3 month average of the F10.7 data
-   Real                    f107a;
-   /// Geomagnetic index (Ap, not Kp)
-   Real                    ap[7];
-   
-   Integer                 mass;
 
-   void                    GetInputs(Real epoch);
+protected:
+   Integer                 mass;
 };
 
 #endif // Msise90Atmosphere_hpp
