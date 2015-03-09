@@ -4583,6 +4583,7 @@ Interpolator* Moderator::GetInterpolator(const std::string &name)
  * @param  manage  The value to use for managing the newly created CS
  *                 0 = do not add to configuration
  *                 1 = add to configuration
+ *                 2 = function object map is used
  */
 //------------------------------------------------------------------------------
 CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
@@ -4660,7 +4661,9 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          obj->SetSolarSystem(ss);
          obj->Initialize();
          
-         if (createDefault)
+         // Create axis if creating default coordinate system
+         // or creating inside a function (LOJ: 2015.02.19 - to fix ACE script)
+         if (createDefault || manage == 2)
          {
             // create MJ2000Eq AxisSystem with Earth as origin
             AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "MJ2000Eq_Earth");
