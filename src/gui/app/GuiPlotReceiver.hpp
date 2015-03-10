@@ -176,6 +176,8 @@ public:
 
    virtual bool DeactivateXyPlot(const std::string &plotName);
    virtual bool ActivateXyPlot(const std::string &plotName);
+   virtual bool TakeXYAction(const std::string &plotName,
+                        const std::string &action);
 
 protected:
    bool ComputePlotPositionAndSize(bool isGLPlot, Real positionX,

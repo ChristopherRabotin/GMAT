@@ -178,6 +178,8 @@ public:
 
    static bool DeactivateXyPlot(const std::string &plotName);
    static bool ActivateXyPlot(const std::string &plotName);
+   static bool TakeXYAction(const std::string &plotName,
+                        const std::string &action);
 
 
 private:
