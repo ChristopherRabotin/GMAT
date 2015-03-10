@@ -1954,6 +1954,42 @@ bool GuiPlotReceiver::ActivateXyPlot(const std::string &plotName)
    return activated;
 }
 
+//------------------------------------------------------------------------------
+// bool GuiPlotReceiver::TakeXYAction(const std::string &plotName,
+//                         const std::string &action)
+//------------------------------------------------------------------------------
+/**
+ *
+ *
+ * @param
+ *
+ * @return
+ */
+//------------------------------------------------------------------------------
+bool GuiPlotReceiver::TakeXYAction(const std::string &plotName,
+                        const std::string &action)
+{
+   bool retval = false;
+   wxString owner = wxString(plotName.c_str());
+
+   MdiChildTsFrame *frame = NULL;
+
+   for (int i = 0; i < MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            ((MdiChildTsFrame*)frame)->TakeAction(action);
+            retval = true;
+         }
+      }
+   }
+
+   return retval;
+}
 
 //------------------------------------------------------------------------------
 // bool ComputePlotPositionAndSize(bool isGLPlot, Integer &x, Integer &y, Integer &w, ...)
