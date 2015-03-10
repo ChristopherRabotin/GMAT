@@ -206,6 +206,9 @@ namespace Gmat
       DATASTREAM,          // For DataFile container objects      
       DATA_FILE,           // For DataFile objects
       OBTYPE,              // For the specific observation types
+
+      // Data filters
+      DATA_FILTER,         // for data filter                              // made changes by TUAN NGUYEN
       
       INTERFACE,           // MatlabInterface and other Interfaces
       MEDIA_CORRECTION,    // For media correction model
