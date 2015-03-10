@@ -49,6 +49,7 @@
 #include "MathFactory.hpp"
 
 #include "ErrorModelFactory.hpp"                                     // made changes by TUAN NGUYEN
+#include "DataFilterFactory.hpp"                                     // made changes by TUAN NGUYEN
 
 #include "Interface.hpp"
 #include "XyPlot.hpp"
@@ -241,6 +242,7 @@ bool Moderator::Initialize(const std::string &startupFile, bool fromGui)
       theFactoryManager->RegisterFactory(new SubscriberFactory());
       theFactoryManager->RegisterFactory(new CelestialBodyFactory());
       theFactoryManager->RegisterFactory(new ErrorModelFactory());                   // made changes by TUAN NGUYEN
+      theFactoryManager->RegisterFactory(new DataFilterFactory());                   // made changes by TUAN NGUYEN
       
       #ifdef __INCLUDE_BUILTIN_PLUGINS__
       ForStaticLinkBuild::RegisterBuiltinPluginFactories(theFactoryManager);
