@@ -2,39 +2,42 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-# CMAKE script file for GMAT CInterface Plugin.
-# This file must be installed in the plugins/CInterfacePlugin/src directory
+# CMAKE script file for GMAT GmatFunction Plugin.
+# (Adapted from the CInterface plugin CMake script)
+# This file must be installed in the plugins/GmatFunctionPlugin/src directory
 #
-# Author: Josh Fisher
-# Modified by Ravi Mathur: Extensive CMake build system overhaul
+# Author: Ravi Mathur
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
+MESSAGE("GMAT GmatFunction Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET "libCInterface")
+	SET(PLUGINTARGET  "libGmatFunction")
 else()
-	SET(PLUGINTARGET "CInterface")
+	SET(PLUGINTARGET "GmatFunction")
 endif()
 
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-DCINTERFACE_EXPORTS")
+ADD_DEFINITIONS("-DGMATFUNCTION_EXPORTS")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS command factory include plugin)
+SET(PLUGIN_DIRS command factory function include plugin)
 
 # ====================================================================
-# specify source files to be compiled
+# source files
 SET(PLUGIN_SRCS
-    command/PrepareMissionSequence.cpp
-    factory/CCommandFactory.cpp
-    plugin/CInterfacePluginFunctions.cpp
+    command/CallGmatFunction.cpp
+    command/Global.cpp
+    factory/GmatFunctionCommandFactory.cpp
+    factory/GmatFunctionFactory.cpp
+    function/GmatFunction.cpp
+    plugin/GmatPluginFunctions.cpp
 )
 
 # ====================================================================
@@ -50,5 +53,5 @@ endif()
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
-  DESTINATION bin
+  DESTINATION plugins
   )

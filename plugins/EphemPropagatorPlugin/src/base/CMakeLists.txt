@@ -2,39 +2,44 @@
 # 
 # GMAT: General Mission Analysis Tool.
 # 
-# CMAKE script file for GMAT CInterface Plugin.
-# This file must be installed in the plugins/CInterfacePlugin/src directory
+# CMAKE script file for GMAT EphemPropagator Plugin.
+# (Adapted from the CInterface plugin CMake script)
+# This file must be installed in the plugins/EphemPropagatorPlugin/src directory
 #
-# Author: Josh Fisher
-# Modified by Ravi Mathur: Extensive CMake build system overhaul
+# Author: Ravi Mathur
 #  
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
+MESSAGE("GMAT EphemPropagator Plugin setup " ${VERSION}) 
 
 if(WIN32)
-	SET(PLUGINTARGET "libCInterface")
+	SET(PLUGINTARGET  "libEphemPropagator")
 else()
-	SET(PLUGINTARGET "CInterface")
+	SET(PLUGINTARGET "EphemPropagator")
 endif()
 
 SET(TargetName ${PLUGINTARGET})
 
 # Add Preproccessor Definitions
-ADD_DEFINITIONS("-DCINTERFACE_EXPORTS")
+ADD_DEFINITIONS("-DEPHEM_PROPAGATOR_EXPORTS")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS command factory include plugin)
+SET(PLUGIN_DIRS factory include plugin propagator)
 
 # ====================================================================
-# specify source files to be compiled
+# include directories for header files
+INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
+
+# ====================================================================
+# source files
 SET(PLUGIN_SRCS
-    command/PrepareMissionSequence.cpp
-    factory/CCommandFactory.cpp
-    plugin/CInterfacePluginFunctions.cpp
+    factory/EphemPropFactory.cpp
+    plugin/GmatPluginFunctions.cpp
+    propagator/EphemerisPropagator.cpp
+    propagator/SPKPropagator.cpp
 )
 
 # ====================================================================
@@ -50,5 +55,5 @@ endif()
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
 
 INSTALL( TARGETS ${TargetName}
-  DESTINATION bin
+  DESTINATION plugins
   )

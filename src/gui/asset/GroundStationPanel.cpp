@@ -403,7 +403,7 @@ void GroundStationPanel::SaveData()
          localGroundStation->SetRealParameter(localGroundStation->GetParameterID("MinimumElevationAngle"), minElevation);
       else
       {
-         std::string elstr = minElevationCtrl->GetValue().c_str();
+         std::string elstr = minElevationCtrl->GetValue().WX_TO_STD_STRING;
          CheckRealRange(elstr, minElevation, "MinimumElevationAngle", -90.0, 90.0, true, true, true, true);
          canClose = false;
       }
