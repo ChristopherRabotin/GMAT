@@ -67,6 +67,9 @@
     <Filter Include="Source Files\tdmReader">
       <UniqueIdentifier>{bd163232-214a-48be-9c8c-bcb3e35e0970}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\datafilter">
+      <UniqueIdentifier>{cb2b4d2b-6bef-4f27-8b11-a305bf37f64c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\include\estimation_defs.hpp">
@@ -363,6 +366,12 @@
     <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\StatisticAcceptFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EstimationDataFilterFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -646,6 +655,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp">
       <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\StatisticAcceptFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EstimationDataFilterFactory.cpp">
+      <Filter>Source Files\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
