@@ -112,6 +112,7 @@ HEADERS = -Iinclude \
           -I$(GMAT_Code_Location)/base/foundation \
           -I$(GMAT_Code_Location)/base/event \
           -I$(GMAT_Code_Location)/base/executive \
+          -I$(GMAT_Code_Location)/base/errormodel \
           -I$(GMAT_Code_Location)/base/asset \
           -I$(GMAT_Code_Location)/base/attitude \
           -I$(GMAT_Code_Location)/base/hardware \
