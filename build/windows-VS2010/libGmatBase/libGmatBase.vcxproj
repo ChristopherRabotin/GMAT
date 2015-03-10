@@ -211,7 +211,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event;..\..\..\src\base\errormodel</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\base\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\base\datafilter;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event;..\..\..\src\base\errormodel</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;GMAT_EXPORTS;EXP_STL;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4251;4231</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -412,6 +412,7 @@
     <ClCompile Include="..\..\..\src\base\coordsystem\TOEEqAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TopocentricAxes.cpp" />
     <ClCompile Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.cpp" />
+    <ClCompile Include="..\..\..\src\base\datafilter\DataFilter.cpp" />
     <ClCompile Include="..\..\..\src\base\errormodel\ErrorModel.cpp" />
     <ClCompile Include="..\..\..\src\base\event\Brent.cpp" />
     <ClCompile Include="..\..\..\src\base\event\EventException.cpp" />
@@ -435,6 +436,7 @@
     <ClCompile Include="..\..\..\src\base\factory\CelestialBodyFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\CommandFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\CoordinateSystemFactory.cpp" />
+    <ClCompile Include="..\..\..\src\base\factory\DataFilterFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\ErrorModelFactory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\Factory.cpp" />
     <ClCompile Include="..\..\..\src\base\factory\FactoryException.cpp" />
@@ -848,6 +850,7 @@
     <ClInclude Include="..\..\..\src\base\coordsystem\TOEEqAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TopocentricAxes.hpp" />
     <ClInclude Include="..\..\..\src\base\coordsystem\TrueOfDateAxes.hpp" />
+    <ClInclude Include="..\..\..\src\base\datafilter\DataFilter.hpp" />
     <ClInclude Include="..\..\..\src\base\errormodel\ErrorModel.hpp" />
     <ClInclude Include="..\..\..\src\base\event\Brent.hpp" />
     <ClInclude Include="..\..\..\src\base\event\EventException.hpp" />
@@ -871,6 +874,7 @@
     <ClInclude Include="..\..\..\src\base\factory\CelestialBodyFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\CommandFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\CoordinateSystemFactory.hpp" />
+    <ClInclude Include="..\..\..\src\base\factory\DataFilterFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\ErrorModelFactory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\Factory.hpp" />
     <ClInclude Include="..\..\..\src\base\factory\FactoryException.hpp" />

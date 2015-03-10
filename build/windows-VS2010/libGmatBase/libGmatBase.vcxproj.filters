@@ -103,6 +103,9 @@
     <Filter Include="Source Files\errormodel">
       <UniqueIdentifier>{88b8d9d7-2554-4ac2-aea5-0fda27e1e4f5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\datafilter">
+      <UniqueIdentifier>{b7bb2a7c-a54c-4106-aa82-890dac1c4c83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\util\StringTokenizer.cpp">
@@ -1385,6 +1388,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\datafilter\DataFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\factory\DataFilterFactory.cpp">
+      <Filter>Source Files\factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2725,6 +2734,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\datafilter\DataFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\factory\DataFilterFactory.hpp">
+      <Filter>Source Files\factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
