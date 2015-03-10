@@ -708,6 +708,7 @@ SpiceDouble SpiceInterface::A1ToSpiceTime(Real a1Time)
    return spiceTime;
 }
 
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -761,6 +762,7 @@ void SpiceInterface::InitializeInterface()
          reset_c();
          throw UtilityException(errmsg);
       }
+
 
       // set actions for cspice error writing
       char  report[5] = "LONG"; // "ALL";

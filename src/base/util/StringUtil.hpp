@@ -48,6 +48,10 @@ namespace GmatStringUtil
    GMAT_API std::string RemoveScientificNotation(const std::string &str);
    GMAT_API std::string RemoveMathSymbols(const std::string &str, bool removeMathOperator = false);
    
+   GMAT_API std::string PadWithBlanks(const std::string &str, Integer toSize, StripType whichEnd = TRAILING);
+   GMAT_API std::string BuildNumber(Real value, bool useExp = false, Integer length = 17);
+
+
    GMAT_API std::string Trim(const std::string &str, StripType stype = BOTH,
                            bool removeSemicolon = false, bool removeEol = false);
    GMAT_API std::string Strip(const std::string &str, StripType stype = BOTH);
@@ -75,6 +79,8 @@ namespace GmatStringUtil
                            Integer width = GmatGlobal::INTEGER_WIDTH);
    GMAT_API std::string ToStringNoZeros(const Real &val);
    
+   GMAT_API std::string ToOrdinal(Integer i, bool textOnly = false);
+
    GMAT_API std::string RemoveExtraParen(const std::string &str, bool ignoreComma = false,
                                          bool ignoreSingleQuotes = false);
    GMAT_API std::string RemoveOuterParen(const std::string &str);
@@ -118,7 +124,7 @@ namespace GmatStringUtil
    GMAT_API UnsignedIntArray ToUnsignedIntArray(const std::string &str, bool allowOverflow = true);
    GMAT_API StringArray ToStringArray(const std::string &str);
    GMAT_API BooleanArray ToBooleanArray(const std::string &str);
-   
+
    GMAT_API void ParseParameter(const std::string &str, std::string &type,
                            std::string &owner, std::string &dep);
    GMAT_API void GetArrayCommaIndex(const std::string &str, Integer &comma,

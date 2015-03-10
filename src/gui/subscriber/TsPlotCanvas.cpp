@@ -117,7 +117,8 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    plotArea(),  // Fixed unitialized value error
    mouseRect(),
    legendRect(),
-   legendColumns  (1)
+   legendColumns  (1),
+   resized        (false)
 {
    wxPaintDC dc(this);
 
@@ -185,12 +186,14 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
    if (legendRect.y > h)
       legendRect.y = h - 5;
 
-   bool drawAll = false;
+   bool drawAll = (resized ? true : false);
    
    // wxRegionIterator is not used here so commented out (LOJ: 2014.10.10)
    //wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
+   #ifdef __WXMAC__
    if (!dataUpdated)
       drawAll = true;
+   #endif
    
    Refresh(dc, drawAll);
    
@@ -202,6 +205,7 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 
 void TsPlotCanvas::OnSize(wxSizeEvent& ev)
 {
+   resized = true;
    initializeLegendLoc = true;
 }
 
@@ -466,7 +470,8 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 
    wxEND_DRAWING
    dataUpdated = false;
-
+   resized = false;
+   
    #if DEBUG_TS_CANVAS
    MessageInterface::ShowMessage("TsPlotCanvas::Refresh() leaving\n");
    #endif

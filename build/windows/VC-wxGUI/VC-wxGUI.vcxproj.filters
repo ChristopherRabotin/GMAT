@@ -2361,6 +2361,12 @@
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp">
       <Filter>Source Files\gui\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseEvent.cpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.cpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4501,6 +4507,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp">
       <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseEvent.hpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.hpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

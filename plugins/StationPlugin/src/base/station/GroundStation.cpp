@@ -38,7 +38,7 @@
 //#define DEBUG_INIT
 //#define DEBUG_HARDWARE
 //#define TEST_GROUNDSTATION
-
+#define DEBUG_AZEL_CONSTRAINT
 
 //---------------------------------
 // static data
@@ -50,6 +50,7 @@ GroundStation::PARAMETER_TEXT[GroundStationParamCount - BodyFixedPointParamCount
    {
       "Id",
       "AddHardware",				// made changes by Tuan Nguyen
+      "MinimumElevationAngle",		// degree
    };
 
 const Gmat::ParameterType
@@ -57,6 +58,7 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
    {
       Gmat::STRING_TYPE,
       Gmat::OBJECTARRAY_TYPE,		// made changes by Tuan Nguyen
+      Gmat::REAL_TYPE,		// MinimumElevationAngle
    };
 
 
@@ -77,7 +79,8 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
 //---------------------------------------------------------------------------
 GroundStation::GroundStation(const std::string &itsName) :
    GroundstationInterface    ("GroundStation", itsName),
-   stationId                 ("StationId")
+   stationId                 ("StationId"),
+   minElevationAngle         (7.0)						// 7 degree
 {
    objectTypeNames.push_back("GroundStation");
    parameterCount = GroundStationParamCount;
@@ -115,7 +118,8 @@ GroundStation::~GroundStation()
 //---------------------------------------------------------------------------
 GroundStation::GroundStation(const GroundStation& gs) :
    GroundstationInterface        (gs),
-   stationId             (gs.stationId)
+   stationId             (gs.stationId),
+   minElevationAngle     (gs.minElevationAngle)
 {
 	hardwareNames 		= gs.hardwareNames;		// made changes by Tuan Nguyen
 // hardwareList 		= gs.hardwareList;		// should it be cloned ????
@@ -140,8 +144,10 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
       GroundstationInterface::operator=(gs);
 
       stationId 	  = gs.stationId;
-      hardwareNames = gs.hardwareNames;		// made changes by Tuan Nguyen
+      hardwareNames   = gs.hardwareNames;		// made changes by Tuan Nguyen
 //      hardwareList	= gs.hardwareList;		// should it be cloned ????
+
+	  minElevationAngle = gs.minElevationAngle;
    }
 
    return *this;
@@ -568,6 +574,65 @@ const StringArray& GroundStation::GetStringArrayParameter(
       const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+//  Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method gets a real parameter based on parameter id.
+ *
+ * @param <id>    id of a real parameter
+ *
+ * @return value of a real parameter.
+ */
+//------------------------------------------------------------------------------
+Real GroundStation::GetRealParameter(const Integer id) const
+{
+   if (id == MINIMUM_ELEVATION_ANGLE)
+      return minElevationAngle;
+
+   return GroundstationInterface::GetRealParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  Real SetRealParameter(const Integer id, const Real value) const
+//------------------------------------------------------------------------------
+/**
+ * This method sets value to a real parameter based on parameter id.
+ *
+ * @param <id>       id of a real parameter
+ * @param <value>    value used to set
+ *
+ * @return value of a real parameter.
+ */
+//------------------------------------------------------------------------------
+Real GroundStation::SetRealParameter(const Integer id,
+                                      const Real value)
+{
+   if (id == MINIMUM_ELEVATION_ANGLE)
+   {
+	  if (( value < -90.0)||( value > 90.0))
+         throw AssetException("Minimum elevation angle set to " + GetName() + " is not in range [-90.0, 90.0]\n");
+	  minElevationAngle = value;
+	  return minElevationAngle;
+   }
+   
+   return GroundstationInterface::SetRealParameter(id, value);
+}
+
+
+Real GroundStation::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+Real GroundStation::SetRealParameter(const std::string &label,
+                                      const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
 }
 
 
@@ -1017,3 +1082,62 @@ bool GroundStation::IsValidID(const std::string &id)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// Real* IsValidElevationAngle(const Rvector6 &state_sez, const Real minElevationAngle)
+//------------------------------------------------------------------------------
+/**
+ * Computes azimuth and elevation, and the difference between elevation and the minimum elevation
+ * 
+ * @return, contains azimuth, elevation, and el - minel
+ */
+//------------------------------------------------------------------------------
+Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez, const Real minElevationAngle)
+{
+   // Get topocentric range and rangerate
+   Rvector3 rho_sez = state_sez.GetR();
+   Rvector3 rhodot_sez = state_sez.GetV();
+
+   // Compute satellite elevation
+   Real rho_sez_mag = rho_sez.GetMagnitude();
+   az_el_visible[1] = rho_sez[3]/rho_sez_mag;
+    
+   // c=cos s=sin compute azimuth, protect against 90 deg elevation
+   Real c_rho = rho_sez[2]/sqrt(GmatMathUtil::Pow(rho_sez[1],2) + GmatMathUtil::Pow(rho_sez[2],2));
+   Real s_rho = -rho_sez[1]/sqrt(GmatMathUtil::Pow(rho_sez[1],2) + GmatMathUtil::Pow(rho_sez[2],2));
+   Real c_rhodot = rhodot_sez[2]/sqrt(GmatMathUtil::Pow(rhodot_sez[1],2) + GmatMathUtil::Pow(rhodot_sez[2],2));
+   Real s_rhodot = -rhodot_sez[1]/sqrt(GmatMathUtil::Pow(rhodot_sez[1],2) + GmatMathUtil::Pow(rhodot_sez[2],2));
+
+   //compute az    
+   if ((az_el_visible[1]*GmatMathConstants::DEG_PER_RAD) != 90) 
+   {
+      az_el_visible[0] = GmatMathUtil::ATan2(s_rho,c_rho);
+   }
+   else if ((az_el_visible[1]*GmatMathConstants::DEG_PER_RAD) == 90)
+   {
+      az_el_visible[0] = GmatMathUtil::ATan2(s_rhodot,c_rhodot);
+   }
+    
+   //// Original code: set flags
+   //if (az_el_visible[1] > minElevationAngle)
+   //{
+   //    az_el_visible[2]=1;
+   //}
+   //else if (az_el_visible[1] < minElevationAngle)
+   //{
+   //    az_el_visible[2]=0;
+   //}
+   //else if (az_el_visible[1]==minElevationAngle)
+   //{
+   //    az_el_visible[2]=-1;
+   //}
+
+   az_el_visible[2] = az_el_visible[1] - minElevationAngle;
+
+   #ifdef DEBUG_AZEL_CONSTRAINT
+      MessageInterface::ShowMessage(" Satellite az=%f degs, satellite el=%f degs. Is visible=%f ", 
+           az_el_visible[0], az_el_visible[1],az_el_visible[2]);   
+   #endif 
+
+   return az_el_visible;
+}

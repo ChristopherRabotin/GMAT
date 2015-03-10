@@ -32,7 +32,7 @@
  * Event locator used for station contact events
  *
  * This class manages station contacts for a set of target SpaceObjects
- * (typically Spacecraft).  COntact events require that two types of event
+ * (typically Spacecraft).  Contact events require that two types of event
  * function be satisfied: an elevation function, placing the target above the
  * station's horizon, and (zero or more) line-of-sight event functions, ensuring
  * that there is no obstructing object between the station and the target.
@@ -124,6 +124,9 @@ protected:
    /// Light time Direction
    std::string lightTimeDirection;
 
+   // The stored results
+   std::vector<EventList*> contactResults;
+
 
    /// Published parameters for contact locators
     enum
@@ -140,7 +143,7 @@ protected:
     static const Gmat::ParameterType
        PARAMETER_TYPE[ContactLocatorParamCount - EventLocatorParamCount];
 
-    virtual void         FindEvents(Real fromTime, Real toTime);
+    virtual void         FindEvents();
     virtual std::string  GetAbcorrString();
 };
 

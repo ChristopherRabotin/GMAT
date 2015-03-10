@@ -12,6 +12,40 @@ MAC_ARCHITECTURE_FLAGS = -arch i386
 F2C_DIR = f2c32
 endif
 
+# ifeq ($(BUILD_64BIT), 1)
+# CSPICE_VER = cspice64
+# MAC_ARCHITECTURE_FLAGS =
+# else
+# CSPICE_VER = cspice
+# MAC_ARCHITECTURE_FLAGS = -arch i386
+# endif
+
+# Environment settings for the EventLocator plugin
+# location of GMAT base headers and libraries
+GMAT_CODE_LOCATION = ../../../../src
+GMAT_BIN_LOCATION = ../../../../application/$(GMAT_BIN_DIR)
+
+DEBUG_BUILD = 0
+
+USE_SPICE = 0
+
+ifeq ($(USE_SPICE), 1)
+# location of CSPICE headers and libraries
+# *** EDIT THIS *** -this is where you installed the version of CSPICE that you're using ...
+SPICE_DIR = /Applications/CSPICE_N0065
+SPICE_INCLUDE = -I$(SPICE_DIR)/$(CSPICE_VER)/include
+#SPICE_LIB_DIR = $(SPICE_DIR)/$(CSPICE_VER)/lib
+#SPICE_LIBRARIES = $(SPICE_LIB_DIR)/cspice.a
+#SPICE_DIRECTIVE = -D__USE_SPICE__
+#SPICE_STACKSIZE = ulimit -s 61440
+else
+SPICE_INCLUDE =
+SPICE_LIB_DIR =
+SPICE_LIBRARIES =
+SPICE_DIRECTIVE = 
+SPICE_STACKSIZE = echo 'SPICE not included in this build ...'
+endif
+
 # Environment settings for the event locator plugin; Linux 64-bit version
 
 GMAT_CODE_LOCATION = ../../../../src
@@ -28,7 +62,7 @@ BASE_LIB_LOCATION = ../$(GMAT_BIN_DIR)/GMAT.app/Contents/Frameworks/
 
 # Uncomment if we ever require f2c
 ##F2C_DIR = ../../../../GMAT_3rdParty/f2c
-#F2C_DIR = ../../../../GMAT_3rdParty/cspice
+#F2C_DIR = ../../../../GMAT_3rdParty/f2c
 #F2C_LIBDIR = $(F2C_DIR)/lib
 #F2C_HEADERDIR = $(F2C_DIR)/include
 #F2C_LIB = -L$(F2C_LIBDIR) -lf2c -lm

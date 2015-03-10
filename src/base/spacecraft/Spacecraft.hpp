@@ -52,6 +52,8 @@ public:
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
    
+   EphemManager*        GetEphemManager();
+
    std::string          GetModelFile();
    std::string          GetModelFileFullPath();
    int                  GetModelId();
