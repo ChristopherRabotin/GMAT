@@ -80,6 +80,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libProductionPropagators", 
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libPythonInterface", "libPythonInterface\libPythonInterface.vcxproj", "{9C5790A0-5085-4AFF-98F7-9991C350A045}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CFA43E77-32C5-4EA9-A878-9A55F91BD4A6} = {CFA43E77-32C5-4EA9-A878-9A55F91BD4A6}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
