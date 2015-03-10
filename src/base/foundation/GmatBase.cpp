@@ -121,7 +121,7 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Hardware",      "CoordinateSystem", "AxisSystem",       "Attitude",         "MathNode",
    "MathTree",      "BodyFixedPoint",   "Event",            "EventLocator",     "DataInterface", 
    "MeasurementModel","CoreMeasurement","ErrorModel",       "TrackingData",     "TrackingSystem",   "DataStream",       // made changes by TUAN NGUYEN.      // add ErrorModel type
-   "DataFile",      "ObType",           "Interface",        "MediaCorrection",  "Sensor",     
+   "DataFile",      "ObType",           "DataFilter",        "Interface",        "MediaCorrection",  "Sensor",          // made changes by TUAN NGUYEN.      // add DataFilter type
    "RFHardware",    "Antenna",          "UnknownObject"
 };
 /**
@@ -148,7 +148,7 @@ GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    false,     true,      false,     false,     false,
    false,     false,     false,     false,     false,
    false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add ErrorModel type
-   false,     false,     false,     false,     false,
+   false,     false,     false,     false,     false,     false,                                 // made changes by TUAN NGUYEN   // add DataFilter type
    false,     false,     false
 };
 
