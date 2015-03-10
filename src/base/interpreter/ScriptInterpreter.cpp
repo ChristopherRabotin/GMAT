@@ -1544,6 +1544,16 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
       WriteObjects(objs, "ErrorModels", mode);                                   // made changes by TUAN NGUYEN
 
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   // DataFilter Objects                                                         // made changes by TUAN NGUYEN
+   //---------------------------------------------                               // made changes by TUAN NGUYEN
+   objs = theModerator->GetListOfObjects(Gmat::DATA_FILTER);                     // made changes by TUAN NGUYEN
+   #ifdef DEBUG_SCRIPT_WRITING                                                   // made changes by TUAN NGUYEN
+   MessageInterface::ShowMessage("   Found %d DataFilters\n", objs.size());      // made changes by TUAN NGUYEN
+   #endif                                                                        // made changes by TUAN NGUYEN
+   if (objs.size() > 0)                                                          // made changes by TUAN NGUYEN
+      WriteObjects(objs, "DataFilters", mode);                                   // made changes by TUAN NGUYEN
+
    //---------------------------------------------
    // Measurement Models and Tracking Data/Systems
    //---------------------------------------------

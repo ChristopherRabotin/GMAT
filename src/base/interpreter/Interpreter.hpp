@@ -381,6 +381,7 @@ private:
    StringArray   eventLocatorList;
    StringArray   interfaceList;
    StringArray   errorModelList;                   // made changes by TUAN NGUYEN
+   StringArray   dataFilterList;                   // made changes by TUAN NGUYEN
 
    StringArray   matlabFunctionNames;
    
