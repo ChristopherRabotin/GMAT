@@ -112,6 +112,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    hasLegend      (true),
    allowPlotOptions(false),			// Change to true to show options dialog
    initializeLegendLoc (true),
+   alwaysDraw     (false),
    xLabelPrecision(8),
    yLabelPrecision(6),
    plotArea(),  // Fixed unitialized value error
@@ -175,7 +176,8 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
    #ifndef __WXGTK__
       wxWindow::Refresh(false);
    #endif
-   
+bool ownedPlotCanvas = true;
+
    wxPaintDC dc(this);
    wxCoord w, h;
    dc.GetSize(&w, &h);
@@ -194,6 +196,8 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
    if (!dataUpdated)
       drawAll = true;
    #endif
+   if (alwaysDraw)
+      drawAll = true;
    
    Refresh(dc, drawAll);
    
@@ -1745,4 +1749,9 @@ double TsPlotCanvas::GetActualXValue(int x, int y)
 double TsPlotCanvas::GetActualYValue(int y, int x)
 {
    return currentYMax - (y - top) / yScale;
+}
+
+void TsPlotCanvas::AlwaysDraw(bool tf)
+{
+   alwaysDraw = tf;
 }
