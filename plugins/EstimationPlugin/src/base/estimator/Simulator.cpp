@@ -101,11 +101,15 @@ Simulator::Simulator(const std::string& name) :
    addNoise            (false)
 {
    objectTypeNames.push_back("Simulator");
+   parameterCount = SimulatorParamCount;
+
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    initialEpoch = ss.str();
+   ss.str("");
+   ss << GmatTimeConstants::MJD_OF_J2000 + 1;
    finalEpoch   = ss.str();
-   parameterCount = SimulatorParamCount;
+   
 }
 
 
@@ -569,9 +573,7 @@ std::string Simulator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)             return propagatorName;
    if (id == EPOCH_FORMAT)           return epochFormat;
-//   if (id == INITIAL_EPOCH_FORMAT)   return initialEpochFormat;
    if (id == INITIAL_EPOCH)          return initialEpoch;
-//   if (id == FINAL_EPOCH_FORMAT)     return finalEpochFormat;
    if (id == FINAL_EPOCH)            return finalEpoch;
 
    return Solver::GetStringParameter(id);
@@ -648,11 +650,6 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
       epochFormat = value;
       return true;
    }
-   //if (id == INITIAL_EPOCH_FORMAT)
-   //{
-   //   initialEpochFormat = value;
-   //   return true;
-   //}
    if (id == INITIAL_EPOCH)
    {
       initialEpoch = value;
@@ -661,11 +658,6 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
       simulationStart = ConvertToRealEpoch(initialEpoch, epochFormat);
       return true;
    }
-   //if (id == FINAL_EPOCH_FORMAT)
-   //{
-   //   finalEpochFormat = value;
-   //   return true;
-   //}
    if (id == FINAL_EPOCH)
    {
       finalEpoch = value;
