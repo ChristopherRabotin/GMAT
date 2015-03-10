@@ -795,6 +795,35 @@ ErrorModel* Factory::CreateErrorModel(const std::string & ofType,               
 
 
 //------------------------------------------------------------------------------
+// DataFilter* CreateDataFilter(const std::string & ofType,
+//    const std::string & withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates a fundamental DataFilter object.
+ *
+ * Must be implemented by derived classes that create DataFilter objects -
+ * in that case, it returns a new DataFilter object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type DataFilter.
+ *
+ * @param <ofType>   specific type of DataFilter object to create.
+ * @param <withName> name to give to the newly created DataFilter object.
+ *
+ * @return pointer to a new DataFilter object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type DataFilter.
+ */
+//------------------------------------------------------------------------------
+DataFilter* Factory::CreateDataFilter(const std::string & ofType,                         // made changes by TUAN NGUYEN
+                                        const std::string & withName)                     // made changes by TUAN NGUYEN
+{                                                                                         // made changes by TUAN NGUYEN
+   throw FactoryException                                                                 // made changes by TUAN NGUYEN
+   ("Factory::CreateDataFilter() must be implemented by a DataFilterFactory\n");          // made changes by TUAN NGUYEN
+}                                                                                         // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
 // DataFile* Factory::CreateDataFile(const std::string & ofType,
 //                                   const std::string & withName)
 //------------------------------------------------------------------------------
