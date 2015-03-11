@@ -3059,9 +3059,15 @@ void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &titl
                               ElementWrapper *wrapper)
 {
    MessageInterface::ShowMessage
-      ("%s%s wrapper=<%p>, type=%2d, desc='%s'\n", prefix.c_str(), title.c_str(),
+      ("%s%s wrapper=<%p>, type=%2d, desc='%s'", prefix.c_str(), title.c_str(),
        wrapper, wrapper ? wrapper->GetWrapperType() : -1,
        wrapper ? wrapper->GetDescription().c_str() : "NULL");
+   if (wrapper && wrapper->GetRefObject())
+      MessageInterface::ShowMessage
+         (", refObject=<%p>'%s'\n", wrapper->GetRefObject(),
+          wrapper->GetRefObject()->GetName().c_str());
+   else
+      MessageInterface::ShowMessage("\n");
 }
 
 

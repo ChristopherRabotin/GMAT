@@ -3761,10 +3761,9 @@ void Propagate::PrepareToPropagate()
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
-         #if DEBUG_PROPAGATE_EXE
+         #if DEBUG_PROPAGATE_INIT
             MessageInterface::ShowMessage
                ("Propagate::PrepareToPropagate() SpaceObject names\n");
-
             MessageInterface::ShowMessage
                ("SpaceObject Count = %d\n", satName[n]->size());
             StringArray *sar = satName[n];
@@ -3772,6 +3771,23 @@ void Propagate::PrepareToPropagate()
             {
                MessageInterface::ShowMessage
                   ("   SpaceObjectName[%d] = %s\n", i, (*sar)[i].c_str());
+            }
+            Propagator *prop = propagators[n]->GetPropagator();
+            ODEModel *om = propagators[n]->GetODEModel();
+            MessageInterface::ShowMessage
+               ("   Propagator = <%p>[%s]'%s'\n", prop,
+                prop ? prop->GetTypeName().c_str() : "NULL",
+                prop ? prop->GetName().c_str() : "NULL");
+            MessageInterface::ShowMessage
+               ("   ODEModel   = <%p>[%s]'%s'\n", om,
+                om ? om->GetTypeName().c_str() : "NULL",
+                om ? om->GetName().c_str() : "NULL");
+            for (Integer i = 0; i < om->GetNumForces(); i++)
+            {
+               PhysicalModel *pm = om->GetForce(i);
+               MessageInterface::ShowMessage
+                  ("   om[%d] = <%p>[%s]'%s'\n", i, pm, pm->GetTypeName().c_str(),
+                   pm->GetName().c_str());
             }
          #endif
 
