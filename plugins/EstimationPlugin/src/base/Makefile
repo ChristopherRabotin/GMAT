@@ -94,6 +94,8 @@ prep:
 HEADERS = -Iinclude \
           -Iadapter \
           -Icommand \
+          -Idatafilter \
+          =Ierrormodel \
           -Iestimator \
           -Ievent \
           -Ifactory \
@@ -112,7 +114,6 @@ HEADERS = -Iinclude \
           -I$(GMAT_Code_Location)/base/foundation \
           -I$(GMAT_Code_Location)/base/event \
           -I$(GMAT_Code_Location)/base/executive \
-          -I$(GMAT_Code_Location)/base/errormodel \
           -I$(GMAT_Code_Location)/base/asset \
           -I$(GMAT_Code_Location)/base/attitude \
           -I$(GMAT_Code_Location)/base/hardware \
@@ -163,6 +164,9 @@ CPP_OBJECTS = \
     adapter/DopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
+    datafilter/DataFilter.o \
+    datafilter/StatisticAcceptFilter.o \
+    errormodel/ErrorModel.o \
     estimator/Estimator.o \
     estimator/BatchEstimator.o \
     estimator/BatchEstimatorInv.o \
