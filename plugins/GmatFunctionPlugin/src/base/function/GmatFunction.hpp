@@ -41,8 +41,8 @@ public:
    virtual void SetNewFunction(bool flag);
    
    // inherited from Function
-   virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
+   virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
    virtual void         Finalize();
    
    // inherited from GmatBase

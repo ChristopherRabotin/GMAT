@@ -235,9 +235,9 @@ void GmatFunction::SetNewFunction(bool flag)
 
 
 //------------------------------------------------------------------------------
-// bool Initialize()
+// bool Initialize(ObjectInitializer *objInit, bool reinitialize = false)
 //------------------------------------------------------------------------------
-bool GmatFunction::Initialize()
+bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
 {
    #ifdef DEBUG_TRACE
    static Integer callCount = 0;
@@ -249,7 +249,8 @@ bool GmatFunction::Initialize()
    #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
          ("======================================================================\n"
-          "GmatFunction::Initialize() entered for function '%s'\n", functionName.c_str());
+          "GmatFunction::Initialize() entered for function '%s', reinitialize=%d\n",
+          functionName.c_str(), reinitialize);
       MessageInterface::ShowMessage("   and FCS is %s set.\n", (fcs? "correctly" : "NOT"));
       MessageInterface::ShowMessage("   Pointer for FCS is %p\n", fcs);
       MessageInterface::ShowMessage("   First command in fcs is %s\n",
@@ -258,7 +259,7 @@ bool GmatFunction::Initialize()
    #endif
    if (!fcs) return false;
    
-   Function::Initialize();
+   Function::Initialize(objInit);
    
    // Initialize the Validator - I think I need to do this each time - or do I?
    validator->SetFunction(this);
@@ -354,10 +355,25 @@ bool GmatFunction::Initialize()
          objectStore->insert(std::make_pair(autoObjName, autoObj));
       }
    }
+
    
-   // first, send all the commands the object store, solar system, etc
    GmatCommand *current = fcs;
    
+   if (!objectsInitialized ||
+       objectsInitialized && reinitialize)
+   {
+      // Initialize function objects here. Moved from Execute() (LOJ: 2015.02.27)
+      objectsInitialized = true;
+      validator->HandleCcsdsEphemerisFile(objectStore, true);
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage("============================ Initializing LocalObjects\n");
+      #endif
+      InitializeLocalObjects(objInit, current, true);
+   }
+   
+   
+   
+   // first, send all the commands the object store, solar system, etc
    while (current)
    {
       #ifdef DEBUG_FUNCTION_INIT
@@ -461,7 +477,7 @@ bool GmatFunction::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool Execute(ObjectInitializer *objInit, bool reinitialize)
+// bool Execute(ObjectInitializer *objInit, bool reinitialize = true)
 //------------------------------------------------------------------------------
 bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
 {
@@ -492,6 +508,11 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    if (reinitialize)
       objectsInitialized = false;
    
+   #ifdef DEBUG_FUNCTION_EXEC
+   MessageInterface::ShowMessage("   objectsInitialized = %d\n", objectsInitialized);
+   #endif
+   
+   #if 1
    // For two modes function parsing, some ref objects are not set without
    // reinitialization
    // Reinitialize Spacecrafts (LOJ: 2015.01.21) - /MonteCarlo/TestCalcOfGSEtime.script
@@ -503,13 +524,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    {
       #ifdef DEBUG_FUNCTION_EXEC
       MessageInterface::ShowMessage
-         ("   Re-initializing CoordinateSystems, CalculatedPointes, Spacecrafts, Burns, and Parameters\n");
+         ("   Reinitializing CoordinateSystems, CalculatedPointes, Spacecrafts, Burns, Solvers, and Parameters\n");
       #endif
-      
-      // if (!objInit->InitializeObjects(true, Gmat::UNKNOWN_OBJECT,
-      //                                 unusedGlobalObjectList))
-      //    throw FunctionException
-      //       ("Failed to re-initialize all objects in the \"" + functionName + "\"");
       
       if (!objInit->InitializeObjects(true, Gmat::COORDINATE_SYSTEM))
          throw FunctionException
@@ -523,10 +539,15 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       if (!objInit->InitializeObjects(true, Gmat::BURN))
          throw FunctionException
             ("Failed to re-initialize Burns in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::SOLVER))
+         throw FunctionException
+            ("Failed to re-initialize Solvers in the \"" + functionName + "\"");
       if (!objInit->InitializeObjects(true, Gmat::PARAMETER))
          throw FunctionException
             ("Failed to re-initialize Parameters in the \"" + functionName + "\"");
    }
+   #endif
+   
    
    // Go through each command in the sequence and execute.
    // Once it gets to a real command, initialize local and automatic objects.
@@ -624,8 +645,12 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                 e.GetFullMessage());
             //throw;
          }
-
-
+         
+         // Should we re-throw the exception here? (LOJ: 2015.02.19)
+         throw FunctionException
+            ("In " + current->GetGeneratingString(Gmat::NO_COMMENTS) + ", " +
+             e.GetFullMessage());
+         
          // Since GmatFunction is parsed in object and command modes,
          // we may not need this section (LOJ: 2014.12.16)
          #if 0
@@ -980,12 +1005,12 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
                                           GmatCommand *current,
                                           bool ignoreException)
 {
-   #ifdef DEBUG_FUNCTION_EXEC
+   #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
       ("\n============================ Begin initialization of local objects in '%s'\n",
        functionName.c_str());
    MessageInterface::ShowMessage
-      ("Now at command \"%s\"\n",
+      ("Now at command <%p><%s> \"%s\"\n", current, current->GetTypeName().c_str(),
        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
@@ -1010,7 +1035,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       // Create LibrationPoint EarthSunL1;
       if (!ignoreException || (ignoreException && e.IsFatal()))
       {
-         #ifdef DEBUG_FUNCTION_EXEC
+         #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("objInit->InitializeObjects() threw a fatal exception:\n'%s'\n"
              "   So rethrow...\n", e.GetFullMessage().c_str());
@@ -1019,7 +1044,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       }
       else
       {
-         #ifdef DEBUG_FUNCTION_EXEC
+         #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("objInit->InitializeObjects() threw an exception:\n'%s'\n"
              "   So ignoring...\n", e.GetFullMessage().c_str());
@@ -1027,7 +1052,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       }
    }
    
-   #ifdef DEBUG_FUNCTION_EXEC
+   #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
       ("============================ End   initialization of local objects\n");
    #endif
