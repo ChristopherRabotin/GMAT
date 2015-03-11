@@ -195,26 +195,27 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
          "Cloning object %s of type %s\n", obj->GetName().c_str(),
          obj->GetTypeName().c_str());
       #endif
-
+      
       cloned = obj->Clone();
-
+      
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (cloned, obj->GetName(), "Sandbox::AddObject()",
           "*cloned = obj->Clone()");
       #endif
-
-      SetObjectByNameInMap(name, cloned);
-
       #ifdef DEBUG_SANDBOX_CLONING
-         MessageInterface::ShowMessage("<%p>\n", cloned);
-
+      MessageInterface::ShowMessage("cloned=<%p>'%s'\n", cloned, cloned->GetName().c_str());
+      #endif
+      
+      SetObjectByNameInMap(name, cloned);
+      
+      #ifdef DEBUG_SANDBOX_CLONING
          if (cloned->IsOfType(Gmat::PROP_SETUP))
             MessageInterface::ShowMessage("   PropSetup propagator <%p> -> "
                   "<%p>\n", ((PropSetup*)(obj))->GetPropagator(),
                   ((PropSetup*)(cloned))->GetPropagator());
       #endif
-
+      
       // Register owned Subscribers with the Publisher
       Integer count = cloned->GetOwnedObjectCount();
 
@@ -462,14 +463,8 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
       errorStr += "\" in the Sandbox.";
       
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-         MessageInterface::ShowMessage("Here is the current object map:\n");
-         for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
-              i != objectMap.end(); ++i)
-            MessageInterface::ShowMessage("   %s\n", i->first.c_str());
-         MessageInterface::ShowMessage("Here is the current global object map:\n");
-         for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap.begin();
-              i != globalObjectMap.end(); ++i)
-            MessageInterface::ShowMessage("   %s\n", i->first.c_str());
+      ShowObjectMap(objectMap, "Here is the current object map:\n");
+      ShowObjectMap(globalObjectMap, "Here is the current global object map:\n");
       #endif
       
       throw SandboxException(errorStr);
@@ -498,17 +493,9 @@ bool Sandbox::Initialize()
 {
    #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage("Initializing the Sandbox\n");
-      MessageInterface::ShowMessage
-			("At the start, the Sandbox Object Map contains %d objects:\n", objectMap.size());
-      for (omIter = objectMap.begin(); omIter != objectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage
-			("At the start, the Global Object Map contains %d objects:\n", globalObjectMap.size());
-      for (omIter = globalObjectMap.begin(); omIter != globalObjectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage(" ........ \n");
+      ShowObjectMap(objectMap, "Sandbox::Initialize() at the start, objectMap\n");
+      ShowObjectMap(globalObjectMap, "Sandbox::Initialize() at the start, globalObjectMap\n");
+      MessageInterface::ShowMessage("........\n");
    #endif
 
    bool rv = false;
@@ -633,22 +620,40 @@ bool Sandbox::Initialize()
          #endif
          globalObjectMap.insert(*omi);
          movedObjects.push_back(omi->first);
+         
+         // If it is coordinate system, copy the clone of origin to global object map
+         // if it is not found in the solar system for fixing Bug1688 (LOJ: 2015.03.02)
+         if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+         {
+            std::string originName = obj->GetStringParameter("Origin");
+            GmatBase *origin = obj->GetRefObject(Gmat::SPACE_POINT, originName);
+            if (origin && !origin->IsOfType(Gmat::CELESTIAL_BODY))
+            {
+               if (globalObjectMap.find(originName) == globalObjectMap.end())
+               {
+                  if (solarSys->GetBody(originName) == NULL)
+                  {
+                     #ifdef DEBUG_SANDBOX_INIT
+                     MessageInterface::ShowMessage
+                        ("Sandbox::Initialize() Copying origin <%p>'%s' of CS <%p>'%s' to global object map\n",
+                         origin, originName.c_str(), obj, obj->GetName().c_str());
+                     #endif
+                     globalObjectMap.insert(make_pair(originName, origin->Clone()));
+                  }
+               }
+            }
+         }
       }
    }
+   
    for (unsigned int ii = 0; ii < movedObjects.size(); ii++)
       objectMap.erase(movedObjects.at(ii));
    movedObjects.clear();  
    
    #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage("--- Right AFTER moving things to the GOS --- \n");
-      MessageInterface::ShowMessage("The Sandbox Object Map contains:\n");
-      for (omIter = objectMap.begin(); omIter != objectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("The Global Object Map contains:\n");
-      for (omIter = globalObjectMap.begin(); omIter != globalObjectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
+      ShowObjectMap(objectMap, "Sandbox Object Map contains\n");
+      ShowObjectMap(globalObjectMap, "Sandbox Global Object Map contains\n");
    #endif
    
    #ifdef DEBUG_SANDBOX_INIT
@@ -659,7 +664,7 @@ bool Sandbox::Initialize()
    StringArray exceptions;
    IntegerArray exceptionTypes;
    UnsignedInt exceptionCount = 0;
-
+   
    // Set the EventLocators
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
@@ -772,7 +777,7 @@ bool Sandbox::Initialize()
             #ifdef DEBUG_SANDBOX_SOLVERBRANCH
             MessageInterface::ShowMessage
                ("Sandbox calling TakeAction() for action 'SetLastVaryCommand "
-                "after BranchCommand <%p><%s> is initialized\n",
+                "after BranchCommand <%p>[%s] is initialized\n",
                 current, current->GetTypeName().c_str());
             #endif
             current->TakeAction("SetLastVaryCommand");
@@ -837,15 +842,8 @@ bool Sandbox::Execute()
 {
 
    #if DBGLVL_SANDBOX_RUN > 1
-   MessageInterface::ShowMessage("Sandbox::Execute() Here is the current object map:\n");
-   for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
-        i != objectMap.end(); ++i)
-      MessageInterface::ShowMessage("   (%p) %s\n", i->second, i->first.c_str());
-   MessageInterface::ShowMessage("Sandbox::Execute() Here is the current global object map:\n");
-   for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap.begin();
-        i != globalObjectMap.end(); ++i)
-      MessageInterface::ShowMessage("   (%p) %s\n", i->second, i->first.c_str());
-
+   ShoObjectMap(objectMap, "Sandbox::Execute() Here is the current object map:\n");
+   ShoObjectMap(objectMap, "Sandbox::Execute() Here is the current global object map:\n");
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the mission sequence:\n");
    std::string seq = GmatCommandUtil::GetCommandSeqString(sequence);
    MessageInterface::ShowMessage(seq);
@@ -1101,23 +1099,6 @@ void Sandbox::Clear()
    
    // Delete the all cloned objects
    std::map<std::string, GmatBase *>::iterator omi;
-   
-   // #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-   // MessageInterface::ShowMessage("Sandbox OMI List\n");
-   // for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
-   // {
-   //    MessageInterface::ShowMessage("   %s", (omi->first).c_str());
-   //    MessageInterface::ShowMessage(" of type %s\n",
-   //       (omi->second)->GetTypeName().c_str());
-   // }
-   // MessageInterface::ShowMessage("Sandbox GOMI List\n");
-   // for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
-   // {
-   //    MessageInterface::ShowMessage("   %s", (omi->first).c_str());
-   //    MessageInterface::ShowMessage(" of type %s\n",
-   //       (omi->second)->GetTypeName().c_str());
-   // }
-   // #endif
    
    #ifdef DEBUG_SANDBOX_CLEAR
    ShowObjectMap(objectMap, "Sandbox::Clear() clearing objectMap\n");
@@ -1405,8 +1386,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
 {
    #ifdef DEBUG_SANDBOX_OBJECT_MAPS
    MessageInterface::ShowMessage
-      ("Sandbox::SetObjectByNameInMap() name = %s\n",
-       name.c_str());
+      ("Sandbox::SetObjectByNameInMap() entered, name = %s\n", name.c_str());
    #endif
    bool found = false;
    // if it's already in a map, set the object pointer for the name
@@ -1420,7 +1400,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
       #endif
       found = true;
    }
-   if (globalObjectMap.find(name) != globalObjectMap.end())
+   else if (globalObjectMap.find(name) != globalObjectMap.end())
    {
       globalObjectMap[name] = obj;
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
@@ -1433,7 +1413,14 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
    // if not already in the map, add it to the objectMap
    // (globals are added to the globalObjectMap later)
    if (!found)
+   {
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+      MessageInterface::ShowMessage
+         ("Sandbox::SetObjectByNameInMap() '%s' not in objectMap nor in globalObjectMap "
+          "so adding to objectMap\n", name.c_str());
+      #endif
       objectMap.insert(std::make_pair(name,obj));
+   }
    
    #ifdef DEBUG_SANDBOX_OBJECT_MAPS
    MessageInterface::ShowMessage
@@ -1652,13 +1639,21 @@ void Sandbox::SetGlobalRefObject(GmatCommand *cmd)
 void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
 {   
    MessageInterface::ShowMessage(title);
-   MessageInterface::ShowMessage("object map = <%p>\n", &om);
+   MessageInterface::ShowMessage
+      ("object map = <%p> and contains %d objects\n", &om, om.size());
    if (om.size() > 0)
    {
+      std::string objName;
+      GmatBase *obj = NULL;
       for (ObjectMap::iterator i = om.begin(); i != om.end(); ++i)
-      MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+      {
+         objName = i->first;
+         obj = i->second;
+         MessageInterface::ShowMessage
+            ("   %40s  <%p> [%s] %s\n", objName.c_str(), obj,
+             obj ? obj->GetTypeName().c_str() : "NULL",
+             obj->IsGlobal() ? "Global" : "");
+      }
    }
    else
    {
