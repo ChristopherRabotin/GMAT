@@ -27,6 +27,7 @@
 //#define DEBUG_TARGETER
 //#define DEBUG_START_MODE
 //#define DEBUG_TARGET_COMMANDS
+//#define DEBUG_TARGET_INIT
 //#define DEBUG_TARGET_EXEC
 
 //#ifndef DEBUG_MEMORY
@@ -471,6 +472,14 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Target::Initialize()
 {
+   #ifdef DEBUG_TARGET_INIT
+   MessageInterface::ShowMessage
+      ("Target::Initialize() entered, theSolver = <%p>'%s', isInitialized = %d\n"
+       "   targeterInFunctionInitialized = %d\n", theSolver, 
+       theSolver ? theSolver->GetName().c_str() : "NULL", isInitialized,
+       targeterInFunctionInitialized);
+   #endif
+   
    GmatBase *mapObj = NULL;
    cloneCount = 0;
 
@@ -507,6 +516,12 @@ bool Target::Initialize()
    if (theSolver != NULL)
       ++cloneCount;
 
+   #ifdef DEBUG_TARGET_INIT
+   MessageInterface::ShowMessage
+      ("Target::Initialize() theSolver <%p>'%s', cloneCount=%d\n", theSolver,
+       theSolver->GetName().c_str(), cloneCount);
+   #endif
+   
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
       (theSolver, theSolver->GetName(), "Target::Initialize()",
@@ -553,7 +568,7 @@ bool Target::Initialize()
    }
 
    bool retval = SolverBranchCommand::Initialize();
-
+   
    if (retval == true) {
       // Targeter specific initialization goes here:
       if (FindObject(solverName) == NULL) 
@@ -567,7 +582,9 @@ bool Target::Initialize()
       retval = theSolver->Initialize();
    }
    
-   targeterInFunctionInitialized = false;
+   // Set this to true for two-mode function parsing (LOJ: 2015.03.09)
+   //targeterInFunctionInitialized = false;
+   targeterInFunctionInitialized = true;
    return retval;
 }
 
