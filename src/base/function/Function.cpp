@@ -261,9 +261,9 @@ void Function::SetNewFunction(bool flag)
 }
 
 //------------------------------------------------------------------------------
-// bool Initialize()  [default implementation]
+// bool Initialize(ObjectInitializer *objInit, bool reinitialize = false)
 //------------------------------------------------------------------------------
-bool Function::Initialize()
+bool Function::Initialize(ObjectInitializer *objInit, bool reinitialize)
 {
    validator = Validator::Instance();
    return true;
@@ -1037,7 +1037,7 @@ void Function::AddFunctionObject(GmatBase *obj)
 {
    #ifdef DEBUG_FUNCTION_OBJ
    MessageInterface::ShowMessage
-      ("Function::AddFunctionObject() entered, obj=<%p><%s>'%s'\n", obj,
+      ("Function::AddFunctionObject() entered, obj=<%p>[%s]'%s'\n", obj,
        obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL");
    #endif
@@ -1231,9 +1231,10 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
 {
    #ifdef DEBUG_AUTO_OBJ
    MessageInterface::ShowMessage
-      ("Function::AddAutomaticObject() <%p>'%s' entered, name='%s', obj=<%p> '%s', "
+      ("Function::AddAutomaticObject() <%p>'%s' entered\n   name='%s', obj=<%p>[%s]'%s', "
        "alreadyManaged=%d, objectStore=<%p>\n", this, GetName().c_str(),
-       withName.c_str(), obj, obj->GetName().c_str(), alreadyManaged, objectStore);
+       withName.c_str(), obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       alreadyManaged, objectStore);
    #endif
    
    // Make sure that the owner of automatic Parameter exist in the objectStore
@@ -1245,8 +1246,8 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
       GmatBase *owner = FindObject(ownerName);
       #ifdef DEBUG_AUTO_OBJ
       MessageInterface::ShowMessage
-         ("Function::AddAutomaticObject(), ownerName='%s', owner=<%p><%s>'%s'\n",
-          ownerName.c_str(), owner, owner ? owner->GetTypeName().c_str() : "NULL",
+         ("   ownerName='%s', owner=<%p>[%s]'%s'\n", ownerName.c_str(), owner,
+          owner ? owner->GetTypeName().c_str() : "NULL",
           owner ? owner->GetName().c_str() : "NULL");
          #ifdef DEBUG_OBJECT_MAP
          ShowObjectMap(objectStore, "In Function::AddAutomaticObject", "objectStore");
@@ -1260,18 +1261,36 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
          throw fe;
       }
       
+      // Check if owner is from the right object store      
       GmatBase *refObj = obj->GetRefObject(owner->GetType(), ownerName);
+      #ifdef DEBUG_AUTO_OBJ
+      MessageInterface::ShowMessage
+         ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+          refObj ? refObj->GetName().c_str() : "NULL");
+      #endif
+      
       if (owner != refObj)
       {
+         #ifdef DEBUG_AUTO_OBJ
          MessageInterface::ShowMessage
-            ("*** WARNING *** The ref object \"%s\" of the Parameter \"%s\""
-             "does not points to object in object store", ownerName.c_str(),
+            ("*** WARNING *** The ref object \"%s\" of the Parameter \"%s\" "
+             "does not point to object in object store\n", ownerName.c_str(),
              withName.c_str());
+         #endif
+
+         //================================================================
+         // Do not throw exception, since objects from Global command will be
+         // moved to global object store when Global command is executing until
+         // then the refobj will be the configured object since the Moderator
+         // sets it. (LOJ: 2015.03.03)
+         #if 0
          FunctionException fe;;
-         fe.SetDetails("The ref object \"%s\" of the Parameter \"%s\""
-                       "does not points to object in object store", ownerName.c_str(),
+         fe.SetDetails("The ref object \"%s\" of the Parameter \"%s\" "
+                       "does not point to object in object store", ownerName.c_str(),
                        withName.c_str());
          throw fe;
+         #endif
+         //================================================================
       }
    }
    
@@ -1295,7 +1314,7 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
       GmatBase *oldObj = automaticObjectMap[withName];
       #ifdef DEBUG_AUTO_OBJ
       MessageInterface::ShowMessage
-         ("   Found oldObj=<%p><%s> '%s'\n", oldObj, oldObj ?
+         ("   Found oldObj=<%p>[%s] '%s'\n", oldObj, oldObj ?
           oldObj->GetTypeName().c_str() : "NULL",
           oldObj ? oldObj->GetName().c_str() : "NULL");
       #endif
@@ -1380,7 +1399,7 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       ("Here is %s <%p>, it has %d objects\n", objMapName.c_str(), objMap, objMap->size());
    for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
       MessageInterface::ShowMessage
-         ("   %40s  <%p><%s>\n", i->first.c_str(), i->second,
+         ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
 }
 
@@ -1401,14 +1420,14 @@ void Function::ShowObjects(const std::string &title)
        objectStore->size());
    for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
       MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+         ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    MessageInterface::ShowMessage
       ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
        globalObjectStore->size());
    for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
       MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+         ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    MessageInterface::ShowMessage("========================================\n");   
 }

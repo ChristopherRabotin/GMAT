@@ -219,8 +219,8 @@ PropSetup::PropSetup(const PropSetup &ps) :
    
    #ifdef DEBUG_PROPSETUP
    MessageInterface::ShowMessage
-      ("PropSetup::PropSetup(copy) exiting, Propagator=<%p><%s> '%s'\n   "
-       "ODEModel=<%p><%s> '%s'\n", mPropagator,
+      ("PropSetup::PropSetup(copy) exiting\n   Propagator=<%p><%s> '%s'\n   "
+       "   ODEModel=<%p><%s> '%s'\n", mPropagator,
        mPropagator ? mPropagator->GetTypeName().c_str() : "NULL",
        mPropagator ? mPropagator->GetName().c_str() : "NULL", mODEModel,
        mODEModel ? mODEModel->GetTypeName().c_str() : "NULL",

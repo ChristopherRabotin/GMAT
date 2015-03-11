@@ -2643,8 +2643,16 @@ ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
             GmatBase *depObjPtr = FindObject(depobj);
             if (depObjPtr == NULL)
             {
-               depExist = false;
-               isParameterValid = false;
+               // See if owner has already associated with attached object for function
+               GmatBase *attachedObj = obj->GetRefObject(ownedObjType, depobj);
+               #if DBGLVL_WRAPPERS > 1
+               MessageInterface::ShowMessage("   attachedObj = <%p>\n", attachedObj);
+               #endif
+               if (theFunction == NULL && attachedObj == NULL)
+               {
+                  depExist = false;
+                  isParameterValid = false;
+               }
             }
             else
             {

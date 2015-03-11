@@ -49,8 +49,8 @@ public:
                                        IntegerArray &colCounts);
    virtual bool         IsNewFunction();
    virtual void         SetNewFunction(bool flag);
-   virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
+   virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
    virtual void         Finalize();
    virtual bool         IsFcsFinalized();
    virtual void         SetObjectMap(ObjectMap *objMap);

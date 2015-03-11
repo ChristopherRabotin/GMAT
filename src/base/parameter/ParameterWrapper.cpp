@@ -158,6 +158,12 @@ Gmat::ParameterType ParameterWrapper::GetDataType() const
 //------------------------------------------------------------------------------
 GmatBase* ParameterWrapper::GetRefObject(const std::string &name)
 {
+   #ifdef DEBUG_PW_REFOBJ
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::GetRefObject() returning <%p>'%s'\n", param,
+       param ? param->GetName().c_str() : "NULL");
+   #endif
+   
    // We don't need to check for the name since only one Parameter
    return (GmatBase*)param;
 }

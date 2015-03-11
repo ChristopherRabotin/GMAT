@@ -982,7 +982,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    GmatBase *obj = NULL;
    
    // if object to be managed and has non-blank name, and name is not valid, handle error
-   if (manage == 1 && name != "")
+   //if (manage == 1 && name != "")
+   // Added manage == 2 for function checking (LOJ: 2015.03.11)
+   if ((manage == 1 || manage == 2) && name != "")
    {
       bool isValid = false;
       
@@ -1029,7 +1031,8 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       #endif
       
       // If object to be managed, give warning if name already exist
-      if (manage == 1)
+      //if (manage == 1)
+      if (manage == 1 || manage == 2)
       {
 //         if ((name != "EarthMJ2000Eq") &&
 //             (name != "EarthMJ2000Ec") &&
@@ -3663,6 +3666,10 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    #endif
    
    // We don't want to manage object to configuration, so pass 0
+   #ifdef DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("AssembleCreateCommand() calling CreateObject() for '%s'\n", name.c_str());
+   #endif
    GmatBase *obj = CreateObject(objTypeStrToUse, name, 0);
    
    #ifdef DEBUG_ASSEMBLE_CREATE
@@ -6151,6 +6158,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                }
                if (!skipCreate)
                {
+                  #ifdef DEBUG_CREATE_OBJECT
+                  MessageInterface::ShowMessage
+                     ("SetPropertyObjectValue() calling CreateObject() for '%s'\n", ownedName.c_str());
+                  #endif
                   ownedObj = CreateObject(valueToUse, ownedName, 0);
                   if (ownedObj == NULL)
                   {
@@ -6221,6 +6232,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                {
                   if (valueToUse == "InternalODEModel")
                   {
+                     #ifdef DEBUG_CREATE_OBJECT
+                     MessageInterface::ShowMessage
+                        ("SetPropertyObjectValue() calling CreateObject() for valueToUse.c_str()\n");
+                     #endif
                      ownedObj = CreateObject("ForceModel", valueToUse);
                      obj->SetRefObject(ownedObj, ownedObj->GetType(), valueToUse);
                   }
@@ -6838,7 +6853,12 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          // We don't want to configure PhysicalModel, so set name after create
          ////PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "");
          std::string forceName = forceType + "." + bodies[i];
-         PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+         std::string actualName = "0." + forceName;
+         #ifdef DEBUG_CREATE_OBJECT
+         MessageInterface::ShowMessage
+            ("SetForceModelProperty() calling CreateObject() for '%s'\n", actualName.c_str());
+         #endif
+         PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, actualName, 0);
          if (pm)
          {
             ////pm->SetName(forceType + "." + bodies[i]);
@@ -6940,8 +6960,13 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       // Create PhysicalModel
       std::string forceName = pmType + "." + centralBodyName;
       //@note 0.ForceName indicates unmanaged internal forcename.
+      std::string actualName = "0." + forceName;
       // Added name for debugging purpose only
-      PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetForceModelProperty() calling CreateObject() for '%s'\n", actualName.c_str());
+      #endif
+      PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, actualName, 0);
       pm->SetName(forceName);
       
       // Should we set SRP on ForceModel central body?
@@ -6977,6 +7002,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          
          // We don't want to configure PhysicalModel, so set name after create
          ////PhysicalModel *pm = (PhysicalModel*)CreateObject(udForces[i], "");
+         #ifdef DEBUG_CREATE_OBJECT
+         MessageInterface::ShowMessage
+            ("SetForceModelProperty() calling CreateObject() for '%s'\n", udForces[i].c_str());
+         #endif
          PhysicalModel *pm = (PhysicalModel*)CreateObject(udForces[i], udForces[i], 0);
          if (pm)
          {
@@ -7140,7 +7169,12 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
    //@note 0.ForceName indicates unmanaged internal forcename.
    // Added name for debugging purpose only
    std::string forceName = pmType + "." + centralBodyName;
-   PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+   std::string actualName = "0." + forceName;
+   #ifdef DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("SetForceModelProperty() calling CreateObject() for '%s'\n", actualName.c_str());
+   #endif
+   PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, actualName, 0);
    pm->SetName(forceName);
    
    #ifdef DEBUG_SET_FORCE_MODEL
@@ -7168,6 +7202,10 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
       
       pm->SetStringParameter("BodyName", centralBodyName);
       pm->SetStringParameter("AtmosphereBody", centralBodyName);
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetDragForceProperty() calling CreateObject() for '%s'\n", valueToUse.c_str());
+      #endif
       GmatBase *am = CreateObject(valueToUse, valueToUse, 0);
       if (am)
       {
@@ -7236,6 +7274,10 @@ bool Interpreter::SetMeasurementModelProperty(GmatBase *obj,
 
    if (propName == "Type")
    {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetMeasurementModelProperty() calling CreateObject() for ''\n");
+      #endif
       GmatBase* model = CreateObject(value, "", 0, false);
       if (model != NULL)
       {
@@ -7361,6 +7403,10 @@ bool Interpreter::SetTrackingDataProperty(GmatBase *obj,
 
    if (propName == "Type")
    {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetTrackingDataProperty() calling CreateObject() for ''\n");
+      #endif
       GmatBase* model = CreateObject(value, "", 0, false);
       if (model != NULL)
       {
@@ -7528,6 +7574,10 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
 
    if (propName == "Format")
    {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetDataStreamProperty() calling CreateObject() for ''\n");
+      #endif
       GmatBase* obs = CreateObject(value, "", 0, false);
       if (obs != NULL)
       {
@@ -8515,8 +8565,12 @@ bool Interpreter::FinalPass()
                   throw InterpreterException("The ODEModel named \"" +
                         refName + "\", referenced by the Propagator \"" +
                         obj->GetName() + "\" cannot be found");
-
+               
                // Create default ODE model
+               #ifdef DEBUG_CREATE_OBJECT
+               MessageInterface::ShowMessage
+                  ("FinalPass() calling CreateObject() for '%s'\n", refName.c_str());
+               #endif
                configuredOde = CreateObject("ODEModel", refName, 1);
                obj->SetRefObject(configuredOde, configuredOde->GetType(),
                      configuredOde->GetName());

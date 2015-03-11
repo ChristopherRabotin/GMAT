@@ -866,14 +866,14 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       f->SetInputElementWrapper(ewi->first, ewi->second);
    }
    
-   // must re-initialize the function each time, as it may be called in more than
-   // one place
-   if (!(f->Initialize()))
-   {
-      std::string errMsg = "FunctionManager:: Error initializing function \"";
-      errMsg += f->GetStringParameter("FunctionName") + "\"\n";
-      throw FunctionException(errMsg);
-   }
+   // // must re-initialize the function each time, as it may be called in more than
+   // // one place
+   // if (!(f->Initialize()))
+   // {
+   //    std::string errMsg = "FunctionManager:: Error initializing function \"";
+   //    errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+   //    throw FunctionException(errMsg);
+   // }
    
    // create new ObjectInitializer   
    #ifdef DEBUG_FM_EXECUTE
@@ -898,6 +898,20 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    MemoryTracker::Instance()->Add
       (objInit, "objInit", "FunctionManager::Execute()", "objInit = new ObjectInitializer");
    #endif
+   
+   // Set re-initialize flag, set to true if it is nested function call
+   bool reinitialize = false;
+   if (callingFunction != NULL)
+      reinitialize = true;
+   
+   // must re-initialize the function each time, as it may be called in more than
+   // one place
+   if (!(f->Initialize(objInit, reinitialize)))
+   {
+      std::string errMsg = "FunctionManager:: Error initializing function \"";
+      errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+      throw FunctionException(errMsg);
+   }
    
    // tell the fcs that this is the calling function
    #ifdef DEBUG_FM_EXECUTE
@@ -931,11 +945,12 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       ("======================================================= Calling f->Execute()\n");
    #endif
    
-   // Now, execute the function
-   bool reinitialize = false;
-   if (callingFunction != NULL)
-      reinitialize = true;
+   // // Set re-initialize flag, set to true if it is nested function call
+   // bool reinitialize = false;
+   // if (callingFunction != NULL)
+   //    reinitialize = true;
 
+   // Now, execute the function
    // If function sequence failed or threw an exception, finalize the function
    try
    {
@@ -2157,7 +2172,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
    
    // Set popped FOS to function and re-initialize fcs
    f->SetObjectMap(functionObjectStore);
-   bool retval = f->Initialize();
+   bool retval = f->Initialize(objInit);
    
    #ifdef DEBUG_FM_STACK
       MessageInterface::ShowMessage(
