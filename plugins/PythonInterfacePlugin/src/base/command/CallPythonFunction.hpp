@@ -33,6 +33,9 @@ public:
 	CallPythonFunction& operator=(const CallPythonFunction &cpf);
 	~CallPythonFunction();
 
+	DEFAULT_TO_NO_CLONES
+
+
 };
 
 

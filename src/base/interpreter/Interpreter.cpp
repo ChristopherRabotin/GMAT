@@ -59,7 +59,7 @@
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
 //#define DEBUG_CREATE_COMMAND
-//#define DEBUG_CREATE_CALL_FUNCTION
+#define DEBUG_CREATE_CALL_FUNCTION
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_WRAPPERS
 //#define DEBUG_MAKE_ASSIGNMENT
@@ -2008,7 +2008,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 
       type1 = "CallFunction";
       
-      // Figure out if which CallFunction to be created.
+      // Figure out which CallFunction to be created.
       std::string funcName = GmatStringUtil::ParseFunctionName(desc);
       if (funcName != "")
       {
@@ -2133,13 +2133,25 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                   type1 = "CallMatlabFunction";
                else
                {
-                  if (gmatFunctionsAvailable)
-                     type1 = "CallGmatFunction";
+                  // Check to see if it is a Python function
+                  if (funcName.find("Python.") == 0)
+                  {
+                     // Todo: Check to see if Python plugin was activated
+                     type1 = "CallPythonFunction";
+//                     throw InterpreterException("The function \"" + funcName +
+//                           "\" is not available; you may need to enable the "
+//                           "PythonInterface plugin (libPythonInterface)");
+                  }
                   else
-                     throw InterpreterException("The function \"" + funcName +
-                           "\" is not available; if it is a GmatFunction, you "
-                           "may need to enable the GmatFunction plugin "
-                           "(libGmatFunction)");
+                  {
+                     if (gmatFunctionsAvailable)
+                        type1 = "CallGmatFunction";
+                     else
+                        throw InterpreterException("The function \"" + funcName +
+                              "\" is not available; if it is a GmatFunction, you "
+                              "may need to enable the GmatFunction plugin "
+                              "(libGmatFunction)");
+                  }
                }
             }
          }
