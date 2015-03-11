@@ -1,6 +1,6 @@
-//$Id: StatisticAcceptFilter.hpp 1398 2015-03-03 13:36:00Z tdnguyen $
+//$Id: ErrorModel.hpp 1398 2015-01-07 20:39:37Z tdnguyen $
 //------------------------------------------------------------------------------
-//                                 StatisticAcceptFilter
+//                                 ErrorModel
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -12,33 +12,34 @@
 // number NNG06CA54C
 //
 // Author: Tuan Dang Nguyen, NASA/GSFC.
-// Created: 2015/03/03
+// Created: 2015/01/07
 //
 /**
- * Definition for the SatisticAcceptFilter class used to define a data accepting 
- * filter for a TrackingFile
+ * Definition for the ErrorModel class used to define an error model for a measurement model
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef StatisticAcceptFilter_hpp
-#define StatisticAcceptFilter_hpp
+#ifndef ErrorModel_hpp
+#define ErrorModel_hpp
 
 #include "estimation_defs.hpp"
 #include "GmatBase.hpp"
-#include "DataFilter.hpp"
 
-class ESTIMATION_API StatisticAcceptFilter : public DataFilter
+class ESTIMATION_API ErrorModel : public GmatBase
+//class GMAT_API ErrorModel : public GmatBase
 {
 public:
-   StatisticAcceptFilter(const std::string name);
-   virtual ~StatisticAcceptFilter();
-   StatisticAcceptFilter(const StatisticAcceptFilter& saf);
-   StatisticAcceptFilter& operator=(const StatisticAcceptFilter& saf);
+   ErrorModel(const std::string name);
+   virtual ~ErrorModel();
+   ErrorModel(const ErrorModel& em);
+   ErrorModel& operator=(const ErrorModel& em);
+   bool operator==(const ErrorModel& em);
 
    virtual GmatBase* Clone() const;
    virtual bool Initialize();
-   
+   virtual bool Finalize();
+
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
    virtual std::string  GetParameterUnit(const Integer id) const;
@@ -69,6 +70,13 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string& label) const;
+   virtual Real         SetRealParameter(const std::string& label,
+                                         const Real value);
+
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
                                             const Integer value);
@@ -76,42 +84,55 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
 
+   //virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+   //                                  const std::string &name = "");
 
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
 
-   virtual ObservationData* 
-                        FilteringData(ObservationData* dataObject);
-//   virtual bool         ValidateInput();
-   StringArray          GetAllAvailableThinModes();
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   /// A list of file names specifies data files on which the filter to be applied 
-   StringArray fileNames;
-   /// Data thinning
-   std::string thinMode;
-   Integer     thinningFrequency;
+   /// Measurement type 
+   std::string   measurementType;               // Its value to be "Range_KM", "Range_RU", "Doppler_RangeRate", or "Doppler_Hz"
+   /// Measurement trip
+   Integer       measurementTrip;               // specify number of ways of a measurement. It would be 1 for one-way, 2 for two-ways, 3 for three-ways, and so on. It is 0 for all trips
+   /// Participant name list
+   StringArray   participantNameList;           // It contains a list of participant name
+   /// Measurement noise sigma
+   Real          noiseSigma;                    // specify noise sigma of a measurement
+   /// Noise Model
+   std::string   noiseModel;                    // specify noise model. It will be "RandomConstant" for Gausian noise model.
+   /// Measurement bias
+   Real          bias;                          // specify bias of a measurement
+   /// Solve-for parameters
+   StringArray   solveforNames;                 // It contains a name list of solve-for parameters
 
    /// Class parameter ID enumeration
    enum
    {
-      FILENAMES = DataFilterParamCount,
-      THIN_MODE,
-      THINNING_FREQUENCY,
-      StatisticAcceptFilterParamCount
+      TYPE = GmatBaseParamCount,
+      TRIP,
+      STRAND,
+      NOISE_SIGMA,
+      NOISE_MODEL,
+      BIAS,
+      SOLVEFORS,                              // made changes by TUAN NGUYEN
+      ErrorModelParamCount
    };
 
    // Start with the parameter IDs and associates strings
-   /// Strings associated with the StatisticAcceptFilter parameters
+   /// Strings associated with the ErrorModel parameters
    static const std::string
-                PARAMETER_TEXT[StatisticAcceptFilterParamCount - DataFilterParamCount];
-   /// Types of the StatisticAcceptFilter parameters
+                PARAMETER_TEXT[ErrorModelParamCount - GmatBaseParamCount];
+   /// Types of the ErrorModel parameters
    static const Gmat::ParameterType
-                PARAMETER_TYPE[StatisticAcceptFilterParamCount - DataFilterParamCount];
-
+                PARAMETER_TYPE[ErrorModelParamCount - GmatBaseParamCount];
 
 };
 
-#endif /* StatisticAcceptFilter_hpp */
+#endif /* ErrorModel_hpp */

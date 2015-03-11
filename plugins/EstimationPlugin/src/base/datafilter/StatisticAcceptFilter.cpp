@@ -23,6 +23,7 @@
 #include "StatisticAcceptFilter.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
+#include "MeasurementException.hpp"
 #include <sstream>
 
 
@@ -36,13 +37,15 @@
 const std::string StatisticAcceptFilter::PARAMETER_TEXT[] =
 {
    "Filenames",
-   "DataThin",
+   "ThinModel",
+   "ThinningFrequency",
 };
 
 const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
 {
    Gmat::STRINGARRAY_TYPE,			// FILE_NAMES
-   Gmat::STRING_TYPE,			   // DATATHIN
+   Gmat::STRING_TYPE,			   // THIN_MODE
+   Gmat::INTEGER_TYPE,           // THINNING_FREQUENCY
 };
 
 
@@ -58,7 +61,8 @@ const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
 //------------------------------------------------------------------------------
 StatisticAcceptFilter::StatisticAcceptFilter(const std::string name) :
    DataFilter        (name),
-   dataThin          ("F1")
+   thinMode          ("F"),
+   thinningFrequency (1)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticAcceptFilter default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -95,7 +99,8 @@ StatisticAcceptFilter::~StatisticAcceptFilter()
 StatisticAcceptFilter::StatisticAcceptFilter(const StatisticAcceptFilter& saf) :
    DataFilter            (saf),
    fileNames             (saf.fileNames),
-   dataThin              (saf.dataThin)
+   thinMode              (saf.thinMode),
+   thinningFrequency     (saf.thinningFrequency)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticAcceptFilter copy constructor from <%s,%p>  to  <%s,%p>\n", saf.GetName().c_str(), &saf, GetName().c_str(), this);
@@ -125,8 +130,9 @@ StatisticAcceptFilter& StatisticAcceptFilter::operator=(const StatisticAcceptFil
    {
       DataFilter::operator=(saf);
 
-      fileNames    = saf.fileNames;
-      dataThin     = saf.dataThin;
+      fileNames         = saf.fileNames;
+      thinMode          = saf.thinMode;
+      thinningFrequency = saf.thinningFrequency;
    }
 
    return *this;
@@ -174,23 +180,6 @@ bool StatisticAcceptFilter::Initialize()
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
 #endif
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
-// bool Finalize()
-//------------------------------------------------------------------------------
-/**
- * Code that executes after a run completes
- *
- * @return true on success, false on failure
- */
-//------------------------------------------------------------------------------
-bool StatisticAcceptFilter::Finalize()
-{
-   bool retval = false;
-
    return retval;
 }
 
@@ -307,8 +296,8 @@ std::string StatisticAcceptFilter::GetParameterTypeString(const Integer id) cons
 //------------------------------------------------------------------------------
 std::string StatisticAcceptFilter::GetStringParameter(const Integer id) const
 {
-   if (id == DATA_THIN)
-      return dataThin;
+   if (id == THIN_MODE)
+      return thinMode;
 
    return DataFilter::GetStringParameter(id);
 }
@@ -327,10 +316,16 @@ std::string StatisticAcceptFilter::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool StatisticAcceptFilter::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == DATA_THIN)
+   if (id == THIN_MODE)
    {
-      dataThin = value;
-      return true;
+      StringArray nameList = GetAllAvailableThinModes();
+      if (find(nameList.begin(), nameList.end(), value) != nameList.end())
+      {
+         thinMode = value;
+         return true;
+      }
+      else
+         throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".ThinMode is invalid.\n");  
    }
 
    return DataFilter::SetStringParameter(id, value);
@@ -519,44 +514,62 @@ const StringArray& StatisticAcceptFilter::GetStringArrayParameter(const std::str
 }
 
 
-#include "ObservationData.hpp"
-GmatBase* StatisticAcceptFilter::FilteringData(GmatBase* dataObject)
+Integer StatisticAcceptFilter::GetIntegerParameter(const Integer id) const
 {
-   if (dataObject == NULL)
-      return dataObject;
+   if (id == THINNING_FREQUENCY)
+      return thinningFrequency;
 
-   ObservationData* measData = (ObservationData*)dataObject;
+   return DataFilter::GetIntegerParameter(id);
+}
 
-   
-   // File verify:
 
-   // Observated objects verify:
-   bool pass1 = false;
-   for(UnsignedInt i = 0; i < observers.size(); ++i)
+Integer StatisticAcceptFilter::SetIntegerParameter(const Integer id, const Integer value)
+{
+   if (id == THINNING_FREQUENCY)
    {
-      for(UnsignedInt j = 1; j < measData->participantIDs.size(); ++j)
+      if (value > 0)
+         thinningFrequency = value;
+      else
       {
-         if (observers[i] == measData->participantIDs[j])
-         {
-            pass1 = true;
-            break;
-         }
+         std::stringstream ss;
+         ss << "Error: An invalid value (" << value << ") is set to " << GetName() << ".ThinningFrequency parameter.\n";
+         throw MeasurementException(ss.str());
       }
-
-      if (pass1)
-         break;
    }
 
-   // Trackers verify:
-
-   // Strands verify:
-   // Time interval verify:
+   return DataFilter::SetIntegerParameter(id, value);
+}
 
 
-   // Data thin verify:
+Integer StatisticAcceptFilter::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+
+Integer StatisticAcceptFilter::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
+
+ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObject)
+{
+   if (DataFilter::FilteringData(dataObject) == NULL)
+      return NULL;
+
+   // 1. File verify:
+
+   // 2. Data thin verify:
 
    return dataObject;
 }
    
 
-   
+StringArray StatisticAcceptFilter::GetAllAvailableThinModes()
+{
+   StringArray nameList;
+   nameList.push_back("F");
+
+   return nameList;
+}
