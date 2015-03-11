@@ -27,6 +27,7 @@ all:
 	cd ExtraPropagatorsPlugin; make all;
 	cd ProductionPropagatorPlugin; make all;
 	cd GmatFunctionPlugin; make all;
+	cd PythonInterfacePlugin; make all;
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
 	cd StationPlugin; make all;
@@ -41,6 +42,7 @@ rebuild:
 	cd ExtraPropagatorsPlugin; make rebuild;
 	cd ProductionPropagatorPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
+	cd PythonInterfacePlugin; make rebuild;
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
 	cd StationPlugin; make rebuild;
@@ -55,6 +57,7 @@ clean:
 	cd ProductionPropagatorPlugin; make clean;
 	cd ExtraPropagatorsPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
+	cd PythonInterfacePlugin; make clean;
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
 	cd StationPlugin; make clean;
@@ -74,6 +77,7 @@ all:
 	cd ProductionPropagatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 #	cd MatlabInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd PythonInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
@@ -89,6 +93,7 @@ rebuild:
 	cd ProductionPropagatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 #	cd MatlabInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd PythonInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
@@ -104,6 +109,7 @@ clean:
 	cd ProductionPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 #	cd MatlabInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd PythonInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
@@ -123,6 +129,7 @@ all:
 	cd ProductionPropagatorPlugin; make all;
 	cd GmatFunctionPlugin; make all;
 	cd MatlabInterfacePlugin; make all;
+	cd PythonInterfacePlugin; make all;
 	cd FminconOptimizerPlugin; make all;
 	cd FormationPlugin; make all;
 	cd SaveCommandPlugin; make all;
@@ -139,6 +146,7 @@ rebuild:
 	cd ProductionPropagatorPlugin; make rebuild;
 	cd GmatFunctionPlugin; make rebuild;
 	cd MatlabInterfacePlugin; make rebuild;
+	cd PythonInterfacePlugin; make rebuild;
 	cd FminconOptimizerPlugin; make rebuild;
 	cd FormationPlugin; make rebuild;
 	cd SaveCommandPlugin; make rebuild;
@@ -155,6 +163,7 @@ clean:
 	cd ProductionPropagatorPlugin; make clean;
 	cd GmatFunctionPlugin; make clean;
 	cd MatlabInterfacePlugin; make clean;
+	cd PythonInterfacePlugin; make clean;
 	cd FminconOptimizerPlugin; make clean;
 	cd FormationPlugin; make clean;
 	cd SaveCommandPlugin; make clean;
@@ -175,6 +184,7 @@ all:
 	cd ProductionPropagatorPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
+	cd PythonInterfacePlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make all BUILD_64BIT=$(BUILD_64BIT);
@@ -190,6 +200,7 @@ rebuild:
 	cd ProductionPropagatorPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
+	cd PythonInterfacePlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make rebuild BUILD_64BIT=$(BUILD_64BIT);
@@ -205,6 +216,7 @@ clean:
 	cd ProductionPropagatorPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd GmatFunctionPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd MatlabInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
+	cd PythonInterfacePlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd FormationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd SaveCommandPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
 	cd StationPlugin; make clean BUILD_64BIT=$(BUILD_64BIT);
