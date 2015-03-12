@@ -546,5 +546,6 @@ if(WIN32)
 endif()
 
 INSTALL( TARGETS ${TargetName}
-  DESTINATION bin
+  RUNTIME DESTINATION bin # Windows
+  LIBRARY DESTINATION bin # Mac/Linux
   )
