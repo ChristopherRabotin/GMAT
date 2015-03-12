@@ -33,9 +33,63 @@ public:
 	CallPythonFunction& operator=(const CallPythonFunction &cpf);
 	~CallPythonFunction();
 
+   // Access methods derived classes can override
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const char *value);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const Integer id,
+//                                           const Integer index) const;
+//   virtual bool         SetStringParameter(const Integer id,
+//                                           const char *value,
+//                                           const Integer index);
+//   virtual bool         SetStringParameter(const Integer id,
+//                                           const std::string &value,
+//                                           const Integer index);
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const char *value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+//   virtual std::string  GetStringParameter(const std::string &label,
+//                                           const Integer index) const;
+//   virtual bool         SetStringParameter(const std::string &label,
+//                                           const std::string &value,
+//                                           const Integer index);
+
 	DEFAULT_TO_NO_CLONES
 
+protected:
+   /// Module name for the Python code
+	std::string moduleName;
+	/// Function name for the Python code
+	std::string functionName;
 
+
+   /// Published parameters for Python functions
+   enum
+   {
+      MODULENAME = CallFunctionParamCount,
+      FUNCTIONNAME,
+      PythonFunctionParamCount
+   };
+
+   /// Python function parameter labels
+   static const std::string
+      PARAMETER_TEXT[PythonFunctionParamCount - CallFunctionParamCount];
+   /// Python function parameter types
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[PythonFunctionParamCount - CallFunctionParamCount];
 };
 
 
