@@ -25,6 +25,9 @@
     <Filter Include="Source Files\factory">
       <UniqueIdentifier>{6584559e-e24a-4671-9545-5c3a7cf2f599}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{9e3b0d9d-8270-46fd-b34c-4a4a68a8dbff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\include\pythoninterface_defs.hpp">
@@ -42,6 +45,9 @@
     <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\factory\PythonCommandFactory.hpp">
       <Filter>Source Files\factory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\command\CallPythonFunction.cpp">
@@ -55,6 +61,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\factory\PythonCommandFactory.cpp">
       <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -50,6 +50,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <OutDir>..\..\..\application\plugins</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -68,7 +71,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DYNAMICLINK;PYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\Gmat3rdparty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\Gmat3rdparty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\function;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\plugins\PythonInterfacePlugin\src\base\plugin;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4251;4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -94,12 +98,14 @@
     <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\function\PythonModule.hpp" />
     <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\include\pythoninterface_defs.hpp" />
     <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\interface\PythonInterface.hpp" />
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\plugin\GmatPluginFunctions.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\command\CallPythonFunction.cpp" />
     <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\factory\PythonCommandFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\function\PythonModule.cpp" />
     <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\interface\PythonInterface.cpp" />
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\plugin\GmatPluginFunctions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
