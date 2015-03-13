@@ -48,9 +48,7 @@ Simulator::PARAMETER_TEXT[SimulatorParamCount -SolverParamCount] =
    "AddData",
    "Propagator",
    "EpochFormat",
-//   "InitialEpochFormat",
    "InitialEpoch",
-//   "FinalEpochFormat",
    "FinalEpoch",
    "MeasurementTimeStep",
    "AddNoise",
@@ -62,9 +60,7 @@ Simulator::PARAMETER_TYPE[SimulatorParamCount - SolverParamCount] =
    Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECT_TYPE,
    Gmat::ENUMERATION_TYPE,
-//   Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
-//   Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,
@@ -87,14 +83,14 @@ Simulator::Simulator(const std::string& name) :
    propagator          (NULL),
    propagatorName      (""),
    simState            (NULL),
-   simulationStart     (GmatTimeConstants::MJD_OF_J2000),
-   simulationEnd       (GmatTimeConstants::MJD_OF_J2000 + 1.0),
-   nextSimulationEpoch (GmatTimeConstants::MJD_OF_J2000),
+//   simulationStart     (GmatTimeConstants::MJD_OF_J2000),
+//   simulationEnd       (GmatTimeConstants::MJD_OF_J2000 + 1.0),
+//   nextSimulationEpoch (GmatTimeConstants::MJD_OF_J2000),
    simEpochCounter     (0),
-   currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
-   epochFormat  ("TAIModJulian"),
-//   initialEpochFormat  ("TAIModJulian"),
-//   finalEpochFormat    ("TAIModJulian"),
+//   currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
+   epochFormat         ("TAIModJulian"),
+   initialEpoch        ("21545"),
+   finalEpoch          ("21545"),
    simulationStep      (60.0),
    locatingEvent       (false),
    timeStep            (60.0),
@@ -103,13 +99,9 @@ Simulator::Simulator(const std::string& name) :
    objectTypeNames.push_back("Simulator");
    parameterCount = SimulatorParamCount;
 
-   std::stringstream ss("");
-   ss << GmatTimeConstants::MJD_OF_J2000;
-   initialEpoch = ss.str();
-   ss.str("");
-   ss << GmatTimeConstants::MJD_OF_J2000 + 1;
-   finalEpoch   = ss.str();
-   
+   simulationStart = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
+   simulationEnd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
+   currentEpoch = nextSimulationEpoch = simulationStart;
 }
 
 
@@ -133,9 +125,7 @@ Simulator::Simulator(const Simulator& sim) :
    simEpochCounter     (0),
    currentEpoch        (sim.currentEpoch),
    epochFormat         (sim.epochFormat),
-//   initialEpochFormat  (sim.initialEpochFormat),
    initialEpoch        (sim.initialEpoch),
-//   finalEpochFormat    (sim.finalEpochFormat),
    finalEpoch          (sim.finalEpoch),
    simulationStep      (sim.simulationStep),
    locatingEvent       (false),
@@ -169,9 +159,12 @@ Simulator& Simulator::operator =(const Simulator& sim)
 
       if (propagator != NULL)
          delete propagator;
-      if (sim.propagator) propagator          = ((PropSetup*)
-                                                    (sim.propagator)->Clone());
-      else                propagator          = NULL;
+
+      if (sim.propagator) 
+         propagator = ((PropSetup*) (sim.propagator)->Clone());
+      else
+         propagator = NULL;
+
       propagatorName      = sim.propagatorName;
       simState            = NULL;   // or clone it here??
       simulationStart     = sim.simulationStart;
@@ -179,17 +172,15 @@ Simulator& Simulator::operator =(const Simulator& sim)
       nextSimulationEpoch = sim.nextSimulationEpoch;
       simEpochCounter     = sim.simEpochCounter;
       currentEpoch        = sim.currentEpoch;
-      epochFormat  = sim.epochFormat;
-//      initialEpochFormat  = sim.initialEpochFormat;
+      epochFormat         = sim.epochFormat;
       initialEpoch        = sim.initialEpoch;
-//      finalEpochFormat    = sim.finalEpochFormat;
       finalEpoch          = sim.finalEpoch;
       simulationStep      = sim.simulationStep;
       timeStep            = sim.timeStep;
       locatingEvent       = false;
       measManager         = sim.measManager;
       measList            = sim.measList;
-     addNoise            = sim.addNoise;
+      addNoise            = sim.addNoise;
    }
 
    return *this;
@@ -427,17 +418,6 @@ Integer Simulator::GetParameterID(const std::string &str) const
 {
    std::string str1 = str;
 
-   // @todo: This section will be remove after for a later GMAT version
-   if (str1 == "InitialEpochFormat")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.InitialEpochFormat was renamed to %s.EpochFormat in this GMAT version. Please change its name in yours script file.\n", GetName().c_str(), GetName().c_str());
-      str1 = "EpochFormat";
-   }
-   else if (str1 == "FinalEpochFormat")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.FinalEpochFormat was renamed to %s.EpochFormat in this GMAT version. Please change its name in yours script file.\n", GetName().c_str(), GetName().c_str());
-      str1 = "EpochFormat";
-   }
 
    // This section is used to throw an exception for unused parameters
    if ((str1 == "ShowProgress")||(str1 == "ReportFile")||(str1 == "ReportStyle")||(str1 == "MaximumIterations"))
@@ -844,23 +824,9 @@ bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 {
-   static StringArray enumStrings;
-   enumStrings.clear();
 
-   // todo This list should come from TimeSystemConverter in the util folder
-   //if ((id == INITIAL_EPOCH_FORMAT) || (id == FINAL_EPOCH_FORMAT))
    if (id == EPOCH_FORMAT)
-   {
-      enumStrings.push_back("A1ModJulian");
-      enumStrings.push_back("TAIModJulian");
-      enumStrings.push_back("UTCModJulian");
-      enumStrings.push_back("TTModJulian");
-      enumStrings.push_back("A1Gregorian");
-      enumStrings.push_back("TAIGregorian");
-      enumStrings.push_back("UTCGregorian");
-      enumStrings.push_back("TTGregorian");
-      return enumStrings;
-   }
+      return TimeConverterUtil::GetListOfTimeSystemTypes();
 
    return Solver::GetPropertyEnumStrings(id);
 }
@@ -978,6 +944,7 @@ const ObjectTypeArray & Simulator::GetRefObjectTypeArray()
    ObjectTypeArray objTypes = Solver::GetRefObjectTypeArray();         // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::PROP_SETUP);                               // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::MEASUREMENT_MODEL);                        // made changes by TUAN NGUYEN
+   objTypes.push_back(Gmat::DATA_FILTER);                              // made changes by TUAN NGUYEN
 //   objTypes.push_back(Gmat::TRACKING_SYSTEM);                          // made changes by TUAN NGUYEN
    return objTypes;                                                    // made changes by TUAN NGUYEN
 
