@@ -128,6 +128,7 @@ DataFile::DataFile(const DataFile& df) :
    GmatBase          (df),
    streamName        (df.streamName),
    obsType           (df.obsType),
+   filterList        (df.filterList),                           // made changes by TUAN NGUYEN
    thinningRatio     (df.thinningRatio),
    selectedStationIDs(df.selectedStationIDs),
    estimationStart   (df.estimationStart),
@@ -173,19 +174,24 @@ DataFile& DataFile::operator=(const DataFile& df)
 
       streamName = df.streamName;
       obsType    = df.obsType;
-	  thinningRatio			= df.thinningRatio;
-	  selectedStationIDs	= df.selectedStationIDs;
+
+      // This section is for new design filter 
+      filterList = df.filterList;                       // made changes by TUAN NGUYEN
+
+	   // This section is for old design filter
+      thinningRatio			= df.thinningRatio;
+	   selectedStationIDs	= df.selectedStationIDs;
+	   estimationStart      = df.estimationStart;
+	   estimationEnd        = df.estimationEnd;
+	   epochFormat          = df.epochFormat;
+	   startEpoch           = df.startEpoch;
+	   endEpoch             = df.endEpoch;
 
       if (df.theDatastream)
          theDatastream = (ObType*)df.theDatastream->Clone();
       else
          theDatastream = NULL;
 
-	  estimationStart      = df.estimationStart;
-	  estimationEnd        = df.estimationEnd;
-	  epochFormat          = df.epochFormat;
-	  startEpoch           = df.startEpoch;
-	  endEpoch             = df.endEpoch;
    }
 
    return *this;
@@ -227,7 +233,7 @@ bool DataFile::Initialize()
    if (theDatastream)
    {
       retval = theDatastream->Initialize();
-	  obsType = theDatastream->GetTypeName();
+	   obsType = theDatastream->GetTypeName();
       #ifdef DEBUG_INITIALIZATION
 	     MessageInterface::ShowMessage("DataFile::Initialize():   theDatastream = '%s'\n", theDatastream->GetStreamName().c_str());
 	     MessageInterface::ShowMessage("DataFile::Initialize():   obsType = '%s'\n", obsType.c_str());
@@ -997,3 +1003,30 @@ Real DataFile::ConvertToRealEpoch(const std::string &theEpoch,
    return retval;
 }
 
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------------
+// bool SetDataFilter(DataFilter *filter)
+//-------------------------------------------------------------------------------
+/**
+* This function is used to set a data filter for DataFile object. It adds filter
+* to it's data filter list. 
+*/
+//------------------------------------------------------------------------------
+bool DataFile::SetDataFilter(DataFilter *filter)
+{
+   bool found = false;
+   for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   {
+      if (filterList[i]->GetName() == filter->GetName())
+      {
+         found = true;
+         break;
+      }
+   }
+
+   if (!found)
+      filterList.push_back(filter);
+
+   return true;
+}

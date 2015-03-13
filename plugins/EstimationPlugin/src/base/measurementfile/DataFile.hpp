@@ -27,6 +27,7 @@
 #include "estimation_defs.hpp"
 #include "GmatBase.hpp"
 #include "ObType.hpp"
+#include "DataFilter.hpp"                            // made changes by TUAN NGUYEN
 #include "MeasurementData.hpp"
 #include "ObservationData.hpp"
 
@@ -91,6 +92,8 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
 
+   virtual bool         SetDataFilter(DataFilter *filter);                 // made changes by TUAN NGUYEN
+
    virtual bool         SetStream(ObType *thisStream);
    virtual bool         OpenStream(bool simulate = false);
    virtual bool         IsOpen();
@@ -116,6 +119,10 @@ protected:
    /// Text description of the observation data type
    std::string    obsType;
 
+   /// This section is set for new design data filter         // made changes by TUAN NGUYEN
+   std::vector<DataFilter*>  filterList;                      // made changes by TUAN NGUYEN
+
+   /// This section is set for old design data filter
    /// Data thinning ratio
    Real thinningRatio;                     // data thinning ratio specify the ratio between the selected data records and total all records
    /// List of station IDs
