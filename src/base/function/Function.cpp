@@ -1017,7 +1017,7 @@ void Function::ClearFunctionObjects()
             #endif
             delete omi->second;
             omi->second = NULL;
-            omi = functionObjectMap.erase(omi);
+            functionObjectMap.erase(omi++);
          }
       }
    }

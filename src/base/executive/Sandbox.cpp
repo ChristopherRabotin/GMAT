@@ -1143,8 +1143,8 @@ void Sandbox::Clear()
          #endif
          delete omi->second;
          omi->second = NULL;
+         objectMap.erase(omi++);
       }
-      omi = objectMap.erase(omi);
    }
    
    #ifdef DEBUG_SANDBOX_CLEAR
@@ -1195,8 +1195,8 @@ void Sandbox::Clear()
          #endif
          delete omi->second;
          omi->second = NULL;
+         globalObjectMap.erase(omi++);
       }
-      omi = globalObjectMap.erase(omi);
    }
    
    #ifdef DEBUG_SANDBOX_CLEAR
