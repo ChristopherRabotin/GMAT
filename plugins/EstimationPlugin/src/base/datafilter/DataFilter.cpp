@@ -736,18 +736,7 @@ StringArray DataFilter::GetListOfGroundStations()
 
 StringArray DataFilter::GetListOfValidEpochFormats()
 {
-   StringArray nameList;
-
-   nameList.push_back("A1ModJulian");
-   nameList.push_back("TAIModJulian");
-   nameList.push_back("UTCModJulian");
-   nameList.push_back("TTModJulian");
-   nameList.push_back("A1Gregorian");
-   nameList.push_back("TAIGregorian");
-   nameList.push_back("UTCGregorian");
-   nameList.push_back("TTGregorian");
-
-   return nameList;
+   return TimeConverterUtil::GetListOfTimeSystemTypes();
 }
 
 
