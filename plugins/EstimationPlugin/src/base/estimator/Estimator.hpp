@@ -267,7 +267,6 @@ protected:
       CONSTANT_MULTIPLIER,
       ADDITIVE_CONSTANT,
       CONVERGENT_STATUS,
-//      SOLVEFOR_STATE,                      // It was added temporarily. SolveFor state should get from the object having solve-for variable in new design
       EstimatorParamCount
    };
 

@@ -54,7 +54,6 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
    "ConvergentStatus",
-//   "SolveForState",
 };
 
 const Gmat::ParameterType
@@ -71,7 +70,6 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
-//   Gmat::STRING_TYPE,
 };
 
 
@@ -571,9 +569,6 @@ std::string Estimator::GetStringParameter(const Integer id) const
       }
    }
 
-//   if (id == SOLVEFOR_STATE)
-//      return "";
-
    return Solver::GetStringParameter(id);
 }
 
@@ -594,11 +589,37 @@ std::string Estimator::GetStringParameter(const Integer id,
                                           const Integer index) const
 {
    if (id == MEASUREMENTS)
-      return measurementNames.at(index);
+   {
+      if (((Integer)measurementNames.size() > index) && (index >= 0))
+         return measurementNames[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a measurement");
+      
+      //return measurementNames.at(index);
+   }
+
    if (id == SOLVEFORS)
-      return solveForStrings.at(index);
+   {
+      if (((Integer)solveForStrings.size() > index) && (index >= 0))
+         return solveForStrings[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a solve-for");
+
+      //return solveForStrings.at(index);
+   }
+
    if (id == ADD_RESIDUAL_PLOT)
-      return addedPlots.at(index);
+   {
+      if (((Integer)addedPlots.size() > index) && (index >= 0))
+         return addedPlots[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a plot");
+
+      //return addedPlots.at(index);
+   }
 
    return Solver::GetStringParameter(id, index);
 }
