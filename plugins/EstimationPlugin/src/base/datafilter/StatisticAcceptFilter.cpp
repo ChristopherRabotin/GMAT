@@ -37,7 +37,7 @@
 const std::string StatisticAcceptFilter::PARAMETER_TEXT[] =
 {
    "Filenames",
-   "ThinModel",
+   "ThinMode",
    "ThinningFrequency",
 };
 
@@ -528,7 +528,10 @@ Integer StatisticAcceptFilter::SetIntegerParameter(const Integer id, const Integ
    if (id == THINNING_FREQUENCY)
    {
       if (value > 0)
+      {
          thinningFrequency = value;
+         return thinningFrequency;
+      }
       else
       {
          std::stringstream ss;
