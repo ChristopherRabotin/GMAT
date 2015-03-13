@@ -637,15 +637,11 @@ const StringArray& BatchEstimator::GetPropertyEnumStrings(const Integer id) cons
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
       enumStrings.push_back("FromParticipants");
-      // todo This list should come from TimeSystemConverter in the util folder
-      enumStrings.push_back("A1ModJulian");
-      enumStrings.push_back("TAIModJulian");
-      enumStrings.push_back("UTCModJulian");
-      enumStrings.push_back("TTModJulian");
-      enumStrings.push_back("A1Gregorian");
-      enumStrings.push_back("TAIGregorian");
-      enumStrings.push_back("UTCGregorian");
-      enumStrings.push_back("TTGregorian");
+
+      StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      for (UnsignedInt i = 0; i < nameList.size(); ++i)
+         enumStrings.push_back(nameList[i]);
+
       return enumStrings;
    }
    return Estimator::GetPropertyEnumStrings(id);
