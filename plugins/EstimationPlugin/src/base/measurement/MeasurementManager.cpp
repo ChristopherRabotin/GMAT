@@ -262,12 +262,12 @@ bool MeasurementManager::Initialize()
    
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
-      // Processing tackingSet[i]
+      // For each tracking set, It needs to do the following steps to process
       // Step 1: Initialize trackingSets[i]
       if (trackingSets[i]->Initialize() == false)
          return false;
 
-      // Step2: Get set of measurement adapers and set value for measurements
+      // Step 2: Get set of measurement adapters and set value for measurement adapters
       std::vector<TrackingDataAdapter*> *setAdapters =
             trackingSets[i]->GetAdapters();
       StringArray names;
@@ -282,18 +282,22 @@ bool MeasurementManager::Initialize()
       }
       adapterFromTFSMap[trackingSets[i]] = names;
       
-      // Step 3: Set stream objects for all observation data files in trackingSet[i] 
+      // Step 3: Set stream objects and data filters for all observation data files in trackingSet[i]
+      // 3.1. Get list of all data filters defined in trackingSet[i]
+      ObjectArray dataFilterObjects = trackingSets[i]->GetRefObjectArray("DataFilter");
+
+      // 3.2. Get list of all file names defined in trackingSet[i]
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("FileName");
-      //for (UnsignedInt i = 0; i < filenames.size(); ++i)  // It uses the same index as the outer loop
+      
+      // 3.3. Create DataFile object for each file name
       for (UnsignedInt k = 0; k < filenames.size(); ++k)
       {
-//         std::stringstream fn;
-//         fn << trackingSets[i]->GetName() << "DataFile" << k;
-//         DataFile *newStream = new DataFile(fn.str());
+         // 3.3.1 Create DataFile object
          DataFile *newStream = new DataFile(filenames[k]);
-         // newStream->SetStringParameter("Filename", filenames[k]);
          newStream->SetStringParameter("Filename", filenames[k]);
-         GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???
+
+         // 3.3.2 Create and set a data stream associated with the DataFile object
+         GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???   // In new design, GMATInteral data file contains data records with different measurement type
          newStream->SetStream(got);
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("   Adding %s DataFile %s <%p>\n",
@@ -320,6 +324,11 @@ bool MeasurementManager::Initialize()
                throw MeasurementException("The stream " + filenames[i] +
                      " failed to open in simulation mode");
          }
+
+         // 3.3.3 Set data filters to DataFile object
+         for (UnsignedInt j = 0; j < dataFilterObjects.size(); ++j)
+            newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]->Clone());
+         
       }// for k loop
       
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
