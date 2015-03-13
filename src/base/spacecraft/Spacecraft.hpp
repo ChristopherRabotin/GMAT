@@ -303,6 +303,7 @@ protected:
 
       // Hardware for spacecraft
       ADD_HARDWARE,
+      SOLVEFORS,                                                    // made changes by TUAN NGUYEN
       // The filename used for the spacecraft's model 
       MODEL_FILE,
       MODEL_FILE_FULL_PATH, // read-only
@@ -583,6 +584,10 @@ protected:
    StringArray       hardwareNames;
    /// List of hardware objects used in the spacecraft
    ObjectArray       hardwareList;
+
+   // Solve-for parameters                                               // made changes by TUAN NGUYEN
+   /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
+   StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
 
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;

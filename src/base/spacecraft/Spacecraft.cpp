@@ -143,6 +143,7 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
+      Gmat::STRINGARRAY_TYPE, // SolveFors                  // made changes by TUAN NGUYEN
       Gmat::FILENAME_TYPE,    // Model File
       Gmat::FILENAME_TYPE,    // ModelFileFullPath
       Gmat::REAL_TYPE,        // Model Offset X
@@ -199,6 +200,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "CartesianVZ",
       "MassFlow",
       "AddHardware",
+      "SolveFors",                             // made changes by TUAN NGUYEN      // move solve-for parameter from batch estimator to solve-for object 
       "ModelFile",
       "ModelFileFullPath",
       "ModelOffsetX",
@@ -3364,8 +3366,17 @@ std::string Spacecraft::GetStringParameter(const Integer id,
                return "";
          }
 
+      case SOLVEFORS:                                                          // made changes by TUAN NGUYEN
+         {                                                                     // made changes by TUAN NGUYEN
+            if ((0 <= index)&(index < (Integer)(solveforNames.size())))        // made changes by TUAN NGUYEN
+               return solveforNames[index];                                    // made changes by TUAN NGUYEN
+            else                                                               // made changes by TUAN NGUYEN
+               return "";                                                      // made changes by TUAN NGUYEN
+         }                                                                     // made changes by TUAN NGUYEN
+
       default:
          break;
+
    }
    return SpaceObject::GetStringParameter(id, index);
 }
@@ -3406,6 +3417,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 {
    if (id == ADD_HARDWARE)
       return hardwareNames;
+   if (id == SOLVEFORS)                                         // made changes by TUAN NGUYEN
+      return solveforNames;                                     // made changes by TUAN NGUYEN
    if (id == FUEL_TANK_ID)
       return tankNames;
    if (id == THRUSTER_ID)
@@ -3545,6 +3558,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       }
       return true;
    }
+
+   if (id == SOLVEFORS)                                                       // made changes by TUAN NGUYEN
+   {                                                                          // made changes by TUAN NGUYEN
+      // Only add the solvefor parameter if it is not in the list already     // made changes by TUAN NGUYEN
+      if (find(solveforNames.begin(), solveforNames.end(), value) ==          // made changes by TUAN NGUYEN
+          solveforNames.end())                                                // made changes by TUAN NGUYEN
+      {                                                                       // made changes by TUAN NGUYEN
+         solveforNames.push_back(value);                                      // made changes by TUAN NGUYEN
+      }                                                                       // made changes by TUAN NGUYEN
+      return true;                                                            // made changes by TUAN NGUYEN
+   }                                                                          // made changes by TUAN NGUYEN
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
@@ -3824,6 +3848,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
+   case SOLVEFORS:                                                                                 // made changes by TUAN NGUYEN
+      {                                                                                            // made changes by TUAN NGUYEN
+         if (index < (Integer)solveforNames.size())                                                // made changes by TUAN NGUYEN
+            solveforNames[index] = value;                                                          // made changes by TUAN NGUYEN
+         else                                                                                      // made changes by TUAN NGUYEN
+            // Only add the solvefor parameter if it is not in the list already                    // made changes by TUAN NGUYEN
+            if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())    // made changes by TUAN NGUYEN
+               solveforNames.push_back(value);                                                     // made changes by TUAN NGUYEN
+
+         return true;                                                                              // made changes by TUAN NGUYEN
+      }                                                                                            // made changes by TUAN NGUYEN
    case FUEL_TANK_ID:
       {
          if (index < (Integer)tankNames.size())
@@ -3847,7 +3882,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-
 
    default:
       return SpaceObject::SetStringParameter(id, value, index);
