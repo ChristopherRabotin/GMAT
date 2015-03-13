@@ -30,6 +30,7 @@
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_GET_PARAMETER
 
@@ -47,8 +48,12 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "UseLightTime",                  // USELIGHTTIME
    "UseRelativityCorrection",       // USE_RELATIVITY
    "UseETminusTAI",                 // USE_ETMINUSTAI
-   "SimRangeModuloConstant",           // RANGE_MODULO
-   "SimDopplerCountInterval",          // DOPPLER_COUNT_INTERVAL
+   "SimRangeModuloConstant",        // RANGE_MODULO
+   "SimDopplerCountInterval",       // DOPPLER_COUNT_INTERVAL
+   "StatisticAcceptFilters",        // STATISTIC_ACCEPT_FILTERS
+   "StatisticRejectFilters",        // STATISTIC_REJECT_FILTERS
+   "EstimationAcceptFilters",       // ESTIMATION_ACCEPT_FILTERS
+   "EstimationRejectFilters",       // ESTIMATION_REJECT_FILTERS
 };
 
 /// Types of the BatchEstimator parameters
@@ -63,6 +68,10 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI
    Gmat::REAL_TYPE,                 // RANGE_MODULO
    Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL
+   Gmat::OBJECTARRAY_TYPE,          // STATISTIC_ACCEPT_FILLTERS
+   Gmat::OBJECTARRAY_TYPE,          // STATISTIC_REJECT_FILLTERS
+   Gmat::OBJECTARRAY_TYPE,          // ESTIMATION_ACCEPT_FILLTERS
+   Gmat::OBJECTARRAY_TYPE,          // ESTIMATION_REJECT_FILLTERS
 };
 
 
@@ -77,7 +86,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
 //------------------------------------------------------------------------------
 TrackingFileSet::TrackingFileSet(const std::string &name) :
    MeasurementModelBase      (name, "TrackingFileSet"),
-   useLighttime              (true),          //(false),    // Default to true once implemented
+   useLighttime              (true),
    solarsystem               (NULL),
    thePropagator             (NULL),
    useRelativityCorrection   (false),
@@ -85,6 +94,10 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    rangeModulo               (1.0e18),
    dopplerCountInterval      (1.0)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet <%s,%p> default construction \n", GetName().c_str(), this);
+#endif
+
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
 
@@ -138,8 +151,21 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useRelativityCorrection   (tfs.useRelativityCorrection),
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
    rangeModulo               (tfs.rangeModulo),
-   dopplerCountInterval      (tfs.dopplerCountInterval)
+   dopplerCountInterval      (tfs.dopplerCountInterval),
+   statAcceptFilterNames     (tfs.statAcceptFilterNames),
+   statRejectFilterNames     (tfs.statRejectFilterNames),
+   estAcceptFilterNames      (tfs.estAcceptFilterNames),
+   estRejectFilterNames      (tfs.estRejectFilterNames),
+   statAcceptFilters         (tfs.statAcceptFilters),
+   statRejectFilters         (tfs.statRejectFilters),
+   estAcceptFilters          (tfs.estAcceptFilters),
+   estRejectFilters          (tfs.estRejectFilters)
+
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet <%s,%p> copy construction from <%s,%p>\n", GetName().c_str(), this, tfs.GetName().c_str(), &tfs);
+#endif
+   
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
 
@@ -160,6 +186,10 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
 //------------------------------------------------------------------------------
 TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet <%s,%p> operator =  from <%s,%p>\n", GetName().c_str(), this, tfs.GetName().c_str(), &tfs);
+#endif
+
    if (this != &tfs)
    {
       MeasurementModelBase::operator=(tfs);
@@ -187,7 +217,14 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       useETminusTAICorrection = tfs.useETminusTAICorrection;
       rangeModulo             = tfs.rangeModulo;
       dopplerCountInterval    = tfs.dopplerCountInterval;
-//      dopplerInterval         = tfs.dopplerInterval;         
+      statAcceptFilterNames   = tfs.statAcceptFilterNames;
+      statRejectFilterNames   = tfs.statRejectFilterNames;
+      estAcceptFilterNames    = tfs.estAcceptFilterNames;
+      estRejectFilterNames    = tfs.estRejectFilterNames;
+      statAcceptFilters       = tfs.statAcceptFilters;
+      statRejectFilters       = tfs.statRejectFilters;
+      estAcceptFilters        = tfs.estAcceptFilters;
+      estRejectFilters        = tfs.estRejectFilters;
 
       isInitialized = false;
    }
@@ -207,6 +244,10 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
 //------------------------------------------------------------------------------
 GmatBase* TrackingFileSet::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::Clone() \n", GetName().c_str(), this);
+#endif
+
    return new TrackingFileSet(*this);
 }
 
@@ -241,15 +282,15 @@ std::string TrackingFileSet::GetParameterText(const Integer id) const
  * @return parameter unit for the requested parameter.
  */
 //------------------------------------------------------------------------------
-std::string TrackingFileSet::GetParameterUnit(const Integer id) const            // made changes by TUAN NGUYEN
-{                                                                                // made changes by TUAN NGUYEN
-   if (id == RANGE_MODULO)                                                       // made changes by TUAN NGUYEN
-      return "RU";                                                               // made changes by TUAN NGUYEN
-   if (id == DOPPLER_COUNT_INTERVAL)                                             // made changes by TUAN NGUYEN
-      return "sec";                                                              // made changes by TUAN NGUYEN
+std::string TrackingFileSet::GetParameterUnit(const Integer id) const
+{
+   if (id == RANGE_MODULO)
+      return "RU";
+   if (id == DOPPLER_COUNT_INTERVAL)
+      return "sec";
 
-   return MeasurementModelBase::GetParameterUnit(id);                            // made changes by TUAN NGUYEN
-}                                                                                // made changes by TUAN NGUYEN
+   return MeasurementModelBase::GetParameterUnit(id);
+}
 
 
 //------------------------------------------------------------------------------
@@ -267,36 +308,36 @@ Integer TrackingFileSet::GetParameterID(const std::string& str) const
 {
    // process all changes of parameter name
    std::string str1 = str;
-   if (str1 == "DopplerInterval")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.DopplerInterval was renamed to %s.SimDopplerCountInterval in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "SimDopplerCountInterval";
-   }
-   else if (str1 == "Filename")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.Filename was renamed to %s.FileName in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "FileName";
-   }
-   else if (str1 == "RampedTable")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.RampedTable was renamed to %s.RampTable in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "RampTable";
-   }
-   else if (str1 == "UseLighttime")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.UseLighttime was renamed to %s.UseLightTime in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "UseLightTime";
-   }
-   else if (str1 == "RangeModuloConstant")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.RangeModuloConstant was renamed to %s.SimRangeModuloConstant in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "SimRangeModuloConstant";
-   }
-   else if (str1 == "DopplerCountInterval")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.DopplerCountInterval was renamed to %s.SimDopplerCountInterval in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "SimDopplerCountInterval";
-   }
+   //if (str1 == "DopplerInterval")
+   //{
+   //   MessageInterface::ShowMessage("Warning: parameter %s.DopplerInterval was renamed to %s.SimDopplerCountInterval in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
+   //   str1 = "SimDopplerCountInterval";
+   //}
+   //else if (str1 == "Filename")
+   //{
+   //   MessageInterface::ShowMessage("Warning: parameter %s.Filename was renamed to %s.FileName in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
+   //   str1 = "FileName";
+   //}
+   //else if (str1 == "RampedTable")
+   //{
+   //   MessageInterface::ShowMessage("Warning: parameter %s.RampedTable was renamed to %s.RampTable in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
+   //   str1 = "RampTable";
+   //}
+   //else if (str1 == "UseLighttime")
+   //{
+   //   MessageInterface::ShowMessage("Warning: parameter %s.UseLighttime was renamed to %s.UseLightTime in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
+   //   str1 = "UseLightTime";
+   //}
+   //else if (str1 == "RangeModuloConstant")
+   //{
+   //   MessageInterface::ShowMessage("Warning: parameter %s.RangeModuloConstant was renamed to %s.SimRangeModuloConstant in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
+   //   str1 = "SimRangeModuloConstant";
+   //}
+   //else if (str1 == "DopplerCountInterval")
+   //{
+   //   MessageInterface::ShowMessage("Warning: parameter %s.DopplerCountInterval was renamed to %s.SimDopplerCountInterval in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
+   //   str1 = "SimDopplerCountInterval";
+   //}
 
 
    for (Integer i = MeasurementModelBaseParamCount; i < TrackingFileSetParamCount; i++)
@@ -476,6 +517,11 @@ std::string TrackingFileSet::GetStringParameter(const Integer id) const
 bool TrackingFileSet::SetStringParameter(const Integer id,
       const std::string& value)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("TrackingFileSet::SetStringParameter(id = %d, "
+            "value = '%s') called\n", id, value.c_str());
+   #endif
+
    if (id == FILENAME)
    {
       if (find(filenames.begin(), filenames.end(), value) == filenames.end())
@@ -483,7 +529,8 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          filenames.push_back(value);
          return true;
       }
-      return false;
+      else
+         throw MeasurementException("Error: File name is replicated ('" + value + "')\n");
    }
 
    if (id == RAMPED_TABLENAME)
@@ -493,7 +540,53 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          rampedTablenames.push_back(value);
          return true;
       }
-      return false;
+      else
+         throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
+
+   }
+
+   if (id == STATISTIC_ACCEPT_FILTERS)
+   {
+      if (find(statAcceptFilterNames.begin(), statAcceptFilterNames.end(), value) == statAcceptFilterNames.end())
+      {
+         statAcceptFilterNames.push_back(value);
+         return true;
+      }
+      else
+         throw MeasurementException("Error: name of statistic accept filter is replicated ('" + value + "')\n");      
+   }
+
+   if (id == STATISTIC_REJECT_FILTERS)
+   {
+      if (find(statRejectFilterNames.begin(), statRejectFilterNames.end(), value) == statRejectFilterNames.end())
+      {
+         statRejectFilterNames.push_back(value);
+         return true;
+      }
+      else
+         throw MeasurementException("Error: name of statistic reject filter is replicated ('" + value + "')\n");      
+   }
+
+   if (id == ESTIMATION_ACCEPT_FILTERS)
+   {
+      if (find(estAcceptFilterNames.begin(), estAcceptFilterNames.end(), value) == estAcceptFilterNames.end())
+      {
+         estAcceptFilterNames.push_back(value);
+         return true;
+      }
+      else
+         throw MeasurementException("Error: name of estimation accept filter is replicated ('" + value + "')\n");      
+   }
+
+   if (id == ESTIMATION_REJECT_FILTERS)
+   {
+      if (find(estRejectFilterNames.begin(), estRejectFilterNames.end(), value) == estRejectFilterNames.end())
+      {
+         estRejectFilterNames.push_back(value);
+         return true;
+      }
+      else
+         throw MeasurementException("Error: name of estimation reject filter is replicated ('" + value + "')\n");      
    }
 
    return MeasurementModelBase::SetStringParameter(id, value);
@@ -540,6 +633,42 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
       else
          throw MeasurementException("Index out of bounds when trying to access "
                "a ramped table file name");
+   }
+
+   if (id == STATISTIC_ACCEPT_FILTERS)
+   {
+      if (((Integer)statAcceptFilterNames.size() > index) && (index >= 0))
+         return statAcceptFilterNames[index];
+      else
+         throw MeasurementException("Index out of bounds when trying to access "
+               "a statistic accept filter name");
+   }
+
+   if (id == STATISTIC_REJECT_FILTERS)
+   {
+      if (((Integer)statRejectFilterNames.size() > index) && (index >= 0))
+         return statRejectFilterNames[index];
+      else
+         throw MeasurementException("Index out of bounds when trying to access "
+               "a statistic reject filter name");
+   }
+
+   if (id == ESTIMATION_ACCEPT_FILTERS)
+   {
+      if (((Integer)estAcceptFilterNames.size() > index) && (index >= 0))
+         return estAcceptFilterNames[index];
+      else
+         throw MeasurementException("Index out of bounds when trying to access "
+               "an estimation accept filter name");
+   }
+
+   if (id == ESTIMATION_REJECT_FILTERS)
+   {
+      if (((Integer)estRejectFilterNames.size() > index) && (index >= 0))
+         return estRejectFilterNames[index];
+      else
+         throw MeasurementException("Index out of bounds when trying to access "
+               "an estimation reject filter name");
    }
 
    return MeasurementModelBase::GetStringParameter(id, index);
@@ -692,6 +821,82 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       return true;
    }
 
+   if (id == STATISTIC_ACCEPT_FILTERS)
+   {
+      if (((Integer)statAcceptFilterNames.size() > index) && (index >= 0))
+         statAcceptFilterNames[index] = value;
+      else if ((Integer)statAcceptFilterNames.size() == index)
+         statAcceptFilterNames.push_back(value);
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+               "set a statistic accept filter name");
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d members in StatisticAcceptFilters:\n",
+               statAcceptFilterNames.size());
+         for (UnsignedInt i = 0; i < statAcceptFilterNames.size(); ++i)
+            MessageInterface::ShowMessage("   %s\n", statAcceptFilterNames[i].c_str());
+      #endif
+      return true;
+   }
+
+   if (id == STATISTIC_REJECT_FILTERS)
+   {
+      if (((Integer)statRejectFilterNames.size() > index) && (index >= 0))
+         statRejectFilterNames[index] = value;
+      else if ((Integer)statRejectFilterNames.size() == index)
+         statRejectFilterNames.push_back(value);
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+               "set a statistic reject filter name");
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d members in StatisticRejectFilters:\n",
+               statRejectFilterNames.size());
+         for (UnsignedInt i = 0; i < statRejectFilterNames.size(); ++i)
+            MessageInterface::ShowMessage("   %s\n", statRejectFilterNames[i].c_str());
+      #endif
+      return true;
+   }
+
+   if (id == ESTIMATION_ACCEPT_FILTERS)
+   {
+      if (((Integer)estAcceptFilterNames.size() > index) && (index >= 0))
+         estAcceptFilterNames[index] = value;
+      else if ((Integer)estAcceptFilterNames.size() == index)
+         estAcceptFilterNames.push_back(value);
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+               "set an estimation accept filter name");
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d members in EstimationAcceptFilters:\n",
+               estAcceptFilterNames.size());
+         for (UnsignedInt i = 0; i < estAcceptFilterNames.size(); ++i)
+            MessageInterface::ShowMessage("   %s\n", estAcceptFilterNames[i].c_str());
+      #endif
+      return true;
+   }
+
+   if (id == ESTIMATION_REJECT_FILTERS)
+   {
+      if (((Integer)estRejectFilterNames.size() > index) && (index >= 0))
+         estRejectFilterNames[index] = value;
+      else if ((Integer)estRejectFilterNames.size() == index)
+         estRejectFilterNames.push_back(value);
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+               "set an estimation reject filter name");
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d members in EstimationRejectFilters:\n",
+               estRejectFilterNames.size());
+         for (UnsignedInt i = 0; i < estRejectFilterNames.size(); ++i)
+            MessageInterface::ShowMessage("   %s\n", estRejectFilterNames[i].c_str());
+      #endif
+      return true;
+   }
+
    return MeasurementModelBase::SetStringParameter(id, value, index);
 }
 
@@ -720,12 +925,7 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
    {
       tconfigs.clear();
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
-         tconfigs.push_back(trackingConfigs[i].GetDefinitionString());                     // made changes by TUAN NGUYEN
-         //for (UnsignedInt j = 0; j < trackingConfigs[i].strands.size(); ++j)             // made changes by TUAN NGUYEN
-         //   for (UnsignedInt k=0; k < trackingConfigs[i].strands[j].size(); ++k)         // made changes by TUAN NGUYEN
-         //      if (find(tconfigs.begin(), tconfigs.end(),                                // made changes by TUAN NGUYEN
-         //            trackingConfigs[i].strands[j][k]) == tconfigs.end())                // made changes by TUAN NGUYEN
-         //         tconfigs.push_back(trackingConfigs[i].strands[j][k]);                  // made changes by TUAN NGUYEN
+         tconfigs.push_back(trackingConfigs[i].GetDefinitionString());
       return tconfigs;
    }
 
@@ -734,6 +934,18 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
 
    if (id == RAMPED_TABLENAME)
       return rampedTablenames;
+
+   if (id == STATISTIC_ACCEPT_FILTERS)
+      return statAcceptFilterNames;
+
+   if (id == STATISTIC_REJECT_FILTERS)
+      return statRejectFilterNames;
+
+   if (id == ESTIMATION_ACCEPT_FILTERS)
+      return estAcceptFilterNames;
+
+   if (id == ESTIMATION_REJECT_FILTERS)
+      return estRejectFilterNames;
 
    return MeasurementModelBase::GetStringArrayParameter(id);
 }
@@ -1054,6 +1266,27 @@ bool TrackingFileSet::SetBooleanParameter(const std::string& label,
 }
 
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param id ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType TrackingFileSet::GetPropertyObjectType(const Integer id) const
+{
+   if ((id == STATISTIC_ACCEPT_FILTERS)||(id == STATISTIC_REJECT_FILTERS)||
+       (id == ESTIMATION_ACCEPT_FILTERS)||(id == ESTIMATION_REJECT_FILTERS))
+      return Gmat::DATA_FILTER;
+
+   return MeasurementModelBase::GetPropertyObjectType(id);
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
@@ -1085,6 +1318,7 @@ const ObjectTypeArray& TrackingFileSet::GetRefObjectTypeArray()
    refObjectTypes.push_back(Gmat::SPACE_POINT);
    /// @todo: remove when they are autogenerated
    refObjectTypes.push_back(Gmat::DATA_FILE);
+   refObjectTypes.push_back(Gmat::DATA_FILTER);
 
    return refObjectTypes;
 }
@@ -1134,6 +1368,18 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
          refObjectNames.push_back(filenames[i]);
    }
 
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILTER))
+   {
+      for (UnsignedInt i = 0; i <  statAcceptFilterNames.size(); ++i)
+         refObjectNames.push_back(statAcceptFilterNames[i]);
+      for (UnsignedInt i = 0; i <  statRejectFilterNames.size(); ++i)
+         refObjectNames.push_back(statRejectFilterNames[i]);
+      for (UnsignedInt i = 0; i <  estAcceptFilterNames.size(); ++i)
+         refObjectNames.push_back(estAcceptFilterNames[i]);
+      for (UnsignedInt i = 0; i <  estRejectFilterNames.size(); ++i)
+         refObjectNames.push_back(estRejectFilterNames[i]);
+   }
+
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Reference objects:  ");
       for (UnsignedInt i = 0; i < refObjectNames.size(); ++i)
@@ -1180,8 +1426,6 @@ bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
 bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
-   bool retval = false;
-
    if ((type == Gmat::DATA_FILE) || (type == Gmat::UNKNOWN_OBJECT))
    {
       for (UnsignedInt i = 0; i < filenames.size(); ++i)
@@ -1189,8 +1433,7 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
          if (filenames[i] == oldName)
          {
             filenames[i] = newName;
-            retval = true;
-            break;
+            return true;
          }
       }
    }
@@ -1206,14 +1449,53 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
                if (trackingConfigs[i].strands[j][k] == oldName)
                {
                   trackingConfigs[i].strands[j][k] = newName;
-                  retval = true;
+                  return true;
                }
             }
          }
       }
    }
 
-   return retval;
+   if ((type == Gmat::DATA_FILTER) || (type == Gmat::UNKNOWN_OBJECT))
+   {
+      for (UnsignedInt i = 0; i < statAcceptFilterNames.size(); ++i)
+      {
+         if (statAcceptFilterNames[i] == oldName)
+         {
+            statAcceptFilterNames[i] = newName;
+            return true;
+         }
+      }
+      
+      for (UnsignedInt i = 0; i < statRejectFilterNames.size(); ++i)
+      {
+         if (statRejectFilterNames[i] == oldName)
+         {
+            statRejectFilterNames[i] = newName;
+            return true;
+         }
+      }
+      
+      for (UnsignedInt i = 0; i < estAcceptFilterNames.size(); ++i)
+      {
+         if (estAcceptFilterNames[i] == oldName)
+         {
+            estAcceptFilterNames[i] = newName;
+            return true;
+         }
+      }
+
+      for (UnsignedInt i = 0; i < estRejectFilterNames.size(); ++i)
+      {
+         if (estRejectFilterNames[i] == oldName)
+         {
+            estRejectFilterNames[i] = newName;
+            return true;
+         }
+      }
+   }
+
+   return MeasurementModelBase::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -1232,6 +1514,30 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
 GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
       const std::string& name)
 {
+   if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
+   {
+      for(UnsignedInt i = 0; i < statAcceptFilters.size(); ++i)
+      {
+         if (statAcceptFilters[i]->GetName() == name)
+            return statAcceptFilters[i];
+      }
+      for(UnsignedInt i = 0; i < statRejectFilters.size(); ++i)
+      {
+         if (statRejectFilters[i]->GetName() == name)
+            return statRejectFilters[i];
+      }
+      for(UnsignedInt i = 0; i < estAcceptFilters.size(); ++i)
+      {
+         if (estAcceptFilters[i]->GetName() == name)
+            return estAcceptFilters[i];
+      }
+      for(UnsignedInt i = 0; i < estRejectFilters.size(); ++i)
+      {
+         if (estRejectFilters[i]->GetName() == name)
+            return estRejectFilters[i];
+      }
+   }
+
    return MeasurementModelBase::GetRefObject(type, name);
 }
 
@@ -1290,6 +1596,49 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Adding datafile %s\n", name.c_str());
          #endif
          datafiles.push_back((DataFile*)obj);
+      }
+   }
+   else if (obj->IsOfType(Gmat::DATA_FILTER))
+   {
+      if (obj->IsOfType("StatisticAcceptFilter"))
+      {
+         if (find(statAcceptFilters.begin(), statAcceptFilters.end(), obj) == statAcceptFilters.end())
+         {
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Adding statistic accept filter %s\n", name.c_str());
+            #endif
+            statAcceptFilters.push_back(obj);
+         }
+      }
+      else if (obj->IsOfType("StatisticRejectFilter"))
+      {
+         if (find(statRejectFilters.begin(), statRejectFilters.end(), obj) == statRejectFilters.end())
+         {
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Adding statistic reject filter %s\n", name.c_str());
+            #endif
+            statRejectFilters.push_back(obj);
+         }
+      }
+      else if (obj->IsOfType("EstimationAcceptFilter"))
+      {
+         if (find(estAcceptFilters.begin(), estAcceptFilters.end(), obj) == estAcceptFilters.end())
+         {
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Adding estimation accept filter %s\n", name.c_str());
+            #endif
+            estAcceptFilters.push_back(obj);
+         }
+      }
+      else if (obj->IsOfType("EstimationRejectFilter"))
+      {
+         if (find(estRejectFilters.begin(), estRejectFilters.end(), obj) == estRejectFilters.end())
+         {
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("Adding estimation reject filter %s\n", name.c_str());
+            #endif
+            estRejectFilters.push_back(obj);
+         }
       }
    }
    else
@@ -1352,7 +1701,22 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
 {
-   return MeasurementModelBase::GetRefObjectArray(type);
+   ObjectArray objectList = MeasurementModelBase::GetRefObjectArray(type);
+
+   if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
+   {
+      for(UnsignedInt i = 0; i < statAcceptFilters.size(); ++i)
+         objectList.push_back(statAcceptFilters[i]);
+      for(UnsignedInt i = 0; i < statRejectFilters.size(); ++i)
+         objectList.push_back(statRejectFilters[i]);
+ 
+      for(UnsignedInt i = 0; i < estAcceptFilters.size(); ++i)
+         objectList.push_back(estAcceptFilters[i]);
+      for(UnsignedInt i = 0; i < estRejectFilters.size(); ++i)
+         objectList.push_back(estRejectFilters[i]);
+   }
+
+   return objectList;
 }
 
 //------------------------------------------------------------------------------
@@ -1418,7 +1782,7 @@ void TrackingFileSet::SetPropagator(PropSetup* ps)
 bool TrackingFileSet::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize() <%p>\n", this);
+      MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize() <%s,%p>\n", GetName().c_str(), this);
    #endif
    
    if (this->IsInitialized())
@@ -1466,10 +1830,6 @@ bool TrackingFileSet::Initialize()
 
          for (UnsignedInt j = 0; j < trackingConfigs[i].types.size(); ++j)
          {
-            //if (trackingConfigs[i].strands.size() != 1)
-            //   throw MeasurementException("Multiple strands and empty strands "
-            //         "are not yet implemented");
-            
             TrackingDataAdapter *tda =
                   BuildAdapter(trackingConfigs[i].strands[0],
                         trackingConfigs[i].types[j], i);
@@ -1578,7 +1938,11 @@ bool TrackingFileSet::Initialize()
    }
    
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Exit TrackingFileSet::Initialize() <%p>\n", this);
+      MessageInterface::ShowMessage("statAcceptFilters.size() = %d\n", statAcceptFilters.size());
+      for (UnsignedInt i = 0; i < statAcceptFilters.size(); ++i)
+         MessageInterface::ShowMessage("filter %d: name = '%s'   pointer = <%p>\n", i, statAcceptFilters[i]->GetName().c_str(), statAcceptFilters[i]);
+
+      MessageInterface::ShowMessage("Exit TrackingFileSet::Initialize() <%s,%p>\n", GetName().c_str(), this);
    #endif
 
    return retval;

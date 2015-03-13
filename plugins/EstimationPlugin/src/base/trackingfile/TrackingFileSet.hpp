@@ -107,6 +107,9 @@ public:
                                             const bool value,
                                             const Integer index);
 
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+
    DEFAULT_TO_NO_CLONES
 
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
@@ -169,20 +172,30 @@ protected:
    /// Name of the associate ramped table
    StringArray rampedTablenames;
    /// Flag for the inclusion of light time solution
-   bool useLighttime;
+   bool        useLighttime;
 
    /// Flag for the inclusion of relativity correction
-   bool useRelativityCorrection;
+   bool        useRelativityCorrection;
    /// Flag for the inclusion of ET-TAI correction
-   bool useETminusTAICorrection;
+   bool        useETminusTAICorrection;
 
    /// Range modulo constant
-   Real rangeModulo;
+   Real        rangeModulo;
    /// Doppler count interval
-   Real dopplerCountInterval;
+   Real        dopplerCountInterval;
 
-   // Doppler interval
-   //Real dopplerInterval;
+   /// Statistis accept filters
+   StringArray statAcceptFilterNames;
+   ObjectArray statAcceptFilters;
+   /// Statistis accept filters
+   StringArray statRejectFilterNames;
+   ObjectArray statRejectFilters;
+   /// Estimation accept filters
+   StringArray estAcceptFilterNames;
+   ObjectArray estAcceptFilters;
+   /// Estimation accept filters
+   StringArray estRejectFilterNames;
+   ObjectArray estRejectFilters;
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -205,6 +218,10 @@ protected:
       USE_ETMINUSTAI,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
+      STATISTIC_ACCEPT_FILTERS,
+      STATISTIC_REJECT_FILTERS,
+      ESTIMATION_ACCEPT_FILTERS,
+      ESTIMATION_REJECT_FILTERS,
       TrackingFileSetParamCount,
    };
 
