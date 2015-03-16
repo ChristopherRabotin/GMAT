@@ -184,18 +184,9 @@ protected:
    /// Doppler count interval
    Real        dopplerCountInterval;
 
-   /// Statistis accept filters
-   StringArray statAcceptFilterNames;
-   ObjectArray statAcceptFilters;
-   /// Statistis accept filters
-   StringArray statRejectFilterNames;
-   ObjectArray statRejectFilters;
-   /// Estimation accept filters
-   StringArray estAcceptFilterNames;
-   ObjectArray estAcceptFilters;
-   /// Estimation accept filters
-   StringArray estRejectFilterNames;
-   ObjectArray estRejectFilters;
+   /// Data filters
+   StringArray dataFilterNames;
+   ObjectArray dataFilters;
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -218,10 +209,7 @@ protected:
       USE_ETMINUSTAI,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
-      STATISTIC_ACCEPT_FILTERS,
-      STATISTIC_REJECT_FILTERS,
-      ESTIMATION_ACCEPT_FILTERS,
-      ESTIMATION_REJECT_FILTERS,
+      DATA_FILTERS,
       TrackingFileSetParamCount,
    };
 
