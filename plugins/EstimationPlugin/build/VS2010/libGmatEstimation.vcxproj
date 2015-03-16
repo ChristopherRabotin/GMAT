@@ -249,6 +249,7 @@
     <ClInclude Include="..\..\src\base\command\RunSimulator.hpp" />
     <ClInclude Include="..\..\src\base\datafilter\DataFilter.hpp" />
     <ClInclude Include="..\..\src\base\datafilter\StatisticAcceptFilter.hpp" />
+    <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp" />
     <ClInclude Include="..\..\src\base\errormodel\ErrorModel.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimator.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimatorInv.hpp" />
@@ -354,6 +355,7 @@
     <ClCompile Include="..\..\src\base\command\RunSimulator.cpp" />
     <ClCompile Include="..\..\src\base\datafilter\DataFilter.cpp" />
     <ClCompile Include="..\..\src\base\datafilter\StatisticAcceptFilter.cpp" />
+    <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp" />
     <ClCompile Include="..\..\src\base\errormodel\ErrorModel.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimator.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimatorInv.cpp" />

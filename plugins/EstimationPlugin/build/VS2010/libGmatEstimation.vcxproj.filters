@@ -384,6 +384,9 @@
     <ClInclude Include="..\..\src\base\datafilter\DataFilter.hpp">
       <Filter>Source Files\datafilter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -681,6 +684,9 @@
       <Filter>Source Files\errormodel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\datafilter\DataFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp">
       <Filter>Source Files\datafilter</Filter>
     </ClCompile>
   </ItemGroup>
