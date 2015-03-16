@@ -187,7 +187,12 @@ Integer Transponder::GetParameterID(const std::string & str) const
    for (Integer i = RFHardwareParamCount; i < TransponderParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw GmatBaseException("Error: '" + str + "' parameter was not defined in GMAT Transponder's syntax.\n");
+
          return i;
+      }
    }
 
    return RFHardware::GetParameterID(str);
@@ -332,6 +337,9 @@ bool Transponder::IsParameterReadOnly(const std::string& label) const
 //------------------------------------------------------------------------------
 bool Transponder::IsParameterReadOnly(const Integer id) const
 {
+   if (id == HARDWARE_DELAY)
+      return false;
+
    if ((id == INPUT_FREQUENCY_MODEL)||(id == INPUT_CENTER_FREQUENCY)||(id == INPUT_BANDWIDTH)||(id == OUTPUT_FREQUENCY_MODEL))
       return true;
 

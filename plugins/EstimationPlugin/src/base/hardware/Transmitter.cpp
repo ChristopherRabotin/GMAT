@@ -174,7 +174,12 @@ Integer Transmitter::GetParameterID(const std::string & str) const
    for (Integer i = RFHardwareParamCount; i < TransmitterParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - RFHardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw GmatBaseException("Error: Parameter '" + str + "' was not defined in GMAT Transmitter's syntax.\n");
+
          return i;
+      }
    }
 
    return RFHardware::GetParameterID(str);
