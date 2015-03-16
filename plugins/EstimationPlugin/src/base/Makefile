@@ -166,6 +166,7 @@ CPP_OBJECTS = \
     command/RunSimulator.o \
     datafilter/DataFilter.o \
     datafilter/StatisticAcceptFilter.o \
+    datafilter/StatisticRejectFilter.o \
     errormodel/ErrorModel.o \
     estimator/Estimator.o \
     estimator/BatchEstimator.o \
@@ -182,7 +183,9 @@ CPP_OBJECTS = \
     event/EventManager.o \
     event/LightTimeCorrection.o \
     event/EstimationRootFinder.o \
+    factory/ErrorModelFactory.o \
     factory/EstimationCommandFactory.o \
+    factory/EstimationDataFilterFactory.o \
     factory/EstimatorFactory.o \
     factory/EventFactory.o \
     factory/EstimatorHardwareFactory.o \
