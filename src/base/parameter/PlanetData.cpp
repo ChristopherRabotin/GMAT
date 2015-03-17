@@ -163,7 +163,9 @@ PlanetData::~PlanetData()
 Real PlanetData::GetPlanetReal(Integer item)
 {
    #ifdef DEBUG_PLANETDATA_RUN
-   MessageInterface::ShowMessage("PlanetData::GetPlanetReal() item=%d\n", item);
+   MessageInterface::ShowMessage
+      ("PlanetData::GetPlanetReal() item=%d, mSpacecraft=<%p>, mSolarSystem=<%p>\n",
+       item, mSpacecraft, mSolarSystem);
    #endif
    
    if (item < LATITUDE || item > LST_ID)
@@ -172,14 +174,25 @@ Real PlanetData::GetPlanetReal(Integer item)
           GmatRealUtil::ToString(item));
    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
+   {
       InitializeRefObjects();
-
+      #ifdef DEBUG_PLANETDATA_RUN
+      MessageInterface::ShowMessage
+         ("   After InitializeRefObjects(), mSpacecraft=<%p>, mSolarSystem=<%p>\n",
+          mSpacecraft, mSolarSystem);
+      #endif
+   }
+   
    // Get current time
    Real a1mjd = mSpacecraft->GetEpoch();
    
    // Call GetHourAngle() on origin
    Real mha = mOrigin->GetHourAngle(a1mjd);
-
+   
+   #ifdef DEBUG_PLANETDATA_RUN
+   MessageInterface::ShowMessage("   mha = %f\n", mha);
+   #endif
+   
    Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
    Rvector6 instate = mSpacecraft->GetState().GetState();
    Rvector6 state;
@@ -192,7 +205,8 @@ Real PlanetData::GetPlanetReal(Integer item)
    Real equatorialRadius =
       mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
 
-   return GmatCalcUtil::CalculatePlanetData(VALID_PLANET_DATA_NAMES[item - LATITUDE], state, equatorialRadius, flatteningFactor, mha);
+   return GmatCalcUtil::CalculatePlanetData(VALID_PLANET_DATA_NAMES[item - LATITUDE],
+                                            state, equatorialRadius, flatteningFactor, mha);
 }
 
 
@@ -277,6 +291,10 @@ bool PlanetData::ValidateRefObjects(GmatBase *param)
 //------------------------------------------------------------------------------
 void PlanetData::InitializeRefObjects()
 {
+   #ifdef DEBUG_PLANETDATA_INIT
+   MessageInterface::ShowMessage("PlanetData::InitializeRefObjects() entered\n");
+   #endif
+   
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
 
    if (mSpacecraft == NULL)
@@ -307,6 +325,12 @@ void PlanetData::InitializeRefObjects()
    mOutCoordSystem =
       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
    
+   #ifdef DEBUG_PLANETDATA_INIT
+   MessageInterface::ShowMessage
+      ("   mOutCoordSystem=<%p>'%s'\n", mOutCoordSystem,
+       mOutCoordSystem ? mOutCoordSystem->GetName().c_str() : "NULL");
+   #endif
+   
    if (mOutCoordSystem == NULL)
       throw ParameterException
          ("PlanetData::InitializeRefObjects() Cannot find output "
@@ -328,14 +352,21 @@ void PlanetData::InitializeRefObjects()
       mOrigin =
          (CelestialBody*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
       
+      #ifdef DEBUG_PLANETDATA_INIT
+      MessageInterface::ShowMessage
+         ("   mOrigin=<%p>'%s'\n", mOrigin, mOrigin ? mOrigin->GetName().c_str() : "NULL");
+      #endif
+      
       if (!mOrigin)
       {
          throw ParameterException
             ("PlanetData::InitializeRefObjects() Cannot find Origin object: " +
              originName + "\n");
       }
-
    }
+   #ifdef DEBUG_PLANETDATA_INIT
+   MessageInterface::ShowMessage("PlanetData::InitializeRefObjects() leaving\n");
+   #endif
 }
 
 

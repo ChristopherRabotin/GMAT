@@ -960,3 +960,25 @@ bool PlotInterface::ActivateXyPlot(const std::string &plotName)
 
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// bool TakeXYAction(const std::string& plotName, const std::string& action)
+//------------------------------------------------------------------------------
+/**
+ * Passes a custom acton to the XY plot
+ *
+ * @param PlotName Name of the plot receiving the action
+ * param action The invoked action
+ *
+ * @return true if an action was taken, false if no action was invoked
+ */
+//------------------------------------------------------------------------------
+bool PlotInterface::TakeXYAction(const std::string& plotName,
+      const std::string& action)
+{
+   if (thePlotReceiver != NULL)
+      return thePlotReceiver->TakeXYAction(plotName, action);
+
+   return false;
+}

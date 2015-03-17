@@ -162,23 +162,23 @@ bool Global::Execute()
       // get it from the LOS, if it's there
       if (objectMap->find(objectNames.at(ii)) != objectMap->end())
       {
+         mapObj = (*objectMap)[objectNames.at(ii)];
          #ifdef DEBUG_GLOBAL
 			MessageInterface::ShowMessage
-				("   Found '%s' in objectMap, so moving to GOS\n",
+				("   Found <%p>'%s' in objectMap, so moving to GOS\n", mapObj,
 				 objectNames.at(ii).c_str());
          #endif
-         mapObj = (*objectMap)[objectNames.at(ii)];
          if (InsertIntoGOS(mapObj, objectNames.at(ii)))
             objectMap->erase(objectNames.at(ii));
       }
       else if (globalObjectMap->find(objectNames.at(ii)) != globalObjectMap->end())
       {
+         mapObj = (*globalObjectMap)[objectNames.at(ii)];
          #ifdef DEBUG_GLOBAL
 			MessageInterface::ShowMessage
-				("   Found '%s' in globalObjctMap, make sure type's matching\n",
+				("   Found <%p>'%s' in globalObjctMap, make sure type's matching\n", mapObj,
 				 objectNames.at(ii).c_str());
          #endif
-         mapObj = (*globalObjectMap)[objectNames.at(ii)];
          InsertIntoGOS(mapObj, objectNames.at(ii));
       }
       else
@@ -192,6 +192,9 @@ bool Global::Execute()
    // Build command summary
    BuildCommandSummary(true);
    
+   #ifdef DEBUG_GLOBAL
+      MessageInterface::ShowMessage("Global::Execute() returning true\n");
+   #endif
    return true;
 }
 

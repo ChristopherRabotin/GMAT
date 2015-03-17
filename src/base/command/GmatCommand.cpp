@@ -51,6 +51,7 @@
 //#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_FIND_OBJECT
+//#define DEBUG_OBJECT_MAP
 //#define DEBUG_SEPARATE
 //#define DEBUG_GEN_STRING 1
 //#define DEBUG_IS_FUNCTION
@@ -2076,6 +2077,11 @@ void GmatCommand::SetRunState(Gmat::RunState newState)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummary(bool commandCompleted)
 {
+   // Do not build summary if inside a function (LOJ: 2014.12.16)
+   if (currentFunction != NULL)
+      return;
+
+   
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
@@ -2271,6 +2277,11 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
 //------------------------------------------------------------------------------
 void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
 {
+   // Do not build summary string if inside a function (LOJ: 2014.12.16)
+   if (currentFunction != NULL)
+      return;
+
+   
    #ifdef DEBUG_COMMAND_SUMMARY_TYPE
       MessageInterface::ShowMessage(
             "   Now entering BuildCommandSummaryString with commandCompleted = %s, summaryForEntireMission = %s, missionPhysicsBasedOnly = %s, for command %s of type %s which is %s a physics-based command.\n",
@@ -3048,9 +3059,15 @@ void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &titl
                               ElementWrapper *wrapper)
 {
    MessageInterface::ShowMessage
-      ("%s%s wrapper=<%p>, type=%2d, desc='%s'\n", prefix.c_str(), title.c_str(),
+      ("%s%s wrapper=<%p>, type=%2d, desc='%s'", prefix.c_str(), title.c_str(),
        wrapper, wrapper ? wrapper->GetWrapperType() : -1,
        wrapper ? wrapper->GetDescription().c_str() : "NULL");
+   if (wrapper && wrapper->GetRefObject())
+      MessageInterface::ShowMessage
+         (", refObject=<%p>'%s'\n", wrapper->GetRefObject(),
+          wrapper->GetRefObject()->GetName().c_str());
+   else
+      MessageInterface::ShowMessage("\n");
 }
 
 

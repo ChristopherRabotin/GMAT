@@ -55,8 +55,4 @@ endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
-
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
-  )
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)

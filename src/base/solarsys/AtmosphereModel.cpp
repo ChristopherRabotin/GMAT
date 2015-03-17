@@ -1292,6 +1292,14 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
       for (Integer i = 0; i < 7; i++)
          ap[i] = nominalAp;
    }
+
+   #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("Flux data for %s model\n", instanceName.c_str());
+      MessageInterface::ShowMessage("   Epoch:  %.12lf\n", epoch);
+      MessageInterface::ShowMessage("   F10.7:  %lf\n", f107);
+      MessageInterface::ShowMessage("   F10.7a: %lf\n", f107a);
+      MessageInterface::ShowMessage("   Ap:     [%lf %lf %lf %lf %lf %lf %lf]\n", ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
+   #endif
 }
 
 

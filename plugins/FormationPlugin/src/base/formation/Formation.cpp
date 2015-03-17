@@ -804,6 +804,12 @@ GmatBase* Formation::GetRefObject(const Gmat::ObjectType type,
 bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJ
+   MessageInterface::ShowMessage
+      ("Formation::SetRefObject() entered, obj=<%p>, type=%d, name='%s'\n",
+       obj, type, name.c_str());
+   #endif
+   
    SpaceObject *so;
    
    if (type == Gmat::SPACECRAFT)
@@ -836,7 +842,11 @@ bool Formation::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                "to the Formation \"" + instanceName + "\".");
       }
       
-      return true;
+      #ifdef DEBUG_REF_OBJ
+      MessageInterface::ShowMessage
+         ("Formation::SetRefObject() returning true\n");
+      #endif
+     return true;
    }
    
    return FormationInterface::SetRefObject(obj, type, name);

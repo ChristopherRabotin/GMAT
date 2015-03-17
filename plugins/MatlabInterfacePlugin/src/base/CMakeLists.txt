@@ -43,14 +43,18 @@ ADD_DEFINITIONS("-DMATLAB_EXPORTS")
 # ====================================================================
 # list of directories containing source/header files
 SET(PLUGIN_DIRS command factory function include interface plugin subscriber)
-#SET(PLUGIN_DIRS ${PLUGIN_DIRS} "../matlab/gmat_mex/src")
+if(UNIX)
+  SET(PLUGIN_DIRS ${PLUGIN_DIRS} "../matlab/gmat_mex/src")
+endif()
 
 # ====================================================================
 # extra include directories for header files
 INCLUDE_DIRECTORIES(${Matlab_INCLUDE_DIRS})
-#INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/include")
-#INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/app")
-INCLUDE(${wxWidgets_USE_FILE})
+if(UNIX)
+  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/include")
+  INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/src/gui/app")
+  INCLUDE(${wxWidgets_USE_FILE})
+endif()
 
 # ====================================================================
 # source files
@@ -64,9 +68,14 @@ SET(PLUGIN_SRCS
     interface/MatlabInterface.cpp
     plugin/GmatPluginFunctions.cpp
     subscriber/MatlabWorkspace.cpp
-    #../matlab/gmat_mex/src/MatlabClient.cpp
-    #../matlab/gmat_mex/src/MatlabConnection.cpp
 )
+if(UNIX)
+  SET(PLUGIN_SRCS
+    ${PLUGIN_SRCS}
+    ../matlab/gmat_mex/src/MatlabClient.cpp
+    ../matlab/gmat_mex/src/MatlabConnection.cpp
+    )
+endif()
 
 # ====================================================================
 # libraries
@@ -76,12 +85,10 @@ else()
 	LINK_LIBRARIES(GmatBase)
 endif()
 LINK_LIBRARIES(${Matlab_LIBRARIES})
-LINK_LIBRARIES(${wxWidgets_LIBRARIES})
+if(UNIX)
+  LINK_LIBRARIES(${wxWidgets_LIBRARIES})
+endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
-
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
-  )
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)

@@ -48,6 +48,7 @@
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_WRAPPERS
 //#define DEBUG_CLEANUP
+//#define DEBUG_FIND_OBJ
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -865,14 +866,14 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       f->SetInputElementWrapper(ewi->first, ewi->second);
    }
    
-   // must re-initialize the function each time, as it may be called in more than
-   // one place
-   if (!(f->Initialize()))
-   {
-      std::string errMsg = "FunctionManager:: Error initializing function \"";
-      errMsg += f->GetStringParameter("FunctionName") + "\"\n";
-      throw FunctionException(errMsg);
-   }
+   // // must re-initialize the function each time, as it may be called in more than
+   // // one place
+   // if (!(f->Initialize()))
+   // {
+   //    std::string errMsg = "FunctionManager:: Error initializing function \"";
+   //    errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+   //    throw FunctionException(errMsg);
+   // }
    
    // create new ObjectInitializer   
    #ifdef DEBUG_FM_EXECUTE
@@ -897,6 +898,20 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    MemoryTracker::Instance()->Add
       (objInit, "objInit", "FunctionManager::Execute()", "objInit = new ObjectInitializer");
    #endif
+   
+   // Set re-initialize flag, set to true if it is nested function call
+   bool reinitialize = false;
+   if (callingFunction != NULL)
+      reinitialize = true;
+   
+   // must re-initialize the function each time, as it may be called in more than
+   // one place
+   if (!(f->Initialize(objInit, reinitialize)))
+   {
+      std::string errMsg = "FunctionManager:: Error initializing function \"";
+      errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+      throw FunctionException(errMsg);
+   }
    
    // tell the fcs that this is the calling function
    #ifdef DEBUG_FM_EXECUTE
@@ -930,11 +945,12 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       ("======================================================= Calling f->Execute()\n");
    #endif
    
-   // Now, execute the function
-   bool reinitialize = false;
-   if (callingFunction != NULL)
-      reinitialize = true;
+   // // Set re-initialize flag, set to true if it is nested function call
+   // bool reinitialize = false;
+   // if (callingFunction != NULL)
+   //    reinitialize = true;
 
+   // Now, execute the function
    // If function sequence failed or threw an exception, finalize the function
    try
    {
@@ -1292,8 +1308,8 @@ bool FunctionManager::CreatePassingArgWrappers()
       {
          #ifdef DEBUG_FM_INIT
          MessageInterface::ShowMessage(
-            "   passed input object \"%s\" of type \"%s\" found in LOS/GOS \n",
-            (passedIns.at(ii)).c_str(), (obj->GetTypeName()).c_str());
+            "   passed input object <%p>\"%s\" of type \"%s\" found in LOS/GOS \n",
+            obj, (passedIns.at(ii)).c_str(), (obj->GetTypeName()).c_str());
          #endif
          objFOS = obj->Clone();
          objFOS->SetName(formalName);
@@ -1388,7 +1404,7 @@ bool FunctionManager::CreatePassingArgWrappers()
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
       ("Exiting  FM::CreatePassingArgWrappers() for '%s'\n", fName.c_str());
-   ShowObjectMap(functionObjectStore, "in CreatePassingArgWrappers()\n");
+   ShowObjectMap(functionObjectStore, "in CreatePassingArgWrappers()");
    #endif
    
    return true;
@@ -2156,7 +2172,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
    
    // Set popped FOS to function and re-initialize fcs
    f->SetObjectMap(functionObjectStore);
-   bool retval = f->Initialize();
+   bool retval = f->Initialize(objInit);
    
    #ifdef DEBUG_FM_STACK
       MessageInterface::ShowMessage(
@@ -2184,6 +2200,7 @@ void FunctionManager::Cleanup()
          ////Edwin's MMS script failed, so commented out (loj: 2008.12.03)
          ////We need to delete this somewhere though.
          ////f->ClearAutomaticObjects();
+         // They are deleted in the Function destructor (LOJ: 2014.12.09)
          #ifdef DEBUG_CLEANUP
          MessageInterface::ShowMessage("   Calling f->Finalize()\n");
          #endif
@@ -2267,6 +2284,10 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
 //------------------------------------------------------------------------------
 bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
 {   
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FM::EmptyObjectMap() entered, om = <%p>, mapID = '%s'\n", om, mapID.c_str());
+   #endif
    if (om == NULL)
    {
       #ifdef DEBUG_OBJECT_MAP
@@ -2355,21 +2376,44 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
                (omi->second, (omi->second)->GetName(), "FunctionManager::EmptyObjectMap()",
                 "deleting obj from ObjectMap");
             #endif
+            #ifdef DEBUG_CLEANUP
+            MessageInterface::ShowMessage("   Deleting <%p>'%s' from om\n", omi->second, (omi->first).c_str());
+            #endif
             delete omi->second;
             omi->second = NULL;
          }
       }
-      toDelete.push_back(omi->first); 
+      
+      if (omi->second != NULL)
+      {
+         #ifdef DEBUG_CLEANUP
+         MessageInterface::ShowMessage("   Adding <%p>'%s' to toDelete\n", omi->second, (omi->first).c_str());
+         #endif
+         toDelete.push_back(omi->first);
+      }
    }
+   #ifdef DEBUG_CLEANUP
+   MessageInterface::ShowMessage("   Before deleting from toDelete.size() = %d\n", toDelete.size());
+   #endif
    for (unsigned int kk = 0; kk < toDelete.size(); kk++)
    {
+      omi = om->find(toDelete.at(kk));
       #ifdef DEBUG_CLEANUP
       MessageInterface::ShowMessage
-         ("   Erasing element with name '%s'\n", (toDelete.at(kk)).c_str());
+         ("   Erasing <%p> object with name '%s'\n", omi->second, (omi->first).c_str());
+      //   ("   Erasing <%p> object with name '%s'\n", omi->second, (toDelete.at(kk)).c_str());
       #endif
-      om->erase(toDelete.at(kk));
+      //om->erase(toDelete.at(kk));
+      delete omi->second;
    }
+   #ifdef DEBUG_CLEANUP
+   MessageInterface::ShowMessage("   After deleting from toDelete.size() = %d\n", toDelete.size());
+   #endif
    om->clear();
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FM::EmptyObjectMap() returning true, om = <%p>, mapID = '%s'\n", om, mapID.c_str());
+   #endif
    return true;
 }
 

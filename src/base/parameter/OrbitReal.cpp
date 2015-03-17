@@ -24,6 +24,7 @@
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_REF_OBJECT 1
 //#define DEBUG_ORBITREAL 1
 //#define DEBUG_ORBITREAL_SET 1
 
@@ -498,18 +499,19 @@ GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
 bool OrbitReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
-   #if DEBUG_ORBITREAL
+   #if DEBUG_REF_OBJECT
    MessageInterface::ShowMessage
-      ("OrbitReal::SetRefObject() setting type=%d, name=%s to %s\n",
-       type, name.c_str(), this->GetName().c_str());
+      ("OrbitReal::SetRefObject() '%s' entered, obj=<%p><%s>'%s', type=%d, name=%s\n",
+       this->GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
    #endif
    
+   if (obj == NULL)
+      return false;
+   
    // Set owner object for Parameter here (LOJ: 2014.04.05)
-   if (obj)
-   {
-      if (obj->GetName() == mParamOwnerName)
-         SetOwner(obj);
-   }
+   if (obj->GetName() == mParamOwnerName)
+      SetOwner(obj);
    
    bool setOK = OrbitData::SetRefObject(obj, type, name);
    // Setting states for SpacePoint parameter owners, other than Spacecraft, is not allowed

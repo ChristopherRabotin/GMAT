@@ -35,6 +35,8 @@ Create Variable avgL; % Average SideLength [ km ]
 Create Variable sizeConstant1 sizeConstant2 sizeConstant3 sizeConstant4; 
 
 
+BeginMissionSequence;
+
 %----- Define position vectors of spacecraft
 posVec1(1, 1) = MMS1.X;
 posVec1(2, 1) = MMS1.Y;

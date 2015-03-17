@@ -273,7 +273,7 @@ bool OwnedPlot::Initialize()
       
       PlotInterface::CreateXyPlotWindow(instanceName, mOldName, 0.0, 0.0, 0.0, 0.0, false, mPlotTitle,
             mXAxisTitle, mYAxisTitle, (mDrawGrid == "On"), false);
-      
+      PlotInterface::TakeXYAction(instanceName, "AlwaysRedraw");
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
       mIsOwnedPlotWindowSet = true;
             

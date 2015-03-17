@@ -957,9 +957,9 @@ GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
  *  
  * @param  type  Type for the requested object.
  * @param  name  Name for the object
- * @param  manage   0, if parameter is not managed
- *                  1, if parameter is added to configuration (default)
- *                  2, if Parameter is added to function object map
+ * @param  manage   0, if object is not managed
+ *                  1, if object is added to configuration (default)
+ *                  2, if object is added to function object map
  * @param <createDefault> set to true if default object to be created (false)
  *
  * @return object pointer on success, NULL on failure.
@@ -982,7 +982,9 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    GmatBase *obj = NULL;
    
    // if object to be managed and has non-blank name, and name is not valid, handle error
-   if (manage == 1 && name != "")
+   //if (manage == 1 && name != "")
+   // Added manage == 2 for function checking (LOJ: 2015.03.11)
+   if ((manage == 1 || manage == 2) && name != "")
    {
       bool isValid = false;
       
@@ -1029,14 +1031,15 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       #endif
       
       // If object to be managed, give warning if name already exist
-      if (manage == 1)
+      //if (manage == 1)
+      if (manage == 1 || manage == 2)
       {
 //         if ((name != "EarthMJ2000Eq") &&
 //             (name != "EarthMJ2000Ec") &&
 //             (name != "EarthFixed")    &&
 //             (name != "EarthICRF"))
 //         {
-            obj = FindObject(name);
+            obj = FindObject(name, type);
             // Since System Parameters are created automatically as they are referenced,
             // do not give warning if creating a system parameter
             if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
@@ -1059,98 +1062,19 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    
    // Set manage option to Moderator
    theModerator->SetObjectManageOption(manage);
-   
-   //======================================================================
-   // This block of code is the future implementation of creating objects
-   // of non-special object types in general way. This will avoid adding
-   // specific methods to the Moderator when we create new object type
-   // through the plug-in code. This is just initial coding and needs
-   // thorough testing. (LOJ: 2010.05.05)
-   //======================================================================
-   #ifdef __NEW_WAY_OF_CREATE_OBJECT__
-   //======================================================================
-   
-   // Handle container or special object type creation
-   if (type == "PropSetup")
-      obj = (GmatBase*)theModerator->CreatePropSetup(name);
-   
-   // Handle Spacecraft
-   else if (type == "Spacecraft" || type == "Formation")
-      obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
-   
-   // Handle AxisSystem
-   else if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
-            axisSystemList.end())
-      obj =(GmatBase*) theModerator->CreateAxisSystem(type, name);
-   
-   // Handle Burns
-   else if (find(burnList.begin(), burnList.end(), type) != 
-            burnList.end())
-      obj = (GmatBase*)theModerator->CreateBurn(type, name, createDefault);
-   
-   // Handle CoordinateSystem
-   else if (type == "CoordinateSystem")
-      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, false, false, manage);
-   
-   // Handle CelestialBody
-   else if (find(celestialBodyList.begin(), celestialBodyList.end(), type) != 
-            celestialBodyList.end())
-      obj = (GmatBase*)theModerator->CreateCelestialBody(type, name);
-   
-   // Handle CalculatedPoint
-   else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
-            calculatedPointList.end())
-      obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
-   
-   // Handle Parameters
-   else if (find(parameterList.begin(), parameterList.end(), type) != 
-            parameterList.end())
-      obj = (GmatBase*)CreateParameter(type, name, "", "");
-   
-   // Handle Subscribers
-   else if (find(subscriberList.begin(), subscriberList.end(), type) != 
-            subscriberList.end())
-      obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
-   
-   // Handle EventLocators
-   else if (find(eventLocatorList.begin(), eventLocatorList.end(), type) !=
-            eventLocatorList.end())
-      obj = (GmatBase*)theModerator->CreateEventLocator(type, name);
+   // If creating function objects, set function object map to Moderator
+   if (manage == 2)
+   {
+      if (currentFunction == NULL)
+         throw InterpreterException
+            ("Parsing function object but current function pointer is NULL\n");
+      
+      ObjectMap *functionMap = currentFunction->GetFunctionObjectMap();
+      theModerator->SetObjectMap(functionMap);
+   }
 
-   // Handle other registered creatable object types
-   else if (find(allObjectTypeList.begin(), allObjectTypeList.end(), type) != 
-            allObjectTypeList.end())
-   {
-      Gmat::ObjectType objType = GetObjectType(type);
-      if (objType != Gmat::UNKNOWN_OBJECT)
-         obj = theModerator->CreateOtherObject(objType, type, name);
-      else
-         obj = NULL;
-   }
-   else
-   {
-      obj = NULL;
-   }
    
-   //@note
-   // Do not throw exception if obj == NULL, since caller uses return pointer
-   // to test further.
-   
-   #ifdef DEBUG_CREATE_OBJECT
-   if (obj != NULL)
-   {
-      MessageInterface::ShowMessage
-         ("Interpreter::CreateObject() type=<%s>, name=<%s> successfully created\n",
-          obj->GetTypeName().c_str(), obj->GetName().c_str());
-   }
-   #endif
-   
-   return obj;
-   
-   //======================================================================
-   #else
-   //======================================================================
-   
+   // Create objects by type names
    if (type == "Spacecraft") 
       obj = (GmatBase*)theModerator->CreateSpacecraft(type, name, createDefault);
    
@@ -1173,6 +1097,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       //obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, true);
       obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, false, false, manage);
    
+   // Create objects by creatable list
    else
    {
       #ifdef DEBUG_CREATE_CELESTIAL_BODY
@@ -1187,7 +1112,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          obj = (GmatBase*)theModerator->CreatePropagator(type, name);
       
       // Handle ODEModel
-      if (find(odeModelList.begin(), odeModelList.end(), type) != 
+      else if (find(odeModelList.begin(), odeModelList.end(), type) != 
           odeModelList.end())
          obj = (GmatBase*)theModerator->CreateODEModel(type, name);
       
@@ -1221,7 +1146,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
                calculatedPointList.end())
          obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
-      
+
       // Handle DataFiles
       else if (find(dataFileList.begin(), dataFileList.end(), type) != 
                dataFileList.end())
@@ -1291,7 +1216,28 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       else if (find(interfaceList.begin(), interfaceList.end(), type) !=
                interfaceList.end())
          obj = theModerator->CreateOtherObject(Gmat::INTERFACE, type, name);
+      
+      // Handle other registered creatable object types
+      //======================================================================
+      // This block of code is the future implementation of creating objects
+      // of non-special object types in general way. This will avoid adding
+      // specific methods to the Moderator when we create new object type
+      // through the plug-in code. This is just initial coding and needs
+      // thorough testing. (LOJ: 2010.05.05)
+      // @todo 
+      // Add a generic CreateObject() method and call specific Create*() method
+      // in each factory class.
+      else if (find(allObjectTypeList.begin(), allObjectTypeList.end(), type) != 
+               allObjectTypeList.end())
+      {
+         Gmat::ObjectType objType = GetObjectType(type);
+         if (objType != Gmat::UNKNOWN_OBJECT)
+            obj = theModerator->CreateOtherObject(objType, type, name);
+         else
+            obj = NULL;
+      }
    }
+   
    
    //@note
    // Do not throw exception if obj == NULL, since caller uses return pointer
@@ -1302,13 +1248,13 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    if (obj != NULL)
    {
       MessageInterface::ShowMessage
-         ("Interpreter::CreateObject() type=<%s>, name=<%s> successfully created\n",
-          obj->GetTypeName().c_str(), obj->GetName().c_str());
+         ("Interpreter::CreateObject() (old way) obj=<%p>, type=<%s>, name=<%s> "
+          "successfully created\n", obj, obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
    }
    #endif
    
    return obj;
-   #endif
 }
 
 
@@ -1818,7 +1764,33 @@ GmatBase* Interpreter::FindObject(const char *name, const std::string &ofType)
 GmatBase* Interpreter::FindObject(const std::string &name, 
                                   const std::string &ofType)
 {
-   return theValidator->FindObject(name, ofType);
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Interpreter::FindObject() entered, name='%s', ofType='%s', currentFunction=<%p>\n",
+       name.c_str(), ofType.c_str(), currentFunction);
+   #endif
+
+   GmatBase *objFound = NULL;
+   
+   // If parsing a function, use current function to find an object (LOJ: 2014.12.10)
+   if (currentFunction == NULL)
+   {
+      objFound = theValidator->FindObject(name, ofType);
+   }
+   else
+   {
+      // Check for SolarSystem since it is global and not added to function map
+      if (name == "SolarSystem")
+         objFound = theSolarSystem;
+      else
+         objFound = currentFunction->FindFunctionObject(name);
+   }
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Interpreter::FindObject() returning <%p>'%s'\n", objFound,
+       objFound ? objFound->GetName().c_str() : "NULL");
+   #endif
+   return objFound;
 }
 
 
@@ -3655,7 +3627,7 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
       else
       {
          GmatBase *obj1 = FindObject(name1, objTypeStrToUse);
-         if (obj1 != NULL && obj1->GetIsGlobal())
+         if (obj1 != NULL && obj1->IsGlobal())
          {
             globalObjFound = true;
             globalObjNames = globalObjNames + name1 + " ";
@@ -3694,6 +3666,10 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    #endif
    
    // We don't want to manage object to configuration, so pass 0
+   #ifdef DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("AssembleCreateCommand() calling CreateObject() for '%s'\n", name.c_str());
+   #endif
    GmatBase *obj = CreateObject(objTypeStrToUse, name, 0);
    
    #ifdef DEBUG_ASSEMBLE_CREATE
@@ -3885,8 +3861,9 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Interpreter::CreateSystemParameter() entered, str='%s', inFunctionMode=%d\n",
-       str.c_str(), inFunctionMode);
+      ("Interpreter::CreateSystemParameter() entered, str='%s', inFunctionMode=%d\n"
+       "   currentFunction=<%p>'%s'\n", str.c_str(), inFunctionMode, currentFunction,
+       currentFunction ? currentFunction->GetName().c_str() : "NULL");
    #endif
    
    Integer manage = 1;
@@ -3905,6 +3882,11 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
        (param == NULL) ? "NULL" : param->GetName().c_str());
    #endif
+   
+   // Set newly created Parameter inside function to local so it can be
+   // deleted when Function destructor is called (LOJ: 2014.12.17)
+   if (param && inFunctionMode)
+      param->SetIsLocal(true);
    
    return param;
 }
@@ -4420,7 +4402,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    
    #ifdef DEBUG_MAKE_ASSIGNMENT
    MessageInterface::ShowMessage
-      ("Interpreter::MakeAssignment() returning lhsObj=%p\n", lhsObj);
+      ("Interpreter::MakeAssignment() returning lhsObj=<%p>\n", lhsObj);
    #endif
    
    if (retval)
@@ -5010,7 +4992,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage("   '%s' is owned object\n", toProp.c_str());
             #endif
-            toObj->SetStringParameter(toProp, fromObj->GetName());
+            ////toObj->SetStringParameter(toProp, fromObj->GetName()); // LOJ: Commented out 2014.12.16
             toObj->SetRefObject(fromObj, fromObj->GetType(), fromObj->GetName());
             objPropType = toObj->GetPropertyObjectType(toId);
             if (objPropType == Gmat::UNKNOWN_OBJECT || 
@@ -6176,6 +6158,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                }
                if (!skipCreate)
                {
+                  #ifdef DEBUG_CREATE_OBJECT
+                  MessageInterface::ShowMessage
+                     ("SetPropertyObjectValue() calling CreateObject() for '%s'\n", ownedName.c_str());
+                  #endif
                   ownedObj = CreateObject(valueToUse, ownedName, 0);
                   if (ownedObj == NULL)
                   {
@@ -6246,6 +6232,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
                {
                   if (valueToUse == "InternalODEModel")
                   {
+                     #ifdef DEBUG_CREATE_OBJECT
+                     MessageInterface::ShowMessage
+                        ("SetPropertyObjectValue() calling CreateObject() for valueToUse.c_str()\n");
+                     #endif
                      ownedObj = CreateObject("ForceModel", valueToUse);
                      obj->SetRefObject(ownedObj, ownedObj->GetType(), valueToUse);
                   }
@@ -6863,7 +6853,12 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          // We don't want to configure PhysicalModel, so set name after create
          ////PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "");
          std::string forceName = forceType + "." + bodies[i];
-         PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+         std::string actualName = "0." + forceName;
+         #ifdef DEBUG_CREATE_OBJECT
+         MessageInterface::ShowMessage
+            ("SetForceModelProperty() calling CreateObject() for '%s'\n", actualName.c_str());
+         #endif
+         PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, actualName, 0);
          if (pm)
          {
             ////pm->SetName(forceType + "." + bodies[i]);
@@ -6965,8 +6960,13 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       // Create PhysicalModel
       std::string forceName = pmType + "." + centralBodyName;
       //@note 0.ForceName indicates unmanaged internal forcename.
+      std::string actualName = "0." + forceName;
       // Added name for debugging purpose only
-      PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetForceModelProperty() calling CreateObject() for '%s'\n", actualName.c_str());
+      #endif
+      PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, actualName, 0);
       pm->SetName(forceName);
       
       // Should we set SRP on ForceModel central body?
@@ -7002,6 +7002,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          
          // We don't want to configure PhysicalModel, so set name after create
          ////PhysicalModel *pm = (PhysicalModel*)CreateObject(udForces[i], "");
+         #ifdef DEBUG_CREATE_OBJECT
+         MessageInterface::ShowMessage
+            ("SetForceModelProperty() calling CreateObject() for '%s'\n", udForces[i].c_str());
+         #endif
          PhysicalModel *pm = (PhysicalModel*)CreateObject(udForces[i], udForces[i], 0);
          if (pm)
          {
@@ -7165,7 +7169,12 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
    //@note 0.ForceName indicates unmanaged internal forcename.
    // Added name for debugging purpose only
    std::string forceName = pmType + "." + centralBodyName;
-   PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, "0."+forceName, 0);
+   std::string actualName = "0." + forceName;
+   #ifdef DEBUG_CREATE_OBJECT
+   MessageInterface::ShowMessage
+      ("SetForceModelProperty() calling CreateObject() for '%s'\n", actualName.c_str());
+   #endif
+   PhysicalModel *pm = (PhysicalModel*)CreateObject(forceType, actualName, 0);
    pm->SetName(forceName);
    
    #ifdef DEBUG_SET_FORCE_MODEL
@@ -7193,6 +7202,10 @@ bool Interpreter::SetDragForceProperty(GmatBase *obj,
       
       pm->SetStringParameter("BodyName", centralBodyName);
       pm->SetStringParameter("AtmosphereBody", centralBodyName);
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetDragForceProperty() calling CreateObject() for '%s'\n", valueToUse.c_str());
+      #endif
       GmatBase *am = CreateObject(valueToUse, valueToUse, 0);
       if (am)
       {
@@ -7261,6 +7274,10 @@ bool Interpreter::SetMeasurementModelProperty(GmatBase *obj,
 
    if (propName == "Type")
    {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetMeasurementModelProperty() calling CreateObject() for ''\n");
+      #endif
       GmatBase* model = CreateObject(value, "", 0, false);
       if (model != NULL)
       {
@@ -7386,6 +7403,10 @@ bool Interpreter::SetTrackingDataProperty(GmatBase *obj,
 
    if (propName == "Type")
    {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetTrackingDataProperty() calling CreateObject() for ''\n");
+      #endif
       GmatBase* model = CreateObject(value, "", 0, false);
       if (model != NULL)
       {
@@ -7553,6 +7574,10 @@ bool Interpreter::SetDataStreamProperty(GmatBase *obj,
 
    if (propName == "Format")
    {
+      #ifdef DEBUG_CREATE_OBJECT
+      MessageInterface::ShowMessage
+         ("SetDataStreamProperty() calling CreateObject() for ''\n");
+      #endif
       GmatBase* obs = CreateObject(value, "", 0, false);
       if (obs != NULL)
       {
@@ -8336,9 +8361,10 @@ bool Interpreter::FinalPass()
          }
       }
       
-      // check Function separately since it has inputs that can be any object type,
+      // Check Function separately since it has inputs that can be any object type,
       // including Real number (1234.5678) and String literal ('abc')
       //
+      // Remove this comment since it is called in FinalPass()? (LOJ: 2015.01.13)
       // We don't want to check this in the FinalPass(), since it will be checked
       // when ScriptInterpreter::InterpretGmatFunction() is called
       else if (obj->GetType() == Gmat::FUNCTION)
@@ -8539,8 +8565,12 @@ bool Interpreter::FinalPass()
                   throw InterpreterException("The ODEModel named \"" +
                         refName + "\", referenced by the Propagator \"" +
                         obj->GetName() + "\" cannot be found");
-
+               
                // Create default ODE model
+               #ifdef DEBUG_CREATE_OBJECT
+               MessageInterface::ShowMessage
+                  ("FinalPass() calling CreateObject() for '%s'\n", refName.c_str());
+               #endif
                configuredOde = CreateObject("ODEModel", refName, 1);
                obj->SetRefObject(configuredOde, configuredOde->GetType(),
                      configuredOde->GetName());
@@ -10165,7 +10195,7 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
-      ("Interpreter::BuildFunctionDefinition() str=<%s>\n", str.c_str());
+      ("Interpreter::BuildFunctionDefinition() entered, str=<%s>\n", str.c_str());
    #endif
    
    std::string lhs;
