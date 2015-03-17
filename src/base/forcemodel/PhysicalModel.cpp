@@ -1620,14 +1620,14 @@ const StringArray& PhysicalModel::GetRefObjectNameArray(
    if (type == Gmat::UNKNOWN_OBJECT)
    {
       static StringArray refs;
-      
-         refs.push_back(bodyName);
-      
-         #ifdef DEBUG_REFERENCE_SETTING
-            MessageInterface::ShowMessage("+++ReferenceObjects:\n");
-            for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
-               MessageInterface::ShowMessage("   %s\n", i->c_str());
-         #endif
+      refs.clear();
+      refs.push_back(bodyName);
+
+      #ifdef DEBUG_REFERENCE_SETTING
+         MessageInterface::ShowMessage("+++ReferenceObjects:\n");
+         for (StringArray::iterator i = refs.begin(); i != refs.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->c_str());
+      #endif
       
       return refs;
    }
