@@ -60,6 +60,8 @@ public:
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetScriptErrorFound(bool errFlag);
    virtual bool         ScriptErrorFound();
+   virtual bool         WasFunctionBuilt();
+   virtual void         SetFunctionWasBuilt(bool built);
    virtual bool         IsFunctionControlSequenceSet();
    virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
    virtual GmatCommand* GetFunctionControlSequence();
@@ -166,6 +168,8 @@ protected:
    Validator            *validator;
    /// Object store needed by the validator
    ObjectMap            validatorStore;
+   /// the flag indicating if function has been built
+   bool                 wasFunctionBuilt;
    /// the flag indicating script error found in function, this flag is set by Interpreter
    bool                 scriptErrorFound;
    /// the flag indicating local objects are initialized

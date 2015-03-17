@@ -88,6 +88,7 @@ Function::Function(const std::string &typeStr, const std::string &name) :
    fcs                (NULL),
    fcsFinalized       (false),
    validator          (NULL),
+   wasFunctionBuilt   (false),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -143,6 +144,7 @@ Function::Function(const Function &f) :
    fcs                (NULL),
    fcsFinalized       (f.fcsFinalized),
    validator          (f.validator),
+   wasFunctionBuilt   (f.wasFunctionBuilt),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -178,6 +180,7 @@ Function& Function::operator=(const Function &f)
    fcs                = NULL;
    fcsFinalized       = f.fcsFinalized;
    validator          = f.validator;
+   wasFunctionBuilt = f.wasFunctionBuilt;
    scriptErrorFound   = f.scriptErrorFound;
    objectsInitialized = f.objectsInitialized;
    inputNames         = f.inputNames;
@@ -350,6 +353,22 @@ void Function::SetInternalCoordSystem(CoordinateSystem *cs)
 void Function::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
+}
+
+//------------------------------------------------------------------------------
+// bool WasFunctionBuilt()
+//------------------------------------------------------------------------------
+bool Function::WasFunctionBuilt()
+{
+   return wasFunctionBuilt;
+}
+
+//------------------------------------------------------------------------------
+// void SetFunctionWasBuilt(bool built)
+//------------------------------------------------------------------------------
+void Function::SetFunctionWasBuilt(bool built)
+{
+   wasFunctionBuilt = built;
 }
 
 //------------------------------------------------------------------------------
