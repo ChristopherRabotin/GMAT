@@ -115,6 +115,14 @@ TrackingFileSet::~TrackingFileSet()
          delete measurements[i];
    }
 
+   // remove all data filter objects
+   //for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+   //{
+   //   if (dataFilters[i])
+   //      delete dataFilters[i];
+   //}
+   dataFilters.clear();
+
    // clear tracking configs
    trackingConfigs.clear();
 
@@ -146,8 +154,7 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
    rangeModulo               (tfs.rangeModulo),
    dopplerCountInterval      (tfs.dopplerCountInterval),
-   dataFilterNames           (tfs.dataFilterNames),
-   dataFilters               (tfs.dataFilters)
+   dataFilterNames           (tfs.dataFilterNames)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("TrackingFileSet <%s,%p> copy construction from <%s,%p>\n", GetName().c_str(), this, tfs.GetName().c_str(), &tfs);
@@ -155,6 +162,16 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
+
+   // Each tracking file set contains a set of filters in which they have their own thinning frequency counters.
+   // Therefore, it needs to have seperate set of data filter objects for each tracking file set object. 
+   // Note that: If 2 different tracking file set objects share the same set of data filter objects, values 
+   // of frequency counters are mixed up by both tracking file set objects. 
+   for (UnsignedInt i = 0; i < tfs.dataFilters.size(); ++i)
+   {
+      if (tfs.dataFilters[i])
+         dataFilters.push_back(tfs.dataFilters[i]->Clone());
+   }
 
    isInitialized = false;
 }
@@ -205,7 +222,21 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       rangeModulo             = tfs.rangeModulo;
       dopplerCountInterval    = tfs.dopplerCountInterval;
       dataFilterNames         = tfs.dataFilterNames;
-      dataFilters             = tfs.dataFilters;
+
+      // Remove all dataFilters
+      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+      {
+         if (dataFilters[i])
+            delete dataFilters[i];
+      }
+      dataFilters.clear();
+
+      // Create clones of data filters
+      for(UnsignedInt i = 0; i < tfs.dataFilters.size(); ++i)
+      {
+         if (tfs.dataFilters[i])
+            dataFilters.push_back(tfs.dataFilters[i]->Clone());
+      }
 
       isInitialized = false;
    }
@@ -1159,8 +1190,8 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Called TrackingFileSet::"
-            "GetRefObjectNameArray(%d)\n", type);
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "GetRefObjectNameArray(%d)\n", GetName().c_str(), this, type);
    #endif
 
    refObjectNames.clear();
@@ -1240,6 +1271,11 @@ bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
 bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "RenameRefObject(type = %d, oldName = '%s', newName = '%s')\n", GetName().c_str(), this, type, oldName.c_str(), newName.c_str());
+   #endif
+
    if ((type == Gmat::DATA_FILE) || (type == Gmat::UNKNOWN_OBJECT))
    {
       for (UnsignedInt i = 0; i < filenames.size(); ++i)
@@ -1358,6 +1394,12 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
 bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "SetRefObject(obj = %p, type = %d, name = '%s')\n", GetName().c_str(), this, obj, type, name.c_str());
+   #endif
+
+
    bool retval = false;
 
    if (obj->IsOfType(Gmat::DATA_FILE))
@@ -1372,7 +1414,17 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
    }
    else if (obj->IsOfType(Gmat::DATA_FILTER))
    {
-      if (find(dataFilters.begin(), dataFilters.end(), obj) == dataFilters.end())
+      bool found = false;
+      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+      {
+         if (obj->GetName() == dataFilters[i]->GetName())
+         {
+            found = true;
+            break;
+         }
+      }
+
+      if (!found)
       {
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("Adding data filter %s\n", name.c_str());
@@ -1413,6 +1465,11 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name, const Integer index)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "SetRefObject(obj = %p, type = %d, name = '%s', index = %d)\n", GetName().c_str(), this, obj, type, name.c_str(), index);
+   #endif
+
    bool retval = false;
 
    if (find(references.begin(), references.end(), obj) == references.end())
@@ -1440,15 +1497,16 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
 {
-   ObjectArray objectList = MeasurementModelBase::GetRefObjectArray(type);
+   static ObjectArray objectList;
 
    if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
    {
       for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
          objectList.push_back(dataFilters[i]);
+      return objectList;
    }
 
-   return objectList;
+   return MeasurementModelBase::GetRefObjectArray(type);
 }
 
 //------------------------------------------------------------------------------
@@ -1666,13 +1724,17 @@ bool TrackingFileSet::Initialize()
          retval = retval && measurements[i]->Initialize();
       }
       
+      // Initialize data filters
+      for (UnsignedInt i = 0; i < dataFilters.size(); ++i)
+         dataFilters[i]->Initialize();
+
       isInitialized = true;
    }
    
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("statAcceptFilters.size() = %d\n", statAcceptFilters.size());
-      for (UnsignedInt i = 0; i < statAcceptFilters.size(); ++i)
-         MessageInterface::ShowMessage("filter %d: name = '%s'   pointer = <%p>\n", i, statAcceptFilters[i]->GetName().c_str(), statAcceptFilters[i]);
+      MessageInterface::ShowMessage("dataFilters.size() = %d\n", dataFilters.size());
+      for (UnsignedInt i = 0; i < dataFilters.size(); ++i)
+         MessageInterface::ShowMessage("filter %d: name = '%s'   pointer = <%p>\n", i, dataFilters[i]->GetName().c_str(), dataFilters[i]);
 
       MessageInterface::ShowMessage("Exit TrackingFileSet::Initialize() <%s,%p>\n", GetName().c_str(), this);
    #endif
