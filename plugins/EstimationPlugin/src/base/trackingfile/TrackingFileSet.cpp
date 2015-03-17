@@ -116,11 +116,11 @@ TrackingFileSet::~TrackingFileSet()
    }
 
    // remove all data filter objects
-   //for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
-   //{
-   //   if (dataFilters[i])
-   //      delete dataFilters[i];
-   //}
+   for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+   {
+      if (dataFilters[i])
+         delete dataFilters[i];
+   }
    dataFilters.clear();
 
    // clear tracking configs
@@ -1429,7 +1429,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("Adding data filter %s\n", name.c_str());
          #endif
-         dataFilters.push_back(obj);
+            dataFilters.push_back(obj->Clone());
       }
    }
    else
@@ -1498,6 +1498,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
 {
    static ObjectArray objectList;
+   objectList.clear();
 
    if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
    {

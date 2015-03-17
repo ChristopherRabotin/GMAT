@@ -94,6 +94,9 @@ protected:
    std::string thinMode;
    Integer     thinningFrequency;
 
+   /// Record count;
+   Integer recCount;
+
    /// Class parameter ID enumeration
    enum
    {

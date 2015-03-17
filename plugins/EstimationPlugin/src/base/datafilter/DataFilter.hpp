@@ -121,9 +121,9 @@ protected:
    /// Get a list of all available measurement types 
    StringArray  GetListOfMeasurementTypes();
    /// Get a list of all spacecrafts 
-   StringArray  GetListOfSpacecrafts();
+   ObjectArray  GetListOfSpacecrafts();
    /// Get a list of all ground stations 
-   StringArray  GetListOfGroundStations();
+   ObjectArray  GetListOfGroundStations();
    /// Get a list of valid epoch formats
    StringArray  GetListOfValidEpochFormats();
 

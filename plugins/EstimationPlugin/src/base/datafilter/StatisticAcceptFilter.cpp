@@ -561,11 +561,20 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
    if (DataFilter::FilteringData(dataObject) == NULL)
       return NULL;
 
-   // 1. File verify:
-
-   // 2. Data thin verify:
-
-   return dataObject;
+   // 1. Data thin verify:
+   if (thinMode == "F")
+   {
+      ++recCount;
+      if (recCount == thinningFrequency)
+      {
+         recCount = 0;
+         return dataObject;
+      }
+      else
+         return NULL;
+   }
+   else
+      throw MeasurementException("Error: " + GetName() + ".ThinMode parameter has an invalid value ('" + thinMode + "'.\n");
 }
    
 

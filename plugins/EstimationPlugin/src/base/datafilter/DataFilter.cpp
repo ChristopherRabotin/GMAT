@@ -31,6 +31,7 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
+#define DEBUG_FILTER
 
 //------------------------------------------------------------------------------
 // static data
@@ -720,17 +721,27 @@ StringArray DataFilter::GetListOfMeasurementTypes()
 }
 
 
-StringArray DataFilter::GetListOfSpacecrafts()
+ObjectArray DataFilter::GetListOfSpacecrafts()
 {
-   StringArray typeList = Moderator::Instance()->GetListOfObjects(Gmat::SPACECRAFT);
-   return typeList;
+   StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::SPACECRAFT);
+   
+   ObjectArray objectList;
+   for (UnsignedInt i = 0; i < nameList.size(); ++i)
+      objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
+
+   return objectList;
 }
 
 
-StringArray DataFilter::GetListOfGroundStations()
+ObjectArray DataFilter::GetListOfGroundStations()
 {
-   StringArray typeList = Moderator::Instance()->GetListOfObjects(Gmat::GROUND_STATION);
-   return typeList;
+   StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::GROUND_STATION);
+
+   ObjectArray objectList;
+   for (UnsignedInt i = 0; i < nameList.size(); ++i)
+      objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
+
+   return objectList;
 }
 
 
@@ -742,20 +753,26 @@ StringArray DataFilter::GetListOfValidEpochFormats()
 
 bool DataFilter::ValidateInput()
 {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()\n", GetName().c_str(), this);
+#endif
+
+   ObjectArray objectList, objectList1;
    StringArray nameList, nameList1;
    bool found;
 
    bool retval = true;
    
    // 1. Verify observers:
-   nameList = GetListOfSpacecrafts();
+   MessageInterface::ShowMessage("Validate observers\n");
+   objectList = GetListOfSpacecrafts();
    for (UnsignedInt i = 0; i < observers.size(); ++i)
    {
-      // check the validation of observers[i]
+      // validate observers[i]
       found = false;
-      for (UnsignedInt j = 0; j < nameList.size(); ++j)
+      for (UnsignedInt j = 0; j < objectList.size(); ++j)
       {
-         if (observers[i] == nameList[j])
+         if (observers[i] == objectList[j]->GetStringParameter("Id"))
          {
             found = true;
             break;
@@ -763,18 +780,22 @@ bool DataFilter::ValidateInput()
       }
 
       if (!found)
-         throw GmatBaseException("Error: observer '" + observers[i] + "' which is set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
+      {
+         MessageInterface::ShowMessage("Data filter %s:\n%s\n", GetName().c_str(), this->GetGeneratingString().c_str());
+         throw GmatBaseException("Error: observer with ID '" + observers[i] + "' set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
+      }
    }
 
    // 2. Verify trackers:
-   nameList1 = GetListOfGroundStations();
+   MessageInterface::ShowMessage("Validate trackers\n");
+   objectList1 = GetListOfGroundStations();
    for (UnsignedInt i = 0; i < trackers.size(); ++i)
    {
-      // check the validation of trackers[i]
+      // validate of trackers[i]
       found = false;
-      for (UnsignedInt j = 0; j < nameList1.size(); ++j)
+      for (UnsignedInt j = 0; j < objectList1.size(); ++j)
       {
-         if (trackers[i] == nameList1[j])
+         if (trackers[i] == objectList1[j]->GetStringParameter("Id"))
          {
             found = true;
             break;
@@ -786,9 +807,10 @@ bool DataFilter::ValidateInput()
    }
 
    // 3. Verify strands:
+   MessageInterface::ShowMessage("Validate strands\n");
    // 3.1. Get a list of all spacecrafts and ground stations
-   for (UnsignedInt i = 0; i < nameList1.size(); ++i)
-      nameList.push_back(nameList1[i]);
+   for (UnsignedInt i = 0; i < objectList1.size(); ++i)
+      objectList.push_back(objectList1[i]);
 
    // 3.2. Verify all strands
    for (UnsignedInt i = 0; i < strands.size(); ++i)
@@ -807,9 +829,9 @@ bool DataFilter::ValidateInput()
 
          // Verify particicpant
          found = false;
-         for (UnsignedInt j = 0; j < nameList.size(); ++j)
+         for (UnsignedInt j = 0; j < objectList.size(); ++j)
          {
-            if (participant == nameList[j])
+            if (participant == objectList[j]->GetStringParameter("Id"))
             {
                found = true;
                break;
@@ -827,11 +849,17 @@ bool DataFilter::ValidateInput()
    // 6. Verify InitialEpoch:
 
    // 7. Verify FinalEpoch:
+
+   return retval;
 }
 
 
 ObservationData* DataFilter::FilteringData(ObservationData* dataObject)
 {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>)\n", GetName().c_str(), this, dataObject);
+#endif
+
    if (ValidateInput())
    {
       // Observated objects verify:

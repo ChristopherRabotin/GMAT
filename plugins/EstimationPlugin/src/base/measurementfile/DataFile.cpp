@@ -33,7 +33,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_OBSERVATION_READ
-//#define DEBUG_OBSERVATION_DATA
+#define DEBUG_OBSERVATION_DATA
 //#define DEBUG_RAMP_TABLE_READ
 //#define DEBUG_RAMP_TABLE_DATA
 
@@ -854,6 +854,38 @@ ObservationData* DataFile::ReadObservation()
    if (theDatastream)
    {
       theObs = theDatastream->ReadObservation();
+      
+      // Run statistic accept filters
+      ObservationData* obdata = theObs;
+      for (UnsignedInt i = 0; i < filterList.size(); ++i)
+      {
+         if (filterList[i]->IsOfType("StatisticAcceptFilter"))
+         {
+            obdata = filterList[i]->FilteringData(theObs);
+
+            // it needs to pass only one accept filter
+            if (obdata)
+               break;
+         }
+      }
+
+      // Run statistic reject filters when it passes accept filters
+      if (obdata)
+      {
+         for (UnsignedInt i = 0; i < filterList.size(); ++i)
+         {
+            if (filterList[i]->IsOfType("StatisticRejectFilter"))
+            {
+               obdata = filterList[i]->FilteringData(theObs);
+
+               // it is rejected when it is rejected by one reject filter
+               if (obdata == NULL)
+                  break;
+            }
+         }
+      }
+
+      theObs = obdata;
 
       #ifdef DEBUG_OBSERVATION_DATA
          if (theObs)
