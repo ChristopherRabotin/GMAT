@@ -84,6 +84,11 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label, const Real value);
+
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -106,11 +111,15 @@ public:
 
 //   virtual Integer         GetEstimationParameterID(const std::string &param);
 //   virtual Integer         SetEstimationParameter(const std::string &param);
-   virtual bool            IsEstimationParameterValid(const Integer id);
-   virtual Integer         GetEstimationParameterSize(const Integer id);
-   virtual Real*           GetEstimationParameterValue(const Integer id);
+   virtual bool         IsEstimationParameterValid(const Integer id);
+   virtual Integer      GetEstimationParameterSize(const Integer id);
+   virtual Real*        GetEstimationParameterValue(const Integer id);
 
-   virtual bool            IsValidID(const std::string &id);
+   virtual bool         IsValidID(const std::string &id);
+
+
+   Real*                IsValidElevationAngle(const Rvector6 &state_sez,
+                                              const Real minElevationEngle);
 
    DEFAULT_TO_NO_CLONES
 
@@ -121,14 +130,19 @@ protected:
    // Added hardware of the ground station
    StringArray	         hardwareNames;       // made changes by Tuan Nguyen
    ObjectArray          hardwareList;        // made changes by Tuan Nguyen
-	
-	
+
+   /// Minimum elevation angle, in degrees
+   Real minElevationAngle;             
+   /// Visibility vector
+   Real az_el_visible[3];
+
 public:
    /// Published parameters for ground stations
    enum
    {
       STATION_ID = BodyFixedPointParamCount,
       ADD_HARDWARE,								// made changes by Tuan Nguyen
+      MINIMUM_ELEVATION_ANGLE,		// It is needed for verifying measurement feasibility
       GroundStationParamCount,
    };
 

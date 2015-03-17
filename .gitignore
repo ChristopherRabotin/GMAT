@@ -17,4 +17,6 @@ Release
 /.settings/
 /KARI/
 CheckRepo.TestEntry
+*~
+*.swp
 *.md

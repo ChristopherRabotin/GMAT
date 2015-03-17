@@ -150,7 +150,7 @@ void ShowSummaryDialog::Create()
       // increase text size on Windows(loj: 2009.02.05)
       theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                                   wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
-      theSummary->SetFont(GmatAppData::Instance()->GetFont() );
+      theSummary->SetFont(GmatAppData::Instance()->GetScriptFont() );
       theMiddleSizer->Add(coordSizer, 0, wxGROW|wxALL, 3);
       theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
    }

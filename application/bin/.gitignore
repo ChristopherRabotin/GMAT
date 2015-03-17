@@ -1,4 +1,5 @@
 /GMAT.exe
+/gmatConsole
 /libCInterface.dll
 /libCInterface.exp
 /libCInterface.lib
@@ -7,7 +8,6 @@
 /libGmatBase.lib
 /lib/
 /*.sh*
-/gmat_startup_file.txt~
 /GmatTester
 /tdm_dsn7.txt
 /lib

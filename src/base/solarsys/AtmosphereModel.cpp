@@ -823,7 +823,8 @@ bool AtmosphereModel::IsParameterReadOnly(const Integer id) const
    if ((id == NOMINAL_FLUX) || (id == NOMINAL_AVERAGE_FLUX) ||
        (id == NOMINAL_MAGNETIC_INDEX) || (id == SCHATTEN_WEATHER_FILE) ||
        (id == CSSI_WEATHER_FILE) )
-      return true;
+//      return true;
+      return false;
    
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -1007,9 +1008,25 @@ bool AtmosphereModel::SetStringParameter(const Integer id, const std::string &va
    return GmatBase::SetStringParameter(id, value);
 }
 
+std::string AtmosphereModel::GetStringParameter(const Integer id) const
+{
+   if (id == CSSI_WEATHER_FILE)
+      return obsFileName;
+
+   if (id == SCHATTEN_WEATHER_FILE)
+      return predictFileName;
+
+   return GmatBase::GetStringParameter(id);
+}
+
+std::string AtmosphereModel::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
 bool AtmosphereModel::SetStringParameter(const std::string &label, const std::string &value)
 {
-   return GmatBase::SetStringParameter(label, value);
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 

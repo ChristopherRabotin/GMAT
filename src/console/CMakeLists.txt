@@ -12,7 +12,7 @@
 #
 
 MESSAGE("==============================")
-MESSAGE("Console building setup " ${VERSION})
+MESSAGE("GMAT console setup " ${VERSION})
 
 if (PROFILE_BUILD)
 	SET(CONSOLETARGET "gmatConsoleP")
@@ -20,14 +20,10 @@ else()
 	SET(CONSOLETARGET "gmatConsole")
 endif()
 
+SET(TargetName ${CONSOLETARGET})
+
 # ====================================================================
 # SPICE specifics
-if(64_BIT)
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
-else()
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
-endif()
-
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 SET(SPICE_LIB_DIR  "${CSPICE_DIR}/lib")
 LINK_DIRECTORIES(${SPICE_LIB_DIR})
@@ -49,10 +45,9 @@ SET(SPICE_SRCS
 	 "util/SpiceKernelWriter.cpp"
 	 "util/SpiceOrbitKernelWriter.cpp")
 
-
 # ====================================================================
 # source files
-SET(SRCS 
+SET(CONSOLE_SRCS 
     driver.cpp 
     ConsoleAppException.cpp
     PrintUtility.cpp
@@ -60,32 +55,13 @@ SET(SRCS
 )
 
 # ====================================================================
+# Recursively find all include files, which will be added to IDE-based
+# projects (VS, XCode, etc.)
+FILE(GLOB_RECURSE CONSOLE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
+
+# ====================================================================
 # include directories for header files
-INCLUDE_DIRECTORIES("../base/include")
-INCLUDE_DIRECTORIES("../base/foundation")
-INCLUDE_DIRECTORIES("../base/executive")
-INCLUDE_DIRECTORIES("../base/factory")
-INCLUDE_DIRECTORIES("../base/forcemodel") 
-INCLUDE_DIRECTORIES("../base/subscriber")
-INCLUDE_DIRECTORIES("../base/command")
-INCLUDE_DIRECTORIES("../base/spacecraft")
-INCLUDE_DIRECTORIES("../base/solarsys")
-INCLUDE_DIRECTORIES("../base/propagator")
-INCLUDE_DIRECTORIES("../base/interpreter")
-INCLUDE_DIRECTORIES("../base/parameter")
-INCLUDE_DIRECTORIES("../base/interpolator")
-INCLUDE_DIRECTORIES("../base/util")
-INCLUDE_DIRECTORIES("../base/stopcond") 
-INCLUDE_DIRECTORIES("../base/hardware")
-INCLUDE_DIRECTORIES("../base/configs")
-INCLUDE_DIRECTORIES("../base/burn")
-INCLUDE_DIRECTORIES("../base/solver")
-INCLUDE_DIRECTORIES("../base/function")
-INCLUDE_DIRECTORIES("../base/coordsystem")
-INCLUDE_DIRECTORIES("../base/attitude")
-INCLUDE_DIRECTORIES("../base/math")
-INCLUDE_DIRECTORIES("../base/plugin")
-INCLUDE_DIRECTORIES("../base/event")
+INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 	
 # ====================================================================
 # libraries
@@ -96,13 +72,17 @@ else()
 	LINK_LIBRARIES(GmatBase)
 endif()
 
-
 # ====================================================================
 # compilation
 
 # add the install targets
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
+ADD_EXECUTABLE(${TargetName} ${CONSOLE_SRCS} ${CONSOLE_HEADERS})
 
-ADD_EXECUTABLE(${CONSOLETARGET} ${SRCS})
+# ====================================================================
+# Add source/header files to IDE-based project source groups
+# Macro defined in top-level CMakeLists.txt
+_ADDSOURCEGROUPS("")
 
-SET_TARGET_PROPERTIES(${CONSOLETARGET} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
+INSTALL( TARGETS ${TargetName}
+  DESTINATION bin
+  )

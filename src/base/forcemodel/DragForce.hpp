@@ -76,6 +76,7 @@ public:
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+   virtual bool         WriteEmptyStringParameter(const Integer id) const;
    
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         GetRealParameter(const std::string &label) const;
@@ -157,10 +158,10 @@ protected:
    AtmosphereModel      *internalAtmos;
    /// Array of densities
    Real                 *density;
-   /// Density model: "High", "Low", or "Mean"							// made changes by TUAN NGUYEN   for GMT-4299
-   std::string			densityModel;									// made changes by TUAN NGUYEN   for GMT-4299
-   /// Inputfile containing all setting parameters for MarsGRAM			// made changes by TUAN NGUYEN   for GMT-4299
-   std::string          inputFile;										// made changes by TUAN NGUYEN   for GMT-4299
+   /// Density model: "High", "Low", or "Mean"
+   std::string          densityModel;
+   /// Inputfile containing all setting parameters for MarsGRAM
+   std::string          inputFile;
    /// Array of products of spacecraft properties
    Real                 *prefactor;
    /// Flag used to determine if data has changed for the prefactors

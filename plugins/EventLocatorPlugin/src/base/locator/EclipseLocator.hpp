@@ -26,6 +26,7 @@
 #include "EventLocator.hpp"
 #include "EventLocatorDefs.hpp"
 #include "Star.hpp"
+#include "EclipseTotalEvent.hpp"
 
 /**
  * The EventLocator used for shadow entry and exit location
@@ -91,6 +92,16 @@ protected:
    StringArray eclipseTypes;
    /// The Sun
    Star        *sun;
+   /// The stored events
+   std::vector<EclipseTotalEvent*> theEvents;
+   /// the start time of the current FindEvents
+   Real        findStart;
+   /// the stop time of the current FindEvents
+   Real        findStop;
+   /// the maximum index of the stored events
+   Integer     maxIndex;
+   /// The maximum duration of the found events
+   Real        maxDuration;
 
    /// Published parameters for eclipse locators
     enum
@@ -106,7 +117,7 @@ protected:
     static const Gmat::ParameterType
        PARAMETER_TYPE[EclipseLocatorParamCount - EventLocatorParamCount];
 
-    virtual void FindEvents(Real fromTime, Real toTime);
+    virtual void FindEvents();
 };
 
 #endif /* EclipseLocator_hpp */

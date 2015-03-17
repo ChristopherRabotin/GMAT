@@ -25,8 +25,10 @@
 //#include "Elevation.hpp"
 //#include "LineOfSight.hpp"
 #include "MessageInterface.hpp"
+#include "GroundstationInterface.hpp"
 
 //#define DEBUG_SET
+//#define DEBUG_SETREF
 
 //------------------------------------------------------------------------------
 // Static data
@@ -637,14 +639,33 @@ GmatBase* ContactLocator::GetRefObject(const Gmat::ObjectType type,
 bool ContactLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_SETREF
+      MessageInterface::ShowMessage("CL::SetRefObject, obj = %s, type = %d (%s), name= %s\n",
+            (obj? "NOT NULL" : "NULL"), (Integer) type, OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(),
+            name.c_str());
+      MessageInterface::ShowMessage("station names are:\n");
+      for (Integer ii = 0; ii < stationNames.size(); ii++)
+         MessageInterface::ShowMessage("   %s\n", stationNames.at(ii).c_str());
+   #endif
    switch (type)
    {
       case Gmat::GROUND_STATION:
          for (UnsignedInt ii = 0; ii < stationNames.size(); ii++)
          {
-            if (obj->GetName() == stationNames.at(ii))
+            #ifdef DEBUG_SETREF
+               MessageInterface::ShowMessage(
+                     "Is of type GROUND_STATION, checking name %s ...\n",
+                     stationNames.at(ii).c_str());
+            #endif
+            if (name == stationNames.at(ii))
+//            if (obj->GetName() == stationNames.at(ii))
             {
-               stations.at(ii) = obj;
+               #ifdef DEBUG_SETREF
+                  MessageInterface::ShowMessage(
+                        "it matched!!! so setting it ...\n");
+               #endif
+               stations.push_back(obj);
+//               stations.at(ii) = (GroundstationInterface*) obj;
                return true;
             }
          }
@@ -653,6 +674,10 @@ bool ContactLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       default:
          break;
    }
+   #ifdef DEBUG_SETREF
+      MessageInterface::ShowMessage(
+            "--- DIDN'T match anthing!!! so caling parent ...\n");
+   #endif
    // Call parent class to add objects to bodyList
    return EventLocator::SetRefObject(obj, type, name);
 }
@@ -683,12 +708,15 @@ const StringArray& ContactLocator::GetRefObjectNameArray(const Gmat::ObjectType 
             (Integer) type, (GmatBase::OBJECT_TYPE_STRING[type]).c_str());
    #endif
 
-   static StringArray csNames;
+   refObjectNames = EventLocator::GetRefObjectNameArray(type);
 
-   csNames.clear();
-   csNames = stationNames;
+  if ((type == Gmat::GROUND_STATION) || (type == Gmat::UNKNOWN_OBJECT))
+  {
+     refObjectNames.insert(refObjectNames.begin(), stationNames.begin(),
+           stationNames.end());
+  }
 
-   return csNames;
+   return refObjectNames;
 }
 
 //------------------------------------------------------------------------------
@@ -703,7 +731,7 @@ const StringArray& ContactLocator::GetRefObjectNameArray(const Gmat::ObjectType 
 //------------------------------------------------------------------------------
 const ObjectTypeArray& ContactLocator::GetRefObjectTypeArray()
 {
-   refObjectTypes.clear();
+   refObjectTypes = EventLocator::GetRefObjectTypeArray();
    refObjectTypes.push_back(Gmat::GROUND_STATION);
    return refObjectTypes;
 }
@@ -824,19 +852,29 @@ void ContactLocator::ReportEventData(const std::string &reportNotice)
    TimeConverterUtil::Convert("A1ModJulian", toEpoch, "",
                               outputFormat, resultMjd, toGregorian);
 
-   if (numEventsFound == 0) // This may be moved to the base EventLocator class <<<
+   Integer sz = (Integer) contactResults.size();
+   if (sz == 0)
    {
       theReport << "There are no Contact events in the time interval ";
       theReport << fromGregorian << " to " << toGregorian + ".\n";
    }
    else
    {
-      // *** REPLACE THIS WITH CODE TO WRITE THE REPORT ***
-      theReport << "There are no Contact events in the time interval ";
-      theReport << fromGregorian << " to " << toGregorian + ".\n";
-      // **************************************************
+      // Loop over the ContactResults list
+      for (Integer ii = 0; ii < sz; ii++)
+      {
+         // write headers or whatever needs to be written here, if anything
+         // loop over the 'contents' [events list] for each ContactResult
+         EventList* evList = contactResults.at(ii);
+         Integer sz2   = (Integer) evList->size();
+         for (Integer jj = 0; jj < sz2; jj++)
+         {
+            LocatedEvent *ev = evList->at(jj);
+            std::string eventString = ev->GetReportString();
+            // do other stuff here
+         }
+      }
    }
-
 
    theReport.close();
 }
@@ -846,14 +884,14 @@ void ContactLocator::ReportEventData(const std::string &reportNotice)
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// void FindEvents(Real fromTime, Real toTime)
+// void FindEvents()
 //------------------------------------------------------------------------------
 /**
  * Find the eclipse events requested in the time range requested.
  *
  */
 //------------------------------------------------------------------------------
-void ContactLocator::FindEvents(Real fromTime, Real toTime)
+void ContactLocator::FindEvents()
 {
    // *** FILL THIS IN WITH CALLS TO SPICE AND OTHER CODE ***
    // *** IT MAY BE USEFUL TO LOOK AT SOME OTHER SPICE CODE, IN UTIL,

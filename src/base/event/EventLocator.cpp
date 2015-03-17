@@ -32,6 +32,7 @@
 #include "TimeSystemConverter.hpp"
 #include "GregorianDate.hpp"
 #include "MessageInterface.hpp"
+//#include "EphemManager.hpp"
 
 
 //#define DEBUG_DUMPEVENTDATA
@@ -39,6 +40,7 @@
 //#define DEBUG_EVENT_INITIALIZATION
 //#define DEBUG_OBJECTS
 //#define DEBUG_DATE_FORMAT
+//#define DEBUG_EVENTLOCATOR_OBJECT
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -111,15 +113,15 @@ EventLocator::EventLocator(const std::string &typeStr,
    epochFormat             ("UTCGregorian"),
    initialEpoch            ("01 Jan 2000 11:59:28.000"),
    finalEpoch              ("01 Jan 2000 14:59:28.000"),
-   stepSize                (60.0),
+   stepSize                (10.0),
    initialEp               (0.0),
    finalEp                 (0.0),
-   satStartEpoch           (0.0),  // review these
    fromEpoch               (0.0),
    toEpoch                 (0.0),
-   numEventsFound          (0),
+//   numEventsFound          (0),
    satName                 (""),
    sat                     (NULL),
+//   ephemMgr                (NULL),
    solarSys                (NULL)
 {
    objectTypes.push_back(Gmat::EVENT_LOCATOR);
@@ -177,18 +179,18 @@ EventLocator::EventLocator(const EventLocator& el) :
    stepSize                (el.stepSize),
    initialEp               (el.initialEp),
    finalEp                 (el.finalEp),
-   satStartEpoch           (el.satStartEpoch),
    fromEpoch               (el.fromEpoch),
    toEpoch                 (el.toEpoch),
-   numEventsFound          (el.numEventsFound),   // or 0?
+//   numEventsFound          (el.numEventsFound),   // or 0?
    satName                 (el.satName),
    sat                     (NULL),
+//   ephemMgr                (NULL),
    solarSys                (el.solarSys)
 {
    occultingBodyNames.clear();
    occultingBodies.clear();
 
-   UnsignedInt sz = occultingBodyNames.size();
+   UnsignedInt sz = el.occultingBodyNames.size();
    for (UnsignedInt ii = 0; ii < sz; ii++)
       occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
 
@@ -227,22 +229,22 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       stepSize             = el.stepSize;
       initialEp            = el.initialEp;
       finalEp              = el.finalEp;
-      satStartEpoch        = el.satStartEpoch;
       fromEpoch            = el.fromEpoch;
       toEpoch              = el.toEpoch;
-      numEventsFound       = el.numEventsFound;
+//      numEventsFound       = el.numEventsFound;
       satName              = el.satName;
       sat                  = NULL;
+//      ephemMgr             = NULL;
       solarSys             = el.solarSys;
 
       occultingBodyNames.clear();
       occultingBodies.clear();
 
-      UnsignedInt sz = occultingBodyNames.size();
+      UnsignedInt sz = el.occultingBodyNames.size();
       for (UnsignedInt ii = 0; ii < sz; ii++)
          occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
 
-      sz = occultingBodies.size();
+      sz = el.occultingBodies.size();
       for (UnsignedInt ii = 0; ii < sz; ii++)
          occultingBodies.push_back(el.occultingBodies.at(ii));
    }
@@ -1013,6 +1015,38 @@ void EventLocator::SetSolarSystem(SolarSystem *ss)
 }
 
 //------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::HasRefObjectTypeArray()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& EventLocator::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   refObjectTypes.push_back(Gmat::CELESTIAL_BODY);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
 //  void SetEpoch(std::string ep)
 //------------------------------------------------------------------------------
 /**
@@ -1204,7 +1238,7 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          if (obj->IsOfType(Gmat::CELESTIAL_BODY))
          {
-            occultingBodies.at(i) = (CelestialBody*) obj;
+            occultingBodies.push_back((CelestialBody*) obj);
             return true;
          }
          return false;
@@ -1355,13 +1389,22 @@ bool EventLocator::Initialize()
       throw EventException(errmsg);
    }
 
-   satStartEpoch = sat->GetEpoch(); // or do I need to get this at some other time??
+//   ephemMgr      = sat->GetEphemManager();
 
    /// Get the occulting bodies from the solar system??? OR put them on the ref object list ??  TBD
    // @todo <<<<<<<<<<  Currently have them in the ref object list
 
+   if (occultingBodyNames.size() > occultingBodies.size())
+   {
+      std::string errmsg = "Specified occulting bodies not set for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
+   }
+
    // For now, call this method here to load the planetary PCKs
-   solarSys->LoadPCKs();
+   #ifdef __USE_SPICE__
+      solarSys->LoadPCKs();
+   #endif
 
    // Tell the spacecraft to start recording its data
    sat->RecordEphemerisData();
@@ -1428,18 +1471,11 @@ void EventLocator::ReportEventData(const std::string &reportNotice)
 //------------------------------------------------------------------------------
 void EventLocator::LocateEvents(const std::string &reportNotice)
 {
-   if (useEntireInterval)
-   {
-      fromEpoch = satStartEpoch;
-      toEpoch   = sat->GetEpoch();
-   }
-   else
-   {
-      fromEpoch = initialEp;
-      toEpoch   = finalEp;
-   }
-   // Locate events here and store them as you have decided to do so
-   FindEvents(fromEpoch, toEpoch);
+   // Stop the data recording so that the kernel will be loaded
+   sat->ProvideEphemerisData();
+
+   // Locate events in derived class and store them as you have decided to do so
+   FindEvents();
 
    // Write the report
    // appendReport should already have been set by a call to SetAppend

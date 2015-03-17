@@ -16,11 +16,17 @@ function root_path = findgmatrootpath
 %
 % Author: Russell Carpenter, NASA GSFC
 % Created: 2011/08/08
+% Modified: 2014/11/12 Ravi Mathur, Emergent Space Technologies Inc.
+%           Handle cases where ROOT_PATH is a relative path
 
+% Make sure gmat_startup_file.txt can be read
 fid = fopen('gmat_startup_file.txt','r');
 if fid == -1
-    error('gmat_startup_file not found on current path')
+    error('GMAT:findgmatrootpath', ...
+        ['gmat_startup_file.txt not found in MATLAB path. Ensure you have a valid GMAT ' ...
+        'installation and add its appropriate paths to your MATLAB path.']);
 else
+    % Extract ROOT_PATH value
     gsfl = '';
     while ~strncmp(gsfl,'ROOT_PATH',9)
         gsfl = fgetl(fid);
@@ -28,4 +34,17 @@ else
     fclose(fid);
     ps = strfind(gsfl,'=');
     root_path = strtrim(gsfl(ps+1:end));
+    
+    % If ROOT_PATH is a relative path, then convert it to absolute
+    W = what(root_path);
+    if(~strcmp(W.path, root_path))
+        gsf_path = fileparts(which('gmat_startup_file.txt'));
+        root_path = fullfile(gsf_path, root_path);
+    end
+    
+    % ROOT_PATH is valid if it contains bin/gmat_startup_file.txt
+    if ~exist(fullfile(root_path, 'bin', 'gmat_startup_file.txt'))
+        error('GMAT:findgmatrootpath', ...
+            'The ROOT_PATH variable in gmat_startup_file.txt does not point to a valid GMAT installation.');
+    end
 end

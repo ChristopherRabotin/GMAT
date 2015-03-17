@@ -541,6 +541,108 @@ std::string GmatStringUtil::RemoveMathSymbols(const std::string &str, bool remov
    return str1;
 }
 
+//------------------------------------------------------------------------------
+// std::string PadWithBlanks(const std::string &str, Integer toSize,
+//                           StripType whichEnd = TRAILING)
+//------------------------------------------------------------------------------
+/*
+ * Pads leading or trailing end of string with blanks.
+ *
+ * @param  str        input string to be padded
+ * @param  toSize     total length desired
+ * @param  whichEnd   option of padding front or end
+ *
+ * @note if the input string is already of size toSize or less, it will just
+ *       return the string as is
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::PadWithBlanks(const std::string &str, Integer toSize,
+                            StripType whichEnd)
+{
+   Integer     len     = (Integer) str.length();
+   std::string blanks("");
+   for (Integer ii= 0; ii < (toSize - len);  ii++)
+      blanks += " ";
+   if (whichEnd == LEADING)
+   {
+      return blanks + str;
+   }
+   else if (whichEnd == TRAILING)
+   {
+      return str + blanks;
+   }
+   else // ignore "BOTH" for now
+   {
+      return str;
+   }
+}
+
+//------------------------------------------------------------------------------
+// const std::string BuildNumber(Real value,  bool useExp = false,
+//       Integer length)
+//------------------------------------------------------------------------------
+/**
+ * Builds a formatted string containing a Real, so the Real can be serialized to
+ * the display
+ *
+ * @param value  The Real that needs to be serialized
+ * @param useExp Use scientific notation
+ * @param length The size of the desired string
+ *
+ * @return The formatted string
+ * @note   This was moved from GmatCommand
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::BuildNumber(Real value, bool useExp,
+                                        Integer length)
+{
+   std::string retval = "Invalid number";
+
+   if (length < 100)
+   {
+      char temp[100], defstr[40];
+      Integer fraction = 1;
+
+      // check for a NaN first
+      if ((!GmatMathUtil::IsEqual(value, 0.0)) &&
+         (GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED)        ||
+          GmatMathUtil::IsEqual(value, GmatRealConstants::REAL_UNDEFINED_LARGE)  ||
+          GmatMathUtil::IsNaN(value)))
+      {
+         sprintf(defstr, "%%%ds", length);
+         sprintf(temp, defstr, "NaN");
+      }
+      else
+      {
+         Real shift = GmatMathUtil::Abs(value);
+         if (useExp || (shift > GmatMathUtil::Exp10((Real)length-3)))
+         {
+            fraction = length - 8;
+            sprintf(defstr, "%%%d.%de", length, fraction);
+         }
+         else
+         {
+            while (shift > 10.0)
+            {
+               ++fraction;
+               shift *= 0.1;
+            }
+            fraction = length - 3 - fraction;
+            sprintf(defstr, "%%%d.%dlf", length, fraction);
+         }
+         #ifdef DEBUG_DEFSTR
+            MessageInterface::ShowMessage("defstr = %s\n", defstr);
+            if (fraction < 0) MessageInterface::ShowMessage("   and fraction = %d\n", fraction);
+         #endif
+         sprintf(temp, defstr, value);
+      }
+      retval = temp;
+   }
+
+   return retval;
+}
+
+
 
 //------------------------------------------------------------------------------
 // std::string Trim(const std::string &str, StripType stype = BOTH,
@@ -1211,6 +1313,35 @@ std::string GmatStringUtil::ToStringNoZeros(const Real &val)
    str = buffer;
    
    return RemoveTrailingZeros(val, str);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToOrdinal(Integer i, bool textOnly = false)
+//------------------------------------------------------------------------------
+/**
+ * Returns the ordinal number, given the input integer.
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToOrdinal(Integer i, bool textOnly)
+{
+   std::string num  = ToString(i, 1);
+   if (textOnly)
+   {
+      // TBD
+//      return num;
+   }
+
+   // Get the digit in the ones place
+   char        ones = num[num.length() - 1];
+   if (ones == '1')
+      return num + "st";
+   else if (ones == '2')
+      return num + "nd";
+   else if (ones == '3')
+      return num + "rd";
+   else
+      return num + "th";
 }
 
 

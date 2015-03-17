@@ -1,0 +1,1329 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>DEMOINTVAL  Interval operations in INTLAB</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2009-05-29">
+      <meta name="m-file" content="dintval"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>DEMOINTVAL  Interval operations in INTLAB</h1>
+         <introduction></introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#2">How to define an interval I</a></li>
+               <li><a href="#3">How to define an interval II</a></li>
+               <li><a href="#7">How to define an interval III</a></li>
+               <li><a href="#8">How to define an interval IV</a></li>
+               <li><a href="#9">Output formats of intervals I</a></li>
+               <li><a href="#12">Output formats of intervals II</a></li>
+               <li><a href="#13">Rigorous output</a></li>
+               <li><a href="#14">Output formats of intervals III</a></li>
+               <li><a href="#16">Changing interval output permanently</a></li>
+               <li><a href="#19">Display with uncertainty</a></li>
+               <li><a href="#20">Newton iteration</a></li>
+               <li><a href="#22">Invoking interval operations</a></li>
+               <li><a href="#25">Interval matrix operations</a></li>
+               <li><a href="#26">Sharp interval multiplication</a></li>
+               <li><a href="#28">Fast interval multiplication</a></li>
+               <li><a href="#30">Acceleration by vector/matrix notation</a></li>
+               <li><a href="#33">Overestimation of interval operations</a></li>
+               <li><a href="#35">Interval standard functions</a></li>
+               <li><a href="#37">Complex interval standard functions</a></li>
+               <li><a href="#39">Standard functions with argument out of range</a></li>
+               <li><a href="#40">Standard functions with argument out of range  and Brouwer's fixed point theorem</a></li>
+               <li><a href="#43">A common misuse of interval arithmetic</a></li>
+               <li><a href="#48">Rigorous solution of linear systems</a></li>
+               <li><a href="#51">Accuracy of rigorous linear system solving: Hilbert matrices</a></li>
+               <li><a href="#54">Sparse linear systems</a></li>
+               <li><a href="#60">Inclusion of eigenvalues and eigenvectors</a></li>
+               <li><a href="#61">Eigenvalue pairs and invariant subspaces</a></li>
+               <li><a href="#63">Nonlinear systems of equations, polynomials, etc.</a></li>
+            </ul>
+         </div>
+         <p>A key to interval operations in INTLAB is changing the rounding mode. Following we ensure "rounding to nearest".</p><pre class="codeinput">setround(0)
+</pre><h2>How to define an interval I<a name="2"></a></h2>
+         <p>There are four possibilities to generate an interval, the first is a simple typecast of a real or complex quantity, for example
+            a matrix. It uses Matlab conversion, i.e. the first component does <b>not</b> necessarily contain "2.3". This is because Matlab first converts "2.3" into binary format, and then the type cast is called.
+         </p><pre class="codeinput">format <span class="string">compact</span> <span class="string">long</span> <span class="string">infsup</span>
+u = intval( [ 2.3 -4e1 ; 3 0 ] )
+</pre><pre class="codeoutput">intval u = 
+[   2.29999999999999,   2.30000000000000] [ -40.00000000000000, -40.00000000000000] 
+[   3.00000000000000,   3.00000000000000] [   0.00000000000000,   0.00000000000000] 
+</pre><h2>How to define an interval II<a name="3"></a></h2>
+         <p>The second possibility is to use INTLAB conversion of constants. In this case the argument is a string and INTLAB verified
+            conversion to binary is called rather than Matlab conversion.
+         </p><pre class="codeinput">u = intval( <span class="string">'0.1 -3.1 5e2 .3e1'</span> )
+</pre><pre class="codeoutput">intval u = 
+  1.0e+002 *
+[   0.00099999999998,   0.00100000000001] 
+[  -0.03100000000001,  -0.03099999999998] 
+[   5.00000000000000,   5.00000000000000] 
+[   0.03000000000000,   0.03000000000000] 
+</pre><p>The first component, for example, definitely contains "0.1". Since 0.1 is not finitely representable in binary format, the
+            radius of the first component must be nonzero.
+         </p><pre class="codeinput">u.rad
+</pre><pre class="codeoutput">ans =
+  1.0e-015 *
+   0.013877787807814
+   0.444089209850063
+                   0
+                   0
+</pre><p>Generating an interval by an input string always produces a column vector. To change "u" into a 2 x 2 matrix, use</p><pre class="codeinput">reshape(u,2,2)
+</pre><pre class="codeoutput">intval ans = 
+  1.0e+002 *
+[   0.00099999999998,   0.00100000000001] [   5.00000000000000,   5.00000000000000] 
+[  -0.03100000000001,  -0.03099999999998] [   0.03000000000000,   0.03000000000000] 
+</pre><p>Note that arrays are stored columnwise in Matlab.</p>
+         <h2>How to define an interval III<a name="7"></a></h2>
+         <p>The third possibility is by specification of midpoint and radius.</p><pre class="codeinput">u = midrad( [ -3e1+2i ; .4711 ; 3 ] , 1e-4 )
+</pre><pre class="codeoutput">intval u = 
+[ -30.00010000000001 +  1.99989999999999i, -29.99989999999999 +  2.00010000000001i] 
+[   0.47099999999998 -  0.00010000000001i,   0.47120000000001 +  0.00010000000001i] 
+[   2.99989999999999 -  0.00010000000001i,   3.00010000000001 +  0.00010000000001i] 
+</pre><h2>How to define an interval IV<a name="8"></a></h2>
+         <p>The fourth possibility is by specification of infimum and supremum</p><pre class="codeinput">u = infsup( [ 1 2 ] , [ 4 7 ] )
+</pre><pre class="codeoutput">intval u = 
+[   1.00000000000000,   4.00000000000000] [   2.00000000000000,   7.00000000000000] 
+</pre><h2>Output formats of intervals I<a name="9"></a></h2>
+         <p>The output format can be changed using the different Matlab formats, for example</p><pre class="codeinput">format <span class="string">midrad</span> <span class="string">long</span> <span class="string">e</span>
+X = midrad( [ -3e1+2i ; .4711 ; 3 ] , 1e-4 )
+</pre><pre class="codeoutput">intval X = 
+&lt; -3.000000000000000e+001 + 2.000000000000000e+000i, 1.000000000000001e-004&gt; 
+&lt;  4.711000000000000e-001 + 0.000000000000000e+000i, 1.000000000001111e-004&gt; 
+&lt;  3.000000000000000e+000 + 0.000000000000000e+000i, 1.000000000000001e-004&gt; 
+</pre><p>or</p><pre class="codeinput">format <span class="string">infsup</span> <span class="string">long</span>
+X
+</pre><pre class="codeoutput">intval X = 
+[ -30.00010000000001 +  1.99989999999999i, -29.99989999999999 +  2.00010000000001i] 
+[   0.47099999999998 -  0.00010000000001i,   0.47120000000001 +  0.00010000000001i] 
+[   2.99989999999999 -  0.00010000000001i,   3.00010000000001 +  0.00010000000001i] 
+</pre><p>or with a common exponent</p><pre class="codeinput">1e4*X
+</pre><pre class="codeoutput">intval ans = 
+  1.0e+005 *
+[  -3.00001000000001 +  0.19998999999999i,  -2.99998999999998 +  0.20001000000001i] 
+[   0.04709999999999 -  0.00001000000001i,   0.04712000000001 +  0.00001000000001i] 
+[   0.29998999999999 -  0.00001000000001i,   0.30001000000001 +  0.00001000000001i] 
+</pre><h2>Output formats of intervals II<a name="12"></a></h2>
+         <p>With two arguments the functions infsup and midrad define an interval, with one argument they control the output of an interval:</p><pre class="codeinput">format <span class="string">short</span>
+u = infsup( [ 1 2 ] , [ 4 7 ] );
+infsup(u), midrad(u)
+</pre><pre class="codeoutput">intval u = 
+[    1.0000,    4.0000] [    2.0000,    7.0000] 
+intval u = 
+&lt;    2.5000,   1.5000&gt; &lt;    4.5000,   2.5000&gt; 
+</pre><h2>Rigorous output<a name="13"></a></h2>
+         <p>Note that output in INTLAB is rigorous. That means,</p><pre> left &lt;= ans &lt;= right     for inf/sup notation
+ ans  in  mid+/-rad       for mid/rad notation</pre><p>where  ans  is the true (real or complex) answer, and left,right, mid,rad are the numbers corresponding to the <i>displayed</i> decimal figures.
+         </p>
+         <h2>Output formats of intervals III<a name="14"></a></h2>
+         <p>A convenient way to display narrow intervals is the following:</p><pre class="codeinput">x=midrad(pi,1e-8);
+format <span class="string">short</span>, infsup(x), midrad(x), disp_(x)
+format <span class="string">long</span>, infsup(x), midrad(x), disp_(x)
+format <span class="string">short</span>
+</pre><pre class="codeoutput">intval x = 
+[    3.1415,    3.1416] 
+intval x = 
+&lt;    3.1416,   0.0001&gt; 
+intval x = 
+    3.1415
+intval x = 
+[   3.14159264358979,   3.14159266358980] 
+intval x = 
+&lt;   3.14159265358979,  0.00000001000001&gt; 
+intval x = 
+   3.1415927_______
+</pre><p>Mathematically the following is true: Form an interval of the displayed midpoint and a radius of 1 unit of the last displayed
+            decimal figure, then this is a correct inclusion of the stored interval.
+         </p>
+         <h2>Changing interval output permanently<a name="16"></a></h2>
+         <p>The interval output format can be changed permanently, for example, to infimum/supremum notation:</p><pre class="codeinput">u = midrad( [ -3e1+2i ; .4711 ; 3 ] , 1e-4 );
+format <span class="string">infsup</span>
+u
+</pre><pre class="codeoutput">intval u = 
+[ -30.0002 +  1.9998i, -29.9998 +  2.0002i] 
+[   0.4709 -  0.0002i,   0.4713 +  0.0002i] 
+[   2.9998 -  0.0002i,   3.0002 +  0.0002i] 
+</pre><p>or to midpoint/radius notation:</p><pre class="codeinput">format <span class="string">midrad</span>
+u
+</pre><pre class="codeoutput">intval u = 
+&lt; -30.0000 +  2.0000i,  0.0002&gt; 
+&lt;   0.4711 +  0.0000i,  0.0002&gt; 
+&lt;   3.0000 +  0.0000i,  0.0002&gt; 
+</pre><p>or to display with uncertainties depicted by "_":</p><pre class="codeinput">format <span class="string">_</span>
+u
+</pre><pre class="codeoutput">intval u = 
+ -30.0000 +  2.0000i 
+   0.4711 +  0.000_i 
+   3.0000 +  0.000_i 
+</pre><h2>Display with uncertainty<a name="19"></a></h2>
+         <p>Display with uncertainty makes only sense for sufficiently narrow intervals. If the accuracy becomes too poor, INTLAB changes
+            automatically to inf-sup or mid-rad display for real or complex intervals, respectively:
+         </p><pre class="codeinput"><span class="keyword">for</span> k=-5:-1
+  disp_(midrad(pi,10^k))
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">intval  = 
+    3.1416
+intval  = 
+    3.142_
+intval  = 
+    3.14__
+intval  = 
+    3.1___
+[    3.0415,    3.2416] 
+</pre><h2>Newton iteration<a name="20"></a></h2>
+         <p>The following code is an interval Newton iteration to include sqrt(2).</p><pre class="codeinput">format <span class="string">long</span>
+f = @(x)(x^2-2);                                <span class="comment">% Function f(x) = x^2-2</span>
+X = infsup(1.4,1.7);                            <span class="comment">% Starting interval</span>
+<span class="keyword">for</span> i=1:4
+  xs = X.mid;                                   <span class="comment">% Midpoint of current interval</span>
+  Y = f(gradientinit(X));                       <span class="comment">% Gradient evaluation of f(X)</span>
+  X = intersect( X , xs-f(intval(xs))/Y.dx )    <span class="comment">% Interval Newton step with intersection</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">intval X = 
+   1.4_____________
+intval X = 
+   1.4142__________
+intval X = 
+   1.414213562_____
+intval X = 
+   1.41421356237309
+</pre><p>The "display_" output format shows nicely the quadratic convergence.</p>
+         <p>The last displayed result (which is in fact an interval) proves that the true value of sqrt(2) is between 1.41421356237308
+            and 1.41421356237310. Indeed, sqrt(2)=1.41421356237309504...
+         </p>
+         <p>The format "long e" in Matlab displays the most figures. With this we see that the internal accuracy of the final X is in
+            fact even better, the width is only 2 units in the last place.
+         </p><pre class="codeinput">format <span class="string">long</span> <span class="string">e</span>
+X
+format <span class="string">short</span>
+</pre><pre class="codeoutput">intval X = 
+  1.414213562373095e+000
+</pre><h2>Invoking interval operations<a name="22"></a></h2>
+         <p>An operation uses interval arithmetic if at least one of the operands is of type intval. For example, in</p><pre class="codeinput">u = intval(5);
+y = 3*u-exp(u)
+</pre><pre class="codeoutput">intval y = 
+ -133.4131
+</pre><p>the result y is an inclusion of 15-exp(5). However, in</p><pre class="codeinput">u = intval(5);
+z = 3*pi*u-exp(u)
+</pre><pre class="codeoutput">intval z = 
+ -101.2892
+</pre><p>the first multiplication "3*pi" is a floating point multiplication. Thus it is not guaranteed that the result z is an inclusion
+            of 15pi-exp(5).
+         </p>
+         <h2>Interval matrix operations<a name="25"></a></h2>
+         <p>INTLAB is designed to be fast. Case distinctions in interval multiplication can slow down computations significantly due to
+            interpretation overhead. Therefore, there is a choice between 'fast' and 'sharp' evaluation of interval matrix products. This
+            applies only to 'thick' intervals, i.e. intervals with nonzero diameter.
+         </p>
+         <h2>Sharp interval multiplication<a name="26"></a></h2>
+         <p>In the following example, c is a real random matrix, C is an interval matrix with diameter zero (a thin interval matrix),
+            and CC is an interval matrix with nonzero diameter (a thick interval matrix), all of dimension nxn for n=100. First we measure
+            the computing time with option 'SharpIVmult'.
+         </p><pre class="codeinput">n = 200;
+c = randn(n);
+C = intval(c);
+C_ = midrad(c,.1);
+intvalinit(<span class="string">'SharpIVmult'</span>)
+tic, scc = c*c; toc
+tic, sCC = C*C; toc
+tic, sCC = C*C_; toc
+tic, sCC__ = C_*C_; toc
+</pre><pre class="codeoutput">===&gt; Slow but sharp interval matrix multiplication in use
+Elapsed time is 0.021475 seconds.
+Elapsed time is 0.047219 seconds.
+Elapsed time is 0.073357 seconds.
+Elapsed time is 3.191112 seconds.
+</pre><p>As can be seen, there is not much penalty if not both matrices are thick interval matrices; then, however, computation is
+            slowed down significantly.
+         </p>
+         <h2>Fast interval multiplication<a name="28"></a></h2><pre class="codeinput">intvalinit(<span class="string">'FastIVmult'</span>)
+tic, fcc = c*c; toc
+tic, fCC = C*C; toc
+tic, fCC = C*C_; toc
+tic, fCC__ = C_*C_; toc
+max(max(diam(fCC__)./diam(sCC__)))
+</pre><pre class="codeoutput">===&gt; Fast interval matrix multiplication in use (maximum overestimation 
+        factor 1.5 in radius, see FAQ)
+Elapsed time is 0.020771 seconds.
+Elapsed time is 0.047111 seconds.
+Elapsed time is 0.070745 seconds.
+Elapsed time is 0.093762 seconds.
+ans =
+    1.0668
+</pre><p>As can be seen there is again not much penalty if not both matrices are thick. However, the 'fast' implementation is much
+            faster than the 'sharp' at the cost of a little wider output. If intervals are very wide and any overestimation cannot be
+            afforded (as in global optimization), the option 'SharpIVmult' is recommended. It is shown in
+         </p>
+         <p>S.M. Rump. Fast and parallel interval arithmetic. BIT Numerical Mathematics, 39(3):539-560, 1999</p>
+         <p>that the maximum (componentwise) overestimation by the option 'FastIVmult' compared to 'SharpIVmult' is a factor 1.5, for
+            real and complex intervals.
+         </p>
+         <h2>Acceleration by vector/matrix notation<a name="30"></a></h2>
+         <p>It is highly advisable to use vector/matrix notation when using interval operation. Consider</p><pre class="codeinput">n = 500; x = 1:n; y = intval(x);
+tic
+<span class="keyword">for</span> i=1:n
+  y(i) = y(i)^2 - y(i);
+<span class="keyword">end</span>
+t1 = toc
+</pre><pre class="codeoutput">t1 =
+    0.6247
+</pre><p>This simple initialization takes considerable computing time. Compare to</p><pre class="codeinput">tic
+y = intval(x);
+y = y.^2 - y;
+t2 = toc
+ratio = t1/t2
+</pre><pre class="codeoutput">t2 =
+    0.0012
+ratio =
+  539.6033
+</pre><p>Sometimes code looks more complicated, a comment may help. It is worth it.</p>
+         <h2>Overestimation of interval operations<a name="33"></a></h2>
+         <p>Note that the main principle of interval arithmetic is that for given intervals A,B and an operation o, the result a o b is
+            included in the interval result A o B for all a in A and all b in B. Since the result must be an interval, overestimations
+            cannot be avoided in many situations. For example, in
+         </p><pre class="codeinput">close, kmax = 40; i = sqrt(-1); a=midrad(2,.7); b=midrad(1-i,1);
+plotintval(3*a-exp(b)); hold <span class="string">on</span>
+phi = linspace(0,2*pi,kmax);
+[A,B] = meshgrid( mid(a)+rad(a)*exp(i*phi) , mid(b)+rad(b)*exp(i*phi) );
+plot(3*A-exp(B))
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="dintval_01.png"> <p>the blue circle is the result of the interval operations, whereas the many circles approximate the power set operation (see
+            also the INTLAB demo). Another reason for overestimation are dependencies, see below.
+         </p>
+         <h2>Interval standard functions<a name="35"></a></h2>
+         <p>Interval standard functions in INTLAB are rigorous. For a given interval X and a function X let Y be the computed value of
+            f(X). Then f(x) is in Y for all x in X. For example
+         </p><pre class="codeinput">x = intval(1e10); format <span class="string">long</span>
+sin(x)
+</pre><pre class="codeoutput">intval ans = 
+  -0.48750602508751
+</pre><p>Note that the result is rigorous (try sin(2^1000) or similar). For timing comparison consider</p><pre class="codeinput">format <span class="string">short</span>
+n=10000; x=random(n,1); X=intval(x);
+tic, exp(x); tapprox = toc
+tic, exp(X); trigorous = toc
+ratio = trigorous/tapprox
+</pre><pre class="codeoutput">tapprox =
+    0.0021
+trigorous =
+    0.0281
+ratio =
+   13.4749
+</pre><h2>Complex interval standard functions<a name="37"></a></h2>
+         <p>Complex interval standard functions are rigorous as well, for example</p><pre class="codeinput">format <span class="string">long</span>
+Z = midrad(3+4i,1e-7);
+R = sin(Z)
+</pre><pre class="codeoutput">intval R = 
+   3.85374_________ - 27.01681_________i 
+</pre><p>It is mathematically correct, that sin(z) is an element of R for every complex z with distance less than or equal to 1e-7
+            from 3+4i.
+         </p>
+         <h2>Standard functions with argument out of range<a name="39"></a></h2>
+         <p>When entering a real argument leading to a complex value of a standard function, there are three possibilities to be specified
+            by intvalinit:')
+         </p><pre class="codeinput">intvalinit(<span class="string">'RealStdFctsExcptnNan'</span>); sqrt(intval(-2))
+intvalinit(<span class="string">'RealStdFctsExcptnWarn'</span>); sqrt(intval(-2))
+intvalinit(<span class="string">'RealStdFctsExcptnAuto'</span>); sqrt(intval(-2))
+</pre><pre class="codeoutput">===&gt; Result NaN for real interval input out of range 
+intval ans = 
+                NaN
+===&gt; Complex interval stdfct used automatically for real interval input 
+        out of range, but with warning
+intval ans = 
+  -0.00000000000000 +  1.41421356237309i 
+===&gt; Complex interval stdfct used automatically for real interval input 
+        out of range (without warning)
+intval ans = 
+  -0.00000000000000 +  1.41421356237309i 
+</pre><h2>Standard functions with argument out of range  and Brouwer's fixed point theorem<a name="40"></a></h2>
+         <p>There is a fourth possibility, which is useful in some applications, that is to ignore input arguments out of range. Note,
+            however, that in this case further usage of a result may lead to incorrect conclusions, for example when applying Brouwer's
+            fixed point theorem.
+         </p>
+         <p>Consider f(x)=sqrt(x)-1. This function has no real fixed point. However</p><pre class="codeinput">f = inline(<span class="string">'sqrt(x)-1'</span>)
+X = infsup(-4,2)
+intvalinit(<span class="string">'RealStdFctsExcptnIgnore'</span>);
+Y = f(X)
+</pre><pre class="codeoutput">f =
+     Inline function:
+     f(x) = sqrt(x)-1
+intval X = 
+[  -4.00000000000000,   2.00000000000000] 
+===&gt; !!! Caution: Input arguments out of range are ignored !!!
+intval Y = 
+[  -1.00000000000000,   0.41421356237310] 
+</pre><p>the interval X = [-4,2] is seemingly mapped by f into itself. To avoid such a wrong conclusion, one can check whether an input
+            out of range occurred in previous computations:
+         </p><pre class="codeinput">intvalinit(<span class="string">'RealStdFctsExcptnOccurred'</span>)
+</pre><pre class="codeoutput">ans =
+     1
+</pre><p>The flag is reset after checking.</p>
+         <h2>A common misuse of interval arithmetic<a name="43"></a></h2>
+         <p>The dependency problem is the most serious problem of (naive) interval arithmetic. The following procedure:</p>
+         <p>" Take some numerical algorithm and replace every operation by its corresponding interval operation. Then the computed interval
+            result(s) definitely contain the true result which would be obtained without the presence of rounding errors. "
+         </p>
+         <p>will most certainly fail in practice. Although a true statement (if no exception like divide by a zero interval occurs), the
+            computed result interval(s) will, for very modest problem size, most certainly be of huge diameter and useless.
+         </p>
+         <p>Consider, for example, the triangular matrix T where all elements on and below the diagonal are equal to 1, and take a randomly
+            generated right hand side. The following lines do this for dimension n=50:
+         </p><pre class="codeinput">n = 50;
+T = tril(ones(n));
+b = randn(n,1);
+</pre><p>Then perform a standard forward substitution to compute an inclusion T\b. Note that X is defined to be an interval vector,
+            so all operations are indeed interval operations (see above section "Invoking interval operations").
+         </p><pre class="codeinput">X = intval(zeros(n,1));
+<span class="keyword">for</span> i=1:n
+  X(i) = b(i) - T(i,1:i-1)*X(1:i-1);
+<span class="keyword">end</span>
+X
+</pre><pre class="codeoutput">intval X = 
+   0.42532038798998
+  -1.03864632152111
+   0.91611968973672
+  -0.60111114450160
+  -0.03802291807970
+   0.26505134654355
+   0.73729550881511
+  -1.9666364381346_
+  -0.5960813145307_
+   0.3751251741858_
+   0.384253430138__
+   1.736856970192__
+   0.662358032662__
+  -0.59496969432___
+  -0.65074760714___
+  -0.16007781053___
+  -0.14770415322___
+   0.1198977998____
+   0.8387008354____
+  -1.4198818594____
+   0.370005191_____
+   0.107244103_____
+   1.539549021_____
+  -2.19248785______
+   1.80225688______
+  -2.71499280______
+   1.80975124______
+   0.4734114_______
+  -2.8624685_______
+   2.3074484_______
+  -0.427219________
+  -0.600712________
+   0.326933________
+   0.247935________
+   2.27647_________
+  -1.49662_________
+   0.3424__________
+   0.6475__________
+  -1.1883__________
+   1.2238__________
+   0.058___________
+  -0.944___________
+  -0.408___________
+  -0.86____________
+  -0.42____________
+   3.13____________
+  -2.16____________
+  -1.2_____________
+   0.9_____________
+   0.6_____________
+</pre><p>The result is displayed with uncertainty perfectly making visible the loss of accuracy. This is due to one of the most common
+            misuses of interval arithmetic, also called "naive interval arithmetic". For more details and examples cf.
+         </p>
+         <p>S.M. Rump. Computer-assisted proofs and Self-Validating Methods. In B. Einarsson, editor, Handbook on Acuracy and Reliability
+            in Scientific Computation, pages 195-240. SIAM, 2005
+         </p>
+         <p>to be downloaded from "www.ti3.tu-harburg.de/rump". Note that the linear system is very well-conditioned:</p><pre class="codeinput">cond(T)
+</pre><pre class="codeoutput">ans =
+  64.270085531579483
+</pre><p>By the well-known rule of thumb of numerical analysis we expect at least 14 correct digits in a floating-point approximation
+            T\b. Using a proper (non-naive) method, an inclusion of this quality is indeed achieved:
+         </p><pre class="codeinput">verifylss(T,b)
+</pre><pre class="codeoutput">intval ans = 
+   0.42532038798998
+  -1.03864632152111
+   0.91611968973672
+  -0.60111114450160
+  -0.03802291807970
+   0.26505134654354
+   0.73729550881511
+  -1.96663643813463
+  -0.59608131453074
+   0.37512517418578
+   0.38425343013794
+   1.73685697019221
+   0.66235803266176
+  -0.59496969432375
+  -0.65074760714398
+  -0.16007781052906
+  -0.14770415321684
+   0.11989779976655
+   0.83870083535047
+  -1.41988185939738
+   0.37000519093880
+   0.10724410321678
+   1.53954902082662
+  -2.19248785034697
+   1.80225688272174
+  -2.71499279709946
+   1.80975124066703
+   0.47341138020084
+  -2.86246846835684
+   2.30744841169744
+  -0.42721854524920
+  -0.60071176498986
+   0.32693287467091
+   0.24793516518707
+   2.27647314077250
+  -1.49662034046118
+   0.34241504244439
+   0.64748585530373
+  -1.18830256375916
+   1.22375299803293
+   0.05786361082547
+  -0.94425564948100
+  -0.40759583436070
+  -0.86468035531526
+  -0.41529236838661
+   3.12903145079620
+  -2.16236512245303
+  -1.17409083486572
+   0.86988134069940
+   0.58471978756261
+</pre><p>Such methods are called "self-validating methods" or "verification methods". For some details see the reference above or</p>
+         <p>S.M. Rump. Self-validating methods. Linear Algebra and its Applications (LAA), 324:3-13, 2001.</p>
+         <p>Due to an improved evaluation of the residual (default option "intvalinit('ImprovedResidual')" , see also function "lssresidual.m")
+            15 correct decimal digits of the result are computed.
+         </p>
+         <h2>Rigorous solution of linear systems<a name="48"></a></h2>
+         <p>The INTLAB linear system solver can be called with "\" or "verifylss".' For example,</p><pre class="codeinput">n = 100;
+A = 2*rand(n)-1;
+b = A*ones(n,1);
+X = verifylss(A,b);
+</pre><p>generates and solves a randomly generated 100x100 linear system. The inclusion and its quality is checked by</p><pre class="codeinput">X([1:3 98:100])
+max( X.rad ./ abs(X.mid) )
+</pre><pre class="codeoutput">intval ans = 
+   0.99999999999998
+   1.00000000000000
+   0.99999999999997
+   0.99999999999999
+   0.99999999999998
+   1.00000000000000
+ans =
+    2.220446049250312e-016
+</pre><p>which calculates the maximum relative error of the inclusion radius with respect to the midpoint. The same is done by</p><pre class="codeinput">max(relerr(X))
+</pre><pre class="codeoutput">ans =
+    2.220446049250312e-016
+</pre><h2>Accuracy of rigorous linear system solving: Hilbert matrices<a name="51"></a></h2>
+         <p>For estimating accuracy, try</p><pre class="codeinput">format <span class="string">long</span> <span class="string">e</span>
+n = 10;
+H = hilb(n);
+b = ones(n,1);
+X = verifylss(H,b)
+</pre><pre class="codeoutput">intval X = 
+ -9.9983019________e+000
+  9.898533_________e+002
+ -2.3756877________e+004
+  2.4021162________e+005
+ -1.26112466_______e+006
+  3.7834081________e+006
+ -6.7261100________e+006
+  7.0006906________e+006
+ -3.9379107________e+006
+  9.2371199________e+005
+</pre><p>The notoriously ill-conditioned Hilbert matrix is given by H_ij := 1/(i+j-1). To estimate the accuracy, we use the symbolic
+            toolbox to compute the perturbation of the solution when perturbing only the (7,7)-element of the input matrix by 2^(-52):
+         </p><pre class="codeinput">Hs = sym(H,<span class="string">'f'</span>);
+Hs(7,7) = Hs(7,7)*(1+sym(2^(-52)));
+double( Hs \ b )
+</pre><pre class="codeoutput">ans =
+   -9.997198050336207e+000
+    9.897576960772726e+002
+   -2.375483680969619e+004
+    2.401930526008937e+005
+   -1.261036061017173e+006
+    3.783164425266260e+006
+   -6.725710140930751e+006
+    7.000304229698808e+006
+   -3.937707813532462e+006
+    9.236673822756851e+005
+</pre><p>The statement "sym(H,'f')" makes sure that no conversion error appears when changing H into symbolic format. This tiny perturbation
+            already changes the solution in the fourth place; thus the computed inclusion is very accurate.
+         </p>
+         <h2>Sparse linear systems<a name="54"></a></h2>
+         <p>The following generates a random sparse system with density of about 1 per cent:</p><pre class="codeinput">format <span class="string">short</span>
+n=1000; A=sprand(n,n,.002)+speye(n); A=A*A'; b = ones(n,1);
+</pre><p>The linear system is generated to be symmetric positive definite. Before calling the verified linear system solver, the bandwidth
+            should reduced. The original matrix looks like
+         </p><pre class="codeinput">p = symamd(A);
+spy(A)
+title(<span class="string">'sparsity pattern of A'</span>)
+</pre><img vspace="5" hspace="5" src="dintval_02.png"> <p>whereas after minimum degree reordering the matrix looks like</p><pre class="codeinput">spy(A(p,p))
+title(<span class="string">'sparsity pattern of renumbered A'</span>)
+</pre><img vspace="5" hspace="5" src="dintval_03.png"> <p>The timing for the built-in (floating point) solver compared to the verified solver is as follows:</p><pre class="codeinput">tic, x = A(p,p)\b(p); toc
+</pre><pre class="codeoutput">Elapsed time is 0.040898 seconds.
+</pre><pre class="codeinput">tic, X = verifylss(A(p,p),b(p)); toc
+</pre><pre class="codeoutput">Elapsed time is 0.205044 seconds.
+</pre><p>On my 1.2 GHz laptop the verified solution takes about 3 times as long as the built-in linear system solver.</p>
+         <h2>Inclusion of eigenvalues and eigenvectors<a name="60"></a></h2>
+         <p>To compute verified inclusions of eigenvalue/eigenvector pairs of simple or multiple eigenvalues, consider, for example, the
+            famous Wilkinson(21) matrix:
+         </p><pre class="codeinput">format <span class="string">long</span>
+W = wilkinson(21);              <span class="comment">% generation of the matrix</span>
+[V,D] = eig(W);                 <span class="comment">% eigenvalue/eigenvector approximations</span>
+<span class="keyword">for</span> k=18:21
+  [L,X] = verifyeig(W,D(k,k),V(:,k))        <span class="comment">% inclusions for the small eigenvalues</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">intval L = 
+   9.21067864730491
+intval X = 
+  -0.38247_________
+   0.30189_________
+   0.44607_________
+   0.23816_________
+   0.080419________
+   0.020042________
+   0.0039719_______
+   0.00065440______
+   0.000092313_____
+   0.0000112430____
+  -0.00000000000___
+  -0.000011243042__
+  -0.000092313004__
+  -0.0006543963623_
+  -0.00397193251082
+  -0.02004206756034
+  -0.08041877341334
+  -0.23815677108033
+  -0.44606931512504
+  -0.30188982395948
+   0.38246757537813
+intval L = 
+   9.21067864736133
+intval X = 
+   0.38246757533800
+  -0.30188982390622
+  -0.44606931509072
+  -0.23815677111720
+  -0.08041877354260
+  -0.02004206794300
+  -0.00397193399399
+  -0.0006544037082_
+  -0.000092357143__
+  -0.00001155397___
+  -0.00000250882___
+  -0.0000115540____
+  -0.000092357_____
+  -0.00065440______
+  -0.0039719_______
+  -0.020042________
+  -0.080419________
+  -0.23816_________
+  -0.44607_________
+  -0.30189_________
+   0.38247_________
+intval L = 
+  10.74619418290332
+intval X = 
+   0.55939864230126
+   0.41742001280922
+   0.16949775589362
+   0.04805373844102
+   0.01052087952088
+   0.00188039874002
+   0.0002842567806_
+   0.000037252700__
+   0.00000430986___
+   0.0000004422____
+  -0.000000000_____
+  -0.00000044______
+  -0.0000043_______
+  -0.000037________
+  -0.00028_________
+  -0.00188_________
+  -0.0105__________
+  -0.048___________
+  -0.170___________
+  -0.42____________
+  -0.56____________
+intval L = 
+  10.74619418290339
+intval X = 
+   0.56____________
+   0.42____________
+   0.170___________
+   0.048___________
+   0.0105__________
+   0.00188_________
+   0.00028_________
+   0.000037________
+   0.0000043_______
+   0.00000045______
+   0.000000084_____
+   0.0000004509____
+   0.00000431088___
+   0.000037252833__
+   0.0002842568009_
+   0.00188039874370
+   0.01052087952171
+   0.04805373844126
+   0.16949775589369
+   0.41742001280919
+   0.55939864230118
+</pre><h2>Eigenvalue pairs and invariant subspaces<a name="61"></a></h2>
+         <p>The smallest eigenvlues are  10.74619418290332 and 10.74619418290339, where all displayed digits are verified to be correct.
+            Invariant subspaces of nearby eigenvalues are in general ill-conditioned. Nearby eigenvalues can also be regarded as clusters.
+            From the inclusions above we can judge how narrow the eigenvalues are. So one of the approximations can be used as an approximation
+            of the pair.
+         </p><pre class="codeinput">[L,X] = verifyeig(W,D(18,18),V(:,18:19))    <span class="comment">% inclusion of the 18/19 eigenvalue pair</span>
+[L,X] = verifyeig(W,D(20,20),V(:,20:21))    <span class="comment">% inclusion of the 20/21 eigenvalue pair</span>
+</pre><pre class="codeoutput">intval L = 
+   9.2106786473____ +  0.0000000000____i 
+intval X = 
+  -0.38246721566493   0.38246757533800
+   0.30188954003016  -0.30188982390622
+   0.44606889559399  -0.44606931509072
+   0.23815654709237  -0.23815677111720
+   0.08041869777897  -0.08041877354260
+   0.02004204871064  -0.02004206794300
+   0.00397192877519  -0.00397193399399
+   0.00065439574687  -0.00065440370821
+   0.00009231291679  -0.00009235714338
+   0.00001124303112  -0.00001155397350
+  -0.00000000000118  -0.00000250882017
+  -0.00001124304199  -0.00001155396293
+  -0.00009231300365  -0.00009235705656
+  -0.00065439636234  -0.00065440309275
+  -0.00397193251082  -0.00397193025836
+  -0.02004206756034  -0.02004204909331
+  -0.08041877341334  -0.08041869790822
+  -0.23815677108033  -0.23815654712923
+  -0.44606931512504  -0.44606889555967
+  -0.30188982395948  -0.30188953997691
+   0.38246757537813   0.38246721562480
+intval L = 
+  10.7461941829034_ +  0.0000000000000_i 
+intval X = 
+   0.55939864230126   0.53926516857120
+   0.41742001280922   0.40239653183024
+   0.16949775589362   0.16339731453128
+   0.04805373844102   0.04632422283758
+   0.01052087952089   0.01014221959041
+   0.00188039874009   0.00181272078417
+   0.00028425678094   0.00027402603484
+   0.00003725270198   0.00003591205802
+   0.00000430988244   0.00000415574012
+   0.00000044236679   0.00000043485205
+   0.00000000151024   0.00000008241241
+  -0.00000042613744   0.00000045076775
+  -0.00000415472850   0.00000431085765
+  -0.00003591192480   0.00003725283040
+  -0.00027402601454   0.00028425680050
+  -0.00181272078050   0.00188039874363
+  -0.01014221958959   0.01052087952169
+  -0.04632422283735   0.04805373844125
+  -0.16339731453120   0.16949775589369
+  -0.40239653183027   0.41742001280919
+  -0.53926516857129   0.55939864230118
+</pre><p>Note that interval output with uncertainty ("_") is used, so all displayed decimal places of the bases of the invariant subspaces
+            are verified to be correct. As explained in section "Output formats of intervals III", the inclusion 10.7461941829034_  of
+            the two smallest eigenvlues reads [10.7461941829033,10.7461941829035], thus including the true eigenvalues as displayed above.
+         </p>
+         <p>The mathematical statement is that the displayed intervals for the cluster contain (at least) two eigenvalues of the Wilkinson
+            matrix W. The size of the cluster is determined by the number of columns of the invariant subspace approximation.
+         </p>
+         <h2>Nonlinear systems of equations, polynomials, etc.<a name="63"></a></h2>
+         <p>For inclusions of systems of nonlinear equations, of roots of polynomials etc. cf. the corresponding demos.</p>
+         <p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% DEMOINTVAL  Interval operations in INTLAB
+%
+
+%%
+% A key to interval operations in INTLAB is changing the rounding
+% mode. Following we ensure "rounding to nearest".
+
+setround(0)                    
+
+%% How to define an interval I
+% There are four possibilities to generate an interval, the first is a simple
+% typecast of a real or complex quantity, for example a matrix.
+% It uses Matlab 
+% conversion, i.e. the first component does *not* necessarily contain "2.3".
+% This is because Matlab first converts "2.3" into binary format, and then
+% the type cast is called.
+
+format compact long infsup
+u = intval( [ 2.3 -4e1 ; 3 0 ] )
+      
+%% How to define an interval II
+% The second possibility is to use INTLAB conversion of constants. 
+% In this case the argument is a string and INTLAB verified conversion
+% to binary is called rather than Matlab conversion. 
+      
+u = intval( '0.1 -3.1 5e2 .3e1' )
+
+%%
+% The first component, for example, definitely contains "0.1". Since 0.1
+% is not finitely representable in binary format, the radius of the first
+% component must be nonzero.
+
+u.rad
+     
+%%
+% Generating an interval by an input string always produces a column vector.
+% To change "u" into a 2 x 2 matrix, use
+
+reshape(u,2,2)
+
+%%
+% Note that arrays are stored columnwise in Matlab.      
+    
+%% How to define an interval III
+% The third possibility is by specification of midpoint and radius.
+
+u = midrad( [ -3e1+2i ; .4711 ; 3 ] , 1e-4 )
+        
+%% How to define an interval IV
+% The fourth possibility is by specification of infimum and supremum
+% 
+
+u = infsup( [ 1 2 ] , [ 4 7 ] ) 
+  
+%% Output formats of intervals I
+% The output format can be changed using the different Matlab formats,
+% for example
+             
+format midrad long e
+X = midrad( [ -3e1+2i ; .4711 ; 3 ] , 1e-4 )
+
+%%
+% or
+
+format infsup long
+X
+
+%%
+% or with a common exponent
+
+1e4*X
+
+%% Output formats of intervals II
+% With two arguments the functions infsup and midrad define an interval,
+% with one argument they control the output of an interval:
+  
+format short
+u = infsup( [ 1 2 ] , [ 4 7 ] ); 
+infsup(u), midrad(u)
+           
+%% Rigorous output
+% Note that output in INTLAB is rigorous. That means, 
+% 
+%   left <= ans <= right     for inf/sup notation
+%   ans  in  mid+/-rad       for mid/rad notation
+%
+% where  ans  is the true (real or complex) answer, and left,right,
+% mid,rad are the numbers corresponding to the _displayed_ decimal figures.
+
+
+%% Output formats of intervals III
+% A convenient way to display narrow intervals is the following:
+      
+x=midrad(pi,1e-8);
+format short, infsup(x), midrad(x), disp_(x)
+format long, infsup(x), midrad(x), disp_(x)      
+format short          
+
+%%
+% Mathematically the following is true: Form an interval of the displayed midpoint and
+% a radius of 1 unit of the last displayed decimal figure, then this is a correct inclusion
+% of the stored interval.
+
+
+%% Changing interval output permanently   
+% The interval output format can be changed permanently, for example,
+% to infimum/supremum notation: 
+   
+u = midrad( [ -3e1+2i ; .4711 ; 3 ] , 1e-4 );
+format infsup
+u
+      
+%%
+% or to midpoint/radius notation: 
+
+format midrad
+u
+      
+%%
+% or to display with uncertainties depicted by "_": 
+  
+format _
+u
+
+
+%% Display with uncertainty
+% Display with uncertainty makes only sense for sufficiently narrow intervals.
+% If the accuracy becomes too poor, INTLAB changes automatically to inf-sup
+% or mid-rad display for real or complex intervals, respectively:
+
+for k=-5:-1
+  disp_(midrad(pi,10^k))
+end
+
+%% Newton iteration
+% The following code is an interval Newton iteration to include sqrt(2).
+
+format long
+f = @(x)(x^2-2);                                % Function f(x) = x^2-2
+X = infsup(1.4,1.7);                            % Starting interval
+for i=1:4
+  xs = X.mid;                                   % Midpoint of current interval
+  Y = f(gradientinit(X));                       % Gradient evaluation of f(X)
+  X = intersect( X , xs-f(intval(xs))/Y.dx )    % Interval Newton step with intersection
+end
+
+%%
+% The "display_" output format shows nicely the quadratic convergence. 
+%
+% The last displayed result (which is in fact an interval) proves that the true
+% value of sqrt(2) is between 1.41421356237308 and 1.41421356237310.
+% Indeed, sqrt(2)=1.41421356237309504...
+%
+% The format "long e" in Matlab displays the most figures. With this we see that
+% the internal accuracy of the final X is in fact even better, the width is
+% only 2 units in the last place.
+
+format long e
+X
+format short
+          
+
+%% Invoking interval operations
+% An operation uses interval arithmetic if at least one of the operands is of type
+% intval. For example, in 
+   
+u = intval(5); 
+y = 3*u-exp(u)
+
+%%
+% the result y is an inclusion of 15-exp(5). However, in
+       
+u = intval(5); 
+z = 3*pi*u-exp(u)
+
+%%
+% the first multiplication "3*pi" is a floating point multiplication. Thus
+% it is not guaranteed that the result z is an inclusion of 15pi-exp(5).
+
+%% Interval matrix operations
+% INTLAB is designed to be fast. Case distinctions in interval multiplication
+% can slow down computations significantly due to interpretation overhead. 
+% Therefore, there is a choice between 'fast' and 'sharp' evaluation of interval
+% matrix products. This applies only to 'thick' intervals, i.e. intervals with
+% nonzero diameter. 
+%
+
+%% Sharp interval multiplication
+% In the following example, c is a real random matrix, C is an interval matrix
+% with diameter zero (a thin interval matrix), and CC is an interval matrix with
+% nonzero diameter (a thick interval matrix), all of dimension nxn for n=100. 
+% First we measure the computing time with option 'SharpIVmult'.
+
+n = 200;
+c = randn(n); 
+C = intval(c);
+C_ = midrad(c,.1);
+intvalinit('SharpIVmult')
+tic, scc = c*c; toc
+tic, sCC = C*C; toc
+tic, sCC = C*C_; toc
+tic, sCC__ = C_*C_; toc
+
+%%
+% As can be seen, there is not much penalty if not both matrices are thick
+% interval matrices; then, however, computation is slowed down significantly.
+
+%% Fast interval multiplication
+
+intvalinit('FastIVmult')
+tic, fcc = c*c; toc
+tic, fCC = C*C; toc
+tic, fCC = C*C_; toc
+tic, fCC__ = C_*C_; toc
+max(max(diam(fCC__)./diam(sCC__)))
+
+%%
+% As can be seen there is again not much penalty if not both matrices are thick. 
+% However, the 'fast' implementation is much faster than the 'sharp' at the cost of
+% a little wider output. If intervals are very wide and any overestimation
+% cannot be afforded (as in global optimization), the option 'SharpIVmult'
+% is recommended. It is shown in
+%
+% S.M. Rump. Fast and parallel interval arithmetic. BIT Numerical Mathematics, 
+% 39(3):539-560, 1999
+%
+% that the maximum (componentwise) overestimation by the option 'FastIVmult'
+% compared to 'SharpIVmult' is a factor 1.5, for real and complex intervals.
+
+%% Acceleration by vector/matrix notation
+% It is highly advisable to use vector/matrix notation when using interval operation.
+% Consider
+
+n = 500; x = 1:n; y = intval(x);
+tic
+for i=1:n
+  y(i) = y(i)^2 - y(i);
+end
+t1 = toc
+
+%%
+% This simple initialization takes considerable computing time. Compare to
+
+tic
+y = intval(x);
+y = y.^2 - y;
+t2 = toc
+ratio = t1/t2
+
+%%
+% Sometimes code looks more complicated, a comment may help. It is worth it.
+
+%% Overestimation of interval operations
+% Note that the main principle of interval arithmetic is that for given intervals
+% A,B and an operation o, the result a o b is included in the interval result A o B
+% for all a in A and all b in B. Since the result must be an interval, overestimations
+% cannot be avoided in many situations. For example, in
+
+close, kmax = 40; i = sqrt(-1); a=midrad(2,.7); b=midrad(1-i,1);
+plotintval(3*a-exp(b)); hold on
+phi = linspace(0,2*pi,kmax);
+[A,B] = meshgrid( mid(a)+rad(a)*exp(i*phi) , mid(b)+rad(b)*exp(i*phi) );
+plot(3*A-exp(B))
+hold off
+
+%%
+% the blue circle is the result of the interval operations, whereas the many
+% circles approximate the power set operation (see also the INTLAB demo). Another
+% reason for overestimation are dependencies, see below. 
+
+%% Interval standard functions               
+% Interval standard functions in INTLAB are rigorous. 
+% For a given interval X and a function X let Y be the computed
+% value of f(X). Then f(x) is in Y for all x in X.
+% For example
+      
+x = intval(1e10); format long
+sin(x)
+          
+%%
+% Note that the result is rigorous (try sin(2^1000) or similar).
+% For timing comparison consider
+
+format short
+n=10000; x=random(n,1); X=intval(x);
+tic, exp(x); tapprox = toc
+tic, exp(X); trigorous = toc
+ratio = trigorous/tapprox
+   
+%% Complex interval standard functions
+% Complex interval standard functions are rigorous as well, 
+% for example
+      
+format long
+Z = midrad(3+4i,1e-7); 
+R = sin(Z)
+
+%%
+% It is mathematically correct, that sin(z) is an element of R for
+% every complex z with distance less than or equal to 1e-7 from 3+4i.
+      
+%% Standard functions with argument out of range
+% When entering a real argument leading to a complex value of a 
+% standard function, there are three possibilities to be specified
+% by intvalinit:')
+
+intvalinit('RealStdFctsExcptnNan'); sqrt(intval(-2))
+intvalinit('RealStdFctsExcptnWarn'); sqrt(intval(-2))
+intvalinit('RealStdFctsExcptnAuto'); sqrt(intval(-2))   
+
+%% Standard functions with argument out of range  and Brouwer's fixed point theorem
+% There is a fourth possibility, which is useful in some applications, that is
+% to ignore input arguments out of range.
+% Note, however, that in this case
+% further usage of a result may lead to incorrect conclusions, for example when 
+% applying Brouwer's fixed point theorem. 
+%
+% Consider f(x)=sqrt(x)-1. This function has no real fixed point. However
+
+f = inline('sqrt(x)-1')
+X = infsup(-4,2)
+intvalinit('RealStdFctsExcptnIgnore'); 
+Y = f(X)
+
+%%
+% the interval X = [-4,2] is seemingly mapped by f into itself. To avoid such a
+% wrong conclusion, one can check whether an input out of range occurred in
+% previous computations:
+
+intvalinit('RealStdFctsExcptnOccurred')
+
+%%
+% The flag is reset after checking.
+
+%% A common misuse of interval arithmetic
+% The dependency problem is the most serious problem of (naive) interval arithmetic.
+% The following procedure:
+% 
+% " Take some numerical algorithm and replace every operation by its corresponding
+% interval operation. Then the computed interval result(s) definitely contain the
+% true result which would be obtained without the presence of rounding errors. "
+%
+% will most certainly fail in practice. Although a true statement (if no exception
+% like divide by a zero interval occurs), the computed result interval(s) will, for
+% very modest problem size, most certainly be of huge diameter and useless. 
+%
+% Consider, for example, the triangular matrix T where all elements on and below the
+% diagonal are equal to 1, and take a randomly generated right hand side. 
+% The following lines do this for dimension n=50:
+
+n = 50;
+T = tril(ones(n));
+b = randn(n,1);
+
+%%
+% Then perform a standard forward substitution to compute an inclusion T\b.
+% Note that X is defined to be an interval vector, so all operations are
+% indeed interval operations (see above section "Invoking interval operations").
+
+X = intval(zeros(n,1));
+for i=1:n
+  X(i) = b(i) - T(i,1:i-1)*X(1:i-1);
+end
+X
+
+%%
+% The result is displayed with uncertainty perfectly making visible the loss of accuracy. 
+% This is due to one of the most common misuses of interval arithmetic, also 
+% called "naive interval arithmetic". For more details and examples cf.
+%
+% S.M. Rump. Computer-assisted proofs and Self-Validating Methods. 
+% In B. Einarsson, editor, Handbook on Acuracy and Reliability in 
+% Scientific Computation, pages 195-240. SIAM, 2005
+%
+% to be downloaded from "www.ti3.tu-harburg.de/rump". Note that the linear
+% system is very well-conditioned:
+
+cond(T)
+
+%%
+% By the well-known rule of thumb of numerical analysis we expect at least
+% 14 correct digits in a floating-point approximation T\b. Using a proper
+% (non-naive) method, an inclusion of this quality is indeed achieved:
+
+verifylss(T,b)
+
+%%
+% Such methods are called "self-validating methods" or "verification methods".
+% For some details see the reference above or
+%
+% S.M. Rump. Self-validating methods. Linear Algebra and its Applications (LAA), 
+% 324:3-13, 2001. 
+%
+% Due to an improved evaluation of the residual (default option "intvalinit('ImprovedResidual')" ,
+% see also function "lssresidual.m") 
+% 15 correct decimal digits of the result are computed. 
+
+
+%% Rigorous solution of linear systems
+% The INTLAB linear system solver can be called with "\" or "verifylss".'
+% For example, 
+
+n = 100; 
+A = 2*rand(n)-1; 
+b = A*ones(n,1); 
+X = verifylss(A,b);
+
+%%
+% generates and solves a randomly generated 100x100 linear system. The inclusion
+% and its quality is checked by 
+     
+X([1:3 98:100])
+max( X.rad ./ abs(X.mid) )
+      
+%%
+% which calculates the maximum relative error of the inclusion radius with
+% respect to the midpoint. The same is done by
+     
+max(relerr(X))
+
+%% Accuracy of rigorous linear system solving: Hilbert matrices
+% For estimating accuracy, try
+
+format long e
+n = 10; 
+H = hilb(n); 
+b = ones(n,1); 
+X = verifylss(H,b)
+    
+%%
+% The notoriously ill-conditioned Hilbert matrix is given by H_ij := 1/(i+j-1). 
+% To estimate the accuracy, we use the symbolic toolbox to compute the perturbation
+% of the solution when perturbing only the (7,7)-element of the input matrix by 2^(-52):
+
+Hs = sym(H,'f'); 
+Hs(7,7) = Hs(7,7)*(1+sym(2^(-52))); 
+double( Hs \ b )
+
+%%
+% The statement "sym(H,'f')" makes sure that no conversion error appears
+% when changing H into symbolic format.
+% This tiny perturbation already changes the solution in the fourth place;
+% thus the computed inclusion is very accurate.
+      
+%% Sparse linear systems
+% The following generates a random sparse system with density of about 1 per cent:
+  
+format short      
+n=1000; A=sprand(n,n,.002)+speye(n); A=A*A'; b = ones(n,1);
+      
+%%
+% The linear system is generated to be symmetric positive definite. 
+% Before calling the verified linear system solver, the bandwidth should
+% reduced. The original matrix looks like
+
+p = symamd(A); 
+spy(A)
+title('sparsity pattern of A')
+
+%%
+% whereas after minimum degree reordering the matrix looks like
+
+spy(A(p,p))
+title('sparsity pattern of renumbered A')
+      
+%% 
+% The timing for the built-in (floating point) solver compared to the 
+% verified solver is as follows:
+
+tic, x = A(p,p)\b(p); toc
+      
+%%
+
+tic, X = verifylss(A(p,p),b(p)); toc
+
+%%
+% On my 1.2 GHz laptop the verified solution takes about 3 times as long as
+% the built-in linear system solver. 
+     
+%% Inclusion of eigenvalues and eigenvectors
+% To compute verified inclusions of eigenvalue/eigenvector pairs of
+% simple or multiple eigenvalues, 
+% consider, for example, the famous Wilkinson(21) matrix:
+     
+format long
+W = wilkinson(21);              % generation of the matrix
+[V,D] = eig(W);                 % eigenvalue/eigenvector approximations
+for k=18:21
+  [L,X] = verifyeig(W,D(k,k),V(:,k))        % inclusions for the small eigenvalues
+end
+      
+%% Eigenvalue pairs and invariant subspaces
+% The smallest eigenvlues are  10.74619418290332 and 10.74619418290339, where all
+% displayed digits are verified to be correct.
+% Invariant subspaces of nearby eigenvalues are in general ill-conditioned.
+% Nearby eigenvalues can also be regarded as clusters. From the inclusions above
+% we can judge how narrow the eigenvalues are. So one of the approximations can
+% be used as an approximation of the pair. 
+   
+[L,X] = verifyeig(W,D(18,18),V(:,18:19))    % inclusion of the 18/19 eigenvalue pair
+[L,X] = verifyeig(W,D(20,20),V(:,20:21))    % inclusion of the 20/21 eigenvalue pair
+
+%%
+% Note that interval output with uncertainty ("_") is used, so all displayed decimal
+% places of the bases of the invariant subspaces are verified to be correct. 
+% As explained in section "Output formats of intervals III", the inclusion  
+% 10.7461941829034_  of the two smallest eigenvlues reads [10.7461941829033,10.7461941829035],
+% thus including the true eigenvalues as displayed above. 
+% 
+% The mathematical statement is that the displayed intervals for the cluster contain
+% (at least) two eigenvalues of the Wilkinson matrix W. The size of the cluster
+% is determined by the number of columns of the invariant subspace approximation.
+
+%% Nonlinear systems of equations, polynomials, etc.
+% For inclusions of systems of nonlinear equations, of roots of polynomials etc.
+% cf. the corresponding demos.
+
+##### SOURCE END #####
+-->
+   </body>
+</html>
