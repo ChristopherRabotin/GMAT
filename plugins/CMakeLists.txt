@@ -19,8 +19,9 @@
 #   TargetName:  Name of plugin target
 #   PLUGIN_DIRS: List of directories containing source/header files
 #   PLUGIN_SRCS: List of .c and .cpp source files
+#   INSTALL_DIR: Directory to install plugin (plugins, bin, etc.)
 # Note that all paths are relative to the plugin's CMakeLists.txt
-MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
+MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   # Add Preproccessor Definitions
   ADD_DEFINITIONS("-D_DYNAMICLINK")
   #ADD_DEFINITIONS("-DEXP_STL")
@@ -49,6 +50,15 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
   # Add source/header files to IDE-based project source groups
   # Macro defined in top-level CMakeLists.txt
   _ADDSOURCEGROUPS("${PLUGIN_DIRS}")
+
+  # ====================================================================
+  # Specify where to install plugin
+  #  - On Windows the dll is RUNTIME (lib is ARCHIVE, ignored here)
+  #  - On Mac/Linux the dylib/so is LIBRARY
+  INSTALL(TARGETS ${TargetName}
+    RUNTIME DESTINATION ${INSTALL_DIR} # Windows
+    LIBRARY DESTINATION ${INSTALL_DIR} # Mac/Linux
+    )
 
 ENDMACRO(_SETUPPLUGIN)
 

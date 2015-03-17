@@ -77,7 +77,7 @@ if(wxWidgets_FOUND)
     INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*.dll"
+      FILES_MATCHING PATTERN "*u_*.dll" # Ignore debug (ud_*)
       PATTERN "msw*" EXCLUDE
       )
   # For Mac/Linux, dylib/so can be in subdirectory of bin
@@ -85,7 +85,7 @@ if(wxWidgets_FOUND)
     INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
       DESTINATION bin/libwx
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "libwx*"
+      FILES_MATCHING PATTERN "libwx_*u_*" # Ignore debug (ud_*)
       PATTERN "wx" EXCLUDE
       )
 

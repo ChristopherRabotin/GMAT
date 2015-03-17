@@ -1087,6 +1087,14 @@ void MdiChildTsFrame::OnClose(wxCloseEvent& event)
    #endif
 }
 
+void MdiChildTsFrame::TakeAction(const std::string &action)
+{
+   if (action == "AlwaysRedraw")
+   {
+      mXyPlot->AlwaysDraw(true);
+   }
+}
+
 
 //---------------------------------
 // protected methods
