@@ -284,11 +284,11 @@ bool MeasurementManager::Initialize()
       
       // Step 3: Set stream objects and data filters for all observation data files in trackingSet[i]
       // 3.1. Get list of all data filters defined in trackingSet[i]
-      ObjectArray dataFilterObjects = trackingSets[i]->GetRefObjectArray("DataFilter");
+      ObjectArray dataFilterObjects = trackingSets[i]->GetRefObjectArray(Gmat::DATA_FILTER);
 
       // 3.2. Get list of all file names defined in trackingSet[i]
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("FileName");
-      
+
       // 3.3. Create DataFile object for each file name
       for (UnsignedInt k = 0; k < filenames.size(); ++k)
       {
@@ -327,7 +327,7 @@ bool MeasurementManager::Initialize()
 
          // 3.3.3 Set data filters to DataFile object
          for (UnsignedInt j = 0; j < dataFilterObjects.size(); ++j)
-            newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]->Clone());
+            newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]);
          
       }// for k loop
       
