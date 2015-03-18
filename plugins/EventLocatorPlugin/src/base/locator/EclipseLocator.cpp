@@ -26,7 +26,6 @@
 #include "Star.hpp"
 #include "EventException.hpp"
 #include "MessageInterface.hpp"
-#include "SpiceInterface.hpp"
 #include "EphemManager.hpp"
 #include "EclipseEvent.hpp"
 #include "StringUtil.hpp"
@@ -298,7 +297,7 @@ std::string EclipseLocator::GetStringParameter(const Integer id) const
  */
 //------------------------------------------------------------------------------
 bool EclipseLocator::SetStringParameter(const Integer id,
-      const std::string &value)
+                                        const std::string &value)
 {
    if (id == ECLIPSE_TYPES)
    {
@@ -334,7 +333,7 @@ bool EclipseLocator::SetStringParameter(const Integer id,
  */
 //------------------------------------------------------------------------------
 std::string EclipseLocator::GetStringParameter(const Integer id,
-      const Integer index) const
+                                               const Integer index) const
 {
    if (id == ECLIPSE_TYPES)
    {
@@ -719,8 +718,6 @@ void EclipseLocator::ReportEventData(const std::string &reportNotice)
       Integer        itsNaifId = sat->GetIntegerParameter("NAIFId");
       theReport << "Spacecraft: " << itsNaifId << "\n\n";
 
-//      theReport << "Start Time (UTC)            Stop Time (UTC)             Type        ";
-//      theReport << "Occ Body          Duration (s)      Total Duration (s)   Event Number\n";
       theReport << "Start Time (UTC)            Stop Time (UTC)               Duration (s)    ";
       theReport << "Occ Body        Type        Event Number  Total Duration (s)\n";
 
@@ -761,8 +758,6 @@ void EclipseLocator::FindEvents()
 {
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Entering EclipseLocator::FindEvents with these occultingBodies:\n");
-//      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
-//         MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
       if (!occultingBodies.empty())
       {
          for (Integer ii = 0; ii < occultingBodies.size(); ii++)
@@ -777,54 +772,17 @@ void EclipseLocator::FindEvents()
          MessageInterface::ShowMessage("   %s\n", eclipseTypes.at(ii).c_str());
    #endif
    EphemManager   *em       = sat->GetEphemManager();
-   Integer        itsNaifId = sat->GetIntegerParameter("NAIFId");
-
-   SpiceInterface *spice    = new SpiceInterface();
+   if (!em)
+   {
+      std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
+      errmsg += sat->GetName() + "!!\n";
+      throw EventException(errmsg);
+   }
    em->ProvideEphemerisData();
    em->StopRecording();
 
-   SPICEDOUBLE_CELL(window, 2000);
-   scard_c(0, &window);   // reset (empty) the coverage cell
-
-   SpiceDouble  start0, end0, startN, endN;
-   SpiceInt     numInt     = 0;
-
-   if (useEntireInterval)
-   {
-      em->GetCoverageWindow(&window); // this may need to be done either way
-      numInt     = wncard_c(&window);
-      wnfetd_c(&window, 0, &start0, &end0);
-      wnfetd_c(&window, (numInt-1), &startN, &endN);
-      findStart  = spice->SpiceTimeToA1(start0);
-      findStop   = spice->SpiceTimeToA1(endN);
-   }
-   else // create a window only over the specified time range
-   {
-      // @todo - use intersection to get the actual coverage within the specified times
-      start0 = spice->A1ToSpiceTime(initialEp);
-      end0   = spice->A1ToSpiceTime(finalEp);   // ??
-      startN = spice->A1ToSpiceTime(initialEp); // ??
-      endN   = spice->A1ToSpiceTime(finalEp);
-      wninsd_c(start0, endN, &window);
-      numInt     = 1;
-      findStart  = initialEp;
-      findStop   = finalEp;
-   }
-
-   #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage("Number of intervals = %d\n", (Integer) numInt);
-   #endif
-
-   #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage(" time of first interval start is %12.10f\n", (Real) spice->SpiceTimeToA1(start0));
-      MessageInterface::ShowMessage(" time of first interval end is %12.10f  \n", (Real) spice->SpiceTimeToA1(end0));
-      MessageInterface::ShowMessage(" time of last interval start is %12.10f \n", (Real) spice->SpiceTimeToA1(startN));
-      MessageInterface::ShowMessage(" time of last interval end is %12.10f   \n", (Real) spice->SpiceTimeToA1(endN));
-   #endif
-
    // Set up data for the calls to CSPICE
 
-//   SpiceInt MAXWIN = 1000;
    std::string      theFront  = "";  // we will loop over occultingBodies
    std::string      theFShape = "ELLIPSOID";
    std::string      theFFrame = ""; // we will loop over occultingBodies for this
@@ -832,37 +790,14 @@ void EclipseLocator::FindEvents()
    std::string      theBShape = "ELLIPSOID";
    std::string      theBFrame = "IAU_SUN";
    std::string      theAbCorr = GetAbcorrString();
-   std::string      theNAIFId = GmatStringUtil::ToString(itsNaifId);
-
-   // CSPICE data
-   ConstSpiceChar   *occType  = NULL;
-   ConstSpiceChar   *front    = NULL;
-   ConstSpiceChar   *fshape   = NULL;
-   ConstSpiceChar   *fframe   = NULL;
-   ConstSpiceChar   *back     = NULL;
-   ConstSpiceChar   *bshape   = NULL;
-   ConstSpiceChar   *bframe   = NULL;
-   ConstSpiceChar   *abcorr   = NULL;
-   ConstSpiceChar   *obsrvr   = NULL;
-   SpiceDouble      step      = stepSize;
-
-   SPICEDOUBLE_CELL(result, 2000);
-   scard_c(0, &result);   // reset (empty) the coverage cell
-
-   fshape = theFShape.c_str();
-   back   = theBack.c_str();
-   bshape = theBShape.c_str();
-   bframe = theBFrame.c_str();
-   abcorr = theAbCorr.c_str();
-   obsrvr = theNAIFId.c_str();
 
    EclipseTotalEvent  *rawList = new EclipseTotalEvent();
+   Integer            numEclipse = 0;
+   RealArray          starts;
+   RealArray          ends;
 
    for (Integer ii = 0; ii < occultingBodies.size(); ii++)
    {
-//      std::string full    = "FULL";
-//      std::string partial = "PARTIAL";
-//      std::string annular = "ANNULAR";
 
       theFront  = GmatStringUtil::ToUpper(occultingBodyNames.at(ii));
       if (theFront == "LUNA")
@@ -870,63 +805,18 @@ void EclipseLocator::FindEvents()
       CelestialBody *body = occultingBodies.at(ii);
       theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
 
-      front     = theFront.c_str();
-      fframe    = theFFrame.c_str();
-
       for (Integer jj = 0; jj < eclipseTypes.size(); jj++)
       {
-         if (eclipseTypes.at(jj) == "Umbra")
-         {
-//            occType = full.c_str();
-            occType = SPICE_GF_FULL;
-         }
-         else if (eclipseTypes.at(jj) == "Penumbra")
-         {
-            occType = SPICE_GF_PARTL;
-//            occType = partial.c_str();
-         }
-         else // Antumbra
-         {
-            occType = SPICE_GF_ANNULR;
-//            occType = annular.c_str();
-         }
-         #ifdef DEBUG_ECLIPSE_EVENTS
-            MessageInterface::ShowMessage("Inputs to gfoclt_c:\n");
-            MessageInterface::ShowMessage("  occType = %s\n", eclipseTypes.at(jj).c_str());
-            MessageInterface::ShowMessage("  front   = %s\n", occultingBodyNames.at(ii).c_str());
-            MessageInterface::ShowMessage("  fshape  = %s\n", theFShape.c_str());
-            MessageInterface::ShowMessage("  fframe  = %s\n", theFFrame.c_str());
-            MessageInterface::ShowMessage("  back    = %s\n", theBack.c_str());
-            MessageInterface::ShowMessage("  bshape  = %s\n", theBShape.c_str());
-            MessageInterface::ShowMessage("  bframe  = %s\n", theBFrame.c_str());
-            MessageInterface::ShowMessage("  abcorr  = %s\n", theAbCorr.c_str());
-            MessageInterface::ShowMessage("  obsrvr  = %s\n", theNAIFId.c_str());
-         #endif
-         gfoclt_c(occType, front, fshape, fframe, back, bshape, bframe, abcorr,
-                  obsrvr, step, &window, &result);
+         starts.clear();
+         ends.clear();
 
-//         // ****
-//            spice->TryBogusCall();
-//         // ****
-         if (failed_c())
-         {
-            ConstSpiceChar option[] = "LONG";
-            SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
-            SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
-            getmsg_c(option, numChar, err);
-            std::string errStr(err);
-            std::string errmsg = "Error calling gfoclt_c!!!  ";
-            errmsg += "Message received from CSPICE is: ";
-            errmsg += errStr + "\n";
-            MessageInterface::ShowMessage("----- error message = %s\n",
-                  errmsg.c_str());
-            reset_c();
-            throw EventException(errmsg);
-         }
+         em->GetOccultationIntervals(eclipseTypes.at(jj), theFront, theFShape, theFFrame,
+                                     theBack, theBShape, theBFrame, theAbCorr,
+                                     initialEp, finalEp, useEntireInterval, stepSize,
+                                     numEclipse, starts, ends);
          #ifdef DEBUG_ECLIPSE_EVENTS
             MessageInterface::ShowMessage("After gfoclt_c .....\n");
          #endif
-         Integer numEclipse = wncard_c(&result);
          #ifdef DEBUG_ECLIPSE_EVENTS
             MessageInterface::ShowMessage("After gfoclt_c:\n");
             MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
@@ -934,10 +824,8 @@ void EclipseLocator::FindEvents()
          // Create an event from the result
          for (Integer kk = 0; kk < numEclipse; kk++)
          {
-            SpiceDouble s, e;
-            wnfetd_c(&result, kk, &s, &e);
-            Real s1 = spice->SpiceTimeToA1(s);
-            Real e1 = spice->SpiceTimeToA1(e);
+            Real s1 = starts.at(kk);
+            Real e1 = ends.at(kk);
             EclipseEvent *newEvent = new EclipseEvent(s1, e1, eclipseTypes.at(jj), theFront);
             rawList->AddEvent(newEvent);
          }
@@ -983,6 +871,9 @@ void EclipseLocator::FindEvents()
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Events have been ordered\n");
    #endif
+
+   findStart = (rawList->GetEvent(0))->GetStart();
+   findStop  = (rawList->GetEvent(numEventsInTotal-1))->GetEnd();
 
    Integer currentIndex = 0;
    EclipseTotalEvent *currentTotal = NULL;

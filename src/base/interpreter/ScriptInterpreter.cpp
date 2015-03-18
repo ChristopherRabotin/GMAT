@@ -10,7 +10,6 @@
 //
 // Author: Waka Waktola
 // Created: 2006/08/25
-// Copyright: (c) 2006 NASA/GSFC. All rights reserved.
 //
 //------------------------------------------------------------------------------
 /**
@@ -44,7 +43,7 @@
 //#define DEBUG_SECTION_DELIMITER
 //#define DEBUG_SCRIPT_WRITING_COMMANDS
 //#define DBGLVL_SCRIPT_READING 1
-//#define DBGLVL_GMAT_FUNCTION 1
+//#define DBGLVL_GMAT_FUNCTION 2
 //#define DEBUG_COMMAND_MODE_TOGGLE
 //#define DEBUG_ENCODING_CHAR
 
@@ -248,16 +247,27 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    #endif
    
    #ifdef DEBUG_COMMAND_MODE_TOGGLE
-      MessageInterface::ShowMessage("Line %s set inCommandMode to true\n",
-            inCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   MessageInterface::ShowMessage
+      ("Line '%s' set inCommandMode to true if not in function\n",
+       inCmd ? inCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str() : "NULL");
    #endif
-
+   
    // Since this method is called from ScriptEvent or InterpretGmatFunction,
    // set command mode to true
    inFunctionMode = functionMode;
-   inCommandMode = true;
+   
+   // If not in function, set command mode to true (LOJ: 2014.12.10)
+   if (!inFunctionMode)
+      inCommandMode = true;
+   
+   #ifdef __OLD_FUNCTION__
    inRealCommandMode = true;
-   beginMissionSeqFound = true;
+   #else
+   inRealCommandMode = false;
+   #endif
+   
+   //beginMissionSeqFound = true; // LOJ: Why set to true? 2014.12.10
+   beginMissionSeqFound = false;
    functionDefined = false;
    ignoreRest = false;
    
@@ -447,7 +457,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
       ("======================================================================\n",
-       "ScriptInterpreter::InterpretGmatFunction()\n   filename = %s\n",
+       "ScriptInterpreter::InterpretGmatFunction(filename) entered\n   filename = %s\n",
        fileName.c_str());
    #endif
    
@@ -480,6 +490,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    
    // Now function file is ready to parse
    functionFilename = fileName;
+   beginMissionSeqFound = false;
    continueOnError = true;
    bool retval = false;
    std::ifstream funcFile(fileName.c_str());
@@ -565,15 +576,19 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
 //------------------------------------------------------------------------------
 GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
 {
+   #if DBGLVL_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InterpretGmatFunction(*function) entered, "
+       " function=<%p>\n", funct);
+   #endif
+   
    if (funct == NULL)
       return NULL;
    
    std::string fileName = funct->GetStringParameter("FunctionPath");
    
    #if DBGLVL_GMAT_FUNCTION
-   MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretGmatFunction() function=%p\n   "
-       "filename = %s\n", funct, fileName.c_str());
+   MessageInterface::ShowMessage("   FunctionPath = %s\n", fileName.c_str());
    #endif
    
    // Set current function
@@ -581,11 +596,11 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
    
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("   currentFunction set to <%p>\n", currentFunction);
+      ("   currentFunction set to <%p>\n   Returning InterpretGmatFunction(fileName)\n",
+       currentFunction);
    #endif
    
    return InterpretGmatFunction(fileName);
-   
 }
 
 
@@ -841,6 +856,8 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    initialized = false;
    Initialize();
    
+   
+   #ifdef __OLD_FUNCTION__
    if (inFunctionMode)
    {
       #ifdef DEBUG_COMMAND_MODE_TOGGLE
@@ -849,6 +866,8 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
       #endif
       inCommandMode = true;
    }
+   #endif
+   
    
    // Read header comment and first logical block.
    // If input command is NULL, this method is called from GUI to interpret
@@ -1146,8 +1165,10 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    {
    case Gmat::COMMENT_BLOCK:
       {
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage("   => currentBlockType is COMMENT_BLOCK\n");
+         #endif
          footerComment = currentBlock;
-         
          #ifdef DEBUG_PARSE_FOOTER
          MessageInterface::ShowMessage("footerComment=<<<%s>>>\n", footerComment.c_str());
          #endif
@@ -1157,12 +1178,18 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       }
    case Gmat::DEFINITION_BLOCK:
       {
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage("   => currentBlockType is DEFINITION_BLOCK\n");
+         #endif
          retval = ParseDefinitionBlock(chunks, inCmd, obj);
          logicalBlockCount++;
          break;
       }
    case Gmat::COMMAND_BLOCK:
       {
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage("   => currentBlockType is COMMAND_BLOCK\n");
+         #endif
          // if TextParser detected as function call
          if (theTextParser.IsFunctionCall())
          {
@@ -1242,7 +1269,8 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
       }
    case Gmat::ASSIGNMENT_BLOCK:
       {
-         #ifdef DEBUG_PARSE_FOOTER
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage("   => currentBlockType is ASSIGNMENT_BLOCK\n");
          MessageInterface::ShowMessage("   Now parsing assignment block\n");
          #endif
          retval = ParseAssignmentBlock(chunks, inCmd, obj);
@@ -1676,6 +1704,10 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
                                              GmatCommand *inCmd, GmatBase *obj)
 {
    #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::ParseDefinitionBlock() entered, inCmd=<%p><%s>, "
+       "inFunctionMode=%d\n", inCmd, inCmd ? inCmd->GetTypeName().c_str() : "NULL",
+       inFunctionMode);
    WriteStringArray("ParseDefinitionBlock()", "", chunks);
    #endif
    
@@ -1685,6 +1717,11 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
    
    Integer count = chunks.size();
    bool retval = true;
+   
+   // Set how new object should be managed (LOJ: 2014.12.09)
+   Integer manageObject = 1; // Add to configuration
+   if (inFunctionMode)
+      manageObject = 2; // Add to function object map
    
    // If object creation is not allowed in command mode
    #ifndef __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
@@ -1735,7 +1772,10 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       type = "PropSetup";
    
    // Handle creating objects in function mode
-   if (inFunctionMode)
+   // New function mode design: Create objects in script mode (LOJ: 2014.12.09)
+   bool createCommand = false;
+   //if (inFunctionMode)
+   if (createCommand)
    {
       std::string desc = chunks[1] + " " + chunks[2];
       obj = (GmatBase*)CreateCommand(chunks[0], desc, retval, inCmd);
@@ -1754,7 +1794,8 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
-         obj = CreateObject(type, names[i]);
+         //obj = CreateObject(type, names[i]);
+         obj = CreateObject(type, names[i], manageObject);
          
          if (obj == NULL)
          {
@@ -1787,6 +1828,13 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          obj->FinalizeCreation();
          
          SetComments(obj, preStr, inStr);
+         
+         // If creating insise a function, add it to function object map
+         if (currentFunction != NULL)
+         {
+            obj->SetIsLocal(true);
+            currentFunction->AddFunctionObject(obj);
+         }
       }
       
       // if not all objectes are created, return false
@@ -1831,7 +1879,7 @@ bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
          std::string chunkString;
          for (UnsignedInt i = 0; i < chunks.size(); ++i)
             chunkString = chunkString + chunks[i] + "  ";
-         MessageInterface::ShowMessage("Line chunks %s set inCommandMode to "
+         MessageInterface::ShowMessage("Line chunks '%s' set inCommandMode to "
                "true\n", chunkString.c_str());
       }
    #endif
@@ -2164,7 +2212,11 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
        "beginMissionSeqFound=%d\n", inCommandMode, inFunctionMode, beginMissionSeqFound);
    #endif
    
-   bool createAssignmentCommand = true;
+   // Set createAssignmentCommand to true if BeginMissionSequence found (LOJ: 2014.12.10)
+   //bool createAssignmentCommand = true;
+   bool createAssignmentCommand = false;
+   if (beginMissionSeqFound)
+      createAssignmentCommand = true;
    
    if (inCommandMode)
    {

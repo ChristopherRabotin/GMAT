@@ -150,6 +150,9 @@ std::string ContactLocator::GetParameterText(const Integer id) const
 {
    if (id >= EventLocatorParamCount && id < ContactLocatorParamCount)
       return PARAMETER_TEXT[id - EventLocatorParamCount];
+
+   if (id == SATNAME)  return "Target";
+
    return EventLocator::GetParameterText(id);
 }
 
@@ -172,8 +175,16 @@ Integer ContactLocator::GetParameterID(const std::string & str) const
       if (str == PARAMETER_TEXT[i - EventLocatorParamCount])
          return i;
    }
-
-   return EventLocator::GetParameterID(str);
+   if (str == "Target")
+      return SATNAME;
+   else if (str == "Spacecraft")
+   {
+      std::string errmsg = "\"Spacecraft\" not a valid field for a Contact Locator.  ";
+      errmsg += "Please use \"Target\".\n";
+      throw EventException(errmsg);
+   }
+   else
+      return EventLocator::GetParameterID(str);
 }
 
 

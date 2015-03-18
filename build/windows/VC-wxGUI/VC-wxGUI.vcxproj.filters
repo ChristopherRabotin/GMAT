@@ -1947,9 +1947,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.cpp">
-      <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
@@ -4089,9 +4086,6 @@
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.hpp">
-      <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp">

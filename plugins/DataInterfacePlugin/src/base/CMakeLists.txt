@@ -1,0 +1,58 @@
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+# CMAKE script file for GMAT DataInterface Plugin.
+# (Adapted from the CInterface plugin CMake script)
+# This file must be installed in the plugins/DataInterfacePlugin/src directory
+#
+# Author: Ravi Mathur
+#  
+# DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
+#
+
+MESSAGE("==============================")
+MESSAGE("GMAT DataInterface Plugin setup " ${VERSION}) 
+
+if(WIN32)
+	SET(PLUGINTARGET  "libDataInterface")
+else()
+	SET(PLUGINTARGET "DataInterface")
+endif()
+
+SET(TargetName ${PLUGINTARGET})
+
+# Add Preproccessor Definitions
+ADD_DEFINITIONS("-DDATAINTERFACE_EXPORTS")
+
+# ====================================================================
+# list of directories containing source/header files
+SET(PLUGIN_DIRS command datainterface datareader factory include plugin)
+
+# ====================================================================
+# source files
+SET(PLUGIN_SRCS
+    command/Set.cpp
+    datainterface/DataInterface.cpp
+    datainterface/FileInterface.cpp
+    datareader/DataReader.cpp
+    datareader/FileReader.cpp
+    datareader/TcopsVHFAscii.cpp
+    datareader/TcopsVHFData.cpp
+    factory/DataInterfaceCommandFactory.cpp
+    factory/DataInterfaceFactory.cpp
+    factory/ReaderFactory.cpp
+    plugin/GmatPluginFunctions.cpp
+)
+
+# ====================================================================
+# libraries
+if(WIN32)
+	LINK_LIBRARIES(libGmatBase)
+else()
+	LINK_LIBRARIES(GmatBase)
+endif()
+
+# ====================================================================
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)

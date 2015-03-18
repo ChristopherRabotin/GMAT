@@ -92,7 +92,8 @@ public:
    int  GetTickCount(bool isXAxis = true);
    void SetMinorTickCount(int count, bool isXAxis = true);
    int  GetMinorTickCount(bool isXAxis = true);
-      
+   void AlwaysDraw(bool tf);
+
 protected:
    /// borders
    int left, right, top, bottom;
@@ -181,6 +182,7 @@ protected:
    bool hasLegend;
    bool allowPlotOptions;
    bool initializeLegendLoc;
+   bool alwaysDraw;
 
    long zoomLeft, zoomTop, zoomWidth, zoomHeight;
    int  xLabelPrecision, yLabelPrecision;

@@ -219,8 +219,8 @@ PropSetup::PropSetup(const PropSetup &ps) :
    
    #ifdef DEBUG_PROPSETUP
    MessageInterface::ShowMessage
-      ("PropSetup::PropSetup(copy) exiting, Propagator=<%p><%s> '%s'\n   "
-       "ODEModel=<%p><%s> '%s'\n", mPropagator,
+      ("PropSetup::PropSetup(copy) exiting\n   Propagator=<%p><%s> '%s'\n   "
+       "   ODEModel=<%p><%s> '%s'\n", mPropagator,
        mPropagator ? mPropagator->GetTypeName().c_str() : "NULL",
        mPropagator ? mPropagator->GetName().c_str() : "NULL", mODEModel,
        mODEModel ? mODEModel->GetTypeName().c_str() : "NULL",
@@ -249,6 +249,8 @@ PropSetup& PropSetup::operator= (const PropSetup &ps)
       return *this;
    
    GmatBase::operator=(ps);
+   
+   ownedObjectCount = ps.ownedObjectCount;
    
    // PropSetup data
    mInitialized = false;
@@ -412,6 +414,12 @@ void PropSetup::SetPropagator(Propagator *propagator, bool fromGUI)
 
    if (mPropagator->UsesODEModel() == false)
       DeleteOwnedObject(ODE_MODEL, true);
+   
+   #ifdef DEBUG_PROPSETUP_SET
+   MessageInterface::ShowMessage
+      ("PropSetup::SetPropagator() this=<%p> '%s' leaving, mPropagator=<%p>, "
+       "propagator=<%p>\n", this, GetName().c_str(), mPropagator, propagator);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -427,9 +435,9 @@ void PropSetup::SetODEModel(ODEModel *odeModel)
 {
    #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage
-      ("PropSetup::SetODEModel() this=<%p> '%s' entered, mODEModel=<%p>, "
-       "odeModel=<%p> '%s'\n", this, GetName().c_str(), mODEModel, odeModel,
-       odeModel->GetName().c_str());
+      ("PropSetup::SetODEModel() this=<%p> '%s' entered, mODEModel=<%p>'%s', "
+       "odeModel=<%p>'%s'\n", this, GetName().c_str(), mODEModel, mODEModel->GetName().c_str(),
+       odeModel, odeModel->GetName().c_str());
    #endif
    
    DeleteOwnedObject(ODE_MODEL, true);
@@ -1591,7 +1599,7 @@ void PropSetup::ClonePropagator(Propagator *prop)
    {
       mPropagatorName = "";
       mPropagator = (Propagator *)(prop->Clone());
-      mPropagator->SetName(instanceName);
+      mPropagator->SetName(instanceName+"_Clone"); //LOJ: Appended _Clone to name (2014.12.16)
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
          (mPropagator, mPropagatorName, "PropSetup::ClonePropagator()",
@@ -1702,7 +1710,7 @@ void PropSetup::DeleteOwnedObject(Integer id, bool forceDelete)
       #ifdef DEBUG_PROPSETUP_DELETE
       MessageInterface::ShowMessage
          ("   mODEModel=<%p>, mODEModelName='%s'\n",
-          mODEModel, mODEModelName.c_str());
+          mODEModel, mODEModel ? mODEModel->GetName().c_str() : "NULL");
       #endif
       if (mODEModel != NULL)
       {
