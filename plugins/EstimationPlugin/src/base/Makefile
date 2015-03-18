@@ -95,7 +95,7 @@ HEADERS = -Iinclude \
           -Iadapter \
           -Icommand \
           -Idatafilter \
-          =Ierrormodel \
+          -Ierrormodel \
           -Iestimator \
           -Ievent \
           -Ifactory \
