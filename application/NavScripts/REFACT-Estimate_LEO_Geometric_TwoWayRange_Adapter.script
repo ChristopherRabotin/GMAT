@@ -24,6 +24,15 @@ GMAT Maui.Id = MauiID;
 GMAT Maui.X = -4450.8;
 GMAT Maui.Y =  2676.1;
 GMAT Maui.Z = -3691.38;
+Maui.ErrorModels = {EstMauiEM}
+
+Create ErrorModel EstMauiEM;
+EstMauiEM.Type = Range_KM;
+EstMauiEM.Trip = 2;
+EstMauiEM.NoiseSigma = 0.03;     % unit: Km
+EstMauiEM.NoiseModel = RandomConstant;
+EstMauiEM.Bias = 10.0;           % unit: Km      %All parameters are the same but Bias
+EstMauiEM.SolveFors = {Bias};
 
 %----- The data file
 Create TrackingFileSet simData

@@ -94,6 +94,8 @@ prep:
 HEADERS = -Iinclude \
           -Iadapter \
           -Icommand \
+          -Idatafilter \
+          -Ierrormodel \
           -Iestimator \
           -Ievent \
           -Ifactory \
@@ -162,6 +164,10 @@ CPP_OBJECTS = \
     adapter/DopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
+    datafilter/DataFilter.o \
+    datafilter/StatisticAcceptFilter.o \
+    datafilter/StatisticRejectFilter.o \
+    errormodel/ErrorModel.o \
     estimator/Estimator.o \
     estimator/BatchEstimator.o \
     estimator/BatchEstimatorInv.o \
@@ -177,7 +183,9 @@ CPP_OBJECTS = \
     event/EventManager.o \
     event/LightTimeCorrection.o \
     event/EstimationRootFinder.o \
+    factory/ErrorModelFactory.o \
     factory/EstimationCommandFactory.o \
+    factory/EstimationDataFilterFactory.o \
     factory/EstimatorFactory.o \
     factory/EventFactory.o \
     factory/EstimatorHardwareFactory.o \

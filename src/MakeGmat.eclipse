@@ -69,11 +69,11 @@ endif
 
 ifeq ($(BUILD_GUI_WITH_WX), 1)
 gui/$(PROGRAM):
-	cd base; make -f MakeBase.eclipse all
-	cd gui; make -f MakeGui.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
+	cd gui; make -f MakeGui.eclipse  -j $(BUILD_THREADS) all
 else
 gui/$(PROGRAM):
-	cd base; make -f MakeBase.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
 endif
 
 console/$(PROGRAM):
@@ -81,4 +81,4 @@ console/$(PROGRAM):
 	cd console; make -f MakeConsole.eclipse all
 
 $(LIBRARY):
-	cd base; make -f MakeBase.eclipse all
+	cd base; make -f MakeBase.eclipse -j $(BUILD_THREADS) all
