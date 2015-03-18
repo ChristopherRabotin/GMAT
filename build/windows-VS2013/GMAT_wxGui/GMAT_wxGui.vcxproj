@@ -126,7 +126,7 @@
     <TargetName>GMAT_D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
     <OutDir>..\..\..\application\bin\</OutDir>
     <TargetName>GMAT</TargetName>
   </PropertyGroup>
