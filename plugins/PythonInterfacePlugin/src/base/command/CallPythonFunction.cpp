@@ -131,6 +131,7 @@ bool CallPythonFunction::SetStringParameter(const Integer id,
    if (id == FUNCTIONNAME)
    {
       functionName = value;
+      mFunctionName = "Python." + moduleName + "." + functionName;
       return true;
    }
 
