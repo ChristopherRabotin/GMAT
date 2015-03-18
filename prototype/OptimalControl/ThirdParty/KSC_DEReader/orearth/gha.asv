@@ -1,5 +1,0 @@
-function g = gha(jd,deps,dpsi)
-
-% GHA Calculate Greenwich Hour Angle
-%     GHA(JD,DEPS,DPSI) returns the Greenwich
-%     hour angle
