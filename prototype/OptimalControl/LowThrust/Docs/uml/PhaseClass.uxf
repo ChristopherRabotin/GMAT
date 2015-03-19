@@ -5,217 +5,160 @@
     <id>Relation</id>
     <coordinates>
       <x>640</x>
-      <y>160</y>
-      <w>300</w>
-      <h>70</h>
+      <y>150</y>
+      <w>140</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;280.0;50.0</additional_attributes>
+    <additional_attributes>10.0;10.0;120.0;60.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>390</x>
-      <y>160</y>
-      <w>280</w>
-      <h>70</h>
+      <x>580</x>
+      <y>150</y>
+      <w>90</w>
+      <h>80</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>260.0;10.0;10.0;50.0</additional_attributes>
+    <additional_attributes>70.0;10.0;10.0;60.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>270</x>
-      <y>390</y>
-      <w>130</w>
-      <h>90</h>
+      <x>420</x>
+      <y>320</y>
+      <w>140</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>110.0;10.0;10.0;70.0</additional_attributes>
+    <additional_attributes>120.0;10.0;10.0;80.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>370</x>
-      <y>390</y>
-      <w>120</w>
-      <h>90</h>
+      <x>530</x>
+      <y>320</y>
+      <w>90</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;100.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;70.0;80.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>550</x>
-      <y>20</y>
-      <w>210</w>
-      <h>150</h>
+      <x>580</x>
+      <y>60</y>
+      <w>150</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>/Phase/
 --
--id: Long
-_-ClassAttribute: Long_
---
-#Operation(i: int): int
-/+AbstractOperation()/
---
-Responsibilities
--- Resp1
-*-- Resp2*</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>870</x>
-      <y>70</y>
-      <w>100</w>
-      <h>30</h>
-    </coordinates>
-    <panel_attributes>/AbstractClass/
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>280</x>
+      <x>470</x>
       <y>210</y>
-      <w>210</w>
-      <h>190</h>
+      <w>140</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>/Collocation/
 --
--id: Long
-~ privVaraiber:intPrivate
---
-#Operation(i: int): int
-/+AbstractOperation()/
---
-Responsibilities
--- Resp1
-*-- Resp2*</panel_attributes>
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>810</x>
+      <x>690</x>
       <y>210</y>
-      <w>210</w>
-      <h>190</h>
+      <w>140</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>/Shooting/
 --
--id: Long
-_-ClassAttribute: Long_
---
-#Operation(i: int): int
-/+AbstractOperation()/
---
-Responsibilities
--- Resp1
-*-- Resp2*</panel_attributes>
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>160</x>
-      <y>460</y>
-      <w>210</w>
-      <h>190</h>
+      <x>360</x>
+      <y>400</y>
+      <w>140</w>
+      <h>110</h>
     </coordinates>
     <panel_attributes>/Radau/
 --
--id: Long
-_-ClassAttribute: Long_
---
-#Operation(i: int): int
-/+AbstractOperation()/
---
-Responsibilities
--- Resp1
-*-- Resp2*</panel_attributes>
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>390</x>
-      <y>460</y>
-      <w>210</w>
-      <h>190</h>
+      <x>520</x>
+      <y>400</y>
+      <w>140</w>
+      <h>110</h>
     </coordinates>
     <panel_attributes>/HermiteSimpson/
 --
--id: Long
-_-ClassAttribute: Long_
---
-#Operation(i: int): int
-/+AbstractOperation()/
---
-Responsibilities
--- Resp1
-*-- Resp2*</panel_attributes>
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>940</x>
-      <y>460</y>
-      <w>210</w>
-      <h>190</h>
+      <x>830</x>
+      <y>400</y>
+      <w>140</w>
+      <h>110</h>
     </coordinates>
     <panel_attributes>ParallelShooting
 --
 
---
 
---
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>700</x>
-      <y>460</y>
-      <w>210</w>
-      <h>190</h>
+      <x>680</x>
+      <y>400</y>
+      <w>140</w>
+      <h>110</h>
     </coordinates>
     <panel_attributes>MultipleShooting
 --
 
---
-
---
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>910</x>
-      <y>390</y>
+      <x>760</x>
+      <y>320</y>
       <w>160</w>
-      <h>90</h>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;140.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;140.0;80.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>800</x>
-      <y>390</y>
-      <w>140</w>
-      <h>90</h>
+      <x>730</x>
+      <y>320</y>
+      <w>50</w>
+      <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>120.0;10.0;10.0;70.0</additional_attributes>
+    <additional_attributes>30.0;10.0;10.0;80.0</additional_attributes>
   </element>
 </diagram>
