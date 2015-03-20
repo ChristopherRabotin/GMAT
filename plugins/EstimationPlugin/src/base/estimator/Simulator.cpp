@@ -90,7 +90,7 @@ Simulator::Simulator(const std::string& name) :
 //   currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
    epochFormat         ("TAIModJulian"),
    initialEpoch        ("21545"),
-   finalEpoch          ("21545"),
+   finalEpoch          ("21546"),          // ("21545"),  It has 1 day time interval to simulate data
    simulationStep      (60.0),
    locatingEvent       (false),
    timeStep            (60.0),
@@ -824,9 +824,14 @@ bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 {
+   static StringArray typeList;
+   typeList.clear();
 
    if (id == EPOCH_FORMAT)
-      return TimeConverterUtil::GetListOfTimeSystemTypes();
+   {
+      typeList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      return typeList;
+   }
 
    return Solver::GetPropertyEnumStrings(id);
 }
@@ -941,7 +946,7 @@ bool Simulator::SetRefObjectName(const Gmat::ObjectType type,
 //-----------------------------------------------------------------------------
 const ObjectTypeArray & Simulator::GetRefObjectTypeArray()
 {
-   ObjectTypeArray objTypes = Solver::GetRefObjectTypeArray();         // made changes by TUAN NGUYEN
+   static ObjectTypeArray objTypes = Solver::GetRefObjectTypeArray();         // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::PROP_SETUP);                               // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::MEASUREMENT_MODEL);                        // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::DATA_FILTER);                              // made changes by TUAN NGUYEN
