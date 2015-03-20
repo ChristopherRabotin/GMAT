@@ -113,6 +113,13 @@ public:
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
 
+   virtual Real        GetRealParameter(const Integer id,
+                                        const Integer index) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value,
+                                        const Integer index);
+
+
    virtual bool SetStringParameter(const Integer id,
                                           const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
