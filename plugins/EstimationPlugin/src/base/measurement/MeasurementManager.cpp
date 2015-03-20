@@ -23,6 +23,7 @@
 #include "MeasurementException.hpp"
 #include "GmatConstants.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <sstream>            // To build DataStream for a TrackingFileSet
 
 #include "DataFileAdapter.hpp"
@@ -327,7 +328,29 @@ bool MeasurementManager::Initialize()
 
          // 3.3.3 Set data filters to DataFile object
          for (UnsignedInt j = 0; j < dataFilterObjects.size(); ++j)
-            newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]);
+         {
+            // data filter is only set to data file if and only if datafilter.Filenames parameter 
+            // is an empty list or contains the name of data file.
+            StringArray nameList = dataFilterObjects[j]->GetStringArrayParameter("Filenames");
+
+            bool setfilter = false;
+            if (nameList.size() == 0)
+               setfilter = true;
+            else
+            {
+               for (UnsignedInt q = 0; q < nameList.size(); ++q)
+               {
+                  if (GmatStringUtil::ToUpper(nameList[q]) == GmatStringUtil::ToUpper(filenames[k]))
+                  {
+                     setfilter = true;
+                     break;
+                  }
+               }
+            }
+
+            if (setfilter)
+               newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]);
+         }
          
       }// for k loop
       
@@ -893,6 +916,152 @@ UnsignedInt MeasurementManager::LoadObservations()
       DataFileAdapter dfa;
    #endif
 
+   UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num;
+   filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = 0;
+
+   observations.clear();
+
+   std::vector<UnsignedInt> numRec;
+   std::vector<UnsignedInt> count;
+   std::vector<ObservationData*> dataBuffer;
+   ObservationData* odPointer;
+
+   // MessageInterface::ShowMessage("Hi there 1: streamList.size() = %d\n", streamList.size());
+   for (UnsignedInt i = 0; i < streamList.size(); ++i)
+   {
+      odPointer = streamList[i]->ReadObservation();
+      dataBuffer.push_back(odPointer);
+
+      if (odPointer == NULL)
+         numRec.push_back(0);
+      else
+         numRec.push_back(1);
+
+      count.push_back(0);
+   }
+
+   // MessageInterface::ShowMessage("Hi there 2\n");
+   ObservationData od;
+   while (true)
+   {
+      //MessageInterface::ShowMessage("Hi there 3.1\n");
+      // 1. get a data record in data buffer with smallest value of epoch
+      UnsignedInt minIndex = dataBuffer.size();     // point to the outside of data buffer
+      for (UnsignedInt i = 0; i < dataBuffer.size(); ++i)
+      {
+         if (dataBuffer[i] == NULL)
+            continue;
+
+         if (minIndex == dataBuffer.size())
+            minIndex = i;
+         else
+         {
+            if (dataBuffer[i]->epoch < dataBuffer[minIndex]->epoch)
+               minIndex = i;
+         }
+      }
+
+      //MessageInterface::ShowMessage("Hi there 3.2\n");
+      // 2. if dada buffer contains all NULL data record (that means all streams at EOF), then exit while loop
+      if (minIndex == dataBuffer.size())
+         break;
+
+      //MessageInterface::ShowMessage("Hi there 3.3\n");
+      // 3. Filter the data record do it for all filters
+      Integer rejectedReason = 0;
+      ObservationData* obsData = dataBuffer[minIndex];
+      // Note that: this observation data is belong to data file: streamList[minIndex]. Therefor, it needs to use filters defined in that data file object
+      ObservationData* selectedData = streamList[minIndex]->FilteringData(obsData, rejectedReason);
+
+      //MessageInterface::ShowMessage("Hi there 3.4\n");
+      // 4. if it passes all filters then add it to observations
+      if (selectedData != NULL)
+      {
+         od = *selectedData;
+         observations.push_back(od);
+         count[minIndex] = count[minIndex] + 1;
+      }
+
+      //MessageInterface::ShowMessage("Hi there 3.5\n");
+      // 5. count throw recods based on rejectedReason
+      switch (rejectedReason)
+      {
+         case 1:
+            ++filter1Num; 
+            break;
+         case 2:
+            ++filter2Num; 
+            break;
+         case 3:
+            ++filter3Num; 
+            break;
+         case 4:
+            ++filter4Num; 
+            break;
+         case 5:
+            ++filter5Num; 
+            break;
+         case 6:
+            ++filter6Num; 
+            break;
+         case 7:
+            ++filter7Num; 
+            break;
+      }
+
+      //MessageInterface::ShowMessage("Hi there 3.6\n");
+      // 6. Read data record from streamList[minIndex] to fill data buffer if the stream is not EOF
+      if (dataBuffer[minIndex] != NULL)
+      {
+         dataBuffer[minIndex] = streamList[minIndex]->ReadObservation();
+         if (dataBuffer[minIndex] != NULL)
+            numRec[minIndex] = numRec[minIndex] + 1;        // count up number of read records if it really has one record read from file
+      }
+
+   }
+
+   // 7. Display all statistic of data records
+   MessageInterface::ShowMessage("Number of thown records due to:\n");
+   MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter3Num);
+   MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter4Num);
+   MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter5Num);
+   MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter1Num);
+   MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter2Num);
+   MessageInterface::ShowMessage("      .Selected observers                     : %d\n", filter6Num);
+   MessageInterface::ShowMessage("      .Selected data types                    : %d\n", filter7Num);
+   for (UnsignedInt i = 0; i < streamList.size(); ++i)
+      MessageInterface::ShowMessage("Data file '%s' has %d records. In which %d records are used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec[i], count[i]);
+
+   #ifdef DEBUG_LOAD_OBSERVATIONS
+      for (UnsignedInt i = 0; i < observations.size(); ++i)
+         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf\n", observations[i].dataFormat.c_str(), observations[i].epoch, observations[i].typeName.c_str(), observations[i].type, observations[i].participantIDs[0].c_str(), observations[i].participantIDs[1].c_str(), observations[i].value[0]);
+   #endif
+
+   // Set the current data pointer to the first observation value
+   currentObs = observations.begin();
+   MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
+
+   #ifdef DEBUG_LOAD_OBSERVATIONS
+     MessageInterface::ShowMessage(
+         "Exit MeasurementManager::LoadObservations() method\n");
+   #endif
+
+   return observations.size(); 
+}
+
+
+
+UnsignedInt MeasurementManager::LoadObservationsOld()
+{
+   #ifdef DEBUG_LOAD_OBSERVATIONS
+      MessageInterface::ShowMessage(
+         "Entered MeasurementManager::LoadObservations() method\n");
+   #endif
+
+   #ifdef USE_DATAFILE_PLUGINS
+      DataFileAdapter dfa;
+   #endif
+
    std::vector<ObservationData>     obsTable;
    std::vector<UnsignedInt>         startIndexes;
    std::vector<UnsignedInt>         endIndexes;
@@ -939,6 +1108,8 @@ UnsignedInt MeasurementManager::LoadObservations()
 
          if (streamList[i]->IsOpen())
          {
+            UnsignedInt filter0Num;                                                                           // made changes by TUAN NGUYEN
+            filter0Num = 0;                                                                                   // made changes by TUAN NGUYEN
             UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, count, numRec;
             filter1Num = filter2Num = filter3Num = filter4Num = filter5Num =  count = numRec = 0;
             Real acc = 1.0;
@@ -948,16 +1119,23 @@ UnsignedInt MeasurementManager::LoadObservations()
 
             Real thinningRatio = streamList[i]->GetRealParameter("DataThinningRatio"); 
             StringArray selectedStations = streamList[i]->GetStringArrayParameter("SelectedStationIDs"); 
+            bool EndofFile = false;                                                                           // made changes by TUAN NGUYEN
             while (true)
             {
-               od = streamList[i]->ReadObservation();
+               od = streamList[i]->ReadObservation();                                                         // made changes by TUAN NGUYEN
                ++numRec;
-
+               
                // End of file
-               if (od == NULL)
+               if (EndofFile)     // if (od == NULL)                                                          // made changes by TUAN NGUYEN
                {
                   --numRec;
                   break;
+               }
+
+               if (od == NULL)                                                                               // made changes by TUAN NGUYEN
+               {                                                                                             // made changes by TUAN NGUYEN
+                  ++filter0Num;                                                                              // made changes by TUAN NGUYEN
+                  continue;                                                                                  // made changes by TUAN NGUYEN
                }
 
                #ifdef DUMP_OBSDATA
@@ -1012,7 +1190,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                   epoch1 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("StartEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
                   epoch2 = TimeConverterUtil::Convert(streamList[i]->GetRealParameter("EndEpoch"), TimeConverterUtil::A1MJD, od->epochSystem);
                }
-
+               
                // Data thinning filter
                acc = acc + thinningRatio;
                if (acc < 1.0)
@@ -1025,7 +1203,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                }
                else
                   acc = acc -1.0;
-
+               
                // Time span filter
                if ((od->epoch < epoch1)||(od->epoch > epoch2))
                {
@@ -1035,7 +1213,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                   ++filter5Num;
                   continue;
                }
-
+               
                // Invalid measurement value filter
                if (od->value.size() > 0)
                   if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
@@ -1047,6 +1225,7 @@ UnsignedInt MeasurementManager::LoadObservations()
                      continue;
                   }
 
+               
                // Duplication or time order filter
                if (od_old.epoch >= (od->epoch + 2.0e-12))
                {
@@ -1098,6 +1277,7 @@ UnsignedInt MeasurementManager::LoadObservations()
             }// endwhile(true)   
 
             MessageInterface::ShowMessage("Number of thown records in '%s' due to:\n", streamList[i]->GetStringParameter("Filename").c_str());
+            MessageInterface::ShowMessage("      .Filter by Satistic data filters        : %d\n", filter0Num);                                       // made changes by TUAN NGUYEN
             MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter1Num);
             MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter2Num);
             MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter3Num);

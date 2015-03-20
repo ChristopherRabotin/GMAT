@@ -92,19 +92,21 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name = "");
 
-   virtual bool         SetDataFilter(DataFilter *filter);                 // made changes by TUAN NGUYEN
+   virtual bool         SetDataFilter(DataFilter *filter);                                     // made changes by TUAN NGUYEN
 
    virtual bool         SetStream(ObType *thisStream);
    virtual bool         OpenStream(bool simulate = false);
    virtual bool         IsOpen();
    virtual void         WriteMeasurement(MeasurementData* theMeas);
    virtual ObservationData*
-                        ReadObservation();
+                        ReadObservation();                                                    // made changes by TUAN NGUYEN
 ///// TBD: Determine if there is a more generic way to add these
    virtual RampTableData* 
                         ReadRampTableData();
 
    virtual bool         CloseStream();
+
+   ObservationData*     FilteringData(ObservationData* dataObject, Integer& rejectedReason);   // made changes by TUAN NGUYEN
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -119,8 +121,8 @@ protected:
    /// Text description of the observation data type
    std::string    obsType;
 
-   /// This section is set for new design data filter         // made changes by TUAN NGUYEN
-   std::vector<DataFilter*>  filterList;                      // made changes by TUAN NGUYEN
+   /// This section is set for new design data filter                                         // made changes by TUAN NGUYEN
+   std::vector<DataFilter*>  filterList;                                                      // made changes by TUAN NGUYEN
 
    /// This section is set for old design data filter
    /// Data thinning ratio
@@ -160,7 +162,16 @@ protected:
                 PARAMETER_TYPE[DataFileParamCount - GmatBaseParamCount];
 
 private:
-   Real ConvertToRealEpoch(const std::string &theEpoch, const std::string &theFormat);
+   Real             ConvertToRealEpoch(const std::string &theEpoch, const std::string &theFormat);
+
+   ObservationData* FilteringDataForNewSyntax(ObservationData* dataObject, Integer& rejectedReason);  // made changes by TUAN NGUYEN
+   ObservationData* FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason);  // made changes by TUAN NGUYEN
+
+   ObservationData  od_old;                                                                           // made changes by TUAN NGUYEN
+   Real             acc;                                                                              // made changes by TUAN NGUYEN
+   Real             epoch1;                                                                           // made changes by TUAN NGUYEN
+   Real             epoch2;                                                                           // made changes by TUAN NGUYEN
+
 };
 
 #endif /* DataFile_hpp */

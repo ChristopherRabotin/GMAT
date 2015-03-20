@@ -95,6 +95,7 @@ public:
 
    // Observation reader methods needed for estimation
    UnsignedInt             LoadObservations();
+   UnsignedInt             LoadObservationsOld();             // made changes by TUAN NGUYEN
    
 ///// TBD: Do we want something more generic here?
    // Ramp tables reader method needed for simulator

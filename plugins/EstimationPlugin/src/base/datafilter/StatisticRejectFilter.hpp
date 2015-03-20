@@ -49,7 +49,7 @@ public:
 
 
    virtual ObservationData* 
-                        FilteringData(ObservationData* dataObject);
+                        FilteringData(ObservationData* dataObject, Integer& rejectedReason);
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES

@@ -1429,7 +1429,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("Adding data filter %s\n", name.c_str());
          #endif
-            dataFilters.push_back(obj->Clone());
+            dataFilters.push_back(obj->Clone());                                     // It needs to clone in order to avoid error when deleting dataFilters in destructor
       }
    }
    else

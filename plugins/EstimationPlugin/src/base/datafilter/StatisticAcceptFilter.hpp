@@ -47,27 +47,15 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
-   virtual std::string  GetStringParameter(const Integer id,
-                                           const Integer index) const;
-   virtual bool         SetStringParameter(const Integer id,
-                                           const std::string &value,
-                                           const Integer index);
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-   virtual std::string  GetStringParameter(const std::string &label,
-                                           const Integer index) const;
-   virtual bool         SetStringParameter(const std::string &label,
-                                           const std::string &value,
-                                           const Integer index);
-
-   virtual const StringArray&
-                        GetStringArrayParameter(const Integer id) const;
-   virtual const StringArray&
-                        GetStringArrayParameter(const std::string &label) const;
 
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
@@ -76,11 +64,10 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
 
-
-
    virtual ObservationData* 
-                        FilteringData(ObservationData* dataObject);
-//   virtual bool         ValidateInput();
+                        FilteringData(ObservationData* dataObject, Integer& rejectedReason);
+   void                 IncreasingRecordCounter();
+
    StringArray          GetAllAvailableThinModes();
 
    /// @todo: Check this
@@ -88,20 +75,16 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   /// A list of file names specifies data files on which the filter to be applied 
-   StringArray fileNames;
    /// Data thinning
    std::string thinMode;
    Integer     thinningFrequency;
-
    /// Record count;
-   Integer recCount;
+   Integer     recCount;
 
    /// Class parameter ID enumeration
    enum
    {
-      FILENAMES = DataFilterParamCount,
-      THIN_MODE,
+      THIN_MODE = DataFilterParamCount,
       THINNING_FREQUENCY,
       StatisticAcceptFilterParamCount
    };
@@ -113,8 +96,6 @@ protected:
    /// Types of the StatisticAcceptFilter parameters
    static const Gmat::ParameterType
                 PARAMETER_TYPE[StatisticAcceptFilterParamCount - DataFilterParamCount];
-
-
 };
 
 #endif /* StatisticAcceptFilter_hpp */

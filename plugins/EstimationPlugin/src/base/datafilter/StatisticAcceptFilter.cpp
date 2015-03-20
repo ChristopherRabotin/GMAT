@@ -29,6 +29,7 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_DATA_FILTER
 
 //------------------------------------------------------------------------------
 // static data
@@ -36,14 +37,12 @@
 
 const std::string StatisticAcceptFilter::PARAMETER_TEXT[] =
 {
-   "Filenames",
    "ThinMode",
    "ThinningFrequency",
 };
 
 const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
 {
-   Gmat::STRINGARRAY_TYPE,			// FILE_NAMES
    Gmat::STRING_TYPE,			   // THIN_MODE
    Gmat::INTEGER_TYPE,           // THINNING_FREQUENCY
 };
@@ -62,7 +61,8 @@ const Gmat::ParameterType StatisticAcceptFilter::PARAMETER_TYPE[] =
 StatisticAcceptFilter::StatisticAcceptFilter(const std::string name) :
    DataFilter        (name),
    thinMode          ("F"),
-   thinningFrequency (1)
+   thinningFrequency (1),
+   recCount          (0)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticAcceptFilter default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -98,9 +98,9 @@ StatisticAcceptFilter::~StatisticAcceptFilter()
 //------------------------------------------------------------------------------
 StatisticAcceptFilter::StatisticAcceptFilter(const StatisticAcceptFilter& saf) :
    DataFilter            (saf),
-   fileNames             (saf.fileNames),
    thinMode              (saf.thinMode),
-   thinningFrequency     (saf.thinningFrequency)
+   thinningFrequency     (saf.thinningFrequency),
+   recCount              (0)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticAcceptFilter copy constructor from <%s,%p>  to  <%s,%p>\n", saf.GetName().c_str(), &saf, GetName().c_str(), this);
@@ -130,9 +130,9 @@ StatisticAcceptFilter& StatisticAcceptFilter::operator=(const StatisticAcceptFil
    {
       DataFilter::operator=(saf);
 
-      fileNames         = saf.fileNames;
       thinMode          = saf.thinMode;
       thinningFrequency = saf.thinningFrequency;
+      recCount          = 0;
    }
 
    return *this;
@@ -174,6 +174,7 @@ bool StatisticAcceptFilter::Initialize()
    {
       //@todo: Initialize code is here
 
+      recCount = 0;
       isInitialized = retval;
    }
 
@@ -283,6 +284,21 @@ std::string StatisticAcceptFilter::GetParameterTypeString(const Integer id) cons
 }
 
 
+bool StatisticAcceptFilter::IsParameterReadOnly(const Integer id) const
+{
+   if (id == THIN_MODE)
+      return true;
+
+   return DataFilter::IsParameterReadOnly(id);
+}
+
+
+bool StatisticAcceptFilter::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -368,152 +384,6 @@ bool StatisticAcceptFilter::SetStringParameter(const std::string &label,
 }
 
 
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const Integer id, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves a string property from a StringArray object
- *
- * @param id      The ID of the property
- * @param index   The index of the property of StringArray type 
- *
- * @return The property value
- */
-//------------------------------------------------------------------------------
-std::string StatisticAcceptFilter::GetStringParameter(const Integer id, const Integer index) const
-{
-   if (id == FILENAMES)
-   {
-      if ((index < 0)||(index >= (Integer)fileNames.size()))
-      {
-         std::stringstream ss;
-         ss << "Error: file name's index (" << index << ") is out of bound.\n";
-         throw GmatBaseException(ss.str());
-      }
-
-      return fileNames[index];
-   }
-
-   return DataFilter::GetStringParameter(id, index);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetStringParameter(const Integer id, const std::string &value, const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Set value to a property of StringArray type
- *
- * @param id      The ID of the property
- * @param index   The index of the property of StringArray type 
- *
- * @return true if the setting successes and false otherwise
- */
-//------------------------------------------------------------------------------
-bool StatisticAcceptFilter::SetStringParameter(const Integer id, const std::string &value,
-                                           const Integer index)
-{
-   if (id == FILENAMES)
-   {
-      if ((0 <= index)&&(index < (Integer)fileNames.size()))
-      {
-         fileNames[index] = value;
-         return true;
-      }
-      else
-      {
-         if (index == fileNames.size())
-         {
-            fileNames.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: file name's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
-      }
-   }
-
-   return DataFilter::SetStringParameter(id, value, index);
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label, const Integer index) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves a string property from a StringArray object
- *
- * @param labe    The name of the property
- * @param index   The index of the property of StringArray type 
- *
- * @return The property value
- */
-//------------------------------------------------------------------------------
-std::string StatisticAcceptFilter::GetStringParameter(const std::string &label, const Integer index) const
-{
-   return GetStringParameter(GetParameterID(label), index);
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetStringParameter(const std::string &label, const std::string &value, const Integer index)
-//------------------------------------------------------------------------------
-/**
- * Set value to a property of StringArray type
- *
- * @param label   The name of the property
- * @param index   The index of the property of StringArray type 
- *
- * @return true if the setting successes and false otherwise
- */
-//------------------------------------------------------------------------------
-bool StatisticAcceptFilter::SetStringParameter(const std::string &label, const std::string &value,
-                                           const Integer index)
-{
-   return SetStringParameter(GetParameterID(label), value, index);
-}
-
-
-//------------------------------------------------------------------------------
-// const std::string GetStringArrayParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves a StringArray property
- *
- * @param id The ID of the property
- *
- * @return The property value
- */
-//------------------------------------------------------------------------------
-const StringArray& StatisticAcceptFilter::GetStringArrayParameter(const Integer id) const
-{
-   if (id == FILENAMES)
-      return fileNames;
-
-   return DataFilter::GetStringArrayParameter(id);
-}
-
-
-//------------------------------------------------------------------------------
-// const std::string GetStringArrayParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves a StringArray property
- *
- * @param label   The name of the property
- *
- * @return The property value
- */
-//------------------------------------------------------------------------------
-const StringArray& StatisticAcceptFilter::GetStringArrayParameter(const std::string &label) const
-{
-   return GetStringArrayParameter(GetParameterID(label));
-}
-
-
 Integer StatisticAcceptFilter::GetIntegerParameter(const Integer id) const
 {
    if (id == THINNING_FREQUENCY)
@@ -556,22 +426,42 @@ Integer StatisticAcceptFilter::SetIntegerParameter(const std::string &label, con
 }
 
 
-ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObject)
+ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
-   if (DataFilter::FilteringData(dataObject) == NULL)
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
+#endif
+   Integer reject = 0; 
+   if (DataFilter::FilteringData(dataObject, reject) == NULL)
+   {
+      rejectedReason = reject;
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1   return NULL\n", dataObject, rejectedReason);
+#endif
       return NULL;
+   }
 
    // 1. Data thin verify:
    if (thinMode == "F")
    {
-      ++recCount;
-      if (recCount == thinningFrequency)
+      //++recCount;                        // record count will be done for all accept filters not for only one 
+      if (recCount == (thinningFrequency-1))
       {
-         recCount = 0;
+         // recCount = 0;
+         rejectedReason = 0;
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3  return <%p>\n", dataObject, rejectedReason, dataObject);
+#endif
          return dataObject;
       }
       else
+      {
+         rejectedReason = 1;    // 1: reject due to thinning ratio
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticAcceptFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2  return NULL   recCount = %d   thinningFrequency = %d\n", dataObject, rejectedReason, recCount, thinningFrequency);
+#endif
          return NULL;
+      }
    }
    else
       throw MeasurementException("Error: " + GetName() + ".ThinMode parameter has an invalid value ('" + thinMode + "'.\n");
@@ -584,4 +474,12 @@ StringArray StatisticAcceptFilter::GetAllAvailableThinModes()
    nameList.push_back("F");
 
    return nameList;
+}
+
+
+void StatisticAcceptFilter::IncreasingRecordCounter()
+{
+   ++recCount;
+   if (recCount == thinningFrequency)
+      recCount = 0;
 }

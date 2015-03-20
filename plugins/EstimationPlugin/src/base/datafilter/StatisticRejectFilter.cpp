@@ -29,6 +29,7 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_DATA_FILTER
 
 //------------------------------------------------------------------------------
 // static data
@@ -270,15 +271,27 @@ std::string StatisticRejectFilter::GetParameterTypeString(const Integer id) cons
 }
 
 
-ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObject)
+ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
-   if (DataFilter::FilteringData(dataObject) == NULL)
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticRejectFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
+#endif
+   Integer reject = 0;
+   if (DataFilter::FilteringData(dataObject, reject) == NULL)
    {
+      rejectedReason = reject;
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticRejectFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
+#endif
       return dataObject;
 
       //@todo: Add code to filter additional data here
    }
 
+   rejectedReason = reject;
+#ifdef DEBUG_DATA_FILTER
+   MessageInterface::ShowMessage("StatisticRejectFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
+#endif
    return NULL;
 }
    

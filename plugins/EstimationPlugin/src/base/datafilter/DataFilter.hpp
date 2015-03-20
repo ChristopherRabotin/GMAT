@@ -72,7 +72,7 @@ public:
 
    /// Filter observed data
    virtual ObservationData* 
-                        FilteringData(ObservationData* dataObject);
+                        FilteringData(ObservationData* dataObject, Integer& rejectedReason);
    virtual bool         ValidateInput();
 
    /// @todo: Check this
@@ -80,6 +80,8 @@ public:
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
+   /// A list of file names specifies data files on which the filter to be applied 
+   StringArray fileNames;
    /// A name list of observed objects
    StringArray observers;
    /// A name list of trackers
@@ -96,10 +98,15 @@ protected:
    /// signal path
    StringArray strands;
 
+   /// Flag indicate that ValidateInput() function was run
+   bool isChecked;
+
+
    /// Class parameter ID enumeration
    enum
    {
-      OBSERVED_OBJECTS = GmatBaseParamCount,
+      FILENAMES = GmatBaseParamCount,
+      OBSERVED_OBJECTS,
       TRACKERS,
       DATA_TYPES,
       EPOCH_FORMAT,

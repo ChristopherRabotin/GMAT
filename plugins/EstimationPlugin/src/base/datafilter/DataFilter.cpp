@@ -31,13 +31,14 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
-#define DEBUG_FILTER
+//#define DEBUG_FILTER
 
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
 const std::string DataFilter::PARAMETER_TEXT[] =
 {
+   "Filenames",
    "ObservedObjects",
    "Trackers",
    "DataTypes",
@@ -49,7 +50,8 @@ const std::string DataFilter::PARAMETER_TEXT[] =
 
 const Gmat::ParameterType DataFilter::PARAMETER_TYPE[] =
 {
-   Gmat::STRINGARRAY_TYPE,			// OBSERVED_OBJCETS
+   Gmat::STRINGARRAY_TYPE,			// FILENAMES
+   Gmat::STRINGARRAY_TYPE,			// OBSERVED_OBJECTS
    Gmat::STRINGARRAY_TYPE,       // TRACKERS
    Gmat::STRINGARRAY_TYPE,       // DATA_TYPES
    Gmat::STRING_TYPE,			   // EPOCH_FORMAT
@@ -73,7 +75,8 @@ DataFilter::DataFilter(const std::string name) :
    GmatBase          (Gmat::DATA_FILTER, "DataFilter", name),
    epochFormat       ("TAIModJulian"),
    epochStart        (GmatTimeConstants::MJD_OF_J2000),
-   epochEnd          (GmatTimeConstants::MJD_OF_J2000 + 1)
+   epochEnd          (GmatTimeConstants::MJD_OF_J2000 + 1),
+   isChecked         (false)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFilter default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -116,6 +119,7 @@ DataFilter::~DataFilter()
 //------------------------------------------------------------------------------
 DataFilter::DataFilter(const DataFilter& saf) :
    GmatBase              (saf),
+   fileNames             (saf.fileNames),
    observers             (saf.observers),
    trackers              (saf.trackers),
    dataTypes             (saf.dataTypes),
@@ -124,7 +128,8 @@ DataFilter::DataFilter(const DataFilter& saf) :
    finalEpoch            (saf.finalEpoch),
    epochStart            (saf.epochStart),
    epochEnd              (saf.epochEnd),
-   strands               (saf.strands)
+   strands               (saf.strands),
+   isChecked             (false)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFilter copy constructor from <%s,%p>  to  <%s,%p>\n", saf.GetName().c_str(), &saf, GetName().c_str(), this);
@@ -154,6 +159,7 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
    {
       GmatBase::operator=(saf);
 
+      fileNames    = saf.fileNames;
       observers    = saf.observers;
       trackers     = saf.trackers;
       dataTypes    = saf.dataTypes;
@@ -163,6 +169,7 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
       epochStart   = saf.epochStart;
       epochEnd     = saf.epochEnd;
       strands      = saf.strands;
+      isChecked    = false;
    }
 
    return *this;
@@ -199,7 +206,10 @@ bool DataFilter::Initialize()
 	MessageInterface::ShowMessage("DataFilter<%s,%p>::Initialize()   entered\n", GetName().c_str(), this);
 #endif
 
-   bool retval = false;
+   bool retval = true;
+
+   if (epochStart > epochEnd)
+      throw MeasurementException("Error: " + GetName() + ".InitialEpoch (" + initialEpoch + ") is greater than " + GetName() +".FinalEpoch (" + finalEpoch +")\n");
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("DataFilter<%s,%p>::Initialize()   exit\n", GetName().c_str(), this);
@@ -426,6 +436,18 @@ bool DataFilter::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string DataFilter::GetStringParameter(const Integer id, const Integer index) const
 {
+   if (id == FILENAMES)
+   {
+      if ((index < 0)||(index >= (Integer)fileNames.size()))
+      {
+         std::stringstream ss;
+         ss << "Error: file name's index (" << index << ") is out of bound.\n";
+         throw GmatBaseException(ss.str());
+      }
+
+      return fileNames[index];
+   }
+
    if (id == OBSERVED_OBJECTS)
    {
       if ((index < 0)||(index >= (Integer)observers.size()))
@@ -493,6 +515,32 @@ std::string DataFilter::GetStringParameter(const Integer id, const Integer index
 bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
                                            const Integer index)
 {
+   if (index == -1)
+      return true;
+
+   if (id == FILENAMES)
+   {
+      if ((0 <= index)&&(index < (Integer)fileNames.size()))
+      {
+         fileNames[index] = value;
+         return true;
+      }
+      else
+      {
+         if (index == fileNames.size())
+         {
+            fileNames.push_back(value);
+            return true;
+         }
+         else
+         {
+            std::stringstream ss;
+            ss << "Error: file name's index (" << index << ") is out of bound.\n"; 
+            throw GmatBaseException(ss.str());
+         }
+      }
+   }
+
    if (id == OBSERVED_OBJECTS)
    {
       if ((0 <= index)&&(index < (Integer)observers.size()))
@@ -644,6 +692,9 @@ bool DataFilter::SetStringParameter(const std::string &label, const std::string 
 //------------------------------------------------------------------------------
 const StringArray& DataFilter::GetStringArrayParameter(const Integer id) const
 {
+   if (id == FILENAMES)
+      return fileNames;
+
    if (id == OBSERVED_OBJECTS)
       return observers;
 
@@ -753,8 +804,11 @@ StringArray DataFilter::GetListOfValidEpochFormats()
 
 bool DataFilter::ValidateInput()
 {
+   //if (isChecked)
+   //   return true;
+
 #ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()\n", GetName().c_str(), this);
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  enter\n", GetName().c_str(), this);
 #endif
 
    ObjectArray objectList, objectList1;
@@ -764,7 +818,7 @@ bool DataFilter::ValidateInput()
    bool retval = true;
    
    // 1. Verify observers:
-   MessageInterface::ShowMessage("Validate observers\n");
+   //MessageInterface::ShowMessage("Validate observers\n");
    objectList = GetListOfSpacecrafts();
    for (UnsignedInt i = 0; i < observers.size(); ++i)
    {
@@ -781,13 +835,13 @@ bool DataFilter::ValidateInput()
 
       if (!found)
       {
-         MessageInterface::ShowMessage("Data filter %s:\n%s\n", GetName().c_str(), this->GetGeneratingString().c_str());
+         //MessageInterface::ShowMessage("Data filter %s:\n%s\n", GetName().c_str(), this->GetGeneratingString().c_str());
          throw GmatBaseException("Error: observer with ID '" + observers[i] + "' set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
       }
    }
 
    // 2. Verify trackers:
-   MessageInterface::ShowMessage("Validate trackers\n");
+   //MessageInterface::ShowMessage("Validate trackers\n");
    objectList1 = GetListOfGroundStations();
    for (UnsignedInt i = 0; i < trackers.size(); ++i)
    {
@@ -807,7 +861,7 @@ bool DataFilter::ValidateInput()
    }
 
    // 3. Verify strands:
-   MessageInterface::ShowMessage("Validate strands\n");
+   //MessageInterface::ShowMessage("Validate strands\n");
    // 3.1. Get a list of all spacecrafts and ground stations
    for (UnsignedInt i = 0; i < objectList1.size(); ++i)
       objectList.push_back(objectList1[i]);
@@ -850,26 +904,37 @@ bool DataFilter::ValidateInput()
 
    // 7. Verify FinalEpoch:
 
+   isChecked = true;
+
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  exit\n", GetName().c_str(), this);
+#endif
+
    return retval;
 }
 
 
-ObservationData* DataFilter::FilteringData(ObservationData* dataObject)
+#include "TimeSystemConverter.hpp"
+ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
 #ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>)\n", GetName().c_str(), this, dataObject);
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)  enter\n", GetName().c_str(), this, dataObject, rejectedReason);
 #endif
-
+   
+   rejectedReason = 0;             // no reject
    if (ValidateInput())
    {
-      // Observated objects verify:
-      bool pass1 = false;
+      // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
+      bool pass1 = true;
       for(UnsignedInt i = 0; i < observers.size(); ++i)
       {
+         pass1 = false;
+         rejectedReason = 6;         // 6: rejected due to spacecraft is not found
          for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
          {
             if (observers[i] == dataObject->participantIDs[j])
             {
+               rejectedReason = 0;   // 0: no rejected due to spacecraft is found in "observers" array
                pass1 = true;
                break;
             }
@@ -878,14 +943,90 @@ ObservationData* DataFilter::FilteringData(ObservationData* dataObject)
          if (pass1)
             break;
       }
-   
-      // Trackers verify:
+      if (!pass1)
+      {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
+      }
+
+      // 2. Trackers verify: It will be passed the test when observation data contains one ground station in "trackers" array
+      bool pass2 = true;
+      for(UnsignedInt i = 0; i < trackers.size(); ++i)
+      {
+         pass2 = false;
+         rejectedReason = 5;        // 5: rejected due to ground station is not found
+         //MessageInterface::ShowMessage("Pass2: trackers[%d] = %s   dataObject->participantIDs[0] = %s\n", i, trackers[i].c_str(), dataObject->participantIDs[0].c_str());
+         if (trackers[i] == dataObject->participantIDs[0])
+         {
+            rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
+            pass2 = true;
+            break;
+         }
+      }
+      if (!pass2)
+      {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 5 
+      }
+
+      // 3. Measurement type verify: It will be passed the test when data type of observation data is found in "dataTypes" array
+      bool pass3 = true;
+      for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
+      {
+         pass3 = false;
+         rejectedReason = 7;        // 7: rejected due to data type of observation data is not found
+         //MessageInterface::ShowMessage("Pass3: dataTypes[%d] = %s   dataObject->participantIDs[0] = %s\n", i, dataTypes[i].c_str(), dataObject->typeName.c_str());
+         if (dataTypes[i] == dataObject->typeName)
+         {
+            rejectedReason = 0;    // 0: no rejected due to data type of observation data is found in "dataTypes" array
+            pass3 = true;
+            break;
+         }
+      }
+      if (!pass3)
+      {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+      }
+
 
       // Strands verify:
       // Time interval verify:
-   }
+      bool pass4 = true;
+      rejectedReason = 0;
+      GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
+      if ((currentEpoch < epochStart)||(currentEpoch > epochEnd))
+      {
+         rejectedReason = 2;      // 2: rejected due to time span
+         pass4 = false;
+      }
+      if (!pass4)
+      {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL  time out of range\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+      }
 
-   return dataObject;
+
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit0 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+#endif
+      return dataObject;
+   }
+   else
+   {
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+      return NULL;
+   }
 }
 
 
