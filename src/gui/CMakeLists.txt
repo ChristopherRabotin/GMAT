@@ -23,47 +23,8 @@ if(NOT wxWidgets_FOUND)
 endif()
 
 # ====================================================================
-SET(GUITARGET "GmatGui")
+SET(GUITARGET "Gmat")
 SET(TargetName ${GUITARGET})
-
-# ====================================================================
-# DEVIL package
-
-if (NOT WIN32)
-    MESSAGE("-- Building with DeVIL")
-
-    if (NOT DevIL_DIR)
-        find_package(DevIL)
-
-        if(NOT IL_FOUND)
-            MESSAGE("** Disabling USE_DEVIL")
-            SET(USE_DEVIL FALSE)
-        endif()
-    else()
-        # check directory
-        if(EXISTS "${DevIL_DIR}" AND IS_DIRECTORY "${DevIL_DIR}")
-            SET(IL_INCLUDE_DIR ${DevIL_DIR})
-        else()
-            MESSAGE("** DEVIL NOT FOUND in directory " ${DevIL_DIR})
-            MESSAGE("** Disabling USE_DEVIL")
-            SET(USE_DEVIL FALSE)
-        endif()
-    endif ()
-    
-
-    if (USE_DEVIL)
-        MESSAGE("-- DevIL FOUND")
-        MESSAGE("-- DevIL_DIR=" ${IL_INCLUDE_DIR})
-        LINK_DIRECTORIES(${IL_INCLUDE_DIR})
-        LINK_LIBRARIES(${IL_LIBRARIES})
-        LINK_LIBRARIES(${ILU_LIBRARIES})
-        LINK_LIBRARIES(${ILUT_LIBRARIES})
-        INCLUDE_DIRECTORIES(${IL_INCLUDE_DIR})
-    else()
-        ADD_DEFINITIONS("-DSKIP_DEVIL")
-    endif()
-endif()
-
 
 # ====================================================================
 # SPICE specifics

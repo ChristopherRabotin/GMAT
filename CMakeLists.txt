@@ -228,11 +228,6 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
-# Set DevIL Preprocessor defs
-if (WIN32)
-  ADD_DEFINITIONS("-DSKIP_DEVIL")
-endif()
-
 if(UNIX)
   ADD_DEFINITIONS("-DLINUX_MAC")
 endif()

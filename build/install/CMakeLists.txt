@@ -25,6 +25,13 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
   USE_SOURCE_PERMISSIONS
   PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
   PATTERN "debug" EXCLUDE # don't copy debug directory
+  PATTERN "bin" EXCLUDE # don't copy bin directory
+  PATTERN "plugins" EXCLUDE # don't copy plugins directory
+  )
+INSTALL( FILES
+  ${PROJECT_SOURCE_DIR}/application/bin/gmat_startup_file.txt
+  ${PROJECT_SOURCE_DIR}/application/bin/GMAT.ini
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
   )
 
 # ====================================================================
@@ -77,7 +84,7 @@ if(wxWidgets_FOUND)
     INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*u_*.dll" # Ignore debug (ud_*)
+      FILES_MATCHING PATTERN "*u_*.dll" # Ignore debug ("ud" suffix)
       PATTERN "msw*" EXCLUDE
       )
   # For Mac/Linux, dylib/so can be in subdirectory of bin
@@ -85,7 +92,7 @@ if(wxWidgets_FOUND)
     INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
       DESTINATION bin/libwx
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "libwx_*u_*" # Ignore debug (ud_*)
+      FILES_MATCHING PATTERN "libwx_*u[_-]*" # Ignore debug ("ud" suffix)
       PATTERN "wx" EXCLUDE
       )
 
@@ -95,10 +102,15 @@ if(wxWidgets_FOUND)
       # Create command for wxmac_change_install_names script
       SET(CHNM "./wxmac_change_install_names.sh")
       SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/bin/libwx\"")
-      SET(ARG2 "\"bin\"") # Unused, dummy argument
+      SET(ARG2 "\"${wxWidgets_LIBRARY_DIRS}\"")
       SET(ARG3 "\"@rpath\"")
-      SET(ARG4 "\"${wxWidgets_LIBRARY_DIRS}\"")
-      SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARG4}")
+
+      # ARGN contains all GMAT components that use wxWidgets
+      # Append new components here
+      SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/bin/Gmat\"
+      \"${CMAKE_INSTALL_PREFIX}/plugins/libMatlabInterface.dylib\"")
+
+      SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARGN}")
       INSTALL(CODE "MESSAGE(STATUS \"Changing wxWidgets library install names\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CHNM_COMMAND} WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\")")
     endif()
