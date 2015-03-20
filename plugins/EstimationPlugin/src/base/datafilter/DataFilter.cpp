@@ -24,7 +24,7 @@
 #include "GmatBase.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
-#include "Measurementexception.hpp"
+#include "MeasurementException.hpp"
 #include "Moderator.hpp"
 #include <sstream>
 

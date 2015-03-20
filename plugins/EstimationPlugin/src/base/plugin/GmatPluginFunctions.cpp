@@ -33,7 +33,7 @@
 #include "TrackingSystemFactory.hpp"
 #include "TrackingDataFactory.hpp"
 #include "ErrorModelFactory.hpp"                      // made changes by TUAN NGUYEN
-#include "EstimationDatafilterFactory.hpp"            // made changes by TUAN NGUYEN
+#include "EstimationDataFilterFactory.hpp"            // made changes by TUAN NGUYEN
 
 #ifndef USE_DATAFILE_PLUGIN
 	#include "DataFileFactory.hpp"
