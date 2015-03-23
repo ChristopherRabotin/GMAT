@@ -36,6 +36,7 @@
 //#define DEBUG_EVENT_INITIALIZATION
 //#define DEBUG_ECLIPSE_EVENTS
 //#define DEBUG_ECLIPSE_ACTION
+//#define DEBUG_ECLIPSE_LOCATOR_WRITE
 
 //------------------------------------------------------------------------------
 // Static data
@@ -673,6 +674,8 @@ bool EclipseLocator::Initialize()
    {
       sun = (Star*) solarSys->GetBody(SolarSystem::SUN_NAME);
    }
+   if (eclipseTypes.size() < 1)
+      throw EventException("ERROR in Eclipse Locator - no eclipse types set.\n");
 
    // NOW initialize the base class
    retval = EventLocator::Initialize();
@@ -689,7 +692,11 @@ bool EclipseLocator::Initialize()
 //------------------------------------------------------------------------------
 void EclipseLocator::ReportEventData(const std::string &reportNotice)
 {
-   bool openOK = OpenReportFile();
+   #ifdef DEBUG_ECLIPSE_LOCATOR_WRITE
+      MessageInterface::ShowMessage("EclipseLocator::ReportEventData ... \n");
+   #endif
+
+   bool openOK = OpenReportFile(false);
 
    if (!openOK)
    {
@@ -778,8 +785,12 @@ void EclipseLocator::FindEvents()
       errmsg += sat->GetName() + "!!\n";
       throw EventException(errmsg);
    }
-   em->ProvideEphemerisData();
-   em->StopRecording();
+   // Set these up first, in case there are no files to read from
+   findStart = initialEp;
+   findStop  = finalEp;
+
+//   em->ProvideEphemerisData();
+//   em->StopRecording();
 
    // Set up data for the calls to CSPICE
 
@@ -815,9 +826,6 @@ void EclipseLocator::FindEvents()
                                      initialEp, finalEp, useEntireInterval, stepSize,
                                      numEclipse, starts, ends);
          #ifdef DEBUG_ECLIPSE_EVENTS
-            MessageInterface::ShowMessage("After gfoclt_c .....\n");
-         #endif
-         #ifdef DEBUG_ECLIPSE_EVENTS
             MessageInterface::ShowMessage("After gfoclt_c:\n");
             MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
          #endif
@@ -832,7 +840,7 @@ void EclipseLocator::FindEvents()
       }
    }
    #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage("rawList has been set up ...n");
+      MessageInterface::ShowMessage("rawList has been set up ...\n");
    #endif
 
    Integer numEventsInTotal = rawList->NumberOfEvents();
