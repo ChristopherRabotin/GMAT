@@ -230,6 +230,11 @@ bool EphemManager::RecordEphemerisData()
       // If it's already recording, continue
       if (!ephemFile)
       {
+         #ifdef DEBUG_EPHEM_MANAGER
+            MessageInterface::ShowMessage(
+                  "In EphemManager::RecordEphemerisData for SC %s, setting up ephemFile\n",
+                  theObj->GetName().c_str());
+         #endif
          if (theType != SPK)
             throw SubscriberException("Only SPK currently allowed for EphemManager\n");
 
@@ -244,6 +249,11 @@ bool EphemManager::RecordEphemerisData()
          ss << ".bsp";
          fileName = ss.str();
          ephemFile         = new EphemerisFile(ephemName);
+         #ifdef DEBUG_EPHEM_MANAGER
+            MessageInterface::ShowMessage(
+                  "In EphemManager::RecordEphemerisData, ephemFile is at <%p> with name %s\n",
+                  ephemFile, ephemName.c_str());
+         #endif
 
    //      // For now, put it in the Vehicle path
    //      FileManager *fm = FileManager::Instance();
@@ -303,6 +313,9 @@ bool EphemManager::ProvideEphemerisData()
 //------------------------------------------------------------------------------
 void EphemManager::StopRecording()
 {
+   #ifdef DEBUG_EPHEM_MANAGER
+      MessageInterface::ShowMessage("StopRecording -----\n");
+   #endif
    // Finalize and close the SPK file
    // Unsubscribe
    Publisher *pub = Publisher::Instance();
@@ -577,6 +590,9 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
    char             kStr[5] = "    ";
    char             aStr[4] = "   ";
 
+   // start with an empty cell
+   scard_c(0, &cover);   // reset the coverage cell
+
    // look through each kernel
    for (unsigned int ii = 0; ii < inKernels.size(); ii++)
    {
@@ -609,8 +625,8 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
          delete [] err;
          throw SubscriberException(errmsg);
       }
-      // start with an empty cell
-      scard_c(0, &cover);   // reset the coverage cell
+//      // start with an empty cell
+//      scard_c(0, &cover);   // reset the coverage cell
 
       #ifdef DEBUG_SPK_COVERAGE
          MessageInterface::ShowMessage("Kernel is of type %s\n",
@@ -642,7 +658,6 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
                MessageInterface::ShowMessage("Checking kernel %s for data for object %d\n",
                      (kernels.at(ii)).c_str(), (Integer) objId);
             #endif
-//            scard_c(0, &cover);   // reset the coverage cell
             spkcov_c (kernelName, idSpice, &cover);
             if (failed_c())
             {
@@ -667,38 +682,6 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
                MessageInterface::ShowMessage("Number of intervals found =  %d\n",
                      (Integer) numInt);
             #endif
-//            if ((firstInt) && (numInt > 0))
-//            {
-//               wnfetd_c(&cover, 0, &b, &e);
-//               if (failed_c())
-//               {
-//                  ConstSpiceChar option[] = "LONG";
-//                  SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
-//                  //SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
-//                  SpiceChar      *err = new SpiceChar[MAX_LONG_MESSAGE_VALUE];
-//                  getmsg_c(option, numChar, err);
-//                  std::string errStr(err);
-//                  std::string errmsg = "Error getting interval times for SPK kernel \"";
-//                  errmsg += kernels.at(ii) + "\".  Message received from CSPICE is: [";
-//                  errmsg += errStr + "]\n";
-//                  reset_c();
-//                  delete [] err;
-//                  throw SubscriberException(errmsg);
-//               }
-//               start    = SpiceTimeToA1(b);
-//               end      = SpiceTimeToA1(e);
-//               firstInt = false;
-//            }
-//            for (SpiceInt jj = 0; jj < numInt; jj++)
-//            {
-//               wnfetd_c(&cover, jj, &b, &e);
-//               bA1 = SpiceTimeToA1(b);
-//               eA1 = SpiceTimeToA1(e);
-//               if (bA1 < start)  start = bA1;
-//               if (eA1 > end)    end   = eA1;
-//            }
-//         }
-
       }
    }
    if (firstInt)
@@ -716,16 +699,9 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
    #endif
 
    }
-//   // coverage interval(s) in the loaded kernels
-//   SPICEDOUBLE_CELL(coverage, 2000);
-//   scard_c(0, &coverage);   // reset (empty) the coverage cell
-//
    // window we want to search
    SPICEDOUBLE_CELL(window, 2000);
    scard_c(0, &window);   // reset (empty) the coverage cell
-
-//   SpiceDouble  start0, end0, startN, endN;
-//   SpiceInt     numInt     = 0;
 
    if (useEntireIntvl)
    {
@@ -742,21 +718,9 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       wninsd_c(s, e, &timespan);
       wnintd_c(&cover, &timespan, &window);
    }
-//   numInt     = wncard_c(&window);
-//   wnfetd_c(&window, 0, &start0, &end0);
-//   wnfetd_c(&window, (numInt-1), &startN, &endN);
-//   findStart  = spice->SpiceTimeToA1(start0);
-//   findStop   = spice->SpiceTimeToA1(endN);
 
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Number of intervals = %d\n", (Integer) numInt);
-   #endif
-
-   #ifdef DEBUG_ECLIPSE_EVENTS
-//      MessageInterface::ShowMessage(" time of first interval start is %12.10f\n", (Real) spice->SpiceTimeToA1(start0));
-//      MessageInterface::ShowMessage(" time of first interval end is %12.10f  \n", (Real) spice->SpiceTimeToA1(end0));
-//      MessageInterface::ShowMessage(" time of last interval start is %12.10f \n", (Real) spice->SpiceTimeToA1(startN));
-//      MessageInterface::ShowMessage(" time of last interval end is %12.10f   \n", (Real) spice->SpiceTimeToA1(endN));
    #endif
 
    copy_c(&window, w);

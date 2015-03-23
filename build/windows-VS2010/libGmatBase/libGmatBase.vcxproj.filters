@@ -1264,6 +1264,9 @@
     <ClCompile Include="..\..\..\src\base\util\UtcDate.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp">
@@ -2585,6 +2588,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\UtcDate.hpp">
       <Filter>Source Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
