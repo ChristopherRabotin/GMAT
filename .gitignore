@@ -6,6 +6,8 @@
 *.dll
 *.exe
 *.app
+*.ilk
+*.pdb
 .project
 .cproject
 GmatLog.txt
