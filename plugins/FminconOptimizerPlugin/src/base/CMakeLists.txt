@@ -29,13 +29,7 @@ endif()
 
 # ====================================================================
 # Define plugin target
-if(WIN32)
-	SET(PLUGINTARGET  "libFminconOptimizer")
-else()
-	SET(PLUGINTARGET "FminconOptimizer")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName FminconOptimizer)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DFMINCON_EXPORTS")
@@ -59,16 +53,10 @@ SET(PLUGIN_SRCS
 )
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-	LINK_LIBRARIES(libMatlabInterface)
-else()
-	LINK_LIBRARIES(GmatBase)
-	LINK_LIBRARIES(MatlabInterface)
-endif()
-LINK_LIBRARIES(${Matlab_LIBRARIES})
-
-# ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# ====================================================================
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} MatlabInterface)
+TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})

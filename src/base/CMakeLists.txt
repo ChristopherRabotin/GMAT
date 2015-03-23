@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT base setup " ${VERSION}) 
 
-if(WIN32)
-	SET(BASETARGET  "libGmatBase")
-else()
-	SET(BASETARGET "GmatBase")
-endif()
-
-SET(TargetName ${BASETARGET})
+SET(TargetName GmatBase)
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
@@ -535,6 +529,10 @@ FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
 
+# Library name should start with "lib"
+# This is always true for Mac/Linux, but needs to be specified for Windows
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
+
 # ====================================================================
 # Add source/header files to IDE-based project source groups
 # Macro defined in top-level CMakeLists.txt
@@ -542,9 +540,13 @@ _ADDSOURCEGROUPS("${BASE_DIRS}")
 
 # specify the version of the library. 
 if(WIN32)
-  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\" /INCREMENTAL:NO")
 endif()
 
+# Create build products in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Specify where to install (make install or VS "INSTALL" project)
 INSTALL( TARGETS ${TargetName}
   RUNTIME DESTINATION bin # Windows
   LIBRARY DESTINATION bin # Mac/Linux

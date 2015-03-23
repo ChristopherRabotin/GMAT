@@ -163,8 +163,8 @@ MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
 
 # Default to Release configuration on single-config generators
 # e.g. make, but not VisualStudio
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (<empty>, Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
+if(NOT CMAKE_CONFIGURATION_TYPES)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (<empty>, Debug, Release, RelWithDebInfo, or MinSizeRel")
 endif()
 
 # ====================================================================
@@ -184,10 +184,12 @@ if(UNIX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 endif()
 
-# check fPIC flag is allowed
-CHECK_CXX_COMPILER_FLAG("-fPIC" GCC_PIC)
-if( GCC_PIC )
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+# check fPIC flag on GCC compilers
+if(CMAKE_COMPILER_IS_GNUCC)
+  CHECK_CXX_COMPILER_FLAG("-fPIC" GCC_PIC)
+  if(GCC_PIC)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  endif()
 endif()
 
 # flags to append to CMAKE_CXX_FLAGS according to CMAKE_BUILD_TYPE 
@@ -198,9 +200,12 @@ if(UNIX)
   SET(CMAKE_CXX_FLAGS_MINSIZEREL "-O3")
 endif()
 
-# some definitions
-ADD_DEFINITIONS("-DNO_GCC_PRAGMA")
+# Common definitions
+ADD_DEFINITIONS(-DNO_GCC_PRAGMA)
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
+
+# Mark debug libraries with a "d" suffix
+SET(CMAKE_DEBUG_POSTFIX "d")
 
 # Linker Flags
 if(UNIX)
@@ -255,6 +260,29 @@ endif()
 # Declare global var for GmatBase header directories
 # This will be defined in the GmatBase CMakeLists.txt file
 SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
+
+# ====================================================================
+# Define macro that sets the output directory for build products,
+# e.g. executables or shared libraries. By default these are placed under
+# the <GMAT>/application/ directory so that devs can easily test without
+# having to install the build (via make install or VS INSTALL).
+# This default location can be changed by the user.
+SET(GMAT_BUILDOUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application" CACHE PATH "Base directory for GMAT binaries. Should contain bin, plugins, etc.")
+MACRO(_SETOUTPUTDIRECTORY TargetName OUTPUT_DIR)
+  if(WIN32)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY_RELEASE ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      )
+  elseif(UNIX) 
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+      RUNTIME_OUTPUT_DIRECTORY ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      )
+  endif()
+ENDMACRO()
 
 # ====================================================================
 # Define macro that adds source/header files to appropriate groups

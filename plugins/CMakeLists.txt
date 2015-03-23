@@ -20,11 +20,10 @@
 #   PLUGIN_DIRS: List of directories containing source/header files
 #   PLUGIN_SRCS: List of .c and .cpp source files
 #   INSTALL_DIR: Directory to install plugin (plugins, bin, etc.)
-# Note that all paths are relative to the plugin's CMakeLists.txt
+# Note that all paths should be relative to the plugin's CMakeLists.txt
 MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   # Add Preproccessor Definitions
   ADD_DEFINITIONS("-D_DYNAMICLINK")
-  #ADD_DEFINITIONS("-DEXP_STL")
 
   # ====================================================================
   # prepend include directories for header files
@@ -50,6 +49,24 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   # Add source/header files to IDE-based project source groups
   # Macro defined in top-level CMakeLists.txt
   _ADDSOURCEGROUPS("${PLUGIN_DIRS}")
+
+  # ====================================================================
+  # Create build products in specified directory
+  # Macro defined in top-level CMakeLists.txt
+  _SETOUTPUTDIRECTORY(${TargetName} ${INSTALL_DIR})
+
+  # ====================================================================
+  # All plugins should start with "lib". This is always true for Mac/Linux, 
+  # but needs to be specified for Windows.
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
+
+  # ====================================================================
+  # Plugin label should include "Plugin" in IDEs (e.g. VisualStudio)
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PROJECT_LABEL "Plugin ${TargetName}")
+
+  # ====================================================================
+  # All plugins link to GmatBase
+  TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
 
   # ====================================================================
   # Specify where to install plugin
@@ -210,16 +227,16 @@ FIND_PATH(GMAT_PROPRIETARYPLUGINS_PATH
   PATHS
     ${PROJECT_SOURCE_DIR}/../gmatinternal-git
     ${PROJECT_SOURCE_DIR}/plugins/gmatinternal-git
-  DOC "Path to GMAT proprietary plugins"
+  DOC "Path to GMAT proprietary plugins (containing code/)"
   NO_DEFAULT_PATH
   )
 
-# Load CMakeLists.txt file from top-level proprietary plugins folder
+# Load CMakeLists.txt file from proprietary plugins /code folder
 if(GMAT_PROPRIETARYPLUGINS_PATH)
   SET(PLUGINDIR "${GMAT_PROPRIETARYPLUGINS_PATH}/code")
-  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/internal")
-  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
-  SET(PluginTargets ${PluginTargets} ${tmp})
+  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/proprietary")
+  GET_DIRECTORY_PROPERTY(ProprietaryTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
+  SET(PluginTargets ${PluginTargets} ${ProprietaryTargets})
 endif()
 
 # ====================================================================

@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT CInterface Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET "libCInterface")
-else()
-	SET(PLUGINTARGET "CInterface")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName CInterface)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DCINTERFACE_EXPORTS")
@@ -36,14 +30,6 @@ SET(PLUGIN_SRCS
     factory/CCommandFactory.cpp
     plugin/CInterfacePluginFunctions.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

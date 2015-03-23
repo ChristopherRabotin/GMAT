@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT Station Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libStation")
-else()
-	SET(PLUGINTARGET "Station")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName Station)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DSTATION_EXPORTS")
@@ -36,14 +30,6 @@ SET(PLUGIN_SRCS
     plugin/GmatPluginFunctions.cpp
     station/GroundStation.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

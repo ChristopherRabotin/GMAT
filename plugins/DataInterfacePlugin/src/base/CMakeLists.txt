@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT DataInterface Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libDataInterface")
-else()
-	SET(PLUGINTARGET "DataInterface")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName DataInterface)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DDATAINTERFACE_EXPORTS")
@@ -44,14 +38,6 @@ SET(PLUGIN_SRCS
     factory/ReaderFactory.cpp
     plugin/GmatPluginFunctions.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

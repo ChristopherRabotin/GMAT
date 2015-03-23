@@ -22,20 +22,12 @@ if(NOT Matlab_FOUND)
   RETURN()
 endif()
 
-if(NOT wxWidgets_FOUND)
+if(UNIX AND (NOT wxWidgets_FOUND))
   MESSAGE(WARNING "Skipping due to missing wxWidgets")
   RETURN()
 endif()
 
-# ====================================================================
-# Define plugin target
-if(WIN32)
-	SET(PLUGINTARGET "libMatlabInterface")
-else()
-	SET(PLUGINTARGET "MatlabInterface")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName MatlabInterface)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DMATLAB_EXPORTS")
@@ -78,17 +70,12 @@ if(UNIX)
 endif()
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
-LINK_LIBRARIES(${Matlab_LIBRARIES})
-if(UNIX)
-  LINK_LIBRARIES(${wxWidgets_LIBRARIES})
-endif()
-
-# ====================================================================
 # Setup common plugin definitions, targets, etc.
 _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
+
+# ====================================================================
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})
+if(UNIX)
+  TARGET_LINK_LIBRARIES(${TargetName} ${wxWidgets_LIBRARIES})
+endif()
