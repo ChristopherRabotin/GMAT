@@ -42,7 +42,8 @@
 #include "Assignment.hpp"     // for Assignment (GMAT) command  
 #include "Report.hpp"         // for Report command
 #include "SaveMission.hpp"    // for SaveMission command  
-#include "Stop.hpp"           // for Stop command  
+#include "Stop.hpp"           // for Stop command
+#include "FindEvents.hpp"     // forFindEvents command
 //#include "CallGmatFunction.hpp"   // for CallGmatFunction command
 #include "BeginFiniteBurn.hpp"// for BeginFiniteBurn command
 #include "EndFiniteBurn.hpp"  // for EndFiniteBurn command
@@ -151,6 +152,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
          return new EndScript;
     else if (ofType == "Stop")
         return new Stop;
+    else if (ofType == "FindEvents")
+        return new FindEvents;
     else if (ofType == "Optimize")
         return new Optimize;
     else if (ofType == "EndOptimize")
@@ -233,6 +236,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("SaveMission");
       creatables.push_back("ScriptEvent");
       creatables.push_back("Stop");
+      creatables.push_back("FindEvents");
       creatables.push_back("Target");
       creatables.push_back("Toggle");
       creatables.push_back("Vary");
