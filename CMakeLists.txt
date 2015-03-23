@@ -236,8 +236,19 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
+# Additional UNIX-specific definitions
 if(UNIX)
   ADD_DEFINITIONS("-DLINUX_MAC")
+
+  # Needed to support OSX 10.8+
+  if(APPLE)
+    # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
+    # This is incompatible with the C++11 standard, and should be fixed
+    # For now, disable this compile error (-Wreserved-user-defined-literal)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11 -Wno-reserved-user-defined-literal")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+  endif()
 endif()
 
 # Enable RPATH on Mac/Linux so that GMAT shared libraries can be found
@@ -255,8 +266,8 @@ if(UNIX)
     # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
     # the Linux search order similar to Mac/Windows.
     SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../bin/libwx/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
-    SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
-    SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
   endif()
 endif()
 
