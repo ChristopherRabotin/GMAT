@@ -18,12 +18,12 @@ MESSAGE("GMAT MatlabInterface Plugin setup " ${VERSION})
 # ====================================================================
 # Major error checks
 if(NOT Matlab_FOUND)
-  MESSAGE(WARNING "Skipping due to missing Matlab")
+  MESSAGE(WARNING "Skipping MatlabInterface: Matlab missing")
   RETURN()
 endif()
 
 if(UNIX AND (NOT wxWidgets_FOUND))
-  MESSAGE(WARNING "Skipping due to missing wxWidgets")
+  MESSAGE(WARNING "Skipping MatlabInterface: wxWidgets missing")
   RETURN()
 endif()
 

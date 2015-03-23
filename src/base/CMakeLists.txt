@@ -127,6 +127,7 @@ SET(BASE_SRCS
     command/BranchCommand.cpp
     command/CallFunction.cpp
     command/CommandException.cpp
+    command/FindEvents.cpp
     command/GmatCommand.cpp
     command/CommandUtil.cpp
     command/ClearPlot.cpp

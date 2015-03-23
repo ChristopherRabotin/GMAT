@@ -20,6 +20,7 @@
 
 # Require CMake minimum version
 cmake_minimum_required(VERSION 2.8)
+SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8) # Support OSX 10.8+
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
@@ -162,9 +163,11 @@ FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
 
 # Default to Release configuration on single-config generators
-# e.g. make, but not VisualStudio
-if(NOT CMAKE_CONFIGURATION_TYPES)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (<empty>, Debug, Release, RelWithDebInfo, or MinSizeRel")
+# e.g. make, but not VisualStudio or XCode
+# Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
+# run, so we check for that and set the default appropriately
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
 endif()
 
 # ====================================================================

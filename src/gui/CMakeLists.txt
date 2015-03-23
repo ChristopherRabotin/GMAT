@@ -18,7 +18,7 @@ MESSAGE("GMAT GUI setup " ${VERSION})
 # ====================================================================
 # Major error checks
 if(NOT wxWidgets_FOUND)
-  MESSAGE(WARNING "Skipping due to missing wxWidgets")
+  MESSAGE(WARNING "Skipping GUI: wxWidgets missing")
   RETURN()
 endif()
 
