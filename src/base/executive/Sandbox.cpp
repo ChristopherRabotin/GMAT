@@ -886,13 +886,13 @@ bool Sandbox::Execute()
                publisher->SetRunState(currentState);
                publisher->NotifyEndOfRun();
                
-               // Write out event data, if any
-               for (UnsignedInt i = 0; i < events.size(); ++i)
-                  events[i]->LocateEvents("Execution was interrupted; the "
-                     "event list may be incomplete");
-//                  events[i]->ReportEventData("Execution was interrupted; the "
+//               // Write out event data, if any
+//               for (UnsignedInt i = 0; i < events.size(); ++i)
+//                  events[i]->LocateEvents("Execution was interrupted; the "
 //                     "event list may be incomplete");
-//
+////                  events[i]->ReportEventData("Execution was interrupted; the "
+////                     "event list may be incomplete");
+////
                throw SandboxException("Execution interrupted");
                //return rv;
             }
@@ -1028,10 +1028,10 @@ bool Sandbox::Execute()
    publisher->SetRunState(currentState);
    publisher->NotifyEndOfRun();
    
-   // Write out event data, if any
-   for (UnsignedInt i = 0; i < events.size(); ++i)
-      events[i]->LocateEvents();
-//      events[i]->ReportEventData();
+//   // Write out event data, if any
+//   for (UnsignedInt i = 0; i < events.size(); ++i)
+//      events[i]->LocateEvents();
+////      events[i]->ReportEventData();
 
    return rv;
 }

@@ -200,6 +200,7 @@ OBJECTS = \
     command/EndScript.o \
     command/EndTarget.o \
     command/EndWhile.o \
+    command/FindEvents.o \
     command/For.o \
     command/If.o \
     command/ManageObject.o \
