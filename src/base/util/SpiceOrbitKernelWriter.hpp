@@ -64,9 +64,9 @@ class GMAT_API SpiceOrbitKernelWriter :public SpiceKernelWriter
 {
 public:
    SpiceOrbitKernelWriter(const std::string       &objName,   const std::string &centerName,
-                     Integer                 objNAIFId,  Integer            centerNAIFId,
-                     const std::string       &fileName,  Integer            deg = 7,
-                     const std::string       &frame = "J2000");
+                          Integer                 objNAIFId,  Integer            centerNAIFId,
+                          const std::string       &fileName,  Integer            deg = 7,
+                          const std::string       &frame = "J2000", bool renameExistingSPK = false);
    SpiceOrbitKernelWriter(const SpiceOrbitKernelWriter &copy);
    SpiceOrbitKernelWriter& operator=(const SpiceOrbitKernelWriter &copy);
    ~SpiceOrbitKernelWriter();
@@ -88,6 +88,11 @@ protected:
    std::string     kernelFileName;
    // the reference frame
    std::string     frameName;
+
+   /// do we try to rename an existing SPK with the filename?
+   /// Set to false for now as Windows does not handle
+   /// renaming
+   bool            renameSPK;
 
    // data converted to SPICE types, to pass into SPICE methods
    /// the target body or spacecraft NAIF Id (SPICE)
