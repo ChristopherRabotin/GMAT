@@ -2364,6 +2364,9 @@
     <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.cpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4507,6 +4510,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.hpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\base\command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
