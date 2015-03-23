@@ -25,12 +25,12 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_SET
-//#define DEBUG_FUNCTION_IN_OUT
+#define DEBUG_FUNCTION_IN_OUT
 //#define DEBUG_WRAPPER_CODE
-//#define DEBUG_FUNCTION_OBJ
+#define DEBUG_FUNCTION_OBJ
 //#define DEBUG_AUTO_OBJ
 //#define DEBUG_OBJECT_MAP
-//#define DEBUG_FIND_OBJECT
+#define DEBUG_FIND_OBJECT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -89,6 +89,7 @@ Function::Function(const std::string &typeStr, const std::string &name) :
    fcsFinalized       (false),
    validator          (NULL),
    wasFunctionBuilt   (false),
+   isFunctionIOSet    (false),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -143,8 +144,10 @@ Function::Function(const Function &f) :
    forces             (NULL),
    fcs                (NULL),
    fcsFinalized       (f.fcsFinalized),
+   functionObjectMap  (f.functionObjectMap), // Do I want to do this?
    validator          (f.validator),
    wasFunctionBuilt   (f.wasFunctionBuilt),
+   isFunctionIOSet    (f.isFunctionIOSet),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -180,7 +183,8 @@ Function& Function::operator=(const Function &f)
    fcs                = NULL;
    fcsFinalized       = f.fcsFinalized;
    validator          = f.validator;
-   wasFunctionBuilt = f.wasFunctionBuilt;
+   wasFunctionBuilt   = f.wasFunctionBuilt;
+   isFunctionIOSet    = f.isFunctionIOSet;
    scriptErrorFound   = f.scriptErrorFound;
    objectsInitialized = f.objectsInitialized;
    inputNames         = f.inputNames;
@@ -369,6 +373,22 @@ bool Function::WasFunctionBuilt()
 void Function::SetFunctionWasBuilt(bool built)
 {
    wasFunctionBuilt = built;
+}
+
+//------------------------------------------------------------------------------
+// bool IsFunctionInputOutputSet()
+//------------------------------------------------------------------------------
+bool Function::IsFunctionInputOutputSet()
+{
+   return isFunctionIOSet;
+}
+
+//------------------------------------------------------------------------------
+// void SetFunctionInputOutputIsSet(bool set)
+//------------------------------------------------------------------------------
+void Function::SetFunctionInputOutputIsSet(bool set)
+{
+   isFunctionIOSet = set;
 }
 
 //------------------------------------------------------------------------------
@@ -677,7 +697,13 @@ std::string Function::GetParameterTypeString(const Integer id) const
 std::string Function::GetStringParameter(const Integer id) const
 {
    if (id == FUNCTION_PATH)
+   {
+      MessageInterface::ShowMessage
+         ("==> Function::GetStringParameter() <%p> returning functionPath '%s'\n",
+          this, functionPath.c_str());
+      
       return functionPath;
+   }
    else if (id == FUNCTION_NAME)
       return functionName;
    
@@ -787,6 +813,14 @@ const StringArray& Function::GetStringArrayParameter(const Integer id) const
    default:
       return GmatBase::GetStringArrayParameter(id);
    }
+}
+
+//---------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+const StringArray& Function::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -1059,6 +1093,7 @@ void Function::AddFunctionObject(GmatBase *obj)
       ("Function::AddFunctionObject() entered, obj=<%p>[%s]'%s'\n", obj,
        obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL");
+   //ShowObjects("In Function::AddFunctionObject()");
    #endif
    
    if (obj && obj->GetName() != "")
@@ -1080,8 +1115,8 @@ GmatBase* Function::FindFunctionObject(const std::string &name)
 {
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Function::FindFunctionObject() entered, name=%s, solarSys=<%p>\n",
-       name.c_str(), solarSys);
+      ("Function::FindFunctionObject() entered, name='%s'\n", name.c_str());
+   //ShowObjects("In Function::FindFunctionObject()");
    #endif
    
    // Ignore array index
@@ -1431,23 +1466,32 @@ void Function::ShowObjects(const std::string &title)
    MessageInterface::ShowMessage("%s\n", title.c_str());
    MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
    MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("solarSys         = <%p>\n", solarSys);
-   MessageInterface::ShowMessage("internalCoordSys = <%p>\n", internalCoordSys);
-   MessageInterface::ShowMessage("forces           = <%p>\n", forces);
-   MessageInterface::ShowMessage
-      ("Here is objectStore <%p>, it has %d objects\n", objectStore,
-       objectStore->size());
-   for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
+   MessageInterface::ShowMessage("solarSys          = <%p>\n", solarSys);
+   MessageInterface::ShowMessage("internalCoordSys  = <%p>\n", internalCoordSys);
+   MessageInterface::ShowMessage("forces            = <%p>\n", forces);
+   MessageInterface::ShowMessage("objectStore       = <%p>\n", objectStore);
+   MessageInterface::ShowMessage("globalObjectStore = <%p>\n", globalObjectStore);
+
+   if (objectStore != NULL)
+   {
       MessageInterface::ShowMessage
-         ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
-   MessageInterface::ShowMessage
-      ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
-       globalObjectStore->size());
-   for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
+         ("Here is objectStore <%p>, it has %d objects\n", objectStore,
+          objectStore->size());
+      for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+   if (globalObjectStore != NULL)
+   {
       MessageInterface::ShowMessage
-         ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
+          globalObjectStore->size());
+      for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
    MessageInterface::ShowMessage("========================================\n");   
 }
 

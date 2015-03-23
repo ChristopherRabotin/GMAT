@@ -40,7 +40,7 @@
 
 //#define DEBUG_SANDBOX_INIT
 //#define DEBUG_MODERATOR_CALLBACK
-//#define DEBUG_SANDBOX_GMATFUNCTION
+#define DEBUG_SANDBOX_GMATFUNCTION
 //#define DEBUG_SANDBOX_OBJ_INIT
 //#define DEBUG_SANDBOX_OBJ_ADD
 //#define DEBUG_SANDBOX_OBJECT_MAPS
@@ -1438,7 +1438,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
 /**
  *  Handles any GmatFunctions included in the sequence.  The input cmd is the 
  *  CallFunction or Assignment command to process - it may itself contain a nested
- *  GmatFunction.  If it does, this method willbe called recursively to process
+ *  GmatFunction.  If it does, this method will be called recursively to process
  *  the nested GmatFunctions.
  *
  *  @param <name>     The cmd.
@@ -1502,6 +1502,9 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
       // if there is not already a function of that name, create it
       if (globalObjectMap.find(fName) == globalObjectMap.end())
       {
+         #ifdef DEBUG_SANDBOX_GMATFUNCTION
+         MessageInterface::ShowMessage("Creating function '%s'\n", fName.c_str());
+         #endif
          if (isMatlabFunction)
             f = moderator->CreateFunction("MatlabFunction",fName, 0);
          else
@@ -1513,6 +1516,14 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
             ("Adding function <%p>'%s' to the Global Object Store\n", f, fName.c_str());
          #endif
          globalObjectMap.insert(std::make_pair(fName,f));
+         
+         // Also add to usingMap so that ScriptInterpreter::InterpretGmatFunction()
+         // can find the function (LOJ: 2015.03.17)
+         //usingMap->insert(std::make_pair(fName,f));
+         
+         // Set globalObjectMap to function so that two-mode GmatFunction parsing
+         // will work for nested function (LOJ: 2015.03.17)
+         //f->SetGlobalObjectMap(&globalObjectMap);
       }
       else // it's already in the GOS, so just grab it
          f = (Function*) globalObjectMap[fName];
@@ -1527,7 +1538,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
       
       #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
-         "Now handling function \"%s\", whose fcs is %s set, ",
+         "Now handling function <%p>'%s', whose fcs is %s set, ", f,
          (f->GetStringParameter("FunctionName")).c_str(), 
          ((f->IsFunctionControlSequenceSet())? "already" : "NOT"));
       MessageInterface::ShowMessage
@@ -1547,8 +1558,9 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
          
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
          MessageInterface::ShowMessage(
-            "About to call InterpretGmatFunction for function %s\n",
-            (f->GetStringParameter("FunctionName")).c_str());
+            "About to call InterpretGmatFunction for function '%s'\n",
+            //(f->GetStringParameter("FunctionName")).c_str());
+            (f->GetStringParameter("FunctionPath")).c_str());
          #endif
          GmatCommand* fcs = moderator->InterpretGmatFunction(f, usingMap, solarSys);
 

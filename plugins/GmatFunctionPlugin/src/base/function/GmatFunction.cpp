@@ -28,10 +28,10 @@
 #include "HardwareException.hpp" 
 #include "MessageInterface.hpp"
 
-//#define DEBUG_FUNCTION
+#define DEBUG_FUNCTION_CONSTRUCT
 //#define DEBUG_FUNCTION_SET
-//#define DEBUG_FUNCTION_SET_PATH
-//#define DEBUG_FUNCTION_INIT
+#define DEBUG_FUNCTION_SET_PATH
+#define DEBUG_FUNCTION_INIT
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_FUNCTION_FINALIZE
 //#define DEBUG_UNUSED_GOL
@@ -78,6 +78,11 @@
 GmatFunction::GmatFunction(const std::string &name) :
    Function("GmatFunction", name)
 {
+   #ifdef DEBUG_FUNCTION_CONSTRUCT
+   MessageInterface::ShowMessage
+      ("GmatFunction::GmatFunction() constructor <%p> entered, name='%s'\n",
+       this, name.c_str());
+   #endif
    mIsNewFunction = false;
    unusedGlobalObjectList = NULL;
    
@@ -90,11 +95,19 @@ GmatFunction::GmatFunction(const std::string &name) :
       // if there is a function name, try to locate it
       if (name != "")
       {
+         #ifdef DEBUG_FUNCTION_CONSTRUCT
+         MessageInterface::ShowMessage
+            ("   Getting path for '%s' from the FileManager\n", name.c_str());
+         #endif
          // Get path of first it is located
          pathname = fm->GetGmatFunctionPath(name + ".gmf");
          // gmat function uses whole path name
          pathname = pathname + name + ".gmf";         
          functionPath = pathname;
+         #ifdef DEBUG_FUNCTION_CONSTRUCT
+         MessageInterface::ShowMessage
+            ("   functionPath now is '%s'\n", functionPath.c_str());
+         #endif
          functionName = GmatFileUtil::ParseFileName(functionPath);
          
          // Remove path and .gmf
@@ -126,7 +139,7 @@ GmatFunction::GmatFunction(const std::string &name) :
       {
          // Use exception to remove Visual C++ warning
          e.GetMessageType();
-         #ifdef DEBUG_FUNCTION
+         #ifdef DEBUG_FUNCTION_CONSTRUCT
          MessageInterface::ShowMessage(e.GetFullMessage());
          #endif
       }
@@ -134,11 +147,14 @@ GmatFunction::GmatFunction(const std::string &name) :
    
    objectTypeNames.push_back("GmatFunction");
 
-   #ifdef DEBUG_FUNCTION
+   #ifdef DEBUG_FUNCTION_CONSTRUCT
    MessageInterface::ShowMessage
       ("   Gmat functionPath=<%s>\n", functionPath.c_str());
    MessageInterface::ShowMessage
       ("   Gmat functionName=<%s>\n", functionName.c_str());
+   MessageInterface::ShowMessage
+      ("GmatFunction::GmatFunction() constructor <%p> leaving, name='%s'\n",
+       this, name.c_str());
    #endif
 }
 
@@ -286,6 +302,11 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       // if name not found, clone it and add to map (loj: 2008.12.15)
       if (objectStore->find(funcObjName) == objectStore->end())
       {
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   About to clone <%p>[%s]'%s'\n", (omi->second), (omi->second)->GetTypeName().c_str(),
+             (omi->second)->GetName().c_str());
+         #endif
          GmatBase *funcObj = (omi->second)->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
@@ -1032,7 +1053,8 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
 {
    #ifdef DEBUG_FUNCTION_SET_PATH
    MessageInterface::ShowMessage
-      ("GmatFunction::SetGmatFunctionPath() entered, path='%s'\n", path.c_str());
+      ("GmatFunction::SetGmatFunctionPath() <%p> entered, path='%s'\n", this,
+       path.c_str());
    #endif
    
    FileManager *fm = FileManager::Instance();
@@ -1104,13 +1126,17 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
       }
    }
    
-   // Add to GmatFunction path
-   // Do we need to add to FileManager function path? Commented out (LOJ: 2015.03.17)
-   //std::string funcPathOnly = GmatFileUtil::ParsePathName(functionPath);
-   //#ifdef DEBUG_FUNCTION_SET_PATH
-   //MessageInterface::ShowMessage("   funcPathOnly='%s'\n", funcPathOnly.c_str());
-   //#endif
-   //fm->AddGmatFunctionPath(funcPathOnly);
+   // Add to GmatFunction path so that nested function can be found
+   // Do we need to add to FileManager function path? exclude it (LOJ: 2015.03.17)
+   #if 1
+   std::string funcPathOnly = GmatFileUtil::ParsePathName(functionPath);
+   #ifdef DEBUG_FUNCTION_SET_PATH
+   MessageInterface::ShowMessage
+      ("   ===> Adding GmatFunction path '%s' to FileManager for function '%s'\n",
+       funcPathOnly.c_str(), GetName().c_str());
+   #endif
+   fm->AddGmatFunctionPath(funcPathOnly);
+   #endif
    
    // Remove path for function name
    functionName = GmatFileUtil::ParseFileName(functionPath);
@@ -1126,7 +1152,7 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
    
    #ifdef DEBUG_FUNCTION_SET_PATH
    MessageInterface::ShowMessage
-      ("GmatFunction::SetGmatFunctionPath() returning true\n");
+      ("GmatFunction::SetGmatFunctionPath() <%p> returning true\n", this);
    #endif
    return true;
 }

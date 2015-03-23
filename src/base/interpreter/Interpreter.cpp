@@ -83,7 +83,7 @@
 //#define DEBUG_VAR_EXPRESSION
 //#define DEBUG_MATH_TREE
 //#define DEBUG_FUNCTION
-//#define DBGLVL_FUNCTION_DEF 2
+#define DBGLVL_FUNCTION_DEF 2
 //#define DBGLVL_FINAL_PASS 2
 //#define DEBUG_AXIS_SYSTEM
 //#define DEBUG_SET_MEASUREMENT_MODEL
@@ -1783,7 +1783,19 @@ GmatBase* Interpreter::FindObject(const std::string &name,
       if (name == "SolarSystem")
          objFound = theSolarSystem;
       else
+      {
          objFound = currentFunction->FindFunctionObject(name);
+         #if 0
+         if (objFound == NULL && ofType == "GmatFunction")
+         {
+            MessageInterface::ShowMessage
+               ("   ==> name='%s' of type='%s' not found in the function "
+                "object map, so trying theValidator->FindObject()\n",
+                name.c_str(), ofType.c_str());
+            objFound = theValidator->FindObject(name, ofType);
+         }
+         #endif
+      }
    }
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
@@ -10195,7 +10207,9 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
-      ("Interpreter::BuildFunctionDefinition() entered, str=<%s>\n", str.c_str());
+      ("Interpreter::BuildFunctionDefinition() entered\n   str=<%s>\n"
+       "   currentFunction=<%p>'%s'\n", str.c_str(), currentFunction,
+       currentFunction->GetName().c_str());
    #endif
    
    std::string lhs;
