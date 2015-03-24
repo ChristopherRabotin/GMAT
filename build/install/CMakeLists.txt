@@ -55,20 +55,40 @@ if(PLUGIN_CINTERFACE)
     SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
     SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
     SET(MCD "cd('${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/build/matlab');")
+    SET(MDEBUG "debugsuffix='${CMAKE_DEBUG_POSTFIX}';")
     SET(MPREP "prepareInterface_cmake;")
     SET(MEXIT "exit;")
     SET(MATLAB_COMMAND "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MPREP} ${MEXIT}\"")
-    MESSAGE(STATUS "Will install CInterface Matlab thunk files with command:\n${MATLAB_COMMAND}")
+    SET(MATLAB_COMMAND_DEBUG "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MDEBUG} ${MPREP} ${MEXIT}\"")
 
     # Running Matlab can take a while, so notify the user
     if(WIN32)
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window...patience is a virtue...\")")
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window twice to build CInterface thunk files...patience is a virtue...\")")
     else()
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab...patience is a virtue...\")")
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface thunk files...patience is a virtue...\")")
     endif()
 
-    # Git 'er done!
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+    # Set up install commands for debug/release configurations.
+    # On single-config generators (e.g. make), simply check the current config.
+    # On multi-config generators (e.g. VS, XCode), there is a CMake deficiency
+    # that does not allow per-generator INSTALL(CODE ...) commands. The
+    # workaround for this is to try creating both release and debug versions
+    # of the CInterface Matlab thunk files. The Matlab prepareInterface script
+    # will gently exit if it couldn't build either one (won't error out).
+
+    # Matlab command for multi-config or release builds
+    if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Release) OR (CMAKE_BUILD_TYPE STREQUAL MinSizeRel))
+      # Matlab command for release configurations
+      MESSAGE(STATUS "Will install CInterface (release) Matlab thunk files with command:\n${MATLAB_COMMAND}")
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+    endif()
+
+    # Matlab command for multi-config or debug builds
+    if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Debug) OR (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo))
+      # Matlab command for debug configurations
+      MESSAGE(STATUS "Will install CInterface (debug) Matlab thunk files with command:\n${MATLAB_COMMAND_DEBUG}")
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND_DEBUG} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+    endif()
 
   # Warn user if Matlab was not found
   else()
@@ -84,7 +104,15 @@ if(wxWidgets_FOUND)
     INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*u_*.dll" # Ignore debug ("ud" suffix)
+      CONFIGURATIONS Release MinSizeRel
+      FILES_MATCHING PATTERN "*u_*.dll" # Only release ("u" suffix)
+      PATTERN "msw*" EXCLUDE
+      )
+    INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
+      DESTINATION bin
+      USE_SOURCE_PERMISSIONS
+      CONFIGURATIONS Debug RelWithDebInfo
+      FILES_MATCHING PATTERN "*ud_*.dll" # Only debug ("ud" suffix)
       PATTERN "msw*" EXCLUDE
       )
   # For Mac/Linux, dylib/so can be in subdirectory of bin
@@ -92,7 +120,15 @@ if(wxWidgets_FOUND)
     INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
       DESTINATION bin/libwx
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "libwx_*u[_-]*" # Ignore debug ("ud" suffix)
+      CONFIGURATIONS Release MinSizeRel
+      FILES_MATCHING PATTERN "libwx_*u[_-]*" # Only release ("u" suffix)
+      PATTERN "wx" EXCLUDE
+      )
+    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
+      DESTINATION bin/libwx
+      USE_SOURCE_PERMISSIONS
+      CONFIGURATIONS Debug RelWithDebInfo
+      FILES_MATCHING PATTERN "libwx_*ud[_-]*" # Only debug ("ud" suffix)
       PATTERN "wx" EXCLUDE
       )
 

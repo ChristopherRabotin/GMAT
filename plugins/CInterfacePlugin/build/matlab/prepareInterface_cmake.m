@@ -8,6 +8,12 @@
 % Modified 11/6/2014 by Ravi Mathur (Emergent Space Technologies, Inc.)
 % Adapted to create prototypes using installed GMAT CInterface instead of
 % in-build CInterface.
+%
+% Requirements: The following must be set before calling this script
+%  - Add path to libCInterface library (usually bin/)
+%  - Add path to findgmatrootpath (usually matlab/libCInterface/)
+%  - cd to this directory (plugins/CInterfacePlugin/build/matlab/)
+%  - (optional) set 'debugsuffix' variable (usually to 'd')
 
 disp('This script builds the GMAT interface prototype files and places them');
 disp('in the appropriate GMAT folder for Matlab use.');
@@ -29,6 +35,9 @@ disp(destdir);
 
 % Path to CInterface shared library
 libname = 'libCInterface';
+if exist('debugsuffix', 'var') % Add debug suffix as needed
+    libname = strcat(libname, debugsuffix);
+end
 libfile = fullfile(root_path, 'bin', libname);
 
 % Path to header file describing library functions
@@ -40,17 +49,24 @@ hfile = fullfile(thisdir, '..', '..', 'src', 'plugin', ...
 incdir = fullfile(thisdir, '..', '..', 'src', 'include');
 
 % Generate CInterface MATLAB prototypes
-[notfound, warnings] = loadlibrary(libfile, hfile, ...
-    'mfilename', 'interfacewrapper', 'includepath', incdir);
-unloadlibrary(libname);
+try
+    [notfound, warnings] = loadlibrary(libfile, hfile, ...
+        'mfilename', 'interfacewrapper', 'includepath', incdir);
+    unloadlibrary(libname);
+catch
+    warning('GMAT:PrepareInterface', 'Library %s could not be properly loaded.', libname);
+    delete('interfacewrapper.m');
+    delete(strcat(libname, '_thunk_*'));
+    return;
+end
 
 % Install prototype wrapper
 disp('Moving file interfacewrapper.m');
 movefile('interfacewrapper.m', destdir);
 
-% Install thunk files
+% Install thunk files that have the correct filename extension
 validexts = {'.dll', '.dylib', '.so'};
-d = dir(['libCInterface_thunk_*']);
+d = dir(strcat(libname, '_thunk_*'));
 for i = 1:length(d)
     [~,~,ext] = fileparts(d(i).name);
     if(isempty(strmatch(ext, validexts, 'exact')))
