@@ -2238,7 +2238,10 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    // Set createAssignmentCommand to true if BeginMissionSequence found (LOJ: 2014.12.10)
    //bool createAssignmentCommand = true;
    bool createAssignmentCommand = false;
-   if (beginMissionSeqFound)
+   // Set to create assignment command if BeginMissionSequence found or parsing
+   // ScriptEvent command (Fix for GMT-5045, LOJ: 2015.03.24)
+   //if (beginMissionSeqFound)
+   if (beginMissionSeqFound || inScriptEvent)
       createAssignmentCommand = true;
    
    if (inCommandMode)
