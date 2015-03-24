@@ -18,52 +18,12 @@ MESSAGE("GMAT GUI setup " ${VERSION})
 # ====================================================================
 # Major error checks
 if(NOT wxWidgets_FOUND)
-  MESSAGE(WARNING "Skipping due to missing wxWidgets")
+  MESSAGE(WARNING "Skipping GUI: wxWidgets missing")
   RETURN()
 endif()
 
 # ====================================================================
-SET(GUITARGET "GmatGui")
-SET(TargetName ${GUITARGET})
-
-# ====================================================================
-# DEVIL package
-
-if (NOT WIN32)
-    MESSAGE("-- Building with DeVIL")
-
-    if (NOT DevIL_DIR)
-        find_package(DevIL)
-
-        if(NOT IL_FOUND)
-            MESSAGE("** Disabling USE_DEVIL")
-            SET(USE_DEVIL FALSE)
-        endif()
-    else()
-        # check directory
-        if(EXISTS "${DevIL_DIR}" AND IS_DIRECTORY "${DevIL_DIR}")
-            SET(IL_INCLUDE_DIR ${DevIL_DIR})
-        else()
-            MESSAGE("** DEVIL NOT FOUND in directory " ${DevIL_DIR})
-            MESSAGE("** Disabling USE_DEVIL")
-            SET(USE_DEVIL FALSE)
-        endif()
-    endif ()
-    
-
-    if (USE_DEVIL)
-        MESSAGE("-- DevIL FOUND")
-        MESSAGE("-- DevIL_DIR=" ${IL_INCLUDE_DIR})
-        LINK_DIRECTORIES(${IL_INCLUDE_DIR})
-        LINK_LIBRARIES(${IL_LIBRARIES})
-        LINK_LIBRARIES(${ILU_LIBRARIES})
-        LINK_LIBRARIES(${ILUT_LIBRARIES})
-        INCLUDE_DIRECTORIES(${IL_INCLUDE_DIR})
-    else()
-        ADD_DEFINITIONS("-DSKIP_DEVIL")
-    endif()
-endif()
-
+SET(TargetName GmatGUI)
 
 # ====================================================================
 # SPICE specifics
@@ -77,12 +37,8 @@ INCLUDE(${wxWidgets_USE_FILE})
 LINK_LIBRARIES(${wxWidgets_LIBRARIES})
 
 # ====================================================================
-# other libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
+# Link libraries
+LINK_LIBRARIES(GmatBase)
 
 # Find OpenGL
 FIND_PACKAGE(OpenGL)
@@ -332,6 +288,14 @@ SET(GUI_SRCS ${GUI_SRCS} ${GMAT_ICON_RC})
 # Create GmatGui as an executable
 ADD_EXECUTABLE(${TargetName} ${GUI_SRCS} ${GUI_HEADERS})
 
+# The GUI name should be just "GMAT"
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES OUTPUT_NAME "GMAT")
+
+# The debug GUI should have the same postfix as top-levl CMakeLists.txt
+# This is required because CMAKE_DEBUG_POSTFIX only applies to libraries
+# and not executables as of CMake 3.0.2
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
 # ====================================================================
 # Add source/header files to IDE-based project source groups
 # Macro defined in top-level CMakeLists.txt
@@ -341,6 +305,10 @@ if(WIN32)
   SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/SUBSYSTEM:windows")
 endif()
 
+# Create build products in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Specify where to install (make install or VS "INSTALL" project)
 INSTALL( TARGETS ${TargetName}
   DESTINATION bin
   )

@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT DataCallback Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libDataCallback")
-else()
-	SET(PLUGINTARGET "DataCallback")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName DataCallback)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DDATACALLBACK_EXPORTS")
@@ -36,14 +30,6 @@ SET(PLUGIN_SRCS
     plugin/GmatPluginFunctions.cpp
     subscriber/DataCallback.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

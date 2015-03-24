@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT ExtraPropagators Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libExtraPropagators")
-else()
-	SET(PLUGINTARGET "ExtraPropagators")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName ExtraPropagators)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DPROPAGATOR_EXPORTS")
@@ -36,14 +30,6 @@ SET(PLUGIN_SRCS
     plugin/GmatPluginFunctions.cpp
     propagator/BulirschStoer.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

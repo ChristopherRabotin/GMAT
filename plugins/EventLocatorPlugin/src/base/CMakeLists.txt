@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT EventLocator Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libEventLocator")
-else()
-	SET(PLUGINTARGET "EventLocator")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName EventLocator)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DLOCATOR_EXPORTS")
@@ -51,14 +45,6 @@ SET(PLUGIN_SRCS
     locator/EclipseLocator.cpp
     plugin/GmatPluginFunctions.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

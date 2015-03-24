@@ -20,6 +20,7 @@
 
 # Require CMake minimum version
 cmake_minimum_required(VERSION 2.8)
+SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8) # Support OSX 10.8+
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
@@ -162,9 +163,11 @@ FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
 
 # Default to Release configuration on single-config generators
-# e.g. make, but not VisualStudio
+# e.g. make, but not VisualStudio or XCode
+# Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
+# run, so we check for that and set the default appropriately
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (<empty>, Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
 endif()
 
 # ====================================================================
@@ -184,10 +187,12 @@ if(UNIX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 endif()
 
-# check fPIC flag is allowed
-CHECK_CXX_COMPILER_FLAG("-fPIC" GCC_PIC)
-if( GCC_PIC )
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+# check fPIC flag on GCC compilers
+if(CMAKE_COMPILER_IS_GNUCC)
+  CHECK_CXX_COMPILER_FLAG("-fPIC" GCC_PIC)
+  if(GCC_PIC)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  endif()
 endif()
 
 # flags to append to CMAKE_CXX_FLAGS according to CMAKE_BUILD_TYPE 
@@ -198,9 +203,12 @@ if(UNIX)
   SET(CMAKE_CXX_FLAGS_MINSIZEREL "-O3")
 endif()
 
-# some definitions
-ADD_DEFINITIONS("-DNO_GCC_PRAGMA")
+# Common definitions
+ADD_DEFINITIONS(-DNO_GCC_PRAGMA)
 ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
+
+# Mark debug libraries with a "d" suffix
+SET(CMAKE_DEBUG_POSTFIX "d")
 
 # Linker Flags
 if(UNIX)
@@ -228,13 +236,19 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
-# Set DevIL Preprocessor defs
-if (WIN32)
-  ADD_DEFINITIONS("-DSKIP_DEVIL")
-endif()
-
+# Additional UNIX-specific definitions
 if(UNIX)
   ADD_DEFINITIONS("-DLINUX_MAC")
+
+  # Needed to support OSX 10.8+
+  if(APPLE)
+    # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
+    # This is incompatible with the C++11 standard, and should be fixed
+    # For now, disable this compile error (-Wreserved-user-defined-literal)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11 -Wno-reserved-user-defined-literal")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+  endif()
 endif()
 
 # Enable RPATH on Mac/Linux so that GMAT shared libraries can be found
@@ -252,14 +266,37 @@ if(UNIX)
     # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
     # the Linux search order similar to Mac/Windows.
     SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../bin/libwx/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
-    SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags")
-    SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-new-dtags")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
   endif()
 endif()
 
 # Declare global var for GmatBase header directories
 # This will be defined in the GmatBase CMakeLists.txt file
 SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
+
+# ====================================================================
+# Define macro that sets the output directory for build products,
+# e.g. executables or shared libraries. By default these are placed under
+# the <GMAT>/application/ directory so that devs can easily test without
+# having to install the build (via make install or VS INSTALL).
+# This default location can be changed by the user.
+SET(GMAT_BUILDOUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application" CACHE PATH "Base directory for GMAT binaries. Should contain bin, plugins, etc.")
+MACRO(_SETOUTPUTDIRECTORY TargetName OUTPUT_DIR)
+  if(WIN32)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY_RELEASE ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      )
+  elseif(UNIX) 
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+      RUNTIME_OUTPUT_DIRECTORY ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      )
+  endif()
+ENDMACRO()
 
 # ====================================================================
 # Define macro that adds source/header files to appropriate groups

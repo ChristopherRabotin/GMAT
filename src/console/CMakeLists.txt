@@ -12,12 +12,12 @@
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT console setup " ${VERSION})
+MESSAGE("GMAT Console setup " ${VERSION})
 
 if (PROFILE_BUILD)
-	SET(CONSOLETARGET "gmatConsoleP")
+	SET(CONSOLETARGET "GmatConsoleP")
 else()
-	SET(CONSOLETARGET "gmatConsole")
+	SET(CONSOLETARGET "GmatConsole")
 endif()
 
 SET(TargetName ${CONSOLETARGET})
@@ -64,25 +64,29 @@ FILE(GLOB_RECURSE CONSOLE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 	
 # ====================================================================
-# libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
-
-# ====================================================================
 # compilation
 
 # add the install targets
 ADD_EXECUTABLE(${TargetName} ${CONSOLE_SRCS} ${CONSOLE_HEADERS})
+
+# The debug Console should have the same postfix as top-levl CMakeLists.txt
+# This is required because CMAKE_DEBUG_POSTFIX only applies to libraries
+# and not executables as of CMake 3.0.2
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
+# ====================================================================
+# Link libraries
+TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
 
 # ====================================================================
 # Add source/header files to IDE-based project source groups
 # Macro defined in top-level CMakeLists.txt
 _ADDSOURCEGROUPS("")
 
+# Create build outputs in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Specify where to install (make install or VS "INSTALL" project)
 INSTALL( TARGETS ${TargetName}
   DESTINATION bin
   )
