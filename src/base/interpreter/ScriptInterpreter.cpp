@@ -43,7 +43,7 @@
 //#define DEBUG_SECTION_DELIMITER
 //#define DEBUG_SCRIPT_WRITING_COMMANDS
 //#define DBGLVL_SCRIPT_READING 1
-#define DBGLVL_GMAT_FUNCTION 2
+//#define DBGLVL_GMAT_FUNCTION 2
 //#define DEBUG_COMMAND_MODE_TOGGLE
 //#define DEBUG_ENCODING_CHAR
 
@@ -242,8 +242,8 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret(%p) Entered inCmd=%s, skipHeader=%d, "
-       "functionMode=%d\n", inCmd, inCmd->GetTypeName().c_str(), skipHeader,
-       functionMode);
+       "functionMode=%d, inScriptEvent=%d\n", inCmd, inCmd->GetTypeName().c_str(),
+       skipHeader, functionMode, inScriptEvent);
    #endif
    
    #ifdef DEBUG_COMMAND_MODE_TOGGLE
@@ -1853,6 +1853,7 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
                 obj->GetName().c_str());
             #endif
             // If object is not an automatic global, set it to local
+            // This will fix crash during function object clearing (LOJ: 2015.03.19)
             if (!obj->IsAutomaticGlobal())
                obj->SetIsLocal(true);
             currentFunction->AddFunctionObject(obj);
