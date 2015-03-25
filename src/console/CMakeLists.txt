@@ -86,6 +86,11 @@ _ADDSOURCEGROUPS("")
 # Create build outputs in bin directory
 _SETOUTPUTDIRECTORY(${TargetName} bin)
 
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  )
+
 # Specify where to install (make install or VS "INSTALL" project)
 INSTALL( TARGETS ${TargetName}
   DESTINATION bin
