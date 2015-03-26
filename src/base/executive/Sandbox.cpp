@@ -1204,7 +1204,7 @@ void Sandbox::Clear()
          delete omi->second;
          omi->second = NULL;
          // Commented out since this causes crash when re-run or exit GMAT (LOJ: 2015.03.26)
-         globalObjectMap.erase(omi++);
+         //globalObjectMap.erase(omi++);
       }
    }
    
