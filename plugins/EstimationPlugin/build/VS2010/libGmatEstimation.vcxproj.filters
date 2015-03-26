@@ -87,9 +87,6 @@
     <ClInclude Include="..\..\src\base\estimator\BatchEstimatorSVD.hpp">
       <Filter>Source Files\estimator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\event\EventException.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\event\EventManager.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
@@ -320,9 +317,6 @@
     <ClCompile Include="..\..\src\base\event\EventData.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\base\event\EventException.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\base\factory\EventFactory.cpp">
       <Filter>Source Files\factory</Filter>
     </ClCompile>
@@ -485,8 +479,5 @@
     <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
 </Project>

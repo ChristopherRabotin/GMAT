@@ -1947,9 +1947,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.cpp">
-      <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
@@ -2366,6 +2363,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.cpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\base\command</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -4091,9 +4091,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.hpp">
-      <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClInclude>
@@ -4513,6 +4510,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.hpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\base\command</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

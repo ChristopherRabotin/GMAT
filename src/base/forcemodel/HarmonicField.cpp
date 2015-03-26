@@ -148,6 +148,10 @@ eop                     (NULL)
    
    FileManager *fm = FileManager::Instance();
    potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField() constructor, this=<%p>, name='%s'\n", this, name.c_str());
+   #endif
 }
 
 
@@ -199,6 +203,10 @@ fixedCS                 (NULL),
 targetCS                (NULL),
 eop                     (hf.eop)
 {
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField() copy constructor, this=<%p>, eop=<%p>\n", this, eop);
+   #endif
 }
 
 
@@ -239,6 +247,10 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    fixedCS        = hf.fixedCS;
    targetCS       = hf.targetCS;
    eop            = hf.eop;
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField() operator=, this=<%p>, eop=<%p>\n", eop, this);
+   #endif
    return *this;
 }
 
@@ -253,6 +265,13 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
 //------------------------------------------------------------------------------
 bool HarmonicField::Initialize()
 {
+   // Write default file message per GMAT session (LOJ: 2014.12.23)
+   static bool writeDefaultFileMessage = true;
+   
+   #ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage
+      ("HarmonicField::Initialize() entered, this=<%p>, eop=<%p>\n", this, eop);
+   #endif
    if (!GravityBase::Initialize())
       return false;
 
@@ -275,14 +294,20 @@ bool HarmonicField::Initialize()
              "EOP file is undefined for Harmonic Field " + instanceName);
 
    hMinitialized = true;
-   if (usingDefaultFile && isFirstTimeDefault)
+   //if (usingDefaultFile && isFirstTimeDefault)
+   if (writeDefaultFileMessage && usingDefaultFile && isFirstTimeDefault)
    {
       MessageInterface::ShowMessage
          ("Using default potential file \"%s\" for GravityField object \"%s\"\n",
           //filename.c_str(), instanceName.c_str());
           filenameFullPath.c_str(), instanceName.c_str());
       isFirstTimeDefault = false;
+      writeDefaultFileMessage = false;
    }
+   #ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage
+      ("HarmonicField::Initialize() returning true, this=<%p>, eop=<%p>\n", this, eop);
+   #endif
    return true;
 }
 
@@ -993,6 +1018,10 @@ void HarmonicField::SetForceOrigin(CelestialBody* toBody)
 //------------------------------------------------------------------------------
 void HarmonicField::SetEopFile(EopFile *eopF)
 {
+   #ifdef DEBUG_EOP_FILE
+   MessageInterface::ShowMessage
+      ("HarmonicField::SetEopFile() entered, this=<%p>, eopF=<%p>\n", this, eopF);
+   #endif
    eop = eopF;
 }
 

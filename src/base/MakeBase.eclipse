@@ -35,7 +35,7 @@ ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dynamiclib -Wl -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
@@ -200,6 +200,7 @@ OBJECTS = \
     command/EndScript.o \
     command/EndTarget.o \
     command/EndWhile.o \
+    command/FindEvents.o \
     command/For.o \
     command/If.o \
     command/ManageObject.o \

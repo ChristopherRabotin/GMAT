@@ -235,9 +235,9 @@ void GmatFunction::SetNewFunction(bool flag)
 
 
 //------------------------------------------------------------------------------
-// bool Initialize()
+// bool Initialize(ObjectInitializer *objInit, bool reinitialize = false)
 //------------------------------------------------------------------------------
-bool GmatFunction::Initialize()
+bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
 {
    #ifdef DEBUG_TRACE
    static Integer callCount = 0;
@@ -249,7 +249,8 @@ bool GmatFunction::Initialize()
    #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
          ("======================================================================\n"
-          "GmatFunction::Initialize() entered for function '%s'\n", functionName.c_str());
+          "GmatFunction::Initialize() entered for function '%s', reinitialize=%d\n",
+          functionName.c_str(), reinitialize);
       MessageInterface::ShowMessage("   and FCS is %s set.\n", (fcs? "correctly" : "NOT"));
       MessageInterface::ShowMessage("   Pointer for FCS is %p\n", fcs);
       MessageInterface::ShowMessage("   First command in fcs is %s\n",
@@ -258,17 +259,69 @@ bool GmatFunction::Initialize()
    #endif
    if (!fcs) return false;
    
-   Function::Initialize();
+   Function::Initialize(objInit);
    
    // Initialize the Validator - I think I need to do this each time - or do I?
    validator->SetFunction(this);
    validator->SetSolarSystem(solarSys);
    std::map<std::string, GmatBase *>::iterator omi;
    
+   #ifdef DEBUG_FUNCTION_INIT
+   MessageInterface::ShowMessage
+      ("   functionObjectMap.size()  = %d\n   automaticObjectMap.size() = %d\n",
+       functionObjectMap.size(), automaticObjectMap.size());
+   #endif
+   
+   // Add clones of objects created in the function to the FOS (LOJ: 2014.12.09)
+   for (omi = functionObjectMap.begin(); omi != functionObjectMap.end(); ++omi)
+   {
+      std::string funcObjName = omi->first;
+      
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("   Add if funcObj '%s' is not already in objectStore\n", funcObjName.c_str());
+      #endif
+      
+      // if name not found, clone it and add to map (loj: 2008.12.15)
+      if (objectStore->find(funcObjName) == objectStore->end())
+      {
+         GmatBase *funcObj = (omi->second)->Clone();
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Add
+            (funcObj, funcObjName, "GmatFunction::Initialize()",
+             "funcObj = (omi->second)->Clone()");
+         #endif
+         
+         #ifdef DEBUG_FUNCTION_INIT_MORE
+         try
+         {
+            MessageInterface::ShowMessage
+               ("   funcObj(%s)->EvaluateReal() = %f\n", funcObjName.c_str(),
+                funcObj->GetRealParameter("Value"));
+         }
+         catch (BaseException &e)
+         {
+            MessageInterface::ShowMessage("%s\n", e.GetFullMessage().c_str());             
+         }
+         #endif
+         
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   Adding clone of funcObj <%p>'%s' to objectStore\n", funcObj, funcObjName.c_str());
+         #endif
+         funcObj->SetIsLocal(true);
+         objectStore->insert(std::make_pair(funcObjName, funcObj));
+      }
+   }
+   
    // add automatic objects such as sat.X to the FOS (well, actually, clones of them)
    for (omi = automaticObjectMap.begin(); omi != automaticObjectMap.end(); ++omi)
    {
       std::string autoObjName = omi->first;
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("   Add if autoObj '%s' is not already in objectStore\n", autoObjName.c_str());
+      #endif
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
       if (objectStore->find(autoObjName) == objectStore->end())
@@ -280,26 +333,47 @@ bool GmatFunction::Initialize()
              "autoObj = (omi->second)->Clone()");
          #endif
          
-         #ifdef DEBUG_FUNCTION_INIT
+         #ifdef DEBUG_FUNCTION_INIT_MORE
          try
          {
             MessageInterface::ShowMessage
-               ("   autoObj->EvaluateReal() = %f\n", autoObj->GetRealParameter("Value"));
+               ("   autoObj(%s)->EvaluateReal() = %f\n", autoObjName.c_str(),
+                autoObj->GetRealParameter("Value"));
          }
          catch (BaseException &e)
          {
-            MessageInterface::ShowMessage(e.GetFullMessage());             
+            MessageInterface::ShowMessage("%s\n", e.GetFullMessage().c_str());             
          }
+         #endif
+         
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   Adding clone of autoObj <%p>'%s' to objectStore\n", autoObj, autoObjName.c_str());
          #endif
          
          autoObj->SetIsLocal(true);
          objectStore->insert(std::make_pair(autoObjName, autoObj));
       }
    }
+
    
-   // first, send all the commands the object store, solar system, etc
    GmatCommand *current = fcs;
    
+   if (!objectsInitialized ||
+       objectsInitialized && reinitialize)
+   {
+      // Initialize function objects here. Moved from Execute() (LOJ: 2015.02.27)
+      objectsInitialized = true;
+      validator->HandleCcsdsEphemerisFile(objectStore, true);
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage("============================ Initializing LocalObjects\n");
+      #endif
+      InitializeLocalObjects(objInit, current, true);
+   }
+   
+   
+   
+   // first, send all the commands the object store, solar system, etc
    while (current)
    {
       #ifdef DEBUG_FUNCTION_INIT
@@ -390,7 +464,7 @@ bool GmatFunction::Initialize()
    fcsFinalized = false;
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
-      ("GmatFunction::Initialize() exiting for function '%s' with true\n",
+      ("GmatFunction::Initialize() exiting for function '%s' with true\n\n",
        functionName.c_str());
    #endif
    
@@ -403,7 +477,7 @@ bool GmatFunction::Initialize()
 
 
 //------------------------------------------------------------------------------
-// bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
+// bool Execute(ObjectInitializer *objInit, bool reinitialize = true)
 //------------------------------------------------------------------------------
 bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
 {
@@ -421,7 +495,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    MessageInterface::ShowMessage
       ("======================================================================\n"
        "GmatFunction::Execute() entered for '%s'\n   internalCS is <%p>, "
-       "reinitialize = %d\n", functionName.c_str(), internalCoordSys, reinitialize);
+       "reinitialize = %d, fcs=<%p><%s>\n", functionName.c_str(), internalCoordSys,
+       reinitialize, fcs, fcs ? fcs->GetTypeName().c_str() : "NULL");
    #endif
    
    GmatCommand *current = fcs;
@@ -433,17 +508,46 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    if (reinitialize)
       objectsInitialized = false;
    
-   // Reinitialize CoordinateSystem to fix bug 1599 (LOJ: 2009.11.05)
+   #ifdef DEBUG_FUNCTION_EXEC
+   MessageInterface::ShowMessage("   objectsInitialized = %d\n", objectsInitialized);
+   #endif
+   
+   #if 1
+   // For two modes function parsing, some ref objects are not set without
+   // reinitialization
+   // Reinitialize Spacecrafts (LOJ: 2015.01.21) - /MonteCarlo/TestCalcOfGSEtime.script
+   // Reinitialize Burns (LOJ:2015.01.09) - Function_TargetCheck.script
+   // Reinitialize CalculatedPoints (LOJ:2015.01.08)
+   // Reinitialize CoordinateSystems to fix bug 1599 (LOJ: 2009.11.05)
    // Reinitialize Parameters to fix bug 1519 (LOJ: 2009.09.16)
    if (objectsInitialized)
    {
+      #ifdef DEBUG_FUNCTION_EXEC
+      MessageInterface::ShowMessage
+         ("   Reinitializing CoordinateSystems, CalculatedPointes, Spacecrafts, Burns, Solvers, and Parameters\n");
+      #endif
+      
       if (!objInit->InitializeObjects(true, Gmat::COORDINATE_SYSTEM))
          throw FunctionException
-            ("Failed to re-initialize Parameters in the \"" + functionName + "\"");
+            ("Failed to re-initialize CoordinateSystems in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::CALCULATED_POINT))
+         throw FunctionException
+            ("Failed to re-initialize CalculatedPoints in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::SPACECRAFT))
+         throw FunctionException
+            ("Failed to re-initialize Spacecrafts in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::BURN))
+         throw FunctionException
+            ("Failed to re-initialize Burns in the \"" + functionName + "\"");
+      if (!objInit->InitializeObjects(true, Gmat::SOLVER))
+         throw FunctionException
+            ("Failed to re-initialize Solvers in the \"" + functionName + "\"");
       if (!objInit->InitializeObjects(true, Gmat::PARAMETER))
          throw FunctionException
             ("Failed to re-initialize Parameters in the \"" + functionName + "\"");
    }
+   #endif
+   
    
    // Go through each command in the sequence and execute.
    // Once it gets to a real command, initialize local and automatic objects.
@@ -511,6 +615,11 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       }
       catch (BaseException &e)
       {
+         #ifdef DEBUG_FUNCTION_EXEC
+         MessageInterface::ShowMessage
+            ("Caught CommandException:\n%s\n", e.GetFullMessage().c_str());
+         #endif
+         
          // If it is user interrupt, rethrow (loj: 2008.10.16)
          // How can we tell if it is thrown by Stop command?
          // For now just find the phrase "interrupted by Stop command"
@@ -537,6 +646,14 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
             //throw;
          }
          
+         // Should we re-throw the exception here? (LOJ: 2015.02.19)
+         throw FunctionException
+            ("In " + current->GetGeneratingString(Gmat::NO_COMMENTS) + ", " +
+             e.GetFullMessage());
+         
+         // Since GmatFunction is parsed in object and command modes,
+         // we may not need this section (LOJ: 2014.12.16)
+         #if 0
          // Let's try initialzing local objects here again (2008.10.14)
          try
          {
@@ -570,6 +687,7 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
                 current->GetGeneratingString(Gmat::NO_COMMENTS) + "\", " +
                 e.GetFullMessage());
          }
+         #endif
       }
       
       // If current command is BranchCommand and still executing, continue to next
@@ -761,6 +879,9 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
    {
    case FUNCTION_PATH:
       {
+         return SetGmatFunctionPath(value);
+         
+         #if 0
          FileManager *fm = FileManager::Instance();
          
          // Compose full path if it has relative path.
@@ -805,6 +926,7 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
          #endif
          
          return true;
+         #endif
       }
    case FUNCTION_NAME:
       {
@@ -883,12 +1005,12 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
                                           GmatCommand *current,
                                           bool ignoreException)
 {
-   #ifdef DEBUG_FUNCTION_EXEC
+   #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
       ("\n============================ Begin initialization of local objects in '%s'\n",
        functionName.c_str());
    MessageInterface::ShowMessage
-      ("Now at command \"%s\"\n",
+      ("Now at command <%p><%s> \"%s\"\n", current, current->GetTypeName().c_str(),
        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
@@ -913,7 +1035,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       // Create LibrationPoint EarthSunL1;
       if (!ignoreException || (ignoreException && e.IsFatal()))
       {
-         #ifdef DEBUG_FUNCTION_EXEC
+         #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("objInit->InitializeObjects() threw a fatal exception:\n'%s'\n"
              "   So rethrow...\n", e.GetFullMessage().c_str());
@@ -922,7 +1044,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       }
       else
       {
-         #ifdef DEBUG_FUNCTION_EXEC
+         #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("objInit->InitializeObjects() threw an exception:\n'%s'\n"
              "   So ignoring...\n", e.GetFullMessage().c_str());
@@ -930,11 +1052,74 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
       }
    }
    
-   #ifdef DEBUG_FUNCTION_EXEC
+   #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
       ("============================ End   initialization of local objects\n");
    #endif
    
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetGmatFunctionPath(const std::string &path)
+//------------------------------------------------------------------------------
+bool GmatFunction::SetGmatFunctionPath(const std::string &path)
+{
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("GmatFunction::SetGmatFunctionPath() entered, path='%s'\n", path.c_str());
+   #endif
+   
+   FileManager *fm = FileManager::Instance();
+   
+   // Compose full path if it has relative path.
+   // Assuming if first char has '.', it has relative path.
+   std::string temp = GmatStringUtil::Trim(path);
+   if (temp[0] == '.')
+   {
+      // Follow new file path implementation (LOJ: 2014.01.13)
+      //std::string currPath = fm->GetCurrentWorkingDirectory();
+      std::string currPath = fm->GetGmatWorkingDirectory();
+      
+      #ifdef DEBUG_FUNCTION_SET
+      MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
+      #endif
+      
+      if (temp[1] != '.')
+         functionPath = currPath + temp.substr(1);
+      else
+      {
+         functionPath = currPath + '/';
+         functionPath = functionPath + temp;
+      }
+   }
+   else
+   {
+      functionPath = path;
+   }
+   
+   // Add to GmatFunction path
+   fm->AddGmatFunctionPath(functionPath);
+   
+   // Remove path
+   functionName = GmatFileUtil::ParseFileName(functionPath);
+   
+   // Remove .gmf for GmatFunction name
+   std::string::size_type dotIndex = functionName.find(".gmf");
+   functionName = functionName.substr(0, dotIndex);
+   
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("   functionPath=<%s>\n", functionPath.c_str());
+   MessageInterface::ShowMessage
+      ("   functionName=<%s>\n", functionName.c_str());
+   #endif
+   
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("GmatFunction::SetGmatFunctionPath() returning true\n");
+   #endif
    return true;
 }
 

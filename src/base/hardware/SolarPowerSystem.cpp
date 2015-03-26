@@ -31,6 +31,7 @@
 //#define DEBUG_SOLAR_RENAME
 //#define DEBUG_SOLAR_POWER_OBJECT
 //#define DEBUG_SET
+//#define DEBUG_SOLAR_POWER_PERCENT
 
 
 //---------------------------------
@@ -358,7 +359,8 @@ Real SolarPowerSystem::GetPowerGenerated() const
 
    // Get the spacecraft epoch and state
    Real atEpoch           = spacecraft->GetEpoch();
-   Real *stateRelToOrigin = (spacecraft->GetState()).GetState();
+
+   Real *stateRelToEarth  = (spacecraft->GetState()).GetState();
 
    // Get the base power
    Real basePower      = GetBasePower();
@@ -376,6 +378,7 @@ Real SolarPowerSystem::GetPowerGenerated() const
    Real solarScaleFactor = (1.0 / sunDist2) * (num / denom);
 
    #ifdef DEBUG_SOLAR_POWER
+      MessageInterface::ShowMessage("atEpoch          = %12.10f\n", atEpoch);
       MessageInterface::ShowMessage("basePower        = %12.10f\n", basePower);
       MessageInterface::ShowMessage("sunDist          = %12.10f\n", sunDist);
       MessageInterface::ShowMessage("num              = %12.10f\n", num);
@@ -396,12 +399,15 @@ Real SolarPowerSystem::GetPowerGenerated() const
    {
       bool lit           = true;
       bool dark          = false;
-      Rvector3  sunPos   = sun->GetMJ2000Position(atEpoch);
-      Rvector3  cbPos    = scOrigin->GetMJ2000Position(atEpoch);
-      Real      cbSunVector[3];
+      Rvector3  sunPos   = sun->GetMJ2000Position(atEpoch); // relative to Earth
+      Rvector3  cbPos    = scOrigin->GetMJ2000Position(atEpoch); // relative to Earth
+      Real      bodySunVector[3];
       Real      state[3];
       Real      sunSat[3];
       Real      force[3];
+      Rvector3  stateRelToOrigin(stateRelToEarth[0] - cbPos[0],
+                                 stateRelToEarth[1] - cbPos[1],
+                                 stateRelToEarth[2] - cbPos[2]);
 
       for (unsigned int jj = 0; jj < shadowBodies.size(); jj++)
       {
@@ -410,36 +416,48 @@ Real SolarPowerSystem::GetPowerGenerated() const
          bool        bodyIsOrigin = (bodyName == scOrigin->GetName());
          Real        bodyRadius   = shadowBodies.at(jj)->GetEquatorialRadius();
 
-         Rvector3 bodyPos  = shadowBodies.at(jj)->GetMJ2000Position(atEpoch);
+         Rvector3 bodyPos  = shadowBodies.at(jj)->GetMJ2000Position(atEpoch); // with respect to Earth
+         #ifdef DEBUG_SOLAR_POWER_PERCENT
+            MessageInterface::ShowMessage("shadow body is %s\n", bodyName.c_str());
+            MessageInterface::ShowMessage("origin is      %s\n", (scOrigin->GetName()).c_str());
+            MessageInterface::ShowMessage("   cbPos   = %12.10f  %12.10f  %12.10f\n",
+                  cbPos[0], cbPos[1], cbPos[2]);
+            MessageInterface::ShowMessage("   bodyPos = %12.10f  %12.10f  %12.10f\n",
+                  bodyPos[0], bodyPos[1], bodyPos[2]);
+         #endif
+
+         // Find vector from the body to the Sun
          if (!bodyIsSun)
          {
-            cbSunVector[0]    = sunPos[0] - bodyPos[0];
-            cbSunVector[1]    = sunPos[1] - bodyPos[1];
-            cbSunVector[2]    = sunPos[2] - bodyPos[2];
+            bodySunVector[0]    = sunPos[0] - bodyPos[0];
+            bodySunVector[1]    = sunPos[1] - bodyPos[1];
+            bodySunVector[2]    = sunPos[2] - bodyPos[2];
          }
          else  // should never happen, as the Sun is not allowed as a Shadow Body
          {
-            cbSunVector[0] = 0.0;
-            cbSunVector[1] = 0.0;
-            cbSunVector[2] = 0.0;
+            bodySunVector[0] = 0.0;
+            bodySunVector[1] = 0.0;
+            bodySunVector[2] = 0.0;
          }
          // Convert state to be relative to the current body
          if (!bodyIsOrigin)
          {
+            // state is from origin to spacecraft ; cb - body = origin wrt shadow body
             state[0] = stateRelToOrigin[0] + (cbPos[0] - bodyPos[0]);
             state[1] = stateRelToOrigin[1] + (cbPos[1] - bodyPos[1]);
             state[2] = stateRelToOrigin[2] + (cbPos[2] - bodyPos[2]);
          }
-         else  // state is with respect to the origin
+         else  // SC state with respect to the origin (which is the current body)
          {
             state[0] = stateRelToOrigin[0];
             state[1] = stateRelToOrigin[1];
             state[2] = stateRelToOrigin[2];
          }
 
-         sunSat[0] = state[0] - cbSunVector[0];
-         sunSat[1] = state[1] - cbSunVector[1];
-         sunSat[2] = state[2] - cbSunVector[2];
+         // Find vector from Sun to the SC
+         sunSat[0] = state[0] - bodySunVector[0];
+         sunSat[1] = state[1] - bodySunVector[1];
+         sunSat[2] = state[2] - bodySunVector[2];
          Real sunDistance = GmatMathUtil::Sqrt(sunSat[0]*sunSat[0] +
                                                sunSat[1]*sunSat[1] +
                                                sunSat[2]*sunSat[2]);
@@ -456,8 +474,8 @@ Real SolarPowerSystem::GetPowerGenerated() const
             MessageInterface::ShowMessage(
                   "In SolarPowerSystem,  body = %s\n",
                   shadowBodies.at(jj)->GetName().c_str());
-            MessageInterface::ShowMessage("   cbSunVector = %12.10f  %12.10f  %12.10f\n",
-                  cbSunVector[0], cbSunVector[1], cbSunVector[2]);
+            MessageInterface::ShowMessage("   bodySunVector = %12.10f  %12.10f  %12.10f\n",
+                  bodySunVector[0], bodySunVector[1], bodySunVector[2]);
             MessageInterface::ShowMessage("   sunSat      = %12.10f  %12.10f  %12.10f\n",
                   sunSat[0], sunSat[1], sunSat[2]);
             MessageInterface::ShowMessage("   force       = %12.10f  %12.10f  %12.10f\n",
@@ -466,7 +484,7 @@ Real SolarPowerSystem::GetPowerGenerated() const
 
 
          percentSun  = shadowState->FindShadowState(lit, dark, "DualCone",
-               state, cbSunVector,sunSat, force, sunRadius, bodyRadius,
+               state, bodySunVector,sunSat, force, sunRadius, bodyRadius,
                psunrad);
 
          // Is there more than one occultation? -  we don't currently model that
@@ -475,7 +493,7 @@ Real SolarPowerSystem::GetPowerGenerated() const
          // For now, we are using the minimum value for percentSun over all bodies
          if (percentSun < percentSunAll)
             percentSunAll = percentSun;
-         #ifdef DEBUG_SOLAR_POWER
+         #ifdef DEBUG_SOLAR_POWER_PERCENT
             MessageInterface::ShowMessage("   percentSun    = %12.10f\n", percentSun);
             MessageInterface::ShowMessage("   percentSunAll = %12.10f\n", percentSunAll);
          #endif

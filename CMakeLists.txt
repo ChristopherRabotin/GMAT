@@ -1,0 +1,329 @@
+# $Id$
+# 
+# GMAT: General Mission Analysis Tool.
+# 
+# CMAKE script file for GMAT Project
+# This file must be installed in the main GMAT directory.
+# That is, we should have the directory structure:
+#   ./src
+#   ./plugins
+#   ./depends
+#   ./application
+#   etc...
+#
+# Original Author: Joris T. Olympio
+# Modified For Production By: Josh Fisher
+# Modified for CMake standardization by: Ravi Mathur
+#
+# DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
+#
+
+# Require CMake minimum version
+cmake_minimum_required(VERSION 2.8)
+SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8) # Support OSX 10.8+
+
+# Set Cmake project
+PROJECT(GMAT C CXX)
+SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "Build version")
+SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
+
+# Set default GMAT installation location
+# Can be overridden by using "-DCMAKE_INSTALL_PREFIX=/foo/bar" at command line
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
+endif()
+
+# Path to custom Find****.cmake files
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
+
+# Set general build options
+OPTION(PROFILE_BUILD "ProfileBuild" OFF)
+OPTION(GMAT_64_BIT "64-Bit Binaries" ON)
+OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
+
+# Public GMAT plugins
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
+OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
+OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
+OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
+OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
+OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
+OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
+OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
+OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
+OPTION(PLUGIN_STATION "Station Plugin" ON)
+
+# Optional Jazz Plugin Inputs
+# to-do
+
+# Set default wxWidgets directory based on OS
+SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
+if(WIN32)
+  # On Windows, FindwxWidgets searches the wxWidgets_ROOT_DIR path
+  SET(wxWidgets_ROOT_DIR "${wxWidgets_PARTIAL_DIR}/wxMSW-3.0.2" CACHE PATH "wxWidgets Root Directory")
+
+elseif(UNIX)
+  # On Mac/Linux, FindwxWidgets uses the wx-config utility which must be
+  # accessible from the system PATH environment variable. 
+  # So first save PATH (just the first time to avoid recursive setting)...
+  if(NOT wxWidgets_ROOT_DIR)
+    SET(SYS_PATH "$ENV{PATH}" CACHE INTERNAL "System PATH environment variable")
+  endif()
+
+  # ... then get the expected path to the wx-config utility ...
+  if(APPLE)
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/cocoa-install/bin" CACHE PATH "wxWidgets Root Directory")
+  else()
+    SET(wxWidgets_ROOT_DIR  "${wxWidgets_PARTIAL_DIR}/wxWidgets-3.0.2/gtk-install/bin" CACHE PATH "wxWidgets Root Directory")
+  endif()
+
+  # ... then append that to the PATH environment variable
+  SET(ENV{PATH} "${SYS_PATH}:${wxWidgets_ROOT_DIR}")
+
+  # Clear wxWidgets_CONFIG_EXECUTABLE in case user changed wxWidgets_ROOT_DIR
+  UNSET(wxWidgets_CONFIG_EXECUTABLE CACHE) 
+endif()
+
+# Find wxWidgets
+FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
+
+# Set default CSPICE directory based on OS
+if(WIN32)
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/windows")
+elseif(APPLE)
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/macosx")
+else()
+  SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/linux")
+endif()
+
+# Use appropriate 32/64-bit CSPICE directories
+if(GMAT_64_BIT)
+  SET(CSPICE_DEPENDS_DIR "${CSPICE_DIR_TEMP}/cspice64")
+else()
+  SET(CSPICE_DEPENDS_DIR "${CSPICE_DIR_TEMP}/cspice32")
+endif()
+
+# Search for CSPICE folder in default paths
+# User can change this via CMake GUI or command line
+FIND_PATH(CSPICE_DIR
+  NAMES include/SpiceUsr.h
+  PATHS
+    ${CSPICE_DEPENDS_DIR}
+  DOC "Path to CSpice root directory (containing include/SpiceUsr.h)"
+  NO_DEFAULT_PATH
+  )
+
+# Make sure CSPICE exists
+if(EXISTS ${CSPICE_DIR})
+  MESSAGE(STATUS "Found CSPICE: " ${CSPICE_DIR})
+else()
+  MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
+endif()
+
+# Set default F2C directory based on OS
+if(WIN32)
+  # On Windows, use F2C version from CSPICE
+  SET(F2C_DEPENDS_DIR "${CSPICE_DIR}/include")
+elseif(UNIX)
+  SET(F2C_DEPENDS_DIR "${PROJECT_SOURCE_DIR}/depends/f2c")
+endif()
+
+# Search for F2C folder in default paths
+# User can change this via CMake GUI or command line
+FIND_PATH(F2C_DIR
+  NAMES f2c.h
+  PATHS 
+    ${F2C_DEPENDS_DIR}
+  DOC "Path to F2C directory (containing f2c.h)"
+  NO_DEFAULT_PATH
+  )
+
+# Make sure F2C exists
+if(EXISTS ${F2C_DIR})
+  MESSAGE(STATUS "Found F2C: " ${F2C_DIR})
+else()
+  MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR to path to f2c.h and re-configure.")
+endif()
+
+# Find Matlab
+SET(Matlab_ROOT_DIR "" CACHE PATH "Path to user-specified MATLAB location. Leave empty to auto-find MATLAB.")
+SET(MATLAB_ADDITIONAL_VERSIONS
+  # Additional Matlab versions should be included here
+  "R2015b=8.6"
+  "R2015a=8.5"
+  "R2014b=8.4"
+  CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
+  )
+FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
+MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
+
+# Default to Release configuration on single-config generators
+# e.g. make, but not VisualStudio or XCode
+# Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
+# run, so we check for that and set the default appropriately
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
+endif()
+
+# ====================================================================
+# Common build options
+INCLUDE(CheckCXXCompilerFlag)
+
+if(WIN32)
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W2")
+endif()
+
+# Enable parallel builds on VisualStudio
+if(MSVC)
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
+if(UNIX)
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+endif()
+
+# check fPIC flag on GCC compilers
+if(CMAKE_COMPILER_IS_GNUCC)
+  CHECK_CXX_COMPILER_FLAG("-fPIC" GCC_PIC)
+  if(GCC_PIC)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+  endif()
+endif()
+
+# flags to append to CMAKE_CXX_FLAGS according to CMAKE_BUILD_TYPE 
+if(UNIX)
+  SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  SET(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
+  SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+  SET(CMAKE_CXX_FLAGS_MINSIZEREL "-O3")
+endif()
+
+# Common definitions
+ADD_DEFINITIONS(-DNO_GCC_PRAGMA)
+ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
+
+# Mark debug libraries with a "d" suffix
+SET(CMAKE_DEBUG_POSTFIX "d")
+
+# Linker Flags
+if(UNIX)
+  if(NOT APPLE)
+    LINK_LIBRARIES("dl")	
+  endif()
+endif()
+
+# Profile Build Compile Flags
+if (PROFILE_BUILD)
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+endif()
+
+# Warning suppression definitions
+# Note that warning C4430 presents as an error in the MatlabInterface plugin
+if(WIN32)
+  ADD_DEFINITIONS("/wd4430 /wd4251 /wd4231 /wd4996 /nologo")
+endif()
+
+# Set 64 bit Definitions and directories
+if (GMAT_64_BIT)
+  MESSAGE(STATUS "Will compile 64-bit GMAT")
+  ADD_DEFINITIONS("-DUSE_64_BIT_LONGS")
+else()
+  MESSAGE(STATUS "Will compile 32-bit GMAT")
+endif()
+
+# Additional UNIX-specific definitions
+if(UNIX)
+  ADD_DEFINITIONS("-DLINUX_MAC")
+
+  # Needed to support OSX 10.8+
+  if(APPLE)
+    # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
+    # This is incompatible with the C++11 standard, and should be fixed
+    # For now, disable this compile error (-Wreserved-user-defined-literal)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11 -Wno-reserved-user-defined-literal")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+  endif()
+endif()
+
+# Enable RPATH on Mac/Linux so that GMAT shared libraries can be found
+# relative to each other. This is necessary to distribute GMAT and use it
+# from 3rd-party apps such as Matlab.
+# Assumes that GMAT libraries are stored in bin/, plugins/, or proprietary/
+if(UNIX)
+  if(APPLE)
+    # On Mac, @loader_path points to directory of current shared library
+    SET(CMAKE_MACOSX_RPATH TRUE)
+    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../bin/libwx/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/")
+  else()
+    # On Linux, $ORIGIN points to directory of current shared library
+    # Linux searches the RPATH before the system LD_LIBRARY_PATH, so enable
+    # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
+    # the Linux search order similar to Mac/Windows.
+    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../bin/libwx/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
+    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
+  endif()
+endif()
+
+# Declare global var for GmatBase header directories
+# This will be defined in the GmatBase CMakeLists.txt file
+SET(GMAT_BASE_INCLUDE_DIRECTORIES "" CACHE INTERNAL "base includes")
+
+# ====================================================================
+# Define macro that sets the output directory for build products,
+# e.g. executables or shared libraries. By default these are placed under
+# the <GMAT>/application/ directory so that devs can easily test without
+# having to install the build (via make install or VS INSTALL).
+# This default location can be changed by the user.
+SET(GMAT_BUILDOUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/application" CACHE PATH "Base directory for GMAT binaries. Should contain bin, plugins, etc.")
+MACRO(_SETOUTPUTDIRECTORY TargetName OUTPUT_DIR)
+  if(WIN32)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+      RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      RUNTIME_OUTPUT_DIRECTORY_RELEASE ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY_RELEASE ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      )
+  elseif(UNIX) 
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+      RUNTIME_OUTPUT_DIRECTORY ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      LIBRARY_OUTPUT_DIRECTORY ${GMAT_BUILDOUTPUT_DIRECTORY}/${OUTPUT_DIR}
+      )
+  endif()
+ENDMACRO()
+
+# ====================================================================
+# Define macro that adds source/header files to appropriate groups
+# for IDE-based projects (e.g. VisualStudio, XCode, ...).
+MACRO(_ADDSOURCEGROUPS ALL_DIRS)
+  # Loop over each directory containing source/header files
+  FOREACH(currdir ${ALL_DIRS})
+    # Create the source group name from the current directory name
+    STRING(REPLACE "/" "\\\\" groupname ${currdir})
+
+    # Add source files (.c, .cpp) to IDE group
+    SOURCE_GROUP("Source Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.c(pp)?")
+
+    # Add header files (.hpp) to IDE group
+    SOURCE_GROUP("Header Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.h(pp)?")
+  ENDFOREACH(currdir)
+ENDMACRO(_ADDSOURCEGROUPS)
+
+# ====================================================================
+# Go to src directory and look for CMake instructions there
+ADD_SUBDIRECTORY(src)
+
+# ====================================================================
+# Go to plugins directory and look for CMake instructions there
+ADD_SUBDIRECTORY(plugins)
+
+# ====================================================================
+# Setup GMAT install process
+ADD_SUBDIRECTORY(build/install)
+

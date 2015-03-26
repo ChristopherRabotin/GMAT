@@ -49,8 +49,8 @@ public:
                                        IntegerArray &colCounts);
    virtual bool         IsNewFunction();
    virtual void         SetNewFunction(bool flag);
-   virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
+   virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
    virtual void         Finalize();
    virtual bool         IsFcsFinalized();
    virtual void         SetObjectMap(ObjectMap *objMap);
@@ -72,12 +72,18 @@ public:
    virtual WrapperArray&   GetWrappersToDelete();
    virtual void         ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs);
    
+   // Methods for objects created in the function via Create
+   virtual void         ClearFunctionObjects();
+   virtual void         AddFunctionObject(GmatBase *obj);
+   virtual GmatBase*    FindFunctionObject(const std::string &name);
+   virtual ObjectMap*   GetFunctionObjectMap();
+   
    // methods to set/get the automatic objects
    virtual void         ClearAutomaticObjects();
    virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj,
                                            bool alreadyManaged);
    virtual GmatBase*    FindAutomaticObject(const std::string &name);
-   virtual ObjectMap&   GetAutomaticObjects();
+   virtual ObjectMap*   GetAutomaticObjectMap();
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
@@ -151,6 +157,8 @@ protected:
    GmatCommand          *fcs;
    /// have the commands in the FCS been finalized?
    bool                 fcsFinalized;
+   /// Map to hold objects created in function
+   ObjectMap            functionObjectMap;
    /// objects automatically created on parsing (but for whom a references object cannot be
    /// set at that time)
    ObjectMap            automaticObjectMap;
