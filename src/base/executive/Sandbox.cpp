@@ -40,7 +40,7 @@
 
 //#define DEBUG_SANDBOX_INIT
 //#define DEBUG_MODERATOR_CALLBACK
-#define DEBUG_SANDBOX_GMATFUNCTION
+//#define DEBUG_SANDBOX_GMATFUNCTION
 //#define DEBUG_SANDBOX_OBJ_INIT
 //#define DEBUG_SANDBOX_OBJ_ADD
 //#define DEBUG_SANDBOX_OBJECT_MAPS
@@ -61,7 +61,7 @@
 #endif
 
 #ifdef DEBUG_SANDBOX_INIT
-   std::map<std::string, GmatBase *>::iterator omIter;
+   ObjectMap::iterator omIter;
 #endif
 
 
@@ -545,7 +545,7 @@ bool Sandbox::Initialize()
          "No reference (internal) coordinate system defined in the Sandbox!");
 
 
-   std::map<std::string, GmatBase *>::iterator omi;
+   ObjectMap::iterator omi;
    GmatBase *obj = NULL;
    std::string oName;
    std::string j2kName;
@@ -1098,7 +1098,7 @@ void Sandbox::Clear()
    current   = NULL;
    
    // Delete the all cloned objects
-   std::map<std::string, GmatBase *>::iterator omi;
+   ObjectMap::iterator omi;
    
    #ifdef DEBUG_SANDBOX_CLEAR
    ShowObjectMap(objectMap, "Sandbox::Clear() clearing objectMap\n");
@@ -1433,7 +1433,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
 
 //------------------------------------------------------------------------------
 // bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
-//                                  std::map<std::string, GmatBase *> *usingMap)
+//                                  ObjectMap *usingMap)
 //------------------------------------------------------------------------------
 /**
  *  Handles any GmatFunctions included in the sequence.  The input cmd is the 
@@ -1447,8 +1447,8 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
  *  @return true if successful; flase otherwise
  */
 //------------------------------------------------------------------------------
-bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
-                                 GmatBase *> *usingMap)
+bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
+                                 std::map<std::string,  GmatBase *> *usingMap)
 {
    #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
@@ -1735,8 +1735,8 @@ void Sandbox::PassToAll(GmatBase *obj, Integer updatedParameterIndex)
 
    // Walk the global object store
    GmatBase *listObj;
-   std::map<std::string, GmatBase *>::iterator current=globalObjectMap.begin();
-
+   ObjectMap::iterator current = globalObjectMap.begin();
+   
    #ifdef DEBUG_CLONE_UPDATES
       MessageInterface::ShowMessage("PassToAll updates: Walking the global "
             "object store\n");
