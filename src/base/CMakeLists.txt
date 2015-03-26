@@ -554,7 +554,26 @@ SET_TARGET_PROPERTIES(${TargetName} PROPERTIES
   )
 
 # Specify where to install (make install or VS "INSTALL" project)
-INSTALL( TARGETS ${TargetName}
-  RUNTIME DESTINATION bin # Windows
-  LIBRARY DESTINATION bin # Mac/Linux
-  )
+if(WIN32)
+  INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION bin)
+else()
+  if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+    SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+  else()
+    SET(INSTALL_DIR bin)
+  endif()
+  INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${INSTALL_DIR})
+endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/"
+      )
+  endif()
+endif()

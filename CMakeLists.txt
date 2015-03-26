@@ -30,7 +30,7 @@ SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 # Set default GMAT installation location
 # Can be overridden by using "-DCMAKE_INSTALL_PREFIX=/foo/bar" at command line
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
+  SET(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
 endif()
 
 # Path to custom Find****.cmake files
@@ -60,6 +60,16 @@ OPTION(PLUGIN_STATION "Station Plugin" ON)
 
 # Optional Jazz Plugin Inputs
 # to-do
+
+# Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
+# This may need to be a user-selectable cache variable in the future
+if(APPLE)
+  if(GMAT_GUI)
+    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
+  else()
+    SET(GMAT_MAC_APPBUNDLE_PATH "")
+  endif()
+endif()
 
 # Set default wxWidgets directory based on OS
 SET(wxWidgets_PARTIAL_DIR "${PROJECT_SOURCE_DIR}/depends/wxWidgets")
@@ -254,18 +264,13 @@ endif()
 # Enable RPATH on Mac/Linux so that GMAT shared libraries can be found
 # relative to each other. This is necessary to distribute GMAT and use it
 # from 3rd-party apps such as Matlab.
-# Assumes that GMAT libraries are stored in bin/, plugins/, or proprietary/
 if(UNIX)
   if(APPLE)
-    # On Mac, @loader_path points to directory of current shared library
-    SET(CMAKE_MACOSX_RPATH TRUE)
-    SET(CMAKE_INSTALL_RPATH "@loader_path/../bin/;@loader_path/../bin/libwx/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/")
+    SET(CMAKE_MACOSX_RPATH TRUE) # Enable Mac RPATH
   else()
-    # On Linux, $ORIGIN points to directory of current shared library
     # Linux searches the RPATH before the system LD_LIBRARY_PATH, so enable
     # the use of RUNPATH which is searched after LD_LIBRARY_PATH. This makes
     # the Linux search order similar to Mac/Windows.
-    SET(CMAKE_INSTALL_RPATH "\$ORIGIN/../bin/;\$ORIGIN/../bin/libwx/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
     SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
   endif()

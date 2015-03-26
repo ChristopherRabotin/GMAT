@@ -53,8 +53,9 @@ try
     [notfound, warnings] = loadlibrary(libfile, hfile, ...
         'mfilename', 'interfacewrapper', 'includepath', incdir);
     unloadlibrary(libname);
-catch
-    warning('GMAT:PrepareInterface', 'Library %s could not be properly loaded.', libname);
+catch ME
+    warning('GMAT:PrepareInterface', 'Library %s could not be properly loaded. Error %s', libname, getReport(ME));
+    
     delete('interfacewrapper.m');
     delete(strcat(libname, '_thunk_*'));
     return;

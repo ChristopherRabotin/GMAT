@@ -31,7 +31,7 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
 INSTALL( FILES
   ${PROJECT_SOURCE_DIR}/application/bin/gmat_startup_file.txt
   ${PROJECT_SOURCE_DIR}/application/bin/GMAT.ini
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+  DESTINATION bin
   )
 
 # ====================================================================
@@ -99,8 +99,8 @@ endif()
 # ====================================================================
 # Install wxWidgets libraries
 if(wxWidgets_FOUND)
-  # For Windows, dlls must be next to executables in bin
   if(WIN32)
+    # For Windows, dlls must be next to executables in bin
     INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
@@ -115,17 +115,23 @@ if(wxWidgets_FOUND)
       FILES_MATCHING PATTERN "*ud_*.dll" # Only debug ("ud" suffix)
       PATTERN "msw*" EXCLUDE
       )
-  # For Mac/Linux, dylib/so can be in subdirectory of bin
   else()
+    # For Mac/Linux, wxlibs are in bin/libwx or Mac app bundle
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      SET(WX_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+    else()
+      SET(WX_INSTALL_DIR bin/libwx)
+    endif()
+
     INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
-      DESTINATION bin/libwx
+      DESTINATION ${WX_INSTALL_DIR}
       USE_SOURCE_PERMISSIONS
       CONFIGURATIONS Release MinSizeRel
       FILES_MATCHING PATTERN "libwx_*u[_-]*" # Only release ("u" suffix)
       PATTERN "wx" EXCLUDE
       )
     INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
-      DESTINATION bin/libwx
+      DESTINATION ${WX_INSTALL_DIR}
       USE_SOURCE_PERMISSIONS
       CONFIGURATIONS Debug RelWithDebInfo
       FILES_MATCHING PATTERN "libwx_*ud[_-]*" # Only debug ("ud" suffix)
@@ -137,18 +143,47 @@ if(wxWidgets_FOUND)
     if(APPLE)
       # Create command for wxmac_change_install_names script
       SET(CHNM "./wxmac_change_install_names.sh")
-      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/bin/libwx\"")
+      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/${WX_INSTALL_DIR}\"")
       SET(ARG2 "\"${wxWidgets_LIBRARY_DIRS}\"")
       SET(ARG3 "\"@rpath\"")
 
-      # ARGN contains all GMAT components that use wxWidgets
-      # Append new components here
-      SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/bin/Gmat\"
-      \"${CMAKE_INSTALL_PREFIX}/plugins/libMatlabInterface.dylib\"")
+      # Collect list of all GMAT components that use wxWidgets
+      if(GMAT_MAC_APPBUNDLE_PATH)
+	SET(MAC_GUIDIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
+	SET(MAC_PLUGINDIR ${GMAT_MAC_APPBUNDLE_PATH}/plugins)
+      else()
+	SET(MAC_GUIDIR bin)
+	SET(MAC_PLUGINDIR plugins)
+      endif()
+
+      if(GMAT_GUI)
+	SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/${MAC_GUIDIR}/GMAT\"")
+      endif()
+
+      if(PLUGIN_MATLABINTERFACE)
+	SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_PLUGINDIR}/libMatlabInterface.dylib\"")
+      endif()
+
+      # Append full pathname of new components here using above pattern
 
       SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARGN}")
       INSTALL(CODE "MESSAGE(STATUS \"Changing wxWidgets library install names\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CHNM_COMMAND} WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\")")
     endif()
   endif()
+endif()
+
+# ====================================================================
+# Setup Mac bundle
+if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  INSTALL(CODE "MESSAGE(STATUS \"Creating GMAT.app bundle\")")
+  
+  # Create PkgInfo file
+  SET(CMD echo -n APPL????)
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\" OUTPUT_FILE PkgInfo)")
+
+  # Modify Info.plist file
+  SET(CMD sed -e "s/EXECUTABLE/RunGMAT/" "-i \"\"" Info.plist)
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\")")
+  
 endif()
