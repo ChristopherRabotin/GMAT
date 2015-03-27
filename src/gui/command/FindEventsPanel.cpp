@@ -185,16 +185,16 @@ void FindEventsPanel::LoadData()
          ++index;
    }
 
-   if (locator == "")
-   {
-      locatorCB->SetValue("Select an event locator");
-   }
+//   if (locator == "")
+//   {
+//      locatorCB->SetValue("Select an event locator");
+//   }
 
-   if (!locatorCB->SetStringSelection(locator.c_str()))
-   {
-          locatorCB->Append("");
-          locatorCB->SetStringSelection("");
-   }
+//   if (!locatorCB->SetStringSelection(locator.c_str()))
+//   {
+//          locatorCB->Append("");
+//          locatorCB->SetStringSelection("");
+//   }
 
    appendCheckBox->SetValue((wxVariant(theCommand->GetBooleanParameter("Append"))));
 }
