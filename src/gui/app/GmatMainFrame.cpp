@@ -65,6 +65,7 @@
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
 #include "SubscriberSetupPanel.hpp"
+#include "FindEventsPanel.hpp"
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
@@ -4290,6 +4291,9 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    case GmatTree::SAVE:
    case GmatTree::MANAGE_OBJECT:
       sizer->Add(new ManageObjectPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::FIND_EVENTS:
+      sizer->Add(new FindEventsPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::REPORT:
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
