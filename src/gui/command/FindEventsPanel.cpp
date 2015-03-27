@@ -124,7 +124,7 @@ void FindEventsPanel::Create()
    // create locator label
    wxStaticText *locatorLabel =
       new wxStaticText(this, ID_TEXT,
-                       wxT("Locator"), wxDefaultPosition, wxDefaultSize, 0);
+                       wxT("Event Locator"), wxDefaultPosition, wxDefaultSize, 0);
 
    #if DEBUG_FINDEVENTS_PANEL
    MessageInterface::ShowMessage
