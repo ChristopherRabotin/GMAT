@@ -1709,6 +1709,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mPowerSystemCBList.end())
          mPowerSystemCBList.erase(pos);
    }
+   else if (type == "EventLocator")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mLocatorCBList.begin(), mLocatorCBList.end(), cb);
+
+      if (pos != mLocatorCBList.end())
+         mLocatorCBList.erase(pos);
+   }
    else if (type == "Sensor")
    {
       std::vector<wxComboBox*>::iterator pos =
@@ -2579,7 +2587,7 @@ wxComboBox* GuiItemManager::GetAntennaComboBox(wxWindow *parent, wxWindowID id,
 //                                    const wxSize &size)
 //------------------------------------------------------------------------------
 /**
- * @return Antenna combo box pointer
+ * @return PowerSystem combo box pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
@@ -2603,6 +2611,36 @@ wxComboBox* GuiItemManager::GetPowerSystemComboBox(wxWindow *parent, wxWindowID 
    mPowerSystemCBList.push_back(powerSystemComboBox);
 
    return powerSystemComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetLocatorComboBox(wxWindow *parent, wxWindowID id,
+//                                const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Event Locator combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetLocatorComboBox(wxWindow *parent, wxWindowID id,
+                                               const wxSize &size)
+{
+   wxComboBox *eventLocatorComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theLocatorList, wxCB_READONLY);
+
+   if (theNumLocator == 0)
+      eventLocatorComboBox->Append("No Event Locators Available");
+
+   // show first Power System
+   eventLocatorComboBox->SetSelection(0);
+
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mLocatorCBList.push_back(eventLocatorComboBox);
+
+   return eventLocatorComboBox;
 }
 
 
@@ -6540,6 +6578,35 @@ void GuiItemManager::UpdateLocatorList()
    }
 
    theNumLocator = theLocatorList.GetCount();
+   //-------------------------------------------------------
+   // update registered PowerSystem ComboBox
+   //-------------------------------------------------------
+   int sel;
+   wxString selStr;
+   for (std::vector<wxComboBox*>::iterator pos = mLocatorCBList.begin();
+        pos != mLocatorCBList.end(); ++pos)
+   {
+      sel = (*pos)->GetSelection();
+      selStr = (*pos)->GetValue();
+
+      if (theNumLocator > 0)
+      {
+         (*pos)->Clear();
+         (*pos)->Append(theLocatorList);
+
+         // Insert first item as "No Event Locator Selected"
+         if (theLocatorList[0] != selStr)
+         {
+            (*pos)->Insert("No Event Locator Selected", 0);
+            (*pos)->SetSelection(0);
+         }
+         else
+         {
+            (*pos)->SetSelection(sel);
+         }
+      }
+   }
+
 }
 
 //------------------------------------------------------------------------------
