@@ -299,6 +299,8 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
          // will have higher priority in search path for the new file path implementation.
          // (LOJ: 2014.07.09)
          AddMatlabFunctionPath(newDir);
+		 //Python
+		 AddPythonModulePath(newDir);
       }
       else
          return false;
@@ -2711,6 +2713,53 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
    return mMatlabFunctionFullPaths;
 }
 
+void FileManager::AddPythonModulePath(const std::string& path)
+{
+#ifdef DEBUG_FUNCTION_PATH
+	MessageInterface::ShowMessage
+		("FileManager::AddPythonFunctionPath() Adding %s to PythonFunctionPath\n",
+		path.c_str());
+#endif
+
+	std::list<std::string>::iterator pos =
+		find(mPythonModulePaths.begin(), mPythonModulePaths.end(), path);
+
+	if (pos == mPythonModulePaths.end())
+	{
+		mPythonModulePaths.push_back(path);
+	}
+	
+
+#ifdef DEBUG_FUNCTION_PATH
+	pos = mPythonFunctionPaths.begin();
+	while (pos != mPythonFunctionPaths.end())
+	{
+		MessageInterface::ShowMessage
+			("   mPythonFunctionPaths=%s\n", (*pos).c_str());
+		++pos;
+	}
+#endif
+}
+
+
+// ------------------------------------------------------------------------------
+// const StringArray& GetAllPythonModulePaths()
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetAllPythonModulePaths()
+{
+	mPythonModuleFullPaths.clear();
+
+	std::list<std::string>::iterator listpos = mPythonModulePaths.begin();
+	while (listpos != mPythonModulePaths.end())
+	{
+		mPythonModuleFullPaths.push_back(ConvertToAbsPath(*listpos));
+		++listpos;
+	}
+
+	return mPythonModuleFullPaths;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetLastFilePathMessage()
 //------------------------------------------------------------------------------
@@ -2856,8 +2905,10 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
       // Handle Gmat and Matlab Function path
       if (type == "GMAT_FUNCTION_PATH")
          AddGmatFunctionPath(str2, false);
-      else if (type == "MATLAB_FUNCTION_PATH")
-         AddMatlabFunctionPath(str2, false);
+	  else if (type == "MATLAB_FUNCTION_PATH")
+		  AddMatlabFunctionPath(str2, false);
+	  else if (type == "PYTHON_MODULE_PATH")
+		  AddPythonModulePath(str2);
 
    }
    else if (type.find("_FILE_ABS") != type.npos)
