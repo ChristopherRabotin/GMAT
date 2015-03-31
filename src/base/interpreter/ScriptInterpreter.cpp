@@ -1722,6 +1722,11 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
        inFunctionMode);
    WriteStringArray("ParseDefinitionBlock()", "", chunks);
    #endif
+   #if DBGLVL_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::ParseDefinitionBlock() currentFunction=<%p>'%s'\n",
+       currentFunction, currentFunction ? currentFunction->GetName().c_str() : "NULL");
+   #endif
    
    // Get comments
    std::string preStr = theTextParser.GetPrefaceComment();
@@ -1806,57 +1811,68 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
-         //obj = CreateObject(type, names[i]);
-         obj = CreateObject(type, names[i], manageObject);
-         
-         if (obj == NULL)
-         {
-            // Check error message from the Validator which has more
-            // detailed error message
-            StringArray errList = theValidator->GetErrorList();
-            #ifdef DEBUG_PARSE
-            MessageInterface::ShowMessage
-               ("   Validator errList.size() = %d\n", errList.size());
-            #endif
-            if (errList.size() > 0)
-            {
-               for (UnsignedInt i=0; i<errList.size(); i++)
-                  HandleError(InterpreterException(errList[i]), true);
-               
-               // Empty Validator errors now
-               theValidator->ClearErrorList();
-            }
-            else
-            {
-               InterpreterException ex
-                  ("Cannot create an object \"" + names[i] + "\". The \"" + type +
-                   "\" is an unknown object type or invalid object name or dimension");
-               HandleError(ex);
-            }
-            return false;
-         }
-         
-         objCounter++;     
-         obj->FinalizeCreation();
-         
-         SetComments(obj, preStr, inStr);
-         
-         // If creating insise a function, add it to function object map
-         if (currentFunction != NULL)
+         // Do not create a GmatFunction if inside a function
+         // since GmatFunction is created from the Sandbox as a global
+         // object (LOJ: 2015.03.25)
+         if (currentFunction != NULL && type == "GmatFunction")
          {
             #if DBGLVL_GMAT_FUNCTION
             MessageInterface::ShowMessage
-               ("   currentFunction=<%p>'%s'\n", currentFunction,
-                currentFunction ? currentFunction->GetName().c_str() : "NULL");
-            MessageInterface::ShowMessage
-               ("==> Adding object <%p>'%s' to function object map\n", obj,
-                obj->GetName().c_str());
+               ("   ==> '%s' is a GmatFunction inside a function, so skip creating\n",
+                names[i].c_str());
             #endif
-            // If object is not an automatic global, set it to local
-            // This will fix crash during function object clearing (LOJ: 2015.03.19)
-            if (!obj->IsAutomaticGlobal())
-               obj->SetIsLocal(true);
-            currentFunction->AddFunctionObject(obj);
+            objCounter++;     
+         }
+         else
+         {
+            obj = CreateObject(type, names[i], manageObject);
+            
+            if (obj == NULL)
+            {
+               // Check error message from the Validator which has more
+               // detailed error message
+               StringArray errList = theValidator->GetErrorList();
+               #ifdef DEBUG_PARSE
+               MessageInterface::ShowMessage
+                  ("   Validator errList.size() = %d\n", errList.size());
+               #endif
+               if (errList.size() > 0)
+               {
+                  for (UnsignedInt i=0; i<errList.size(); i++)
+                     HandleError(InterpreterException(errList[i]), true);
+                  
+                  // Empty Validator errors now
+                  theValidator->ClearErrorList();
+               }
+               else
+               {
+                  InterpreterException ex
+                     ("Cannot create an object \"" + names[i] + "\". The \"" + type +
+                      "\" is an unknown object type or invalid object name or dimension");
+                  HandleError(ex);
+               }
+               return false;
+            }
+            
+            objCounter++;     
+            obj->FinalizeCreation();
+            
+            SetComments(obj, preStr, inStr);
+            
+            // If creating insise a function, add it to function object map
+            if (currentFunction != NULL)
+            {
+               #if DBGLVL_GMAT_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   ==> Adding object <%p>'%s' to function object map\n", obj,
+                   obj->GetName().c_str());
+               #endif
+               // If object is not an automatic global, set it to local
+               // This will fix crash during function object clearing (LOJ: 2015.03.19)
+               if (!obj->IsAutomaticGlobal())
+                  obj->SetIsLocal(true);
+               currentFunction->AddFunctionObject(obj);
+            }
          }
       }
       
@@ -1868,7 +1884,7 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          return false;
       }
    }
-
+   
    return retval;
 } // end ParseDefinitionBlock()
 

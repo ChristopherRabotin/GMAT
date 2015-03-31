@@ -41,7 +41,7 @@
 //#define DEBUG_GLOBAL_OBJECT_MAP
 //#define DEBUG_RUN_COMPLETE
 //#define DEBUG_OBJECT_REF
-#define DEBUG_FUNCTION
+//#define DEBUG_FUNCTION
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY

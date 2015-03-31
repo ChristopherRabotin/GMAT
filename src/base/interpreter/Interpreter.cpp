@@ -48,7 +48,7 @@
 
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
-//#define DEBUG_HANDLE_ERROR
+#define DEBUG_HANDLE_ERROR
 //#define DEBUG_INIT
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_COMMAND_VALIDATION
@@ -83,7 +83,7 @@
 //#define DEBUG_VAR_EXPRESSION
 //#define DEBUG_MATH_TREE
 //#define DEBUG_FUNCTION
-#define DBGLVL_FUNCTION_DEF 2
+//#define DBGLVL_FUNCTION_DEF 2
 //#define DBGLVL_FINAL_PASS 2
 //#define DEBUG_AXIS_SYSTEM
 //#define DEBUG_SET_MEASUREMENT_MODEL
@@ -1769,7 +1769,7 @@ GmatBase* Interpreter::FindObject(const std::string &name,
       ("Interpreter::FindObject() entered, name='%s', ofType='%s', currentFunction=<%p>\n",
        name.c_str(), ofType.c_str(), currentFunction);
    #endif
-
+   
    GmatBase *objFound = NULL;
    
    // If parsing a function, use current function to find an object (LOJ: 2014.12.10)
@@ -1785,22 +1785,29 @@ GmatBase* Interpreter::FindObject(const std::string &name,
       else
       {
          objFound = currentFunction->FindFunctionObject(name);
-         #if 0
-         if (objFound == NULL && ofType == "GmatFunction")
+         // If no object found, search current object map in use for GmatFunction
+         if (objFound == NULL)
          {
+            #ifdef DEBUG_FUNCTION
             MessageInterface::ShowMessage
-               ("   ==> name='%s' of type='%s' not found in the function "
-                "object map, so trying theValidator->FindObject()\n",
-                name.c_str(), ofType.c_str());
-            objFound = theValidator->FindObject(name, ofType);
+               ("   Object '%s' not found, so trying to find it from "
+                "the current object map\n", name.c_str());
+            ShowObjectMap("In Interpreter::FindObject()", theObjectMap);
+            #endif
+            if (theObjectMap->find(name) != theObjectMap->end())
+            {
+               GmatBase *obj = (*theObjectMap)[name];
+               if (obj && obj->IsOfType("GmatFunction"))
+                  objFound = obj;
+            }
          }
-         #endif
       }
    }
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Interpreter::FindObject() returning <%p>'%s'\n", objFound,
-       objFound ? objFound->GetName().c_str() : "NULL");
+      ("Interpreter::FindObject() returning <%p>[%s]'%s' for object name '%s'\n",
+       objFound, objFound ? objFound->GetTypeName().c_str() : "NULL",
+       objFound ? objFound->GetName().c_str() : "NULL",name.c_str());
    #endif
    return objFound;
 }
@@ -9770,41 +9777,6 @@ bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
 
 
 //------------------------------------------------------------------------------
-// void WriteStringArray(const std::string &title1, const std::string &title2,
-//                       const StringArray &parts)
-//------------------------------------------------------------------------------
-void Interpreter::WriteStringArray(const std::string &title1,
-                                   const std::string &title2,
-                                   const StringArray &parts)
-{
-   MessageInterface::ShowMessage("   ========== %s%s, has %d parts\n",
-                                 title1.c_str(), title2.c_str(), parts.size());
-   for (UnsignedInt i=0; i<parts.size(); i++)
-      MessageInterface::ShowMessage("   %d: '%s'\n", i, parts[i].c_str());
-   MessageInterface::ShowMessage("\n");
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteForceModel(GmatBase *obj)
-//------------------------------------------------------------------------------
-void Interpreter::WriteForceModel(GmatBase *obj)
-{
-   ODEModel *fm = (ODEModel*)obj;
-   Integer numForces = fm->GetNumForces();
-   MessageInterface::ShowMessage
-      ("   ODEModel '%s' has %d forces\n", fm->GetName().c_str(), numForces);
-   for (int i = 0; i < numForces; i++)
-   {
-      const PhysicalModel* force = fm->GetForce(i);
-      MessageInterface::ShowMessage
-         ("      force[%d] = <%p><%s>'%s'\n", i, force, force->GetTypeName().c_str(),
-          force->GetName().c_str());
-   }
-}
-
-
-//------------------------------------------------------------------------------
 // bool CheckFunctionDefinition(const std::string &funcPath, GmatBase *function,
 //                              bool fullCheck)
 //------------------------------------------------------------------------------
@@ -10405,4 +10377,59 @@ bool Interpreter::HasFilenameTypeParameter(GmatCommand *cmd)
 }
 
 
+//------------------------------------------------------------------------------
+// void WriteStringArray(const std::string &title1, const std::string &title2,
+//                       const StringArray &parts)
+//------------------------------------------------------------------------------
+void Interpreter::WriteStringArray(const std::string &title1,
+                                   const std::string &title2,
+                                   const StringArray &parts)
+{
+   MessageInterface::ShowMessage("   ========== %s%s, has %d parts\n",
+                                 title1.c_str(), title2.c_str(), parts.size());
+   for (UnsignedInt i=0; i<parts.size(); i++)
+      MessageInterface::ShowMessage("   %d: '%s'\n", i, parts[i].c_str());
+   MessageInterface::ShowMessage("\n");
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteForceModel(GmatBase *obj)
+//------------------------------------------------------------------------------
+void Interpreter::WriteForceModel(GmatBase *obj)
+{
+   ODEModel *fm = (ODEModel*)obj;
+   Integer numForces = fm->GetNumForces();
+   MessageInterface::ShowMessage
+      ("   ODEModel '%s' has %d forces\n", fm->GetName().c_str(), numForces);
+   for (int i = 0; i < numForces; i++)
+   {
+      const PhysicalModel* force = fm->GetForce(i);
+      MessageInterface::ShowMessage
+         ("      force[%d] = <%p><%s>'%s'\n", i, force, force->GetTypeName().c_str(),
+          force->GetName().c_str());
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL)
+//------------------------------------------------------------------------------
+void Interpreter::ShowObjectMap(const std::string &title, ObjectMap *objMap)
+{
+   MessageInterface::ShowMessage(title + "\n");
+   if (objMap != NULL)
+   {
+      MessageInterface::ShowMessage
+         (" passedObjectMap = <%p>, it has %d objects\n", objMap, objMap->size());
+      for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
+      {
+         MessageInterface::ShowMessage
+            ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+      }
+   }
+   else
+      MessageInterface::ShowMessage(" passed object map is NULL\n");
+}
 

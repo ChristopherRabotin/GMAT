@@ -36,9 +36,9 @@
 // Deleting subscribers needs more testing but try
 //#define __DO_NOT_DELETE_SUBSCRIBERS__
 
-#define DEBUG_FUNCTION_MANAGER
+//#define DEBUG_FUNCTION_MANAGER
 //#define DEBUG_FM_SET
-#define DEBUG_FM_INIT
+//#define DEBUG_FM_INIT
 //#define DEBUG_FM_REFRESH
 //#define DEBUG_FM_EVAL
 //#define DEBUG_FM_EXECUTE
@@ -293,14 +293,14 @@ void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> *tf)
 //------------------------------------------------------------------------------
 void FunctionManager::SetFunctionName(const std::string &itsName)
 {
-   #ifdef DEBUG_FUNCTION_MANAGER
+   #ifdef DEBUG_FM_SET
       MessageInterface::ShowMessage("Entering FM::SetFunctionName with name = %s\n",
                                     itsName.c_str());
    #endif
    fName = itsName;
    if ((currentFunction) && (currentFunction->GetTypeName() == "GmatFunction"))  
    {
-      #ifdef DEBUG_FUNCTION_MANAGER
+      #ifdef DEBUG_FM_SET
          MessageInterface::ShowMessage("   and setting name to %s on the function\n",
                                        itsName.c_str());
       #endif
@@ -331,7 +331,7 @@ std::string FunctionManager::GetFunctionName() const
 //------------------------------------------------------------------------------
 void FunctionManager::SetFunction(Function *theFunction)
 {
-   #ifdef DEBUG_FUNCTION_MANAGER
+   #ifdef DEBUG_FM_SET
    MessageInterface::ShowMessage
       ("FunctionManager::SetFunction() fName='%s', theFunction=<%p>\n",
        fName.c_str(), theFunction);
@@ -765,7 +765,7 @@ bool FunctionManager::Initialize()
    ShowObjectMap(globalObjectStore, "In FunctionManager::Initialize(), GOS to be used in the function");
    #endif
    
-   #if 1
+   #if 0
    // We need to update function input/output info in function object map
    // for two-mode GmatFunction parsing since it uses functions from the
    // function object store from the caller for nested function calls.
@@ -784,7 +784,7 @@ bool FunctionManager::Initialize()
          if (globalFunc != NULL)
          {
             MessageInterface::ShowMessage
-               ("==> currentFunction=<%p>, Setting <%p> to currentFunction\n");
+               ("==> currentFunction=<%p>, Setting <%p> to currentFunction\n", globalFunc);
             currentFunction = globalFunc;
          }
          

@@ -25,12 +25,12 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_SET
-#define DEBUG_FUNCTION_IN_OUT
+//#define DEBUG_FUNCTION_IN_OUT
 //#define DEBUG_WRAPPER_CODE
-#define DEBUG_FUNCTION_OBJ
+//#define DEBUG_FUNCTION_OBJ
 //#define DEBUG_AUTO_OBJ
 //#define DEBUG_OBJECT_MAP
-#define DEBUG_FIND_OBJECT
+//#define DEBUG_FIND_OBJECT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -109,7 +109,13 @@ Function::Function(const std::string &typeStr, const std::string &name) :
 //------------------------------------------------------------------------------
 Function::~Function()
 {
-   // delete only output wrappers, input wrappers are set by FunctionManager,
+   #ifdef DEBUG_DESTRUCTOR
+   MessageInterface::ShowMessage
+      ("Function::~Function() <%p>[%s]'%s' entered\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
+   
+   // Delete only output wrappers, input wrappers are set by FunctionManager,
    // so they are deleted there.
    // crashes on nested function if delete output wrappers here
    //ClearInOutArgMaps(false, true);
@@ -117,6 +123,12 @@ Function::~Function()
    // Clear original objects
    ClearAutomaticObjects();
    ClearFunctionObjects();
+   
+   #ifdef DEBUG_DESTRUCTOR
+   MessageInterface::ShowMessage
+      ("Function::~Function() <%p>[%s]'%s' leaving\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
 }
 
 
@@ -698,10 +710,11 @@ std::string Function::GetStringParameter(const Integer id) const
 {
    if (id == FUNCTION_PATH)
    {
+      #ifdef DEBUG_GET
       MessageInterface::ShowMessage
-         ("==> Function::GetStringParameter() <%p> returning functionPath '%s'\n",
+         ("Function::GetStringParameter() <%p> returning functionPath '%s'\n",
           this, functionPath.c_str());
-      
+      #endif
       return functionPath;
    }
    else if (id == FUNCTION_NAME)
@@ -1040,16 +1053,19 @@ void Function::ClearFunctionObjects()
    #endif
    
    StringArray toDelete;
-   ObjectMap::iterator omi;
-   for (omi = functionObjectMap.begin(); omi != functionObjectMap.end(); ++omi)
+   ObjectMap::iterator omi = functionObjectMap.begin();
+   while (omi != functionObjectMap.end())
    {
+      GmatBase *obj = omi->second;
       #ifdef DEBUG_FUNCTION_OBJ
       MessageInterface::ShowMessage
-         ("   Checking if <%p>'%s' can be deleted\n", omi->second, (omi->first).c_str());
+         ("   ==> Checking if <%p>[%s]'%s' can be deleted\n", obj,
+          obj ? obj->GetTypeName().c_str() : "NULL", (omi->first).c_str());
       #endif
-      if (omi->second != NULL)
+      
+      // If object is not NULL and not this function, delete
+      if (obj != NULL && (!obj->IsOfType("GmatFunction")))
       {
-         GmatBase *obj = omi->second;
          #ifdef DEBUG_FUNCTION_OBJ
          MessageInterface::ShowMessage
             ("   isLocal = %d, isGlobal = %d, isAutomaticGlobal = %d, \n",
@@ -1057,7 +1073,7 @@ void Function::ClearFunctionObjects()
          #endif
          // @note CelestialBody is added to SolarSystem and it will be deleted when
          // when SolarSystem in use is deleted (LOJ: 2014.12.23)
-         if ((omi->second)->IsLocal() && !((omi->second)->IsOfType(Gmat::CELESTIAL_BODY)))
+         if (obj->IsLocal() && !(obj->IsOfType(Gmat::CELESTIAL_BODY)))
          {
             #ifdef DEBUG_MEMORY
             GmatBase *obj = omi->second;
@@ -1070,9 +1086,11 @@ void Function::ClearFunctionObjects()
             #endif
             delete omi->second;
             omi->second = NULL;
-            functionObjectMap.erase(omi++);
+            //functionObjectMap.erase(omi);
+            //++omi;
          }
       }
+      ++omi;
    }
    
    #ifdef DEBUG_FUNCTION_OBJ

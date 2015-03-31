@@ -78,7 +78,7 @@
 //#define DEBUG_INITIALIZE 1
 //#define DEBUG_FINALIZE 1
 //#define DEBUG_INTERPRET 1
-#define DEBUG_RUN 1
+//#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 2
 //#define DEBUG_CREATE_DEFAULT_RESOURCE 1
@@ -101,7 +101,7 @@
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_CHANGE 1
 //#define DEBUG_CREATE_VAR 1
-#define DEBUG_GMAT_FUNCTION 1
+//#define DEBUG_GMAT_FUNCTION 1
 //#define DEBUG_OBJECT_MAP 1
 //#define DEBUG_FIND_OBJECT 2
 //#define DEBUG_ADD_OBJECT 1
@@ -5278,11 +5278,11 @@ Function* Moderator::CreateFunction(const std::string &type,
                                        e.GetFullMessage());
       }
       
-      //#if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage
-         ("===> Moderator::CreateFunction() returning <%p> for '%s'\n", obj,
+         ("Moderator::CreateFunction() returning <%p> for '%s'\n", obj,
           obj->GetName().c_str());
-      //#endif
+      #endif
       return obj;
    }
    else
@@ -8960,6 +8960,7 @@ void Moderator::SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
       ("=====> Moderator::%s setting solarSystemInUse=<%p>, "
        "objectMapInUse=<%p> %s\n", callFrom.c_str(), ss, objMap,
        forFunction ? "for function" : "");
+   ShowObjectMap("In Moderator::SetSolarSystemAndObjectMap()", objMap);
    #endif
    
    // Set solar system in use and object map 
@@ -9765,7 +9766,7 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
       for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
       {
          MessageInterface::ShowMessage
-            ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+            ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
       }
    }
@@ -9782,7 +9783,7 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
         i != objectMapInUse->end(); ++i)
    {
       MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+         ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
 }

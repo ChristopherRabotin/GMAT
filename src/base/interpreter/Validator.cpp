@@ -42,7 +42,7 @@
 #include "Assignment.hpp"
 #include "ParameterInfo.hpp"            // for IsSettable()
 
-//#define DEBUG_HANDLE_ERROR
+#define DEBUG_HANDLE_ERROR
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_CHECK_OBJECT
 //#define DEBUG_CREATE_PARAM

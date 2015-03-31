@@ -28,10 +28,10 @@
 #include "HardwareException.hpp" 
 #include "MessageInterface.hpp"
 
-#define DEBUG_FUNCTION_CONSTRUCT
+//#define DEBUG_FUNCTION_CONSTRUCT
 //#define DEBUG_FUNCTION_SET
-#define DEBUG_FUNCTION_SET_PATH
-#define DEBUG_FUNCTION_INIT
+//#define DEBUG_FUNCTION_SET_PATH
+//#define DEBUG_FUNCTION_INIT
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_FUNCTION_FINALIZE
 //#define DEBUG_UNUSED_GOL
@@ -1128,7 +1128,6 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
    
    // Add to GmatFunction path so that nested function can be found
    // Do we need to add to FileManager function path? exclude it (LOJ: 2015.03.17)
-   #if 1
    std::string funcPathOnly = GmatFileUtil::ParsePathName(functionPath);
    #ifdef DEBUG_FUNCTION_SET_PATH
    MessageInterface::ShowMessage
@@ -1136,7 +1135,6 @@ bool GmatFunction::SetGmatFunctionPath(const std::string &path)
        funcPathOnly.c_str(), GetName().c_str());
    #endif
    fm->AddGmatFunctionPath(funcPathOnly);
-   #endif
    
    // Remove path for function name
    functionName = GmatFileUtil::ParseFileName(functionPath);
