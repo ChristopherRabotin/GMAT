@@ -70,12 +70,18 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
 
   # ====================================================================
   # Specify where to install plugin
-  #  - On Windows the dll is RUNTIME (lib is ARCHIVE, ignored here)
-  #  - On Mac/Linux the dylib/so is LIBRARY
-  INSTALL(TARGETS ${TargetName}
-    RUNTIME DESTINATION ${INSTALL_DIR} # Windows
-    LIBRARY DESTINATION ${INSTALL_DIR} # Mac/Linux
-    )
+  # - On Windows the dll is RUNTIME (lib is ARCHIVE, ignored here)
+  # - On Mac/Linux the dylib/so is LIBRARY
+  if(WIN32)
+    INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION ${INSTALL_DIR})
+  else()
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      set(FULL_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/${INSTALL_DIR})
+    else()
+      set(FULL_INSTALL_DIR ${INSTALL_DIR})
+    endif()
+    INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${FULL_INSTALL_DIR})
+  endif()
 
 ENDMACRO(_SETUPPLUGIN)
 

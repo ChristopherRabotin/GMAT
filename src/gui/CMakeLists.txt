@@ -116,6 +116,7 @@ SET(GUI_SRCS
     command/BeginFiniteBurnPanel.cpp
     command/CallFunctionPanel.cpp
     command/EndFiniteBurnPanel.cpp
+    command/FindEventsPanel.cpp
     command/GmatCommandPanel.cpp
     command/ManageObjectPanel.cpp
     command/ManeuverPanel.cpp
@@ -240,36 +241,6 @@ SET(GUI_SRCS
 FILE(GLOB_RECURSE GUI_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # ====================================================================
-# TODO not sure I understand what are those mac specifics for... 
-# it should no compromise building though...
-
-if(APPLE)
-#macrez:
-#	echo "linking Carbon and wx resource files ......."
-#	$(REZ) -d WXUSINGDLL -o $(TargetName)
-#	cp -f $(TargetName) ../../application/bin/.
-
-#macosx: 
-#	echo "building Mac application bundle ......."
-#	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/bin/$(TargetName)
-#	mkdir -p $(CONTENTS_DIR)
-#	mkdir -p $(MACOS_DIR)
-#	mkdir -p $(RES_DIR)
-#	mkdir -p $(LIBS_DIR)
-#	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-#	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
-#	echo -n "APPL????" > $(MAC_PKGINFO)
-#	ln -f $(TOP_DIR)/application/bin/$(TargetName) $(MAC_APP)
-#	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
-#	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-#	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/lib $(BASELIBNAME) $(PCRE_LIB_LOC)
-
-#macstacksize:
-#	echo "setting stack size needed for SPICE"
-#	$(SPICE_STACKSIZE)
-endif()
-
-# ====================================================================
 # add the icon information
 SET(GMAT_ICON_DIR "resource")
 SET(GMAT_ICON_O "GmatIcon.o")
@@ -308,7 +279,54 @@ endif()
 # Create build products in bin directory
 _SETOUTPUTDIRECTORY(${TargetName} bin)
 
-# Specify where to install (make install or VS "INSTALL" project)
-INSTALL( TARGETS ${TargetName}
-  DESTINATION bin
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
   )
+
+# Specify where to install (make install or VS "INSTALL" project)
+if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
+else()
+  SET(INSTALL_DIR bin)
+endif()
+INSTALL(TARGETS ${TargetName} DESTINATION ${INSTALL_DIR})
+
+# Install Mac bundle files
+if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  # Install Mac icon file
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resource/GMATMac.icns
+    DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}/Resources
+    RENAME gmat.icns
+    )
+
+  # Install Mac plist file
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Info_GMAT.plist
+    DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}
+    RENAME Info.plist
+    )
+
+  # Install Mac plist file
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/RunGMAT
+    DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}/MacOS
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
+    )
+endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
+    else()
+      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
+    endif()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/libwx/"
+      )
+  endif()
+endif()

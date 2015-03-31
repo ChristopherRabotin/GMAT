@@ -92,17 +92,20 @@ IF NOT EXIST %cspice_path% (
 	cd %cspice_path%
 	
 	:: - Download and extract Spice (32 and 64), finally remove archive
-	ftp -s:..\bin\cspice\cspice32-ftp.txt
-	..\bin\unzip\unzip cspice.zip
-	ren cspice cspice32
-	DEL cspice.zip
-	
-	ftp -s:..\bin\cspice\cspice64-ftp.txt
-	..\bin\unzip\unzip cspice.zip
-	ren cspice cspice64
-	DEL cspice.zip
+	IF %processor_architecture% == x86 (
+		ftp -s:..\bin\cspice\cspice32-ftp.txt
+		..\bin\unzip\unzip cspice.zip
+		ren cspice cspice32
+		DEL cspice.zip
+	) ELSE (
+		ftp -s:..\bin\cspice\cspice64-ftp.txt
+		..\bin\unzip\unzip cspice.zip
+		ren cspice cspice64
+		DEL cspice.zip
+	)
         
-        cd ..
+	:: Change back to depends directory
+        cd ..\..
 )
 
 :: Create directories and download wxwidgets if it does not already exist.

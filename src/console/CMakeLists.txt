@@ -86,7 +86,28 @@ _ADDSOURCEGROUPS("")
 # Create build outputs in bin directory
 _SETOUTPUTDIRECTORY(${TargetName} bin)
 
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  )
+
 # Specify where to install (make install or VS "INSTALL" project)
 INSTALL( TARGETS ${TargetName}
   DESTINATION bin
   )
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../${GMAT_MAC_APPBUNDLE_PATH}/Frameworks/")
+    endif()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/"
+      )
+  endif()
+endif()
