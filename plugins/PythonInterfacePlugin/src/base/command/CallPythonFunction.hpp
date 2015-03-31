@@ -23,6 +23,8 @@
 
 #include "pythoninterface_defs.hpp"
 #include "CallFunction.hpp"
+#include "PythonInterface.hpp"
+
 
 class  PYTHON_API CallPythonFunction : public CallFunction
 {
@@ -31,8 +33,8 @@ public:
 	CallPythonFunction();
 	CallPythonFunction(const CallPythonFunction &cpf);
 	CallPythonFunction& operator=(const CallPythonFunction &cpf);
-	~CallPythonFunction();
-
+	virtual ~CallPythonFunction();
+	
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
@@ -67,6 +69,12 @@ public:
 //                                           const std::string &value,
 //                                           const Integer index);
 
+   // override GmatCommand methods
+   virtual bool         Initialize();
+   virtual bool         Execute();
+   virtual void         RunComplete();
+
+
 	DEFAULT_TO_NO_CLONES
 
 protected:
@@ -74,7 +82,8 @@ protected:
 	std::string moduleName;
 	/// Function name for the Python code
 	std::string functionName;
-
+	/// Python Interface singleton
+	PythonInterface *pythonIf;
 
    /// Published parameters for Python functions
    enum

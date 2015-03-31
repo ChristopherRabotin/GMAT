@@ -1,23 +1,23 @@
 #include "CallPythonFunction.hpp"
-
+#include "FileManager.hpp"
 
 //------------------------------------------------------------------------------
 // Static Data
 //------------------------------------------------------------------------------
 const std::string
 CallPythonFunction::PARAMETER_TEXT[PythonFunctionParamCount - CallFunctionParamCount] =
-   {
+{
       "PythonModule",
-      "PythonFunction",
-   };
+      "PythonFunction"
+};
 
 
 const Gmat::ParameterType
 CallPythonFunction::PARAMETER_TYPE[PythonFunctionParamCount - CallFunctionParamCount] =
-   {
+{
       Gmat::STRING_TYPE,
       Gmat::STRING_TYPE
-   };
+};
 
 
 CallPythonFunction::CallPythonFunction() :
@@ -185,3 +185,32 @@ bool CallPythonFunction::SetStringParameter(const std::string& label,
 //{
 //   return SetStringParameter(GetParameterID(label), value, index);
 //}
+
+bool CallPythonFunction::Initialize()
+{
+	bool ret = false;
+
+	ret = CallFunction::Initialize();
+
+	pythonIf = PythonInterface::PyInstance();
+	FileManager *fm = FileManager::Instance();
+	
+	//Initialize Python engine
+	pythonIf->PyInitialize();
+
+	// Get all Python function paths from the startup file
+	StringArray paths = fm->GetAllPythonModulePaths();
+	pythonIf->PyAddModulePath(paths);
+
+	return ret;
+}
+
+bool CallPythonFunction::Execute()
+{
+	return true;
+}
+
+void CallPythonFunction::RunComplete()
+{
+	return;
+}

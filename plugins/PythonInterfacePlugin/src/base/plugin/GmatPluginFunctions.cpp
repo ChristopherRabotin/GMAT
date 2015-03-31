@@ -60,7 +60,7 @@ extern "C"
       switch (index)
       {
          case 0:
-            factory = new PythonCommandFactory;
+            factory = new PythonCommandFactory();
             break;
             
          default:
