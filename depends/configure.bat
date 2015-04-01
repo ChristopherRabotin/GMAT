@@ -53,12 +53,12 @@ IF NOT EXIST %cspice_path% (
 	:: Download and extract Spice (32 and 64), finally remove archive
 	IF %processor_architecture% == x86 (
 		..\..\bin\winscp\WinSCP.com -script=..\..\bin\cspice\cspice32-ftp.txt
-		..\..\bin\7za\7za.exe cspice.zip
+		..\..\bin\7za\7za.exe x cspice.zip
 		ren cspice cspice32
 		DEL cspice.zip
 	) ELSE (
 		..\..\bin\winscp\WinSCP.com -script=..\..\bin\cspice\cspice64-ftp.txt
-		..\..\bin\7za\7za.exe cspice.zip
+		..\..\bin\7za\7za.exe x cspice.zip
 		ren cspice cspice64
 		DEL cspice.zip
 	)
