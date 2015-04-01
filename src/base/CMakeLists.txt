@@ -547,8 +547,33 @@ endif()
 # Create build products in bin directory
 _SETOUTPUTDIRECTORY(${TargetName} bin)
 
-# Specify where to install (make install or VS "INSTALL" project)
-INSTALL( TARGETS ${TargetName}
-  RUNTIME DESTINATION bin # Windows
-  LIBRARY DESTINATION bin # Mac/Linux
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
   )
+
+# Specify where to install (make install or VS "INSTALL" project)
+if(WIN32)
+  INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION bin)
+else()
+  if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+    SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+  else()
+    SET(INSTALL_DIR bin)
+  endif()
+  INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${INSTALL_DIR})
+endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/"
+      )
+  endif()
+endif()

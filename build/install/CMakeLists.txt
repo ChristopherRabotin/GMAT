@@ -31,7 +31,7 @@ INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
 INSTALL( FILES
   ${PROJECT_SOURCE_DIR}/application/bin/gmat_startup_file.txt
   ${PROJECT_SOURCE_DIR}/application/bin/GMAT.ini
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+  DESTINATION bin
   )
 
 # ====================================================================
@@ -55,20 +55,40 @@ if(PLUGIN_CINTERFACE)
     SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
     SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
     SET(MCD "cd('${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/build/matlab');")
+    SET(MDEBUG "debugsuffix='${CMAKE_DEBUG_POSTFIX}';")
     SET(MPREP "prepareInterface_cmake;")
     SET(MEXIT "exit;")
     SET(MATLAB_COMMAND "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MPREP} ${MEXIT}\"")
-    MESSAGE(STATUS "Will install CInterface Matlab thunk files with command:\n${MATLAB_COMMAND}")
+    SET(MATLAB_COMMAND_DEBUG "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MDEBUG} ${MPREP} ${MEXIT}\"")
 
     # Running Matlab can take a while, so notify the user
     if(WIN32)
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window...patience is a virtue...\")")
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window twice to build CInterface thunk files...patience is a virtue...\")")
     else()
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab...patience is a virtue...\")")
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface thunk files...patience is a virtue...\")")
     endif()
 
-    # Git 'er done!
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+    # Set up install commands for debug/release configurations.
+    # On single-config generators (e.g. make), simply check the current config.
+    # On multi-config generators (e.g. VS, XCode), there is a CMake deficiency
+    # that does not allow per-generator INSTALL(CODE ...) commands. The
+    # workaround for this is to try creating both release and debug versions
+    # of the CInterface Matlab thunk files. The Matlab prepareInterface script
+    # will gently exit if it couldn't build either one (won't error out).
+
+    # Matlab command for multi-config or release builds
+    if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Release) OR (CMAKE_BUILD_TYPE STREQUAL MinSizeRel))
+      # Matlab command for release configurations
+      MESSAGE(STATUS "Will install CInterface (release) Matlab thunk files with command:\n${MATLAB_COMMAND}")
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+    endif()
+
+    # Matlab command for multi-config or debug builds
+    if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Debug) OR (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo))
+      # Matlab command for debug configurations
+      MESSAGE(STATUS "Will install CInterface (debug) Matlab thunk files with command:\n${MATLAB_COMMAND_DEBUG}")
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND_DEBUG} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+    endif()
 
   # Warn user if Matlab was not found
   else()
@@ -79,20 +99,42 @@ endif()
 # ====================================================================
 # Install wxWidgets libraries
 if(wxWidgets_FOUND)
-  # For Windows, dlls must be next to executables in bin
   if(WIN32)
+    # For Windows, dlls must be next to executables in bin
     INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*u_*.dll" # Ignore debug ("ud" suffix)
+      CONFIGURATIONS Release MinSizeRel
+      FILES_MATCHING PATTERN "*u_*.dll" # Only release ("u" suffix)
       PATTERN "msw*" EXCLUDE
       )
-  # For Mac/Linux, dylib/so can be in subdirectory of bin
-  else()
-    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
-      DESTINATION bin/libwx
+    INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
+      DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "libwx_*u[_-]*" # Ignore debug ("ud" suffix)
+      CONFIGURATIONS Debug RelWithDebInfo
+      FILES_MATCHING PATTERN "*ud_*.dll" # Only debug ("ud" suffix)
+      PATTERN "msw*" EXCLUDE
+      )
+  else()
+    # For Mac/Linux, wxlibs are in bin/libwx or Mac app bundle
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      SET(WX_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+    else()
+      SET(WX_INSTALL_DIR bin/libwx)
+    endif()
+
+    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
+      DESTINATION ${WX_INSTALL_DIR}
+      USE_SOURCE_PERMISSIONS
+      CONFIGURATIONS Release MinSizeRel
+      FILES_MATCHING PATTERN "libwx_*u[_-]*" # Only release ("u" suffix)
+      PATTERN "wx" EXCLUDE
+      )
+    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
+      DESTINATION ${WX_INSTALL_DIR}
+      USE_SOURCE_PERMISSIONS
+      CONFIGURATIONS Debug RelWithDebInfo
+      FILES_MATCHING PATTERN "libwx_*ud[_-]*" # Only debug ("ud" suffix)
       PATTERN "wx" EXCLUDE
       )
 
@@ -101,18 +143,47 @@ if(wxWidgets_FOUND)
     if(APPLE)
       # Create command for wxmac_change_install_names script
       SET(CHNM "./wxmac_change_install_names.sh")
-      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/bin/libwx\"")
+      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/${WX_INSTALL_DIR}\"")
       SET(ARG2 "\"${wxWidgets_LIBRARY_DIRS}\"")
       SET(ARG3 "\"@rpath\"")
 
-      # ARGN contains all GMAT components that use wxWidgets
-      # Append new components here
-      SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/bin/Gmat\"
-      \"${CMAKE_INSTALL_PREFIX}/plugins/libMatlabInterface.dylib\"")
+      # Collect list of all GMAT components that use wxWidgets
+      if(GMAT_MAC_APPBUNDLE_PATH)
+	SET(MAC_GUIDIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
+	SET(MAC_PLUGINDIR ${GMAT_MAC_APPBUNDLE_PATH}/plugins)
+      else()
+	SET(MAC_GUIDIR bin)
+	SET(MAC_PLUGINDIR plugins)
+      endif()
+
+      if(GMAT_GUI)
+	SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/${MAC_GUIDIR}/GMAT\"")
+      endif()
+
+      if(PLUGIN_MATLABINTERFACE)
+	SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_PLUGINDIR}/libMatlabInterface.dylib\"")
+      endif()
+
+      # Append full pathname of new components here using above pattern
 
       SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARGN}")
       INSTALL(CODE "MESSAGE(STATUS \"Changing wxWidgets library install names\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CHNM_COMMAND} WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\")")
     endif()
   endif()
+endif()
+
+# ====================================================================
+# Setup Mac bundle
+if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  INSTALL(CODE "MESSAGE(STATUS \"Creating GMAT.app bundle\")")
+  
+  # Create PkgInfo file
+  SET(CMD echo -n APPL????)
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\" OUTPUT_FILE PkgInfo)")
+
+  # Modify Info.plist file
+  SET(CMD sed -e "s/EXECUTABLE/RunGMAT/" "-i \"\"" Info.plist)
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\")")
+  
 endif()
