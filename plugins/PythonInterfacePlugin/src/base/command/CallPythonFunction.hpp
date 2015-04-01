@@ -30,10 +30,10 @@ class  PYTHON_API CallPythonFunction : public CallFunction
 {
 public:
 
-	CallPythonFunction();
-	CallPythonFunction(const CallPythonFunction &cpf);
-	CallPythonFunction& operator=(const CallPythonFunction &cpf);
-	virtual ~CallPythonFunction();
+   CallPythonFunction();
+   CallPythonFunction(const CallPythonFunction &cpf);
+   CallPythonFunction& operator=(const CallPythonFunction &cpf);
+   virtual ~CallPythonFunction();
 	
    // Access methods derived classes can override
    virtual std::string  GetParameterText(const Integer id) const;
