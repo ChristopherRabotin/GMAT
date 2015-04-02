@@ -3,6 +3,6 @@ binary
 cd pub/3.0.2
 get wxWidgets-3.0.2_headers.7z
 cd binaries
-get wxMSW-3.0.2_vc%visualstudio_version%0_x64_Dev.7z
-get wxMSW-3.0.2_vc%visualstudio_version%0_x64_ReleaseDLL.7z
+get wxMSW-3.0.2_vc%visualstudio_version%0%wxwidgets_type%Dev.7z
+get wxMSW-3.0.2_vc%visualstudio_version%0%wxwidgets_type%ReleaseDLL.7z
 exit

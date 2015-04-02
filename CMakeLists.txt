@@ -38,7 +38,6 @@ SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
 
 # Set general build options
 OPTION(PROFILE_BUILD "ProfileBuild" OFF)
-OPTION(GMAT_64_BIT "64-Bit Binaries" ON)
 OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 
 # Public GMAT plugins
@@ -57,6 +56,13 @@ OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
 OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
 OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
 OPTION(PLUGIN_STATION "Station Plugin" ON)
+
+# Detect 32/64 bit
+if(CMAKE_CL_64 OR (CMAKE_SIZEOF_VOID_P EQUAL 8))
+  SET(GMAT_64_BIT ON)
+else()
+  SET(GMAT_64_BIT OFF)
+endif()
 
 # Optional Jazz Plugin Inputs
 # to-do
@@ -124,7 +130,7 @@ FIND_PATH(CSPICE_DIR
   NAMES include/SpiceUsr.h
   PATHS
     ${CSPICE_DEPENDS_DIR}
-  DOC "Path to CSpice root directory (containing include/SpiceUsr.h)"
+  DOC "Path to CSpice root directory (containing include/)"
   NO_DEFAULT_PATH
   )
 
@@ -239,7 +245,7 @@ if(WIN32)
 endif()
 
 # Set 64 bit Definitions and directories
-if (GMAT_64_BIT)
+if(GMAT_64_BIT)
   MESSAGE(STATUS "Will compile 64-bit GMAT")
   ADD_DEFINITIONS("-DUSE_64_BIT_LONGS")
 else()
