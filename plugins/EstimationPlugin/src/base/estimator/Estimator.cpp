@@ -305,6 +305,7 @@ bool Estimator::Initialize()
       {                                                                            // made changes by TUAN NGUYEN
          std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
          //MessageInterface::ShowMessage("name = <%s>\n", name.c_str());
+
          bool found = false;                                                       // made changes by TUAN NGUYEN
          for(UnsignedInt j = 0; j < measModels.size(); ++j)                        // made changes by TUAN NGUYEN
          {
@@ -771,8 +772,10 @@ bool Estimator::SetStringParameter(const Integer id,
    //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
    if (id == MEASUREMENTS)                                                                                          // made changes by TUAN NGUYEN
    {                                                                                                                // made changes by TUAN NGUYEN
-      if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")                           // made changes by TUAN NGUYEN
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));              // made changes by TUAN NGUYEN
+      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
          throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+      return SetStringParameter(id, measName, measurementNames.size());                                             // made changes by TUAN NGUYEN
    }                                                                                                                // made changes by TUAN NGUYEN
 
    return Solver::SetStringParameter(id, value);
@@ -1282,6 +1285,9 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
             modelNames.push_back(meas->GetName());
             measManager.AddMeasurement(meas);
+
+            // Add TrackingSystem object to measurement manager      // made changes by TUAN NGUYEN
+            measManager.AddMeasurement((TrackingSystem*)obj);        // made changes by TUAN NGUYEN
          }
          return true;
       }

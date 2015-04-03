@@ -115,6 +115,16 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
       models.push_back((MeasurementModel*)((*i)->Clone()));
    }
 
+   for (std::vector<TrackingSystem*>::const_iterator i = mm.systems.begin();
+         i != mm.systems.end(); ++i)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Cloning %s TrackingSystem\n",
+               (*i)->GetStringParameter("Type").c_str());
+      #endif
+      systems.push_back((TrackingSystem*)((*i)->Clone()));
+   }
+
    // made changes @ 9/16/2014
    // process TrackingDataAdapter objects
    for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
@@ -164,12 +174,17 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
       eventCount       = mm.eventCount;
       inSimulationMode = mm.inSimulationMode;
 
-      // Clone the measurements, adapters, and tracking file sets
+      // Clone the measurements, tracking systems, adapters, and tracking file sets
       // Clean up first
       for (std::vector<MeasurementModel*>::iterator i = models.begin();
             i != models.end(); ++i)
          delete (*i);
       models.clear();
+
+      for (std::vector<TrackingSystem*>::iterator i = systems.begin();
+            i != systems.end(); ++i)
+         delete (*i);
+      systems.clear();
 
       for (std::vector<TrackingDataAdapter*>::iterator i = adapters.begin();
             i != adapters.end(); ++i)
@@ -187,6 +202,10 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
       for (std::vector<MeasurementModel*>::const_iterator i = mm.models.begin();
             i != mm.models.end(); ++i)
          models.push_back((MeasurementModel*)(*i)->Clone());
+
+      for (std::vector<TrackingSystem*>::const_iterator i = mm.systems.begin();
+            i != mm.systems.end(); ++i)
+         systems.push_back((TrackingSystem*)(*i)->Clone());
 
       for (std::vector<TrackingDataAdapter*>::const_iterator i = mm.adapters.begin();
             i != mm.adapters.end(); ++i)
@@ -1103,7 +1122,7 @@ UnsignedInt MeasurementManager::LoadObservations()
    MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
    MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
-      MessageInterface::ShowMessage("Data file '%s' has %d records. In which %d records are used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec[i], count[i]);
+      MessageInterface::ShowMessage("Data file '%s' has %d of %d records used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), count[i], numRec[i]);
 
    #ifdef DEBUG_LOAD_OBSERVATIONS
       for (UnsignedInt i = 0; i < observations.size(); ++i)
