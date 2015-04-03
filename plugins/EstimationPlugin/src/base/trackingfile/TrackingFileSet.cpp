@@ -22,6 +22,7 @@
 #include "TFSMagicNumbers.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <sstream>                  // For magic number mapping code
 /// Temporarily here; needs to move into a factory
 #include "RangeAdapterKm.hpp"
@@ -32,6 +33,7 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_INITIALIZE
 //#define DEBUG_GET_PARAMETER
 
 //------------------------------------------------------------------------------
@@ -500,31 +502,34 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
             "value = '%s') called\n", id, value.c_str());
    #endif
 
-   if (id == FILENAME)
-   {
-      if (find(filenames.begin(), filenames.end(), value) == filenames.end())
-      {
-         filenames.push_back(value);
-         return true;
-      }
-      else
-         throw MeasurementException("Error: File name is replicated ('" + value + "')\n");
-   }
+   //if (id == FILENAME)
+   //{
+   //   if (find(filenames.begin(), filenames.end(), value) == filenames.end())
+   //   {
+   //      filenames.push_back(value);
+   //      return true;
+   //   }
+   //   else
+   //      throw MeasurementException("Error: File name is replicated ('" + value + "')\n");
+   //}
 
-   if (id == RAMPED_TABLENAME)
-   {
-      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
-      {
-         rampedTablenames.push_back(value);
-         return true;
-      }
-      else
-         throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
+   //if (id == RAMPED_TABLENAME)
+   //{
+   //   if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
+   //   {
+   //      rampedTablenames.push_back(value);
+   //      return true;
+   //   }
+   //   else
+   //      throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
 
-   }
+   //}
 
    if (id == DATA_FILTERS)
    {
+      if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")                           // made changes by TUAN NGUYEN
+         return true;
+
       if (find(dataFilterNames.begin(), dataFilterNames.end(), value) == dataFilterNames.end())
       {
          dataFilterNames.push_back(value);
@@ -618,6 +623,10 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == TRACKINGCONFIG)
    {
+      // return true when it is an empty list                                                               // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                      // made changes by TUAN NGUYEN
+         return true;                                                                                       // made changes by TUAN NGUYEN
+
       if ((value.size() > 1) && (value.c_str()[0] == '{') && (value.c_str()[value.size()-1] == '}'))        // made changes by TUAN NGUYEN
       {
          // Processing a tracking config:
@@ -699,12 +708,18 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == FILENAME)
    {
+      // throw an error message when it is an empty list                                                           // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                             // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: No file name was set to " + GetName() + ".Filenames parameter.\n");    // made changes by TUAN NGUYEN
+
+      if ((!filenames.empty())&&
+          (find (filenames.begin(), filenames.end(), value) != filenames.end()))                                   // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of file name ('" + value + "').\n");                       // made changes by TUAN NGUYEN
+
       if (((Integer)filenames.size() > index) && (index >= 0))
          filenames[index] = value;
       else if ((Integer)filenames.size() == index)
-      {
          filenames.push_back(value);
-      }
       else
          throw MeasurementException("Index out of bounds when trying to "
                "set a tracking data file name");
@@ -720,12 +735,18 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == RAMPED_TABLENAME)
    {
+      // return true when it is an empty list                                                           // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                  // made changes by TUAN NGUYEN
+         return true;                                                                                   // made changes by TUAN NGUYEN
+
+      if ((!rampedTablenames.empty())&&
+          (find(rampedTablenames.begin(), rampedTablenames.end(), value) != rampedTablenames.end()))    // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of ramped table name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+
       if (((Integer)rampedTablenames.size() > index) && (index >= 0))
          rampedTablenames[index] = value;
       else if ((Integer)rampedTablenames.size() == index)
-      {
          rampedTablenames.push_back(value);
-      }
       else
          throw MeasurementException("Index out of bounds when trying to "
                "set a ramped table file name");
@@ -741,6 +762,14 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == DATA_FILTERS)
    {
+      // return true when it is an empty list                                                          // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                 // made changes by TUAN NGUYEN
+         return true;                                                                                  // made changes by TUAN NGUYEN
+
+      if ((!dataFilterNames.empty())&&
+          (find(dataFilterNames.begin(), dataFilterNames.end(), value) != dataFilterNames.end()))      // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of data filter name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+      
       if (((Integer)dataFilterNames.size() > index) && (index >= 0))
          dataFilterNames[index] = value;
       else if ((Integer)dataFilterNames.size() == index)
@@ -1410,6 +1439,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Adding datafile %s\n", name.c_str());
          #endif
          datafiles.push_back((DataFile*)obj);
+         return true;
       }
    }
    else if (obj->IsOfType(Gmat::DATA_FILTER))
@@ -1430,6 +1460,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Adding data filter %s\n", name.c_str());
          #endif
             dataFilters.push_back(obj->Clone());                                     // It needs to clone in order to avoid error when deleting dataFilters in destructor
+            return true;
       }
    }
    else
@@ -1440,7 +1471,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Adding node %s\n", name.c_str());
          #endif
          references.push_back(obj);
-         retval = true;
+         return true;
       }
    }
 
@@ -1572,7 +1603,7 @@ void TrackingFileSet::SetPropagator(PropSetup* ps)
 //------------------------------------------------------------------------------
 bool TrackingFileSet::Initialize()
 {
-   #ifdef DEBUG_INITIALIZATION
+   #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize() <%s,%p>\n", GetName().c_str(), this);
    #endif
    
@@ -1606,8 +1637,8 @@ bool TrackingFileSet::Initialize()
 //         throw MeasurementException("No ramp table is set to " + GetName() + " object.\n");
 
       // Build the adapters
-      if (trackingConfigs.size() == 0)
-         throw MeasurementException("No TrackingConfig is defined for " + GetName() + " object.\n");
+      //if (trackingConfigs.size() == 0)
+      //   throw MeasurementException("No TrackingConfig is defined for " + GetName() + " object.\n");
 
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       {
@@ -1732,7 +1763,7 @@ bool TrackingFileSet::Initialize()
       isInitialized = true;
    }
    
-   #ifdef DEBUG_INITIALIZATION
+   #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage("dataFilters.size() = %d\n", dataFilters.size());
       for (UnsignedInt i = 0; i < dataFilters.size(); ++i)
          MessageInterface::ShowMessage("filter %d: name = '%s'   pointer = <%p>\n", i, dataFilters[i]->GetName().c_str(), dataFilters[i]);
@@ -1961,6 +1992,34 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
 }
 
 
+bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList)
+{
+   if (strandsList.empty())
+      return true;
+
+   // Generate a list of tracking configs
+   MessageInterface::ShowMessage("Total of %d tracking configurations are generated:\n", strandsList.size());
+   for(UnsignedInt i = 0; i < strandsList.size(); ++i)
+   {
+      MeasurementDefinition md;
+      md.SetDefinitionString(strandsList[i], typesList[i]);
+      trackingConfigs.push_back(md);
+      trackingConfigs[i].GetDefinitionString();
+      MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString());
+   }
+
+   // Count the adapters needed
+   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
+   StringArray knownTypes = mn->GetKnownTypes();
+
+      
+   // Reinitialize
+   isInitialized = false;
+   
+   return Initialize();
+}
+
+
 // Internal class definition
 
 //------------------------------------------------------------------------------
@@ -2040,6 +2099,16 @@ TrackingFileSet::MeasurementDefinition&
    }
 
    return *this;
+}
+
+
+// made changes by TUAN NGUYEN
+bool TrackingFileSet::MeasurementDefinition::SetDefinitionString(StringArray strand, std::string measType)
+{
+   strands.push_back(strand);
+   types.push_back(measType);
+
+   return true;
 }
 
 

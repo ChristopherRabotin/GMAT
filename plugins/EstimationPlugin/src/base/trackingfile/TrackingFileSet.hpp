@@ -142,6 +142,8 @@ public:
    const StringArray&   GetParticipants() const;           // made changes by TUAN NGUYEN
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
+   bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList);   // made changes by TUAN NGUYEN
+
 protected:
    /**
     * Internal class used to match strand and model descriptions together, as
@@ -156,6 +158,7 @@ protected:
       MeasurementDefinition& operator=(const MeasurementDefinition& md);
 
       std::string GetDefinitionString() const;
+      bool        SetDefinitionString(StringArray strand, std::string measType);      // made changes by TUAN NGUYEN
 
       /// The strings describing signal paths                             // made changes by TUAN NGUYEN
       std::vector<StringArray> strands;

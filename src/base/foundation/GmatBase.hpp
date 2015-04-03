@@ -493,6 +493,15 @@ public:
    virtual bool IsParameterCommandModeSettable(const Integer id) const;
    void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
 
+   
+   /// Functions use information from Moderator                               // made changes by TUAN NGUYEN
+   ObjectMap*              GetConfiguredObjectMap();                          // made changes by TUAN NGUYEN
+   GmatBase*               GetConfiguredObject(const std::string &name);      // made changes by TUAN NGUYEN
+   const StringArray&      GetListOfObjects(Gmat::ObjectType type,            // made changes by TUAN NGUYEN
+                                       bool excludeDefaultObjects = false);   // made changes by TUAN NGUYEN
+   const StringArray&      GetListOfObjects(const std::string &typeName,      // made changes by TUAN NGUYEN
+                                       bool excludeDefaultObjects = false);   // made changes by TUAN NGUYEN
+
 protected:
    /// Parameter IDs
    enum

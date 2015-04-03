@@ -36,7 +36,7 @@
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_SIMULATOR_WRITE
-//#define DEBUG_SIMULATOR_INITIALIZATION
+//#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_EVENT
 //#define DEBUG_ACCUMULATION_RESULTS
@@ -892,13 +892,14 @@ void BatchEstimator::CompleteInitialization()
       }
       currentEpoch         = gs->GetEpoch();
       
-      // Tell the measManager to complete its initialization
-      bool measOK = measManager.SetPropagator(propagator);
-      measOK = measOK && measManager.Initialize();
-      if (!measOK)
-         throw SolverException(
-               "BatchEstimator::CompleteInitialization - error initializing "
-               "MeasurementManager.\n");
+      // This code was moved to Estimator::Reinitilaize()                              // made changes by TUAN NGUYEN
+      //// Tell the measManager to complete its initialization                         // made changes by TUAN NGUYEN
+      //bool measOK = measManager.SetPropagator(propagator);                           // made changes by TUAN NGUYEN
+      //measOK = measOK && measManager.Initialize();                                   // made changes by TUAN NGUYEN
+      //if (!measOK)                                                                   // made changes by TUAN NGUYEN
+      //   throw SolverException(                                                      // made changes by TUAN NGUYEN
+      //         "BatchEstimator::CompleteInitialization - error initializing "        // made changes by TUAN NGUYEN
+      //         "MeasurementManager.\n");                                             // made changes by TUAN NGUYEN
       
       
       // Set all solve-for and consider objects to tracking data adapters
@@ -914,11 +915,13 @@ void BatchEstimator::CompleteInitialization()
 
       // Now load up the observations
       measManager.PrepareForProcessing(false);
-      UnsignedInt numRec = measManager.LoadObservations();
-      if (numRec == 0)
-      {
-         throw EstimatorException("No observation data is used for estimation\n");
-      }
+
+      // This code was moved to Estimator::Reinitialize() function                      // made changes by TUAN NGUYEN
+      //UnsignedInt numRec = measManager.LoadObservations();                            // made changes by TUAN NGUYEN
+      //if (numRec == 0)                                                                // made changes by TUAN NGUYEN
+      //{                                                                               // made changes by TUAN NGUYEN
+      //   throw EstimatorException("No observation data is used for estimation\n");    // made changes by TUAN NGUYEN
+      //}                                                                               // made changes by TUAN NGUYEN
       
 ///// Check for more generic approach
       measManager.LoadRampTables();
@@ -952,7 +955,7 @@ void BatchEstimator::CompleteInitialization()
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
             "Init complete!\n   STM = %s\n   Covariance = %s\n",
-            stm->ToString().c_str(), covariance->ToString().c_str());
+            stm->ToString().c_str(), stateCovariance->GetCovariance()->ToString().c_str());
    #endif
 
    hAccum.clear();
@@ -1123,7 +1126,7 @@ void BatchEstimator::FindTimeStep()
 void BatchEstimator::CalculateData()
 {
    #ifdef WALK_STATE_MACHINE
-     MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
+      MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
    #endif
 
    // Update the STM

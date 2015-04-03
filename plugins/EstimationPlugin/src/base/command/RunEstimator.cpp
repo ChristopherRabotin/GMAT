@@ -52,6 +52,8 @@ RunEstimator::RunEstimator() :
    eventMan                (NULL)
 {
    overridePropInit = true;
+//   needReinitialize = false;                 // made changes by TUAN NGUYEN
+   delayInitialization = true;                 // made changes by TUAN NGUYEN
 }
 
 
@@ -91,6 +93,8 @@ RunEstimator::RunEstimator(const RunEstimator & rs) :
    eventMan                (NULL)
 {
    overridePropInit = true;
+//   needReinitialize = false;                  // made changes by TUAN NGUYEN
+   delayInitialization = true;                 // made changes by TUAN NGUYEN
 }
 
 //------------------------------------------------------------------------------
@@ -278,9 +282,45 @@ const std::string& RunEstimator::GetGeneratingString(Gmat::WriteMode mode,
  * @return true on success, false on failure
  */
 //------------------------------------------------------------------------------
-#include "Moderator.hpp"
+//bool RunEstimator::Initialize()
+//{
+//#ifdef DEBUG_INITIALIZATION
+//   MessageInterface::ShowMessage("Start RunEstimator::Initialize()\n");
+//#endif
+//
+//   needReinitialize = true;
+//
+//#ifdef DEBUG_INITIALIZATION
+//   MessageInterface::ShowMessage("Start RunEstimator::Initialize()\n");
+//#endif
+//   return true;
+//}
+
+
+//#include "Moderator.hpp"
 bool RunEstimator::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start RunEstimator::Initialize()\n");
+#endif
+
+   // This step is used to delay to initialize until it runs Execute() function.
+   // It is needed due to no observation data available before simulation. As a result,
+   // no tracking configurations are auto generated for estimation. After simulation 
+   // step completes, based on simulation data, this code will generate tracking 
+   // configuration automatically for estimation step. 
+   if (delayInitialization)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Exit RunEstimator::Initialize():   delay initialization to the next time\n"); 
+      #endif
+      return true;
+   }
+
+   // if it is initizlized, does not need to do it again
+   if (isInitialized)
+      return true;
+
    bool retval = false;
 
    // First set the Estimator object
@@ -302,6 +342,8 @@ bool RunEstimator::Initialize()
             "object named " + solverName + " is not a Estimator.");
 
    theEstimator = (Estimator*)(simObj->Clone());
+   theEstimator->SetDelayInitialization(false);                           // made changes by TUAN NGUYEN
+   theEstimator->Initialize();                                            // made changes by TUAN NGUYEN
 
    theEstimator->TakeAction("ResetInstanceCount");
    simObj->TakeAction("ResetInstanceCount");
@@ -358,37 +400,39 @@ bool RunEstimator::Initialize()
 
 
    // Load solve for objects to esm                                               // made changes by TUAN NGUYEN
-   // Get list of solve-for objects                                               // made changes by TUAN NGUYEN
-   ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();        // made changes by TUAN NGUYEN
-   ObjectArray solveforObjList;                                                   // made changes by TUAN NGUYEN
-   for (ObjectMap::iterator i = objectmap->begin(); i != objectmap->end(); ++i)   // made changes by TUAN NGUYEN
-   {                                                                              // made changes by TUAN NGUYEN
-      StringArray solveforNames;                                                  // made changes by TUAN NGUYEN
-      try                                                                         // made changes by TUAN NGUYEN
-      {                                                                           // made changes by TUAN NGUYEN
-         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");       // made changes by TUAN NGUYEN
-      }                                                                           // made changes by TUAN NGUYEN
-      catch(...)                                                                  // made changes by TUAN NGUYEN
-      {                                                                           // made changes by TUAN NGUYEN
-         // If object has no SolveFors parameter, skip it                         // made changes by TUAN NGUYEN
-         continue;                                                                // made changes by TUAN NGUYEN
-      }                                                                           // made changes by TUAN NGUYEN
+   LoadSolveForsToESM_Old();
+   //// Get list of solve-for objects                                               // made changes by TUAN NGUYEN
+   ////ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();        // made changes by TUAN NGUYEN
+   //ObjectMap* objectmap = GetConfiguredObjectMap();                               // made changes by TUAN NGUYEN
+   //ObjectArray solveforObjList;                                                   // made changes by TUAN NGUYEN
+   //for (ObjectMap::iterator i = objectmap->begin(); i != objectmap->end(); ++i)   // made changes by TUAN NGUYEN
+   //{                                                                              // made changes by TUAN NGUYEN
+   //   StringArray solveforNames;                                                  // made changes by TUAN NGUYEN
+   //   try                                                                         // made changes by TUAN NGUYEN
+   //   {                                                                           // made changes by TUAN NGUYEN
+   //      solveforNames = (*i).second->GetStringArrayParameter("SolveFors");       // made changes by TUAN NGUYEN
+   //   }                                                                           // made changes by TUAN NGUYEN
+   //   catch(...)                                                                  // made changes by TUAN NGUYEN
+   //   {                                                                           // made changes by TUAN NGUYEN
+   //      // If object has no SolveFors parameter, skip it                         // made changes by TUAN NGUYEN
+   //      continue;                                                                // made changes by TUAN NGUYEN
+   //   }                                                                           // made changes by TUAN NGUYEN
 
-      // Initialize the object before processing                                  // made changes by TUAN NGUYEN
-      if ((*i).second->IsInitialized() == false)                                  // made changes by TUAN NGUYEN
-         (*i).second->Initialize();                                               // made changes by TUAN NGUYEN
+   //   // Initialize the object before processing                                  // made changes by TUAN NGUYEN
+   //   if ((*i).second->IsInitialized() == false)                                  // made changes by TUAN NGUYEN
+   //      (*i).second->Initialize();                                               // made changes by TUAN NGUYEN
 
-      solveforNames = (*i).second->GetStringArrayParameter("SolveFors");          // made changes by TUAN NGUYEN
-      if (solveforNames.empty())                                                  // made changes by TUAN NGUYEN
-         continue;                                                                // made changes by TUAN NGUYEN
-      
-      // if object has solve-for, push object to solveforNames object array for processing    // made changes by TUAN NGUYEN
-      solveforObjList.push_back((*i).second);                                     // made changes by TUAN NGUYEN
-   }                                                                              // made changes by TUAN NGUYEN
+   //   solveforNames = (*i).second->GetStringArrayParameter("SolveFors");          // made changes by TUAN NGUYEN
+   //   if (solveforNames.empty())                                                  // made changes by TUAN NGUYEN
+   //      continue;                                                                // made changes by TUAN NGUYEN
+   //   
+   //   // if object has solve-for, push object to solveforNames object array for processing    // made changes by TUAN NGUYEN
+   //   solveforObjList.push_back((*i).second);                                     // made changes by TUAN NGUYEN
+   //}                                                                              // made changes by TUAN NGUYEN
 
-   // Setup solve-for parameters                                                  // made changes by TUAN NGUYEN
-   for(UnsignedInt i= 0; i < solveforObjList.size(); ++i)                         // made changes by TUAN NGUYEN
-      esm->SetProperty(solveforObjList[i]);                                       // made changes by TUAN NGUYEN
+   //// Setup solve-for parameters                                                  // made changes by TUAN NGUYEN
+   //for(UnsignedInt i= 0; i < solveforObjList.size(); ++i)                         // made changes by TUAN NGUYEN
+   //   esm->SetProperty(solveforObjList[i]);                                       // made changes by TUAN NGUYEN
 
 
    // Pass in the objects
@@ -487,7 +531,17 @@ bool RunEstimator::Initialize()
    // Now we can initialize the propagation subsystem by calling up the
    // inheritance tree.
    if (retval)
-      retval = RunSolver::Initialize();
+   {
+      try
+      {
+         retval = RunSolver::Initialize();
+      } catch(GmatBaseException e)
+      {
+         MessageInterface::ShowMessage(" *** message: %s\n", e.GetDetails().c_str());
+      }
+   }
+
+   isInitialized = retval;
 
    #ifdef DEBUG_INITIALIZATION
       if (retval == false)
@@ -495,7 +549,89 @@ bool RunEstimator::Initialize()
                "initialize; RunSolver::Initialize() call failed.\n");
    #endif
 
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Exit RunEstimator::Initialize()\n");
+#endif
    return retval;
+}
+
+
+void RunEstimator::LoadSolveForsToESM_Old()
+{
+   // 1. Get list of solve-for objects
+   //ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();
+   ObjectMap* objectmap = GetConfiguredObjectMap();
+   ObjectArray solveforObjList;
+   for (ObjectMap::iterator i = objectmap->begin(); i != objectmap->end(); ++i)
+   {
+      // For each GMAT object:
+      // 1.1 Get a list of solve-for parameter name. 
+      //     If the object has no SolveFors parameters or the list is empty, skip to the next object
+      StringArray solveforNames;
+      try
+      {
+         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");
+      }
+      catch(...)
+      {
+         // If object has no SolveFors parameter, skip it
+         continue;
+      }
+      if (solveforNames.empty())
+         continue;
+
+      // 1.2 Initialize the object before processing
+      if ((*i).second->IsInitialized() == false)
+         (*i).second->Initialize();
+
+      // 1.3 Push object to an object array for processing
+      solveforObjList.push_back((*i).second);
+   }
+
+   // 2. Setup solve-for parameters
+   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+   for(UnsignedInt i= 0; i < solveforObjList.size(); ++i)
+      esm->SetProperty(solveforObjList[i]);
+}
+
+
+void RunEstimator::LoadSolveForsToESM()
+{
+   // 1. Get list of solve-for objects
+   //ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();
+   ObjectMap* objectmap = GetConfiguredObjectMap();
+   ObjectArray objsList;
+
+   for (ObjectMap::iterator i = objectmap->begin(); i != objectmap->end(); ++i)
+   {
+      // For each GMAT object:
+      // 1.1 Get a list of solve-for parameter name. 
+      //     If the object has no SolveFors parameters or the list is empty, skip to the next object
+      StringArray solveforNames;
+      try
+      {
+         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");
+      }
+      catch(...)
+      {
+         // If object has no SolveFors parameter, skip it
+         continue;
+      }
+      if (solveforNames.empty())
+         continue;
+
+      // 1.2 Initialize the object before processing
+      if ((*i).second->IsInitialized() == false)
+         (*i).second->Initialize();
+
+      // 1.3 Push object to an object array for processing
+      objsList.push_back((*i).second);
+   }
+
+   // 2. Setup solve-for parameters
+   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+   for(UnsignedInt i= 0; i < objsList.size(); ++i)
+      esm->SetProperty(objsList[i]);
 }
 
 
@@ -544,6 +680,21 @@ bool RunEstimator::Execute()
    #ifdef DEBUG_STATE
      MessageInterface::ShowMessage("*** Enter RunEstimator:Execute()\n");
    #endif
+
+   //--------------------------------------------------------------------
+   // Steps to run before running Execute()
+   //--------------------------------------------------------------------
+   // Initialize code is moved here:       // made changes by TUAN NGUYEN
+   if (delayInitialization)                // made changes by TUAN NGUYEN
+   {                                       // made changes by TUAN NGUYEN
+      // It needs to run it now            // made changes by TUAN NGUYEN
+      delayInitialization = false;         // made changes by TUAN NGUYEN
+      Initialize();                        // made changes by TUAN NGUYEN
+      theEstimator->Reinitialize();                                          // made changes by TUAN NGUYEN
+   }                                       // made changes by TUAN NGUYEN
+
+
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());

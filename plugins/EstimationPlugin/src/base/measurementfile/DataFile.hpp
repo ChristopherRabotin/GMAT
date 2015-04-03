@@ -171,7 +171,6 @@ private:
    Real             acc;                                                                              // made changes by TUAN NGUYEN
    Real             epoch1;                                                                           // made changes by TUAN NGUYEN
    Real             epoch2;                                                                           // made changes by TUAN NGUYEN
-
 };
 
 #endif /* DataFile_hpp */

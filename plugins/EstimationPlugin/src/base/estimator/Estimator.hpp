@@ -40,6 +40,7 @@ public:
    Estimator& operator=(const Estimator& est);
 
    virtual bool         Initialize();
+   bool                 Reinitialize();                        // made changes by TUAN NGUYEN
    virtual void         CompleteInitialization();
    virtual bool         Finalize();
 
@@ -118,6 +119,9 @@ public:
 
    virtual bool HasLocalClones();
    virtual void UpdateClonedObject(GmatBase *obj);
+
+
+   void                SetDelayInitialization(bool delay); 
 
 protected:
 ///// TBD: Do we need to separate TS and MM like this going forward?
@@ -278,7 +282,7 @@ protected:
                                PARAMETER_TYPE[EstimatorParamCount -
                                               SolverParamCount];
 
-   virtual Integer TestForConvergence(std::string &reason);
+   virtual Integer         TestForConvergence(std::string &reason);
 
    Real                    ConvertToRealEpoch(const std::string &theEpoch,
                                               const std::string &theFormat);
@@ -297,7 +301,7 @@ protected:
    virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);
    virtual void            GetEstimationState(GmatState& outputState);
 
-   /// Estimation status contains all st
+   /// Estimation status contains all status of an estimation
    enum EstimationStatus
    {
       UNKNOWN,
@@ -310,6 +314,8 @@ protected:
       DIVERGING,
    };
 
+private:
+   bool      delayInitialization;            // made changes by TUAN NGUYEN
 };
 
 #endif /* Estimator_hpp */

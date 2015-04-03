@@ -606,18 +606,22 @@ std::string Simulator::GetStringParameter(const Integer id,
  * @return  success flag.
  */
 //------------------------------------------------------------------------------
+#include "StringUtil.hpp"
 bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION
       MessageInterface::ShowMessage(
-               "Simulator::SetStringParameter(%d, %s)\n",
+               "Simulator<%s,%p>::SetStringParameter(%d, %s)\n",GetName().c_str(), this, 
             id, value.c_str());
    #endif
 
+   //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
    if (id == MEASUREMENTS)
    {
-      Integer sz = (Integer) measList.size();
-      return SetStringParameter(id, value, sz);
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+      return SetStringParameter(id, measName, measList.size());
    }
 
    if (id == PROPAGATOR)
@@ -1326,7 +1330,6 @@ bool Simulator::Initialize()
    std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
    StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
    
-   
    for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
    {                                                                            // made changes by TUAN NGUYEN
       std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
@@ -1371,6 +1374,17 @@ bool Simulator::Initialize()
       if (!found)                                                               // made changes by TUAN NGUYEN
          throw SolverException("Cannot initialize simulator; '" + name + "' object is not defined in script.\n");        // made changes by TUAN NGUYEN
    }                                                                            // made changes by TUAN NGUYEN
+
+
+   // Check for TrackingConfig to be defined in TrackingFileSet                    // made changes by TUAN NGUYEN
+   for(UnsignedInt i = 0; i < tfs.size(); ++i)                                     // made changes by TUAN NGUYEN
+   {                                                                               // made changes by TUAN NGUYEN
+      StringArray list = tfs[i]->GetStringArrayParameter("AddTrackingConfig");     // made changes by TUAN NGUYEN
+      if (list.size() == 0)                                                        // made changes by TUAN NGUYEN
+         throw SolverException("Cannot initialize simulator; TrackingFileSet '" +  // made changes by TUAN NGUYEN
+                 tfs[i]->GetName() + "' object which is defined in simulator '" +  // made changes by TUAN NGUYEN
+                 GetName() + "' has no tracking configuration.\n");                // made changes by TUAN NGUYEN
+   }                                                                               // made changes by TUAN NGUYEN
 
    measModels.clear();                                                          // made changes by TUAN NGUYEN
    tkSystems.clear();                                                           // made changes by TUAN NGUYEN

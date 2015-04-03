@@ -4802,3 +4802,34 @@ bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
 {
    return false;
 }
+
+
+// made changes by TUAN NGUYEN
+#include "Moderator.hpp"
+ObjectMap* GmatBase::GetConfiguredObjectMap()
+{
+   return Moderator::Instance()->GetConfiguredObjectMap();
+}
+
+// made changes by TUAN NGUYEN
+GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
+{
+   return Moderator::Instance()->GetConfiguredObject(name);
+}
+
+
+// made changes by TUAN NGUYEN
+const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type,
+                 bool excludeDefaultObjects)
+{
+   return Moderator::Instance()->GetListOfObjects(type, excludeDefaultObjects);
+}
+
+
+// made changes by TUAN NGUYEN
+const StringArray& GmatBase::GetListOfObjects(const std::string &typeName,
+                                       bool excludeDefaultObjects)
+{
+   return Moderator::Instance()->GetListOfObjects(typeName, excludeDefaultObjects);
+}
+

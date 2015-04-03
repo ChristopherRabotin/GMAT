@@ -48,6 +48,7 @@
 //#define DEBUG_ADVANCE_OBSERVATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_ADAPTERS
+//#define DEBUG_AUTO_GENERATE_TRACKINGDATAADAPTERS
 
 // Selects between old datafile classes and the classes in the DataFile plugin
 //#define USE_DATAFILE_PLUGINS
@@ -326,30 +327,52 @@ bool MeasurementManager::Initialize()
                      " failed to open in simulation mode");
          }
 
-         // 3.3.3 Set data filters to DataFile object
+         // 3.3.3 Set data filters of type "Statistics" filter to DataFile object
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage(" &&&&   There are %d data filter objects.\n", dataFilterObjects.size());
+         #endif
          for (UnsignedInt j = 0; j < dataFilterObjects.size(); ++j)
          {
-            // data filter is only set to data file if and only if datafilter.Filenames parameter 
-            // is an empty list or contains the name of data file.
-            StringArray nameList = dataFilterObjects[j]->GetStringArrayParameter("Filenames");
-
-            bool setfilter = false;
-            if (nameList.size() == 0)
-               setfilter = true;
-            else
+            //MessageInterface::ShowMessage(" &&&&   For data filter objects <%s,%p>:\n", dataFilterObjects[j]->GetName().c_str(), dataFilterObjects[j]);
+            if ((dataFilterObjects[j]->IsOfType("StatisticsAcceptFilter"))||(dataFilterObjects[j]->IsOfType("StatisticsRejectFilter")))
             {
-               for (UnsignedInt q = 0; q < nameList.size(); ++q)
+               // data filter is only set to data file if and only if datafilter.Filenames parameter 
+               // is an empty list or contains the name of data file.
+               StringArray nameList = dataFilterObjects[j]->GetStringArrayParameter("FileNames");
+               
+               //MessageInterface::ShowMessage("data filter's file names: %d\n", nameList.size());
+               //for (UnsignedInt mm = 0; mm < nameList.size(); ++mm)
+               //   MessageInterface::ShowMessage("file name <%s>\n", nameList[mm].c_str());
+
+               bool setfilter = false;
+               if (nameList.size() == 0)
+                  setfilter = true;
+               else
                {
-                  if (GmatStringUtil::ToUpper(nameList[q]) == GmatStringUtil::ToUpper(filenames[k]))
-                  {
+                  if ((dataFilterObjects[j]->IsOfType("StatisticsAcceptFilter"))&&
+                      (find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end()))
                      setfilter = true;
-                     break;
+                  else
+                  {
+                     for (UnsignedInt q = 0; q < nameList.size(); ++q)
+                     {
+                        if (GmatStringUtil::ToUpper(nameList[q]) == GmatStringUtil::ToUpper(filenames[k]))
+                        {
+                           setfilter = true;
+                           break;
+                        }
+                     }
                   }
                }
-            }
 
-            if (setfilter)
-               newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]);
+               if (setfilter)
+               {
+                  #ifdef DEBUG_INITIALIZATION
+                     MessageInterface::ShowMessage(" &&&&   Set data filter <%s,%p> to data file <%s,%p>.\n", dataFilterObjects[i]->GetName().c_str(), dataFilterObjects[i], newStream->GetName().c_str(), newStream);
+                  #endif
+                  newStream->SetDataFilter((DataFilter*)dataFilterObjects[j]);
+               }
+            }
          }
          
       }// for k loop
@@ -415,7 +438,7 @@ bool MeasurementManager::Initialize()
 
    #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage(
-            "Entered MeasurementManager::Initialize()\n");
+            "Exit MeasurementManager::Initialize()\n");
    #endif
 #ifdef DEBUG_FLOW
    MessageInterface::ShowMessage(
@@ -893,6 +916,7 @@ bool MeasurementManager::WriteMeasurement(const Integer measurementToWrite)
 }
 
 
+
 //-----------------------------------------------------------------------------
 // UsignedInt LoadObservations()
 //-----------------------------------------------------------------------------
@@ -916,8 +940,37 @@ UnsignedInt MeasurementManager::LoadObservations()
       DataFileAdapter dfa;
    #endif
 
-   UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num;
-   filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = 0;
+   // Open all streams in streamList                                                                // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < streamList.size(); ++i)                                              // made changes by TUAN NGUYEN
+   {                                                                                                // made changes by TUAN NGUYEN
+      #ifdef DEBUG_LOAD_OBSERVATIONS                                                                // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("Opening the data stream to file %s\n",                      // made changes by TUAN NGUYEN
+               streamList[i]->GetName().c_str());                                                   // made changes by TUAN NGUYEN
+      #endif                                                                                        // made changes by TUAN NGUYEN
+
+      #ifdef USE_DATAFILE_PLUGINS                                                                   // made changes by TUAN NGUYEN
+         std::string writeMode = (simulating ? "w" : "r");                                          // made changes by TUAN NGUYEN
+         streamList[i]->SetStringParameter(                                                         // made changes by TUAN NGUYEN
+               streamList[i]->GetParameterID("ReadWriteMode"), writeMode);                          // made changes by TUAN NGUYEN
+
+         if (streamList[i]->OpenFile() == false)                                                    // made changes by TUAN NGUYEN
+            retval = false;                                                                         // made changes by TUAN NGUYEN
+      #else                                                                                         // made changes by TUAN NGUYEN
+         if (streamList[i]->OpenStream(false) == false)                                             // made changes by TUAN NGUYEN
+            throw MeasurementException("Error: Cannot open file '" + streamList[i]->GetName() + "'.\n");  // made changes by TUAN NGUYEN
+      #endif                                                                                        // made changes by TUAN NGUYEN
+   }                                                                                                // made changes by TUAN NGUYEN
+   
+   // Initialize trackingConfigsMap                                                                 // made changes by TUAN NGUYEN
+   for (UnsignedInt i = 0; i < streamList.size(); ++i)                                              // made changes by TUAN NGUYEN
+   {                                                                                                // made changes by TUAN NGUYEN
+      StringArray sa;                                                                               // made changes by TUAN NGUYEN
+      trackingConfigsMap[i] = sa;                                                                   // made changes by TUAN NGUYEN
+   }                                                                                                // made changes by TUAN NGUYEN
+
+
+   UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num, filter8Num;
+   filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = filter8Num = 0;
 
    observations.clear();
 
@@ -925,8 +978,8 @@ UnsignedInt MeasurementManager::LoadObservations()
    std::vector<UnsignedInt> count;
    std::vector<ObservationData*> dataBuffer;
    ObservationData* odPointer;
-
-   // MessageInterface::ShowMessage("Hi there 1: streamList.size() = %d\n", streamList.size());
+   
+   //MessageInterface::ShowMessage("Hi there 1: streamList.size() = %d\n", streamList.size());
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
    {
       odPointer = streamList[i]->ReadObservation();
@@ -940,7 +993,7 @@ UnsignedInt MeasurementManager::LoadObservations()
       count.push_back(0);
    }
 
-   // MessageInterface::ShowMessage("Hi there 2\n");
+   //MessageInterface::ShowMessage("Hi there 2\n");
    ObservationData od;
    while (true)
    {
@@ -980,6 +1033,22 @@ UnsignedInt MeasurementManager::LoadObservations()
          od = *selectedData;
          observations.push_back(od);
          count[minIndex] = count[minIndex] + 1;
+
+         //@todo: generate tracking config here
+         std::stringstream ss;
+         ss << "{";
+         for (UnsignedInt i = 0; i < od.participantIDs.size(); ++i)
+         {
+            if (i != 0)
+               ss << ",";
+            ss << od.participantIDs[i];
+         }
+         ss << "}," << od.typeName;
+
+         if (trackingConfigsMap[minIndex].empty())
+            trackingConfigsMap[minIndex].push_back(ss.str());
+         else if (find(trackingConfigsMap[minIndex].begin(), trackingConfigsMap[minIndex].end(), ss.str()) == trackingConfigsMap[minIndex].end())
+            trackingConfigsMap[minIndex].push_back(ss.str());
       }
 
       //MessageInterface::ShowMessage("Hi there 3.5\n");
@@ -1007,6 +1076,9 @@ UnsignedInt MeasurementManager::LoadObservations()
          case 7:
             ++filter7Num; 
             break;
+         case 8:
+            ++filter8Num; 
+            break;
       }
 
       //MessageInterface::ShowMessage("Hi there 3.6\n");
@@ -1022,13 +1094,14 @@ UnsignedInt MeasurementManager::LoadObservations()
 
    // 7. Display all statistic of data records
    MessageInterface::ShowMessage("Number of thown records due to:\n");
-   MessageInterface::ShowMessage("      .Invalid measurement value              : %d\n", filter3Num);
-   MessageInterface::ShowMessage("      .Duplication record or time order filter: %d\n", filter4Num);
-   MessageInterface::ShowMessage("      .Selected stations filter               : %d\n", filter5Num);
-   MessageInterface::ShowMessage("      .Data thinning filter                   : %d\n", filter1Num);
-   MessageInterface::ShowMessage("      .Time span filter                       : %d\n", filter2Num);
-   MessageInterface::ShowMessage("      .Selected observers                     : %d\n", filter6Num);
-   MessageInterface::ShowMessage("      .Selected data types                    : %d\n", filter7Num);
+   MessageInterface::ShowMessage("      .Invalid measurement value       : %d\n", filter3Num);
+   MessageInterface::ShowMessage("      .Record duplication or time order: %d\n", filter4Num);
+   MessageInterface::ShowMessage("      .Trackers selection              : %d\n", filter5Num);
+   MessageInterface::ShowMessage("      .Data thinning                   : %d\n", filter1Num);
+   MessageInterface::ShowMessage("      .Time span                       : %d\n", filter2Num);
+   MessageInterface::ShowMessage("      .Observers selection             : %d\n", filter6Num);
+   MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
+   MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
       MessageInterface::ShowMessage("Data file '%s' has %d records. In which %d records are used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), numRec[i], count[i]);
 
@@ -1039,7 +1112,15 @@ UnsignedInt MeasurementManager::LoadObservations()
 
    // Set the current data pointer to the first observation value
    currentObs = observations.begin();
-   MessageInterface::ShowMessage("Total number of load records : %d\n", observations.size());
+   MessageInterface::ShowMessage("Total number of load records : %d\n\n", observations.size());
+
+   for(UnsignedInt i = 0; i < trackingConfigsMap.size(); ++i)
+   {
+      MessageInterface::ShowMessage("List of tracking configurations (present in participant ID) for load records from data file '%s':\n", streamList[i]->GetName().c_str());
+      for(UnsignedInt j = 0; j < trackingConfigsMap[i].size(); ++j)
+         MessageInterface::ShowMessage("   Config %d: {%s}\n", j, trackingConfigsMap[i].at(j).c_str());
+   }
+   MessageInterface::ShowMessage("\n");
 
    #ifdef DEBUG_LOAD_OBSERVATIONS
      MessageInterface::ShowMessage(
@@ -1050,6 +1131,134 @@ UnsignedInt MeasurementManager::LoadObservations()
 }
 
 
+bool MeasurementManager::AutoGenerateTrackingDataAdapters()
+{
+#ifdef DEBUG_AUTO_GENERATE_TRACKINGDATAADAPTERS
+   MessageInterface::ShowMessage("Enter MeasurementManager::AutoGenerateTrackingDataAdapters()\n");
+#endif
+
+   // Get a list of TrackingFileSet having no tracking configs
+   for(UnsignedInt i = 0; i < trackingSets.size(); ++i)
+   {
+      StringArray list = trackingSets[i]->GetStringArrayParameter("AddTrackingConfig");
+      if (list.empty())
+      {
+         // For each tracking file set object, It generates tracking data adapters for trackingSets[i]
+         StringArray createList;
+
+         // 1. Get list data files
+         StringArray fileNamesList = trackingSets[i]->GetStringArrayParameter("FileName");
+         for (UnsignedInt j = 0; j < fileNamesList.size(); ++j)
+         {
+            // Get file index for fileNamesList[j]
+            UnsignedInt index;
+            for (UnsignedInt k = 0; k < streamList.size(); ++k)
+            {
+               if (GmatStringUtil::ToUpper(fileNamesList[j]) == GmatStringUtil::ToUpper(streamList[k]->GetName()))
+               {
+                  index = k;
+                  break;
+               }
+            }
+
+            // Get a list of tracking configurations for this data file
+            StringArray tclist = trackingConfigsMap[index];
+            for (UnsignedInt k = 0; k < tclist.size(); ++k)
+            {
+               if (createList.empty())
+                  createList.push_back(tclist[k]);
+               else if (find(createList.begin(), createList.end(), tclist[k]) == createList.end())
+                  createList.push_back(tclist[k]);
+            }
+         }
+
+         // 2. Create tracking data adapters for trackingSets[i] based on createList
+         // 2.0. Get a list of stations and spacecrafts
+         ObjectMap* objectmap = trackingSets[i]->GetConfiguredObjectMap();
+         ObjectArray partList;
+         for (ObjectMap::iterator j = objectmap->begin(); j != objectmap->end(); ++j)
+         {
+            if (((*j).second->IsOfType(Gmat::GROUND_STATION))||
+                ((*j).second->IsOfType(Gmat::SPACECRAFT)))
+               partList.push_back((*j).second);
+         }
+
+         // 2.1. Prepare all inputs
+         std::vector<StringArray> strands;
+         StringArray types;
+
+         for (UnsignedInt j = 0; j < createList.size(); ++j)
+         {
+            StringArray participants;
+            std::string participantID;
+            Integer count;
+            GmatBase* obj;
+
+            std::string config = createList[j];
+            UnsignedInt pos = config.find_last_of(',');
+            std::string type = config.substr(pos+1, config.size()-(pos+1));
+            std::string strand = config.substr(1, pos-2);
+            while (strand != "")
+            {
+               pos = strand.find_first_of(',');
+               if (pos != strand.npos)
+               {
+                  participantID = strand.substr(0,pos);
+                  strand = strand.substr(pos+1);
+               }
+               else
+               {
+                  participantID = strand;
+                  strand = "";
+               }
+
+               // Convert participant ID to participant object
+               count = 0;
+               obj = NULL;
+               for (UnsignedInt k = 0; k < partList.size(); ++k)
+               {
+                  if (partList[k]->GetStringParameter("Id") == participantID)
+                  {
+                     ++count;
+                     obj = partList[k];
+                  }
+               }
+               if (count == 0)
+                  throw MeasurementException("Error: It is failed to generate tracking configuration due to neither station nor spacecraft defined in your script has Id = '" + participantID + "'.\n" );
+               else if (count > 1)
+                  throw MeasurementException("Error: It is failed to generate tracking configuation due to 2 or more GMAT objects having the same Id = '" + participantID + "'.\n");
+
+               // Set name
+               participants.push_back(obj->GetName());
+               // Set reference object for tracking file set
+               try
+               {
+                  trackingSets[i]->SetRefObject(obj, obj->GetType(), obj->GetName());
+               }
+               catch(...)
+               {
+                  // skip when it fail to set referent object
+               }
+            }
+
+            //participants.push_back(strand);
+            strands.push_back(participants);
+            types.push_back(type);
+         }
+
+         // 2.2. Generate tracking configs
+         trackingSets[i]->GenerateTrackingConfigs(strands, types);
+
+      }
+      else
+         MessageInterface::ShowMessage("****   No tracking configuartion is generated due to tracking configuration was defined in your script.\n");
+   }
+
+#ifdef DEBUG_AUTO_GENERATE_TRACKINGDATAADAPTERS
+   MessageInterface::ShowMessage("Exit MeasurementManager::AutoGenerateTrackingDataAdapters()\n");
+#endif
+   return true;
+}
 
 UnsignedInt MeasurementManager::LoadObservationsOld()
 {
@@ -2199,6 +2408,7 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
 
       #ifdef DEBUG_CALCULATE_MEASUREMENTS
          MessageInterface::ShowMessage(" processing for tracking data adapters ...\n");
+         MessageInterface::ShowMessage("adapter.size() = %d:\n", adapters.size());
       #endif
       // Now do the tracking data adapters
       for (UnsignedInt j = 0; j < adapters.size(); ++j)
@@ -2245,9 +2455,8 @@ bool MeasurementManager::CalculateMeasurements(bool forSimulation, bool withEven
             std::vector<RampTableData>* rt = NULL;
             if (sr.size() > 0)
                rt = &(rampTables[sr[0]]);
-          
             measurements[j] = adapters[j]->CalculateMeasurement(withEvents, od, rt);
-
+            
             if (measurements[j].isFeasible)
             {
                if (!withEvents)

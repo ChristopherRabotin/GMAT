@@ -29,7 +29,7 @@
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
-//#define DEBUG_DATA_FILTER
+//#define DEBUG_FILTER
 
 //------------------------------------------------------------------------------
 // static data
@@ -62,9 +62,12 @@ StatisticRejectFilter::StatisticRejectFilter(const std::string name) :
 #endif
 
    objectTypes.push_back(Gmat::DATA_FILTER);
-   objectTypeNames.push_back("StatisticRejectFilter");
+   objectTypeNames.push_back("StatisticsRejectFilter");
 
    parameterCount = StatisticRejectFilterParamCount;
+
+   initialEpoch = finalEpoch;
+   epochStart = epochEnd;
 }
 
 
@@ -81,44 +84,44 @@ StatisticRejectFilter::~StatisticRejectFilter()
 
 
 //------------------------------------------------------------------------------
-// StatisticRejectFilter(const StatisticRejectFilter& saf)
+// StatisticRejectFilter(const StatisticRejectFilter& srf)
 //------------------------------------------------------------------------------
 /**
  * Copy constructor for a StatisticRejectFilter
  *
- * @param saf        The StatisticRejectFilter object that provides data for the new one
+ * @param srf        The StatisticRejectFilter object that provides data for the new one
  */
 //------------------------------------------------------------------------------
-StatisticRejectFilter::StatisticRejectFilter(const StatisticRejectFilter& saf) :
-   DataFilter            (saf)
+StatisticRejectFilter::StatisticRejectFilter(const StatisticRejectFilter& srf) :
+   DataFilter            (srf)
 {
 #ifdef DEBUG_CONSTRUCTION
-	MessageInterface::ShowMessage("StatisticRejectFilter copy constructor from <%s,%p>  to  <%s,%p>\n", saf.GetName().c_str(), &saf, GetName().c_str(), this);
+	MessageInterface::ShowMessage("StatisticRejectFilter copy constructor from <%s,%p>  to  <%s,%p>\n", srf.GetName().c_str(), &srf, GetName().c_str(), this);
 #endif
 
 }
 
 
 //------------------------------------------------------------------------------
-// StatisticRejectFilter& operator=(const StatisticRejectFilter& saf)
+// StatisticRejectFilter& operator=(const StatisticRejectFilter& srf)
 //------------------------------------------------------------------------------
 /**
  * StatisticRejectFilter assignment operator
  *
- * @param saf    The StatisticRejectFilter object that provides data for the this one
+ * @param srf    The StatisticRejectFilter object that provides data for the this one
  *
  * @return This object, configured to match saf
  */
 //------------------------------------------------------------------------------
-StatisticRejectFilter& StatisticRejectFilter::operator=(const StatisticRejectFilter& saf)
+StatisticRejectFilter& StatisticRejectFilter::operator=(const StatisticRejectFilter& srf)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("StatisticRejectFilter operator = <%s,%p>\n", GetName().c_str(), this);
 #endif
 
-   if (this != &saf)
+   if (this != &srf)
    {
-      DataFilter::operator=(saf);
+      DataFilter::operator=(srf);
 
       //@todo: set value for parameters here
    }
@@ -273,26 +276,72 @@ std::string StatisticRejectFilter::GetParameterTypeString(const Integer id) cons
 
 ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
-#ifdef DEBUG_DATA_FILTER
-   MessageInterface::ShowMessage("StatisticRejectFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)  enter\n", GetName().c_str(), this, dataObject, rejectedReason);
 #endif
-   Integer reject = 0;
-   if (DataFilter::FilteringData(dataObject, reject) == NULL)
-   {
-      rejectedReason = reject;
-#ifdef DEBUG_DATA_FILTER
-   MessageInterface::ShowMessage("StatisticRejectFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
-#endif
-      return dataObject;
+   
+   rejectedReason = 0;             // no reject
 
-      //@todo: Add code to filter additional data here
+   // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
+   for(UnsignedInt i = 0; i < observers.size(); ++i)
+   {
+      for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
+      {
+         if (observers[i] == dataObject->participantIDs[j])
+         {
+            rejectedReason = 6;         // 6: rejected due to spacecraft is found in "observers" array
+            #ifdef DEBUG_FILTER
+               MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+            #endif
+            return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
+         }
+      }
    }
 
-   rejectedReason = reject;
-#ifdef DEBUG_DATA_FILTER
-   MessageInterface::ShowMessage("StatisticRejectFilter::FilteringData(dataObject = <%p>, rejectedReason = %d) enter\n", dataObject, rejectedReason);
-#endif
-   return NULL;
+   // 2. Trackers verify: It will be passed the test when observation data contains one ground station in "trackers" array
+   for(UnsignedInt i = 0; i < trackers.size(); ++i)
+   {
+      if (trackers[i] == dataObject->participantIDs[0])
+      {
+         rejectedReason = 5;        // 5: rejected due to ground station is found in "trackers" array
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+         #endif
+         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 5 
+      }
+   }
+
+   // 3. Measurement type verify: It will be passed the test when data type of observation data is found in "dataTypes" array
+   for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
+   {
+      if (dataTypesMap[dataTypes[i]] == dataObject->typeName)
+      {
+         rejectedReason = 7;        // 7: rejected due to data type of observation data is not found in "dataTypes" array
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+         #endif
+         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+      }
+   }
+
+
+   // Strands verify:
+   // Time interval verify:
+   GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
+   if ((currentEpoch >= epochStart)&&(currentEpoch <= epochEnd))
+   {
+      rejectedReason = 2;      // 2: rejected due to time span
+      #ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL  time out of range\n", GetName().c_str(), this, dataObject, rejectedReason);
+      #endif
+      return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
+   }
+
+
+   #ifdef DEBUG_FILTER
+      MessageInterface::ShowMessage("StatisticRejectFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit0 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
+   #endif
+   return dataObject;
 }
    
 

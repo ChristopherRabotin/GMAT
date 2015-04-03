@@ -25,7 +25,7 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
-#include "Moderator.hpp"
+#include "DateUtil.hpp" 
 #include <sstream>
 
 
@@ -38,7 +38,7 @@
 //------------------------------------------------------------------------------
 const std::string DataFilter::PARAMETER_TEXT[] =
 {
-   "Filenames",
+   "FileNames",
    "ObservedObjects",
    "Trackers",
    "DataTypes",
@@ -74,8 +74,8 @@ const Gmat::ParameterType DataFilter::PARAMETER_TYPE[] =
 DataFilter::DataFilter(const std::string name) :
    GmatBase          (Gmat::DATA_FILTER, "DataFilter", name),
    epochFormat       ("TAIModJulian"),
-   epochStart        (GmatTimeConstants::MJD_OF_J2000),
-   epochEnd          (GmatTimeConstants::MJD_OF_J2000 + 1),
+   initialEpoch      (DateUtil::EARLIEST_VALID_MJD), 
+   finalEpoch        (DateUtil::LATEST_VALID_MJD),
    isChecked         (false)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -87,12 +87,18 @@ DataFilter::DataFilter(const std::string name) :
 
    parameterCount = DataFilterParamCount;
    
-   std::stringstream ss;
-   ss << GmatTimeConstants::MJD_OF_J2000;
-   initialEpoch = ss.str();
-   ss.str("");
-   ss << GmatTimeConstants::MJD_OF_J2000 + 1;
-   finalEpoch   = ss.str();
+   epochStart = ConvertToRealEpoch(initialEpoch, epochFormat);
+   epochEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
+
+   observers.push_back("All");
+   fileNames.push_back("From_AddTrackingConfig");
+   trackers.push_back("All");
+   dataTypes.push_back("All");
+
+   dataTypesMap["Range_KM"]          = "Range";
+   dataTypesMap["Range_KU"]          = "DSNRange";
+   dataTypesMap["Doppler_Hz"]        = "Doppler";
+   dataTypesMap["Doppler_RangeRate"] = "RangeRate";
 }
 
 
@@ -129,6 +135,7 @@ DataFilter::DataFilter(const DataFilter& saf) :
    epochStart            (saf.epochStart),
    epochEnd              (saf.epochEnd),
    strands               (saf.strands),
+   dataTypesMap          (saf.dataTypesMap),
    isChecked             (false)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -169,6 +176,7 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
       epochStart   = saf.epochStart;
       epochEnd     = saf.epochEnd;
       strands      = saf.strands;
+      dataTypesMap = saf.dataTypesMap;
       isChecked    = false;
    }
 
@@ -273,7 +281,11 @@ Integer DataFilter::GetParameterID(const std::string &str) const
    for (Integer i = GmatBaseParamCount; i < DataFilterParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw MeasurementException("Error: " + str + "parameter was not defined in DataFilter.\n");
          return i;
+      }
    }
 
    return GmatBase::GetParameterID(str);
@@ -315,6 +327,22 @@ std::string DataFilter::GetParameterTypeString(const Integer id) const
 {
    return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
+
+
+bool DataFilter::IsParameterReadOnly(const Integer id) const
+{
+   if (id == STRANDS)
+      return true;
+
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+bool DataFilter::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -515,126 +543,135 @@ std::string DataFilter::GetStringParameter(const Integer id, const Integer index
 bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
                                            const Integer index)
 {
-   if (index == -1)
-      return true;
-
    if (id == FILENAMES)
    {
-      if ((0 <= index)&&(index < (Integer)fileNames.size()))
+      if (index == -1)
       {
-         fileNames[index] = value;
+         fileNames.clear();
+         return true;
+      } 
+      else if ((0 <= index)&&(index <= (Integer)fileNames.size()))
+      {
+         if (value == "")
+            throw MeasurementException("Error: cannot assign an empty string to file name.\n");
+
+         if (index == fileNames.size())
+            fileNames.push_back(value);
+         else
+            fileNames[index] = value;
          return true;
       }
       else
       {
-         if (index == fileNames.size())
-         {
-            fileNames.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: file name's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
+         std::stringstream ss;
+         ss << "Error: file name's index (" << index << ") is out of bound.\n"; 
+         throw GmatBaseException(ss.str());
       }
    }
 
    if (id == OBSERVED_OBJECTS)
    {
-      if ((0 <= index)&&(index < (Integer)observers.size()))
+      if (index == -1)
       {
-         observers[index] = value;
+         observers.clear();
+         return true;
+      } 
+      else if ((0 <= index)&&(index <= (Integer)observers.size()))
+      {
+         if (value == "")
+            throw MeasurementException("Error: cannot assign an empty string to observer ID.\n");
+
+         if (index == observers.size())
+            observers.push_back(value);
+         else
+            observers[index] = value;
          return true;
       }
       else
       {
-         if (index == observers.size())
-         {
-            observers.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: observer's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
+         std::stringstream ss;
+         ss << "Error: observer's index (" << index << ") is out of bound.\n"; 
+         throw GmatBaseException(ss.str());
       }
    }
 
    if (id == TRACKERS)
    {
-      if ((0 <= index)&&(index < (Integer)trackers.size()))
+      if (index == -1)
       {
-         trackers[index] = value;
+         trackers.clear();
+         return true;
+      } 
+      else if ((0 <= index)&&(index <= (Integer)trackers.size()))
+      {
+         if (value == "")
+            throw MeasurementException("Error: cannot accept an empty string to a tracker ID.\n");
+
+         if (index == trackers.size())
+            trackers.push_back(value);
+         else
+            trackers[index] = value;
          return true;
       }
       else
       {
-         if (index == trackers.size())
-         {
-            trackers.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: tracker's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
+         std::stringstream ss;
+         ss << "Error: tracker's index (" << index << ") is out of bound.\n"; 
+         throw GmatBaseException(ss.str());
       }
    }
 
    if (id == DATA_TYPES)
    {
-      if ((0 <= index)&&(index < (Integer)dataTypes.size()))
+      if (index == -1)
+      {
+         dataTypes.clear();
+         return true;
+      } 
+      else if ((0 <= index)&&(index <= (Integer)dataTypes.size()))
       {
          StringArray nameList = GetListOfMeasurementTypes();
          if (find(nameList.begin(), nameList.end(), value) == nameList.end())
             throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".DataTypes parameter is invalid.\n");
 
-         dataTypes[index] = value;
+         if (index == dataTypes.size())
+            dataTypes.push_back(value);
+         else
+            dataTypes[index] = value;
          return true;
       }
       else
       {
-         if (index == dataTypes.size())
-         {
-            dataTypes.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: data type's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
+         std::stringstream ss;
+         ss << "Error: data type's index (" << index << ") is out of bound.\n"; 
+         throw GmatBaseException(ss.str());
       }
    }
 
 
    if (id == STRANDS)
    {
-      if ((0 <= index)&&(index < (Integer)strands.size()))
+      if (index == -1)
       {
-         strands[index] = value;
+         strands.clear();
+         return true;
+      } 
+      else if ((0 <= index)&&(index <= (Integer)strands.size()))
+      {
+         if (value == "")
+            throw MeasurementException("Error: cannot assign an empty string to strand.\n");
+
+         if (index == strands.size())
+            strands.push_back(value);
+         else
+            strands[index] = value;
          return true;
       }
       else
       {
-         if (index == strands.size())
-         {
-            strands.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: strand's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
+         std::stringstream ss;
+         ss << "Error: strand's index (" << index << ") is out of bound.\n"; 
+         throw GmatBaseException(ss.str());
       }
    }
 
@@ -763,22 +800,27 @@ StringArray DataFilter::GetListOfMeasurementTypes()
    StringArray typeList;
 
    //@todo: need to add any new measurement type here
-   typeList.push_back("Range");
-   typeList.push_back("DSNRange");
-   typeList.push_back("Doppler");
-   typeList.push_back("RangeRate");
+   //typeList.push_back("Range");
+   //typeList.push_back("DSNRange");
+   //typeList.push_back("Doppler");
+   //typeList.push_back("RangeRate");
 
+   typeList.push_back("Range_KM");
+   typeList.push_back("Range_RU");
+   typeList.push_back("Doppler_Hz");
+   typeList.push_back("Doppler_RangeRate");
    return typeList;
 }
 
 
 ObjectArray DataFilter::GetListOfSpacecrafts()
 {
-   StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::SPACECRAFT);
-   
+   // StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::SPACECRAFT);
+   StringArray nameList = GetListOfObjects(Gmat::SPACECRAFT);
    ObjectArray objectList;
    for (UnsignedInt i = 0; i < nameList.size(); ++i)
-      objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
+      objectList.push_back(GetConfiguredObject(nameList[i]));
+      //objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
 
    return objectList;
 }
@@ -786,11 +828,13 @@ ObjectArray DataFilter::GetListOfSpacecrafts()
 
 ObjectArray DataFilter::GetListOfGroundStations()
 {
-   StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::GROUND_STATION);
+   //StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::GROUND_STATION);
+   StringArray nameList = GetListOfObjects(Gmat::GROUND_STATION);
 
    ObjectArray objectList;
    for (UnsignedInt i = 0; i < nameList.size(); ++i)
-      objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
+      objectList.push_back(GetConfiguredObject(nameList[i]));
+      //objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
 
    return objectList;
 }
@@ -804,8 +848,8 @@ StringArray DataFilter::GetListOfValidEpochFormats()
 
 bool DataFilter::ValidateInput()
 {
-   //if (isChecked)
-   //   return true;
+   if (isChecked)
+      return true;
 
 #ifdef DEBUG_FILTER
    MessageInterface::ShowMessage("DataFilter<%s,%p>::ValidateInput()  enter\n", GetName().c_str(), this);
@@ -914,119 +958,10 @@ bool DataFilter::ValidateInput()
 }
 
 
-#include "TimeSystemConverter.hpp"
 ObservationData* DataFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)  enter\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-   
-   rejectedReason = 0;             // no reject
-   if (ValidateInput())
-   {
-      // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
-      bool pass1 = true;
-      for(UnsignedInt i = 0; i < observers.size(); ++i)
-      {
-         pass1 = false;
-         rejectedReason = 6;         // 6: rejected due to spacecraft is not found
-         for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
-         {
-            if (observers[i] == dataObject->participantIDs[j])
-            {
-               rejectedReason = 0;   // 0: no rejected due to spacecraft is found in "observers" array
-               pass1 = true;
-               break;
-            }
-         }
-
-         if (pass1)
-            break;
-      }
-      if (!pass1)
-      {
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit1 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
-      }
-
-      // 2. Trackers verify: It will be passed the test when observation data contains one ground station in "trackers" array
-      bool pass2 = true;
-      for(UnsignedInt i = 0; i < trackers.size(); ++i)
-      {
-         pass2 = false;
-         rejectedReason = 5;        // 5: rejected due to ground station is not found
-         //MessageInterface::ShowMessage("Pass2: trackers[%d] = %s   dataObject->participantIDs[0] = %s\n", i, trackers[i].c_str(), dataObject->participantIDs[0].c_str());
-         if (trackers[i] == dataObject->participantIDs[0])
-         {
-            rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
-            pass2 = true;
-            break;
-         }
-      }
-      if (!pass2)
-      {
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit2 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 5 
-      }
-
-      // 3. Measurement type verify: It will be passed the test when data type of observation data is found in "dataTypes" array
-      bool pass3 = true;
-      for(UnsignedInt i = 0; i < dataTypes.size(); ++i)
-      {
-         pass3 = false;
-         rejectedReason = 7;        // 7: rejected due to data type of observation data is not found
-         //MessageInterface::ShowMessage("Pass3: dataTypes[%d] = %s   dataObject->participantIDs[0] = %s\n", i, dataTypes[i].c_str(), dataObject->typeName.c_str());
-         if (dataTypes[i] == dataObject->typeName)
-         {
-            rejectedReason = 0;    // 0: no rejected due to data type of observation data is found in "dataTypes" array
-            pass3 = true;
-            break;
-         }
-      }
-      if (!pass3)
-      {
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit3 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
-      }
-
-
-      // Strands verify:
-      // Time interval verify:
-      bool pass4 = true;
-      rejectedReason = 0;
-      GmatEpoch currentEpoch = TimeConverterUtil::Convert(dataObject->epoch, dataObject->epochSystem, TimeConverterUtil::A1MJD);
-      if ((currentEpoch < epochStart)||(currentEpoch > epochEnd))
-      {
-         rejectedReason = 2;      // 2: rejected due to time span
-         pass4 = false;
-      }
-      if (!pass4)
-      {
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL  time out of range\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-         return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 4 
-      }
-
-
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit0 return <%p>\n", GetName().c_str(), this, dataObject, rejectedReason, dataObject);
-#endif
-      return dataObject;
-   }
-   else
-   {
-#ifdef DEBUG_FILTER
-   MessageInterface::ShowMessage("DataFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit4 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
-#endif
-      return NULL;
-   }
+   throw MeasurementException("Error: Do not allow to run DataFilter::FilteringData()\n");
+   return NULL;
 }
 
 

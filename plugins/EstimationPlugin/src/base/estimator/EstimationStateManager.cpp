@@ -35,6 +35,7 @@
 //#define DEBUG_CLONING
 //#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_STM_MAPPING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)
@@ -1096,11 +1097,11 @@ bool EstimationStateManager::MapObjectsToSTM()
       if (stateMap[h]->subelement == 1)
       {
          elementId = stateMap[h]->parameterID;
-//         elementLength = stateMap[h]->length;
 
          bool hasDstm = obj->HasDynamicParameterSTM(elementId);
 
          #ifdef DEBUG_STM_MAPPING
+            Integer elementLength = stateMap[h]->length;
             MessageInterface::ShowMessage("Prepping for STM; element %s for "
                   "object %s has ID %d and length %d, and %s a dynamic STM "
                   "contribution\n", stateMap[h]->elementName.c_str(),

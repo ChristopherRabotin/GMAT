@@ -57,6 +57,7 @@ public:
          const std::string &prefix, const std::string &useName);
 
    virtual bool Initialize();
+//   bool         Reinitialize();                                      // made changes by TUAN NGUYEN
    virtual bool Execute();
    virtual void RunComplete();
    virtual bool TakeAction(const std::string &action,
@@ -114,6 +115,13 @@ protected:
    // Helper methods
    virtual void SetPropagationProperties(PropagationStateManager *psm);
    virtual void CleanUpEvents();
+
+private:
+//   bool needReinitialize;                            // made changes by TUAN NGUYEN
+   bool delayInitialization;                           // made changes by TUAN NGUYEN
+
+   void LoadSolveForsToESM();                          // made changes by TUAN NGUYEN
+   void LoadSolveForsToESM_Old();                      // made changes by TUAN NGUYEN
 };
 
 #endif /* RunEstimator_hpp */

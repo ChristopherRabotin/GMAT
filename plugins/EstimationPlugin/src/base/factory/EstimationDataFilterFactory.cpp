@@ -45,8 +45,8 @@ EstimationDataFilterFactory::EstimationDataFilterFactory() :
 
    if (creatables.empty())
    {
-      creatables.push_back("StatisticAcceptFilter");
-      creatables.push_back("StatisticRejectFilter");
+      creatables.push_back("StatisticsAcceptFilter");
+      creatables.push_back("StatisticsRejectFilter");
       //creatables.push_back("EstimationAcceptFilter");
       //creatables.push_back("EstimationRejectFilter");
    }
@@ -83,8 +83,8 @@ EstimationDataFilterFactory::EstimationDataFilterFactory(StringArray createList)
 
    if (creatables.empty())
    {
-      creatables.push_back("StatisticAcceptFilter");
-      creatables.push_back("StatisticRejectFilter");
+      creatables.push_back("StatisticsAcceptFilter");
+      creatables.push_back("StatisticsRejectFilter");
       //creatables.push_back("EstimationAcceptFilter");
       //creatables.push_back("EstimationRejectFilter");
    }
@@ -109,8 +109,8 @@ EstimationDataFilterFactory::EstimationDataFilterFactory(const EstimationDataFil
 
    if (creatables.empty())
    {
-      creatables.push_back("StatisticAcceptFilter");
-      creatables.push_back("StatisticRejectFilter");
+      creatables.push_back("StatisticsAcceptFilter");
+      creatables.push_back("StatisticsRejectFilter");
       //creatables.push_back("EstimationAcceptFilter");
       //creatables.push_back("EstimationRejectFilter");
    }
@@ -140,8 +140,8 @@ EstimationDataFilterFactory& EstimationDataFilterFactory::operator= (const Estim
 
       if (creatables.empty())
       {
-         creatables.push_back("StatisticAcceptFilter");
-         creatables.push_back("StatisticRejectFilter");
+         creatables.push_back("StatisticsAcceptFilter");
+         creatables.push_back("StatisticsRejectFilter");
          //creatables.push_back("EstimationAcceptFilter");
          //creatables.push_back("EstimationRejectFilter");
       }
@@ -173,9 +173,9 @@ DataFilter* EstimationDataFilterFactory::CreateDataFilter(const std::string &ofT
 
    DataFilter *retval = NULL;
 
-   if (ofType == "StatisticAcceptFilter")
+   if (ofType == "StatisticsAcceptFilter")
       retval = new StatisticAcceptFilter(withName);
-   if (ofType == "StatisticRejectFilter")
+   if (ofType == "StatisticsRejectFilter")
       retval = new StatisticRejectFilter(withName);
    //if (ofType == "EstimationAcceptFilter")
    //   retval = new EstimationAcceptFilter(withName);

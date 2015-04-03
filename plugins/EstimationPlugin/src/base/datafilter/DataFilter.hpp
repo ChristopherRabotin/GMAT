@@ -48,6 +48,9 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
                                            const std::string &value);
@@ -101,6 +104,7 @@ protected:
    /// Flag indicate that ValidateInput() function was run
    bool isChecked;
 
+   std::map<std::string, std::string> dataTypesMap;                    // made changes by TUAN NGUYEN
 
    /// Class parameter ID enumeration
    enum
