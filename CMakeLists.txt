@@ -316,6 +316,10 @@ MACRO(_ADDSOURCEGROUPS ALL_DIRS)
 ENDMACRO(_ADDSOURCEGROUPS)
 
 # ====================================================================
+# Setup GMAT directory structure
+INCLUDE(build/install/CMake_INSTALL_Setup.cmake)
+
+# ====================================================================
 # Go to src directory and look for CMake instructions there
 ADD_SUBDIRECTORY(src)
 
