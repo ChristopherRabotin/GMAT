@@ -5,8 +5,6 @@
 
 PythonInterface* PythonInterface::instance = NULL;
 
-PythonInterface::platform PythonInterface::plF = PythonInterface::platform::win;
-
 PythonInterface* PythonInterface::PyInstance()
 {
    if (instance == NULL)
@@ -19,15 +17,19 @@ PythonInterface::PythonInterface(): Interface("PythonInterface", NULL)
 {
    isPythonInitialized = false;
    numPyCommands = 0;
-
+   plF = new char[2];
+   memset(plF, 0, 2);
 }
 
 PythonInterface::~PythonInterface()
 {
+   delete[] plF;
 }
 
 PythonInterface::PythonInterface(const PythonInterface& pi) : Interface(pi)
 {
+   plF = new char[2];
+   memcpy(plF, pi.plF, 2);
 }
 
 
@@ -41,6 +43,7 @@ PythonInterface& PythonInterface::operator=(const PythonInterface& pi)
 	   Interface::operator=(pi);
       numPyCommands = pi.numPyCommands;
       isPythonInitialized = pi.isPythonInitialized;
+      plF = pi.plF;
    }
 
    return *this;
@@ -103,10 +106,10 @@ void PythonInterface::PyPathSep()
    if (isPythonInitialized)
    {
 	   const char* plForm = Py_GetPlatform();
-	   if (plForm == "win")
-		   plF = win;
+      if (plForm == "win")
+         plF = ";";
 	   else
-		   plF = non_win;
+		   plF = ":";
    }
 
 }
@@ -114,20 +117,43 @@ void PythonInterface::PyPathSep()
 
 void PythonInterface::PyAddModulePath(const StringArray& path)
 {
-   wchar_t *s3K = NULL;
-   char *s2K = NULL;
+   wchar_t *s3K = new wchar_t[512];
+   char *s2K = new char[512];
+
+   char *destPath = new char[512];
+   char *p = new char[128];
 
 #ifdef IS_PY3K
-	   s3K = Py_GetPath();
+   s3K = Py_GetPath();
+   //convert wchar_t to char
+   wcstombs(destPath, s3K, sizeof(destPath));
+   //concatenate the path delimiter (unix , windows and mac)
+   strcat(destPath, plF);
 #else
    s2K = Py_GetPath();
+   strcpy(destPath, s2K);
+   strcat(destPath, plF);
 #endif
-   std::wstring s(s3K);
 
    StringArray::const_iterator it;
    for (it = path.begin(); it != path.end(); ++it)
    {
-
+      p = (char *)it->c_str();
+      strcat(destPath, p);
+      strcat(destPath, plF); 
    }
+
+   //convert wchar_t to char
+#ifdef IS_PY3K
+   mbtowc(s3K, destPath, sizeof(s3K));
+   PySys_SetPath(s3K);
+#else
+   PySys_SetPath(destPath);
+#endif
+
+   delete[] destPath;
+   delete[] s3K;
+   delete[] s2K;
+   delete[] p;
 
 }

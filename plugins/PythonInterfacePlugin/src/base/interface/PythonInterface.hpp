@@ -30,13 +30,6 @@ public:
    /// Add Module path to sys.path
    void PyAddModulePath(const StringArray& path);
 	
-   /// Identify the platform we are running
-   enum platform
-   {
-	   win = 0,
-	   non_win
-   };
-	
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
@@ -56,8 +49,14 @@ private:
    bool isPythonInitialized;
    /// Number of Python command referenced in Gmat script
    Integer numPyCommands;
+   /// Identify the platform we are running
+   enum platform
+   {
+      win = 0,
+      non_win
+   };
 
-   static platform plF;
+   char *plF;
    void PyPathSep();
 	
 };
