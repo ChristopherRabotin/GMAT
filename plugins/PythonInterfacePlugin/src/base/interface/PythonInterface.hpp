@@ -50,12 +50,6 @@ private:
    /// Number of Python command referenced in Gmat script
    Integer numPyCommands;
    /// Identify the platform we are running
-   enum platform
-   {
-      win = 0,
-      non_win
-   };
-
    char *plF;
    void PyPathSep();
 	

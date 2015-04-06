@@ -143,7 +143,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
       strcat(destPath, plF); 
    }
 
-   //convert wchar_t to char
+   //convert char to wchar_t
 #ifdef IS_PY3K
    mbtowc(s3K, destPath, sizeof(s3K));
    PySys_SetPath(s3K);
