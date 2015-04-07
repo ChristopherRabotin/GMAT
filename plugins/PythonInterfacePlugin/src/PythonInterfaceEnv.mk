@@ -2,6 +2,9 @@
 # Linux environment settings for the SaveCommand GMAT plugin
 GMAT_CODE_LOCATION = ../../../../src
 GMAT_BIN_LOCATION  = ../../../../application/bin
+PYTHON_LOCATION =  ../../../../../Gmat3rdParty/python
+PYTHON_INCLUDE_LOCATION = $(PYTHON_LOCATION)/include/python3.4m
+PYTHON_LIB_LOCATION = $(PYTHON_LOCATION)/lib
 
 DEBUG_BUILD = 1
 
@@ -32,7 +35,7 @@ MAC_SPECIFIC = 0
 
 # Shared library settings
 SHARED_EXTENSION = .so
-SHARED_LIB_FLAGS = $(SAVECOMMAND_LINK_FLAGS) -shared -fPIC
+SHARED_LIB_FLAGS = -L$(PYTHON_LIB_LOCATION) -lpython3 $(SAVECOMMAND_LINK_FLAGS) -shared -fPIC
 
 ifeq ($(DEBUG_BUILD), 1)
 OPTIMIZATIONS = -fno-strict-aliasing $(WX_28_DEFINES)

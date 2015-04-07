@@ -59,6 +59,7 @@ INCLUDES = \
           -I$(GMAT_CODE_LOCATION)/base/forcemodel \
           -I$(GMAT_CODE_LOCATION)/base/foundation \
           -I$(GMAT_CODE_LOCATION)/base/function \
+          -I$(GMAT_CODE_LOCATION)/base/interface \
           -I$(GMAT_CODE_LOCATION)/base/interpreter \
           -I$(GMAT_CODE_LOCATION)/base/coordsystem \
           -I$(GMAT_CODE_LOCATION)/base/solarsys \
@@ -70,7 +71,8 @@ INCLUDES = \
           -I$(GMAT_CODE_LOCATION)/base/attitude \
           -I$(GMAT_CODE_LOCATION)/base/hardware \
           -I$(GMAT_CODE_LOCATION)/base/parameter \
-          -I$(GMAT_CODE_LOCATION)/base/spacecraft
+          -I$(GMAT_CODE_LOCATION)/base/spacecraft \
+          -I$(PYTHON_INCLUDE_LOCATION)
 
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET): $(OBJECTS)
