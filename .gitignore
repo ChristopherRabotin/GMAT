@@ -20,3 +20,4 @@ CheckRepo.TestEntry
 *~
 *.swp
 *.md
+/GmatDev/
