@@ -141,13 +141,8 @@ else()
   MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
 endif()
 
-# Set default F2C directory based on OS
-if(WIN32)
-  # On Windows, use F2C version from CSPICE
-  SET(F2C_DEPENDS_DIR "${CSPICE_DIR}/include")
-elseif(UNIX)
-  SET(F2C_DEPENDS_DIR "${PROJECT_SOURCE_DIR}/depends/f2c")
-endif()
+# By default use the CSPICE version of F2C
+SET(F2C_DEPENDS_DIR "${CSPICE_DIR}/include")
 
 # Search for F2C folder in default paths
 # User can change this via CMake GUI or command line
@@ -319,6 +314,10 @@ MACRO(_ADDSOURCEGROUPS ALL_DIRS)
     SOURCE_GROUP("Header Files\\${groupname}" REGULAR_EXPRESSION "${currdir}/.*\\.h(pp)?")
   ENDFOREACH(currdir)
 ENDMACRO(_ADDSOURCEGROUPS)
+
+# ====================================================================
+# Setup GMAT directory structure
+INCLUDE(build/install/CMake_INSTALL_Setup.cmake)
 
 # ====================================================================
 # Go to src directory and look for CMake instructions there

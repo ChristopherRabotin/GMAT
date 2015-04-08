@@ -35,7 +35,7 @@
 # * Windows: The installed versions of Matlab are retrieved from the
 #   Windows registry
 # * OS X: The installed versions of Matlab are given by the MATLAB
-#   paths in ``/Application``. If no such application is found, it falls back 
+#   paths in ``/Application``. If no such application is found, it falls back
 #   to the one that might be accessible from the PATH.
 # * Unix: The desired Matlab should be accessible from the PATH.
 #
@@ -78,7 +78,7 @@
 #   ``TRUE`` if the Matlab installation is found, ``FALSE``
 #   otherwise. All variable below are defined if Matlab is found.
 # ``Matlab_ROOT_DIR``
-#   the final root of the Matlab installation determined by the FindMatlab 
+#   the final root of the Matlab installation determined by the FindMatlab
 #   module.
 # ``Matlab_MAIN_PROGRAM``
 #   the Matlab binary program. Available only if the component ``MAIN_PROGRAM``
@@ -198,9 +198,9 @@
 #         "R2013a=8.1"
 #         "R2012b=8.0")
 #
-#   The order of entries in this list matters when several versions of 
+#   The order of entries in this list matters when several versions of
 #   Matlab are installed. The priority is set according to the ordering in
-#   this list. 
+#   this list.
 
 #=============================================================================
 # Copyright 2014-2015 Raffi Enficiaud, Max Planck Society
@@ -394,10 +394,12 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
     endforeach(match)
 
   endif()
-  
-  list(REMOVE_DUPLICATES matlabs_from_registry)
-  list(SORT matlabs_from_registry)
-  list(REVERSE matlabs_from_registry)  
+
+  if(matlabs_from_registry)
+    list(REMOVE_DUPLICATES matlabs_from_registry)
+    list(SORT matlabs_from_registry)
+    list(REVERSE matlabs_from_registry)
+  endif()
 
   set(${matlab_versions} ${matlabs_from_registry} PARENT_SCOPE)
 
@@ -438,9 +440,11 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
 
 
   # we order from more recent to older
-  list(REMOVE_DUPLICATES matlab_supported_versions)
-  list(SORT matlab_supported_versions)
-  list(REVERSE matlab_supported_versions)
+  if(matlab_supported_versions)
+    list(REMOVE_DUPLICATES matlab_supported_versions)
+    list(SORT matlab_supported_versions)
+    list(REVERSE matlab_supported_versions)
+  endif()
 
 
   set(${matlab_versions} ${matlab_supported_versions})
@@ -615,7 +619,7 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
   if(WIN32)
     set(_matlab_additional_commands "-wait")
   endif()
-  
+
   set(devnull)
   if(UNIX)
     set(devnull INPUT_FILE /dev/null)
@@ -677,7 +681,9 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
 
       list(APPEND matlab_list_of_all_versions_tmp ${CMAKE_MATCH_1})
     endforeach()
-    list(REMOVE_DUPLICATES matlab_list_of_all_versions_tmp)
+    if(matlab_list_of_all_versions_tmp)
+      list(REMOVE_DUPLICATES matlab_list_of_all_versions_tmp)
+    endif()
     set(${matlab_list_versions} ${matlab_list_of_all_versions_tmp} PARENT_SCOPE)
 
   endif()
@@ -950,7 +956,7 @@ endfunction()
 
 
 # (internal)
-# Used to get the version of matlab, using caching. This basically transforms the 
+# Used to get the version of matlab, using caching. This basically transforms the
 # output of the root list, with possible unknown version, to a version
 #
 function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_final_version)
@@ -958,9 +964,9 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
   # if the version is not trivial, we query matlab for that
   # we keep track of the location of matlab that induced this version
   #if(NOT DEFINED Matlab_PROG_VERSION_STRING_AUTO_DETECT)
-  #  set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version") 
+  #  set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
   #endif()
-  
+
   if(NOT ${matlab_known_version} STREQUAL "NOTFOUND")
     # the version is known, we just return it
     set(${matlab_final_version} ${matlab_known_version} PARENT_SCOPE)
@@ -968,23 +974,23 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
     return()
   endif()
 
-  # 
+  #
   set(_matlab_current_program ${Matlab_MAIN_PROGRAM})
-  
+
   # do we already have a matlab program?
   if(NOT _matlab_current_program)
-  
+
     set(_find_matlab_options)
     if(matlab_root AND EXISTS ${matlab_root})
       set(_find_matlab_options PATHS ${matlab_root} ${matlab_root}/bin NO_DEFAULT_PATH)
     endif()
-  
+
     find_program(
         _matlab_current_program
         matlab
         ${_find_matlab_options}
         DOC "Matlab main program"
-      )  
+      )
   endif()
 
   if(NOT _matlab_current_program OR NOT EXISTS ${_matlab_current_program})
@@ -1002,7 +1008,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
   # full real path for path comparison
   get_filename_component(_matlab_main_real_path_tmp "${_matlab_current_program}" REALPATH)
   unset(_matlab_current_program)
-  unset(_matlab_current_program CACHE)    
+  unset(_matlab_current_program CACHE)
 
   # is it the same as the previous one?
   if(_matlab_main_real_path_tmp STREQUAL Matlab_PROG_VERSION_STRING_AUTO_DETECT)
@@ -1017,22 +1023,22 @@ function(_Matlab_get_version_from_root matlab_root matlab_known_version matlab_f
   matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
 
   list(GET matlab_list_of_all_versions 0 _matlab_version_tmp)
-  
+
   # set the version into the cache
   set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
-  
+
   # warning, just in case several versions found (should not happen)
   list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
   if((${list_of_all_versions_length} GREATER 1) AND MATLAB_FIND_DEBUG)
     message(WARNING "[MATLAB] Found several versions, taking the first one (versions found ${matlab_list_of_all_versions})")
-  endif()  
-  
+  endif()
+
   # return the updated value
   set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
 
 endfunction()
-  
-  
+
+
 
 
 
@@ -1048,7 +1054,7 @@ set(_matlab_possible_roots)
 
 if(Matlab_ROOT_DIR)
   # if the user specifies a possible root, we keep this one
-  
+
   if(NOT EXISTS ${Matlab_ROOT_DIR})
     # if Matlab_ROOT_DIR specified but erroneous
     if(MATLAB_FIND_DEBUG)
@@ -1065,8 +1071,8 @@ if(Matlab_ROOT_DIR)
 
 
 else()
-  
-  # if the user does not specify the possible installation root, we look for 
+
+  # if the user does not specify the possible installation root, we look for
   # one installation using the appropriate heuristics
 
   if(WIN32)
@@ -1094,7 +1100,7 @@ else()
     unset(_matlab_versions_from_registry)
 
   elseif(APPLE)
-  
+
     # on mac, we look for the /Application paths
     # this corresponds to the behaviour on Windows. On Linux, we do not have
     # any other guess.
@@ -1118,10 +1124,10 @@ else()
 
       unset(_matlab_full_string)
     endforeach(_matlab_current_release)
-    
+
     unset(_matlab_current_release)
-    unset(_matlab_releases)  
-  
+    unset(_matlab_releases)
+
   endif()
 
 endif()
@@ -1131,15 +1137,15 @@ endif()
 list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
 if(_numbers_of_matlab_roots EQUAL 0)
   # if we have not found anything, we fall back on the PATH
- 
- 
+
+
   # At this point, we have no other choice than trying to find it from PATH.
   # If set by the user, this wont change
   find_program(
     _matlab_main_tmp
     NAMES matlab)
 
-  
+
   if(_matlab_main_tmp)
     # we then populate the list of roots, with empty version
     if(MATLAB_FIND_DEBUG)
@@ -1148,16 +1154,16 @@ if(_numbers_of_matlab_roots EQUAL 0)
 
     # resolve symlinks
     get_filename_component(_matlab_current_location "${_matlab_main_tmp}" REALPATH)
-    
+
     # get the directory (the command below has to be run twice)
     # this will be the matlab root
     get_filename_component(_matlab_current_location "${_matlab_current_location}" DIRECTORY)
     get_filename_component(_matlab_current_location "${_matlab_current_location}" DIRECTORY) # Matlab should be in bin
-    
+
     list(APPEND _matlab_possible_roots "NOTFOUND" ${_matlab_current_location})
-    
+
     unset(_matlab_current_location)
-    
+
   endif()
   unset(_matlab_main_tmp CACHE)
 
@@ -1185,7 +1191,7 @@ if(_numbers_of_matlab_roots GREATER 0)
   # adding a warning in case of ambiguity
   if(_numbers_of_matlab_roots GREATER 2 AND MATLAB_FIND_DEBUG)
     message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
-                    " If this is not the desired behaviour, provide the -DMATLAB_USER_ROOT on the command line")
+                    " If this is not the desired behaviour, provide the -DMatlab_ROOT_DIR=... on the command line")
   endif()
 endif()
 
@@ -1193,17 +1199,17 @@ endif()
 # check if the root changed against the previous defined one, if so
 # clear all the cached variables
 if(DEFINED Matlab_ROOT_DIR_LAST_CACHED)
-  
+
   if(NOT Matlab_ROOT_DIR_LAST_CACHED STREQUAL Matlab_ROOT_DIR)
-    set(_Matlab_cached_vars  
+    set(_Matlab_cached_vars
         Matlab_INCLUDE_DIRS
-        Matlab_MEX_LIBRARY 
+        Matlab_MEX_LIBRARY
         Matlab_MEX_COMPILER
         Matlab_MAIN_PROGRAM
         Matlab_MX_LIBRARY
         Matlab_ENG_LIBRARY
         Matlab_MEX_EXTENSION
-        
+
         # internal
         Matlab_MEXEXTENSIONS_PROG
         Matlab_ROOT_DIR_LAST_CACHED
@@ -1361,7 +1367,7 @@ unset(_matlab_find_mex_compiler)
 # component Matlab program
 list(FIND Matlab_FIND_COMPONENTS MAIN_PROGRAM _matlab_find_matlab_program)
 if(_matlab_find_matlab_program GREATER -1)
-  
+
   find_program(
     Matlab_MAIN_PROGRAM
     matlab
