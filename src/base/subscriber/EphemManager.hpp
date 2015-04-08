@@ -81,13 +81,16 @@ public:
                                                 RealArray         &starts,
                                                 RealArray         &ends);
 
+   bool                 GetCoverageStartAndStop(Real s, Real e,
+                                                bool useEntireIntvl,
+                                                bool includeAll,
+                                                Real &intvlStart,
+                                                Real &intvlStop);
+
    /// Set reference objects
    virtual void         SetObject(GmatBase *obj);
    virtual void         SetEphemType(ManagedEphemType eType);
    virtual void         SetCoordinateSystem(CoordinateSystem *cs);
-
-//   virtual void         SetInitialEpoch(const std::string &ep);
-//   virtual void         SetFinalEpoch(const std::string &ep);
 
 protected:
 //   /// Epoch format
@@ -120,16 +123,22 @@ protected:
    bool                 deleteTmpFiles;
    /// List of created files
    StringArray          fileList;
+   /// start time of the observation window
+   Real                 intStart;
+   /// stop time of the observation window
+   Real                 intStop;
    #ifdef __USE_SPICE__
       /// need a SpiceInterface to load and unload kernels
       SpiceInterface       *spice;
       /// The window specifying the SPK coverage for this object
       SpiceCell            *cover;
-
+      /// The window specifying the desired observation window for this
+      /// object
+      SpiceCell            *window;
       /// Method to determine the coverage window(s) for the spacecraft
-   void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
-                                          bool useEntireIntvl,
-                                          bool includeAll = true);
+      void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
+                                             bool useEntireIntvl,
+                                             bool includeAll = true);
    #endif
 
 };

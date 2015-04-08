@@ -98,10 +98,16 @@ protected:
    Real        findStart;
    /// the stop time of the current FindEvents
    Real        findStop;
+   /// The start (spacecraft) time
+   Real        scStart;
+   /// The current (spacecraft) time
+   Real        scNow;
    /// the maximum index of the stored events
    Integer     maxIndex;
    /// The maximum duration of the found events
    Real        maxDuration;
+   /// the default types of eclipse
+   StringArray defaultEclipseTypes;
 
    /// Published parameters for eclipse locators
     enum

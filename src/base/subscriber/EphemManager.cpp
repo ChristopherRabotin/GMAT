@@ -39,6 +39,7 @@
 //#define DEBUG_EPHEM_MANAGER
 //#define DEBUG_EM_COVERAGE
 
+
 /**
  * Manager for ephemeris recording for the specified object
  */
@@ -59,7 +60,9 @@ EphemManager::EphemManager(bool deleteFiles) :
    ephemCount             (0),
    fileName               (""),
    recording              (false),
-   deleteTmpFiles         (deleteFiles)
+   deleteTmpFiles         (deleteFiles),
+   intStart               (0.0),
+   intStop                (0.0)
 {
 #ifdef __USE_SPICE__
    spice = NULL;
@@ -108,8 +111,10 @@ EphemManager::~EphemManager()
    fileList.clear();
 
    #ifdef __USE_SPICE__
-      if (cover)
-         delete cover;
+//   if (cover)
+//      delete cover;
+//   if (window)
+//      delete cover;
    #endif
 
    #ifdef DEBUG_EPHEM_MANAGER
@@ -146,7 +151,9 @@ EphemManager::EphemManager(const EphemManager& copy) :
    ephemCount             (0),
    fileName               (copy.fileName),
    recording              (copy.recording),
-   deleteTmpFiles         (copy.deleteTmpFiles)
+   deleteTmpFiles         (copy.deleteTmpFiles),
+   intStart               (copy.intStart),
+   intStop                (copy.intStop)
 {
    #ifdef __USE_SPICE__
       spice = NULL;
@@ -173,9 +180,11 @@ EphemManager& EphemManager::operator=(const EphemManager& copy)
    coordSysName             = copy.coordSysName;
    ephemName                = "";                 // OR copy.ephemName;
    ephemCount               = copy.ephemCount;
-   fileName                 = "";
+   fileName                 = copy.fileName;
    recording                = copy.recording;
    deleteTmpFiles           = copy.deleteTmpFiles;
+   intStart                 = copy.intStart;
+   intStop                  = copy.intStop;
 
    #ifdef __USE_SPICE__
       if (spice) delete spice;
@@ -314,7 +323,8 @@ bool EphemManager::ProvideEphemerisData()
 void EphemManager::StopRecording()
 {
    #ifdef DEBUG_EPHEM_MANAGER
-      MessageInterface::ShowMessage("StopRecording -----\n");
+      MessageInterface::ShowMessage("StopRecording -----  fileName = %s\n",
+            fileName.c_str());
    #endif
    // Finalize and close the SPK file
    // Unsubscribe
@@ -328,6 +338,10 @@ void EphemManager::StopRecording()
    {
       #ifdef __USE_SPICE__
          spice->LoadKernel(fileName);
+      #endif
+      #ifdef DEBUG_EPHEM_MANAGER
+         MessageInterface::ShowMessage("-==-==-= adding fileName %s to fileList\n",
+               fileName.c_str());
       #endif
       // save the just written file name
       fileList.push_back(fileName);
@@ -348,6 +362,8 @@ void EphemManager::StopRecording()
 //                                    const std::string &abbCorrection,
 //                                    Integer           naifId,
 //                                    Integer           step,
+//                                    Real              &intvlStart,
+//                                    Real              &intvlStop,
 //                                    Integer           &numIntervals,
 //                                    RealArray         &starts,
 //                                    RealArray         &ends);
@@ -366,6 +382,8 @@ void EphemManager::StopRecording()
  * @param abbCorrection the aberration correction for the operation
  * @param naifId        the NAIF ID for the spacecraft
  * @param step          step size (s)
+ * @param intvlStart    start of the resulting interval
+ * @param intvlStop     stop of the resulting interval
  * @param numIntervals  the number of intervals detected (output)
  * @param starts        array of start times for the intervals (output)
  * @param ends          array of end times for the intervals (output)
@@ -393,7 +411,7 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
    Spacecraft  *theSc       = (Spacecraft*) theObj;
 
    #ifndef __USE_SPICE__
-      std::string errmsg = "ERROR - cannot compute occulation intervals for spacecraft ";
+      std::string errmsg = "ERROR - cannot compute occultation intervals for spacecraft ";
       errmsg += theSc->GetName() + " without SPICE included in build!\n";
       throw SubscriberException(errmsg);
    #else
@@ -401,11 +419,23 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       Integer     theNAIFId    = theSc->GetIntegerParameter("NAIFId");
       std::string theNAIFIdStr = GmatStringUtil::ToString(theNAIFId);
 
-      // window we want to search
+//      // window we want to search
       SPICEDOUBLE_CELL(window, 2000);
       scard_c(0, &window);   // reset (empty) the cell
 
       GetCoverageWindow(&window, s, e, useEntireIntvl);
+
+//      // Get the interval start and stop times
+//      SpiceInt szWin = wncard_c(&window);
+//      if (((Integer) szWin) > 0)
+//      {
+//         SpiceDouble s, e;
+//         wnfetd_c(&window, 0, &s, &e);
+//         intvlStart = spice->SpiceTimeToA1(s);
+//         wnfetd_c(&window, szWin-1, &s, &e);
+//         intvlStop  = spice->SpiceTimeToA1(e);
+//      }
+
 
    //   SpiceDouble  start0, end0, startN, endN;
       SpiceInt     numInt = wncard_c(&window);
@@ -478,65 +508,39 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
 }
 
 
-//------------------------------------------------------------------------------
-// SetObject()
-//------------------------------------------------------------------------------
-void EphemManager::SetObject(GmatBase *obj)
+bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
+                                           bool useEntireIntvl,
+                                           bool includeAll,
+                                           Real &intvlStart,
+                                           Real &intvlStop)
 {
-   if (!obj->IsOfType("Spacecraft"))
-   {
-      throw SubscriberException("Object used for EphemManager must be a Spacecraft.\n");
-   }
-   theObj     = obj;
-   theObjName = obj->GetName();
+   #ifndef __USE_SPICE__
+      std::string errmsg = "ERROR - cannot compute occultation intervals for spacecraft ";
+      errmsg += theSc->GetName() + " without SPICE included in build!\n";
+      throw SubscriberException(errmsg);
+   #else
+      SPICEDOUBLE_CELL(coverWindow, 2000);
+      scard_c(0, &coverWindow);   // reset (empty) the cell
+
+      GetCoverageWindow(&coverWindow, s, e, useEntireIntvl, includeAll);
+
+      intvlStart = intStart;
+      intvlStop  = intStop;
+      return true;
+   #endif
 }
-
 //------------------------------------------------------------------------------
-// SetEphemType()
-//------------------------------------------------------------------------------
-void EphemManager::SetEphemType(ManagedEphemType eType)
-{
-   if (eType != SPK)
-   {
-      throw SubscriberException("Type used for EphemManager must currently be SPK.\n");
-   }
-   theType = eType;
-}
-
-//------------------------------------------------------------------------------
-// SetCoordinateSystem()
-//------------------------------------------------------------------------------
-void EphemManager::SetCoordinateSystem(CoordinateSystem *cs)
-{
-   coordSys     = cs;
-   coordSysName = cs->GetName();
-}
-
-////------------------------------------------------------------------------------
-//// SetInitialEpoch()
-////------------------------------------------------------------------------------
-//void EphemManager::SetInitialEpoch(const std::string &ep)
-//{
-//}
-//
-////------------------------------------------------------------------------------
-//// SetFinalEpoch()
-////------------------------------------------------------------------------------
-//void EphemManager::SetFinalEpoch(const std::string &ep)
-//{
-//}
-
-//------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
-#ifdef __USE_SPICE__
-
-//------------------------------------------------------------------------------
-// void GetCoverageWindow(SpiceCell* w, bool includeAll = true)
+// void GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
+//                              bool useEntireIntvl, bool includeAll = true)
 //------------------------------------------------------------------------------
 void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
-                                     bool useEntireIntvl, bool includeAll)
+                                      bool useEntireIntvl, bool includeAll)
 {
+#ifndef __USE_SPICE__
+   std::string errmsg = "ERROR - cannot compute occultation intervals for spacecraft ";
+   errmsg += theSc->GetName() + " without SPICE included in build!\n";
+   throw SubscriberException(errmsg);
+#else
    // @todo - most of this should be moved to SpiceInterface and
    // made very general (for SPK, CK, etc.)
    // Set SPICEDOUBLE_CELL cover
@@ -556,7 +560,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
          inKernels.push_back(inputKernels.at(ii));
    }
    #ifdef DEBUG_EM_COVERAGE
-      MessageInterface::ShowMessage("Entering GetCoverageWindow:\n");
+      MessageInterface::ShowMessage("In GetCoverageWindow:\n");
       MessageInterface::ShowMessage("   forNaifId = %d\n", forNaifId);
       MessageInterface::ShowMessage("   kernels are:\n");
       if (inKernels.empty())  MessageInterface::ShowMessage("   EMPTY!!!!\n");
@@ -564,6 +568,13 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       {
          for (unsigned int ii = 0; ii < inKernels.size(); ii++)
             MessageInterface::ShowMessage("   %d    %s\n", (Integer) ii, inKernels.at(ii).c_str());
+      }
+      MessageInterface::ShowMessage("   fileList are:\n");
+      if (fileList.empty())  MessageInterface::ShowMessage("   EMPTY!!!!\n");
+      else
+      {
+         for (unsigned int ii = 0; ii < fileList.size(); ii++)
+            MessageInterface::ShowMessage("   %d    %s\n", (Integer) ii, fileList.at(ii).c_str());
       }
    #endif
    // first check to see if a kernel specified is not loaded; if not,
@@ -682,21 +693,21 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
                MessageInterface::ShowMessage("Number of intervals found =  %d\n",
                      (Integer) numInt);
             #endif
+         }
       }
-   }
-   if (firstInt)
-   {
-      std::stringstream errmsg("");
-      errmsg << "Error - no data available for body with NAIF ID " << forNaifId << " on specified SPK kernels\n";
-      throw SubscriberException(errmsg.str());
-   }
-   #ifdef DEBUG_SPK_COVERAGE
-      else
+      if (firstInt)
       {
-         MessageInterface::ShowMessage("Number of intervals found for body with NAIF ID %d =  %d\n",
-               forNaifId, (Integer) numInt);
+         std::stringstream errmsg("");
+         errmsg << "Error - no data available for body with NAIF ID " << forNaifId << " on specified SPK kernels\n";
+         throw SubscriberException(errmsg.str());
       }
-   #endif
+      #ifdef DEBUG_SPK_COVERAGE
+         else
+         {
+            MessageInterface::ShowMessage("Number of intervals found for body with NAIF ID %d =  %d\n",
+                  forNaifId, (Integer) numInt);
+         }
+      #endif
 
    }
    // window we want to search
@@ -723,8 +734,56 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       MessageInterface::ShowMessage("Number of intervals = %d\n", (Integer) numInt);
    #endif
 
+   // Get the window start and stop times
+   SpiceInt szWin = wncard_c(&window);
+   if (((Integer) szWin) > 0)
+   {
+      SpiceDouble s, e;
+      wnfetd_c(&window, 0, &s, &e);
+      intStart = spice->SpiceTimeToA1(s);
+      wnfetd_c(&window, szWin-1, &s, &e);
+      intStop  = spice->SpiceTimeToA1(e);
+   }
+   #endif
    copy_c(&window, w);
 }
-#endif
 
+//------------------------------------------------------------------------------
+// SetObject()
+//------------------------------------------------------------------------------
+void EphemManager::SetObject(GmatBase *obj)
+{
+   if (!obj->IsOfType("Spacecraft"))
+   {
+      throw SubscriberException("Object used for EphemManager must be a Spacecraft.\n");
+   }
+   theObj     = obj;
+   theObjName = obj->GetName();
+}
+
+//------------------------------------------------------------------------------
+// SetEphemType()
+//------------------------------------------------------------------------------
+void EphemManager::SetEphemType(ManagedEphemType eType)
+{
+   if (eType != SPK)
+   {
+      throw SubscriberException("Type used for EphemManager must currently be SPK.\n");
+   }
+   theType = eType;
+}
+
+//------------------------------------------------------------------------------
+// SetCoordinateSystem()
+//------------------------------------------------------------------------------
+void EphemManager::SetCoordinateSystem(CoordinateSystem *cs)
+{
+   coordSys     = cs;
+   coordSysName = cs->GetName();
+}
+
+//------------------------------------------------------------------------------
+// protected methods
+//------------------------------------------------------------------------------
+// none
 
