@@ -122,6 +122,8 @@ public:
    /// This function is used to generate tracking data adapters for tracking file set objects having no tracking configs     // made changes by TUAN NGUYEN
    bool                    AutoGenerateTrackingDataAdapters();                                                               // made changes by TUAN NGUYEN
 
+   bool                    SetStatisticsDataFiltersToDataFiles();                                                           // made changes by TUAN NGUYEN
+
 protected:
    /// List of the managed measurement models
    StringArray                      modelNames;
