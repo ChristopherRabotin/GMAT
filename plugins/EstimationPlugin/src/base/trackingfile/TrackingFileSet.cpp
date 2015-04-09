@@ -35,6 +35,7 @@
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_INITIALIZE
 //#define DEBUG_GET_PARAMETER
+//#define DEBUG_BUILD_ADAPTER
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -498,8 +499,8 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       const std::string& value)
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("TrackingFileSet::SetStringParameter(id = %d, "
-            "value = '%s') called\n", id, value.c_str());
+      MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::SetStringParameter(id = %d, "
+            "value = '%s') called\n", GetName().c_str(), this, id, value.c_str());
    #endif
 
    //if (id == FILENAME)
@@ -527,8 +528,11 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == DATA_FILTERS)
    {
-      if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")                           // made changes by TUAN NGUYEN
-         return true;
+      if (value.substr(0,1) == "{")
+      {
+         if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")                           // made changes by TUAN NGUYEN
+            return true;
+      }
 
       if (find(dataFilterNames.begin(), dataFilterNames.end(), value) == dataFilterNames.end())
       {
@@ -617,8 +621,8 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 {
    std::string value = value1;                                                                              // made changes by TUAN NGUYEN
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("TrackingFileSet::SetStringParameter(%d, "
-            "'%s', %d) called\n", id, value.c_str(), index);
+      MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::SetStringParameter(%d, "
+            "'%s', %d) called\n", GetName().c_str(), this, id, value.c_str(), index);
    #endif
 
    if (id == TRACKINGCONFIG)
@@ -1841,6 +1845,10 @@ std::vector<TrackingDataAdapter*> *TrackingFileSet::GetAdapters()
 TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       const std::string& type, Integer configIndex)
 {
+#ifdef DEBUG_BUILD_ADAPTER
+   MessageInterface::ShowMessage("TrackingFileSet::BuildAdapter(, type = <%s>, configIndex = %d)   enter\n", type.c_str(), configIndex);
+#endif
+
    TrackingDataAdapter *retval = NULL;
    std::vector<StringArray> nodelist;
    StringArray currentStrand;
@@ -1988,6 +1996,10 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval->SetModelTypeID(magicNumber, type, multiplier);
    }
 
+#ifdef DEBUG_BUILD_ADAPTER
+   MessageInterface::ShowMessage("TrackingFileSet::BuildAdapter(, type = <%s>, configIndex = %d)   exit\n", type.c_str(), configIndex);
+#endif
+
    return retval;
 }
 
@@ -1998,7 +2010,7 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       return true;
 
    // Generate a list of tracking configs
-   MessageInterface::ShowMessage("Total of %d tracking configurations are generated:\n", strandsList.size());
+   MessageInterface::ShowMessage("Total of %d tracking configurations are generated for tracking file set %s:\n", strandsList.size(), GetName().c_str());
    for(UnsignedInt i = 0; i < strandsList.size(); ++i)
    {
       MeasurementDefinition md;
@@ -2008,11 +2020,19 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString());
    }
 
-   // Count the adapters needed
-   TFSMagicNumbers *mn = TFSMagicNumbers::Instance();
-   StringArray knownTypes = mn->GetKnownTypes();
+   // This step was removed due to those participants were initialized in sand box
+   //// Initialize all participants
+   //for (UnsignedInt i = 0; i < references.size(); ++i)
+   //{
+   //   if ((references[i]->IsOfType(Gmat::GROUND_STATION))||(references[i]->IsOfType(Gmat::SPACECRAFT)))
+   //   {
+   //      references[i]->SetSolarSystem(solarsystem);
 
-      
+   //      // Initialize paticipants
+   //      references[i]->Initialize();
+   //   }
+   //}
+
    // Reinitialize
    isInitialized = false;
    
