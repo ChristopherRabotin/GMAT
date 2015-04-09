@@ -42,29 +42,30 @@
 # Plugins
 #-----------------------------------------------------------
 # Default plugins
-PLUGIN                 = ./plugins/libEphemPropagator
-PLUGIN                 = ./plugins/libEventLocator
-PLUGIN                 = ./plugins/libFormation
-PLUGIN                 = ./plugins/libStation
-PLUGIN                 = ./plugins/libMatlabInterface
-PLUGIN                 = ./plugins/libFminconOptimizer
-PLUGIN                 = ./plugins/libDataInterface
-PLUGIN                 = ./plugins/libProductionPropagators
+PLUGIN                 = ./plugins/libEphemPropagatord
+PLUGIN                 = ./plugins/libEventLocatord
+PLUGIN                 = ./plugins/libFormationd
+PLUGIN                 = ./plugins/libStationd
+PLUGIN                 = ./plugins/libMatlabInterfaced
+PLUGIN                 = ./plugins/libFminconOptimizerd
+PLUGIN                 = ./plugins/libDataInterfaced
+PLUGIN                 = ./plugins/libProductionPropagatorsd
 
 # Alpha plugins
-#PLUGIN                = ./libCInterface
-#PLUGIN                = ./plugins/libExtraPropagators
-#PLUGIN                = ./plugins/libGmatEstimation
-#PLUGIN                = ./plugins/libGeometricMeasurements
-#PLUGIN                = ./plugins/libGmatFunction
-#PLUGIN                = ./plugins/libSaveCommand
+#PLUGIN                = ./libCInterfaced
+#PLUGIN                = ./plugins/libExtraPropagatorsd
+#PLUGIN                = ./plugins/libGmatEstimationd
+#PLUGIN                = ./plugins/libGeometricMeasurementsd
+#PLUGIN                = ./plugins/libGmatFunctiond
+#PLUGIN                = ./plugins/libSaveCommandd
 
 # Internal-only plugins
-PLUGIN                 = ./plugins/proprietary/libMarsGRAM
-PLUGIN                 = ./plugins/proprietary/libMsise86
-PLUGIN                 = ./plugins/proprietary/libNewParameters
-PLUGIN                 = ./plugins/proprietary/libNRLMsise00
-PLUGIN                 = ./plugins/proprietary/libVF13Optimizer
+PLUGIN                 = ./plugins/proprietary/libMarsGRAMd
+PLUGIN                 = ./plugins/proprietary/libMsise86d
+PLUGIN                 = ./plugins/proprietary/libNewParametersd
+PLUGIN                 = ./plugins/proprietary/libNRLMsise00d
+PLUGIN                 = ./plugins/proprietary/libVF13Optimizerd
+#PLUGIN                 = ./plugins/proprietary/libSNOptimizerd
 
 #-----------------------------------------------------------
 # Directory/file paths
