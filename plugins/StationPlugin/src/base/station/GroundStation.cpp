@@ -133,7 +133,7 @@ GroundStation::GroundStation(const std::string &itsName) :
    ionosphereModel           ("None")
 {
 #ifdef DEBUG_CONSTRUCTION
-   MessageInterface::ShowMessage("GroundStation default constructor\n");
+   MessageInterface::ShowMessage("GroundStation default constructor <%s,%p>\n", GetName().c_str(), this);
 #endif
 
    objectTypeNames.push_back("GroundStation");
@@ -202,7 +202,7 @@ GroundStation::GroundStation(const GroundStation& gs) :
    troposphereModel      (gs.troposphereModel)
 {
 #ifdef DEBUG_CONSTRUCTION
-   MessageInterface::ShowMessage("GroundStation copy constructor start\n");
+   MessageInterface::ShowMessage("GroundStation copy constructor <%s,%p> from <%s,%p>   start\n", GetName().c_str(), this, gs.GetName().c_str(), &gs);
 #endif
 
    hardwareNames       = gs.hardwareNames;
@@ -228,7 +228,7 @@ GroundStation::GroundStation(const GroundStation& gs) :
 GroundStation& GroundStation::operator=(const GroundStation& gs)
 {
 #ifdef DEBUG_CONSTRUCTION
-   MessageInterface::ShowMessage("GroundStation operator =\n");
+   MessageInterface::ShowMessage("GroundStation operator =  <%s,%p>   from <%s,%p>\n", GetName().c_str(), this, gs.GetName().c_str(), &gs);
 #endif
 
    if (&gs != this)
@@ -1364,7 +1364,7 @@ bool GroundStation::VerifyAddHardware()
 bool GroundStation::Initialize()
 {
    #ifdef DEBUG_INIT
-      MessageInterface::ShowMessage("GroundStation::Initializing %s\n", instanceName.c_str());
+      MessageInterface::ShowMessage("GroundStation<%s,%p>::Initialize()  start\n", GetName().c_str(), this);
    #endif
 
    // Call the parent class to initialize its data
@@ -1417,7 +1417,7 @@ bool GroundStation::Initialize()
       return false;
 
    #ifdef DEBUG_INIT
-      MessageInterface::ShowMessage("GroundStation::Initializing %s  exit\n", instanceName.c_str());
+      MessageInterface::ShowMessage("GroundStation<%s,%p>::Initialize()  exit\n", GetName().c_str(), this);
    #endif
 
    return true;
