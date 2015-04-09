@@ -11,6 +11,7 @@ cls
 :: Set default variables
 set vs_version=12
 set use_64bit=1
+set depends_dir=%cd%
 
 :: ***********************************
 :: Input System
@@ -67,9 +68,7 @@ IF %use_64bit% EQU 1 (
 	echo ********** Setting up 32-bit dependencies **********
 )
 
-:: ***********************************
-:: Download Library Dependencies
-:: ***********************************
+echo ********** Setting up CSpice for VisualStudio version %vs_version%.0 **********
 
 :: Check if dependency libraries already exists
 :: Note that cspice_type is used in cspice-ftp.txt
@@ -77,14 +76,28 @@ set cspice_path=cspice\windows
 IF %use_64bit% EQU 1 (
 	set cspice_dir=cspice64
 	set cspice_type=64bit
+	set vs_arch=x86_amd64
 ) ELSE (
 	set cspice_dir=cspice32
 	set cspice_type=32bit
+	set vs_arch=x86
 )
+
+:: Add Visual Studio tools to command line path
+set vs_envvar=vs%vs_version%0comntools
+setlocal enabledelayedexpansion
+for /F %%a in ("%vs_envvar%") do set vs_path=!%%a!
+IF "%vs_path%" == "" (
+	echo ***Visual Studio %vs_version%.0 NOT FOUND!***
+	echo Please enter full path to Microsoft Visual Studio %vs_version%.0 folder
+	set /p vs_base_path="Path: "
+	set vs_path=!vs_base_path!\Microsoft Visual Studio %vs_version%.0\Common7\Tools\
+)
+endlocal & set vs_path=%vs_path%
+call "%vs_path%\..\..\VC\vcvarsall.bat" %vs_arch%
 
 :: Create directories and download cspice if it does not already exist.
 IF NOT EXIST %cspice_path%\%cspice_dir% (
-
 	:: Create Directories
 	mkdir %cspice_path%
 	
@@ -96,9 +109,21 @@ IF NOT EXIST %cspice_path%\%cspice_dir% (
 	..\..\bin\7za\7za.exe x cspice.zip
 	REN cspice %cspice_dir%
 	DEL cspice.zip
+
+	:: Compile debug version of cspice
+	:: The compile options are taken from CSPICE src/cspice/mkprodct.bat
+	cd %cspice_dir%\src\cspice
+	cl /c /DEBUG /Z7 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c
+	link -lib /out:..\..\lib\cspiced.lib *.obj
+	del *.obj
+
+	:: Compile release version of cspice
+	cl /c /O2 /MP -D_COMPLEX_DEFINED -DMSDOS -DOMIT_BLANK_CC -DNON_ANSI_STDIO -DUIOLEN_int *.c
+	link -lib /out:..\..\lib\cspice.lib *.obj
+	del *.obj
         
 	:: Change back to depends directory
-        cd ..\..
+	cd "%depends_dir%"
 ) ELSE (
 	echo CSpice already exists
 )
@@ -141,7 +166,7 @@ IF NOT EXIST %wxWidgets_path%\lib\vc%wxwidgets_type%dll (
 	cd lib
 	REN vc%vs_version%0%wxwidgets_type%dll vc%wxwidgets_type%dll
 
-        cd ..\..\..
+        cd "%depends_dir%"
 ) ELSE (
 	echo wxWidgets already exists
 )

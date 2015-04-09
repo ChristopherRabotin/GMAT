@@ -24,10 +24,6 @@ ADD_DEFINITIONS("-DLOCATOR_EXPORTS")
 SET(PLUGIN_DIRS event factory include locator plugin)
 
 # ====================================================================
-# extra include directories for header files
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-
-# ====================================================================
 # source files
 SET(PLUGIN_SRCS
     event/Antumbra.cpp

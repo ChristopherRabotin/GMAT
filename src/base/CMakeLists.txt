@@ -24,13 +24,7 @@ ADD_DEFINITIONS("-DEXP_STL")
 # ====================================================================
 # SPICE specifics
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-LINK_DIRECTORIES("${CSPICE_DIR}/lib")
-
-if(WIN32)
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.lib")
-else()
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.a")
-endif()
+LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
 	
 ADD_DEFINITIONS("-D__USE_SPICE__")
 

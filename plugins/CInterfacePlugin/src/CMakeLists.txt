@@ -91,13 +91,6 @@ if(PLUGIN_CINTERFACE)
     SET(MATLAB_COMMAND "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MPREP} ${MEXIT}\"")
     SET(MATLAB_COMMAND_DEBUG "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MDEBUG} ${MPREP} ${MEXIT}\"")
 
-    # Running Matlab can take a while, so notify the user
-    if(WIN32)
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window twice to build CInterface release/debug thunk files...patience is a virtue...\")")
-    else()
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface thunk files...patience is a virtue...\")")
-    endif()
-
     # Set up install commands for debug/release configurations.
     # On single-config generators (e.g. make), simply check the current config.
     # On multi-config generators (e.g. VS, XCode), there is a CMake deficiency
@@ -110,6 +103,7 @@ if(PLUGIN_CINTERFACE)
     if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Release) OR (CMAKE_BUILD_TYPE STREQUAL MinSizeRel))
       # Matlab command for release configurations
       MESSAGE(STATUS "Will install CInterface (release) Matlab thunk files with command:\n${MATLAB_COMMAND}")
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface (release) thunk files...patience is a virtue...\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
     endif()
 
@@ -117,6 +111,7 @@ if(PLUGIN_CINTERFACE)
     if( CMAKE_CONFIGURATION_TYPES OR (CMAKE_BUILD_TYPE STREQUAL Debug) OR (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo))
       # Matlab command for debug configurations
       MESSAGE(STATUS "Will install CInterface (debug) Matlab thunk files with command:\n${MATLAB_COMMAND_DEBUG}")
+      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface (debug) thunk files...patience is a virtue...\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND_DEBUG} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
     endif()
 

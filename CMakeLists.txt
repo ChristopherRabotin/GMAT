@@ -27,17 +27,10 @@ PROJECT(GMAT C CXX)
 SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "Build version")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
-# Set default GMAT installation location
-# Can be overridden by using "-DCMAKE_INSTALL_PREFIX=/foo/bar" at command line
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  SET(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}" CACHE PATH "GMAT top-directory installation location" FORCE )
-endif()
-
 # Path to custom Find****.cmake files
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
 
 # Set general build options
-OPTION(PROFILE_BUILD "ProfileBuild" OFF)
 OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 
 # Public GMAT plugins
@@ -64,8 +57,25 @@ else()
   SET(GMAT_64_BIT OFF)
 endif()
 
-# Optional Jazz Plugin Inputs
-# to-do
+# Default to Release configuration on single-config generators
+# e.g. make, but not VisualStudio or XCode
+# Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
+# run, so we check for that and set the default appropriately
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
+endif()
+
+# Set default GMAT installation location
+# Can be overridden by using "-DCMAKE_INSTALL_PREFIX=/foo/bar" at command line
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  if(GMAT_64_BIT)
+    SET(GMAT_RELEASE_TYPE "x64")
+  else()
+    SET(GMAT_RELEASE_TYPE "x86")
+  endif()
+
+  SET(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/GMAT-${GMAT_RELEASE_NAME}-${CMAKE_SYSTEM_NAME}-${GMAT_RELEASE_TYPE}" CACHE PATH "GMAT top-directory installation location" FORCE )
+endif()
 
 # Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
 # This may need to be a user-selectable cache variable in the future
@@ -130,13 +140,25 @@ FIND_PATH(CSPICE_DIR
   NAMES include/SpiceUsr.h
   PATHS
     ${CSPICE_DEPENDS_DIR}
-  DOC "Path to CSpice root directory (containing include/)"
+  DOC "Path to CSpice root directory (containing include/, lib/, etc.)"
   NO_DEFAULT_PATH
   )
 
 # Make sure CSPICE exists
-if(EXISTS ${CSPICE_DIR})
+if(CSPICE_DIR)
   MESSAGE(STATUS "Found CSPICE: " ${CSPICE_DIR})
+
+  # Set CSPICE library files
+  if(WIN32)
+    SET(CSPICE_EXT "lib")
+  else()
+    SET(CSPICE_EXT "a")
+  endif()
+  SET(CSPICE_LIB "${CSPICE_DIR}/lib/cspice.${CSPICE_EXT}")
+  SET(CSPICE_LIB_DEBUG "${CSPICE_DIR}/lib/cspiced.${CSPICE_EXT}")
+  if(NOT EXISTS ${CSPICE_LIB_DEBUG})
+    SET(CSPICE_LIB_DEBUG ${CSPICE_LIB})
+  endif()
 else()
   MESSAGE(WARNING "CSPICE NOT FOUND. Set CSPICE_DIR to path to include/SpiceUsr.h and re-configure.")
 endif()
@@ -155,7 +177,7 @@ FIND_PATH(F2C_DIR
   )
 
 # Make sure F2C exists
-if(EXISTS ${F2C_DIR})
+if(F2C_DIR)
   MESSAGE(STATUS "Found F2C: " ${F2C_DIR})
 else()
   MESSAGE(WARNING "F2C NOT FOUND. Set F2C_DIR to path to f2c.h and re-configure.")
@@ -172,14 +194,6 @@ SET(MATLAB_ADDITIONAL_VERSIONS
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
-
-# Default to Release configuration on single-config generators
-# e.g. make, but not VisualStudio or XCode
-# Note that CMAKE_BUILD_TYPE is initialized to "" on the initial cmake-gui
-# run, so we check for that and set the default appropriately
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration (Debug, Release, RelWithDebInfo, or MinSizeRel" FORCE)
-endif()
 
 # ====================================================================
 # Common build options
@@ -226,11 +240,6 @@ if(UNIX)
   if(NOT APPLE)
     LINK_LIBRARIES("dl")	
   endif()
-endif()
-
-# Profile Build Compile Flags
-if (PROFILE_BUILD)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 endif()
 
 # Warning suppression definitions

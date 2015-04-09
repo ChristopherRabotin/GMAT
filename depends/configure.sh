@@ -112,14 +112,28 @@ function download_depends() {
 		  gzip -d cspice.tar.Z
 		  tar xfv cspice.tar
 		  mv cspice cspice32
+		  cd cspice32/src/cspice
+		  export TKCOMPILEARCH="-m32"
 		else
 		  wget ftp://naif.jpl.nasa.gov/pub/naif/toolkit//C/"$cspice_type"_64bit/packages/cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar xfv cspice.tar
 		  mv cspice cspice64
+		  cd cspice64/src/cspice
+		  export TKCOMPILEARCH="-m64"
 		fi
 
+		# Compile debug CSPICE with integer uiolen [GMT-5044]
+		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -g -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+		./mkprodct.csh
+		mv ../../lib/cspice.a ../../lib/cspiced.a
+
+		# Compile release CSPICE with integer uiolen [GMT-5044]
+		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
+		./mkprodct.csh
+
 		# Remove downloaded archive
+		cd ../../..
 		rm cspice.tar
 	fi	
 

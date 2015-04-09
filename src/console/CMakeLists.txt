@@ -14,36 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT Console setup " ${VERSION})
 
-if (PROFILE_BUILD)
-	SET(CONSOLETARGET "GmatConsoleP")
-else()
-	SET(CONSOLETARGET "GmatConsole")
-endif()
-
-SET(TargetName ${CONSOLETARGET})
-
-# ====================================================================
-# SPICE specifics
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-SET(SPICE_LIB_DIR  "${CSPICE_DIR}/lib")
-LINK_DIRECTORIES(${SPICE_LIB_DIR})
-
-if(WIN32)
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.lib")
-else()
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.a")
-endif()
-        
-ADD_DEFINITIONS("-D__USE_SPICE__")
-
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
+SET(TargetName GmatConsole)
 
 # ====================================================================
 # source files
