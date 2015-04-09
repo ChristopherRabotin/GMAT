@@ -4806,30 +4806,45 @@ bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
 
 // made changes by TUAN NGUYEN
 #include "Moderator.hpp"
-ObjectMap* GmatBase::GetConfiguredObjectMap()
+ObjectMap GmatBase::GetConfiguredObjectMap()
 {
-   return Moderator::Instance()->GetConfiguredObjectMap();
+   return Moderator::Instance()->GetSandbox()->GetObjectMap();
 }
 
 // made changes by TUAN NGUYEN
 GmatBase* GmatBase::GetConfiguredObject(const std::string &name)
 {
-   return Moderator::Instance()->GetConfiguredObject(name);
+   return Moderator::Instance()->GetInternalObject(name);
+   //return Moderator::Instance()->GetConfiguredObject(name);
 }
 
 
 // made changes by TUAN NGUYEN
-const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type,
-                 bool excludeDefaultObjects)
+const StringArray& GmatBase::GetListOfObjects(Gmat::ObjectType type)
 {
-   return Moderator::Instance()->GetListOfObjects(type, excludeDefaultObjects);
+   ObjectMap objMap = GetConfiguredObjectMap();
+   StringArray nameList;
+   for (ObjectMap::iterator i = objMap.begin(); i != objMap.end(); ++i)
+   {
+      if ((*i).second->IsOfType(type))
+         nameList.push_back((*i).first);
+   }
+
+   return nameList;
 }
 
 
 // made changes by TUAN NGUYEN
-const StringArray& GmatBase::GetListOfObjects(const std::string &typeName,
-                                       bool excludeDefaultObjects)
+const StringArray& GmatBase::GetListOfObjects(const std::string &typeName)
 {
-   return Moderator::Instance()->GetListOfObjects(typeName, excludeDefaultObjects);
+   ObjectMap objMap = GetConfiguredObjectMap();
+   StringArray nameList;
+   for (ObjectMap::iterator i = objMap.begin(); i != objMap.end(); ++i)
+   {
+      if ((*i).second->IsOfType(typeName))
+         nameList.push_back((*i).first);
+   }
+
+   return nameList;
 }
 
