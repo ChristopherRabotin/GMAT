@@ -48,7 +48,7 @@
 
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
-#define DEBUG_HANDLE_ERROR
+//#define DEBUG_HANDLE_ERROR
 //#define DEBUG_INIT
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_COMMAND_VALIDATION
