@@ -599,7 +599,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
    ephemMgr             (NULL),
-   includeCartesianState(a.includeCartesianState)
+   includeCartesianState(a.includeCartesianState),
+   solveforNames        (a.solveforNames)                         // made changes by TUAN NGUYEN
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -766,6 +767,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    includeCartesianState = a.includeCartesianState;
 
+   solveforNames      = a.solveforNames;                                 // made changes by TUAN NGUYEN
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -3561,6 +3563,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == SOLVEFORS)                                                       // made changes by TUAN NGUYEN
    {                                                                          // made changes by TUAN NGUYEN
+      if ((value.substr(0,2) == "{}"))                                        // made changes by TUAN NGUYEN
+      {                                                                       // made changes by TUAN NGUYEN
+         solveforNames.clear();                                               // made changes by TUAN NGUYEN
+         return true;                                                         // made changes by TUAN NGUYEN
+      }                                                                       // made changes by TUAN NGUYEN
+
       // Only add the solvefor parameter if it is not in the list already     // made changes by TUAN NGUYEN
       if (find(solveforNames.begin(), solveforNames.end(), value) ==          // made changes by TUAN NGUYEN
           solveforNames.end())                                                // made changes by TUAN NGUYEN
