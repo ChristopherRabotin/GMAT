@@ -1216,7 +1216,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          i = forStrand;
 
       #ifdef DEBUG_CALCULATE_MEASUREMENT
-         MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d:  ", i);
+         MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d of %d:  ", i, signalPaths.size());
          SignalBase* s = signalPaths[i];
          SignalData* sdata; 
          while (s != NULL)
