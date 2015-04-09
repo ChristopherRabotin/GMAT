@@ -6382,6 +6382,16 @@ void Moderator::ClearAllSandboxes()
 }
 
 
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// Sandbox* GetSandbox(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+Sandbox* Moderator::GetSandbox(Integer sandboxNum)
+{
+   return sandboxes[sandboxNum-1];
+}
+
+
 //------------------------------------------------------------------------------
 // GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1)
 //------------------------------------------------------------------------------
