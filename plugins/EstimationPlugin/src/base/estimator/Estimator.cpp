@@ -288,8 +288,7 @@ bool Estimator::Initialize()
       // Check to make sure required objects have been set
       if (!propagator)
          throw SolverException(
-               "Estimator error - no propagator set for the estimator object"
-               /*" named %s.", GetName().c_str()*/);
+               "Estimator error - no propagators are set for estimation or propagators are not defined in your script.\n");
 
       if (measurementNames.empty())
          throw EstimatorException("Error: no measurements are set for estimation.\n");
@@ -1252,6 +1251,10 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
           !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
          // Handle MeasurmentModel and TrackingFileSet
+         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+            MessageInterface::ShowMessage("Handle MeasurementModel and TrackingFileSet: <%s>\n", name.c_str());
+         #endif
+
          modelNames.push_back(obj->GetName());
          measManager.AddMeasurement((MeasurementModel *)obj);         
          return true;
@@ -1260,8 +1263,11 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          // Handle for TrackingSystem
          #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Handle for TrackingSystem\n");
+            MessageInterface::ShowMessage("Handle TrackingSystem: <%s>\n", name.c_str());
          #endif
+
+         // Add to tracking system list                           // made changes by TUAN NGUYEN
+         measManager.AddMeasurement((TrackingSystem*)obj);        // made changes by TUAN NGUYEN
          
          MeasurementModel *meas;
          // Retrieve each measurement model from the tracking system ...
@@ -1286,8 +1292,6 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             modelNames.push_back(meas->GetName());
             measManager.AddMeasurement(meas);
 
-            // Add TrackingSystem object to measurement manager      // made changes by TUAN NGUYEN
-            measManager.AddMeasurement((TrackingSystem*)obj);        // made changes by TUAN NGUYEN
          }
          return true;
       }
