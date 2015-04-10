@@ -104,6 +104,7 @@ SET(PLUGIN_SRCS
 
 # Temporarily disable Ionosphere for Mac/Linux
 if(WIN32)
+  ADD_DEFINITIONS("-DIONOSPHERE")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
     measurement/Ionosphere/cira.c

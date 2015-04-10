@@ -1,34 +1,40 @@
 #!/bin/bash
-# Author: 	Jfisher
-# Project:	Gmat
-# Title:	configure.sh
-# Purpose:	This script allows developers to quickly and easily 
-#		configure the gmat development environment on linux.
-# Usage:        configure.sh [-p /path/to/gmat] [-w]
-#               Default behavior detects OS and GMAT path, and builds wxWidgets
-#               -p: specify path to top-level GMAT directory
-#               -w: do NOT build wxWidgets (retained for compatibility)
-
-# Clear the screen
-clear
+# Author:  Jfisher
+# Project: Gmat
+# Title:   configure.sh
+# Purpose: This script allows developers to quickly and easily 
+#	   configure the gmat development environment on Mac/Linux.
+# Usage:   configure.sh [-p /path/to/gmat] [-w wx_version] [-help]
+#          Default behavior detects GMAT path and builds wxWidgets 3.0.2
+#           -p: (optional) path to top-level GMAT directory
+#           -w: (optional) wxWidgets dotted version, e.g. 3.0.2
+#           -help: Print usage
+# Updates: Feb-Apr 2015: Ravi Mathur: Heavy updates for new CMake
 
 # Set defaults
-use_latest=false # Use latest or predetermined releases of dependencies
-build_wx=true 
+wx_build=true 
+wx_version=3.0.2
 
-BASEDIR=$( dirname "${BASH_SOURCE[0]}" )
-BASEDIRFULL=$( cd "${BASEDIR}" && pwd )
-gmat_path="$(dirname "${BASEDIRFULL}")"
+# Get path to gmat (one folder above this script)
+BASEDIR=$( dirname "${BASH_SOURCE[0]}" ) # Path to this script
+BASEDIRFULL=$( cd "${BASEDIR}" && pwd ) # Go to script folder
+gmat_path="$(dirname "${BASEDIRFULL}")" # Path to gmat folder
 
 # ***********************************
 # Input System
 # ***********************************
-while getopts p:w opt; do
+while getopts pw:h opt; do
   case $opt in
     p) gmat_path="$OPTARG";;
-    w) build_wx=false;;
+    w) wx_version="$OPTARG";;
+    h) echo Usage: configure.sh [-p /path/to/gmat] [-w wx_dotted_version] [-help]
+      exit;;
   esac
 done
+
+clear
+echo Launching from $gmat_path
+echo Using wxWidgets $wx_version
   
 # Detect Mac/Linux
 if [ "$(uname)" = "Darwin" ]
@@ -68,15 +74,16 @@ function download_depends() {
 	fi
 
 	# Display the variables
-	echo $bin_path
-	echo $f2c_path
-	echo $cspice_path
-	echo $wxWidgets_path
-	echo $sofa_path
-	echo $tsplot_path
+	#echo $bin_path
+	#echo $f2c_path
+	#echo $cspice_path
+	#echo $wxWidgets_path
+	#echo $sofa_path
+	#echo $tsplot_path
 
 	# Create directories and download f2c if it does not already exist.
-	if [ ! -d "$f2c_path" ]
+	# Disabled for now
+	if [ ! -d "$f2c_path" ] && [ false == true ]
 	then
 		# Create Directories
 		mkdir "$f2c_path"
@@ -89,8 +96,10 @@ function download_depends() {
 	fi
 
 	# Create directories and download cspice if it does not already exist.
-	if [ ! -d "$cspice_path" ]
+	if [ -d "$cspice_path" ]
 	then
+	  echo "CSPICE already configured"
+	else
 		# Create Directories
 		mkdir -p "$cspice_path"
 	
@@ -100,9 +109,9 @@ function download_depends() {
 		# Determine download folder based on OS
         	if [ $mac == true ]
         	then
-            		cspice_type=MacIntel_OSX_AppleC
+		  cspice_type=MacIntel_OSX_AppleC
         	else 
-            		cspice_type=PC_Linux_GCC
+		  cspice_type=PC_Linux_GCC
         	fi
 	
 		# Download and extract Spice (32/64-bit)
@@ -112,6 +121,7 @@ function download_depends() {
 		  gzip -d cspice.tar.Z
 		  tar xfv cspice.tar
 		  mv cspice cspice32
+		  rm cspice.tar
 		  cd cspice32/src/cspice
 		  export TKCOMPILEARCH="-m32"
 		else
@@ -119,6 +129,7 @@ function download_depends() {
 		  gzip -d cspice.tar.Z
 		  tar xfv cspice.tar
 		  mv cspice cspice64
+		  rm cspice.tar
 		  cd cspice64/src/cspice
 		  export TKCOMPILEARCH="-m64"
 		fi
@@ -131,14 +142,10 @@ function download_depends() {
 		# Compile release CSPICE with integer uiolen [GMT-5044]
 		export TKCOMPILEOPTIONS="$TKCOMPILEARCH -c -ansi -O2 -fPIC -DNON_UNIX_STDIO -DUIOLEN_int"
 		./mkprodct.csh
-
-		# Remove downloaded archive
-		cd ../../..
-		rm cspice.tar
 	fi	
 
 	# Create directories and download wxWidgets if needed
-	if [ ! -d "$wxWidgets_path" ] && [ $build_wx == true ]
+	if [ ! -d "$wxWidgets_path" ] && [ $wx_build == true ]
 	then
 		# Create Directories
 		mkdir "$wxWidgets_path"
@@ -146,17 +153,20 @@ function download_depends() {
 		# Change to wxWidgets directory
 		cd "$wxWidgets_path"
 	
-		if [ $use_latest == true ]
+		# Checkout wxWidgets source
+		wx_version_download=`echo $wx_version | sed 's/\./_/g'`
+		svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_$wx_version_download/ wxWidgets-$wx_version
+
+		# Make sure wxWidgets was downloaded
+		if [ ! -d "wxWidgets-$wx_version" ]
 		then
-		  # Checkout latest development wxWidgets source.
-		  svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/trunk/ wxWidgets-latest
-		else
-		  # Checkout latest stable wxWidgets 3.0 source.
-		  svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_3_0_2/ wxWidgets-3.0.2
+		  echo Error in wxWidgets-$wx_version download
+		  wx_build=false
 		fi
 	fi
 
 	# Create directories and download sofa if it does not already exist.
+	# Disabled for now
 	if [ ! -d "$sofa_path" ] && [ false == true ]
 	then
 		# Change to depends directory
@@ -169,7 +179,8 @@ function download_depends() {
 	fi
 
 	# Create directories and download tsplot if it does not already exist.
-	if [ ! -d "$tsplot_path" ] && [ false  == true ]
+	# Disabled for now
+	if [ ! -d "$tsplot_path" ] && [ false == true ]
 	then
 		# Create Directories
 		mkdir "$tsplot_path"
@@ -182,7 +193,8 @@ function download_depends() {
 	fi
 
 	# Create directories and download pcre if it does not already exist.
-	if [ ! -d "$pcre_path" ] && [ false ]
+	# Disabled for now
+	if [ ! -d "$pcre_path" ] && [ false == true ]
 	then
 		# Create Directories
 		mkdir "$pcre_path"
@@ -190,48 +202,41 @@ function download_depends() {
 		# Change to pcre directory
 		cd "$pcre_path"
 	
-		if [ $use_latest == true ]
-		then
-		  # Checkout latest pcre source.
-		  svn co svn://vcs.exim.org/pcre/code/trunk pcre-latest
-		else
-		  # Checkout release pcre source.
-		  svn co svn://vcs.exim.org/pcre/code/tags/pcre-8.31 pcre-8.31
-		fi
+		# Checkout release pcre source.
+		svn co svn://vcs.exim.org/pcre/code/tags/pcre-8.31 pcre-8.31
 	fi
 }
 
 function build_wxWidgets() {
 	# Set build path based on version
-	if [ $use_latest == true ]
-	then
-	  wx_path=$gmat_path/depends/wxWidgets/latest
-	else
-	  wx_path=$gmat_path/depends/wxWidgets/wxWidgets-3.0.2
-	fi
+	wx_path=$wxWidgets_path/wxWidgets-$wx_version
 
 	# OS-specific vars
 	if [ $mac == true ]
     	then
-	  # Out-of-source build/install locations
+	  # Out-of-source wx build/install locations
 	  wx_build_path=$wx_path/cocoa-build
 	  wx_install_path=$wx_path/cocoa-install
-
-	  # Test file to see if wxWidgets has already been installed
-	  wx_test_file=$wx_install_path/lib/libwx_osx_cocoau_core-3.0.dylib
     	else
-	  # Out-of-source build/install locations
+	  # Out-of-source wx build/install locations
 	  wx_build_path=$wx_path/gtk-build
 	  wx_install_path=$wx_path/gtk-install
-
-	  # Test file to see if wxWidgets has already been installed
-	  wx_test_file=$wx_install_path/lib/libwx_gtk3u_core-3.0.so
     	fi
 
-	# Build wxWidgets if the test library doesn't already exist
+	# Find a test file to see if wxWidgets has already been configured
+	wx_test_file=`ls $wx_install_path/lib/libwx_baseu-* 2> /dev/null | head -n 1`
+
+	# Build wxWidgets if the test file doesn't already exist
+	# Note that according to 
+	#   http://docs.wxwidgets.org/3.0/overview_debugging.html
+	# debugging features "are always available by default", so
+	# we don't build a separate debug version here.
+	# IF a debug version is required in the future, then this
+	# if/else block should be repeated with the --enable-debug flag
+	# added to mac & linux versions of the wx ./configure command
 	if [ -f "$wx_test_file" ]
 	then
-	  echo "wxWidgets already installed"
+	  echo "wxWidgets already configured"
 	else
 	  echo "Building wxWidgets..."
 	  mkdir -p "$wx_build_path"
@@ -239,16 +244,16 @@ function build_wxWidgets() {
 
 	  if [ $mac == true ]
 	  then
-	    # Extra compile/link flags are required because OSX 10.9+ uses libc++ instead of libstdc++ by default. There should be a version check here to handle OSX 10.8 and lower
+	    # Extra compile/link flags are required because OSX 10.9+ uses libc++ instead of libstdc++ by default. Should there should be a version check here to handle OSX 10.8 and lower?
 	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
-	    # Configure wxWidget build
+	    # Configure wxWidgets build
 	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path"
 	    ncores=$(nproc)
 	  fi
 
-	  # Compile wxWidget build
+	  # Compile wxWidgets build
 	  make -j$ncores
 	  make install
 	fi
@@ -256,7 +261,7 @@ function build_wxWidgets() {
 
 # Run Script Functions
 download_depends
-if [ $build_wx == true ]
+if [ $wx_build == true ]
 then
   build_wxWidgets
 fi
@@ -264,6 +269,5 @@ fi
 # ***********************************
 # End of script
 # ***********************************
-echo $gmat_path
 echo Dependency Configuration Complete!
 exit 1
