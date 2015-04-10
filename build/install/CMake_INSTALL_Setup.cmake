@@ -35,7 +35,12 @@ INSTALL( FILES
   CONFIGURATIONS Release MinSizeRel
   )
 INSTALL( FILES
-  ${PROJECT_SOURCE_DIR}/application/debug/gmat_startup_file.txt
+  ${PROJECT_SOURCE_DIR}/application/debug/gmat_startup_file_debuginstall.txt
+  DESTINATION bin
+  CONFIGURATIONS Debug RelWithDebInfo
+  RENAME gmat_startup_file.txt
+  )
+INSTALL( FILES
   ${PROJECT_SOURCE_DIR}/application/debug/GMAT.ini
   DESTINATION bin
   CONFIGURATIONS Debug RelWithDebInfo
