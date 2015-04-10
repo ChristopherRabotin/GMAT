@@ -84,6 +84,10 @@ protected:
 	std::string functionName;
 	/// Python Interface singleton
 	PythonInterface *pythonIf;
+   /// Fill in Input parameter list
+   Integer FillInputList();
+   /// Fill in Output parameter list
+   Integer FillOutputList();
 
    /// Published parameters for Python functions
    enum

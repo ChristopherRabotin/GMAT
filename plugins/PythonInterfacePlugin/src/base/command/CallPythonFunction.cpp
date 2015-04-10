@@ -1,5 +1,6 @@
 #include "CallPythonFunction.hpp"
 #include "FileManager.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -198,9 +199,15 @@ bool CallPythonFunction::Initialize()
 	//Initialize Python engine
 	pythonIf->PyInitialize();
 
-	// Get all Python function paths from the startup file
+	// Get all Python module paths from the startup file
 	StringArray paths = fm->GetAllPythonModulePaths();
 	pythonIf->PyAddModulePath(paths);
+   
+   //Fill in Inputlist
+   Integer sizeIn = FillInputList();
+   
+   //Fill in Outputlist
+   Integer sizeOut = FillOutputList();
 
 	return ret;
 }
@@ -213,4 +220,51 @@ bool CallPythonFunction::Execute()
 void CallPythonFunction::RunComplete()
 {
 	return;
+}
+
+
+Integer CallPythonFunction::FillInputList()
+{
+   GmatBase *mapObj;
+
+   mInputList.clear();
+  
+   StringArray ar = GetStringArrayParameter(ADD_INPUT);
+   StringArray::iterator it;
+   for (it = ar.begin(); it != ar.end(); ++it)
+   {
+      if ((mapObj = FindObject(*it)) == NULL)
+      {
+         throw CommandException("CallPythonFunction command cannot find Parameter " +
+                                    *it + " in script line\n   \"" +
+                                       GetGeneratingString(Gmat::SCRIPTING) + "\"");
+      }
+         
+      mInputList.push_back((Parameter *)mapObj);
+   }
+      
+   return mInputList.size();
+}
+
+Integer CallPythonFunction::FillOutputList()
+{
+   GmatBase *mapObj;
+
+   mOutputList.clear();
+
+   StringArray ar = GetStringArrayParameter(ADD_OUTPUT);
+   StringArray::iterator it;
+   for (it = ar.begin(); it != ar.end(); ++it)
+   {
+      if ((mapObj = FindObject(*it)) == NULL)
+      {
+         throw CommandException("CallPythonFunction command cannot find Parameter " +
+            *it + " in script line\n   \"" +
+            GetGeneratingString(Gmat::SCRIPTING) + "\"");
+      }
+
+      mOutputList.push_back((Parameter *)mapObj);
+   }
+
+   return mOutputList.size();
 }
