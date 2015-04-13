@@ -91,7 +91,7 @@ function download_depends() {
 		# Change to f2c directory
 		cd "$f2c_path"
 	
-		# Use wget to download software
+		# Download F2C
 		wget -nH --cut-dirs=1 -r http://netlib.org/f2c/
 	fi
 
@@ -117,7 +117,7 @@ function download_depends() {
 		# Download and extract Spice (32/64-bit)
 		if [ "$arch" = "x86" ]
 		then
-		  wget ftp://naif.jpl.nasa.gov/pub/naif/toolkit//C/"$cspice_type"_32bit/packages/cspice.tar.Z
+		  ftp ftp://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar xfv cspice.tar
 		  mv cspice cspice32
@@ -125,7 +125,7 @@ function download_depends() {
 		  cd cspice32/src/cspice
 		  export TKCOMPILEARCH="-m32"
 		else
-		  wget ftp://naif.jpl.nasa.gov/pub/naif/toolkit//C/"$cspice_type"_64bit/packages/cspice.tar.Z
+		  ftp ftp://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z
 		  gzip -d cspice.tar.Z
 		  tar xfv cspice.tar
 		  mv cspice cspice64
@@ -244,8 +244,15 @@ function build_wxWidgets() {
 
 	  if [ $mac == true ]
 	  then
-	    # Extra compile/link flags are required because OSX 10.9+ uses libc++ instead of libstdc++ by default. Should there should be a version check here to handle OSX 10.8 and lower?
-	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8 CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
+	    # Extra compile/link flags are required because OSX 10.9+ uses libc++ instead of libstdc++ by default.
+	    macver=`sw_vers -productVersion`
+	    macver_minor=`echo $macver | awk -F . '{print $2}'`
+	    if [ $macver_minor -ge 9 ] # Check for OSX 10.9+
+	    then
+	      ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8 CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
+	    else
+	      ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa
+	    fi
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
 	    # Configure wxWidgets build
@@ -253,9 +260,10 @@ function build_wxWidgets() {
 	    ncores=$(nproc)
 	  fi
 
-	  # Compile wxWidgets build
+	  # Compile, install, and clean wxWidgets
 	  make -j$ncores
 	  make install
+	  cd ..; rm -Rf "$wx_build_path"
 	fi
 }
 
