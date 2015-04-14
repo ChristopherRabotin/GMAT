@@ -1012,29 +1012,32 @@ bool CallFunction::Initialize()
    isMatlabFunction = false;
    
    bool rv = true;  // Initialization return value
-   if (mFunction == NULL)
-      throw CommandException("CallFunction::Initialize() the function pointer is NULL");
-   
-   if (mFunction->GetTypeName() == "GmatFunction")
-      isGmatFunction = true;
-   else if (mFunction->GetTypeName() == "MatlabFunction")
-      isMatlabFunction = true;
-   
-   if (!isGmatFunction && !isMatlabFunction)
-      throw CommandException
-         ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
-   
-   mFunctionPathAndName = mFunction->GetFunctionPathAndName();
-   std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
-   if (fname == "")
-      mFunctionPathAndName += mFunctionName;
-   
-   #ifdef DEBUG_CALL_FUNCTION_INIT
-   MessageInterface::ShowMessage
-      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
-       "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
-       mFunctionPathAndName.c_str());
-   #endif
+   if (!IsOfType("CallPythonFunction"))
+   {
+      if (mFunction == NULL)
+         throw CommandException("CallFunction::Initialize() the function pointer is NULL");
+
+      if (mFunction->GetTypeName() == "GmatFunction")
+         isGmatFunction = true;
+      else if (mFunction->GetTypeName() == "MatlabFunction")
+         isMatlabFunction = true;
+
+      if (!isGmatFunction && !isMatlabFunction)
+         throw CommandException
+            ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
+
+      mFunctionPathAndName = mFunction->GetFunctionPathAndName();
+      std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
+      if (fname == "")
+         mFunctionPathAndName += mFunctionName;
+
+      #ifdef DEBUG_CALL_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
+          "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
+          mFunctionPathAndName.c_str());
+      #endif
+   }
    
    return rv;
 }
