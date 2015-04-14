@@ -5,6 +5,10 @@ CLS
 set MSYS=C:\MinGW\msys\1.0
 set SH=%MSYS%\bin\sh.exe
 set Path=%MSYS%\bin;%Path%
+call "%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" %1
+rem echo Argument is %1
+rem echo Path is %Path%
+rem where msbuild
 
 echo Starting build process at %date% - %time%
 echo    * Cleaning up old build (%time%)...
