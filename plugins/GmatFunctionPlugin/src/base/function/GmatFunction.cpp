@@ -28,8 +28,9 @@
 #include "HardwareException.hpp" 
 #include "MessageInterface.hpp"
 
-//#define DEBUG_FUNCTION
+//#define DEBUG_FUNCTION_CONSTRUCT
 //#define DEBUG_FUNCTION_SET
+//#define DEBUG_FUNCTION_SET_PATH
 //#define DEBUG_FUNCTION_INIT
 //#define DEBUG_FUNCTION_EXEC
 //#define DEBUG_FUNCTION_FINALIZE
@@ -77,6 +78,11 @@
 GmatFunction::GmatFunction(const std::string &name) :
    Function("GmatFunction", name)
 {
+   #ifdef DEBUG_FUNCTION_CONSTRUCT
+   MessageInterface::ShowMessage
+      ("GmatFunction::GmatFunction() constructor <%p> entered, name='%s'\n",
+       this, name.c_str());
+   #endif
    mIsNewFunction = false;
    unusedGlobalObjectList = NULL;
    
@@ -89,11 +95,19 @@ GmatFunction::GmatFunction(const std::string &name) :
       // if there is a function name, try to locate it
       if (name != "")
       {
+         #ifdef DEBUG_FUNCTION_CONSTRUCT
+         MessageInterface::ShowMessage
+            ("   Getting path for '%s' from the FileManager\n", name.c_str());
+         #endif
          // Get path of first it is located
          pathname = fm->GetGmatFunctionPath(name + ".gmf");
          // gmat function uses whole path name
          pathname = pathname + name + ".gmf";         
          functionPath = pathname;
+         #ifdef DEBUG_FUNCTION_CONSTRUCT
+         MessageInterface::ShowMessage
+            ("   functionPath now is '%s'\n", functionPath.c_str());
+         #endif
          functionName = GmatFileUtil::ParseFileName(functionPath);
          
          // Remove path and .gmf
@@ -125,7 +139,7 @@ GmatFunction::GmatFunction(const std::string &name) :
       {
          // Use exception to remove Visual C++ warning
          e.GetMessageType();
-         #ifdef DEBUG_FUNCTION
+         #ifdef DEBUG_FUNCTION_CONSTRUCT
          MessageInterface::ShowMessage(e.GetFullMessage());
          #endif
       }
@@ -133,11 +147,14 @@ GmatFunction::GmatFunction(const std::string &name) :
    
    objectTypeNames.push_back("GmatFunction");
 
-   #ifdef DEBUG_FUNCTION
+   #ifdef DEBUG_FUNCTION_CONSTRUCT
    MessageInterface::ShowMessage
       ("   Gmat functionPath=<%s>\n", functionPath.c_str());
    MessageInterface::ShowMessage
       ("   Gmat functionName=<%s>\n", functionName.c_str());
+   MessageInterface::ShowMessage
+      ("GmatFunction::GmatFunction() constructor <%p> leaving, name='%s'\n",
+       this, name.c_str());
    #endif
 }
 
@@ -285,6 +302,11 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       // if name not found, clone it and add to map (loj: 2008.12.15)
       if (objectStore->find(funcObjName) == objectStore->end())
       {
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   About to clone <%p>[%s]'%s'\n", (omi->second), (omi->second)->GetTypeName().c_str(),
+             (omi->second)->GetName().c_str());
+         #endif
          GmatBase *funcObj = (omi->second)->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
@@ -874,74 +896,37 @@ bool GmatFunction::SetStringParameter(const Integer id, const std::string &value
    MessageInterface::ShowMessage
       ("GmatFunction::SetStringParameter() entered, id=%d, value=%s\n", id, value.c_str());
    #endif
-   
+
+   bool retval = false;
    switch (id)
    {
    case FUNCTION_PATH:
       {
-         return SetGmatFunctionPath(value);
-         
-         #if 0
-         FileManager *fm = FileManager::Instance();
-         
-         // Compose full path if it has relative path.
-         // Assuming if first char has '.', it has relative path.
-         std::string temp = GmatStringUtil::Trim(value);
-         if (temp[0] == '.')
-         {
-            std::string currPath = fm->GetCurrentWorkingDirectory();
-            
-            #ifdef DEBUG_FUNCTION_SET
-            MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
-            #endif
-            
-            if (temp[1] != '.')
-               functionPath = currPath + temp.substr(1);
-            else
-            {
-               functionPath = currPath + '/';
-               functionPath = functionPath + temp;
-            }
-         }
-         else
-         {
-            functionPath = value;
-         }
-         
-         // Add to GmatFunction path
-         fm->AddGmatFunctionPath(functionPath);
-         
-         // Remove path
-         functionName = GmatFileUtil::ParseFileName(functionPath);
-         
-         // Remove .gmf if GmatGmatFunction
-         std::string::size_type dotIndex = functionName.find(".gmf");
-         functionName = functionName.substr(0, dotIndex);
-         
-         #ifdef DEBUG_FUNCTION_SET
-         MessageInterface::ShowMessage
-            ("   functionPath=<%s>\n", functionPath.c_str());
-         MessageInterface::ShowMessage
-            ("   functionName=<%s>\n", functionName.c_str());
-         #endif
-         
-         return true;
-         #endif
+         retval = SetGmatFunctionPath(value);
+         break;
       }
    case FUNCTION_NAME:
       {
          // Remove path if it has one
          functionName = GmatFileUtil::ParseFileName(functionPath);
          
-         // Remove .gmf if GmatGmatFunction
+         // Remove .gmf for function name
          std::string::size_type dotIndex = functionName.find(".gmf");
          functionName = functionName.substr(0, dotIndex);
          
-         return true;
+         retval = true;
+         break;
       }
    default:
-      return Function::SetStringParameter(id, value);
+      retval = Function::SetStringParameter(id, value);
+      break;
    }
+   
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("GmatFunction::SetStringParameter() returning %d\n", retval);
+   #endif
+   return retval;
 }
 
 
@@ -1066,59 +1051,106 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
 //------------------------------------------------------------------------------
 bool GmatFunction::SetGmatFunctionPath(const std::string &path)
 {
-   #ifdef DEBUG_FUNCTION_SET
+   #ifdef DEBUG_FUNCTION_SET_PATH
    MessageInterface::ShowMessage
-      ("GmatFunction::SetGmatFunctionPath() entered, path='%s'\n", path.c_str());
+      ("GmatFunction::SetGmatFunctionPath() <%p> entered, path='%s'\n", this,
+       path.c_str());
    #endif
    
    FileManager *fm = FileManager::Instance();
    
    // Compose full path if it has relative path.
    // Assuming if first char has '.', it has relative path.
-   std::string temp = GmatStringUtil::Trim(path);
-   if (temp[0] == '.')
+   std::string tempPath = GmatStringUtil::Trim(path);
+   #ifdef DEBUG_FUNCTION_SET_PATH
+   MessageInterface::ShowMessage("   tempPath='%s'\n", tempPath.c_str());
+   #endif
+   if (tempPath[0] == '.')
    {
-      // Follow new file path implementation (LOJ: 2014.01.13)
+      #ifdef DEBUG_FUNCTION_SET_PATH
+      MessageInterface::ShowMessage("   It has relative path\n");
+      #endif
+      // Follow new file path implementation (LOJ: 2015.01.13)
       //std::string currPath = fm->GetCurrentWorkingDirectory();
       std::string currPath = fm->GetGmatWorkingDirectory();
       
-      #ifdef DEBUG_FUNCTION_SET
-      MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
+      #ifdef DEBUG_FUNCTION_SET_PATH
+      MessageInterface::ShowMessage("   currPath='%s'\n", currPath.c_str());
+      #endif
+            
+      tempPath = currPath + tempPath;
+      
+      #ifdef DEBUG_FUNCTION_SET_PATH
+      MessageInterface::ShowMessage("   tempPath='%s'\n", tempPath.c_str());
       #endif
       
-      if (temp[1] != '.')
-         functionPath = currPath + temp.substr(1);
+      // If path has only a path name without a function name, append function name
+      // This will make FunctionPath to work without specifying function name (LOJ: 2015.03.16)
+      if (tempPath.find(".gmf") == tempPath.npos)
+      {
+         #ifdef DEBUG_FUNCTION_SET_PATH
+         MessageInterface::ShowMessage("   It has relative path only\n");
+         #endif
+         if ((tempPath[tempPath.size()-1] != '/') &&
+             (tempPath[tempPath.size()-1] != '\\'))
+            tempPath = tempPath + "/";
+         functionPath = tempPath + functionName + ".gmf";
+      }
       else
       {
-         functionPath = currPath + '/';
-         functionPath = functionPath + temp;
+         #ifdef DEBUG_FUNCTION_SET_PATH
+         MessageInterface::ShowMessage("   It has relative path and name\n");
+         #endif
+         functionPath = tempPath;
       }
    }
    else
    {
-      functionPath = path;
+      // Check if it has only absolute path
+      if (tempPath.find(".gmf") == tempPath.npos)
+      {
+         #ifdef DEBUG_FUNCTION_SET_PATH
+         MessageInterface::ShowMessage("   It has absolute path only\n");
+         #endif
+         if ((tempPath[tempPath.size()-1] != '/') &&
+             (tempPath[tempPath.size()-1] != '\\'))
+            tempPath = tempPath + '/';
+         functionPath = tempPath + functionName + ".gmf";
+      }
+      else
+      {
+         #ifdef DEBUG_FUNCTION_SET_PATH
+         MessageInterface::ShowMessage("   It has absolute path and name\n");
+         #endif
+         functionPath = tempPath;
+      }
    }
    
-   // Add to GmatFunction path
-   fm->AddGmatFunctionPath(functionPath);
+   // Add to GmatFunction path so that nested function can be found
+   // Do we need to add to FileManager function path? exclude it (LOJ: 2015.03.17)
+   std::string funcPathOnly = GmatFileUtil::ParsePathName(functionPath);
+   #ifdef DEBUG_FUNCTION_SET_PATH
+   MessageInterface::ShowMessage
+      ("   ===> Adding GmatFunction path '%s' to FileManager for function '%s'\n",
+       funcPathOnly.c_str(), GetName().c_str());
+   #endif
+   fm->AddGmatFunctionPath(funcPathOnly);
    
-   // Remove path
+   // Remove path for function name
    functionName = GmatFileUtil::ParseFileName(functionPath);
    
    // Remove .gmf for GmatFunction name
    std::string::size_type dotIndex = functionName.find(".gmf");
    functionName = functionName.substr(0, dotIndex);
    
-   #ifdef DEBUG_FUNCTION_SET
-   MessageInterface::ShowMessage
-      ("   functionPath=<%s>\n", functionPath.c_str());
-   MessageInterface::ShowMessage
-      ("   functionName=<%s>\n", functionName.c_str());
+   #ifdef DEBUG_FUNCTION_SET_PATH
+   MessageInterface::ShowMessage("   functionPath='%s'\n", functionPath.c_str());
+   MessageInterface::ShowMessage("   functionName='%s'\n", functionName.c_str());
    #endif
    
-   #ifdef DEBUG_FUNCTION_SET
+   #ifdef DEBUG_FUNCTION_SET_PATH
    MessageInterface::ShowMessage
-      ("GmatFunction::SetGmatFunctionPath() returning true\n");
+      ("GmatFunction::SetGmatFunctionPath() <%p> returning true\n", this);
    #endif
    return true;
 }

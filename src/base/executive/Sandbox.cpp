@@ -61,7 +61,7 @@
 #endif
 
 #ifdef DEBUG_SANDBOX_INIT
-   std::map<std::string, GmatBase *>::iterator omIter;
+   ObjectMap::iterator omIter;
 #endif
 
 
@@ -545,7 +545,7 @@ bool Sandbox::Initialize()
          "No reference (internal) coordinate system defined in the Sandbox!");
 
 
-   std::map<std::string, GmatBase *>::iterator omi;
+   ObjectMap::iterator omi;
    GmatBase *obj = NULL;
    std::string oName;
    std::string j2kName;
@@ -607,8 +607,8 @@ bool Sandbox::Initialize()
       obj = omi->second;
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage(
-            "Sandbox::checking object %s (of type %s) \n",
-            (omi->first).c_str(), (obj->GetTypeName()).c_str());
+            "Sandbox::checking object %s (of type %s) IsGlobal=%d\n",
+            (omi->first).c_str(), (obj->GetTypeName()).c_str(), obj->IsGlobal());
       #endif
       // Check the isGlobal flag
       if (obj->IsGlobal())
@@ -621,24 +621,31 @@ bool Sandbox::Initialize()
          globalObjectMap.insert(*omi);
          movedObjects.push_back(omi->first);
          
-         // If it is coordinate system, copy the clone of origin to global object map
-         // if it is not found in the solar system for fixing Bug1688 (LOJ: 2015.03.02)
+         // Since CoordinateSystem is an automatic global object the origin also
+         // should be in the global object map for GmatFunction.
+         // So if an object is a coordinate system, copy the clone of origin to global
+         // object map if it is not found in the objectMap or in the solar system for
+         // fixing GmatFunction Bug1688 (LOJ: 2015.03.02)
          if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
          {
             std::string originName = obj->GetStringParameter("Origin");
             GmatBase *origin = obj->GetRefObject(Gmat::SPACE_POINT, originName);
             if (origin && !origin->IsOfType(Gmat::CELESTIAL_BODY))
             {
-               if (globalObjectMap.find(originName) == globalObjectMap.end())
+               // Skip adding to globalObjectMap if object is already in the objectMap (LOJ: 2015.03.26)
+               if (objectMap.find(originName) == objectMap.end())
                {
-                  if (solarSys->GetBody(originName) == NULL)
+                  if (globalObjectMap.find(originName) == globalObjectMap.end())
                   {
-                     #ifdef DEBUG_SANDBOX_INIT
-                     MessageInterface::ShowMessage
-                        ("Sandbox::Initialize() Copying origin <%p>'%s' of CS <%p>'%s' to global object map\n",
-                         origin, originName.c_str(), obj, obj->GetName().c_str());
-                     #endif
-                     globalObjectMap.insert(make_pair(originName, origin->Clone()));
+                     if (solarSys->GetBody(originName) == NULL)
+                     {
+                        #ifdef DEBUG_SANDBOX_INIT
+                        MessageInterface::ShowMessage
+                           ("Sandbox::Initialize() Copying origin <%p>'%s' of CS <%p>'%s' to global object map\n",
+                            origin, originName.c_str(), obj, obj->GetName().c_str());
+                        #endif
+                        globalObjectMap.insert(make_pair(originName, origin->Clone()));
+                     }
                   }
                }
             }
@@ -715,7 +722,7 @@ bool Sandbox::Initialize()
 
          current->SetTriggerManagers(&triggerManagers);
 
-         #ifdef DEBUG_SANDBOX_GMATFUNCTION
+         #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage("Sandbox Initializing %s command\n",
                current->GetTypeName().c_str());
          #endif
@@ -886,13 +893,13 @@ bool Sandbox::Execute()
                publisher->SetRunState(currentState);
                publisher->NotifyEndOfRun();
                
-               // Write out event data, if any
-               for (UnsignedInt i = 0; i < events.size(); ++i)
-                  events[i]->LocateEvents("Execution was interrupted; the "
-                     "event list may be incomplete");
-//                  events[i]->ReportEventData("Execution was interrupted; the "
+//               // Write out event data, if any
+//               for (UnsignedInt i = 0; i < events.size(); ++i)
+//                  events[i]->LocateEvents("Execution was interrupted; the "
 //                     "event list may be incomplete");
-//
+////                  events[i]->ReportEventData("Execution was interrupted; the "
+////                     "event list may be incomplete");
+////
                throw SandboxException("Execution interrupted");
                //return rv;
             }
@@ -1028,10 +1035,10 @@ bool Sandbox::Execute()
    publisher->SetRunState(currentState);
    publisher->NotifyEndOfRun();
    
-   // Write out event data, if any
-   for (UnsignedInt i = 0; i < events.size(); ++i)
-      events[i]->LocateEvents();
-//      events[i]->ReportEventData();
+//   // Write out event data, if any
+//   for (UnsignedInt i = 0; i < events.size(); ++i)
+//      events[i]->LocateEvents();
+////      events[i]->ReportEventData();
 
    return rv;
 }
@@ -1098,7 +1105,7 @@ void Sandbox::Clear()
    current   = NULL;
    
    // Delete the all cloned objects
-   std::map<std::string, GmatBase *>::iterator omi;
+   ObjectMap::iterator omi;
    
    #ifdef DEBUG_SANDBOX_CLEAR
    ShowObjectMap(objectMap, "Sandbox::Clear() clearing objectMap\n");
@@ -1143,7 +1150,8 @@ void Sandbox::Clear()
          #endif
          delete omi->second;
          omi->second = NULL;
-         objectMap.erase(omi++);
+         // Commented out since this causes crash when re-run or exit GMAT (LOJ: 2015.03.26)
+         //objectMap.erase(omi++);
       }
    }
    
@@ -1195,7 +1203,8 @@ void Sandbox::Clear()
          #endif
          delete omi->second;
          omi->second = NULL;
-         globalObjectMap.erase(omi++);
+         // Commented out since this causes crash when re-run or exit GMAT (LOJ: 2015.03.26)
+         //globalObjectMap.erase(omi++);
       }
    }
    
@@ -1433,12 +1442,12 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
 
 //------------------------------------------------------------------------------
 // bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
-//                                  std::map<std::string, GmatBase *> *usingMap)
+//                                  ObjectMap *usingMap)
 //------------------------------------------------------------------------------
 /**
  *  Handles any GmatFunctions included in the sequence.  The input cmd is the 
  *  CallFunction or Assignment command to process - it may itself contain a nested
- *  GmatFunction.  If it does, this method willbe called recursively to process
+ *  GmatFunction.  If it does, this method will be called recursively to process
  *  the nested GmatFunctions.
  *
  *  @param <name>     The cmd.
@@ -1447,8 +1456,8 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
  *  @return true if successful; flase otherwise
  */
 //------------------------------------------------------------------------------
-bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
-                                 GmatBase *> *usingMap)
+bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
+                                 std::map<std::string,  GmatBase *> *usingMap)
 {
    #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
@@ -1502,6 +1511,9 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
       // if there is not already a function of that name, create it
       if (globalObjectMap.find(fName) == globalObjectMap.end())
       {
+         #ifdef DEBUG_SANDBOX_GMATFUNCTION
+         MessageInterface::ShowMessage("Creating function '%s'\n", fName.c_str());
+         #endif
          if (isMatlabFunction)
             f = moderator->CreateFunction("MatlabFunction",fName, 0);
          else
@@ -1513,6 +1525,14 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
             ("Adding function <%p>'%s' to the Global Object Store\n", f, fName.c_str());
          #endif
          globalObjectMap.insert(std::make_pair(fName,f));
+         
+         // Also add to usingMap so that ScriptInterpreter::InterpretGmatFunction()
+         // can find the function (LOJ: 2015.03.17)
+         //usingMap->insert(std::make_pair(fName,f));
+         
+         // Set globalObjectMap to function so that two-mode GmatFunction parsing
+         // will work for nested function (LOJ: 2015.03.17)
+         //f->SetGlobalObjectMap(&globalObjectMap);
       }
       else // it's already in the GOS, so just grab it
          f = (Function*) globalObjectMap[fName];
@@ -1527,7 +1547,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
       
       #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
-         "Now handling function \"%s\", whose fcs is %s set, ",
+         "Now handling function <%p>'%s', whose fcs is %s set, ", f,
          (f->GetStringParameter("FunctionName")).c_str(), 
          ((f->IsFunctionControlSequenceSet())? "already" : "NOT"));
       MessageInterface::ShowMessage
@@ -1547,8 +1567,9 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd, std::map<std::string,
          
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
          MessageInterface::ShowMessage(
-            "About to call InterpretGmatFunction for function %s\n",
-            (f->GetStringParameter("FunctionName")).c_str());
+            "About to call InterpretGmatFunction for function '%s'\n",
+            //(f->GetStringParameter("FunctionName")).c_str());
+            (f->GetStringParameter("FunctionPath")).c_str());
          #endif
          GmatCommand* fcs = moderator->InterpretGmatFunction(f, usingMap, solarSys);
 
@@ -1723,8 +1744,8 @@ void Sandbox::PassToAll(GmatBase *obj, Integer updatedParameterIndex)
 
    // Walk the global object store
    GmatBase *listObj;
-   std::map<std::string, GmatBase *>::iterator current=globalObjectMap.begin();
-
+   ObjectMap::iterator current = globalObjectMap.begin();
+   
    #ifdef DEBUG_CLONE_UPDATES
       MessageInterface::ShowMessage("PassToAll updates: Walking the global "
             "object store\n");

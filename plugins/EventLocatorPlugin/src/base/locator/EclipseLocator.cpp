@@ -36,6 +36,7 @@
 //#define DEBUG_EVENT_INITIALIZATION
 //#define DEBUG_ECLIPSE_EVENTS
 //#define DEBUG_ECLIPSE_ACTION
+//#define DEBUG_ECLIPSE_LOCATOR_WRITE
 
 //------------------------------------------------------------------------------
 // Static data
@@ -70,6 +71,8 @@ EclipseLocator::EclipseLocator(const std::string &name) :
    EventLocator         ("EclipseLocator", name),
    findStart            (0.0),
    findStop             (0.0),
+   scStart              (0.0),
+   scNow                (0.0),
    maxIndex             (-1),
    maxDuration          (-1.0)
 {
@@ -112,6 +115,8 @@ EclipseLocator::EclipseLocator(const EclipseLocator & el) :
    sun                  (NULL),
    findStart            (el.findStart),
    findStop             (el.findStop),
+   scStart              (el.scStart),
+   scNow                (el.scNow),
    maxIndex             (el.maxIndex),
    maxDuration          (el.maxDuration)
 {
@@ -147,6 +152,8 @@ EclipseLocator& EclipseLocator::operator=(const EclipseLocator & el)
       sun          = NULL;
       findStart    = el.findStart;
       findStop     = el.findStop;
+      scStart      = el.scStart;
+      scNow        = el.scNow;
       maxIndex     = el.maxIndex;
       maxDuration  = el.maxDuration;
 
@@ -673,10 +680,14 @@ bool EclipseLocator::Initialize()
    {
       sun = (Star*) solarSys->GetBody(SolarSystem::SUN_NAME);
    }
+   if (eclipseTypes.size() < 1)
+      throw EventException("ERROR in Eclipse Locator - no eclipse types set.\n");
 
    // NOW initialize the base class
    retval = EventLocator::Initialize();
 
+   // move this to EventLocator?
+   scStart = sat->GetEpoch();
    return retval;
 }
 
@@ -689,7 +700,11 @@ bool EclipseLocator::Initialize()
 //------------------------------------------------------------------------------
 void EclipseLocator::ReportEventData(const std::string &reportNotice)
 {
-   bool openOK = OpenReportFile();
+   #ifdef DEBUG_ECLIPSE_LOCATOR_WRITE
+      MessageInterface::ShowMessage("EclipseLocator::ReportEventData ... \n");
+   #endif
+
+   bool openOK = OpenReportFile(false);
 
    if (!openOK)
    {
@@ -778,11 +793,30 @@ void EclipseLocator::FindEvents()
       errmsg += sat->GetName() + "!!\n";
       throw EventException(errmsg);
    }
+
+   scNow = sat->GetEpoch();
    em->ProvideEphemerisData();
-   em->StopRecording();
+   em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
+                               findStart, findStop);
+   #ifdef DEBUG_ECLIPSE_EVENTS
+      MessageInterface::ShowMessage("---- findStart (from em)  = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop (from em)   = %12.10f\n", findStop );
+   #endif
+   if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
+   {
+      // ... in case there were no files to read from, we'll just use the
+      // beginning and current spacecraft times
+      findStart = scStart;
+      findStop  = scNow;
+//      findStart = initialEp;
+//      findStop  = finalEp;
+   }
+   #ifdef DEBUG_ECLIPSE_EVENTS
+      MessageInterface::ShowMessage("---- findStart  = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop   = %12.10f\n", findStop );
+   #endif
 
    // Set up data for the calls to CSPICE
-
    std::string      theFront  = "";  // we will loop over occultingBodies
    std::string      theFShape = "ELLIPSOID";
    std::string      theFFrame = ""; // we will loop over occultingBodies for this
@@ -814,9 +848,7 @@ void EclipseLocator::FindEvents()
                                      theBack, theBShape, theBFrame, theAbCorr,
                                      initialEp, finalEp, useEntireInterval, stepSize,
                                      numEclipse, starts, ends);
-         #ifdef DEBUG_ECLIPSE_EVENTS
-            MessageInterface::ShowMessage("After gfoclt_c .....\n");
-         #endif
+
          #ifdef DEBUG_ECLIPSE_EVENTS
             MessageInterface::ShowMessage("After gfoclt_c:\n");
             MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
@@ -832,7 +864,7 @@ void EclipseLocator::FindEvents()
       }
    }
    #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage("rawList has been set up ...n");
+      MessageInterface::ShowMessage("rawList has been set up ...\n");
    #endif
 
    Integer numEventsInTotal = rawList->NumberOfEvents();
@@ -872,8 +904,6 @@ void EclipseLocator::FindEvents()
       MessageInterface::ShowMessage("Events have been ordered\n");
    #endif
 
-   findStart = (rawList->GetEvent(0))->GetStart();
-   findStop  = (rawList->GetEvent(numEventsInTotal-1))->GetEnd();
 
    Integer currentIndex = 0;
    EclipseTotalEvent *currentTotal = NULL;

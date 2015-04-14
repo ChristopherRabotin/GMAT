@@ -63,7 +63,8 @@ const Integer SpiceOrbitKernelWriter::MAX_FILE_RENAMES  = 1000; // currently unu
 //                         Integer                 centerNAIFId,
 //                         const std::string       &fileName,
 //                         Integer                 deg,
-//                         const std::string       &frame)
+//                         const std::string       &frame = "J2000",
+//                         bool                    renameExistingSPK = false)
 //------------------------------------------------------------------------------
 /**
  * This method constructs a SpiceKernelWriter instance.
@@ -76,13 +77,15 @@ const Integer SpiceOrbitKernelWriter::MAX_FILE_RENAMES  = 1000; // currently unu
  * @param    fileName      name of the kernel to generate
  * @param    deg           degree of interpolating polynomials
  * @param    frame         reference frame (default = "J2000")
+ * @param    renameSPK     rename existing SPK file(s) with same name?
+ *                         [true = rename; false = overwrite]
  *
  */
 //------------------------------------------------------------------------------
 SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName,   const std::string &centerName,
                                               Integer                 objNAIFId,  Integer           centerNAIFId,
                                               const std::string       &fileName,  Integer           deg,
-                                              const std::string       &frame) :
+                                              const std::string       &frame,     bool renameExistingSPK) :
    SpiceKernelWriter(),
    objectName      (objName),
    centralBodyName (centerName),
@@ -92,7 +95,8 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    fileFinalized   (false),
    dataWritten     (false),
    tmpTxtFile      (NULL),
-   fm              (NULL)
+   fm              (NULL),
+   renameSPK       (renameExistingSPK)
 {
    #ifdef DEBUG_SPK_INIT
       MessageInterface::ShowMessage(
@@ -153,44 +157,62 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    // append to an existing file - this is the most common error returned from spkopn
    if (GmatFileUtil::DoesFileExist(kernelFileName))
    {
-      Integer     fileCounter = 0;
-      bool        done        = false;
-      std::string fileWithBSP = fileName;
-      std::string fileNoBSP   = fileWithBSP.erase(fileWithBSP.rfind(".bsp"));
-      std::stringstream fileRename("");
-      Integer     retCode = 0;
-      while (!done)
+      if (renameSPK)
       {
-         fileRename.str("");
-         fileRename << fileNoBSP << "__" << fileCounter << ".bsp";
-         if (fm->RenameFile(kernelFileName, fileRename.str(), retCode))
+         #ifdef DEBUG_SPK_INIT
+            MessageInterface::ShowMessage(
+                  "SPKOrbitWriter: the file %s exists, will need to rename ... \n",
+                  kernelFileName.c_str());
+         #endif
+         Integer     fileCounter = 0;
+         bool        done        = false;
+         std::string fileWithBSP = fileName;
+         std::string fileNoBSP   = fileWithBSP.erase(fileWithBSP.rfind(".bsp"));
+         std::stringstream fileRename("");
+         Integer     retCode = 0;
+         while (!done)
          {
-            done = true;
-         }
-         else
-         {
-            if (retCode == 0) // if no error from system, but not allowed to overwrite
+            fileRename.str("");
+            fileRename << fileNoBSP << "__" << fileCounter << ".bsp";
+            #ifdef DEBUG_SPK_INIT
+               MessageInterface::ShowMessage(
+                     "SPKOrbitWriter: renaming %s to %s ... \n",
+                     kernelFileName.c_str(), fileRename.str().c_str());
+            #endif
+            if (fm->RenameFile(kernelFileName, fileRename.str(), retCode))
             {
-//               if (fileCounter < MAX_FILE_RENAMES) // no MAX for now
-                  fileCounter++;
-//               else
-//               {
-//                  reset_c(); // reset failure flag in SPICE
-//                  std::string errmsg = "Error renaming existing SPK file  \"";
-//                  errmsg += kernelFileName + "\".  Maximum number of renames exceeded.\n";
-//                  throw UtilityException(errmsg);
-//               }
+               done = true;
             }
             else
             {
-//               reset_c(); // reset failure flag in SPICE
-               std::string errmsg =
-                     "Unknown system error occurred when attempting to rename existing SPK file \"";
-               errmsg += kernelFileName + "\".\n";
-               throw UtilityException(errmsg);
+               if (retCode == 0) // if no error from system, but not allowed to overwrite
+               {
+   //               if (fileCounter < MAX_FILE_RENAMES) // no MAX for now
+                     fileCounter++;
+   //               else
+   //               {
+   //                  reset_c(); // reset failure flag in SPICE
+   //                  std::string errmsg = "Error renaming existing SPK file  \"";
+   //                  errmsg += kernelFileName + "\".  Maximum number of renames exceeded.\n";
+   //                  throw UtilityException(errmsg);
+   //               }
+               }
+               else
+               {
+   //               reset_c(); // reset failure flag in SPICE
+                  std::string errmsg =
+                        "Unknown system error occurred when attempting to rename existing SPK file \"";
+                  errmsg += kernelFileName + "\".\n";
+                  throw UtilityException(errmsg);
+               }
             }
-         }
 
+         }
+      }
+      else
+      {
+         // delete the file
+         remove(kernelFileName.c_str());
       }
    }
    else // otherwise, check to make sure the directory is writable
@@ -258,7 +280,8 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const SpiceOrbitKernelWriter &cop
    fileFinalized     (copy.fileFinalized),
    dataWritten       (copy.dataWritten),
    tmpTxtFile        (copy.tmpTxtFile),
-   fm                (copy.fm)// ??
+   fm                (copy.fm),
+   renameSPK         (copy.renameSPK)
 {
    kernelNameSPICE  = kernelFileName.c_str();
    referenceFrame   = frameName.c_str();
@@ -295,6 +318,7 @@ SpiceOrbitKernelWriter& SpiceOrbitKernelWriter::operator=(const SpiceOrbitKernel
       dataWritten       = copy.dataWritten;
       tmpTxtFile        = copy.tmpTxtFile; // ??
       fm                = copy.fm;
+      renameSPK         = copy.renameSPK;
 
       kernelNameSPICE   = kernelFileName.c_str();
       referenceFrame    = frameName.c_str();

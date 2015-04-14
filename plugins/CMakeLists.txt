@@ -20,11 +20,10 @@
 #   PLUGIN_DIRS: List of directories containing source/header files
 #   PLUGIN_SRCS: List of .c and .cpp source files
 #   INSTALL_DIR: Directory to install plugin (plugins, bin, etc.)
-# Note that all paths are relative to the plugin's CMakeLists.txt
+# Note that all paths should be relative to the plugin's CMakeLists.txt
 MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   # Add Preproccessor Definitions
   ADD_DEFINITIONS("-D_DYNAMICLINK")
-  #ADD_DEFINITIONS("-DEXP_STL")
 
   # ====================================================================
   # prepend include directories for header files
@@ -52,15 +51,57 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   _ADDSOURCEGROUPS("${PLUGIN_DIRS}")
 
   # ====================================================================
+  # Create build products in specified directory
+  # Macro defined in top-level CMakeLists.txt
+  _SETOUTPUTDIRECTORY(${TargetName} ${INSTALL_DIR})
+
+  # ====================================================================
+  # All plugins should start with "lib". This is always true for Mac/Linux, 
+  # but needs to be specified for Windows.
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
+
+  # ====================================================================
+  # Plugin label should include "Plugin" in IDEs (e.g. VisualStudio)
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PROJECT_LABEL "Plugin ${TargetName}")
+
+  # ====================================================================
+  # All plugins link to GmatBase
+  TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
+
+  # ====================================================================
   # Specify where to install plugin
-  #  - On Windows the dll is RUNTIME (lib is ARCHIVE, ignored here)
-  #  - On Mac/Linux the dylib/so is LIBRARY
-  INSTALL(TARGETS ${TargetName}
-    RUNTIME DESTINATION ${INSTALL_DIR} # Windows
-    LIBRARY DESTINATION ${INSTALL_DIR} # Mac/Linux
-    )
+  # - On Windows the dll is RUNTIME (lib is ARCHIVE, ignored here)
+  # - On Mac/Linux the dylib/so is LIBRARY
+  if(WIN32)
+    INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION ${INSTALL_DIR})
+  else()
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      set(FULL_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/${INSTALL_DIR})
+    else()
+      set(FULL_INSTALL_DIR ${INSTALL_DIR})
+    endif()
+    INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${FULL_INSTALL_DIR})
+  endif()
 
 ENDMACRO(_SETUPPLUGIN)
+
+# ====================================================================
+# Declare all public plugins and their default values
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
+OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
+OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
+OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
+OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
+OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
+OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
+OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
+OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
+OPTION(PLUGIN_STATION "Station Plugin" ON)
 
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
@@ -210,16 +251,16 @@ FIND_PATH(GMAT_PROPRIETARYPLUGINS_PATH
   PATHS
     ${PROJECT_SOURCE_DIR}/../gmatinternal-git
     ${PROJECT_SOURCE_DIR}/plugins/gmatinternal-git
-  DOC "Path to GMAT proprietary plugins"
+  DOC "Path to GMAT proprietary plugins (containing code/)"
   NO_DEFAULT_PATH
   )
 
-# Load CMakeLists.txt file from top-level proprietary plugins folder
+# Load CMakeLists.txt file from proprietary plugins /code folder
 if(GMAT_PROPRIETARYPLUGINS_PATH)
   SET(PLUGINDIR "${GMAT_PROPRIETARYPLUGINS_PATH}/code")
-  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/internal")
-  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
-  SET(PluginTargets ${PluginTargets} ${tmp})
+  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/proprietary")
+  GET_DIRECTORY_PROPERTY(ProprietaryTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
+  SET(PluginTargets ${PluginTargets} ${ProprietaryTargets})
 endif()
 
 # ====================================================================

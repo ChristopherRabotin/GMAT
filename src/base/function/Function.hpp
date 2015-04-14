@@ -60,6 +60,10 @@ public:
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetScriptErrorFound(bool errFlag);
    virtual bool         ScriptErrorFound();
+   virtual bool         WasFunctionBuilt();
+   virtual void         SetFunctionWasBuilt(bool built);
+   virtual bool         IsFunctionInputOutputSet();
+   virtual void         SetFunctionInputOutputIsSet(bool set);
    virtual bool         IsFunctionControlSequenceSet();
    virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
    virtual GmatCommand* GetFunctionControlSequence();
@@ -111,6 +115,8 @@ public:
                                            const std::string &value);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -166,6 +172,10 @@ protected:
    Validator            *validator;
    /// Object store needed by the validator
    ObjectMap            validatorStore;
+   /// the flag indicating if function has been built
+   bool                 wasFunctionBuilt;
+   /// the flag indicating if function input/output are set
+   bool                 isFunctionIOSet;
    /// the flag indicating script error found in function, this flag is set by Interpreter
    bool                 scriptErrorFound;
    /// the flag indicating local objects are initialized

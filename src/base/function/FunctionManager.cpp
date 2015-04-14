@@ -86,7 +86,7 @@ FunctionManager::FunctionManager() :
    globalObjectStore   (NULL),
    solarSys            (NULL),
    fName               (""),
-   f                   (NULL),
+   currentFunction     (NULL),
    firstExecution      (true),
    isFinalized         (false),
    numVarsCreated      (0),
@@ -152,7 +152,7 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    solarSys            (fm.solarSys),
    forces              (fm.forces),
    fName               (fm.fName),
-   f                   (fm.f), // copy the pointer here
+   currentFunction     (fm.currentFunction), // copy the pointer here
    passedIns           (fm.passedIns),
    passedOuts          (fm.passedOuts),
    //inputWrapperMap       (fm.inputWrapperMap),
@@ -198,7 +198,7 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       solarSys            = fm.solarSys;
       forces              = fm.forces;
       fName               = fm.fName;
-      f                   = fm.f;  // copy the pointer here
+      currentFunction     = fm.currentFunction;  // copy the pointer here
       passedIns           = fm.passedIns;
       passedOuts          = fm.passedOuts;
       firstExecution      = true;
@@ -274,7 +274,8 @@ void FunctionManager::SetSolarSystem(SolarSystem *ss)
    MessageInterface::ShowMessage("FunctionManager::SetSolarSystem() ss=<%p>\n", ss);
    #endif
    solarSys = ss;
-   if ((f) && (f->GetTypeName() == "GmatFunction"))   f->SetSolarSystem(ss);
+   if ((currentFunction) && (currentFunction->GetTypeName() == "GmatFunction"))
+      currentFunction->SetSolarSystem(ss);
 }
 
 //------------------------------------------------------------------------------
@@ -283,7 +284,8 @@ void FunctionManager::SetSolarSystem(SolarSystem *ss)
 void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
-   if ((f) && (f->GetTypeName() == "GmatFunction"))   f->SetTransientForces(tf);
+   if ((currentFunction) && (currentFunction->GetTypeName() == "GmatFunction"))
+      currentFunction->SetTransientForces(tf);
 }
 
 //------------------------------------------------------------------------------
@@ -291,18 +293,18 @@ void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> *tf)
 //------------------------------------------------------------------------------
 void FunctionManager::SetFunctionName(const std::string &itsName)
 {
-   #ifdef DEBUG_FUNCTION_MANAGER
+   #ifdef DEBUG_FM_SET
       MessageInterface::ShowMessage("Entering FM::SetFunctionName with name = %s\n",
                                     itsName.c_str());
    #endif
    fName = itsName;
-   if ((f) && (f->GetTypeName() == "GmatFunction"))  
+   if ((currentFunction) && (currentFunction->GetTypeName() == "GmatFunction"))  
    {
-      #ifdef DEBUG_FUNCTION_MANAGER
+      #ifdef DEBUG_FM_SET
          MessageInterface::ShowMessage("   and setting name to %s on the function\n",
                                        itsName.c_str());
       #endif
-      f->SetStringParameter("FunctionName", itsName);
+      currentFunction->SetStringParameter("FunctionName", itsName);
    }
 }
 
@@ -311,15 +313,15 @@ void FunctionManager::SetFunctionName(const std::string &itsName)
 //------------------------------------------------------------------------------
 std::string FunctionManager::GetFunctionName() const
 {
-   if (f)
+   if (currentFunction)
    {
-      std::string theFunctionName = f->GetStringParameter("FunctionName");
+      std::string theFunctionName = currentFunction->GetStringParameter("FunctionName");
       #ifdef DEBUG_FM_GET
       MessageInterface::ShowMessage
          ("in FM::GetFunctionName, <%p> function name = '%s', "
           "fName = '%s'\n", f, theFunctionName.c_str(), fName.c_str());
       #endif
-      //return f->GetStringParameter("FunctionName");
+      //return currentFunction->GetStringParameter("FunctionName");
    }
    return fName; // why not return theFunctionName here?
 }
@@ -329,15 +331,15 @@ std::string FunctionManager::GetFunctionName() const
 //------------------------------------------------------------------------------
 void FunctionManager::SetFunction(Function *theFunction)
 {
-   #ifdef DEBUG_FUNCTION_MANAGER
+   #ifdef DEBUG_FM_SET
    MessageInterface::ShowMessage
       ("FunctionManager::SetFunction() fName='%s', theFunction=<%p>\n",
        fName.c_str(), theFunction);
    #endif
-   f = theFunction;
-   f->SetStringParameter("FunctionName", fName);
-   if (f->IsOfType("GmatFunction"))
-      fcs = f->GetFunctionControlSequence();
+   currentFunction = theFunction;
+   currentFunction->SetStringParameter("FunctionName", fName);
+   if (currentFunction->IsOfType("GmatFunction"))
+      fcs = currentFunction->GetFunctionControlSequence();
    else
    {
       std::string errMsg = "Function passed to FunctionManager \"";
@@ -352,7 +354,7 @@ void FunctionManager::SetFunction(Function *theFunction)
 //------------------------------------------------------------------------------
 Function* FunctionManager::GetFunction() const
 {
-   return f;
+   return currentFunction;
 }
 
 //------------------------------------------------------------------------------
@@ -430,8 +432,8 @@ void FunctionManager::SetInternalCoordinateSystem(CoordinateSystem *intCS)
       return;
    
    internalCS = intCS;
-   if ((f) && (f->GetTypeName() == "GmatFunction"))
-      f->SetInternalCoordSystem(internalCS);
+   if ((currentFunction) && (currentFunction->GetTypeName() == "GmatFunction"))
+      currentFunction->SetInternalCoordSystem(internalCS);
 }
 
 
@@ -444,7 +446,7 @@ bool FunctionManager::SetInputWrapper(Integer index, ElementWrapper *ew)
       return false;
    
    Integer numWrappers = inputWrapperMap.size();
-   std::string formalInput = f->GetStringParameter("Input", index);
+   std::string formalInput = currentFunction->GetStringParameter("Input", index);
    
    #ifdef DEBUG_INPUT
    MessageInterface::ShowMessage
@@ -494,7 +496,7 @@ bool FunctionManager::SetInputWrapper(Integer index, ElementWrapper *ew)
 ElementWrapper* FunctionManager::GetInputWrapper(Integer index)
 {
    Integer numWrappers = inputWrapperMap.size();
-   std::string formalInput = f->GetStringParameter("Input", index);
+   std::string formalInput = currentFunction->GetStringParameter("Input", index);
 
    #ifdef DEBUG_INPUT
    MessageInterface::ShowMessage
@@ -572,7 +574,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
       #endif
    }
    
-   std::string formalInput = f->GetStringParameter("Input", index);
+   std::string formalInput = currentFunction->GetStringParameter("Input", index);
    
    #ifdef DEBUG_INPUT
    Integer numOthers = createdOthers.size();
@@ -694,7 +696,7 @@ bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAd
 //------------------------------------------------------------------------------
 WrapperArray& FunctionManager::GetWrappersToDelete()
 {
-   return f->GetWrappersToDelete();
+   return currentFunction->GetWrappersToDelete();
 }
 
 // Sequence methods
@@ -704,7 +706,7 @@ WrapperArray& FunctionManager::GetWrappersToDelete()
 //------------------------------------------------------------------------------
 bool FunctionManager::PrepareObjectMap()
 {
-   if (f == NULL)
+   if (currentFunction == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to execute Function """;
       errMsg += fName + """ - pointer is NULL\n";
@@ -754,12 +756,62 @@ bool FunctionManager::Initialize()
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
       ("=======================================================================\n"
-       "Entering FM::Initialize() this FM is <%p>, current function is '%s'\n   "
-       "calling FM is <%p>'%s'\n", this, fName.c_str(), callingFunction,
+       "Entering FM::Initialize() this FM is <%p>, current function is <%p>'%s'\n   "
+       "calling FM is <%p>'%s'\n", this, currentFunction, fName.c_str(), callingFunction,
        callingFunction ? callingFunction->GetFunctionName().c_str() : "NULL");
    MessageInterface::ShowMessage
       ("FunctionManager::Initialize() clonedObjectStores.size()=%d\n",
        clonedObjectStores.size());
+   ShowObjectMap(globalObjectStore, "In FunctionManager::Initialize(), GOS to be used in the function");
+   #endif
+   
+   #if 0
+   // We need to update function input/output info in function object map
+   // for two-mode GmatFunction parsing since it uses functions from the
+   // function object store from the caller for nested function calls.
+   // So copy input/output info from the functions in the globalObjectStore
+   // (LOJ: 2015.03.18)
+   if (!currentFunction->IsFunctionInputOutputSet())
+   {
+      ObjectMap::iterator gomi = globalObjectStore->find(fName);
+      if (gomi != globalObjectStore->end())
+      {
+         Function *globalFunc = (Function*)(gomi->second);
+         MessageInterface::ShowMessage
+            ("==> Found globalFunc <%p>'%s'\n", globalFunc,
+             globalFunc ? globalFunc->GetName().c_str() : "NULL");
+         
+         if (globalFunc != NULL)
+         {
+            MessageInterface::ShowMessage
+               ("==> currentFunction=<%p>, Setting <%p> to currentFunction\n", globalFunc);
+            currentFunction = globalFunc;
+         }
+         
+         #if 0
+         ObjectMap *funcObjMap = currentFunction->GetFunctionObjectMap();
+         ObjectMap::iterator omi;
+         ShowObjectMap(funcObjMap, "In FunctionManager::Initialize(), functionObjectMap");
+         for (omi = funcObjMap->begin(); omi != funcObjMap->end(); ++omi)
+         {
+            if ((omi->first) == fName)
+            {
+               StringArray inputs  = globalFunc->GetStringArrayParameter("Input");
+               StringArray outputs = globalFunc->GetStringArrayParameter("Output");
+               Function *localFunc = (Function*)(omi->second);
+               MessageInterface::ShowMessage
+                  ("==> Found localFunc <%p>'%s'\n", localFunc,
+                   localFunc ? localFunc->GetName().c_str() : "NULL");
+               for (UnsignedInt i=0; i<inputs.size(); i++)
+                  localFunc->SetStringParameter("Input", inputs[i]);
+               for (UnsignedInt i=0; i<outputs.size(); i++)
+                  localFunc->SetStringParameter("Output", outputs[i]);
+               break;
+            }
+         }
+         #endif
+      }
+   }
    #endif
    
    // clonedObjectStores should not be cleared for recursive call to work
@@ -801,7 +853,7 @@ bool FunctionManager::Initialize()
 //------------------------------------------------------------------------------
 bool FunctionManager::Execute(FunctionManager *callingFM)
 {
-   if (f == NULL)
+   if (currentFunction == NULL)
       throw FunctionException("FunctionManager: Function pointer is NULL");
    
    #ifdef DEBUG_TRACE
@@ -849,10 +901,10 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    #endif
    
    // pass the FOS/GOS and other objects into the function
-   f->SetObjectMap(functionObjectStore);
-   f->SetGlobalObjectMap(globalObjectStore);
-   f->SetSolarSystem(solarSys);
-   f->SetTransientForces(forces);
+   currentFunction->SetObjectMap(functionObjectStore);
+   currentFunction->SetGlobalObjectMap(globalObjectStore);
+   currentFunction->SetSolarSystem(solarSys);
+   currentFunction->SetTransientForces(forces);
    
    // send all input element wrappers to the function
    std::map<std::string, ElementWrapper *>::iterator ewi;
@@ -860,18 +912,18 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    {
       #ifdef DEBUG_FM_EXECUTE
       MessageInterface::ShowMessage
-         ("   Calling f->InputElementWrapper(%s, %p)\n", ewi->first.c_str(),
+         ("   Calling currentFunction->InputElementWrapper(%s, %p)\n", ewi->first.c_str(),
           ewi->second);
       #endif
-      f->SetInputElementWrapper(ewi->first, ewi->second);
+      currentFunction->SetInputElementWrapper(ewi->first, ewi->second);
    }
    
    // // must re-initialize the function each time, as it may be called in more than
    // // one place
-   // if (!(f->Initialize()))
+   // if (!(currentFunction->Initialize()))
    // {
    //    std::string errMsg = "FunctionManager:: Error initializing function \"";
-   //    errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+   //    errMsg += currentFunction->GetStringParameter("FunctionName") + "\"\n";
    //    throw FunctionException(errMsg);
    // }
    
@@ -906,10 +958,10 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    
    // must re-initialize the function each time, as it may be called in more than
    // one place
-   if (!(f->Initialize(objInit, reinitialize)))
+   if (!(currentFunction->Initialize(objInit, reinitialize)))
    {
       std::string errMsg = "FunctionManager:: Error initializing function \"";
-      errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+      errMsg += currentFunction->GetStringParameter("FunctionName") + "\"\n";
       throw FunctionException(errMsg);
    }
    
@@ -921,7 +973,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
          fName.c_str(), callingFunction, callingFunction ?
          callingFunction->GetFunctionName().c_str() : "NULL");
    #endif
-   GmatCommand *cmd = f->GetFunctionControlSequence();
+   GmatCommand *cmd = currentFunction->GetFunctionControlSequence();
    while (cmd) 
    {
       #ifdef DEBUG_FM_EXECUTE
@@ -942,7 +994,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    ShowObjectMap(functionObjectStore, "FOS to be used in the function");
    ShowObjectMap(globalObjectStore, "GOS to be used in the function");
    MessageInterface::ShowMessage
-      ("======================================================= Calling f->Execute()\n");
+      ("======================================================= Calling currentFunction->Execute()\n");
    #endif
    
    // // Set re-initialize flag, set to true if it is nested function call
@@ -954,12 +1006,12 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    // If function sequence failed or threw an exception, finalize the function
    try
    {
-      if (!f->Execute(objInit, reinitialize))
+      if (!currentFunction->Execute(objInit, reinitialize))
       {
          MessageInterface::ShowMessage
             ("*** ERROR *** FunctionManager \"%s\" finalizing... due to false returned "
-             "from f->Execute()\n", fName.c_str());
-         f->Finalize();
+             "from currentFunction->Execute()\n", fName.c_str());
+         currentFunction->Finalize();
          if (publisher)
             publisher->ClearPublishedData();
          
@@ -972,7 +1024,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       MessageInterface::ShowMessage
          ("*** ERROR *** FunctionManager \"%s\" finalizing... due to \n%s\n", fName.c_str(),
           e.GetFullMessage().c_str());
-      f->Finalize();
+      currentFunction->Finalize();
       if (publisher)
          publisher->ClearPublishedData();
       
@@ -982,7 +1034,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
-      ("======================================================= f->Execute() DONE\n");
+      ("======================================================= currentFunction->Execute() DONE\n");
    #endif
    
    // Now assign result
@@ -1007,7 +1059,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
 //------------------------------------------------------------------------------
 Real FunctionManager::Evaluate(FunctionManager *callingFM)
 {
-   if (f == NULL)
+   if (currentFunction == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to return Real value from Function """;
       errMsg += fName + """ - pointer is NULL\n";
@@ -1016,7 +1068,7 @@ Real FunctionManager::Evaluate(FunctionManager *callingFM)
    
    #ifdef DEBUG_FM_EVAL
    MessageInterface::ShowMessage
-      ("Entering FunctionManager::Evaluate() f=<%p><%s>\n", f, f->GetName().c_str());
+      ("Entering FunctionManager::Evaluate() f=<%p><%s>\n", f, currentFunction->GetName().c_str());
    #endif
    
    Execute(callingFM);
@@ -1037,7 +1089,7 @@ Real FunctionManager::Evaluate(FunctionManager *callingFM)
 //------------------------------------------------------------------------------
 Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
 {
-   if (f == NULL)
+   if (currentFunction == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to return Rmatrix value from Function """;
       errMsg += fName + """ - pointer is NULL\n";
@@ -1046,7 +1098,7 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
 
    #ifdef DEBUG_FM_EVAL
    MessageInterface::ShowMessage
-      ("Entering FunctionManager::MatrixEvaluate() f=<%p><%s>\n", f, f->GetName().c_str());
+      ("Entering FunctionManager::MatrixEvaluate() f=<%p><%s>\n", f, currentFunction->GetName().c_str());
    #endif
    
    Execute(callingFM);
@@ -1107,8 +1159,8 @@ void FunctionManager::Finalize()
 bool FunctionManager::IsFinalized()
 {
    return isFinalized;
-//    if (f)
-//       return f->IsFcsFinalized();
+//    if (currentFunction)
+//       return currentFunction->IsFcsFinalized();
 //    return true;
 }
 
@@ -1173,12 +1225,13 @@ bool FunctionManager::ValidateFunctionArguments()
 {
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
-      ("Entering FM::ValidateFunctionArguments for '%s'\n", fName.c_str());
+      ("Entering FM::ValidateFunctionArguments for <%p>'%s'\n", currentFunction,
+       fName.c_str());
    #endif
    if (!firstExecution) return true;
    
-   StringArray inFormalNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
-   StringArray outFormalNames = f->GetStringArrayParameter(f->GetParameterID("Output"));
+   StringArray inFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
+   StringArray outFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Output"));
    
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
@@ -1214,7 +1267,7 @@ bool FunctionManager::ValidateFunctionArguments()
    {
       FunctionException ex;
       ex.SetDetails("The function '%s' expecting %d input argument(s), but called "
-                    "with %d argument(s)", f->GetFunctionPathAndName().c_str(),
+                    "with %d argument(s)", currentFunction->GetFunctionPathAndName().c_str(),
                     inFormalNames.size(), passedIns.size());
       throw ex;
    }
@@ -1227,14 +1280,15 @@ bool FunctionManager::ValidateFunctionArguments()
    {
       FunctionException ex;
       ex.SetDetails("The function '%s' expecting %d output argument(s), but called "
-                    "with %d argument(s)", f->GetFunctionPathAndName().c_str(),
+                    "with %d argument(s)", currentFunction->GetFunctionPathAndName().c_str(),
                     outFormalNames.size(), passedOuts.size());
       throw ex;
    }
    
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
-      ("Exiting  FM::ValidateFunctionArguments with true for '%s'\n", fName.c_str());
+      ("Exiting  FM::ValidateFunctionArguments with true for <%p>'%s'\n",
+       currentFunction, fName.c_str());
    #endif
    
    return true;
@@ -1263,8 +1317,8 @@ bool FunctionManager::CreatePassingArgWrappers()
    GmatBase *obj, *objFOS;
    std::string formalName, passedName;
    
-   StringArray inFormalNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
-   StringArray outFormalNames = f->GetStringArrayParameter(f->GetParameterID("Output"));
+   StringArray inFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
+   StringArray outFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Output"));
    
    validator->SetObjectMap(&combinedObjectStore);
    validator->SetSolarSystem(solarSys);
@@ -1434,7 +1488,7 @@ void FunctionManager::RefreshFOS()
    StringArray toDelete;
    bool        isInput = false;
    std::map<std::string, GmatBase *>::iterator omi;
-   StringArray inFormalNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
+   StringArray inFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
    
    #ifdef DEBUG_FM_REFRESH
    MessageInterface::ShowMessage
@@ -1498,7 +1552,7 @@ void FunctionManager::RefreshFormalInputObjects()
    
    std::string formalName, passedName;
    // Get function formal input argument names (parameters)
-   StringArray inFormalNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
+   StringArray inFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
    
    // Find and/or evaluate the input objects
    for (unsigned int ii=0; ii<passedIns.size(); ii++)
@@ -1864,7 +1918,7 @@ void FunctionManager::AssignResult()
       {
          bool retval = false;
          ElementWrapper *ew = NULL;
-         ew = f->GetOutputArgument(jj);
+         ew = currentFunction->GetOutputArgument(jj);
          
          if (ew == NULL)
             throw FunctionException
@@ -1920,7 +1974,7 @@ bool FunctionManager::HandleCallStack()
           functionObjectStore);
       #endif
       
-      StringArray outFormalNames = f->GetStringArrayParameter(f->GetParameterID("Output"));
+      StringArray outFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Output"));
       
       // call the caller to pop its FOS back of the stack
       if (!callingFunction->PopFromStack(functionObjectStore, outFormalNames, passedOuts))
@@ -1946,7 +2000,7 @@ bool FunctionManager::HandleCallStack()
          functionObjectStore = localObjectStore;
       
       // Should this be deleted here? (loj: 2008.12.12)
-      //f->ClearClonedObjects();
+      //currentFunction->ClearClonedObjects();
       firstExecution = true;   // to make sure it is reinitialized next time ???
    }
    else
@@ -1955,9 +2009,9 @@ bool FunctionManager::HandleCallStack()
       // Do not call Finalize() it will delete LOS and nested function will not work
       #ifdef DEBUG_FM_EXECUTE
       MessageInterface::ShowMessage
-         ("   calling function <%p>'%s'->Finalize()\n", f, f->GetName().c_str());
+         ("   calling function <%p>'%s'->Finalize()\n", f, currentFunction->GetName().c_str());
       #endif
-      f->Finalize();
+      currentFunction->Finalize();
       
       // Unsubscribe subscribers since function run is completed
       UnsubscribeSubscribers(functionObjectStore);
@@ -1995,7 +2049,7 @@ bool FunctionManager::HandleCallStack()
 //------------------------------------------------------------------------------
 void FunctionManager::SaveLastResult()
 {
-   ElementWrapper *ew = f->GetOutputArgument(0);
+   ElementWrapper *ew = currentFunction->GetOutputArgument(0);
    if (!ew) 
    {
       std::string errMsg = "FunctionManager: missing output argument from function \"";
@@ -2171,8 +2225,8 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
    #endif
    
    // Set popped FOS to function and re-initialize fcs
-   f->SetObjectMap(functionObjectStore);
-   bool retval = f->Initialize(objInit);
+   currentFunction->SetObjectMap(functionObjectStore);
+   bool retval = currentFunction->Initialize(objInit);
    
    #ifdef DEBUG_FM_STACK
       MessageInterface::ShowMessage(
@@ -2193,19 +2247,19 @@ void FunctionManager::Cleanup()
    MessageInterface::ShowMessage("==> FunctionManager::Cleanup() entered, f=<%p>\n", f);
    #endif
    
-   if (f != NULL)
+   if (currentFunction != NULL)
    {
-      if (f->IsOfType("GmatFunction"))
+      if (currentFunction->IsOfType("GmatFunction"))
       {
          ////Edwin's MMS script failed, so commented out (loj: 2008.12.03)
          ////We need to delete this somewhere though.
-         ////f->ClearAutomaticObjects();
+         ////currentFunction->ClearAutomaticObjects();
          // They are deleted in the Function destructor (LOJ: 2014.12.09)
          #ifdef DEBUG_CLEANUP
-         MessageInterface::ShowMessage("   Calling f->Finalize()\n");
+         MessageInterface::ShowMessage("   Calling currentFunction->Finalize()\n");
          #endif
          
-         f->Finalize();
+         currentFunction->Finalize();
       }
    }
    

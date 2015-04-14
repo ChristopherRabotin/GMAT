@@ -41,6 +41,7 @@
 //#define DEBUG_OBJECTS
 //#define DEBUG_DATE_FORMAT
 //#define DEBUG_EVENTLOCATOR_OBJECT
+//#define DEBUG_EVENTLOCATOR_WRITE
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -128,6 +129,8 @@ EventLocator::EventLocator(const std::string &typeStr,
    objectTypeNames.push_back("EventLocator");
 
    filename = instanceName + ".txt";  // default filename
+
+   blockCommandModeAssignment = false;
 
    occultingBodyNames.clear();
    occultingBodies.clear();
@@ -367,6 +370,23 @@ bool EventLocator::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
 }
+
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::IsParameterCommandModeSettable(const Integer id) const
+{
+   return true;   // all settable for now
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1406,6 +1426,9 @@ bool EventLocator::Initialize()
       solarSys->LoadPCKs();
    #endif
 
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage(">>> About to tell spacecraft to record its data ...\n");
+   #endif
    // Tell the spacecraft to start recording its data
    sat->RecordEphemerisData();
 
@@ -1429,7 +1452,8 @@ bool EventLocator::Initialize()
 //------------------------------------------------------------------------------
 void EventLocator::ReportEventData(const std::string &reportNotice)
 {
-   bool openOK = OpenReportFile();
+   // renameFile set to false here because renaming does not work on Windows
+   bool openOK = OpenReportFile(false);
 
    if (!openOK)
    {
@@ -1584,14 +1608,22 @@ bool EventLocator::OpenReportFile(bool renameOld)
       withoutExt = fullFileName.substr(0, lastDot);
    }
 
+   bool fileDoesExist = GmatFileUtil::DoesFileExist(fullFileName);
+
+   #ifdef DEBUG_EVENTLOCATOR_WRITE
+      MessageInterface::ShowMessage("In ReportEventData, fullFileName  = %s\n", fullFileName.c_str());
+      MessageInterface::ShowMessage("                    withoutExt    = %s\n", withoutExt.c_str());
+      MessageInterface::ShowMessage("                    fileDoesExist = %s\n", (fileDoesExist? "true" : "false"));
+   #endif
+
    if (appendReport)
-      theReport.open(fullFileName.c_str(), std::fstream::app);
+      theReport.open(fullFileName.c_str(), std::fstream::out | std::fstream::app);
    else
    {
       // Rename any old existing files here if necessary
-      if (renameOld)
+      if (renameOld) // renaming does NOT WORK on Windows, so we will overwrite all the time
       {
-         if (GmatFileUtil::DoesFileExist(fullFileName))
+         if (fileDoesExist)
          {
             // Get the FileManager pointer
             FileManager *fm = FileManager::Instance();
@@ -1603,6 +1635,10 @@ bool EventLocator::OpenReportFile(bool renameOld)
             {
                fileRename.str("");
                fileRename << withoutExt << "__" << fileCounter << fileExt;
+               #ifdef DEBUG_EVENTLOCATOR_WRITE
+                  MessageInterface::ShowMessage("------>>> Renaming %s to %s\n",
+                        fullFileName.c_str(), fileRename.str().c_str());
+               #endif
                if (fm->RenameFile(fullFileName, fileRename.str(), retCode))
                {
                   done = true;
@@ -1637,7 +1673,7 @@ bool EventLocator::OpenReportFile(bool renameOld)
       }
       else // if not renaming, if it already exists, delete it
       {
-         if (GmatFileUtil::DoesFileExist(fullFileName))
+         if (fileDoesExist)
             remove(fullFileName.c_str());
       }
       theReport.open(fullFileName.c_str(), std::fstream::out);

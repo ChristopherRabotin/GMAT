@@ -42,31 +42,42 @@
 # Plugins
 #-----------------------------------------------------------
 # Default plugins
-PLUGIN                 = ./plugins/libEphemPropagator
-PLUGIN                 = ./plugins/libFormation
-PLUGIN                 = ./plugins/libStation
-PLUGIN                 = ./plugins/libMatlabInterface
-PLUGIN                 = ./plugins/libFminconOptimizer
-PLUGIN                 = ./plugins/libDataInterface
+PLUGIN                 = ./plugins/libEphemPropagatord
+PLUGIN                 = ./plugins/libEventLocatord
+PLUGIN                 = ./plugins/libFormationd
+PLUGIN                 = ./plugins/libStationd
+PLUGIN                 = ./plugins/libMatlabInterfaced
+PLUGIN                 = ./plugins/libFminconOptimizerd
+PLUGIN                 = ./plugins/libDataInterfaced
+PLUGIN                 = ./plugins/libProductionPropagatorsd
 
 # Alpha plugins
-PLUGIN                = ./libCInterface
-PLUGIN                = ./plugins/libEventLocator
-PLUGIN                = ./plugins/libExtraPropagators
-PLUGIN                = ./plugins/libGmatEstimation
-PLUGIN                = ./plugins/libGmatFunction
-PLUGIN                = ./plugins/libSaveCommand
+#PLUGIN                = ./libCInterfaced
+#PLUGIN                = ./plugins/libExtraPropagatorsd
+#PLUGIN                = ./plugins/libGmatEstimationd
+#PLUGIN                = ./plugins/libGeometricMeasurementsd
+#PLUGIN                = ./plugins/libGmatFunctiond
+#PLUGIN                = ./plugins/libSaveCommandd
 
 # Internal-only plugins
-PLUGIN                 = ./plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ./plugins/proprietary/libNRLMsise00
-PLUGIN                 = ./plugins/proprietary/libMsise86
-PLUGIN                = ./plugins/proprietary/libMarsGRAM
+PLUGIN                 = ./plugins/proprietary/libMarsGRAMd
+PLUGIN                 = ./plugins/proprietary/libMsise86d
+PLUGIN                 = ./plugins/proprietary/libNewParametersd
+PLUGIN                 = ./plugins/proprietary/libNRLMsise00d
+PLUGIN                 = ./plugins/proprietary/libVF13Optimizerd
+#PLUGIN                 = ./plugins/proprietary/libSNOptimizerd
 
 #-----------------------------------------------------------
 # Directory/file paths
 #-----------------------------------------------------------
+
+# Occasional issues have been observed on Windows in which
+# GMAT cannot find certain data files, such as icons and DE
+# files, at runtime. If this occurs, set ROOT_PATH to the
+# absolute path to your top-level GMAT directory.
+
 ROOT_PATH              = ../
+
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
 LOG_FILE               = OUTPUT_PATH/GmatLog.txt
@@ -74,7 +85,7 @@ SCREENSHOT_FILE        = OUTPUT_PATH/GmatScreenShot
 #-----------------------------------------------------------
 MEASUREMENT_PATH       = OUTPUT_PATH/
 #-----------------------------------------------------------
-EPHEM_PATH             = OUTPUT_PATH/
+VEHICLE_EPHEM_PATH     = OUTPUT_PATH/
 #-----------------------------------------------------------
 GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
 #-----------------------------------------------------------
@@ -83,13 +94,16 @@ MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------
-SPK_PATH               = DATA_PATH/planetary_ephem/spk/
-PLANETARY_SPK_FILE     = SPK_PATH/DE421AllPlanets.bsp
+PLANETARY_EPHEM_SPK_PATH = DATA_PATH/planetary_ephem/spk/
+PLANETARY_SPK_FILE     = PLANETARY_EPHEM_SPK_PATH/DE421AllPlanets.bsp
 #-----------------------------------------------------------
-DE_PATH                = DATA_PATH/planetary_ephem/de/
-DE405_FILE             = DE_PATH/leDE1941.405
-DE421_FILE             = DE_PATH/leDE1900.421
-DE424_FILE             = DE_PATH/leDE18002100.424
+PLANETARY_EPHEM_DE_PATH = DATA_PATH/planetary_ephem/de/
+DE405_FILE             = PLANETARY_EPHEM_DE_PATH/leDE1941.405
+DE421_FILE             = PLANETARY_EPHEM_DE_PATH/leDE1900.421
+DE424_FILE             = PLANETARY_EPHEM_DE_PATH/leDE18002100.424
+#-----------------------------------------------------------
+VEHICLE_EPHEM_SPK_PATH   = DATA_PATH/vehicle/ephem/spk/
+VEHICLE_EPHEM_CCSDS_PATH = DATA_PATH/vehicle/ephem/ccsds/
 #-----------------------------------------------------------
 PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
@@ -103,6 +117,7 @@ EARTH_POT_PATH         = DATA_PATH/gravity/earth/
 LUNA_POT_PATH          = DATA_PATH/gravity/luna/
 MARS_POT_PATH          = DATA_PATH/gravity/mars/
 VENUS_POT_PATH         = DATA_PATH/gravity/venus/
+OTHER_POT_PATH         = DATA_PATH/gravity/other/
 #-----------------------------------------------------------
 EGM96_FILE             = EARTH_POT_PATH/EGM96.cof
 JGM2_FILE              = EARTH_POT_PATH/JGM2.cof
@@ -133,12 +148,19 @@ URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
 NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
 PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
 #-----------------------------------------------------------
+BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
+#-----------------------------------------------------------
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
 #-----------------------------------------------------------
-MODEL_PATH             = DATA_PATH/vehicle/models/
-SPACECRAFT_MODEL_FILE  = MODEL_PATH/aura.3ds
+VEHICLE_MODEL_PATH     = DATA_PATH/vehicle/models/
+SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
+#-----------------------------------------------------------
+SPAD_PATH              = DATA_PATH/vehicle/spad/
+SPAD_SRP_FILE          = SPAD_PATH/SphericalModel.spo
+#-----------------------------------------------------------
+ATMOSPHERE_PATH        = DATA_PATH/vehicle/atmosphere/
 #-----------------------------------------------------------
 HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------
@@ -152,5 +174,6 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
 #DEBUG_PARAMETERS      = OFF
+#DEBUG_FILE_PATH       = ON
 #HIDE_SAVEMISSION      = TRUE
 #PLOT_MODE             = TILE

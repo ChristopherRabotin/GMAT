@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT SaveCommand Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libSaveCommand")
-else()
-	SET(PLUGINTARGET "SaveCommand")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName SaveCommand)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DSAVECOMMAND_EXPORTS")
@@ -36,14 +30,6 @@ SET(PLUGIN_SRCS
     factory/SaveCommandFactory.cpp
     plugin/GmatPluginFunctions.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

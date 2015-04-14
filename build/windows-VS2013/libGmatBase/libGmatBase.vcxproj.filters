@@ -1365,6 +1365,9 @@
     <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\util\StringTokenizer.hpp">
@@ -2686,6 +2689,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
