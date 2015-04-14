@@ -85,6 +85,24 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
 
 ENDMACRO(_SETUPPLUGIN)
 
+# ====================================================================
+# Declare all public plugins and their default values
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
+OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
+OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
+OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
+OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
+OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
+OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
+OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
+OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
+OPTION(PLUGIN_STATION "Station Plugin" ON)
+
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
 

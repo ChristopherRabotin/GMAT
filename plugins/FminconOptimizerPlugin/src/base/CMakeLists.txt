@@ -17,13 +17,18 @@ MESSAGE("GMAT FminconOptimizer Plugin setup " ${VERSION})
 
 # ====================================================================
 # Major error checks
-if(NOT Matlab_FOUND)
-  MESSAGE(WARNING "Skipping FminconOptimizer: Matlab missing")
+if(NOT WIN32)
+  MESSAGE(WARNING "Skipping FminconOptimizer: Not supported on ${CMAKE_SYSTEM_NAME}")
   RETURN()
 endif()
 
-if(NOT WIN32)
-  MESSAGE(WARNING "Skipping FminconOptimizer: Not supported on ${CMAKE_SYSTEM_NAME}")
+if(NOT PLUGIN_MATLABINTERFACE)
+  MESSAGE(WARNING "Skipping FminconOptimizer: MatlabInterface Plugin disabled")
+  RETURN()
+endif()
+
+if(NOT Matlab_FOUND)
+  MESSAGE(WARNING "Skipping FminconOptimizer: Matlab missing")
   RETURN()
 endif()
 

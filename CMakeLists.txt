@@ -20,35 +20,20 @@
 
 # Require CMake minimum version
 cmake_minimum_required(VERSION 2.8)
-SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8) # Support OSX 10.8+
+
+# Support OSX 10.8+
+IF(APPLE)
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8 CACHE STRING 
+    "Minimum OSX version to target for deployment (at runtime). Set to empty string to target current MacOS version.")
+ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "Build version")
+SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Path to custom Find****.cmake files
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
-
-# Set general build options
-OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
-
-# Public GMAT plugins
-OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
-OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
-OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
-OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
-OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
-OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
-OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
-OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
-OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
-OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
-OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
-OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
-OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
-OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
-OPTION(PLUGIN_STATION "Station Plugin" ON)
 
 # Detect 32/64 bit
 if(CMAKE_CL_64 OR (CMAKE_SIZEOF_VOID_P EQUAL 8))
@@ -79,9 +64,15 @@ endif()
 
 # Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
 # This may need to be a user-selectable cache variable in the future
+OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 if(APPLE)
   if(GMAT_GUI)
-    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
+    if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
+      (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd.app/Contents")
+    else()
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
+    endif()
   else()
     SET(GMAT_MAC_APPBUNDLE_PATH "")
   endif()
@@ -188,12 +179,9 @@ SET(Matlab_ROOT_DIR "" CACHE PATH "Path to user-specified MATLAB location. Leave
 SET(MATLAB_ADDITIONAL_VERSIONS
   # Additional Matlab versions should be included here
   "R2015b=8.6"
-  "R2015a=8.5"
-  "R2014b=8.4"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
-MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
 
 # ====================================================================
 # Common build options
@@ -256,18 +244,15 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
-# Additional UNIX-specific definitions
+# Additional *NIX-specific definitions
 if(UNIX)
   ADD_DEFINITIONS("-DLINUX_MAC")
 
-  # Needed to support OSX 10.8+
   if(APPLE)
     # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
     # This is incompatible with the C++11 standard, and should be fixed
     # For now, disable this compile error (-Wreserved-user-defined-literal)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11 -Wno-reserved-user-defined-literal")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
   endif()
 endif()
 
