@@ -228,6 +228,8 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2015a=8.5"
+  "R2014b=8.4"
   "R2014a=8.3"
   "R2013b=8.2"
   "R2013a=8.1"
@@ -1062,7 +1064,7 @@ if(Matlab_ROOT_DIR)
     endif()
   else()
     # NOTFOUND indicates the code below to search for the version automatically
-    if(NOT DEFINED Matlab_VERSION_STRING_INTERNAL)
+    if(NOT Matlab_VERSION_STRING_INTERNAL)
       list(APPEND _matlab_possible_roots "NOTFOUND" ${Matlab_ROOT_DIR}) # empty version
     else()
       list(APPEND _matlab_possible_roots ${Matlab_VERSION_STRING_INTERNAL} ${Matlab_ROOT_DIR}) # cached version

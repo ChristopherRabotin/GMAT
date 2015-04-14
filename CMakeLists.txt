@@ -179,12 +179,9 @@ SET(Matlab_ROOT_DIR "" CACHE PATH "Path to user-specified MATLAB location. Leave
 SET(MATLAB_ADDITIONAL_VERSIONS
   # Additional Matlab versions should be included here
   "R2015b=8.6"
-  "R2015a=8.5"
-  "R2014b=8.4"
   CACHE STRING "Additional searched MATLAB versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
-MARK_AS_ADVANCED(CLEAR Matlab_ROOT_DIR)
 
 # ====================================================================
 # Common build options
