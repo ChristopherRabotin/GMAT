@@ -3,10 +3,9 @@
 # Project: Gmat
 # Title:   configure.sh
 # Purpose: This script allows developers to quickly and easily 
-#	   configure the gmat development environment on Mac/Linux.
-# Usage:   configure.sh [-p /path/to/gmat] [-w wx_version] [-help]
+#	   configure the GMAT dependencies on Mac/Linux.
+# Usage:   configure.sh [-w wx_version] [-help]
 #          Default behavior detects GMAT path and builds wxWidgets 3.0.2
-#           -p: (optional) path to top-level GMAT directory
 #           -w: (optional) wxWidgets dotted version, e.g. 3.0.2
 #           -help: Print usage
 # Updates: Feb-Apr 2015: Ravi Mathur: Heavy updates for new CMake
@@ -23,18 +22,16 @@ gmat_path="$(dirname "${BASEDIRFULL}")" # Path to gmat folder
 # ***********************************
 # Input System
 # ***********************************
-while getopts pw:h opt; do
+while getopts w:h opt; do
   case $opt in
-    p) gmat_path="$OPTARG";;
     w) wx_version="$OPTARG";;
-    h) echo Usage: configure.sh [-p /path/to/gmat] [-w wx_dotted_version] [-help]
+    h) echo Usage: configure.sh [-w wx_dotted_version] [-help]
       exit;;
   esac
 done
 
 clear
 echo Launching from $gmat_path
-echo Using wxWidgets $wx_version
   
 # Detect Mac/Linux
 if [ "$(uname)" = "Darwin" ]
@@ -73,14 +70,6 @@ function download_depends() {
 	  cspice_path=$cspice_path/linux
 	fi
 
-	# Display the variables
-	#echo $bin_path
-	#echo $f2c_path
-	#echo $cspice_path
-	#echo $wxWidgets_path
-	#echo $sofa_path
-	#echo $tsplot_path
-
 	# Create directories and download f2c if it does not already exist.
 	# Disabled for now
 	if [ ! -d "$f2c_path" ] && [ false == true ]
@@ -117,17 +106,21 @@ function download_depends() {
 		# Download and extract Spice (32/64-bit)
 		if [ "$arch" = "x86" ]
 		then
+		  echo "Downloading 32-bit CSPICE..."
 		  ftp ftp://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z
+		  echo "Extracting 32-bit CSPICE..."
 		  gzip -d cspice.tar.Z
-		  tar xfv cspice.tar
+		  tar xf cspice.tar
 		  mv cspice cspice32
 		  rm cspice.tar
 		  cd cspice32/src/cspice
 		  export TKCOMPILEARCH="-m32"
 		else
+		  echo "Downloading 64-bit CSPICE..."
 		  ftp ftp://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z
+		  echo "Extracting 32-bit CSPICE..."
 		  gzip -d cspice.tar.Z
-		  tar xfv cspice.tar
+		  tar xf cspice.tar
 		  mv cspice cspice64
 		  rm cspice.tar
 		  cd cspice64/src/cspice
@@ -145,17 +138,23 @@ function download_depends() {
 	fi	
 
 	# Create directories and download wxWidgets if needed
-	if [ ! -d "$wxWidgets_path" ] && [ $wx_build == true ]
+	if [ ! -d "$wxWidgets_path/wxWidgets-$wx_version" ] && [ $wx_build == true ]
 	then
 		# Create Directories
-		mkdir "$wxWidgets_path"
+		mkdir -p "$wxWidgets_path"
 	
 		# Change to wxWidgets directory
 		cd "$wxWidgets_path"
 	
 		# Checkout wxWidgets source
 		wx_version_download=`echo $wx_version | sed 's/\./_/g'`
-		svn co http://svn.wxwidgets.org/svn/wx/wxWidgets/tags/WX_$wx_version_download/ wxWidgets-$wx_version
+		echo "Downloading wxWidgets $wx_version..."
+		curl -L https://github.com/wxWidgets/wxWidgets/archive/WX_$wx_version_download.tar.gz > wxWidgets.tar.gz
+		echo "Extracting wxWidgets $wx_version..."
+		gzip -d wxWidgets.tar.gz
+		mkdir -p wxWidgets-$wx_version
+		tar xf wxWidgets.tar -C wxWidgets-$wx_version --strip-components 1
+		rm wxWidgets.tar
 
 		# Make sure wxWidgets was downloaded
 		if [ ! -d "wxWidgets-$wx_version" ]
@@ -236,7 +235,7 @@ function build_wxWidgets() {
 	# added to mac & linux versions of the wx ./configure command
 	if [ -f "$wx_test_file" ]
 	then
-	  echo "wxWidgets already configured"
+	  echo "wxWidgets $wx_version already configured"
 	else
 	  echo "Building wxWidgets..."
 	  mkdir -p "$wx_build_path"
@@ -244,15 +243,7 @@ function build_wxWidgets() {
 
 	  if [ $mac == true ]
 	  then
-	    # Extra compile/link flags are required because OSX 10.9+ uses libc++ instead of libstdc++ by default.
-	    macver=`sw_vers -productVersion`
-	    macver_minor=`echo $macver | awk -F . '{print $2}'`
-	    if [ $macver_minor -ge 9 ] # Check for OSX 10.9+
-	    then
-	      ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8 CXXFLAGS="-stdlib=libc++ -std=c++11" OBJCXXFLAGS="-stdlib=libc++ -std=c++11" LDFLAGS=-stdlib=libc++
-	    else
-	      ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa
-	    fi
+	    ../configure --enable-unicode --with-opengl --prefix="$wx_install_path" --with-osx_cocoa --with-macosx-version-min=10.8
 	    ncores=$(sysctl hw.ncpu | awk '{print $2}')
 	  else
 	    # Configure wxWidgets build
@@ -262,8 +253,14 @@ function build_wxWidgets() {
 
 	  # Compile, install, and clean wxWidgets
 	  make -j$ncores
-	  make install
-	  cd ..; rm -Rf "$wx_build_path"
+	  if [ $? -eq 0 ]
+	  then
+	    make install
+	    cd ..; rm -Rf "$wx_build_path"
+	  else
+	    echo "wxWidgets build failed. Fix errors and try again."
+	    return
+	  fi
 	fi
 }
 

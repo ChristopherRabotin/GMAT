@@ -20,11 +20,16 @@
 
 # Require CMake minimum version
 cmake_minimum_required(VERSION 2.8)
-SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8) # Support OSX 10.8+
+
+# Support OSX 10.8+
+IF(APPLE)
+  SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.8 CACHE STRING 
+    "Minimum OSX version to target for deployment (at runtime). Set to empty string to target current MacOS version.")
+ENDIF()
 
 # Set Cmake project
 PROJECT(GMAT C CXX)
-SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "Build version")
+SET(GMAT_RELEASE_NAME "R2015a" CACHE STRING "GMAT version name")
 SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 
 # Path to custom Find****.cmake files
@@ -256,18 +261,15 @@ else()
   MESSAGE(STATUS "Will compile 32-bit GMAT")
 endif()
 
-# Additional UNIX-specific definitions
+# Additional *NIX-specific definitions
 if(UNIX)
   ADD_DEFINITIONS("-DLINUX_MAC")
 
-  # Needed to support OSX 10.8+
   if(APPLE)
     # GMAT GUI has many instances of text like "XX"GUI_ACCEL_KEY"YY"
     # This is incompatible with the C++11 standard, and should be fixed
     # For now, disable this compile error (-Wreserved-user-defined-literal)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11 -Wno-reserved-user-defined-literal")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
-    SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-reserved-user-defined-literal")
   endif()
 endif()
 
