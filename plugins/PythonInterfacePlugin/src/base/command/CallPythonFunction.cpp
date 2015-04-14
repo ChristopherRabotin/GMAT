@@ -191,16 +191,25 @@ bool CallPythonFunction::Initialize()
 {
 	bool ret = false;
 
-	ret = CallFunction::Initialize();
+   MessageInterface::ShowMessage("Calling CallPythonFunction::Initialize()\n");
+
+   ret = CallFunction::Initialize();
+
+   MessageInterface::ShowMessage("   Base class init complete\n");
 
 	pythonIf = PythonInterface::PyInstance();
 	FileManager *fm = FileManager::Instance();
-	
+
+   MessageInterface::ShowMessage("   pythonIf:  %p\n", pythonIf);
+
 	//Initialize Python engine
 	pythonIf->PyInitialize();
 
 	// Get all Python module paths from the startup file
 	StringArray paths = fm->GetAllPythonModulePaths();
+
+   MessageInterface::ShowMessage("   Adding %d python paths\n", paths.size());
+
 	pythonIf->PyAddModulePath(paths);
    
    //Fill in Inputlist
