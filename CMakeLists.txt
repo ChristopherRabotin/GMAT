@@ -35,26 +35,6 @@ SET(GMAT_VERSION ${GMAT_RELEASE_NAME})
 # Path to custom Find****.cmake files
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/build/cmake_modules")
 
-# Set general build options
-OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
-
-# Public GMAT plugins
-OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
-OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
-OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
-OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
-OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
-OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
-OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
-OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
-OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
-OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
-OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
-OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
-OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
-OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
-OPTION(PLUGIN_STATION "Station Plugin" ON)
-
 # Detect 32/64 bit
 if(CMAKE_CL_64 OR (CMAKE_SIZEOF_VOID_P EQUAL 8))
   SET(GMAT_64_BIT ON)
@@ -84,9 +64,15 @@ endif()
 
 # Set path to app bundle on Mac, relative to CMAKE_INSTALL_PREFIX
 # This may need to be a user-selectable cache variable in the future
+OPTION(GMAT_GUI "Build the GUI, requires wxWidgets" ON)
 if(APPLE)
   if(GMAT_GUI)
-    SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
+    if((${CMAKE_BUILD_TYPE} STREQUAL "Debug") OR 
+      (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo"))
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMATd.app/Contents")
+    else()
+      SET(GMAT_MAC_APPBUNDLE_PATH "bin/GMAT.app/Contents")
+    endif()
   else()
     SET(GMAT_MAC_APPBUNDLE_PATH "")
   endif()
