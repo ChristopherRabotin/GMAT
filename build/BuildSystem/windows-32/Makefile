@@ -4,7 +4,6 @@ GMAT_SRC_BASE_DIR = $(GMAT_DIR)/src/base
 GMAT_SRC_GUI_DIR = $(GMAT_DIR)/src/gui
 GMAT_PLUGIN_DIR = $(GMAT_HOME)/GmatPlugins/code
 GMAT_BUILD_DIR = $(GMAT_DIR)/build/windows-VS2013-CMake
-GMAT_PLUGIN_BUILD_DIR = $(GMAT_HOME)/GmatPlugins/code/build/VS2010
 GMAT_BIN_DIR = $(GMAT_DIR)/application/bin
 GMAT_MATLAB_CINTF_DIR = $(GMAT_DIR)/application/matlab/libCInterface
 GMAT_PLUGIN_BIN_DIR = $(GMAT_DIR)/application/plugins
