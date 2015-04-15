@@ -1,19 +1,19 @@
 #include "stdlib.h"
 
 #include "PythonInterface.hpp"
-
+#include "MessageInterface.hpp"
 
 PythonInterface* PythonInterface::instance = NULL;
 
 PythonInterface* PythonInterface::PyInstance()
 {
    if (instance == NULL)
-	   instance = new PythonInterface();
+	   instance = new PythonInterface("PythonInterface");
 
    return instance;
 }
 
-PythonInterface::PythonInterface(): Interface("PythonInterface", NULL)
+PythonInterface::PythonInterface(const std::string &name) : Interface("PythonInterface", name)
 {
    isPythonInitialized = false;
    numPyCommands = 0;
@@ -106,7 +106,9 @@ void PythonInterface::PyPathSep()
    if (isPythonInitialized)
    {
 	   const char* plForm = Py_GetPlatform();
-      if (plForm == "win")
+      std::string str(plForm);
+   
+      if (str.find("win") != std::string::npos)
          plF = ";";
 	   else
 		   plF = ":";
@@ -117,21 +119,19 @@ void PythonInterface::PyPathSep()
 
 void PythonInterface::PyAddModulePath(const StringArray& path)
 {
-   wchar_t *s3K = new wchar_t[512];
-   char *s2K = new char[512];
+   wchar_t *s3K = new wchar_t[8192];
 
-   char *destPath = new char[512];
+   char *destPath = new char[8192];
    char *p = new char[128];
 
 #ifdef IS_PY3K
-   s3K = Py_GetPath();
+   PyPathSep();
    //convert wchar_t to char
-   wcstombs(destPath, s3K, sizeof(destPath));
+   wcstombs(destPath, Py_GetPath(), 8192);
    //concatenate the path delimiter (unix , windows and mac)
    strcat(destPath, plF);
 #else
-   s2K = Py_GetPath();
-   strcpy(destPath, s2K);
+   strcpy(destPath, Py_GetPath());
    strcat(destPath, plF);
 #endif
 
@@ -140,7 +140,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
    {
       p = (char *)it->c_str();
       strcat(destPath, p);
-      strcat(destPath, plF); 
+      strcat(destPath, plF);     
    }
 
    //convert char to wchar_t
@@ -153,7 +153,8 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 
    delete[] destPath;
    delete[] s3K;
-   delete[] s2K;
    delete[] p;
+
+   MessageInterface::ShowMessage("Leaving PyAddModulePath( ) \n");
 
 }

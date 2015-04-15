@@ -36,7 +36,7 @@ public:
 private:
    static PythonInterface *instance;
 	
-   PythonInterface();
+   PythonInterface(const std::string &name);
    ~PythonInterface();
    PythonInterface(const PythonInterface &pi);
    PythonInterface& operator=(const PythonInterface &pi);
