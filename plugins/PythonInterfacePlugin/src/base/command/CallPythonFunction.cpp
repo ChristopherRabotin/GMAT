@@ -24,14 +24,16 @@ CallPythonFunction::PARAMETER_TYPE[PythonFunctionParamCount - CallFunctionParamC
 CallPythonFunction::CallPythonFunction() :
    CallFunction      ("CallPythonFunction"),
    moduleName        (""),
-   functionName      ("")
+   functionName      (""),
+   pythonIf          (NULL)
 {
 }
 
 CallPythonFunction::CallPythonFunction(const CallPythonFunction& cpf) :
    CallFunction      (cpf),
    moduleName        (cpf.moduleName),
-   functionName      (cpf.functionName)
+   functionName      (cpf.functionName),
+   pythonIf          (cpf.pythonIf)
 {
 }
 
@@ -43,6 +45,7 @@ CallPythonFunction& CallPythonFunction::operator =(
       CallFunction::operator=(cpf);
       moduleName   = cpf.moduleName;
       functionName = cpf.functionName;
+      pythonIf = cpf.pythonIf;
    }
 
    return *this;
@@ -198,10 +201,10 @@ bool CallPythonFunction::Initialize()
    MessageInterface::ShowMessage("   Base class init complete\n");
 
 	pythonIf = PythonInterface::PyInstance();
-	FileManager *fm = FileManager::Instance();
+   FileManager *fm = FileManager::Instance();
 
    MessageInterface::ShowMessage("   pythonIf:  %p\n", pythonIf);
-
+   
 	//Initialize Python engine
 	pythonIf->PyInitialize();
 
@@ -214,9 +217,11 @@ bool CallPythonFunction::Initialize()
    
    //Fill in Inputlist
    Integer sizeIn = FillInputList();
-   
+   MessageInterface::ShowMessage("   SizeIn is %d\n", sizeIn);
+
    //Fill in Outputlist
    Integer sizeOut = FillOutputList();
+   MessageInterface::ShowMessage("   SizeOut is %d\n", sizeOut);
 
 	return ret;
 }
