@@ -30,6 +30,13 @@ while getopts w:h opt; do
   esac
 done
 
+# Make sure curl exists
+if ! type curl > /dev/null
+then
+  echo "This script requires curl to download dependencies. Please install curl first."
+  exit
+fi
+
 clear
 echo Launching from $gmat_path
   
@@ -107,7 +114,7 @@ function download_depends() {
 		if [ "$arch" = "x86" ]
 		then
 		  echo "Downloading 32-bit CSPICE..."
-		  ftp ftp://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z
+		  curl http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_32bit/packages/cspice.tar.Z > cspice.tar.Z
 		  echo "Extracting 32-bit CSPICE..."
 		  gzip -d cspice.tar.Z
 		  tar xf cspice.tar
@@ -117,8 +124,8 @@ function download_depends() {
 		  export TKCOMPILEARCH="-m32"
 		else
 		  echo "Downloading 64-bit CSPICE..."
-		  ftp ftp://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z
-		  echo "Extracting 32-bit CSPICE..."
+		  curl http://naif.jpl.nasa.gov/pub/naif/toolkit/C/"$cspice_type"_64bit/packages/cspice.tar.Z > cspice.tar.Z
+		  echo "Extracting 64-bit CSPICE..."
 		  gzip -d cspice.tar.Z
 		  tar xf cspice.tar
 		  mv cspice cspice64
@@ -149,7 +156,7 @@ function download_depends() {
 		# Checkout wxWidgets source
 		wx_version_download=`echo $wx_version | sed 's/\./_/g'`
 		echo "Downloading wxWidgets $wx_version..."
-		curl -L https://github.com/wxWidgets/wxWidgets/archive/WX_$wx_version_download.tar.gz > wxWidgets.tar.gz
+		curl -Lk https://github.com/wxWidgets/wxWidgets/archive/WX_$wx_version_download.tar.gz > wxWidgets.tar.gz
 		echo "Extracting wxWidgets $wx_version..."
 		gzip -d wxWidgets.tar.gz
 		mkdir -p wxWidgets-$wx_version
