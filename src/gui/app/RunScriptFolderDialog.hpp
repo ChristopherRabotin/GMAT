@@ -31,6 +31,7 @@ public:
    ~RunScriptFolderDialog();
    
    wxString GetFilterString(bool &exclude);
+   wxString Get2ndFilterString(bool &exclude);
    
    bool RunScripts() { return mRunScripts; }
    bool RunFromSavedScripts() { return mRunFromSavedScripts; }
@@ -59,6 +60,7 @@ protected:
    wxTextCtrl *mStartingScriptTextCtrl;
    wxTextCtrl *mNumScriptsToRunTextCtrl;
    wxTextCtrl *mFilterStringTextCtrl;
+   wxTextCtrl *m2ndFilterStringTextCtrl;
    wxTextCtrl *mNumTimesToRunTextCtrl;
    wxTextCtrl *mCompareDirTextCtrl;
    wxTextCtrl *mReplaceTextCtrl;
@@ -69,6 +71,7 @@ protected:
    
    wxCheckBox *mRunFromSavedCheckBox;
    wxCheckBox *mExcludeScriptsCheckBox;
+   wxCheckBox *m2ndExcludeScriptsCheckBox;
    wxCheckBox *mCreateRunFolderCheckBox;
    wxCheckBox *mCompareCheckBox;
    wxCheckBox *mSaveResultCheckBox;
@@ -101,12 +104,14 @@ private:
    bool mSaveCompareResults;
    bool mOutDirChanged;
    bool mExcludeScripts;
+   bool m2ndExcludeScripts;
    bool mCreateRunFolder;
    Integer mNumStartingScript;
    Integer mNumScriptsToRun;
    Integer mNumTimesToRun;
    Real mAbsTol;
    wxString mFilterString;
+   wxString m2ndFilterString;
    wxString mReplaceString;
    wxString mCurrOutDir;
    wxString mSaveScriptsDir;

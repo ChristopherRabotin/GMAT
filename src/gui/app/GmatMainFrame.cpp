@@ -6563,6 +6563,10 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    
    while (cont)
    {
+      // Skip GmatLog.txt since it will be always different (LOJ: 2015.04.01)
+      if (filename == "GmatLog.txt")
+         cont = dir.GetNext(&filename);
+      
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
           filename.Contains(".eph") || filename.Contains(".truth"))
