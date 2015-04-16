@@ -515,6 +515,7 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
                                            Real &intvlStop)
 {
    #ifndef __USE_SPICE__
+      Spacecraft *theSc = (Spacecraft*) theObj;
       std::string errmsg = "ERROR - cannot compute occultation intervals for spacecraft ";
       errmsg += theSc->GetName() + " without SPICE included in build!\n";
       throw SubscriberException(errmsg);
@@ -529,6 +530,8 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
       return true;
    #endif
 }
+
+#ifdef __USE_SPICE__
 //------------------------------------------------------------------------------
 // void GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
 //                              bool useEntireIntvl, bool includeAll = true)
@@ -537,6 +540,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
                                       bool useEntireIntvl, bool includeAll)
 {
 #ifndef __USE_SPICE__
+   Spacecraft *theSc = (Spacecraft*) theObj;
    std::string errmsg = "ERROR - cannot compute occultation intervals for spacecraft ";
    errmsg += theSc->GetName() + " without SPICE included in build!\n";
    throw SubscriberException(errmsg);
@@ -747,6 +751,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
    #endif
    copy_c(&window, w);
 }
+#endif //#ifdef __USE_SPICE__
 
 //------------------------------------------------------------------------------
 // SetObject()
