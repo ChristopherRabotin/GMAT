@@ -14,7 +14,7 @@ GMAT_CAPI_PLUGIN_DOCS_DIR = $(GMAT_CAPI_PLUGIN_DIR)/doc
 GMAT_DOC_DIR = $(GMAT_DIR)/doc
 GMAT_HELP_BUILD_DIR = $(GMAT_DOC_DIR)/help
 NETWORK_DIR = Y:
-DESTINATION_DIR  = $(NETWORK_DIR)/Builds/windows/VS2013_build_cmake_32
+DESTINATION_DIR  = $(NETWORK_DIR)/Builds/windows/VS2013_build_32
 BUILD_DATE = ` date "+%Y-%m-%d" `
 DAILY_DESTINATION_DIR = $(DESTINATION_DIR)/$(BUILD_DATE)
 DAILY_MATLAB_DEST_DIR = $(DAILY_DESTINATION_DIR)/matlab
@@ -30,12 +30,14 @@ LATEST_DOCS_BUILD_DIR = $(NETWORK_DIR)/Builds/DevDocs
 # compiles the latest build
 all: 
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GMAT.sln //p:Configuration=Release //m //t:Rebuild //fl ;
+	cmake --build . --config Release -- //m //fl ;
+#	msbuild.exe GMAT.sln //p:Configuration=Release //m //t:Rebuild //fl ;
 
 # cleans up the compiled source code and docs files
 clean:
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GMAT.sln //p:Configuration=Release //m //fl //target:Clean;
+	cmake --build . --target clean --config Release -- //fl ;
+#	msbuild.exe GMAT.sln //p:Configuration=Release //m //fl //target:Clean;
 	cd $(GMAT_BIN_DIR) && rm -rf *.dll
 	cd $(GMAT_PLUGIN_BIN_DIR) && rm -rf *.dll
 	rm -f $(GMAT_PROPRIETARY_BIN_DIR)/*.dll
@@ -76,7 +78,8 @@ dist:
 	rm -rf $(LATEST_BUILD_DIR);
 #	$(GMAT_BUILD_DIR)/assemble.sh -d $(LATEST_BUILD_DIR) -j $(GMAT_PLUGIN_DIR) -n $(NETWORK_DIR) -b $(DAILY_DESTINATION_DIR)
 	cd $(GMAT_BUILD_DIR); \
-	msbuild.exe GMAT.sln //p:Configuration=Release //fl //target:INSTALL;
+	cmake --build . --target INSTALL --config Release -- //fl ;
+#	msbuild.exe GMAT.sln //p:Configuration=Release //fl //target:INSTALL;
 
 dist-devdocs:
 	rm -rf $(LATEST_DOCS_BUILD_DIR)

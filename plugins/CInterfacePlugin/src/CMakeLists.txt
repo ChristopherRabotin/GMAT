@@ -104,7 +104,7 @@ if(PLUGIN_CINTERFACE)
       # Matlab command for release configurations
       MESSAGE(STATUS "Will install CInterface (release) Matlab thunk files with command:\n${MATLAB_COMMAND}")
       INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface (release) thunk files...patience is a virtue...\")")
-      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\" TIMEOUT 30)")
     endif()
 
     # Matlab command for multi-config or debug builds
@@ -112,7 +112,7 @@ if(PLUGIN_CINTERFACE)
       # Matlab command for debug configurations
       MESSAGE(STATUS "Will install CInterface (debug) Matlab thunk files with command:\n${MATLAB_COMMAND_DEBUG}")
       INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab to build CInterface (debug) thunk files...patience is a virtue...\")")
-      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND_DEBUG} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
+      INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND_DEBUG} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\" TIMEOUT 30)")
     endif()
 
   # Warn user if Matlab was not found
