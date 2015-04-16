@@ -183,6 +183,10 @@ SET(MATLAB_ADDITIONAL_VERSIONS
   )
 FIND_PACKAGE(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY ENG_LIBRARY)
 
+if(NOT Matlab_FOUND)
+  MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
+endif()
+
 # ====================================================================
 # Common build options
 INCLUDE(CheckCXXCompilerFlag)
