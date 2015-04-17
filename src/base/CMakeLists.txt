@@ -23,19 +23,21 @@ ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
 # SPICE specifics
+# SPICE is linked and included because it contains the F2C implementation
+# It will be ignored if the top-level GMAT_USE_SPICE is OFF
 INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
-	
-ADD_DEFINITIONS("-D__USE_SPICE__")
 
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
+if(GMAT_USE_SPICE)
+  SET(SPICE_SRCS
+    "attitude/SpiceAttitude.cpp"
+    "util/SpiceAttitudeKernelReader.cpp"
+    "util/SpiceInterface.cpp"
+    "util/SpiceOrbitKernelReader.cpp"
+    "util/SpiceKernelReader.cpp"
+    "util/SpiceKernelWriter.cpp"
+    "util/SpiceOrbitKernelWriter.cpp")
+endif()
 
 # ====================================================================
 # F2C

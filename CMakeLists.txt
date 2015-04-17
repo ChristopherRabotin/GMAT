@@ -109,6 +109,15 @@ endif()
 # Find wxWidgets
 FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv stc gl)
 
+# User option for SPICE
+OPTION(GMAT_USE_SPICE "Use CSPICE" ON)
+if(GMAT_USE_SPICE)
+  ADD_DEFINITIONS("-D__USE_SPICE__")
+endif()
+
+# Search for CSPICE even if it is not selected, because
+# the CSPICE libs contain the F2C implementation
+
 # Set default CSPICE directory based on OS
 if(WIN32)
   SET(CSPICE_DIR_TEMP "${PROJECT_SOURCE_DIR}/depends/cspice/windows")
