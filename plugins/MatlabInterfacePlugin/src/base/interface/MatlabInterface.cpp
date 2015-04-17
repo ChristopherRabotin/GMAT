@@ -822,8 +822,8 @@ int MatlabInterface::OpenEngineOnMac()
       return 1;
    }
    
-   // open the X11 application before launching the matlab
-   system("open -a X11");
+//   // open the X11 application before launching the matlab
+//   system("open -a X11");
    // need to get IP address or hostname here
    char hName[128];
    int OK = gethostname(hName, 128);
@@ -835,11 +835,9 @@ int MatlabInterface::OpenEngineOnMac()
    }
    
    std::string hNameStr(hName);
-   // -desktop now causes MATLAB desktop to come up (as of 2008.01.11) but it
-   // hangs both MATLAB and GMAT
-   //std::string runString = "matlab -display " + hNameStr + ":0.0 -desktop";
-   //std::string runString = "matlab -display " + hNameStr + ":0.0";
-   std::string runString = "matlab -maci ";  // for 32-bit ONLY for now!!!
+//   std::string runString = "matlab -maci ";  // for 32-bit ONLY for now!!!
+   // do we want -nodisplay here as well??
+   std::string runString = "matlab -nosplash -nodesktop";  // for 64-bit ONLY for now!!!
    if ((enginePtr = engOpen(runString.c_str())))
    {
       MessageInterface::ShowMessage(
@@ -902,9 +900,9 @@ int MatlabInterface::CloseEngineOnMac()
              accessCount);
       }
       
-      // need to close X11 here ------------ **** TBD ****
-      MessageInterface::ShowMessage
-         ("Closing MATLAB engine ... please close X11 ...\n");
+//      // need to close X11 here ------------ **** TBD ****
+//      MessageInterface::ShowMessage
+//         ("Closing MATLAB engine ... please close X11 ...\n");
       
       //==============================================================
       // int engClose(Engine *ep);
