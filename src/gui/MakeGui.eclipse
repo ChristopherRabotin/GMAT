@@ -322,6 +322,7 @@ else
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
+	chrpath -r '$ORIGIN:$ORIGIN/lib' $(WXTARGET)
 	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.
 else
@@ -344,6 +345,7 @@ else
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
+	chrpath -r '$ORIGIN:$ORIGIN/lib' $(WXTARGET)
 	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)
