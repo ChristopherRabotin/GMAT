@@ -28,7 +28,6 @@ SET(TargetName GmatGUI)
 # ====================================================================
 # SPICE specifics
 if(GMAT_USE_SPICE)
-  INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
   SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
 endif()
 

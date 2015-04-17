@@ -23,9 +23,7 @@ ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
 # SPICE specifics
-# SPICE is linked and included because it contains the F2C implementation
-# It will be ignored if the top-level GMAT_USE_SPICE is OFF
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
+# SPICE is linked because it contains the F2C implementation
 LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
 
 if(GMAT_USE_SPICE)

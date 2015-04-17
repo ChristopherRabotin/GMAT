@@ -113,6 +113,7 @@ FIND_PACKAGE(wxWidgets COMPONENTS core base xml net richtext aui xrc qa html adv
 OPTION(GMAT_USE_SPICE "Use CSPICE" ON)
 if(GMAT_USE_SPICE)
   ADD_DEFINITIONS("-D__USE_SPICE__")
+  INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
 endif()
 
 # Search for CSPICE even if it is not selected, because
