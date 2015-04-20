@@ -4482,7 +4482,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    bool compare = dlg.CompareResults();
    bool saveCompareResults = dlg.SaveCompareResults();
    bool excludeScripts = false;
+   bool excludeScripts2 = false;
    wxString filterString = dlg.GetFilterString(excludeScripts);
+   wxString filterString2 = dlg.Get2ndFilterString(excludeScripts2);
    bool builtOk = false;
    
    // for current output path
@@ -4610,6 +4612,18 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          {
             scriptId = GetNextChild(itemId, cookie);
             continue;
+         }
+         else
+         {
+            if (filterString2 != "")
+            {
+               if ((excludeScripts2 && filename.Contains(filterString2)) ||
+                   (!excludeScripts2 && !filename.Contains(filterString2)))
+               {
+                  scriptId = GetNextChild(itemId, cookie);
+                  continue;
+               }
+            }
          }
       }
       

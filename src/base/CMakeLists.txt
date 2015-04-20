@@ -23,19 +23,19 @@ ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
 # SPICE specifics
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
+# SPICE is linked because it contains the F2C implementation
 LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
-	
-ADD_DEFINITIONS("-D__USE_SPICE__")
 
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
+if(GMAT_USE_SPICE)
+  SET(SPICE_SRCS
+    "attitude/SpiceAttitude.cpp"
+    "util/SpiceAttitudeKernelReader.cpp"
+    "util/SpiceInterface.cpp"
+    "util/SpiceOrbitKernelReader.cpp"
+    "util/SpiceKernelReader.cpp"
+    "util/SpiceKernelWriter.cpp"
+    "util/SpiceOrbitKernelWriter.cpp")
+endif()
 
 # ====================================================================
 # F2C

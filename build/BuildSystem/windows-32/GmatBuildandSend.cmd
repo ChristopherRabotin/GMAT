@@ -5,6 +5,6 @@ set server=mailhost.gsfc.nasa.gov
 set fromaddress=linda.o.jun@nasa.gov
 set toaddress=gmat-buildtest@lists.sourceforge.net
 
-rem blat start.txt -to %toaddress% -f %fromaddress% -s "GMAT Build Started "%time% -server %server% -timestamp -debug -log blat.log
+blat start.txt -to %toaddress% -f %fromaddress% -s "GMAT Build Started "%time% -server %server% -timestamp -debug -log blat.log
 call GmatBuild.cmd %1 > results.txt
-rem blat results.txt -to %toaddress% -f %fromaddress% -s "GMAT Build "%time% -server %server% -timestamp -debug -log blat.log
+blat results.txt -to %toaddress% -f %fromaddress% -s "GMAT Build "%time% -server %server% -timestamp -debug -log blat.log

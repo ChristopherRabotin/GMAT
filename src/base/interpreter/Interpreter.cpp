@@ -2214,8 +2214,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          ("   => Now calling %s->InterpretAction()\n", type1.c_str());
       #endif
       
+      // Moved this after InterpretAction() so that debug from command will
+      // show actual command string (LOJ: 2015.04.01)
       // Set current function to command 
-      cmd->SetCurrentFunction(currentFunction);
+      //cmd->SetCurrentFunction(currentFunction);
       
       // if command has its own InterpretAction(), just return cmd
       if (cmd->InterpretAction())
@@ -2227,6 +2229,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          #ifdef DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage("   => Now calling ValidateCommand()\n");
          #endif
+         
+         // Set current function to command
+         if (currentFunction)
+            cmd->SetCurrentFunction(currentFunction);
          retFlag  = ValidateCommand(cmd);
          
          // For Solver commands make sure Solver type is correct
@@ -2323,7 +2329,12 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       bool retval1  = AssembleCommand(cmd, realDesc);
       
       if (retval1)
+      {
+         // Set current function to command 
+         if (currentFunction)
+            cmd->SetCurrentFunction(currentFunction);
          retval3 = ValidateCommand(cmd);
+      }
       else
       {
          if (!ignoreError)
@@ -2334,7 +2345,6 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       }
       
       retFlag = retval1 && retval3;
-      
    }
    else
    {

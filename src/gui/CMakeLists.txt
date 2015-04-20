@@ -27,9 +27,9 @@ SET(TargetName GmatGUI)
 
 # ====================================================================
 # SPICE specifics
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
-ADD_DEFINITIONS("-D__USE_SPICE__")
+if(GMAT_USE_SPICE)
+  SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
+endif()
 
 # ====================================================================
 # wxWidgets specifics
