@@ -273,30 +273,41 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
          // Epoch is not a valid parameter
          epochIDs.push_back(-1);
       }
-   }
 
-   #ifdef DEBUG_STATE_CONSTRUCTION
-      MessageInterface::ShowMessage("Object set; current points to %s\n",
-         current->GetName().c_str());
-   #endif
+     // Moved lower because it calling SetObject with multiple solve for
+     // parameters was resulting in duplicate entries.
+//   }
 
-   for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
-   {
-      // Set the object property
-      if (solveForObjectNames[i] == objName)
+      #ifdef DEBUG_STATE_CONSTRUCTION
+         MessageInterface::ShowMessage("Object set; current points to %s\n",
+            current->GetName().c_str());
+      #endif
+
+      for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
       {
-         solveForObjects[i] = obj;
+         // Set the object property
+         if (solveForObjectNames[i] == objName)
+         {
+            solveForObjects[i] = obj;
 
-         // Set the property ID
-         Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
-         if (id == -1)                                                                                                                      // made changes by TUAN NGUYEN
-            throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
-
-         solveForIDs[i] = id;
-         elements[obj]->push_back(solveForIDNames[i]);
-         retval = true;
+            // Set the property ID
+            Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
+            if (id == -1)                                                                                                                      // made changes by TUAN NGUYEN
+               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
+            solveForIDs[i] = id;
+            elements[obj]->push_back(solveForIDNames[i]);
+            retval = true;
+         }
       }
+
+   // Close was moved to here
    }
+
+   #ifdef DEBUG_ESM_LOADING
+      MessageInterface::ShowMessage("   ESM now has %d objects, %d "
+            "solveForObjects, and %d solveFors\n", objects.size(), solveForObjects.size(),
+            solveForIDNames.size());
+   #endif
 
    return retval;
 }
@@ -534,7 +545,7 @@ bool EstimationStateManager::IsPropertiesSetupCorrect()
          throw EstimatorException("Error: '" + solveForNames[i] +"' parameter which is specified in AddSolverFor was not defined in your script.\n");
       else
       {
-         if(solveForIDs[i] == NULL)
+         if(solveForIDs[i] == -1)  // Changed from NULL to clear warning
             throw EstimatorException("Error: '" + solveForNames[i] +"' paramter which is specified in AddSolverFor was not defined in your script.\n");
       }
    }
@@ -709,6 +720,18 @@ bool EstimationStateManager::BuildState()
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage("Entered BuildState()\n");
+      MessageInterface::ShowMessage("   ESM now has %d objects, %d "
+            "solveForObjects, and %d solveFors\n", objects.size(), solveForObjects.size(),
+            solveForIDNames.size());
+
+      MessageInterface::ShowMessage("   There are %d elements:\n", elements.size());
+      for (std::map<GmatBase*, StringArray*>::iterator i = elements.begin();
+            i != elements.end(); ++i)
+      {
+         MessageInterface::ShowMessage("      %s, with %d components\n", i->first->GetName().c_str(), i->second->size());
+         for (UnsignedInt j = 0; j < i->second->size(); ++j)
+            MessageInterface::ShowMessage("         %s\n", i->second->at(j).c_str());
+      }
    #endif
 
    // Determine the size of the propagation state vector
@@ -1284,6 +1307,13 @@ Integer EstimationStateManager::SortVector()
    {
       current  = i->first;
       elementList = i->second;
+
+      #ifdef DEBUG_OBJECT_MAPPING
+         MessageInterface::ShowMessage("Working with %s, %d elements:\n",
+               current->GetName().c_str(), elementList->size());
+         for (UnsignedInt m = 0; m < elementList->size(); ++m)
+            MessageInterface::ShowMessage("   %s\n", elementList->at(m).c_str());
+      #endif
 
       for (StringArray::iterator j = elementList->begin();
             j != elementList->end(); ++j)
