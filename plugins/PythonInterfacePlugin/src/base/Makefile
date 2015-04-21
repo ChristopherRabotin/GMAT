@@ -30,7 +30,7 @@ CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti \
            $(MAC_ARCHITECTURE_FLAGS)
 else
 TARGET = ../lib/libPythonInterface$(SHARED_EXTENSION)
-CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -fPIC
+CPPFLAGS = -fno-strict-aliasing -funroll-loops -fno-rtti -fPIC $(PYTHON_INCLUDE)
 endif
                    
                    
@@ -71,8 +71,7 @@ INCLUDES = \
           -I$(GMAT_CODE_LOCATION)/base/attitude \
           -I$(GMAT_CODE_LOCATION)/base/hardware \
           -I$(GMAT_CODE_LOCATION)/base/parameter \
-          -I$(GMAT_CODE_LOCATION)/base/spacecraft \
-          -I$(PYTHON_INCLUDE_LOCATION)
+          -I$(GMAT_CODE_LOCATION)/base/spacecraft
 
 ifeq ($(MAC_SPECIFIC), 1)
 $(TARGET): $(OBJECTS)
