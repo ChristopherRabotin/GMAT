@@ -113,7 +113,7 @@ protected:
    std::vector<PhysicalModel *> 
                         *forces;
    /// Name of the function this FunctionManager manages
-   std::string          fName;
+   std::string          functionName;
    /// the function that this FunctionManager manages
    Function             *currentFunction;
    /// the list of passing input strings for this call of the function
