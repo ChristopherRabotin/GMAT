@@ -161,6 +161,8 @@ protected:
    // @todo - should these next four items remain here or move to GmatFunction??
    /// the function control sequence
    GmatCommand          *fcs;
+   /// have the commands in the FCS been initialized?
+   bool                 fcsInitialized;
    /// have the commands in the FCS been finalized?
    bool                 fcsFinalized;
    /// Map to hold objects created in function
@@ -180,7 +182,7 @@ protected:
    bool                 scriptErrorFound;
    /// the flag indicating local objects are initialized
    bool                 objectsInitialized;
-   
+      
    enum
    {
       FUNCTION_PATH = GmatBaseParamCount,

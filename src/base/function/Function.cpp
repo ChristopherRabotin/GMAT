@@ -86,6 +86,7 @@ Function::Function(const std::string &typeStr, const std::string &name) :
    internalCoordSys   (NULL),
    forces             (NULL),
    fcs                (NULL),
+   fcsInitialized     (false),
    fcsFinalized       (false),
    validator          (NULL),
    wasFunctionBuilt   (false),
@@ -155,6 +156,7 @@ Function::Function(const Function &f) :
    internalCoordSys   (NULL),
    forces             (NULL),
    fcs                (NULL),
+   fcsInitialized     (f.fcsInitialized),
    fcsFinalized       (f.fcsFinalized),
    functionObjectMap  (f.functionObjectMap), // Do I want to do this?
    validator          (f.validator),
@@ -193,6 +195,7 @@ Function& Function::operator=(const Function &f)
    internalCoordSys   = f.internalCoordSys;
    forces             = f.forces;
    fcs                = NULL;
+   fcsInitialized     = f.fcsInitialized;
    fcsFinalized       = f.fcsFinalized;
    validator          = f.validator;
    wasFunctionBuilt   = f.wasFunctionBuilt;
