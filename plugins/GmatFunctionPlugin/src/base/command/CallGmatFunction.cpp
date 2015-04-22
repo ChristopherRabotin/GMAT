@@ -111,28 +111,33 @@ GmatBase* CallGmatFunction::Clone() const
 bool CallGmatFunction::Initialize()
 {
    #ifdef DEBUG_CALL_FUNCTION_INIT
-      MessageInterface::ShowMessage
-         ("CallGmatFunction::Initialize() this=<%p> entered, command = '%s'\n   "
-          "function type is '%s', callingFunction is '%s'\n", this,
-          GetGeneratingString(Gmat::NO_COMMENTS).c_str(), mFunction->GetTypeName().c_str(),
-          callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("CallGmatFunction::Initialize() this=<%p> entered, command = '%s'\n   "
+       "function type is '%s', callingFunction is '%s'\n", this,
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), mFunction->GetTypeName().c_str(),
+       callingFunction? (callingFunction->GetFunctionName()).c_str() : "NULL");
+   MessageInterface::ShowMessage("   isGmatFunction = %d\n", isGmatFunction);
    #endif
-      
+   
    bool rv = CallFunction::Initialize();
    
    // Handle additional initialization for GmatFunctions
    if (isGmatFunction)
    {
-      #ifdef DEBUG_GMAT_FUNCTION_INIT
-         MessageInterface::ShowMessage
-            ("CallGmatFunction::Initialize: Initializing GmatFunction '%s'\n",
-             mFunction->GetName().c_str());
+      #ifdef DEBUG_CALL_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("CallGmatFunction::Initialize() Setting solarSys, forces, gom to "
+          "function manager '%s'\n", mFunction->GetName().c_str());
       #endif
       fm.SetSolarSystem(solarSys);
       fm.SetTransientForces(forces);
       fm.SetGlobalObjectMap(globalObjectMap);
    }
    
+   #ifdef DEBUG_CALL_FUNCTION_INIT
+   MessageInterface::ShowMessage
+      ("CallGmatFunction::Initialize() this=<%p> returning %d\n", this, rv);
+   #endif
    return rv;
 }
 
@@ -152,7 +157,7 @@ bool CallGmatFunction::Execute()
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== CallGmatFunction::Execute() entered, '%s' Count = %d\n",
+      (">>>>> CALL TRACE: CallGmatFunction::Execute() entered, '%s' Count = %d\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
    
@@ -204,7 +209,7 @@ bool CallGmatFunction::Execute()
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage
-      ("=== CallGmatFunction::Execute() exiting, '%s' Count = %d, Run Time: %f seconds\n",
+      (">>>>> CALL TRACE: CallGmatFunction::Execute() exiting, '%s' Count = %d, Run Time: %f seconds\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
    #endif
    

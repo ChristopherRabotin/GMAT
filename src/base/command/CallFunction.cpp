@@ -1043,7 +1043,7 @@ bool CallFunction::Initialize()
    
    #ifdef DEBUG_CALL_FUNCTION_INIT
    MessageInterface::ShowMessage
-      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
+      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s'\n   "
        "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
        mFunctionPathAndName.c_str());
    #endif
@@ -1067,7 +1067,7 @@ bool CallFunction::Execute()
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== CallFunction::Execute() entered, '%s' Count = %d\n",
+      (">>>>> CallFunction::Execute() entered, '%s' Count = %d\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
    

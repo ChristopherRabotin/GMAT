@@ -54,9 +54,8 @@
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_SEPARATE
 //#define DEBUG_GEN_STRING 1
-//#define DEBUG_IS_FUNCTION
+//#define DEBUG_FUNCTION
 //#define DEBUG_INTERPRET_PREFACE
-//#define DEBUG_CMD_CALLING_FUNCTION
 //#define DEBUG_COMMAND_SUMMARY_STATE
 //#define DEBUG_COMMAND_SUMMARY_REF_DATA
 //#define DEBUG_COMMAND_SUMMARY_TYPE
@@ -64,6 +63,10 @@
 //#define DEBUG_SUMMARY_STRINGS
 //#define DEBUG_DEFSTR
 //#define DEBUG_CMD_SUMMARY
+
+#ifdef DEBUG_FUNCTION
+#include "Function.hpp"
+#endif
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -523,6 +526,13 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 void GmatCommand::SetCurrentFunction(Function *function)
 {
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("GmatCommand::SetCurrentFunction() <%p>[%s]'%s' setting <%p>'%s' to "
+       "currentFunction\n", this, GetTypeName().c_str(),
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), function,
+       function ? function->GetName().c_str() : "NULL");
+   #endif
    currentFunction = function;
 }
 
@@ -553,7 +563,7 @@ Function* GmatCommand::GetCurrentFunction()
 //------------------------------------------------------------------------------
 void GmatCommand::SetCallingFunction(FunctionManager *fm)
 {
-   #ifdef DEBUG_CMD_CALLING_FUNCTION
+   #ifdef DEBUG_FUNCTION
       MessageInterface::ShowMessage(
             "NOW setting calling function on command of type %s\n",
             (GetTypeName()).c_str());

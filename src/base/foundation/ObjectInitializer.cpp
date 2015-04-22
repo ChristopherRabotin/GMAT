@@ -178,8 +178,8 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    callCount++;
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== ObjectInitializer::InitializeObjects() entered, Count = %d\n",
-       callCount);
+      (">>>>> CALL TRACE: ObjectInitializer::InitializeObjects() entered, Count = %d, objType = %d\n",
+       callCount, objType);
    #endif
    
    #ifdef DEBUG_INITIALIZE_OBJ
@@ -483,8 +483,8 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage
-      ("=== ObjectInitializer::InitializeObjects() Count = %d, Run Time: %f seconds\n",
-       callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
+      (">>>>> CALL TRACE: ObjectInitializer::InitializeObjects() leaving, Count = %d, "
+       "Run Time: %f seconds\n", callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
    #endif
    
    return true;
