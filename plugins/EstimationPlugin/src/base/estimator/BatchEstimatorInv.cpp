@@ -34,6 +34,7 @@
 //#define DEBUG_WEIGHTS
 //#define DEBUG_O_MINUS_C
 //#define DEBUG_SCHUR
+//#define DEBUG_INVERSION
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -816,7 +817,19 @@ void BatchEstimatorInv::Estimate()
       } 
       catch (...)
       {
-         throw EstimatorException("Error: Normal matrix is sigular\n");
+         #ifdef DEBUG_INVERSION
+            MessageInterface::ShowMessage("Information matrix:\n");
+            for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
+            {
+               MessageInterface::ShowMessage("      [");
+               for (UnsignedInt j = 0; j < information.GetNumColumns(); ++j)
+               {
+                  MessageInterface::ShowMessage(" %.12lf ", information(i,j));
+               }
+               MessageInterface::ShowMessage("]\n");
+            }
+         #endif
+         throw EstimatorException("Error: Normal matrix is singular\n");
       }
    }
 
@@ -826,7 +839,7 @@ void BatchEstimatorInv::Estimate()
          MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
       MessageInterface::ShowMessage("]\n");
 
-      MessageInterface::ShowMessage("   covarian matrix:\n");
+      MessageInterface::ShowMessage("   covariance matrix:\n");
       for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
       {
          MessageInterface::ShowMessage("      [");
