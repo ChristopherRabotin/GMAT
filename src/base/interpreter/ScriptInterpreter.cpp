@@ -489,12 +489,15 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    }
    
    // Now function file is ready to parse
-   functionFilename = fileName;
+   // Since actual function path may have been changed in CheckFunctionDefinition(),
+   // get updated function path (LOJ: 2015.04.15)
+   //functionFilename = fileName;
+   functionFilename = currentFunction->GetFunctionPathAndName();
    beginMissionSeqFound = false;
    continueOnError = true;
    bool retval = false;
    // Set input stream to the ReadWriter
-   std::ifstream funcFile(fileName.c_str());
+   std::ifstream funcFile(functionFilename.c_str());
    SetInStream(&funcFile);
    GmatCommand *noOp = new NoOp;
    
@@ -544,12 +547,12 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
       #if DBGLVL_GMAT_FUNCTION > 0
       MessageInterface::ShowMessage
          ("ScriptInterpreter::InterpretGmatFunction(filename) returning <%p><NoOp> for "
-          "function '%s'\n", noOp, fileName.c_str());
+          "function '%s'\n", noOp, functionFilename.c_str());
       #endif
       
       #if DBGLVL_GMAT_FUNCTION > 1
       std::string fcsStr = GmatCommandUtil::GetCommandSeqString(noOp, true, true);
-      MessageInterface::ShowMessage("---------- FCS of '%s'\n", fileName.c_str());
+      MessageInterface::ShowMessage("---------- FCS of '%s'\n", functionFilename.c_str());
       MessageInterface::ShowMessage(fcsStr); //Notes: Do not use %s for command string
       #endif
       
@@ -560,7 +563,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
       #if DBGLVL_GMAT_FUNCTION > 0
       MessageInterface::ShowMessage
          ("ScriptInterpreter::InterpretGmatFunction() returning NULL for function "
-          "<%p>'%s'\n", currentFunction, fileName.c_str());
+          "<%p>'%s'\n", currentFunction, functionFilename.c_str());
       #endif
       delete noOp;
       return NULL;

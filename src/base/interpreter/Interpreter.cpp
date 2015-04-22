@@ -9804,8 +9804,9 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
-      ("Interpreter::CheckFunctionDefinition() function=<%p>, fullCheck=%d\n   "
-       "funcPath=<%s>\n", function, fullCheck, funcPath.c_str());
+      ("Interpreter::CheckFunctionDefinition() function=<%p>'%s', fullCheck=%d\n   "
+       "funcPath=<%s>\n", function, function ? function->GetName().c_str() : "NULL",
+       fullCheck, funcPath.c_str());
    #endif
    
    debugMsg = "In CheckFunctionDefinition()";
@@ -9819,24 +9820,46 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       retval = false;;
    }
    
+   std::string fPath = funcPath;
+   std::string fName = function->GetName();
+   
    // check if function path exist
    if (!GmatFileUtil::DoesFileExist(funcPath))
    {
-      InterpreterException ex
-         ("Nonexistent GmatFunction file \"" + funcPath +
-          "\" referenced in \"" + function->GetName() + "\"\n");
-      HandleError(ex, false);
-      retval = false;
+      // Check FileManager if function is in the GmatFunction path
+      fPath = FileManager::Instance()->GetGmatFunctionPath(fName);
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   fPath = '%s'\n", fPath.c_str());
+      #endif
+      if (fPath != "")
+      {
+         fPath = fPath + fName + ".gmf";
+         // Write warning about using new GmatFunction path
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Cannot find GmatFunction file \"%s\" but it was "
+             "found in \"%s\".", funcPath.c_str(), fPath.c_str());
+         MessageInterface::ShowMessage
+            ("  So setting function path of '%s' to \"%s\"\n", fName.c_str(), fPath.c_str());
+         function->SetStringParameter("FunctionPath", fPath);
+      }
+      else
+      {
+         InterpreterException ex
+            ("Cannot find GmatFunction file \"" + funcPath +
+             "\" referenced in the caller of \"" + fName + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+      }
    }
    
    // check for no extension of .gmf or wrong extension
-   StringArray parts = GmatStringUtil::SeparateBy(funcPath, ".");
+   StringArray parts = GmatStringUtil::SeparateBy(fPath, ".");
    if ((parts.size() == 1) ||
        (parts.size() == 2 && parts[1] != "gmf"))
    {
       InterpreterException ex
-         ("The GmatFunction file \"" + funcPath + "\" has no or incorrect file "
-          "extension referenced in \"" + function->GetName() + "\"\n");
+         ("The GmatFunction file \"" + fPath + "\" has no or incorrect file "
+          "extension referenced in \"" + fName + "\"\n");
       HandleError(ex, false);
       retval = false;
    }
@@ -9852,7 +9875,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
    }
    
    // check function declaration
-   std::ifstream inStream(funcPath.c_str());
+   std::ifstream inStream(fPath.c_str());
    std::string line;
    StringArray inputArgs;
    StringArray outputArgs;
@@ -9864,7 +9887,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("Error reading the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9909,7 +9932,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("Invalid output argument list found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9932,7 +9955,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The \"function\" is missing in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9960,7 +9983,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("Invalid output argument list found in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -9971,7 +9994,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("The output argument list is empty in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -9991,7 +10014,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The function name not found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -10017,7 +10040,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The invalid input argument list found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -10042,8 +10065,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The function name \"" + fileFuncName + "\" does not match with the "
-             "GmatFunction file name \"" + funcPath + "\" referenced in \"" +
-             function->GetName() + "\"\n");
+             "GmatFunction file name \"" + fPath + "\" referenced in \"" +
+             fName + "\"\n");
          HandleError(ex, false);
          retval = false;
       }
@@ -10069,7 +10092,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("Invalid input argument list found in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -10079,7 +10102,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("The input argument list is empty in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -10115,7 +10138,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
                
                InterpreterException ex
                   (errMsg + " found in the GmatFunction file \"" +
-                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                   fPath + "\" referenced in \"" + fName + "\"\n");
                HandleError(ex, false);
                retval = false;
                break;
@@ -10129,8 +10152,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
    if (line == "")
    {
       InterpreterException ex
-         ("The GmatFunction file \"" + funcPath + "\" referenced in \"" +
-          function->GetName() + "\" is empty\n");
+         ("The GmatFunction file \"" + fPath + "\" referenced in \"" +
+          fName + "\" is empty\n");
       HandleError(ex, false);
       retval = false;
    }
@@ -10151,7 +10174,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             (errMsg + " found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
       }
