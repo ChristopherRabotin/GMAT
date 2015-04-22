@@ -37,6 +37,7 @@
 //#define DEBUG_TIMESTEP
 //#define DEBUG_EVENT
 //#define DEBUG_INITIALIZE
+//#define DEBUG_CLONED_PARAMETER UPDATES
 
 //------------------------------------------------------------------------------
 // static data
@@ -1535,6 +1536,33 @@ void Simulator::UpdateClonedObject(GmatBase *obj)
       return;
    throw SolverException("To do: implement Simulator::UpdateClonedObject "
          "for " + obj->GetTypeName() + " objects");
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * Added method to remove message in the Message window.
+ *
+ * The current implementation needs to be updated to actually process parameters
+ * when they are updated in the system.  For now, it is just overriding the base
+ * class "do nothing" method so that the message traffic is not shown to the
+ * user.
+ *
+ * Turn on the debug to figure out the updates being requested.
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void Simulator::UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+{
+#ifdef DEBUG_CLONED_PARAMETER UPDATES
+   MessageInterface::ShowMessage("Simulator updating parameter %d (%s) using "
+         "object %s\n", updatedParameterId, obj->GetParameterText(updatedParameterId).c_str(),
+         obj->GetName().c_str());
+#endif
 }
 
 

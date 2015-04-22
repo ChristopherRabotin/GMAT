@@ -123,6 +123,8 @@ public:
 
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
+   virtual void         UpdateClonedObjectParameter(GmatBase *obj,
+                              Integer updatedParameterId);
 
 protected:
    /// Enumeration for the scripted parameters on the Simulator
