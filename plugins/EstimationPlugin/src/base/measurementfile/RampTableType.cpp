@@ -244,7 +244,7 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
 
    if (retval == false)
    {
-      throw MeasurementException("GMAT cann't open ramp table file "+streamName+"\n");
+      throw MeasurementException("GMAT can't open ramp table file "+streamName+"\n");
    }
    return retval;
 }
