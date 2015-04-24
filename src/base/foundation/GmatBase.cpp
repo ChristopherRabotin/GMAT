@@ -179,6 +179,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    parameterCount             (GmatBaseParamCount),
    typeName                   (typeStr),
    instanceName               (nomme),
+   instanceFullName           (nomme),                   // made changes by TUAN NGUYEN
    type                       (typeId),
    ownedObjectCount           (0),
    isInitialized              (false),
@@ -262,6 +263,7 @@ GmatBase::GmatBase(const GmatBase &a) :
     typeName                  (a.typeName),
     //instanceName    ("CopyOf"+a.instanceName),
     instanceName              (a.instanceName),
+    instanceFullName          (a.instanceFullName),          // made changes by TUAN NGUYEN
     type                      (a.type),
     ownedObjectCount          (a.ownedObjectCount),
     generatingString          (a.generatingString),
@@ -4801,6 +4803,21 @@ bool GmatBase::IsCommandModeAssignable() const
 bool GmatBase::IsParameterCommandModeSettable(const Integer id) const
 {
    return false;
+}
+
+
+// made changes by TUAN NGUYEN
+const std::string GmatBase::GetFullName()
+{
+   return instanceFullName;
+}
+
+
+// made changes by TUAN NGUYEN
+bool GmatBase::SetFullName(const std::string name)
+{
+   instanceFullName = name;
+   return true;
 }
 
 

@@ -85,6 +85,10 @@ public:
                                 const std::string &oldName = "");
    virtual bool         SetName(const char *who,
                                 const std::string &oldName = "");
+
+   virtual const std::string  GetFullName();                                       // made changes by TUAN NGUYEN
+   virtual bool         SetFullName(const std::string name);                       // made changes by TUAN NGUYEN
+
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
@@ -523,6 +527,10 @@ protected:
    std::string         typeName;
    /// Name of the object -- empty if it is nameless
    std::string         instanceName;
+   
+   /// Full name of this object                               // made changes by TUAN NGUYEN
+   std::string         instanceFullName;                      // made changes by TUAN NGUYEN
+
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance
