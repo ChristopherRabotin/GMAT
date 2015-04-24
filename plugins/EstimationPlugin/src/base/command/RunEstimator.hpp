@@ -118,11 +118,9 @@ protected:
    virtual void CleanUpEvents();
 
 private:
-//   bool needReinitialize;                            // made changes by TUAN NGUYEN
    bool delayInitialization;                           // made changes by TUAN NGUYEN
 
    void LoadSolveForsToESM();                          // made changes by TUAN NGUYEN
-   void LoadSolveForsToESM_Old();                      // made changes by TUAN NGUYEN
 };
 
 #endif /* RunEstimator_hpp */

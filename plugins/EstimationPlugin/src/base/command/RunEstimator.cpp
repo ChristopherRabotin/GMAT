@@ -491,7 +491,7 @@ bool RunEstimator::Initialize()
 //
 //
 //   // Load solve for objects to esm                                   // made changes by TUAN NGUYEN
-//   LoadSolveForsToESM_Old();                                          // made changes by TUAN NGUYEN
+//   LoadSolveForsToESM();                                              // made changes by TUAN NGUYEN
 //
 //   // Pass in the objects
 //   StringArray objList = esm->GetObjectList("");
@@ -614,46 +614,26 @@ bool RunEstimator::Initialize()
 //}
 
 
-void RunEstimator::LoadSolveForsToESM_Old()
+void RunEstimator::LoadSolveForsToESM()
 {
 #ifdef DEBUG_LOAD_SOLVEFORS
    MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  enter\n");
 #endif
 
-   // 1. Get list of solve-for objects
-   //ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();
+   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+   StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();
+
    ObjectMap objectmap = GetConfiguredObjectMap();
-   ObjectArray solveforObjList;
+
    for (ObjectMap::iterator i = objectmap.begin(); i != objectmap.end(); ++i)
    {
-      // For each GMAT object:
-      // 1.1 Get a list of solve-for parameter name. 
-      //     If the object has no SolveFors parameters or the list is empty, skip to the next object
-      StringArray solveforNames;
-      try
+      if (find(names.begin(), names.end(), (*i).first) != names.end())
       {
-         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");
+         // Set solve-for for all participants. If participant does not have solve-for defined in it, 
+         // esm->SetProperty rejects the set request and return false otherwise return true
+         esm->SetProperty((*i).second);
       }
-      catch(...)
-      {
-         // If object has no SolveFors parameter, skip it
-         continue;
-      }
-      if (solveforNames.empty())
-         continue;
-
-      // 1.2 Initialize the object before processing
-      if ((*i).second->IsInitialized() == false)
-         (*i).second->Initialize();
-
-      // 1.3 Push object to an object array for processing
-      solveforObjList.push_back((*i).second);
    }
-
-   // 2. Setup solve-for parameters
-   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
-   for(UnsignedInt i= 0; i < solveforObjList.size(); ++i)
-      esm->SetProperty(solveforObjList[i]);
 
 #ifdef DEBUG_LOAD_SOLVEFORS
    MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  exit\n");
@@ -662,44 +642,43 @@ void RunEstimator::LoadSolveForsToESM_Old()
 }
 
 
-void RunEstimator::LoadSolveForsToESM()
-{
-   // 1. Get list of solve-for objects
-   //ObjectMap* objectmap = Moderator::Instance()->GetConfiguredObjectMap();
-   ObjectMap objectmap = GetConfiguredObjectMap();
-   ObjectArray objsList;
-
-   for (ObjectMap::iterator i = objectmap.begin(); i != objectmap.end(); ++i)
-   {
-      // For each GMAT object:
-      // 1.1 Get a list of solve-for parameter name. 
-      //     If the object has no SolveFors parameters or the list is empty, skip to the next object
-      StringArray solveforNames;
-      try
-      {
-         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");
-      }
-      catch(...)
-      {
-         // If object has no SolveFors parameter, skip it
-         continue;
-      }
-      if (solveforNames.empty())
-         continue;
-
-      // 1.2 Initialize the object before processing
-      if ((*i).second->IsInitialized() == false)
-         (*i).second->Initialize();
-
-      // 1.3 Push object to an object array for processing
-      objsList.push_back((*i).second);
-   }
-
-   // 2. Setup solve-for parameters
-   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
-   for(UnsignedInt i= 0; i < objsList.size(); ++i)
-      esm->SetProperty(objsList[i]);
-}
+//void RunEstimator::LoadSolveForsToESM()
+//{
+//   // 1. Get list of solve-for objects
+//   ObjectMap objectmap = GetConfiguredObjectMap();
+//   ObjectArray objsList;
+//
+//   for (ObjectMap::iterator i = objectmap.begin(); i != objectmap.end(); ++i)
+//   {
+//      // For each GMAT object:
+//      // 1.1 Get a list of solve-for parameter name. 
+//      //     If the object has no SolveFors parameters or the list is empty, skip to the next object
+//      StringArray solveforNames;
+//      try
+//      {
+//         solveforNames = (*i).second->GetStringArrayParameter("SolveFors");
+//      }
+//      catch(...)
+//      {
+//         // If object has no SolveFors parameter, skip it
+//         continue;
+//      }
+//      if (solveforNames.empty())
+//         continue;
+//
+//      // 1.2 Initialize the object before processing
+//      if ((*i).second->IsInitialized() == false)
+//         (*i).second->Initialize();
+//
+//      // 1.3 Push object to an object array for processing
+//      objsList.push_back((*i).second);
+//   }
+//
+//   // 2. Setup solve-for parameters
+//   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+//   for(UnsignedInt i= 0; i < objsList.size(); ++i)
+//      esm->SetProperty(objsList[i]);
+//}
 
 
 //------------------------------------------------------------------------------
@@ -751,19 +730,35 @@ bool RunEstimator::PreExecution()
       EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
       StringArray participants = measman->GetParticipantList();
       esm->SetParticipantList(participants);
-
+      
       // Load solve for objects to esm                                   // made changes by TUAN NGUYEN
-      LoadSolveForsToESM_Old();                                          // made changes by TUAN NGUYEN
+      LoadSolveForsToESM();                                              // made changes by TUAN NGUYEN
 
       // Pass in the objects
       StringArray objList = esm->GetObjectList("");
       for (UnsignedInt i = 0; i < objList.size(); ++i)
       {
-         GmatBase* obj = FindObject(objList[i]);
-         if (obj != NULL)
+         std::string propName = objList[i];
+         std::string objName = propName;
+         std::string refObjectName = "";
+         UnsignedInt loc = propName.find('.');
+         if (loc != propName.npos)
          {
-            esm->SetObject(obj);
+            objName = propName.substr(0, loc);
+            refObjectName = propName.substr(loc+1);
          }
+
+         GmatBase* obj = FindObject(objName);
+         // if referent object is used, set referent object to be solve-for object 
+         // ex: propName = "CAN.ErrorModel1". Referent object is "ErrorModel1". It needs to set object ErrorModel1 to estimation state mananger   
+         if (refObjectName != "")
+         { 
+            GmatBase* refObj = obj->GetRefObject(Gmat::UNKNOWN_OBJECT, propName);         // made changes by TUAN NGUYEN
+            obj = refObj;
+         }
+
+         if (obj != NULL)
+            esm->SetObject(obj);
       }
 
       esm->BuildState();
