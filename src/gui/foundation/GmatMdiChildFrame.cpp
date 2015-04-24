@@ -162,8 +162,11 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
       MessageInterface::ShowMessage
          ("GmatMdiChildFrame() destructor calling UpdateGuiItem()\n");
       #endif
+// Fix for the access violation on exit on Linux
+#ifndef __linux
       UpdateGuiItem(0, 0);
-   #endif
+#endif
+    #endif
       
    #ifdef DEBUG_MDI_CHILD_FRAME
    MessageInterface::ShowMessage

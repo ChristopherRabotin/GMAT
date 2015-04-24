@@ -23,6 +23,8 @@
 #include "FileUtil.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_PARSING
+
 
 //------------------------------------------------------------------------------
 // FileReader(const std::string& theTypeName, const std::string& theName) :
@@ -164,7 +166,7 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
             fileStringMap[theField].c_str());
    #endif
 
-   UnsignedInt start = 0, end;
+   size_t start = 0, end;
    if (theField != "")
       start = theLine.find(fileStringMap[theField]);
 
@@ -181,6 +183,12 @@ bool FileReader::ParseRealValue(const Integer i, const std::string& theField)
       } while ((end < theLine.length()) && (theLine[end] != ' '));
 
       std::string theData = theLine.substr(start, end - start);
+
+      #ifdef DEBUG_PARSING
+         MessageInterface::ShowMessage("   Details: \"%s\" is the string built "
+               "from [%d, %d] of \"%s\"\n", theData.c_str(), start, end,
+               theLine.c_str());
+      #endif
 
       // Change occurrences of "D" or "d" to "e" to account for FORTRAN doubles
       for (UnsignedInt i = 0; i < theData.length(); ++i)
@@ -319,12 +327,17 @@ bool FileReader::ParseStringValue(const Integer i, const std::string& theField)
             fileStringMap[theField].c_str());
    #endif
 
-   UnsignedInt start = 0, end;
+   size_t start = 0, end;
    if (theField != "")
       start = theLine.find(fileStringMap[theField]);
 
    if (start != std::string::npos)
    {
+      #ifdef DEBUG_PARSING
+         MessageInterface::ShowMessage("String \"%s\" found at pos %d in line \"%s\"\n",
+               fileStringMap[theField].c_str(), start, theLine.c_str());
+      #endif
+
       start += fileStringMap[theField].length() + 1;
 
       while (theLine[start] == ' ')
@@ -338,7 +351,8 @@ bool FileReader::ParseStringValue(const Integer i, const std::string& theField)
 
       #ifdef DEBUG_PARSING
          MessageInterface::ShowMessage("The data for field %s is set to "
-               "\"%s\"\n", theField.c_str(), theData.c_str());
+               "\"%s\" from start = %d, end = %d\n", theField.c_str(),
+               theData.c_str(), start, end);
       #endif
       
       // To be valid the string must contain some type of data

@@ -2017,7 +2017,7 @@ bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsLi
       md.SetDefinitionString(strandsList[i], typesList[i]);
       trackingConfigs.push_back(md);
       trackingConfigs[i].GetDefinitionString();
-      MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString());
+      MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString().c_str());
    }
 
    // This step was removed due to those participants were initialized in sand box
