@@ -273,36 +273,30 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
          // Epoch is not a valid parameter
          epochIDs.push_back(-1);
       }
-   }
+   
 
-     // Moved lower because it calling SetObject with multiple solve for
-     // parameters was resulting in duplicate entries.
-//   }
+      #ifdef DEBUG_STATE_CONSTRUCTION
+         MessageInterface::ShowMessage("Object set; current points to <%s,%p>\n",
+            current->GetName().c_str(), current);
+      #endif
 
-   #ifdef DEBUG_STATE_CONSTRUCTION
-      MessageInterface::ShowMessage("Object set; current points to <%s,%p>\n",
-         current->GetName().c_str(), current);
-   #endif
-
-   std::string objFullName = obj->GetFullName();      
-   for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
-   {
-      // Set the object property
-      if (solveForObjectNames[i] == objFullName)
+      std::string objFullName = obj->GetFullName();      
+      for (UnsignedInt i = 0; i < solveForObjectNames.size(); ++i)
       {
-         solveForObjects[i] = obj;
+         // Set the object property
+         if (solveForObjectNames[i] == objFullName)
+         {
+            solveForObjects[i] = obj;
 
-         // Set the property ID
-         Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
-         if (id == -1)
-            throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
-         solveForIDs[i] = id;
-         elements[obj]->push_back(solveForIDNames[i]);
-         retval = true;
+            // Set the property ID
+            Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
+            if (id == -1)
+               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
+            solveForIDs[i] = id;
+            elements[obj]->push_back(solveForIDNames[i]);
+            retval = true;
+         }
       }
-   }
-
-   // Close was moved to here
    }
 
    #ifdef DEBUG_ESM_LOADING
