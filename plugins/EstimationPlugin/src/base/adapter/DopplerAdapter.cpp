@@ -948,7 +948,6 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
  * @return The derivative vector
  */
 //------------------------------------------------------------------------------
-#include "GroundstationInterface.hpp"
 const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       GmatBase* obj, Integer id)
 {
@@ -958,7 +957,7 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
 
    Integer parmId = GetParmIdFromEstID(id, obj);
    #ifdef DEBUG_DERIVATIVE_CALCULATION
-      MessageInterface::ShowMessage("Enter DopplerAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+      MessageInterface::ShowMessage("Enter DopplerAdapter::CalculateMeasurementDerivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n", obj->GetFullName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
    
    // Get parameter name specified by id
