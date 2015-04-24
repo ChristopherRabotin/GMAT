@@ -1630,7 +1630,8 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
 {
    std::stringstream ss;
    
-   ss << infor->objectName << ".";
+   //ss << infor->objectName << ".";                        // made changes by TUAN NGUYEN
+   ss << infor->objectFullName << ".";                      // made changes by TUAN NGUYEN
    if (infor->elementName == "CartesianState")
    {
       if (isInternalCS)
