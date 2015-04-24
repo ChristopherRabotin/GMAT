@@ -91,15 +91,6 @@ bool PythonInterface::PyFinalize()
    return isPythonInitialized;
 }
 
-Integer PythonInterface::PyPutRealArray()
-{
-   return 0;
-}
-
-Integer PythonInterface::PyGetRealArray()
-{
-   return 0;
-}
 
 void PythonInterface::PyPathSep()
 {
@@ -120,12 +111,13 @@ void PythonInterface::PyPathSep()
 void PythonInterface::PyAddModulePath(const StringArray& path)
 {
    wchar_t *s3K = new wchar_t[8192];
-
    char *destPath = new char[8192];
    char *p = new char[128];
 
-#ifdef IS_PY3K
+   // Platform path seperator delimiter
    PyPathSep();
+
+#ifdef IS_PY3K
    //convert wchar_t to char
    wcstombs(destPath, Py_GetPath(), 8192);
    //concatenate the path delimiter (unix , windows and mac)

@@ -23,10 +23,6 @@ public:
    bool PyInitialize();
    /// Unload Python modules
    bool PyFinalize();
-   /// Put Real Array
-   Integer PyPutRealArray();
-   /// Get Real Array
-   Integer PyGetRealArray();
    /// Add Module path to sys.path
    void PyAddModulePath(const StringArray& path);
 	
