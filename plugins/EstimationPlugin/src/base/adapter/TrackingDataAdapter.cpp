@@ -1304,7 +1304,7 @@ bool TrackingDataAdapter::Initialize()
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("End Initializing a Tracking Data Adapter <%p>\n", this);
    #endif
-
+   
    return retval;
 }
 
@@ -1528,54 +1528,83 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
          last = last->next;
       
       // Specify ground station
-      SpacePoint* gs = NULL;
+      SpacePoint* gs = NULL;            // ground station 
+      GmatBase* sc = NULL;              // spacecraft
       if ((first->tNode->IsOfType(Gmat::GROUND_STATION)) && (last->rNode->IsOfType(Gmat::GROUND_STATION) == false))
-         gs = first->tNode;
-      else if (last->rNode->IsOfType(Gmat::GROUND_STATION))
-         gs = last->rNode;
-
-      // Search for ErrorModel associated with measType and numTrip
-      ObjectArray errmodels = ((GroundstationInterface*)gs)->GetRefObjectArray("ErrorModel");
-      if (errmodels.size() == 0)
-         throw MeasurementException("Error: ErrorModel mismatched. No error model was set to GroundStation " + gs->GetName() + ".ErrorModels\n");
-
-      UnsignedInt k;
-      for (k = 0; k < errmodels.size(); ++k)
       {
-         if ((errmodels[k]->GetStringParameter("Type") == measType)&&(errmodels[k]->GetIntegerParameter("Trip") == numTrip))
-            break;
+         gs = first->tNode;
+         sc = first->rNode;
       }
-      if (k >= errmodels.size())
+      else if (last->rNode->IsOfType(Gmat::GROUND_STATION))
+      {
+         gs = last->rNode;
+         sc = last->tNode;
+      }
+
+      // Search for ErrorModel associated with measType, numTrip,  and spacecraft (It has to serach in GroundStation::errorModelMap)
+      std::map<std::string,ObjectArray> errmodelMap = ((GroundstationInterface*)gs)->GetErrorModelMap();
+      ErrorModel* errmodel = NULL;
+      for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); mapIndex != errmodelMap.end(); ++mapIndex)
+      {
+         if (sc->GetName() == mapIndex->first)
+         {
+            for(UnsignedInt j = 0; j < mapIndex->second.size(); ++j)
+            {
+               if ((mapIndex->second.at(j)->GetStringParameter("Type") == measType)&&(mapIndex->second.at(j)->GetIntegerParameter("Trip") == numTrip))
+               {
+                  errmodel = (ErrorModel*) mapIndex->second.at(j);
+                  break;
+               }
+            }
+
+            if (errmodel != NULL)
+               break;
+         }
+      }
+
+      // if not found, throw an error message
+      if (errmodel == NULL)
       {
          std::stringstream ss;
          ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
 
+
       bias = 0.0;
       if (forObjects.size() > 0)
       {
+         //MessageInterface::ShowMessage("TrackingDataAdapter %s: List of all forObjects (size = %d):\n", GetName().c_str(), forObjects.size());
+         //for (UnsignedInt j = 0; j < forObjects.size(); ++j)
+         //   MessageInterface::ShowMessage("%d:%s\n", j, forObjects[j]->GetFullName().c_str());
+
          // This is case for running estimation: solve-for objects are stored in forObjects array
          // Search for object with the same name with errmodels[k]
          UnsignedInt j;
          for (j = 0; j < forObjects.size(); ++j)
          {
-            if (forObjects[j]->GetName() == errmodels[k]->GetName())
+            //if (forObjects[j]->GetName() == errmodels[k]->GetName())                 // made changes by TUAN NGUYEN
+            if (forObjects[j]->GetFullName() == errmodel->GetFullName())               // made changes by TUAN NGUYEN
                break;
          }
 
          // Get Bias from that error model
          if (j >= forObjects.size())
-            bias = errmodels[k]->GetRealParameter(biasName);          // bias is a consider parameter
+         {
+            bias = errmodel->GetRealParameter(biasName);          // bias is a consider parameter
+            //MessageInterface::ShowMessage("TrackingDataAdapter::ComputeMeasurementBias(...): ErrorModel <%s,%p>   Bias = %lf   Bias is a solve-for\n", errmodel->GetFullName().c_str(), errmodel, bias);
+         }
          else
+         {
             bias = forObjects[j]->GetRealParameter(biasName);         // bias is a solve-for parameter
-         //MessageInterface::ShowMessage("TrackingDataAdapter::GetMeasurementBias(...): ErrorModel <%p>   Bias = %lf\n", forObjects[j], bias);
+            //MessageInterface::ShowMessage("TrackingDataAdapter::ComputeMeasurementBias(...): ErrorModel <%s,%p>   Bias = %lf   Bias is a solve-for\n", forObjects[j]->GetName().c_str(), forObjects[j], bias);
+         }
       }
       else
       {
          // This is case for running simulation. no solve-for objects are stored in forObjects
          // For this case, bias value is gotten from GroundStation.ErrorModels parameter
-         bias = errmodels[k]->GetRealParameter(biasName);             // bias is consider parameter
+         bias = errmodel->GetRealParameter(biasName);             // bias is consider parameter
       }
       
       measurementBias.push_back(bias);
