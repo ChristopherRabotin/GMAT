@@ -667,8 +667,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
    }
       else
       {
-         //UnsignedInt startIndex = paramName.size()-4;
-         //if (paramName.substr(startIndex) == "Bias")
          //MessageInterface::ShowMessage(" paramName = %s\n", paramName.c_str());
          if (paramName == "Bias")
          {
@@ -684,26 +682,36 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                {
                   // if ground station is only at first transmit node in signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
 
-                  // Get name of the derivitive object
-                  std::string derivObjName = obj->GetName();
+                  // Get full name of the derivitive object
+                  std::string derivObjName = obj->GetFullName();                                     // made changes by TUAN NGUYEN
 
                   // Get names of all error models defined in the ground station
                   GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().tNode;
-                  StringArray errormodelNames = gs->GetStringArrayParameter("ErrorModels");
+                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();            // made changes by TUAN NGUYEN
 
                   // Search for error model
-                  UnsignedInt j;
-                  //MessageInterface::ShowMessage("groundstation <%s,%p>  errormodelNames.size() = %d\n", gs->GetName().c_str(), gs, errormodelNames.size());
-                  for (j = 0; j < errormodelNames.size(); ++j)
-                     if (errormodelNames[j] == derivObjName)
-                        break;
-
-                  // Take derivative, if the error model is found
-                  if (j < errormodelNames.size())
+                  bool found = false;
+                  for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
+                     mapIndex != errmodelMap.end(); ++mapIndex)
                   {
-                     for (Integer i = 0; i < size; ++i)
-                        theDataDerivatives[0][i] += 1.0;
+                     for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)                     // made changes by TUAN NGUYEN
+                     {
+                        //MessageInterface::ShowMessage("Errormodel in map: <%s>   dirivative object: <%s>\n", mapIndex->second.at(j)->GetFullName().c_str(), derivObjName.c_str());
+                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
+                        {
+                           found = true;
+                           break;                                                                    // made changes by TUAN NGUYEN
+                        }
+                        if (found)
+                           break;
+                     }
                   }
+
+                  if (found)
+                  {                                                                                  // made changes by TUAN NGUYEN
+                     for (Integer i = 0; i < size; ++i)                                              // made changes by TUAN NGUYEN
+                        theDataDerivatives[0][i] += 1.0;                                             // made changes by TUAN NGUYEN
+                  }                                                                                  // made changes by TUAN NGUYEN
                }
             }
             else if (next == NULL)
@@ -712,22 +720,32 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
                {
                   // if ground station is at the end of signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
-                  // Get name of the derivitive object
-                  std::string derivObjName = obj->GetName();
+                  // Get full name of the derivitive object
+                  std::string derivObjName = obj->GetFullName();                                     // made changes by TUAN NGUYEN
 
                   // Get names of all error models defined in the ground station
                   GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().rNode;
-                  StringArray errormodelNames = gs->GetStringArrayParameter("ErrorModels");
+                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();            // made changes by TUAN NGUYEN
 
                   // Search for error model
-                  UnsignedInt j;
-                  //MessageInterface::ShowMessage("groundstation <%s,%p>  errormodelNames.size() = %d\n", gs->GetName().c_str(), gs, errormodelNames.size());
-                  for (j = 0; j < errormodelNames.size(); ++j)
-                     if (errormodelNames[j] == derivObjName)
-                        break;
+                  bool found = false;
+                  for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
+                     mapIndex != errmodelMap.end(); ++mapIndex)
+                  {
+                     for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)                                 // made changes by TUAN NGUYEN
+                     {
+                        //MessageInterface::ShowMessage("Errormodel in map: <%s>   dirivative object: <%s>\n", mapIndex->second.at(j)->GetFullName().c_str(), derivObjName.c_str());
+                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
+                        {
+                           found = true;
+                           break;                                                                    // made changes by TUAN NGUYEN
+                        }
+                        if (found)
+                           break;
+                     }
+                  }
 
-                  // Take derivative, if the error model is found
-                  if (j < errormodelNames.size())
+                  if (found)
                   {
                      for (Integer i = 0; i < size; ++i)
                         theDataDerivatives[0][i] += 1.0;
