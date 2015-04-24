@@ -148,6 +148,9 @@ protected:
 
    Integer                    SortVector();
 
+private:
+   StringArray                GetSolveForList(GmatBase* obj);              // made changes by TUAN NGUYEN
+
 };
 
 #endif /* EstimationStateManager_hpp */
