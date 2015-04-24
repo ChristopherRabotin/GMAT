@@ -77,7 +77,7 @@ void ICRFFile::Initialize()
    // icrfFileName = path+name;
    // FILE* fpt = fopen(icrfFileName.c_str(), "r");
    // if (fpt == NULL)
-	//   throw GmatBaseException("Error: GMAT cann't open '" + icrfFileName + "' file!!!\n");
+	//   throw GmatBaseException("Error: GMAT can't open '" + icrfFileName + "' file!!!\n");
    
    FileManager *fm = FileManager::Instance();
    icrfFileName = fm->GetFilename(FileManager::ICRF_FILE);
@@ -89,7 +89,7 @@ void ICRFFile::Initialize()
    
    FILE* fpt = fopen(icrfFileNameFullPath.c_str(), "r");
    if (fpt == NULL)
-      throw GmatBaseException("Error: GMAT cann't open '" + icrfFileName + "' file!!!\n");
+      throw GmatBaseException("Error: GMAT can't open '" + icrfFileName + "' file!!!\n");
    
    // Read ICRF Euler rotation vector from data file and store to buffer:
    Real t;
