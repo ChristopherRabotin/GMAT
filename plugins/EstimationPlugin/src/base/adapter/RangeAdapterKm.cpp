@@ -707,7 +707,7 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
    #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
             "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
-            obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+            obj->GetFullName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
 
    const std::vector<RealArray> *derivativeData =
