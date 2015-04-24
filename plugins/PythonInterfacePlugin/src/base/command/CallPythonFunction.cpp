@@ -228,6 +228,15 @@ bool CallPythonFunction::Initialize()
 
 bool CallPythonFunction::Execute()
 {
+   // send the in parameters
+   std::string formatIn("");
+   std::vector<void *> argIn;
+
+   // Prepare the format string specifier (const char *format) to build 
+   // Python object.
+   SendInParam(mInputList, formatIn, argIn);
+  // Next call Python function Wrapper
+
 	return true;
 }
 
@@ -254,7 +263,8 @@ Integer CallPythonFunction::FillInputList()
                                        GetGeneratingString(Gmat::SCRIPTING) + "\"");
       }
          
-      mInputList.push_back((Parameter *)mapObj);
+      if (mapObj->IsOfType(Gmat::PARAMETER))
+         mInputList.push_back((Parameter *)mapObj);
    }
       
    return mInputList.size();
@@ -277,8 +287,51 @@ Integer CallPythonFunction::FillOutputList()
             GetGeneratingString(Gmat::SCRIPTING) + "\"");
       }
 
-      mOutputList.push_back((Parameter *)mapObj);
+      if (mapObj->IsOfType(Gmat::PARAMETER))
+         mOutputList.push_back((Parameter *)mapObj);
    }
 
    return mOutputList.size();
+}
+
+
+void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, std::string &formatIn, std::vector<void *> &argIn)
+{
+   for (unsigned int i = 0; i < mInputList.size(); i++)
+   {
+      Parameter *param = mInputList[i];
+      Gmat::ParameterType type = param->GetReturnType();
+      
+      switch (type)
+      {
+         case Gmat::REAL_TYPE:
+         {
+            if (i == 0)
+               formatIn.append("(d");
+            else
+               formatIn.append("d");
+        
+            Real r = param->EvaluateReal();
+            argIn.push_back(&r);
+
+            break;
+         }
+         case Gmat::STRING:
+         {
+            if (i == 0)
+               formatIn.append("(s");
+            else
+               formatIn.append("s");
+            break;
+
+            std::string s = param->EvaluateString();
+            argIn.push_back((char*)s.c_str());
+         }
+         case Gmat::ARRAY:
+            ;
+      }
+   }
+
+   formatIn.append(")");
+
 }

@@ -88,6 +88,12 @@ protected:
    Integer FillInputList();
    /// Fill in Output parameter list
    Integer FillOutputList();
+   /// Create C++ variable type declared in GMAT script
+   void SendInParam(const std::vector<Parameter*> InputList, std::string &formatIn, std::vector<void *> &argIn);
+   /// Create C++ variable type declared in GMAT script
+   void GetOutParams();
+   /// Python function Wrapper
+   void PythonFuncWrapper();
 
    /// Published parameters for Python functions
    enum
