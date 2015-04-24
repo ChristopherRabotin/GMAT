@@ -39,7 +39,10 @@ public:
    GroundstationInterface(const GroundstationInterface& gsi);
    GroundstationInterface& operator=(const GroundstationInterface& gsi);
 
-   virtual Real* IsValidElevationAngle(const Rvector6 &state_sez) = 0;
+   virtual Real*           IsValidElevationAngle(const Rvector6 &state_sez) = 0;
+   virtual bool            CreateErrorModelForSignalPath(std::string spacecraftName) = 0;   // made changes by TUAN NGUYEN
+   virtual std::map<std::string,ObjectArray>&    
+                           GetErrorModelMap() = 0;                                          // made changes by TUAN NGUYEN
 };
 
 #endif
