@@ -625,7 +625,7 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
    refObjectNames.clear();
-
+   
    // Build the list
    for (std::vector<StringArray*>::iterator sa = participantLists.begin();
          sa != participantLists.end(); ++sa)
@@ -635,7 +635,7 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
          std::string candidate = (*sa)->at(i);
          if (find(refObjectNames.begin(), refObjectNames.end(), candidate) ==
                refObjectNames.end())
-            refObjectNames.push_back(candidate);
+         refObjectNames.push_back(candidate);
       }
    }
 
@@ -828,7 +828,7 @@ void MeasureModel::SetPropagator(PropSetup* ps)
 bool MeasureModel::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Start MeasurementModel<%p>::Initialize()\n", this);
+      MessageInterface::ShowMessage("Start MeasurementModel<%s,%p>::Initialize()\n", GetName().c_str(), this);
    #endif
 
    bool retval = false;
@@ -976,6 +976,42 @@ bool MeasureModel::Initialize()
             for(UnsignedInt i = 0; i < correctionTypeList.size(); ++i)
                AddCorrection(correctionModelList[i], correctionTypeList[i]);
 
+            // For each ground station, clone all ErrorModel objects for each signal path                // made changes by TUAN NGUYEN
+            for (UnsignedInt i = 0; i < participants.size(); ++i)                                        // made changes by TUAN NGUYEN
+            {                                                                                            // made changes by TUAN NGUYEN
+               GmatBase* firstPart = participants[i]->at(0);                                             // made changes by TUAN NGUYEN
+               GmatBase* lastPart = participants[i]->at(participants[i]->size()-1);                      // made changes by TUAN NGUYEN
+               
+               if (firstPart->IsOfType(Gmat::GROUND_STATION))                                            // made changes by TUAN NGUYEN
+               {                                                                                         // made changes by TUAN NGUYEN
+                  // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
+                  std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
+                  if (participants[i]->at(1)->IsOfType(Gmat::SPACECRAFT))                                // made changes by TUAN NGUYEN
+                     spacecraftName = participants[i]->at(1)->GetName();                                 // made changes by TUAN NGUYEN
+                  else                                                                                   // made changes by TUAN NGUYEN
+                     throw MeasurementException("Error: It has 2 ground stations (" + 
+                          firstPart->GetName() + ", " + participants[i]->at(1)->GetName() + 
+                          ") next to each other in signal path.\n");                                     // made changes by TUAN NGUYEN
+
+                  ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName);  // made changes by TUAN NGUYEN
+               }
+
+               // It is one-way or three-ways range measurement                                          // made changes by TUAN NGUYEN
+               if ((lastPart != firstPart)&&(lastPart->IsOfType(Gmat::GROUND_STATION)))                  // made changes by TUAN NGUYEN
+               {                                                                                         // made changes by TUAN NGUYEN
+                  // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
+                  std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
+                  if (participants[i]->at(participants[i]->size()-2)->IsOfType(Gmat::SPACECRAFT))        // made changes by TUAN NGUYEN
+                     spacecraftName = participants[i]->at(participants[i]->size()-2)->GetName();         // made changes by TUAN NGUYEN
+                  else                                                                                   // made changes by TUAN NGUYEN
+                     throw MeasurementException("Error: It has 2 ground stations (" + 
+                            participants[i]->at(participants[i]->size()-2)->GetName() + ", " + 
+                            lastPart->GetName() + ") next to each other in signal path.\n");             // made changes by TUAN NGUYEN
+
+                  ((GroundstationInterface*) lastPart)->CreateErrorModelForSignalPath(spacecraftName);   // made changes by TUAN NGUYEN
+               }                                                                                         // made changes by TUAN NGUYEN
+            }                                                                                            // made changes by TUAN NGUYEN
+
             retval = true;
          }
          else
@@ -1014,7 +1050,7 @@ bool MeasureModel::Initialize()
    }
 
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("End MeasurementModel<%p>::Initialize()\n", this);
+      MessageInterface::ShowMessage("End MeasurementModel<%s,%p>::Initialize()\n", GetName().c_str(), this);
    #endif
 
    return retval;
