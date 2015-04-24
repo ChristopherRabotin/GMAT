@@ -28,16 +28,18 @@
 #include <map>
 #include <vector>
 
+// Example: information of CAN.ErrorModel1.Bias is stored in ListItem such as below
 struct GMAT_API ListItem
 {
-   std::string objectName;
-   std::string elementName;
-   std::string associateName;
-   GmatBase*   object;
+   std::string objectName;             // "ErrorModel1" is stored in objectName
+   std::string objectFullName;         // "CAN.ErrorModel1" is stored in objectFullName                                 // made changes by TUAN NGUYEN
+   std::string elementName;            // "Bias" is stored in elementName
+   std::string associateName;          // "" is stored in associateName. Currently, field "associateName" is not used
+   GmatBase*   object;                 // store ErrorModel1 GMAT object
    // Gmat::StateElementId
-   Integer     elementID;
-   Integer     subelement;
-   Integer     parameterID;
+   Integer     elementID;              // store estimaion parameter Id
+   Integer     subelement;             // index of each subelement of parameter 
+   Integer     parameterID;            // store parameter Id
    Gmat::ParameterType
                parameterType;
    Integer     rowIndex;      // Used for vectors and arrays
