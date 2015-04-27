@@ -29,6 +29,7 @@
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
 #include "GroundstationInterface.hpp"
+#include "StringUtil.hpp"
 
 #include <sstream>
 
@@ -759,7 +760,6 @@ std::string Estimator::GetStringParameter(const Integer id,
  *
  */
 //------------------------------------------------------------------------------
-#include "StringUtil.hpp" 
 bool Estimator::SetStringParameter(const Integer id,
                                    const std::string &value) // const?
 {
