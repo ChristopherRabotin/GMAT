@@ -144,6 +144,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
       Gmat::STRINGARRAY_TYPE, // SolveFors                  // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,        // CD_EPSILON
+      Gmat::REAL_TYPE,        // CR_EPSILON
       Gmat::FILENAME_TYPE,    // Model File
       Gmat::FILENAME_TYPE,    // ModelFileFullPath
       Gmat::REAL_TYPE,        // Model Offset X
@@ -201,6 +203,8 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "MassFlow",
       "AddHardware",
       "SolveFors",                             // made changes by TUAN NGUYEN      // move solve-for parameter from batch estimator to solve-for object 
+      "Cd_Epsilon",
+      "Cr_Epsilon",
       "ModelFile",
       "ModelFileFullPath",
       "ModelOffsetX",
@@ -367,7 +371,9 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
    ephemMgr             (NULL),
-   includeCartesianState(0)
+   includeCartesianState(0),
+   cdEpsilon            (0.0),
+   crEpsilon            (0.0)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -600,7 +606,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    spadBFCS             (NULL),
    ephemMgr             (NULL),
    includeCartesianState(a.includeCartesianState),
-   solveforNames        (a.solveforNames)                         // made changes by TUAN NGUYEN
+   solveforNames        (a.solveforNames),                        // made changes by TUAN NGUYEN
+   cdEpsilon            (a.cdEpsilon),
+   crEpsilon            (a.crEpsilon)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -768,6 +776,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    includeCartesianState = a.includeCartesianState;
 
    solveforNames      = a.solveforNames;                                 // made changes by TUAN NGUYEN
+
+   cdEpsilon          = a.cdEpsilon;
+   crEpsilon          = a.crEpsilon;
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -2481,6 +2492,9 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
          return false;
    }
 
+   if ((id == CD_EPSILON) || (id == CR_EPSILON))
+      return true;
+
    // NAIF ID is not read-only for spacecraft
    if (id == NAIF_ID)  return false;
 
@@ -2741,8 +2755,13 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    }
 
    if (id == DRY_MASS_ID)   return dryMass;
-   if (id == CD_ID)         return coeffDrag;
-   if (id == CR_ID)         return reflectCoeff;
+
+   if (id == CD_ID)
+      return coeffDrag * (1.0 + cdEpsilon);
+
+   if (id == CR_ID)
+      return reflectCoeff * (1.0 + crEpsilon);
+
    if (id == DRAG_AREA_ID)  return dragArea;
    if (id == SRP_AREA_ID)   return srpArea;
    if (id == TOTAL_MASS_ID) return UpdateTotalMass();
@@ -2776,6 +2795,9 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    if (id == MODEL_ROTATION_Y)   return modelRotationY;
    if (id == MODEL_ROTATION_Z)   return modelRotationZ;
    if (id == MODEL_SCALE)        return modelScale;
+
+   if (id == CD_EPSILON)         return cdEpsilon;
+   if (id == CR_EPSILON)         return crEpsilon;
 
    return SpaceObject::GetRealParameter(id);
 }
@@ -3097,7 +3119,10 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    if (label == "Cd")
    {
       if (value >= 0.0)
+      {
          coeffDrag = value;
+         cdEpsilon = 0.0;
+      }
       else
       {
          SpaceObjectException soe("");
@@ -3142,7 +3167,10 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    if (label == "Cr")
    {
       if ((value >= 0.0) && (value <= 2.0))
+      {
          reflectCoeff = value;
+         crEpsilon = 0.0;
+      }
       else
       {
          SpaceObjectException soe("");
@@ -3153,6 +3181,16 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       }
       parmsChanged = true;
       return reflectCoeff;
+   }
+   if (label == "Cd_Epsilon")
+   {
+      cdEpsilon = value;
+      return cdEpsilon;
+   }
+   if (label == "Cr_Epsilon")
+   {
+      crEpsilon = value;
+      return crEpsilon;
    }
 
    if (label == "TotalMass")// return totalMass;    // Don't change the total mass
@@ -5033,6 +5071,63 @@ bool Spacecraft::PropItemNeedsFinalUpdate(const Integer item)
 
 
 //------------------------------------------------------------------------------
+// Integer GmatBase::GetEstimationParameterID(const std::string &param)
+//------------------------------------------------------------------------------
+/**
+ * This method builds the parameter ID used in the estimation subsystem
+ *
+ * @param param The text name of the estimation parameter
+ *
+ * @return The ID used in estimation for the parameter
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::GetEstimationParameterID(const std::string &param)
+{
+   Integer id = type * ESTIMATION_TYPE_ALLOCATION; // Base for estimation ID
+
+   try
+   {
+      Integer parmID = GetParameterID(param);
+
+      // Handle special cases that do not directly manipulate the parameter
+      if (param == "Cd")
+         parmID = CD_EPSILON;
+      if (param == "Cr")
+         parmID = CR_EPSILON;
+
+      id += parmID;
+   }
+   catch (BaseException &)
+   {
+      return -1;
+   }
+
+   return id;
+}
+
+
+std::string Spacecraft::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+   if (parmName == "Cd")
+      return (GetParameterText(CD_EPSILON));
+   if (parmName == "Cr")
+      return (GetParameterText(CR_EPSILON));
+
+   return SpaceObject::GetParameterNameForEstimationParameter(parmName);
+}
+
+std::string Spacecraft::GetParameterNameFromEstimationParameter(const std::string &parmName)
+{
+   if (parmName == "Cd_Epsilon")
+      return (GetParameterText(CD_ID));
+   if (parmName == "Cr_Epsilon")
+      return (GetParameterText(CR_ID));
+
+   return SpaceObject::GetParameterNameFromEstimationParameter(parmName);
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsEstimationParameterValid(const Integer item)
 //------------------------------------------------------------------------------
 bool Spacecraft::IsEstimationParameterValid(const Integer item)
@@ -5059,6 +5154,7 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
    return retval;
 }
 
+
 //------------------------------------------------------------------------------
 // Integer GetEstimationParameterSize(const Integer item)
 //------------------------------------------------------------------------------
@@ -5079,6 +5175,9 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
    {
       case CARTESIAN_X:
          retval = 6;
+         break;
+      case CR_ID:
+         retval = 1;
          break;
 
       case Gmat::MASS_FLOW:
@@ -5106,6 +5205,10 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
    {
       case CARTESIAN_X:
          retval = state.GetState();
+         break;
+
+      case CR_ID:
+         retval = &reflectCoeff;
          break;
 
 //      case Gmat::MASS_FLOW:

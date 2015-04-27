@@ -234,6 +234,9 @@ public:
    virtual Integer         GetPropItemSize(const Integer item);
    virtual bool            PropItemNeedsFinalUpdate(const Integer item);
 
+   virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
    virtual Real*           GetEstimationParameterValue(const Integer id);
@@ -304,6 +307,8 @@ protected:
       // Hardware for spacecraft
       ADD_HARDWARE,
       SOLVEFORS,                                                    // made changes by TUAN NGUYEN
+      CD_EPSILON,
+      CR_EPSILON,
       // The filename used for the spacecraft's model 
       MODEL_FILE,
       MODEL_FILE_FULL_PATH, // read-only
@@ -588,6 +593,11 @@ protected:
    // Solve-for parameters                                               // made changes by TUAN NGUYEN
    /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
    StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
+
+   /// Epsilon value used when solving for the Cd parameter
+   Real              cdEpsilon;
+   /// Epsilon value used when solving for the Cr parameter
+   Real              crEpsilon;
 
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;
