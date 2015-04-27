@@ -475,6 +475,8 @@ public:
    virtual std::string     GetAssociateName(UnsignedInt val = 0);
 
    virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual Integer         SetEstimationParameter(const std::string &param);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);

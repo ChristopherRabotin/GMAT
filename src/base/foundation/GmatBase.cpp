@@ -4067,7 +4067,7 @@ Integer GmatBase::SetEstimationParameter(const std::string &param)
 // Integer GmatBase::GetEstimationParameterID(const std::string &param)
 //------------------------------------------------------------------------------
 /**
- * This method...
+ * This method builds the parameter ID used in the estimation subsystem
  *
  * @param param The text name of the estimation parameter
  *
@@ -4090,6 +4090,15 @@ Integer GmatBase::GetEstimationParameterID(const std::string &param)
    return id;
 }
 
+std::string GmatBase::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
+
+std::string GmatBase::GetParameterNameFromEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
 
 //------------------------------------------------------------------------------
 // bool GmatBase::IsEstimationParameterValid(Integer id)
