@@ -32,7 +32,7 @@
 //#define DEBUG_SET_PARAMETER
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_RANGE_CALCULATION
-
+//#define CR_PREP_WORK
 
 //------------------------------------------------------------------------------
 // RangeAdapterKm(const std::string& name)
@@ -710,8 +710,24 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
             obj->GetFullName().c_str(), id, parmId, cMeasurement.epoch);
    #endif
 
+#ifdef CR_PREP_WORK
+   std::vector<RealArray> *derivativeData = NULL;
+   // Placeholder for redesign work
+   if (obj->HasDynamicParameterSTM(parmId))
+   {
+      derivativeData = (std::vector<RealArray> *)(&(calcData->CalculateMeasurementDerivatives(obj, id)));
+   }
+   else
+   {
+      derivativeData = new std::vector<RealArray>;
+      RealArray dv;
+      dv.push_back(1.0);
+      derivativeData->push_back(dv);
+   }
+#else
    const std::vector<RealArray> *derivativeData =
          &(calcData->CalculateMeasurementDerivatives(obj, id));
+#endif
 
    #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("   Derivatives: [");
