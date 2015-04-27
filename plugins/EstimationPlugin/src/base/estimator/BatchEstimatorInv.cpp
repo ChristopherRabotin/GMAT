@@ -834,7 +834,7 @@ void BatchEstimatorInv::Estimate()
    }
 
    #ifdef DEBUG_VERBOSE
-      MessageInterface::ShowMessage(" residuals: [\n");
+      MessageInterface::ShowMessage(" residuals: [");
       for (UnsignedInt i = 0; i < stateSize; ++i)
          MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
       MessageInterface::ShowMessage("]\n");
@@ -851,7 +851,7 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   // Calculalte state change dx 
+   // Calculate state change dx
    dx.clear();
    Real delta;
    for (UnsignedInt i = 0; i < stateSize; ++i)
