@@ -1374,7 +1374,7 @@ Integer EstimationStateManager::SortVector()
          {
             idList.push_back(id);
             owners.push_back(current);
-            property.push_back(*j);
+            property.push_back(current->GetParameterNameForEstimationParameter(*j));
 
             // Put this item in the ordering list
             oLoc = order.begin();
