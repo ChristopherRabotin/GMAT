@@ -137,7 +137,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 
    //convert char to wchar_t
 #ifdef IS_PY3K
-   mbtowc(s3K, destPath, sizeof(s3K));
+   mbstowcs(s3K, destPath, 8192);
    PySys_SetPath(s3K);
 #else
    PySys_SetPath(destPath);
@@ -149,4 +149,13 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 
    MessageInterface::ShowMessage("Leaving PyAddModulePath( ) \n");
 
+}
+
+PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
+                                                std::string &formatIn, const std::vector<void *> &argIn)
+{
+   PyObject* pyRet = NULL;
+
+
+   return pyRet;
 }
