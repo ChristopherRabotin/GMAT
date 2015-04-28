@@ -236,6 +236,7 @@ bool CallPythonFunction::Execute()
    // Python object.
    SendInParam(mInputList, formatIn, argIn);
   // Next call Python function Wrapper
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
 
 	return true;
 }
@@ -278,6 +279,7 @@ Integer CallPythonFunction::FillOutputList()
 
    StringArray ar = GetStringArrayParameter(ADD_OUTPUT);
    StringArray::iterator it;
+
    for (it = ar.begin(); it != ar.end(); ++it)
    {
       if ((mapObj = FindObject(*it)) == NULL)
