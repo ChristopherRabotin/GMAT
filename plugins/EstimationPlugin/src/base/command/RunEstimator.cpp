@@ -741,7 +741,7 @@ bool RunEstimator::PreExecution()
          std::string propName = objList[i];
          std::string objName = propName;
          std::string refObjectName = "";
-         UnsignedInt loc = propName.find('.');
+         size_t loc = propName.find('.');
          if (loc != propName.npos)
          {
             objName = propName.substr(0, loc);
