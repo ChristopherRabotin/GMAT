@@ -1261,7 +1261,7 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
             GmatBase* obj;
 
             std::string config = createList[j];
-            std::string::size_type pos = config.find_last_of(',');
+            size_t pos = config.find_last_of(',');                     // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
             std::string type = config.substr(pos+1, config.size()-(pos+1));
             std::string strand = config.substr(1, pos-2);
             while (strand != "")

@@ -1053,7 +1053,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
 
    if (id == Participants)
    {
-      std::string::size_type loc = value.find(".");
+      size_t loc = value.find(".");           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
       std::string parName;
       if (loc != std::string::npos)
          parName = value.substr(0, loc);
@@ -1230,7 +1230,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
    {
    case Participants:
       {
-         std::string::size_type loc = value.find(".");
+         size_t loc = value.find(".");         // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
          std::string parName;
          std::string hwName;
          if (loc != std::string::npos)

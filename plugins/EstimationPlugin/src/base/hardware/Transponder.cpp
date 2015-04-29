@@ -754,7 +754,7 @@ bool Transponder::SetSignal(Signal* s,Integer whichOne)
 Real Transponder::GetTurnAroundRatio()
 {
    Real ratio;
-   std::string::size_type loc = turnAroundRatio.find('/');
+   size_t loc = turnAroundRatio.find('/');                       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
    if (loc >= 0)
    {
       Integer len = turnAroundRatio.length();
