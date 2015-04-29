@@ -636,7 +636,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
          // Processing a tracking config:
          value = value.substr(1,value.size()-2);                                                            // made changes by TUAN NGUYEN
          std::string term;                                                                                  // made changes by TUAN NGUYEN
-         Integer pos = value.find_first_of(',');                                                            // made changes by TUAN NGUYEN
+         std::string::size_type pos = value.find_first_of(',');                                                            // made changes by TUAN NGUYEN
          Integer newIndex = 0;                                                                              // made changes by TUAN NGUYEN
          bool retVal;                                                                                       // made changes by TUAN NGUYEN
 

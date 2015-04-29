@@ -917,7 +917,7 @@ bool DataFilter::ValidateInput()
       std::string strand = strands[i];
       
       //3.2.2. Get a partcipant from the strand and verify it in valid participant list  
-      UnsignedInt pos = strand.find_first_of('-');
+      std::string::size_type pos = strand.find_first_of('-');
       while (pos != std::string::npos)
       {
          // Get participant

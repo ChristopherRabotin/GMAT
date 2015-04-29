@@ -1261,7 +1261,7 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
             GmatBase* obj;
 
             std::string config = createList[j];
-            UnsignedInt pos = config.find_last_of(',');
+            std::string::size_type pos = config.find_last_of(',');
             std::string type = config.substr(pos+1, config.size()-(pos+1));
             std::string strand = config.substr(1, pos-2);
             while (strand != "")

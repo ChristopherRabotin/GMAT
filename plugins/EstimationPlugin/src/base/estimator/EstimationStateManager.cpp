@@ -1296,7 +1296,7 @@ void EstimationStateManager::DecomposeParameter(std::string &param,
       Integer howMany)
 {
    chunks.clear();
-   UnsignedInt loc;
+   std::string::size_type loc;
 
    loc = param.find_last_of('.');                                                         // made changes by TUAN NGUYEN
    chunks.push_back(param.substr(0,loc));

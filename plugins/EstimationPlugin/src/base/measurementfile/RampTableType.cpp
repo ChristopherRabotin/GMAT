@@ -216,8 +216,8 @@ bool RampTableType::Open(bool forRead, bool forWrite, bool append)
       fullPath += streamName;
 
       // Add the .gmd extension if there is no extension in the file
-      UnsignedInt dotLoc = fullPath.find_last_of('.');
-      UnsignedInt slashLoc = fullPath.find_last_of('/');
+      std::string::size_type dotLoc = fullPath.find_last_of('.');
+      std::string::size_type slashLoc = fullPath.find_last_of('/');
       if (slashLoc == std::string::npos)
          slashLoc = fullPath.find_last_of('\\');
 
