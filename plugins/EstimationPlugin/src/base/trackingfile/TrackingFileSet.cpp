@@ -684,7 +684,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
 
       // Strip off trailing '}', and leading and trailing white space
-      UnsignedInt loc = rawName.find('}');
+      std::string::size_type loc = rawName.find('}');
       if (loc != std::string::npos)
          rawName = rawName.substr(0,loc);
       valarray = rawName.c_str();
