@@ -39,7 +39,7 @@ const std::string
    {
       "Burn",
       "Spacecraft",
-      "Backprop",
+      "BackProp",
    };
 
 
@@ -251,7 +251,7 @@ const std::string& Maneuver::GetGeneratingString(Gmat::WriteMode mode,
 {
    generatingString = prefix + "Maneuver ";
    if (maneuverBackwards)
-      generatingString += "Backprop ";
+      generatingString += "BackProp ";
    generatingString += burnName + "(" + satName + ");";
    
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
@@ -567,7 +567,7 @@ bool Maneuver::InterpretAction()
    std::string burnChunk = chunks[1];
    if (subchunks.size() == 2)
    {
-      if (subchunks[0] == "Backprop")
+      if (subchunks[0] == "BackProp")
       {
          maneuverBackwards = true;
          burnChunk = subchunks[1];
@@ -576,7 +576,7 @@ bool Maneuver::InterpretAction()
    else if (subchunks.size() != 1)
       throw CommandException("Maneuver command is malformed; expecting "
                              "\"Maneuver ImpulsiveBurnName(SpacecraftName)\" or"
-                             " \"Maneuver Backprop ImpulsiveBurnName"
+                             " \"Maneuver BackProp ImpulsiveBurnName"
                              "(SpacecraftName)\"\n");
 
    // Find and set the burn object name ...
