@@ -27,7 +27,7 @@ public:
    void PyAddModulePath(const StringArray& path);
    /// Python function wrapper
    PyObject* PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                 std::string &formatIn, const std::vector<void *> &argIn);
+                                 const std::string &formatIn, const std::vector<void *> &argIn);
 
 	
    DEFAULT_TO_NO_CLONES

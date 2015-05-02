@@ -2,7 +2,7 @@
 
 #include "PythonInterface.hpp"
 #include "MessageInterface.hpp"
-
+#include <iostream>
 PythonInterface* PythonInterface::instance = NULL;
 
 PythonInterface* PythonInterface::PyInstance()
@@ -130,13 +130,13 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
    StringArray::const_iterator it;
    for (it = path.begin(); it != path.end(); ++it)
    {
-      p = (char *)it->c_str();
+      strcpy(p, it->c_str());
       strcat(destPath, p);
       strcat(destPath, plF);     
    }
-
-   //convert char to wchar_t
+ 
 #ifdef IS_PY3K
+   //convert char to wchar_t
    mbstowcs(s3K, destPath, 8192);
    PySys_SetPath(s3K);
 #else
@@ -152,9 +152,27 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 }
 
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                                std::string &formatIn, const std::vector<void *> &argIn)
+                                                const std::string &formatIn, const std::vector<void *> &argIn)
 {
    PyObject* pyRet = NULL;
+   PyObject* pyModule;
+   PyObject* pyPluginModule;
+   
+#ifdef IS_PY3K
+   // create a python Unicode object from an UTF-8 encoded null terminated char buffer
+   pyModule = PyUnicode_FromString(modName.c_str());
+#else
+   pyModule = PyBytes_FromString(modName.c_str());
+#endif
+  
+   // import the python module
+   pyPluginModule = PyImport_Import(pyModule);
+   Py_DECREF(pyModule);
+   if (!pyPluginModule)
+   {
+      PyErr_Print();
+
+   }
 
 
    return pyRet;
