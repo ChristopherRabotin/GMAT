@@ -741,7 +741,7 @@ bool RunEstimator::PreExecution()
          std::string propName = objList[i];
          std::string objName = propName;
          std::string refObjectName = "";
-         size_t loc = propName.find('.');
+         size_t loc = propName.find('.');              // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
          if (loc != propName.npos)
          {
             objName = propName.substr(0, loc);
