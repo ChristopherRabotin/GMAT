@@ -2,7 +2,8 @@
 
 #include "PythonInterface.hpp"
 #include "MessageInterface.hpp"
-#include <iostream>
+#include "InterfaceException.hpp"
+
 PythonInterface* PythonInterface::instance = NULL;
 
 PythonInterface* PythonInterface::PyInstance()
@@ -72,7 +73,7 @@ bool PythonInterface::PyInitialize()
    }
    else
    {
-	   throw CommandException ("Python is not installed or loaded properly.");
+	   throw CommandException ("  Python is not installed or loaded properly.");
    }
 		
    return isPythonInitialized;
@@ -94,17 +95,15 @@ bool PythonInterface::PyFinalize()
 
 void PythonInterface::PyPathSep()
 {
-   if (isPythonInitialized)
-   {
-	   const char* plForm = Py_GetPlatform();
-      std::string str(plForm);
+	const char* plForm = Py_GetPlatform();
+   std::string str(plForm);
    
-      if (str.find("win") != std::string::npos)
-         plF = ";";
-	   else
-		   plF = ":";
-   }
-
+   // Unix and Mac separator is ":"
+   // Windows separator is ";"
+   if (str.find("win") != std::string::npos)
+      plF = ";";
+   else
+      plF = ":";
 }
 
 
@@ -147,7 +146,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
    delete[] s3K;
    delete[] p;
 
-   MessageInterface::ShowMessage("Leaving PyAddModulePath( ) \n");
+   MessageInterface::ShowMessage("  Leaving PyAddModulePath( ) \n");
 
 }
 
@@ -157,23 +156,60 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    PyObject* pyRet = NULL;
    PyObject* pyModule;
    PyObject* pyPluginModule;
+   PyObject* pyFuncAttr;
+   PyObject* pyArgs;
+   PyObject* pyFunc;
    
 #ifdef IS_PY3K
    // create a python Unicode object from an UTF-8 encoded null terminated char buffer
-   pyModule = PyUnicode_FromString(modName.c_str());
+   pyModule = PyUnicode_FromString(modName.c_str() );
 #else
-   pyModule = PyBytes_FromString(modName.c_str());
+   pyModule = PyBytes_FromString(modName.c_str() );
 #endif
   
    // import the python module
    pyPluginModule = PyImport_Import(pyModule);
    Py_DECREF(pyModule);
+
    if (!pyPluginModule)
    {
       PyErr_Print();
 
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to import the python module. \n");
    }
 
+   // retrieve an attribute named 'funcName' from imported python module
+   pyFuncAttr = PyObject_GetAttrString(pyPluginModule, funcName.c_str() );
+   Py_DECREF(pyPluginModule);
 
-   return pyRet;
+   if (!pyFuncAttr)
+   {
+      PyErr_Print();
+
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to fetch module.function. \n");
+   }
+
+   // Build the Python object based on the format string
+   pyArgs = Py_BuildValue(formatIn.c_str(), argIn[0]);
+   if (!pyArgs)
+   {
+      PyErr_Print();
+      Py_DECREF(pyFuncAttr);
+
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to build python tuple. \n");
+   }
+
+   // Call the python function
+   pyFunc = PyObject_CallObject(pyFuncAttr, pyArgs);
+   Py_DECREF(pyFuncAttr);
+   Py_DECREF(pyArgs);
+
+   if (!pyFunc)
+   {
+      PyErr_Print();
+
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to call python function. \n");
+   }
+
+   return pyFunc;
 }
