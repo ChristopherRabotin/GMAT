@@ -241,7 +241,6 @@ bool GmatFunction::IsNewFunction()
    return mIsNewFunction;
 }
 
-
 //------------------------------------------------------------------------------
 // void SetNewFunction(bool flag)
 //------------------------------------------------------------------------------
@@ -260,6 +259,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    static Integer callCount = 0;
    callCount++;      
    clock_t t1 = clock();
+   MessageInterface::ShowMessage("\n");
    ShowTrace(callCount, t1, "GmatFunction::Initialize() entered");
    #endif
    
@@ -273,6 +273,8 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       MessageInterface::ShowMessage("   First command in fcs is %s\n",
             (fcs->GetTypeName()).c_str());
       MessageInterface::ShowMessage("   internalCS is %p\n", internalCoordSys);
+      MessageInterface::ShowMessage
+         ("   prevFuncManager=<%p>, currFuncManager=<%p>\n", prevFuncManager, currFuncManager);
    #endif
    if (!fcs) return false;
    
@@ -377,7 +379,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          objectStore->insert(std::make_pair(autoObjName, autoObj));
       }
    }
-
+   
    
    GmatCommand *current = fcs;
    
@@ -387,12 +389,19 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       // Initialize function objects here. Moved from Execute() (LOJ: 2015.02.27)
       objectsInitialized = true;
       validator->HandleCcsdsEphemerisFile(objectStore, true);
-      #ifdef DEBUG_FUNCTION_INIT
-      MessageInterface::ShowMessage("============================ Initializing LocalObjects\n");
-      #endif
       InitializeLocalObjects(objInit, current, true);
    }
    
+   #ifdef DEBUG_FUNCTION_INIT
+   MessageInterface::ShowMessage("   Now about to set object map to Validator\n");
+   #endif
+   // Set object map on Validator (moved here from below) LOJ: 2015.04.09 
+   validatorStore.clear();
+   for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
+      validatorStore.insert(std::make_pair(omi->first, omi->second));
+   for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+      validatorStore.insert(std::make_pair(omi->first, omi->second));
+   validator->SetObjectMap(&validatorStore);
    
    
    // first, send all the commands the object store, solar system, etc
@@ -409,40 +418,58 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       current->SetSolarSystem(solarSys);
       current->SetInternalCoordSystem(internalCoordSys);
       current->SetTransientForces(forces);
-      #ifdef DEBUG_FUNCTION_INIT
-         MessageInterface::ShowMessage
-            ("   Now about to set object map of type %s to Validator\n",
-             (current->GetTypeName()).c_str());      
-      #endif
-      // (Re)set object map on Validator (necessary because objects may have been added to the 
-      // Local Object Store or Global Object Store during initialization of previous commands)
-      validatorStore.clear();
-      for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
-         validatorStore.insert(std::make_pair(omi->first, omi->second));
-      for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-         validatorStore.insert(std::make_pair(omi->first, omi->second));
-      validator->SetObjectMap(&validatorStore);
       
-      #ifdef DEBUG_FUNCTION_INIT
-      MessageInterface::ShowMessage
-         ("   Now about to call Validator->ValidateCommand() of type %s\n",
-          current->GetTypeName().c_str());
-      #endif
       
-      // Let's try to ValidateCommand here, this will validate the command
-      // and create wrappers also
-      if (!validator->ValidateCommand(current, false, 2))
+      // #if 0
+      // /// Can we move this to before going through commands?
+      // #ifdef DEBUG_FUNCTION_INIT
+      //    MessageInterface::ShowMessage
+      //       ("   Now about to set object map of type %s to Validator\n",
+      //        (current->GetTypeName()).c_str());      
+      // #endif
+      // // (Re)set object map on Validator (necessary because objects may have been added to the 
+      // // Local Object Store or Global Object Store during initialization of previous commands)
+      // validatorStore.clear();
+      // for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
+      //    validatorStore.insert(std::make_pair(omi->first, omi->second));
+      // for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+      //    validatorStore.insert(std::make_pair(omi->first, omi->second));
+      // validator->SetObjectMap(&validatorStore);
+      // #endif
+      
+      
+      // See if commands can be validated only once (LOJ: 2015.04.21)
+      if (fcsInitialized)
       {
-         // get error message (loj: 2008.06.04)
-         StringArray errList = validator->GetErrorList();
-         std::string msg; // Check for empty errList (loj: 2009.03.17)
-         if (errList.empty())
-            msg = "Error occurred";
-         else
-            msg = errList[0];
-         
-         throw FunctionException(msg + " in the function \"" + functionPath + "\"");
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   fcs already validated, so skipping validation\n");
+         #endif
       }
+      else
+      {
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   Now about to call Validator->ValidateCommand() of type %s\n",
+             current->GetTypeName().c_str());
+         #endif
+         
+         // Let's try to ValidateCommand here, this will validate the command
+         // and create wrappers also
+         if (!validator->ValidateCommand(current, false, 2))
+         {
+            // get error message (loj: 2008.06.04)
+            StringArray errList = validator->GetErrorList();
+            std::string msg; // Check for empty errList (loj: 2009.03.17)
+            if (errList.empty())
+               msg = "Error occurred";
+            else
+               msg = errList[0];
+            
+            throw FunctionException(msg + " in the function \"" + functionPath + "\"");
+         }
+      }
+      
       
       #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
@@ -477,12 +504,14 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       current = current->GetNext();
    }
    
+   
    // Get automatic global object list and check if they are used in the function
    // command sequence so that when any global object is declared in the main script
    // but not used in the function, they can be ignored during function local object
    // initialization. (LOJ: 2009.12.18)
    BuildUnusedGlobalObjectList();
    
+   fcsInitialized = true;
    fcsFinalized = false;
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
@@ -510,6 +539,7 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
    static Integer callCount = 0;
    callCount++;      
    clock_t t1 = clock();
+   MessageInterface::ShowMessage("\n");
    ShowTrace(callCount, t1, "GmatFunction::Execute() entered");
    #endif
    
@@ -519,6 +549,8 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
        "GmatFunction::Execute() entered for '%s'\n   internalCS is <%p>, "
        "reinitialize = %d, fcs=<%p><%s>\n", functionName.c_str(), internalCoordSys,
        reinitialize, fcs, fcs ? fcs->GetTypeName().c_str() : "NULL");
+   MessageInterface::ShowMessage
+      ("   prevFuncManager=<%p>, currFuncManager=<%p>\n", prevFuncManager, currFuncManager);
    #endif
    
    GmatCommand *current = fcs;
@@ -549,6 +581,10 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
          ("   Reinitializing CoordinateSystems, CalculatedPointes, Spacecrafts, Burns, Solvers, and Parameters\n");
       #endif
       
+      #ifdef DEBUG_TRACE
+      ShowTrace(callCount, t1, "GmatFunction::Execute() BEGIN object re-initialization");
+      #endif
+      
       if (!objInit->InitializeObjects(true, Gmat::COORDINATE_SYSTEM))
          throw FunctionException
             ("Failed to re-initialize CoordinateSystems in the \"" + functionName + "\"");
@@ -567,6 +603,10 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       if (!objInit->InitializeObjects(true, Gmat::PARAMETER))
          throw FunctionException
             ("Failed to re-initialize Parameters in the \"" + functionName + "\"");
+      
+      #ifdef DEBUG_TRACE
+      ShowTrace(callCount, t1, "GmatFunction::Execute() END   object re-initialization");
+      #endif
    }
    #endif
    
@@ -675,41 +715,41 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
          
          // Since GmatFunction is parsed in object and command modes,
          // we may not need this section (LOJ: 2014.12.16)
-         #if 0
-         // Let's try initialzing local objects here again (2008.10.14)
-         try
-         {
-            #ifdef DEBUG_FUNCTION_EXEC
-            MessageInterface::ShowMessage
-               ("============================ Reinitializing LocalObjects at current\n"
-                "%s\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-            #endif
+         // #if 0
+         // // Let's try initialzing local objects here again (2008.10.14)
+         // try
+         // {
+         //    #ifdef DEBUG_FUNCTION_EXEC
+         //    MessageInterface::ShowMessage
+         //       ("============================ Reinitializing LocalObjects at current\n"
+         //        "%s\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         //    #endif
             
-            InitializeLocalObjects(objInit, current, false);
+         //    InitializeLocalObjects(objInit, current, false);
             
-            #ifdef DEBUG_FUNCTION_EXEC
-            MessageInterface::ShowMessage
-               ("......Function re-executing <%p><%s> [%s]\n", current,
-                current->GetTypeName().c_str(),
-                current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-            #endif
+         //    #ifdef DEBUG_FUNCTION_EXEC
+         //    MessageInterface::ShowMessage
+         //       ("......Function re-executing <%p><%s> [%s]\n", current,
+         //        current->GetTypeName().c_str(),
+         //        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         //    #endif
             
-            if (!(current->Execute()))
-               return false;
-         }
-         catch (HardwareException &)
-         {
-            // Ignore for hardware exception since spacecraft is associated with Thruster
-            // but Thruster binds with Tank later in the fcs
-         }
-         catch (BaseException &)
-         {
-            throw FunctionException
-               ("During initialization of local objects before \"" +
-                current->GetGeneratingString(Gmat::NO_COMMENTS) + "\", " +
-                e.GetFullMessage());
-         }
-         #endif
+         //    if (!(current->Execute()))
+         //       return false;
+         // }
+         // catch (HardwareException &)
+         // {
+         //    // Ignore for hardware exception since spacecraft is associated with Thruster
+         //    // but Thruster binds with Tank later in the fcs
+         // }
+         // catch (BaseException &)
+         // {
+         //    throw FunctionException
+         //       ("During initialization of local objects before \"" +
+         //        current->GetGeneratingString(Gmat::NO_COMMENTS) + "\", " +
+         //        e.GetFullMessage());
+         // }
+         // #endif
       }
       
       // If current command is BranchCommand and still executing, continue to next
@@ -948,7 +988,7 @@ void GmatFunction::ShowTrace(Integer count, Integer t1, const std::string &label
                              bool showMemoryTracks, bool addEol)
 {
    // To locally control debug output
-   bool showTrace = false;
+   bool showTrace = true;
    bool showTracks = true;
    
    showTracks = showTracks & showMemoryTracks;
@@ -958,7 +998,7 @@ void GmatFunction::ShowTrace(Integer count, Integer t1, const std::string &label
       #ifdef DEBUG_TRACE
       clock_t t2 = clock();
       MessageInterface::ShowMessage
-         ("=== %s, '%s' Count = %d, elapsed time: %f sec\n", label.c_str(),
+         (">>>>> CALL TRACE: %s, '%s' Count = %d, elapsed time: %f sec\n", label.c_str(),
           functionName.c_str(), count, (Real)(t2-t1)/CLOCKS_PER_SEC);
       #endif
    }
@@ -972,7 +1012,7 @@ void GmatFunction::ShowTrace(Integer count, Integer t1, const std::string &label
             ("    ==> There are %d memory tracks\n", tracks.size());
       else
          MessageInterface::ShowMessage
-            ("=== There are %d memory tracks when %s, '%s'\n", tracks.size(),
+            (">>>>> MEMORY TRACK: There are %d memory tracks when %s, '%s'\n", tracks.size(),
              label.c_str(), functionName.c_str());
       
       if (addEol)
@@ -992,11 +1032,13 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
 {
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
-      ("\n============================ Begin initialization of local objects in '%s'\n",
+      ("\n============================ BEGIN INITIALIZATION of local objects in '%s'\n",
        functionName.c_str());
    MessageInterface::ShowMessage
       ("Now at command <%p><%s> \"%s\"\n", current, current->GetTypeName().c_str(),
        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   ShowObjectMap(&functionObjectMap, "In GmatFunction::InitializeLocalObjects()",
+                 "functionObjectMap");
    #endif
    
    // Why internal coordinate system is empty in ObjectInitializer?
@@ -1039,7 +1081,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
    
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage
-      ("============================ End   initialization of local objects\n");
+      ("============================ END INITIALIZATION of local objects\n");
    #endif
    
    return true;

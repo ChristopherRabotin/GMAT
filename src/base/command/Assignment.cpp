@@ -1065,7 +1065,7 @@ bool Assignment::Execute()
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== Assignment::Execute() entered, '%s' Count = %d\n",
+      (">>>>> CALL TRACE: Assignment::Execute() entered, '%s' Count = %d\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
    
@@ -1256,7 +1256,7 @@ bool Assignment::Execute()
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage
-      ("=== Assignment::Execute() exiting, '%s' Count = %d, Run Time: %f seconds\n",
+      (">>>>> CALL TRACE: Assignment::Execute() exiting, '%s' Count = %d, Run Time: %f seconds\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount,
        (Real)(t2-t1)/CLOCKS_PER_SEC);
    #endif

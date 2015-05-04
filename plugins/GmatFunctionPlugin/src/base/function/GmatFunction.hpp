@@ -37,8 +37,8 @@ public:
    GmatFunction(const GmatFunction &copy);
    GmatFunction& operator=(const GmatFunction &right);
    
-   virtual bool IsNewFunction();
-   virtual void SetNewFunction(bool flag);
+   virtual bool         IsNewFunction();
+   virtual void         SetNewFunction(bool flag);
    
    // inherited from Function
    virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);

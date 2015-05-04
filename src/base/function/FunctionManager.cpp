@@ -39,9 +39,9 @@
 //#define DEBUG_FUNCTION_MANAGER
 //#define DEBUG_FM_SET
 //#define DEBUG_FM_INIT
+//#define DEBUG_FM_EXECUTE
 //#define DEBUG_FM_REFRESH
 //#define DEBUG_FM_EVAL
-//#define DEBUG_FM_EXECUTE
 //#define DEBUG_FM_RESULT
 //#define DEBUG_FM_FINALIZE
 //#define DEBUG_FM_STACK
@@ -85,7 +85,7 @@ FunctionManager::FunctionManager() :
    localObjectStore    (NULL),
    globalObjectStore   (NULL),
    solarSys            (NULL),
-   fName               (""),
+   functionName        (""),
    currentFunction     (NULL),
    firstExecution      (true),
    isFinalized         (false),
@@ -151,7 +151,7 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    globalObjectStore   (fm.globalObjectStore),
    solarSys            (fm.solarSys),
    forces              (fm.forces),
-   fName               (fm.fName),
+   functionName        (fm.functionName),
    currentFunction     (fm.currentFunction), // copy the pointer here
    passedIns           (fm.passedIns),
    passedOuts          (fm.passedOuts),
@@ -197,7 +197,7 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       globalObjectStore   = fm.globalObjectStore; // is that right?
       solarSys            = fm.solarSys;
       forces              = fm.forces;
-      fName               = fm.fName;
+      functionName        = fm.functionName;
       currentFunction     = fm.currentFunction;  // copy the pointer here
       passedIns           = fm.passedIns;
       passedOuts          = fm.passedOuts;
@@ -229,7 +229,7 @@ void FunctionManager::SetPublisher(Publisher *pub)
    #ifdef DEBUG_PUBLISHER
    MessageInterface::ShowMessage
       ("FunctionManager::SetPublisher() '%s' setting publisher <%p>\n",
-       fName.c_str(), pub);
+       functionName.c_str(), pub);
    #endif
    publisher = pub;
 }
@@ -297,7 +297,7 @@ void FunctionManager::SetFunctionName(const std::string &itsName)
       MessageInterface::ShowMessage("Entering FM::SetFunctionName with name = %s\n",
                                     itsName.c_str());
    #endif
-   fName = itsName;
+   functionName = itsName;
    if ((currentFunction) && (currentFunction->GetTypeName() == "GmatFunction"))  
    {
       #ifdef DEBUG_FM_SET
@@ -319,11 +319,11 @@ std::string FunctionManager::GetFunctionName() const
       #ifdef DEBUG_FM_GET
       MessageInterface::ShowMessage
          ("in FM::GetFunctionName, <%p> function name = '%s', "
-          "fName = '%s'\n", f, theFunctionName.c_str(), fName.c_str());
+          "functionName = '%s'\n", f, theFunctionName.c_str(), functionName.c_str());
       #endif
       //return currentFunction->GetStringParameter("FunctionName");
    }
-   return fName; // why not return theFunctionName here?
+   return functionName; // why not return theFunctionName here?
 }
 
 //------------------------------------------------------------------------------
@@ -333,20 +333,21 @@ void FunctionManager::SetFunction(Function *theFunction)
 {
    #ifdef DEBUG_FM_SET
    MessageInterface::ShowMessage
-      ("FunctionManager::SetFunction() fName='%s', theFunction=<%p>\n",
-       fName.c_str(), theFunction);
+      ("FunctionManager::SetFunction() functionName='%s', theFunction=<%p>\n",
+       functionName.c_str(), theFunction);
    #endif
    currentFunction = theFunction;
-   currentFunction->SetStringParameter("FunctionName", fName);
+   currentFunction->SetStringParameter("FunctionName", functionName);
    if (currentFunction->IsOfType("GmatFunction"))
+   {
       fcs = currentFunction->GetFunctionControlSequence();
+   }
    else
    {
       std::string errMsg = "Function passed to FunctionManager \"";
-      errMsg += fName + "\" is of wrong type; must be a GmatFunction\n"; // other types in the future?
+      errMsg += functionName + "\" is of wrong type; must be a GmatFunction\n"; // other types in the future?
       throw FunctionException(errMsg);
    }
-
 }
 
 //------------------------------------------------------------------------------
@@ -706,10 +707,15 @@ WrapperArray& FunctionManager::GetWrappersToDelete()
 //------------------------------------------------------------------------------
 bool FunctionManager::PrepareObjectMap()
 {
+   #ifdef DEBUG_FM_EXECUTE
+   MessageInterface::ShowMessage
+      ("FunctionManager::PrepareObjectMap() <%p>'%s' entered, validator=<%p>\n",
+       this, functionName.c_str(), validator);
+   #endif
    if (currentFunction == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to execute Function """;
-      errMsg += fName + """ - pointer is NULL\n";
+      errMsg += functionName + """ - pointer is NULL\n";
       throw FunctionException(errMsg);
    }
    
@@ -720,23 +726,42 @@ bool FunctionManager::PrepareObjectMap()
    if (validator == NULL)
       validator = Validator::Instance();
    
-   combinedObjectStore.clear();
-   std::map<std::string, GmatBase *>::iterator omi;
-   for (omi = localObjectStore->begin(); omi != localObjectStore->end(); ++omi)
-      combinedObjectStore.insert(std::make_pair(omi->first, omi->second));
-   for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-      combinedObjectStore.insert(std::make_pair(omi->first, omi->second));
+   // Build combinedObjectStore for the first execution
+   if (firstExecution == false)
+   {
+      #ifdef DEBUG_FM_EXECUTE
+      MessageInterface::ShowMessage
+         ("in FM::PrepareObjectMap(), It is not first execution so skipping "
+          "building combinedObjectStore\n");
+      #endif
+   }
+   else
+   {
+      combinedObjectStore.clear();
+      std::map<std::string, GmatBase *>::iterator omi;
+      for (omi = localObjectStore->begin(); omi != localObjectStore->end(); ++omi)
+         combinedObjectStore.insert(std::make_pair(omi->first, omi->second));
+      for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+         combinedObjectStore.insert(std::make_pair(omi->first, omi->second));
+      
+      // Set conbined (local and global) object store to Validator
+      validator->SetObjectMap(&combinedObjectStore);
+      
+      #ifdef DEBUG_FM_EXECUTE
+      MessageInterface::ShowMessage
+         ("in FM::PrepareObjectMap(), Validator's object map was just set to "
+          "combinedObjectStore\n");
+      #ifdef DEBUG_OBJECT_MAP
+      ShowObjectMap(&combinedObjectStore, "CombinedObjectStore");
+      #endif
+      #endif
+   }
    
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
-      ("in FM::PrepareObjectMap(), Validator's object map was just set to "
-       "combinedObjectStore\n");
-   #ifdef DEBUG_OBJECT_MAP
-   ShowObjectMap(&combinedObjectStore, "CombinedObjectStore");
+      ("FunctionManager::PrepareObjectMap() <%p>'%s' returning true\n",
+       this, functionName.c_str());
    #endif
-   #endif
-   
-   validator->SetObjectMap(&combinedObjectStore);
    
    return true;
 }
@@ -757,61 +782,12 @@ bool FunctionManager::Initialize()
    MessageInterface::ShowMessage
       ("=======================================================================\n"
        "Entering FM::Initialize() this FM is <%p>, current function is <%p>'%s'\n   "
-       "calling FM is <%p>'%s'\n", this, currentFunction, fName.c_str(), callingFunction,
+       "calling FM is <%p>'%s'\n", this, currentFunction, functionName.c_str(), callingFunction,
        callingFunction ? callingFunction->GetFunctionName().c_str() : "NULL");
    MessageInterface::ShowMessage
       ("FunctionManager::Initialize() clonedObjectStores.size()=%d\n",
        clonedObjectStores.size());
    ShowObjectMap(globalObjectStore, "In FunctionManager::Initialize(), GOS to be used in the function");
-   #endif
-   
-   #if 0
-   // We need to update function input/output info in function object map
-   // for two-mode GmatFunction parsing since it uses functions from the
-   // function object store from the caller for nested function calls.
-   // So copy input/output info from the functions in the globalObjectStore
-   // (LOJ: 2015.03.18)
-   if (!currentFunction->IsFunctionInputOutputSet())
-   {
-      ObjectMap::iterator gomi = globalObjectStore->find(fName);
-      if (gomi != globalObjectStore->end())
-      {
-         Function *globalFunc = (Function*)(gomi->second);
-         MessageInterface::ShowMessage
-            ("==> Found globalFunc <%p>'%s'\n", globalFunc,
-             globalFunc ? globalFunc->GetName().c_str() : "NULL");
-         
-         if (globalFunc != NULL)
-         {
-            MessageInterface::ShowMessage
-               ("==> currentFunction=<%p>, Setting <%p> to currentFunction\n", globalFunc);
-            currentFunction = globalFunc;
-         }
-         
-         #if 0
-         ObjectMap *funcObjMap = currentFunction->GetFunctionObjectMap();
-         ObjectMap::iterator omi;
-         ShowObjectMap(funcObjMap, "In FunctionManager::Initialize(), functionObjectMap");
-         for (omi = funcObjMap->begin(); omi != funcObjMap->end(); ++omi)
-         {
-            if ((omi->first) == fName)
-            {
-               StringArray inputs  = globalFunc->GetStringArrayParameter("Input");
-               StringArray outputs = globalFunc->GetStringArrayParameter("Output");
-               Function *localFunc = (Function*)(omi->second);
-               MessageInterface::ShowMessage
-                  ("==> Found localFunc <%p>'%s'\n", localFunc,
-                   localFunc ? localFunc->GetName().c_str() : "NULL");
-               for (UnsignedInt i=0; i<inputs.size(); i++)
-                  localFunc->SetStringParameter("Input", inputs[i]);
-               for (UnsignedInt i=0; i<outputs.size(); i++)
-                  localFunc->SetStringParameter("Output", outputs[i]);
-               break;
-            }
-         }
-         #endif
-      }
-   }
    #endif
    
    // clonedObjectStores should not be cleared for recursive call to work
@@ -861,7 +837,6 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    callCount++;      
    clock_t t1 = clock();
    ShowTrace(callCount, t1, "FunctionManager::Execute() entered");
-   //MessageInterface::ShowMessage("   === firstExecution=%d\n", firstExecution);
    #endif
    
    #ifdef DEBUG_FM_EXECUTE
@@ -869,8 +844,9 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       ("=======================================================================\n"
        "Entering FM::Execute(), current function is '%s'\n   calling FM is '%s'\n"
        "   solarSys is %p, internalCS is %p, forces is %p\n",
-       fName.c_str(), callingFM ? callingFM->GetFunctionName().c_str() : "NULL",
+       functionName.c_str(), callingFM ? callingFM->GetFunctionName().c_str() : "NULL",
        solarSys, internalCS, forces);
+   MessageInterface::ShowMessage("   === firstExecution=%d\n", firstExecution);
    #endif
    
    PrepareObjectMap();
@@ -889,13 +865,16 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       MessageInterface::ShowMessage
          ("   NOT First execution, so calling RefreshFOS()\n");
       #endif
+      // Need to refresh for nested or recursive function call or
+      // function call in math equation for input/output arguments
       RefreshFOS();
       RefreshFormalInputObjects();
    } // end if not first time through
    
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
-      ("   Now pass FOS/GOS into the function <%p>'%s'\n", f, GetFunctionName().c_str());
+      ("   Now pass FOS/GOS into the function <%p>'%s'\n", currentFunction,
+       GetFunctionName().c_str());
    ShowObjectMap(functionObjectStore, "FOS to pass to function");
    ShowObjectMap(globalObjectStore, "GOS to pass to function");
    #endif
@@ -918,21 +897,12 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       currentFunction->SetInputElementWrapper(ewi->first, ewi->second);
    }
    
-   // // must re-initialize the function each time, as it may be called in more than
-   // // one place
-   // if (!(currentFunction->Initialize()))
-   // {
-   //    std::string errMsg = "FunctionManager:: Error initializing function \"";
-   //    errMsg += currentFunction->GetStringParameter("FunctionName") + "\"\n";
-   //    throw FunctionException(errMsg);
-   // }
-   
    // create new ObjectInitializer   
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
-      ("in FM::Execute (%s), about to create new ObjectInitializer, objInit=<%p>, "
+      ("in FM::Execute (%s), about to create new ObjectInitializer, objInit=<%p>,\n   "
        "solarSys=<%p>, FOS=<%p>, GOS=<%p>, internalCS=<%p>, and true for useGOS\n",
-       fName.c_str(), objInit, solarSys, functionObjectStore, globalObjectStore, internalCS);
+       functionName.c_str(), objInit, solarSys, functionObjectStore, globalObjectStore, internalCS);
    #endif
    
    if (objInit)
@@ -945,7 +915,8 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    }
    
    objInit = new ObjectInitializer(solarSys, functionObjectStore,
-                                   globalObjectStore, internalCS, true, true);   
+                                   globalObjectStore, internalCS, true, true);
+   
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
       (objInit, "objInit", "FunctionManager::Execute()", "objInit = new ObjectInitializer");
@@ -958,6 +929,11 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    
    // must re-initialize the function each time, as it may be called in more than
    // one place
+   #ifdef DEBUG_FM_EXECUTE
+   MessageInterface::ShowMessage
+      ("FunctionManager::Execute() Now initializing currentFunction '%s'\n",
+       currentFunction->GetName().c_str());
+   #endif
    if (!(currentFunction->Initialize(objInit, reinitialize)))
    {
       std::string errMsg = "FunctionManager:: Error initializing function \"";
@@ -970,7 +946,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       MessageInterface::ShowMessage("   new objInit=<%p> created\n", objInit);
       MessageInterface::ShowMessage(
          "in FM::Execute (%s), about to set calling function <%p> '%s' on commands\n",
-         fName.c_str(), callingFunction, callingFunction ?
+         functionName.c_str(), callingFunction, callingFunction ?
          callingFunction->GetFunctionName().c_str() : "NULL");
    #endif
    GmatCommand *cmd = currentFunction->GetFunctionControlSequence();
@@ -978,11 +954,11 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    {
       #ifdef DEBUG_FM_EXECUTE
          MessageInterface::ShowMessage(
-               "in FM::Execute, about to set calling function on command %s\n",
+               "in FM::Execute, about to set calling function on command '%s'\n",
                (cmd->GetTypeName()).c_str());
       #endif
       cmd->SetCallingFunction(this);
-      cmd->SetInternalCoordSystem(internalCS); //added (loj: 2008.10.07)
+      cmd->SetInternalCoordSystem(internalCS);
       cmd = cmd->GetNext();
    }
    
@@ -990,7 +966,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    MessageInterface::ShowMessage("in FM::Execute, Now calling function->Execute()\n");
    MessageInterface::ShowMessage
       ("   Create and Global command may have updated FOS/GOS in the function <%p>'%s'\n",
-       f, GetFunctionName().c_str());
+       currentFunction, GetFunctionName().c_str());
    ShowObjectMap(functionObjectStore, "FOS to be used in the function");
    ShowObjectMap(globalObjectStore, "GOS to be used in the function");
    MessageInterface::ShowMessage
@@ -1010,7 +986,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       {
          MessageInterface::ShowMessage
             ("*** ERROR *** FunctionManager \"%s\" finalizing... due to false returned "
-             "from currentFunction->Execute()\n", fName.c_str());
+             "from currentFunction->Execute()\n", functionName.c_str());
          currentFunction->Finalize();
          if (publisher)
             publisher->ClearPublishedData();
@@ -1022,7 +998,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("*** ERROR *** FunctionManager \"%s\" finalizing... due to \n%s\n", fName.c_str(),
+         ("*** ERROR *** FunctionManager \"%s\" finalizing... due to \n%s\n", functionName.c_str(),
           e.GetFullMessage().c_str());
       currentFunction->Finalize();
       if (publisher)
@@ -1062,13 +1038,14 @@ Real FunctionManager::Evaluate(FunctionManager *callingFM)
    if (currentFunction == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to return Real value from Function """;
-      errMsg += fName + """ - pointer is NULL\n";
+      errMsg += functionName + """ - pointer is NULL\n";
       throw FunctionException(errMsg);
    }
    
    #ifdef DEBUG_FM_EVAL
    MessageInterface::ShowMessage
-      ("Entering FunctionManager::Evaluate() f=<%p><%s>\n", f, currentFunction->GetName().c_str());
+      ("Entering FunctionManager::Evaluate() f=<%p><%s>\n", currentFunction,
+       currentFunction->GetName().c_str());
    #endif
    
    Execute(callingFM);
@@ -1092,13 +1069,14 @@ Rmatrix FunctionManager::MatrixEvaluate(FunctionManager *callingFM)
    if (currentFunction == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to return Rmatrix value from Function """;
-      errMsg += fName + """ - pointer is NULL\n";
+      errMsg += functionName + """ - pointer is NULL\n";
       throw FunctionException(errMsg);
    }
 
    #ifdef DEBUG_FM_EVAL
    MessageInterface::ShowMessage
-      ("Entering FunctionManager::MatrixEvaluate() f=<%p><%s>\n", f, currentFunction->GetName().c_str());
+      ("Entering FunctionManager::MatrixEvaluate() f=<%p><%s>\n", currentFunction,
+       currentFunction->GetName().c_str());
    #endif
    
    Execute(callingFM);
@@ -1128,7 +1106,7 @@ void FunctionManager::Finalize()
    #ifdef DEBUG_FM_FINALIZE
    MessageInterface::ShowMessage
       ("Entering FM::Finalize, this FM is <%p>, current function is '%s', "
-       " calling FM is <%p> '%s'\n", this, fName.c_str(), callingFunction,
+       " calling FM is <%p> '%s'\n", this, functionName.c_str(), callingFunction,
        callingFunction ? callingFunction->GetFunctionName().c_str() : "NULL");
    MessageInterface::ShowMessage
        ("   functionObjectStore=<%p>, localObjectStore=<%p>, clonedObjectStores.size()=%d\n",
@@ -1175,7 +1153,7 @@ void FunctionManager::PrepareExecution(FunctionManager *callingFM)
 {
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
-      ("Entering FM::PrepareExecution for '%s'\n", fName.c_str());
+      ("Entering FM::PrepareExecution for '%s'\n", functionName.c_str());
    MessageInterface::ShowMessage
       ("   and the calling FM is '%s'\n",
        callingFM? (callingFM->GetFunctionName()).c_str() : "NULL");
@@ -1193,7 +1171,7 @@ void FunctionManager::PrepareExecution(FunctionManager *callingFM)
       #ifdef DO_NOT_EXECUTE_NESTED_GMAT_FUNCTIONS
          Finalize(); // Do we need Finalize here? (loj: 2008.09.11)
          std::string noNested = "FunctionManager (";
-         noNested += fName + ") - nested functions not yet supported";
+         noNested += functionName + ") - nested functions not yet supported";
          throw FunctionException(noNested);
       #else
          #ifdef DEBUG_FM_EXECUTE
@@ -1209,7 +1187,7 @@ void FunctionManager::PrepareExecution(FunctionManager *callingFM)
    }
    
    #ifdef DEBUG_FM_EXECUTE
-   MessageInterface::ShowMessage("Exiting  FM::PrepareExecution() for '%s'\n", fName.c_str());
+   MessageInterface::ShowMessage("Exiting  FM::PrepareExecution() for '%s'\n", functionName.c_str());
    #endif
 }
 
@@ -1226,7 +1204,7 @@ bool FunctionManager::ValidateFunctionArguments()
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
       ("Entering FM::ValidateFunctionArguments for <%p>'%s'\n", currentFunction,
-       fName.c_str());
+       functionName.c_str());
    #endif
    if (!firstExecution) return true;
    
@@ -1288,7 +1266,7 @@ bool FunctionManager::ValidateFunctionArguments()
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
       ("Exiting  FM::ValidateFunctionArguments with true for <%p>'%s'\n",
-       currentFunction, fName.c_str());
+       currentFunction, functionName.c_str());
    #endif
    
    return true;
@@ -1311,7 +1289,7 @@ bool FunctionManager::CreatePassingArgWrappers()
 {
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
-      ("Entering FM::CreatePassingArgWrappers() for '%s'\n", fName.c_str());
+      ("FunctionManager::CreatePassingArgWrappers() entered for '%s'\n", functionName.c_str());
    #endif
    
    GmatBase *obj, *objFOS;
@@ -1350,7 +1328,7 @@ bool FunctionManager::CreatePassingArgWrappers()
          {
             std::string errMsg = "FunctionManager: Object not found or created for input string \"";
             errMsg += passedIns.at(ii) + "\" for function \"";
-            errMsg += fName + "\"\n";
+            errMsg += functionName + "\"\n";
             throw FunctionException(errMsg);
          }
          objFOS = obj; // do not clone obj, just set to objFos (loj: 2008.12.10)
@@ -1390,7 +1368,7 @@ bool FunctionManager::CreatePassingArgWrappers()
       #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
          ("==========> FM:CreatePassingArgWrappers() '%s' Creating "
-          "ElementWrapper for '%s'\n", fName.c_str(), inName.c_str());
+          "ElementWrapper for '%s'\n", functionName.c_str(), inName.c_str());
       #endif
       
       ElementWrapper *inWrapper = validator->CreateElementWrapper(inName, false, false);
@@ -1426,7 +1404,7 @@ bool FunctionManager::CreatePassingArgWrappers()
          if (!(obj = FindObject(passedOuts.at(jj))))
          {
             std::string errMsg = "Output \"" + passedOuts.at(jj);
-            errMsg += " not found for function \"" + fName + "\"";
+            errMsg += " not found for function \"" + functionName + "\"";
             throw FunctionException(errMsg);
          }
          // Do we neet to set this inside the loop? commented out (loj: 2008.11.21)
@@ -1436,7 +1414,7 @@ bool FunctionManager::CreatePassingArgWrappers()
          #ifdef DEBUG_WRAPPERS
          MessageInterface::ShowMessage
             ("==========> FM:CreatePassingArgWrappers() '%s' Creating "
-             "ElementWrapper for '%s'\n", fName.c_str(), outName.c_str());
+             "ElementWrapper for '%s'\n", functionName.c_str(), outName.c_str());
          #endif
          
          ElementWrapper *outWrapper = validator->CreateElementWrapper(outName);
@@ -1457,7 +1435,7 @@ bool FunctionManager::CreatePassingArgWrappers()
    
    #ifdef DEBUG_FM_INIT
    MessageInterface::ShowMessage
-      ("Exiting  FM::CreatePassingArgWrappers() for '%s'\n", fName.c_str());
+      ("FunctionManager::CreatePassingArgWrappers() for '%s' exiting\n", functionName.c_str());
    ShowObjectMap(functionObjectStore, "in CreatePassingArgWrappers()");
    #endif
    
@@ -1476,7 +1454,7 @@ void FunctionManager::RefreshFOS()
    #ifdef DEBUG_FM_REFRESH
    MessageInterface::ShowMessage
       ("FM:RefreshFOS() entered for '%s', current FOS = <%p>, "
-       "has %d objects\n", fName.c_str(), functionObjectStore, functionObjectStore->size());
+       "has %d objects\n", functionName.c_str(), functionObjectStore, functionObjectStore->size());
    #endif
    
    if (functionObjectStore == NULL)
@@ -1488,14 +1466,15 @@ void FunctionManager::RefreshFOS()
    StringArray toDelete;
    bool        isInput = false;
    std::map<std::string, GmatBase *>::iterator omi;
-   StringArray inFormalNames = currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
+   StringArray inFormalNames =
+      currentFunction->GetStringArrayParameter(currentFunction->GetParameterID("Input"));
    
    #ifdef DEBUG_FM_REFRESH
    MessageInterface::ShowMessage
       ("   Function '%s' has %d inputs and FOS <%p> has %d objects\n",
-       fName.c_str(), inFormalNames.size(), functionObjectStore, functionObjectStore->size());
+       functionName.c_str(), inFormalNames.size(), functionObjectStore, functionObjectStore->size());
    #endif
-   
+
    for (omi = functionObjectStore->begin(); omi != functionObjectStore->end(); ++omi)
    {
       isInput = false;
@@ -1523,15 +1502,16 @@ void FunctionManager::RefreshFOS()
    {
       #ifdef DEBUG_FM_REFRESH
       MessageInterface::ShowMessage
-         ("   erasing %s from FOS <%p>\n", toDelete.at(kk).c_str());
+         ("   erasing '%s' from FOS <%p>\n", toDelete.at(kk).c_str(), functionObjectStore);
       #endif
       functionObjectStore->erase(toDelete.at(kk));
    }
+
    
    #ifdef DEBUG_FM_REFRESH
    MessageInterface::ShowMessage
       ("FM:RefreshFOS() leaving for '%s', has %d objects in FOS\n",
-       fName.c_str(), functionObjectStore->size());
+       functionName.c_str(), functionObjectStore->size());
    #endif
 }
 
@@ -1601,7 +1581,7 @@ void FunctionManager::RefreshFormalInputObjects()
             if (createdOthers.find(passedName) == createdOthers.end())
             {
                std::string errMsg = "Input \"" + passedName;
-               errMsg += " not found for function \"" + fName + "\"";
+               errMsg += " not found for function \"" + functionName + "\"";
                throw FunctionException(errMsg);
             }
             
@@ -1618,7 +1598,7 @@ void FunctionManager::RefreshFormalInputObjects()
                std::string errMsg2 =
                   "FunctionManager: Object not found or created for input string \"";
                errMsg2 += passedName + "\" for function \"";
-               errMsg2 += fName + "\"\n";
+               errMsg2 += functionName + "\"\n";
                throw FunctionException(errMsg2);
             }
             createdOthers[passedName] = obj;
@@ -1961,7 +1941,7 @@ bool FunctionManager::HandleCallStack()
 {
    #ifdef DEBUG_FM_EXECUTE
    MessageInterface::ShowMessage
-      ("Entering FM::HandleCallStack for function '%s'\n", fName.c_str());
+      ("Entering FM::HandleCallStack for function '%s'\n", functionName.c_str());
    //ShowStackContents(callStack, "Stack contents at beg. of PushToStack");
    //ShowObjectMap(functionObjectStore, "FOS at beg. of PushToStack");
    #endif
@@ -2009,7 +1989,8 @@ bool FunctionManager::HandleCallStack()
       // Do not call Finalize() it will delete LOS and nested function will not work
       #ifdef DEBUG_FM_EXECUTE
       MessageInterface::ShowMessage
-         ("   calling function <%p>'%s'->Finalize()\n", f, currentFunction->GetName().c_str());
+         ("   calling function <%p>'%s'->Finalize()\n", currentFunction,
+          currentFunction->GetName().c_str());
       #endif
       currentFunction->Finalize();
       
@@ -2053,7 +2034,7 @@ void FunctionManager::SaveLastResult()
    if (!ew) 
    {
       std::string errMsg = "FunctionManager: missing output argument from function \"";
-      errMsg += fName + "\"\n";
+      errMsg += functionName + "\"\n";
       throw FunctionException(errMsg);
    }
    
@@ -2104,7 +2085,7 @@ ObjectMap* FunctionManager::PushToStack()
 {
    #ifdef DEBUG_FM_STACK
    MessageInterface::ShowMessage
-      ("Entering FM::PushToStack for function '%s'\n", fName.c_str());
+      ("Entering FM::PushToStack for function '%s'\n", functionName.c_str());
    ShowStackContents(callStack, "Stack contents at beg. of PushToStack");
    ShowObjectMap(functionObjectStore, "FOS at beg. of PushToStack");
    #endif
@@ -2114,7 +2095,7 @@ ObjectMap* FunctionManager::PushToStack()
    clonedObjectStores.push_back(clonedObjMap);
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
-      (clonedObjMap, "clonedObjMap", fName + ":FunctionManager::PushToStack()",
+      (clonedObjMap, "clonedObjMap", functionName + ":FunctionManager::PushToStack()",
        "*clonedObjMap = new ObjectMap");
    #endif
    CloneObjectMap(functionObjectStore, clonedObjMap);
@@ -2124,7 +2105,7 @@ ObjectMap* FunctionManager::PushToStack()
    
    #ifdef DEBUG_FM_STACK
       MessageInterface::ShowMessage(
-            "Exiting  PushToStack for function '%s'\n", fName.c_str());
+            "Exiting  PushToStack for function '%s'\n", functionName.c_str());
       ShowObjectMap(clonedObjMap, "Cloned map at end of PushToStack");
       ShowStackContents(callStack, "Stack contents at end of PushToStack");
    #endif
@@ -2144,7 +2125,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
 {
    #ifdef DEBUG_FM_STACK
    MessageInterface::ShowMessage
-      ("Entering FM::PopFromStack for function '%s', cloned=<%p>\n", fName.c_str(), cloned);
+      ("Entering FM::PopFromStack for function '%s', cloned=<%p>\n", functionName.c_str(), cloned);
    ShowStackContents(callStack, "Stack contents at beg. of PopFromStack");
    #endif
    if (callStack.empty())
@@ -2188,7 +2169,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
       {
          std::string errMsg = "PopFromStack::Error getting output named ";
          errMsg += outNames.at(jj) + " from cloned map in function \"";
-         errMsg += fName + "\"\n";
+         errMsg += functionName + "\"\n";
          throw FunctionException(errMsg);
       }
       if (fosObj == NULL)
@@ -2196,7 +2177,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
          // We don't want to throw exception here (loj: 2008.09.12)
          //std::string errMsg = "PopFromStack::Error setting output named \"";
          //errMsg += callingNames.at(jj) + "\" from nested function on function \"";
-         //errMsg += fName + "\"\n";
+         //errMsg += functionName + "\"\n";
          ////throw FunctionException(errMsg);
          #ifdef DEBUG_FM_STACK
          MessageInterface::ShowMessage
@@ -2221,7 +2202,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
             "PopFromStack::reset object map to the one popped from the stack\n");
       MessageInterface::ShowMessage(
             "PopFromStack::now about to re-initialize the function '%s'\n",
-            fName.c_str());
+            functionName.c_str());
    #endif
    
    // Set popped FOS to function and re-initialize fcs
@@ -2230,7 +2211,7 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
    
    #ifdef DEBUG_FM_STACK
       MessageInterface::ShowMessage(
-         "Exiting  FM::PopFromStack for function %s with %d\n", fName.c_str(), retval);
+         "Exiting  FM::PopFromStack for function %s with %d\n", functionName.c_str(), retval);
       ShowStackContents(callStack, "Stack contents at end of PopFromStack");
    #endif
 
@@ -2312,7 +2293,7 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
             #ifdef DEBUG_FM_SUBSCRIBER
             MessageInterface::ShowMessage
                ("   '%s' Unsubscribe <%p>'%s' from the publisher <%p>\n",
-                fName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
+                functionName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
             #endif
             
             // Unsubscribe subscriber
@@ -2324,7 +2305,7 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
             {
                #ifdef DEBUG_FM_SUBSCRIBER
                MessageInterface::ShowMessage
-                  ("   '%s' Cannot unsubscribe, the publisher is NULL\n", fName.c_str());
+                  ("   '%s' Cannot unsubscribe, the publisher is NULL\n", functionName.c_str());
                #endif
             }
          }
@@ -2397,7 +2378,7 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             #ifdef DEBUG_CLEANUP
             MessageInterface::ShowMessage
                ("   '%s' Unsubscribe <%p>'%s' from the publisher <%p>\n",
-                fName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
+                functionName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
             #endif
             
             if (publisher)
@@ -2408,7 +2389,7 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             {
                #ifdef DEBUG_CLEANUP
                MessageInterface::ShowMessage
-                  ("   '%s' Cannot unsubscribe, the publisher is NULL\n", fName.c_str());
+                  ("   '%s' Cannot unsubscribe, the publisher is NULL\n", functionName.c_str());
                #endif
             }
             #ifdef DEBUG_MEMORY
@@ -2686,7 +2667,7 @@ void FunctionManager::ShowCallers(const std::string &label)
    MessageInterface::ShowMessage("==================== %s\n", label.c_str());
    MessageInterface::ShowMessage
       ("   Call stack for this=<%p>'%s', there are %d FunctionManagers in stack\n",
-       this, fName.c_str(), callers.size());
+       this, functionName.c_str(), callers.size());
    
    while (!(callers.empty()))
    {
@@ -2718,7 +2699,7 @@ void FunctionManager::ShowTrace(Integer count, Integer t1, const std::string &la
                                 bool showMemoryTracks, bool addEol)
 {
    // To locally control debug output
-   bool showTrace = false;
+   bool showTrace = true;
    bool showTracks = true;
    
    showTracks = showTracks & showMemoryTracks;
@@ -2728,8 +2709,8 @@ void FunctionManager::ShowTrace(Integer count, Integer t1, const std::string &la
       #ifdef DEBUG_TRACE
       clock_t t2 = clock();
       MessageInterface::ShowMessage
-         ("=== %s, '%s' Count = %d, elapsed time: %f sec\n", label.c_str(),
-          fName.c_str(), count, (Real)(t2-t1)/CLOCKS_PER_SEC);
+         (">>>>> CALL TRACE: %s, <%p> '%s' Count = %d, elapsed time: %f sec\n", label.c_str(),
+          this, functionName.c_str(), count, (Real)(t2-t1)/CLOCKS_PER_SEC);
       #endif
    }
    
@@ -2742,8 +2723,8 @@ void FunctionManager::ShowTrace(Integer count, Integer t1, const std::string &la
             ("    ==> There are %d memory tracks\n", tracks.size());
       else
          MessageInterface::ShowMessage
-            ("=== There are %d memory tracks when %s, '%s'\n", tracks.size(),
-             label.c_str(), fName.c_str());
+            (">>>>> MEMORY TRACK: There are %d memory tracks when %s, '%s'\n",
+             tracks.size(), label.c_str(), functionName.c_str());
       
       if (addEol)
          MessageInterface::ShowMessage("\n");

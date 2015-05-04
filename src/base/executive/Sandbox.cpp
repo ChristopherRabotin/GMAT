@@ -492,6 +492,7 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 bool Sandbox::Initialize()
 {
    #ifdef DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage("\n==================== Sandbox::Initialize() entered\n");
       MessageInterface::ShowMessage("Initializing the Sandbox\n");
       ShowObjectMap(objectMap, "Sandbox::Initialize() at the start, objectMap\n");
       ShowObjectMap(globalObjectMap, "Sandbox::Initialize() at the start, globalObjectMap\n");
@@ -615,7 +616,7 @@ bool Sandbox::Initialize()
       {
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
-               "Sandbox::moving object <%p>'%s' to the Global Object Store\n",
+               "Sandbox::Initialie() moving object <%p>'%s' to the Global Object Store\n",
                omi->second, (omi->first).c_str());
          #endif
          globalObjectMap.insert(*omi);
@@ -663,11 +664,6 @@ bool Sandbox::Initialize()
       ShowObjectMap(globalObjectMap, "Sandbox Global Object Map contains\n");
    #endif
    
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage(
-         "Sandbox::Initialize() Initializing Commands...\n");
-   #endif
-   
    StringArray exceptions;
    IntegerArray exceptionTypes;
    UnsignedInt exceptionCount = 0;
@@ -708,6 +704,11 @@ bool Sandbox::Initialize()
       }
    }
 
+   #ifdef DEBUG_SANDBOX_INIT
+   MessageInterface::ShowMessage
+      ("Sandbox::Initialize() Initializing Commands...\n");
+   #endif
+   
    // Initialize commands
    while (current)
    {
@@ -715,22 +716,28 @@ bool Sandbox::Initialize()
       {
          #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage
-            ("Initializing %s command\n   \"%s\"\n",
+            ("Sandbox::Initialize() Setting TriggerManager to [%s] command\n   \"%s\"\n",
              current->GetTypeName().c_str(),
              current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
          #endif
-
+         
          current->SetTriggerManagers(&triggerManagers);
-
+         
          #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage("Sandbox Initializing %s command\n",
-               current->GetTypeName().c_str());
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() Setting objectMap, globalObjectMap to [%s] command\n",
+             current->GetTypeName().c_str());
          #endif
-
+         
          current->SetObjectMap(&objectMap);
          current->SetGlobalObjectMap(&globalObjectMap);
          SetGlobalRefObject(current);
 
+         #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() Checking if [%s] is CallFunction or Assignment command, "
+             "so that GmatFunction can be built if needed\n", current->GetTypeName().c_str());
+         #endif
          // Handle GmatFunctions
          if ((current->IsOfType("CallFunction")) ||
              (current->IsOfType("Assignment")))
@@ -741,6 +748,12 @@ bool Sandbox::Initialize()
             #endif
             HandleGmatFunction(current, &combinedObjectMap);
          }
+         
+         #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() Checking if [%s] is BranchCommand, so that GmatFunction "
+             "inside branch command can be built if needed\n", current->GetTypeName().c_str());
+         #endif
          if (current->IsOfType("BranchCommand"))
          {
             std::vector<GmatCommand*> cmdList = ((BranchCommand*) current)->GetCommandsWithGmatFunctions();
@@ -754,7 +767,11 @@ bool Sandbox::Initialize()
                (cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
             }
          }
-
+         
+         #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage
+            ("Sandbox::Initialize() Initializing [%s] command\n", current->GetTypeName().c_str());
+         #endif
          try
          {
             rv = current->Initialize();
@@ -783,7 +800,7 @@ bool Sandbox::Initialize()
          {
             #ifdef DEBUG_SANDBOX_SOLVERBRANCH
             MessageInterface::ShowMessage
-               ("Sandbox calling TakeAction() for action 'SetLastVaryCommand "
+               ("Sandbox::Initialize() calling TakeAction() for action 'SetLastVaryCommand "
                 "after BranchCommand <%p>[%s] is initialized\n",
                 current, current->GetTypeName().c_str());
             #endif
@@ -820,13 +837,12 @@ bool Sandbox::Initialize()
    }
 
    #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage(
-         "Sandbox::Initialize() Successfully initialized\n");
+   MessageInterface::ShowMessage
+      ("==================== Sandbox::Initialize() Successfully initialized\n");
    #endif
 
    state = INITIALIZED;
    
-   //MessageInterface::ShowMessage("=====> Initialize successful\n");
    return rv;
 }
 
@@ -847,13 +863,15 @@ bool Sandbox::Initialize()
 //------------------------------------------------------------------------------
 bool Sandbox::Execute()
 {
-
+   #if DBGLVL_SANDBOX_RUN > 0
+   MessageInterface::ShowMessage("\n==================== Sandbox::Execute() entered\n");
    #if DBGLVL_SANDBOX_RUN > 1
-   ShoObjectMap(objectMap, "Sandbox::Execute() Here is the current object map:\n");
-   ShoObjectMap(objectMap, "Sandbox::Execute() Here is the current global object map:\n");
+   ShowObjectMap(objectMap, "Sandbox::Execute() Here is the current object map:\n");
+   ShowObjectMap(objectMap, "Sandbox::Execute() Here is the current global object map:\n");
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the mission sequence:\n");
    std::string seq = GmatCommandUtil::GetCommandSeqString(sequence);
    MessageInterface::ShowMessage(seq);
+   #endif
    #endif
    
    bool rv = true;
@@ -885,7 +903,7 @@ bool Sandbox::Execute()
             }
             else
             {
-               //MessageInterface::ShowMessage("Sandbox::Execution interrupted.\n");
+               //MessageInterface::ShowMessage("Sandbox::Execute() interrupted.\n");
                sequence->RunComplete();
                
                // notify subscribers end of run
@@ -909,11 +927,11 @@ bool Sandbox::Execute()
          if (current != NULL)
          {
             MessageInterface::ShowMessage
-               ("Sandbox::Execution running %s\n", current->GetTypeName().c_str());
+               ("Sandbox::Execute() running [%s]\n", current->GetTypeName().c_str());
             
             #if DBGLVL_SANDBOX_RUN > 1
             MessageInterface::ShowMessage
-               ("command = \n<%s>\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+               ("command = '%s'\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
             #endif
          }
          #endif
@@ -1039,7 +1057,11 @@ bool Sandbox::Execute()
 //   for (UnsignedInt i = 0; i < events.size(); ++i)
 //      events[i]->LocateEvents();
 ////      events[i]->ReportEventData();
-
+   
+   #if DBGLVL_SANDBOX_RUN > 0
+   MessageInterface::ShowMessage("==================== Sandbox::Execute() leaving\n");
+   #endif
+   
    return rv;
 }
 
@@ -1525,14 +1547,6 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
             ("Adding function <%p>'%s' to the Global Object Store\n", f, fName.c_str());
          #endif
          globalObjectMap.insert(std::make_pair(fName,f));
-         
-         // Also add to usingMap so that ScriptInterpreter::InterpretGmatFunction()
-         // can find the function (LOJ: 2015.03.17)
-         //usingMap->insert(std::make_pair(fName,f));
-         
-         // Set globalObjectMap to function so that two-mode GmatFunction parsing
-         // will work for nested function (LOJ: 2015.03.17)
-         //f->SetGlobalObjectMap(&globalObjectMap);
       }
       else // it's already in the GOS, so just grab it
          f = (Function*) globalObjectMap[fName];

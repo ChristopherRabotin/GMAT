@@ -227,7 +227,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mPolygonMode = GL_FILL;
    
    mXyPlaneColor = GmatColor::NAVY;
-   mEcPlaneColor = 0x00002266; //dark red
+   mEcPlaneColor = GmatColor::MAROON;
    mSunLineColor = GmatColor::YELLOW;
    
    // animation
