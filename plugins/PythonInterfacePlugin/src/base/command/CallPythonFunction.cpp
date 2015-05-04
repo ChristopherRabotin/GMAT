@@ -236,8 +236,8 @@ bool CallPythonFunction::Execute()
    // Python object.
    SendInParam(mInputList, formatIn, argIn);
   // Next call Python function Wrapper
-   PyObject* pyRet = NULL;
-   pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+
    MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
 
 	return true;
@@ -333,7 +333,7 @@ void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, s
             break; 
          }
          case Gmat::ARRAY:
-            ;
+            break;
       }
    }
 
