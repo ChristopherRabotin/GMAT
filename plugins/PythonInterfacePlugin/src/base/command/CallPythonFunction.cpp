@@ -194,16 +194,16 @@ bool CallPythonFunction::Initialize()
 {
 	bool ret = false;
 
-   MessageInterface::ShowMessage("Calling CallPythonFunction::Initialize()\n");
+   MessageInterface::ShowMessage("  Calling CallPythonFunction::Initialize()\n");
 
    ret = CallFunction::Initialize();
 
-   MessageInterface::ShowMessage("   Base class init complete\n");
+   MessageInterface::ShowMessage("  Base class init complete\n");
 
 	pythonIf = PythonInterface::PyInstance();
    FileManager *fm = FileManager::Instance();
 
-   MessageInterface::ShowMessage("   pythonIf:  %p\n", pythonIf);
+   MessageInterface::ShowMessage("  pythonIf:  %p\n", pythonIf);
    
 	//Initialize Python engine
 	pythonIf->PyInitialize();
@@ -211,17 +211,17 @@ bool CallPythonFunction::Initialize()
 	// Get all Python module paths from the startup file
 	StringArray paths = fm->GetAllPythonModulePaths();
 
-   MessageInterface::ShowMessage("   Adding %d python paths\n", paths.size());
+   MessageInterface::ShowMessage("  Adding %d python paths\n", paths.size());
 
 	pythonIf->PyAddModulePath(paths);
    
    //Fill in Inputlist
    Integer sizeIn = FillInputList();
-   MessageInterface::ShowMessage("   SizeIn is %d\n", sizeIn);
+   MessageInterface::ShowMessage("  SizeIn is %d\n", sizeIn);
 
    //Fill in Outputlist
    Integer sizeOut = FillOutputList();
-   MessageInterface::ShowMessage("   SizeOut is %d\n", sizeOut);
+   MessageInterface::ShowMessage("  SizeOut is %d\n", sizeOut);
 
 	return ret;
 }
@@ -236,7 +236,9 @@ bool CallPythonFunction::Execute()
    // Python object.
    SendInParam(mInputList, formatIn, argIn);
   // Next call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+   PyObject* pyRet = NULL;
+   pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+   MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
 
 	return true;
 }
@@ -259,9 +261,9 @@ Integer CallPythonFunction::FillInputList()
    {
       if ((mapObj = FindObject(*it)) == NULL)
       {
-         throw CommandException("CallPythonFunction command cannot find Parameter " +
-                                    *it + " in script line\n   \"" +
-                                       GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         throw CommandException("   CallPythonFunction command cannot find Parameter " +
+                                       *it + " in script line\n   \"" +
+                                          GetGeneratingString(Gmat::SCRIPTING) + "\"");
       }
          
       if (mapObj->IsOfType(Gmat::PARAMETER))
@@ -284,9 +286,9 @@ Integer CallPythonFunction::FillOutputList()
    {
       if ((mapObj = FindObject(*it)) == NULL)
       {
-         throw CommandException("CallPythonFunction command cannot find Parameter " +
-            *it + " in script line\n   \"" +
-            GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         throw CommandException("   CallPythonFunction command cannot find Parameter " +
+                                       *it + " in script line\n   \"" +
+                                          GetGeneratingString(Gmat::SCRIPTING) + "\"");
       }
 
       if (mapObj->IsOfType(Gmat::PARAMETER))
@@ -324,10 +326,11 @@ void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, s
                formatIn.append("(s");
             else
                formatIn.append("s");
-            break;
 
             std::string s = param->EvaluateString();
             argIn.push_back((char*)s.c_str());
+
+            break; 
          }
          case Gmat::ARRAY:
             ;
