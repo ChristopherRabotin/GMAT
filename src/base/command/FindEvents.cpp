@@ -485,7 +485,7 @@ const std::string& FindEvents::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
-   generatingString = prefix + "FindEvents " + eventLocatorName + " {AppendFlag = ";
+   generatingString = prefix + "FindEvents " + eventLocatorName + " {Append = ";
    if (appendFlag)
       generatingString += "true";
    else
