@@ -138,7 +138,7 @@ public:
 //   virtual GmatBase*    GetOwnedObject(Integer whichOne);
 
    virtual bool         Initialize();
-   virtual void         ReportEventData(const std::string &reportNotice = "");
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
    virtual void         LocateEvents(const std::string &reportNotice = "");
    virtual bool         FileWasWritten();
 
@@ -179,6 +179,15 @@ protected:
    Real                        fromEpoch;
    /// The end epoch of the interval (depends on useEntireInterval flag)
    Real                        toEpoch;
+   /// the start time of the current FindEvents
+   Real        findStart;
+   /// the stop time of the current FindEvents
+   Real        findStop;
+   /// The start (spacecraft) time
+   Real        scStart;
+   /// The current (spacecraft) time
+   Real        scNow;
+
 //   /// The number of events found in the current specified time range
 //   Integer                     numEventsFound;
 
@@ -200,6 +209,9 @@ protected:
    std::vector<CelestialBody*> occultingBodies;
    /// The file stream
    std::fstream                theReport;
+   /// the default occulting bodies (if none are set)
+   // names of the default bodies to use
+   StringArray                 defaultOccultingBodies;
 
    /// Published parameters for event locators
     enum
@@ -226,11 +238,14 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount];
+    static const Real STEP_MULTIPLE;
 
-    Real                 EpochToReal(const std::string &ep);
-    bool                 OpenReportFile(bool renameOld = true);
-    virtual std::string  GetAbcorrString();
-    virtual void         FindEvents() = 0;
+    Real                   EpochToReal(const std::string &ep);
+    bool                   OpenReportFile(bool renameOld = true);
+    virtual std::string    GetAbcorrString();
+    virtual CelestialBody* GetCelestialBody(const std::string &withName);
+    virtual std::string    GetNoEventsString(const std::string &forType);
+    virtual void           FindEvents() = 0;
 };
 
 #endif /* EventLocator_hpp */
