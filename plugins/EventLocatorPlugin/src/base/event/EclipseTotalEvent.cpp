@@ -43,6 +43,7 @@ EclipseTotalEvent::EclipseTotalEvent(const EclipseTotalEvent& copy) :
    LocatedEvent  (copy),
    theIndex      (copy.theIndex)
 {
+   TakeAction("Clear");
 }
 
 EclipseTotalEvent& EclipseTotalEvent::operator=(const EclipseTotalEvent& copy)
