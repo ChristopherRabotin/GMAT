@@ -14,8 +14,9 @@
 /**
  * Base class definition for the EphemManager.  The EphemManager is
  * responsible for creating, loading, and managing private/hidden EphemerisFile
- * objects associated with its specified Spacecraft object.
- * NOTE: currently, the EphemManager will only handle SPK Orbit files.
+ * objects associated with its specified Spacecraft or Asset object.
+ * NOTE: currently, the EphemManager will only handle SPK Orbit files, and
+ * FK text files for the GroundStation.
  */
 //------------------------------------------------------------------------------
 
@@ -25,6 +26,8 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "CoordinateSystem.hpp"
+#include "SolarSystem.hpp"
+
 #ifdef __USE_SPICE__
    #include "SpiceInterface.hpp"
 #endif
@@ -44,6 +47,7 @@ public:
    enum ManagedEphemType
    {
       SPK,
+      FK,
       CK,     // future
       CCSDS,  // future
    };
@@ -81,6 +85,20 @@ public:
                                                 RealArray         &starts,
                                                 RealArray         &ends);
 
+   /// @YRL
+   bool                 GetContactIntervals(const std::string &observerID,
+                                            Real              minElevation,
+                                            const std::string &obsFrameName,
+                                            StringArray       &occultingBodyNames,
+                                            const std::string &abCorrection,
+                                            Real              s,
+                                            Real              e,
+                                            bool              useEntireIntvl,
+                                            Integer           stepSize,
+                                            Integer           &numIntervals,
+                                            RealArray         &starts,
+                                            RealArray         &ends);
+
    bool                 GetCoverageStartAndStop(Real s, Real e,
                                                 bool useEntireIntvl,
                                                 bool includeAll,
@@ -91,6 +109,7 @@ public:
    virtual void         SetObject(GmatBase *obj);
    virtual void         SetEphemType(ManagedEphemType eType);
    virtual void         SetCoordinateSystem(CoordinateSystem *cs);
+   virtual void         SetSolarSystem(SolarSystem *ss);
 
 protected:
 //   /// Epoch format
@@ -105,6 +124,8 @@ protected:
    std::string          theObjName;
    /// pointer to the object whose ephemeris is being managed
    GmatBase             *theObj;
+   /// the solar system
+   SolarSystem          *solarSys;
    /// the Subscriber to which the Ephem will be written
    EphemerisFile        *ephemFile;
    /// CoordinateSystem to use for the EphemerisFile

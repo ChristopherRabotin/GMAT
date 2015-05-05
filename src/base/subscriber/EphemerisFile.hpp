@@ -41,6 +41,7 @@ public:
    // methods for this class
    void                 SetProperFileExtension();
    virtual void         ValidateParameters(bool forInitialization);
+   virtual void         SetBackgroundGeneration(bool inBackground);
    
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
@@ -131,6 +132,7 @@ protected:
    std::string outputFormat;
    bool writeEphemeris;
    bool usingDefaultFileName;
+   bool generateInBackground;
    /// for propagator change
    std::string prevPropName;
    std::string currPropName;

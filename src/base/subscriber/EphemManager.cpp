@@ -32,12 +32,14 @@
 #include "SubscriberException.hpp"
 #include "FileUtil.hpp"
 #include "StringUtil.hpp"
+#include "GmatConstants.hpp"
 #ifdef __USE_SPICE__
    #include "SpiceInterface.hpp"
 #endif
 
 //#define DEBUG_EPHEM_MANAGER
 //#define DEBUG_EM_COVERAGE
+//#define DEBUG_OCCULTATION
 
 
 /**
@@ -53,6 +55,7 @@ EphemManager::EphemManager(bool deleteFiles) :
    theType                (SPK),
    theObjName             (""),
    theObj                 (NULL),
+   solarSys               (NULL),
    ephemFile              (NULL),
    coordSys               (NULL),
    coordSysName           (""),
@@ -144,6 +147,7 @@ EphemManager::EphemManager(const EphemManager& copy) :
    theType                (copy.theType),
    theObjName             (copy.theObjName),
    theObj                 (NULL),
+   solarSys               (NULL),
    ephemFile              (NULL),
    coordSys               (NULL),
    coordSysName           (copy.coordSysName),
@@ -174,6 +178,7 @@ EphemManager& EphemManager::operator=(const EphemManager& copy)
    theType                  = copy.theType;
    theObjName               = copy.theObjName;
    theObj                   = copy.theObj;
+   solarSys                 = copy.solarSys;
 //   ephemFile                = (EphemerisFile*)(copy.ephemFile)->Clone(); // need to Subscribe here?
    ephemFile                = NULL;
    coordSys                 = copy.coordSys;
@@ -208,6 +213,8 @@ bool EphemManager::Initialize()
       throw SubscriberException("Coordinate system for EphemManager has not been set!\n");
    if (!theObj)
       throw SubscriberException("Spacecraft for EphemManager has not been set!\n");
+   if (!solarSys)
+      throw SubscriberException("SolarSystem for EphemManager has not been set!\n");
 
    #ifdef __USE_SPICE__
       // Create SPICE interface
@@ -274,9 +281,6 @@ bool EphemManager::RecordEphemerisData()
          std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
          fileName = spkPath + fileName;
 
-   //      // Save the filename in the list
-   //      fileList.push_back(fileName);
-
          // Set up the EphemerisFile to write what we need - currently only SPK Orbit
          ephemFile->SetStringParameter("FileFormat", "SPK");
          ephemFile->SetStringParameter("StateType", "Cartesian");
@@ -285,6 +289,7 @@ bool EphemManager::RecordEphemerisData()
          ephemFile->SetStringParameter("Filename", fileName);
          ephemFile->SetStringParameter("Interpolator", "Hermite");
          ephemFile->SetIntegerParameter(ephemFile->GetParameterID("InterpolationOrder"), 7);
+         ephemFile->SetBackgroundGeneration(true);
 
          ephemFile->SetInternalCoordSystem(coordSys);
          ephemFile->SetRefObject(theObj,   Gmat::SPACECRAFT,        theObjName);
@@ -312,6 +317,10 @@ bool EphemManager::RecordEphemerisData()
 //------------------------------------------------------------------------------
 bool EphemManager::ProvideEphemerisData()
 {
+   #ifdef DEBUG_EPHEM_MANAGER
+      MessageInterface::ShowMessage("ProvideEphemerisData called -----  fileName = %s\n",
+            fileName.c_str());
+   #endif
    StopRecording();
    RecordEphemerisData();
    return true;
@@ -416,36 +425,31 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       throw SubscriberException(errmsg);
    #else
 
+      #ifdef DEBUG_OCCULTATION
+         MessageInterface::ShowMessage("In GetOccultationIntervals:\n");
+         MessageInterface::ShowMessage("   occType      = %s\n", occType.c_str());
+         MessageInterface::ShowMessage("   frontBody    = %s\n", frontBody.c_str());
+         MessageInterface::ShowMessage("   frontShape   = %s\n", frontShape.c_str());
+         MessageInterface::ShowMessage("   frontFrame   = %s\n", frontFrame.c_str());
+         MessageInterface::ShowMessage("   backBody     = %s\n", backBody.c_str());
+         MessageInterface::ShowMessage("   backShape    = %s\n", backShape.c_str());
+         MessageInterface::ShowMessage("   backFrame    = %s\n", backFrame.c_str());
+         MessageInterface::ShowMessage("   abCorrection = %s\n", abCorrection.c_str());
+      #endif
+
       Integer     theNAIFId    = theSc->GetIntegerParameter("NAIFId");
       std::string theNAIFIdStr = GmatStringUtil::ToString(theNAIFId);
 
-//      // window we want to search
+      // window we want to search
       SPICEDOUBLE_CELL(window, 2000);
       scard_c(0, &window);   // reset (empty) the cell
 
       GetCoverageWindow(&window, s, e, useEntireIntvl);
 
-//      // Get the interval start and stop times
-//      SpiceInt szWin = wncard_c(&window);
-//      if (((Integer) szWin) > 0)
-//      {
-//         SpiceDouble s, e;
-//         wnfetd_c(&window, 0, &s, &e);
-//         intvlStart = spice->SpiceTimeToA1(s);
-//         wnfetd_c(&window, szWin-1, &s, &e);
-//         intvlStop  = spice->SpiceTimeToA1(e);
-//      }
-
-
-   //   SpiceDouble  start0, end0, startN, endN;
       SpiceInt     numInt = wncard_c(&window);
-   //   wnfetd_c(&window, 0, &start0, &end0);
-   //   wnfetd_c(&window, (numInt-1), &startN, &endN);
-   //   findStart  = spice->SpiceTimeToA1(start0);
-   //   findStop   = spice->SpiceTimeToA1(endN);
 
       // CSPICE data
-      ConstSpiceChar   *occultationType  = occType.c_str();
+      ConstSpiceChar   *occultationType; //   = occType.c_str();
       ConstSpiceChar   *front            = frontBody.c_str();
       ConstSpiceChar   *fshape           = frontShape.c_str();
       ConstSpiceChar   *fframe           = frontFrame.c_str();
@@ -492,6 +496,10 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
 
       SpiceInt sz = wncard_c(&result);
       numIntervals = (Integer) sz;
+      #ifdef DEBUG_OCCULTATION
+         MessageInterface::ShowMessage("---------- For occType = %s, %d events found\n",
+               occType.c_str(), numIntervals);
+      #endif
 
       for (Integer ii = 0; ii < numIntervals; ii++)
       {
@@ -506,6 +514,114 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       return true;
    #endif
 }
+
+/// @YRL
+bool EphemManager::GetContactIntervals(const std::string &observerID,
+                                       Real              minElevation,
+                                       const std::string &obsFrameName,
+                                       StringArray       &occultingBodyNames,
+                                       const std::string &abCorrection,
+                                       Real              s,
+                                       Real              e,
+                                       bool              useEntireIntvl,
+                                       Integer           stepSize,
+                                       Integer           &numIntervals,
+                                       RealArray         &starts,
+                                       RealArray         &ends)
+{
+   Spacecraft  *theSc       = (Spacecraft*) theObj;
+
+#ifndef __USE_SPICE__
+   std::string errmsg = "ERROR - cannot compute contact intervals for spacecraft ";
+   errmsg += theSc->GetName() + " without SPICE included in build!\n";
+   throw SubscriberException(errmsg);
+#else
+
+   Integer     theNAIFId       = theSc->GetIntegerParameter("NAIFId");
+   std::string theNAIFIdStr    = GmatStringUtil::ToString(theNAIFId);
+
+//   std::string theNAIFFrameStr = theSc->GetStringParameter(theSc->GetParameterID("SpiceFrameName"));
+
+   // window we want to search
+   SPICEDOUBLE_CELL(window, 2000);
+   scard_c(0, &window);   // reset (empty) the cell
+
+   GetCoverageWindow(&window, s, e, useEntireIntvl);
+
+   SpiceInt       numInt      = wncard_c(&window);
+
+   std::string    theCrdSys   = "LATITUDINAL";
+   std::string    theCoord    = "LATITUDE";
+   std::string    theRelate   = ">";
+   std::string    theOccType  = "ANY";
+   std::string    theFront    = "";
+   std::string    theFShape   = "ELLIPSOID";
+   std::string    theFFrame   = "";
+   std::string    theTShape   = "POINT";
+
+   // CSPICE data
+   ConstSpiceChar *target           = theNAIFIdStr.c_str();     // NAIF Id of the spacecraft
+   ConstSpiceChar *tframe           = obsFrameName.c_str();     // SpiceFrameName for the observer OR ' '?
+   ConstSpiceChar *abcorr           = abCorrection.c_str();     // Aberration correction
+   ConstSpiceChar *obsrvr           = observerID.c_str();       // NAIF ID of the observer
+   ConstSpiceChar *crdsys           = theCrdSys.c_str();        //
+   ConstSpiceChar *coord            = theCoord.c_str();         //
+   ConstSpiceChar *relate           = theRelate.c_str();        //
+   ConstSpiceChar *occultationType  = theOccType.c_str();       //
+   ConstSpiceChar *fshape           = theFShape.c_str();        //
+   ConstSpiceChar *tshape           = theTShape.c_str();        //
+   ConstSpiceChar *front;
+   ConstSpiceChar *fframe;
+   SpiceInt       refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
+   SpiceInt       adjust            = 0;
+   SpiceInt       nintvls           = 1e6;
+   SpiceDouble    step              = stepSize;
+
+   SPICEDOUBLE_CELL(result, 2000);
+   scard_c(0, &result);   // reset (empty) the coverage cell
+   SPICEDOUBLE_CELL(obsResults, 2000);
+   scard_c(0, &obsResults);   // reset (empty) the coverage cell
+   SPICEDOUBLE_CELL(occultResults, 2000);
+   scard_c(0, &occultResults);   // reset (empty) the coverage cell
+
+   gfposc_c(target, tframe, abcorr, obsrvr, crdsys, coord, relate,
+            refval, adjust, step, nintvls, &window, &obsResults);
+
+   for (Integer ii = 0; ii < occultingBodyNames.size(); ii++ )
+   {
+      CelestialBody *body = solarSys->GetBody(occultingBodyNames.at(ii));
+
+      theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
+      Integer bodyNaifId = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
+      theFront = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
+
+      front  = theFront.c_str();
+      fframe = theFFrame.c_str();
+
+//      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, tframe, abcorr,
+//               obsrvr, step, &window, &occultResults);
+      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, " ", abcorr,
+               obsrvr, step, &obsResults, &occultResults);
+      wndifd_c(&obsResults, &occultResults, &result);
+   }
+
+   SpiceInt sz = wncard_c(&result);
+   numIntervals = (Integer) sz;
+
+   for (Integer ii = 0; ii < numIntervals; ii++)
+   {
+      SpiceDouble s, e;
+      wnfetd_c(&result, ii, &s, &e);
+      Real ss = spice->SpiceTimeToA1(s);
+      Real ee = spice->SpiceTimeToA1(e);
+      starts.push_back(ss); // OR starts.at(ii) = s? (and same for e)?
+      ends.push_back(ee);
+   }
+
+   return true;
+#endif
+}
+
 
 
 bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
@@ -531,6 +647,7 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
    #endif
 }
 
+
 #ifdef __USE_SPICE__
 //------------------------------------------------------------------------------
 // void GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
@@ -539,12 +656,6 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
 void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
                                       bool useEntireIntvl, bool includeAll)
 {
-#ifndef __USE_SPICE__
-   Spacecraft *theSc = (Spacecraft*) theObj;
-   std::string errmsg = "ERROR - cannot compute occultation intervals for spacecraft ";
-   errmsg += theSc->GetName() + " without SPICE included in build!\n";
-   throw SubscriberException(errmsg);
-#else
    // @todo - most of this should be moved to SpiceInterface and
    // made very general (for SPK, CK, etc.)
    // Set SPICEDOUBLE_CELL cover
@@ -640,8 +751,6 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
          delete [] err;
          throw SubscriberException(errmsg);
       }
-//      // start with an empty cell
-//      scard_c(0, &cover);   // reset the coverage cell
 
       #ifdef DEBUG_SPK_COVERAGE
          MessageInterface::ShowMessage("Kernel is of type %s\n",
@@ -748,7 +857,6 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       wnfetd_c(&window, szWin-1, &s, &e);
       intStop  = spice->SpiceTimeToA1(e);
    }
-   #endif
    copy_c(&window, w);
 }
 #endif //#ifdef __USE_SPICE__
@@ -786,6 +894,12 @@ void EphemManager::SetCoordinateSystem(CoordinateSystem *cs)
    coordSys     = cs;
    coordSysName = cs->GetName();
 }
+
+void EphemManager::SetSolarSystem(SolarSystem *ss)
+{
+   solarSys = ss;
+}
+
 
 //------------------------------------------------------------------------------
 // protected methods
