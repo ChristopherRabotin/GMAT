@@ -76,14 +76,14 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
    virtual bool         TakeAction(const std::string &action,
-                                   const std::string &actionData);
+                                   const std::string &actionData = "");
 
    const ObjectTypeArray& GetTypesForList(const Integer id);
    const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual GmatBase*    Clone() const;
    virtual bool         Initialize();
-   virtual void         ReportEventData(const std::string &reportNotice = "");
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
 
    DEFAULT_TO_NO_CLONES
 
@@ -94,20 +94,13 @@ protected:
    Star        *sun;
    /// The stored events
    std::vector<EclipseTotalEvent*> theEvents;
-   /// the start time of the current FindEvents
-   Real        findStart;
-   /// the stop time of the current FindEvents
-   Real        findStop;
-   /// The start (spacecraft) time
-   Real        scStart;
-   /// The current (spacecraft) time
-   Real        scNow;
    /// the maximum index of the stored events
    Integer     maxIndex;
    /// The maximum duration of the found events
    Real        maxDuration;
    /// the default types of eclipse
    StringArray defaultEclipseTypes;
+
 
    /// Published parameters for eclipse locators
     enum
