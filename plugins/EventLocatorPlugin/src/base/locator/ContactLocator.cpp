@@ -22,13 +22,20 @@
 
 #include "ContactLocator.hpp"
 #include "EventException.hpp"
-//#include "Elevation.hpp"
-//#include "LineOfSight.hpp"
 #include "MessageInterface.hpp"
 #include "GroundstationInterface.hpp"
+#include "SolarSystem.hpp"
+#include "CelestialBody.hpp"
+#include "Star.hpp"
+#include "EventException.hpp"
+#include "EphemManager.hpp"
+#include "StringUtil.hpp"
+#include "ContactEvent.hpp"
 
 //#define DEBUG_SET
 //#define DEBUG_SETREF
+//#define DEBUG_CONTACT_LOCATOR_WRITE
+//#define DEBUG_CONTACT_EVENTS
 
 //------------------------------------------------------------------------------
 // Static data
@@ -76,6 +83,7 @@ ContactLocator::ContactLocator(const std::string &name) :
 //------------------------------------------------------------------------------
 ContactLocator::~ContactLocator()
 {
+   TakeAction("Clear");
 }
 
 //------------------------------------------------------------------------------
@@ -92,6 +100,9 @@ ContactLocator::ContactLocator(const ContactLocator &cl) :
    stationNames         (cl.stationNames),
    lightTimeDirection   (cl.lightTimeDirection)
 {
+   TakeAction("Clear");
+   for (Integer ii = 0; ii < cl.contactResults.size(); ii++)
+      contactResults.push_back(cl.contactResults.at(ii));
 }
 
 
@@ -99,7 +110,7 @@ ContactLocator::ContactLocator(const ContactLocator &cl) :
 // ContactLocator& operator=(const ContactLocator &c)
 //------------------------------------------------------------------------------
 /**
- * Assignemtn operator
+ * Assignment operator
  *
  * @param c The ContactLocator providing parameters for this one
  *
@@ -114,6 +125,11 @@ ContactLocator& ContactLocator::operator=(const ContactLocator &c)
 
       stationNames       = c.stationNames;
       lightTimeDirection = c.lightTimeDirection;
+
+      TakeAction("Clear");
+      for (Integer ii = 0; ii < c.contactResults.size(); ii++)
+         contactResults.push_back(c.contactResults.at(ii));
+
    }
 
    return *this;
@@ -788,6 +804,44 @@ bool ContactLocator::RenameRefObject(const Gmat::ObjectType type,
    return retval;
 }
 
+//------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * Performs a custom action on the object.
+ *
+ * Event locators use this method to clear arrays in the locator.
+ *
+ * @param action The string specifying the action to be taken
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool ContactLocator::TakeAction(const std::string &action,
+                                const std::string &actionData)
+{
+   #ifdef DEBUG_ECLIPSE_ACTION
+      MessageInterface::ShowMessage(
+            "Entering EclipseLocator::TakeAction with action = %s and actionData = %s\n",
+            action.c_str(), actionData.c_str());
+   #endif
+   if (action == "Clear")
+   {
+      bool retval = false;
+
+      for (Integer ii = 0; ii < contactResults.size(); ii++)
+      {
+         contactResults.at(ii)->TakeAction("Clear", "Events");
+         delete contactResults.at(ii);
+      }
+      contactResults.clear();
+      retval = true;
+
+      return (EventLocator::TakeAction(action, actionData) || retval);
+   }
+
+   return EventLocator::TakeAction(action, actionData);
+}
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -829,6 +883,19 @@ bool ContactLocator::Initialize()
          }
       }
 
+      // Set up the ground stations so that we can do Contact Location
+      for (UnsignedInt ii= 0; ii < stations.size(); ii++)
+      {
+         GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
+         if (!gsi->InitializeForContactLocation(false))
+         {
+            std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
+            errmsg            += stationNames.at(ii) + " used by ContactLocator ";
+            errmsg            += instanceName + "\n";
+            throw EventException(errmsg);
+         }
+      }
+
       // Initialize the member event functions
       retval = true;
    }
@@ -837,57 +904,75 @@ bool ContactLocator::Initialize()
 }
 
 //------------------------------------------------------------------------------
-// void ReportEventData()
+// bool ReportEventData(const std::string &reportNotice = "")
 //------------------------------------------------------------------------------
 /**
  * Writes the event data to file and optionally displays the event data plot.
  */
 //------------------------------------------------------------------------------
-void ContactLocator::ReportEventData(const std::string &reportNotice)
+bool ContactLocator::ReportEventData(const std::string &reportNotice)
 {
-   bool openOK = OpenReportFile();
+   #ifdef DEBUG_CONTACT_LOCATOR_WRITE
+      MessageInterface::ShowMessage("ContactLocator::ReportEventData ... \n");
+   #endif
+
+   bool openOK = OpenReportFile(false);
 
    if (!openOK)
    {
       // TBD - do we want to throw an exception or just continue without writing?
-      return;
+      return false;
    }
 
-   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
-   std::string fromGregorian, toGregorian;
-   Real        resultMjd;
+   std::string    itsName   = sat->GetName();
+   theReport << "Target: " << itsName << "\n\n";
 
+   Integer     sz       = (Integer) contactResults.size();
+   std::string noEvents = GetNoEventsString("Contact");
 
-   TimeConverterUtil::Convert("A1ModJulian", fromEpoch, "",
-                              outputFormat, resultMjd, fromGregorian);
-   TimeConverterUtil::Convert("A1ModJulian", toEpoch, "",
-                              outputFormat, resultMjd, toGregorian);
+//   if (sz == 0)
+//   {
+//      theReport << GetNoEventsString() << "\n";
+//   }
+//   else
+//   {
+      #ifdef DEBUG_CONTACT_LOCATOR_WRITE
+         MessageInterface::ShowMessage("attempting to write out %d events\n",
+               (Integer) sz);
+      #endif
+      Integer numIndividual = 0;
 
-   Integer sz = (Integer) contactResults.size();
-   if (sz == 0)
-   {
-      theReport << "There are no Contact events in the time interval ";
-      theReport << fromGregorian << " to " << toGregorian + ".\n";
-   }
-   else
-   {
-      // Loop over the ContactResults list
+      // Loop over the total events list
       for (Integer ii = 0; ii < sz; ii++)
       {
-         // write headers or whatever needs to be written here, if anything
-         // loop over the 'contents' [events list] for each ContactResult
-         EventList* evList = contactResults.at(ii);
-         Integer sz2   = (Integer) evList->size();
-         for (Integer jj = 0; jj < sz2; jj++)
-         {
-            LocatedEvent *ev = evList->at(jj);
+         ContactResult* ev = contactResults.at(ii);
+         ev->SetNoEvents(noEvents);
+//         Integer numEv     = ev->NumberOfEvents();
+//         if (numEv > 0)
+//         {
+//            std::string itsName = stations.at(ii)->GetName();
+//            theReport << "Observer: " << itsName << "\n";
+//            theReport << "Start Time (UTC)            Stop Time (UTC)";
+//            theReport << "               Duration (s)         ";
+//            theReport << "Maximum Elevation (deg)\n";
+
             std::string eventString = ev->GetReportString();
-            // do other stuff here
-         }
+            theReport << eventString << "\n";
+//         }
+//         else
+//         {
+//            theReport << GetNoEventsString() << "\n";
+//         }
       }
-   }
+
+      for (unsigned int jj = 0; jj < sz; jj++)
+         numIndividual += contactResults.at(jj)->NumberOfEvents();
+
+      theReport << "\nNumber of events : " << numIndividual << "\n";
+//   }
 
    theReport.close();
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -904,9 +989,110 @@ void ContactLocator::ReportEventData(const std::string &reportNotice)
 //------------------------------------------------------------------------------
 void ContactLocator::FindEvents()
 {
-   // *** FILL THIS IN WITH CALLS TO SPICE AND OTHER CODE ***
-   // *** IT MAY BE USEFUL TO LOOK AT SOME OTHER SPICE CODE, IN UTIL,
-   // *** TO SEE HOW STRINGS, TIMES, ETC. ARE USED AND PASSED TO CSPICE
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("Entering ContactLocator::FindEvents ...\n");
+   #endif
+
+   EphemManager   *em       = sat->GetEphemManager();
+   if (!em)
+   {
+      std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
+      errmsg += sat->GetName() + "!!\n";
+      throw EventException(errmsg);
+   }
+
+   scNow = sat->GetEpoch();
+   em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
+                               findStart, findStop);
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
+   #endif
+   if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
+   {
+      // ... in case there were no files to read from, we'll just use the
+      // beginning and current spacecraft times
+      findStart = scStart;
+      findStop  = scNow;
+   }
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("---- findStart  = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop   = %12.10f\n", findStop );
+   #endif
+
+   // Set up data for the calls to CSPICE
+
+   // @YRL
+   std::string      theObsrvr = ""; // we will loop over observers for this
+   // up to this line
+   std::string      theFront  = "";  // we will loop over occultingBodies
+   std::string      theFShape = "ELLIPSOID";
+   std::string      theFFrame = ""; // we will loop over occultingBodies for this
+   std::string      theBack   = "SUN";
+   std::string      theBShape = "ELLIPSOID";
+   std::string      theBFrame = "IAU_SUN";
+   std::string      theAbCorr = GetAbcorrString();
+
+   Integer        numContacts = 0;
+   RealArray      starts;
+   RealArray      ends;
+
+   // Need to set findStart and findStop somewhere in here!!!!
+
+   // @YRL
+   for (Integer j = 0; j < stations.size(); j++ )
+   {
+      // We want a ContactResult for each station whether or not there are events
+      ContactResult *evList = new ContactResult();
+      evList->SetObserverName(stations.at(j)->GetName());
+
+      starts.clear();
+      ends.clear();
+      Integer obsNaifId = stations.at(j)->GetIntegerParameter(
+                          stations.at(j)->GetParameterID("NAIFId"));
+      theObsrvr = GmatStringUtil::ToString(obsNaifId);
+      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameName");
+
+      Real  minElAngle  = stations.at(j)->GetRealParameter("MinimumElevationAngle");
+
+      #ifdef DEBUG_CONTACT_EVENTS
+         MessageInterface::ShowMessage("Calling GetContactIntervals with: \n");
+         MessageInterface::ShowMessage("   theObsrvr         = %s\n", theObsrvr.c_str());
+         MessageInterface::ShowMessage("   occultingBodies   = \n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("      %d     %s\n", ii, occultingBodyNames.at(ii).c_str());
+         MessageInterface::ShowMessage("   theAbCorr         = %s\n", theAbCorr.c_str());
+         MessageInterface::ShowMessage("   initialEp         = %12.10f\n", initialEp);
+         MessageInterface::ShowMessage("   finalEp           = %12.10f\n", finalEp);
+         MessageInterface::ShowMessage("   useEntireInterval = %s\n", (useEntireInterval? "true" : "false"));
+         MessageInterface::ShowMessage("   stepSize          = %12.10f\n", stepSize);
+      #endif
+      em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, occultingBodyNames, theAbCorr,
+            initialEp, finalEp, useEntireInterval, stepSize, numContacts,
+            starts, ends);
+      #ifdef DEBUG_CONTACT_EVENTS
+         MessageInterface::ShowMessage("After GetContactIntervals: \n");
+         MessageInterface::ShowMessage("   numContacts       = %d\n", numContacts);
+      #endif
+      if (numContacts > 0)
+      {
+//         ContactResult *evList = new ContactResult();
+         // Insert the events into the array
+         for (Integer kk = 0; kk < numContacts; kk++ )
+         {
+            Real s1 = starts.at(kk);
+            Real e1 = ends.at(kk);
+            ContactEvent *newEvent = new ContactEvent(s1, e1);
+            evList->AddEvent(newEvent);
+         }
+//         // One result array for each station
+//         contactResults.push_back(evList);
+      }
+      // One result array for each station whether or not there are events
+      contactResults.push_back(evList);
+   }
+
+   // @YRL, upto this line
 }
 
 //------------------------------------------------------------------------------
