@@ -78,6 +78,7 @@ public:
    void        AddMetaData(const std::string &line,  bool done = false);
    void        AddMetaData(const StringArray &lines, bool done = false);
    void        FinalizeKernel();
+   Integer     GetMinNumberOfStates();
 
 protected:
    /// the name of the spacecraft or body for which the SPK is created
