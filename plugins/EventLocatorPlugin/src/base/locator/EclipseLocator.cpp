@@ -834,6 +834,9 @@ void EclipseLocator::FindEvents()
    std::string      theBShape = "ELLIPSOID";
    std::string      theBFrame = "IAU_SUN";
    std::string      theAbCorr = GetAbcorrString();
+   #ifdef DEBUG_ECLIPSE_EVENTS
+      MessageInterface::ShowMessage("---- theAbCorr  = %s\n", theAbCorr.c_str());
+   #endif
 
    EclipseTotalEvent  *rawList = new EclipseTotalEvent();
    Integer            numEclipse = 0;

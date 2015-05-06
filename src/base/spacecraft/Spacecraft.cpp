@@ -380,17 +380,17 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
    
-//   // Set up the appropriate naifID defaults
-//   naifId         = -(scNaifId * 1000) - 1;
-//   scNaifId++;
-//   naifIdRefFrame = naifId + 1000000;
-//
-//   #ifdef DEBUG_SC_NAIF_ID
-//      MessageInterface::ShowMessage("NAIF ID for spacecraft %s set to %d\n",
-//            instanceName.c_str(), naifId);
-//      MessageInterface::ShowMessage("NAIF ID for spacecraft %s reference frame set to %d\n",
-//            instanceName.c_str(), naifIdRefFrame);
-//   #endif
+   // Set up the appropriate naifID defaults
+   naifId         = -(scNaifId * 1000) - 1;
+   scNaifId++;
+   naifIdRefFrame = naifId + 1000000;
+
+   #ifdef DEBUG_SC_NAIF_ID
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s set to %d\n",
+            instanceName.c_str(), naifId);
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s reference frame set to %d\n",
+            instanceName.c_str(), naifIdRefFrame);
+   #endif
 
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;

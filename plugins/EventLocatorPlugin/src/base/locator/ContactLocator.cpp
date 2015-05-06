@@ -1032,6 +1032,9 @@ void ContactLocator::FindEvents()
    std::string      theBShape = "ELLIPSOID";
    std::string      theBFrame = "IAU_SUN";
    std::string      theAbCorr = GetAbcorrString();
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("---- theAbCorr  = %s\n", theAbCorr.c_str());
+   #endif
 
    Integer        numContacts = 0;
    RealArray      starts;
@@ -1067,8 +1070,9 @@ void ContactLocator::FindEvents()
          MessageInterface::ShowMessage("   useEntireInterval = %s\n", (useEntireInterval? "true" : "false"));
          MessageInterface::ShowMessage("   stepSize          = %12.10f\n", stepSize);
       #endif
+      bool transmit = (GmatStringUtil::ToUpper(lightTimeDirection) == "TRANSMIT");
       em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, occultingBodyNames, theAbCorr,
-            initialEp, finalEp, useEntireInterval, stepSize, numContacts,
+            initialEp, finalEp, useEntireInterval, useLightTimeDelay, transmit, stepSize, numContacts,
             starts, ends);
       #ifdef DEBUG_CONTACT_EVENTS
          MessageInterface::ShowMessage("After GetContactIntervals: \n");

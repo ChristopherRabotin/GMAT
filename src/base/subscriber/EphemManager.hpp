@@ -80,7 +80,7 @@ public:
                                                 Real              s,
                                                 Real              e,
                                                 bool              useEntireIntvl,
-                                                Integer           stepSize,
+                                                Real              stepSize,
                                                 Integer           &numIntervals,
                                                 RealArray         &starts,
                                                 RealArray         &ends);
@@ -94,7 +94,9 @@ public:
                                             Real              s,
                                             Real              e,
                                             bool              useEntireIntvl,
-                                            Integer           stepSize,
+                                            bool              useLightTime,
+                                            bool              transmit,
+                                            Real              stepSize,
                                             Integer           &numIntervals,
                                             RealArray         &starts,
                                             RealArray         &ends);
@@ -159,7 +161,12 @@ protected:
       /// Method to determine the coverage window(s) for the spacecraft
       void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
                                              bool useEntireIntvl,
-                                             bool includeAll = true);
+                                             bool includeAll = true,
+                                             bool lightTimeCorrection = false,
+                                             bool transmit = false,
+                                             Real stepSize = 10.0,
+                                             Integer obsID = -999);
+
    #endif
 
 };
