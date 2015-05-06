@@ -438,11 +438,12 @@ bool SpiceInterface::UnloadKernel(const std::string &fileName)
       SpiceChar      err[MAX_LONG_MESSAGE];
       getmsg_c(option, numChar, err);
       std::string errStr(err);
-      std::string errmsg = "Error unloading kernel \"";
+      std::string errmsg = "*** WARNING *** Error unloading kernel \"";
       errmsg += fileName + "\".  Message received from CSPICE is: ";
       errmsg += errStr + "\n";
       reset_c();
-      throw UtilityException(errmsg);
+//      throw UtilityException(errmsg);
+      MessageInterface::ShowMessage("%s", errmsg.c_str());
    }
 
    #ifdef DEBUG_SPK_LOADING
