@@ -291,7 +291,7 @@ std::string DopplerAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
 {
-   // Note that: measurement type of adapter is always "Range", so it does not need to change
+   // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
    bool retval = true;
    if (id != MEASUREMENT_TYPE)
       retval = adapterS->SetStringParameter(id, value);
