@@ -25,13 +25,15 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
-#include "DateUtil.hpp" 
+#include "DateUtil.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_FILTER
+//#define DEBUG_SET_PARAMETER
 
 //------------------------------------------------------------------------------
 // static data
@@ -51,8 +53,8 @@ const std::string DataFilter::PARAMETER_TEXT[] =
 const Gmat::ParameterType DataFilter::PARAMETER_TYPE[] =
 {
    Gmat::STRINGARRAY_TYPE,			// FILENAMES
-   Gmat::STRINGARRAY_TYPE,			// OBSERVED_OBJECTS
-   Gmat::STRINGARRAY_TYPE,       // TRACKERS
+   Gmat::OBJECTARRAY_TYPE,       //Gmat::STRINGARRAY_TYPE,			// OBSERVED_OBJECTS
+   Gmat::OBJECTARRAY_TYPE,       //Gmat::STRINGARRAY_TYPE,       // TRACKERS
    Gmat::STRINGARRAY_TYPE,       // DATA_TYPES
    Gmat::STRING_TYPE,			   // EPOCH_FORMAT
    Gmat::STRING_TYPE,            // INITIAL_EPOCH
@@ -76,7 +78,10 @@ DataFilter::DataFilter(const std::string name) :
    epochFormat       ("TAIModJulian"),
    initialEpoch      (DateUtil::EARLIEST_VALID_MJD), 
    finalEpoch        (DateUtil::LATEST_VALID_MJD),
-   isChecked         (false)
+   isChecked         (false),
+   allObserver       (false),
+   allTracker        (false),
+   allDataType       (false)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DataFilter default constructor <%s,%p>\n", GetName().c_str(), this);
@@ -91,12 +96,13 @@ DataFilter::DataFilter(const std::string name) :
    epochEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
 
    observers.push_back("All");
-   fileNames.push_back("From_AddTrackingConfig");
+   //fileNames.push_back("From_AddTrackingConfig");      // made changes by TUAN NGUYEN
+   fileNames.push_back("All");                           // made changes by TUAN NGUYEN
    trackers.push_back("All");
    dataTypes.push_back("All");
 
-   dataTypesMap["Range_KM"]          = "Range";
-   dataTypesMap["Range_KU"]          = "DSNRange";
+   dataTypesMap["Range_KM"]          = "Range_KM";     // "Range";      // made changes by TUAN NGUYEN
+   dataTypesMap["Range_RU"]          = "DSNRange";
    dataTypesMap["Doppler_Hz"]        = "Doppler";
    dataTypesMap["Doppler_RangeRate"] = "RangeRate";
 }
@@ -127,8 +133,13 @@ DataFilter::DataFilter(const DataFilter& saf) :
    GmatBase              (saf),
    fileNames             (saf.fileNames),
    observers             (saf.observers),
+   observerObjects       (saf.observerObjects),
+   allObserver           (saf.allObserver),
    trackers              (saf.trackers),
+   trackerObjects        (saf.trackerObjects),
+   allTracker            (saf.allTracker),
    dataTypes             (saf.dataTypes),
+   allDataType           (saf.allDataType),
    epochFormat           (saf.epochFormat),
    initialEpoch          (saf.initialEpoch),
    finalEpoch            (saf.finalEpoch),
@@ -166,18 +177,23 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
    {
       GmatBase::operator=(saf);
 
-      fileNames    = saf.fileNames;
-      observers    = saf.observers;
-      trackers     = saf.trackers;
-      dataTypes    = saf.dataTypes;
-      epochFormat  = saf.epochFormat;
-      initialEpoch = saf.initialEpoch;
-      finalEpoch   = saf.finalEpoch;
-      epochStart   = saf.epochStart;
-      epochEnd     = saf.epochEnd;
-      strands      = saf.strands;
-      dataTypesMap = saf.dataTypesMap;
-      isChecked    = false;
+      fileNames       = saf.fileNames;
+      observers       = saf.observers;
+      observerObjects = saf.observerObjects;
+      allObserver     = saf.allObserver;
+      trackers        = saf.trackers;
+      trackerObjects  = saf.trackerObjects;
+      allTracker      = saf.allTracker;
+      dataTypes       = saf.dataTypes;
+      allDataType     = saf.allDataType;
+      epochFormat     = saf.epochFormat;
+      initialEpoch    = saf.initialEpoch;
+      finalEpoch      = saf.finalEpoch;
+      epochStart      = saf.epochStart;
+      epochEnd        = saf.epochEnd;
+      strands         = saf.strands;
+      dataTypesMap    = saf.dataTypesMap;
+      isChecked       = false;
    }
 
    return *this;
@@ -384,6 +400,10 @@ std::string DataFilter::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::SetStringParameter(id = %d, value = <%s>) enter\n", GetName().c_str(), this, id, value.c_str());
+#endif
+
    if (id == EPOCH_FORMAT)
    {
       StringArray nameList = GetListOfValidEpochFormats();
@@ -407,6 +427,75 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
       finalEpoch = value;
       // Convert to a.1 time for internal processing
       epochEnd = ConvertToRealEpoch(finalEpoch, epochFormat);
+      return true;
+   }
+
+   if (id == OBSERVED_OBJECTS)
+   {
+      if (value == "")
+         throw MeasurementException("Error: an empty string is set to " + GetName() + ".ObservedObjects.\n");  
+      else if (GmatStringUtil::RemoveSpaceInBrackets(value,"{}") == "{}")
+      {
+         allObserver = false;
+         observers.clear();
+      }
+      else
+      {
+         if (value == "All")
+            allObserver = true;
+
+         if ((allObserver == false) && (observers[0] == "All"))
+            observers.erase(observers.begin());
+
+         if (find(observers.begin(), observers.end(), value) == observers.end())
+            observers.push_back(value);
+      }
+      return true;
+   }
+
+   if (id == TRACKERS)
+   {
+      if (value == "")
+         throw MeasurementException("Error: an empty string is set to " + GetName() + ".Trackers.\n");  
+      else if (GmatStringUtil::RemoveSpaceInBrackets(value,"{}") == "{}")
+      {
+         allTracker = false;
+         trackers.clear();
+      }
+      else
+      {
+         if (value == "All")
+            allTracker = true;
+
+         if ((allTracker == false) && (trackers[0] == "All"))
+            trackers.erase(trackers.begin());
+
+         if (find(trackers.begin(), trackers.end(), value) == trackers.end())
+            trackers.push_back(value);
+      }
+      return true;
+   }
+
+   if (id == DATA_TYPES)
+   {
+      if (value == "")
+         throw MeasurementException("Error: an empty string is set to " + GetName() + ".DataTypes.\n");
+      else if (GmatStringUtil::RemoveSpaceInBrackets(value,"{}") == "{}")
+      {
+         allDataType = false;
+         dataTypes.clear();
+      }
+      else
+      {
+         if (value == "All")
+            allDataType = true;
+
+         if ((allDataType == false) && (dataTypes[0] == "All"))
+            dataTypes.erase(dataTypes.begin());
+
+         if (find(dataTypes.begin(), dataTypes.end(), value) == dataTypes.end())
+            dataTypes.push_back(value);
+      }
       return true;
    }
 
@@ -543,6 +632,10 @@ std::string DataFilter::GetStringParameter(const Integer id, const Integer index
 bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
                                            const Integer index)
 {
+#ifdef DEBUG_SET_PARAMETER
+   MessageInterface::ShowMessage("DataFilter<%s,%p>::SetStringParameter(id = %d, value = <%s>, index = %d) enter\n", GetName().c_str(), this, id, value.c_str(), index);
+#endif
+
    if (id == FILENAMES)
    {
       if (index == -1)
@@ -580,6 +673,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       {
          if (value == "")
             throw MeasurementException("Error: cannot assign an empty string to observer ID.\n");
+         else if (value == "All")
+            allObserver = true;          // set flag to indicate choosing all observers
 
          if (index == observers.size())
             observers.push_back(value);
@@ -606,6 +701,8 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value,
       {
          if (value == "")
             throw MeasurementException("Error: cannot accept an empty string to a tracker ID.\n");
+         else
+            allTracker = true;         // set flag to indicate choosing all trackers
 
          if (index == trackers.size())
             trackers.push_back(value);
@@ -766,6 +863,327 @@ const StringArray& DataFilter::GetStringArrayParameter(const std::string &label)
 
 
 //------------------------------------------------------------------------------
+// bool RenameRefObject(const Gmat::ObjectType type,
+//------------------------------------------------------------------------------
+/**
+ * Renames references objects
+ *
+ * @param type The type of object that is renamed
+ * @param oldName The name of the object that is changing
+ * @param newName the new object name
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool DataFilter::RenameRefObject(const Gmat::ObjectType type,
+      const std::string & oldName, const std::string & newName)
+{
+   /// @todo Estimator rename code needs to be implemented
+   return GmatBase::RenameRefObject(type, oldName, newName);
+}
+
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * This method retrieves an array of reference object types
+ *
+ * @return The array
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& DataFilter::GetRefObjectTypeArray()
+{
+   static std::vector<Gmat::ObjectType> objTypes;
+   objTypes.clear();
+
+   objTypes.push_back(Gmat::SPACECRAFT);
+   objTypes.push_back(Gmat::GROUND_STATION);
+
+   return objTypes;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Initialization method that identifies the reference objects needed
+ *
+ * @param type The ObjectType for the references; UNKNOWN_OBJECT retrieves all
+ *
+ * @return A StringArray with all of the object names.
+ */
+//------------------------------------------------------------------------------
+const StringArray& DataFilter::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage(
+            "DataFilter::GetRefObjectNameArray(%d) entered\n", type);
+   #endif
+
+   static StringArray nameList;
+   nameList.clear();
+
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACE_POINT) || (type == Gmat::SPACECRAFT) || (type == Gmat::GROUND_STATION))
+   {
+      if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACE_POINT) || (type == Gmat::SPACECRAFT))
+      {
+         for (UnsignedInt i = 0; i < observers.size(); ++i)
+         {
+            if (observers[i] == "All")
+               continue;                             // do not add "All" to name list
+
+            if (find(nameList.begin(), nameList.end(), observers[i]) == nameList.end())
+            {
+               #ifdef DEBUG_INITIALIZATION
+                  MessageInterface::ShowMessage(
+                  "   Adding name of observed objects: %s\n", observers[i].c_str());
+               #endif
+
+               nameList.push_back(observers[i]);
+            }
+         }
+      }
+
+      if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACE_POINT) || (type == Gmat::GROUND_STATION))
+      {
+         for (UnsignedInt i = 0; i < trackers.size(); ++i)
+         {
+            if (trackers[i] == "All")
+               continue;                          // do not add "All" to name list
+
+            if (find(nameList.begin(), nameList.end(), trackers[i]) == nameList.end())
+            {
+               #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+                  MessageInterface::ShowMessage(
+                     "   Adding name of tracker: %s\n", trackers[i].c_str());
+               #endif
+               nameList.push_back(trackers[i]);
+            }
+         }
+      }
+
+   }
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Name list of observer objects: size = %d\n", observers.size());
+      for(UnsignedInt i = 0; i < observers.size(); ++i)
+         MessageInterface::ShowMessage("%d: <%s>\n", i, observers[i].c_str());
+      MessageInterface::ShowMessage("Name list of tracker objects: size = %d\n", trackers.size());
+      for(UnsignedInt i = 0; i < trackers.size(); ++i)
+         MessageInterface::ShowMessage("%d: <%s>\n", i, trackers[i].c_str());
+      MessageInterface::ShowMessage("Name list of Refrerent Objects: size = %d\n", nameList.size());
+      for(UnsignedInt i = 0; i < nameList.size(); ++i)
+         MessageInterface::ShowMessage("%d: <%s>\n", i, nameList[i].c_str());
+      MessageInterface::ShowMessage(
+            "DataFilter::GetRefObjectNameArray(%d) exit\n", type);
+   #endif
+   return nameList;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the name of a referenced object of a given type
+ *
+ * @param type The object's type
+ *
+ * @return The name of the associated object
+ */
+//------------------------------------------------------------------------------
+std::string DataFilter::GetRefObjectName(const Gmat::ObjectType type) const
+{
+   return GmatBase::GetRefObjectName(type);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a pointer to a referenced object of a given type and name
+ *
+ * @param type The object's type
+ * @param name The object's name
+ *
+ * @return The pointer to the associated object
+ */
+//------------------------------------------------------------------------------
+GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
+      const std::string & name)
+{
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::SPACECRAFT))
+   {
+      for(UnsignedInt i = 0; i < observerObjects.size(); ++i)
+      {
+         if (observerObjects[i]->GetName() == name)
+            return observerObjects[i];
+      }
+   }
+
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::GROUND_STATION))
+   {
+      for(UnsignedInt i = 0; i < trackerObjects.size(); ++i)
+      {
+         if (trackerObjects[i]->GetName() == name)
+            return trackerObjects[i];
+      }
+   }
+
+   return GmatBase::GetRefObject(type, name);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string & name,
+//       const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a pointer to a referenced object of a given type and name from an
+ * array of reference objects
+ *
+ * @param type The object's type
+ * @param name The object's name
+ * @param index The index to the object
+ *
+ * @return The pointer to the associated object
+ */
+//------------------------------------------------------------------------------
+GmatBase* DataFilter::GetRefObject(const Gmat::ObjectType type,
+      const std::string & name, const Integer index)
+{
+   return GmatBase::GetRefObject(type, name, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//       const std::string & name)
+//------------------------------------------------------------------------------
+/**
+ * Sets a pointer to a referenced object of a given type and name
+ *
+ * @param obj  The object
+ * @param type The object's type
+ * @param name The object's name
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool DataFilter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+      const std::string & name)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Setting ref object %s with type %s  %d\n",
+            name.c_str(), obj->GetTypeName().c_str(), type);
+   #endif
+
+   if (obj->IsOfType(Gmat::SPACECRAFT))
+   {
+      for(UnsignedInt i = 0; i < observerObjects.size(); ++i)
+      {
+         if (observerObjects[i]->GetName() == name)
+            return true;
+      }
+      observerObjects.push_back(obj);
+      return true;
+   }
+
+
+   if (obj->IsOfType(Gmat::GROUND_STATION))
+   {
+      for(UnsignedInt i = 0; i < trackerObjects.size(); ++i)
+      {
+         if (trackerObjects[i]->GetName() == name)
+            return true;
+      }
+      trackerObjects.push_back(obj);
+      return true;
+   }
+
+   return GmatBase::SetRefObject(obj, type, name);
+}
+
+//------------------------------------------------------------------------------
+// ObjectArray& GetRefObjectArray(const std::string & typeString)
+//------------------------------------------------------------------------------
+/**
+ * This method retrieves an array of reference objects of a given type
+ *
+ * @param typeString The type of object requested
+ *
+ * @return The array of objects
+ */
+//------------------------------------------------------------------------------
+ObjectArray& DataFilter::GetRefObjectArray(const std::string & typeString)
+{
+   return GetRefObjectArray(GetObjectType(typeString));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//       const std::string &name, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Sets a pointer to a referenced object of a given type and name in an array of
+ * objects of that type
+ *
+ * @param obj  The object
+ * @param type The object's type
+ * @param name The object's name
+ * @param index The index into the object array
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool DataFilter::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+      const std::string & name, const Integer index)
+{
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage(""
+            "Setting indexed ref object %s with type %s\n", name.c_str(),
+            obj->GetTypeName().c_str());
+   #endif
+
+   return GmatBase::SetRefObject(obj, type, name, index);
+}
+
+
+//------------------------------------------------------------------------------
+// ObjectArray & GetRefObjectArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * This method retrieves an array of reference objects of a given type
+ *
+ * @param type The type of object requested
+ *
+ * @return The array of objects
+ */
+//------------------------------------------------------------------------------
+ObjectArray & DataFilter::GetRefObjectArray(const Gmat::ObjectType type)
+{
+   if (type == Gmat::SPACECRAFT)
+   {
+      return observerObjects;
+   }
+
+   if (type == Gmat::GROUND_STATION)
+   {
+      return trackerObjects;
+   }
+
+   return GmatBase::GetRefObjectArray(type);
+}
+
+
+
+
+
+//------------------------------------------------------------------------------
 // Real ConvertToRealEpoch(const std::string &theEpoch,
 //                         const std::string &theFormat)
 //------------------------------------------------------------------------------
@@ -800,11 +1218,6 @@ StringArray DataFilter::GetListOfMeasurementTypes()
    StringArray typeList;
 
    //@todo: need to add any new measurement type here
-   //typeList.push_back("Range");
-   //typeList.push_back("DSNRange");
-   //typeList.push_back("Doppler");
-   //typeList.push_back("RangeRate");
-
    typeList.push_back("Range_KM");
    typeList.push_back("Range_RU");
    typeList.push_back("Doppler_Hz");
@@ -815,12 +1228,10 @@ StringArray DataFilter::GetListOfMeasurementTypes()
 
 ObjectArray DataFilter::GetListOfSpacecrafts()
 {
-   // StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::SPACECRAFT);
    StringArray nameList = GetListOfObjects(Gmat::SPACECRAFT);
    ObjectArray objectList;
    for (UnsignedInt i = 0; i < nameList.size(); ++i)
       objectList.push_back(GetConfiguredObject(nameList[i]));
-      //objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
 
    return objectList;
 }
@@ -828,13 +1239,11 @@ ObjectArray DataFilter::GetListOfSpacecrafts()
 
 ObjectArray DataFilter::GetListOfGroundStations()
 {
-   //StringArray nameList = Moderator::Instance()->GetListOfObjects(Gmat::GROUND_STATION);
    StringArray nameList = GetListOfObjects(Gmat::GROUND_STATION);
 
    ObjectArray objectList;
    for (UnsignedInt i = 0; i < nameList.size(); ++i)
       objectList.push_back(GetConfiguredObject(nameList[i]));
-      //objectList.push_back(Moderator::Instance()->GetConfiguredObject(nameList[i]));
 
    return objectList;
 }
@@ -864,13 +1273,13 @@ bool DataFilter::ValidateInput()
    // 1. Verify observers:
    //MessageInterface::ShowMessage("Validate observers\n");
    objectList = GetListOfSpacecrafts();
-   for (UnsignedInt i = 0; i < observers.size(); ++i)
+   for (UnsignedInt i = 0; i < observerObjects.size(); ++i)
    {
       // validate observers[i]
       found = false;
       for (UnsignedInt j = 0; j < objectList.size(); ++j)
       {
-         if (observers[i] == objectList[j]->GetStringParameter("Id"))
+         if (observerObjects[i]->GetName() == objectList[j]->GetName())
          {
             found = true;
             break;
@@ -880,20 +1289,20 @@ bool DataFilter::ValidateInput()
       if (!found)
       {
          //MessageInterface::ShowMessage("Data filter %s:\n%s\n", GetName().c_str(), this->GetGeneratingString().c_str());
-         throw GmatBaseException("Error: observer with ID '" + observers[i] + "' set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
+         throw GmatBaseException("Error: observer '" + observerObjects[i]->GetName() + "' set to parameter " + GetName() + ".ObservedObjects was not defined in script\n"); 
       }
    }
 
    // 2. Verify trackers:
    //MessageInterface::ShowMessage("Validate trackers\n");
    objectList1 = GetListOfGroundStations();
-   for (UnsignedInt i = 0; i < trackers.size(); ++i)
+   for (UnsignedInt i = 0; i < trackerObjects.size(); ++i)
    {
-      // validate of trackers[i]
+      // validate of trackerObjects[i]
       found = false;
       for (UnsignedInt j = 0; j < objectList1.size(); ++j)
       {
-         if (trackers[i] == objectList1[j]->GetStringParameter("Id"))
+         if (trackerObjects[i]->GetName() == objectList1[j]->GetName())
          {
             found = true;
             break;
@@ -901,7 +1310,7 @@ bool DataFilter::ValidateInput()
       }
 
       if (!found)
-         throw GmatBaseException("Error: tracker '" + trackers[i] + "' which is set to parameter " + GetName() + ".Trackers was not defined in script\n"); 
+         throw GmatBaseException("Error: tracker '" + trackerObjects[i]->GetName() + "' which is set to parameter " + GetName() + ".Trackers was not defined in script\n"); 
    }
 
    // 3. Verify strands:
@@ -929,7 +1338,7 @@ bool DataFilter::ValidateInput()
          found = false;
          for (UnsignedInt j = 0; j < objectList.size(); ++j)
          {
-            if (participant == objectList[j]->GetStringParameter("Id"))
+            if (participant == objectList[j]->GetName())
             {
                found = true;
                break;
