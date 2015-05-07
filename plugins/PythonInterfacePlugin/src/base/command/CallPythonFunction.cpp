@@ -237,6 +237,14 @@ bool CallPythonFunction::Execute()
    SendInParam(mInputList, formatIn, argIn);
   // Next call Python function Wrapper
    PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+   Real ret = 0;
+
+   if (pyRet && PyFloat_Check(pyRet))
+   {
+      ret = PyFloat_AsDouble(pyRet);
+      MessageInterface::ShowMessage("  ret:  %f\n", ret);
+      Py_DECREF(pyRet);
+   }
 
    MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
 
@@ -311,9 +319,9 @@ void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, s
          case Gmat::REAL_TYPE:
          {
             if (i == 0)
-               formatIn.append("(d");
+               formatIn.append("(f");
             else
-               formatIn.append("d");
+               formatIn.append("f");
         
             Real r = param->EvaluateReal();
             argIn.push_back(&r);
