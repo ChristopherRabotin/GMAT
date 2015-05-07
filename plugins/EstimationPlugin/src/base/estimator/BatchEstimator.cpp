@@ -31,6 +31,7 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 #include "SpaceObject.hpp"    // To access epoch data
+#include "Spacecraft.hpp"
 #include "StringUtil.hpp"
 
 
@@ -1625,7 +1626,6 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
-#include "Spacecraft.hpp"
 std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalCS) const
 {
    std::stringstream ss;
