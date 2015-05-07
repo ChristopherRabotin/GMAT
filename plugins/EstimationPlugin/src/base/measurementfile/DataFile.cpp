@@ -849,20 +849,25 @@ ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject
 
    rejectedReason = 0;
    ObservationData* obdata = dataObject;
+
    // Run statistic reject filters when it passes accept filters
    //MessageInterface::ShowMessage("I am here 0: There are %d filter.\n  List of statistics reject filters:\n", filterList.size());
-   for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   if (obdata)
    {
-      if (filterList[i]->IsOfType("StatisticsRejectFilter"))
+      for (UnsignedInt i = 0; i < filterList.size(); ++i)
       {
-         //MessageInterface::ShowMessage("reject filter: <%s>\n", filterList[i]->GetName().c_str());
-         obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejectedReason);
+         if (filterList[i]->IsOfType("StatisticsRejectFilter"))
+         {
+            //MessageInterface::ShowMessage("reject filter: <%s>\n", filterList[i]->GetName().c_str());
+            obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejectedReason);
 
-         // it is rejected when it is rejected by one reject filter
-         if (obdata == NULL)
-            break;
+            // it is rejected when it is rejected by one reject filter
+            if (obdata == NULL)
+               break;
+         }
       }
    }
+
    //MessageInterface::ShowMessage("I am here 1\n");
    // Run statistic accept filters
    if (obdata)
@@ -1003,7 +1008,7 @@ ObservationData* DataFile::FilteringData(ObservationData* dataObject, Integer& r
 #ifdef DEBUG_FILTER
    MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)   enter\n", GetName().c_str(), this, dataObject, rejectedReason);
 #endif
-
+   // filter data using data filters
    ObservationData* od;
 
    od = FilteringDataForOldSyntax(dataObject, rejectedReason);
