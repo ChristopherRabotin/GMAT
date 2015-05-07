@@ -443,7 +443,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       }// for i loop
       
       
-      if (measurementType == "Range")
+      // if (measurementType == "Range")                  // made changes by TUAN NGUYEN
+      if (measurementType == "Range_KM")                  // made changes by TUAN NGUYEN
       {
          // @todo: it needs to specify number of trips instead of using 2
          ComputeMeasurementBias("Bias", "Range_KM", 2);
@@ -473,7 +474,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
             MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
             MessageInterface::ShowMessage("      . Bias adding option        : %s\n", (addBias?"true":"false"));
-            if (measurementType == "Range")
+            // if (measurementType == "Range")            // made changes by TUAN NGUYEN
+            if (measurementType == "Range_KM")            // made changes by TUAN NGUYEN
             {
                MessageInterface::ShowMessage("      . Range noise sigma          : %.12lf km \n", noiseSigma[i]);
                MessageInterface::ShowMessage("      . Range bias                 : %.12lf km \n", measurementBias[i]);
@@ -481,10 +483,11 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             }
          #endif
 
-         // This section is only done when measurement type is 'Range'. For other types such as DSNRange or Doppler, it will be done in their adapters  
-         if (measurementType == "Range")
+         // This section is only done when measurement type is "Range_KM". For other types such as DSNRange or Doppler, it will be done in their adapters  
+         // if (measurementType == "Range")                                          // made changes by TUAN NGUYEN
+         if (measurementType == "Range_KM")                                          // made changes by TUAN NGUYEN
          {
-            // Apply multiplier for "Range" measurement model. This step has to   // made changes by TUAN NGUYEN
+            // Apply multiplier for "Range_KM" measurement model. This step has to   // made changes by TUAN NGUYEN
             // be done before adding bias and noise                               // made changes by TUAN NGUYEN
             measVal = measVal*multiplier;                                         // made changes by TUAN NGUYEN
 
@@ -643,9 +646,11 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
 
       // Specify noise sigma value
       Real nsigma = 0.0;
-      if ((measurementType == "Range")||(measurementType == "DSNRange"))
+      // if ((measurementType == "Range")||(measurementType == "DSNRange"))           // made changes by TUAN NGUYEN
+      if ((measurementType == "Range_KM")||(measurementType == "DSNRange"))           // made changes by TUAN NGUYEN
          nsigma = noiseSigma[0];
-      else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))
+      //else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))   // made changes by TUAN NGUYEN
+      else if (measurementType == "Doppler")                                          // made changes by TUAN NGUYEN
          nsigma = noiseSigma[1];
 
       // Set measurement values
@@ -732,7 +737,8 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
    // Now assemble the derivative data into the requested derivative
    // Note that: multiplier is only applied for elements of spacecraft's state, position, and velocity
    Real factor = 1.0;
-   if (measurementType == "Range")
+   // if (measurementType == "Range")                    // made changes by TUAN NGUYEN
+   if (measurementType == "Range_KM")                    // made changes by TUAN NGUYEN
    {
       if (obj->IsOfType(Gmat::SPACECRAFT))
       {

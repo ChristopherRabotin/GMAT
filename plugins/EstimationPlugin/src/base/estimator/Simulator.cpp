@@ -28,6 +28,7 @@
 #include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 //#define DEBUG_STATE_MACHINE
@@ -607,7 +608,6 @@ std::string Simulator::GetStringParameter(const Integer id,
  * @return  success flag.
  */
 //------------------------------------------------------------------------------
-#include "StringUtil.hpp"
 bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION

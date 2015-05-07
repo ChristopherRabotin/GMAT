@@ -261,11 +261,12 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    //        In the current code, that means spacecraft and ground stations, but
    //        the list might grow
    //  3. Error Models                                                       // made changes by TUAN NGUYEN
-   //  3. Measurement Models
-   //  4. System Parameters
-   //  5. Parameters
-   //  6. Subscribers
-   //  7. Remaining Objects
+   //  4. Data Filters                                                       // made changes by TUAN NGUYEN
+   //  5. Measurement Models
+   //  6. System Parameters
+   //  7. Parameters
+   //  8. Subscribers
+   //  9. Remaining Objects
       
    // Coordinate Systems
    if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::COORDINATE_SYSTEM)
@@ -352,6 +353,24 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          MessageInterface::ShowMessage("--- Initialize ErrorModel in GOS\n");     // made changes by TUAN NGUYEN
          #endif                                                                   // made changes by TUAN NGUYEN
          InitializeObjectsInTheMap(GOS, Gmat::ERROR_MODEL);                       // made changes by TUAN NGUYEN
+      }                                                                           // made changes by TUAN NGUYEN
+   }                                                                              // made changes by TUAN NGUYEN
+
+   // DataFilter                                                                  // made changes by TUAN NGUYEN
+   // Handle DataFilter objects                                                   // made changes by TUAN NGUYEN
+   if (objType == Gmat::UNKNOWN_OBJECT || objType == Gmat::DATA_FILTER)           // made changes by TUAN NGUYEN
+   {                                                                              // made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZE_OBJ                                                 // made changes by TUAN NGUYEN
+      MessageInterface::ShowMessage("--- Initialize DataFilter in LOS\n");        // made changes by TUAN NGUYEN
+      #endif                                                                      // made changes by TUAN NGUYEN
+      InitializeObjectsInTheMap(LOS, Gmat::DATA_FILTER);                          // made changes by TUAN NGUYEN
+
+      if (includeGOS)                                                             // made changes by TUAN NGUYEN
+      {                                                                           // made changes by TUAN NGUYEN
+         #ifdef DEBUG_INITIALIZE_OBJ                                              // made changes by TUAN NGUYEN
+         MessageInterface::ShowMessage("--- Initialize DataFilter in GOS\n");     // made changes by TUAN NGUYEN
+         #endif                                                                   // made changes by TUAN NGUYEN
+         InitializeObjectsInTheMap(GOS, Gmat::DATA_FILTER);                       // made changes by TUAN NGUYEN
       }                                                                           // made changes by TUAN NGUYEN
    }                                                                              // made changes by TUAN NGUYEN
 

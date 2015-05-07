@@ -28,11 +28,11 @@
 
 #include "DataFileAdapter.hpp"
 #include "PropSetup.hpp"
+#include "StatisticAcceptFilter.hpp"
 
 // Temporary to get Adapters hooked up
 #include "GmatObType.hpp"
 #include "RampTableType.hpp"
-
 
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_FILE_WRITE
@@ -339,11 +339,13 @@ bool MeasurementManager::Initialize()
             if (newStream->OpenStream(inSimulationMode) == false)
                throw MeasurementException("The stream " + filenames[i] +
                      " failed to open in simulation mode");
-         }         
+         }
       }// for k loop
       
-      // 3.2. Set data filters to data file
-      SetStatisticsDataFiltersToDataFiles(); 
+
+      // 3.2. Set data filters to data file (only set data filters in estimation mode)           // made changes by TUAN NGUYEN
+      if (!inSimulationMode)                                                                     // made changes by TUAN NGUYEN
+         SetStatisticsDataFiltersToDataFiles();                                                  // made changes by TUAN NGUYEN
 
 
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
@@ -432,9 +434,34 @@ bool MeasurementManager::Initialize()
 //-----------------------------------------------------------------------------------
 bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
 {
+
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
-      // 1. Get all data filters defined in tracking file set object trackingSet[i]
+      // 1. Get tracking configs in ID from TrackingFileSet trackingSet[i]
+      StringArray tkconfigs;
+      std::stringstream ss;
+      std::vector<TrackingDataAdapter*>* adapters = trackingSets[i]->GetAdapters();
+      for (UnsignedInt k = 0; k < adapters->size(); ++k)
+      {
+         MeasureModel* model = adapters->at(k)->GetMeasurementModel();
+         std::vector<ObjectArray*> objArrList = model->GetParticipantObjectLists();
+         for (UnsignedInt k1 = 0; k1 < objArrList.size(); ++k1)
+         {
+            ss.str("");
+            ss << "{{";
+            for (UnsignedInt k2 = 0; k2 < objArrList[k1]->size(); ++k2)
+            {
+               ss << objArrList[k1]->at(k2)->GetStringParameter("Id");
+               if (k2 < objArrList[k1]->size()-1)
+                  ss << ",";
+            }
+            ss << "}" << adapters->at(k)->GetStringParameter("MeasurementType") << "}";
+            tkconfigs.push_back(ss.str());
+            MessageInterface::ShowMessage("tkconfig: <%s>\n", ss.str().c_str());
+         }
+      }
+
+      // 2. Get all data filters defined in tracking file set object trackingSet[i]
       ObjectArray dataFilterObjects = trackingSets[i]->GetRefObjectArray(Gmat::DATA_FILTER);
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage(" &&&&   There are %d data filter objects defined in %s.\n", dataFilterObjects.size(), trackingSets[i]->GetName().c_str());
@@ -442,7 +469,14 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
             MessageInterface::ShowMessage("filter %d: <%s>\n", j, dataFilterObjects[j]->GetName().c_str());
       #endif
 
-      // 2. Get list of all file names defined in trackingSet[i]
+      // 3. Set tracking configs to statistics data filters in order to filter data based on them
+      for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
+      {
+         if (dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))
+            ((StatisticAcceptFilter*)dataFilterObjects[k])->SetTrackingConfigs(tkconfigs);
+      }
+
+      // 4. Get list of all file names defined in trackingSet[i]
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("FileName");
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage(" &&&&   There are %d filenames defined in %s.\n", filenames.size(), trackingSets[i]->GetName().c_str());
@@ -450,11 +484,11 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
             MessageInterface::ShowMessage("file %d: <%s>\n", j, filenames[j].c_str());
       #endif
 
-      // 3. Set data filters to the DataFile objects
+      // 5. Set data filters to the DataFile objects
       for (UnsignedInt j = 0; j < filenames.size(); ++j)
       {
          std::string fileName = filenames[j];
-         // 3.1. Specify DataFile object having filename[j]
+         // 5.1. Specify DataFile object having filename[j]
          DataFile* fileObj = NULL;
          for (UnsignedInt k = 0; k < streamList.size(); ++k)
          {
@@ -467,7 +501,7 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
          if (fileObj == NULL)
             throw MeasurementException("Error: DataFile object with name '" + filenames[j] + "' was not set in MeasurementManager.\n");
 
-         // 3.2. Set data filters of type "Statistics" filter to DataFile object
+         // 5.2. Set data filters of type "Statistics" filter to DataFile object
          for (UnsignedInt k = 0; k < dataFilterObjects.size(); ++k)
          {
             GmatBase*  datafilter = dataFilterObjects[k];
@@ -483,7 +517,8 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
                else
                {
                   if ((datafilter->IsOfType("StatisticsAcceptFilter"))&&
-                      (find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end()))
+                      ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
+                       (find(nameList.begin(), nameList.end(), "All") != nameList.end())))
                      setfilter = true;
                   else
                   {
@@ -1035,8 +1070,8 @@ UnsignedInt MeasurementManager::LoadObservations()
    }                                                                                                // made changes by TUAN NGUYEN
 
 
-   UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num, filter8Num;
-   filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = filter8Num = 0;
+   UnsignedInt filter1Num, filter2Num, filter3Num, filter4Num, filter5Num, filter6Num, filter7Num, filter8Num, filter9Num;
+   filter1Num = filter2Num = filter3Num = filter4Num = filter5Num = filter6Num = filter7Num = filter8Num = filter9Num = 0;
 
    observations.clear();
 
@@ -1144,6 +1179,8 @@ UnsignedInt MeasurementManager::LoadObservations()
             break;
          case 8:
             ++filter8Num; 
+         case 9:
+            ++filter9Num; 
             break;
       }
 
@@ -1168,6 +1205,7 @@ UnsignedInt MeasurementManager::LoadObservations()
    MessageInterface::ShowMessage("      .Observers selection             : %d\n", filter6Num);
    MessageInterface::ShowMessage("      .Data types selection            : %d\n", filter7Num);
    MessageInterface::ShowMessage("      .Data files selection            : %d\n", filter8Num);
+   MessageInterface::ShowMessage("      .Tracking configuration selection: %d\n", filter9Num);
    for (UnsignedInt i = 0; i < streamList.size(); ++i)
       MessageInterface::ShowMessage("Data file '%s' has %d of %d records used for estimation.\n", streamList[i]->GetStringParameter("Filename").c_str(), count[i], numRec[i]);
 
@@ -1261,7 +1299,7 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
             GmatBase* obj;
 
             std::string config = createList[j];
-            UnsignedInt pos = config.find_last_of(',');
+            size_t pos = config.find_last_of(',');                     // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
             std::string type = config.substr(pos+1, config.size()-(pos+1));
             std::string strand = config.substr(1, pos-2);
             while (strand != "")
@@ -1353,7 +1391,8 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
                   else
                   {
                      if ((dataFilterObjects[k]->IsOfType("StatisticsAcceptFilter"))&&
-                         (find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end()))
+                         ((find(nameList.begin(), nameList.end(), "From_AddTrackingConfig") != nameList.end())||
+                          (find(nameList.begin(), nameList.end(), "All") != nameList.end())))
                         setfilter = true;
                      else
                      {

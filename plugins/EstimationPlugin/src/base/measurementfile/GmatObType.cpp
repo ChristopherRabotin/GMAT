@@ -221,8 +221,8 @@ bool GmatObType::Open(bool forRead, bool forWrite, bool append)
       fullPath += streamName;
 
       // Add the .gmd extension if there is no extension in the file
-      UnsignedInt dotLoc = fullPath.find_last_of('.');
-      UnsignedInt slashLoc = fullPath.find_last_of('/');
+      size_t dotLoc = fullPath.find_last_of('.');                    // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+      size_t slashLoc = fullPath.find_last_of('/');                  // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
       if (slashLoc == std::string::npos)
          slashLoc = fullPath.find_last_of('\\');
 
@@ -358,6 +358,20 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
 }
 
 
+StringArray GmatObType::GetAvailableMeasurementTypes()
+{
+   StringArray typeList;
+   typeList.push_back("Range_KM");
+   typeList.push_back("DSNRange");
+   typeList.push_back("Doppler");
+   typeList.push_back("DSNTwoWayRange");
+   typeList.push_back("DSNTwoWayDoppler");
+   typeList.push_back("USNTwoWayRange");
+
+   return typeList;
+}
+
+
 //-----------------------------------------------------------------------------
 // ObservationData* ReadObservation()
 //-----------------------------------------------------------------------------
@@ -426,6 +440,12 @@ ObservationData* GmatObType::ReadObservation()
    theLine >> type;
    currentObs.type = (Gmat::MeasurementType)type;
 
+   // Verify measurement type
+   StringArray typeList = GetAvailableMeasurementTypes();
+   if (find(typeList.begin(), typeList.end(), currentObs.typeName) == typeList.end())
+      throw MeasurementException("Error: GMAT can't handle measurement type '" + currentObs.typeName + "'.\n");
+
+
    // Signal based measurements have types that start at 9000; smaller IDs are
    // the old code.
    /// @todo Once ported to signal measurements, remove the code from here:
@@ -481,7 +501,8 @@ ObservationData* GmatObType::ReadObservation()
       }
 #endif
 
-      if ((currentObs.typeName == "Range")||(currentObs.typeName == "DSNRange")
+      //if ((currentObs.typeName == "Range")||(currentObs.typeName == "DSNRange")       // made changes by TUAN NGUYEN
+      if ((currentObs.typeName == "Range_KM")||(currentObs.typeName == "DSNRange")      // made changes by TUAN NGUYEN
          ||(currentObs.typeName == "Doppler"))
       {
          dataSize = 1;

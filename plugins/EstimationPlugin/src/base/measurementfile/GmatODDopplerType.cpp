@@ -219,8 +219,8 @@ bool GmatODDopplerType::Open(bool forRead, bool forWrite, bool append)
       fullPath += streamName;
 
       // Add the .gmd extension if there is no extension in the file
-      UnsignedInt dotLoc = fullPath.find_last_of('.');
-      UnsignedInt slashLoc = fullPath.find_last_of('/');
+      size_t dotLoc = fullPath.find_last_of('.');                      // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+      size_t slashLoc = fullPath.find_last_of('/');                    // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
       if (slashLoc == std::string::npos)
          slashLoc = fullPath.find_last_of('\\');
 

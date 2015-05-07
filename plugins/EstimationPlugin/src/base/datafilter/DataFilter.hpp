@@ -73,6 +73,27 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
+
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string & oldName, const std::string & newName);
+   virtual const ObjectTypeArray& 
+                        GetRefObjectTypeArray();
+   virtual const StringArray& 
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string & name);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string & name, const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string & name);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string & name, const Integer index);
+   virtual ObjectArray& GetRefObjectArray(const std::string & typeString);
+   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+
+
+
    /// Filter observed data
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
@@ -80,17 +101,27 @@ public:
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
-   DEFAULT_TO_NO_REFOBJECTS
+   //DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// A list of file names specifies data files on which the filter to be applied 
    StringArray fileNames;
    /// A name list of observed objects
    StringArray observers;
+   /// A list of observed objects
+   ObjectArray observerObjects;
+   bool allObserver;
+
    /// A name list of trackers
    StringArray trackers;
+   /// A list of trackers
+   ObjectArray trackerObjects;
+   bool allTracker;
+
    /// A list of all data types
    StringArray dataTypes;
+   bool allDataType;
+
    /// Format of an epoch
    std::string epochFormat;
    /// Initial epoch and Final epoch
