@@ -160,6 +160,8 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    PyObject* pyArgs;
    PyObject* pyFunc;
    
+   MessageInterface::ShowMessage("  First element of the argIn is %f \n", *(Real*)argIn.at(0));
+
 #ifdef IS_PY3K
    // create a python Unicode object from an UTF-8 encoded null terminated char buffer
    pyModule = PyUnicode_FromString(modName.c_str() );
@@ -175,7 +177,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    {
       PyErr_Print();
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to import the python module. \n");
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to import the Python module. \n");
    }
 
    // retrieve an attribute named 'funcName' from imported python module
@@ -186,17 +188,17 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    {
       PyErr_Print();
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to fetch module.function. \n");
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to fetch function within Python module. \n");
    }
 
    // Build the Python object based on the format string
-   pyArgs = Py_BuildValue(formatIn.c_str(), argIn[0]);
+   pyArgs = Py_BuildValue(formatIn.c_str(), *(Real*)argIn.at(0));
    if (!pyArgs)
    {
       PyErr_Print();
       Py_DECREF(pyFuncAttr);
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to build python tuple. \n");
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to build Python tuple. \n");
    }
 
    // Call the python function
@@ -208,7 +210,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    {
       PyErr_Print();
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to call python function. \n");
+      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to call Python function. \n");
    }
 
    return pyFunc;
