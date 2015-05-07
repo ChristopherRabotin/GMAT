@@ -113,9 +113,9 @@ protected:
    std::vector<PhysicalModel *> 
                         *forces;
    /// Name of the function this FunctionManager manages
-   std::string          fName;
+   std::string          functionName;
    /// the function that this FunctionManager manages
-   Function             *f;
+   Function             *currentFunction;
    /// the list of passing input strings for this call of the function
    StringArray          passedIns;
    /// the list of passing output strings for this call of the function

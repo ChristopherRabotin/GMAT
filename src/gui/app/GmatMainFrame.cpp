@@ -65,6 +65,7 @@
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
 #include "SubscriberSetupPanel.hpp"
+#include "FindEventsPanel.hpp"
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
@@ -4291,6 +4292,9 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    case GmatTree::MANAGE_OBJECT:
       sizer->Add(new ManageObjectPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::FIND_EVENTS:
+      sizer->Add(new FindEventsPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::REPORT:
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
@@ -6559,6 +6563,10 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    
    while (cont)
    {
+      // Skip GmatLog.txt since it will be always different (LOJ: 2015.04.01)
+      if (filename == "GmatLog.txt")
+         cont = dir.GetNext(&filename);
+      
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
           filename.Contains(".eph") || filename.Contains(".truth"))

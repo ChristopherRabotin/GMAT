@@ -103,8 +103,11 @@ void PowerSystemPanel::Create()
    // SetPath() understands ".."
    pConfig->SetPath(wxT("/Spacecraft Power System"));
 
-   wxStaticBox      *item1   = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBoxSizer *item0   = new wxStaticBoxSizer( item1, wxHORIZONTAL );
+    //wxStaticBox *item2 = new wxStaticBox( this, -1, wxT("") );
+    wxStaticBoxSizer *item1 = new wxStaticBoxSizer(wxVERTICAL, this, "" );
+   //wxBoxSizer      *item1   = new wxBoxSizer( wxHORIZONTAL );
+   wxBoxSizer *item0   = //new wxStaticBoxSizer( wxHORIZONTAL );
+      new wxBoxSizer(wxHORIZONTAL);
 
    // label for power system
    wxStaticText *powerSystemStaticText = new wxStaticText( this, ID_TEXT,
@@ -121,11 +124,12 @@ void PowerSystemPanel::Create()
 
    item0->Add( powerSystemStaticText, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    item0->Add( powerSystemComboBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   item1->Add( item0, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
 
    this->SetAutoLayout( TRUE );
-   this->SetSizer( item0 );
-   item0->Fit( this );
-   item0->SetSizeHints( this );
+   this->SetSizer( item1 );
+   //item0->Fit( this );
+   //item0->SetSizeHints( this );
 }
 
 

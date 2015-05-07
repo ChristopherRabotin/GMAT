@@ -97,13 +97,13 @@ private:
       PASS_TO_REGISTERED,     // Use this method when all clones are registered
       SKIP_UPDATES            // Set this method to revert to pre-clone updates
    };
-    
+   
    /// Object store for this run
-   std::map<std::string, GmatBase *> objectMap;
+   ObjectMap objectMap;
    /// Global object store for this run
-   std::map<std::string, GmatBase *> globalObjectMap;
+   ObjectMap globalObjectMap;
    /// Combined object store for passing to interpreter (via Moderator)
-   std::map<std::string, GmatBase *> combinedObjectMap;
+   ObjectMap combinedObjectMap;
    /// Solar System model for this Sandbox
    SolarSystem                       *solarSys;
    /// CoordinateSystem used internally
@@ -139,8 +139,7 @@ private:
    
    GmatBase* FindObject(const std::string &name);
    bool      SetObjectByNameInMap(const std::string &name, GmatBase *obj);
-   bool      HandleGmatFunction(GmatCommand *cmd,
-                                std::map<std::string, GmatBase *> *usingMap);
+   bool      HandleGmatFunction(GmatCommand *cmd, ObjectMap *usingMap);
    void      SetGlobalRefObject(GmatCommand *cmd);
    void      ShowObjectMap(ObjectMap &om, const std::string &title);
    bool      AddOwnedSubscriber(Subscriber *sub);

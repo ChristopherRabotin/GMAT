@@ -37,13 +37,13 @@ traj-&gt;&gt;traj:SetSparsityPattern()
 traj-&gt;&gt;traj:InitializeSparseFiniteDiff()
 
 iframe{:Loop numPhases
-traj-&gt;&gt;phas:traj,phas:InitializeLinkages()
+traj-&gt;&gt;phas:traj,phas:InitializeScaleHelper()
 phas-&gt;&gt;nondim:phas,nondim:Initialize()
 nondim-&gt;&gt;phas:phas,nondim:
 phas-&gt;&gt;traj:traj,phas:
 iframe}
 
-traj-&gt;&gt;opt:traj,opt:GetDecVecBounds()
+traj-&gt;&gt;opt:traj,opt:Initialize()
 opt-&gt;&gt;traj:traj,opt:
 
 traj-&gt;&gt;traj:WriteSummaryReport()</panel_attributes>

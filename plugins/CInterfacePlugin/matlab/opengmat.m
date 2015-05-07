@@ -33,21 +33,11 @@ function [retval] = opengmat
 % Note that this requires gmat_startup_file's ROOT_PATH to be
 % specified as a full absolute path (not a relative path).
 
-% Find GMAT startup file in existing MATLAB paths
-gsf = which('gmat_startup_file.txt');
-
-% If startup file doesn't exist, then exit with error
-if isempty(gsf)
-    error('gmat_startup_file.txt does not exist in any MATLAB path. Check your paths.');
-end
-
 % Check that ROOT_PATH of startup file is a valid GMAT installation
 root_path = findgmatrootpath;
-if ~exist(fullfile(root_path, 'bin', 'gmat_startup_file.txt'))
-    error('The ROOT_PATH variable in gmat_startup_file.txt does not point to a valid GMAT installation.');
-end
     
 % Copy startup file to local directory if needed
+gsf = which('gmat_startup_file.txt');
 copygsf = ~strcmp(fileparts(gsf), pwd);
 if copygsf
     disp('Local GMAT startup file missing ... copying global GMAT startup file:');

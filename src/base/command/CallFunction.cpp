@@ -36,12 +36,12 @@
 //#define DEBUG_UPDATE_VAR
 //#define DEBUG_UPDATE_OBJECT
 //#define DEBUG_SHOW_ARRAY
-//#define DEBUG_GMAT_FUNCTION_INIT
 //#define DEBUG_GET_OUTPUT
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_GLOBAL_OBJECT_MAP
 //#define DEBUG_RUN_COMPLETE
 //#define DEBUG_OBJECT_REF
+//#define DEBUG_FUNCTION
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -390,7 +390,14 @@ void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
       
       // Set only GmatFunction to FunctionManager (loj: 2008.09.03)
       if (mapObj->GetTypeName() == "GmatFunction")
+      {
+         #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+            ("CallFunction::SetGlobalObjectMap() setting function<%p>'%s' to FunctionManager\n",
+             mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
+         #endif
          fm.SetFunction(mFunction);
+      }
    }
    fm.SetGlobalObjectMap(map);
    
@@ -940,6 +947,11 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          mFunctionPathAndName = mFunction->GetFunctionPathAndName();
          if (mFunction && mFunction->GetTypeName() == "GmatFunction")
          {
+            #ifdef DEBUG_FUNCTION
+            MessageInterface::ShowMessage
+               ("CallFunction::SetRefObject() setting function<%p>'%s' to FunctionManager\n",
+                mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
+            #endif
             fm.SetFunction(mFunction);
             isGmatFunction = true;
             isMatlabFunction = false;
@@ -1031,7 +1043,7 @@ bool CallFunction::Initialize()
    
    #ifdef DEBUG_CALL_FUNCTION_INIT
    MessageInterface::ShowMessage
-      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s', "
+      ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s'\n   "
        "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
        mFunctionPathAndName.c_str());
    #endif
@@ -1055,7 +1067,7 @@ bool CallFunction::Execute()
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== CallFunction::Execute() entered, '%s' Count = %d\n",
+      (">>>>> CallFunction::Execute() entered, '%s' Count = %d\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
    

@@ -34,7 +34,11 @@
 class GMATFUNCTION_API GmatFunctionFactory : public Factory
 {
 public:
-   Function* CreateFunction(const std::string &ofType, const std::string &withName = "");
+   // method to create Solver object
+   virtual GmatBase*    CreateObject(const std::string &ofType,
+                                     const std::string &withName = "");        
+   virtual Function*    CreateFunction(const std::string &ofType,
+                                       const std::string &withName = "");
 
    GmatFunctionFactory();
    virtual ~GmatFunctionFactory();

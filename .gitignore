@@ -6,6 +6,8 @@
 *.dll
 *.exe
 *.app
+*.ilk
+*.pdb
 .project
 .cproject
 GmatLog.txt
@@ -20,4 +22,6 @@ Release
 /GmatAtGoddard.prj
 *.md
 CheckRepo.TestEntry
+*~
+*.swp
 *.md

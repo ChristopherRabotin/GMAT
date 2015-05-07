@@ -96,7 +96,7 @@ DataFilter::DataFilter(const std::string name) :
    dataTypes.push_back("All");
 
    dataTypesMap["Range_KM"]          = "Range";
-   dataTypesMap["Range_KU"]          = "DSNRange";
+   dataTypesMap["Range_RU"]          = "DSNRange";
    dataTypesMap["Doppler_Hz"]        = "Doppler";
    dataTypesMap["Doppler_RangeRate"] = "RangeRate";
 }
