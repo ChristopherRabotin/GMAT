@@ -1934,7 +1934,8 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    
-   if (type == "Range")
+   // if (type == "Range")                             // made changes by TUAN NGUYEN
+   if (type == "Range_KM")                             // made changes by TUAN NGUYEN
    {
       retval = new RangeAdapterKm(adapterName);
       if (retval)
@@ -1957,7 +1958,8 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new DopplerAdapter(adapterName);
       if (retval)
       {
-         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex); 
+         // ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);            // made changes by TUAN NGUYEN
+         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);            // made changes by TUAN NGUYEN
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
