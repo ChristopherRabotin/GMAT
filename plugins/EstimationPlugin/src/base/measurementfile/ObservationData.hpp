@@ -46,6 +46,8 @@ public:
    ObservationData&  operator=(const ObservationData& od);
 
    virtual void      Clear();
+   
+   std::string       GetTrackingConfig();                       //made changes by TUAN NGUYEN
 
 // Explicitly public so that this class acts like a struct
 public:
