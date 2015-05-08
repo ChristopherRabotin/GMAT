@@ -73,12 +73,12 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GEN_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
-//#define DEBUG_BUILDING_MODELS
-//#define DEBUG_STATE
+#define DEBUG_BUILDING_MODELS
+#define DEBUG_STATE
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_REORIGIN
 //#define DEBUG_ERROR_ESTIMATE
-//#define DEBUG_STM_AMATRIX_DERIVS
+#define DEBUG_STM_AMATRIX_DERIVS
 //#define DEBUG_MU_MAP
 //#define DEBUG_PM_EPOCH
 //#define DEBUG_EVENTLOCATION
@@ -357,6 +357,7 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    satCount                   (0),
    stateStart                 (fdf.stateStart),
    stateEnd                   (fdf.stateEnd),
+   stmRowCount                (fdf.stmRowCount),
    cartStateSize              (0),
    dynamicProperties          (false),
    isInitializedForParameters (false),
@@ -446,6 +447,7 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    satCount = 0;
    stateStart = fdf.stateStart;
    stateEnd   = fdf.stateEnd;
+   stmRowCount = fdf.stmRowCount;
 
    cartStateSize       = 0;
    isInitializedForParameters = false;
@@ -1190,6 +1192,7 @@ bool ODEModel::BuildModelFromMap()
    dynamicsIndex.clear();
    dynamicObjects.clear();
    dynamicIDs.clear();
+   stmRowCount.clear();
 
    // Loop through the state map, counting objects for each type needed
    #ifdef DEBUG_INITIALIZATION
@@ -1214,7 +1217,8 @@ bool ODEModel::BuildModelFromMap()
          if (objectCount > 0)
          {
             // Build the derivative model piece for this element
-            retval = BuildModelElement(id, start, objectCount);
+            retval = BuildModelElement(id, start, objectCount,
+                  (index - start) / objectCount);
             if (retval == false)
             {
 //               throw ODEModelException(
@@ -1251,7 +1255,8 @@ bool ODEModel::BuildModelFromMap()
    // Catch the last element
    if (objectCount > 0)
    {
-      retval = BuildModelElement(id, start, objectCount);
+      retval = BuildModelElement(id, start, objectCount,
+            (map->size() - start) / objectCount);
       if (retval == false)
       {
          // throw ODEModelException(
@@ -1316,7 +1321,7 @@ bool ODEModel::BuildModelFromMap()
  */
 //------------------------------------------------------------------------------
 bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
-      Integer objectCount)
+      Integer objectCount, Integer size)
 {
    bool retval = false, tf;
    Integer modelsUsed = 0;
@@ -1362,7 +1367,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    /// @todo Check this piece again for 6DoF
    if (id == Gmat::CARTESIAN_STATE)
    {
-      cartesianCount   = objectCount;
+      cartesianCount = objectCount;
       cartesianStart = start;
       cartStateSize  = objectCount * 6;
    }
@@ -1373,6 +1378,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (stmStart == -1)
          stmStart = start;
       stmCount = objectCount;
+      stmRowCount.push_back(sqrt(size));
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1386,6 +1392,12 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    #ifdef DEBUG_BUILDING_MODELS
       MessageInterface::ShowMessage(
             "ODEModel is using %d components for element %d\n", modelsUsed, id);
+      if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+      {
+         MessageInterface::ShowMessage("STM row count(s):\n");
+         for (UnsignedInt i = 0; i < stmRowCount.size(); ++i)
+            MessageInterface::ShowMessage("   %d has %d rows\n", i, stmRowCount[i]);
+      }
    #endif
    
    return retval;
@@ -2656,14 +2668,20 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    #ifdef DEBUG_STM_AMATRIX_DERIVS
       MessageInterface::ShowMessage("Final dv array:\n");
 
+      /// @todo Add handling for multiple STMs of differing sizes
+      Integer stmDim = stmRowCount[0];
+
+      // Cartesian state piece
       for (Integer i = 0; i < 6; ++i)
       {
          MessageInterface::ShowMessage("  %lf  ", deriv[i]);
       }
       MessageInterface::ShowMessage("\n");
-      for (Integer i = 6; i < dimension; i += 6)
+
+      // STM
+      for (Integer i = 6; i < dimension; i += stmDim)
       {
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmDim; ++j)
             MessageInterface::ShowMessage("  %le  ", deriv[i+j]);
          MessageInterface::ShowMessage("\n");
       }
@@ -2707,6 +2725,7 @@ bool ODEModel::PrepareDerivativeArray()
 
    #ifdef DEBUG_STM_AMATRIX_DERIVS
       static bool eins = false;
+      MessageInterface::ShowMessage("Derivative initializes non-zero:\n");
    #endif
 
    const std::vector<ListItem*> *smap = psm->GetStateMap();
@@ -2716,7 +2735,7 @@ bool ODEModel::PrepareDerivativeArray()
    {
       #ifdef DEBUG_STM_AMATRIX_DERIVS
          if (eins == false)
-            MessageInterface::ShowMessage("Mapping [%d] %s\n", i,
+            MessageInterface::ShowMessage("   Mapping [%d] %s\n", i,
                   ((*smap)[i]->nonzeroInit == true ? "true" : "false"));
       #endif
 
@@ -2733,14 +2752,20 @@ bool ODEModel::PrepareDerivativeArray()
       {
          MessageInterface::ShowMessage("Initial dv array:\n");
 
+         /// @todo Add handling for multiple STMs of varying sizes
+         Integer stmDim = stmRowCount[0];
+
+         // Cartesian state element
          for (Integer i = 0; i < 6; ++i)
          {
             MessageInterface::ShowMessage("  %lf  ", deriv[i]);
          }
+
+         /// STM
          MessageInterface::ShowMessage("\n");
-         for (Integer i = 6; i < dimension; i += 6)
+         for (Integer i = 6; i < dimension; i += stmDim)
          {
-            for (Integer j = 0; j < 6; ++j)
+            for (Integer j = 0; j < stmDim; ++j)
                MessageInterface::ShowMessage("  %lf  ", deriv[i+j]);
             MessageInterface::ShowMessage("\n");
          }
@@ -2776,26 +2801,30 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
 
    for (Integer i = 0; i < stmCount; ++i)
    {
-      Integer i6 = stmStart + i * 36;
+      Integer stmRows = stmRowCount[i];
+      Integer stmDim = stmRows*stmRows;
+
+      /// @todo Add handling for multiple STMs of varying sizes
+      Integer i6 = stmStart + i * stmRows;
 
       // Build aTilde
-      Real aTilde[36];
-      for (Integer m = 0; m < 36; ++m)
+      Real aTilde[stmDim];
+      for (Integer m = 0; m < stmRows; ++m)
          aTilde[m] = deriv[i6+m];
 
       if (fillSTM)
       {
          // Convert A to Phi dot for STM pieces
          // \Phi\dot = A\tilde \Phi
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmRows; ++j)
          {
-            for (Integer k = 0; k < 6; ++k)
+            for (Integer k = 0; k < stmRows; ++k)
             {
-               Integer element = j * 6 + k;
+               Integer element = j * stmRows + k;
                deriv[i6+element] = 0.0;
-               for (Integer l = 0; l < 6; ++l)
+               for (Integer l = 0; l < stmRows; ++l)
                {
-                  deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
+                  deriv[i6+element] += aTilde[j*stmRows+l] * state[i6+l*stmRows+k];
                }
             }
          }

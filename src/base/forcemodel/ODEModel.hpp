@@ -316,6 +316,8 @@ protected:
    Integer stateStart;
    /// ID for CartesianState end for processing dynamic state data
    Integer stateEnd;
+   /// Number of rows/columns in each STM
+   std::vector<Integer> stmRowCount;
 
    /// Number of elements in the Cartesian state data
    Integer cartStateSize;
@@ -384,7 +386,8 @@ protected:
 
    bool                      BuildModelElement(Gmat::StateElementId id, 
                                                Integer start, 
-                                               Integer objectCount);
+                                               Integer objectCount,
+                                               Integer size);
    bool                      PrepareDerivativeArray();
    bool                      CompleteDerivativeCalculations(Real *state);
    
