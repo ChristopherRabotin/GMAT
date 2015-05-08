@@ -29,14 +29,14 @@
 
 
 //#define DEBUG_ESM_LOADING
-//#define DEBUG_STATE_CONSTRUCTION
+#define DEBUG_STATE_CONSTRUCTION
 //#define DEBUG_OBJECT_UPDATES
 //#define DUMP_STATE
-//#define DEBUG_OBJECT_MAPPING
+#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CLONING
 //#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
-//#define DEBUG_STM_MAPPING
+#define DEBUG_STM_MAPPING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)
@@ -649,6 +649,12 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
       if (!obj->IsOfType(Gmat::GROUND_STATION))
          solveforList[i] = obj->GetName() + "." + solveforList[i]; 
    }
+
+   #ifdef DEBUG_STATE_CONSTRUCTION
+      MessageInterface::ShowMessage("Solve for parameters:\n");
+      for (UnsignedInt i = 0; i < solveforList.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", solveforList[i].c_str());
+   #endif
 
    return solveforList;
 }
