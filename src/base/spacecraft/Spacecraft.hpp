@@ -150,6 +150,23 @@ public:
                                          const Real value,
                                          const Integer index);
    
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+//   virtual Integer      GetIntegerParameter(const Integer id,
+//                                            const Integer index) const;
+//   virtual Integer      SetIntegerParameter(const Integer id,
+//                                            const Integer value,
+//                                            const Integer index);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+//   virtual Integer      GetIntegerParameter(const std::string &label,
+//                                            const Integer index) const;
+//   virtual Integer      SetIntegerParameter(const std::string &label,
+//                                            const Integer value,
+//                                            const Integer index);
+
    virtual const Rvector& GetRvectorParameter(const Integer id) const;
    virtual const Rvector& GetRvectorParameter(const std::string &label) const;
    virtual const Rvector& SetRvectorParameter(const Integer id,
@@ -288,6 +305,9 @@ protected:
       ATTITUDE,
       ORBIT_STM,
       ORBIT_A_MATRIX,
+      FULL_STM,
+      FULL_A_MATRIX,
+      FULL_STM_ROWCOUNT,
 //      ORBIT_COVARIANCE,
 
       // SPAD SRP parameters
@@ -567,6 +587,12 @@ protected:
    Rmatrix           orbitSTM;
    /// The orbit State A Matrix
    Rmatrix           orbitAMatrix;
+   /// The full State Transition Matrix used for propagation
+   Rmatrix           fullSTM;
+   /// The full State A Matrix
+   Rmatrix           fullAMatrix;
+   /// full STM number of rows (and columns)
+   Integer           fullSTMRowCount;
 
    /// The name of the SPAD SRP file
    std::string       spadSRPFile;
