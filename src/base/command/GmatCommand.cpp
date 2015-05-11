@@ -22,6 +22,7 @@
 
 #include "GmatCommand.hpp"       // class's header file
 #include "CommandException.hpp"
+#include "Parameter.hpp"
 #include "CoordinateConverter.hpp"
 #include "MessageInterface.hpp"  // MessageInterface
 #include "TimeSystemConverter.hpp"
@@ -3333,6 +3334,57 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+// void HandleReferencesToClones(Parameter *param)
+//------------------------------------------------------------------------------
+void GmatCommand::HandleReferencesToClones(Parameter *param)
+{
+   #ifdef DEBUG_REF_CLONE
+   MessageInterface::ShowMessage
+      ("GmatCommand::HandleReferencesToClones() <%p>'%s' entered, param=<%p>'%s'\n",
+       this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(), param,
+       param ? param->GetName().c_str() : "NULL");
+   #endif
+   
+   if (param == NULL)
+   {
+      #ifdef DEBUG_REF_CLONE
+      MessageInterface::ShowMessage
+         ("GmatCommand::HandleReferencesToClones() <%p>'%s' just exiting, parameter is NULL\n");
+      #endif
+      return;
+   }
+   
+   // Handle external clones
+   // For now, there is only one external clone
+   std::string cloneName = param->GetExternalCloneName(0);
+   GmatCommand *cmd = GetPrevious();
+   while (cmd != NULL)
+   {
+      Integer count = cmd->GetCloneCount();
+      
+      for (Integer index = 0; index < count; ++index)
+      {
+         GmatBase *obj = cmd->GetClone(index);
+         if (obj != NULL)
+         {
+            if (obj->GetName() == cloneName)
+            {
+               param->SetExternalClone(obj);
+               cmd = NULL;
+               break;
+            }
+         }
+      }
+      if (cmd != NULL)
+         cmd = cmd->GetPrevious();
+   }
+   
+   #ifdef DEBUG_REF_CLONE
+   MessageInterface::ShowMessage
+      ("GmatCommand::HandleReferencesToClones() <%p>'%s' exiting\n");
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)

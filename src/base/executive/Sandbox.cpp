@@ -1686,7 +1686,7 @@ void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
          objName = i->first;
          obj = i->second;
          MessageInterface::ShowMessage
-            ("   %40s  <%p> [%s] %s\n", objName.c_str(), obj,
+            ("   %50s  <%p> [%s] %s\n", objName.c_str(), obj,
              obj ? obj->GetTypeName().c_str() : "NULL",
              obj->IsGlobal() ? "Global" : "");
       }
