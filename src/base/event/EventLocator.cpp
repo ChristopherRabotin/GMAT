@@ -44,6 +44,8 @@
 //#define DEBUG_EVENTLOCATOR_WRITE
 //#define DEBUG_EVENTLOCATOR_DATA
 //#define DEBUG_EVENTLOCATOR_SET
+//#define DEBUG_EVENTLOCATOR_GET
+//#define DEBUG_EVENTLOCATOR_COPY
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -183,7 +185,7 @@ EventLocator::EventLocator(const EventLocator& el) :
    fileWasWritten          (false),
    useLightTimeDelay       (el.useLightTimeDelay),
    useStellarAberration    (el.useStellarAberration),
-   writeReport             (el.writeReport), // or true?
+   writeReport             (el.writeReport),
    useEntireInterval       (el.useEntireInterval),
    appendReport            (el.appendReport),
    epochFormat             (el.epochFormat),
@@ -263,7 +265,14 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       occultingBodyNames.clear();
       occultingBodies.clear();
       defaultOccultingBodies.clear();
-
+      #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("In EventLocator::operator=, current body names:\n");
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", occultingBodyNames.at(ii).c_str());
+      MessageInterface::ShowMessage("In EventLocator::operator=, body names of input are:\n");
+      for (Integer ii = 0; ii < (el.occultingBodyNames).size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", (el.occultingBodyNames.at(ii)).c_str());
+      #endif
       UnsignedInt sz = el.occultingBodyNames.size();
       for (UnsignedInt ii = 0; ii < sz; ii++)
          occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
@@ -589,6 +598,13 @@ bool EventLocator::SetStringParameter(const Integer id,
    }
    if (id == OCCULTING_BODIES)
    {
+      #ifdef DEBUG_EVENTLOCATOR_SET
+         MessageInterface::ShowMessage("About to set occulting body on EventLocator %s\n",
+               instanceName.c_str());
+         MessageInterface::ShowMessage("Current occulting bodies list:\n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
+      #endif
       if (value != satName)
       {
          if (value != "Sun")
@@ -605,6 +621,11 @@ bool EventLocator::SetStringParameter(const Integer id,
             return false;
          }
       }
+      #ifdef DEBUG_EVENTLOCATOR_SET
+         MessageInterface::ShowMessage("And THEN occulting bodies list:\n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
+      #endif
       return true;
    }
 
@@ -690,6 +711,11 @@ bool EventLocator::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 const StringArray& EventLocator::GetStringArrayParameter(const Integer id) const
 {
+   #ifdef DEBUG_EVENTLOCATOR_GET
+      MessageInterface::ShowMessage("In EL::GetStringArrayP, occulting bodies are:\n");
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", occultingBodyNames.at(ii).c_str());
+   #endif
    if (id == OCCULTING_BODIES)
    {
       if (occultingBodyNames.empty())
@@ -957,8 +983,12 @@ bool EventLocator::SetBooleanParameter(const std::string &label,
  */
 //------------------------------------------------------------------------------
 bool EventLocator::TakeAction(const std::string &action,
-      const std::string &actionData)
+                              const std::string &actionData)
 {
+   #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("In EL::TakeAction, action = %s and actionData = %s\n",
+            action.c_str(), actionData.c_str());
+   #endif
    if (action == "Clear")
    {
       if ((actionData == "OccultingBodies") || (actionData == ""))

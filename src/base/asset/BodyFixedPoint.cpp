@@ -1365,6 +1365,10 @@ void BodyFixedPoint::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
 {
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("Entering InitializeForC for %s\n",
+            instanceName.c_str());
+   #endif
    // Initialize/set the Naif IDs (for writing the SPK and FK)
    Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
    naifId           = bodyNaif * 1000 + gsNaifId--;
@@ -1387,8 +1391,15 @@ bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
       if (!spice) spice = new SpiceInterface();
    #endif
 
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("   About to write the SPK and FK kernels\n");
+   #endif
    if (!WriteSPK(deleteFiles) || (!WriteFK(deleteFiles)))
       return false;
+   #ifdef DEBUG_BFP_SPICE
+      MessageInterface::ShowMessage("   Kernels written successfully for %s\n",
+            instanceName.c_str());
+   #endif
    kernelsWritten = true;
    return true;
 }
