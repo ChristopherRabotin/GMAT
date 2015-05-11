@@ -79,7 +79,7 @@ EclipseLocator::EclipseLocator(const std::string &name) :
    defaultEclipseTypes.push_back("Penumbra");
    defaultEclipseTypes.push_back("Antumbra");
 
-   TakeAction("Clear");
+   TakeAction("Clear", "Events");
 
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Creating Eclipse locator %s at <%p>\n",
@@ -114,7 +114,7 @@ EclipseLocator::~EclipseLocator()
 //------------------------------------------------------------------------------
 EclipseLocator::EclipseLocator(const EclipseLocator & el) :
    EventLocator         (el),
-   eclipseTypes         (el.eclipseTypes),
+//   eclipseTypes         (el.eclipseTypes),
    sun                  (NULL),
    maxIndex             (el.maxIndex),
    maxDuration          (el.maxDuration)
@@ -124,15 +124,24 @@ EclipseLocator::EclipseLocator(const EclipseLocator & el) :
             "using the Copy constructor\n", instanceName.c_str(), this);
    #endif
    defaultEclipseTypes.clear();
-   // copy the list of default body names
+   // copy the list of default eclipse types
    for (unsigned int i = 0; i < (el.defaultEclipseTypes).size(); i++)
-   {
       defaultEclipseTypes.push_back((el.defaultEclipseTypes).at(i));
-   }
 
+   // Eclipse Types
+   eclipseTypes.clear();
+   for (Integer jj = 0; jj < (el.eclipseTypes).size(); jj++)
+      eclipseTypes.push_back(el.eclipseTypes.at(jj));
+   // Events
    TakeAction("Clear", "Events");
+   EclipseTotalEvent *toCopy   = NULL;
+   EclipseTotalEvent *newEvent = NULL;
    for (Integer ii = 0; ii < el.theEvents.size(); ii++)
-      theEvents.push_back(el.theEvents.at(ii));
+   {
+      toCopy   = el.theEvents.at(ii);
+      newEvent = new EclipseTotalEvent(*toCopy);
+      theEvents.push_back(newEvent);
+   }
 
    isInitialized = false;
 }
@@ -160,15 +169,25 @@ EclipseLocator& EclipseLocator::operator=(const EclipseLocator & el)
       maxDuration  = el.maxDuration;
 
       defaultEclipseTypes.clear();
-      // copy the list of default body names
+      // copy the list of default eclipse types
       for (unsigned int i = 0; i < (el.defaultEclipseTypes).size(); i++)
-      {
          defaultEclipseTypes.push_back((el.defaultEclipseTypes).at(i));
-      }
 
+      eclipseTypes.clear();
+      // copy the list of eclipse types
+      for (Integer jj = 0; jj < (el.eclipseTypes).size(); jj++)
+         eclipseTypes.push_back(el.eclipseTypes.at(jj));
+
+      // copy the events
       TakeAction("Clear", "Events");
+      EclipseTotalEvent *toCopy   = NULL;
+      EclipseTotalEvent *newEvent = NULL;
       for (Integer ii = 0; ii < el.theEvents.size(); ii++)
-         theEvents.push_back(el.theEvents.at(ii));
+      {
+         toCopy   = el.theEvents.at(ii);
+         newEvent = new EclipseTotalEvent(*toCopy);
+         theEvents.push_back(newEvent);
+      }
 
       isInitialized = false;
    }
@@ -680,6 +699,20 @@ GmatBase *EclipseLocator::Clone() const
    return new EclipseLocator(*this);
 }
 
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ *
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void EclipseLocator::Copy(const GmatBase* orig)
+{
+   operator=(*((EclipseLocator *)(orig)));
+}
+
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
@@ -846,8 +879,8 @@ void EclipseLocator::FindEvents()
    for (Integer ii = 0; ii < occultingBodies.size(); ii++)
    {
       CelestialBody *body = (CelestialBody*) occultingBodies.at(ii);
-      Integer bodyNaifId = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
-      theFront = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
+      Integer bodyNaifId  = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
+      theFront  = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
       theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
 
       for (Integer jj = 0; jj < eclipseTypes.size(); jj++)
@@ -932,7 +965,7 @@ void EclipseLocator::FindEvents()
 
    for (Integer qq = 1; qq < numEventsInTotal; qq++)
    {
-      currentEvent = rawList->GetEvent(qq);
+      currentEvent  = rawList->GetEvent(qq);
       Real itsStart = currentEvent->GetStart();
       Real itsEnd   = currentEvent->GetEnd();
       if (itsStart > (theEvents.at(currentIndex))->GetEnd())
@@ -967,5 +1000,5 @@ void EclipseLocator::FindEvents()
          maxIndex = rr;
       }
    }
-   delete rawList;
+//   delete rawList;
 }

@@ -36,6 +36,7 @@
 //#define DEBUG_SETREF
 //#define DEBUG_CONTACT_LOCATOR_WRITE
 //#define DEBUG_CONTACT_EVENTS
+//#define DEBUG_INIT_FINALIZE
 
 //------------------------------------------------------------------------------
 // Static data
@@ -72,6 +73,14 @@ ContactLocator::ContactLocator(const std::string &name) :
 {
    objectTypeNames.push_back("ContactLocator");
    parameterCount = ContactLocatorParamCount;
+
+   stationNames.clear();
+   stations.clear();
+   contactResults.clear();
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage("CREATED new ContactLocator %s<%p>\n",
+            instanceName.c_str(), this);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -83,6 +92,10 @@ ContactLocator::ContactLocator(const std::string &name) :
 //------------------------------------------------------------------------------
 ContactLocator::~ContactLocator()
 {
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage("DESTRUCTING ContactLocator %s<%p>\n",
+            instanceName.c_str(), this);
+   #endif
    TakeAction("Clear");
 }
 
@@ -100,9 +113,28 @@ ContactLocator::ContactLocator(const ContactLocator &cl) :
    stationNames         (cl.stationNames),
    lightTimeDirection   (cl.lightTimeDirection)
 {
-   TakeAction("Clear");
+   // Observers
+   stationNames.clear();
+   stations.clear();
+   for (Integer jj = 0; jj < cl.stationNames.size(); jj++)
+      stationNames.push_back(cl.stationNames.at(jj));
+   for (Integer jj = 0; jj < cl.stations.size(); jj++)
+      stations.push_back(cl.stations.at(jj));
+   // ContactResults
+   TakeAction("Clear", "Events");
+   ContactResult *toCopy   = NULL;
+   ContactResult *newEvent = NULL;
    for (Integer ii = 0; ii < cl.contactResults.size(); ii++)
-      contactResults.push_back(cl.contactResults.at(ii));
+   {
+      toCopy   = cl.contactResults.at(ii);
+      newEvent = new ContactResult(*toCopy);
+      contactResults.push_back(newEvent);
+   }
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage(
+            "CREATED new ContactLocator %s<%p> by copying %s<%p>\n",
+            instanceName.c_str(), this, cl.instanceName.c_str(), &cl);
+   #endif
 }
 
 
@@ -123,14 +155,32 @@ ContactLocator& ContactLocator::operator=(const ContactLocator &c)
    {
       EventLocator::operator=(c);
 
-      stationNames       = c.stationNames;
+//      stationNames       = c.stationNames;
       lightTimeDirection = c.lightTimeDirection;
 
-      TakeAction("Clear");
+      // Observers
+      stationNames.clear();
+      stations.clear();
+      for (Integer jj = 0; jj < c.stationNames.size(); jj++)
+         stationNames.push_back(c.stationNames.at(jj));
+      for (Integer jj = 0; jj < c.stations.size(); jj++)
+         stations.push_back(c.stations.at(jj));
+      // ContactResults
+      TakeAction("Clear", "Events");
+      ContactResult *toCopy   = NULL;
+      ContactResult *newEvent = NULL;
       for (Integer ii = 0; ii < c.contactResults.size(); ii++)
-         contactResults.push_back(c.contactResults.at(ii));
-
+      {
+         toCopy   = c.contactResults.at(ii);
+         newEvent = new ContactResult(*toCopy);
+         contactResults.push_back(newEvent);
+      }
    }
+   #ifdef DEBUG_INIT_FINALIZE
+      MessageInterface::ShowMessage(
+            "COPIED to ContactLocator %s<%p> from %s<%p>\n",
+            instanceName.c_str(), this, c.instanceName.c_str(), &c);
+   #endif
 
    return *this;
 }
@@ -148,6 +198,20 @@ ContactLocator& ContactLocator::operator=(const ContactLocator &c)
 GmatBase *ContactLocator::Clone() const
 {
    return new ContactLocator(*this);
+}
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ *
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void ContactLocator::Copy(const GmatBase* orig)
+{
+   operator=(*((ContactLocator *)(orig)));
 }
 
 
@@ -822,20 +886,34 @@ bool ContactLocator::TakeAction(const std::string &action,
 {
    #ifdef DEBUG_ECLIPSE_ACTION
       MessageInterface::ShowMessage(
-            "Entering EclipseLocator::TakeAction with action = %s and actionData = %s\n",
-            action.c_str(), actionData.c_str());
+            "Entering EclipseLocator::TakeAction (%s<%p>) with action = %s and actionData = %s\n",
+            instanceName.c_str(), this, action.c_str(), actionData.c_str());
    #endif
    if (action == "Clear")
    {
       bool retval = false;
 
-      for (Integer ii = 0; ii < contactResults.size(); ii++)
+      if ((actionData == "Observers") || (actionData == ""))
       {
-         contactResults.at(ii)->TakeAction("Clear", "Events");
-         delete contactResults.at(ii);
+         stationNames.clear();
+         stations.clear();
+         retval = true;
       }
-      contactResults.clear();
-      retval = true;
+      else if ((actionData == "Events") || (actionData == ""))
+      {
+         #ifdef DEBUG_ECLIPSE_ACTION
+            MessageInterface::ShowMessage(
+                  "In ContactLocator::TakeAction, about to clear %d events\n",
+                  (Integer) contactResults.size());
+         #endif
+         for (Integer ii = 0; ii < contactResults.size(); ii++)
+         {
+            contactResults.at(ii)->TakeAction("Clear", "Events");
+            delete contactResults.at(ii);
+         }
+         contactResults.clear();
+         retval = true;
+      }
 
       return (EventLocator::TakeAction(action, actionData) || retval);
    }
@@ -873,15 +951,15 @@ bool ContactLocator::Initialize()
             throw EventException(errmsg);
          }
       }
-      for (UnsignedInt i = 0; i < occultingBodies.size(); ++i)
-      {
+//      for (UnsignedInt i = 0; i < occultingBodies.size(); ++i)
+//      {
          for (UnsignedInt j = 0; j < stations.size(); ++j)
          {
             if (!stations[j]->IsOfType(Gmat::SPACE_POINT))
                throw EventException("The object " + stations[j]->GetName() +
                      " must be a SpacePoint for Contact Location");
          }
-      }
+//      }
 
       // Set up the ground stations so that we can do Contact Location
       for (UnsignedInt ii= 0; ii < stations.size(); ii++)
@@ -930,12 +1008,6 @@ bool ContactLocator::ReportEventData(const std::string &reportNotice)
    Integer     sz       = (Integer) contactResults.size();
    std::string noEvents = GetNoEventsString("Contact");
 
-//   if (sz == 0)
-//   {
-//      theReport << GetNoEventsString() << "\n";
-//   }
-//   else
-//   {
       #ifdef DEBUG_CONTACT_LOCATOR_WRITE
          MessageInterface::ShowMessage("attempting to write out %d events\n",
                (Integer) sz);
@@ -947,29 +1019,15 @@ bool ContactLocator::ReportEventData(const std::string &reportNotice)
       {
          ContactResult* ev = contactResults.at(ii);
          ev->SetNoEvents(noEvents);
-//         Integer numEv     = ev->NumberOfEvents();
-//         if (numEv > 0)
-//         {
-//            std::string itsName = stations.at(ii)->GetName();
-//            theReport << "Observer: " << itsName << "\n";
-//            theReport << "Start Time (UTC)            Stop Time (UTC)";
-//            theReport << "               Duration (s)         ";
-//            theReport << "Maximum Elevation (deg)\n";
 
-            std::string eventString = ev->GetReportString();
-            theReport << eventString << "\n";
-//         }
-//         else
-//         {
-//            theReport << GetNoEventsString() << "\n";
-//         }
+         std::string eventString = ev->GetReportString();
+         theReport << eventString << "\n";
       }
 
       for (unsigned int jj = 0; jj < sz; jj++)
          numIndividual += contactResults.at(jj)->NumberOfEvents();
 
       theReport << "\nNumber of events : " << numIndividual << "\n";
-//   }
 
    theReport.close();
    return true;
@@ -991,6 +1049,10 @@ void ContactLocator::FindEvents()
 {
    #ifdef DEBUG_CONTACT_EVENTS
       MessageInterface::ShowMessage("Entering ContactLocator::FindEvents ...\n");
+      MessageInterface::ShowMessage("Stations (%d) are:\n", stations.size());
+      for (Integer ii = 0; ii < stations.size(); ii++)
+         MessageInterface::ShowMessage("    %d     %s<%p>\n",
+               ii, (stations.at(ii)->GetName()).c_str(), stations.at(ii));
    #endif
 
    EphemManager   *em       = sat->GetEphemManager();
@@ -1001,6 +1063,10 @@ void ContactLocator::FindEvents()
       throw EventException(errmsg);
    }
 
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("---- About to call GetCoverageStartAndStop for %s\n",
+            instanceName.c_str());
+   #endif
    scNow = sat->GetEpoch();
    em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
                                findStart, findStop);
@@ -1025,12 +1091,12 @@ void ContactLocator::FindEvents()
    // @YRL
    std::string      theObsrvr = ""; // we will loop over observers for this
    // up to this line
-   std::string      theFront  = "";  // we will loop over occultingBodies
-   std::string      theFShape = "ELLIPSOID";
-   std::string      theFFrame = ""; // we will loop over occultingBodies for this
-   std::string      theBack   = "SUN";
-   std::string      theBShape = "ELLIPSOID";
-   std::string      theBFrame = "IAU_SUN";
+//   std::string      theFront  = "";  // we will loop over occultingBodies
+//   std::string      theFShape = "ELLIPSOID";
+//   std::string      theFFrame = ""; // we will loop over occultingBodies for this
+//   std::string      theBack   = "SUN";
+//   std::string      theBShape = "ELLIPSOID";
+//   std::string      theBFrame = "IAU_SUN";
    std::string      theAbCorr = GetAbcorrString();
    #ifdef DEBUG_CONTACT_EVENTS
       MessageInterface::ShowMessage("---- theAbCorr  = %s\n", theAbCorr.c_str());
@@ -1060,7 +1126,8 @@ void ContactLocator::FindEvents()
 
       #ifdef DEBUG_CONTACT_EVENTS
          MessageInterface::ShowMessage("Calling GetContactIntervals with: \n");
-         MessageInterface::ShowMessage("   theObsrvr         = %s\n", theObsrvr.c_str());
+         MessageInterface::ShowMessage("   theObsrvr         = %s(%s)\n",
+               (stations.at(j))->GetName().c_str(), theObsrvr.c_str());
          MessageInterface::ShowMessage("   occultingBodies   = \n");
          for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
             MessageInterface::ShowMessage("      %d     %s\n", ii, occultingBodyNames.at(ii).c_str());

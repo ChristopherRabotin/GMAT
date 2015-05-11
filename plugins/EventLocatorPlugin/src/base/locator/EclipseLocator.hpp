@@ -82,6 +82,7 @@ public:
    const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    virtual bool         Initialize();
    virtual bool         ReportEventData(const std::string &reportNotice = "");
 

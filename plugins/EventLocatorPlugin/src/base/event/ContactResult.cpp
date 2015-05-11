@@ -43,7 +43,14 @@ ContactResult::ContactResult(const ContactResult& copy) :
    LocatedEvent  (copy)
 {
    TakeAction("Clear");
-//   theEvents = copy.theEvents;
+   ContactEvent *toCopy   = NULL;
+   ContactEvent *newEvent = NULL;
+   for (Integer ii = 0; ii < copy.theEvents.size(); ii++)
+   {
+      toCopy   = copy.theEvents.at(ii);
+      newEvent = new ContactEvent(*toCopy);
+      theEvents.push_back(newEvent);
+   }
 }
 
 ContactResult& ContactResult::operator=(const ContactResult& copy)
@@ -51,7 +58,15 @@ ContactResult& ContactResult::operator=(const ContactResult& copy)
    if (&copy != this)
    {
       LocatedEvent::operator=(copy);
-//      TakeAction("Clear");
+      TakeAction("Clear");
+      ContactEvent *toCopy   = NULL;
+      ContactEvent *newEvent = NULL;
+      for (Integer ii = 0; ii < copy.theEvents.size(); ii++)
+      {
+         toCopy   = copy.theEvents.at(ii);
+         newEvent = new ContactEvent(*toCopy);
+         theEvents.push_back(newEvent);
+      }
    }
 
    return *this;
