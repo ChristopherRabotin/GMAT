@@ -774,8 +774,10 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
-   if (ephemMgr) delete ephemMgr;
-   ephemMgr           = NULL;
+   // We don't want to delete any ephem manager here or the event
+   // location will not work
+//   if (ephemMgr) delete ephemMgr;
+//   ephemMgr           = NULL;
 
    includeCartesianState = a.includeCartesianState;
 
