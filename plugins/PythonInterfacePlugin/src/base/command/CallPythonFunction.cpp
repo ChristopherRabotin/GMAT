@@ -244,6 +244,11 @@ bool CallPythonFunction::Execute()
       ret = PyFloat_AsDouble(pyRet);
       MessageInterface::ShowMessage("  ret:  %f\n", ret);
       Py_DECREF(pyRet);
+
+      // clean up the argIns.
+      std::vector<void *>::iterator it;
+      for (it = argIn.begin(); it != argIn.end(); ++it)
+          delete *it;
    }
 
    MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
@@ -323,8 +328,9 @@ void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, s
             else
                formatIn.append("f");
         
-            Real r = param->EvaluateReal();
-            argIn.push_back(&r);
+            Real *r = new Real;
+            *r = param->EvaluateReal();
+            argIn.push_back(r);
 
             break;
          }
@@ -335,8 +341,9 @@ void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, s
             else
                formatIn.append("s");
 
-            std::string s = param->EvaluateString();
-            argIn.push_back((char*)s.c_str());
+            char *str = new char[64];
+            str = const_cast<char *>(param->EvaluateString().c_str());
+            argIn.push_back(str);
 
             break; 
          }
