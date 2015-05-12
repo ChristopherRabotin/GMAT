@@ -30,7 +30,8 @@
 //#define DEBUG_EVENTPANEL_LOAD
 //#define DEBUG_EVENTPANEL_SAVE
 //#define DEBUG_EVENTPANEL_SAVE_COEFS
-//#define DEBUG_POWERSYSTEM_PANEL_COMBOBOX
+//#define DEBUG_EVENTPANEL_PANEL_COMBOBOX
+//#define DEBUG_ECLIPSE_OBSERVERS
 
 //------------------------------
 // event tables for wxWidgets
@@ -181,10 +182,10 @@ void EventLocatorPanel::Create()
    // label for spacecraft/target
    if (isEclipse)
       scTargetTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Spacecraft", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Spacecraft", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    else
       scTargetTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Target", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Target", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
    scTargetComboBox = theGuiManager->GetSpacecraftComboBox(this, ID_COMBOBOX,
                                                            wxSize(150,-1));
@@ -194,9 +195,9 @@ void EventLocatorPanel::Create()
    // Occulting Bodies
    //-----------------------------------------------------------------
    bodiesTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Occulting Bodies", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+      ""GUI_ACCEL_KEY"Occulting Bodies", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    bodiesCheckListBox =
-     theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100),
+     theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,-1),
            true, false, false, false);
 
    #ifdef DEBUG_EVENTPANEL_CREATE
@@ -206,19 +207,23 @@ void EventLocatorPanel::Create()
    //-----------------------------------------------------------------
    // Eclipse/Observers
    //-----------------------------------------------------------------
+   #ifdef DEBUG_ECLIPSE_OBSERVERS
+      MessageInterface::ShowMessage("-- About to create eclipseObserversCLB and isEclipse = %s\n",
+            (isEclipse? "true":"false"));
+   #endif
    if (isEclipse)
    {
       eclipseObserversTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Eclipse Types", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Eclipse Types", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       eclipseObserversCheckListBox = new wxCheckListBox(this, ID_CHECKLISTBOX, wxDefaultPosition,
-            wxSize(200,100), emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
+            wxSize(200,-1), emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
       eclipseObserversTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Observers", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Observers", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       eclipseObserversCheckListBox =
-            theGuiManager->GetGroundStationCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100));
+            theGuiManager->GetGroundStationCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,-1));
 //        theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100),
 //              false, false, false, true);
       #ifdef DEBUG_EVENTPANEL_CREATE
@@ -233,13 +238,13 @@ void EventLocatorPanel::Create()
    // Filename/Report
    //-----------------------------------------------------------------
    fileNameTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Filename", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Filename", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    fileNameTxtCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
-                     wxSize(200, 20), 0);
+                     wxSize(200, -1), 0);
    fileNameBrowseButton =
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
 
    writeReportCheckBox = new wxCheckBox(this, ID_CHECKBOX, wxT("Write Report"),
                                   wxDefaultPosition, wxDefaultSize, 0);
@@ -257,7 +262,7 @@ void EventLocatorPanel::Create()
 
    // label for epoch format
    epochFormatTxt = new wxStaticText( this, ID_TEXT,
-      "Epoch "GUI_ACCEL_KEY"Format", wxDefaultPosition, wxSize(staticTextLarger,20), 0 );
+      "Epoch "GUI_ACCEL_KEY"Format", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
 
    // combo box for the epoch format
    epochFormatComboBox = new wxComboBox
@@ -267,7 +272,7 @@ void EventLocatorPanel::Create()
 
    // label for epoch
    initialEpochTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Initial Epoch", wxDefaultPosition, wxSize(staticTextLarger,20), 0 );
+      ""GUI_ACCEL_KEY"Initial Epoch", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
 
    // textfield for the initial epoch value
    initialEpochTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -276,7 +281,7 @@ void EventLocatorPanel::Create()
 
    // label for epoch
    finalEpochTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Final Epoch", wxDefaultPosition, wxSize(staticTextLarger,20), 0 );
+      ""GUI_ACCEL_KEY"Final Epoch", wxDefaultPosition, wxSize(staticTextLarger,-1), 0 );
 
    // textfield for the final epoch value
    finalEpochTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -299,7 +304,7 @@ void EventLocatorPanel::Create()
    if (!isEclipse)
    {
       lightTimeDirectionTxt = new wxStaticText( this, ID_TEXT,
-         ""GUI_ACCEL_KEY"Light-time direction", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+         ""GUI_ACCEL_KEY"Light-time direction", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       lightTimeDirectionComboBox = new wxComboBox
          ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(epochWidth,-1),
                emptyList, wxCB_DROPDOWN | wxCB_READONLY );
@@ -310,15 +315,15 @@ void EventLocatorPanel::Create()
    }
 
    stepSizeTxt = new wxStaticText( this, ID_TEXT,
-      ""GUI_ACCEL_KEY"Step size", wxDefaultPosition, wxSize(staticTextWidth,20), 0 );
+      ""GUI_ACCEL_KEY"Step size", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    stepSizeTxtCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(epochWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
    stepSizeUnitsTxt = new wxStaticText( this, ID_TEXT,
-      "s", wxDefaultPosition, wxSize(10,20), 0 );
+      "s", wxDefaultPosition, wxSize(10,-1), 0 );
 
    // Make s small blank string to match up the static box sizers
    wxStaticText *blankTxt = new wxStaticText( this, ID_TEXT,
-      " ", wxDefaultPosition, wxSize(10,20), 0 );
+      " ", wxDefaultPosition, wxSize(10,-1), 0 );
 
 
    #ifdef DEBUG_EVENTPANEL_CREATE
@@ -500,26 +505,52 @@ void EventLocatorPanel::LoadData()
 
    // load the eclipse types or observers
    wxString wxEcObs;
+   int itsPos = -1;
    if (isEclipse)
    {
       paramID = theLocator->GetParameterID("EclipseTypes");
       StringArray possibleEclipseTypes = theLocator->GetPropertyEnumStrings(paramID);
       unsigned int posEcSz = possibleEclipseTypes.size();
+      #ifdef DEBUG_ECLIPSE_OBSERVERS
+         MessageInterface::ShowMessage("-- The possible EclipseTypes are:\n");
+         for (Integer ll = 0; ll < posEcSz; ll++)
+            MessageInterface::ShowMessage("   %d   %s\n",
+                  ll, possibleEclipseTypes.at(ll).c_str());
+      #endif
+
       wxString *wxPossibleEcTypes = new wxString[posEcSz];
       for (unsigned int kk = 0; kk < posEcSz; kk++)
       {
-         wxPossibleEcTypes[kk] = possibleEclipseTypes.at(kk).c_str();
+         wxString asWx = STD_TO_WX_STRING(possibleEclipseTypes.at(kk));
+         wxPossibleEcTypes[kk] = asWx;
+         #ifdef DEBUG_ECLIPSE_OBSERVERS
+            MessageInterface::ShowMessage("-- Adding to Eclipse Types CBL:\n");
+               MessageInterface::ShowMessage("   %s\n",
+                     asWx.WX_TO_C_STRING);
+         #endif
       }
       eclipseObserversCheckListBox->InsertItems(posEcSz, wxPossibleEcTypes, 0);
+
       StringArray eclipseTypes = theLocator->GetStringArrayParameter(paramID);
       unsigned int ecSz = eclipseTypes.size();
+      #ifdef DEBUG_ECLIPSE_OBSERVERS
+         MessageInterface::ShowMessage("-- And these are the selected ones:\n");
+         for (Integer ll = 0; ll < ecSz; ll++)
+            MessageInterface::ShowMessage("   %d   %s\n",
+                  ll, eclipseTypes.at(ll).c_str());
+      #endif
       for (unsigned int kk = 0; kk < ecSz; kk++)
       {
          wxEcObs = eclipseTypes.at(kk).c_str();
-         int itsPos = eclipseObserversCheckListBox->FindString(wxEcObs);
+         itsPos = eclipseObserversCheckListBox->FindString(wxEcObs);
          if (itsPos != wxNOT_FOUND)
          {
             eclipseObserversCheckListBox->Check(itsPos);
+            #ifdef DEBUG_ECLIPSE_OBSERVERS
+               MessageInterface::ShowMessage("-- Checking the box ON for: ");
+                  MessageInterface::ShowMessage("   %s\n",
+                        wxEcObs.WX_TO_C_STRING);
+            #endif
          }
       }
    }
@@ -528,10 +559,16 @@ void EventLocatorPanel::LoadData()
       paramID = theLocator->GetParameterID("Observers");
       StringArray observers = theLocator->GetStringArrayParameter(paramID);
       unsigned int obsSz   = observers.size();
+      #ifdef DEBUG_ECLIPSE_OBSERVERS
+         MessageInterface::ShowMessage("-- The observers are:\n");
+         for (Integer ll = 0; ll < obsSz; ll++)
+            MessageInterface::ShowMessage("   %d   %s\n",
+                  ll, observers.at(ll).c_str());
+      #endif
       for (unsigned int ii = 0; ii < obsSz; ii++)
       {
          wxEcObs = observers.at(ii).c_str();
-         int itsPos = eclipseObserversCheckListBox->FindString(wxEcObs);
+         itsPos = eclipseObserversCheckListBox->FindString(wxEcObs);
          if (itsPos != wxNOT_FOUND)
          {
             eclipseObserversCheckListBox->Check(itsPos);
@@ -955,7 +992,7 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
 {
    std::string toEpochFormat  = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
 
-   #ifdef DEBUG_POWERSYSTEM_PANEL_COMBOBOX
+   #ifdef DEBUG_EVENTPANEL_PANEL_COMBOBOX
    MessageInterface::ShowMessage
       ("\nEventLocatorPanel::OnComboBoxChange() toEpochFormat=%s\n",
             toEpochFormat.c_str());
@@ -1007,7 +1044,7 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
          }
          else
          {
-            #ifdef DEBUG_POWERSYSTEM_PANEL_COMBOBOX
+            #ifdef DEBUG_EVENTPANEL_PANEL_COMBOBOX
             MessageInterface::ShowMessage
                ("\nEventLocatorPanel::OnComboBoxChange() converting from %s to %s\n",
                      "TAIModJulian", toEpochFormat.c_str());
@@ -1047,7 +1084,7 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
          }
          else
          {
-            #ifdef DEBUG_POWERSYSTEM_PANEL_COMBOBOX
+            #ifdef DEBUG_EVENTPANEL_PANEL_COMBOBOX
             MessageInterface::ShowMessage
                ("\nEventLocatorPanel::OnComboBoxChange() converting from %s to %s\n",
                      "TAIModJulian", toEpochFormat.c_str());
@@ -1083,7 +1120,7 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
    }
 
    EnableUpdate(true);
-   #ifdef DEBUG_POWERSYSTEM_PANEL_COMBOBOX
+   #ifdef DEBUG_EVENTPANEL_PANEL_COMBOBOX
    MessageInterface::ShowMessage
       ("\nEventLocatorPanel::OnComboBoxChange() EXITing\n");
    #endif
