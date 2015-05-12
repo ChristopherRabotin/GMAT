@@ -20,6 +20,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FINDEVENTS_PANEL 1
+//#define DEBUG_FINDEVENTS_LOAD
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -132,7 +133,7 @@ void FindEventsPanel::Create()
    #endif
 
    // create locator combo box
-   locatorCB = theGuiManager->GetLocatorComboBox(this, ID_LOCATOR_COMBOBOX, wxSize(150,-1));
+   locatorCB = theGuiManager->GetLocatorComboBox(this, ID_LOCATOR_COMBOBOX, wxSize(180,-1));
 
 
    //----------------------------------------------------------------------
@@ -167,34 +168,39 @@ void FindEventsPanel::LoadData()
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
 
-   // default values
-   //burnCB->SetSelection(0);
-   //satCB->SetSelection(0);
-
-   // burn
+   // locator
    id = theCommand->GetParameterID("EventLocator");
-   std::string locator = theCommand->GetStringParameter(id);
+   std::string locator     = theCommand->GetStringParameter(id);
    StringArray locatorList = theGuiInterpreter->GetListOfObjects(Gmat::EVENT_LOCATOR);
    index = 0;
+   #ifdef DEBUG_FINDEVENTS_LOAD
+      MessageInterface::ShowMessage("In FindEvents::LoadData, locator = **%s**\n", locator.c_str());
+      MessageInterface::ShowMessage("     and list of event locators is:\n");
+      for (Integer ii = 0; ii < locatorList.size(); ii++)
+         MessageInterface::ShowMessage("    -- %s\n", locatorList.at(ii).c_str());
+   #endif
    for (StringArray::iterator iter = locatorList.begin();
         iter != locatorList.end(); ++iter)
    {
+      #ifdef DEBUG_FINDEVENTS_LOAD
+         MessageInterface::ShowMessage("     iter = %s\n", (*iter).c_str());
+      #endif
       if (locator == *iter)
+      {
          locatorCB->SetSelection(index);
+         #ifdef DEBUG_FINDEVENTS_LOAD
+            MessageInterface::ShowMessage("Set selection to %d\n", index);
+         #endif
+      }
       else
          ++index;
    }
 
-//   if (locator == "")
-//   {
-//      locatorCB->SetValue("Select an event locator");
-//   }
-
-//   if (!locatorCB->SetStringSelection(locator.c_str()))
-//   {
-//          locatorCB->Append("");
-//          locatorCB->SetStringSelection("");
-//   }
+   if (!locatorCB->SetStringSelection(locator.c_str()))
+   {
+          locatorCB->Append("Select an event locator");
+          locatorCB->SetStringSelection("Select an event locator");
+   }
 
    appendCheckBox->SetValue((wxVariant(theCommand->GetBooleanParameter("Append"))));
 }
@@ -209,20 +215,20 @@ void FindEventsPanel::SaveData()
    //-----------------------------------------------------------------
    try
    {
-           // save data to core engine
-           Integer id;
-           wxString elemString;
+        // save data to core engine
+        Integer id;
+        wxString elemString;
 
-           // save burn
-           wxString locatorString = locatorCB->GetStringSelection();
-           id = theCommand->GetParameterID("EventLocator");
-           std::string locator = std::string (locatorString.c_str());
-           theCommand->SetStringParameter(id, locator);
+        // save burn
+        wxString locatorString = locatorCB->GetStringSelection();
+        id = theCommand->GetParameterID("EventLocator");
+        std::string locator = std::string (locatorString.c_str());
+        theCommand->SetStringParameter(id, locator);
 
-           if (appendCheckBox->IsChecked())
-              theCommand->SetBooleanParameter("Append", true);
-           else
-              theCommand->SetBooleanParameter("Append", false);
+        if (appendCheckBox->IsChecked())
+           theCommand->SetBooleanParameter("Append", true);
+        else
+           theCommand->SetBooleanParameter("Append", false);
 
    }
    catch (BaseException &e)

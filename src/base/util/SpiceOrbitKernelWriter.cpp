@@ -53,6 +53,7 @@
 
 std::string   SpiceOrbitKernelWriter::TMP_TXT_FILE_NAME = "GMATtmpSPKcmmnt";
 const Integer SpiceOrbitKernelWriter::MAX_FILE_RENAMES  = 1000; // currently unused
+
 //---------------------------------
 // public methods
 //---------------------------------
@@ -452,7 +453,6 @@ void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
       throw UtilityException(errmsg);
    }
 
-
    dataWritten = true;
 
    #ifdef DEBUG_SPK_KERNELS
@@ -569,6 +569,10 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
             (tmpFileOK? "true" : "false"));
       MessageInterface::ShowMessage("In FinalizeKernel .... kernelFileName = %s\n",
             kernelFileName.c_str());
+      MessageInterface::ShowMessage("In FinalizeKernel .... fileOpen = %s\n",
+            (fileOpen? "true": "false"));
+      MessageInterface::ShowMessage("In FinalizeKernel .... dataWritten = %s\n",
+            (dataWritten? "true": "false"));
    #endif
 
    if ((fileOpen) && (dataWritten)) // should be both or neither are true
@@ -601,6 +605,21 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
    fileOpen      = false;
    fileFinalized = true;
 }
+
+//------------------------------------------------------------------------------
+//  Integer GetMinNumberOfStates()
+//------------------------------------------------------------------------------
+/**
+ * This method returns the minimum number if states required by SPICE to
+ * so the interpolation.
+ *
+ */
+//------------------------------------------------------------------------------
+Integer SpiceOrbitKernelWriter::GetMinNumberOfStates()
+{
+   return degree+1;
+}
+
 
 //------------------------------------------------------------------------------
 //  WriteMetaData()

@@ -132,6 +132,7 @@ HEADERS = -I../base/include \
           -Icommand \
           -Icontrollogic \
           -Icoordsystem \
+          -Ievent \
           -Iforcemodel \
           -Ifoundation \
           -Ifunction \
@@ -211,6 +212,7 @@ OBJECTS = \
     coordsystem/CoordPanel.o \
     coordsystem/CoordSysCreateDialog.o \
     coordsystem/CoordSystemConfigPanel.o \
+    event/EventLocatorPanel.o \
     forcemodel/DragInputsDialog.o \
     foundation/ArraySetupDialog.o \
     foundation/ArraySetupPanel.o \
