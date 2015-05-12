@@ -4176,7 +4176,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       tmpObjTypeList.Add("String");
    
    *objectTypeComboBox =
-      GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, 20),
+      GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, -1),
                             tmpObjTypeList);
    (*objectTypeComboBox)->SetToolTip(pConfig->Read(_T("ObjectTypeListHint")));
    
@@ -4270,11 +4270,11 @@ wxSizer* GuiItemManager::CreateParameterSizer
       *colStaticText = new wxStaticText(parent, -1, GUI_ACCEL_KEY"Col [xx]");
       
       *rowTextCtrl =
-         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
+         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, -1));
       (*rowTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayRowHint")));
       
       *colTextCtrl =
-         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
+         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, -1));
       (*colTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayColHint")));
       
       //----- arrayIndexSizer
@@ -4331,15 +4331,15 @@ wxSizer* GuiItemManager::CreateParameterSizer
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *coordSysComboBox =
-         GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
+         GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, -1));
       (*coordSysComboBox)->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
       
       *originComboBox =
-         GetCelestialBodyComboBox(parent, originComboBoxId, wxSize(170, 20));
+         GetCelestialBodyComboBox(parent, originComboBoxId, wxSize(170, -1));
       (*originComboBox)->SetToolTip(pConfig->Read(_T("OriginHint")));
 
       *odeModelComboBox = 
-         GetODEModelComboBox(parent, odeModelComboBoxId, wxSize(170, 20));
+         GetODEModelComboBox(parent, odeModelComboBoxId, wxSize(170, -1));
       (*odeModelComboBox)->SetToolTip(pConfig->Read(_T("ODEModelHint")));
 
       

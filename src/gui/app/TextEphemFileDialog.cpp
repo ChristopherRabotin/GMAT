@@ -85,11 +85,11 @@ void TextEphemFileDialog::Create()
    
    mEphemFileTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(200,20), 0);
+                     wxDefaultPosition, wxSize(200,-1), 0);
    
    mEphemFileBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
-                    wxDefaultPosition, wxSize(60,20), 0);
+                    wxDefaultPosition, wxSize(60,-1), 0);
 
    //----- Interval
    wxStaticText *intervalLabel =
@@ -98,7 +98,7 @@ void TextEphemFileDialog::Create()
    
    mIntervalTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("60"),
-                     wxDefaultPosition, wxSize(80,20), 0);
+                     wxDefaultPosition, wxSize(80,-1), 0);
    
    wxStaticText *intervalUnitLabel =
       new wxStaticText(this, ID_TEXT, wxT("Seconds"),
@@ -166,11 +166,11 @@ void TextEphemFileDialog::Create()
    #endif
    
    mAddScButton = new wxButton(this, ID_BUTTON, wxT("-->"),
-                               wxDefaultPosition, wxSize(buttonWidth,20), 0);
+                               wxDefaultPosition, wxSize(buttonWidth,-1), 0);
    mRemoveScButton = new wxButton(this, ID_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(buttonWidth,20), 0);
+                                 wxDefaultPosition, wxSize(buttonWidth,-1), 0);
    mClearScButton = new wxButton(this, ID_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(buttonWidth,20), 0);
+                                wxDefaultPosition, wxSize(buttonWidth,-1), 0);
 
    
    wxBoxSizer *arrowsSizer = new wxBoxSizer(wxVERTICAL);
