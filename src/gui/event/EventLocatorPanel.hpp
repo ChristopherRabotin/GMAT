@@ -54,7 +54,8 @@ private:
    // Spacecraft for EclipseLocator, Target for ContactLocator
    bool     isSCTargetChanged;
    bool     isBodyListChanged;
-   bool     isEclipseObserverChanged;
+   bool     isEclipseTypesChanged;
+   bool     isObserverListChanged;
    bool     isFileNameChanged;
    bool     isFileNameTextChanged;
    bool     isWriteReportChanged;
@@ -83,7 +84,8 @@ private:
    std::string lightTimeDirectionStr;
 
    StringArray bodiesList;
-   StringArray eclipseObserverList;
+   StringArray eclipseTypesList;
+   StringArray observersList;
 
    SolarSystem    *ss;
 
@@ -105,7 +107,8 @@ private:
    // static text (labels)
    wxStaticText *scTargetTxt;
    wxStaticText *bodiesTxt;
-   wxStaticText *eclipseObserversTxt;
+   wxStaticText *eclipseTypesTxt;
+   wxStaticText *observersTxt;
    wxStaticText *fileNameTxt;
    wxStaticText *writeReportTxt;
    wxStaticText *entireIntervalTxt;
@@ -136,7 +139,8 @@ private:
    wxCheckBox   *stellarAberrationCheckBox;
    // Checklist Boxes
    wxCheckListBox *bodiesCheckListBox;
-   wxCheckListBox *eclipseObserversCheckListBox;
+   wxCheckListBox *eclipseTypesCheckListBox;
+   wxCheckListBox *observersCheckListBox;
 
    // wxString arrays
    wxString       *wxPossibleDir;

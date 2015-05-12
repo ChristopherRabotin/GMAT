@@ -112,7 +112,7 @@ EventLocatorPanel::~EventLocatorPanel()
 
    theGuiManager->UnregisterCheckListBox("SpacePoint", bodiesCheckListBox);
    theGuiManager->UnregisterComboBox("Spacecraft", scTargetComboBox);
-   if (!isEclipse) theGuiManager->UnregisterCheckListBox("GroundStation", eclipseObserversCheckListBox);
+   if (!isEclipse) theGuiManager->UnregisterCheckListBox("GroundStation", observersCheckListBox);
 }
 
 //-------------------------------
@@ -208,21 +208,21 @@ void EventLocatorPanel::Create()
    // Eclipse/Observers
    //-----------------------------------------------------------------
    #ifdef DEBUG_ECLIPSE_OBSERVERS
-      MessageInterface::ShowMessage("-- About to create eclipseObserversCLB and isEclipse = %s\n",
+      MessageInterface::ShowMessage("-- About to create eclipseTypesCLB OR observersCLB and isEclipse = %s\n",
             (isEclipse? "true":"false"));
    #endif
    if (isEclipse)
    {
-      eclipseObserversTxt = new wxStaticText( this, ID_TEXT,
+      eclipseTypesTxt = new wxStaticText( this, ID_TEXT,
          ""GUI_ACCEL_KEY"Eclipse Types", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
-      eclipseObserversCheckListBox = new wxCheckListBox(this, ID_CHECKLISTBOX, wxDefaultPosition,
+      eclipseTypesCheckListBox = new wxCheckListBox(this, ID_CHECKLISTBOX, wxDefaultPosition,
             wxSize(200,-1), emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    else
    {
-      eclipseObserversTxt = new wxStaticText( this, ID_TEXT,
+      observersTxt = new wxStaticText( this, ID_TEXT,
          ""GUI_ACCEL_KEY"Observers", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
-      eclipseObserversCheckListBox =
+      observersCheckListBox =
             theGuiManager->GetGroundStationCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,-1));
 //        theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100),
 //              false, false, false, true);
@@ -336,8 +336,16 @@ void EventLocatorPanel::Create()
    leftGridSizer->Add( bodiesTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    leftGridSizer->Add( bodiesCheckListBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    leftGridSizer->Add(20,20);
-   leftGridSizer->Add( eclipseObserversTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
-   leftGridSizer->Add( eclipseObserversCheckListBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   if (isEclipse)
+   {
+      leftGridSizer->Add( eclipseTypesTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+      leftGridSizer->Add( eclipseTypesCheckListBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   }
+   else
+   {
+      leftGridSizer->Add( observersTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+      leftGridSizer->Add( observersCheckListBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   }
    leftGridSizer->Add(20,20);
    leftGridSizer->Add( fileNameTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    leftGridSizer->Add( fileNameTxtCtrl, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
@@ -529,7 +537,7 @@ void EventLocatorPanel::LoadData()
                      asWx.WX_TO_C_STRING);
          #endif
       }
-      eclipseObserversCheckListBox->InsertItems(posEcSz, wxPossibleEcTypes, 0);
+      eclipseTypesCheckListBox->InsertItems(posEcSz, wxPossibleEcTypes, 0);
 
       StringArray eclipseTypes = theLocator->GetStringArrayParameter(paramID);
       unsigned int ecSz = eclipseTypes.size();
@@ -542,10 +550,10 @@ void EventLocatorPanel::LoadData()
       for (unsigned int kk = 0; kk < ecSz; kk++)
       {
          wxEcObs = eclipseTypes.at(kk).c_str();
-         itsPos = eclipseObserversCheckListBox->FindString(wxEcObs);
+         itsPos = eclipseTypesCheckListBox->FindString(wxEcObs);
          if (itsPos != wxNOT_FOUND)
          {
-            eclipseObserversCheckListBox->Check(itsPos);
+            eclipseTypesCheckListBox->Check(itsPos);
             #ifdef DEBUG_ECLIPSE_OBSERVERS
                MessageInterface::ShowMessage("-- Checking the box ON for: ");
                   MessageInterface::ShowMessage("   %s\n",
@@ -568,10 +576,10 @@ void EventLocatorPanel::LoadData()
       for (unsigned int ii = 0; ii < obsSz; ii++)
       {
          wxEcObs = observers.at(ii).c_str();
-         itsPos = eclipseObserversCheckListBox->FindString(wxEcObs);
+         itsPos = observersCheckListBox->FindString(wxEcObs);
          if (itsPos != wxNOT_FOUND)
          {
-            eclipseObserversCheckListBox->Check(itsPos);
+            observersCheckListBox->Check(itsPos);
          }
       }
    }
@@ -879,34 +887,44 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
       }
 
       // Eclipse types OR Observers
-      if (isEclipseObserverChanged)
+      if (isEclipse && isEclipseTypesChanged)
       {
-         #ifdef DEBUG_EVENTPANEL_SAVE
-         MessageInterface::ShowMessage("EventLocatorPanel::SaveData(obj) - saving eclipse types or observers!!\n");
-         #endif
-         count     = eclipseObserversCheckListBox->GetCount();
-         if (isEclipse)
-         {
-            forObject->TakeAction("Clear", "EclipseTypes");
-            paramID   = forObject->GetParameterID("EclipseTypes");
-         }
-         else
-         {
-            forObject->TakeAction("Clear", "Observers");
-            paramID   = forObject->GetParameterID("Observers");
-         }
+         count     = eclipseTypesCheckListBox->GetCount();
+         forObject->TakeAction("Clear", "EclipseTypes");
+         paramID   = forObject->GetParameterID("EclipseTypes");
          for (int i = 0; i < count; i++)
          {
-            if (eclipseObserversCheckListBox->IsChecked(i))
+            if (eclipseTypesCheckListBox->IsChecked(i))
             {
-               std::string str =  eclipseObserversCheckListBox->GetString(i).WX_TO_STD_STRING;
+               std::string str =  eclipseTypesCheckListBox->GetString(i).WX_TO_STD_STRING;
                #ifdef DEBUG_EVENTPANEL_SAVE
                MessageInterface::ShowMessage("--- adding %s to the list of eclObs\n", str.c_str());
                #endif
                forObject->SetStringParameter(paramID, str);
             }
          }
-         isEclipseObserverChanged = false;
+         isEclipseTypesChanged = false;
+      }
+      if (!isEclipse && isObserverListChanged)
+      {
+         #ifdef DEBUG_EVENTPANEL_SAVE
+         MessageInterface::ShowMessage("EventLocatorPanel::SaveData(obj) - saving eclipse types or observers!!\n");
+         #endif
+         count     = observersCheckListBox->GetCount();
+         forObject->TakeAction("Clear", "Observers");
+         paramID   = forObject->GetParameterID("Observers");
+         for (int i = 0; i < count; i++)
+         {
+            if (observersCheckListBox->IsChecked(i))
+            {
+               std::string str =  observersCheckListBox->GetString(i).WX_TO_STD_STRING;
+               #ifdef DEBUG_EVENTPANEL_SAVE
+               MessageInterface::ShowMessage("--- adding %s to the list of eclObs\n", str.c_str());
+               #endif
+               forObject->SetStringParameter(paramID, str);
+            }
+         }
+         isObserverListChanged = false;
       }
 
       // Checkbox values
@@ -1186,9 +1204,13 @@ void EventLocatorPanel::OnCheckListBoxChange(wxCommandEvent& event)
    {
       isBodyListChanged = true;
    }
-   else if (event.GetEventObject() == eclipseObserversCheckListBox)
+   else if (isEclipse && event.GetEventObject() == eclipseTypesCheckListBox)
    {
-      isEclipseObserverChanged = true;
+      isEclipseTypesChanged = true;
+   }
+   else if (!isEclipse && event.GetEventObject() == observersCheckListBox)
+   {
+      isObserverListChanged = true;
    }
    EnableUpdate(true);
 }
@@ -1227,7 +1249,8 @@ void EventLocatorPanel::ResetChangedFlags()
 {
    isSCTargetChanged           = false;
    isBodyListChanged           = false;
-   isEclipseObserverChanged    = false;
+   isEclipseTypesChanged       = false;
+   isObserverListChanged       = false;
    isFileNameChanged           = false;
    isFileNameTextChanged       = false;
    isWriteReportChanged        = false;
