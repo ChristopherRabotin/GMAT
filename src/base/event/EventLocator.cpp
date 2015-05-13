@@ -68,6 +68,7 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
    "UseLightTimeDelay",    // USE_LIGHT_TIME_DELAY
    "UseStellarAberration", // USE_STELLAR_ABERRATION
    "WriteReport",          // WRITE_REPORT
+   "RunMode",              // RUN_MODE
    "UseEntireInterval",    // USE_ENTIRE_INTERVAL
 //   "AppendToReport",       // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
@@ -85,9 +86,19 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
    Gmat::BOOLEAN_TYPE,     // USE_LIGHT_TIME_DELAY
    Gmat::BOOLEAN_TYPE,     // USE_STELLAR_ABERRATION
    Gmat::BOOLEAN_TYPE,     // WRITE_REPORT
+   Gmat::ENUMERATION_TYPE, // RUN_MODE
    Gmat::BOOLEAN_TYPE,     // USE_ENTIRE_INTERVAL
 //   Gmat::BOOLEAN_TYPE,     // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
+
+const std::string EventLocator::RUN_MODES[3] =
+{
+      "Automatic",
+      "Manual",
+      "Disabled",
+};
+
+const Integer EventLocator::numModes = 3;
 
 // Used for light-time calculations
 const Real EventLocator::STEP_MULTIPLE = 0.5;
@@ -115,6 +126,7 @@ EventLocator::EventLocator(const std::string &typeStr,
    useLightTimeDelay       (false),
    useStellarAberration    (false),
    writeReport             (true),
+   runMode                 ("Automatic"),
    useEntireInterval       (true),
    appendReport            (false),
    epochFormat             ("TAIModJulian"),
@@ -186,6 +198,7 @@ EventLocator::EventLocator(const EventLocator& el) :
    useLightTimeDelay       (el.useLightTimeDelay),
    useStellarAberration    (el.useStellarAberration),
    writeReport             (el.writeReport),
+   runMode                 (el.runMode),
    useEntireInterval       (el.useEntireInterval),
    appendReport            (el.appendReport),
    epochFormat             (el.epochFormat),
@@ -244,6 +257,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       useLightTimeDelay    = el.useLightTimeDelay;
       useStellarAberration = el.useStellarAberration;
       writeReport          = el.writeReport;
+      runMode              = el.runMode;
       useEntireInterval    = el.useEntireInterval;
       appendReport         = el.appendReport;
       epochFormat          = el.epochFormat;
@@ -537,6 +551,8 @@ std::string EventLocator::GetStringParameter(const Integer id) const
       return initialEpoch;
    if (id == FINAL_EPOCH)
       return finalEpoch;
+   if (id == RUN_MODE)
+      return runMode;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -595,6 +611,29 @@ bool EventLocator::SetStringParameter(const Integer id,
    {
       SetEpoch(value, id);
       return true;
+   }
+
+   if (id == RUN_MODE)
+   {
+      for (Integer jj = 0; jj < numModes; jj++)
+      {
+         if (GmatStringUtil::ToUpper(value) == GmatStringUtil::ToUpper(RUN_MODES[jj]))
+         {
+            runMode = value;
+            return true;
+         }
+      }
+      EventException ee("");
+      std::string allowed = "One of ";
+      for (Integer jj = 0; jj < numModes; jj++)
+      {
+         allowed += RUN_MODES[jj];
+         if (jj != (numModes -1))
+            allowed += ", ";
+      }
+      ee.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            "RunMode", allowed.c_str());
+      throw ee;
    }
    if (id == OCCULTING_BODIES)
    {
@@ -1030,6 +1069,34 @@ Gmat::ObjectType EventLocator::GetPropertyObjectType(const Integer id) const
       return GmatBase::GetPropertyObjectType(id);
    }
 }
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& EventLocator::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+   case RUN_MODE:
+      enumStrings.clear();
+      for (Integer ii = 0; ii < numModes; ii++)
+         enumStrings.push_back(RUN_MODES[ii]);
+
+      return enumStrings;
+   default:
+      return GmatBase::GetPropertyEnumStrings(id);
+   }
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1622,18 +1689,22 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
    #ifdef DEBUG_EVENTLOCATOR_DATA
       MessageInterface::ShowMessage("In EL::LocateEvents, about to call ProvideEphemerisData\n");
    #endif
-   // Stop the data recording so that the kernel will be loaded
-   sat->ProvideEphemerisData();
 
-   // Locate events in derived class and store them as you have decided to do so
-   FindEvents();
-
-   // Write the report
-   // appendReport should already have been set by a call to SetAppend
-   if (writeReport)
+   if (runMode != "Disabled")
    {
-      bool wasOK = ReportEventData(reportNotice);
-      if (wasOK) fileWasWritten = true;
+      // Stop the data recording so that the kernel will be loaded
+      sat->ProvideEphemerisData();
+
+      // Locate events in derived class and store them as you have decided to do so
+      FindEvents();
+
+      // Write the report
+      // appendReport should already have been set by a call to SetAppend
+      if (writeReport)
+      {
+         bool wasOK = ReportEventData(reportNotice);
+         if (wasOK) fileWasWritten = true;
+      }
    }
 }
 
@@ -1649,6 +1720,20 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 bool EventLocator::FileWasWritten()
 {
    return fileWasWritten;
+}
+
+//------------------------------------------------------------------------------
+// bool IsInAutomaticMode()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating if the EventLocation run mode is "Automatic"
+ *
+ * @return The flag.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::IsInAutomaticMode()
+{
+   return (runMode == "Automatic");
 }
 
 

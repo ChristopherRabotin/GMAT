@@ -911,13 +911,14 @@ bool Sandbox::Execute()
                publisher->SetRunState(currentState);
                publisher->NotifyEndOfRun();
                
-//               // Write out event data, if any
-//               for (UnsignedInt i = 0; i < events.size(); ++i)
-//                  events[i]->LocateEvents("Execution was interrupted; the "
-//                     "event list may be incomplete");
-////                  events[i]->ReportEventData("Execution was interrupted; the "
-////                     "event list may be incomplete");
-////
+               // Write out event data, if any, and if we are writing it in
+               // "Automatic mode"
+               for (UnsignedInt i = 0; i < events.size(); ++i)
+               {
+                  if (events[i]->IsInAutomaticMode())
+                     events[i]->LocateEvents("Execution was interrupted; the "
+                                "event list may be incomplete");
+               }
                throw SandboxException("Execution interrupted");
                //return rv;
             }
@@ -1053,10 +1054,13 @@ bool Sandbox::Execute()
    publisher->SetRunState(currentState);
    publisher->NotifyEndOfRun();
    
-//   // Write out event data, if any
-//   for (UnsignedInt i = 0; i < events.size(); ++i)
-//      events[i]->LocateEvents();
-////      events[i]->ReportEventData();
+   // Write out event data, if any, and if we are writing in
+   // "Automatic mode"
+   for (UnsignedInt i = 0; i < events.size(); ++i)
+   {
+      if (events[i]->IsInAutomaticMode())
+         events[i]->LocateEvents();
+   }
    
    #if DBGLVL_SANDBOX_RUN > 0
    MessageInterface::ShowMessage("==================== Sandbox::Execute() leaving\n");
