@@ -1602,8 +1602,6 @@ bool EventLocator::Initialize()
       throw EventException(errmsg);
    }
 
-//   ephemMgr      = sat->GetEphemManager();
-
    /// Get the occulting bodies from the solar system??? OR put them on the ref object list ??  TBD
    // @todo <<<<<<<<<<  Currently have them in the ref object list
    if (occultingBodyNames.size() < 1)
@@ -1628,8 +1626,11 @@ bool EventLocator::Initialize()
    #ifdef DEBUG_EVENT_INITIALIZATION
       MessageInterface::ShowMessage(">>> About to tell spacecraft to record its data ...\n");
    #endif
-   // Tell the spacecraft to start recording its data
-   sat->RecordEphemerisData();
+   if (runMode != "Disabled")
+   {
+      // Tell the spacecraft to start recording its data
+      sat->RecordEphemerisData();
+   }
 
 
    fileWasWritten = false;

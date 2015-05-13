@@ -972,16 +972,19 @@ bool ContactLocator::Initialize()
          }
 //      }
 
-      // Set up the ground stations so that we can do Contact Location
-      for (UnsignedInt ii= 0; ii < stations.size(); ii++)
+      if (runMode != "Disabled")
       {
-         GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
-         if (!gsi->InitializeForContactLocation(false))
+         // Set up the ground stations so that we can do Contact Location
+         for (UnsignedInt ii= 0; ii < stations.size(); ii++)
          {
-            std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
-            errmsg            += stationNames.at(ii) + " used by ContactLocator ";
-            errmsg            += instanceName + "\n";
-            throw EventException(errmsg);
+            GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
+            if (!gsi->InitializeForContactLocation(false))
+            {
+               std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
+               errmsg            += stationNames.at(ii) + " used by ContactLocator ";
+               errmsg            += instanceName + "\n";
+               throw EventException(errmsg);
+            }
          }
       }
 
