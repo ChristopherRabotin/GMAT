@@ -45,8 +45,12 @@ BEGIN_EVENT_TABLE(EventLocatorPanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBOBOX, EventLocatorPanel::OnComboBoxChange)
    EVT_BUTTON(ID_BUTTON_BROWSE, EventLocatorPanel::OnBrowseButton)
    EVT_CHECKBOX(ID_CHECKBOX, EventLocatorPanel::OnCheckBoxChange)
-   EVT_CHECKLISTBOX(ID_CHECKLISTBOX, EventLocatorPanel::OnCheckListBoxChange)
-   EVT_LISTBOX(ID_CHECKLISTBOX, EventLocatorPanel::OnCheckListBoxSelect)
+   EVT_CHECKLISTBOX(ID_CHECKLISTBOX_BODIES, EventLocatorPanel::OnCheckListBoxChange)
+   EVT_CHECKLISTBOX(ID_CHECKLISTBOX_ECLIPSE, EventLocatorPanel::OnCheckListBoxChange)
+   EVT_CHECKLISTBOX(ID_CHECKLISTBOX_OBSERVER, EventLocatorPanel::OnCheckListBoxChange)
+   EVT_LISTBOX(ID_CHECKLISTBOX_BODIES, EventLocatorPanel::OnCheckListBoxSelect)
+   EVT_LISTBOX(ID_CHECKLISTBOX_ECLIPSE, EventLocatorPanel::OnCheckListBoxSelect)
+   EVT_LISTBOX(ID_CHECKLISTBOX_OBSERVER, EventLocatorPanel::OnCheckListBoxSelect)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -197,7 +201,7 @@ void EventLocatorPanel::Create()
    bodiesTxt = new wxStaticText( this, ID_TEXT,
       ""GUI_ACCEL_KEY"Occulting Bodies", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
    bodiesCheckListBox =
-     theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,-1),
+     theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX_BODIES, wxSize(200,-1),
            true, false, false, false);
 
    #ifdef DEBUG_EVENTPANEL_CREATE
@@ -215,7 +219,7 @@ void EventLocatorPanel::Create()
    {
       eclipseTypesTxt = new wxStaticText( this, ID_TEXT,
          ""GUI_ACCEL_KEY"Eclipse Types", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
-      eclipseTypesCheckListBox = new wxCheckListBox(this, ID_CHECKLISTBOX, wxDefaultPosition,
+      eclipseTypesCheckListBox = new wxCheckListBox(this, ID_CHECKLISTBOX_ECLIPSE, wxDefaultPosition,
             wxSize(200,-1), emptyList, wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
    }
    else
@@ -223,7 +227,7 @@ void EventLocatorPanel::Create()
       observersTxt = new wxStaticText( this, ID_TEXT,
          ""GUI_ACCEL_KEY"Observers", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
       observersCheckListBox =
-            theGuiManager->GetGroundStationCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,-1));
+            theGuiManager->GetGroundStationCheckListBox(this, ID_CHECKLISTBOX_OBSERVER, wxSize(200,-1));
 //        theGuiManager->GetSpacePointCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,100),
 //              false, false, false, true);
       #ifdef DEBUG_EVENTPANEL_CREATE
@@ -933,8 +937,8 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
          paramID = forObject->GetParameterID("WriteReport");
          if (writeReportCheckBox->IsChecked())
              forObject->SetBooleanParameter(paramID, true);
-          else
-             forObject->SetBooleanParameter(paramID, false);
+         else
+            forObject->SetBooleanParameter(paramID, false);
          isWriteReportChanged = false;
       }
       if (isEntireIntervalChanged)
@@ -942,26 +946,26 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
          paramID = forObject->GetParameterID("UseEntireInterval");
          if (entireIntervalCheckBox->IsChecked())
              forObject->SetBooleanParameter(paramID, true);
-          else
-             forObject->SetBooleanParameter(paramID, false);
+         else
+            forObject->SetBooleanParameter(paramID, false);
          isEntireIntervalChanged = false;
       }
       if (isLightTimeDelayChanged)
       {
          paramID = forObject->GetParameterID("UseLightTimeDelay");
          if (lightTimeDelayCheckBox->IsChecked())
-             forObject->SetBooleanParameter(paramID, true);
-          else
-             forObject->SetBooleanParameter(paramID, false);
+            forObject->SetBooleanParameter(paramID, true);
+         else
+            forObject->SetBooleanParameter(paramID, false);
          isLightTimeDelayChanged = false;
       }
       if (isStellarAberrationChanged)
       {
          paramID = forObject->GetParameterID("UseStellarAberration");
          if (stellarAberrationCheckBox->IsChecked())
-             forObject->SetBooleanParameter(paramID, true);
-          else
-             forObject->SetBooleanParameter(paramID, false);
+            forObject->SetBooleanParameter(paramID, true);
+         else
+            forObject->SetBooleanParameter(paramID, false);
          isStellarAberrationChanged = false;
       }
 
