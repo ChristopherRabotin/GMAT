@@ -177,7 +177,7 @@ void EventFilePanel::LoadData()
    if (mFileExists && populated)
       mFileContentsTextCtrl->LoadFile(filename.c_str());
    else
-      mFileContentsTextCtrl->SetValue("\n   *** No events were found ***\n");
+      mFileContentsTextCtrl->SetValue("\n   *** No event location was performed ***\n");
    
    delete file;
 }
