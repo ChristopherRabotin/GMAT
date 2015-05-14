@@ -231,10 +231,11 @@ bool CallPythonFunction::Execute()
    // send the in parameters
    std::string formatIn("");
    std::vector<void *> argIn;
+   std::vector<void *> argOut;
 
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
-   SendInParam(mInputList, formatIn, argIn);
+   SendInParam(formatIn, argIn);
   // Next call Python function Wrapper
    PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
    Real ret = 0;
@@ -242,8 +243,13 @@ bool CallPythonFunction::Execute()
    if (pyRet && PyFloat_Check(pyRet))
    {
       ret = PyFloat_AsDouble(pyRet);
+      argOut.push_back(&ret);
+
       MessageInterface::ShowMessage("  ret:  %f\n", ret);
       Py_DECREF(pyRet);
+
+      // Fill out the parameter out
+      GetOutParams(argOut);
 
       // clean up the argIns.
       std::vector<void *>::iterator it;
@@ -270,6 +276,7 @@ Integer CallPythonFunction::FillInputList()
   
    StringArray ar = GetStringArrayParameter(ADD_INPUT);
    StringArray::iterator it;
+
    for (it = ar.begin(); it != ar.end(); ++it)
    {
       if ((mapObj = FindObject(*it)) == NULL)
@@ -312,7 +319,7 @@ Integer CallPythonFunction::FillOutputList()
 }
 
 
-void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, std::string &formatIn, std::vector<void *> &argIn)
+void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn)
 {
    for (unsigned int i = 0; i < mInputList.size(); i++)
    {
@@ -354,4 +361,25 @@ void CallPythonFunction::SendInParam(const std::vector<Parameter *> InputList, s
 
    formatIn.append(")");
 
+}
+
+void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
+{
+   
+   for (unsigned int i = 0; i < mOutputList.size(); i++)
+   {
+      Parameter *param = mOutputList[i];
+      Gmat::ParameterType type = param->GetReturnType();
+
+      switch (type)
+      {
+         case Gmat::REAL_TYPE:
+         {
+            param->SetReal(*(Real*)argOut.at(0));
+            break;
+         }
+
+      }
+   }
+            
 }

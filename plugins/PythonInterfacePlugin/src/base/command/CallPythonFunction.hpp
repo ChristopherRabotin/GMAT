@@ -89,9 +89,9 @@ protected:
    /// Fill in Output parameter list
    Integer FillOutputList();
    /// Create C++ variable type declared in GMAT script
-   void SendInParam(const std::vector<Parameter*> InputList, std::string &formatIn, std::vector<void *> &argIn);
+   void SendInParam(std::string &formatIn, std::vector<void *> &argIn);
    /// Create C++ variable type declared in GMAT script
-   void GetOutParams();
+   void GetOutParams(const std::vector<void *> &argOut);
    /// Python function Wrapper
    void PythonFuncWrapper();
 
