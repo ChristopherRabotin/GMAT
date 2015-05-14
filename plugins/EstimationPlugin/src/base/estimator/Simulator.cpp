@@ -200,6 +200,14 @@ Simulator::~Simulator()
 {
    if (propagator)
       delete propagator;
+
+   if (simState)                       // made changes by TUAN NGUYEN
+      delete simState;                 // made changes by TUAN NGUYEN
+
+   activeEvents.clear();               // made changes by TUAN NGUYEN
+   measList.clear();                   // made changes by TUAN NGUYEN
+   measModelList.clear();              // made changes by TUAN NGUYEN
+   refObjectList.clear();              // made changes by TUAN NGUYEN
 }
 
 
