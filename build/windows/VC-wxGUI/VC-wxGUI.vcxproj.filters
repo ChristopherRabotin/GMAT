@@ -304,6 +304,9 @@
     <Filter Include="Source Files\plugins\NewParameterPlugin\parameter">
       <UniqueIdentifier>{47fc0132-1b82-42cd-982b-7804c15e1669}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\gui\event">
+      <UniqueIdentifier>{b26c0f23-bfd3-4b3f-8385-93fa6bdf5d7e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp">
@@ -2414,6 +2417,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactResult.cpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp">
+      <Filter>Source Files\gui\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -4600,6 +4606,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactResult.hpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp">
+      <Filter>Source Files\gui\event</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
