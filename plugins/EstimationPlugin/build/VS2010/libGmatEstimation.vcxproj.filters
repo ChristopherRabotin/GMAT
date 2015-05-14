@@ -387,6 +387,9 @@
     <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp">
       <Filter>Source Files\datafilter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -688,6 +691,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp">
       <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
