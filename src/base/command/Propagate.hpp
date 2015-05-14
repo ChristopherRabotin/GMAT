@@ -309,9 +309,9 @@ protected:
    /// Array of allowed propagation modes
    static std::string      PropModeList[PropModeCount];
 
-   
-   virtual void            SetNames(const std::string& name, 
-                                    StringArray& owners, StringArray& elements);
+   //Moved to PropagationEnabledCommand for GMT-5101 fix (LOJ: 2015.05.14)
+   // virtual void            SetNames(const std::string& name, 
+   //                                  StringArray& owners, StringArray& elements);
    virtual void            CheckForOptions(Integer &loc, 
                                            std::string& generatingString);
 
