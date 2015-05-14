@@ -101,10 +101,10 @@ DataFilter::DataFilter(const std::string name) :
    trackers.push_back("All");
    dataTypes.push_back("All");
 
-   dataTypesMap["Range_KM"]          = "Range_KM";     // "Range";      // made changes by TUAN NGUYEN
+   dataTypesMap["Range_KM"]          = "Range_KM";                 // made changes by TUAN NGUYEN
    dataTypesMap["Range_RU"]          = "DSNRange";
    dataTypesMap["Doppler_Hz"]        = "Doppler";
-   dataTypesMap["Doppler_RangeRate"] = "RangeRate";
+   dataTypesMap["Doppler_RangeRate"] = "Doppler_RangeRate";        // made changes by TUAN NGUYEN
 }
 
 
