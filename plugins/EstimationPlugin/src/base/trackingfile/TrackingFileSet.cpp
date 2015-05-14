@@ -28,6 +28,7 @@
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
+#include "GNDopplerAdapter.hpp"                           // made changes by TUAN NGUYEN
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
@@ -1738,19 +1739,20 @@ bool TrackingFileSet::Initialize()
             measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);
          }
 
+         std::string measType = measurements[i]->GetStringParameter("MeasurementType");
          // Set range modulo constant for DSNRange
-         if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")
+         if (measType == "DSNRange")
          {
             measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
          }
 
          // Set doppler count interval for Doppler
-         if (measurements[i]->GetStringParameter("MeasurementType") == "Doppler")
+         if ((measType == "Doppler")||(measType == "Doppler_RangeRate"))                            // made changes by TUAN NGUYEN
          {
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
          }
          // Set range modulo constant for RangeRate
-         if (measurements[i]->GetStringParameter("MeasurementType") == "RangeRate")
+         if (measType == "RangeRate")
          {
             //measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
             measurements[i]->SetRealParameter("DopplerInterval", dopplerCountInterval);      // unit: second
@@ -1964,7 +1966,17 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
          retval->SetStringParameter("MeasurementType", type);
       }
    }                                                                  
-   else if (type == "RangeRate")                                       
+   else if (type == "Doppler_RangeRate")                                                                                  // made changes by TUAN NGUYEN
+   {                                                                                                                      // made changes by TUAN NGUYEN
+      retval = new GNDopplerAdapter(adapterName);                                                                         // made changes by TUAN NGUYEN
+      if (retval)                                                                                                         // made changes by TUAN NGUYEN
+      {                                                                                                                   // made changes by TUAN NGUYEN
+         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);          // made changes by TUAN NGUYEN
+         retval->UsesLightTime(useLighttime);                                                                             // made changes by TUAN NGUYEN
+         retval->SetStringParameter("MeasurementType", type);                                                             // made changes by TUAN NGUYEN
+      }                                                                                                                   // made changes by TUAN NGUYEN
+   }                                                                                                                      // made changes by TUAN NGUYEN
+   else if (type == "RangeRate")
    {                                                                  
       retval = new RangeRateAdapterKps(instanceName + type);              
       if (retval)                                                     

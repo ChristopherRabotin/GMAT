@@ -606,6 +606,65 @@ TFSMagicNumbers::TFSMagicNumbers() :
    magicNumbers.push_back(lastNumber);
    ++lastNumber;
 
+   // Generic range entry.  Other range entries take precedence
+   lue = new LookupEntry;
+   lue->arbitraryCount = true;
+   lue->signalPathCount = 1;
+   lue->nodeCount = -1;             // Arbitrary
+   nodes.clear();
+   lue->nodes.push_back(nodes);     // Empty for this one
+   lue->type = "Doppler_RangeRate";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+
+   // Yeah, yeah, the list is empty here, but in case code is cut and pasted...
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   // One way doppler, 2 participants
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Doppler_RangeRate";
+   lue->multFactor = 1.0;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   // Two way doppler
+   lue = new LookupEntry;
+   lue->arbitraryCount = false;
+   lue->signalPathCount = 1;
+   lue->nodeCount = 2;
+   nodes.clear();
+   nodes.push_back("T1");
+   nodes.push_back("S1");
+   nodes.push_back("T1");
+   lue->nodes.push_back(nodes);
+   lue->type = "Doppler_RangeRate";
+   lue->multFactor = 0.5;
+   lue->magicNumber = lastNumber;
+   if (find(knownTypes.begin(), knownTypes.end(), lue->type) == knownTypes.end())
+      knownTypes.push_back(lue->type);
+
+   lookupTable.push_back(lue);
+   magicNumbers.push_back(lastNumber);
+   ++lastNumber;
+
+   
    // Build the factor map
    factorMap.clear();
    for (UnsignedInt i = 0; i < lookupTable.size(); ++i)
