@@ -457,7 +457,7 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
             }
             ss << "}" << adapters->at(k)->GetStringParameter("MeasurementType") << "}";
             tkconfigs.push_back(ss.str());
-            MessageInterface::ShowMessage("tkconfig: <%s>\n", ss.str().c_str());
+            //MessageInterface::ShowMessage("tkconfig: <%s>\n", ss.str().c_str());
          }
       }
 
