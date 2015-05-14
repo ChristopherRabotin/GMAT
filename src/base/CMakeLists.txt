@@ -14,114 +14,95 @@
 MESSAGE("==============================")
 MESSAGE("GMAT base setup " ${VERSION}) 
 
-if(WIN32)
-	SET(BASETARGET  "libGmatBase")
-else()
-	SET(BASETARGET "GmatBase")
-endif()
+SET(TargetName GmatBase)
 
-SET(TargetName ${BASETARGET})
-
-# Add Preproccessor Definitions
+# Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
 ADD_DEFINITIONS("-DGMAT_EXPORTS")
 ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
-# specific compilation flags
-if (UNIX)
-	MESSAGE("-- Using a shared base library")
-	IF(APPLE) # mac
-		SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -dylib -dynamiclib -two_levelnamespace -undefined dynamic_lookup")
-
-		# snow leopard
-		#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -arch i386")
-	endif()
-endif (UNIX)
-
-
-# ====================================================================
 # SPICE specifics
-if(64_BIT)
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
-else()
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
+# SPICE is linked because it contains the F2C implementation
+LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
+
+if(GMAT_USE_SPICE)
+  SET(SPICE_SRCS
+    "attitude/SpiceAttitude.cpp"
+    "util/SpiceAttitudeKernelReader.cpp"
+    "util/SpiceInterface.cpp"
+    "util/SpiceOrbitKernelReader.cpp"
+    "util/SpiceKernelReader.cpp"
+    "util/SpiceKernelWriter.cpp"
+    "util/SpiceOrbitKernelWriter.cpp")
 endif()
-	
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-LINK_DIRECTORIES("${CSPICE_DIR}/lib")
-
-if(WIN32)
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.lib")
-else()
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.a")
-endif()
-	
-ADD_DEFINITIONS("-D__USE_SPICE__")
-
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
-
-# Unix type systems need a change in the stack size
-# Unix type systems include MAC, LINUX
-MESSAGE("-- Executing... ulimit -s 61440")
-execute_process(COMMAND ulimit -s 61440)
 
 # ====================================================================
 # F2C
 MESSAGE("-- Use F2C version of MSISE.")
 SET(MSISE_SRCS "solarsys/msise90_sub.c")
 
+# ====================================================================
+# list of directories containing source/header files
+SET(BASE_DIRS
+  asset
+  attitude
+  burn
+  command
+  configs
+  coordsystem
+  event
+  executive
+  factory
+  forcemodel
+  forcemodel/harmonic
+  foundation
+  function
+  hardware
+  include
+  interface
+  interpolator
+  interpreter
+  math
+  parameter
+  plugin
+  propagator
+  solarsys
+  solver
+  spacecraft
+  stopcond
+  subscriber
+  util
+  )
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES("./include")
-INCLUDE_DIRECTORIES("./foundation")
-INCLUDE_DIRECTORIES("./hardware")
-INCLUDE_DIRECTORIES("./executive")
-INCLUDE_DIRECTORIES("./attitude")
-INCLUDE_DIRECTORIES("./spacecraft")
-INCLUDE_DIRECTORIES("./asset")
-INCLUDE_DIRECTORIES("./forcemodel")
-INCLUDE_DIRECTORIES("./forcemodel/harmonic")
-INCLUDE_DIRECTORIES("./propagator")
-INCLUDE_DIRECTORIES("./subscriber")
-INCLUDE_DIRECTORIES("./command")
-INCLUDE_DIRECTORIES("./solarsys")
-INCLUDE_DIRECTORIES("./factory")
-INCLUDE_DIRECTORIES("./stopcond")
-INCLUDE_DIRECTORIES("./interpreter")
-INCLUDE_DIRECTORIES("./util")
-INCLUDE_DIRECTORIES("./interpolator")
-INCLUDE_DIRECTORIES("./interface")
-INCLUDE_DIRECTORIES("./parameter")
-INCLUDE_DIRECTORIES("./configs")
-INCLUDE_DIRECTORIES("./burn")
-INCLUDE_DIRECTORIES("./solver")
-INCLUDE_DIRECTORIES("./function")
-INCLUDE_DIRECTORIES("./coordsystem")
-INCLUDE_DIRECTORIES("./math")
-INCLUDE_DIRECTORIES("./plugin")
-INCLUDE_DIRECTORIES("./event")
+# Globally available list of GMAT Base include directories
+# Use absolute path so other GMAT dependencies can refer to them
+FOREACH(currdir ${BASE_DIRS})
+  SET(GMAT_BASE_INCLUDE_DIRECTORIES
+      ${GMAT_BASE_INCLUDE_DIRECTORIES}
+	  "${CMAKE_CURRENT_SOURCE_DIR}/${currdir}"
+	  CACHE INTERNAL "base includes"
+	  )
+ENDFOREACH(currdir)
+
+# ====================================================================
+# Include directories for header files
+INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 
 # ====================================================================
 # source files
-
-# define the source files
 SET(BASE_SRCS
     asset/AssetException.cpp
     asset/BodyFixedPoint.cpp
     asset/GroundstationInterface.cpp
     attitude/Attitude.cpp
     attitude/AttitudeException.cpp
+    attitude/CCSDSAttitude.cpp
     attitude/CSFixed.cpp
     attitude/Kinematic.cpp
+    attitude/NadirPointing.cpp
+    attitude/PrecessingSpinner.cpp
     attitude/Spinner.cpp
     burn/BurnException.cpp
     burn/Burn.cpp
@@ -140,6 +121,7 @@ SET(BASE_SRCS
     command/BranchCommand.cpp
     command/CallFunction.cpp
     command/CommandException.cpp
+    command/FindEvents.cpp
     command/GmatCommand.cpp
     command/CommandUtil.cpp
     command/ClearPlot.cpp
@@ -167,8 +149,8 @@ SET(BASE_SRCS
     command/PenUp.cpp
     command/Propagate.cpp
     command/PropagationEnabledCommand.cpp
-	command/PlotCommand.cpp
-	command/SolverSequenceCommand.cpp
+    command/PlotCommand.cpp
+    command/SolverSequenceCommand.cpp
     command/Report.cpp
     command/RunSolver.cpp
     command/SaveMission.cpp
@@ -208,18 +190,18 @@ SET(BASE_SRCS
     coordsystem/TOEEqAxes.cpp
     coordsystem/TopocentricAxes.cpp
     coordsystem/TrueOfDateAxes.cpp
-	coordsystem/ICRFAxes.cpp
-	coordsystem/ICRFFile.cpp
-	coordsystem/ITRFAxes.cpp
-	coordsystem/IAUFile.cpp
-	coordsystem/BodySpinSunAxes.cpp
-	event/Brent.cpp
-	event/EventException.cpp
-	event/EventFunction.cpp
-	event/EventLocator.cpp
-	event/LocatedEvent.cpp
-	event/LocatedEventTable.cpp
-	event/RootFinder.cpp
+    coordsystem/ICRFAxes.cpp
+    coordsystem/ICRFFile.cpp
+    coordsystem/ITRFAxes.cpp
+    coordsystem/IAUFile.cpp
+    coordsystem/BodySpinSunAxes.cpp
+    #event/Brent.cpp
+    event/EventException.cpp
+    event/EventFunction.cpp
+    event/EventLocator.cpp
+    event/LocatedEvent.cpp
+    event/LocatedEventTable.cpp
+    #event/RootFinder.cpp
     executive/Moderator.cpp
     executive/PlotInterface.cpp
     executive/PlotReceiver.cpp
@@ -256,17 +238,17 @@ SET(BASE_SRCS
     forcemodel/ODEModelException.cpp
     forcemodel/ODEModel.cpp
     forcemodel/GravityField.cpp
-	forcemodel/GravityBase.cpp
+    forcemodel/GravityBase.cpp
     forcemodel/HarmonicField.cpp
     forcemodel/PhysicalModel.cpp
     forcemodel/PointMassForce.cpp
     forcemodel/SolarRadiationPressure.cpp
-	forcemodel/EventModel.cpp
-	forcemodel/RelativisticCorrection.cpp
-	forcemodel/harmonic/Harmonic.cpp
-	forcemodel/harmonic/HarmonicGravity.cpp
-	forcemodel/harmonic/HarmonicGravityCof.cpp
-	forcemodel/harmonic/HarmonicGravityGrv.cpp
+    #forcemodel/EventModel.cpp
+    forcemodel/RelativisticCorrection.cpp
+    forcemodel/harmonic/Harmonic.cpp
+    forcemodel/harmonic/HarmonicGravity.cpp
+    forcemodel/harmonic/HarmonicGravityCof.cpp
+    forcemodel/harmonic/HarmonicGravityGrv.cpp
     foundation/Covariance.cpp
     foundation/ElementWrapper.cpp
     foundation/GmatBaseException.cpp
@@ -279,9 +261,16 @@ SET(BASE_SRCS
     function/Function.cpp
     function/FunctionException.cpp
     function/FunctionManager.cpp
+    hardware/ChemicalTank.cpp
+    hardware/ChemicalThruster.cpp
+    hardware/ElectricTank.cpp
+    hardware/ElectricThruster.cpp
     hardware/FuelTank.cpp
     hardware/HardwareException.cpp
     hardware/Hardware.cpp
+    hardware/NuclearPowerSystem.cpp
+    hardware/PowerSystem.cpp
+    hardware/SolarPowerSystem.cpp
     hardware/Thruster.cpp
     interface/InterfaceException.cpp
     interface/Interface.cpp
@@ -334,6 +323,7 @@ SET(BASE_SRCS
     math/Tan.cpp
     math/Tanh.cpp
     math/Transpose.cpp
+    parameter/AlternateEquinoctialParameters.cpp
     parameter/AngularParameters.cpp
     parameter/Array.cpp
     parameter/ArrayWrapper.cpp
@@ -341,16 +331,20 @@ SET(BASE_SRCS
     parameter/AttitudeData.cpp
     parameter/AttitudeParameters.cpp
     parameter/AttitudeReal.cpp
+    parameter/AttitudeRvector.cpp
     parameter/BallisticMassParameters.cpp
     parameter/BallisticMassReal.cpp
     parameter/BooleanWrapper.cpp
     parameter/BplaneData.cpp
     parameter/BplaneParameters.cpp
     parameter/BplaneReal.cpp
+    parameter/BrouwerMeanLongParameters.cpp
+    parameter/BrouwerMeanShortParameters.cpp
     parameter/BurnData.cpp
     parameter/BurnParameters.cpp
     parameter/BurnReal.cpp
     parameter/CartesianParameters.cpp
+    parameter/DelaunayParameters.cpp
     parameter/EnvData.cpp
     parameter/EnvParameters.cpp
     parameter/EnvReal.cpp
@@ -358,7 +352,9 @@ SET(BASE_SRCS
     parameter/ExpressionParser.cpp
     parameter/HardwareReal.cpp
     parameter/HardwareParameters.cpp
+    parameter/IncomingAsymptoteParameters.cpp
     parameter/KeplerianParameters.cpp
+    parameter/ModEquinoctialParameters.cpp
     parameter/NumberWrapper.cpp
     parameter/ObjectWrapper.cpp
     parameter/ObjectPropertyWrapper.cpp
@@ -370,10 +366,12 @@ SET(BASE_SRCS
     parameter/OrbitRmat66.cpp
     parameter/OrbitRvec6.cpp
     parameter/OrbitStmParameters.cpp
+    parameter/OutgoingAsymptoteParameters.cpp
     parameter/ParameterDatabase.cpp
     parameter/ParameterInfo.cpp
     parameter/Parameter.cpp
     parameter/ParameterWrapper.cpp
+    parameter/PlanetodeticParameters.cpp
     parameter/PlanetData.cpp
     parameter/PlanetParameters.cpp
     parameter/PlanetReal.cpp
@@ -382,6 +380,7 @@ SET(BASE_SRCS
     parameter/Rmat33Var.cpp
     parameter/Rmat66Var.cpp
     parameter/Rvec6Var.cpp
+    parameter/RvectorVar.cpp
     parameter/SpacecraftData.cpp
     parameter/SphericalParameters.cpp
     parameter/StringWrapper.cpp
@@ -393,7 +392,7 @@ SET(BASE_SRCS
     parameter/TimeString.cpp
     parameter/Variable.cpp
     parameter/VariableWrapper.cpp
-	parameter/AttitudeString.cpp
+    parameter/AttitudeString.cpp
     plugin/DynamicLibrary.cpp
     propagator/AdamsBashforthMoulton.cpp
     propagator/DormandElMikkawyPrince68.cpp
@@ -423,8 +422,10 @@ SET(BASE_SRCS
     solarsys/PlanetaryEphemException.cpp
     solarsys/PlanetaryEphem.cpp
     solarsys/Planet.cpp
+    solarsys/ShadowState.cpp
     solarsys/SlpFile.cpp
     solarsys/SolarFluxFileReader.cpp
+    solarsys/SolarFluxReader.cpp
     solarsys/SolarSystemException.cpp
     solarsys/SolarSystem.cpp
     solarsys/Star.cpp
@@ -444,6 +445,7 @@ SET(BASE_SRCS
     spacecraft/TextTrajectoryFile.cpp
     stopcond/StopCondition.cpp
     subscriber/EphemerisFile.cpp
+    subscriber/EphemManager.cpp
     subscriber/MessageWindow.cpp
     subscriber/TextEphemFile.cpp
     subscriber/OrbitView.cpp
@@ -451,16 +453,24 @@ SET(BASE_SRCS
     subscriber/ReportFile.cpp
     subscriber/Subscriber.cpp
     subscriber/XyPlot.cpp
-	subscriber/OrbitPlot.cpp
-	subscriber/GroundTrackPlot.cpp
+    subscriber/OrbitPlot.cpp
+    subscriber/GroundTrackPlot.cpp
     util/A1Date.cpp
     util/A1Mjd.cpp
     util/AngleUtil.cpp
+    util/AttitudeConversionUtility.cpp
     util/AttitudeUtil.cpp
     util/BaseException.cpp
     util/BodyFixedStateConverter.cpp
-	util/CalculationUtilities.cpp
-	util/Code500EphemerisFile.cpp
+    util/CalculationUtilities.cpp
+    util/Code500EphemerisFile.cpp
+    util/ColorDatabase.cpp
+    util/CCSDSAEMEulerAngleSegment.cpp
+    util/CCSDSAEMQuaternionSegment.cpp
+    util/CCSDSAEMReader.cpp
+    util/CCSDSAEMSegment.cpp
+    util/CCSDSEMReader.cpp
+    util/CCSDSEMSegment.cpp
     util/Date.cpp
     util/DateUtil.cpp
     util/ElapsedTime.cpp
@@ -485,33 +495,79 @@ SET(BASE_SRCS
     util/Rvector.cpp
     util/StringTokenizer.cpp
     util/StringUtil.cpp
+    util/SPADFileReader.cpp
     util/TextParser.cpp
     util/TimeSystemConverter.cpp
     util/TimeTypes.cpp
     util/UtcDate.cpp
-	util/StateConversionUtil.cpp
-	util/GravityFileUtil.cpp
-	util/Frozen.cpp
-	util/OrbitDesignerTime.cpp
-	util/SunSync.cpp
-	util/RepeatSunSync.cpp
-	util/RepeatGroundTrack.cpp
+    util/StateConversionUtil.cpp
+    util/GravityFileUtil.cpp
+    util/Frozen.cpp
+    util/OrbitDesignerTime.cpp
+    util/SunSync.cpp
+    util/RepeatSunSync.cpp
+    util/RepeatGroundTrack.cpp
     solarsys/SimpleExponentialAtmosphere.cpp
-	solarsys/SpecialCelestialPoint.cpp
+    solarsys/SpecialCelestialPoint.cpp
     ${MSISE_SRCS}
     ${SPICE_SRCS}
 )
 
+# ====================================================================
+# Recursively find all include files, which will be added to IDE-based
+# projects (VS, XCode, etc.)
+FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # ====================================================================
 # add the install targets
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
 
-ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS})
+# Create GmatBase as a shared library
+ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
+
+# Library name should start with "lib"
+# This is always true for Mac/Linux, but needs to be specified for Windows
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
+
+# ====================================================================
+# Add source/header files to IDE-based project source groups
+# Macro defined in top-level CMakeLists.txt
+_ADDSOURCEGROUPS("${BASE_DIRS}")
 
 # specify the version of the library. 
 if(WIN32)
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\" /INCREMENTAL:NO")
+endif()
+
+# Create build products in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  )
+
+# Specify where to install (make install or VS "INSTALL" project)
+if(WIN32)
+  INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION bin)
 else()
-	SET_TARGET_PROPERTIES(${TargetName} PROPERTIES VERSION ${GMAT_VERSION} )
+  if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+    SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+  else()
+    SET(INSTALL_DIR bin)
+  endif()
+  INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${INSTALL_DIR})
+endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/"
+      )
+  endif()
 endif()

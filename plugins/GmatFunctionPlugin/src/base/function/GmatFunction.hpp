@@ -37,12 +37,12 @@ public:
    GmatFunction(const GmatFunction &copy);
    GmatFunction& operator=(const GmatFunction &right);
    
-   virtual bool IsNewFunction();
-   virtual void SetNewFunction(bool flag);
+   virtual bool         IsNewFunction();
+   virtual void         SetNewFunction(bool flag);
    
    // inherited from Function
-   virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
+   virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
    virtual void         Finalize();
    
    // inherited from GmatBase
@@ -61,6 +61,7 @@ protected:
    bool InitializeLocalObjects(ObjectInitializer *objInit,
                                GmatCommand *current,
                                bool ignoreException);
+   bool SetGmatFunctionPath(const std::string &path);
    void BuildUnusedGlobalObjectList();
    
    // for debug

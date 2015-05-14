@@ -1833,11 +1833,12 @@ void ODEModel::SetInternalCoordinateSystem(const std::string csId,
             centralBodyName);
          internalCoordinateSystems.push_back(cs);
 
-         #ifdef DEBUG_MEMORY
-            MemoryTracker::Instance()->Add
-               (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
-                "cs = earthFixed->Clone()", this);
-         #endif
+         // The pointers are added in CoordinateSystem::CreateLocalCoordinateSystem()
+         // #ifdef DEBUG_MEMORY
+         //    MemoryTracker::Instance()->Add
+         //       (cs, csName, "ODEModel::SetInternalCoordinateSystem()",
+         //        "cs = earthFixed->Clone()", this);
+         // #endif
 
          #ifdef DEBUG_ODEMODEL_INIT
             MessageInterface::ShowMessage("Created %s with description\n\n%s\n", 

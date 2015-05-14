@@ -556,7 +556,7 @@ bool Create::InsertIntoObjectStore(GmatBase *obj, const std::string &withName)
       return true;
    
    // check to see if the object is a(n automatic) global
-   bool isGlobalObj = obj->GetIsGlobal();
+   bool isGlobalObj = obj->IsGlobal();
    if (!isGlobalObj)
    {
       #ifdef DEBUG_CREATE_INIT

@@ -227,7 +227,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mPolygonMode = GL_FILL;
    
    mXyPlaneColor = GmatColor::NAVY;
-   mEcPlaneColor = 0x00002266; //dark red
+   mEcPlaneColor = GmatColor::MAROON;
    mSunLineColor = GmatColor::YELLOW;
    
    // animation
@@ -2037,7 +2037,7 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       // If body has 3d model file, use it
       if (body != NULL && body->Get3dViewModelId() != -1)
       {
-         DrawCelestialBody3dModel(body, objId, frame);
+         DrawCelestialBody3dModel(body, objName, objId, frame);
       }
       else
       {
@@ -2699,18 +2699,22 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
 //------------------------------------------------------------------------------
 // void DrawCelestialBody3dModel(CelestialBody *body, int objId, int frame)
 //------------------------------------------------------------------------------
-void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, int objId, int frame)
+void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxString &objName,
+                                               int objId, int frame)
 {
    #ifdef DEBUG_DRAW_3D_BODY
    MessageInterface::ShowMessage
-      ("OrbitViewCanvas::DrawCelestialBody3dModel() entered, body=<%p>'%s', objId=%d, "
-       "frame=%d\n", body, body ? body->GetName().c_str() : "NULL", objId, frame);
+      ("OrbitViewCanvas::DrawCelestialBody3dModel() entered, body=<%p>'%s', objName='%s', "
+       "objId=%d, frame=%d\n", body, body ? body->GetName().c_str() : "NULL", objName.WX_TO_C_STRING,
+       objId, frame);
    #endif
+   
+   // Rotate body before drawing model
+   RotateBodyUsingAttitude(objName, objId);
    
    ModelManager *mm = ModelManager::Instance();
    ModelObject *bodyModel = mm->GetModel(body->Get3dViewModelId());
 
-   
    // Comment out attitude for now. Add it later if needed (LOJ: 2015.01.30)
    float RTD = (float)GmatMathConstants::DEG_PER_RAD;
    
@@ -2750,13 +2754,12 @@ void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, int objId, i
       rotation[i] = 0.0;
    }
    
-   // Comment out for now. Add it later if needed (LOJ: 2015.01.30)
-   // offset[0]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetX"));
-   // offset[1]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetY"));
-   // offset[2]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetZ"));
-   // rotation[0] = body->GetRealParameter(body->GetParameterID("3DModelRotationX"));
-   // rotation[1] = body->GetRealParameter(body->GetParameterID("3DModelRotationY"));
-   // rotation[2] = body->GetRealParameter(body->GetParameterID("3DModelRotationZ"));
+   offset[0]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetX"));
+   offset[1]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetY"));
+   offset[2]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetZ"));
+   rotation[0] = body->GetRealParameter(body->GetParameterID("3DModelRotationX"));
+   rotation[1] = body->GetRealParameter(body->GetParameterID("3DModelRotationY"));
+   rotation[2] = body->GetRealParameter(body->GetParameterID("3DModelRotationZ"));
    scale = body->GetRealParameter(body->GetParameterID("3DModelScale"));
    bodyModel->SetBaseOffset(offset[0], offset[1], offset[2]);
    bodyModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);

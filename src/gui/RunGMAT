@@ -33,13 +33,13 @@ fi
 # ...................................................
 
 # Set architecture flag here ........................
-archflag='32bit'
-# archflag='64bit'
+# archflag='32bit'
+archflag='64bit'
 # ...................................................
 
 
 # What do we want to run?
-cmd='GMAT'
+cmd=`ls $here/GMAT* | xargs basename` # Supports release & debug GMAT
 # Where is the startup file?
 FILE="$here/../../../gmat_startup_file.txt"
 

@@ -528,6 +528,9 @@
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp">
       <Filter>Source Files\solarsys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gui\app\GmatToolBar.hpp">
@@ -994,6 +997,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp">
       <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp">
+      <Filter>Source Files\command</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -25,7 +25,7 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 #include "MeasurementException.hpp"
-#include "DateUtil.hpp"
+#include "DateUtil.hpp" 
 #include "StringUtil.hpp"
 #include <sstream>
 
@@ -177,23 +177,23 @@ DataFilter& DataFilter::operator=(const DataFilter& saf)
    {
       GmatBase::operator=(saf);
 
-      fileNames       = saf.fileNames;
-      observers       = saf.observers;
+      fileNames    = saf.fileNames;
+      observers    = saf.observers;
       observerObjects = saf.observerObjects;
       allObserver     = saf.allObserver;
-      trackers        = saf.trackers;
+      trackers     = saf.trackers;
       trackerObjects  = saf.trackerObjects;
       allTracker      = saf.allTracker;
-      dataTypes       = saf.dataTypes;
+      dataTypes    = saf.dataTypes;
       allDataType     = saf.allDataType;
-      epochFormat     = saf.epochFormat;
-      initialEpoch    = saf.initialEpoch;
-      finalEpoch      = saf.finalEpoch;
-      epochStart      = saf.epochStart;
-      epochEnd        = saf.epochEnd;
-      strands         = saf.strands;
-      dataTypesMap    = saf.dataTypesMap;
-      isChecked       = false;
+      epochFormat  = saf.epochFormat;
+      initialEpoch = saf.initialEpoch;
+      finalEpoch   = saf.finalEpoch;
+      epochStart   = saf.epochStart;
+      epochEnd     = saf.epochEnd;
+      strands      = saf.strands;
+      dataTypesMap = saf.dataTypesMap;
+      isChecked    = false;
    }
 
    return *this;

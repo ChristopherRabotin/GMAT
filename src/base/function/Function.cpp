@@ -27,8 +27,10 @@
 //#define DEBUG_FUNCTION_SET
 //#define DEBUG_FUNCTION_IN_OUT
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_FUNCTION_OBJ
 //#define DEBUG_AUTO_OBJ
 //#define DEBUG_OBJECT_MAP
+//#define DEBUG_FIND_OBJECT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -84,8 +86,11 @@ Function::Function(const std::string &typeStr, const std::string &name) :
    internalCoordSys   (NULL),
    forces             (NULL),
    fcs                (NULL),
+   fcsInitialized     (false),
    fcsFinalized       (false),
    validator          (NULL),
+   wasFunctionBuilt   (false),
+   isFunctionIOSet    (false),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -105,12 +110,26 @@ Function::Function(const std::string &typeStr, const std::string &name) :
 //------------------------------------------------------------------------------
 Function::~Function()
 {
-   // delete only output wrappers, input wrappers are set by FunctionManager,
+   #ifdef DEBUG_DESTRUCTOR
+   MessageInterface::ShowMessage
+      ("Function::~Function() <%p>[%s]'%s' entered\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
+   
+   // Delete only output wrappers, input wrappers are set by FunctionManager,
    // so they are deleted there.
    // crashes on nested function if delete output wrappers here
    //ClearInOutArgMaps(false, true);
    
+   // Clear original objects
    ClearAutomaticObjects();
+   ClearFunctionObjects();
+   
+   #ifdef DEBUG_DESTRUCTOR
+   MessageInterface::ShowMessage
+      ("Function::~Function() <%p>[%s]'%s' leaving\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
 }
 
 
@@ -137,8 +156,12 @@ Function::Function(const Function &f) :
    internalCoordSys   (NULL),
    forces             (NULL),
    fcs                (NULL),
+   fcsInitialized     (f.fcsInitialized),
    fcsFinalized       (f.fcsFinalized),
+   functionObjectMap  (f.functionObjectMap), // Do I want to do this?
    validator          (f.validator),
+   wasFunctionBuilt   (f.wasFunctionBuilt),
+   isFunctionIOSet    (f.isFunctionIOSet),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -172,8 +195,11 @@ Function& Function::operator=(const Function &f)
    internalCoordSys   = f.internalCoordSys;
    forces             = f.forces;
    fcs                = NULL;
+   fcsInitialized     = f.fcsInitialized;
    fcsFinalized       = f.fcsFinalized;
    validator          = f.validator;
+   wasFunctionBuilt   = f.wasFunctionBuilt;
+   isFunctionIOSet    = f.isFunctionIOSet;
    scriptErrorFound   = f.scriptErrorFound;
    objectsInitialized = f.objectsInitialized;
    inputNames         = f.inputNames;
@@ -257,9 +283,9 @@ void Function::SetNewFunction(bool flag)
 }
 
 //------------------------------------------------------------------------------
-// bool Initialize()  [default implementation]
+// bool Initialize(ObjectInitializer *objInit, bool reinitialize = false)
 //------------------------------------------------------------------------------
-bool Function::Initialize()
+bool Function::Initialize(ObjectInitializer *objInit, bool reinitialize)
 {
    validator = Validator::Instance();
    return true;
@@ -346,6 +372,38 @@ void Function::SetInternalCoordSystem(CoordinateSystem *cs)
 void Function::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
+}
+
+//------------------------------------------------------------------------------
+// bool WasFunctionBuilt()
+//------------------------------------------------------------------------------
+bool Function::WasFunctionBuilt()
+{
+   return wasFunctionBuilt;
+}
+
+//------------------------------------------------------------------------------
+// void SetFunctionWasBuilt(bool built)
+//------------------------------------------------------------------------------
+void Function::SetFunctionWasBuilt(bool built)
+{
+   wasFunctionBuilt = built;
+}
+
+//------------------------------------------------------------------------------
+// bool IsFunctionInputOutputSet()
+//------------------------------------------------------------------------------
+bool Function::IsFunctionInputOutputSet()
+{
+   return isFunctionIOSet;
+}
+
+//------------------------------------------------------------------------------
+// void SetFunctionInputOutputIsSet(bool set)
+//------------------------------------------------------------------------------
+void Function::SetFunctionInputOutputIsSet(bool set)
+{
+   isFunctionIOSet = set;
 }
 
 //------------------------------------------------------------------------------
@@ -492,152 +550,6 @@ WrapperArray& Function::GetWrappersToDelete()
    return wrappersToDelete;
 }
 
-
-//------------------------------------------------------------------------------
-// void AddAutomaticObject(const std::string &withName, GmatBase *obj,
-//                         bool alreadyManaged)
-//------------------------------------------------------------------------------
-/*
- * Adds automatic objects such as Parameter, e.g. sat.X, to automatic object map.
- * The GmatFunction::Initialize() calls Validator to validate and to create
- * ElementWrappers for commands in the FCS. The Validator creates automatic
- * Parameters if necessary and calls this method for adding. Since function can be
- * initialized more than one time multiple automatic Parameters can be created
- * which is the case for nested and recursive call.
- *
- * @param  withName  Automatic object name
- * @param  obj  Automatic object pointer
- * @param  alreadyManaged  true if object is Sandbox object
- *
- * @note Make sure that old automatic objects are deleted properly
- */
-//------------------------------------------------------------------------------
-void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
-                                  bool alreadyManaged)
-{
-   #ifdef DEBUG_AUTO_OBJ
-   MessageInterface::ShowMessage
-      ("Function::AddAutomaticObject() <%p>'%s' entered, name='%s', obj=<%p> '%s', "
-       "alreadyManaged=%d, objectStore=<%p>\n", this, GetName().c_str(),
-       withName.c_str(), obj, obj->GetName().c_str(), alreadyManaged, objectStore);
-   #endif
-   
-   // Make sure that the owner of automatic Parameter exist in the objectStore
-   // (LOJ: 2009.03.25)
-   if (objectStore != NULL)
-   {
-      std::string type, ownerName, dep;
-      GmatStringUtil::ParseParameter(withName, type, ownerName, dep);
-      GmatBase *owner = FindObject(ownerName);
-      #ifdef DEBUG_AUTO_OBJ
-      MessageInterface::ShowMessage
-         ("Function::AddAutomaticObject(), ownerName='%s', owner=<%p><%s>'%s'\n",
-          ownerName.c_str(), owner, owner ? owner->GetTypeName().c_str() : "NULL",
-          owner ? owner->GetName().c_str() : "NULL");
-         #ifdef DEBUG_OBJECT_MAP
-         ShowObjectMap(objectStore, "In Function::AddAutomaticObject", "objectStore");
-         #endif
-      #endif
-      if (owner == NULL)
-      {
-         FunctionException fe;;
-         fe.SetDetails("Cannot find the object named \"%s\" in the function "
-                       "object store", ownerName.c_str());
-         throw fe;
-      }
-      
-      GmatBase *refObj = obj->GetRefObject(owner->GetType(), ownerName);
-      if (owner != refObj)
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** The ref object \"%s\" of the Parameter \"%s\""
-             "does not points to object in object store", ownerName.c_str(),
-             withName.c_str());
-         FunctionException fe;;
-         fe.SetDetails("The ref object \"%s\" of the Parameter \"%s\""
-                       "does not points to object in object store", ownerName.c_str(),
-                       withName.c_str());
-         throw fe;
-      }
-   }
-   
-   if (alreadyManaged)
-   {
-      if (find(sandboxObjects.begin(), sandboxObjects.end(), obj) ==
-          sandboxObjects.end() &&
-          automaticObjectMap.find(withName) == automaticObjectMap.end())         
-      {
-         #ifdef DEBUG_AUTO_OBJ
-         MessageInterface::ShowMessage
-            ("   Adding <%p>'%s' to sandboxObjects\n", obj, obj->GetName().c_str());
-         #endif
-         sandboxObjects.push_back(obj);
-      }
-   }
-   
-   #ifdef __COLLECT_AUTO_OBJECTS__
-   if (automaticObjectMap.find(withName) != automaticObjectMap.end())
-   {
-      GmatBase *oldObj = automaticObjectMap[withName];
-      #ifdef DEBUG_AUTO_OBJ
-      MessageInterface::ShowMessage
-         ("   Found oldObj=<%p><%s> '%s'\n", oldObj, oldObj ?
-          oldObj->GetTypeName().c_str() : "NULL",
-          oldObj ? oldObj->GetName().c_str() : "NULL");
-      #endif
-      
-      // if old object is not in the sandboxObjects add it to delete list,
-      // since objects in the Sandbox objectMap will be deleted from the Sandbox first.
-      // (LOJ: 2009.03.16)
-      if (oldObj != NULL &&
-          (find(sandboxObjects.begin(), sandboxObjects.end(), oldObj) ==
-           sandboxObjects.end()))
-      {
-         if (find(objectsToDelete.begin(), objectsToDelete.end(), oldObj) ==
-             objectsToDelete.end())
-         {
-            #ifdef DEBUG_AUTO_OBJ
-            MessageInterface::ShowMessage("   Adding to objectsToDelete\n");
-            #endif
-            objectsToDelete.push_back(oldObj);
-         }
-      }
-   }
-   #endif
-   
-   #ifdef DEBUG_AUTO_OBJ
-   MessageInterface::ShowMessage
-      ("Function::AddAutomaticObject() <%p>'%s' leaving, <%p>'%s' inserted to "
-       "automaticObjectMap\n", this, GetName().c_str(), obj, withName.c_str());
-   #endif
-   
-   automaticObjectMap.insert(std::make_pair(withName,obj));
-   
-   #ifdef DEBUG_AUTO_OBJ
-   ShowObjectMap(&automaticObjectMap, "In AddAutomaticObject()", "automaticObjectMap");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// GmatBase* FindAutomaticObject(const std::string &name)
-//------------------------------------------------------------------------------
-GmatBase* Function::FindAutomaticObject(const std::string &name)
-{
-   if (automaticObjectMap.find(name) != automaticObjectMap.end())
-      return automaticObjectMap[name];
-   else
-      return NULL;
-}
-
-
-//------------------------------------------------------------------------------
-// ObjectMap& GetAutomaticObjects()
-//------------------------------------------------------------------------------
-ObjectMap& Function::GetAutomaticObjects()
-{
-   return automaticObjectMap;
-}
 
 //------------------------------------------------------------------------------
 // virtual bool TakeAction(const std::string &action,
@@ -800,7 +712,14 @@ std::string Function::GetParameterTypeString(const Integer id) const
 std::string Function::GetStringParameter(const Integer id) const
 {
    if (id == FUNCTION_PATH)
+   {
+      #ifdef DEBUG_GET
+      MessageInterface::ShowMessage
+         ("Function::GetStringParameter() <%p> returning functionPath '%s'\n",
+          this, functionPath.c_str());
+      #endif
       return functionPath;
+   }
    else if (id == FUNCTION_NAME)
       return functionName;
    
@@ -912,6 +831,14 @@ const StringArray& Function::GetStringArrayParameter(const Integer id) const
    }
 }
 
+//---------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+const StringArray& Function::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
 //------------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const char *value)
 //------------------------------------------------------------------------------
@@ -1004,26 +931,46 @@ bool Function::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 GmatBase* Function::FindObject(const std::string &name)
 {
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindObject() '%s' entered, name = '%s'\n", functionName.c_str(),
+       name.c_str());
+   #endif
+   
    std::string newName = name;
+   GmatBase *obj = NULL;
    
    // Ignore array indexing of Array
    std::string::size_type index = name.find('(');
    if (index != name.npos)
       newName = name.substr(0, index);
-   
+
    // Check for the object in the Local Object Store (LOS) first
    if (objectStore && objectStore->find(newName) != objectStore->end())
-      return (*objectStore)[newName];
+      //return (*objectStore)[newName];
+      obj = (*objectStore)[newName];
    
    // If not found in the LOS, check the Global Object Store (GOS)
-   if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
-      return (*globalObjectStore)[newName];
-
-   // Let's try SolarSystem (loj: 2008.06.12)
-   if (solarSys && solarSys->GetBody(newName))
-      return (GmatBase*)(solarSys->GetBody(newName));
+   else if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
+      //return (*globalObjectStore)[newName];
+      obj = (*globalObjectStore)[newName];
    
-   return NULL;
+   // Let's try SolarSystem (loj: 2008.06.12)
+   else if (solarSys && solarSys->GetBody(newName))
+      //return (GmatBase*)(solarSys->GetBody(newName));
+      obj = (GmatBase*)(solarSys->GetBody(newName));
+   
+   // If still not found, try functionObjectMap
+   // Should this moved to top?
+   else if (functionObjectMap.find(newName) != functionObjectMap.end())
+      obj = functionObjectMap[newName];
+   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindObject() returning <%p>\n", obj);
+   #endif
+   //return NULL;
+   return obj;
 }
 
 
@@ -1032,7 +979,7 @@ GmatBase* Function::FindObject(const std::string &name)
 //------------------------------------------------------------------------------
 void Function::ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs)
 {
-   #ifdef DEBUG_ARG_MAP
+   #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
       ("Function::ClearInOutArgMaps() this=<%p> '%s' entered\n", this,
        GetName().c_str());
@@ -1094,6 +1041,139 @@ void Function::ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs)
    outputArgMap.clear();
 }
 
+//LOJ: 2014.12.09
+//------------------------------------------------------------------------------
+// void ClearFunctionObjects()
+//------------------------------------------------------------------------------
+void Function::ClearFunctionObjects()
+{
+   #ifdef DEBUG_FUNCTION_OBJ
+   MessageInterface::ShowMessage
+      ("Function::ClearFunctionObjects() this=<%p> '%s' entered\n   "
+       "functionObjectMap.size()=%d, sandboxObjects.size()=%d, "
+       "objectsToDelete.size()=%d\n", this, GetName().c_str(),
+       functionObjectMap.size(), sandboxObjects.size(), objectsToDelete.size());
+   #endif
+   
+   StringArray toDelete;
+   ObjectMap::iterator omi = functionObjectMap.begin();
+   while (omi != functionObjectMap.end())
+   {
+      GmatBase *obj = omi->second;
+      #ifdef DEBUG_FUNCTION_OBJ
+      MessageInterface::ShowMessage
+         ("   ==> Checking if <%p>[%s]'%s' can be deleted\n", obj,
+          obj ? obj->GetTypeName().c_str() : "NULL", (omi->first).c_str());
+      #endif
+      
+      // If object is not NULL and not this function, delete
+      if (obj != NULL && (!obj->IsOfType("GmatFunction")))
+      {
+         #ifdef DEBUG_FUNCTION_OBJ
+         MessageInterface::ShowMessage
+            ("   isLocal = %d, isGlobal = %d, isAutomaticGlobal = %d, \n",
+             obj->IsLocal(), obj->IsGlobal(), obj->IsAutomaticGlobal());
+         #endif
+         // @note CelestialBody is added to SolarSystem and it will be deleted when
+         // when SolarSystem in use is deleted (LOJ: 2014.12.23)
+         if (obj->IsLocal() && !(obj->IsOfType(Gmat::CELESTIAL_BODY)))
+         {
+            #ifdef DEBUG_MEMORY
+            GmatBase *obj = omi->second;
+            MemoryTracker::Instance()->Remove
+               (obj, obj->GetName(), "Function::ClearFunctionObjects()",
+                "deleting functionObj");
+            #endif
+            #ifdef DEBUG_FUNCTION_OBJ
+            MessageInterface::ShowMessage("   Deleting since it is a local object\n");
+            #endif
+            delete omi->second;
+            omi->second = NULL;
+            //functionObjectMap.erase(omi);
+            //++omi;
+         }
+      }
+      ++omi;
+   }
+   
+   #ifdef DEBUG_FUNCTION_OBJ
+   MessageInterface::ShowMessage
+      ("Function::ClearFunctionObjects() this=<%p> '%s' leaving\n",
+       this, GetName().c_str());
+   #endif
+}
+
+//LOJ: 2014.12.09
+//------------------------------------------------------------------------------
+// void AddFunctionObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+void Function::AddFunctionObject(GmatBase *obj)
+{
+   #ifdef DEBUG_FUNCTION_OBJ
+   MessageInterface::ShowMessage
+      ("Function::AddFunctionObject() entered, obj=<%p>[%s]'%s'\n", obj,
+       obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL");
+   //ShowObjects("In Function::AddFunctionObject()");
+   #endif
+   
+   if (obj && obj->GetName() != "")
+   {
+      std::string objName = obj->GetName();
+      if (functionObjectMap.find(objName) == functionObjectMap.end())
+         functionObjectMap.insert(std::make_pair(objName, obj));
+   }
+   #ifdef DEBUG_FUNCTION_OBJ
+   ShowObjectMap(&functionObjectMap, "In AddFunctionObject()", "functionObjectMap");
+   #endif
+}
+
+//LOJ: 2014.10.10
+//------------------------------------------------------------------------------
+// GmatBase* FindFunctionObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Function::FindFunctionObject(const std::string &name)
+{
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindFunctionObject() entered, name='%s'\n", name.c_str());
+   //ShowObjects("In Function::FindFunctionObject()");
+   #endif
+   
+   // Ignore array index
+   std::string newName = name;
+   std::string::size_type index = name.find_first_of("([");
+   if (index != name.npos)
+      newName = name.substr(0, index);
+   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage("   newName='%s'\n", newName.c_str());
+   #endif
+   
+   GmatBase *obj = NULL;
+   
+   if (functionObjectMap.find(newName) != functionObjectMap.end())
+      obj = functionObjectMap[newName];
+   
+   // try SolarSystem if obj is still NULL
+   if (obj == NULL && solarSys != NULL)
+      obj = (GmatBase*)(solarSys->GetBody(newName));
+   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindFunctionObject() returning <%p>\n", obj);
+   #endif
+   
+   return obj;
+}
+
+//------------------------------------------------------------------------------
+// ObjectMap* GetFunctionObjectMap()
+//------------------------------------------------------------------------------
+ObjectMap* Function::GetFunctionObjectMap()
+{
+   return &functionObjectMap;
+}
 
 //------------------------------------------------------------------------------
 // void ClearAutomaticObjects()
@@ -1117,7 +1197,7 @@ void Function::ClearAutomaticObjects()
          ("Checking if <%p> '%s' can be deleted\n", omi->second,
           (omi->first).c_str());
       #endif
-      if (omi->second != NULL &&
+      if (omi->second != NULL && !sandboxObjects.empty() &&
           find(sandboxObjects.begin(), sandboxObjects.end(), omi->second) ==
           sandboxObjects.end())
       {
@@ -1203,6 +1283,174 @@ void Function::ClearAutomaticObjects()
 
 
 //------------------------------------------------------------------------------
+// void AddAutomaticObject(const std::string &withName, GmatBase *obj,
+//                         bool alreadyManaged)
+//------------------------------------------------------------------------------
+/*
+ * Adds automatic objects such as Parameter, e.g. sat.X, to automatic object map.
+ * The GmatFunction::Initialize() calls Validator to validate and to create
+ * ElementWrappers for commands in the FCS. The Validator creates automatic
+ * Parameters if necessary and calls this method for adding. Since function can be
+ * initialized more than one time multiple automatic Parameters can be created
+ * which is the case for nested and recursive call.
+ *
+ * @param  withName  Automatic object name
+ * @param  obj  Automatic object pointer
+ * @param  alreadyManaged  true if object is Sandbox object
+ *
+ * @note Make sure that old automatic objects are deleted properly
+ */
+//------------------------------------------------------------------------------
+void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
+                                  bool alreadyManaged)
+{
+   #ifdef DEBUG_AUTO_OBJ
+   MessageInterface::ShowMessage
+      ("Function::AddAutomaticObject() <%p>'%s' entered\n   name='%s', obj=<%p>[%s]'%s', "
+       "alreadyManaged=%d, objectStore=<%p>\n", this, GetName().c_str(),
+       withName.c_str(), obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       alreadyManaged, objectStore);
+   #endif
+   
+   // Make sure that the owner of automatic Parameter exist in the objectStore
+   // (LOJ: 2009.03.25)
+   if (objectStore != NULL)
+   {
+      std::string type, ownerName, dep;
+      GmatStringUtil::ParseParameter(withName, type, ownerName, dep);
+      GmatBase *owner = FindObject(ownerName);
+      #ifdef DEBUG_AUTO_OBJ
+      MessageInterface::ShowMessage
+         ("   ownerName='%s', owner=<%p>[%s]'%s'\n", ownerName.c_str(), owner,
+          owner ? owner->GetTypeName().c_str() : "NULL",
+          owner ? owner->GetName().c_str() : "NULL");
+         #ifdef DEBUG_OBJECT_MAP
+         ShowObjectMap(objectStore, "In Function::AddAutomaticObject", "objectStore");
+         #endif
+      #endif
+      if (owner == NULL)
+      {
+         FunctionException fe;;
+         fe.SetDetails("Cannot find the object named \"%s\" in the function "
+                       "object store", ownerName.c_str());
+         throw fe;
+      }
+      
+      // Check if owner is from the right object store      
+      GmatBase *refObj = obj->GetRefObject(owner->GetType(), ownerName);
+      #ifdef DEBUG_AUTO_OBJ
+      MessageInterface::ShowMessage
+         ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+          refObj ? refObj->GetName().c_str() : "NULL");
+      #endif
+      
+      if (owner != refObj)
+      {
+         #ifdef DEBUG_AUTO_OBJ
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The ref object \"%s\" of the Parameter \"%s\" "
+             "does not point to object in object store\n", ownerName.c_str(),
+             withName.c_str());
+         #endif
+
+         //================================================================
+         // Do not throw exception, since objects from Global command will be
+         // moved to global object store when Global command is executing until
+         // then the refobj will be the configured object since the Moderator
+         // sets it. (LOJ: 2015.03.03)
+         #if 0
+         FunctionException fe;;
+         fe.SetDetails("The ref object \"%s\" of the Parameter \"%s\" "
+                       "does not point to object in object store", ownerName.c_str(),
+                       withName.c_str());
+         throw fe;
+         #endif
+         //================================================================
+      }
+   }
+   
+   if (alreadyManaged)
+   {
+      if (find(sandboxObjects.begin(), sandboxObjects.end(), obj) ==
+          sandboxObjects.end() &&
+          automaticObjectMap.find(withName) == automaticObjectMap.end())         
+      {
+         #ifdef DEBUG_AUTO_OBJ
+         MessageInterface::ShowMessage
+            ("   Adding <%p>'%s' to sandboxObjects\n", obj, obj->GetName().c_str());
+         #endif
+         sandboxObjects.push_back(obj);
+      }
+   }
+   
+   #ifdef __COLLECT_AUTO_OBJECTS__
+   if (automaticObjectMap.find(withName) != automaticObjectMap.end())
+   {
+      GmatBase *oldObj = automaticObjectMap[withName];
+      #ifdef DEBUG_AUTO_OBJ
+      MessageInterface::ShowMessage
+         ("   Found oldObj=<%p>[%s] '%s'\n", oldObj, oldObj ?
+          oldObj->GetTypeName().c_str() : "NULL",
+          oldObj ? oldObj->GetName().c_str() : "NULL");
+      #endif
+      
+      // if old object is not in the sandboxObjects add it to delete list,
+      // since objects in the Sandbox objectMap will be deleted from the Sandbox first.
+      // (LOJ: 2009.03.16)
+      if (oldObj != NULL &&
+          (find(sandboxObjects.begin(), sandboxObjects.end(), oldObj) ==
+           sandboxObjects.end()))
+      {
+         if (find(objectsToDelete.begin(), objectsToDelete.end(), oldObj) ==
+             objectsToDelete.end())
+         {
+            #ifdef DEBUG_AUTO_OBJ
+            MessageInterface::ShowMessage("   Adding to objectsToDelete\n");
+            #endif
+            objectsToDelete.push_back(oldObj);
+         }
+      }
+   }
+   #endif
+   
+   #ifdef DEBUG_AUTO_OBJ
+   MessageInterface::ShowMessage
+      ("Function::AddAutomaticObject() <%p>'%s' leaving\n   <%p>'%s' inserted to "
+       "automaticObjectMap\n", this, GetName().c_str(), obj, withName.c_str());
+   #endif
+
+   // Objects in automaticObjectMap are cloned and add to function objectStore
+   // in GmatFunction
+   automaticObjectMap.insert(std::make_pair(withName,obj));
+   
+   #ifdef DEBUG_AUTO_OBJ
+   ShowObjectMap(&automaticObjectMap, "In AddAutomaticObject()", "automaticObjectMap");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* FindAutomaticObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Function::FindAutomaticObject(const std::string &name)
+{
+   if (automaticObjectMap.find(name) != automaticObjectMap.end())
+      return automaticObjectMap[name];
+   else
+      return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// ObjectMap* GetAutomaticObjectMap()
+//------------------------------------------------------------------------------
+ObjectMap* Function::GetAutomaticObjectMap()
+{
+   return &automaticObjectMap;
+}
+
+
+//------------------------------------------------------------------------------
 // void ShowObjectMap(ObjectMap *objMap, const std::string &title,
 //                    const std::string &mapName)
 //------------------------------------------------------------------------------
@@ -1226,7 +1474,7 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       ("Here is %s <%p>, it has %d objects\n", objMapName.c_str(), objMap, objMap->size());
    for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
       MessageInterface::ShowMessage
-         ("   %40s  <%p><%s>\n", i->first.c_str(), i->second,
+         ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
 }
 
@@ -1239,23 +1487,32 @@ void Function::ShowObjects(const std::string &title)
    MessageInterface::ShowMessage("%s\n", title.c_str());
    MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
    MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("solarSys         = <%p>\n", solarSys);
-   MessageInterface::ShowMessage("internalCoordSys = <%p>\n", internalCoordSys);
-   MessageInterface::ShowMessage("forces           = <%p>\n", forces);
-   MessageInterface::ShowMessage
-      ("Here is objectStore <%p>, it has %d objects\n", objectStore,
-       objectStore->size());
-   for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
+   MessageInterface::ShowMessage("solarSys          = <%p>\n", solarSys);
+   MessageInterface::ShowMessage("internalCoordSys  = <%p>\n", internalCoordSys);
+   MessageInterface::ShowMessage("forces            = <%p>\n", forces);
+   MessageInterface::ShowMessage("objectStore       = <%p>\n", objectStore);
+   MessageInterface::ShowMessage("globalObjectStore = <%p>\n", globalObjectStore);
+
+   if (objectStore != NULL)
+   {
       MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
-   MessageInterface::ShowMessage
-      ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
-       globalObjectStore->size());
-   for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
+         ("Here is objectStore <%p>, it has %d objects\n", objectStore,
+          objectStore->size());
+      for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+   if (globalObjectStore != NULL)
+   {
       MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
+          globalObjectStore->size());
+      for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
    MessageInterface::ShowMessage("========================================\n");   
 }
 
