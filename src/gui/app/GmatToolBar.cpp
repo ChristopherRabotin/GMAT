@@ -108,7 +108,8 @@ void GmatToolBar::CreateToolBar(wxToolBar* toolBar)
    guiManager->LoadIcon("screenshot", bitmapType, &bitmaps[16], screenshot_xpm);
    
    // Changed from wxSize(18, 15) (LOJ: 2011.02.04)
-   toolBar->SetToolBitmapSize(wxSize(16, 16));
+   // Changed from wxSize(16, 16) to accomodate large fonts (TGG: 2015.05.08)
+   toolBar->SetToolBitmapSize(wxSize(25, 25));
    
    #ifdef DEBUG_CREATE_TOOLBAR
    MessageInterface::ShowMessage("   Adding mission tools\n");
@@ -293,10 +294,10 @@ void GmatToolBar::AddGuiScriptSyncStatus(wxToolBar* toolBar)
    // Add GUI/Script status text
    wxStaticText *syncLabel = new wxStaticText(this, -1, wxT("GUI/Script Sync Status: "));
    theSyncStatus = new wxStaticText
-      (this, -1, wxT(" Synchronized "), wxDefaultPosition, wxSize(120, 20), wxALIGN_CENTRE);
+      (this, -1, wxT(" Synchronized "), wxDefaultPosition, wxSize(120, -1), wxALIGN_CENTRE);
 #else
    theSyncStatus = new wxStaticText
-      (this, -1, wxT("S"), wxDefaultPosition, wxSize(20, 20), wxALIGN_CENTRE);
+      (this, -1, wxT("S"), wxDefaultPosition, wxSize(20, -1), wxALIGN_CENTRE);
 #endif
 
    // Make font bold face

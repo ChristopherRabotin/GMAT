@@ -37,6 +37,7 @@
 //#define DEBUG_ECLIPSE_EVENTS
 //#define DEBUG_ECLIPSE_ACTION
 //#define DEBUG_ECLIPSE_LOCATOR_WRITE
+//#define DEBUG_ECLIPSE_SET
 
 //------------------------------------------------------------------------------
 // Static data
@@ -53,7 +54,6 @@ const Gmat::ParameterType EclipseLocator::PARAMETER_TYPE[
    Gmat::STRINGARRAY_TYPE     // OCCULTERS
 };
 
-
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
@@ -69,15 +69,17 @@ const Gmat::ParameterType EclipseLocator::PARAMETER_TYPE[
 //------------------------------------------------------------------------------
 EclipseLocator::EclipseLocator(const std::string &name) :
    EventLocator         ("EclipseLocator", name),
-   findStart            (0.0),
-   findStop             (0.0),
-   scStart              (0.0),
-   scNow                (0.0),
    maxIndex             (-1),
    maxDuration          (-1.0)
 {
    objectTypeNames.push_back("EclipseLocator");
    parameterCount = EclipseLocatorParamCount;
+
+   defaultEclipseTypes.push_back("Umbra");
+   defaultEclipseTypes.push_back("Penumbra");
+   defaultEclipseTypes.push_back("Antumbra");
+
+   TakeAction("Clear", "Events");
 
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Creating Eclipse locator %s at <%p>\n",
@@ -98,6 +100,7 @@ EclipseLocator::~EclipseLocator()
       MessageInterface::ShowMessage("Deleting EclipseLocator at <%p>\n", this);
    #endif
    TakeAction("Clear", "Events");
+   defaultEclipseTypes.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -111,12 +114,8 @@ EclipseLocator::~EclipseLocator()
 //------------------------------------------------------------------------------
 EclipseLocator::EclipseLocator(const EclipseLocator & el) :
    EventLocator         (el),
-   eclipseTypes         (el.eclipseTypes),
+//   eclipseTypes         (el.eclipseTypes),
    sun                  (NULL),
-   findStart            (el.findStart),
-   findStop             (el.findStop),
-   scStart              (el.scStart),
-   scNow                (el.scNow),
    maxIndex             (el.maxIndex),
    maxDuration          (el.maxDuration)
 {
@@ -124,9 +123,25 @@ EclipseLocator::EclipseLocator(const EclipseLocator & el) :
       MessageInterface::ShowMessage("Creating Eclipse locator %s at <%p> "
             "using the Copy constructor\n", instanceName.c_str(), this);
    #endif
+   defaultEclipseTypes.clear();
+   // copy the list of default eclipse types
+   for (unsigned int i = 0; i < (el.defaultEclipseTypes).size(); i++)
+      defaultEclipseTypes.push_back((el.defaultEclipseTypes).at(i));
+
+   // Eclipse Types
+   eclipseTypes.clear();
+   for (Integer jj = 0; jj < (el.eclipseTypes).size(); jj++)
+      eclipseTypes.push_back(el.eclipseTypes.at(jj));
+   // Events
    TakeAction("Clear", "Events");
+   EclipseTotalEvent *toCopy   = NULL;
+   EclipseTotalEvent *newEvent = NULL;
    for (Integer ii = 0; ii < el.theEvents.size(); ii++)
-      theEvents.push_back(el.theEvents.at(ii));
+   {
+      toCopy   = el.theEvents.at(ii);
+      newEvent = new EclipseTotalEvent(*toCopy);
+      theEvents.push_back(newEvent);
+   }
 
    isInitialized = false;
 }
@@ -150,16 +165,29 @@ EclipseLocator& EclipseLocator::operator=(const EclipseLocator & el)
 
       eclipseTypes = el.eclipseTypes;
       sun          = NULL;
-      findStart    = el.findStart;
-      findStop     = el.findStop;
-      scStart      = el.scStart;
-      scNow        = el.scNow;
       maxIndex     = el.maxIndex;
       maxDuration  = el.maxDuration;
 
+      defaultEclipseTypes.clear();
+      // copy the list of default eclipse types
+      for (unsigned int i = 0; i < (el.defaultEclipseTypes).size(); i++)
+         defaultEclipseTypes.push_back((el.defaultEclipseTypes).at(i));
+
+      eclipseTypes.clear();
+      // copy the list of eclipse types
+      for (Integer jj = 0; jj < (el.eclipseTypes).size(); jj++)
+         eclipseTypes.push_back(el.eclipseTypes.at(jj));
+
+      // copy the events
       TakeAction("Clear", "Events");
+      EclipseTotalEvent *toCopy   = NULL;
+      EclipseTotalEvent *newEvent = NULL;
       for (Integer ii = 0; ii < el.theEvents.size(); ii++)
-         theEvents.push_back(el.theEvents.at(ii));
+      {
+         toCopy   = el.theEvents.at(ii);
+         newEvent = new EclipseTotalEvent(*toCopy);
+         theEvents.push_back(newEvent);
+      }
 
       isInitialized = false;
    }
@@ -358,7 +386,7 @@ std::string EclipseLocator::GetStringParameter(const Integer id,
 
 //------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string & value,
-//       const Integer index)
+//                         const Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets a parameter value in a string array
@@ -373,11 +401,18 @@ std::string EclipseLocator::GetStringParameter(const Integer id,
 bool EclipseLocator::SetStringParameter(const Integer id,
       const std::string &value, const Integer index)
 {
+   #ifdef DEBUG_ECLIPSE_SET
+      MessageInterface::ShowMessage(
+            "Entering EclipseLocator::SetStringParameter (index) ... ");
+      MessageInterface::ShowMessage(
+            "id = %d, value = %s, index = %d\n", id, value.c_str(), index);
+   #endif
    if (id == ECLIPSE_TYPES)
    {
       if (index < 0)
       {
-         std::string errmsg = "Index for EclipseTypes is out-of-range\n";
+         std::string errmsg = "Eclipse type(s) must be set for an Eclipse Locator.  ";
+         errmsg += "Empty braces are not allowed.\n";
          throw EventException(errmsg);
       }
       if ((value != "Umbra") && (value != "Penumbra") && (value != "Antumbra"))
@@ -418,7 +453,12 @@ bool EclipseLocator::SetStringParameter(const Integer id,
 const StringArray& EclipseLocator::GetStringArrayParameter(const Integer id) const
 {
    if (id == ECLIPSE_TYPES)
+   {
+      //If there have been eclipse types set, return those names
+      // Otherwise, return the default set of eclipse types
+      if (eclipseTypes.empty()) return defaultEclipseTypes;
       return eclipseTypes;
+   }
 
    return EventLocator::GetStringArrayParameter(id);
 }
@@ -659,6 +699,20 @@ GmatBase *EclipseLocator::Clone() const
    return new EclipseLocator(*this);
 }
 
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ *
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void EclipseLocator::Copy(const GmatBase* orig)
+{
+   operator=(*((EclipseLocator *)(orig)));
+}
+
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
@@ -681,24 +735,26 @@ bool EclipseLocator::Initialize()
       sun = (Star*) solarSys->GetBody(SolarSystem::SUN_NAME);
    }
    if (eclipseTypes.size() < 1)
-      throw EventException("ERROR in Eclipse Locator - no eclipse types set.\n");
+   {
+      // Use default list here
+      for (Integer ii = 0; ii < 3; ii++)
+         eclipseTypes.push_back(defaultEclipseTypes[ii]);
+   }
 
    // NOW initialize the base class
    retval = EventLocator::Initialize();
 
-   // move this to EventLocator?
-   scStart = sat->GetEpoch();
    return retval;
 }
 
 //------------------------------------------------------------------------------
-// void ReportEventData()
+// bool ReportEventData(const std::string &reportNotice = "")
 //------------------------------------------------------------------------------
 /**
  * Writes the event data to file and optionally displays the event data plot.
  */
 //------------------------------------------------------------------------------
-void EclipseLocator::ReportEventData(const std::string &reportNotice)
+bool EclipseLocator::ReportEventData(const std::string &reportNotice)
 {
    #ifdef DEBUG_ECLIPSE_LOCATOR_WRITE
       MessageInterface::ShowMessage("EclipseLocator::ReportEventData ... \n");
@@ -709,30 +765,19 @@ void EclipseLocator::ReportEventData(const std::string &reportNotice)
    if (!openOK)
    {
       // TBD - do we want to throw an exception or just continue without writing?
-      return;
+      return false;
    }
 
-   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
-   std::string fromGregorian, toGregorian;
-   Real        resultMjd;
-
-
-   TimeConverterUtil::Convert("A1ModJulian", findStart, "",
-                              outputFormat, resultMjd, fromGregorian);
-   TimeConverterUtil::Convert("A1ModJulian", findStop, "",
-                              outputFormat, resultMjd, toGregorian);
+   std::string    itsName   = sat->GetName();
+   theReport << "Spacecraft: " << itsName << "\n\n";
 
    Integer sz = (Integer) theEvents.size();
    if (sz == 0)
    {
-      theReport << "There are no Eclipse events in the time interval ";
-      theReport << fromGregorian << " to " << toGregorian + ".\n";
+      theReport << GetNoEventsString("Eclipse") << "\n";
    }
    else
    {
-      Integer        itsNaifId = sat->GetIntegerParameter("NAIFId");
-      theReport << "Spacecraft: " << itsNaifId << "\n\n";
-
       theReport << "Start Time (UTC)            Stop Time (UTC)               Duration (s)    ";
       theReport << "Occ Body        Type        Event Number  Total Duration (s)\n";
 
@@ -741,7 +786,7 @@ void EclipseLocator::ReportEventData(const std::string &reportNotice)
       {
          EclipseTotalEvent* ev = theEvents.at(ii);
          std::string eventString = ev->GetReportString();
-         theReport << eventString << "\n";
+         theReport << eventString; //  << "\n";
       }
       Integer numIndividual = 0;
       for (unsigned int jj = 0; jj < sz; jj++)
@@ -755,6 +800,7 @@ void EclipseLocator::ReportEventData(const std::string &reportNotice)
    }
 
    theReport.close();
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -795,12 +841,11 @@ void EclipseLocator::FindEvents()
    }
 
    scNow = sat->GetEpoch();
-   em->ProvideEphemerisData();
    em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
                                findStart, findStop);
    #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage("---- findStart (from em)  = %12.10f\n", findStart);
-      MessageInterface::ShowMessage("---- findStop (from em)   = %12.10f\n", findStop );
+      MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
    #endif
    if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
    {
@@ -808,8 +853,6 @@ void EclipseLocator::FindEvents()
       // beginning and current spacecraft times
       findStart = scStart;
       findStop  = scNow;
-//      findStart = initialEp;
-//      findStop  = finalEp;
    }
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("---- findStart  = %12.10f\n", findStart);
@@ -824,6 +867,9 @@ void EclipseLocator::FindEvents()
    std::string      theBShape = "ELLIPSOID";
    std::string      theBFrame = "IAU_SUN";
    std::string      theAbCorr = GetAbcorrString();
+   #ifdef DEBUG_ECLIPSE_EVENTS
+      MessageInterface::ShowMessage("---- theAbCorr  = %s\n", theAbCorr.c_str());
+   #endif
 
    EclipseTotalEvent  *rawList = new EclipseTotalEvent();
    Integer            numEclipse = 0;
@@ -832,11 +878,9 @@ void EclipseLocator::FindEvents()
 
    for (Integer ii = 0; ii < occultingBodies.size(); ii++)
    {
-
-      theFront  = GmatStringUtil::ToUpper(occultingBodyNames.at(ii));
-      if (theFront == "LUNA")
-         theFront = "MOON";
-      CelestialBody *body = occultingBodies.at(ii);
+      CelestialBody *body = (CelestialBody*) occultingBodies.at(ii);
+      Integer bodyNaifId  = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
+      theFront  = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
       theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
 
       for (Integer jj = 0; jj < eclipseTypes.size(); jj++)
@@ -921,7 +965,7 @@ void EclipseLocator::FindEvents()
 
    for (Integer qq = 1; qq < numEventsInTotal; qq++)
    {
-      currentEvent = rawList->GetEvent(qq);
+      currentEvent  = rawList->GetEvent(qq);
       Real itsStart = currentEvent->GetStart();
       Real itsEnd   = currentEvent->GetEnd();
       if (itsStart > (theEvents.at(currentIndex))->GetEnd())
@@ -956,5 +1000,5 @@ void EclipseLocator::FindEvents()
          maxIndex = rr;
       }
    }
-   delete rawList;
+//   delete rawList;
 }

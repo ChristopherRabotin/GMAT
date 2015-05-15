@@ -29,6 +29,7 @@ SET(PLUGIN_SRCS
     event/Antumbra.cpp
     event/Contact.cpp
     event/ContactEvent.cpp
+    event/ContactResult.cpp
     event/Eclipse.cpp
     event/EclipseEvent.cpp
     event/EclipseTotalEvent.cpp

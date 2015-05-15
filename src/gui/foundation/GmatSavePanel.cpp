@@ -111,7 +111,7 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    if (mShowScriptActiveStatus)
    {
       mScriptActiveLabel = new wxStaticText
-         (this, -1, wxT(""), wxDefaultPosition, wxSize(110, 18), wxALIGN_CENTRE);
+         (this, -1, wxT(""), wxDefaultPosition, wxSize(110, -1), wxALIGN_CENTRE);
       mScriptActiveLabel->Centre();
       // Make font bold face
       wxFont font = mScriptActiveLabel->GetFont();
@@ -128,7 +128,7 @@ GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
    
    // Add script status label
    mScriptDirtyLabel = new wxStaticText
-      (this, -1, wxT(""), wxDefaultPosition, wxSize(80, 20), wxALIGN_CENTRE);
+      (this, -1, wxT(""), wxDefaultPosition, wxSize(80, -1), wxALIGN_CENTRE);
    bottomGridSizer->Add(mScriptDirtyLabel, 0, wxALIGN_LEFT | wxALL, borderSize*2);
    bottomGridSizer->Add(50, 20);
    

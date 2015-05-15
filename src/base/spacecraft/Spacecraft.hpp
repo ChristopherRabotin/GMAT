@@ -446,6 +446,8 @@ protected:
    static const Integer ATTITUDE_ID_OFFSET;
    static const Real    UNSET_ELEMENT_VALUE;
    
+   static Integer scNaifId;
+
    std::map <std::string, std::string> attribCommentLineMap;
    std::map <std::string, std::string> inlineAttribCommentMap;
    std::map<std::string, std::string> defaultStateTypeMap;

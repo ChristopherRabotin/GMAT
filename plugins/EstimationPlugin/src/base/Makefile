@@ -162,6 +162,7 @@ CPP_OBJECTS = \
     adapter/PointRangeRateAdapterKps.o \
     adapter/DSNRangeAdapter.o \
     adapter/DopplerAdapter.o \
+    adapter/GNDopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
     datafilter/DataFilter.o \

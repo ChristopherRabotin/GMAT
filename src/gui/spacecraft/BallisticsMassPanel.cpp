@@ -201,7 +201,7 @@ void BallisticsMassPanel::Create()
     spadFlexSizer->Add( spadSrpFileTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     spadBrowseButton =
        new wxBitmapButton(this, ID_SPAD_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                          wxSize(buttonWidth, 20));
+                          wxSize(buttonWidth, -1));
     spadBrowseButton->SetToolTip(pConfig->Read(_T("BrowseSPADSRPFileNameHint")));
     spadFlexSizer->Add( spadBrowseButton, 0, wxALIGN_LEFT|wxALL, 5 );
 

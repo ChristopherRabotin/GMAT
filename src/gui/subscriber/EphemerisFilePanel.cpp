@@ -193,7 +193,7 @@ void EphemerisFilePanel::Create()
    fileNameTextCtrl->SetToolTip(pConfig->Read(_T("FilenameHint")));
    browseButton =
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    browseButton->SetToolTip(pConfig->Read(_T("BrowseEphemerisFilenameHint")));
    grid2->Add(fileNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add(fileNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize );
