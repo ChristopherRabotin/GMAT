@@ -848,9 +848,9 @@ const MeasurementData& DopplerAdapter::CalculateMeasurement(bool withEvents,
       if (measurementType == "Doppler")
       {         
          // Compute bias
-         ComputeMeasurementBias("Bias", "Doppler_Hz", 2);                    // change from "Doppler_HZ" to Doppler_Hz"          // made changes by TUAN NGUYEN
+         ComputeMeasurementBias("Bias", "Doppler_HZ", 2);
          // Compute noise sigma
-         ComputeMeasurementNoiseSigma("NoiseSigma", "Doppler_Hz", 2);        // change from "Doppler_HZ" to Doppler_Hz"          // made changes by TUAN NGUYEN
+         ComputeMeasurementNoiseSigma("NoiseSigma", "Doppler_HZ", 2);
          // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
@@ -982,7 +982,7 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
    {
       //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
       //theDataDerivatives.clear();                                                   // made changes by TUAN NGUYEN
-      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Doppler_Hz")             // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Doppler_HZ")             // made changes by TUAN NGUYEN
          theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
       else                                                                            // made changes by TUAN NGUYEN
       {                                                                               // made changes by TUAN NGUYEN

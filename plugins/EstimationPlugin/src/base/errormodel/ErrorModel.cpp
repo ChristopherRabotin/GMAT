@@ -46,7 +46,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
 
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 {
-   Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_Hz"
+   Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_HZ"
    Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
    Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
