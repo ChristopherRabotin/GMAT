@@ -397,10 +397,10 @@ void BurnThrusterPanel::Create()
                            wxDefaultPosition, wxDefaultSize, 0);
       minPowerTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
-                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                        wxSize(otherTextWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       maxPowerTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
-                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                        wxSize(otherTextWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
       minPowerUnits =
          new wxStaticText(this, ID_TEXT, gmatwxT("kW"), wxDefaultPosition, wxDefaultSize, 0);
@@ -419,13 +419,13 @@ void BurnThrusterPanel::Create()
                            wxDefaultPosition, wxDefaultSize, 0);
       efficiencyTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
-                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                        wxSize(otherTextWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       ispTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
-                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                        wxSize(otherTextWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
       constantThrustTxtCtrl =
          new wxTextCtrl(this, ID_TEXTCTRL, gmatwxT(""), wxDefaultPosition,
-                        wxSize(otherTextWidth,20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                        wxSize(otherTextWidth,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
       efficiencyUnits =
          new wxStaticText(this, ID_TEXT, gmatwxT(""), wxDefaultPosition, wxDefaultSize, 0);

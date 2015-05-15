@@ -474,7 +474,7 @@ void CelestialBodyVisualizationPanel::Create()
    textureFileTextCtrl->SetToolTip(pConfig->Read(_T("TextureMapFileHint")));
    textureFileBrowseButton = new wxBitmapButton(this, ID_BUTTON_BROWSE, 
                        openBitmap, wxDefaultPosition,
-                       wxSize(buttonWidth, 20));
+                       wxSize(buttonWidth, -1));
    textureFileBrowseButton->SetToolTip(pConfig->Read(_T("BrowseTextureMapFileHint"), "Browse for file"));
    
    // view 3D model file
@@ -485,7 +485,7 @@ void CelestialBodyVisualizationPanel::Create()
    view3dModelTextCtrl->SetToolTip(pConfig->Read(_T("3DModelFileHint")));
    view3dModelBrowseButton = new wxBitmapButton(this, ID_BUTTON_BROWSE, 
                        openBitmap, wxDefaultPosition,
-                       wxSize(buttonWidth, 20));
+                       wxSize(buttonWidth, -1));
    view3dModelBrowseButton->SetToolTip(pConfig->Read(_T("Browse3DModelFileHint"), "Browse for file"));
    
    // view 3D model offset

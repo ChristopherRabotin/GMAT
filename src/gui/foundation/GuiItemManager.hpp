@@ -257,6 +257,9 @@ public:
    wxCheckListBox* GetSpacecraftCheckListBox(wxWindow *parent, wxWindowID id,
                                              const wxSize &size,
                                              wxArrayString *excList = NULL);      
+   wxCheckListBox* GetGroundStationCheckListBox(wxWindow *parent, wxWindowID id,
+                                                const wxSize &size,
+                                                wxArrayString *excList = NULL);
    wxCheckListBox* GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
                                             const wxSize &size,
 														  bool includeAutoGlobal = true,
@@ -442,6 +445,7 @@ private:
    std::vector<wxCheckListBox*> mXyPlotCLBList;
    std::vector<wxCheckListBox*> mSpacePointCLBList;
    std::vector<wxCheckListBox*> mSpacecraftCLBList;
+   std::vector<wxCheckListBox*> mGroundStationCLBList;
    std::vector<wxCheckListBox*> mAllObjectCLBList;
    std::vector<wxListBox*> mHardwareLBList;
    std::vector<wxListBox*> mFuelTankLBList;
@@ -472,6 +476,7 @@ private:
    std::vector<wxArrayString*> mSpacePointExcList;
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
+   std::vector<wxArrayString*> mGroundStationExcList;
    std::vector<wxArrayString*> mImpBurnExcList;
    std::vector<wxArrayString*> mAllObjectExcList;
    std::vector<wxArrayString*> mFuelTankExcList;

@@ -29,7 +29,7 @@
 
 //#define DBGLVL_PUBLISHER_SUBSCRIBE 1
 //#define DBGLVL_PUBLISHER_REGISTER 1
-//#define DBGLVL_PUBLISHER_PUBLISH 1
+//#define DBGLVL_PUBLISHER_PUBLISH 2
 //#define DBGLVL_PUBLISHER_CLEAR 1
 //#define DEBUG_PUBLISHER_RUN_STATE
 //#define DEBUG_PUBLISHER_BUFFERS
@@ -325,6 +325,14 @@ bool Publisher::Publish(GmatBase *provider, Integer id, Real *data, Integer coun
       #endif
       
       // Set labels
+      #if DBGLVL_PUBLISHER_PUBLISH > 1
+      MessageInterface::ShowMessage
+         ("Publisher::Publish() Setting data labels:\n");
+      StringArray dataLabels = (*dataList)[id].labels;
+      for (unsigned int ii = 0; ii < dataLabels.size(); ii++)
+         MessageInterface::ShowMessage("%s ", dataLabels[ii].c_str());
+      MessageInterface::ShowMessage("\n");
+      #endif
       (*current)->SetDataLabels((*dataList)[id].labels);
       
       // Set provider

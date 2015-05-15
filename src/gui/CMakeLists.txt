@@ -134,6 +134,7 @@ SET(GUI_SRCS
     coordsystem/CoordPanel.cpp
     coordsystem/CoordSysCreateDialog.cpp
     coordsystem/CoordSystemConfigPanel.cpp
+    event/EventLocatorPanel.cpp
     forcemodel/DragInputsDialog.cpp
     foundation/ArraySetupDialog.cpp
     foundation/ArraySetupPanel.cpp

@@ -36,6 +36,7 @@ static GmatInterface *gmatInt = GmatInterface::Instance();
 //#define DEBUG_OPTIMIZE_CONSTRUCTION
 //#define DEBUG_OPTIMIZE_INIT
 //#define DEBUG_OPTIMIZE_EXEC
+//#define DEBUG_OPTIMIZE_COMMANDS
 //#define DEBUG_STATE_TRANSITIONS
 
 //#ifndef DEBUG_MEMORY
@@ -359,6 +360,10 @@ bool Optimize::Initialize()
 {
    #ifdef DEBUG_OPTIMIZE_INIT
       ShowCommand("", "Initialize() entered, this = ", this);
+      MessageInterface::ShowMessage
+         ("   theSolver = <%p>[%s]'%s'\n", theSolver,
+          theSolver ? theSolver->GetTypeName().c_str() : "NULL",
+          theSolver ? theSolver->GetName().c_str() : "NULL");
    #endif
    
    GmatBase *mapObj = NULL;

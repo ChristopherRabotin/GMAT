@@ -169,6 +169,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    outputFormat         ("PC"),
    writeEphemeris       (true),
    usingDefaultFileName (true),
+   generateInBackground (false),
    prevPropName         (""),
    currPropName         (""),
    currComments         (""),
@@ -219,7 +220,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    finalEpochProcessed  (false),
    writeDataInDataCS    (true),
    processingLargeStep  (false),
-   spkWriteFailed       (true),
+   spkWriteFailed       (false),   // true),
    code500WriteFailed   (true),
    writeCommentAfterData (true),
    checkForLargeTimeGap (false),
@@ -330,7 +331,7 @@ EphemerisFile::~EphemerisFile()
    #ifdef __USE_SPICE__
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
-      ("   spkWriter=<%p>, spkWriteFailed=%d\n", spkWriter, spkWriteFailed);
+      ("   spkWriter=<%p>, spkWriteFailed=%s\n", spkWriter, (spkWriteFailed? "true":"false"));
    #endif
    if (spkWriter != NULL)
    {
@@ -392,6 +393,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    outputFormat         (ef.outputFormat),
    writeEphemeris       (ef.writeEphemeris),
    usingDefaultFileName (ef.usingDefaultFileName),
+   generateInBackground (ef.generateInBackground),
    prevPropName         (ef.prevPropName),
    currPropName         (ef.currPropName),
    currComments         (ef.currComments),
@@ -488,6 +490,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    outputFormat         = ef.outputFormat;
    writeEphemeris       = ef.writeEphemeris;
    usingDefaultFileName = ef.usingDefaultFileName;
+   generateInBackground = ef.generateInBackground;
    prevPropName         = ef.prevPropName;
    currPropName         = ef.currPropName;
    currComments         = ef.currComments;
@@ -762,6 +765,12 @@ void EphemerisFile::ValidateParameters(bool forInitialization)
    MessageInterface::ShowMessage
       ("EphemerisFile::ValidateParameters() <%p>'%s' leaving\n", this, GetName().c_str());
    #endif
+}
+
+
+void EphemerisFile::SetBackgroundGeneration(bool inBackground)
+{
+   generateInBackground = inBackground;
 }
 
 
@@ -2080,8 +2089,8 @@ void EphemerisFile::CloseEphemerisFile()
    #ifdef __USE_SPICE__
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage
-      ("EphemerisFile::CloseEphemerisFile() spkWriter=<%p>, spkWriteFailed=%d\n",
-       spkWriter, spkWriteFailed);
+      ("EphemerisFile::CloseEphemerisFile() spkWriter=<%p>, spkWriteFailed=%s\n",
+       spkWriter, (spkWriteFailed? "true":"false"));
    #endif
    if (spkWriter != NULL)
    {
@@ -3786,6 +3795,10 @@ void EphemerisFile::BufferOrbitData(Real epochInDays, const Real state[6])
 //------------------------------------------------------------------------------
 void EphemerisFile::ClearOrbitData()
 {
+   #ifdef DEBUG_EPHEMFILE_BUFFER
+   MessageInterface::ShowMessage
+      ("ClearOrbitData() entered, there is(are) %d data point(s) to clear\n", a1MjdArray.size());
+   #endif
    EpochArray::iterator ei;
    for (ei = a1MjdArray.begin(); ei != a1MjdArray.end(); ++ei)
       delete (*ei);
@@ -4360,10 +4373,10 @@ void EphemerisFile::WriteSpkOrbitDataSegment()
          throw SubscriberException
             ("*** INTERNAL ERROR *** SPK Writer is NULL in "
              "EphemerisFile::WriteSpkOrbitDataSegment()\n");
-      
+
       A1Mjd *start = a1MjdArray.front();
       A1Mjd *end   = a1MjdArray.back();
-      
+
       #ifdef DEBUG_EPHEMFILE_SPICE
       MessageInterface::ShowMessage
          ("   Writing start=%.15f, end=%.15f\n", start->GetReal(), end->GetReal());
@@ -4378,13 +4391,13 @@ void EphemerisFile::WriteSpkOrbitDataSegment()
              (st->ToString()).c_str());
       }
       #endif
-      
+
       #ifdef DEBUG_EPHEMFILE_TEXT
       WriteString("\n");
       for (unsigned int ii = 0; ii < a1MjdArray.size(); ii++)
          DebugWriteOrbit("In WriteSpkOrbitDataSegment:", a1MjdArray[ii], stateArray[ii]);
       #endif
-      
+
       spkWriteFailed = false;
       try
       {
@@ -4514,6 +4527,8 @@ void EphemerisFile::FinalizeSpkFile()
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage("=====> FinalizeSpkFile() entered\n");
+   MessageInterface::ShowMessage("   and size of data is %d\n",
+         (Integer) a1MjdArray.size());
    #endif
    
    #ifdef __USE_SPICE__
@@ -4521,7 +4536,19 @@ void EphemerisFile::FinalizeSpkFile()
    {
       if (!a1MjdArray.empty())
       {
-         WriteSpkOrbitDataSegment();
+         Integer mnSz = spkWriter->GetMinNumberOfStates();
+         // if we are generating SPK files in the background and there
+         // are not enough states for the interpolation, we DO NOT
+         // want to try to write and trigger the SPICE error;
+         // for user-specified SPK files, we DO want to present
+         // errors to the user.
+         if (!generateInBackground || ((Integer) a1MjdArray.size() >= mnSz))
+         {
+            #ifdef DEBUG_EPHEMFILE_SPICE
+            MessageInterface::ShowMessage("   about to write SPK orbit data segment\n");
+            #endif
+            WriteSpkOrbitDataSegment();
+         }
       }
 
       spkWriter->FinalizeKernel();

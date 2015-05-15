@@ -48,6 +48,7 @@
 #include "SpacecraftPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
 #include "PowerSystemConfigPanel.hpp"
+#include "EventLocatorPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagatePanel.hpp"
@@ -4178,7 +4179,8 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new LibrationPointPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::EVENT_LOCATOR:
-     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+//     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      sizer->Add(new EventLocatorPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
      break;
    case GmatTree::USER_DEFINED_OBJECT:
      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
