@@ -19,7 +19,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "BatchEstimatorInv.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
@@ -153,6 +152,8 @@ void BatchEstimatorInv::Accumulate()
    const MeasurementData *calculatedMeas;
    std::vector<RealArray> stateDeriv;
    
+   for (UnsignedInt i = 0; i < hTilde.size(); ++i)
+      hTilde[i].clear();
    hTilde.clear();
 
    // Get state map, measurement models, and measurement data
@@ -912,7 +913,6 @@ void BatchEstimatorInv::Estimate()
    OData.clear();
    CData.clear();
 
-   
    currentState = CHECKINGRUN;
 }
 
