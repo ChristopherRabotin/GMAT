@@ -43,6 +43,7 @@ BEGIN_EVENT_TABLE(EventLocatorPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_TEXT(ID_TEXTCTRL, EventLocatorPanel::OnTextChange)
    EVT_COMBOBOX(ID_COMBOBOX, EventLocatorPanel::OnComboBoxChange)
+   EVT_COMBOBOX(ID_RUNMODE_COMBOBOX, EventLocatorPanel::OnComboBoxChange)
    EVT_BUTTON(ID_BUTTON_BROWSE, EventLocatorPanel::OnBrowseButton)
    EVT_CHECKBOX(ID_CHECKBOX, EventLocatorPanel::OnCheckBoxChange)
    EVT_CHECKLISTBOX(ID_CHECKLISTBOX_BODIES, EventLocatorPanel::OnCheckListBoxChange)
@@ -253,6 +254,15 @@ void EventLocatorPanel::Create()
    writeReportCheckBox = new wxCheckBox(this, ID_CHECKBOX, wxT("Write Report"),
                                   wxDefaultPosition, wxDefaultSize, 0);
 
+   runModeTxt = new wxStaticText( this, ID_TEXT,
+         ""GUI_ACCEL_KEY"Run Mode", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
+
+   runModeComboBox = new wxComboBox
+      ( this, ID_RUNMODE_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(epochWidth,-1),
+            emptyList, wxCB_DROPDOWN | wxCB_READONLY );
+   runModeComboBox->SetToolTip(pConfig->Read(_T("RunMode")));
+
+
    #ifdef DEBUG_EVENTPANEL_CREATE
       MessageInterface::ShowMessage("EventLocatorPanel::Create() report widgets created ...\n");
    #endif
@@ -342,29 +352,36 @@ void EventLocatorPanel::Create()
    leftGridSizer->Add(20,20);
    if (isEclipse)
    {
-      leftGridSizer->Add( eclipseTypesTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+      leftGridSizer->Add( eclipseTypesTxt,          0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
       leftGridSizer->Add( eclipseTypesCheckListBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    }
    else
    {
-      leftGridSizer->Add( observersTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+      leftGridSizer->Add( observersTxt,          0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
       leftGridSizer->Add( observersCheckListBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    }
    leftGridSizer->Add(20,20);
-   leftGridSizer->Add( fileNameTxt, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
-   leftGridSizer->Add( fileNameTxtCtrl, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   leftGridSizer->Add( fileNameTxt,          0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   leftGridSizer->Add( fileNameTxtCtrl,      0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
    leftGridSizer->Add( fileNameBrowseButton, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+
+
+   leftGridSizer->Add( runModeTxt,          0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   leftGridSizer->Add( runModeComboBox,     0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+   leftGridSizer->Add(20,20);
+
    if (centeredCheckboxes)
    {
       leftGridSizer->Add(20,20);
       leftGridSizer->Add( writeReportCheckBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
+      leftGridSizer->Add(20,20);
    }
    else
    {
       leftGridSizer->Add( writeReportCheckBox, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
       leftGridSizer->Add(20,20);
+      leftGridSizer->Add(20,20);
    }
-   leftGridSizer->Add(20,20);
 
    leftSizer->Add(leftGridSizer, 0, wxGROW|wxALIGN_LEFT | wxALL, bsize );
 
@@ -597,6 +614,18 @@ void EventLocatorPanel::LoadData()
    paramID = theLocator->GetParameterID("WriteReport");
    bool writeReport = theLocator->GetBooleanParameter(paramID);
    writeReportCheckBox->SetValue(writeReport);
+
+   // load the run mode
+   paramID = theLocator->GetParameterID("RunMode");
+   StringArray theModes = theLocator->GetPropertyEnumStrings(paramID);
+   unsigned int modeSz = theModes.size();
+   for (unsigned int kk = 0; kk < modeSz; kk++)
+   {
+      runModeComboBox->Append(theModes.at(kk).c_str());
+   }
+   std::string currentMode = theLocator->GetStringParameter(paramID);
+   runModeComboBox->SetValue(wxString(currentMode.c_str()));
+
 
    // load the entire interval flag
    paramID = theLocator->GetParameterID("UseEntireInterval");
@@ -930,6 +959,14 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
          }
          isObserverListChanged = false;
       }
+      // run mode change
+      if (isRunModeChanged)
+      {
+         str     = runModeComboBox->GetValue().WX_TO_STD_STRING;
+         paramID = forObject->GetParameterID("RunMode");
+         forObject->SetStringParameter(paramID, str);
+         isRunModeChanged = false;
+      }
 
       // Checkbox values
       if (isWriteReportChanged)
@@ -1132,6 +1169,11 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
       scTargetStr       = scTargetComboBox->GetValue().WX_TO_STD_STRING;
       isSCTargetChanged = true;
    }
+   else if (event.GetEventObject() == runModeComboBox)
+   {
+      runModeStr       = runModeComboBox->GetValue().WX_TO_STD_STRING;
+      isRunModeChanged = true;
+   }
    else if (event.GetEventObject() == lightTimeDirectionComboBox)
    {
       if (!isEclipse)
@@ -1258,6 +1300,7 @@ void EventLocatorPanel::ResetChangedFlags()
    isFileNameChanged           = false;
    isFileNameTextChanged       = false;
    isWriteReportChanged        = false;
+   isRunModeChanged            = false;
 
    isEntireIntervalChanged     = false;
    isEpochFormatChanged        = false;

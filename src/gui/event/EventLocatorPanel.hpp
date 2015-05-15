@@ -59,6 +59,7 @@ private:
    bool     isFileNameChanged;
    bool     isFileNameTextChanged;
    bool     isWriteReportChanged;
+   bool     isRunModeChanged;
 
    bool     isEntireIntervalChanged;
    bool     isEpochFormatChanged;
@@ -81,6 +82,7 @@ private:
    std::string errMsgFormat;
 
    std::string scTargetStr;
+   std::string runModeStr;
    std::string lightTimeDirectionStr;
 
    StringArray bodiesList;
@@ -111,6 +113,7 @@ private:
    wxStaticText *observersTxt;
    wxStaticText *fileNameTxt;
    wxStaticText *writeReportTxt;
+   wxStaticText *runModeTxt;
    wxStaticText *entireIntervalTxt;
    wxStaticText *epochFormatTxt;
    wxStaticText *initialEpochTxt;
@@ -128,6 +131,7 @@ private:
    wxTextCtrl   *stepSizeTxtCtrl;
    // Combo boxes
    wxComboBox   *scTargetComboBox;
+   wxComboBox   *runModeComboBox;
    wxComboBox   *epochFormatComboBox;
    wxComboBox   *lightTimeDirectionComboBox;
    // Browse button
@@ -151,6 +155,7 @@ private:
       ID_TEXT = 31280, // ?
       ID_TEXTCTRL,
       ID_COMBOBOX,
+      ID_RUNMODE_COMBOBOX,
       ID_BUTTON_BROWSE,
       ID_CHECKBOX,
       ID_CHECKLISTBOX_BODIES,
