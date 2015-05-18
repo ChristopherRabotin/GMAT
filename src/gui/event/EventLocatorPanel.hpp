@@ -54,10 +54,12 @@ private:
    // Spacecraft for EclipseLocator, Target for ContactLocator
    bool     isSCTargetChanged;
    bool     isBodyListChanged;
-   bool     isEclipseObserverChanged;
+   bool     isEclipseTypesChanged;
+   bool     isObserverListChanged;
    bool     isFileNameChanged;
    bool     isFileNameTextChanged;
    bool     isWriteReportChanged;
+   bool     isRunModeChanged;
 
    bool     isEntireIntervalChanged;
    bool     isEpochFormatChanged;
@@ -80,10 +82,12 @@ private:
    std::string errMsgFormat;
 
    std::string scTargetStr;
+   std::string runModeStr;
    std::string lightTimeDirectionStr;
 
    StringArray bodiesList;
-   StringArray eclipseObserverList;
+   StringArray eclipseTypesList;
+   StringArray observersList;
 
    SolarSystem    *ss;
 
@@ -105,9 +109,11 @@ private:
    // static text (labels)
    wxStaticText *scTargetTxt;
    wxStaticText *bodiesTxt;
-   wxStaticText *eclipseObserversTxt;
+   wxStaticText *eclipseTypesTxt;
+   wxStaticText *observersTxt;
    wxStaticText *fileNameTxt;
    wxStaticText *writeReportTxt;
+   wxStaticText *runModeTxt;
    wxStaticText *entireIntervalTxt;
    wxStaticText *epochFormatTxt;
    wxStaticText *initialEpochTxt;
@@ -125,6 +131,7 @@ private:
    wxTextCtrl   *stepSizeTxtCtrl;
    // Combo boxes
    wxComboBox   *scTargetComboBox;
+   wxComboBox   *runModeComboBox;
    wxComboBox   *epochFormatComboBox;
    wxComboBox   *lightTimeDirectionComboBox;
    // Browse button
@@ -136,7 +143,8 @@ private:
    wxCheckBox   *stellarAberrationCheckBox;
    // Checklist Boxes
    wxCheckListBox *bodiesCheckListBox;
-   wxCheckListBox *eclipseObserversCheckListBox;
+   wxCheckListBox *eclipseTypesCheckListBox;
+   wxCheckListBox *observersCheckListBox;
 
    // wxString arrays
    wxString       *wxPossibleDir;
@@ -147,9 +155,12 @@ private:
       ID_TEXT = 31280, // ?
       ID_TEXTCTRL,
       ID_COMBOBOX,
+      ID_RUNMODE_COMBOBOX,
       ID_BUTTON_BROWSE,
       ID_CHECKBOX,
-      ID_CHECKLISTBOX,
+      ID_CHECKLISTBOX_BODIES,
+      ID_CHECKLISTBOX_ECLIPSE,
+      ID_CHECKLISTBOX_OBSERVER
    };
 };
 #endif

@@ -37,6 +37,7 @@
 //#define DEBUG_CONTACT_LOCATOR_WRITE
 //#define DEBUG_CONTACT_EVENTS
 //#define DEBUG_INIT_FINALIZE
+//#define DEBUG_CONTACTLOCATOR_INIT
 
 //------------------------------------------------------------------------------
 // Static data
@@ -53,6 +54,12 @@ const Gmat::ParameterType ContactLocator::PARAMETER_TYPE[
 {
    Gmat::OBJECTARRAY_TYPE,    // STATIONS
    Gmat::ENUMERATION_TYPE,
+};
+
+const std::string ContactLocator::LT_DIRECTIONS[2] =
+{
+   "Transmit",
+   "Receive",
 };
 
 
@@ -625,8 +632,9 @@ const StringArray& ContactLocator::GetPropertyEnumStrings(const Integer id) cons
    {
    case LIGHT_TIME_DIRECTION:
       enumStrings.clear();
-      enumStrings.push_back("Transmit");
-      enumStrings.push_back("Receive");
+      for (Integer ii = 0; ii < 2; ii++)
+         enumStrings.push_back(LT_DIRECTIONS[ii]);
+
       return enumStrings;
    default:
       return EventLocator::GetPropertyEnumStrings(id);
@@ -933,6 +941,9 @@ bool ContactLocator::TakeAction(const std::string &action,
 bool ContactLocator::Initialize()
 {
    bool retval = false;
+   #ifdef DEBUG_CONTACTLOCATOR_INIT
+      MessageInterface::ShowMessage("In CL::Init for %s\n", instanceName.c_str());
+   #endif
 
    if (EventLocator::Initialize())
    {
@@ -961,16 +972,19 @@ bool ContactLocator::Initialize()
          }
 //      }
 
-      // Set up the ground stations so that we can do Contact Location
-      for (UnsignedInt ii= 0; ii < stations.size(); ii++)
+      if (runMode != "Disabled")
       {
-         GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
-         if (!gsi->InitializeForContactLocation(false))
+         // Set up the ground stations so that we can do Contact Location
+         for (UnsignedInt ii= 0; ii < stations.size(); ii++)
          {
-            std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
-            errmsg            += stationNames.at(ii) + " used by ContactLocator ";
-            errmsg            += instanceName + "\n";
-            throw EventException(errmsg);
+            GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
+            if (!gsi->InitializeForContactLocation(false))
+            {
+               std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
+               errmsg            += stationNames.at(ii) + " used by ContactLocator ";
+               errmsg            += instanceName + "\n";
+               throw EventException(errmsg);
+            }
          }
       }
 

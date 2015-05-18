@@ -25,6 +25,7 @@
 #include "CommandException.hpp"
 
 //#define DEBUG_GLOBAL
+//#define DEBUG_RENAME
 
 //---------------------------------
 // static data
@@ -217,10 +218,42 @@ bool Global::RenameRefObject(const Gmat::ObjectType type,
                              const std::string &oldName,
                              const std::string &newName)
 {
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Global::RenameRefObject() entered, type=%d, oldName='%s', newName='%s'\n",
+       type, oldName.c_str(), newName.c_str());
+   #endif
+   
    for (Integer index = 0; index < (Integer)objectNames.size(); ++index)
    {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage
+         ("objectName[%d] = '%s'\n", index, objectNames[index].c_str());
+      #endif
+      
       if (objectNames[index] == oldName)
+      {
          objectNames[index] = newName;
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            (">>> changed objectName[%d] to '%s'\n", index, objectNames[index].c_str());
+         #endif
+         break;
+      }
+      else if (type == Gmat::PROP_SETUP)
+      {
+         // Handle default force model rename
+         std::string oldFmName = oldName + "_ForceModel";
+         if (objectNames[index] == oldFmName)
+         {
+            objectNames[index] = newName + "_ForceModel";
+            #ifdef DEBUG_RENAME
+            MessageInterface::ShowMessage
+               (">>> changed objectName[%d] to '%s'\n", index, objectNames[index].c_str());
+            #endif
+            break;
+         }
+      }
    }
    
    return true;

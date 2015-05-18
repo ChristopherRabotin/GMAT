@@ -115,13 +115,6 @@ EphemManager::~EphemManager()
    }
    fileList.clear();
 
-   #ifdef __USE_SPICE__
-//   if (cover)
-//      delete cover;
-//   if (window)
-//      delete cover;
-   #endif
-
    #ifdef DEBUG_EPHEM_MANAGER
       MessageInterface::ShowMessage("Destructing EphemManager ... deleting ephemFile\n");
    #endif

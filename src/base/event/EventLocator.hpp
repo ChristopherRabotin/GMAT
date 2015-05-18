@@ -113,6 +113,8 @@ public:
                                    const std::string &actionData = "");
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
    virtual const ObjectTypeArray& GetTypesForList(const Integer id);
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
@@ -141,6 +143,7 @@ public:
    virtual bool         ReportEventData(const std::string &reportNotice = "");
    virtual void         LocateEvents(const std::string &reportNotice = "");
    virtual bool         FileWasWritten();
+   virtual bool         IsInAutomaticMode();
 
 protected:
    /// We need to store vector of Events
@@ -157,6 +160,8 @@ protected:
    bool                        useStellarAberration;
    /// Write the report or not?
    bool                        writeReport;
+   /// Should we do location at the end, when commanded to do so, or not at all?
+   std::string                 runMode;
    /// Use the entire time interval (true  - use the entire interval; false,
    /// use the input start and stop epochs)
    bool                        useEntireInterval;
@@ -227,6 +232,7 @@ protected:
        USE_LIGHT_TIME_DELAY,
        USE_STELLAR_ABERRATION,
        WRITE_REPORT,
+       RUN_MODE,
        USE_ENTIRE_INTERVAL,
 //       APPEND_TO_REPORT,   // this may be input to the FindEvents command
        EventLocatorParamCount
@@ -238,6 +244,9 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount];
+    static const std::string RUN_MODES[3];
+    static const Integer numModes;
+
     static const Real STEP_MULTIPLE;
 
     Real                   EpochToReal(const std::string &ep);

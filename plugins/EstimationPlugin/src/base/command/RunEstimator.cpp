@@ -887,7 +887,7 @@ void RunEstimator::LocateEvent()
          fm[0]->SetTime(dt);
 
          #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("   Event %d, of type %s\n", j,
+            MessageInterface::ShowMessage("   Event %d, of type %s\n", eventIndex,
                   currentEvent->GetTypeName().c_str());
          #endif
       }

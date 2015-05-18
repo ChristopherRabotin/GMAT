@@ -149,6 +149,8 @@ protected:
     static const Gmat::ParameterType
        PARAMETER_TYPE[ContactLocatorParamCount - EventLocatorParamCount];
 
+    static const std::string LT_DIRECTIONS[2];
+
     virtual void         FindEvents();
     virtual std::string  GetAbcorrString();
 };
