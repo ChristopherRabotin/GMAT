@@ -544,7 +544,6 @@ OBJECTS = \
     util/GmatGlobal.o \
     util/GravityFileUtil.o \
     util/GregorianDate.o \
-    util/LatLonHgt.o \
     util/LeapSecsFileReader.o \
     util/Linear.o \
     util/MemoryTracker.o \
