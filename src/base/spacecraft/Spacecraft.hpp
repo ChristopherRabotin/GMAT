@@ -583,10 +583,10 @@ protected:
    bool              csSet;
    bool              isThrusterSettingMode;
 
-   /// The orbit State Transition Matrix
-   Rmatrix           orbitSTM;
-   /// The orbit State A Matrix
-   Rmatrix           orbitAMatrix;
+//   /// The orbit State Transition Matrix
+//   Rmatrix           orbitSTM;
+//   /// The orbit State A Matrix
+//   Rmatrix           orbitAMatrix;
    /// The full State Transition Matrix used for propagation
    Rmatrix           fullSTM;
    /// The full State A Matrix

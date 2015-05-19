@@ -73,12 +73,12 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GEN_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
-#define DEBUG_BUILDING_MODELS
-#define DEBUG_STATE
+//#define DEBUG_BUILDING_MODELS
+//#define DEBUG_STATE
 //#define DEBUG_MASS_FLOW
 //#define DEBUG_REORIGIN
 //#define DEBUG_ERROR_ESTIMATE
-#define DEBUG_STM_AMATRIX_DERIVS
+//#define DEBUG_STM_AMATRIX_DERIVS
 //#define DEBUG_MU_MAP
 //#define DEBUG_PM_EPOCH
 //#define DEBUG_EVENTLOCATION
@@ -357,7 +357,6 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    satCount                   (0),
    stateStart                 (fdf.stateStart),
    stateEnd                   (fdf.stateEnd),
-   stmRowCount                (fdf.stmRowCount),
    cartStateSize              (0),
    dynamicProperties          (false),
    isInitializedForParameters (false),
@@ -447,7 +446,6 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    satCount = 0;
    stateStart = fdf.stateStart;
    stateEnd   = fdf.stateEnd;
-   stmRowCount = fdf.stmRowCount;
 
    cartStateSize       = 0;
    isInitializedForParameters = false;
@@ -1192,7 +1190,6 @@ bool ODEModel::BuildModelFromMap()
    dynamicsIndex.clear();
    dynamicObjects.clear();
    dynamicIDs.clear();
-   stmRowCount.clear();
 
    // Loop through the state map, counting objects for each type needed
    #ifdef DEBUG_INITIALIZATION
@@ -1343,7 +1340,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    {
       if ((*i)->SupportsDerivative(id))
       {
-         tf = (*i)->SetStart(id, start, objectCount);
+         tf = (*i)->SetStart(id, start, objectCount, size);
          if (tf == false)
             MessageInterface::ShowMessage("PhysicalModel %s was not set, even "
                   "though it registered support for derivatives of type %d\n",
@@ -1378,7 +1375,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (stmStart == -1)
          stmStart = start;
       stmCount = objectCount;
-      stmRowCount.push_back(sqrt(size));
+      stmRowCount = sqrt(size);
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1387,6 +1384,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
+      stmRowCount = sqrt(size);
    }
 
    #ifdef DEBUG_BUILDING_MODELS
@@ -1395,8 +1393,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
       {
          MessageInterface::ShowMessage("STM row count(s):\n");
-         for (UnsignedInt i = 0; i < stmRowCount.size(); ++i)
-            MessageInterface::ShowMessage("   %d has %d rows\n", i, stmRowCount[i]);
+         MessageInterface::ShowMessage("   %d rows\n", stmRowCount);
       }
    #endif
    
@@ -2669,7 +2666,7 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
       MessageInterface::ShowMessage("Final dv array:\n");
 
       /// @todo Add handling for multiple STMs of differing sizes
-      Integer stmDim = stmRowCount[0];
+      Integer stmDim = stmRowCount;
 
       // Cartesian state piece
       for (Integer i = 0; i < 6; ++i)
@@ -2753,7 +2750,7 @@ bool ODEModel::PrepareDerivativeArray()
          MessageInterface::ShowMessage("Initial dv array:\n");
 
          /// @todo Add handling for multiple STMs of varying sizes
-         Integer stmDim = stmRowCount[0];
+         Integer stmDim = stmRowCount;
 
          // Cartesian state element
          for (Integer i = 0; i < 6; ++i)
@@ -2799,17 +2796,17 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
 
    bool retval = true;
 
+   Integer stmRows = stmRowCount;
+   Integer stmDim = stmRows*stmRows;
+
    for (Integer i = 0; i < stmCount; ++i)
    {
-      Integer stmRows = stmRowCount[i];
-      Integer stmDim = stmRows*stmRows;
-
       /// @todo Add handling for multiple STMs of varying sizes
-      Integer i6 = stmStart + i * stmRows;
+      Integer i6 = stmStart + i * stmDim;
 
       // Build aTilde
       Real aTilde[stmDim];
-      for (Integer m = 0; m < stmRows; ++m)
+      for (Integer m = 0; m < stmDim; ++m)
          aTilde[m] = deriv[i6+m];
 
       if (fillSTM)

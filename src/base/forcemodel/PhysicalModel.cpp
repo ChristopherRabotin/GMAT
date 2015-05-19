@@ -171,6 +171,7 @@ PhysicalModel::PhysicalModel(Gmat::ObjectType id, const std::string &typeStr,
    fillSTM                     (false),
    stmStart                    (-1),
    stmCount                    (0),
+   stmRowCount                 (6),
    fillAMatrix                 (false),
    aMatrixStart                (-1),
    aMatrixCount                (0)
@@ -271,6 +272,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    fillSTM                     (pm.fillSTM),
    stmStart                    (pm.stmStart),
    stmCount                    (pm.stmCount),
+   stmRowCount                 (pm.stmRowCount),
    fillAMatrix                 (pm.fillAMatrix),
    aMatrixStart                (pm.aMatrixStart),
    aMatrixCount                (pm.aMatrixCount)
@@ -370,6 +372,7 @@ PhysicalModel& PhysicalModel::operator=(const PhysicalModel& pm)
    fillSTM        = pm.fillSTM;
    stmStart       = pm.stmStart;
    stmCount       = pm.stmCount;
+   stmRowCount    = pm.stmRowCount;
    fillAMatrix    = pm.fillAMatrix;
    aMatrixStart   = pm.aMatrixStart;
    aMatrixCount   = pm.aMatrixCount;
@@ -1313,12 +1316,14 @@ bool PhysicalModel::SupportsDerivative(Gmat::StateElementId id)
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param sizeOfType For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of rows or columns in the STM
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::SetStart(Gmat::StateElementId id, Integer index,
-      Integer quantity)
+      Integer quantity, Integer sizeOfType)
 {
    return false;
 }
@@ -1764,7 +1769,7 @@ const StringArray&  PhysicalModel::GetSupportedDerivativeNames()
  *                  velocity sextuplets to be processed in a single call.  If
  *                  dimension is not a multiple of 6, an exception is thrown.
  *
- * @return true is teh transformation succeeded, false if it failed.
+ * @return true if the transformation succeeded, false if it failed.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::BuildModelState(GmatEpoch now, Real* state, Real* j2kState,

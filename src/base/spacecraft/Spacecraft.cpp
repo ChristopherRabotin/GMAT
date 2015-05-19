@@ -81,6 +81,7 @@
 //#define DEBUG_FILEPATH
 //#define DEBUG_DELETE_OWNED_OBJ
 //#define DEBUG_POWER_SYSTEM
+//#define DEBUG_SPACECRAFT_STM
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -369,8 +370,8 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    initialDisplay       (false),
    csSet                (false),
    isThrusterSettingMode(false),
-   orbitSTM             (6,6),
-   orbitAMatrix         (6,6),
+//   orbitSTM             (6,6),
+//   orbitAMatrix         (6,6),
    fullSTM              (6,6),
    fullAMatrix          (6,6),
    fullSTMRowCount      (6),
@@ -477,15 +478,17 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    BuildStateElementLabelsAndUnits();
 
    // Initialize the STM to the identity matrix
-   orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
-   orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
+//   orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
+//   orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
 
-   fullSTM = orbitSTM;
+   fullSTM(0,0) = fullSTM(1,1) = fullSTM(2,2) =
+   fullSTM(3,3) = fullSTM(4,4) = fullSTM(5,5) = 1.0;
 
-   orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
-   orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+//   orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
+//   orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
 
-   fullAMatrix = orbitAMatrix;
+   fullAMatrix(0,0) = fullAMatrix(1,1) = fullAMatrix(2,2) =
+   fullAMatrix(3,3) = fullAMatrix(4,4) = fullAMatrix(5,5) = 1.0;
 
    // Initialize the covariance matrix
    covariance.AddCovarianceElement("CartesianState", this);
@@ -611,10 +614,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    initialDisplay       (false),
    csSet                (a.csSet),
    isThrusterSettingMode(a.isThrusterSettingMode),
-   orbitSTM             (a.orbitSTM),
-   orbitAMatrix         (a.orbitAMatrix),
-   fullSTM              (a.fullSTM),
-   fullAMatrix          (a.fullAMatrix),
    fullSTMRowCount      (a.fullSTMRowCount),
    spadSRPFile          (a.spadSRPFile),
    spadSrpFileFullPath  (a.spadSrpFileFullPath),
@@ -651,6 +650,28 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    representations   = a.representations;
    tankNames         = a.tankNames;
    thrusterNames     = a.thrusterNames;
+
+   // resize the matrices first, then copy the contents
+   Integer r,c;
+//   r = a.orbitSTM.GetNumRows();
+//   c = a.orbitSTM.GetNumColumns();
+//   orbitSTM.SetSize(r,c);
+//   orbitSTM = a.orbitSTM;
+//
+//   r = a.orbitAMatrix.GetNumRows();
+//   c = a.orbitAMatrix.GetNumColumns();
+//   orbitAMatrix.SetSize(r,c);
+//   orbitAMatrix = a.orbitAMatrix;
+
+   r = a.fullSTM.GetNumRows();
+   c = a.fullSTM.GetNumColumns();
+   fullSTM.SetSize(r,c);
+   fullSTM = a.fullSTM;
+
+   r = a.fullAMatrix.GetNumRows();
+   c = a.fullAMatrix.GetNumColumns();
+   fullAMatrix.SetSize(r,c);
+   fullAMatrix = a.fullAMatrix;
 
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
@@ -779,10 +800,28 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
 
-   orbitSTM = a.orbitSTM;
-   orbitAMatrix = a.orbitAMatrix;
+   // resize the matrices first, then copy the contents
+   Integer r,c;
+//   r = a.orbitSTM.GetNumRows();
+//   c = a.orbitSTM.GetNumColumns();
+//   orbitSTM.SetSize(r,c);
+//   orbitSTM = a.orbitSTM;
+//
+//   r = a.orbitAMatrix.GetNumRows();
+//   c = a.orbitAMatrix.GetNumColumns();
+//   orbitAMatrix.SetSize(r,c);
+//   orbitAMatrix = a.orbitAMatrix;
+
+   r = a.fullSTM.GetNumRows();
+   c = a.fullSTM.GetNumColumns();
+   fullSTM.SetSize(r,c);
    fullSTM = a.fullSTM;
+
+   r = a.fullAMatrix.GetNumRows();
+   c = a.fullAMatrix.GetNumColumns();
+   fullAMatrix.SetSize(r,c);
    fullAMatrix = a.fullAMatrix;
+
    fullSTMRowCount = a.fullSTMRowCount;
 
 
@@ -2396,12 +2435,17 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
             return i;
          }
       }
-      if (str == "STM")
-         return ORBIT_STM;
+      if ((str == "STM") || (str == "OrbitSTM"))
+         return FULL_STM;
 
-      if (str == "AMatrix")
-         return ORBIT_A_MATRIX;
+      if ((str == "AMatrix") || (str == "OrbitAMatrix"))
+         return FULL_A_MATRIX;
 
+//      if (str == "STM")
+//         return ORBIT_STM;
+//
+//      if (str == "AMatrix")
+//         return ORBIT_A_MATRIX;
 
       if ((str == "CartesianState") || (str == "CartesianX")) return CARTESIAN_X;
       if (str == "CartesianY" )  return CARTESIAN_Y;
@@ -4263,10 +4307,6 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
       if ((col < 0) || (col >= fullSTM.GetNumColumns()))
          throw SpaceObjectException("SetRealParameter: col requested for orbitSTM is out-of-range\n");
       fullSTM(row, col) = value;
-
-         if ((row == col) && (row == fullSTMRowCount-1))
-            MessageInterface::ShowMessage("Orbit STM:  \n%s\n", fullSTM.ToString(12).c_str());
-
       return fullSTM(row, col);
    }
 
@@ -4294,8 +4334,10 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
          throw SpaceObjectException("SetRealParameter: col requested for fullSTM is out-of-range\n");
       fullSTM(row, col) = value;
 
+      #ifdef DEBUG_SPACECRAFT_STM
          if ((row == col) && (row == fullSTMRowCount-1))
-            MessageInterface::ShowMessage("Full STM:  \n%s\n", fullSTM.ToString(12).c_str());
+            MessageInterface::ShowMessage("Full STM; setting rc %d, %d:  \n%s\n", row, col, fullSTM.ToString(12).c_str());
+      #endif
 
       return fullSTM(row, col);
    }
@@ -4652,16 +4694,16 @@ bool Spacecraft::TakeAction(const std::string &action,
          }
       }
 
-      orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
-      orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
-
-      orbitSTM(0,1)=orbitSTM(0,2)=orbitSTM(0,3)=orbitSTM(0,4)=orbitSTM(0,5)=
-      orbitSTM(1,0)=orbitSTM(1,2)=orbitSTM(1,3)=orbitSTM(1,4)=orbitSTM(1,5)=
-      orbitSTM(2,0)=orbitSTM(2,1)=orbitSTM(2,3)=orbitSTM(2,4)=orbitSTM(2,5)=
-      orbitSTM(3,0)=orbitSTM(3,1)=orbitSTM(3,2)=orbitSTM(3,4)=orbitSTM(3,5)=
-      orbitSTM(4,0)=orbitSTM(4,1)=orbitSTM(4,2)=orbitSTM(4,3)=orbitSTM(4,5)=
-      orbitSTM(5,0)=orbitSTM(5,1)=orbitSTM(5,2)=orbitSTM(5,3)=orbitSTM(5,4)
-            = 0.0;
+//      orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
+//      orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
+//
+//      orbitSTM(0,1)=orbitSTM(0,2)=orbitSTM(0,3)=orbitSTM(0,4)=orbitSTM(0,5)=
+//      orbitSTM(1,0)=orbitSTM(1,2)=orbitSTM(1,3)=orbitSTM(1,4)=orbitSTM(1,5)=
+//      orbitSTM(2,0)=orbitSTM(2,1)=orbitSTM(2,3)=orbitSTM(2,4)=orbitSTM(2,5)=
+//      orbitSTM(3,0)=orbitSTM(3,1)=orbitSTM(3,2)=orbitSTM(3,4)=orbitSTM(3,5)=
+//      orbitSTM(4,0)=orbitSTM(4,1)=orbitSTM(4,2)=orbitSTM(4,3)=orbitSTM(4,5)=
+//      orbitSTM(5,0)=orbitSTM(5,1)=orbitSTM(5,2)=orbitSTM(5,3)=orbitSTM(5,4)
+//            = 0.0;
    }
 
    if (action == "ResetAMatrix")
@@ -4675,19 +4717,19 @@ bool Spacecraft::TakeAction(const std::string &action,
          }
       }
 
-      orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
-      orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
-
-      orbitAMatrix(0,1) = orbitAMatrix(0,2) = orbitAMatrix(0,3) =
-      orbitAMatrix(0,4) = orbitAMatrix(0,5) = orbitAMatrix(1,0) =
-      orbitAMatrix(1,2) = orbitAMatrix(1,3) = orbitAMatrix(1,4) =
-      orbitAMatrix(1,5) = orbitAMatrix(2,0) = orbitAMatrix(2,1) =
-      orbitAMatrix(2,3) = orbitAMatrix(2,4) = orbitAMatrix(2,5) =
-      orbitAMatrix(3,0) = orbitAMatrix(3,1) = orbitAMatrix(3,2) =
-      orbitAMatrix(3,4) = orbitAMatrix(3,5) = orbitAMatrix(4,0) =
-      orbitAMatrix(4,1) = orbitAMatrix(4,2) = orbitAMatrix(4,3) =
-      orbitAMatrix(4,5) = orbitAMatrix(5,0) = orbitAMatrix(5,1) =
-      orbitAMatrix(5,2) = orbitAMatrix(5,3) = orbitAMatrix(5,4) = 0.0;
+//      orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
+//      orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+//
+//      orbitAMatrix(0,1) = orbitAMatrix(0,2) = orbitAMatrix(0,3) =
+//      orbitAMatrix(0,4) = orbitAMatrix(0,5) = orbitAMatrix(1,0) =
+//      orbitAMatrix(1,2) = orbitAMatrix(1,3) = orbitAMatrix(1,4) =
+//      orbitAMatrix(1,5) = orbitAMatrix(2,0) = orbitAMatrix(2,1) =
+//      orbitAMatrix(2,3) = orbitAMatrix(2,4) = orbitAMatrix(2,5) =
+//      orbitAMatrix(3,0) = orbitAMatrix(3,1) = orbitAMatrix(3,2) =
+//      orbitAMatrix(3,4) = orbitAMatrix(3,5) = orbitAMatrix(4,0) =
+//      orbitAMatrix(4,1) = orbitAMatrix(4,2) = orbitAMatrix(4,3) =
+//      orbitAMatrix(4,5) = orbitAMatrix(5,0) = orbitAMatrix(5,1) =
+//      orbitAMatrix(5,2) = orbitAMatrix(5,3) = orbitAMatrix(5,4) = 0.0;
    }
 
    return SpaceObject::TakeAction(action, actionData);

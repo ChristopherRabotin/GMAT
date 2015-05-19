@@ -316,8 +316,6 @@ protected:
    Integer stateStart;
    /// ID for CartesianState end for processing dynamic state data
    Integer stateEnd;
-   /// Number of rows/columns in each STM
-   std::vector<Integer> stmRowCount;
 
    /// Number of elements in the Cartesian state data
    Integer cartStateSize;

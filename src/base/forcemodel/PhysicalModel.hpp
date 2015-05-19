@@ -198,7 +198,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
    
 
    // Parameter accessor methods -- inherited from GmatBase
@@ -276,6 +276,8 @@ protected:
    Integer                   stmStart;
    /// Number of STM matrices that need to be filled
    Integer                   stmCount;
+   /// Number of rows/columns in the STM
+   Integer                   stmRowCount;
 
    /// Flag indicating that the orbital A-matrix should be filled
    bool                      fillAMatrix;

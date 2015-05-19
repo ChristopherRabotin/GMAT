@@ -32,7 +32,7 @@
 #include <sstream>                 // for <<
 #include "FormationInterface.hpp"           // To allow formation member state updates
 
-#define DEBUG_STATE_CONSTRUCTION
+//#define DEBUG_STATE_CONSTRUCTION
 //#define DUMP_STATE
 //#define DEBUG_OBJECT_UPDATES
 
