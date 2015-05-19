@@ -3438,8 +3438,9 @@ void ResourceTree::OnAddLocator(wxCommandEvent &event)
       MessageInterface::ShowMessage("Creating a Locator of type %s named %s\n",
             selected.c_str(), newName.c_str());
    #endif
-      
-   GmatBase *obj = CreateObject(selected, newName);
+
+   // Call with createDefault set to true so we get the default spacecraft
+   GmatBase *obj = CreateObject(selected, newName, true);
 
    if (obj != NULL)
    {

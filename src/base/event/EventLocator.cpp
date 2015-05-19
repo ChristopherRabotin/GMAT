@@ -434,7 +434,12 @@ bool EventLocator::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 bool EventLocator::IsParameterCommandModeSettable(const Integer id) const
 {
-   return true;   // all settable for now
+   if ((id == EVENT_FILENAME)      || (id == INPUT_EPOCH_FORMAT)  ||
+       (id == INITIAL_EPOCH)       || (id == FINAL_EPOCH)         ||
+       (id == USE_ENTIRE_INTERVAL) || (id == WRITE_REPORT)          )
+      return true;
+
+   return false;
 }
 
 
