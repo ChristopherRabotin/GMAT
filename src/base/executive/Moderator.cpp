@@ -4568,19 +4568,21 @@ ObType* Moderator::GetObType(const std::string &name)
 
 //------------------------------------------------------------------------------
 // EventLocator* Moderator::CreateEventLocator(const std::string &type,
-//                          const std::string &name)
+//                          const std::string &name, bool createDefault = false)
 //------------------------------------------------------------------------------
 /**
  * Calls the FactoryManager to create an EventLocator
  *
  * @param type The type of event locator to be created
  * @param name The name of the new EventLocator
+ * @param createDefault if this is set, it will create/set the default SC on the
+ *                      new locator
  *
  * @return The named EventLocator
  */
 //------------------------------------------------------------------------------
 EventLocator* Moderator::CreateEventLocator(const std::string &type,
-                         const std::string &name)
+                         const std::string &name, bool createDefault)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
@@ -4625,6 +4627,16 @@ EventLocator* Moderator::CreateEventLocator(const std::string &type,
          ("Moderator::CreateEventLocator() returning new EventLocator <%p>\n", el);
       #endif
       
+      if (createDefault)
+      {
+         // set spacecraft
+         std::string scOrTarget = "Spacecraft";
+         if (el->IsOfType("ContactLocator"))
+               scOrTarget = "Target";
+         Integer id = el->GetParameterID(scOrTarget);
+         el->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
+      }
+
       return el;
    }
    else
@@ -5979,6 +5991,21 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetStringParameter(id, "=");          
          id = cmd->GetParameterID("ConstraintArg2");
          cmd->SetStringParameter(id, "7000"); 
+      }
+      else if (type == "FindEvents")
+      {
+         id = cmd->GetParameterID("EventLocator");
+         EventLocator *defaultLocator = GetDefaultEventLocator();
+         if (!defaultLocator)
+         {
+            // can't create new one because can't count on having
+            // the plugins available
+            cmd->SetStringParameter(id, "No Event Locators");
+         }
+         else
+         {
+            cmd->SetStringParameter(id, defaultLocator->GetName());
+         }
       }
       else
       {
@@ -9347,6 +9374,47 @@ Solver* Moderator::GetDefaultOptimizer()
    // Create default Optimizer
    return CreateSolver("FminconOptimizer", "DefaultSQP");
 }
+
+//------------------------------------------------------------------------------
+// EventLocator* GetDefaultEventLocator()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves configured EventLocator object. If none exist, it creates an
+ * EclipseLocator as a default (if it is available; else none)
+ */
+//------------------------------------------------------------------------------
+EventLocator* Moderator::GetDefaultEventLocator()
+{
+   StringArray configList = GetListOfObjects(Gmat::EVENT_LOCATOR);
+   Integer numLocator     = configList.size();
+   GmatBase *obj = NULL;
+
+   if (numLocator > 0)
+   {
+      // return 1st EventLocator
+      EventLocator *el = GetEventLocator(configList[0]);
+      #ifdef DEBUG_DEFAULT_COMMAND
+      MessageInterface::ShowMessage
+         ("Moderator::GetDefaultEventLocator() returning existing event locator <%p>'%s'\n",
+          el, el->GetName().c_str());
+      #endif
+      return (EventLocator*)el;
+   }
+
+   StringArray locatorsAvailable = theFactoryManager->GetListOfItems(Gmat::EVENT_LOCATOR);
+   for (Integer ii = 0; ii < locatorsAvailable.size(); ii++)
+   {
+      if (locatorsAvailable.at(ii) == "EclipseLocator")
+      {
+         // Create default Optimizer
+         return CreateEventLocator("EclipseLocator", "DefaultEclipseLocator");
+      }
+   }
+   // Create default Optimizer
+   return NULL;
+
+}
+
 
 //------------------------------------------------------------------------------
 // StopCondition* CreateDefaultStopCondition()

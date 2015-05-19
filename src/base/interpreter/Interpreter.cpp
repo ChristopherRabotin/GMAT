@@ -1195,7 +1195,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Handle EventLocators
       else if (find(eventLocatorList.begin(), eventLocatorList.end(), type) !=
                eventLocatorList.end())
-         obj = (GmatBase*)theModerator->CreateEventLocator(type, name);
+         obj = (GmatBase*)theModerator->CreateEventLocator(type, name, createDefault);
 
       // Handle EphemerisFile
       else if (find(ephemFileList.begin(), ephemFileList.end(), type) != 
