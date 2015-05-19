@@ -9406,11 +9406,11 @@ EventLocator* Moderator::GetDefaultEventLocator()
    {
       if (locatorsAvailable.at(ii) == "EclipseLocator")
       {
-         // Create default Optimizer
+         // Create default EventLocator if EclipseLocator is available
          return CreateEventLocator("EclipseLocator", "DefaultEclipseLocator");
       }
    }
-   // Create default Optimizer
+   // Cannot create a default EventLocator so returning NULL
    return NULL;
 
 }
