@@ -61,6 +61,7 @@
 #include "BodyFixedAxes.hpp"        // for SetEopFile(), SetCoefficientsFile()
 #include "ICRFAxes.hpp"
 #include "ObjectReferencedAxes.hpp"
+#include "ParameterInfo.hpp"        // for ParameterInfo
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"          // for GetCommandSeq()
 #include "StringTokenizer.hpp"      // for StringTokenizer
@@ -8592,8 +8593,20 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
             }
             else
             {
+               // Build detailed Parameter error message (LOJ: 2015.05.18)
+               // throw GmatBaseException
+               //    ("Parameter type: " + type + " should be property of " +
+               //     paramOwnerType);
+               ParameterInfo *paramInfo = ParameterInfo::Instance();
+               std::string subMsg;
+               if (paramInfo->IsForAttachedObject(type))
+               {
+                  Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+                  subMsg = GmatBase::GetObjectTypeString(ownedObjType) + " attached to ";
+               }
+               
                throw GmatBaseException
-                  ("Parameter type: " + type + " should be property of " +
+                  ("Parameter type \"" + type + "\" should be property of " + subMsg +
                    paramOwnerType);
             }
          }
