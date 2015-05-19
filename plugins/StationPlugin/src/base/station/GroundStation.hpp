@@ -32,7 +32,6 @@
 #include "StationDefs.hpp"
 #include "SpacePoint.hpp"
 #include "GroundstationInterface.hpp"
-#include "LatLonHgt.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
