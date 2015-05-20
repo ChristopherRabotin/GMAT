@@ -3,6 +3,7 @@
 #include "PythonInterface.hpp"
 #include "MessageInterface.hpp"
 #include "InterfaceException.hpp"
+#include <iostream>
 
 PythonInterface* PythonInterface::instance = NULL;
 
@@ -64,7 +65,8 @@ bool PythonInterface::PyInitialize()
 {
    // Initialize Python only once.
    if (!isPythonInitialized)
-	   Py_Initialize();
+      Py_Initialize();
+   
 
    if (Py_IsInitialized())
    {
@@ -153,13 +155,19 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
                                                 const std::string &formatIn, const std::vector<void *> &argIn)
 {
-   PyObject* pyRet = NULL;
-   PyObject* pyModule;
-   PyObject* pyPluginModule;
-   PyObject* pyFuncAttr;
-   PyObject* pyArgs;
-   PyObject* pyFunc;
-   
+   PyObject* pyModule = NULL;
+   PyObject* pyPluginModule = NULL;
+   PyObject* pyFuncAttr = NULL;
+   PyObject* pyArgs = NULL;
+   PyObject* pyFunc = NULL;
+
+   //error messages
+   PyObject* pType = NULL;
+   PyObject* pValue = NULL;
+   PyObject* pTraceback = NULL;
+
+   std::string msg;
+
    MessageInterface::ShowMessage("  First element of the argIn is %f \n", *(Real*)argIn.at(0));
 
 #ifdef IS_PY3K
@@ -175,9 +183,9 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    if (!pyPluginModule)
    {
-      PyErr_Print();
+      PyErrorMsg(pType, pValue, pTraceback, msg);
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to import the Python module. \n");
+      throw InterfaceException(" Python Exception Type: " + msg + "\n");
    }
 
    // retrieve an attribute named 'funcName' from imported python module
@@ -214,4 +222,35 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    }
 
    return pyFunc;
+}
+
+
+void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, std::string &msg)
+{
+   // will own the reference to each variables passed
+   PyErr_Fetch(&pType, &pValue, &pTraceback);
+
+   if (pType != NULL)
+   {
+      PyObject* v = PyObject_Str(pValue);
+      PyObject* t = PyObject_Str(pType);
+
+      if (v)
+      {
+
+#ifdef IS_PY3K
+         msg = std::string(_PyUnicode_AsString(t));
+         msg += ": " + std::string(_PyUnicode_AsString(v));
+#else
+         msg = std::string(PyString_AsString(t));
+         msg += ": " + std::string(PyString_AsString(v));
+#endif
+         
+      }
+   }
+
+   Py_DECREF(pType);
+   Py_DECREF(pValue);
+   Py_DECREF(pTraceback);
+
 }

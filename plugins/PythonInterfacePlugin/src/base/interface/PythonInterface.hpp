@@ -52,6 +52,8 @@ private:
    /// Identify the platform we are running
    char *plF;
    void PyPathSep();
+   /// Python error/exception message
+   void PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, std::string &msg);
 	
 };
 
