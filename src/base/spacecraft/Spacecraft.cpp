@@ -3799,7 +3799,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
           solveforNames.end())                                                // made changes by TUAN NGUYEN
       {                                                                       // made changes by TUAN NGUYEN
          solveforNames.push_back(value);                                      // made changes by TUAN NGUYEN
-         length += GetEstimationParameterSize(GetParameterID(value));
+         if (value != "CartesianState")
+            length += GetEstimationParameterSize(GetParameterID(value));
       }                                                                       // made changes by TUAN NGUYEN
       SetIntegerParameter(FULL_STM_ROWCOUNT, length);
       return true;                                                            // made changes by TUAN NGUYEN
@@ -4307,6 +4308,12 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
       if ((col < 0) || (col >= fullSTM.GetNumColumns()))
          throw SpaceObjectException("SetRealParameter: col requested for orbitSTM is out-of-range\n");
       fullSTM(row, col) = value;
+
+      #ifdef DEBUG_SPACECRAFT_STM
+         if ((row == col) && (row + 1 == fullSTMRowCount))
+            MessageInterface::ShowMessage("Full STM:\n%s\n", fullSTM.ToString().c_str());
+      #endif
+
       return fullSTM(row, col);
    }
 
@@ -4334,10 +4341,10 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
          throw SpaceObjectException("SetRealParameter: col requested for fullSTM is out-of-range\n");
       fullSTM(row, col) = value;
 
-      #ifdef DEBUG_SPACECRAFT_STM
+//      #ifdef DEBUG_SPACECRAFT_STM
          if ((row == col) && (row == fullSTMRowCount-1))
             MessageInterface::ShowMessage("Full STM; setting rc %d, %d:  \n%s\n", row, col, fullSTM.ToString(12).c_str());
-      #endif
+//      #endif
 
       return fullSTM(row, col);
    }
@@ -5469,7 +5476,8 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
    Integer retval = 1;
 
 
-   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+   Integer id = (item > ESTIMATION_TYPE_ALLOCATION ?
+                 item - type * ESTIMATION_TYPE_ALLOCATION : item);
 
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("Spacecraft::GetEstimationParameterSize(%d)"
