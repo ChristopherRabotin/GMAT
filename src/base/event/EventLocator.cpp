@@ -1227,9 +1227,9 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
       epochString = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
    {
-      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
-         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
-      else
+//      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
+//         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
+//      else
          epochString = ep;
    }
 
