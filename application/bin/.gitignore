@@ -12,3 +12,12 @@
 /tdm_dsn7.txt
 /lib
 inputs*.txt
+/libGmatBase.so.R2015a
+/libCInterface.so.R2015a
+/INPUTnondefault_0x2024130.txt
+/INPUTnondefault_0x30fda50.txt
+/INPUT_MAVEN - orginal_0x2458bc0.txt
+/GmatConsole-R2015a
+/GmatConsole
+/GMAT-R2015a
+*.txt
