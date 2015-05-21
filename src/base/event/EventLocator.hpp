@@ -66,6 +66,8 @@ public:
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
 
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
+
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
@@ -111,6 +113,8 @@ public:
                                    const std::string &actionData = "");
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
+   virtual const StringArray&
+                        GetPropertyEnumStrings(const Integer id) const;
    virtual const ObjectTypeArray& GetTypesForList(const Integer id);
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
@@ -136,9 +140,10 @@ public:
 //   virtual GmatBase*    GetOwnedObject(Integer whichOne);
 
    virtual bool         Initialize();
-   virtual void         ReportEventData(const std::string &reportNotice = "");
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
    virtual void         LocateEvents(const std::string &reportNotice = "");
    virtual bool         FileWasWritten();
+   virtual bool         IsInAutomaticMode();
 
 protected:
    /// We need to store vector of Events
@@ -155,6 +160,8 @@ protected:
    bool                        useStellarAberration;
    /// Write the report or not?
    bool                        writeReport;
+   /// Should we do location at the end, when commanded to do so, or not at all?
+   std::string                 runMode;
    /// Use the entire time interval (true  - use the entire interval; false,
    /// use the input start and stop epochs)
    bool                        useEntireInterval;
@@ -177,6 +184,15 @@ protected:
    Real                        fromEpoch;
    /// The end epoch of the interval (depends on useEntireInterval flag)
    Real                        toEpoch;
+   /// the start time of the current FindEvents
+   Real        findStart;
+   /// the stop time of the current FindEvents
+   Real        findStop;
+   /// The start (spacecraft) time
+   Real        scStart;
+   /// The current (spacecraft) time
+   Real        scNow;
+
 //   /// The number of events found in the current specified time range
 //   Integer                     numEventsFound;
 
@@ -198,6 +214,9 @@ protected:
    std::vector<CelestialBody*> occultingBodies;
    /// The file stream
    std::fstream                theReport;
+   /// the default occulting bodies (if none are set)
+   // names of the default bodies to use
+   StringArray                 defaultOccultingBodies;
 
    /// Published parameters for event locators
     enum
@@ -213,6 +232,7 @@ protected:
        USE_LIGHT_TIME_DELAY,
        USE_STELLAR_ABERRATION,
        WRITE_REPORT,
+       RUN_MODE,
        USE_ENTIRE_INTERVAL,
 //       APPEND_TO_REPORT,   // this may be input to the FindEvents command
        EventLocatorParamCount
@@ -224,11 +244,17 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount];
+    static const std::string RUN_MODES[3];
+    static const Integer numModes;
 
-    Real                 EpochToReal(const std::string &ep);
-    bool                 OpenReportFile(bool renameOld = true);
-    virtual std::string  GetAbcorrString();
-    virtual void         FindEvents() = 0;
+    static const Real STEP_MULTIPLE;
+
+    Real                   EpochToReal(const std::string &ep);
+    bool                   OpenReportFile(bool renameOld = true);
+    virtual std::string    GetAbcorrString();
+    virtual CelestialBody* GetCelestialBody(const std::string &withName);
+    virtual std::string    GetNoEventsString(const std::string &forType);
+    virtual void           FindEvents() = 0;
 };
 
 #endif /* EventLocator_hpp */

@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT EphemPropagator Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libEphemPropagator")
-else()
-	SET(PLUGINTARGET "EphemPropagator")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName EphemPropagator)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DEPHEM_PROPAGATOR_EXPORTS")
@@ -41,14 +35,6 @@ SET(PLUGIN_SRCS
     propagator/EphemerisPropagator.cpp
     propagator/SPKPropagator.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

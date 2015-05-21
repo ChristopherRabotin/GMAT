@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT ProductionPropagators Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libProductionPropagators")
-else()
-	SET(PLUGINTARGET "ProductionPropagators")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName ProductionPropagators)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DPROPAGATOR_EXPORTS")
@@ -36,14 +30,6 @@ SET(PLUGIN_SRCS
     plugin/GmatPluginFunctions.cpp
     propagator/PrinceDormand853.cpp
 )
-
-# ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
 
 # ====================================================================
 # Setup common plugin definitions, targets, etc.

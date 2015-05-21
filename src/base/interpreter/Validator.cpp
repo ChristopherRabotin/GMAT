@@ -433,7 +433,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== Validator::ValidateCommand() entered, <%s> '%s' Count = %d\n",
+      (">>>>> CALL TRACE: Validator::ValidateCommand() entered, <%s> '%s' Count = %d\n",
        cmd->GetTypeName().c_str(),
        cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
@@ -629,7 +629,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer mana
    #ifdef DEBUG_TRACE
    clock_t t2 = clock();
    MessageInterface::ShowMessage
-      ("=== Validator::ValidateCommand() Count = %d, Run Time: %f seconds\n",
+      (">>>>> CALL TRACE: Validator::ValidateCommand() Count = %d, Run Time: %f seconds\n",
        callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
    #endif
    

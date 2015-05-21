@@ -57,6 +57,7 @@
 #include "bitmaps/mt_NonlinearConstraint.xpm"
 #include "bitmaps/mt_RunSimulator.xpm"
 #include "bitmaps/mt_RunEstimator.xpm"
+//#include "bitmaps/mt_FindEvents.xpm"
 
 #include <wx/tipwin.h>
 
@@ -2887,6 +2888,7 @@ void MissionTree::AddIcons()
    
    theGuiManager->LoadIcon("mt_RunSimulator", bitmapType, &bitmaps[++index], mt_RunSimulator_xpm);
    theGuiManager->LoadIcon("mt_RunEstimator", bitmapType, &bitmaps[++index], mt_RunEstimator_xpm);
+   theGuiManager->LoadIcon("mt_FindEvents",   bitmapType, &bitmaps[++index], mt_Default_xpm);  // <<<<<<< need FindEvents bitmap
    theGuiManager->LoadIcon("mt_Default", bitmapType, &bitmaps[++index], mt_Default_xpm);
    
    // Rescale if bitmap size is not 16x16 and use high quality scale (LOJ: 2011.04.22)
@@ -4347,6 +4349,8 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::VARY;
    if (cmd == "Save")
       return GmatTree::SAVE;
+   if (cmd == "FindEvents")
+      return GmatTree::FIND_EVENTS;
    if (cmd == "Global")
       return GmatTree::MANAGE_OBJECT;
    if (cmd == "Report")

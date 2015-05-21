@@ -101,7 +101,7 @@
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_CHANGE 1
 //#define DEBUG_CREATE_VAR 1
-//#define DEBUG_GMAT_FUNCTION 2
+//#define DEBUG_GMAT_FUNCTION 1
 //#define DEBUG_OBJECT_MAP 1
 //#define DEBUG_FIND_OBJECT 2
 //#define DEBUG_ADD_OBJECT 1
@@ -5278,6 +5278,11 @@ Function* Moderator::CreateFunction(const std::string &type,
                                        e.GetFullMessage());
       }
       
+      #if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+         ("Moderator::CreateFunction() returning <%p> for '%s'\n", obj,
+          obj->GetName().c_str());
+      #endif
       return obj;
    }
    else
@@ -8955,6 +8960,7 @@ void Moderator::SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
       ("=====> Moderator::%s setting solarSystemInUse=<%p>, "
        "objectMapInUse=<%p> %s\n", callFrom.c_str(), ss, objMap,
        forFunction ? "for function" : "");
+   ShowObjectMap("In Moderator::SetSolarSystemAndObjectMap()", objMap);
    #endif
    
    // Set solar system in use and object map 
@@ -9641,23 +9647,27 @@ void Moderator::AddOtherObjectsToSandbox(Integer index)
    
    #if DEBUG_RUN
    MessageInterface::ShowMessage
-      ("Moderator::AddOtherObjectsToSandbox() count = %d\n", names.size());
+      ("Moderator::AddOtherObjectsToSandbox() entered, allItemCount = %d\n", names.size());
+   for (Integer i=0; i<(Integer)names.size(); i++)
+      MessageInterface::ShowMessage("   names[%2d] = '%s'\n", i, names[i].c_str());
    #endif
    
    for (Integer i=0; i<(Integer)names.size(); i++)
    {
       obj = theConfigManager->GetItem(names[i]);
-
-      // Skip subscribers since those are handled separately
-      if (obj->IsOfType(Gmat::SUBSCRIBER))
-         continue;
-      
-      #ifdef DEBUG_RUN
-      MessageInterface::ShowMessage
-         ("   Adding <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
-          obj->GetName().c_str());
-      #endif
-      sandboxes[index]->AddObject(obj);
+      if (obj != NULL)
+      {
+         // Skip subscribers since those are handled separately
+         if (obj->IsOfType(Gmat::SUBSCRIBER))
+            continue;
+         
+         #ifdef DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("   Adding <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+             obj->GetName().c_str());
+         #endif
+         sandboxes[index]->AddObject(obj);
+      }
    }
 }
 
@@ -9756,7 +9766,7 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
       for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
       {
          MessageInterface::ShowMessage
-            ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+            ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
       }
    }
@@ -9773,7 +9783,7 @@ void Moderator::ShowObjectMap(const std::string &title, ObjectMap *objMap)
         i != objectMapInUse->end(); ++i)
    {
       MessageInterface::ShowMessage
-         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+         ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
 }

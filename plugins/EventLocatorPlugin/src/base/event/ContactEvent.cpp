@@ -16,7 +16,10 @@
  */
 //------------------------------------------------------------------------------
 
+#include <sstream>
 #include "ContactEvent.hpp"
+#include "TimeSystemConverter.hpp"
+#include "StringUtil.hpp"
 
 //------------------------------------------------------------------------------
 // public methods
@@ -50,7 +53,21 @@ ContactEvent& ContactEvent::operator=(const ContactEvent& copy)
 
 std::string ContactEvent::GetReportString()
 {
-   // TBD
-   return "no contact event data\n";
-}
+   std::stringstream eventString("");
+   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string startGregorian, endGregorian;
+   Real        resultMjd;
+   std::string blanks       = "    ";
 
+   TimeConverterUtil::Convert("A1ModJulian", start, "",
+                              outputFormat, resultMjd, startGregorian);
+   TimeConverterUtil::Convert("A1ModJulian", end, "",
+                              outputFormat, resultMjd, endGregorian);
+
+   Real currentDuration = GetDuration();
+
+   eventString << startGregorian << blanks << endGregorian         << blanks <<
+                  GmatStringUtil::BuildNumber(currentDuration, false, 14);
+
+   return eventString.str();
+}

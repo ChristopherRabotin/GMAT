@@ -242,8 +242,8 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    #if DBGLVL_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret(%p) Entered inCmd=%s, skipHeader=%d, "
-       "functionMode=%d\n", inCmd, inCmd->GetTypeName().c_str(), skipHeader,
-       functionMode);
+       "functionMode=%d, inScriptEvent=%d\n", inCmd, inCmd->GetTypeName().c_str(),
+       skipHeader, functionMode, inScriptEvent);
    #endif
    
    #ifdef DEBUG_COMMAND_MODE_TOGGLE
@@ -456,9 +456,9 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
 {
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("======================================================================\n",
-       "ScriptInterpreter::InterpretGmatFunction(filename) entered\n   filename = %s\n",
-       fileName.c_str());
+      ("======================================================================\n"
+       "ScriptInterpreter::InterpretGmatFunction(filename) entered\n   "
+       "currentFunction=<%p>, filename = %s\n", currentFunction, fileName.c_str());
    #endif
    
    // Check if ObjectMap and SolarSystem is set
@@ -489,20 +489,25 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    }
    
    // Now function file is ready to parse
-   functionFilename = fileName;
+   // Since actual function path may have been changed in CheckFunctionDefinition(),
+   // get updated function path (LOJ: 2015.04.15)
+   //functionFilename = fileName;
+   functionFilename = currentFunction->GetFunctionPathAndName();
    beginMissionSeqFound = false;
    continueOnError = true;
    bool retval = false;
-   std::ifstream funcFile(fileName.c_str());
+   // Set input stream to the ReadWriter
+   std::ifstream funcFile(functionFilename.c_str());
    SetInStream(&funcFile);
    GmatCommand *noOp = new NoOp;
+   
    #ifdef DEBUG_MEMORY
    MemoryTracker::Instance()->Add
-      (noOp, "NoOp", "ScriptInterpreter::InterpretGmatFunction()", "*noOp = new NoOp");
+      (noOp, "NoOp", "ScriptInterpreter::InterpretGmatFunction(filename)", "*noOp = new NoOp");
    #endif
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretGmatFunction() Create <%p>NoOp\n", noOp);
+      ("ScriptInterpreter::InterpretGmatFunction(filename) Created <%p>NoOp\n", noOp);
    #endif
    
    // Set build function definition flag
@@ -512,6 +517,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    // Clear temporary object names which currently holding MatlabFunction names
    ClearTempObjectNames();
    
+   // Now interpret function file.
    // We don't want parse first comment as header, so set skipHeader to true.
    // Set function mode to true
    retval = Interpret(noOp, true, true);
@@ -532,20 +538,21 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    
    #if DBGLVL_GMAT_FUNCTION > 0
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretGmatFunction() retval=%d\n", retval);
+      ("ScriptInterpreter::InterpretGmatFunction(filename) retval=%d\n", retval);
    #endif
-
+   
    // Just return noOP for now
    if (retval)
    {
       #if DBGLVL_GMAT_FUNCTION > 0
       MessageInterface::ShowMessage
-         ("ScriptInterpreter::InterpretGmatFunction() returning <%p><NoOp>\n", noOp);
+         ("ScriptInterpreter::InterpretGmatFunction(filename) returning <%p><NoOp> for "
+          "function '%s'\n", noOp, functionFilename.c_str());
       #endif
       
       #if DBGLVL_GMAT_FUNCTION > 1
       std::string fcsStr = GmatCommandUtil::GetCommandSeqString(noOp, true, true);
-      MessageInterface::ShowMessage("---------- FCS of '%s'\n", fileName.c_str());
+      MessageInterface::ShowMessage("---------- FCS of '%s'\n", functionFilename.c_str());
       MessageInterface::ShowMessage(fcsStr); //Notes: Do not use %s for command string
       #endif
       
@@ -555,7 +562,8 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    {
       #if DBGLVL_GMAT_FUNCTION > 0
       MessageInterface::ShowMessage
-         ("ScriptInterpreter::InterpretGmatFunction() returning NULL\n");
+         ("ScriptInterpreter::InterpretGmatFunction() returning NULL for function "
+          "<%p>'%s'\n", currentFunction, functionFilename.c_str());
       #endif
       delete noOp;
       return NULL;
@@ -579,7 +587,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
       ("ScriptInterpreter::InterpretGmatFunction(*function) entered, "
-       " function=<%p>\n", funct);
+       "function=<%p>\n", funct);
    #endif
    
    if (funct == NULL)
@@ -596,11 +604,18 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
    
    #if DBGLVL_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("   currentFunction set to <%p>\n   Returning InterpretGmatFunction(fileName)\n",
+      ("   currentFunction set to <%p>\n   Calling InterpretGmatFunction(fileName)\n",
        currentFunction);
    #endif
    
-   return InterpretGmatFunction(fileName);
+   GmatCommand *fcs = InterpretGmatFunction(fileName);
+   //return InterpretGmatFunction(fileName);
+   
+   #if DBGLVL_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InterpretGmatFunction(*function) returning <%p>\n", fcs);
+   #endif
+   return fcs;
 }
 
 
@@ -1033,8 +1048,8 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
 {
    #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::Parse() inCmd=<%p>, currentBlock = \n<<<%s>>>\n",
-       inCmd, currentBlock.c_str());
+      ("ScriptInterpreter::Parse() inCmd=<%p>[%s], currentBlock = \n<<<%s>>>\n",
+       inCmd, inCmd ? inCmd->GetTypeName().c_str() : "NULL", currentBlock.c_str());
    #endif
    
    bool retval = true;
@@ -1710,6 +1725,11 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
        inFunctionMode);
    WriteStringArray("ParseDefinitionBlock()", "", chunks);
    #endif
+   #if DBGLVL_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::ParseDefinitionBlock() currentFunction=<%p>'%s'\n",
+       currentFunction, currentFunction ? currentFunction->GetName().c_str() : "NULL");
+   #endif
    
    // Get comments
    std::string preStr = theTextParser.GetPrefaceComment();
@@ -1794,46 +1814,68 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
-         //obj = CreateObject(type, names[i]);
-         obj = CreateObject(type, names[i], manageObject);
-         
-         if (obj == NULL)
+         // Do not create a GmatFunction if inside a function
+         // since GmatFunction is created from the Sandbox as a global
+         // object (LOJ: 2015.03.25)
+         if (currentFunction != NULL && type == "GmatFunction")
          {
-            // Check error message from the Validator which has more
-            // detailed error message
-            StringArray errList = theValidator->GetErrorList();
-            #ifdef DEBUG_PARSE
+            #if DBGLVL_GMAT_FUNCTION
             MessageInterface::ShowMessage
-               ("   Validator errList.size() = %d\n", errList.size());
+               ("   ==> '%s' is a GmatFunction inside a function, so skip creating\n",
+                names[i].c_str());
             #endif
-            if (errList.size() > 0)
-            {
-               for (UnsignedInt i=0; i<errList.size(); i++)
-                  HandleError(InterpreterException(errList[i]), true);
-               
-               // Empty Validator errors now
-               theValidator->ClearErrorList();
-            }
-            else
-            {
-               InterpreterException ex
-                  ("Cannot create an object \"" + names[i] + "\". The \"" + type +
-                   "\" is an unknown object type or invalid object name or dimension");
-               HandleError(ex);
-            }
-            return false;
+            objCounter++;     
          }
-         
-         objCounter++;     
-         obj->FinalizeCreation();
-         
-         SetComments(obj, preStr, inStr);
-         
-         // If creating insise a function, add it to function object map
-         if (currentFunction != NULL)
+         else
          {
-            obj->SetIsLocal(true);
-            currentFunction->AddFunctionObject(obj);
+            obj = CreateObject(type, names[i], manageObject);
+            
+            if (obj == NULL)
+            {
+               // Check error message from the Validator which has more
+               // detailed error message
+               StringArray errList = theValidator->GetErrorList();
+               #ifdef DEBUG_PARSE
+               MessageInterface::ShowMessage
+                  ("   Validator errList.size() = %d\n", errList.size());
+               #endif
+               if (errList.size() > 0)
+               {
+                  for (UnsignedInt i=0; i<errList.size(); i++)
+                     HandleError(InterpreterException(errList[i]), true);
+                  
+                  // Empty Validator errors now
+                  theValidator->ClearErrorList();
+               }
+               else
+               {
+                  InterpreterException ex
+                     ("Cannot create an object \"" + names[i] + "\". The \"" + type +
+                      "\" is an unknown object type or invalid object name or dimension");
+                  HandleError(ex);
+               }
+               return false;
+            }
+            
+            objCounter++;     
+            obj->FinalizeCreation();
+            
+            SetComments(obj, preStr, inStr);
+            
+            // If creating insise a function, add it to function object map
+            if (currentFunction != NULL)
+            {
+               #if DBGLVL_GMAT_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   ==> Adding object <%p>'%s' to function object map\n", obj,
+                   obj->GetName().c_str());
+               #endif
+               // If object is not an automatic global, set it to local
+               // This will fix crash during function object clearing (LOJ: 2015.03.19)
+               if (!obj->IsAutomaticGlobal())
+                  obj->SetIsLocal(true);
+               currentFunction->AddFunctionObject(obj);
+            }
          }
       }
       
@@ -1845,9 +1887,9 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
          return false;
       }
    }
-
+   
    return retval;
-}
+} // end ParseDefinitionBlock()
 
 
 //------------------------------------------------------------------------------
@@ -2215,7 +2257,10 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    // Set createAssignmentCommand to true if BeginMissionSequence found (LOJ: 2014.12.10)
    //bool createAssignmentCommand = true;
    bool createAssignmentCommand = false;
-   if (beginMissionSeqFound)
+   // Set to create assignment command if BeginMissionSequence found or parsing
+   // ScriptEvent command (Fix for GMT-5045, LOJ: 2015.03.24)
+   //if (beginMissionSeqFound)
+   if (beginMissionSeqFound || inScriptEvent)
       createAssignmentCommand = true;
    
    if (inCommandMode)

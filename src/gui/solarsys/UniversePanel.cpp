@@ -199,7 +199,7 @@ void UniversePanel::Create()
    
    mBrowseButton =
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    mBrowseButton->SetToolTip(pConfig->Read(_T("BrowseEphemerisFilenameHint")));
    
    
@@ -218,7 +218,7 @@ void UniversePanel::Create()
 
    mLSKBrowseButton =
       new wxBitmapButton(this, ID_LSK_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    mLSKBrowseButton->SetToolTip(pConfig->Read(_T("BrowseLSKFilenameHint")));
 
 

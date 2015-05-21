@@ -62,6 +62,7 @@ CPP_OBJECTS = \
     event/Elevation.o \
     event/Contact.o \
     event/ContactEvent.o \
+    event/ContactResult.o \
     event/Eclipse.o \
     event/EclipseEvent.o \
     event/EclipseTotalEvent.o \

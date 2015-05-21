@@ -86,8 +86,11 @@ Function::Function(const std::string &typeStr, const std::string &name) :
    internalCoordSys   (NULL),
    forces             (NULL),
    fcs                (NULL),
+   fcsInitialized     (false),
    fcsFinalized       (false),
    validator          (NULL),
+   wasFunctionBuilt   (false),
+   isFunctionIOSet    (false),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -107,7 +110,13 @@ Function::Function(const std::string &typeStr, const std::string &name) :
 //------------------------------------------------------------------------------
 Function::~Function()
 {
-   // delete only output wrappers, input wrappers are set by FunctionManager,
+   #ifdef DEBUG_DESTRUCTOR
+   MessageInterface::ShowMessage
+      ("Function::~Function() <%p>[%s]'%s' entered\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
+   
+   // Delete only output wrappers, input wrappers are set by FunctionManager,
    // so they are deleted there.
    // crashes on nested function if delete output wrappers here
    //ClearInOutArgMaps(false, true);
@@ -115,6 +124,12 @@ Function::~Function()
    // Clear original objects
    ClearAutomaticObjects();
    ClearFunctionObjects();
+   
+   #ifdef DEBUG_DESTRUCTOR
+   MessageInterface::ShowMessage
+      ("Function::~Function() <%p>[%s]'%s' leaving\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
 }
 
 
@@ -141,8 +156,12 @@ Function::Function(const Function &f) :
    internalCoordSys   (NULL),
    forces             (NULL),
    fcs                (NULL),
+   fcsInitialized     (f.fcsInitialized),
    fcsFinalized       (f.fcsFinalized),
+   functionObjectMap  (f.functionObjectMap), // Do I want to do this?
    validator          (f.validator),
+   wasFunctionBuilt   (f.wasFunctionBuilt),
+   isFunctionIOSet    (f.isFunctionIOSet),
    scriptErrorFound   (false),
    objectsInitialized (false)
 {
@@ -176,8 +195,11 @@ Function& Function::operator=(const Function &f)
    internalCoordSys   = f.internalCoordSys;
    forces             = f.forces;
    fcs                = NULL;
+   fcsInitialized     = f.fcsInitialized;
    fcsFinalized       = f.fcsFinalized;
    validator          = f.validator;
+   wasFunctionBuilt   = f.wasFunctionBuilt;
+   isFunctionIOSet    = f.isFunctionIOSet;
    scriptErrorFound   = f.scriptErrorFound;
    objectsInitialized = f.objectsInitialized;
    inputNames         = f.inputNames;
@@ -350,6 +372,38 @@ void Function::SetInternalCoordSystem(CoordinateSystem *cs)
 void Function::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
+}
+
+//------------------------------------------------------------------------------
+// bool WasFunctionBuilt()
+//------------------------------------------------------------------------------
+bool Function::WasFunctionBuilt()
+{
+   return wasFunctionBuilt;
+}
+
+//------------------------------------------------------------------------------
+// void SetFunctionWasBuilt(bool built)
+//------------------------------------------------------------------------------
+void Function::SetFunctionWasBuilt(bool built)
+{
+   wasFunctionBuilt = built;
+}
+
+//------------------------------------------------------------------------------
+// bool IsFunctionInputOutputSet()
+//------------------------------------------------------------------------------
+bool Function::IsFunctionInputOutputSet()
+{
+   return isFunctionIOSet;
+}
+
+//------------------------------------------------------------------------------
+// void SetFunctionInputOutputIsSet(bool set)
+//------------------------------------------------------------------------------
+void Function::SetFunctionInputOutputIsSet(bool set)
+{
+   isFunctionIOSet = set;
 }
 
 //------------------------------------------------------------------------------
@@ -658,7 +712,14 @@ std::string Function::GetParameterTypeString(const Integer id) const
 std::string Function::GetStringParameter(const Integer id) const
 {
    if (id == FUNCTION_PATH)
+   {
+      #ifdef DEBUG_GET
+      MessageInterface::ShowMessage
+         ("Function::GetStringParameter() <%p> returning functionPath '%s'\n",
+          this, functionPath.c_str());
+      #endif
       return functionPath;
+   }
    else if (id == FUNCTION_NAME)
       return functionName;
    
@@ -768,6 +829,14 @@ const StringArray& Function::GetStringArrayParameter(const Integer id) const
    default:
       return GmatBase::GetStringArrayParameter(id);
    }
+}
+
+//---------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+const StringArray& Function::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
 }
 
 //------------------------------------------------------------------------------
@@ -987,16 +1056,19 @@ void Function::ClearFunctionObjects()
    #endif
    
    StringArray toDelete;
-   ObjectMap::iterator omi;
-   for (omi = functionObjectMap.begin(); omi != functionObjectMap.end(); ++omi)
+   ObjectMap::iterator omi = functionObjectMap.begin();
+   while (omi != functionObjectMap.end())
    {
+      GmatBase *obj = omi->second;
       #ifdef DEBUG_FUNCTION_OBJ
       MessageInterface::ShowMessage
-         ("   Checking if <%p>'%s' can be deleted\n", omi->second, (omi->first).c_str());
+         ("   ==> Checking if <%p>[%s]'%s' can be deleted\n", obj,
+          obj ? obj->GetTypeName().c_str() : "NULL", (omi->first).c_str());
       #endif
-      if (omi->second != NULL)
+      
+      // If object is not NULL and not this function, delete
+      if (obj != NULL && (!obj->IsOfType("GmatFunction")))
       {
-         GmatBase *obj = omi->second;
          #ifdef DEBUG_FUNCTION_OBJ
          MessageInterface::ShowMessage
             ("   isLocal = %d, isGlobal = %d, isAutomaticGlobal = %d, \n",
@@ -1004,7 +1076,7 @@ void Function::ClearFunctionObjects()
          #endif
          // @note CelestialBody is added to SolarSystem and it will be deleted when
          // when SolarSystem in use is deleted (LOJ: 2014.12.23)
-         if ((omi->second)->IsLocal() && !((omi->second)->IsOfType(Gmat::CELESTIAL_BODY)))
+         if (obj->IsLocal() && !(obj->IsOfType(Gmat::CELESTIAL_BODY)))
          {
             #ifdef DEBUG_MEMORY
             GmatBase *obj = omi->second;
@@ -1017,9 +1089,11 @@ void Function::ClearFunctionObjects()
             #endif
             delete omi->second;
             omi->second = NULL;
-            functionObjectMap.erase(omi++);
+            //functionObjectMap.erase(omi);
+            //++omi;
          }
       }
+      ++omi;
    }
    
    #ifdef DEBUG_FUNCTION_OBJ
@@ -1040,6 +1114,7 @@ void Function::AddFunctionObject(GmatBase *obj)
       ("Function::AddFunctionObject() entered, obj=<%p>[%s]'%s'\n", obj,
        obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL");
+   //ShowObjects("In Function::AddFunctionObject()");
    #endif
    
    if (obj && obj->GetName() != "")
@@ -1061,8 +1136,8 @@ GmatBase* Function::FindFunctionObject(const std::string &name)
 {
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Function::FindFunctionObject() entered, name=%s, solarSys=<%p>\n",
-       name.c_str(), solarSys);
+      ("Function::FindFunctionObject() entered, name='%s'\n", name.c_str());
+   //ShowObjects("In Function::FindFunctionObject()");
    #endif
    
    // Ignore array index
@@ -1412,23 +1487,32 @@ void Function::ShowObjects(const std::string &title)
    MessageInterface::ShowMessage("%s\n", title.c_str());
    MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
    MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("solarSys         = <%p>\n", solarSys);
-   MessageInterface::ShowMessage("internalCoordSys = <%p>\n", internalCoordSys);
-   MessageInterface::ShowMessage("forces           = <%p>\n", forces);
-   MessageInterface::ShowMessage
-      ("Here is objectStore <%p>, it has %d objects\n", objectStore,
-       objectStore->size());
-   for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
+   MessageInterface::ShowMessage("solarSys          = <%p>\n", solarSys);
+   MessageInterface::ShowMessage("internalCoordSys  = <%p>\n", internalCoordSys);
+   MessageInterface::ShowMessage("forces            = <%p>\n", forces);
+   MessageInterface::ShowMessage("objectStore       = <%p>\n", objectStore);
+   MessageInterface::ShowMessage("globalObjectStore = <%p>\n", globalObjectStore);
+
+   if (objectStore != NULL)
+   {
       MessageInterface::ShowMessage
-         ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
-   MessageInterface::ShowMessage
-      ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
-       globalObjectStore->size());
-   for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
+         ("Here is objectStore <%p>, it has %d objects\n", objectStore,
+          objectStore->size());
+      for (ObjectMap::iterator i = objectStore->begin(); i != objectStore->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+   if (globalObjectStore != NULL)
+   {
       MessageInterface::ShowMessage
-         ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
+          globalObjectStore->size());
+      for (ObjectMap::iterator i = globalObjectStore->begin(); i != globalObjectStore->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
    MessageInterface::ShowMessage("========================================\n");   
 }
 

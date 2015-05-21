@@ -20,6 +20,9 @@
 #include "EclipseEvent.hpp"
 #include "TimeSystemConverter.hpp"
 #include "StringUtil.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_REPORT_STRING
 
 //------------------------------------------------------------------------------
 // public methods
@@ -64,6 +67,9 @@ EclipseEvent& EclipseEvent::operator=(const EclipseEvent& copy)
 
 std::string EclipseEvent::GetReportString()
 {
+   #ifdef DEBUG_REPORT_STRING
+      MessageInterface::ShowMessage("In EcEv::GetReportString\n");
+   #endif
    std::stringstream eventString("");
    std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
    std::string startGregorian, endGregorian;
@@ -75,6 +81,9 @@ std::string EclipseEvent::GetReportString()
    TimeConverterUtil::Convert("A1ModJulian", end, "",
                               outputFormat, resultMjd, endGregorian);
 
+   #ifdef DEBUG_REPORT_STRING
+      MessageInterface::ShowMessage("In EcEv::GetReportString, about to get Duration\n");
+   #endif
    Real currentDuration = GetDuration();
 
    eventString << startGregorian << blanks << endGregorian         << blanks <<

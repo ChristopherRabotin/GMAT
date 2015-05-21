@@ -254,14 +254,14 @@ void GroundTrackPlotPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
    mOrbitColorCtrl =
       new wxColourPickerCtrl(this, ID_COLOR_CTRL, *wxRED,
-                             wxDefaultPosition, wxSize(colorW, 20), 0);
+                             wxDefaultPosition, wxSize(colorW, -1), 0);
    wxStaticText *targetColorLabel =
       new wxStaticText(this, -1, wxT("Target Color"),
                        wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);   
    wxColour targColor = wxTheColourDatabase->Find("STEEL BLUE");
    mTargetColorCtrl =
       new wxColourPickerCtrl(this, ID_COLOR_CTRL, targColor,
-                             wxDefaultPosition, wxSize(colorW, 20), 0);
+                             wxDefaultPosition, wxSize(colorW, -1), 0);
    
    //-----------------------------------
    // Drawing color sizer
@@ -300,7 +300,7 @@ void GroundTrackPlotPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mDataCollectFreqTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
-                     wxSize(200, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(200, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    wxStaticText *dataCollectFreqUnit =
       new wxStaticText(this, -1, wxT("step(s)"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
@@ -311,7 +311,7 @@ void GroundTrackPlotPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    mUpdatePlotFreqTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
-                     wxSize(200, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(200, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    wxStaticText *updatePlotFreqUnit =
       new wxStaticText(this, -1, wxT("cycle(s)"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
@@ -319,10 +319,10 @@ void GroundTrackPlotPanel::Create()
    // Number of points to redraw
    wxStaticText *numPointsToRedrawLabel =
       new wxStaticText(this, -1, wxT("Num. points to redraw\n(Enter 0 to draw all)"),
-                       wxDefaultPosition, wxSize(-1, 30), 0);
+                       wxDefaultPosition, wxSize(-1, -1), 0);
    mNumPointsToRedrawTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
-                     wxSize(200, 20), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
+                     wxSize(200, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    // Show plot option
    mShowPlotCheckBox =
@@ -374,11 +374,11 @@ void GroundTrackPlotPanel::Create()
       new wxStaticText(this, -1, wxT("Texture Map"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    mTextureMapTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250, 20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(250, -1), 0);
    wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
    mTextureMapBrowseButton =
       new wxBitmapButton(this, ID_BROWSE_BUTTON, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    
    //-----------------------------------
    // Other option sizer

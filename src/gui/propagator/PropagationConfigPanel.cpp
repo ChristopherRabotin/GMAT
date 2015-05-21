@@ -411,7 +411,7 @@ void PropagationConfigPanel::Create()
 
    wxStaticText *errorCtrlStaticText =
       new wxStaticText( this, ID_TEXT, GUI_ACCEL_KEY"Error Control",
-                        wxDefaultPosition, wxSize(w,20), wxST_NO_AUTORESIZE );
+                        wxDefaultPosition, wxSize(w,-1), wxST_NO_AUTORESIZE );
 
    theErrorComboBox =
       new wxComboBox( this, ID_CB_ERROR, errorControlArray[0],
@@ -426,7 +426,7 @@ void PropagationConfigPanel::Create()
    // Central Body
    wxStaticText *centralBodyStaticText =
       new wxStaticText( this, ID_TEXT, "Central "GUI_ACCEL_KEY"Body",
-                        wxDefaultPosition, wxSize(w,20), wxST_NO_AUTORESIZE);
+                        wxDefaultPosition, wxSize(w,-1), wxST_NO_AUTORESIZE);
    theOriginComboBox  =
       theGuiManager->GetCelestialBodyComboBox(this, ID_CB_ORIGIN, wxSize(100,-1));
    theOriginComboBox->SetToolTip(pConfig->Read(_T("ForceModelCentralBodyHint")));
@@ -495,7 +495,7 @@ void PropagationConfigPanel::Create()
    gravityOrderTextCtrl->SetToolTip(pConfig->Read(_T("ForceModelGravityOrderHint")));
    theGravModelSearchButton =
       new wxBitmapButton(this, ID_BUTTON_GRAV_SEARCH, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    theGravModelSearchButton->SetToolTip(pConfig->Read(_T("ForceModelGravitySearchHint")));
 
    wxBoxSizer *degOrdSizer = new wxBoxSizer( wxHORIZONTAL );

@@ -227,10 +227,13 @@ Real ParameterWrapper::EvaluateReal() const
    #endif
 
    #ifdef DEBUG_PW_POINTER
-      MessageInterface::ShowMessage("ParameterWrapper: Parameter %s is at %p\n",
-            param->GetName().c_str(), param);
+   MessageInterface::ShowMessage
+      ("ParameterWrapper: Parameter %s is at %p\n", param->GetName().c_str(), param);
+   GmatBase *paramOwner = param->GetOwner();
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::EvaluateReal() '%s', owner of param = <%p>'%s'\n",
+       description.c_str(), paramOwner, paramOwner ? paramOwner->GetName().c_str() : "NULL");
    #endif
-
    return param->EvaluateReal();
 }
 

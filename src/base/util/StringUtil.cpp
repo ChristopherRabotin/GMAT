@@ -5150,6 +5150,16 @@ bool GmatStringUtil::IsLastNumberPartOfName(const std::string &str)
       ("GmatStringUtil::IsLastNumberPartOfName() entered, str=<%s>\n", str.c_str());
    #endif
    
+   if (str.empty())
+   {
+      #ifdef DEBUG_NUMBER_WITH_NAME
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::IsLastNumberPartOfName() returning false, "
+          "input string is empty\n");
+      #endif
+      return false;
+   }
+   
    if (!isdigit(str[str.size()-1]))
    {
       #ifdef DEBUG_NUMBER_WITH_NAME

@@ -1769,7 +1769,7 @@ GmatBase* Interpreter::FindObject(const std::string &name,
       ("Interpreter::FindObject() entered, name='%s', ofType='%s', currentFunction=<%p>\n",
        name.c_str(), ofType.c_str(), currentFunction);
    #endif
-
+   
    GmatBase *objFound = NULL;
    
    // If parsing a function, use current function to find an object (LOJ: 2014.12.10)
@@ -1783,12 +1783,31 @@ GmatBase* Interpreter::FindObject(const std::string &name,
       if (name == "SolarSystem")
          objFound = theSolarSystem;
       else
+      {
          objFound = currentFunction->FindFunctionObject(name);
+         // If no object found, search current object map in use for GmatFunction
+         if (objFound == NULL)
+         {
+            #ifdef DEBUG_FUNCTION
+            MessageInterface::ShowMessage
+               ("   Object '%s' not found, so trying to find it from "
+                "the current object map\n", name.c_str());
+            ShowObjectMap("In Interpreter::FindObject()", theObjectMap);
+            #endif
+            if (theObjectMap->find(name) != theObjectMap->end())
+            {
+               GmatBase *obj = (*theObjectMap)[name];
+               if (obj && obj->IsOfType("GmatFunction"))
+                  objFound = obj;
+            }
+         }
+      }
    }
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Interpreter::FindObject() returning <%p>'%s'\n", objFound,
-       objFound ? objFound->GetName().c_str() : "NULL");
+      ("Interpreter::FindObject() returning <%p>[%s]'%s' for object name '%s'\n",
+       objFound, objFound ? objFound->GetTypeName().c_str() : "NULL",
+       objFound ? objFound->GetName().c_str() : "NULL",name.c_str());
    #endif
    return objFound;
 }
@@ -2195,8 +2214,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          ("   => Now calling %s->InterpretAction()\n", type1.c_str());
       #endif
       
+      // Moved this after InterpretAction() so that debug from command will
+      // show actual command string (LOJ: 2015.04.01)
       // Set current function to command 
-      cmd->SetCurrentFunction(currentFunction);
+      //cmd->SetCurrentFunction(currentFunction);
       
       // if command has its own InterpretAction(), just return cmd
       if (cmd->InterpretAction())
@@ -2208,6 +2229,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          #ifdef DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage("   => Now calling ValidateCommand()\n");
          #endif
+         
+         // Set current function to command
+         if (currentFunction)
+            cmd->SetCurrentFunction(currentFunction);
          retFlag  = ValidateCommand(cmd);
          
          // For Solver commands make sure Solver type is correct
@@ -2304,7 +2329,12 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       bool retval1  = AssembleCommand(cmd, realDesc);
       
       if (retval1)
+      {
+         // Set current function to command 
+         if (currentFunction)
+            cmd->SetCurrentFunction(currentFunction);
          retval3 = ValidateCommand(cmd);
+      }
       else
       {
          if (!ignoreError)
@@ -2315,7 +2345,6 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       }
       
       retFlag = retval1 && retval3;
-      
    }
    else
    {
@@ -9758,41 +9787,6 @@ bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
 
 
 //------------------------------------------------------------------------------
-// void WriteStringArray(const std::string &title1, const std::string &title2,
-//                       const StringArray &parts)
-//------------------------------------------------------------------------------
-void Interpreter::WriteStringArray(const std::string &title1,
-                                   const std::string &title2,
-                                   const StringArray &parts)
-{
-   MessageInterface::ShowMessage("   ========== %s%s, has %d parts\n",
-                                 title1.c_str(), title2.c_str(), parts.size());
-   for (UnsignedInt i=0; i<parts.size(); i++)
-      MessageInterface::ShowMessage("   %d: '%s'\n", i, parts[i].c_str());
-   MessageInterface::ShowMessage("\n");
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteForceModel(GmatBase *obj)
-//------------------------------------------------------------------------------
-void Interpreter::WriteForceModel(GmatBase *obj)
-{
-   ODEModel *fm = (ODEModel*)obj;
-   Integer numForces = fm->GetNumForces();
-   MessageInterface::ShowMessage
-      ("   ODEModel '%s' has %d forces\n", fm->GetName().c_str(), numForces);
-   for (int i = 0; i < numForces; i++)
-   {
-      const PhysicalModel* force = fm->GetForce(i);
-      MessageInterface::ShowMessage
-         ("      force[%d] = <%p><%s>'%s'\n", i, force, force->GetTypeName().c_str(),
-          force->GetName().c_str());
-   }
-}
-
-
-//------------------------------------------------------------------------------
 // bool CheckFunctionDefinition(const std::string &funcPath, GmatBase *function,
 //                              bool fullCheck)
 //------------------------------------------------------------------------------
@@ -9810,8 +9804,9 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
-      ("Interpreter::CheckFunctionDefinition() function=<%p>, fullCheck=%d\n   "
-       "funcPath=<%s>\n", function, fullCheck, funcPath.c_str());
+      ("Interpreter::CheckFunctionDefinition() function=<%p>'%s', fullCheck=%d\n   "
+       "funcPath=<%s>\n", function, function ? function->GetName().c_str() : "NULL",
+       fullCheck, funcPath.c_str());
    #endif
    
    debugMsg = "In CheckFunctionDefinition()";
@@ -9825,24 +9820,46 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       retval = false;;
    }
    
+   std::string fPath = funcPath;
+   std::string fName = function->GetName();
+   
    // check if function path exist
    if (!GmatFileUtil::DoesFileExist(funcPath))
    {
-      InterpreterException ex
-         ("Nonexistent GmatFunction file \"" + funcPath +
-          "\" referenced in \"" + function->GetName() + "\"\n");
-      HandleError(ex, false);
-      retval = false;
+      // Check FileManager if function is in the GmatFunction path
+      fPath = FileManager::Instance()->GetGmatFunctionPath(fName);
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   fPath = '%s'\n", fPath.c_str());
+      #endif
+      if (fPath != "")
+      {
+         fPath = fPath + fName + ".gmf";
+         // Write warning about using new GmatFunction path
+         MessageInterface::ShowMessage
+            ("*** WARNING *** Cannot find GmatFunction file \"%s\" but it was "
+             "found in \"%s\".", funcPath.c_str(), fPath.c_str());
+         MessageInterface::ShowMessage
+            ("  So setting function path of '%s' to \"%s\"\n", fName.c_str(), fPath.c_str());
+         function->SetStringParameter("FunctionPath", fPath);
+      }
+      else
+      {
+         InterpreterException ex
+            ("Cannot find GmatFunction file \"" + funcPath +
+             "\" referenced in the caller of \"" + fName + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+      }
    }
    
    // check for no extension of .gmf or wrong extension
-   StringArray parts = GmatStringUtil::SeparateBy(funcPath, ".");
+   StringArray parts = GmatStringUtil::SeparateBy(fPath, ".");
    if ((parts.size() == 1) ||
        (parts.size() == 2 && parts[1] != "gmf"))
    {
       InterpreterException ex
-         ("The GmatFunction file \"" + funcPath + "\" has no or incorrect file "
-          "extension referenced in \"" + function->GetName() + "\"\n");
+         ("The GmatFunction file \"" + fPath + "\" has no or incorrect file "
+          "extension referenced in \"" + fName + "\"\n");
       HandleError(ex, false);
       retval = false;
    }
@@ -9858,7 +9875,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
    }
    
    // check function declaration
-   std::ifstream inStream(funcPath.c_str());
+   std::ifstream inStream(fPath.c_str());
    std::string line;
    StringArray inputArgs;
    StringArray outputArgs;
@@ -9870,7 +9887,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("Error reading the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9915,7 +9932,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("Invalid output argument list found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9938,7 +9955,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The \"function\" is missing in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9966,7 +9983,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("Invalid output argument list found in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -9977,7 +9994,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("The output argument list is empty in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -9997,7 +10014,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The function name not found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -10023,7 +10040,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The invalid input argument list found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
          break;
@@ -10048,8 +10065,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             ("The function name \"" + fileFuncName + "\" does not match with the "
-             "GmatFunction file name \"" + funcPath + "\" referenced in \"" +
-             function->GetName() + "\"\n");
+             "GmatFunction file name \"" + fPath + "\" referenced in \"" +
+             fName + "\"\n");
          HandleError(ex, false);
          retval = false;
       }
@@ -10075,7 +10092,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("Invalid input argument list found in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -10085,7 +10102,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          {
             InterpreterException ex
                ("The input argument list is empty in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -10121,7 +10138,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
                
                InterpreterException ex
                   (errMsg + " found in the GmatFunction file \"" +
-                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+                   fPath + "\" referenced in \"" + fName + "\"\n");
                HandleError(ex, false);
                retval = false;
                break;
@@ -10135,8 +10152,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
    if (line == "")
    {
       InterpreterException ex
-         ("The GmatFunction file \"" + funcPath + "\" referenced in \"" +
-          function->GetName() + "\" is empty\n");
+         ("The GmatFunction file \"" + fPath + "\" referenced in \"" +
+          fName + "\" is empty\n");
       HandleError(ex, false);
       retval = false;
    }
@@ -10157,7 +10174,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       {
          InterpreterException ex
             (errMsg + " found in the GmatFunction file \"" +
-             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+             fPath + "\" referenced in \"" + fName + "\"\n");
          HandleError(ex, false);
          retval = false;
       }
@@ -10195,7 +10212,9 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
-      ("Interpreter::BuildFunctionDefinition() entered, str=<%s>\n", str.c_str());
+      ("Interpreter::BuildFunctionDefinition() entered\n   str=<%s>\n"
+       "   currentFunction=<%p>'%s'\n", str.c_str(), currentFunction,
+       currentFunction->GetName().c_str());
    #endif
    
    std::string lhs;
@@ -10391,4 +10410,59 @@ bool Interpreter::HasFilenameTypeParameter(GmatCommand *cmd)
 }
 
 
+//------------------------------------------------------------------------------
+// void WriteStringArray(const std::string &title1, const std::string &title2,
+//                       const StringArray &parts)
+//------------------------------------------------------------------------------
+void Interpreter::WriteStringArray(const std::string &title1,
+                                   const std::string &title2,
+                                   const StringArray &parts)
+{
+   MessageInterface::ShowMessage("   ========== %s%s, has %d parts\n",
+                                 title1.c_str(), title2.c_str(), parts.size());
+   for (UnsignedInt i=0; i<parts.size(); i++)
+      MessageInterface::ShowMessage("   %d: '%s'\n", i, parts[i].c_str());
+   MessageInterface::ShowMessage("\n");
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteForceModel(GmatBase *obj)
+//------------------------------------------------------------------------------
+void Interpreter::WriteForceModel(GmatBase *obj)
+{
+   ODEModel *fm = (ODEModel*)obj;
+   Integer numForces = fm->GetNumForces();
+   MessageInterface::ShowMessage
+      ("   ODEModel '%s' has %d forces\n", fm->GetName().c_str(), numForces);
+   for (int i = 0; i < numForces; i++)
+   {
+      const PhysicalModel* force = fm->GetForce(i);
+      MessageInterface::ShowMessage
+         ("      force[%d] = <%p><%s>'%s'\n", i, force, force->GetTypeName().c_str(),
+          force->GetName().c_str());
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL)
+//------------------------------------------------------------------------------
+void Interpreter::ShowObjectMap(const std::string &title, ObjectMap *objMap)
+{
+   MessageInterface::ShowMessage(title + "\n");
+   if (objMap != NULL)
+   {
+      MessageInterface::ShowMessage
+         (" passedObjectMap = <%p>, it has %d objects\n", objMap, objMap->size());
+      for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
+      {
+         MessageInterface::ShowMessage
+            ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+      }
+   }
+   else
+      MessageInterface::ShowMessage(" passed object map is NULL\n");
+}
 

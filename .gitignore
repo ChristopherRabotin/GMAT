@@ -6,6 +6,8 @@
 *.dll
 *.exe
 *.app
+*.ilk
+*.pdb
 .project
 .cproject
 GmatLog.txt
@@ -20,3 +22,5 @@ CheckRepo.TestEntry
 *~
 *.swp
 *.md
+/LinuxRelease/
+/LinuxDebug/

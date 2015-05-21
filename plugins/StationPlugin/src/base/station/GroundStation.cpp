@@ -33,12 +33,11 @@
 #include "AssetException.hpp"
 #include "ColorTypes.hpp"               // for namespace GmatColor::
 
-
 //#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_INIT
 //#define DEBUG_HARDWARE
 //#define TEST_GROUNDSTATION
-#define DEBUG_AZEL_CONSTRAINT
+//#define DEBUG_AZEL_CONSTRAINT
 
 //---------------------------------
 // static data
@@ -60,8 +59,6 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
       Gmat::OBJECTARRAY_TYPE,		// made changes by Tuan Nguyen
       Gmat::REAL_TYPE,		// MinimumElevationAngle
    };
-
-
 
 //---------------------------------
 // public methods
@@ -143,7 +140,7 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
    {
       GroundstationInterface::operator=(gs);
 
-      stationId 	  = gs.stationId;
+      stationId 	    = gs.stationId;
       hardwareNames   = gs.hardwareNames;		// made changes by Tuan Nguyen
 //      hardwareList	= gs.hardwareList;		// should it be cloned ????
 
@@ -1012,7 +1009,6 @@ bool GroundStation::Initialize()
       }
    }
 
-
    // made changes by Tuan Nguyen
    // verify GroundStation's referenced objects
    if (VerifyAddHardware() == false)	// verify add hardware
@@ -1141,3 +1137,4 @@ Real* GroundStation::IsValidElevationAngle(const Rvector6 &state_sez, const Real
 
    return az_el_visible;
 }
+
