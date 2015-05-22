@@ -197,6 +197,19 @@ if(NOT Matlab_FOUND)
   MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
 endif()
 
+## Find Python
+#SET(Python_ROOT_DIR "" CACHE PATH "Path to user-specified Python location. Leave empty to auto-find Python.")
+#SET(Python_ADDITIONAL_VERSIONS
+#  # Additional Python versions should be included here
+#  "Python34=3.4"
+#  CACHE STRING "Additional searched Python versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
+#  )
+#FIND_PACKAGE(PythonLibs PYTHON_LIBRARY PYTHON_INCLUDE_DIR)
+#
+#if(NOT Python_FOUND)
+#  MESSAGE(WARNING "Python NOT FOUND. Set Python_ROOT_DIR to the path to Python and ensure you have a working license.")
+#endif()
+
 # ====================================================================
 # Common build options
 INCLUDE(CheckCXXCompilerFlag)
