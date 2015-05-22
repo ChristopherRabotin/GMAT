@@ -1101,9 +1101,6 @@
     <ClCompile Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.cpp">
       <Filter>Source Files\base\forcemodel\harmonic</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\forcemodel\EventModel.cpp">
-      <Filter>Source Files\base\forcemodel</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\subscriber\GroundTrackPlot.cpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClCompile>
@@ -1349,6 +1346,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\SpiceInterface.cpp">
       <Filter>Source Files\base\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2411,9 +2414,6 @@
     <ClInclude Include="..\..\..\src\base\forcemodel\harmonic\HarmonicGravityGrv.hpp">
       <Filter>Source Files\base\forcemodel\harmonic</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\forcemodel\EventModel.hpp">
-      <Filter>Source Files\base\forcemodel</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\subscriber\GroundTrackPlot.hpp">
       <Filter>Source Files\base\subscriber</Filter>
     </ClInclude>
@@ -2659,6 +2659,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\SpiceInterface.hpp">
       <Filter>Source Files\base\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

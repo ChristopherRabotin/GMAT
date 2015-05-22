@@ -121,6 +121,7 @@ public:
    void OnMove(wxMoveEvent& event);
    void OnPlotClose(wxCloseEvent& event);
    void OnClose(wxCloseEvent& event);
+   void TakeAction(const std::string &action);
 
 protected:
    

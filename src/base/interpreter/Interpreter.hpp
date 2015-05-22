@@ -339,11 +339,6 @@ protected:
    bool FinalPass();
    bool FinalPassSubscribers();
    
-   // for debug
-   void WriteStringArray(const std::string &title1, const std::string &title2,
-                         const StringArray &parts);
-   void WriteForceModel(GmatBase *obj);
-   
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
                                 GmatBase *function, bool fullCheck = true);
@@ -355,7 +350,13 @@ protected:
          *accumulatedErrors = NULL);
 
    bool ValidateSolverCmdLevels(GmatCommand *bc, Integer cmdLevel);
-
+   
+   // for debug
+   void WriteStringArray(const std::string &title1, const std::string &title2,
+                         const StringArray &parts);
+   void WriteForceModel(GmatBase *obj);
+   void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
+   
 private:
       
    StringArray   commandList;

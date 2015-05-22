@@ -270,9 +270,12 @@ void GLStars::ReadTextConstellations()
    NumConstellations = 0;
    
    // Go through the file and store all of the star pairs that make up the constellation lines
-   for (i = 0, buffer = ConstellationFile.GetNextLine(); i < MAXLINES && !ConstellationFile.Eof();
+   for (i = 0, buffer = ConstellationFile.GetFirstLine(); i < MAXLINES && !ConstellationFile.Eof();
         buffer = ConstellationFile.GetNextLine())
    {
+      // Skip empty lines
+      if(buffer.IsEmpty())
+         continue;
       // Skip the comment lines
       if (buffer[0] == '#')
          continue;

@@ -6,12 +6,15 @@
 *.dll
 *.exe
 *.app
+*.ilk
+*.pdb
 .project
 .cproject
 GmatLog.txt
 language.settings.xml
 GMAT
 Debug
+Linux*
 Release
 *.user
 /.settings/
@@ -20,4 +23,3 @@ CheckRepo.TestEntry
 *~
 *.swp
 *.md
-/GmatDev/

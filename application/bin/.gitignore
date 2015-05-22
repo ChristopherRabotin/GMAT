@@ -13,4 +13,4 @@
 /lib
 inputs*.txt
 *-R201*
-*.so.R2015a
+/GmatConsole

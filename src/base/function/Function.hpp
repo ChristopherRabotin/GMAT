@@ -49,8 +49,8 @@ public:
                                        IntegerArray &colCounts);
    virtual bool         IsNewFunction();
    virtual void         SetNewFunction(bool flag);
-   virtual bool         Initialize();
-   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize);
+   virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
+   virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
    virtual void         Finalize();
    virtual bool         IsFcsFinalized();
    virtual void         SetObjectMap(ObjectMap *objMap);
@@ -60,6 +60,10 @@ public:
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetScriptErrorFound(bool errFlag);
    virtual bool         ScriptErrorFound();
+   virtual bool         WasFunctionBuilt();
+   virtual void         SetFunctionWasBuilt(bool built);
+   virtual bool         IsFunctionInputOutputSet();
+   virtual void         SetFunctionInputOutputIsSet(bool set);
    virtual bool         IsFunctionControlSequenceSet();
    virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
    virtual GmatCommand* GetFunctionControlSequence();
@@ -72,12 +76,18 @@ public:
    virtual WrapperArray&   GetWrappersToDelete();
    virtual void         ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs);
    
+   // Methods for objects created in the function via Create
+   virtual void         ClearFunctionObjects();
+   virtual void         AddFunctionObject(GmatBase *obj);
+   virtual GmatBase*    FindFunctionObject(const std::string &name);
+   virtual ObjectMap*   GetFunctionObjectMap();
+   
    // methods to set/get the automatic objects
    virtual void         ClearAutomaticObjects();
    virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj,
                                            bool alreadyManaged);
    virtual GmatBase*    FindAutomaticObject(const std::string &name);
-   virtual ObjectMap&   GetAutomaticObjects();
+   virtual ObjectMap*   GetAutomaticObjectMap();
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
@@ -105,6 +115,8 @@ public:
                                            const std::string &value);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -149,8 +161,12 @@ protected:
    // @todo - should these next four items remain here or move to GmatFunction??
    /// the function control sequence
    GmatCommand          *fcs;
+   /// have the commands in the FCS been initialized?
+   bool                 fcsInitialized;
    /// have the commands in the FCS been finalized?
    bool                 fcsFinalized;
+   /// Map to hold objects created in function
+   ObjectMap            functionObjectMap;
    /// objects automatically created on parsing (but for whom a references object cannot be
    /// set at that time)
    ObjectMap            automaticObjectMap;
@@ -158,11 +174,15 @@ protected:
    Validator            *validator;
    /// Object store needed by the validator
    ObjectMap            validatorStore;
+   /// the flag indicating if function has been built
+   bool                 wasFunctionBuilt;
+   /// the flag indicating if function input/output are set
+   bool                 isFunctionIOSet;
    /// the flag indicating script error found in function, this flag is set by Interpreter
    bool                 scriptErrorFound;
    /// the flag indicating local objects are initialized
    bool                 objectsInitialized;
-   
+      
    enum
    {
       FUNCTION_PATH = GmatBaseParamCount,

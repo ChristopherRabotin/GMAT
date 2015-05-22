@@ -263,7 +263,7 @@ void DCSetupPanel::Setup( wxWindow *parent)
       new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(200,-1), 0 );
    
    browseButton = new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-	                            wxSize(buttonWidth, 20));
+	                            wxSize(buttonWidth, -1));
    
    grid2->Add( showProgressCheckBox, 0, wxALIGN_LEFT|wxALL, bsize );
    grid2->Add( 0, 0, wxALIGN_CENTRE|wxALL, bsize);

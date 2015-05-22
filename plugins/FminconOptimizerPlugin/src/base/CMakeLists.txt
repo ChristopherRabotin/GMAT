@@ -17,25 +17,24 @@ MESSAGE("GMAT FminconOptimizer Plugin setup " ${VERSION})
 
 # ====================================================================
 # Major error checks
-if(NOT Matlab_FOUND)
-  MESSAGE(WARNING "Skipping due to missing Matlab")
+if(NOT WIN32)
+  MESSAGE(WARNING "Skipping FminconOptimizer: Not supported on ${CMAKE_SYSTEM_NAME}")
   RETURN()
 endif()
 
-if(NOT WIN32)
-  MESSAGE(WARNING "Skipping on Mac/Linux")
+if(NOT PLUGIN_MATLABINTERFACE)
+  MESSAGE(WARNING "Skipping FminconOptimizer: MatlabInterface Plugin disabled")
+  RETURN()
+endif()
+
+if(NOT Matlab_FOUND)
+  MESSAGE(WARNING "Skipping FminconOptimizer: Matlab missing")
   RETURN()
 endif()
 
 # ====================================================================
 # Define plugin target
-if(WIN32)
-	SET(PLUGINTARGET  "libFminconOptimizer")
-else()
-	SET(PLUGINTARGET "FminconOptimizer")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName FminconOptimizer)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DFMINCON_EXPORTS")
@@ -59,20 +58,10 @@ SET(PLUGIN_SRCS
 )
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-	LINK_LIBRARIES(libMatlabInterface)
-else()
-	LINK_LIBRARIES(GmatBase)
-	LINK_LIBRARIES(MatlabInterface)
-endif()
-LINK_LIBRARIES(${Matlab_LIBRARIES})
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
-# Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
-
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
-  )
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} MatlabInterface)
+TARGET_LINK_LIBRARIES(${TargetName} ${Matlab_LIBRARIES})

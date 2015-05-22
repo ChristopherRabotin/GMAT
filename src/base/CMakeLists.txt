@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT base setup " ${VERSION}) 
 
-if(WIN32)
-	SET(BASETARGET  "libGmatBase")
-else()
-	SET(BASETARGET "GmatBase")
-endif()
-
-SET(TargetName ${BASETARGET})
+SET(TargetName GmatBase)
 
 # Add preprocessor definitions
 ADD_DEFINITIONS("-D_DYNAMICLINK")
@@ -29,25 +23,19 @@ ADD_DEFINITIONS("-DEXP_STL")
 
 # ====================================================================
 # SPICE specifics
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-LINK_DIRECTORIES("${CSPICE_DIR}/lib")
+# SPICE is linked because it contains the F2C implementation
+LINK_LIBRARIES(optimized ${CSPICE_LIB} debug ${CSPICE_LIB_DEBUG})
 
-if(WIN32)
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.lib")
-else()
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.a")
+if(GMAT_USE_SPICE)
+  SET(SPICE_SRCS
+    "attitude/SpiceAttitude.cpp"
+    "util/SpiceAttitudeKernelReader.cpp"
+    "util/SpiceInterface.cpp"
+    "util/SpiceOrbitKernelReader.cpp"
+    "util/SpiceKernelReader.cpp"
+    "util/SpiceKernelWriter.cpp"
+    "util/SpiceOrbitKernelWriter.cpp")
 endif()
-	
-ADD_DEFINITIONS("-D__USE_SPICE__")
-
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
 
 # ====================================================================
 # F2C
@@ -133,6 +121,7 @@ SET(BASE_SRCS
     command/BranchCommand.cpp
     command/CallFunction.cpp
     command/CommandException.cpp
+    command/FindEvents.cpp
     command/GmatCommand.cpp
     command/CommandUtil.cpp
     command/ClearPlot.cpp
@@ -535,6 +524,10 @@ FILE(GLOB_RECURSE BASE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 # Create GmatBase as a shared library
 ADD_LIBRARY(${TargetName} SHARED ${BASE_SRCS} ${BASE_HEADERS})
 
+# Library name should start with "lib"
+# This is always true for Mac/Linux, but needs to be specified for Windows
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
+
 # ====================================================================
 # Add source/header files to IDE-based project source groups
 # Macro defined in top-level CMakeLists.txt
@@ -542,9 +535,39 @@ _ADDSOURCEGROUPS("${BASE_DIRS}")
 
 # specify the version of the library. 
 if(WIN32)
-  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\"")
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:\"libcmt.lib\" /INCREMENTAL:NO")
 endif()
 
-INSTALL( TARGETS ${TargetName}
-  DESTINATION bin
+# Create build products in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
   )
+
+# Specify where to install (make install or VS "INSTALL" project)
+if(WIN32)
+  INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION bin)
+else()
+  if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+    SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+  else()
+    SET(INSTALL_DIR bin)
+  endif()
+  INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${INSTALL_DIR})
+endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/;@loader_path/../plugins/;@loader_path/../plugins/proprietary/"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/../plugins/;\$ORIGIN/../plugins/proprietary/"
+      )
+  endif()
+endif()

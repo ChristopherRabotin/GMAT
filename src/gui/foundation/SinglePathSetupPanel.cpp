@@ -99,10 +99,10 @@ void SinglePathSetupPanel::Create()
    
    //----- file name and browse button
    mFileTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                  wxDefaultPosition, wxSize(350, 20), 0);
+                                  wxDefaultPosition, wxSize(350, -1), 0);
    wxBitmapButton *browseButton =
       new wxBitmapButton(this, ID_BROWSE_BUTTON, openBitmap, wxDefaultPosition,
-                         wxSize(buttonWidth, 20));
+                         wxSize(buttonWidth, -1));
    
    //----- add to the sizer
    wxFlexGridSizer *pathSizer = new wxFlexGridSizer(2, 0, 0);   

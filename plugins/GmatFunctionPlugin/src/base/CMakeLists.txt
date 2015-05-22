@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT GmatFunction Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libGmatFunction")
-else()
-	SET(PLUGINTARGET "GmatFunction")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName GmatFunction)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DGMATFUNCTION_EXPORTS")
@@ -41,17 +35,5 @@ SET(PLUGIN_SRCS
 )
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
-
-# ====================================================================
 # Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
-
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
-  )
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)

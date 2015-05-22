@@ -18,58 +18,18 @@ MESSAGE("GMAT GUI setup " ${VERSION})
 # ====================================================================
 # Major error checks
 if(NOT wxWidgets_FOUND)
-  MESSAGE(WARNING "Skipping due to missing wxWidgets")
+  MESSAGE(WARNING "Skipping GUI: wxWidgets missing")
   RETURN()
 endif()
 
 # ====================================================================
-SET(GUITARGET "GmatGui")
-SET(TargetName ${GUITARGET})
-
-# ====================================================================
-# DEVIL package
-
-if (NOT WIN32)
-    MESSAGE("-- Building with DeVIL")
-
-    if (NOT DevIL_DIR)
-        find_package(DevIL)
-
-        if(NOT IL_FOUND)
-            MESSAGE("** Disabling USE_DEVIL")
-            SET(USE_DEVIL FALSE)
-        endif()
-    else()
-        # check directory
-        if(EXISTS "${DevIL_DIR}" AND IS_DIRECTORY "${DevIL_DIR}")
-            SET(IL_INCLUDE_DIR ${DevIL_DIR})
-        else()
-            MESSAGE("** DEVIL NOT FOUND in directory " ${DevIL_DIR})
-            MESSAGE("** Disabling USE_DEVIL")
-            SET(USE_DEVIL FALSE)
-        endif()
-    endif ()
-    
-
-    if (USE_DEVIL)
-        MESSAGE("-- DevIL FOUND")
-        MESSAGE("-- DevIL_DIR=" ${IL_INCLUDE_DIR})
-        LINK_DIRECTORIES(${IL_INCLUDE_DIR})
-        LINK_LIBRARIES(${IL_LIBRARIES})
-        LINK_LIBRARIES(${ILU_LIBRARIES})
-        LINK_LIBRARIES(${ILUT_LIBRARIES})
-        INCLUDE_DIRECTORIES(${IL_INCLUDE_DIR})
-    else()
-        ADD_DEFINITIONS("-DSKIP_DEVIL")
-    endif()
-endif()
-
+SET(TargetName GmatGUI)
 
 # ====================================================================
 # SPICE specifics
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
-ADD_DEFINITIONS("-D__USE_SPICE__")
+if(GMAT_USE_SPICE)
+  SET(SPICE_SRCS "spacecraft/SpicePanel.cpp")
+endif()
 
 # ====================================================================
 # wxWidgets specifics
@@ -77,12 +37,8 @@ INCLUDE(${wxWidgets_USE_FILE})
 LINK_LIBRARIES(${wxWidgets_LIBRARIES})
 
 # ====================================================================
-# other libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
+# Link libraries
+LINK_LIBRARIES(GmatBase)
 
 # Find OpenGL
 FIND_PACKAGE(OpenGL)
@@ -160,6 +116,7 @@ SET(GUI_SRCS
     command/BeginFiniteBurnPanel.cpp
     command/CallFunctionPanel.cpp
     command/EndFiniteBurnPanel.cpp
+    command/FindEventsPanel.cpp
     command/GmatCommandPanel.cpp
     command/ManageObjectPanel.cpp
     command/ManeuverPanel.cpp
@@ -177,6 +134,7 @@ SET(GUI_SRCS
     coordsystem/CoordPanel.cpp
     coordsystem/CoordSysCreateDialog.cpp
     coordsystem/CoordSystemConfigPanel.cpp
+    event/EventLocatorPanel.cpp
     forcemodel/DragInputsDialog.cpp
     foundation/ArraySetupDialog.cpp
     foundation/ArraySetupPanel.cpp
@@ -284,36 +242,6 @@ SET(GUI_SRCS
 FILE(GLOB_RECURSE GUI_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 
 # ====================================================================
-# TODO not sure I understand what are those mac specifics for... 
-# it should no compromise building though...
-
-if(APPLE)
-#macrez:
-#	echo "linking Carbon and wx resource files ......."
-#	$(REZ) -d WXUSINGDLL -o $(TargetName)
-#	cp -f $(TargetName) ../../application/bin/.
-
-#macosx: 
-#	echo "building Mac application bundle ......."
-#	/Developer/Tools/SetFile -a C $(TOP_DIR)/application/bin/$(TargetName)
-#	mkdir -p $(CONTENTS_DIR)
-#	mkdir -p $(MACOS_DIR)
-#	mkdir -p $(RES_DIR)
-#	mkdir -p $(LIBS_DIR)
-#	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-#	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
-#	echo -n "APPL????" > $(MAC_PKGINFO)
-#	ln -f $(TOP_DIR)/application/bin/$(TargetName) $(MAC_APP)
-#	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT_DIR)/RunGMAT
-#	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-#	./$(INSTALL_LIBS_INTO_BUNDLE) GMAT ../base/lib $(BASELIBNAME) $(PCRE_LIB_LOC)
-
-#macstacksize:
-#	echo "setting stack size needed for SPICE"
-#	$(SPICE_STACKSIZE)
-endif()
-
-# ====================================================================
 # add the icon information
 SET(GMAT_ICON_DIR "resource")
 SET(GMAT_ICON_O "GmatIcon.o")
@@ -332,6 +260,14 @@ SET(GUI_SRCS ${GUI_SRCS} ${GMAT_ICON_RC})
 # Create GmatGui as an executable
 ADD_EXECUTABLE(${TargetName} ${GUI_SRCS} ${GUI_HEADERS})
 
+# The GUI name should be just "GMAT"
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES OUTPUT_NAME "GMAT")
+
+# The debug GUI should have the same postfix as top-levl CMakeLists.txt
+# This is required because CMAKE_DEBUG_POSTFIX only applies to libraries
+# and not executables as of CMake 3.0.2
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
 # ====================================================================
 # Add source/header files to IDE-based project source groups
 # Macro defined in top-level CMakeLists.txt
@@ -341,6 +277,65 @@ if(WIN32)
   SET_TARGET_PROPERTIES(${TargetName} PROPERTIES LINK_FLAGS "/SUBSYSTEM:windows")
 endif()
 
-INSTALL( TARGETS ${TargetName}
-  DESTINATION bin
+# Create build products in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
   )
+
+# Specify where to install (make install or VS "INSTALL" project)
+if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  SET(INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
+else()
+  SET(INSTALL_DIR bin)
+endif()
+INSTALL(TARGETS ${TargetName} DESTINATION ${INSTALL_DIR})
+
+# Install Mac bundle files
+if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+  INSTALL(CODE "MESSAGE(STATUS \"Creating GMAT.app bundle\")")
+
+  # Install Mac icon file
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resource/GMATMac.icns
+    DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}/Resources
+    RENAME gmat.icns
+    )
+
+  # Install Mac plist file
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/Info_GMAT.plist
+    DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}
+    RENAME Info.plist
+    )
+  SET(CMD sed -e "s/EXECUTABLE/RunGMAT/" "-i \"\" " Info.plist)
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\")")
+
+  # Install Mac wrapper script to run GMAT
+  INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/RunGMAT
+    DESTINATION ${GMAT_MAC_APPBUNDLE_PATH}/MacOS
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
+    )
+
+  # Create PkgInfo file
+  SET(CMD echo -n APPL????)
+  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMD} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/${GMAT_MAC_APPBUNDLE_PATH}\" OUTPUT_FILE PkgInfo)")
+endif()
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
+    else()
+      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
+    endif()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/;\$ORIGIN/libwx/"
+      )
+  endif()
+endif()

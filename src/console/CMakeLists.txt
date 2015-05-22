@@ -12,38 +12,9 @@
 #
 
 MESSAGE("==============================")
-MESSAGE("GMAT console setup " ${VERSION})
+MESSAGE("GMAT Console setup " ${VERSION})
 
-if (PROFILE_BUILD)
-	SET(CONSOLETARGET "gmatConsoleP")
-else()
-	SET(CONSOLETARGET "gmatConsole")
-endif()
-
-SET(TargetName ${CONSOLETARGET})
-
-# ====================================================================
-# SPICE specifics
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-SET(SPICE_LIB_DIR  "${CSPICE_DIR}/lib")
-LINK_DIRECTORIES(${SPICE_LIB_DIR})
-
-if(WIN32)
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.lib")
-else()
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.a")
-endif()
-        
-ADD_DEFINITIONS("-D__USE_SPICE__")
-
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
+SET(TargetName GmatConsole)
 
 # ====================================================================
 # source files
@@ -64,25 +35,50 @@ FILE(GLOB_RECURSE CONSOLE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
 INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
 	
 # ====================================================================
-# libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
-
-# ====================================================================
 # compilation
 
 # add the install targets
 ADD_EXECUTABLE(${TargetName} ${CONSOLE_SRCS} ${CONSOLE_HEADERS})
+
+# The debug Console should have the same postfix as top-levl CMakeLists.txt
+# This is required because CMAKE_DEBUG_POSTFIX only applies to libraries
+# and not executables as of CMake 3.0.2
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+
+# ====================================================================
+# Link libraries
+TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
 
 # ====================================================================
 # Add source/header files to IDE-based project source groups
 # Macro defined in top-level CMakeLists.txt
 _ADDSOURCEGROUPS("")
 
+# Create build outputs in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  )
+
+# Specify where to install (make install or VS "INSTALL" project)
 INSTALL( TARGETS ${TargetName}
   DESTINATION bin
   )
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../${GMAT_MAC_APPBUNDLE_PATH}/Frameworks/")
+    endif()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/"
+      )
+  endif()
+endif()

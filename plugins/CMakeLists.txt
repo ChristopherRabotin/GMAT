@@ -19,11 +19,11 @@
 #   TargetName:  Name of plugin target
 #   PLUGIN_DIRS: List of directories containing source/header files
 #   PLUGIN_SRCS: List of .c and .cpp source files
-# Note that all paths are relative to the plugin's CMakeLists.txt
-MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
+#   INSTALL_DIR: Directory to install plugin (plugins, bin, etc.)
+# Note that all paths should be relative to the plugin's CMakeLists.txt
+MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS INSTALL_DIR)
   # Add Preproccessor Definitions
   ADD_DEFINITIONS("-D_DYNAMICLINK")
-  #ADD_DEFINITIONS("-DEXP_STL")
 
   # ====================================================================
   # prepend include directories for header files
@@ -50,13 +50,77 @@ MACRO(_SETUPPLUGIN TargetName PLUGIN_DIRS PLUGIN_SRCS)
   # Macro defined in top-level CMakeLists.txt
   _ADDSOURCEGROUPS("${PLUGIN_DIRS}")
 
+  # ====================================================================
+  # Create build products in specified directory
+  # Macro defined in top-level CMakeLists.txt
+  _SETOUTPUTDIRECTORY(${TargetName} ${INSTALL_DIR})
+
+  # ====================================================================
+  # All plugins should start with "lib". This is always true for Mac/Linux, 
+  # but needs to be specified for Windows.
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PREFIX "lib")
+
+  # ====================================================================
+  # Plugin label should include "Plugin" in IDEs (e.g. VisualStudio)
+  SET_TARGET_PROPERTIES(${TargetName} PROPERTIES PROJECT_LABEL "Plugin ${TargetName}")
+
+  # ====================================================================
+  # All plugins link to GmatBase
+  TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
+
+  # ====================================================================
+  # Specify where to install plugin
+  # - On Windows the dll is RUNTIME (lib is ARCHIVE, ignored here)
+  # - On Mac/Linux the dylib/so is LIBRARY
+  if(WIN32)
+    INSTALL(TARGETS ${TargetName} RUNTIME DESTINATION ${INSTALL_DIR})
+  else()
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      set(FULL_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/${INSTALL_DIR})
+    else()
+      set(FULL_INSTALL_DIR ${INSTALL_DIR})
+    endif()
+    INSTALL(TARGETS ${TargetName} LIBRARY DESTINATION ${FULL_INSTALL_DIR})
+  endif()
+
 ENDMACRO(_SETUPPLUGIN)
+
+# ====================================================================
+# Declare all public plugins and their default values
+# FOR NEW PLUGINS: Add a new line here with the plugin name
+#                  Insert new OPTION command alphabetically for readability
+# OPTION(PLUGIN_<PLUGINNAME> "<PluginName> Plugin" ON|OFF)
+OPTION(PLUGIN_CINTERFACE "CInterface Plugin" ON)
+OPTION(PLUGIN_DATAINTERFACE "DataInterface Plugin" ON)
+OPTION(PLUGIN_DATACALLBACK "DataCallback Plugin" OFF)
+OPTION(PLUGIN_EPHEMPROPAGATOR "EphemPropagator Plugin" ON)
+OPTION(PLUGIN_ESTIMATION "Estimation Plugins" ON)
+OPTION(PLUGIN_EVENTLOCATOR "EventLocator Plugin" ON)
+OPTION(PLUGIN_EXTRAPROPAGATORS "ExtraPropagators Plugin" ON)
+OPTION(PLUGIN_FMINCONOPTIMIZER "FminconOptimizer Plugin" OFF)
+OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
+OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
+OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
+OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
+OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
+OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
+OPTION(PLUGIN_STATION "Station Plugin" ON)
 
 # Variable used to collect a list of all enabled plugins
 SET(PluginTargets "")
 
 # ====================================================================
-# CInterface Plugin binary
+# FOR NEW PLUGINS: This code adds your plugin to the build system
+# Insert this code in alphabetical order between the plugins below
+#if (PLUGIN_<PLUGINNAME>) # Use your plugin's name
+#  SET(PLUGINDIR "<PluginDir>/src/base") # Use your plugin's directory name
+#  ADD_SUBDIRECTORY(${PLUGINDIR}) 
+#  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+#  SET(PluginTargets ${PluginTargets} ${tmp})
+#endif()
+
+# ====================================================================
+# CInterface Plugin
 if (PLUGIN_CINTERFACE)
   SET(PLUGINDIR "CInterfacePlugin/src")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -65,7 +129,7 @@ if (PLUGIN_CINTERFACE)
 endif()
 
 # ====================================================================
-# DataInterface Plugin binary
+# DataInterface Plugin
 if (PLUGIN_DATAINTERFACE)
   SET(PLUGINDIR "DataInterfacePlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -74,7 +138,7 @@ if (PLUGIN_DATAINTERFACE)
 endif()
 
 # ====================================================================
-# DataCallback Plugin binary
+# DataCallback Plugin
 if (PLUGIN_DATACALLBACK)
   SET(PLUGINDIR "DataCallbackPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -83,7 +147,7 @@ if (PLUGIN_DATACALLBACK)
 endif()
 
 # ====================================================================
-# EphemPropagator Plugin binary
+# EphemPropagator Plugin
 if (PLUGIN_EPHEMPROPAGATOR)
   SET(PLUGINDIR "EphemPropagatorPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -92,7 +156,7 @@ if (PLUGIN_EPHEMPROPAGATOR)
 endif()
 
 # ====================================================================
-# Estimation Plugin binary
+# Estimation Plugin
 if (PLUGIN_ESTIMATION)
   SET(PLUGINDIR "EstimationPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -101,7 +165,7 @@ if (PLUGIN_ESTIMATION)
 endif()
 
 # ====================================================================
-# EventLocator Plugin binary
+# EventLocator Plugin
 if (PLUGIN_EVENTLOCATOR)
   SET(PLUGINDIR "EventLocatorPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -110,7 +174,7 @@ if (PLUGIN_EVENTLOCATOR)
 endif()
 
 # ====================================================================
-# ExtraPropagators Plugin binary
+# ExtraPropagators Plugin
 if (PLUGIN_EXTRAPROPAGATORS)
   SET(PLUGINDIR "ExtraPropagatorsPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -119,7 +183,7 @@ if (PLUGIN_EXTRAPROPAGATORS)
 endif()
 
 # ====================================================================
-# FminconOptimizer Plugin binary
+# FminconOptimizer Plugin
 if (PLUGIN_FMINCONOPTIMIZER)
   SET(PLUGINDIR "FminconOptimizerPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -128,7 +192,7 @@ if (PLUGIN_FMINCONOPTIMIZER)
 endif()
 
 # ====================================================================
-# Formation Plugin binary
+# Formation Plugin
 if (PLUGIN_FORMATION)
   SET(PLUGINDIR "FormationPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -137,7 +201,7 @@ if (PLUGIN_FORMATION)
 endif()
 
 # ====================================================================
-# GeometricMeasurement Plugin binary
+# GeometricMeasurement Plugin
 if (PLUGIN_GEOMETRICMEASUREMENT)
   SET(PLUGINDIR "GeometricMeasurementPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -146,7 +210,7 @@ if (PLUGIN_GEOMETRICMEASUREMENT)
 endif()
 
 # ====================================================================
-# GmatFunction Plugin binary
+# GmatFunction Plugin
 if (PLUGIN_GMATFUNCTION)
   SET(PLUGINDIR "GmatFunctionPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -155,7 +219,7 @@ if (PLUGIN_GMATFUNCTION)
 endif()
 
 # ====================================================================
-# MatlabInterface Plugin binary
+# MatlabInterface Plugin
 if (PLUGIN_MATLABINTERFACE)
   SET(PLUGINDIR "MatlabInterfacePlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -164,7 +228,7 @@ if (PLUGIN_MATLABINTERFACE)
 endif()
 
 # ====================================================================
-# ProductionPropagators Plugin binary
+# ProductionPropagators Plugin
 if (PLUGIN_PRODUCTIONPROPAGATORS)
   SET(PLUGINDIR "ProductionPropagatorPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -173,7 +237,7 @@ if (PLUGIN_PRODUCTIONPROPAGATORS)
 endif()
 
 # ====================================================================
-# SaveCommand Plugin binary
+# SaveCommand Plugin
 if (PLUGIN_SAVECOMMAND)
   SET(PLUGINDIR "SaveCommandPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -182,7 +246,7 @@ if (PLUGIN_SAVECOMMAND)
 endif()
 
 # ====================================================================
-# Station Plugin binary
+# Station Plugin
 if (PLUGIN_STATION)
   SET(PLUGINDIR "StationPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
@@ -200,16 +264,16 @@ FIND_PATH(GMAT_PROPRIETARYPLUGINS_PATH
   PATHS
     ${PROJECT_SOURCE_DIR}/../gmatinternal-git
     ${PROJECT_SOURCE_DIR}/plugins/gmatinternal-git
-  DOC "Path to GMAT proprietary plugins"
+  DOC "Path to GMAT proprietary plugins (containing code/)"
   NO_DEFAULT_PATH
   )
 
-# Load CMakeLists.txt file from top-level proprietary plugins folder
+# Load CMakeLists.txt file from proprietary plugins /code folder
 if(GMAT_PROPRIETARYPLUGINS_PATH)
   SET(PLUGINDIR "${GMAT_PROPRIETARYPLUGINS_PATH}/code")
-  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/internal")
-  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
-  SET(PluginTargets ${PluginTargets} ${tmp})
+  ADD_SUBDIRECTORY(${PLUGINDIR} "${CMAKE_CURRENT_BINARY_DIR}/proprietary")
+  GET_DIRECTORY_PROPERTY(ProprietaryTargets DIRECTORY ${PLUGINDIR} DEFINITION PluginTargets)
+  SET(PluginTargets ${PluginTargets} ${ProprietaryTargets})
 endif()
 
 # ====================================================================

@@ -989,7 +989,60 @@ Real AtmosphereModel::SetRealParameter(const Integer id, const Real value)
 }
 
 
-bool AtmosphereModel::SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Call through method since derived classes need it (e.g. MarsGRAM)
+ *
+ * @param id The parameter ID
+ * @param index Index of the requested real number
+ *
+ * @return The array based real parameter requested.
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::GetRealParameter(const Integer id,
+      const Integer index) const
+{
+   return GmatBase::GetRealParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * Call through method since derived classes need it (e.g. MarsGRAM)
+ *
+ * @param id The parameter ID
+ * @param value The new parameter value
+ * @param index Index of the requested real number
+ *
+ * @return The new array based real parameter requested.
+ */
+//------------------------------------------------------------------------------
+Real AtmosphereModel::SetRealParameter(const Integer id,
+                                     const Real value,
+                                     const Integer index)
+{
+   return GmatBase::SetRealParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets string based values on the model
+ *
+ * @param id The ID of the parameter being set
+ * @param value The new value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool AtmosphereModel::SetStringParameter(const Integer id,
+      const std::string &value)
 {
    if (id == CSSI_WEATHER_FILE)
    {
@@ -1008,6 +1061,18 @@ bool AtmosphereModel::SetStringParameter(const Integer id, const std::string &va
    return GmatBase::SetStringParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string based value
+ *
+ * @param id The ID for the requested parameter
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
 std::string AtmosphereModel::GetStringParameter(const Integer id) const
 {
    if (id == CSSI_WEATHER_FILE)
@@ -1019,12 +1084,38 @@ std::string AtmosphereModel::GetStringParameter(const Integer id) const
    return GmatBase::GetStringParameter(id);
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string based parameter using the script label
+ *
+ * @param label The text label for the parameter
+ *
+ * @return The parameter value
+ */
+//------------------------------------------------------------------------------
 std::string AtmosphereModel::GetStringParameter(const std::string &label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
 
-bool AtmosphereModel::SetStringParameter(const std::string &label, const std::string &value)
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets string based values on the model
+ *
+ * @param label The text label for the parameter
+ * @param value The new value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool AtmosphereModel::SetStringParameter(const std::string &label,
+      const std::string &value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
@@ -1292,6 +1383,14 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
       for (Integer i = 0; i < 7; i++)
          ap[i] = nominalAp;
    }
+
+   #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("Flux data for %s model\n", instanceName.c_str());
+      MessageInterface::ShowMessage("   Epoch:  %.12lf\n", epoch);
+      MessageInterface::ShowMessage("   F10.7:  %lf\n", f107);
+      MessageInterface::ShowMessage("   F10.7a: %lf\n", f107a);
+      MessageInterface::ShowMessage("   Ap:     [%lf %lf %lf %lf %lf %lf %lf]\n", ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
+   #endif
 }
 
 

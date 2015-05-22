@@ -10,82 +10,61 @@
 # DO NOT MODIFY THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING!
 #
 
-# ====================================================================
-# Set overall install instructions
-# executed when running "make install" or building the VS "INSTALL" target
-
 MESSAGE("==============================")
-MESSAGE("Setting up steps to install GMAT " ${VERSION})
-
-# ====================================================================
-# Install the default application/ directory structure
-MESSAGE(STATUS "Will install GMAT to " ${CMAKE_INSTALL_PREFIX})
-INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/application/"
-  DESTINATION ${CMAKE_INSTALL_PREFIX}
-  USE_SOURCE_PERMISSIONS
-  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
-  PATTERN "debug" EXCLUDE # don't copy debug directory
-  )
-
-# ====================================================================
-# Install the CInterface Matlab scripts (opengmat, closegmat, etc...)
-INSTALL( DIRECTORY "${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/matlab/"
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/matlab/libCInterface
-  USE_SOURCE_PERMISSIONS
-  PATTERN ".*" EXCLUDE  # e.g. .gitignore, .ds_store, etc...
-  )
-
-# Create the CInterface Matlab thunk files if Matlab exists
-if(PLUGIN_CINTERFACE)
-  if(Matlab_FOUND)
-    # Create the command to be executed by Matlab
-    SET(MSTART "\"${Matlab_MAIN_PROGRAM}\"")
-    if(WIN32)
-      # Need -wait on Windows so matlab call doesn't immediately return
-      SET(MSTART "${MSTART} -wait")
-    endif()
-    SET(MSTART "${MSTART} -nosplash -nodesktop -nodisplay -r")
-    SET(MPATH1 "addpath('${CMAKE_INSTALL_PREFIX}/bin');")
-    SET(MPATH2 "addpath('${CMAKE_INSTALL_PREFIX}/matlab/libCInterface');")
-    SET(MCD "cd('${PROJECT_SOURCE_DIR}/plugins/CInterfacePlugin/build/matlab');")
-    SET(MPREP "prepareInterface_cmake;")
-    SET(MEXIT "exit;")
-    SET(MATLAB_COMMAND "${MSTART} \"${MPATH1} ${MPATH2} ${MCD} ${MPREP} ${MEXIT}\"")
-    MESSAGE(STATUS "Will install CInterface Matlab thunk files with command:\n${MATLAB_COMMAND}")
-
-    # Running Matlab can take a while, so notify the user
-    if(WIN32)
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab in a separate window...patience is a virtue...\")")
-    else()
-      INSTALL(CODE "MESSAGE(STATUS \"Launching Matlab...patience is a virtue...\")")
-    endif()
-
-    # Git 'er done!
-    INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${MATLAB_COMMAND} WORKING_DIRECTORY \"${CMAKE_INSTALL_PREFIX}/bin\")")
-
-  # Warn user if Matlab was not found
-  else()
-    MESSAGE(WARNING "Matlab not found, will not build Matlab prototype files for the GMAT CInterface Plugin.")
-  endif()
-endif()
+MESSAGE("Setting up wxWidgets install instructions for GMAT " ${VERSION})
 
 # ====================================================================
 # Install wxWidgets libraries
+# This should be investigated further, since it's possible to build
+# release/debug GMAT using either release/debug wxWidgets. Therefore there
+# should be a nice cross-platform way of checking for the version of
+# wxWidgets that is actually being used.
 if(wxWidgets_FOUND)
-  # For Windows, dlls must be next to executables in bin
   if(WIN32)
+    # For Windows, dlls must be next to executables in bin
     INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
       DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "*.dll"
+      CONFIGURATIONS Release MinSizeRel
+      FILES_MATCHING PATTERN "*u_*.dll" # Only release ("u" suffix)
       PATTERN "msw*" EXCLUDE
       )
-  # For Mac/Linux, dylib/so can be in subdirectory of bin
-  else()
-    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
-      DESTINATION bin/libwx
+    INSTALL(DIRECTORY ${wxWidgets_LIB_DIR}/
+      DESTINATION bin
       USE_SOURCE_PERMISSIONS
-      FILES_MATCHING PATTERN "libwx*"
+      CONFIGURATIONS Debug RelWithDebInfo
+      FILES_MATCHING PATTERN "*ud_*.dll" # Only debug ("ud" suffix)
+      PATTERN "msw*" EXCLUDE
+      )
+  else()
+    # For Mac/Linux, wxlibs are in bin/libwx or Mac app bundle
+    if(APPLE AND GMAT_MAC_APPBUNDLE_PATH)
+      SET(WX_INSTALL_DIR ${GMAT_MAC_APPBUNDLE_PATH}/Frameworks)
+    else()
+      SET(WX_INSTALL_DIR bin/libwx)
+    endif()
+
+    # Set wxlib type based on debug/release
+    # This is needed because it's possible (on Mac/Linux) to build debug
+    # GMAT using release wxWidgets
+    if(wxWidgets_USE_DEBUG)
+      SET(WX_DEBUG_PATTERN "libwx_*ud[_-]*")
+    else()
+      SET(WX_DEBUG_PATTERN "libwx_*u[_-]*")
+    endif()
+
+    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
+      DESTINATION ${WX_INSTALL_DIR}
+      USE_SOURCE_PERMISSIONS
+      CONFIGURATIONS Release MinSizeRel
+      FILES_MATCHING PATTERN "libwx_*u[_-]*"
+      PATTERN "wx" EXCLUDE
+      )
+    INSTALL(DIRECTORY ${wxWidgets_LIBRARY_DIRS}/
+      DESTINATION ${WX_INSTALL_DIR}
+      USE_SOURCE_PERMISSIONS
+      CONFIGURATIONS Debug RelWithDebInfo
+      FILES_MATCHING PATTERN "${WX_DEBUG_PATTERN}"
       PATTERN "wx" EXCLUDE
       )
 
@@ -94,11 +73,31 @@ if(wxWidgets_FOUND)
     if(APPLE)
       # Create command for wxmac_change_install_names script
       SET(CHNM "./wxmac_change_install_names.sh")
-      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/bin/libwx\"")
-      SET(ARG2 "\"bin\"") # Unused, dummy argument
+      SET(ARG1 "\"${CMAKE_INSTALL_PREFIX}/${WX_INSTALL_DIR}\"")
+      SET(ARG2 "\"${wxWidgets_LIBRARY_DIRS}\"")
       SET(ARG3 "\"@rpath\"")
-      SET(ARG4 "\"${wxWidgets_LIBRARY_DIRS}\"")
-      SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARG4}")
+
+      # Collect list of all GMAT components that use wxWidgets
+      if(GMAT_MAC_APPBUNDLE_PATH)
+	SET(MAC_GUIDIR ${GMAT_MAC_APPBUNDLE_PATH}/MacOS)
+	SET(MAC_PLUGINDIR ${GMAT_MAC_APPBUNDLE_PATH}/plugins)
+      else()
+	SET(MAC_GUIDIR bin)
+	SET(MAC_PLUGINDIR plugins)
+      endif()
+
+      if(GMAT_GUI)
+	SET(ARGN "\"${CMAKE_INSTALL_PREFIX}/${MAC_GUIDIR}/GMAT*\"")
+      endif()
+
+      if(PLUGIN_MATLABINTERFACE)
+	SET(ARGN "${ARGN} \"${CMAKE_INSTALL_PREFIX}/${MAC_PLUGINDIR}/libMatlabInterface*.dylib\"")
+      endif()
+
+      # Append full pathname of new components here using above pattern
+
+      # Finally create install command to change rpaths and install names
+      SET(CHNM_COMMAND "${CHNM} ${ARG1} ${ARG2} ${ARG3} ${ARGN}")
       INSTALL(CODE "MESSAGE(STATUS \"Changing wxWidgets library install names\")")
       INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CHNM_COMMAND} WORKING_DIRECTORY \"${CMAKE_CURRENT_SOURCE_DIR}\")")
     endif()

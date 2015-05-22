@@ -42,6 +42,7 @@
 //#define DEBUG_GLOBAL_OBJECT_MAP
 //#define DEBUG_RUN_COMPLETE
 //#define DEBUG_OBJECT_REF
+//#define DEBUG_FUNCTION
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -390,7 +391,14 @@ void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
       
       // Set only GmatFunction to FunctionManager (loj: 2008.09.03)
       if (mapObj->GetTypeName() == "GmatFunction")
+      {
+         #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+            ("CallFunction::SetGlobalObjectMap() setting function<%p>'%s' to FunctionManager\n",
+             mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
+         #endif
          fm.SetFunction(mFunction);
+      }
    }
    fm.SetGlobalObjectMap(map);
    
@@ -940,6 +948,11 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          mFunctionPathAndName = mFunction->GetFunctionPathAndName();
          if (mFunction && mFunction->GetTypeName() == "GmatFunction")
          {
+            #ifdef DEBUG_FUNCTION
+            MessageInterface::ShowMessage
+               ("CallFunction::SetRefObject() setting function<%p>'%s' to FunctionManager\n",
+                mFunction, mFunction ? mFunction->GetName().c_str() : "NULL");
+            #endif
             fm.SetFunction(mFunction);
             isGmatFunction = true;
             isMatlabFunction = false;
@@ -1038,6 +1051,32 @@ bool CallFunction::Initialize()
           mFunctionPathAndName.c_str());
       #endif
    }
+   else
+   {
+      if (mFunction == NULL)
+         throw CommandException("CallFunction::Initialize() the function pointer is NULL");
+   
+      if (mFunction->GetTypeName() == "GmatFunction")
+         isGmatFunction = true;
+      else if (mFunction->GetTypeName() == "MatlabFunction")
+         isMatlabFunction = true;
+   
+      if (!isGmatFunction && !isMatlabFunction)
+         throw CommandException
+            ("CallFunction::Initialize() the function is neither GmatFunction nor MatlabFunction");
+   
+      mFunctionPathAndName = mFunction->GetFunctionPathAndName();
+      std::string fname = GmatFileUtil::ParseFileName(mFunctionPathAndName);
+      if (fname == "")
+         mFunctionPathAndName += mFunctionName;
+   
+      #ifdef DEBUG_CALL_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("CallFunction::Initialize() returning %d, fname='%s', mFunctionName='%s'\n   "
+          "mFunctionPathAndName='%s'\n", rv, fname.c_str(), mFunctionName.c_str(),
+          mFunctionPathAndName.c_str());
+      #endif
+   }
    
    return rv;
 }
@@ -1058,7 +1097,7 @@ bool CallFunction::Execute()
    callCount++;      
    clock_t t1 = clock();
    MessageInterface::ShowMessage
-      ("=== CallFunction::Execute() entered, '%s' Count = %d\n",
+      (">>>>> CallFunction::Execute() entered, '%s' Count = %d\n",
        GetGeneratingString(Gmat::NO_COMMENTS).c_str(), callCount);
    #endif
    

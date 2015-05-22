@@ -26,6 +26,7 @@
 
 #include "EventLocator.hpp"
 #include "EventLocatorDefs.hpp"
+#include "ContactResult.hpp"
 
 
 /**
@@ -110,9 +111,14 @@ public:
                                        const std::string &oldName,
                                        const std::string &newName);
 
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
+
+
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    virtual bool         Initialize();
-   virtual void         ReportEventData(const std::string &reportNotice = "");
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
 
    DEFAULT_TO_NO_CLONES
 
@@ -125,7 +131,7 @@ protected:
    std::string lightTimeDirection;
 
    // The stored results
-   std::vector<EventList*> contactResults;
+   std::vector<ContactResult*> contactResults;
 
 
    /// Published parameters for contact locators
@@ -142,6 +148,8 @@ protected:
     /// burn parameter types
     static const Gmat::ParameterType
        PARAMETER_TYPE[ContactLocatorParamCount - EventLocatorParamCount];
+
+    static const std::string LT_DIRECTIONS[2];
 
     virtual void         FindEvents();
     virtual std::string  GetAbcorrString();

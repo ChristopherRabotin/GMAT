@@ -22,6 +22,10 @@
 #include "EventException.hpp"
 #include "StringUtil.hpp"
 #include "GmatConstants.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_ECLIPSE_TOTAL_EVENT
+//#define DEBUG_CLEAR_EVENTS
 
 //------------------------------------------------------------------------------
 // public methods
@@ -36,13 +40,22 @@ EclipseTotalEvent::EclipseTotalEvent() :
 
 EclipseTotalEvent::~EclipseTotalEvent()
 {
-   // nothing to do here
+   TakeAction("Clear");
 }
 
 EclipseTotalEvent::EclipseTotalEvent(const EclipseTotalEvent& copy) :
    LocatedEvent  (copy),
    theIndex      (copy.theIndex)
 {
+   TakeAction("Clear");
+   EclipseEvent *toCopy   = NULL;
+   EclipseEvent *newEvent = NULL;
+   for (Integer ii = 0; ii < (copy.theEvents).size(); ii++)
+   {
+      toCopy   = copy.theEvents.at(ii);
+      newEvent = new EclipseEvent(*toCopy);
+      theEvents.push_back(newEvent);
+   }
 }
 
 EclipseTotalEvent& EclipseTotalEvent::operator=(const EclipseTotalEvent& copy)
@@ -51,6 +64,15 @@ EclipseTotalEvent& EclipseTotalEvent::operator=(const EclipseTotalEvent& copy)
    {
       LocatedEvent::operator=(copy);
       theIndex      = copy.theIndex;
+   }
+   TakeAction("Clear");
+   EclipseEvent *toCopy   = NULL;
+   EclipseEvent *newEvent = NULL;
+   for (Integer ii = 0; ii < (copy.theEvents).size(); ii++)
+   {
+      toCopy   = copy.theEvents.at(ii);
+      newEvent = new EclipseEvent(*toCopy);
+      theEvents.push_back(newEvent);
    }
 
    return *this;
@@ -102,7 +124,7 @@ void EclipseTotalEvent::SetIndex(Integer i)
 EclipseEvent* EclipseTotalEvent::GetEvent(Integer atIndex)
 {
    if ((atIndex < 0) || (atIndex >= numEvents))
-      throw EventException("Index out-of-range for EclispeTotalEvent.\n");
+      throw EventException("Index out-of-range for EclipseTotalEvent.\n");
 
    return theEvents.at(atIndex);
 }
@@ -112,10 +134,19 @@ std::string EclipseTotalEvent::GetReportString()
    std::stringstream totalString("");
 
    Integer sz = theEvents.size();
+   #ifdef DEBUG_ECLIPSE_TOTAL_EVENT
+      MessageInterface::ShowMessage("In ETE::GetReportString, numEvents = %d\n",
+            sz);
+   #endif
+
    // Loop over the total events list
    for (Integer ii = 0; ii < sz; ii++)
    {
       EclipseEvent* ev = theEvents.at(ii);
+      #ifdef DEBUG_ECLIPSE_TOTAL_EVENT
+         MessageInterface::ShowMessage("In ETE::GetReportString, event %d is %sNULL\n",
+               ii, (ev? "NOT " : ""));
+      #endif
       std::string eventString = ev->GetReportString();
       Real        totalD      = GetDuration();
       totalString <<  eventString << "    ";
@@ -145,6 +176,10 @@ bool EclipseTotalEvent::TakeAction(const std::string &action,
 {
    if (action == "Clear")
    {
+      #ifdef DEBUG_CLEAR_EVENTS
+            MessageInterface::ShowMessage("Now clearing %d events in the EclipseTotalEvent\n",
+                                         (Integer) theEvents.size());
+      #endif
       for (Integer ii = 0; ii < theEvents.size(); ii++)
       {
          delete theEvents.at(ii);

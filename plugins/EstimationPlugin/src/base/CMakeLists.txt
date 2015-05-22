@@ -21,13 +21,7 @@ if(NOT EXISTS ${F2C_DIR})
   RETURN()
 endif()
 
-if(WIN32)
-	SET(PLUGINTARGET  "libGmatEstimation")
-else()
-	SET(PLUGINTARGET "GmatEstimation")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName GmatEstimation)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
@@ -110,6 +104,7 @@ SET(PLUGIN_SRCS
 
 # Temporarily disable Ionosphere for Mac/Linux
 if(WIN32)
+  ADD_DEFINITIONS("-DIONOSPHERE")
   SET(PLUGIN_SRCS ${PLUGIN_SRCS}
     measurement/Ionosphere/Ionosphere.cpp
     measurement/Ionosphere/cira.c
@@ -122,17 +117,5 @@ if(WIN32)
 endif()
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
-
-# ====================================================================
 # Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
-
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
-  )
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)

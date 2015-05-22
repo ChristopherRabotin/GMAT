@@ -24,7 +24,8 @@
 //  static data
 //---------------------------------
 MessageReceiver* MessageInterface::theMessageReceiver = NULL;
-const int MessageInterface::MAX_MESSAGE_LENGTH = 20000;
+//const int MessageInterface::MAX_MESSAGE_LENGTH = 20000;
+const int MessageInterface::MAX_MESSAGE_LENGTH = 30000;
 
 
 //---------------------------------
@@ -110,8 +111,8 @@ void MessageInterface::ShowMessage(const char *format, ...)
 {
    if (theMessageReceiver != NULL)
    {
-      short    ret;
-      short    size;
+      int      ret;
+      size_t   size;
       va_list  marker;
       char     *msgBuffer = NULL;
       std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
@@ -119,14 +120,15 @@ void MessageInterface::ShowMessage(const char *format, ...)
       // format is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
       size = strlen(format) + MAX_MESSAGE_LENGTH;
-      //LogMessage("strlen(format)=%d, size=%d\n", strlen(format), size);
+      //LogMessage("strlen(format)=%u, size=%u\n", strlen(format), size);
       
       if( (msgBuffer = (char *)malloc(size)) != NULL )
       {
-         for (int i=0; i<size; i++)
+         for (unsigned int i=0; i<size; i++)
             msgBuffer[i] = '\0';
          va_start(marker, format);
          ret = vsprintf(msgBuffer, format, marker);
+         //LogMessage("return from vsprintf() is %d\n", ret);
          if (ret < 0)
             theMessageReceiver->ShowMessage("Unable to complete messaging");
          else
@@ -138,10 +140,7 @@ void MessageInterface::ShowMessage(const char *format, ...)
       else
       {
          theMessageReceiver->ShowMessage(msgStr);
-//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
       }
-
-//      theMessageReceiver->ShowMessage(std::string(msgBuffer));
       free(msgBuffer);
    }
 } // end ShowMessage()
@@ -215,10 +214,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *forma
       else
       {
          theMessageReceiver->PopupMessage(msgType, msgStr);
-//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
       }
-      
-//      theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
       
       free(msgBuffer);
    }

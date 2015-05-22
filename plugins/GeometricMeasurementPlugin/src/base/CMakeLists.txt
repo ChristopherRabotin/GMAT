@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT Geometric Measurement Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libGeometricMeasurements")
-else()
-	SET(PLUGINTARGET "GeometricMeasurements")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName GeometricMeasurements)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DGEOMETRICMEAS_EXPORTS")
@@ -54,17 +48,9 @@ SET(PLUGIN_SRCS
 )
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase libGmatEstimation)
-else()
-	LINK_LIBRARIES(GmatBase GmatEstimation)
-endif()
+# Setup common plugin definitions, targets, etc.
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
-# Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
-
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
-  )
+# Additional link libraries
+TARGET_LINK_LIBRARIES(${TargetName} GmatEstimation)

@@ -228,7 +228,7 @@ void AttitudePanel::Create()
    #if __WXMAC__
    int buttonWidth = 40;
    int otherTextWidth = 100;
-   Integer defHeight = 20;
+   Integer defHeight = -1;
    #else
    int buttonWidth = 25;
    int otherTextWidth = 100;

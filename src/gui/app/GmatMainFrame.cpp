@@ -48,6 +48,7 @@
 #include "SpacecraftPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
 #include "PowerSystemConfigPanel.hpp"
+#include "EventLocatorPanel.hpp"
 #include "UniversePanel.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "PropagatePanel.hpp"
@@ -65,6 +66,7 @@
 #include "ReportFileSetupPanel.hpp"
 #include "EphemerisFilePanel.hpp"
 #include "SubscriberSetupPanel.hpp"
+#include "FindEventsPanel.hpp"
 #include "MessageInterface.hpp"
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
@@ -4177,7 +4179,8 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new LibrationPointPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::EVENT_LOCATOR:
-     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+//     sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      sizer->Add(new EventLocatorPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
      break;
    case GmatTree::USER_DEFINED_OBJECT:
      sizer->Add(new GmatBaseSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
@@ -4290,6 +4293,9 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    case GmatTree::SAVE:
    case GmatTree::MANAGE_OBJECT:
       sizer->Add(new ManageObjectPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::FIND_EVENTS:
+      sizer->Add(new FindEventsPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::REPORT:
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
@@ -6559,6 +6565,10 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    
    while (cont)
    {
+      // Skip GmatLog.txt since it will be always different (LOJ: 2015.04.01)
+      if (filename == "GmatLog.txt")
+         cont = dir.GetNext(&filename);
+      
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
           filename.Contains(".eph") || filename.Contains(".truth"))

@@ -14,13 +14,7 @@
 MESSAGE("==============================")
 MESSAGE("GMAT DataCallback Plugin setup " ${VERSION}) 
 
-if(WIN32)
-	SET(PLUGINTARGET  "libDataCallback")
-else()
-	SET(PLUGINTARGET "DataCallback")
-endif()
-
-SET(TargetName ${PLUGINTARGET})
+SET(TargetName DataCallback)
 
 # Add Preproccessor Definitions
 ADD_DEFINITIONS("-DDATACALLBACK_EXPORTS")
@@ -38,17 +32,34 @@ SET(PLUGIN_SRCS
 )
 
 # ====================================================================
-# libraries
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
+# Setup common plugin definitions, targets, etc.
+if(APPLE)
+  # Override appbundle path so plugin is installed directly into bin
+  set(MAC_APPBUNDLE_PATH ${GMAT_MAC_APPBUNDLE_PATH}) # Save for later
+  set(GMAT_MAC_APPBUNDLE_PATH "")
 endif()
 
-# ====================================================================
-# Setup common plugin definitions, targets, etc.
-_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}")
+_SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" bin)
 
-INSTALL( TARGETS ${TargetName}
-  DESTINATION plugins
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    set(GMAT_MAC_APPBUNDLE_PATH ${MAC_APPBUNDLE_PATH}) # Restore
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../${GMAT_MAC_APPBUNDLE_PATH}/Frameworks/")
+    endif()           
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/"                             
+      )
+  endif()
+endif()
+
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  LIBRARY_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
   )

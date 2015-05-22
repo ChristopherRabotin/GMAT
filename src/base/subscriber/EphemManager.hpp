@@ -14,8 +14,9 @@
 /**
  * Base class definition for the EphemManager.  The EphemManager is
  * responsible for creating, loading, and managing private/hidden EphemerisFile
- * objects associated with its specified Spacecraft object.
- * NOTE: currently, the EphemManager will only handle SPK Orbit files.
+ * objects associated with its specified Spacecraft or Asset object.
+ * NOTE: currently, the EphemManager will only handle SPK Orbit files, and
+ * FK text files for the GroundStation.
  */
 //------------------------------------------------------------------------------
 
@@ -25,6 +26,8 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "CoordinateSystem.hpp"
+#include "SolarSystem.hpp"
+
 #ifdef __USE_SPICE__
    #include "SpiceInterface.hpp"
 #endif
@@ -44,6 +47,7 @@ public:
    enum ManagedEphemType
    {
       SPK,
+      FK,
       CK,     // future
       CCSDS,  // future
    };
@@ -76,18 +80,38 @@ public:
                                                 Real              s,
                                                 Real              e,
                                                 bool              useEntireIntvl,
-                                                Integer           stepSize,
+                                                Real              stepSize,
                                                 Integer           &numIntervals,
                                                 RealArray         &starts,
                                                 RealArray         &ends);
+
+   /// @YRL
+   bool                 GetContactIntervals(const std::string &observerID,
+                                            Real              minElevation,
+                                            const std::string &obsFrameName,
+                                            StringArray       &occultingBodyNames,
+                                            const std::string &abCorrection,
+                                            Real              s,
+                                            Real              e,
+                                            bool              useEntireIntvl,
+                                            bool              useLightTime,
+                                            bool              transmit,
+                                            Real              stepSize,
+                                            Integer           &numIntervals,
+                                            RealArray         &starts,
+                                            RealArray         &ends);
+
+   bool                 GetCoverageStartAndStop(Real s, Real e,
+                                                bool useEntireIntvl,
+                                                bool includeAll,
+                                                Real &intvlStart,
+                                                Real &intvlStop);
 
    /// Set reference objects
    virtual void         SetObject(GmatBase *obj);
    virtual void         SetEphemType(ManagedEphemType eType);
    virtual void         SetCoordinateSystem(CoordinateSystem *cs);
-
-//   virtual void         SetInitialEpoch(const std::string &ep);
-//   virtual void         SetFinalEpoch(const std::string &ep);
+   virtual void         SetSolarSystem(SolarSystem *ss);
 
 protected:
 //   /// Epoch format
@@ -102,6 +126,8 @@ protected:
    std::string          theObjName;
    /// pointer to the object whose ephemeris is being managed
    GmatBase             *theObj;
+   /// the solar system
+   SolarSystem          *solarSys;
    /// the Subscriber to which the Ephem will be written
    EphemerisFile        *ephemFile;
    /// CoordinateSystem to use for the EphemerisFile
@@ -120,16 +146,27 @@ protected:
    bool                 deleteTmpFiles;
    /// List of created files
    StringArray          fileList;
+   /// start time of the observation window
+   Real                 intStart;
+   /// stop time of the observation window
+   Real                 intStop;
    #ifdef __USE_SPICE__
       /// need a SpiceInterface to load and unload kernels
       SpiceInterface       *spice;
       /// The window specifying the SPK coverage for this object
       SpiceCell            *cover;
-
+      /// The window specifying the desired observation window for this
+      /// object
+      SpiceCell            *window;
       /// Method to determine the coverage window(s) for the spacecraft
-   void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
-                                          bool useEntireIntvl,
-                                          bool includeAll = true);
+      void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
+                                             bool useEntireIntvl,
+                                             bool includeAll = true,
+                                             bool lightTimeCorrection = false,
+                                             bool transmit = false,
+                                             Real stepSize = 10.0,
+                                             Integer obsID = -999);
+
    #endif
 
 };
