@@ -1,3 +1,23 @@
+//$Id$
+//------------------------------------------------------------------------------
+//                                 CallPythonFunction
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2014 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// FDSS II .
+//
+// Author: Farideh Farahnak
+// Created: 2015/02/23
+//
+/**
+* Definition for the CallPythonFunction command class
+*/
+//------------------------------------------------------------------------------
 #include "CallPythonFunction.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
@@ -190,6 +210,21 @@ bool CallPythonFunction::SetStringParameter(const std::string& label,
 //   return SetStringParameter(GetParameterID(label), value, index);
 //}
 
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+* Initialize Python engine
+*
+* This method will initialize python by loading Python engine and setting the 
+* PYTHONPATH.
+*
+* @param none
+*
+* @return bool
+*/
+//------------------------------------------------------------------------------
 bool CallPythonFunction::Initialize()
 {
 	bool ret = false;
@@ -226,6 +261,20 @@ bool CallPythonFunction::Initialize()
 	return ret;
 }
 
+
+//------------------------------------------------------------------------------
+// bool Execute()
+//------------------------------------------------------------------------------
+/**
+* Execute as a Python wrapper
+*
+* This method will execute the Python functions in a Python module.
+*
+* @param none
+*
+* @return bool
+*/
+//------------------------------------------------------------------------------
 bool CallPythonFunction::Execute()
 {
    // send the in parameters
@@ -268,6 +317,19 @@ void CallPythonFunction::RunComplete()
 }
 
 
+//------------------------------------------------------------------------------
+// Integer FillInputList()
+//------------------------------------------------------------------------------
+/**
+* Fills in input parameters
+*
+* This method will fill in input parameters declared in script.
+*
+* @param none
+*
+* @return Integer
+*/
+//------------------------------------------------------------------------------
 Integer CallPythonFunction::FillInputList()
 {
    GmatBase *mapObj;
@@ -293,6 +355,20 @@ Integer CallPythonFunction::FillInputList()
    return mInputList.size();
 }
 
+
+//------------------------------------------------------------------------------
+// Integer FillOutputList()
+//------------------------------------------------------------------------------
+/**
+* Fills in output parameters
+*
+* This method will fill in output parameters declared in script.
+*
+* @param none
+*
+* @return Integer
+*/
+//------------------------------------------------------------------------------
 Integer CallPythonFunction::FillOutputList()
 {
    GmatBase *mapObj;
@@ -319,6 +395,19 @@ Integer CallPythonFunction::FillOutputList()
 }
 
 
+//------------------------------------------------------------------------------
+// void SendInParam()
+//------------------------------------------------------------------------------
+/**
+* Fills in format string and input parameters for Python function
+*
+* This method will fill in format string and input parameters
+*
+* @param none
+*
+* @return void
+*/
+//------------------------------------------------------------------------------
 void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn)
 {
    for (unsigned int i = 0; i < mInputList.size(); i++)
