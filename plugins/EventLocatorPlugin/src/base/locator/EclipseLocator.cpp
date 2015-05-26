@@ -796,9 +796,8 @@ bool EclipseLocator::ReportEventData(const std::string &reportNotice)
       theReport << "Number of total events      : "   << sz            << "\n";
       theReport << "Maximum duration (s)        : "   << maxDuration   << "\n";
       theReport << "Maximum duration at the "         <<
-                   GmatStringUtil::ToOrdinal(maxIndex + 1) << " eclipse.\n";
+                   GmatStringUtil::ToOrdinal(maxIndex + 1) << " eclipse.\n\n\n";
    }
-
    theReport.close();
    return true;
 }
