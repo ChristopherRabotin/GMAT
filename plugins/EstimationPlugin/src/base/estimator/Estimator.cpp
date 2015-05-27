@@ -267,7 +267,7 @@ bool Estimator::Initialize()
    MessageInterface::ShowMessage("Enter Estimator::Initialize()\n");
 #endif
 
-   // it the delay flag is on, skip initializtion to the next time
+   // it the delay flag is on, skip initialization to the next time
    if (delayInitialization)
    {
       #ifdef DEBUG_INITIALIZE
@@ -276,7 +276,7 @@ bool Estimator::Initialize()
       return true;
    }
 
-   // If it was initialized, does not do it again
+   // If initialized, do not do it again
    if (isInitialized)
       return true;
 
@@ -345,7 +345,8 @@ bool Estimator::Initialize()
          }                                                                         // made changes by TUAN NGUYEN
 
          if (!found)                                                               // made changes by TUAN NGUYEN
-            throw SolverException("Cannot initialize estimator; '" + name + "' object is not defined in script.\n");        // made changes by TUAN NGUYEN
+            throw SolverException("Cannot initialize estimator; '" + name +
+                  "' object is not defined in script.\n");                         // made changes by TUAN NGUYEN
       }                                                                            // made changes by TUAN NGUYEN
 
       measModels.clear();                                                          // made changes by TUAN NGUYEN
