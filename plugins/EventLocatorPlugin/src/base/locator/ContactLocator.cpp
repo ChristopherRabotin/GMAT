@@ -978,7 +978,8 @@ bool ContactLocator::Initialize()
          for (UnsignedInt ii= 0; ii < stations.size(); ii++)
          {
             GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
-            if (!gsi->InitializeForContactLocation(false))
+//            if (!gsi->InitializeForContactLocation(false))
+            if (!gsi->InitializeForContactLocation(true))
             {
                std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
                errmsg            += stationNames.at(ii) + " used by ContactLocator ";

@@ -1272,7 +1272,8 @@ void Spacecraft::RecordEphemerisData()
 {
    if (!ephemMgr)
    {
-      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+//      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+      ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
       ephemMgr->SetObject(this);
       // @todo - do I need to resend this, if the internalCoordSys ever changes?
       ephemMgr->SetCoordinateSystem(internalCoordSystem);
@@ -4639,7 +4640,8 @@ bool Spacecraft::Initialize()
 
       if (!ephemMgr)
       {
-         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+//         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+         ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
          ephemMgr->SetObject(this);
          // @todo - do I need to resend this, if the internalCoordSys ever changes?
          ephemMgr->SetCoordinateSystem(internalCoordSystem);
