@@ -29,14 +29,14 @@
 
 
 //#define DEBUG_ESM_LOADING
-#define DEBUG_STATE_CONSTRUCTION
+//#define DEBUG_STATE_CONSTRUCTION
 //#define DEBUG_OBJECT_UPDATES
 //#define DUMP_STATE
-#define DEBUG_OBJECT_MAPPING
+//#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CLONING
 //#define DEBUG_COVARIANCE
 //#define DEBUG_INITIALIZATION
-#define DEBUG_STM_MAPPING
+//#define DEBUG_STM_MAPPING
 
 //------------------------------------------------------------------------------
 // EstimationStateManager(Integer size)

@@ -260,6 +260,7 @@ public:
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
    virtual Integer         HasParameterCovariances(Integer parameterId);
 
    // Cloned object update management
@@ -593,6 +594,8 @@ protected:
    Rmatrix           fullAMatrix;
    /// full STM number of rows (and columns)
    Integer           fullSTMRowCount;
+   /// Mapping of the rows/columns in the STM
+   IntegerArray      stmIndices;
 
    /// The name of the SPAD SRP file
    std::string       spadSRPFile;

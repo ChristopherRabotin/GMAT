@@ -1194,6 +1194,7 @@ void RunEstimator::Propagate()
       #endif
       
       fm[0]->UpdateFromSpaceObject();
+      fm[0]->TakeAction("UpdateSpacecraftParameters");
       
       #ifdef DEBUG_STATE_RESETS
          Real* newState = fm[0]->GetState();
@@ -1207,6 +1208,7 @@ void RunEstimator::Propagate()
    {
       fm[0]->UpdateFromSpaceObject();
       fm[0]->SetTime(estimationOffset);
+      fm[0]->TakeAction("UpdateSpacecraftParameters");
       startNewPass = false;
    }
    

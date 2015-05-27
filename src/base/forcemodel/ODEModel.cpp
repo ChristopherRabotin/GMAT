@@ -2346,6 +2346,20 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
                throw ODEModelException("SRP Area parameter unphysical on object " +
                   sat->GetName());
             pm->SetSatelliteParameter(i, satIds[5], parm);
+
+            // ... Cd ...
+            parm = sat->GetRealParameter(satIds[3]);
+            if (parm < 0)
+               throw ODEModelException("Cr parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[3], parm);
+
+            // ... Cr ...
+            parm = sat->GetRealParameter(satIds[6]);
+            if (parm < 0)
+               throw ODEModelException("Cd parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[6], parm);
          }
          else if (sat->GetType() == Gmat::FORMATION)
          {
@@ -3081,6 +3095,12 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
          // deleting it
          delete deleteList[i];
       }
+   }
+
+   if (action == "UpdateSpacecraftParameters")
+   {
+      UpdateDynamicSpacecraftData(&stateObjects, 0);
+      UpdateDynamicSpacecraftData(&stateObjects, 0);
    }
 
    return true;

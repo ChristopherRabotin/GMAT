@@ -1328,6 +1328,41 @@ bool PhysicalModel::SetStart(Gmat::StateElementId id, Integer index,
    return false;
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStmRowId(Integer rowNumber, Integer rowId)
+//------------------------------------------------------------------------------
+/**
+ * Sets up the mapping the the STM rows/columns
+ *
+ * @param rowNumber The row number for the ID
+ * @param rowId The parameter ID for that row
+ *
+ * @return true if the ID was saved/updated, false if it was discarded
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::SetStmRowId(Integer rowNumber, Integer rowId)
+{
+   bool retval = false;
+
+   if (stmRowId.size() > rowNumber)
+   {
+      stmRowId[rowNumber] = rowId;
+      retval = true;
+   }
+   else if (stmRowId.size() == rowNumber)
+   {
+      stmRowId.push_back(rowId);
+      retval = true;
+   }
+   else
+      throw ODEModelException("State Transition Matrix array index out of "
+            "bounds in PhysicalModel::SetStmRowId");
+
+   return retval;
+}
+
+
 //---------------------------------
 // inherited methods from GmatBase
 //---------------------------------

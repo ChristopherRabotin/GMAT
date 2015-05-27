@@ -484,6 +484,13 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    fullSTM(0,0) = fullSTM(1,1) = fullSTM(2,2) =
    fullSTM(3,3) = fullSTM(4,4) = fullSTM(5,5) = 1.0;
 
+   stmIndices.push_back(CARTESIAN_X);
+   stmIndices.push_back(CARTESIAN_Y);
+   stmIndices.push_back(CARTESIAN_Z);
+   stmIndices.push_back(CARTESIAN_VX);
+   stmIndices.push_back(CARTESIAN_VY);
+   stmIndices.push_back(CARTESIAN_VZ);
+
 //   orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
 //   orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
 
@@ -667,6 +674,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    c = a.fullSTM.GetNumColumns();
    fullSTM.SetSize(r,c);
    fullSTM = a.fullSTM;
+   stmIndices = a.stmIndices;
 
    r = a.fullAMatrix.GetNumRows();
    c = a.fullAMatrix.GetNumColumns();
@@ -816,6 +824,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    c = a.fullSTM.GetNumColumns();
    fullSTM.SetSize(r,c);
    fullSTM = a.fullSTM;
+   stmIndices = a.stmIndices;
 
    r = a.fullAMatrix.GetNumRows();
    c = a.fullAMatrix.GetNumColumns();
@@ -3119,6 +3128,19 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
       return newVal;
    }
 
+   if (id == CD_EPSILON)
+   {
+      cdEpsilon = value;
+      MessageInterface::ShowMessage("Setting Cd_epsilon to %.12lf\n", crEpsilon);
+      return cdEpsilon;
+   }
+
+   if (id == CR_EPSILON)
+   {
+      crEpsilon = value;
+      MessageInterface::ShowMessage("Setting Cr_epsilon to %.12lf\n", crEpsilon);
+      return crEpsilon;
+   }
 
    return SpaceObject::SetRealParameter(id, value);
 }
@@ -3794,13 +3816,28 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       }                                                                       // made changes by TUAN NGUYEN
 
       Integer length = 6;
+
+      stmIndices.clear();
+      stmIndices.push_back(GetEstimationParameterID("CartesianX"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianY"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianZ"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianVX"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianVY"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianVZ"));
+
       // Only add the solvefor parameter if it is not in the list already     // made changes by TUAN NGUYEN
       if (find(solveforNames.begin(), solveforNames.end(), value) ==          // made changes by TUAN NGUYEN
           solveforNames.end())                                                // made changes by TUAN NGUYEN
       {                                                                       // made changes by TUAN NGUYEN
          solveforNames.push_back(value);                                      // made changes by TUAN NGUYEN
          if (value != "CartesianState")
+         {
             length += GetEstimationParameterSize(GetParameterID(value));
+            for (Integer i = 0; i < GetEstimationParameterSize(GetParameterID(value)); ++i)
+            {
+               stmIndices.push_back(GetEstimationParameterID(value));
+            }
+         }
       }                                                                       // made changes by TUAN NGUYEN
       SetIntegerParameter(FULL_STM_ROWCOUNT, length);
       return true;                                                            // made changes by TUAN NGUYEN
@@ -4341,10 +4378,10 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
          throw SpaceObjectException("SetRealParameter: col requested for fullSTM is out-of-range\n");
       fullSTM(row, col) = value;
 
-//      #ifdef DEBUG_SPACECRAFT_STM
+      #ifdef DEBUG_SPACECRAFT_STM
          if ((row == col) && (row == fullSTMRowCount-1))
             MessageInterface::ShowMessage("Full STM; setting rc %d, %d:  \n%s\n", row, col, fullSTM.ToString(12).c_str());
-//      #endif
+      #endif
 
       return fullSTM(row, col);
    }
@@ -7387,6 +7424,30 @@ Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
 //      return &orbitSTM;
 
    return SpaceObject::GetParameterSTM(parameterId);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetStmRowId(const Integer forRow)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID associated with a given row/column of the STM
+ *
+ * Note that since the STM is of the form d(r(t)) / d(r(t_o)), the numerator
+ * setting for each row matches the denominator setting for each column.
+ *
+ * @param forRow The associated row (for the numerator) or column (denominator)
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::GetStmRowId(const Integer forRow)
+{
+   Integer retval = -1;
+
+
+
+   return retval;
 }
 
 //-------------------------------------------------------------------------

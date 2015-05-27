@@ -4725,6 +4725,26 @@ Rmatrix* GmatBase::GetParameterSTM(Integer parameterId)
    return NULL;
 }
 
+
+//------------------------------------------------------------------------------
+// Integer GmatBase::GetStmRowId(const Integer forRow)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID associated with a given row/column of the STM
+ *
+ * Note that since the STM is of the form d(r(t)) / d(r(t_o)), the numerator
+ * setting for each row matches the denominator setting for each column.
+ *
+ * @param forRow The associated row (for the numerator) or column (denominator)
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer GmatBase::GetStmRowId(const Integer forRow)
+{
+   return -1;
+}
+
 //------------------------------------------------------------------------------
 // Integer HasParameterCovariances(Integer parameterId)
 //------------------------------------------------------------------------------

@@ -156,7 +156,10 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    satCount            (0),
    massID              (-1),
    crID                (-1),
-   areaID              (-1)
+   areaID              (-1),
+   estimatingCr        (false),
+   crEpsilonID         (-1),
+   crEpsilonRow        (6)
 {
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
@@ -200,7 +203,10 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    satCount            (srp.satCount),
    massID              (srp.massID),
    crID                (srp.crID),
-   areaID              (srp.areaID)
+   areaID              (srp.areaID),
+   estimatingCr        (srp.estimatingCr),
+   crEpsilonID         (srp.crEpsilonID),
+   crEpsilonRow        (srp.crEpsilonRow)
 {
    parameterCount = SRPParamCount;
 
@@ -243,10 +249,14 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       percentSun   = srp.percentSun;
       bodyID       = srp.bodyID;
    
-      satCount      = srp.satCount;
-      massID        = srp.massID;
-      crID          = srp.crID;
-      areaID        = srp.areaID;
+      satCount     = srp.satCount;
+      massID       = srp.massID;
+      crID         = srp.crID;
+      areaID       = srp.areaID;
+
+      estimatingCr = srp.estimatingCr;
+      crEpsilonID  = srp.crEpsilonID;
+      crEpsilonRow = srp.crEpsilonRow;
 
       if (shadowState)
       {
@@ -942,6 +952,9 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                                 mass[i];
             if (srpModel == "Spherical")
             {
+               #ifdef DEBUG_CR_UPDATES
+                  MessageInterface::ShowMessage("SRP using Cr = %.12lf\n", cr[i]);
+               #endif
                mag *= cr[i] * area[i];
                if (order == 1)
                {
@@ -1010,14 +1023,19 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
    if (fillSTM || fillAMatrix)
    {
       Real aTilde[stmRowCount*stmRowCount];
+
+/// Temporary; needs generalization
+if (stmRowCount == 7)
+   estimatingCr = true;
+
       Integer associate, element;
       for (Integer i = 0; i < stmCount; ++i)
       {
          #ifdef DEBUG_STM_MATRIX
             MessageInterface::ShowMessage("Filling STM for spacecraft %d\n", i);
          #endif
-         i6 = stmStart + i * stmRowCount*stmRowCount;
-         associate = theState->GetAssociateIndex(i6);
+         Integer iStart = stmStart + i * stmRowCount*stmRowCount;
+         associate = theState->GetAssociateIndex(iStart);
 
          // Calculate A-tilde
          for (Integer j = 0; j < stmRowCount; ++j)
@@ -1072,6 +1090,15 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          {
             if (srpModel == "Spherical")
             {
+static Real old_cr = 0.0;
+//static Real old_epoch = 999999.9999;
+//if ((old_cr != cr[i]) || (dt < old_epoch))
+if ((old_cr != cr[i]))
+{
+   old_cr = cr[i];
+   MessageInterface::ShowMessage("Cr = %.12lf\n", cr[i]);
+}
+//old_epoch = dt;
                // All of the common terms for C_s
                mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
                                    (mass[i] * sunDistance);
@@ -1082,14 +1109,29 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                aTilde[ix]   = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
                aTilde[ix+1] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
                aTilde[ix+2] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+
+               // VX term for estimating Cr
+               if (estimatingCr)
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 3];
+
                ix = stmRowCount * 4;
                aTilde[ix]   = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
                aTilde[ix+1] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
                aTilde[ix+2] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+
+               // VY term for estimating Cr
+               if (estimatingCr)
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 4];
+
                ix = stmRowCount * 5;
                aTilde[ix]   = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
                aTilde[ix+1] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
                aTilde[ix+2] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+
+               // VZ term for estimating Cr
+               if (estimatingCr)
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 5];
+
             }
             else // SPADFile
             {
@@ -1186,7 +1228,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             for (Integer k = 0; k < stmRowCount; ++k)
             {
                element = j * stmRowCount + k;
-               deriv[i6+element] = aTilde[element];
+               deriv[iStart+element] = aTilde[element];
             }
          }
       }
@@ -1197,8 +1239,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             MessageInterface::ShowMessage(
                   "Filling A-matrix for spacecraft %d\n", i);
          #endif
-         i6 = aMatrixStart + i * stmRowCount*stmRowCount;
-         associate = theState->GetAssociateIndex(i6);
+         Integer iStart = aMatrixStart + i * stmRowCount*stmRowCount;
+         associate = theState->GetAssociateIndex(iStart);
 
          // Calculate A-tilde
          for (Integer j = 0; j < stmRowCount; ++j)
@@ -1339,7 +1381,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             for (Integer k = 0; k < stmRowCount; ++k)
             {
                element = j * stmRowCount + k;
-               deriv[i6+element] = aTilde[element];
+               deriv[iStart+element] = aTilde[element];
                #ifdef DEBUG_A_MATRIX
                   MessageInterface::ShowMessage("  %le  ", deriv[i6+element]);
                #endif
@@ -1867,7 +1909,17 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
         if (parmID >= 0)
             areaID = parmID;
     }
+    if (parmName == "CrEpsilon")
+    {
+        if (parmNumber < crEpsilon.size())
+            crEpsilon[i] = parm;
+        else
+            crEpsilon.push_back(parm);
+        if (parmID >= 0)
+           crEpsilonID = parmID;
+    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SetSatelliteParameter(const Integer i, Integer parmID, const Real parm)
@@ -1887,7 +1939,7 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
 
    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE
         std::stringstream msg;
-        msg << "Setting satellite parameter " << parmName << " for Spacecraft "
+        msg << "Setting satellite parameter " << parmID << " for Spacecraft "
             << i << " to " << parm << "\n";
         MessageInterface::ShowMessage(msg.str());
    #endif
@@ -1912,6 +1964,13 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
          area[i] = parm;
       else
          area.push_back(parm);
+   }
+   if (parmID == crEpsilonID)
+   {
+      if (parmNumber < crEpsilon.size())
+         crEpsilon[i] = parm;
+      else
+         crEpsilon.push_back(parm);
    }
 }
 
@@ -1938,6 +1997,8 @@ void SolarRadiationPressure::ClearSatelliteParameters(
       mass.clear();
    if ((parmName == "Cr") || (parmName == ""))
       cr.clear();
+   if ((parmName == "CrEpsilon") || (parmName == ""))
+      crEpsilon.clear();
    if ((parmName == "SRPArea") || (parmName == ""))
       area.clear();
    if ((parmName == "scObjs")  || (parmName == ""))

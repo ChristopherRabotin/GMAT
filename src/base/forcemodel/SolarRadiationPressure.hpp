@@ -230,6 +230,10 @@ protected:
    Integer crID;
    Integer areaID;
 
+   bool estimatingCr;
+   Integer crEpsilonID;
+   Integer crEpsilonRow;
+   std::vector<Real> crEpsilon;
 
 //   void     FindShadowState(bool &lit, bool &dark, Real *state);
 //   Real     ShadowFunction(Real *state);

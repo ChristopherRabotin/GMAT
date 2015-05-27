@@ -199,6 +199,7 @@ public:
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
                          Integer quantity, Integer sizeOfType);
+   virtual bool SetStmRowId(Integer rowNumber, Integer rowId);
    
 
    // Parameter accessor methods -- inherited from GmatBase
@@ -278,6 +279,8 @@ protected:
    Integer                   stmCount;
    /// Number of rows/columns in the STM
    Integer                   stmRowCount;
+   /// Mapping for the STM entries
+   IntegerArray              stmRowId;
 
    /// Flag indicating that the orbital A-matrix should be filled
    bool                      fillAMatrix;

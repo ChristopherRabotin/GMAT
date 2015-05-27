@@ -484,6 +484,7 @@ public:
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
 
    // Covariance handling code
    virtual Integer         HasParameterCovariances(Integer parameterId);
