@@ -42,7 +42,7 @@
 // FuelMass(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 FuelMass::FuelMass(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "FuelMass", Gmat::SPACECRAFT, Gmat::CHEMICAL_FUEL_TANK, obj,
+   : HardwareReal(name, "FuelMass", Gmat::SPACECRAFT, Gmat::FUEL_TANK, obj,
                   "Fuel Mass", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -564,7 +564,7 @@ GmatBase* FuelDensity::Clone(void) const
 // DutyCycle(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 DutyCycle::DutyCycle(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "DutyCycle", Gmat::SPACECRAFT, Gmat::CHEMICAL_THRUSTER, obj,
+   : HardwareReal(name, "DutyCycle", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
                   "Duty Cycle", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -651,7 +651,7 @@ GmatBase* DutyCycle::Clone(void) const
 // ThrustScaleFactor(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 ThrustScaleFactor::ThrustScaleFactor(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "ThrustScaleFactor", Gmat::SPACECRAFT, Gmat::CHEMICAL_THRUSTER, obj,
+   : HardwareReal(name, "ThrustScaleFactor", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
                   "Thrust Scale Factor", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -738,7 +738,7 @@ GmatBase* ThrustScaleFactor::Clone(void) const
 // GravitationalAccel(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 GravitationalAccel::GravitationalAccel(const std::string &name, GmatBase *obj)
-   : HardwareReal(name, "GravitationalAccel", Gmat::SPACECRAFT, Gmat::CHEMICAL_THRUSTER, obj,
+   : HardwareReal(name, "GravitationalAccel", Gmat::SPACECRAFT, Gmat::THRUSTER, obj,
                   "Gravitational Acceleration", "")
 {
    #ifdef USE_PREDEFINED_COLORS
@@ -1061,7 +1061,7 @@ GmatBase* ImpulseCoefficients::Clone(void) const
 //------------------------------------------------------------------------------
 ThrustDirections::ThrustDirections(const std::string &type,
                                    const std::string &name, GmatBase *obj)
-   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::CHEMICAL_THRUSTER, obj, type, "")
+   : HardwareReal(name, type, Gmat::SPACECRAFT, Gmat::THRUSTER, obj, type, "")
 {
    #ifdef USE_PREDEFINED_COLORS
       mColor = GmatColor::CHESTNUT;
