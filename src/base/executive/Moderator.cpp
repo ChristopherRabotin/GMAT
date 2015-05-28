@@ -8427,8 +8427,8 @@ void Moderator::CreateDefaultMission()
       // Hardware 
       if (GmatGlobal::Instance()->IsWritingParameterInfo())
       {
-         CreateHardware("FuelTank", "DefaultFuelTank");
-         CreateHardware("Thruster", "DefaultThruster");
+         CreateHardware("ChemicalTank", "DefaultFuelTank");
+         CreateHardware("ChemicalThruster", "DefaultThruster");
          
          #if DEBUG_DEFAULT_MISSION > 0
          MessageInterface::ShowMessage("-->default hardware created\n");
@@ -9193,9 +9193,9 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
    Hardware *hw = NULL;
    
    if (type == "FuelTank")
-      hw = CreateHardware("FuelTank", "DefaultFuelTank");
+      hw = CreateHardware("ChemicalTank", "DefaultFuelTank");
    else if (type == "Thruster")
-      hw = CreateHardware("Thruster", "DefaultThruster");
+      hw = CreateHardware("ChemicalThruster", "DefaultThruster");
    
    return hw;
 }
@@ -9415,7 +9415,7 @@ EventLocator* Moderator::GetDefaultEventLocator()
    }
 
    StringArray locatorsAvailable = theFactoryManager->GetListOfItems(Gmat::EVENT_LOCATOR);
-   for (Integer ii = 0; ii < locatorsAvailable.size(); ii++)
+   for (unsigned int ii = 0; ii < locatorsAvailable.size(); ii++)
    {
       if (locatorsAvailable.at(ii) == "EclipseLocator")
       {
