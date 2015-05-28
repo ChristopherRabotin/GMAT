@@ -228,7 +228,7 @@ void GroundStationPanel::Create()
    stationIDLabel->SetMinSize(wxSize(minLabelSize, stationIDLabel->GetMinHeight()));
    centralBodyLabel->SetMinSize(wxSize(minLabelSize, centralBodyLabel->GetMinHeight()));
 
-   wxStaticText *minElLabel = new wxStaticText(this, ID_TEXT, "Min. Elevation:");
+   wxStaticText *minElLabel = new wxStaticText(this, ID_TEXT, "Min. Elevation");
    minElLabel->SetMinSize(wxSize(minLabelSize, minElLabel->GetMinHeight()));
    minElevationCtrl = new wxTextCtrl(this, ID_ELEVATION_TEXTCTRL,
       wxT(""), wxDefaultPosition, wxSize(120, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
