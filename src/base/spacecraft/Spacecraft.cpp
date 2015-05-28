@@ -5761,7 +5761,9 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
 
       // If not found, clone otherHardware[i] and add to hardwareList
       if (j == hardwareList.size())
+      {
          hardwareList.push_back(otherHardware[i]->Clone());
+      }
    }
 }
 

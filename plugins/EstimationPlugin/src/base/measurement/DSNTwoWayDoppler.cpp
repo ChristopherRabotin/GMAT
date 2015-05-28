@@ -977,6 +977,8 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
       Real dtS, dtE, dtdt, preFactor;
 
       // 9. Get sensors used in DSN 2-ways Doppler
+      UpdateHardware();                                                         // made changes by TUAN NGUYEN
+
       if (participantHardware.empty()||
             ((!participantHardware.empty())&&
               participantHardware[0].empty()&&
@@ -985,7 +987,7 @@ bool DSNTwoWayDoppler::Evaluate(bool withEvents)
          )
       {
          // Throw an exception when no hardware is defined due to signal frequency is specified base on hardware
-         throw MeasurementException("No transmmitter, transponder, and reciever is defined in measurement participants.\n");
+         throw MeasurementException("No transmmitter, transponder, and receiver is defined in measurement participants.\n");
          return false;
       }
 

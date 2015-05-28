@@ -37,7 +37,6 @@
 #include "CoordinateSystem.hpp"
 #include "SolarSystem.hpp"
 
-
 /**
  * GMAT's estimation subsystem represents measurement models using a
  * MeasurementModel container class and measurement primitives that perform the
@@ -57,8 +56,8 @@ public:
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name,
                               const Integer index);
-   virtual bool         SetParticipantHardware(GmatBase *obj,
-                              const std::string &hwName, Integer hwIndex);
+//   virtual bool         SetParticipantHardware(GmatBase *obj,                       // made changes by TUAN NGUYEN
+//                              const std::string &hwName, Integer hwIndex);          // made changes by TUAN NGUYEN
 
    virtual MeasurementData*        GetMeasurementDataPointer();
    virtual std::vector<RealArray>* GetDerivativePointer();
@@ -83,6 +82,8 @@ public:
    virtual Integer            GetMeasurementParameterCount() const;
 
    void                       SetNoise(Rvector* ns);
+
+//   virtual bool               SetParticipantHardwareNames(std::vector<StringArray>& participantHardwareNames);    // made changes by TUAN NGUYEN
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
@@ -217,6 +218,7 @@ protected:
    bool                       CheckSat2SatLOS(Rvector3 p1loc, Rvector3 p2loc, SpacePoint *cb);
    bool                       CheckStation2SatLOS(Real a1Epoch, Rvector3 sLoc, SpacePoint *cb);
 
+   bool                       UpdateHardware();                                              // made changes by TUAN NGUYEN
 
    // Used for debug
    virtual void               DumpParticipantStates(const std::string& ref);
@@ -227,7 +229,6 @@ protected:
    {
        CoreMeasurementParamCount = GmatBaseParamCount
    };
-
 };
 
 #endif /* CoreMeasurement_hpp */

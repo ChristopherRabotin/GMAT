@@ -34,6 +34,7 @@
 #include "GmatObType.hpp"
 #include "RampTableType.hpp"
 
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
 //#define DEBUG_FILE_WRITE
 //#define DEBUG_FLOW
@@ -165,6 +166,9 @@ MeasurementManager::MeasurementManager(const MeasurementManager &mm) :
 //------------------------------------------------------------------------------
 MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementManager::operator= enter: <%p> assign from <%p>\n", this, &mm);  
+#endif
    if (&mm != this)
    {
       thePropagator    = mm.thePropagator;
@@ -218,6 +222,9 @@ MeasurementManager& MeasurementManager::operator=(const MeasurementManager &mm)
       // Should measurements be rebuilt here?
    }
 
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementManager::operator= exit: <%p> assign from <%p>\n", this, &mm);  
+#endif
    return *this;
 }
 
