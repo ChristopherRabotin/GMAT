@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "InterfaceException.hpp"
 #include <iostream>
+#include <stdarg.h>
 
 PythonInterface* PythonInterface::instance = NULL;
 
@@ -172,7 +173,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 }
 
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                                const std::string &formatIn, const std::vector<void *> &argIn)
+                                                const std::string &formatIn, int n, ...)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -187,7 +188,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    std::string msg;
 
-   MessageInterface::ShowMessage("  First element of the argIn is %f \n", *(Real*)argIn.at(0));
+ //  MessageInterface::ShowMessage("  First element of the argIn is %f \n", *(Real*)argIn.at(0));
 
 #ifdef IS_PY3K
    // create a python Unicode object from an UTF-8 encoded null terminated char buffer
@@ -219,7 +220,13 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    }
 
    // Build the Python object based on the format string
-   pyArgs = Py_BuildValue(formatIn.c_str(), *(Real*)argIn.at(0));
+   va_list vl;
+   va_start(vl, n);
+   va_arg(vl, std::vector<void *>);
+   pyArgs = Py_VaBuildValue(formatIn.c_str(), vl);
+   va_end(vl);
+
+ //  pyArgs = Py_BuildValue(formatIn.c_str(), *(Real*)argIn.at(0));
    if (!pyArgs)
    {
       PyErr_Print();
