@@ -978,7 +978,8 @@ bool ContactLocator::Initialize()
          for (UnsignedInt ii= 0; ii < stations.size(); ii++)
          {
             GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
-            if (!gsi->InitializeForContactLocation(false))
+//            if (!gsi->InitializeForContactLocation(false))
+            if (!gsi->InitializeForContactLocation(true))
             {
                std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
                errmsg            += stationNames.at(ii) + " used by ContactLocator ";
@@ -1022,26 +1023,26 @@ bool ContactLocator::ReportEventData(const std::string &reportNotice)
    Integer     sz       = (Integer) contactResults.size();
    std::string noEvents = GetNoEventsString("Contact");
 
-      #ifdef DEBUG_CONTACT_LOCATOR_WRITE
-         MessageInterface::ShowMessage("attempting to write out %d events\n",
-               (Integer) sz);
-      #endif
-      Integer numIndividual = 0;
+   #ifdef DEBUG_CONTACT_LOCATOR_WRITE
+      MessageInterface::ShowMessage("attempting to write out %d events\n",
+            (Integer) sz);
+   #endif
+   Integer numIndividual = 0;
 
-      // Loop over the total events list
-      for (Integer ii = 0; ii < sz; ii++)
-      {
-         ContactResult* ev = contactResults.at(ii);
-         ev->SetNoEvents(noEvents);
+   // Loop over the total events list
+   for (Integer ii = 0; ii < sz; ii++)
+   {
+      ContactResult* ev = contactResults.at(ii);
+      ev->SetNoEvents(noEvents);
 
-         std::string eventString = ev->GetReportString();
-         theReport << eventString << "\n";
-      }
+      std::string eventString = ev->GetReportString();
+      theReport << eventString << "\n";
+   }
 
-      for (unsigned int jj = 0; jj < sz; jj++)
-         numIndividual += contactResults.at(jj)->NumberOfEvents();
+   for (unsigned int jj = 0; jj < sz; jj++)
+      numIndividual += contactResults.at(jj)->NumberOfEvents();
 
-      theReport << "\nNumber of events : " << numIndividual << "\n";
+   theReport << "\nNumber of events : " << numIndividual << "\n\n\n";
 
    theReport.close();
    return true;
@@ -1122,6 +1123,8 @@ void ContactLocator::FindEvents()
 
    // Need to set findStart and findStop somewhere in here!!!!
 
+   // Clear old events
+   TakeAction("Clear", "Events");
    // @YRL
    for (Integer j = 0; j < stations.size(); j++ )
    {

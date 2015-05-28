@@ -1740,6 +1740,21 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       return true;
    
    //------------------------------------------------------------
+   // if not writing solver iteration data and solver is running,
+   // just return
+   //------------------------------------------------------------
+   if ((mSolverIterOption == SI_NONE) &&
+       (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS))
+   {
+      #if DBGLVL_REPORTFILE_DATA > 0
+      MessageInterface::ShowMessage
+         ("   ===> Just returning; not writing solver itertion data and solver "
+          "is running or solved\n");
+      #endif
+      return true;
+   }
+   
+   //------------------------------------------------------------
    // if writing current iteration only and solver is not finished,
    // just return
    //------------------------------------------------------------
@@ -1756,41 +1771,16 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    if (len == 0)
       return true;
    
-   bool writeFinalData = false;
    //------------------------------------------------------------
-   // if not writing solver iteration data and solver is running, just return
+   // If data time is the same as previous time, just return
    //------------------------------------------------------------
-   if (mSolverIterOption == SI_NONE)
+   if (mLastReportTime == dat[0])
    {
-      if (runstate == Gmat::SOLVING)
-         writeFinalData = false;
-      else if ((runstate == Gmat::SOLVEDPASS) && prevRunState == Gmat::SOLVING)
-         writeFinalData = true; // To write final iteration data
-      
-      if (!writeFinalData)
-      {
-         #if DBGLVL_REPORTFILE_DATA > 0
-         MessageInterface::ShowMessage
-            ("   ===> Just returning; not writing solver itertion data and solver is running\n");
-         #endif
-         
-         return true;
-      }
-   }
-   
-   if (!writeFinalData)
-   {
-      // If data time is the same as previous time and not reporting all solver
-      // iterations, just return
-      if (mLastReportTime == dat[0] &&
-          (mSolverIterOption != SI_ALL && runstate != Gmat::SOLVING))
-      {
-         #if DBGLVL_REPORTFILE_DATA > 0
-         MessageInterface::ShowMessage
-            ("   ===> Just returning; current time is the same as last report time\n");
-         #endif
-         return true;
-      }
+      #if DBGLVL_REPORTFILE_DATA > 0
+      MessageInterface::ShowMessage
+         ("   ===> Just returning; current time is the same as last report time\n");
+      #endif
+      return true;
    }
    
    #if DBGLVL_REPORTFILE_DATA > 0

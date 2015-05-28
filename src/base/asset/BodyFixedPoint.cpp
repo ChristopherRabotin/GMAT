@@ -181,11 +181,19 @@ BodyFixedPoint::~BodyFixedPoint()
       {
          if (deleteSPK && (spkName != ""))
          {
+            #ifdef DEBUG_BFP_SPICE
+               MessageInterface::ShowMessage("**** In BFP, About to unload %s\n",
+                     spkName.c_str());
+            #endif
             spice->UnloadKernel(spkName);
             remove(spkName.c_str());
          }
          if (deleteFK && (fkName != ""))
          {
+            #ifdef DEBUG_BFP_SPICE
+               MessageInterface::ShowMessage("**** In BFP, About to unload %s\n",
+                     fkName.c_str());
+            #endif
             spice->UnloadKernel(fkName);
             remove(fkName.c_str());
          }
