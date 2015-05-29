@@ -46,6 +46,7 @@
 //#define DEBUG_ORBITDATA_OBJREF_EPOCH
 //#define DEBUG_ORBITDATA_OBJNAME
 //#define DEBUG_BROUWER_LONG
+#define DEBUG_FULL_STM
 
 using namespace GmatMathUtil;
 
@@ -1704,6 +1705,12 @@ const Rmatrix66& OrbitData::GetStmRmat66(Integer item)
    case ORBIT_STM:
       {
          Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
+
+         #ifdef DEBUG_FULL_STM
+            MessageInterface::ShowMessage("Full Spacecraft STM:\n%s\n",
+                  fullSTM.ToString(17).c_str());
+         #endif
+
          for (Integer i = 0; i < 6; ++i)
          {
             mSTM(i,i) = fullSTM(i,i);
