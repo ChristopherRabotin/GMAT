@@ -541,7 +541,7 @@ void CelestialBodyOrbitPanel::Create()
    ephemFileTextCtrl->SetToolTip(pConfig->Read(_T("EphemerisFileHint")));
    ephemFileBrowseButton  = new wxBitmapButton(this, ID_BROWSE_BUTTON_EPHEM_FILE, 
                             openBitmap, wxDefaultPosition,
-                            wxSize(buttonWidth, 20));
+                            wxSize(buttonWidth, -1));
    ephemFileBrowseButton->SetToolTip(pConfig->Read(_T("BrowseEphemerisFileHint"), "Browse for file"));
    
    wxBoxSizer *spkButtonSizer = NULL;

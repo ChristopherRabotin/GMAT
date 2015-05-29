@@ -131,6 +131,9 @@ protected:
    virtual void         BufferSatelliteStates(bool fillingBuffer = true);
 
    virtual void         SetPropagationProperties(PropagationStateManager *psm);
+   
+   virtual void         SetNames(const std::string& name, 
+                                 StringArray& owners, StringArray& elements);
 };
 
 #endif /* PropagationEnabledCommand_hpp */

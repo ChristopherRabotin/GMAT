@@ -887,6 +887,8 @@ void AveragedDoppler::SetHardwareDelays(bool loadEvents)
       MessageInterface::ShowMessage("   t3e timetag:   %.12lf\n", t3E[1]);
    #endif
 
+   UpdateHardware();                                                         // made changes by TUAN NGUYEN
+
    // Transmitter sits on the 1st participant
    #ifdef DEBUG_HARDWARE_DELAYS
       MessageInterface::ShowMessage("Setting Transmitter delay (size %d)\n",

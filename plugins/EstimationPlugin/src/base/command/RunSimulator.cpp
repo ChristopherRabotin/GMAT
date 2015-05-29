@@ -64,6 +64,8 @@ RunSimulator::~RunSimulator()
 {
    if (theSimulator)
       delete theSimulator;
+
+   eventList.clear();
 }
 
 

@@ -1,0 +1,5 @@
+open ftp://anonymous:gmat@naif.jpl.nasa.gov
+binary
+cd pub/naif/toolkit/C/PC_Windows_VisualC_%cspice_type%/packages
+get cspice.zip
+exit

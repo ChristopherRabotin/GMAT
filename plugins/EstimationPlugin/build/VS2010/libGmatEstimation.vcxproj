@@ -220,7 +220,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\datafilter;..\..\src\base\errormodel;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\tdmReader;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\Xerces-3.1.2\include;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
@@ -230,17 +230,20 @@
       <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;..\..\..\..\..\Gmat3rdParty\Xerces-3.1.2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;cspice.lib;xerces-c_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\adapter\DopplerAdapter.hpp" />
     <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp" />
+    <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp" />
     <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp" />
@@ -263,7 +266,6 @@
     <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp" />
     <ClInclude Include="..\..\src\base\event\Event.hpp" />
     <ClInclude Include="..\..\src\base\event\EventData.hpp" />
-    <ClInclude Include="..\..\src\base\event\EventException.hpp" />
     <ClInclude Include="..\..\src\base\event\EventManager.hpp" />
     <ClInclude Include="..\..\src\base\event\LightTimeCorrection.hpp" />
     <ClInclude Include="..\..\src\base\factory\DataFileFactory.hpp" />
@@ -347,6 +349,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\base\adapter\DopplerAdapter.cpp" />
     <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp" />
+    <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp" />
     <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp" />
@@ -369,7 +372,6 @@
     <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp" />
     <ClCompile Include="..\..\src\base\event\Event.cpp" />
     <ClCompile Include="..\..\src\base\event\EventData.cpp" />
-    <ClCompile Include="..\..\src\base\event\EventException.cpp" />
     <ClCompile Include="..\..\src\base\event\EventManager.cpp" />
     <ClCompile Include="..\..\src\base\event\LightTimeCorrection.cpp" />
     <ClCompile Include="..\..\src\base\factory\DataFileFactory.cpp" />
@@ -445,9 +447,6 @@
     <ClCompile Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\TrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\USNTrackingSystem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

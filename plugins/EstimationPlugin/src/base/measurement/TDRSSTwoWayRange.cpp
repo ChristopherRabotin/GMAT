@@ -188,18 +188,18 @@ bool TDRSSTwoWayRange::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (find(participants.begin(), participants.end(), obj) == participants.end())
       {
-         std::vector<Hardware*> hv;
+//         std::vector<Hardware*> hv;
          // Cheating here for the moment to be sure GroundStation is 1st object
          if (obj->IsOfType(Gmat::GROUND_STATION))
          {
             participants.insert(participants.begin(), (SpacePoint*)obj);
-            participantHardware.insert(participantHardware.begin(), hv);
+//            participantHardware.insert(participantHardware.begin(), hv);
             stationParticipant = true;
          }
          else
          {
             participants.push_back((SpacePoint*)obj);
-            participantHardware.push_back(hv);
+//            participantHardware.push_back(hv);
          }
 
          // Set IDs
@@ -1054,6 +1054,8 @@ void TDRSSTwoWayRange::SetHardwareDelays(bool loadEvents)
             transmitDelay, tdrssUplinkDelay, targetDelay, tdrssDownlinkDelay,
             receiveDelay);
    #endif
+
+   UpdateHardware();                                                         // made changes by TUAN NGUYEN
 
    Real satDelay = targetDelay;
    TwoWayRange::SetHardwareDelays(false);

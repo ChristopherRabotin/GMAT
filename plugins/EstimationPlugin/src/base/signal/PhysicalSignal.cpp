@@ -606,7 +606,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       objPtr = theData.rNode;
    
    //Integer parameterID = -1;
-   if (objPtr != NULL)
+   if (objPtr != NULL)                    // Derivative object is a participant (either GroundStation or Spacecraft):
    {
       if (paramName == "Position")
       {
@@ -665,8 +665,8 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
          #endif
       }
    }
-      else
-      {
+   else         // Derivative object is not a participant (neither a GroundStation nor a Spacecraft): such as ErrorModel object
+   {
          //MessageInterface::ShowMessage(" paramName = %s\n", paramName.c_str());
          if (paramName == "Bias")
          {
@@ -766,7 +766,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
             for (UnsignedInt i = 0; i < 3; ++i)
                theDataDerivatives[0][i] += 0.0;
          }
-      }
+   }
    
 
 

@@ -3446,11 +3446,11 @@ bool Propagate::Initialize()
          p->SetSolarSystem(solarSys);
       }
 
-      #ifdef DEBUG_PUBLISH_DATA
-      MessageInterface::ShowMessage
-            ("Propagate::Initialize() '%s' registering published data\n",
-             GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-      #endif
+      // #ifdef DEBUG_PUBLISH_DATA
+      // MessageInterface::ShowMessage
+      //       ("Propagate::Initialize() '%s' registering published data\n",
+      //        GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      // #endif
 
 //      streamID = publisher->RegisterPublishedData(this, streamID, owners,
 //            elements);
@@ -3490,12 +3490,22 @@ bool Propagate::Initialize()
             FillFormation(so, owners, elements);
          else
          {
+            #ifdef DEBUG_PUBLISH_DATA
+            MessageInterface::ShowMessage
+               ("Propagate::Initialize() '%s' setting data labels\n",
+                GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+            #endif
             SetNames(so->GetName(), owners, elements);
          }
       }
    }
-   streamID = publisher->RegisterPublishedData(this, streamID, owners,
-         elements);
+   
+   #ifdef DEBUG_PUBLISH_DATA
+   MessageInterface::ShowMessage
+      ("Propagate::Initialize() '%s' registering published data\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+   #endif
+   streamID = publisher->RegisterPublishedData(this, streamID, owners, elements);
    
    isInitialized = true;
 
@@ -3675,7 +3685,14 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
       if (el->GetType() == Gmat::FORMATION)
          FillFormation(el, owners, elements);
       else     // Setup spacecraft data descriptions
+      {
+         #ifdef DEBUG_PUBLISH_DATA
+         MessageInterface::ShowMessage
+            ("Propagate::FillFormation() '%s' setting data labels\n",
+             GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+         #endif
          SetNames(el->GetName(), owners, elements);
+      }
    }
 
    ((FormationInterface*)(so))->BuildState();
@@ -3761,10 +3778,9 @@ void Propagate::PrepareToPropagate()
 
       for (Integer n = 0; n < (Integer)propagators.size(); ++n)
       {
-         #if DEBUG_PROPAGATE_EXE
+         #if DEBUG_PROPAGATE_INIT
             MessageInterface::ShowMessage
                ("Propagate::PrepareToPropagate() SpaceObject names\n");
-
             MessageInterface::ShowMessage
                ("SpaceObject Count = %d\n", satName[n]->size());
             StringArray *sar = satName[n];
@@ -3772,6 +3788,23 @@ void Propagate::PrepareToPropagate()
             {
                MessageInterface::ShowMessage
                   ("   SpaceObjectName[%d] = %s\n", i, (*sar)[i].c_str());
+            }
+            Propagator *prop = propagators[n]->GetPropagator();
+            ODEModel *om = propagators[n]->GetODEModel();
+            MessageInterface::ShowMessage
+               ("   Propagator = <%p>[%s]'%s'\n", prop,
+                prop ? prop->GetTypeName().c_str() : "NULL",
+                prop ? prop->GetName().c_str() : "NULL");
+            MessageInterface::ShowMessage
+               ("   ODEModel   = <%p>[%s]'%s'\n", om,
+                om ? om->GetTypeName().c_str() : "NULL",
+                om ? om->GetName().c_str() : "NULL");
+            for (Integer i = 0; i < om->GetNumForces(); i++)
+            {
+               PhysicalModel *pm = om->GetForce(i);
+               MessageInterface::ShowMessage
+                  ("   om[%d] = <%p>[%s]'%s'\n", i, pm, pm->GetTypeName().c_str(),
+                   pm->GetName().c_str());
             }
          #endif
 
@@ -6292,33 +6325,33 @@ void Propagate::ClearTransientForces()
    #endif
 }
 
+//Moved to PropagationEnabledCommand for GMT-5101 fix (LOJ: 2015.05.14)
+// //------------------------------------------------------------------------------
+// // void SetNames(const std::string& name, StringArray& owners,
+// //               StringArray& elements)
+// //------------------------------------------------------------------------------
+// /**
+//  * Sets the parameter names used when publishing Spacecraft data.
+//  *
+//  * @param <name>     Name of the Spacecraft that is referenced.
+//  * @param <owners>   Array of published data identifiers.
+//  * @param <elements> Individual elements of the published data.
+//  */
+// //------------------------------------------------------------------------------
+// void Propagate::SetNames(const std::string& name, StringArray& owners,
+//                          StringArray& elements)
+// {
+//    // Add satellite labels
+//    for (Integer i = 0; i < 6; ++i)
+//       owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
 
-//------------------------------------------------------------------------------
-// void SetNames(const std::string& name, StringArray& owners,
-//               StringArray& elements)
-//------------------------------------------------------------------------------
-/**
- * Sets the parameter names used when publishing Spacecraft data.
- *
- * @param <name>     Name of the Spacecraft that is referenced.
- * @param <owners>   Array of published data identifiers.
- * @param <elements> Individual elements of the published data.
- */
-//------------------------------------------------------------------------------
-void Propagate::SetNames(const std::string& name, StringArray& owners,
-                         StringArray& elements)
-{
-   // Add satellite labels
-   for (Integer i = 0; i < 6; ++i)
-      owners.push_back(name);       // X, Y, Z, Vx, Vy, Vz
-
-   elements.push_back(name+".X");
-   elements.push_back(name+".Y");
-   elements.push_back(name+".Z");
-   elements.push_back(name+".Vx");
-   elements.push_back(name+".Vy");
-   elements.push_back(name+".Vz");
-}
+//    elements.push_back(name+".X");
+//    elements.push_back(name+".Y");
+//    elements.push_back(name+".Z");
+//    elements.push_back(name+".Vx");
+//    elements.push_back(name+".Vy");
+//    elements.push_back(name+".Vz");
+// }
 
 
 ////------------------------------------------------------------------------------

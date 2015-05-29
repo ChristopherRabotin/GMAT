@@ -159,7 +159,7 @@ public:
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual bool         IncludeOwnedObjectsInValidation();
    virtual bool         SetIsGlobal(bool globalFlag);
-   virtual bool         GetIsGlobal() const;
+   virtual bool         IsGlobal() const;
 	virtual bool         IsAutomaticGlobal() const;
    virtual bool         SetIsLocal(bool localFlag);
    virtual bool         IsLocal() const;

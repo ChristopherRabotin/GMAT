@@ -73,7 +73,7 @@ void SetPathDialog::Create()
                        wxDefaultPosition, wxDefaultSize, 0 );
    mReadFileTextCtrl =
       new wxTextCtrl(this, -1, wxT(""),
-                     wxDefaultPosition, wxSize(350, 20), 0);
+                     wxDefaultPosition, wxSize(350, -1), 0);
    mReadFileTextCtrl->Disable();
    
    //----- write startup file
@@ -82,7 +82,7 @@ void SetPathDialog::Create()
                    wxDefaultPosition, wxDefaultSize, 0);
    mSaveFileTextCtrl =
       new wxTextCtrl(this, -1, wxT(""),
-                     wxDefaultPosition, wxSize(350, 20), 0);
+                     wxDefaultPosition, wxSize(350, -1), 0);
    mSaveFileTextCtrl->Disable();
    
    //----- add to sizer

@@ -81,6 +81,7 @@
 //#define DEBUG_FILEPATH
 //#define DEBUG_DELETE_OWNED_OBJ
 //#define DEBUG_POWER_SYSTEM
+//#define DEBUG_SC_NAIF_ID
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -308,6 +309,8 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
 
 const Integer  Spacecraft::ATTITUDE_ID_OFFSET  = 20000;
 const Real     Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
+Integer        Spacecraft::scNaifId = 10000;
+
 
 //-------------------------------------
 // public methods
@@ -385,6 +388,18 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
       
+   // Set up the appropriate naifID defaults
+   naifId         = -(scNaifId * 1000) - 1;
+   scNaifId++;
+   naifIdRefFrame = naifId + 1000000;
+
+   #ifdef DEBUG_SC_NAIF_ID
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s set to %d\n",
+            instanceName.c_str(), naifId);
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s reference frame set to %d\n",
+            instanceName.c_str(), naifIdRefFrame);
+   #endif
+
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -770,8 +785,10 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
-   if (ephemMgr) delete ephemMgr;
-   ephemMgr           = NULL;
+   // We don't want to delete any ephem manager here or the event
+   // location will not work
+//   if (ephemMgr) delete ephemMgr;
+//   ephemMgr           = NULL;
 
    includeCartesianState = a.includeCartesianState;
 
@@ -1274,12 +1291,14 @@ void Spacecraft::RecordEphemerisData()
       ephemMgr->SetObject(this);
       // @todo - do I need to resend this, if the internalCoordSys ever changes?
       ephemMgr->SetCoordinateSystem(internalCoordSystem);
+      ephemMgr->SetSolarSystem(solarSystem);
+      ephemMgr->Initialize();
    }
    ephemMgr->RecordEphemerisData();
 }
 
 //------------------------------------------------------------------------------
-// ProvideEphemeris()
+// ProvideEphemerisData()
 // Load the recorded ephemeris and start up another file to continue recording
 //------------------------------------------------------------------------------
 void Spacecraft::ProvideEphemerisData()
@@ -4694,6 +4713,17 @@ bool Spacecraft::Initialize()
 
       if (powerSystem) powerSystem->Initialize();
 
+      if (!ephemMgr)
+      {
+         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+         ephemMgr->SetObject(this);
+         // @todo - do I need to resend this, if the internalCoordSys ever changes?
+         ephemMgr->SetCoordinateSystem(internalCoordSystem);
+         ephemMgr->SetSolarSystem(solarSystem);
+         ephemMgr->Initialize();
+      }
+
+
       isInitialized = true;
       retval = true;
    }
@@ -5834,7 +5864,9 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
 
       // If not found, clone otherHardware[i] and add to hardwareList
       if (j == hardwareList.size())
+      {
          hardwareList.push_back(otherHardware[i]->Clone());
+      }
    }
 }
 

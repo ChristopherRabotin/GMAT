@@ -122,6 +122,7 @@ protected:
    std::string    obsType;
 
    /// This section is set for new design data filter                                         // made changes by TUAN NGUYEN
+   /// List of data filters                                                                   // made changes by TUAN NGUYEN
    std::vector<DataFilter*>  filterList;                                                      // made changes by TUAN NGUYEN
 
    /// This section is set for old design data filter

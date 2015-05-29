@@ -31,6 +31,7 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 #include "SpaceObject.hpp"    // To access epoch data
+#include "Spacecraft.hpp"
 #include "StringUtil.hpp"
 
 
@@ -1364,6 +1365,25 @@ void BatchEstimator::RunComplete()
 
    if (showAllResiduals)
       PlotResiduals();
+
+
+   // Clean up memory
+   for (UnsignedInt i = 0; i < hTilde.size(); ++i)
+      hTilde[i].clear();
+   hTilde.clear();
+   
+   for (UnsignedInt i = 0; i < hAccum.size(); ++i)
+      hAccum[i].clear();
+   hAccum.clear();
+
+   Weight.clear();
+   OData.clear();
+   CData.clear();
+
+   measurementResiduals.clear();
+   measurementEpochs.clear();
+   measurementResidualID.clear();
+
 }
 
 
@@ -1625,7 +1645,6 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
-#include "Spacecraft.hpp"
 std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalCS) const
 {
    std::stringstream ss;

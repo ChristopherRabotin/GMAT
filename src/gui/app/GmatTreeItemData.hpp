@@ -152,6 +152,8 @@ namespace GmatTree
       
       MISSION_ICON_RUN_SIMULATOR,
       MISSION_ICON_RUN_ESTIMATOR,
+
+      MISSION_ICON_FIND_EVENTS,
       MISSION_ICON_DEFAULT,
       
       MISSION_ICON_COUNT,
@@ -311,6 +313,7 @@ namespace GmatTree
       MINIMIZE,
       NON_LINEAR_CONSTRAINT,
 		SAVE,
+		FIND_EVENTS,
       MANAGE_OBJECT,
       TOGGLE,
       PLOT_ACTION,
@@ -320,7 +323,7 @@ namespace GmatTree
       ASSIGNMENT,
       FREE_FORM_SCRIPT,
       SCRIPT_EVENT,
-	  SET,
+      SET,
       OTHER_COMMAND,
       END_OF_COMMAND,
 

@@ -77,7 +77,7 @@ wxChar *MatlabConnection::Request(const wxString& item, int *size,
     MessageInterface::ShowMessage("\nMatlabConnection::Request() enters...\n");
     MessageInterface::ShowMessage(" ... and item = %s\n", item.c_str());
 #endif
-    wxChar *data =  wxConnection::Request(item, size, format);
+    wxChar *data =  (wxChar*)wxConnection::Request(item, (size_t*)size, format);
     return data;
 }
 

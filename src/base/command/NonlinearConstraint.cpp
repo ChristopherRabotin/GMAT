@@ -31,6 +31,13 @@
 //#define DEBUG_NLC_PARSING
 //#define DEBUG_NLC_WRAPPER_CODE
 
+//#ifndef DEBUG_MEMORY
+//#define DEBUG_MEMORY
+//#endif
+
+#ifdef DEBUG_MEMORY
+#include "MemoryTracker.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -866,6 +873,11 @@ void NonlinearConstraint::ClearWrappers()
    for (UnsignedInt i = 0; i < temp.size(); ++i)
    {
       wrapper = temp[i];
+      #ifdef DEBUG_MEMORY
+      MemoryTracker::Instance()->Remove
+         (wrapper, wrapper->GetDescription(), "NonlinearConstraint::ClearWrappers()",
+          GetTypeName() + " deleting wrapper");
+      #endif
       delete wrapper;
    }
 }

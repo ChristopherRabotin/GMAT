@@ -25,7 +25,7 @@
 
 #include "ObservationData.hpp"
 #include "EstimationDefs.hpp"
-
+#include <sstream>
 
 //-----------------------------------------------------------------------------
 // ObservationData()
@@ -179,4 +179,21 @@ void ObservationData::Clear()
    uplinkFreq              = 0.0;
    rangeModulo             = 1.0;
    dopplerCountInterval    = 1.0e-10;
+}
+
+
+
+std::string ObservationData::GetTrackingConfig()
+{
+   std::stringstream ss;
+   ss << "{{";
+   for (UnsignedInt i = 0; i < participantIDs.size(); ++i)
+   {
+      ss << participantIDs[i];
+      if (i < participantIDs.size()-1)
+         ss << ",";
+   }
+   ss << "}" << typeName << "}";
+
+   return ss.str();
 }

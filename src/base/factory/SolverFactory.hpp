@@ -31,8 +31,11 @@
 class SolverFactory : public Factory
 {
 public:
-   virtual Solver* CreateSolver(const std::string &ofType,
-                                const std::string &withName /* = "" */);
+   // method to create Solver object
+   virtual GmatBase*    CreateObject(const std::string &ofType,
+                                     const std::string &withName = "");        
+   virtual Solver*      CreateSolver(const std::string &ofType,
+                                     const std::string &withName /* = "" */);
    
    // default constructor
    SolverFactory();

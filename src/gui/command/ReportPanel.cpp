@@ -123,7 +123,7 @@ void ReportPanel::Create()
                        wxDefaultSize, 0);
    
    mReportFileComboBox = theGuiManager->
-      GetReportFileComboBox(this, ID_COMBOBOX, wxSize(200, 20));
+      GetReportFileComboBox(this, ID_COMBOBOX, wxSize(200, -1));
    
    wxBoxSizer *reportFileSizer = new wxBoxSizer(wxHORIZONTAL);
    reportFileSizer->Add(reportFileLabel, 0, wxALIGN_CENTRE|wxALL, bsize);

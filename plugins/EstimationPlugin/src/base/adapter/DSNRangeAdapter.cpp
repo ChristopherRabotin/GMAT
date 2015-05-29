@@ -22,6 +22,7 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include "RandomNumber.hpp"
+#include "ErrorModel.hpp"
 #include <sstream>
 
 //#define DEBUG_ADAPTER_EXECUTION
@@ -502,6 +503,21 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
          MessageInterface::ShowMessage("      . Feasibility reason         : %s\n", cMeasurement.unfeasibleReason.c_str());
          MessageInterface::ShowMessage("      . Elevation angle            : %.12lf degree\n", cMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("      . Covariance matrix          : <%p>\n", cMeasurement.covariance);
+         if (cMeasurement.covariance)
+         {
+            MessageInterface::ShowMessage("      . Covariance matrix size = %d\n", cMeasurement.covariance->GetDimension());
+            MessageInterface::ShowMessage("     [ ");
+            for (UnsignedInt i = 0; i < cMeasurement.covariance->GetDimension(); ++i)
+            {
+               if ( i > 0)
+                  MessageInterface::ShowMessage("\n");
+               for (UnsignedInt j = 0; j < cMeasurement.covariance->GetDimension(); ++j)
+                  MessageInterface::ShowMessage("%le   ", cMeasurement.covariance->GetCovariance()->GetElement(i,j));
+            }
+            MessageInterface::ShowMessage("]\n");
+         }
+
          MessageInterface::ShowMessage("===================================================================\n");
       #endif
 
@@ -550,9 +566,26 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
       MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
    #endif
 
-   
+   // Clear derivative variable
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      theDataDerivatives[i].clear();
+   theDataDerivatives.clear();                                                     // made changes by TUAN NGUYEN
+
    if (paramName == "Bias")
-      RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   {
+      //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+      //theDataDerivatives.clear();                                                   // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_RU")               // made changes by TUAN NGUYEN
+         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
+      else                                                                            // made changes by TUAN NGUYEN
+      {                                                                               // made changes by TUAN NGUYEN
+         Integer size = obj->GetEstimationParameterSize(id);                          // made changes by TUAN NGUYEN
+         RealArray oneRow;                                                            // made changes by TUAN NGUYEN
+         oneRow.assign(size, 0.0);                                                    // made changes by TUAN NGUYEN
+         theDataDerivatives.push_back(oneRow);                                        // made changes by TUAN NGUYEN
+      }                                                                               // made changes by TUAN NGUYEN
+
+   }
    else
    {
       // Compute measurement derivatives w.r.t position and velocity in km:

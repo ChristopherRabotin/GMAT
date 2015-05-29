@@ -348,6 +348,20 @@ bool StatisticAcceptFilter::SetStringParameter(const Integer id, const std::stri
          throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".ThinMode is invalid.\n");  
    }
 
+   if (id == FILENAMES)
+   {
+      if (value == "All")
+      {
+         if (find(observers.begin(), observers.end(), "From_AddTrackingConfig") != observers.end())
+            throw MeasurementException("Error: Both 'All' and 'From_AddTrackingConfig' can not set to " + GetName() + ".FileNames simultanously.\n");  
+      }
+      else if (value == "From_AddTrackingConfig")
+      {
+         if (find(observers.begin(), observers.end(), "All") != observers.end())
+            throw MeasurementException("Error: Both 'All' and 'From_AddTrackingConfig' can not set to " + GetName() + ".FileNames simultanously.\n");  
+      }
+   }
+
    return DataFilter::SetStringParameter(id, value);
 }
 
@@ -430,6 +444,13 @@ Integer StatisticAcceptFilter::SetIntegerParameter(const std::string &label, con
 }
 
 
+bool StatisticAcceptFilter::SetTrackingConfigs(StringArray tkconfigs)
+{
+   tkConfigList = tkconfigs;
+   return true;
+}
+
+
 ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
 #ifdef DEBUG_DATA_FILTER
@@ -452,6 +473,36 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
       return NULL;             // return NULL when it does not pass the test. The value of rejectedReason has to be 6 
    }
 
+   // Filter data using tracking configs
+   bool pass5 = true;
+   rejectedReason = 0;
+   if (find(fileNames.begin(), fileNames.end(), "From_AddTrackingConfig") != fileNames.end())
+   {
+      // Filter data based on tracking configs when tracking configs are not generated automatically
+      if (tkConfigList.size() != 0)
+      {
+         bool pass5 = false;
+         rejectedReason = 9;         // 9: reject due to tracking configuration 
+         for(UnsignedInt i = 0; i < tkConfigList.size(); ++i)
+         {
+            if (dataObject->GetTrackingConfig() == tkConfigList[i])
+            {
+               pass5 = true;
+               rejectedReason = 0;
+               break;
+            }
+         }
+         if (!pass5)
+         {
+            #ifdef DEBUG_FILTER
+               MessageInterface::ShowMessage("StatisticAcceptFilter<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d) exit7 return NULL\n", GetName().c_str(), this, dataObject, rejectedReason);
+            #endif
+            return NULL;
+         }
+      }
+   }
+
+
    // 1. Observated objects verify: It will be passed the test when observation data contains one spacecraft in "observers" array
    bool pass1 = true;
    rejectedReason = 0;   // 0: no rejected due to accept all spacecrafts
@@ -459,13 +510,13 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
    {
       if (find(observers.begin(), observers.end(), "All") == observers.end())
       {
-         for(UnsignedInt i = 0; i < observers.size(); ++i)
+         for(UnsignedInt i = 0; i < observerObjects.size(); ++i)                                               // made changes by TUAN NGUYEN
          {
             pass1 = false;
             rejectedReason = 6;         // 6: rejected due to spacecraft is not found
             for(UnsignedInt j = 1; j < dataObject->participantIDs.size(); ++j)
             {
-               if (observers[i] == dataObject->participantIDs[j])
+               if (observerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[j])              // made changes by TUAN NGUYEN
                {
                   rejectedReason = 0;   // 0: no rejected due to spacecraft is found in "observers" array
                   pass1 = true;
@@ -499,12 +550,12 @@ ObservationData* StatisticAcceptFilter::FilteringData(ObservationData* dataObjec
    {
       if (find(trackers.begin(), trackers.end(), "All") == trackers.end())
       {
-         for(UnsignedInt i = 0; i < trackers.size(); ++i)
+         for(UnsignedInt i = 0; i < trackerObjects.size(); ++i)                                   // made changes by TUAN NGUYEN
          {
             pass2 = false;
             rejectedReason = 5;        // 5: rejected due to ground station is not found
-            //MessageInterface::ShowMessage("Pass2: trackers[%d] = %s   dataObject->participantIDs[0] = %s\n", i, trackers[i].c_str(), dataObject->participantIDs[0].c_str());
-            if (trackers[i] == dataObject->participantIDs[0])
+            //MessageInterface::ShowMessage("Pass2: trackerObjects[%d].Id = %s   dataObject->participantIDs[0] = %s\n", i, trackerObjects[i]->GetStringParameter("Id").c_str(), dataObject->participantIDs[0].c_str());
+            if (trackerObjects[i]->GetStringParameter("Id") == dataObject->participantIDs[0])    // made changes by TUAN NGUYEN
             {
                rejectedReason = 0;    // 0: no rejected due to ground station is found in "trackers" array
                pass2 = true;
