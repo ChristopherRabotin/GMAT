@@ -509,7 +509,12 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
       }
       else
       {
-         if (index == participantNameList.size())
+         if (index == -1)
+         {
+            participantNameList.clear();
+            return true;
+         }
+         else if (index == participantNameList.size())
          {
             participantNameList.push_back(value);
             return true;
@@ -532,7 +537,12 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
       }                                                                             // made changes by TUAN NGUYEN
       else                                                                          // made changes by TUAN NGUYEN
       {                                                                             // made changes by TUAN NGUYEN
-         if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
+         if (index == -1)
+         {
+            solveforNames.clear();
+            return true;
+         }
+         else if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
          {                                                                          // made changes by TUAN NGUYEN
             solveforNames.push_back(value);                                         // made changes by TUAN NGUYEN
             return true;                                                            // made changes by TUAN NGUYEN
