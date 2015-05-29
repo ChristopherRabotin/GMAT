@@ -111,9 +111,6 @@
     <ClInclude Include="..\..\src\base\estimator\BatchEstimatorSVD.hpp">
       <Filter>Source Files\estimator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\base\event\EventException.hpp">
-      <Filter>Source Files\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\base\event\EventManager.hpp">
       <Filter>Source Files\event</Filter>
     </ClInclude>
@@ -387,6 +384,9 @@
     <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp">
       <Filter>Source Files\datafilter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -432,9 +432,6 @@
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\EventData.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\EventException.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\factory\EventFactory.cpp">
@@ -689,8 +686,8 @@
     <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp">
       <Filter>Source Files\datafilter</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
+    <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

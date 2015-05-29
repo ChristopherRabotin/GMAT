@@ -25,6 +25,7 @@
 #include "Transponder.hpp"
 #include "PropSetup.hpp"
 #include "RandomNumber.hpp"
+#include "ErrorModel.hpp"
 #include <sstream>
 
 //#define DEBUG_ADAPTER_EXECUTION
@@ -291,7 +292,7 @@ std::string DopplerAdapter::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DopplerAdapter::SetStringParameter(const Integer id, const std::string& value)
 {
-   // Note that: measurement type of adapter is always "Range", so it does not need to change
+   // Note that: measurement type of adapter is always "Range_KM", so it does not need to change
    bool retval = true;
    if (id != MEASUREMENT_TYPE)
       retval = adapterS->SetStringParameter(id, value);
@@ -972,8 +973,25 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
    #endif
 
+   // Clear derivative variable:
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      theDataDerivatives[i].clear();
+   theDataDerivatives.clear();                                                        // made changes by TUAN NGUYEN
+
    if (paramName == "Bias")
-      RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+   {
+      //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+      //theDataDerivatives.clear();                                                   // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Doppler_HZ")             // made changes by TUAN NGUYEN
+         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
+      else                                                                            // made changes by TUAN NGUYEN
+      {                                                                               // made changes by TUAN NGUYEN
+         Integer size = obj->GetEstimationParameterSize(id);                          // made changes by TUAN NGUYEN
+         RealArray oneRow;                                                            // made changes by TUAN NGUYEN
+         oneRow.assign(size, 0.0);                                                    // made changes by TUAN NGUYEN
+         theDataDerivatives.push_back(oneRow);                                        // made changes by TUAN NGUYEN
+      }                                                                               // made changes by TUAN NGUYEN
+   }
    else
    {
 
@@ -1082,7 +1100,7 @@ const std::vector<RealArray>& DopplerAdapter::CalculateMeasurementDerivatives(
       // Now assemble the derivative data into the requested derivative
       size = derivativesE[0].size();
 
-      theDataDerivatives.clear();
+      // theDataDerivatives.clear();                                     // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < derivativesE.size(); ++i)
       {
          RealArray oneRow;

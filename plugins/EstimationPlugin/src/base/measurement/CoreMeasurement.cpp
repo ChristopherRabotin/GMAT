@@ -92,6 +92,9 @@ CoreMeasurement::CoreMeasurement(const std::string &type,
 //-----------------------------------------------------------------------------
 CoreMeasurement::~CoreMeasurement()
 {
+#ifdef DEBUG_CONSTRUCTOR
+	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> destructor constructor enter\n", GetName().c_str(), this);
+#endif
    // delete the local coordinate systems, if necessary
    if (F1)
       delete F1;
@@ -101,6 +104,9 @@ CoreMeasurement::~CoreMeasurement()
       delete Fo;
    if (j2k)
       delete j2k;
+#ifdef DEBUG_CONSTRUCTOR
+	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> destructor constructor exit\n", GetName().c_str(), this);
+#endif
 }
 
 
@@ -132,22 +138,36 @@ CoreMeasurement::CoreMeasurement(const CoreMeasurement& core) :
    noiseSigma         (NULL)
 {
 #ifdef DEBUG_CONSTRUCTOR
-	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> Copy constructor. Copy from <'%s',%p>\n", GetName().c_str(), this, core.GetName().c_str(), &core);
+	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> Copy constructor enter: Copy from <'%s',%p>\n", GetName().c_str(), this, core.GetName().c_str(), &core);
 #endif
 
-   std::vector<Hardware*> hv;
-   participantHardware.assign(core.participantHardware.size(), hv);
-
-   for (UnsignedInt i = 0; i < core.participantHardware.size(); ++i)
-   {
-      participantHardware[i].assign(core.participantHardware[i].size(), NULL);
-      for (UnsignedInt j = 0; j < core.participantHardware[i].size(); ++j)
-         if (core.participantHardware[i][j] != NULL)
-         {
-            participantHardware[i][j] =
-                  (Hardware*)(core.participantHardware[i][j]->Clone());
-         }
-   }
+//   std::vector<Hardware*> hv;
+//   participantHardware.assign(core.participantHardware.size(), hv);
+//
+//#ifdef DEBUG_CONSTRUCTOR
+//	MessageInterface::ShowMessage("CoreMeasurement Copy constructor: step 1\n");
+//#endif
+//   for (UnsignedInt i = 0; i < core.participantHardware.size(); ++i)
+//   {
+//      participantHardware[i].assign(core.participantHardware[i].size(), NULL);
+//      for (UnsignedInt j = 0; j < core.participantHardware[i].size(); ++j)
+//         if (core.participantHardware[i][j] != NULL)
+//         {
+//#ifdef DEBUG_CONSTRUCTOR
+//	MessageInterface::ShowMessage("CoreMeasurement Copy constructor: step 2: core.participantHardware[%d][%d] = <%p,%s>\n", i, j, core.participantHardware[i][j], core.participantHardware[i][j]->GetName().c_str());
+//#endif
+//            participantHardware[i][j] = //(Hardware*)(core.participantHardware[i][j]);
+//                  (Hardware*)(core.participantHardware[i][j]->Clone());
+//         }
+//#ifdef DEBUG_CONSTRUCTOR
+//         else
+//	         MessageInterface::ShowMessage("CoreMeasurement Copy constructor: step 2: core.participantHardware[%d][%d] = NULL\n", i, j);
+//#endif
+//
+//   }
+#ifdef DEBUG_CONSTRUCTOR
+	MessageInterface::ShowMessage("CoreMeasurement <'%s',%p> Copy constructor exit: Copy from <'%s',%p>\n", GetName().c_str(), this, core.GetName().c_str(), &core);
+#endif
 }
 
 
@@ -185,28 +205,28 @@ CoreMeasurement& CoreMeasurement::operator=(const CoreMeasurement& core)
       j2k                = NULL;
       solarSystem        = core.solarSystem;
       satEpochID         = core.satEpochID;
-	  noiseSigma         = NULL;
+	   noiseSigma         = NULL;
 
-      // Clear the old hardware out
-      for (UnsignedInt i = 0; i < participantHardware.size(); ++i)
-         for (UnsignedInt j = 0; j < participantHardware[i].size(); ++j)
-            if (participantHardware[i][j] != NULL)
-               delete participantHardware[i][j];
-      participantHardware.clear();
-      // And clone in the new
-      std::vector<Hardware*> hv;
-      participantHardware.assign(core.participantHardware.size(), hv);
+      //// Clear the old hardware out
+      //for (UnsignedInt i = 0; i < participantHardware.size(); ++i)
+      //   for (UnsignedInt j = 0; j < participantHardware[i].size(); ++j)
+      //      if (participantHardware[i][j] != NULL)
+      //         delete participantHardware[i][j];
+      //participantHardware.clear();
+      //// And clone in the new
+      //std::vector<Hardware*> hv;
+      //participantHardware.assign(core.participantHardware.size(), hv);
 
-      for (UnsignedInt i = 0; i < core.participantHardware.size(); ++i)
-      {
-         participantHardware[i].assign(core.participantHardware[i].size(), NULL);
-         for (UnsignedInt j = 0; j < core.participantHardware[i].size(); ++j)
-            if (core.participantHardware[i][j] != NULL)
-            {
-               participantHardware[i][j] =
-                     (Hardware*)(core.participantHardware[i][j]->Clone());
-            }
-      }
+      //for (UnsignedInt i = 0; i < core.participantHardware.size(); ++i)
+      //{
+      //   participantHardware[i].assign(core.participantHardware[i].size(), NULL);
+      //   for (UnsignedInt j = 0; j < core.participantHardware[i].size(); ++j)
+      //      if (core.participantHardware[i][j] != NULL)
+      //      {
+      //         participantHardware[i][j] = //(Hardware*)(core.participantHardware[i][j]);
+      //               (Hardware*)(core.participantHardware[i][j]->Clone());
+      //      }
+      //}
    }
 
    return *this;
@@ -241,41 +261,41 @@ bool CoreMeasurement::SetRefObject(GmatBase *obj,
             participants.end())
       {
          // Cheating here for the moment to be sure GroundStation is 1st object
-         std::vector<Hardware*> hv;
+         //std::vector<Hardware*> hv;
          if (obj->IsOfType(Gmat::GROUND_STATION))
          {
             participants.insert(participants.begin(), (SpacePoint*)obj);
-            participantHardware.insert(participantHardware.begin(), hv);
+            //participantHardware.insert(participantHardware.begin(), hv);
             stationParticipant = true;
 		    
-			// add hardware to participantHardware list:
-			ObjectArray objList = obj->GetRefObjectArray(Gmat::HARDWARE);
-			int index = 0;
-			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
-			{
-				participantHardware[0].push_back((Hardware*)(*i));
-				++index;
-			}
+			   //// add hardware to participantHardware list:
+			   //ObjectArray objList = obj->GetRefObjectArray(Gmat::HARDWARE);
+			   //int index = 0;
+			   //for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
+			   //{
+				  // participantHardware[0].push_back((Hardware*)(*i));
+      //         MessageInterface::ShowMessage("CoreMeasurement<%s,%p>::SetRefObject():  set hardware to participantHardware[%d][%d] = '%s'\n", GetName().c_str(), this, 0, index, participantHardware[0][index]->GetName().c_str());
+				  // ++index;
+			   //}
 
          }
-         else
+         else if (obj->IsOfType(Gmat::SPACECRAFT))
          {
             participants.push_back((SpacePoint*)obj);
-            participantHardware.push_back(hv);
+            //participantHardware.push_back(hv);
 			
-			// add hardware to participantHardware list:
-			Spacecraft* sc = (Spacecraft*)obj;
-			ObjectArray objList = sc->GetRefObjectArray(Gmat::HARDWARE);
-			int index1 = participantHardware.size() - 1;
-			int index2 = 0;
-			for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
-			{
-				participantHardware[index1].push_back((Hardware*)(*i));
-//				MessageInterface::ShowMessage("CoreMeasurement<'%s',%p>::SetRefObject():  set hardware to participantHardware[%d][%d] = '%s'\n", GetName().c_str(), this, index1, index2, participantHardware[index1][index2]->GetName().c_str());
-				++index2;
-			}
-
-		 }
+			   //// add hardware to participantHardware list:
+			   //Spacecraft* sc = (Spacecraft*)obj;
+			   //ObjectArray objList = sc->GetRefObjectArray(Gmat::HARDWARE);
+			   //int index1 = participantHardware.size() - 1;
+			   //int index2 = 0;
+			   //for (ObjectArray::iterator i = objList.begin(); i != objList.end(); ++i)
+			   //{
+				  // participantHardware[index1].push_back((Hardware*)(*i));
+				  // MessageInterface::ShowMessage("CoreMeasurement<%s,%p>::SetRefObject():  set hardware to participantHardware[%d][%d] = '%s'\n", GetName().c_str(), this, index1, index2, participantHardware[index1][index2]->GetName().c_str());
+				  // ++index2;
+			   //}
+		   }
 
          // Set IDs
          currentMeasurement.participantIDs.clear();
@@ -1111,41 +1131,41 @@ void CoreMeasurement::DumpParticipantStates(const std::string& ref)
  * @return true if the Hardware was retrieved, false if not
  */
 //------------------------------------------------------------------------------
-bool CoreMeasurement::SetParticipantHardware(GmatBase *obj,
-      const std::string &hwName, Integer hwIndex)
-{
-   bool retval = false;
-
-   // Check that obj is a participant
-   for (UnsignedInt i = 0; i < participants.size(); ++i)
-   {
-      if (participants[i] == obj)
-      {
-         // Retrieve the hardware element from the participant
-         GmatBase *gb = obj->GetRefObject(Gmat::HARDWARE, hwName);
-         if (gb == NULL)
-            throw MeasurementException(obj->GetName() + " does not have a "
-                  "hardware element named " + hwName);
-         if (gb->IsOfType(Gmat::HARDWARE))
-         {
-            #ifdef DEBUG_HARDWARE
-               MessageInterface::ShowMessage("   Found %s!\n", hwName.c_str());
-            #endif
-
-            if (participantHardware[i].size() > (UnsignedInt)hwIndex)
-               participantHardware[i][hwIndex] = (Hardware*)gb;
-            else if (participantHardware[i].size() == (UnsignedInt)hwIndex)
-               participantHardware[i].push_back((Hardware*)gb);
-            else
-               throw MeasurementException("Measurement Hardware Index is out "
-                     "of bounds");
-            retval = true;
-         }
-      }
-   }
-
-   return retval;
-}
+//bool CoreMeasurement::SetParticipantHardware(GmatBase *obj,
+//      const std::string &hwName, Integer hwIndex)
+//{
+//   bool retval = false;
+//
+//   // Check that obj is a participant
+//   for (UnsignedInt i = 0; i < participants.size(); ++i)
+//   {
+//      if (participants[i] == obj)
+//      {
+//         // Retrieve the hardware element from the participant
+//         GmatBase *gb = obj->GetRefObject(Gmat::HARDWARE, hwName);
+//         if (gb == NULL)
+//            throw MeasurementException(obj->GetName() + " does not have a "
+//                  "hardware element named " + hwName);
+//         if (gb->IsOfType(Gmat::HARDWARE))
+//         {
+//            #ifdef DEBUG_HARDWARE
+//               MessageInterface::ShowMessage("   Found %s!\n", hwName.c_str());
+//            #endif
+//
+//            if (participantHardware[i].size() > (UnsignedInt)hwIndex)
+//               participantHardware[i][hwIndex] = (Hardware*)gb;
+//            else if (participantHardware[i].size() == (UnsignedInt)hwIndex)
+//               participantHardware[i].push_back((Hardware*)gb);
+//            else
+//               throw MeasurementException("Measurement Hardware Index is out "
+//                     "of bounds");
+//            retval = true;
+//         }
+//      }
+//   }
+//
+//   return retval;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1167,6 +1187,8 @@ Real CoreMeasurement::GetDelay(UnsignedInt forParticipant, Integer whichOne)
       MessageInterface::ShowMessage("CoreMeasurement<%p>::GetDelay(%d)\n", this,
             whichOne);
    #endif
+
+   UpdateHardware();                        // made changes by TUAN NGUYEN
 
    Real hwDelay = 0.0;
 
@@ -1270,3 +1292,25 @@ void CoreMeasurement::SetNoise(Rvector* ns)
 {
 	noiseSigma = ns;
 }
+
+
+// made changes by TUAN NGUYEN
+bool CoreMeasurement::UpdateHardware()
+{
+   participantHardware.clear();
+
+   for(UnsignedInt i = 0; i < participants.size(); ++i)
+   {
+      ObjectArray objList = participants[i]->GetRefObjectArray(Gmat::HARDWARE);
+
+      std::vector<Hardware*> hwList;
+      for(UnsignedInt j = 0; j < objList.size(); ++j)
+         hwList.push_back((Hardware*)objList[j]);
+
+      participantHardware.push_back(hwList);
+   }
+
+   return true;
+}
+
+

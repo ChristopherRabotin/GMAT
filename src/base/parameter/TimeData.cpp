@@ -478,8 +478,16 @@ const std::string* TimeData::GetValidObjectList() const
 }
 
 // The inherited methods from RefData
+//------------------------------------------------------------------------------
+// std::string GetRefObjectName(const Gmat::ObjectType type) const
+//------------------------------------------------------------------------------
 std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
 {
+   #ifdef DEBUG_TIMEDATA_OBJNAME
+   MessageInterface::ShowMessage
+      ("TimeData::GetRefObjectName() entered, type=%d\n", type);
+   #endif
+   
    try
    {
       return RefData::GetRefObjectName(type);
@@ -490,7 +498,11 @@ std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
       // list (or vice versa?), since we are looking for a Spacecraft
       // and a Spacecraft is a SpacePoint
       Gmat::ObjectType altType = type;
-      if (type == Gmat::SPACE_POINT) altType = Gmat::SPACECRAFT;
+      if (type == Gmat::SPACE_POINT)
+         altType = Gmat::SPACECRAFT;
+      else if (type == Gmat::SPACECRAFT)
+         altType = Gmat::SPACE_POINT;
+      
       #ifdef DEBUG_TIMEDATA_OBJNAME
          MessageInterface::ShowMessage(
                "TimeData::GetRefObjectName -> couldn't find type %d, so look for type %d\n",
@@ -503,7 +515,7 @@ std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
             //Notes: will return first object name.
             #ifdef DEBUG_TIMEDATA_OBJNAME
             MessageInterface::ShowMessage
-               ("---> TimeData::GetRefObjectName() altType=%d returning: %s\n", altType,
+               ("TimeData::GetRefObjectName() altType=%d returning: %s\n", altType,
                 mRefObjList[i].objName.c_str());
             #endif
             return mRefObjList[i].objName;
@@ -514,6 +526,9 @@ std::string TimeData::GetRefObjectName(const Gmat::ObjectType type) const
    }
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
 const StringArray& TimeData::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    RefData::GetRefObjectNameArray(type);
@@ -555,6 +570,9 @@ bool TimeData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetRefObject(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
 GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
                                  const std::string &name)
 {
@@ -583,7 +601,7 @@ GmatBase* TimeData::GetRefObject(const Gmat::ObjectType type,
                //Notes: will return first object name.
                #ifdef DEBUG_TIMEDATA_OBJNAME
                MessageInterface::ShowMessage
-                  ("---> TimeData::GetRefObject() altType=%d returning: %s\n", altType,
+                  ("TimeData::GetRefObject() altType=%d returning: %s\n", altType,
                    mRefObjList[i].objName.c_str());
                #endif
                return mRefObjList[i].obj;
@@ -628,6 +646,12 @@ bool TimeData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool TimeData::ValidateRefObjects(GmatBase *param)
 {
+   #ifdef DEBUG_TIMEDATA
+   MessageInterface::ShowMessage
+      ("TimeData::ValidateRefObjects() entered, param=<%p>'%s'\n", param,
+       param ? param->GetName().c_str() : "NULL");
+   #endif
+   
    //loj: 3/23/04 removed checking for type
    bool status = false;
     
@@ -657,7 +681,11 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
          }
       }
    }
-
+   
+   #ifdef DEBUG_TIMEDATA
+   MessageInterface::ShowMessage
+      ("TimeData::ValidateRefObjects() returning %d\n", status);
+   #endif
    return status;
 }
 
@@ -667,11 +695,19 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
 //------------------------------------------------------------------------------
 void TimeData::InitializeRefObjects()
 {
+   #ifdef DEBUG_TIMEDATA
+   MessageInterface::ShowMessage("TimeData::InitializeRefObjects() entered\n");
+   #endif
+   
 //   mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    mSpacePoint = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
    if (!mSpacePoint)
       mSpacePoint = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
 
+   #ifdef DEBUG_TIMEDATA
+   MessageInterface::ShowMessage("   mSpacePoint=<%p>\n", mSpacePoint);
+   #endif
+   
 //   if (mSpacecraft == NULL)
    if (mSpacePoint == NULL)
    {
@@ -707,6 +743,11 @@ void TimeData::InitializeRefObjects()
    {
       mSpacecraft = (Spacecraft*)mSpacePoint;
    }
+   
+   #ifdef DEBUG_TIMEDATA
+   MessageInterface::ShowMessage
+      ("TimeData::InitializeRefObjects() leaving, mSpacecraft=<%p>\n", mSpacecraft);
+   #endif
 }
 
 

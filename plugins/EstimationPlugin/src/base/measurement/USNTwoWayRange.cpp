@@ -865,6 +865,9 @@ bool USNTwoWayRange::Evaluate(bool withEvents)
       //         objList1 := all transmitters in participantHardware list
       //         objList2 := all receivers in participantHardware list
       //         objList3 := all transponders in participantHardware list
+
+      UpdateHardware();                                                         // made changes by TUAN NGUYEN
+      
       if (!(participantHardware.empty()||
              ((!participantHardware.empty())&&
               participantHardware[0].empty()&&

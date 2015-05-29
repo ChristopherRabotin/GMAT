@@ -64,6 +64,9 @@ public:
    virtual Integer      SetIntegerParameter(const std::string &label,
                                             const Integer value);
 
+   /// This function is used to set tracking configs to data file object in order to use for data filter       // made changes by TUAN NGUYEN
+   virtual bool         SetTrackingConfigs(StringArray tkconfigs);                                             // made changes by TUAN NGUYEN
+
    virtual ObservationData* 
                         FilteringData(ObservationData* dataObject, Integer& rejectedReason);
    void                 IncreasingRecordCounter();
@@ -72,7 +75,7 @@ public:
 
    /// @todo: Check this
    DEFAULT_TO_NO_CLONES
-   DEFAULT_TO_NO_REFOBJECTS
+   //DEFAULT_TO_NO_REFOBJECTS
 
 protected:
    /// Data thinning
@@ -80,6 +83,9 @@ protected:
    Integer     thinningFrequency;
    /// Record count;
    Integer     recCount;
+
+   /// List of tracking configs used for data filter                                          // made changes by TUAN NGUYEN
+   StringArray tkConfigList;                                                                  // made changes by TUAN NGUYEN
 
    /// Class parameter ID enumeration
    enum

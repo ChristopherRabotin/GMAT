@@ -33,7 +33,6 @@
 #include "AssetException.hpp"
 #include "ColorTypes.hpp"               // for namespace GmatColor::
 
-
 //#define DEBUG_OBJECT_MAPPING
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_INIT
@@ -75,8 +74,6 @@ GroundStation::PARAMETER_TYPE[GroundStationParamCount - BodyFixedPointParamCount
       Gmat::REAL_TYPE,      // MinimumElevationAngle
       Gmat::OBJECTARRAY_TYPE,      // ERROR_MODEL                          // made changes by TUAN NGUYEN
    };
-
-
 
 //---------------------------------
 // public methods
@@ -206,7 +203,7 @@ GroundStation& GroundStation::operator=(const GroundStation& gs)
    {
       GroundstationInterface::operator=(gs);
 
-      stationId       = gs.stationId;
+      stationId 	    = gs.stationId;
       hardwareNames   = gs.hardwareNames;
 //    hardwareList    = gs.hardwareList;       // should it be cloned ????
 
@@ -1256,7 +1253,6 @@ bool GroundStation::Initialize()
          }
       }
    }
-
 
    // verify GroundStation's referenced objects
    if (VerifyAddHardware() == false)   // verify add hardware

@@ -29,7 +29,6 @@
 
 #ifdef IONOSPHERE
 #include "CoordinateConverter.hpp"
-//#include "Moderator.hpp"
 #endif
 
 //#define DEBUG_DERIVATIVES
@@ -518,7 +517,6 @@ RealArray PhysicalMeasurement::IonosphereCorrection(Real freq, Rvector3 r1B, Rve
       CoordinateSystem* cs = gs->GetBodyFixedCoordinateSystem();
 
       // Create EarthMJ2000Eq coordinate system
-      // CoordinateSystem* fk5cs = Moderator::Instance()->GetCoordinateSystem("EarthMJ2000Eq");         // It is no longer using Moderator 
       CelestialBody *earthBody = solarSystem->GetBody("Earth");
       CoordinateSystem* fk5cs = CoordinateSystem::CreateLocalCoordinateSystem("Earthfk5", "MJ2000Eq",
                earthBody, NULL, NULL, earthBody, solarSystem);

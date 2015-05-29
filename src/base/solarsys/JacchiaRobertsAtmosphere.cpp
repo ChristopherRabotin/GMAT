@@ -31,7 +31,7 @@
 //#define UNIT_TEST
 //#define UNIT_TEST_90km
 //#define DEBUG_SHOW_DENSITY
-#define DEBUG_FIRSTCALL
+//#define DEBUG_FIRSTCALL
 
 
 //------------------------------------------------------------------------------

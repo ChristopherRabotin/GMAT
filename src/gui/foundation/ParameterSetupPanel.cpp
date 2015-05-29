@@ -84,9 +84,9 @@ void ParameterSetupPanel::Create()
    
    // wxTextCtrl
    mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,20), 0);
+                                 wxDefaultPosition, wxSize(150,-1), 0);
    mValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(300,20), 0);
+                                 wxDefaultPosition, wxSize(300,-1), 0);
       
    // wxSizers
    mPageBoxSizer = new wxBoxSizer(wxVERTICAL);

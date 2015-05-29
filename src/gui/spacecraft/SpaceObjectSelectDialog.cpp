@@ -130,11 +130,11 @@ void SpaceObjectSelectDialog::Create()
    
    // wxButton
    addSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("->"),
-                                       wxDefaultPosition, wxSize(20,20), 0 );
+                                       wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
    removeSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("<-"),
-                                          wxDefaultPosition, wxSize(20,20), 0 );
+                                          wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
    clearSpaceObjectButton = new wxButton( this, ID_BUTTON, wxT("<="),
-                                         wxDefaultPosition, wxSize(20,20), 0 );
+       wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
 
    #ifdef DEBUG_SO_DIALOG
    MessageInterface::ShowMessage

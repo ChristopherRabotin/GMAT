@@ -454,9 +454,6 @@ int main(int argc, char *argv[])
       bool        batchRun = false;
       bool        settingVerbose = false;
       
-//      chdir("/Users/wshoan/Documents/workspace/trunk/application/bin64"); // ******* try this ***********
-
-
       // Set the message receiver and moderator pointers here
       ConsoleMessageReceiver *theMessageReceiver = ConsoleMessageReceiver::Instance();
       MessageInterface::SetMessageReceiver(theMessageReceiver);

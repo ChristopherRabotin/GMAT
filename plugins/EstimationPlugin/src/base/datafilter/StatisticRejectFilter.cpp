@@ -274,6 +274,49 @@ std::string StatisticRejectFilter::GetParameterTypeString(const Integer id) cons
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string property
+ *
+ * @param id The ID of the property
+ * @param value The new value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool StatisticRejectFilter::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == FILENAMES)
+   {
+      if (value == "From_AddTrackingConfig")
+         throw MeasurementException("Error: 'From_AddTrackingConfig' is an invalid value for " + GetName() + ".FileNames parameter.\n");  
+   }
+
+   return DataFilter::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string property
+ *
+ * @param label The text description of the property
+ * @param value The new value
+ *
+ * @return true on success, false on failure
+ */
+//------------------------------------------------------------------------------
+bool StatisticRejectFilter::SetStringParameter(const std::string &label,
+      const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
 ObservationData* StatisticRejectFilter::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
 {
 #ifdef DEBUG_FILTER

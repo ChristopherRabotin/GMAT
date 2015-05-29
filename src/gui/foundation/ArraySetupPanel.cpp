@@ -98,11 +98,11 @@ void ArraySetupPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT(" X "), wxDefaultPosition, wxDefaultSize, 0);
    
    mArrNameTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0);
    mArrRowTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,-1), 0);
    mArrColTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,20), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35,-1), 0);
    
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
@@ -136,7 +136,7 @@ void ArraySetupPanel::Create()
                      0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
    
    mArrValTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(100,20), 0);
+                                     wxDefaultPosition, wxSize(100,-1), 0);
    mUpdateButton =
       new wxButton(this, ID_BUTTON, wxT("Update"),
                    wxDefaultPosition, wxDefaultSize, 0);

@@ -446,7 +446,7 @@ void GmatBaseSetupPanel::CreateControls(GmatBase *theObject, Integer index,
    {
       *aUnit =
          new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
-                            wxSize(buttonWidth, 20));
+                            wxSize(buttonWidth, -1));
 	  //BrowseButtonWildcard = BMP and GIF files (*.bmp;*.gif)|*.bmp;*.gif|PNG files (*.png)|*.png|All Files (*.*)|*.*;
       idInfoMap[(wxObject *) *aUnit] = config->Read(_T("BrowseButtonWildcard"), "All Files (*.*)|*.*");
       (*aUnit)->SetToolTip(config->Read(_T("BrowseButtonHint")));

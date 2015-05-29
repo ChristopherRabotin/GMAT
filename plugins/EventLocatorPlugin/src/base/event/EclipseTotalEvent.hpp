@@ -21,7 +21,6 @@
 #define EclipseTotalEvent_hpp
 
 #include "gmatdefs.hpp"
-#include "LocatedEvent.hpp"
 #include "EclipseEvent.hpp"
 
 /**
@@ -55,7 +54,7 @@ public:
 
    // Clear the event list
    virtual bool         TakeAction(const std::string &action,
-                                   const std::string &actionData);
+                                   const std::string &actionData = "");
 
 protected:
    /// The eclipse events

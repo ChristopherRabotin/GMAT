@@ -46,7 +46,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
 
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 {
-   Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_Hz"
+   Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_HZ"
    Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
    Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
@@ -509,7 +509,12 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
       }
       else
       {
-         if (index == participantNameList.size())
+         if (index == -1)
+         {
+            participantNameList.clear();
+            return true;
+         }
+         else if (index == participantNameList.size())
          {
             participantNameList.push_back(value);
             return true;
@@ -532,7 +537,12 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
       }                                                                             // made changes by TUAN NGUYEN
       else                                                                          // made changes by TUAN NGUYEN
       {                                                                             // made changes by TUAN NGUYEN
-         if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
+         if (index == -1)
+         {
+            solveforNames.clear();
+            return true;
+         }
+         else if (index == solveforNames.size())                                         // made changes by TUAN NGUYEN
          {                                                                          // made changes by TUAN NGUYEN
             solveforNames.push_back(value);                                         // made changes by TUAN NGUYEN
             return true;                                                            // made changes by TUAN NGUYEN

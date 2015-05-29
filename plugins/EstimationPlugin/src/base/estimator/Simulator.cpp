@@ -28,6 +28,7 @@
 #include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 //#define DEBUG_STATE_MACHINE
@@ -199,6 +200,14 @@ Simulator::~Simulator()
 {
    if (propagator)
       delete propagator;
+
+   if (simState)                       // made changes by TUAN NGUYEN
+      delete simState;                 // made changes by TUAN NGUYEN
+
+   activeEvents.clear();               // made changes by TUAN NGUYEN
+   measList.clear();                   // made changes by TUAN NGUYEN
+   measModelList.clear();              // made changes by TUAN NGUYEN
+   refObjectList.clear();              // made changes by TUAN NGUYEN
 }
 
 
@@ -607,7 +616,6 @@ std::string Simulator::GetStringParameter(const Integer id,
  * @return  success flag.
  */
 //------------------------------------------------------------------------------
-#include "StringUtil.hpp"
 bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION

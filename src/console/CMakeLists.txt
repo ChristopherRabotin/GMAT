@@ -12,47 +12,13 @@
 #
 
 MESSAGE("==============================")
-MESSAGE("Console building setup " ${VERSION})
+MESSAGE("GMAT Console setup " ${VERSION})
 
-if (PROFILE_BUILD)
-	SET(CONSOLETARGET "gmatConsoleP")
-else()
-	SET(CONSOLETARGET "gmatConsole")
-endif()
-
-# ====================================================================
-# SPICE specifics
-if(64_BIT)
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice64")
-else()
-	SET(CSPICE_DIR "${CSPICE_DIR}/cspice32")
-endif()
-
-INCLUDE_DIRECTORIES("${CSPICE_DIR}/include")
-SET(SPICE_LIB_DIR  "${CSPICE_DIR}/lib")
-LINK_DIRECTORIES(${SPICE_LIB_DIR})
-
-if(WIN32)
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.lib")
-else()
-	LINK_LIBRARIES("${CSPICE_DIR}/lib/cspice.a")
-endif()
-        
-ADD_DEFINITIONS("-D__USE_SPICE__")
-
-SET(SPICE_SRCS
-	 "attitude/SpiceAttitude.cpp"
-	 "util/SpiceAttitudeKernelReader.cpp"
-	 "util/SpiceInterface.cpp"
-	 "util/SpiceOrbitKernelReader.cpp"
-	 "util/SpiceKernelReader.cpp"
-	 "util/SpiceKernelWriter.cpp"
-	 "util/SpiceOrbitKernelWriter.cpp")
-
+SET(TargetName GmatConsole)
 
 # ====================================================================
 # source files
-SET(SRCS 
+SET(CONSOLE_SRCS 
     driver.cpp 
     ConsoleAppException.cpp
     PrintUtility.cpp
@@ -60,49 +26,59 @@ SET(SRCS
 )
 
 # ====================================================================
-# include directories for header files
-INCLUDE_DIRECTORIES("../base/include")
-INCLUDE_DIRECTORIES("../base/foundation")
-INCLUDE_DIRECTORIES("../base/executive")
-INCLUDE_DIRECTORIES("../base/factory")
-INCLUDE_DIRECTORIES("../base/forcemodel") 
-INCLUDE_DIRECTORIES("../base/subscriber")
-INCLUDE_DIRECTORIES("../base/command")
-INCLUDE_DIRECTORIES("../base/spacecraft")
-INCLUDE_DIRECTORIES("../base/solarsys")
-INCLUDE_DIRECTORIES("../base/propagator")
-INCLUDE_DIRECTORIES("../base/interpreter")
-INCLUDE_DIRECTORIES("../base/parameter")
-INCLUDE_DIRECTORIES("../base/interpolator")
-INCLUDE_DIRECTORIES("../base/util")
-INCLUDE_DIRECTORIES("../base/stopcond") 
-INCLUDE_DIRECTORIES("../base/hardware")
-INCLUDE_DIRECTORIES("../base/configs")
-INCLUDE_DIRECTORIES("../base/burn")
-INCLUDE_DIRECTORIES("../base/solver")
-INCLUDE_DIRECTORIES("../base/function")
-INCLUDE_DIRECTORIES("../base/coordsystem")
-INCLUDE_DIRECTORIES("../base/attitude")
-INCLUDE_DIRECTORIES("../base/math")
-INCLUDE_DIRECTORIES("../base/plugin")
-INCLUDE_DIRECTORIES("../base/event")
-	
+# Recursively find all include files, which will be added to IDE-based
+# projects (VS, XCode, etc.)
+FILE(GLOB_RECURSE CONSOLE_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.hpp)
+
 # ====================================================================
-# libraries
-LINK_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
-if(WIN32)
-	LINK_LIBRARIES(libGmatBase)
-else()
-	LINK_LIBRARIES(GmatBase)
-endif()
-
-
+# include directories for header files
+INCLUDE_DIRECTORIES(${GMAT_BASE_INCLUDE_DIRECTORIES})
+	
 # ====================================================================
 # compilation
 
 # add the install targets
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../application/bin")
+ADD_EXECUTABLE(${TargetName} ${CONSOLE_SRCS} ${CONSOLE_HEADERS})
 
-ADD_EXECUTABLE(${CONSOLETARGET} ${SRCS})
+# The debug Console should have the same postfix as top-levl CMakeLists.txt
+# This is required because CMAKE_DEBUG_POSTFIX only applies to libraries
+# and not executables as of CMake 3.0.2
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 
-SET_TARGET_PROPERTIES(${CONSOLETARGET} PROPERTIES TARGET_VERSION_MAJOR "${VERSION}")
+# ====================================================================
+# Link libraries
+TARGET_LINK_LIBRARIES(${TargetName} GmatBase)
+
+# ====================================================================
+# Add source/header files to IDE-based project source groups
+# Macro defined in top-level CMakeLists.txt
+_ADDSOURCEGROUPS("")
+
+# Create build outputs in bin directory
+_SETOUTPUTDIRECTORY(${TargetName} bin)
+
+# Override debug output directory
+SET_TARGET_PROPERTIES(${TargetName} PROPERTIES 
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${GMAT_BUILDOUTPUT_DEBUGDIR}
+  )
+
+# Specify where to install (make install or VS "INSTALL" project)
+INSTALL( TARGETS ${TargetName}
+  DESTINATION bin
+  )
+
+# Set RPATH to find shared libraries in default locations on Mac/Linux
+if(UNIX)
+  if(APPLE)
+    if(GMAT_MAC_APPBUNDLE_PATH)
+      SET(MAC_BASEPATH "../${GMAT_MAC_APPBUNDLE_PATH}/Frameworks/")
+    endif()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "@loader_path/${MAC_BASEPATH}"
+      )
+  else()
+    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
+      "\$ORIGIN/"
+      )
+  endif()
+endif()

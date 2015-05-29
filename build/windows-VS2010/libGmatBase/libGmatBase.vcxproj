@@ -352,6 +352,7 @@
     <ClCompile Include="..\..\..\src\base\command\EndScript.cpp" />
     <ClCompile Include="..\..\..\src\base\command\EndTarget.cpp" />
     <ClCompile Include="..\..\..\src\base\command\EndWhile.cpp" />
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp" />
     <ClCompile Include="..\..\..\src\base\command\For.cpp" />
     <ClCompile Include="..\..\..\src\base\command\GmatCommand.cpp" />
     <ClCompile Include="..\..\..\src\base\command\If.cpp" />
@@ -786,6 +787,7 @@
     <ClInclude Include="..\..\..\src\base\command\EndScript.hpp" />
     <ClInclude Include="..\..\..\src\base\command\EndTarget.hpp" />
     <ClInclude Include="..\..\..\src\base\command\EndWhile.hpp" />
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp" />
     <ClInclude Include="..\..\..\src\base\command\For.hpp" />
     <ClInclude Include="..\..\..\src\base\command\GmatCommand.hpp" />
     <ClInclude Include="..\..\..\src\base\command\If.hpp" />

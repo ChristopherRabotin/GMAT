@@ -1007,6 +1007,10 @@ Integer GmatBase::GetOwnedObjectCount()
 //---------------------------------------------------------------------------
 GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 {
+   MessageInterface::ShowMessage
+      ("GmatBase::GetOwnedObject() entered, this=<%p>'%s', whichOne = %d\n",
+       this, this->GetName().c_str(), whichOne);
+   
    throw GmatBaseException
       ("No owned objects for this instance \"" + instanceName + "\" of type \"" +
        typeName + "\"");
@@ -1053,7 +1057,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
 }
 
 //------------------------------------------------------------------------------
-//  bool GetIsGlobal()
+//  bool tIsGlobal()
 //------------------------------------------------------------------------------
 /**
  * Method to return the isGlobal flag for an object.
@@ -1061,7 +1065,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
  * @return value of isGlobal flag (i.e. whether or not this object is Global)
  */
 //------------------------------------------------------------------------------
-bool GmatBase::GetIsGlobal() const
+bool GmatBase::IsGlobal() const
 {
    return isGlobal;
 }

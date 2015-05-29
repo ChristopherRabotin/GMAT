@@ -440,6 +440,8 @@ private:
    
    // Object map
    GmatBase* FindObject(const std::string &name);
+   void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
+                                  Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,

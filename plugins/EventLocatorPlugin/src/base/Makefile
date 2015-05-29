@@ -46,9 +46,7 @@ HEADERS = -Ievent \
           -I$(GMAT_CODE_LOCATION)/base/spacecraft \
           -I$(GMAT_CODE_LOCATION)/base/foundation \
           -I$(GMAT_CODE_LOCATION)/base/factory \
-          -I$(GMAT_CODE_LOCATION)/base/subscriber \
-          $(SPICE_INCLUDE)
-
+          -I$(GMAT_CODE_LOCATION)/base/subscriber 
 
 clean : archclean
 
@@ -64,6 +62,7 @@ CPP_OBJECTS = \
     event/Elevation.o \
     event/Contact.o \
     event/ContactEvent.o \
+    event/ContactResult.o \
     event/Eclipse.o \
     event/EclipseEvent.o \
     event/EclipseTotalEvent.o \

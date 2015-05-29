@@ -45,12 +45,13 @@
 //#define DEBUG_GUI_ITEM_VALIDATE
 //#define DEBUG_PROPERTY_LISTBOX
 //#define DBGLVL_GUI_ITEM 1
-//#define DBGLVL_GUI_ITEM_UPDATE 1
+//#define DBGLVL_GUI_ITEM_UPDATE 2
 //#define DBGLVL_GUI_ITEM_REG 1
 //#define DBGLVL_GUI_ITEM_UNREG 1
 //#define DBGLVL_GUI_ITEM_PARAM 2
 //#define DBGLVL_GUI_ITEM_PROPERTY 2
 //#define DBGLVL_GUI_ITEM 2
+//#define DBGLVL_GUI_ITEM_EL 2
 //#define DBGLVL_GUI_ITEM_FN 2
 //#define DBGLVL_GUI_ITEM_SO 2
 //#define DBGLVL_GUI_ITEM_SC 2
@@ -1582,6 +1583,22 @@ void GuiItemManager::UnregisterCheckListBox(const wxString &type, wxCheckListBox
          mSpacecraftExcList.erase(pos2);
       #endif
    }
+   else if (type == "GroundStation")
+   {
+      std::vector<wxCheckListBox*>::iterator pos1 =
+         find(mGroundStationCLBList.begin(), mGroundStationCLBList.end(), clb);
+
+      if (pos1 != mGroundStationCLBList.end())
+         mGroundStationCLBList.erase(pos1);
+
+      #if 0
+      std::vector<wxArrayString*>::iterator pos2 =
+         find(mGroundStationExcList.begin(), mGroundStationExcList.end(), excList);
+
+      if (pos2 != mGroundStationExcList.end())
+         mGroundStationExcList.erase(pos2);
+      #endif
+   }
    else if (type == "SpacePoint")
    {
       std::vector<wxCheckListBox*>::iterator pos1 =
@@ -1708,6 +1725,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 
       if (pos != mPowerSystemCBList.end())
          mPowerSystemCBList.erase(pos);
+   }
+   else if (type == "EventLocator")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mLocatorCBList.begin(), mLocatorCBList.end(), cb);
+
+      if (pos != mLocatorCBList.end())
+         mLocatorCBList.erase(pos);
    }
    else if (type == "Sensor")
    {
@@ -2579,7 +2604,7 @@ wxComboBox* GuiItemManager::GetAntennaComboBox(wxWindow *parent, wxWindowID id,
 //                                    const wxSize &size)
 //------------------------------------------------------------------------------
 /**
- * @return Antenna combo box pointer
+ * @return PowerSystem combo box pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetPowerSystemComboBox(wxWindow *parent, wxWindowID id,
@@ -2603,6 +2628,36 @@ wxComboBox* GuiItemManager::GetPowerSystemComboBox(wxWindow *parent, wxWindowID 
    mPowerSystemCBList.push_back(powerSystemComboBox);
 
    return powerSystemComboBox;
+}
+
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetLocatorComboBox(wxWindow *parent, wxWindowID id,
+//                                const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return Event Locator combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetLocatorComboBox(wxWindow *parent, wxWindowID id,
+                                               const wxSize &size)
+{
+   wxComboBox *eventLocatorComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theLocatorList, wxCB_READONLY);
+
+   if (theNumLocator == 0)
+      eventLocatorComboBox->Append("No Event Locators Available");
+
+   // show first Power System
+   eventLocatorComboBox->SetSelection(0);
+
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mLocatorCBList.push_back(eventLocatorComboBox);
+
+   return eventLocatorComboBox;
 }
 
 
@@ -2966,6 +3021,47 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
    mSpacecraftCLBList.push_back(checkListBox);
    mSpacecraftExcList.push_back(excList);
    
+   return checkListBox;
+}
+
+//------------------------------------------------------------------------------
+// wxCheckListBox* GetGroundStationCheckListBox(wxWindow *parent, wxWindowID id,
+//                                             const wxSize &size,
+//                                             wxArrayString &excList)
+//------------------------------------------------------------------------------
+/**
+ * @return Available GroundStation ListBox pointer
+ */
+//------------------------------------------------------------------------------
+wxCheckListBox* GuiItemManager::GetGroundStationCheckListBox(wxWindow *parent, wxWindowID id,
+                                                            const wxSize &size,
+                                                            wxArrayString *excList)
+{
+   wxArrayString emptyList;
+   wxCheckListBox *checkListBox =
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
+                         wxLB_SINGLE|wxLB_SORT|wxLB_HSCROLL);
+
+   if (excList != NULL && excList->GetCount() > 0)
+   {
+      for (int i=0; i<theNumGroundStation; i++)
+      {
+         if (excList->Index(theGroundStationList[i]) == wxNOT_FOUND)
+            checkListBox->Append(theGroundStationList[i]);
+      }
+   }
+   else
+   {
+      for (int i=0; i<theNumGroundStation; i++)
+         checkListBox->Append(theGroundStationList[i]);
+   }
+
+   //---------------------------------------------
+   // register to update list
+   //---------------------------------------------
+   mGroundStationCLBList.push_back(checkListBox);
+   mGroundStationExcList.push_back(excList);
+
    return checkListBox;
 }
 
@@ -4138,7 +4234,7 @@ wxSizer* GuiItemManager::CreateParameterSizer
       tmpObjTypeList.Add("String");
    
    *objectTypeComboBox =
-      GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, 20),
+      GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, -1),
                             tmpObjTypeList);
    (*objectTypeComboBox)->SetToolTip(pConfig->Read(_T("ObjectTypeListHint")));
    
@@ -4232,11 +4328,11 @@ wxSizer* GuiItemManager::CreateParameterSizer
       *colStaticText = new wxStaticText(parent, -1, GUI_ACCEL_KEY"Col [xx]");
       
       *rowTextCtrl =
-         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
+         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, -1));
       (*rowTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayRowHint")));
       
       *colTextCtrl =
-         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, 20));
+         new wxTextCtrl(parent, -1, wxT("1"), wxDefaultPosition, wxSize(40, -1));
       (*colTextCtrl)->SetToolTip(pConfig->Read(_T("ArrayColHint")));
       
       //----- arrayIndexSizer
@@ -4293,15 +4389,15 @@ wxSizer* GuiItemManager::CreateParameterSizer
                           wxDefaultPosition, wxDefaultSize, 0);
       
       *coordSysComboBox =
-         GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
+         GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, -1));
       (*coordSysComboBox)->SetToolTip(pConfig->Read(_T("CoordinateSystemHint")));
       
       *originComboBox =
-         GetCelestialBodyComboBox(parent, originComboBoxId, wxSize(170, 20));
+         GetCelestialBodyComboBox(parent, originComboBoxId, wxSize(170, -1));
       (*originComboBox)->SetToolTip(pConfig->Read(_T("OriginHint")));
 
       *odeModelComboBox = 
-         GetODEModelComboBox(parent, odeModelComboBoxId, wxSize(170, 20));
+         GetODEModelComboBox(parent, odeModelComboBoxId, wxSize(170, -1));
       (*odeModelComboBox)->SetToolTip(pConfig->Read(_T("ODEModelHint")));
 
       
@@ -4483,11 +4579,15 @@ wxArrayString GuiItemManager::BuildSpacePointList(const wxString &spTypeNames)
 {
    #if DBGLVL_GUI_ITEM_SP
    MessageInterface::ShowMessage
-      ("GuiItemManager::BuildSpacePointList() entered, spTypeNames='%s'\n", spTypeNames.c_str());
+      ("GuiItemManager::BuildSpacePointList() entered, spTypeNames='%s'\n", spTypeNames.WX_TO_C_STRING);
    #endif
    
    wxArrayString spacePointArray;
    std::string typeNames = spTypeNames.WX_TO_STD_STRING;
+   // wcs 2015.05.08 I think this needs to be here if Spacecraft is
+   // not part of the list (so that the list starts with a '+')
+   //   if (typeNames[0] == '+')
+   //      typeNames.erase(0,1);
    StringArray objTypes = GmatStringUtil::SeparateBy(typeNames, "+", false, false, false);
    
    #if DBGLVL_GUI_ITEM_SP > 1
@@ -4500,7 +4600,7 @@ wxArrayString GuiItemManager::BuildSpacePointList(const wxString &spTypeNames)
    {
       obj = theGuiInterpreter->GetConfiguredObject(theSpacePointList[i].c_str());
       #if DBGLVL_GUI_ITEM_SP > 1
-      MessageInterface::ShowMessage("   objNames[%2d] = '%s'\n", i, theSpacePointList[i].c_str());
+      MessageInterface::ShowMessage("   objNames[%2d] = '%s'\n", i, theSpacePointList[i].WX_TO_C_STRING);
       #endif
       for (unsigned int j = 0; j < objTypes.size(); j++)
       {
@@ -4516,7 +4616,7 @@ wxArrayString GuiItemManager::BuildSpacePointList(const wxString &spTypeNames)
    MessageInterface::ShowMessage
       ("GuiItemManager::BuildSpacePointList() returning %d SpacePoints\n", spacePointArray.size());
    for (unsigned int i = 0; i < spacePointArray.size(); i++)
-      MessageInterface::ShowMessage("   '%s'\n", spacePointArray[i].c_str());
+      MessageInterface::ShowMessage("   '%s'\n", spacePointArray[i].WX_TO_C_STRING);
    #endif
    
    return spacePointArray;
@@ -4883,6 +4983,37 @@ void GuiItemManager::UpdateGroundStationList()
    
    theNumGroundStation = theGroundStationList.GetCount();
    
+   //-------------------------------------------------------
+   // update registered GroundStation CheckListBox
+   //-------------------------------------------------------
+   #if DBGLVL_GUI_ITEM_SP
+   MessageInterface::ShowMessage
+      ("GuiItemManager::UpdateGroundStationList() About to update the registered CheckListbox\n");
+   #endif
+   wxArrayString itemCheckedArray;
+   for (std::vector<wxCheckListBox*>::iterator pos = mGroundStationCLBList.begin();
+        pos != mGroundStationCLBList.end(); ++pos)
+   {
+      if ((*pos) == NULL)
+         continue;
+
+      itemCheckedArray.Clear();
+
+      // save checked item
+      int count = (*pos)->GetCount();
+      for (int i=0; i<count; i++)
+         if ((*pos)->IsChecked(i))
+            itemCheckedArray.Add((*pos)->GetString(i));
+
+      (*pos)->Clear();
+      (*pos)->Append(theGroundStationList);
+
+      // restore checked item
+      count = (*pos)->GetCount();
+      for (int i=0; i<count; i++)
+         if (itemCheckedArray.Index((*pos)->GetString(i)) != wxNOT_FOUND)
+            (*pos)->Check(i);
+   }
 } // end UpdateGroundStationList()
 
 
@@ -4914,7 +5045,7 @@ void GuiItemManager::UpdateSpacecraftList()
          #if DBGLVL_GUI_ITEM_SP
          MessageInterface::ShowMessage
             ("GuiItemManager::UpdateSpacecraftList() theSpacecraftList[%d]=%s\n",
-             i, theSpacecraftList[i].c_str());
+             i, theSpacecraftList[i].WX_TO_C_STRING);
          #endif
       }
    }
@@ -4953,7 +5084,7 @@ void GuiItemManager::UpdateSpacecraftList()
          #if DBGLVL_GUI_ITEM_SP
          MessageInterface::ShowMessage
             ("GuiItemManager::UpdateSpacecraftList() checking for index %s\n",
-                  theSpacecraftList[i].c_str());
+                  theSpacecraftList[i].WX_TO_C_STRING);
          #endif
          if (excList != NULL && (excList->Index(theSpacecraftList[i].c_str()) == wxNOT_FOUND))
             (*pos)->Append(theSpacecraftList[i]);
@@ -5404,7 +5535,7 @@ void GuiItemManager::UpdateSpacePointList()
       
       #if DBGLVL_GUI_ITEM_SP > 1
       MessageInterface::ShowMessage
-         ("   theSpacePointList[%d]=%s\n", i, theSpacePointList[i].c_str());
+         ("   theSpacePointList[%d]=%s\n", i, theSpacePointList[i].WX_TO_C_STRING);
       #endif
    }
    
@@ -6535,11 +6666,40 @@ void GuiItemManager::UpdateLocatorList()
 
       #if DBGLVL_GUI_ITEM_EL > 1
       MessageInterface::ShowMessage
-         ("   %s added to theLocatorList\n", theLocatorList[i].c_str());
+         ("   %s added to theLocatorList\n", theLocatorList[i].WX_TO_STD_STRING.c_str());
       #endif
    }
 
    theNumLocator = theLocatorList.GetCount();
+   //-------------------------------------------------------
+   // update registered EventLocator ComboBox
+   //-------------------------------------------------------
+   int sel;
+   wxString selStr;
+   for (std::vector<wxComboBox*>::iterator pos = mLocatorCBList.begin();
+        pos != mLocatorCBList.end(); ++pos)
+   {
+      sel = (*pos)->GetSelection();
+      selStr = (*pos)->GetValue();
+
+      if (theNumLocator > 0)
+      {
+         (*pos)->Clear();
+         (*pos)->Append(theLocatorList);
+
+         // Insert first item as "No Event Locator Selected"
+         if (theLocatorList[0] != selStr)
+         {
+            (*pos)->Insert("No Event Locator Selected", 0);
+            (*pos)->SetSelection(0);
+         }
+         else
+         {
+            (*pos)->SetSelection(sel);
+         }
+      }
+   }
+
 }
 
 //------------------------------------------------------------------------------

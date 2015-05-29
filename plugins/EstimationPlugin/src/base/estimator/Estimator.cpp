@@ -33,6 +33,7 @@
 
 #include <sstream>
 
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_ESTIMATOR_WRITE
 //#define DEBUG_ESTIMATOR_INITIALIZATION
@@ -180,6 +181,10 @@ Estimator::Estimator(const Estimator& est) :
    constMult            (est.constMult),
    additiveConst        (est.additiveConst)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("Estimator::Estimator() enter: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
+#endif
+
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
    else
@@ -188,10 +193,13 @@ Estimator::Estimator(const Estimator& est) :
    measManager = est.measManager;
    esm         = est.esm;
    addedPlots  = est.addedPlots;
-
    esm.SetMeasurementManager(&measManager);
 
    delayInitialization = true;                                // made changes by TUAN NGUYEN
+
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("Estimator::Estimator() exit: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
+#endif
 }
 
 
@@ -301,7 +309,7 @@ bool Estimator::Initialize()
       std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();        // made changes by TUAN NGUYEN
       std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
       StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
-   
+
       for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
       {                                                                            // made changes by TUAN NGUYEN
          std::string name = measNames[i];                                          // made changes by TUAN NGUYEN

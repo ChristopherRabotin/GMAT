@@ -1544,6 +1544,9 @@ std::string Parameter::GetDependentTypeString(const GmatParam::DepObject depObj)
    case GmatParam::ATTACHED_OBJ:
       depObjStr = "AttachedObject";
       break;
+   case GmatParam::ODE_MODEL:
+      depObjStr = "OdeModel";
+      break;
    default:
       depObjStr = "Unknown";
       break;

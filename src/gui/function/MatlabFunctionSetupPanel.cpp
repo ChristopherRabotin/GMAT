@@ -77,7 +77,7 @@ void MatlabFunctionSetupPanel::Create()
    // wxTextCtrl
    mPathTextCtrl = 
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
-         wxSize(250,20), 0);
+         wxSize(250,-1), 0);
    // create buttons
    mBrowseButton =
       new wxButton(this, ID_BUTTON, "Browse", wxDefaultPosition, wxDefaultSize, 0);

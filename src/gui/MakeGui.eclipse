@@ -132,6 +132,7 @@ HEADERS = -I../base/include \
           -Icommand \
           -Icontrollogic \
           -Icoordsystem \
+          -Ievent \
           -Iforcemodel \
           -Ifoundation \
           -Ifunction \
@@ -193,6 +194,7 @@ OBJECTS = \
     command/BeginFiniteBurnPanel.o \
     command/CallFunctionPanel.o \
     command/EndFiniteBurnPanel.o \
+    command/FindEventsPanel.o \
     command/GmatCommandPanel.o \
     command/ManeuverPanel.o \
     command/MinimizePanel.o \
@@ -210,6 +212,7 @@ OBJECTS = \
     coordsystem/CoordPanel.o \
     coordsystem/CoordSysCreateDialog.o \
     coordsystem/CoordSystemConfigPanel.o \
+    event/EventLocatorPanel.o \
     forcemodel/DragInputsDialog.o \
     foundation/ArraySetupDialog.o \
     foundation/ArraySetupPanel.o \

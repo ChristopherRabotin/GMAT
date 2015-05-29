@@ -93,7 +93,7 @@ void ManageObjectPanel::Create()
    
    // create object label
    wxStaticText *objectLabel = NULL;
-   wxStaticText *autoGlobalLabel = NULL;
+   wxTextCtrl *autoGlobalLabel = NULL;
 	
 	#ifdef DEBUG_MANAGEOBJECT_CREATE
 	MessageInterface::ShowMessage
@@ -106,7 +106,7 @@ void ManageObjectPanel::Create()
 												 wxDefaultPosition, wxDefaultSize, 0);
 		// list of object, include automatic global objects
 		mObjectCheckListBox = theGuiManager->
-			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200), true);
+			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(350,200), true);
    }
 	else if (theCommand->IsOfType("Global"))
 	{
@@ -114,18 +114,22 @@ void ManageObjectPanel::Create()
 												 wxDefaultPosition, wxDefaultSize, 0);
 		// list of object, exclude automatic global objects
 		mObjectCheckListBox = theGuiManager->
-			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200), false);
+			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(350,200), false);
 		wxString autoGlobalText;
 		wxArrayString autoGlobalList = theGuiManager->GetAutoGlobalObjectList();
 		int numObjs = autoGlobalList.GetCount();
 		for (int i = 0; i < numObjs - 1; i++)
 			autoGlobalText += autoGlobalList[i] + ", ";
 		autoGlobalText += autoGlobalList[numObjs - 1];
-		autoGlobalText += " are Automatic Global Objects.";
-		int height = (autoGlobalText.Len() / 30  + 1) * 10;
-		autoGlobalLabel = new wxStaticText(this, ID_TEXT, autoGlobalText,
-													  wxDefaultPosition, wxSize(300, height),
-													  wxALIGN_LEFT|wxST_NO_AUTORESIZE);
+		autoGlobalText += " are automatic global objects.";
+      wxFont currFont = GetFont();
+      int currFontSize = currFont.GetPointSize();
+      #ifdef DEBUG_MANAGEOBJECT_CREATE
+      MessageInterface::ShowMessage("currFontSize = %d\n", currFontSize);
+      #endif
+		int height = (autoGlobalText.Len() / 30  + 1) * currFontSize * 2;
+      autoGlobalLabel = new wxTextCtrl(this, -1, autoGlobalText, wxDefaultPosition,
+                                       wxSize(350, height), wxTE_MULTILINE | wxTE_READONLY);
 		autoGlobalLabel->SetForegroundColour(*wxRED);
    }
 	else
@@ -134,20 +138,20 @@ void ManageObjectPanel::Create()
 												 wxDefaultPosition, wxDefaultSize, 0);
 		// list of object, include automatic global objects
 		mObjectCheckListBox = theGuiManager->
-			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200), true);
+			GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(350,200), true);
 	}
 	
    // create sizers
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    
    // add object label and combobox to sizer
-   pageBoxSizer->Add(objectLabel, 0, wxALIGN_CENTER|wxALL, bsize);
-   pageBoxSizer->Add(mObjectCheckListBox, 0, wxALIGN_CENTER|wxGROW|wxALL, bsize);
+   pageSizer->Add(objectLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mObjectCheckListBox, 0, wxALIGN_CENTER|wxGROW|wxALL, bsize);
 	if (autoGlobalLabel != NULL)
-		pageBoxSizer->Add(autoGlobalLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+		pageSizer->Add(autoGlobalLabel, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // add to middle sizer
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
+   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
 
 }
 
