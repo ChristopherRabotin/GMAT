@@ -89,6 +89,7 @@
 //#define DEBUG_SATELLITE_PARAMETER_UPDATES
 //#define DEBUG_FORMATION_PROPERTIES
 //#define DEBUG_NAN_CONDITIONS
+#define DEBUG_AMATRIX
  
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
@@ -2822,6 +2823,13 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
       Real aTilde[stmDim];
       for (Integer m = 0; m < stmDim; ++m)
          aTilde[m] = deriv[i6+m];
+
+      #ifdef DEBUG_AMATRIX
+         MessageInterface::ShowMessage("A matrix last column: [");
+         for (Integer j = 0; j < stmRowCount; ++j)
+            MessageInterface::ShowMessage("%15lf", aTilde[i6 + j*stmRows + stmRowCount - 1]);
+         MessageInterface::ShowMessage("]^T\n");
+      #endif
 
       if (fillSTM)
       {
