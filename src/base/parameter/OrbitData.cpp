@@ -46,7 +46,7 @@
 //#define DEBUG_ORBITDATA_OBJREF_EPOCH
 //#define DEBUG_ORBITDATA_OBJNAME
 //#define DEBUG_BROUWER_LONG
-#define DEBUG_FULL_STM
+//#define DEBUG_FULL_STM
 
 using namespace GmatMathUtil;
 
