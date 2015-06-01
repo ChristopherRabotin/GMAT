@@ -440,7 +440,7 @@ void BatchEstimatorInv::Accumulate()
             #endif
             for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
             {
-               // Caluclate residual O-C
+               // Calculate residual O-C
                ocDiff = currentObs->value[k] - calculatedMeas->value[k];
                #ifdef DEBUG_O_MINUS_C
                   Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
@@ -489,7 +489,6 @@ void BatchEstimatorInv::Accumulate()
                    #endif
                }
                Weight.push_back(weight);
-
             
                for (UnsignedInt i = 0; i < stateSize; ++i)
                {
@@ -514,7 +513,7 @@ void BatchEstimatorInv::Accumulate()
                if (textFileMode != "Normal")
                {
                   // fill out N/A for partial derivative
-                  for (int p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
+                  for (UnsignedInt p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
                   {
                      sprintf(&s[0],"   %18.12le", hAccum[hAccum.size()-1][p]);
                      ss.assign(s); 
