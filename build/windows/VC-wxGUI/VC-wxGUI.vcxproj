@@ -697,7 +697,6 @@
     <ClCompile Include="..\..\..\src\base\util\GmatGlobal.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GravityFileUtil.cpp" />
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp" />
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp" />
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp" />
     <ClCompile Include="..\..\..\src\base\util\Linear.cpp" />
     <ClCompile Include="..\..\..\src\base\util\MemoryTracker.cpp" />
@@ -1413,7 +1412,6 @@
     <ClInclude Include="..\..\..\src\base\util\GmatGlobal.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GravityFileUtil.hpp" />
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp" />
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp" />
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp" />
     <ClInclude Include="..\..\..\src\base\util\Linear.hpp" />
     <ClInclude Include="..\..\..\src\base\util\MessageInterface.hpp" />

@@ -38554,8 +38554,8 @@ static doublereal c_b6 = 10.;
     double cos(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static integer i__;
-    static real pi, f3f, f4s, f1z, f2kp;
+    integer i__;
+    real pi, f3f, f4s, f1z, f2kp;
 
 /* ----------------------------------------------------------------------- */
 /* D-region model of Danilov, Rodevich, and Smirnova, Adv. Space Res. */
@@ -38645,16 +38645,14 @@ static doublereal c_b6 = 10.;
     double r_lg10(real *), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real edenijkl[2];
-    static integer i__, j, l, m;
-    static real edeni[16]	/* was [2][2][2][2] */, h1;
-    static integer i1, i2, j1, j2, k1, k2, l1, l2, m1, m2;
-    static real el;
-    static integer mh;
-    static real edenij[8]	/* was [2][2][2] */, edenijk[4]	/* was [2][2] 
-	    */;
-    static integer mon;
-    static real deg1, f107l, day1, xhi1, flx1;
+    real edenijkl[2];
+    integer i__, j, l, m;
+    real h1;
+    integer i1, i2, j1, j2, k1, k2, l1, l2, m1, m2;
+    real el;
+    integer mh, mon;
+    real deg1, f107l, day1, xhi1, flx1, edeni[16]	/* was [2][2][2][2] */
+	    , edenij[8]	/* was [2][2][2] */, edenijk[4]	/* was [2][2] */;
 
 /* --------------------------------------------------------------------- */
 /*     PURPOSE: */

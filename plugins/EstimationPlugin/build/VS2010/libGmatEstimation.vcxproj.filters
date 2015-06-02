@@ -387,6 +387,9 @@
     <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\loadfiles.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -688,6 +691,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp">
       <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\loadfiles.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

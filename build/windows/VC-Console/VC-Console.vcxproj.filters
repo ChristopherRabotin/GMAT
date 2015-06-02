@@ -981,9 +981,6 @@
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -2277,9 +2274,6 @@
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp">

@@ -1165,9 +1165,6 @@
     <ClCompile Include="..\..\..\src\base\hardware\Hardware.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -1267,6 +1264,10 @@
     <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
       <Filter>Source Files\command</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\event\Brent.cpp" />
+    <ClCompile Include="..\..\..\src\base\event\RootFinder.cpp" />
+    <ClCompile Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.cpp" />
+    <ClCompile Include="..\..\..\src\base\util\GmatTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\include\gmatdefs.hpp">
@@ -2478,9 +2479,6 @@
     <ClInclude Include="..\..\..\src\base\hardware\Hardware.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
-      <Filter>Source Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp">
       <Filter>Source Files\util</Filter>
     </ClInclude>
@@ -2592,6 +2590,10 @@
     <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
       <Filter>Source Files\command</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\base\event\Brent.hpp" />
+    <ClInclude Include="..\..\..\src\base\event\RootFinder.hpp" />
+    <ClInclude Include="..\..\..\src\base\solarsys\MediaCorrectionInterface.hpp" />
+    <ClInclude Include="..\..\..\src\base\util\GmatTime.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
