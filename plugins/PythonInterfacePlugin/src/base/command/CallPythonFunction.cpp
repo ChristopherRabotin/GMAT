@@ -286,7 +286,7 @@ bool CallPythonFunction::Execute()
    // Python object.
    SendInParam(formatIn, argIn);
   // Next call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn.size(), argIn);
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
    Real ret = 0;
 
    if (pyRet && PyFloat_Check(pyRet))
