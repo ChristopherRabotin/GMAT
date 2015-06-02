@@ -173,7 +173,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 }
 
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                                const std::string &formatIn, int n, ...)
+                                                const std::string &formatIn, const std::vector<void *> &argIn)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -219,15 +219,38 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to fetch function within Python module. \n");
    }
 
-   // Build the Python object based on the format string
-   va_list vl;
-   va_start(vl, n);
-   va_arg(vl, std::vector<void *>);
-   pyArgs = Py_VaBuildValue(formatIn.c_str(), vl);
-   va_end(vl);
-
- //  pyArgs = Py_BuildValue(formatIn.c_str(), *(Real*)argIn.at(0));
-   if (!pyArgs)
+   // Build the Python Tuple object based on the format string
+   PyObject* pyTupleObj = PyTuple_New(argIn.size());
+   char* pch = NULL;
+   char key[3] = "fs";
+   int i = 0;
+   //Locate characters in string
+   pch = (char*)strpbrk(formatIn.c_str(), key);
+  
+   //Fill in the Python Tuple object with parameter Ins
+   while (pch != NULL)
+   {
+      std::string str(pch);
+      if (str.find_first_of("f") != std::string::npos)
+      {
+         PyObject* pyFloatObj = PyFloat_FromDouble(*(Real*)argIn.at(i));
+         PyTuple_SetItem(pyTupleObj, i, pyFloatObj);
+      } 
+      else if (str.find_first_of("s") != std::string::npos)
+      {
+#ifdef IS_PY3K
+         PyObject* pyStringObj = PyUnicode_FromString((char*)argIn.at(i));
+#else
+         pyObject* pyStringObj = PyBytes_FromString((char*)argIn.at(i));
+#endif
+         PyTuple_SetItem(pyTupleObj, i, pyStringObj);
+      }
+      
+      i++;
+      pch = strpbrk(pch + 1, key);
+   }
+   
+   if (!pyTupleObj)
    {
       PyErr_Print();
       Py_DECREF(pyFuncAttr);
@@ -235,10 +258,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to build Python tuple. \n");
    }
 
-   // Call the python function
-   pyFunc = PyObject_CallObject(pyFuncAttr, pyArgs);
+   // Call the python function   
+   pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
    Py_DECREF(pyFuncAttr);
-   Py_DECREF(pyArgs);
+   Py_DECREF(pyTupleObj);
 
    if (!pyFunc)
    {
