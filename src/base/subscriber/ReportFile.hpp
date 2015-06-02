@@ -149,6 +149,9 @@ protected:
    bool                 usingDefaultFileName;
    /// fixed width columns
    bool                 fixedWidth;
+   /// Flag for writing final solver data
+   bool                 writeFinalSolverData;
+   std::ofstream::pos_type finalSolverDataPosition;
    /// delimiter
    char                 delimiter;
    
@@ -188,8 +191,8 @@ protected:
       WRITE_HEADERS,
       LEFT_JUSTIFY,
       ZERO_FILL,
-	  FIXED_WIDTH,
-	  DELIMITER,
+      FIXED_WIDTH,
+      DELIMITER,
       COL_WIDTH,
       WRITE_REPORT,
       ReportFileParamCount  /// Count of the parameters for this class
