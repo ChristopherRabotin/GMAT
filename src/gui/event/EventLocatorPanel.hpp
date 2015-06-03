@@ -112,14 +112,10 @@ private:
    wxStaticText *eclipseTypesTxt;
    wxStaticText *observersTxt;
    wxStaticText *fileNameTxt;
-   wxStaticText *writeReportTxt;
    wxStaticText *runModeTxt;
-   wxStaticText *entireIntervalTxt;
    wxStaticText *epochFormatTxt;
    wxStaticText *initialEpochTxt;
    wxStaticText *finalEpochTxt;
-   wxStaticText *lightTimeDelayTxt;
-   wxStaticText *stellarAberrationTxt;
    wxStaticText *lightTimeDirectionTxt;
    wxStaticText *stepSizeTxt;
    wxStaticText *stepSizeUnitsTxt;

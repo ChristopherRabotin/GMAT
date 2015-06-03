@@ -57,6 +57,53 @@ union {
 #define model_2 (model_._2)
 
 struct {
+    integer nmax_shc__[14];
+    real erad_shc__[14], shcfiles[11200]	/* was [4][200][14] */;
+} shc1_;
+
+#define shc1_1 shc1_
+
+struct {
+    char filmod[168];
+} shc2_;
+
+#define shc2_1 shc2_
+
+struct {
+    real dtemod[14];
+} shc3_;
+
+#define shc3_1 shc3_
+
+struct {
+    integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
+	    imend_igrz__, iyend_igrz__;
+    real ionoindx_igrz__[722], indrz_igrz__[722];
+} igrz1_;
+
+#define igrz1_1 igrz1_
+
+struct {
+    integer num_records_ap__, ints_ap__[440000]	/* was [11][40000] */;
+    real reals_ap__[40000];
+} ap_;
+
+#define ap_1 ap_
+
+struct {
+    real f2_ccir__[23712]	/* was [13][76][2][12] */, f3_ccir__[10584]	
+	    /* was [9][49][2][12] */;
+} ccir_;
+
+#define ccir_1 ccir_
+
+struct {
+    real f2_ursi__[23712]	/* was [13][76][2][12] */;
+} ursi_;
+
+#define ursi_1 ursi_
+
+struct {
     real umr;
 } const_;
 
@@ -83,10 +130,8 @@ union {
 /* Table of constant values */
 
 static real c_b3 = (float)1.;
-static integer c__1 = 1;
-static integer c__3 = 3;
-static integer c__4 = 4;
 static integer c__9 = 9;
+static integer c__1 = 1;
 static integer c_n1 = -1;
 static integer c__0 = 0;
 static integer c__25 = 25;
@@ -107,6 +152,9 @@ static integer c__25 = 25;
 /*  2/05/92 Reduce variable names: INTER(P)SHC,EXTRA(P)SHC,INITI(ALI)ZE */
 /*  8/08/95 Updated to IGRF-45-95; new coeff. DGRF90, IGRF95, IGRF95S */
 /*  5/31/00 Updated to IGRF-45-00; new coeff.: IGRF00, IGRF00s */
+/*  4/16/15 Bugfix: Initialize IER to 0 in igrf_sub (Joseph Nicholas) */
+/*  4/16/15 Load dgrf data from memory instead of file (Joseph Nicholas) */
+/*  4/27/15 Error checking bugfix (Joseph Nicholas) */
 /* -Version-mm/dd/yy-Description (Person reporting the correction) */
 /* 2000.01 05/07/01 initial version */
 /* 2000.02 07/11/01 replace feldi(xi,h) by feldi (P. Wilkinson) */
@@ -128,16 +176,15 @@ static integer c__25 = 25;
     double sqrt(doublereal), atan(doublereal);
 
     /* Local variables */
-    static real lati, dimo;
+    real bab1, lati, dimo;
     extern /* Subroutine */ int feldg_(real *, real *, real *, real *, real *,
 	     real *, real *);
-    static real beast, longi, bdown;
+    real beast, longi, bdown;
     extern /* Subroutine */ int shellg_(real *, real *, real *, real *, real *
 	    , integer *, real *);
-    static real bnorth;
-    extern /* Subroutine */ int feldcof_(real *, real *, integer *);
-    static real bab1;
-    extern /* Subroutine */ int initize_();
+    real bnorth;
+    extern /* Subroutine */ int feldcof_(real *, real *, integer *), initize_(
+	    );
 
 /* ----------------------------------------------------------------------- */
 /* INPUT: */
@@ -155,6 +202,7 @@ static integer c__25 = 25;
 /*    IER       error   = 0 no error; != 0 having an error */
 /* ----------------------------------------------------------------------- */
 
+    *ier = 0;
     initize_();
     lati = *xlat;
     longi = *xlong;
@@ -185,10 +233,10 @@ static integer c__25 = 25;
 	     real *), atan(doublereal);
 
     /* Local variables */
-    static real babs, dimo, h__;
+    real h__, babs, dimo;
     extern /* Subroutine */ int feldg_(real *, real *, real *, real *, real *,
 	     real *, real *);
-    static real beast, bdown, xlati, dipdiv, smodip, bnorth, xlongi;
+    real beast, bdown, xlati, dipdiv, smodip, bnorth, xlongi;
     extern /* Subroutine */ int feldcof_(real *, real *, integer *), initize_(
 	    );
 
@@ -209,6 +257,7 @@ static integer c__25 = 25;
     initize_();
 
 /* ----------------CALCULATE PROFILES----------------------------------- */
+
     xlati = *xlat;
     xlongi = *xlong;
     h__ = *height;
@@ -255,13 +304,14 @@ static integer c__25 = 25;
     double r_sign(real *, real *), sqrt(doublereal);
 
     /* Local variables */
-    static real bold, bmin, rold, step;
-    static integer irun;
-    static real b;
-    static integer i__, j, n;
-    static real p[32]	/* was [8][4] */, step12;
+    real b;
+    integer i__, j, n;
+    real p[32]	/* was [8][4] */, r1, r2, r3, zz, bq1, bq2, bq3, bold, bmin, 
+	    rold, step;
+    integer irun;
+    real step12;
     extern /* Subroutine */ int stoer_(real *, real *, real *);
-    static real r1, r2, r3, bdelta, zz, bq1, bq2, bq3;
+    real bdelta;
 
 /* -------------------------------------------------------------------- */
 /* FINDS SMALLEST MAGNETIC FIELD STRENGTH ON FIELD LINE */
@@ -396,15 +446,15 @@ L8888:
 	    real *), log(doublereal), exp(doublereal);
 
     /* Local variables */
-    static real bequ, rlat;
-    static integer iequ;
-    static real term, rlon, step2, d__;
-    static integer i__, n;
-    static real p[800]	/* was [8][100] */, r__, t, z__, radik, step12, c0, 
-	    c1, c2, oterm, c3, d0, d1, d2, e0;
+    real d__;
+    integer i__, n;
+    real p[800]	/* was [8][100] */, r__, t, z__, c0, c1, c2, c3, d0, d1, d2, 
+	    e0, e1, e2, r1, r2, r3, ff, gg, fi, ct, rq, st, zq, xx, zz, bq1, 
+	    bq2, bq3, r3h, hli, stp, arg1, arg2, bequ, rlat;
+    integer iequ;
+    real term, rlon, step2, radik, step12, oterm;
     extern /* Subroutine */ int stoer_(real *, real *, real *);
-    static real e1, e2, r1, r2, r3, dimob0, ff, gg, fi, ct, rq, st, oradik, 
-	    zq, xx, zz, bq1, bq2, bq3, r3h, hli, stp, arg1, arg2;
+    real dimob0, oradik;
 
 /* ----------------------------------------------------------------------- */
 /* CALCULATES L-VALUE FOR SPECIFIED GEODAETIC COORDINATES, ALTITUDE */
@@ -739,9 +789,8 @@ L30:
     double sqrt(doublereal);
 
     /* Local variables */
-    static real q;
+    real q, dr, dx, dy, dz, rq, xm, ym, zm, wr, fli, dsq, dxm, dym, dzm;
     extern /* Subroutine */ int feldi_();
-    static real dr, dx, dy, dz, rq, xm, ym, zm, wr, fli, dsq, dxm, dym, dzm;
 
 /* ******************************************************************* */
 /* * SUBROUTINE USED FOR FIELD LINE TRACING IN SHELLG                * */
@@ -799,19 +848,20 @@ L30:
     double sin(doublereal), cos(doublereal), sqrt(doublereal);
 
     /* Local variables */
-    static real brho;
-    static integer imax;
-    static real rlat;
-    static integer last;
-    static real rlon, bxxx, byyy, bzzz, d__, f;
-    static integer i__, k, m;
-    static real s, t, x, y, z__;
-    static integer ihmax, ih;
-    static real cp;
-    static integer il;
-    static real ct;
-    static integer is;
-    static real sp, rq, st, rho, xxx, yyy, zzz;
+    real d__, f;
+    integer i__, k, m;
+    real s, t, x, y, z__;
+    integer ih;
+    real cp;
+    integer il;
+    real ct;
+    integer is;
+    real sp, rq, st, rho, xxx, yyy, zzz, brho;
+    integer imax;
+    real rlat;
+    integer last;
+    real rlon, bxxx, byyy, bzzz;
+    integer ihmax;
 
 /* ----------------------------------------------------------------------- */
 /* CALCULATES EARTH MAGNETIC FIELD FROM SPHERICAL HARMONICS MODEL */
@@ -1006,40 +1056,26 @@ L7:
 
 /* Subroutine */ int feldcof_(real *year, real *dimo, integer *ier)
 {
-    /* Initialized data */
-
-    static char filmod[12*14+1] = "dgrf45.dat  dgrf50.dat  dgrf55.dat  dgrf6\
-0.dat  dgrf65.dat  dgrf70.dat  dgrf75.dat  dgrf80.dat  dgrf85.dat  dgrf90.da\
-t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
-    static real dtemod[14] = { (float)1945.,(float)1950.,(float)1955.,(float)
-	    1960.,(float)1965.,(float)1970.,(float)1975.,(float)1980.,(float)
-	    1985.,(float)1990.,(float)1995.,(float)2e3,(float)2005.,(float)
-	    2010. };
-
     /* System generated locals */
     integer i__1, i__2;
 
     /* Builtin functions */
-    /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
     double sqrt(doublereal);
 
     /* Local variables */
-    static integer iyea;
     extern /* Subroutine */ int intershc_(real *, real *, integer *, real *, 
 	    real *, integer *, real *, integer *, real *), extrashc_(real *, 
 	    real *, integer *, real *, integer *, real *, integer *, real *);
-    static integer nmax1, nmax2;
-    static doublereal f;
-    static integer i__, j;
-    static real sqrt2;
-    static integer l, m, n;
-    static doublereal x, f0;
-    static integer numye, is, iu;
-    extern /* Subroutine */ int getshc_(integer *, char *, integer *, real *, 
-	    real *, integer *, ftnlen);
-    static real gh2[144], gha[144];
-    static char fil2[12];
-    static real dte1, dte2;
+    doublereal f;
+    integer i__, j, l, m, n;
+    doublereal x, f0;
+    integer is, iu;
+    real gh2[144], gha[144], dte1, dte2;
+    integer iyea, nmax1, nmax2;
+    real sqrt2;
+    integer numye;
+    extern /* Subroutine */ int getshc_(integer *, integer *, integer *, real 
+	    *, real *, integer *);
 
 /* ----------------------------------------------------------------------- */
 /*  DETERMINES COEFFICIENTS AND DIPOL MOMENT FROM IGRF MODELS */
@@ -1053,10 +1089,14 @@ t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
 /*  ### updated to IGRF-10 version -dkb- 11/10/2005 */
 /* ----------------------------------------------------------------------- */
 /* ### FILMOD, DTEMOD arrays +1 */
-/* ### updated to 2005 */
 
 /* ### numye = numye + 1 ; is number of years represented by IGRF */
 
+/*     Fortran include file storing common blocks and associated */
+/*     parameters. */
+
+/*     Changelog: */
+/*       2015-04-16     Created (Joseph Nicholas) */
     numye = 13;
 
 /*  IS=0 FOR SCHMIDT NORMALIZATION   IS=1 GAUSS NORMALIZATION */
@@ -1074,19 +1114,16 @@ t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
     if (l > numye) {
 	l = numye;
     }
-    dte1 = dtemod[l - 1];
-    s_copy(model_2.fil1, filmod + (l - 1) * 12, (ftnlen)12, (ftnlen)12);
-    dte2 = dtemod[l];
-    s_copy(fil2, filmod + l * 12, (ftnlen)12, (ftnlen)12);
+    dte1 = shc3_1.dtemod[l - 1];
+    dte2 = shc3_1.dtemod[l];
 /* -- GET IGRF COEFFICIENTS FOR THE BOUNDARY YEARS */
-
-    getshc_(&iu, model_2.fil1, &nmax1, &igrf1_2.erad, model_2.gh1, ier, (
-	    ftnlen)12);
+    getshc_(&iu, &l, &nmax1, &igrf1_2.erad, model_2.gh1, ier);
     if (*ier != 0) {
 /*               print *, "Program has an error" */
 	return 0;
     }
-    getshc_(&iu, fil2, &nmax2, &igrf1_2.erad, gh2, ier, (ftnlen)12);
+    i__1 = l + 1;
+    getshc_(&iu, &i__1, &nmax2, &igrf1_2.erad, gh2, ier);
     if (*ier != 0) {
 /*               print *, "Program has an error" */
 	return 0;
@@ -1144,35 +1181,22 @@ t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
 
 
 
-
-/* Subroutine */ int getshc_(integer *iu, char *fspec, integer *nmax, real *
-	erad, real *gh, integer *ier, ftnlen fspec_len)
+/* Subroutine */ int getshc_(integer *iu, integer *ifile, integer *nmax, real 
+	*erad, real *gh, integer *ier)
 {
-    /* Format strings */
-	static char fmt_667[] = "('./../data/IonosphereData/',a12)";	// made changes by Tuan Nguyen on Jan 11,2013
-
     /* System generated locals */
     integer i__1, i__2;
-    olist o__1;
-    cllist cl__1;
 
     /* Builtin functions */
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    f_open(olist *), s_rsle(cilist *), e_rsle(), do_lio(integer *, 
-	    integer *, char *, ftnlen), f_clos(cllist *), s_wsle(cilist *), 
-	    e_wsle();
+    integer i_nint(real *), s_wsle(cilist *), do_lio(integer *, integer *, 
+	    char *, ftnlen), e_wsle();
 
     /* Local variables */
-    static char fout[55];
-    static real g, h__;
-    static integer i__, m, n, mm, nn;
+    real g, h__;
+    integer i__, m, n, mm, nn, irec;
 
     /* Fortran I/O blocks */
-    static icilist io___160 = { 0, fout, 0, fmt_667, 55, 1 };
-    static cilist io___161 = { 1, 0, 1, 0, 0 };
-    static cilist io___162 = { 1, 0, 1, 0, 0 };
-    static cilist io___166 = { 1, 0, 1, 0, 0 };
-    static cilist io___171 = { 0, 6, 0, 0, 0 };
+    static cilist io___164 = { 0, 6, 0, 0, 0 };
 
 
 /* =============================================================== */
@@ -1184,7 +1208,7 @@ t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
 
 /*       Input: */
 /*           IU    - Logical unit number */
-/*           FSPEC - File specification */
+/*           IFILE - File index */
 
 /*       Output: */
 /*           NMAX  - Maximum degree and order of model */
@@ -1201,111 +1225,35 @@ t  dgrf95.dat  dgrf00.dat  igrf05.dat  igrf05s.dat ";
 /*       USGS, MS 964, Box 25046 Federal Center, Denver, CO  80225 */
 
 /* =============================================================== */
-/* --------------------------------------------------------------- */
-/*       Open coefficient file. Read past first header record. */
-/*       Read degree and order of model and Earth's radius. */
-/* --------------------------------------------------------------- */
+/*     Fortran include file storing common blocks and associated */
+/*     parameters. */
+
+/*     Changelog: */
+/*       2015-04-16     Created (Joseph Nicholas) */
     /* Parameter adjustments */
     --gh;
 
     /* Function Body */
-    s_wsfi(&io___160);
-
-    do_fio(&c__1, fspec, fspec_len);
-    e_wsfi();
-/* special for IRIWeb version */
-/* 667  FORMAT('/usr/local/etc/httpd/cgi-bin/models/IRI/',A12) */
-    o__1.oerr = 1;
-    o__1.ounit = *iu;
-    o__1.ofnmlen = 55;
-    o__1.ofnm = fout;
-    o__1.orl = 0;
-    o__1.osta = "OLD";
-    o__1.oacc = 0;
-    o__1.ofm = 0;
-    o__1.oblnk = 0;
-    *ier = f_open(&o__1);
-    if (*ier != 0) {
+    if (*ifile < 1 || *ifile > 14) {
+	*ier = -3;
 	goto L999;
     }
-    io___161.ciunit = *iu;
-    *ier = s_rsle(&io___161);
-    if (*ier != 0) {
-	goto L100001;
-    }
-    *ier = e_rsle();
-L100001:
-    if (*ier > 0) {
-	goto L999;
-    }
-    io___162.ciunit = *iu;
-    *ier = s_rsle(&io___162);
-    if (*ier != 0) {
-	goto L100002;
-    }
-    *ier = do_lio(&c__3, &c__1, (char *)&(*nmax), (ftnlen)sizeof(integer));
-    if (*ier != 0) {
-	goto L100002;
-    }
-    *ier = do_lio(&c__4, &c__1, (char *)&(*erad), (ftnlen)sizeof(real));
-    if (*ier != 0) {
-	goto L100002;
-    }
-    *ier = e_rsle();
-L100002:
-    if (*ier > 0) {
-	goto L999;
-    }
-/* --------------------------------------------------------------- */
-/*       Read the coefficient file, arranged as follows: */
-
-/*                                       N     M     G     H */
-/*                                       ---------------------- */
-/*                                   /   1     0    GH(1)  - */
-/*                                  /    1     1    GH(2) GH(3) */
-/*                                 /     2     0    GH(4)  - */
-/*                                /      2     1    GH(5) GH(6) */
-/*           NMAX*(NMAX+3)/2     /       2     2    GH(7) GH(8) */
-/*              records          \       3     0    GH(9)  - */
-/*                                \      .     .     .     . */
-/*                                 \     .     .     .     . */
-/*           NMAX*(NMAX+2)          \    .     .     .     . */
-/*           elements in GH          \  NMAX  NMAX   .     . */
-
-/*       N and M are, respectively, the degree and order of the */
-/*       coefficient. */
-/* --------------------------------------------------------------- */
+    *nmax = shc1_1.nmax_shc__[*ifile - 1];
     i__ = 0;
+    irec = 0;
     i__1 = *nmax;
     for (nn = 1; nn <= i__1; ++nn) {
 	i__2 = nn;
 	for (mm = 0; mm <= i__2; ++mm) {
-	    io___166.ciunit = *iu;
-	    *ier = s_rsle(&io___166);
-	    if (*ier != 0) {
-		goto L100003;
-	    }
-	    *ier = do_lio(&c__3, &c__1, (char *)&n, (ftnlen)sizeof(integer));
-	    if (*ier != 0) {
-		goto L100003;
-	    }
-	    *ier = do_lio(&c__3, &c__1, (char *)&m, (ftnlen)sizeof(integer));
-	    if (*ier != 0) {
-		goto L100003;
-	    }
-	    *ier = do_lio(&c__4, &c__1, (char *)&g, (ftnlen)sizeof(real));
-	    if (*ier != 0) {
-		goto L100003;
-	    }
-	    *ier = do_lio(&c__4, &c__1, (char *)&h__, (ftnlen)sizeof(real));
-	    if (*ier != 0) {
-		goto L100003;
-	    }
-	    *ier = e_rsle();
-L100003:
-	    if (*ier > 0) {
+	    ++irec;
+	    if (irec > 200) {
+		*ier = -4;
 		goto L999;
 	    }
+	    n = i_nint(&shc1_1.shcfiles[(irec + *ifile * 200 << 2) - 804]);
+	    m = i_nint(&shc1_1.shcfiles[(irec + *ifile * 200 << 2) - 803]);
+	    g = shc1_1.shcfiles[(irec + *ifile * 200 << 2) - 802];
+	    h__ = shc1_1.shcfiles[(irec + *ifile * 200 << 2) - 801];
 	    if (nn != n || mm != m) {
 		*ier = -2;
 		goto L999;
@@ -1322,13 +1270,9 @@ L100003:
     }
     goto L998;
 L999:
-    cl__1.cerr = 0;
-    cl__1.cunit = *iu;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
-    s_wsle(&io___171);
-    do_lio(&c__9, &c__1, "Error in GETSHC function: Open or read file error \
-!!!", (ftnlen)53);
+    s_wsle(&io___164);
+    do_lio(&c__9, &c__1, "Error in GETSHC function: file read error !!!", (
+	    ftnlen)45);
     e_wsle();
 L998:
     return 0;
@@ -1343,8 +1287,8 @@ L998:
     integer i__1;
 
     /* Local variables */
-    static integer i__, k, l;
-    static real factor;
+    integer i__, k, l;
+    real factor;
 
 /* =============================================================== */
 
@@ -1426,8 +1370,8 @@ L998:
     integer i__1;
 
     /* Local variables */
-    static integer i__, k, l;
-    static real factor;
+    integer i__, k, l;
+    real factor;
 
 /* =============================================================== */
 
@@ -1508,7 +1452,7 @@ L998:
     double atan(doublereal);
 
     /* Local variables */
-    static real erequ, erpol;
+    real erequ, erpol;
 
 /* ---------------------------------------------------------------- */
 /* Initializes the parameters in COMMON/IGRF1/ */
@@ -1538,13 +1482,10 @@ L998:
 /* Subroutine */ int geodip_(integer *iyr, real *sla, real *slo, real *dla, 
 	real *dlo, integer *j)
 {
-    static real r__, x, y, z__, pf, th;
+    real r__, x, y, z__, pf, th, rm, xm, ym, zm, dco, col, sco, rlo, szm;
     extern /* Subroutine */ int geomag_(real *, real *, real *, real *, real *
-	    , real *, integer *, integer *);
-    static real rm, xm, ym, zm;
-    extern /* Subroutine */ int sphcar_(real *, real *, real *, real *, real *
-	    , real *, integer *);
-    static real dco, col, sco, rlo, szm;
+	    , real *, integer *, integer *), sphcar_(real *, real *, real *, 
+	    real *, real *, real *, integer *);
 
 /*  Calculates dipole geomagnetic coordinates from geocentric coordinates */
 /*  or vice versa. */
@@ -1596,7 +1537,7 @@ L1234:
 	    cos(doublereal);
 
     /* Local variables */
-    static real sq;
+    real sq;
 
 /*   CONVERTS SPHERICAL COORDS INTO CARTESIAN ONES AND VICA VERSA */
 /*    (TETA AND PHI IN RADIANS). */
@@ -1695,7 +1636,7 @@ L2:
     double sqrt(doublereal);
 
     /* Local variables */
-    static real f1, f2, g10, g11, h11, dt, sq, sqq, sqr;
+    real f1, f2, g10, g11, h11, dt, sq, sqq, sqr;
 
 /*  If only IYR is given then CALL RECALC(IYR,0,25,0,0) */
 /*  Modified to accept years from 1900 through 2010 using the DGRF & */

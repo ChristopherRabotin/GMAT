@@ -33,6 +33,7 @@ struct {
 /* Corrections */
 /* 11/09/99 always calculated Legendre; 'if glat' and 'if stl' taken out */
 /* 11/09/99 use UMR, dumr and humr from COMMON */
+/* 04/16/15 Bugfix: Added SAVE PLG to CIRA86 (Joseph Nicholas) */
 /* Version-mm/dd/yy------------------------------------------------- */
 /* 2001.01 05/07/01 start of versioning */
 /* 2002.01 28/10/02 replace TAB/6 blanks, enforce 72/line (D. Simpson) */
@@ -51,10 +52,11 @@ struct {
     double sin(doublereal), cos(doublereal);
 
     /* Local variables */
-    static real c__, s, ctloc, stloc, c2, c4, f1, f2, f3, g0, s2, t1, t2, t3, 
-	    t5, t4, t7, t8, z1, z2, c2tloc, c3tloc, s2tloc, s3tloc, t11, t12, 
-	    t14, t71, t72, t81, t82, sr, zz, cd9, dr2, cd11, dfa, cd14, cd32, 
-	    cd18, cd39, plg[36]	/* was [9][4] */, t7814;
+    real c__, s, c2, c4, f1, f2, f3, g0, s2, t1, t2, t3, t5, t4, t7, t8, z1, 
+	    z2, t11, t12, t14, t71, t72, t81, t82, sr, zz, cd9, dr2, cd11, 
+	    dfa, cd14, cd32, cd18, cd39;
+    static real plg[36]	/* was [9][4] */;
+    real t7814, ctloc, stloc, c2tloc, c3tloc, s2tloc, s3tloc;
 
 /* ----------------------------------------------------------------------- */
 

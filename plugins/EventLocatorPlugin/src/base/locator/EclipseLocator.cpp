@@ -796,9 +796,8 @@ bool EclipseLocator::ReportEventData(const std::string &reportNotice)
       theReport << "Number of total events      : "   << sz            << "\n";
       theReport << "Maximum duration (s)        : "   << maxDuration   << "\n";
       theReport << "Maximum duration at the "         <<
-                   GmatStringUtil::ToOrdinal(maxIndex + 1) << " eclipse.\n";
+                   GmatStringUtil::ToOrdinal(maxIndex + 1) << " eclipse.\n\n\n";
    }
-
    theReport.close();
    return true;
 }
@@ -875,12 +874,14 @@ void EclipseLocator::FindEvents()
    Integer            numEclipse = 0;
    RealArray          starts;
    RealArray          ends;
+   std::string        bodyName;
 
    for (Integer ii = 0; ii < occultingBodies.size(); ii++)
    {
       CelestialBody *body = (CelestialBody*) occultingBodies.at(ii);
       Integer bodyNaifId  = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
       theFront  = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
+      bodyName  = body->GetName();
       theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
 
       for (Integer jj = 0; jj < eclipseTypes.size(); jj++)
@@ -902,7 +903,8 @@ void EclipseLocator::FindEvents()
          {
             Real s1 = starts.at(kk);
             Real e1 = ends.at(kk);
-            EclipseEvent *newEvent = new EclipseEvent(s1, e1, eclipseTypes.at(jj), theFront);
+//            EclipseEvent *newEvent = new EclipseEvent(s1, e1, eclipseTypes.at(jj), theFront);
+            EclipseEvent *newEvent = new EclipseEvent(s1, e1, eclipseTypes.at(jj), bodyName);
             rawList->AddEvent(newEvent);
          }
       }

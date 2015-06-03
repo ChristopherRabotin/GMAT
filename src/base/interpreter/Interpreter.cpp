@@ -1237,7 +1237,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Handle EventLocators
       else if (find(eventLocatorList.begin(), eventLocatorList.end(), type) !=
                eventLocatorList.end())
-         obj = (GmatBase*)theModerator->CreateEventLocator(type, name);
+         obj = (GmatBase*)theModerator->CreateEventLocator(type, name, createDefault);
       
       // Handle EphemerisFile
       else if (find(ephemFileList.begin(), ephemFileList.end(), type) != 
@@ -4890,7 +4890,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
       {
          InterpreterException ex
             ("The value of \"" + objName + "\" for field \"" + toProp +
-             "\" on ForceModel \"" + toOwner->GetName() + "\" is not an allowed value");
+             "\" on ForceModel \"" + toOwner->GetName() + "\" is not an allowed value.");
          HandleError(ex);
          return false;
       }
@@ -4987,7 +4987,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
          {
             InterpreterException ex
                ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
-                "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+                "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
             HandleError(ex);
             return false;
          }
@@ -5047,7 +5047,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             {
                InterpreterException ex
                   ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
-                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
                HandleError(ex);
                return false;
             }
@@ -5127,7 +5127,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             {
                InterpreterException ex
                   ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
-                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
                HandleError(ex);
                return false;
             }
@@ -5299,7 +5299,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
       {
          InterpreterException ex
             (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
-             toOwner->GetName() + "\" is not an allowed value" + errorMsg2);
+             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
          HandleError(ex);
       }
    }
@@ -5359,7 +5359,7 @@ bool Interpreter::SetPropertyToArray(GmatBase *toOwner, const std::string &toPro
    {
       InterpreterException ex
          ("The value of \"" + fromArray + "\" for field \"" + toProp +
-          "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+          "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
       HandleError(ex);
       return false;
    }
@@ -5501,7 +5501,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
       {
          InterpreterException ex
             (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
-             toOwner->GetName() + "\" is not an allowed value" + errorMsg2);
+             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
          HandleError(ex);
       }
    }

@@ -368,6 +368,10 @@ StringArray GmatObType::GetAvailableMeasurementTypes()
    typeList.push_back("DSNTwoWayRange");
    typeList.push_back("DSNTwoWayDoppler");
    typeList.push_back("USNTwoWayRange");
+   typeList.push_back("GeometricRange");
+   typeList.push_back("GeometricRangeRate");
+   typeList.push_back("GeometricRADec");
+   typeList.push_back("GeometricAzEl");
 
    return typeList;
 }

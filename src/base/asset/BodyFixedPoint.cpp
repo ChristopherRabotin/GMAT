@@ -135,6 +135,8 @@ BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &it
    fkName               (""),
    deleteSPK            (true),
    deleteFK             (true),
+   naifIDDetermined     (false),
+   kernelNamesDetermined (false),
    kernelsWritten       (false)
 {
    objectTypes.push_back(Gmat::BODY_FIXED_POINT);
@@ -174,19 +176,29 @@ BodyFixedPoint::BodyFixedPoint(const std::string &itsType, const std::string &it
 //---------------------------------------------------------------------------
 BodyFixedPoint::~BodyFixedPoint()
 {
-   if (kernelsWritten)
-   {
-      if (deleteSPK && (spkName != ""))
-      {
-         remove(spkName.c_str());
-      }
-      if (deleteFK && (fkName != ""))
-      {
-         remove(fkName.c_str());
-      }
-   }
-
    #ifdef __USE_SPICE__
+      if (kernelsWritten)
+      {
+         if (deleteSPK && (spkName != ""))
+         {
+            #ifdef DEBUG_BFP_SPICE
+               MessageInterface::ShowMessage("**** In BFP, About to unload %s\n",
+                     spkName.c_str());
+            #endif
+            spice->UnloadKernel(spkName);
+            remove(spkName.c_str());
+         }
+         if (deleteFK && (fkName != ""))
+         {
+            #ifdef DEBUG_BFP_SPICE
+               MessageInterface::ShowMessage("**** In BFP, About to unload %s\n",
+                     fkName.c_str());
+            #endif
+            spice->UnloadKernel(fkName);
+            remove(fkName.c_str());
+         }
+      }
+
       if (spice) delete spice;
    #endif
 
@@ -224,7 +236,9 @@ BodyFixedPoint::BodyFixedPoint(const BodyFixedPoint& bfp) :
    fkName               (bfp.fkName),
    deleteSPK            (bfp.deleteSPK),
    deleteFK             (bfp.deleteFK),
-   kernelsWritten       (bfp.kernelsWritten)
+   naifIDDetermined     (bfp.naifIDDetermined), // ??
+   kernelNamesDetermined (false),
+   kernelsWritten       (false)
 {
    location[0]   = bfp.location[0];
    location[1]   = bfp.location[1];
@@ -280,6 +294,8 @@ BodyFixedPoint& BodyFixedPoint::operator=(const BodyFixedPoint& bfp)
       fkName               = bfp.fkName;
       deleteSPK            = bfp.deleteSPK;
       deleteFK             = bfp.deleteFK;
+      naifIDDetermined     = bfp.naifIDDetermined;
+      kernelNamesDetermined = bfp.kernelNamesDetermined;
       kernelsWritten       = bfp.kernelsWritten;
 
       location[0]          = bfp.location[0];
@@ -349,28 +365,15 @@ bool BodyFixedPoint::Initialize()
    // If it was input in Cartesian, we're done
    UpdateBodyFixedLocation();
 
-//   // Initialize/set the Naif IDs (for writing the SPK and FK)
-//   Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
-//   naifId           = bodyNaif * 1000 + gsNaifId--;
-//   naifIdRefFrame   = naifId + 1000000;
-//   // Upper case name
-//   std::string thisName = GmatStringUtil::ToUpper(instanceName);
-//   spiceFrameName   = thisName + "_TOPO";
-//
-//   // Set up the file names for the SPK and FK kernels
-//   std::stringstream ss("");
-//   // @todo - put these files in the tmp directory (platform-dependent)
-//   ss << "tmp_" << instanceName;
-//   // For now, put it in the Output path << this should be put into the
-//   // appropriate TMPDIR for the platform
-//   FileManager *fm     = FileManager::Instance();
-//   std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-//   kernelBaseName      = spkPath + ss.str();
-//
-//   #ifdef __USE_SPICE__
-//      spice = new SpiceInterface();
-//   #endif
-//
+   if (!naifIDDetermined)
+   {
+      // Initialize/set the Naif IDs
+      Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
+      naifId           = bodyNaif * 1000 + gsNaifId--;
+      naifIdRefFrame   = naifId + 1000000;
+
+      naifIDDetermined = true;
+   }
 
    #ifdef DEBUG_INIT
       MessageInterface::ShowMessage("...BodyFixedPoint %s Initialized!\n", instanceName.c_str());
@@ -1369,23 +1372,28 @@ bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
       MessageInterface::ShowMessage("Entering InitializeForC for %s\n",
             instanceName.c_str());
    #endif
-   // Initialize/set the Naif IDs (for writing the SPK and FK)
-   Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
-   naifId           = bodyNaif * 1000 + gsNaifId--;
-   naifIdRefFrame   = naifId + 1000000;
-   // Upper case name
-   std::string thisName = GmatStringUtil::ToUpper(instanceName);
-   spiceFrameName   = thisName + "_TOPO";
+   if (!kernelNamesDetermined)
+   {
+//      // Initialize/set the Naif IDs
+//      Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
+//      naifId           = bodyNaif * 1000 + gsNaifId--;
+//      naifIdRefFrame   = naifId + 1000000;
+      // Upper case name
+      std::string thisName = GmatStringUtil::ToUpper(instanceName);
+      spiceFrameName   = thisName + "_TOPO";
 
-   // Set up the file names for the SPK and FK kernels
-   std::stringstream ss("");
-   // @todo - put these files in the tmp directory (platform-dependent)
-   ss << "tmp_" << instanceName;
-   // For now, put it in the Output path << this should be put into the
-   // appropriate TMPDIR for the platform
-   FileManager *fm     = FileManager::Instance();
-   std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-   kernelBaseName      = spkPath + ss.str();
+      // Set up the file names for the SPK and FK kernels
+      std::stringstream ss("");
+      // @todo - put these files in the tmp directory (platform-dependent)
+      ss << "tmp_" << instanceName;
+      // For now, put it in the Output path << this should be put into the
+      // appropriate TMPDIR for the platform
+      FileManager *fm     = FileManager::Instance();
+      std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
+      kernelBaseName      = spkPath + ss.str();
+
+      kernelNamesDetermined = true;
+   }
 
    #ifdef __USE_SPICE__
       if (!spice) spice = new SpiceInterface();

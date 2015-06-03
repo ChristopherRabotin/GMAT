@@ -77,7 +77,8 @@ IONOSPHERE_C_OBJECTS = \
 	measurement/Ionosphere/iridreg.o \
 	measurement/Ionosphere/irifun.o \
 	measurement/Ionosphere/iritec.o \
-	measurement/Ionosphere/irisub.o
+	measurement/Ionosphere/irisub.o \
+	measurement/Ionosphere/loadfiles.o
 IONOSPHERE_CPP_OBJECTS = \
 	measurement/Ionosphere/Ionosphere.o 
 else

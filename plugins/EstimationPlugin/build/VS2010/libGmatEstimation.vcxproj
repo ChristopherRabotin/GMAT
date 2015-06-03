@@ -312,6 +312,7 @@
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\irifun.h" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\irisub.h" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\iritec.h" />
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\loadfiles.h" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementData.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementException.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementManager.hpp" />
@@ -416,6 +417,7 @@
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\irifun.c" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\irisub.c" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\iritec.c" />
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\loadfiles.c" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementData.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementManager.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementModel.cpp" />
