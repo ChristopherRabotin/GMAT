@@ -261,7 +261,6 @@ bool CallPythonFunction::Initialize()
 	return ret;
 }
 
-
 //------------------------------------------------------------------------------
 // bool Execute()
 //------------------------------------------------------------------------------
@@ -452,6 +451,19 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
 
 }
 
+//------------------------------------------------------------------------------
+// void GetOutParams()
+//------------------------------------------------------------------------------
+/**
+* Get output parameters
+*
+* This method will fill in output parameters
+*
+* @param vector<void *> argOut
+*
+* @return void
+*/
+//------------------------------------------------------------------------------
 void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
 {
    
@@ -464,7 +476,7 @@ void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
       {
          case Gmat::REAL_TYPE:
          {
-            param->SetReal(*(Real*)argOut.at(0));
+            param->SetReal(*(Real*)argOut.at(i));
             break;
          }
 
