@@ -46,6 +46,7 @@
 //#define DEBUG_ORBITDATA_OBJREF_EPOCH
 //#define DEBUG_ORBITDATA_OBJNAME
 //#define DEBUG_BROUWER_LONG
+//#define DEBUG_FULL_STM
 
 using namespace GmatMathUtil;
 
@@ -1723,7 +1724,22 @@ const Rmatrix66& OrbitData::GetStmRmat66(Integer item)
    {
    case ORBIT_STM:
       {
-         mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+         Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
+
+         #ifdef DEBUG_FULL_STM
+            MessageInterface::ShowMessage("Full Spacecraft STM:\n%s\n",
+                  fullSTM.ToString(17).c_str());
+         #endif
+
+         for (Integer i = 0; i < 6; ++i)
+         {
+            mSTM(i,i) = fullSTM(i,i);
+            for (Integer j = i+1; j < 6; ++j)
+            {
+               mSTM(i,j) = fullSTM(i,j);
+               mSTM(j,i) = fullSTM(j,i);
+            }
+         }
          return mSTM;
       }
    default:
@@ -1747,21 +1763,53 @@ const Rmatrix33& OrbitData::GetStmRmat33(Integer item)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
-   mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+   Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
    
    switch (item)
    {
    case ORBIT_STM_A:
-      mSTMSubset = mSTM.UpperLeft();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i,i);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i,j);
+            mSTMSubset(j,i) = fullSTM(j,i);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_B:
-      mSTMSubset = mSTM.UpperRight();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i,i+3);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i,j+3);
+            mSTMSubset(j,i) = fullSTM(j,i+3);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_C:
-      mSTMSubset = mSTM.LowerLeft();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i+3,i);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i+3,j);
+            mSTMSubset(j,i) = fullSTM(j+3,i);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_D:
-      mSTMSubset = mSTM.LowerRight();
+      for (Integer i = 3; i < 6; ++i)
+      {
+         mSTMSubset(i-3,i-3) = fullSTM(i,i);
+         for (Integer j = i+1; j < 6; ++j)
+         {
+            mSTMSubset(i-3,j-3) = fullSTM(i,j);
+            mSTMSubset(j-3,i-3) = fullSTM(j,i);
+         }
+      }
       return mSTMSubset;
    default:
       // otherwise, there is an error   

@@ -78,6 +78,7 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const std::string &name) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
+   stmRowCount       (6),
    feasible          (false),
    withLighttime     (true),
    propsNeedInit     (false),          // Only need init if one is set
@@ -170,6 +171,7 @@ MeasureModel::~MeasureModel()
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const MeasureModel& mm) :
    GmatBase          (mm),
+   stmRowCount       (mm.stmRowCount),
    feasible          (false),
    withLighttime     (mm.withLighttime),
    propsNeedInit     (false),
@@ -211,6 +213,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
+      stmRowCount         = mm.stmRowCount;
       feasible            = false;
       withLighttime       = mm.withLighttime;
       navLog              = mm.navLog;
@@ -798,6 +801,13 @@ void MeasureModel::SetPropagator(PropSetup* ps)
    {
       SpacePoint *obj = i->first;
       
+      bool updateSTMRowCount = false;
+      if (obj->IsOfType(Gmat::SPACECRAFT))
+      {
+         stmRowCount = obj->GetIntegerParameter("FullSTMRowCount");
+         updateSTMRowCount = true;
+      }
+
       if (obj->IsOfType(Gmat::SPACEOBJECT))
       {
          // Clone the propagator for each SpaceObject
@@ -809,6 +819,10 @@ void MeasureModel::SetPropagator(PropSetup* ps)
             for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
             {
                signalPaths[i]->SetPropagator(propagator, obj);
+               if (updateSTMRowCount)
+               {
+                  signalPaths[i]->SetStmRowCount(stmRowCount);
+               }
             }
          }
       }
@@ -1302,6 +1316,9 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       // 4.3. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
       leg = signalPaths[i];
+
+      /// @todo Adjust the following code for multiple spacecraft
+
       while (leg != NULL)
       {
          SignalData *sdObj = leg->GetSignalDataObject();
@@ -1314,11 +1331,10 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
             Rvector6 state(propState);
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
-
             // transmit participant STM at measurement time tm
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
-                  sdObj->tSTMtm(ii,jj) = propState[6 + ii*6 + jj];
+                  sdObj->tSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
 
             // transmit participant STM at transmite time t1
             sdObj->tSTM = sdObj->tSTMtm;
@@ -1335,7 +1351,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
             // receive participant STM at measurement type tm
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
-                  sdObj->rSTMtm(ii,jj) = propState[6 + ii*6 + jj];
+                  sdObj->rSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
 
             // receive participant STM at receive time t2
             sdObj->rSTM = sdObj->rSTMtm;

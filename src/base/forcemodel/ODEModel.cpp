@@ -89,6 +89,7 @@
 //#define DEBUG_SATELLITE_PARAMETER_UPDATES
 //#define DEBUG_FORMATION_PROPERTIES
 //#define DEBUG_NAN_CONDITIONS
+//#define DEBUG_AMATRIX
  
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
@@ -1214,7 +1215,8 @@ bool ODEModel::BuildModelFromMap()
          if (objectCount > 0)
          {
             // Build the derivative model piece for this element
-            retval = BuildModelElement(id, start, objectCount);
+            retval = BuildModelElement(id, start, objectCount,
+                  (index - start) / objectCount);
             if (retval == false)
             {
 //               throw ODEModelException(
@@ -1251,7 +1253,8 @@ bool ODEModel::BuildModelFromMap()
    // Catch the last element
    if (objectCount > 0)
    {
-      retval = BuildModelElement(id, start, objectCount);
+      retval = BuildModelElement(id, start, objectCount,
+            (map->size() - start) / objectCount);
       if (retval == false)
       {
          // throw ODEModelException(
@@ -1316,7 +1319,7 @@ bool ODEModel::BuildModelFromMap()
  */
 //------------------------------------------------------------------------------
 bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
-      Integer objectCount)
+      Integer objectCount, Integer size)
 {
    bool retval = false, tf;
    Integer modelsUsed = 0;
@@ -1338,7 +1341,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    {
       if ((*i)->SupportsDerivative(id))
       {
-         tf = (*i)->SetStart(id, start, objectCount);
+         tf = (*i)->SetStart(id, start, objectCount, size);
          if (tf == false)
             MessageInterface::ShowMessage("PhysicalModel %s was not set, even "
                   "though it registered support for derivatives of type %d\n",
@@ -1362,7 +1365,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
    /// @todo Check this piece again for 6DoF
    if (id == Gmat::CARTESIAN_STATE)
    {
-      cartesianCount   = objectCount;
+      cartesianCount = objectCount;
       cartesianStart = start;
       cartStateSize  = objectCount * 6;
    }
@@ -1373,6 +1376,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (stmStart == -1)
          stmStart = start;
       stmCount = objectCount;
+      stmRowCount = sqrt(size);
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1381,11 +1385,17 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
+      stmRowCount = sqrt(size);
    }
 
    #ifdef DEBUG_BUILDING_MODELS
       MessageInterface::ShowMessage(
             "ODEModel is using %d components for element %d\n", modelsUsed, id);
+      if (id == Gmat::ORBIT_STATE_TRANSITION_MATRIX)
+      {
+         MessageInterface::ShowMessage("STM row count(s):\n");
+         MessageInterface::ShowMessage("   %d rows\n", stmRowCount);
+      }
    #endif
    
    return retval;
@@ -2338,6 +2348,20 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
                throw ODEModelException("SRP Area parameter unphysical on object " +
                   sat->GetName());
             pm->SetSatelliteParameter(i, satIds[5], parm);
+
+            // ... Cd ...
+            parm = sat->GetRealParameter(satIds[3]);
+            if (parm < 0)
+               throw ODEModelException("Cr parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[3], parm);
+
+            // ... Cr ...
+            parm = sat->GetRealParameter(satIds[6]);
+            if (parm < 0)
+               throw ODEModelException("Cd parameter unphysical on object " +
+                  sat->GetName());
+            pm->SetSatelliteParameter(i, satIds[6], parm);
          }
          else if (sat->GetType() == Gmat::FORMATION)
          {
@@ -2657,14 +2681,20 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
    #ifdef DEBUG_STM_AMATRIX_DERIVS
       MessageInterface::ShowMessage("Final dv array:\n");
 
+      /// @todo Add handling for multiple STMs of differing sizes
+      Integer stmDim = stmRowCount;
+
+      // Cartesian state piece
       for (Integer i = 0; i < 6; ++i)
       {
          MessageInterface::ShowMessage("  %lf  ", deriv[i]);
       }
       MessageInterface::ShowMessage("\n");
-      for (Integer i = 6; i < dimension; i += 6)
+
+      // STM
+      for (Integer i = 6; i < dimension; i += stmDim)
       {
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmDim; ++j)
             MessageInterface::ShowMessage("  %le  ", deriv[i+j]);
          MessageInterface::ShowMessage("\n");
       }
@@ -2708,6 +2738,7 @@ bool ODEModel::PrepareDerivativeArray()
 
    #ifdef DEBUG_STM_AMATRIX_DERIVS
       static bool eins = false;
+      MessageInterface::ShowMessage("Derivative initializes non-zero:\n");
    #endif
 
    const std::vector<ListItem*> *smap = psm->GetStateMap();
@@ -2717,7 +2748,7 @@ bool ODEModel::PrepareDerivativeArray()
    {
       #ifdef DEBUG_STM_AMATRIX_DERIVS
          if (eins == false)
-            MessageInterface::ShowMessage("Mapping [%d] %s\n", i,
+            MessageInterface::ShowMessage("   Mapping [%d] %s\n", i,
                   ((*smap)[i]->nonzeroInit == true ? "true" : "false"));
       #endif
 
@@ -2734,14 +2765,20 @@ bool ODEModel::PrepareDerivativeArray()
       {
          MessageInterface::ShowMessage("Initial dv array:\n");
 
+         /// @todo Add handling for multiple STMs of varying sizes
+         Integer stmDim = stmRowCount;
+
+         // Cartesian state element
          for (Integer i = 0; i < 6; ++i)
          {
             MessageInterface::ShowMessage("  %lf  ", deriv[i]);
          }
+
+         /// STM
          MessageInterface::ShowMessage("\n");
-         for (Integer i = 6; i < dimension; i += 6)
+         for (Integer i = 6; i < dimension; i += stmDim)
          {
-            for (Integer j = 0; j < 6; ++j)
+            for (Integer j = 0; j < stmDim; ++j)
                MessageInterface::ShowMessage("  %lf  ", deriv[i+j]);
             MessageInterface::ShowMessage("\n");
          }
@@ -2775,28 +2812,39 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
 
    bool retval = true;
 
+   Integer stmRows = stmRowCount;
+   Integer stmDim = stmRows*stmRows;
+
    for (Integer i = 0; i < stmCount; ++i)
    {
-      Integer i6 = stmStart + i * 36;
+      /// @todo Add handling for multiple STMs of varying sizes
+      Integer i6 = stmStart + i * stmDim;
 
       // Build aTilde
-      Real aTilde[36];
-      for (Integer m = 0; m < 36; ++m)
+      Real aTilde[stmDim];
+      for (Integer m = 0; m < stmDim; ++m)
          aTilde[m] = deriv[i6+m];
+
+      #ifdef DEBUG_AMATRIX
+         MessageInterface::ShowMessage("A matrix last column: [");
+         for (Integer j = 0; j < stmRowCount; ++j)
+            MessageInterface::ShowMessage("%15lf", aTilde[i6 + j*stmRows + stmRowCount - 1]);
+         MessageInterface::ShowMessage("]^T\n");
+      #endif
 
       if (fillSTM)
       {
          // Convert A to Phi dot for STM pieces
          // \Phi\dot = A\tilde \Phi
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmRows; ++j)
          {
-            for (Integer k = 0; k < 6; ++k)
+            for (Integer k = 0; k < stmRows; ++k)
             {
-               Integer element = j * 6 + k;
+               Integer element = j * stmRows + k;
                deriv[i6+element] = 0.0;
-               for (Integer l = 0; l < 6; ++l)
+               for (Integer l = 0; l < stmRows; ++l)
                {
-                  deriv[i6+element] += aTilde[j*6+l] * state[i6+l*6+k];
+                  deriv[i6+element] += aTilde[j*stmRows+l] * state[i6+l*stmRows+k];
                }
             }
          }
@@ -3056,6 +3104,12 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
          // deleting it
          delete deleteList[i];
       }
+   }
+
+   if (action == "UpdateSpacecraftParameters")
+   {
+      UpdateDynamicSpacecraftData(&stateObjects, 0);
+      UpdateDynamicSpacecraftData(&stateObjects, 0);
    }
 
    return true;

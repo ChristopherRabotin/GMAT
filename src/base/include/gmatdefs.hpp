@@ -304,7 +304,7 @@ namespace Gmat
       UNKNOWN_STATE = -1,
       CARTESIAN_STATE = 3700,          // Integrable state representations
       EQUINOCTIAL_STATE,
-      ORBIT_STATE_TRANSITION_MATRIX,   // 6x6 STM for the orbit
+      ORBIT_STATE_TRANSITION_MATRIX,   // STM for the orbit
       ORBIT_A_MATRIX,
       MASS_FLOW,                       // m dot
       PREDEFINED_STATE_MAX,

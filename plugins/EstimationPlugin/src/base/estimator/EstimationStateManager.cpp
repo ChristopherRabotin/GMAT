@@ -650,6 +650,12 @@ StringArray EstimationStateManager::GetSolveForList(GmatBase* obj)
          solveforList[i] = obj->GetName() + "." + solveforList[i]; 
    }
 
+   #ifdef DEBUG_STATE_CONSTRUCTION
+      MessageInterface::ShowMessage("Solve for parameters:\n");
+      for (UnsignedInt i = 0; i < solveforList.size(); ++i)
+         MessageInterface::ShowMessage("   %s\n", solveforList[i].c_str());
+   #endif
+
    return solveforList;
 }
 

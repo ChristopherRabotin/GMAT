@@ -384,7 +384,8 @@ protected:
 
    bool                      BuildModelElement(Gmat::StateElementId id, 
                                                Integer start, 
-                                               Integer objectCount);
+                                               Integer objectCount,
+                                               Integer size);
    bool                      PrepareDerivativeArray();
    bool                      CompleteDerivativeCalculations(Real *state);
    
