@@ -82,6 +82,19 @@ GmatBase* PythonInterface::Clone() const
    return (new PythonInterface(*this));
 }
 
+//------------------------------------------------------------------------------
+// bool PyInitialize()
+//------------------------------------------------------------------------------
+/**
+* Load Python engine
+*
+* This method will initialize python by loading Python engine.
+*
+* @param none
+*
+* @return bool
+*/
+//------------------------------------------------------------------------------
 bool PythonInterface::PyInitialize()
 {
    // Initialize Python only once.
@@ -101,6 +114,19 @@ bool PythonInterface::PyInitialize()
    return isPythonInitialized;
 }
 
+//------------------------------------------------------------------------------
+// bool PyFinalize()
+//------------------------------------------------------------------------------
+/**
+* UnLoad Python engine
+*
+* This method will shut down/unload python engine.
+*
+* @param none
+*
+* @return bool
+*/
+//------------------------------------------------------------------------------
 bool PythonInterface::PyFinalize()
 {
    // when all the Python commands in Gmat script is run and completed
@@ -114,7 +140,19 @@ bool PythonInterface::PyFinalize()
    return isPythonInitialized;
 }
 
-
+//------------------------------------------------------------------------------
+// void PyPathSep()
+//------------------------------------------------------------------------------
+/**
+* Operating system environment/system path delimiter
+*
+* This method will differentiate the path delimiter for different OS.
+*
+* @param none
+*
+* @return void
+*/
+//------------------------------------------------------------------------------
 void PythonInterface::PyPathSep()
 {
 	const char* plForm = Py_GetPlatform();
@@ -128,7 +166,17 @@ void PythonInterface::PyPathSep()
       plF = ":";
 }
 
-
+//------------------------------------------------------------------------------
+// void PyAddModulePath()
+//------------------------------------------------------------------------------
+/**
+* Add Python module to the system path.
+*
+* @param StringArray & path
+*
+* @return void
+*/
+//------------------------------------------------------------------------------
 void PythonInterface::PyAddModulePath(const StringArray& path)
 {
    wchar_t *s3K = new wchar_t[8192];
@@ -172,6 +220,17 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 
 }
 
+//------------------------------------------------------------------------------
+// bool PyFunctionWrapper()
+//------------------------------------------------------------------------------
+/**
+* Call Python Function
+*
+* @param modName, funcName, formatIn, argIn
+*
+* @return PyObject
+*/
+//------------------------------------------------------------------------------
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
                                                 const std::string &formatIn, const std::vector<void *> &argIn)
 {
@@ -273,7 +332,17 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    return pyFunc;
 }
 
-
+//------------------------------------------------------------------------------
+// bool PyErrorMsg
+//------------------------------------------------------------------------------
+/**
+* Fetch Internal Python error/exception messages
+*
+* @param pType, pValue, pTraceback of type PyObject, msg as string
+*
+* @return void
+*/
+//------------------------------------------------------------------------------
 void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, std::string &msg)
 {
    // will own the reference to each variables passed
