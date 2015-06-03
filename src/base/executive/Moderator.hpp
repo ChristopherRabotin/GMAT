@@ -271,7 +271,8 @@ public:
 
    // EventLocator
    EventLocator* CreateEventLocator(const std::string &type,
-                            const std::string &name);
+                                    const std::string &name,
+                                    bool createDefault = false);
    EventLocator* GetEventLocator(const std::string &name);
 
    // Interpolator
@@ -453,17 +454,18 @@ private:
    const StringArray& GetSequenceStarters();
    
    // Default objects
-   Spacecraft* GetDefaultSpacecraft();
-   PropSetup*  GetDefaultPropSetup();
-   Burn*       GetDefaultBurn(const std::string &type);
-   Hardware*   GetDefaultHardware(const std::string &type);
-   Solver*     GetDefaultBoundaryValueSolver();
-   Solver*     GetDefaultOptimizer();
-   Subscriber* GetDefaultSubscriber(const std::string &type,
+   Spacecraft*   GetDefaultSpacecraft();
+   PropSetup*    GetDefaultPropSetup();
+   Burn*         GetDefaultBurn(const std::string &type);
+   Hardware*     GetDefaultHardware(const std::string &type);
+   Solver*       GetDefaultBoundaryValueSolver();
+   Solver*       GetDefaultOptimizer();
+   EventLocator* GetDefaultEventLocator();
+   Subscriber*   GetDefaultSubscriber(const std::string &type,
                                     bool addObjects = true,
                                     bool createIfNoneFound = true);
-   Parameter*  GetDefaultX();
-   Parameter*  GetDefaultY();
+   Parameter*    GetDefaultX();
+   Parameter*    GetDefaultY();
    StopCondition* CreateDefaultStopCondition();
    
    // Sandbox

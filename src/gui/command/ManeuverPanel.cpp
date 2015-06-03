@@ -253,7 +253,7 @@ void ManeuverPanel::LoadData()
           satCB->SetStringSelection("");
    }
    
-   backpropCheckBox->SetValue((wxVariant(theCommand->GetBooleanParameter("Backprop"))));
+   backpropCheckBox->SetValue(theCommand->GetBooleanParameter("BackProp"));
 }
 
 //------------------------------------------------------------------------------
@@ -283,9 +283,9 @@ void ManeuverPanel::SaveData()
            theCommand->SetStringParameter(id, spacecraft);
 
            if (backpropCheckBox->IsChecked())
-              theCommand->SetBooleanParameter("Backprop", true);
+              theCommand->SetBooleanParameter("BackProp", true);
            else
-              theCommand->SetBooleanParameter("Backprop", false);
+              theCommand->SetBooleanParameter("BackProp", false);
 
    }
    catch (BaseException &e)

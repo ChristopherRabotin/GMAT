@@ -82,6 +82,8 @@ EphemManager::~EphemManager()
 {
    #ifdef DEBUG_EPHEM_MANAGER
       MessageInterface::ShowMessage("Destructing EphemManager ...\n");
+      MessageInterface::ShowMessage("     and deleteTmpFiles = %s\n",
+            (deleteTmpFiles? "true" : "false"));
    #endif
    // Stop recording
    if (recording) StopRecording();
@@ -110,7 +112,7 @@ EphemManager::~EphemManager()
                   "Destructing EphemManager ...about to delete file %s\n",
                   eachFile.c_str());
          #endif
-         remove(eachFile.c_str()); // don't want to do this for now, since we need to check the files
+         remove(eachFile.c_str());
       }
    }
    fileList.clear();

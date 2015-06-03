@@ -103,7 +103,7 @@ void EventFilePanel::Create()
                                            wxTE_READONLY | wxTE_MULTILINE | wxGROW);
    
    // set font
-   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetScriptFont() );
       
    // create bottom buttons
    theCloseButton =

@@ -49,14 +49,13 @@ static integer c__2 = 2;
 
 /* Subroutine */ int irit13_(real *alati, real *along, integer *jmag, logical 
 	*jf, integer *iy, integer *md, real *hour, real *hbeg, real *hend, 
-	real *tec, real *tecb, real *tect, integer *error)
+	real *tec, real *tecb, real *tect)
 {
-    static real aend, oarr[50], astp, outf[10000]	/* was [20][500] */;
+    real abeg, aend, oarr[50], astp, outf[10000]	/* was [20][500] */;
     extern /* Subroutine */ int iri_tec__(real *, real *, integer *, real *, 
 	    real *, real *), iri_sub__(logical *, integer *, real *, real *, 
 	    integer *, integer *, real *, real *, real *, real *, real *, 
-	    real *, integer *);
-    static real abeg;
+	    real *);
 
 /* ----------------------------------------------------------------------- */
 /* Program for numerical integration of IRI-94 profiles from h=100km */
@@ -89,7 +88,7 @@ static integer c__2 = 2;
     aend = *hend;
     astp = *hend - *hbeg;
     iri_sub__(&jf[1], jmag, alati, along, iy, md, hour, &abeg, &aend, &astp, 
-	    outf, oarr, error);
+	    outf, oarr);
 
 /*  calculate total electron content (TEC) in m-2 using the */
 /*  stepsize selection 2 (highest accuracy) */
@@ -122,19 +121,16 @@ doublereal ioncorr_(real *tec, real *f)
     double exp(doublereal), log(doublereal);
 
     /* Local variables */
-    static real delx, ss_t__;
-    static logical expo;
-    static real step[5], hei_2__, hei_3__, hei_4__, hei_5__;
     static integer num_step__;
     static real h__;
-    static integer i__;
-    static real xnorm, xntop;
-    static integer ia;
-    static real hh, hr[6], hu, hx, sumbot, x_2__, x_3__, x_4__, x_5__, sumtop,
-	     del_hei__, hei_end__, yne, hss, xkk, hei_top__, top_end__, 
+    static integer i__, ia;
+    static real hh, hr[6], hu, hx, x_2__, x_3__, x_4__, x_5__, yne, hss, xkk, 
 	    ed_2__, ed_3__, ed_4__, ed_5__, yyy;
     extern doublereal xe_1__(real *);
-    static real zzz, ss_2__, ss_3__, ss_4__;
+    static real zzz, ss_2__, ss_3__, ss_4__, delx, ss_t__;
+    static logical expo;
+    static real step[5], hei_2__, hei_3__, hei_4__, hei_5__, xnorm, xntop, 
+	    sumbot, sumtop, del_hei__, hei_end__, hei_top__, top_end__;
     static integer numstep;
 
 /* ----------------------------------------------------------------------- */
