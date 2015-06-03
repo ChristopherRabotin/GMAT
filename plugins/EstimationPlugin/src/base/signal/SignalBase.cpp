@@ -57,11 +57,11 @@ const Rvector3   SignalBase::zUnit      = Rvector3(0.0,0.0,1.0);
  * @param name Name of the new object
  */
 //------------------------------------------------------------------------------
-SignalBase::SignalBase(const std::string &typeStr,
-      const std::string &name) :
+SignalBase::SignalBase(const std::string &typeStr, const std::string &name) :
    GmatBase             (Gmat::GENERIC_OBJECT, typeStr, name),
    next                 (NULL),
    previous             (NULL),
+   stmRowCount          (6),
    tcs                  (NULL),
    rcs                  (NULL),
    ocs                  (NULL),
@@ -117,6 +117,7 @@ SignalBase::SignalBase(const SignalBase& sb) :
    next                 (NULL),
    previous             (NULL),
    theData              (sb.theData),
+   stmRowCount          (sb.stmRowCount),
    tcs                  (NULL),
    rcs                  (NULL),
    ocs                  (NULL),
@@ -153,6 +154,7 @@ SignalBase& SignalBase::operator=(const SignalBase& sb)
       GmatBase::operator=(sb);
 
       theData             = sb.theData;
+      stmRowCount         = sb.stmRowCount;
       
       if (tcs) 
          delete tcs;
@@ -526,6 +528,26 @@ void SignalBase::SetPropagator(PropSetup* propagator, GmatBase* forObj)
       if (next)
          next->SetPropagator(propagator, forObj);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetStmRowCount(UnsignedInt rc)
+//------------------------------------------------------------------------------
+/**
+ * Updates the state transition matrix size used in the signal propagation
+ *
+ * @param rc The number of rows/columns in the state transition matrix
+ */
+//------------------------------------------------------------------------------
+void SignalBase::SetStmRowCount(UnsignedInt rc)
+{
+   if (rc < 6)
+      throw MeasurementException("In the signal class, cannot set the STM row "
+            "count to the requested size; the STM must have at least 6 rows");
+   stmRowCount = rc;
+   if (next)
+      next->SetStmRowCount(rc);
 }
 
 
@@ -1101,7 +1123,10 @@ void SignalBase::GetRangeVectorDerivative(GmatBase *forObj, bool wrtR,
    Rvector3 rangeVec = theData.rangeVecInertial;      // Check sign?
 
    // phi(t1,tm) = phi(t1, t0)* Inv(phi(tm, t0))   where: t0 is initial epoch; tm is measurement time; t1 is either transmit time or receive time
-   // Rmatrix phi = (forTransmitter ? theData.tSTM : theData.rSTM);
+   //Rmatrix phi = (forTransmitter ? theData.tSTM : theData.rSTM);
+
+   /// @todo Adjust the following code for multiple spacecraft
+
    Rmatrix phi = (forTransmitter ? (theData.tSTM*theData.tSTMtm.Inverse()) : (theData.rSTM*theData.rSTMtm.Inverse()));
 
    // Check: Not using old STM inverse approach -- STMs computed from initial
@@ -1264,6 +1289,10 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
    // 1. Propagate receive node at time theEpoch and update it's SignalData
    if (epochAtReceive || moveAll)
    {
+
+      /// @todo Adjust the following code for multiple spacecraft
+
+
       Real dt = (theEpoch - theData.rPrecTime).GetTimeInSec();
       #ifdef DEBUG_LIGHTTIME
          MessageInterface::ShowMessage("   dt = (%.12lf - %.12lf)*86400 => %.12le\n",
@@ -1290,7 +1319,7 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             state.Set(pstate);
             for (UnsignedInt i = 0; i < 6; ++i)
                for (UnsignedInt j = 0; j < 6; ++j)
-                  stm(i,j) = pstate[6 + i*6 + j];
+                  stm(i,j) = pstate[6 + i*stmRowCount + j];
          }
 
          theData.rLoc = state.GetR();
@@ -1336,7 +1365,7 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
             state.Set(pstate);
             for (UnsignedInt i = 0; i < 6; ++i)
                for (UnsignedInt j = 0; j < 6; ++j)
-                  stm(i,j) = pstate[6 + i*6 + j];
+                  stm(i,j) = pstate[6 + i*stmRowCount + j];
          }
 
          theData.tLoc = state.GetR();
@@ -1423,6 +1452,7 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
    // 2. Propagate transmiter node (or receiver node) for stepToTake and specify its state
    Rvector6 state;
    Rmatrix66 stm;
+
    if (prop)      // Handle spacecraft
    {
       #ifdef DEBUG_LIGHTTIME
@@ -1443,10 +1473,13 @@ bool SignalBase::StepParticipant(Real stepToTake, bool forTransmitter)
                 theData.receiveParticipant.c_str()), stepToTake);
       }
 
+
+      /// @todo Adjust the following code for multiple spacecraft
+
       state.Set(outState);
       for (UnsignedInt i = 0; i < 6; ++i)
          for (UnsignedInt j = 0; j < 6; ++j)
-            stm(i,j) = outState[6 + i*6 + j];
+            stm(i,j) = outState[6 + i*stmRowCount + j];
 
       // Buffer the STM
       if (forTransmitter)

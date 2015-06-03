@@ -74,6 +74,7 @@ public:
 
    virtual void         SetPropagator(PropSetup *propagator,
                                       GmatBase *forObj = NULL);
+   virtual void         SetStmRowCount(UnsignedInt rc);
    virtual bool         Initialize();
    virtual void         InitializeSignal(bool chainForwards = false);
 
@@ -117,8 +118,10 @@ protected:
    GmatState                  rState;
    // Participant data that can be passed to callers
    SignalData                 theData;
-   // Participant data that can be passed to callers
+   /// Participant data that can be passed to callers
    std::vector<RealArray>     theDataDerivatives;
+   /// Number of rows/columns in teh state transition matrix
+   UnsignedInt                stmRowCount;
 
    // Member data used
    // Coordinate Systems
