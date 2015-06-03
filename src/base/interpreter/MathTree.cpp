@@ -328,7 +328,8 @@ bool MathTree::Validate(std::string &msg)
    {
       // Remove last , from the errmsg
       errmsg = GmatStringUtil::RemoveLastString(errmsg, ", ");
-      msg = errmsg + " in a math equation.";
+      msg = errmsg + " in a math equation. If it is GMAT function call, currently "
+         "[] is required on the left hand side of equal sign";
    }
    
    #ifdef DEBUG_VALIDATE

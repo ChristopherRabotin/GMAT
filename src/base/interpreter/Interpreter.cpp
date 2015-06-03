@@ -9931,8 +9931,10 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       catch (BaseException &)
       {
          InterpreterException ex
-            ("Invalid output argument list found in the GmatFunction file \"" +
-             fPath + "\" referenced in \"" + fName + "\"\n");
+            ("Invalid output argument list found '" + parts[0] +
+             "' in GmatFunction \"" + fName + ".\"\n"
+             "Syntax of a GmatFunction statement is:\n"
+             "function [out1, out2, ...] = FunctionName(in1, in2, in3, ...)");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9982,8 +9984,13 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          catch (BaseException &)
          {
             InterpreterException ex
-               ("Invalid output argument list found in the GmatFunction file \"" +
-                fPath + "\" referenced in \"" + fName + "\"\n");
+               ("Invalid output argument list found '" + parts[0] +
+                "' in GmatFunction \"" + fName + ".\"\n"
+                "Syntax of a GmatFunction statement is:\n"
+                "function [out1, out2, ...] = FunctionName(in1, in2, in3, ...)");
+            // InterpreterException ex
+            //    ("Invalid output argument list found in the GmatFunction file \"" +
+            //     fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
@@ -10039,8 +10046,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       catch (BaseException &)
       {
          InterpreterException ex
-            ("The invalid input argument list found in the GmatFunction file \"" +
-             fPath + "\" referenced in \"" + fName + "\"\n");
+            ("The invalid input argument list found '" + parts[1] + "' in "
+             "GmatFunction file \"" + fPath + "\"");
          HandleError(ex, false);
          retval = false;
          break;
@@ -10091,8 +10098,11 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          catch (BaseException &)
          {
             InterpreterException ex
-               ("Invalid input argument list found in the GmatFunction file \"" +
-                fPath + "\" referenced in \"" + fName + "\"\n");
+               ("The invalid input argument list found '" + rhsParts[1] + "' in "
+                "GmatFunction file \"" + fPath + "\"");
+            // InterpreterException ex
+            //    ("Invalid input argument list found in the GmatFunction file \"" +
+            //     fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
