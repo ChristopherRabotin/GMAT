@@ -1376,7 +1376,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (stmStart == -1)
          stmStart = start;
       stmCount = objectCount;
-      stmRowCount = sqrt(size);
+      stmRowCount = Integer(sqrt((Real)size));
    }
 
    if (id == Gmat::ORBIT_A_MATRIX)
@@ -1385,7 +1385,7 @@ bool ODEModel::BuildModelElement(Gmat::StateElementId id, Integer start,
       if (aMatrixStart == -1)
          aMatrixStart = start;
       ++aMatrixCount;
-      stmRowCount = sqrt(size);
+      stmRowCount = Integer(sqrt((Real)size));
    }
 
    #ifdef DEBUG_BUILDING_MODELS
@@ -2821,7 +2821,10 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
       Integer i6 = stmStart + i * stmDim;
 
       // Build aTilde
-      Real aTilde[stmDim];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+
       for (Integer m = 0; m < stmDim; ++m)
          aTilde[m] = deriv[i6+m];
 
@@ -2849,6 +2852,8 @@ bool ODEModel::CompleteDerivativeCalculations(Real *state)
             }
          }
       }
+
+	  delete [] aTilde;
    }
    return retval;
 }

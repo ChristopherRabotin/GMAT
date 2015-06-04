@@ -474,7 +474,10 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
       #endif
       if (fillSTM || fillAMatrix)
       {
-         Real aTilde[stmRowCount*stmRowCount];
+         Integer stmSize = stmRowCount * stmRowCount;
+         Real *aTilde;
+         aTilde = new Real[stmSize];
+
          Integer associate, element;
          Integer aiCount = (fillSTM ? stmCount : aMatrixCount);
 
@@ -566,6 +569,8 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order,
                }
             }
          }
+
+		 delete [] aTilde;
       }
    }
    
@@ -1078,7 +1083,7 @@ bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
          
@@ -1086,7 +1091,7 @@ bool PointMassForce::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 

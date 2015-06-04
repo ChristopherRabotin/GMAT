@@ -540,7 +540,10 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
 #endif
          if (fillSTM)
          {
-            Real aTilde[stmRowCount*stmRowCount];
+            Integer stmSize = stmRowCount * stmRowCount;
+            Real *aTilde;
+            aTilde = new Real[stmSize];
+
             Integer element;
             // @todo Add the use of the GetAssociateIndex() method here to get index into state array
             //       (See assumption 1, above)
@@ -582,11 +585,16 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                   }
                }
             }
+
+			delete [] aTilde;
          }
 
          if (fillAMatrix)
          {
-            Real aTilde[stmRowCount*stmRowCount];
+            Integer stmSize = stmRowCount * stmRowCount;
+            Real *aTilde;
+            aTilde = new Real[stmSize];
+
             Integer element;
             // @todo Add the use of the GetAssociateIndex() method here to get index into state array
             //       (See assumption 1, above)
@@ -628,6 +636,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                   }
                }
             }
+
+			delete [] aTilde;
          }
 
       }  // end for
@@ -1075,7 +1085,7 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
          stmCount       = quantity;
          stmStart       = index;
          fillSTM        = true;
-         stmRowCount    = sqrt(sizeOfType);
+         stmRowCount    = Integer(sqrt((Real)sizeOfType));
          retval         = true;
          break;
 
@@ -1083,7 +1093,7 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount   = quantity;
          aMatrixStart   = index;
          fillAMatrix    = true;
-         stmRowCount    = sqrt(sizeOfType);
+         stmRowCount    = Integer(sqrt((Real)sizeOfType));
          retval         = true;
          break;
 

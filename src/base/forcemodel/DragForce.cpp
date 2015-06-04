@@ -2301,7 +2301,7 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
          satCount = quantity;
          cartIndex = index;
          fillCartesian = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
          

@@ -1022,11 +1022,13 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillSTM || fillAMatrix)
    {
-      Real aTilde[stmRowCount*stmRowCount];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
 
-/// Temporary; needs generalization
-if (stmRowCount == 7)
-   estimatingCr = true;
+      /// @todo Temporary; needs generalization
+      if (stmRowCount == 7)
+         estimatingCr = true;
 
       Integer associate, element;
       for (Integer i = 0; i < stmCount; ++i)
@@ -1090,15 +1092,14 @@ if (stmRowCount == 7)
          {
             if (srpModel == "Spherical")
             {
-static Real old_cr = 0.0;
-//static Real old_epoch = 999999.9999;
-//if ((old_cr != cr[i]) || (dt < old_epoch))
-if ((old_cr != cr[i]))
-{
-   old_cr = cr[i];
-   MessageInterface::ShowMessage("Cr = %.12lf\n", cr[i]);
-}
-//old_epoch = dt;
+               /// @todo Make Cr value reporting more elegant
+               static Real old_cr = 0.0;
+               if ((old_cr != cr[i]))
+               {
+                  old_cr = cr[i];
+                  MessageInterface::ShowMessage("Cr = %.12lf\n", cr[i]);
+               }
+
                // All of the common terms for C_s
                mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
                                    (mass[i] * sunDistance);
@@ -1391,6 +1392,8 @@ if ((old_cr != cr[i]))
             #endif
          }
       }
+
+	  delete [] aTilde;
    }
     
    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
@@ -2107,7 +2110,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
          
@@ -2115,7 +2118,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 

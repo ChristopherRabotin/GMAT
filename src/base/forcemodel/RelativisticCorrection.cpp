@@ -419,7 +419,10 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
    if (fillSTM)
    {
       // Setting all zeroes for now
-      Real aTilde[stmRowCount*stmRowCount];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+
       Integer element;
       for (Integer i = 0; i < stmCount; ++i)
       {
@@ -445,11 +448,16 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
             }
          }
       }
+
+	  delete [] aTilde;
    }
    if (fillAMatrix)
    {
       // Setting all zeroes for now
-      Real aTilde[stmRowCount*stmRowCount];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+
       Integer element;
       for (Integer i = 0; i < stmCount; ++i)
       {
@@ -475,6 +483,8 @@ bool RelativisticCorrection::GetDerivatives(Real *state, Real dt, Integer order,
             }
          }
       }
+
+      delete [] aTilde;
    }
 
    return true;
@@ -893,7 +903,7 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 
@@ -901,7 +911,7 @@ bool RelativisticCorrection::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
-         stmRowCount = sqrt(sizeOfType);
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 
