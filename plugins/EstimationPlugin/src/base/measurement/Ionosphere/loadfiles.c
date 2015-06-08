@@ -87,9 +87,9 @@ struct {
 /* Table of constant values */
 
 static integer c__1 = 1;
-static integer c__9 = 9;
 static integer c__3 = 3;
 static integer c__4 = 4;
+static integer c__2 = 2;
 
 /*     Loads all files into memory so they don't have to be reread on */
 /*     every routine call. */
@@ -108,35 +108,34 @@ static integer c__4 = 4;
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
 
-/* Subroutine */ int load_shc__(integer *ifile, char *filename, ftnlen 
-	filename_len)
+/* Subroutine */ int load_shc__(integer *ifile, char *filename, integer *
+	ierror, char *errmsg, ftnlen filename_len, ftnlen errmsg_len)
 {
     /* Format strings */
     static char fmt_1001[] = "(\002./../data/IonosphereData/\002,a12)";
 
     /* System generated locals */
-    integer i__1, i__2;
+    address a__1[2];
+    integer i__1, i__2, i__3[2];
     icilist ici__1;
     olist o__1;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
-	    e_wsle();
-    /* Subroutine */ int s_stop(char *, ftnlen);
-    integer f_open(olist *), s_rsle(cilist *), e_rsle(), f_clos(cllist *);
+    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
+    /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
+    integer f_open(olist *), s_rsle(cilist *), e_rsle(), do_lio(integer *, 
+	    integer *, char *, ftnlen), f_clos(cllist *);
+    /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     char fullpath[256];
     integer i__, mm, nn, irec;
 
     /* Fortran I/O blocks */
-    static cilist io___2 = { 0, 6, 0, 0, 0 };
+    static cilist io___2 = { 0, 84, 0, 0, 0 };
     static cilist io___3 = { 0, 84, 0, 0, 0 };
-    static cilist io___4 = { 0, 84, 0, 0, 0 };
-    static cilist io___8 = { 0, 6, 0, 0, 0 };
-    static cilist io___9 = { 0, 84, 0, 0, 0 };
+    static cilist io___7 = { 0, 84, 0, 0, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -157,15 +156,17 @@ static integer c__4 = 4;
     s_wsfi(&ici__1);
     do_fio(&c__1, filename, filename_len);
     e_wsfi();
+    *ierror = 0;
     if (*ifile > 14) {
-	s_wsle(&io___2);
-	do_lio(&c__9, &c__1, "ERROR: load_shc: ifile exceeds MAXFILES_SHC", (
-		ftnlen)43);
-	e_wsle();
-	s_stop("1", (ftnlen)1);
+/*              write(*,*) 'ERROR: load_shc: ifile exceeds MAXFILES_SHC' */
+/*              stop 1 */
+	*ierror = 1;
+	s_copy(errmsg, "ERROR: load_shc: ifile exceeds MAXFILES_SHC", (ftnlen)
+		256, (ftnlen)43);
+	return 0;
     }
 /*         Open coefficient file. Read past first header record. */
-    o__1.oerr = 0;
+    o__1.oerr = 1;
     o__1.ounit = 84;
     o__1.ofnmlen = 256;
     o__1.ofnm = fullpath;
@@ -174,11 +175,14 @@ static integer c__4 = 4;
     o__1.oacc = 0;
     o__1.ofm = 0;
     o__1.oblnk = 0;
-    f_open(&o__1);
+    i__1 = f_open(&o__1);
+    if (i__1 != 0) {
+	goto L2001;
+    }
 /*         Read degree and order of model and Earth's radius. */
-    s_rsle(&io___3);
+    s_rsle(&io___2);
     e_rsle();
-    s_rsle(&io___4);
+    s_rsle(&io___3);
     do_lio(&c__3, &c__1, (char *)&shc1_1.nmax_shc__[*ifile - 1], (ftnlen)
 	    sizeof(integer));
     do_lio(&c__4, &c__1, (char *)&shc1_1.erad_shc__[*ifile - 1], (ftnlen)
@@ -210,13 +214,15 @@ static integer c__4 = 4;
 	for (mm = 0; mm <= i__2; ++mm) {
 	    ++irec;
 	    if (irec > 200) {
-		s_wsle(&io___8);
-		do_lio(&c__9, &c__1, "ERROR: load_shc: irec exceeds MAXRECOR\
-DS_SHC", (ftnlen)44);
-		e_wsle();
-		s_stop("1", (ftnlen)1);
+/*                      write(*,*) */
+/*     &                    'ERROR: load_shc: irec exceeds MAXRECORDS_SHC' */
+/*                      stop 1 */
+		*ierror = 2;
+		s_copy(errmsg, "ERROR: load_shc: irec exceeds MAXRECORDS_SHC",
+			 (ftnlen)256, (ftnlen)44);
+		return 0;
 	    }
-	    s_rsle(&io___9);
+	    s_rsle(&io___7);
 	    for (i__ = 1; i__ <= 4; ++i__) {
 		do_lio(&c__4, &c__1, (char *)&shc1_1.shcfiles[i__ + (irec + *
 			ifile * 200 << 2) - 805], (ftnlen)sizeof(real));
@@ -228,37 +234,50 @@ DS_SHC", (ftnlen)44);
     cl__1.cunit = 84;
     cl__1.csta = 0;
     f_clos(&cl__1);
+    s_copy(errmsg, "", (ftnlen)256, (ftnlen)0);
+    return 0;
+L2001:
+    *ierror += 1000;
+/* Writing concatenation */
+    i__3[0] = 21, a__1[0] = "Error: can not open \"";
+    i__3[1] = 256, a__1[1] = fullpath;
+    s_cat(errmsg, a__1, i__3, &c__2, (ftnlen)256);
+/* Writing concatenation */
+    i__3[0] = 256, a__1[0] = errmsg;
+    i__3[1] = 1, a__1[1] = "\"";
+    s_cat(errmsg, a__1, i__3, &c__2, (ftnlen)256);
     return 0;
 } /* load_shc__ */
 
-/* Subroutine */ int load_igrz__(char *filename, ftnlen filename_len)
+/* Subroutine */ int load_igrz__(char *filename, integer *ierror, char *
+	errmsg, ftnlen filename_len, ftnlen errmsg_len)
 {
     /* Format strings */
     static char fmt_1001[] = "(\002./../data/IonosphereData/\002,a)";
 
     /* System generated locals */
-    integer i__1;
+    address a__1[2];
+    integer i__1, i__2[2];
     icilist ici__1;
     olist o__1;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    f_open(olist *), s_rsle(cilist *), do_lio(integer *, integer *, 
-	    char *, ftnlen), e_rsle(), s_wsle(cilist *), e_wsle();
-    /* Subroutine */ int s_stop(char *, ftnlen);
-    integer f_clos(cllist *);
+    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
+    /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
+    integer f_open(olist *), s_rsle(cilist *), do_lio(integer *, integer *, 
+	    char *, ftnlen), e_rsle(), f_clos(cllist *);
+    /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     char fullpath[256];
     integer i__, inum_vals__;
 
     /* Fortran I/O blocks */
-    static cilist io___12 = { 0, 84, 0, 0, 0 };
+    static cilist io___10 = { 0, 84, 0, 0, 0 };
+    static cilist io___11 = { 0, 84, 0, 0, 0 };
     static cilist io___13 = { 0, 84, 0, 0, 0 };
-    static cilist io___15 = { 0, 6, 0, 0, 0 };
-    static cilist io___16 = { 0, 84, 0, 0, 0 };
-    static cilist io___18 = { 0, 84, 0, 0, 0 };
+    static cilist io___15 = { 0, 84, 0, 0, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -279,7 +298,9 @@ DS_SHC", (ftnlen)44);
     s_wsfi(&ici__1);
     do_fio(&c__1, filename, filename_len);
     e_wsfi();
-    o__1.oerr = 0;
+    *ierror = 0;
+    s_copy(errmsg, "", (ftnlen)256, (ftnlen)0);
+    o__1.oerr = 1;
     o__1.ounit = 84;
     o__1.ofnmlen = 256;
     o__1.ofnm = fullpath;
@@ -288,10 +309,13 @@ DS_SHC", (ftnlen)44);
     o__1.oacc = 0;
     o__1.ofm = 0;
     o__1.oblnk = 0;
-    f_open(&o__1);
+    i__1 = f_open(&o__1);
+    if (i__1 != 0) {
+	goto L3001;
+    }
 /*         Read the update date, the start date and the end date */
 /*         (mm,yyyy), and get number of data points to read. */
-    s_rsle(&io___12);
+    s_rsle(&io___10);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupd_igrz__, (ftnlen)sizeof(integer)
 	    );
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupm_igrz__, (ftnlen)sizeof(integer)
@@ -299,7 +323,7 @@ DS_SHC", (ftnlen)44);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iupy_igrz__, (ftnlen)sizeof(integer)
 	    );
     e_rsle();
-    s_rsle(&io___13);
+    s_rsle(&io___11);
     do_lio(&c__3, &c__1, (char *)&igrz1_1.imst_igrz__, (ftnlen)sizeof(integer)
 	    );
     do_lio(&c__3, &c__1, (char *)&igrz1_1.iyst_igrz__, (ftnlen)sizeof(integer)
@@ -312,21 +336,23 @@ DS_SHC", (ftnlen)44);
     inum_vals__ = 3 - igrz1_1.imst_igrz__ + (igrz1_1.iyend_igrz__ - 
 	    igrz1_1.iyst_igrz__) * 12 + igrz1_1.imend_igrz__;
     if (inum_vals__ > 722) {
-	s_wsle(&io___15);
-	do_lio(&c__9, &c__1, "ERROR: load_igrz: inum_vals exceeds MAXRECORDL\
-EN_IGRZ", (ftnlen)53);
-	e_wsle();
-	s_stop("1", (ftnlen)1);
+/*              write(*,*) */
+/*     &           'ERROR: load_igrz: inum_vals exceeds MAXRECORDLEN_IGRZ' */
+/*              stop 1 */
+	*ierror = 3;
+	s_copy(errmsg, "ERROR: load_igrz: inum_vals exceeds MAXRECORDLEN_IGRZ"
+		, (ftnlen)256, (ftnlen)53);
+	return 0;
     }
 /*         Read data records */
-    s_rsle(&io___16);
+    s_rsle(&io___13);
     i__1 = inum_vals__;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	do_lio(&c__4, &c__1, (char *)&igrz1_1.ionoindx_igrz__[i__ - 1], (
 		ftnlen)sizeof(real));
     }
     e_rsle();
-    s_rsle(&io___18);
+    s_rsle(&io___15);
     i__1 = inum_vals__;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	do_lio(&c__4, &c__1, (char *)&igrz1_1.indrz_igrz__[i__ - 1], (ftnlen)
@@ -338,34 +364,45 @@ EN_IGRZ", (ftnlen)53);
     cl__1.csta = 0;
     f_clos(&cl__1);
     return 0;
+L3001:
+    *ierror += 1000;
+/* Writing concatenation */
+    i__2[0] = 21, a__1[0] = "Error: can not open \"";
+    i__2[1] = 256, a__1[1] = fullpath;
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+/* Writing concatenation */
+    i__2[0] = 256, a__1[0] = errmsg;
+    i__2[1] = 1, a__1[1] = "\"";
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+    return 0;
 } /* load_igrz__ */
 
-/* Subroutine */ int load_ap__(char *filename, ftnlen filename_len)
+/* Subroutine */ int load_ap__(char *filename, integer *ierror, char *errmsg, 
+	ftnlen filename_len, ftnlen errmsg_len)
 {
     /* Format strings */
     static char fmt_1001[] = "(\002./../data/IonosphereData/\002,a)";
     static char fmt_1002[] = "(3i3,8i3,f5.1)";
 
     /* System generated locals */
-    integer i__1;
+    address a__1[2];
+    integer i__1, i__2[2];
     icilist ici__1;
     olist o__1;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    f_open(olist *), s_wsle(cilist *), do_lio(integer *, integer *, 
-	    char *, ftnlen), e_wsle();
-    /* Subroutine */ int s_stop(char *, ftnlen);
-    integer s_rsfe(cilist *), e_rsfe(), f_clos(cllist *);
+    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
+    /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
+    integer f_open(olist *), s_rsfe(cilist *), e_rsfe(), f_clos(cllist *);
+    /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     char fullpath[256];
     integer k, irec;
 
     /* Fortran I/O blocks */
-    static cilist io___21 = { 0, 6, 0, 0, 0 };
-    static cilist io___22 = { 0, 84, 1, fmt_1002, 0 };
+    static cilist io___18 = { 0, 84, 1, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -386,7 +423,9 @@ EN_IGRZ", (ftnlen)53);
     s_wsfi(&ici__1);
     do_fio(&c__1, filename, filename_len);
     e_wsfi();
-    o__1.oerr = 0;
+    *ierror = 0;
+    s_copy(errmsg, "", (ftnlen)256, (ftnlen)0);
+    o__1.oerr = 1;
     o__1.ounit = 84;
     o__1.ofnmlen = 256;
     o__1.ofnm = fullpath;
@@ -395,16 +434,19 @@ EN_IGRZ", (ftnlen)53);
     o__1.oacc = 0;
     o__1.ofm = 0;
     o__1.oblnk = 0;
-    f_open(&o__1);
+    i__1 = f_open(&o__1);
+    if (i__1 != 0) {
+	goto L4001;
+    }
     for (irec = 1; irec <= 40001; ++irec) {
 	if (irec > 40000) {
-	    s_wsle(&io___21);
-	    do_lio(&c__9, &c__1, "ERROR: load_ap: irec exceeds MAXRECORDS_AP",
-		     (ftnlen)42);
-	    e_wsle();
-	    s_stop("1", (ftnlen)1);
+/*                write(*,*) 'ERROR: load_ap: irec exceeds MAXRECORDS_AP' */
+/*                stop 1 */
+	    *ierror = 4;
+	    s_copy(errmsg, "ERROR: load_ap: irec exceeds MAXRECORDS_AP", (
+		    ftnlen)256, (ftnlen)42);
 	}
-	i__1 = s_rsfe(&io___22);
+	i__1 = s_rsfe(&io___18);
 	if (i__1 != 0) {
 	    goto L2001;
 	}
@@ -432,9 +474,21 @@ L2001:
     f_clos(&cl__1);
     ap_1.num_records_ap__ = irec - 1;
     return 0;
+L4001:
+    *ierror += 1000;
+/* Writing concatenation */
+    i__2[0] = 21, a__1[0] = "Error: can not open \"";
+    i__2[1] = 256, a__1[1] = fullpath;
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+/* Writing concatenation */
+    i__2[0] = 256, a__1[0] = errmsg;
+    i__2[1] = 1, a__1[1] = "\"";
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+    return 0;
 } /* load_ap__ */
 
-/* Subroutine */ int load_ccir__(integer *imonth)
+/* Subroutine */ int load_ccir__(integer *imonth, integer *ierror, char *
+	errmsg, ftnlen errmsg_len)
 {
     /* Format strings */
     static char fmt_1001[] = "(\002./../data/IonosphereData/ccir\002,i2,\002\
@@ -442,25 +496,24 @@ L2001:
     static char fmt_1002[] = "(1x,4e15.8)";
 
     /* System generated locals */
-    integer i__1;
+    address a__1[2];
+    integer i__1, i__2[2];
     icilist ici__1;
     olist o__1;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
-	    e_wsle();
-    /* Subroutine */ int s_stop(char *, ftnlen);
+    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
+    /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
     integer f_open(olist *), s_rsfe(cilist *), e_rsfe(), f_clos(cllist *);
+    /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     char fullpath[256];
     integer i__, j, k;
 
     /* Fortran I/O blocks */
-    static cilist io___25 = { 0, 6, 0, 0, 0 };
-    static cilist io___26 = { 0, 84, 0, fmt_1002, 0 };
+    static cilist io___21 = { 0, 84, 0, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -482,14 +535,17 @@ L2001:
     i__1 = *imonth + 10;
     do_fio(&c__1, (char *)&i__1, (ftnlen)sizeof(integer));
     e_wsfi();
+    *ierror = 0;
+    s_copy(errmsg, "", (ftnlen)256, (ftnlen)0);
     if (*imonth > 12) {
-	s_wsle(&io___25);
-	do_lio(&c__9, &c__1, "ERROR: load_ccir: imonth exceeds MAXFILES_CCIR",
-		 (ftnlen)46);
-	e_wsle();
-	s_stop("1", (ftnlen)1);
+/*              write(*,*) */
+/*     &                  'ERROR: load_ccir: imonth exceeds MAXFILES_CCIR' */
+/*              stop 1 */
+	*ierror = 5;
+	s_copy(errmsg, "ERROR: load_ccir: imonth exceeds MAXFILES_CCIR", (
+		ftnlen)256, (ftnlen)46);
     }
-    o__1.oerr = 0;
+    o__1.oerr = 1;
     o__1.ounit = 84;
     o__1.ofnmlen = 256;
     o__1.ofnm = fullpath;
@@ -498,8 +554,11 @@ L2001:
     o__1.oacc = 0;
     o__1.ofm = 0;
     o__1.oblnk = 0;
-    f_open(&o__1);
-    s_rsfe(&io___26);
+    i__1 = f_open(&o__1);
+    if (i__1 != 0) {
+	goto L5001;
+    }
+    s_rsfe(&io___21);
     for (k = 1; k <= 2; ++k) {
 	for (j = 1; j <= 76; ++j) {
 	    for (i__ = 1; i__ <= 13; ++i__) {
@@ -524,9 +583,21 @@ L2001:
     cl__1.csta = 0;
     f_clos(&cl__1);
     return 0;
+L5001:
+    *ierror += 1000;
+/* Writing concatenation */
+    i__2[0] = 21, a__1[0] = "Error: can not open \"";
+    i__2[1] = 256, a__1[1] = fullpath;
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+/* Writing concatenation */
+    i__2[0] = 256, a__1[0] = errmsg;
+    i__2[1] = 1, a__1[1] = "\"";
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+    return 0;
 } /* load_ccir__ */
 
-/* Subroutine */ int load_ursi__(integer *imonth)
+/* Subroutine */ int load_ursi__(integer *imonth, integer *ierror, char *
+	errmsg, ftnlen errmsg_len)
 {
     /* Format strings */
     static char fmt_1001[] = "(\002./../data/IonosphereData/ursi\002,i2,\002\
@@ -534,25 +605,24 @@ L2001:
     static char fmt_1002[] = "(1x,4e15.8)";
 
     /* System generated locals */
-    integer i__1;
+    address a__1[2];
+    integer i__1, i__2[2];
     icilist ici__1;
     olist o__1;
     cllist cl__1;
 
     /* Builtin functions */
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    s_wsle(cilist *), do_lio(integer *, integer *, char *, ftnlen), 
-	    e_wsle();
-    /* Subroutine */ int s_stop(char *, ftnlen);
+    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi();
+    /* Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
     integer f_open(olist *), s_rsfe(cilist *), e_rsfe(), f_clos(cllist *);
+    /* Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     char fullpath[256];
     integer i__, j, k;
 
     /* Fortran I/O blocks */
-    static cilist io___31 = { 0, 6, 0, 0, 0 };
-    static cilist io___32 = { 0, 84, 0, fmt_1002, 0 };
+    static cilist io___26 = { 0, 84, 0, fmt_1002, 0 };
 
 
 /*     Fortran include file storing common blocks and associated */
@@ -574,14 +644,17 @@ L2001:
     i__1 = *imonth + 10;
     do_fio(&c__1, (char *)&i__1, (ftnlen)sizeof(integer));
     e_wsfi();
+    *ierror = 0;
+    s_copy(errmsg, "", (ftnlen)256, (ftnlen)0);
     if (*imonth > 12) {
-	s_wsle(&io___31);
-	do_lio(&c__9, &c__1, "ERROR: load_ursi: imonth exceeds MAXFILES_URSI",
-		 (ftnlen)46);
-	e_wsle();
-	s_stop("1", (ftnlen)1);
+/*              write(*,*) */
+/*     &                  'ERROR: load_ursi: imonth exceeds MAXFILES_URSI' */
+/*              stop 1 */
+	*ierror = 6;
+	s_copy(errmsg, "ERROR: load_ursi: imonth exceeds MAXFILES_URSI", (
+		ftnlen)256, (ftnlen)46);
     }
-    o__1.oerr = 0;
+    o__1.oerr = 1;
     o__1.ounit = 84;
     o__1.ofnmlen = 256;
     o__1.ofnm = fullpath;
@@ -590,8 +663,11 @@ L2001:
     o__1.oacc = 0;
     o__1.ofm = 0;
     o__1.oblnk = 0;
-    f_open(&o__1);
-    s_rsfe(&io___32);
+    i__1 = f_open(&o__1);
+    if (i__1 != 0) {
+	goto L6001;
+    }
+    s_rsfe(&io___26);
     for (k = 1; k <= 2; ++k) {
 	for (j = 1; j <= 76; ++j) {
 	    for (i__ = 1; i__ <= 13; ++i__) {
@@ -607,14 +683,29 @@ L2001:
     cl__1.csta = 0;
     f_clos(&cl__1);
     return 0;
+L6001:
+    *ierror += 1000;
+/* Writing concatenation */
+    i__2[0] = 21, a__1[0] = "Error: can not open \"";
+    i__2[1] = 256, a__1[1] = fullpath;
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+/* Writing concatenation */
+    i__2[0] = 256, a__1[0] = errmsg;
+    i__2[1] = 1, a__1[1] = "\"";
+    s_cat(errmsg, a__1, i__2, &c__2, (ftnlen)256);
+    return 0;
 } /* load_ursi__ */
 
-/* Subroutine */ int load_all_files__()
+/* Subroutine */ int load_all_files__(integer *ierror, char *errmsg, ftnlen 
+	errmsg_len)
 {
-    extern /* Subroutine */ int load_shc__(integer *, char *, ftnlen);
+    extern /* Subroutine */ int load_shc__(integer *, char *, integer *, char 
+	    *, ftnlen, ftnlen);
     integer i__;
-    extern /* Subroutine */ int load_ccir__(integer *), load_igrz__(char *, 
-	    ftnlen), load_ursi__(integer *), load_ap__(char *, ftnlen);
+    extern /* Subroutine */ int load_ccir__(integer *, integer *, char *, 
+	    ftnlen), load_igrz__(char *, integer *, char *, ftnlen, ftnlen), 
+	    load_ursi__(integer *, integer *, char *, ftnlen), load_ap__(char 
+	    *, integer *, char *, ftnlen, ftnlen);
 
 /*     Fortran include file storing common blocks and associated */
 /*     parameters. */
@@ -622,15 +713,31 @@ L2001:
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
     for (i__ = 1; i__ <= 14; ++i__) {
-	load_shc__(&i__, shc2_1.filmod + (i__ - 1) * 12, (ftnlen)12);
+	load_shc__(&i__, shc2_1.filmod + (i__ - 1) * 12, ierror, errmsg, (
+		ftnlen)12, (ftnlen)256);
+	if (*ierror != 0) {
+	    return 0;
+	}
     }
-    load_igrz__("ig_rz.dat", (ftnlen)9);
-    load_ap__("ap.dat", (ftnlen)6);
-    for (i__ = 1; i__ <= 12; ++i__) {
-	load_ccir__(&i__);
+    load_igrz__("ig_rz.dat", ierror, errmsg, (ftnlen)9, (ftnlen)256);
+    if (*ierror != 0) {
+	return 0;
+    }
+    load_ap__("ap.dat", ierror, errmsg, (ftnlen)6, (ftnlen)256);
+    if (*ierror != 0) {
+	return 0;
     }
     for (i__ = 1; i__ <= 12; ++i__) {
-	load_ursi__(&i__);
+	load_ccir__(&i__, ierror, errmsg, (ftnlen)256);
+	if (*ierror != 0) {
+	    return 0;
+	}
+    }
+    for (i__ = 1; i__ <= 12; ++i__) {
+	load_ursi__(&i__, ierror, errmsg, (ftnlen)256);
+	if (*ierror != 0) {
+	    return 0;
+	}
     }
     return 0;
 } /* load_all_files__ */
