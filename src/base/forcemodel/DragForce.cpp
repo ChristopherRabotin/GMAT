@@ -2286,7 +2286,7 @@ bool DragForce::SupportsDerivative(Gmat::StateElementId id)
  */
 //------------------------------------------------------------------------------
 bool DragForce::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("DragForce setting start data for id = %d"
@@ -2301,6 +2301,7 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
          satCount = quantity;
          cartIndex = index;
          fillCartesian = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
          

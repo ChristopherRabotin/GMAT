@@ -4071,7 +4071,7 @@ Integer GmatBase::SetEstimationParameter(const std::string &param)
 // Integer GmatBase::GetEstimationParameterID(const std::string &param)
 //------------------------------------------------------------------------------
 /**
- * This method...
+ * This method builds the parameter ID used in the estimation subsystem
  *
  * @param param The text name of the estimation parameter
  *
@@ -4094,6 +4094,15 @@ Integer GmatBase::GetEstimationParameterID(const std::string &param)
    return id;
 }
 
+std::string GmatBase::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
+
+std::string GmatBase::GetParameterNameFromEstimationParameter(const std::string &parmName)
+{
+   return parmName;
+}
 
 //------------------------------------------------------------------------------
 // bool GmatBase::IsEstimationParameterValid(Integer id)
@@ -4718,6 +4727,26 @@ bool GmatBase::HasDynamicParameterSTM(Integer parameterId)
 Rmatrix* GmatBase::GetParameterSTM(Integer parameterId)
 {
    return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GmatBase::GetStmRowId(const Integer forRow)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID associated with a given row/column of the STM
+ *
+ * Note that since the STM is of the form d(r(t)) / d(r(t_o)), the numerator
+ * setting for each row matches the denominator setting for each column.
+ *
+ * @param forRow The associated row (for the numerator) or column (denominator)
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer GmatBase::GetStmRowId(const Integer forRow)
+{
+   return -1;
 }
 
 //------------------------------------------------------------------------------

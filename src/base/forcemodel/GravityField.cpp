@@ -540,41 +540,44 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
 #endif
          if (fillSTM)
          {
-            Real aTilde[36];
+            Integer stmSize = stmRowCount * stmRowCount;
+            Real *aTilde;
+            aTilde = new Real[stmSize];
+
             Integer element;
             // @todo Add the use of the GetAssociateIndex() method here to get index into state array
             //       (See assumption 1, above)
             if (n <= stmCount)
             {
-               Integer i6 = stmStart + n * 36;
+               Integer ix, i6 = stmStart + n * stmRowCount * stmRowCount;
 
                // Calculate A-tilde
-               aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
-               aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
-               aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-               aTilde[ 9] = aTilde[10] = aTilde[11] =
-               aTilde[12] = aTilde[13] = aTilde[14] =
-               aTilde[15] = aTilde[16] = aTilde[17] =
-               aTilde[21] = aTilde[22] = aTilde[23] =
-               aTilde[27] = aTilde[28] = aTilde[29] =
-               aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
-
-               // fill in the lower left quadrant with the calculated gradient values
-               aTilde[18] = gradnew(0,0);
-               aTilde[19] = gradnew(0,1);
-               aTilde[20] = gradnew(0,2);
-               aTilde[24] = gradnew(1,0);
-               aTilde[25] = gradnew(1,1);
-               aTilde[26] = gradnew(1,2);
-               aTilde[30] = gradnew(2,0);
-               aTilde[31] = gradnew(2,1);
-               aTilde[32] = gradnew(2,2);
-
-               for (Integer j = 0; j < 6; j++)
+               for (Integer i = 0; i < stmRowCount; ++i)
                {
-                  for (Integer k = 0; k < 6; k++)
+                  ix = i * stmRowCount;
+                  for (Integer j = 0; j < stmRowCount; ++j)
+                     aTilde[ix+j] = 0.0;
+               }
+
+               // fill in the lower left quadrant of the upper 6x6 with the calculated gradient values
+               ix = stmRowCount * 3;
+               aTilde[ix]   = gradnew(0,0);
+               aTilde[ix+1] = gradnew(0,1);
+               aTilde[ix+2] = gradnew(0,2);
+               ix = stmRowCount * 4;
+               aTilde[ix]   = gradnew(1,0);
+               aTilde[ix+1] = gradnew(1,1);
+               aTilde[ix+2] = gradnew(1,2);
+               ix = stmRowCount * 5;
+               aTilde[ix]   = gradnew(2,0);
+               aTilde[ix+1] = gradnew(2,1);
+               aTilde[ix+2] = gradnew(2,2);
+
+               for (Integer j = 0; j < stmRowCount; j++)
+               {
+                  for (Integer k = 0; k < stmRowCount; k++)
                   {
-                     element = j * 6 + k;
+                     element = j * stmRowCount + k;
 #ifdef DEBUG_DERIVATIVES
                      MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", (i6+element), aTilde[element]);
 #endif
@@ -582,45 +585,50 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                   }
                }
             }
+
+			delete [] aTilde;
          }
 
          if (fillAMatrix)
          {
-            Real aTilde[36];
+            Integer stmSize = stmRowCount * stmRowCount;
+            Real *aTilde;
+            aTilde = new Real[stmSize];
+
             Integer element;
             // @todo Add the use of the GetAssociateIndex() method here to get index into state array
             //       (See assumption 1, above)
             if (n <= aMatrixCount)
             {
-               Integer i6 = aMatrixStart + n * 36;
+               Integer ix, i6 = stmStart + n * stmRowCount * stmRowCount;
 
                // Calculate A-tilde
-               aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
-               aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
-               aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-               aTilde[ 9] = aTilde[10] = aTilde[11] =
-               aTilde[12] = aTilde[13] = aTilde[14] =
-               aTilde[15] = aTilde[16] = aTilde[17] =
-               aTilde[21] = aTilde[22] = aTilde[23] =
-               aTilde[27] = aTilde[28] = aTilde[29] =
-               aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
-
-               // fill in the lower left quadrant with the calculated gradient values
-               aTilde[18] = gradnew(0,0);
-               aTilde[19] = gradnew(0,1);
-               aTilde[20] = gradnew(0,2);
-               aTilde[24] = gradnew(1,0);
-               aTilde[25] = gradnew(1,1);
-               aTilde[26] = gradnew(1,2);
-               aTilde[30] = gradnew(2,0);
-               aTilde[31] = gradnew(2,1);
-               aTilde[32] = gradnew(2,2);
-
-               for (Integer j = 0; j < 6; j++)
+               for (Integer i = 0; i < stmRowCount; ++i)
                {
-                  for (Integer k = 0; k < 6; k++)
+                  ix = i * stmRowCount;
+                  for (Integer j = 0; j < stmRowCount; ++j)
+                     aTilde[ix+j] = 0.0;
+               }
+
+               // fill in the lower left quadrant of the upper 6x6 with the calculated gradient values
+               ix = stmRowCount * 3;
+               aTilde[ix]   = gradnew(0,0);
+               aTilde[ix+1] = gradnew(0,1);
+               aTilde[ix+2] = gradnew(0,2);
+               ix = stmRowCount * 4;
+               aTilde[ix]   = gradnew(1,0);
+               aTilde[ix+1] = gradnew(1,1);
+               aTilde[ix+2] = gradnew(1,2);
+               ix = stmRowCount * 5;
+               aTilde[ix]   = gradnew(2,0);
+               aTilde[ix+1] = gradnew(2,1);
+               aTilde[ix+2] = gradnew(2,2);
+
+               for (Integer j = 0; j < stmRowCount; j++)
+               {
+                  for (Integer k = 0; k < stmRowCount; k++)
                   {
-                     element = j * 6 + k;
+                     element = j * stmRowCount + k;
 #ifdef DEBUG_DERIVATIVES
                      MessageInterface::ShowMessage("------ deriv[%d] = %12.10f\n", (i6+element), aTilde[element]);
 #endif
@@ -628,6 +636,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder,
                   }
                }
             }
+
+			delete [] aTilde;
          }
 
       }  // end for
@@ -1045,12 +1055,14 @@ bool GravityField::SupportsDerivative(Gmat::StateElementId id)
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param sizeOfType For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of rows or columns in the STM
  *
  * @return true if the type is supported, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("GravityFiels setting start data for id = "
@@ -1073,6 +1085,7 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
          stmCount       = quantity;
          stmStart       = index;
          fillSTM        = true;
+         stmRowCount    = Integer(sqrt((Real)sizeOfType));
          retval         = true;
          break;
 
@@ -1080,6 +1093,7 @@ bool GravityField::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount   = quantity;
          aMatrixStart   = index;
          fillAMatrix    = true;
+         stmRowCount    = Integer(sqrt((Real)sizeOfType));
          retval         = true;
          break;
 

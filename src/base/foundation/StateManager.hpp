@@ -31,25 +31,47 @@
 // Example: information of CAN.ErrorModel1.Bias is stored in ListItem such as below
 struct GMAT_API ListItem
 {
-   std::string objectName;             // "ErrorModel1" is stored in objectName
-   std::string objectFullName;         // "CAN.ErrorModel1" is stored in objectFullName                                 // made changes by TUAN NGUYEN
-   std::string elementName;            // "Bias" is stored in elementName
-   std::string associateName;          // "" is stored in associateName. Currently, field "associateName" is not used
-   GmatBase*   object;                 // store ErrorModel1 GMAT object
+   /**
+    * Name of the object owning the parameter being listed
+    *
+    * For owned clone objects like error models, the model name
+    * (e.g. "ErrorModel1") is stored in objectName.
+    */
+   std::string objectName;
+   /// Full heirarchical name of the object (e.g. "CAN.ErrorModel1")
+   std::string objectFullName;
+   /// Name of the object field (e.g. "Bias") for the current item
+   std::string elementName;
+   /// Associate used to track cross correlations and referenced objects
+   std::string associateName;
+   /// The object holding the list item
+   GmatBase*   object;
    // Gmat::StateElementId
-   Integer     elementID;              // store estimaion parameter Id
-   Integer     subelement;             // index of each subelement of parameter 
-   Integer     parameterID;            // store parameter Id
+   /// The parameter ID for the list item
+   Integer     elementID;
+   /// index of each subelement of parameter
+   Integer     subelement;
+   /// Parameter Id for the current (sub)element
+   Integer     parameterID;
+   /// Type for the parameter
    Gmat::ParameterType
                parameterType;
-   Integer     rowIndex;      // Used for vectors and arrays
-   Integer     rowLength;     // Used for vectors and arrays
-   Integer     colIndex;      // Used for arrays
+   /// Row index used for the element, when in an array
+   Integer     rowIndex;
+   /// Length of the row for row or array data
+   Integer     rowLength;
+   /// Column index used for the element, when in an array
+   Integer     colIndex;
+   /// Number of elements stored for the item; for arrays, the number of columns (CHECK THIS)
    Integer     length;
-   bool        dynamicObjectProperty;  // Set if property forces object updates
-   bool        nonzeroInit;			   // Indicates initial value != 0.0
-   Real        initialValue;           // Non-zero initial value
-   bool        postDerivativeUpdate;   // true = Post-superposition step needed
+   /// true if property forces object updates
+   bool        dynamicObjectProperty;
+   /// Indicates initial value != 0.0
+   bool        nonzeroInit;
+   /// Non-zero initial value
+   Real        initialValue;
+   /// true = Post-superposition step needed
+   bool        postDerivativeUpdate;
 };
 
 
