@@ -279,21 +279,75 @@ bool CallPythonFunction::Execute()
    // send the in parameters
    std::string formatIn("");
    std::vector<void *> argIn;
+   // send the out parameters
    std::vector<void *> argOut;
 
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
    SendInParam(formatIn, argIn);
+
   // Next call Python function Wrapper
    PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+ 
+   /*------------------------------------------------------------------------------------*/
+   // Python Requirements on output paramerters from PythonInterfaceNotes_2015_01_14.txt
+   /*------------------------------------------------------------------------------------*/
+   /* GMAT will recieve Python data following these rules:
+
+   * Floats are passed to GMAT Variables
+   
+   * Ints are passed to GMAT Variables
+   
+   * Strings are passed to GMAT strings
+   * Lists are passed to GMAT arrays (and must be lists of floats) 
+   
+   * Lists of lists are passed to GMAT arrays (and must be lists of lists of floats,
+   * all of the same dimension)
+   
+   * Tuples must contain numerical data, and are passed to GMAT one-dimensional arrays
+   
+   * Tuples of tuples must contain numerical data, and are passed to GMAT 2D arrays
+  
+   ************************************************************************************/
    Real ret = 0;
-
-   if (pyRet && PyFloat_Check(pyRet))
+   if (pyRet)
    {
-      ret = PyFloat_AsDouble(pyRet);
-      argOut.push_back(&ret);
-
-      MessageInterface::ShowMessage("  ret:  %f\n", ret);
+      //if the Python module returns a float value without using []
+      if (PyFloat_Check(pyRet))
+      {
+         ret = PyFloat_AsDouble(pyRet);
+         argOut.push_back(&ret);
+         MessageInterface::ShowMessage("  ret:  %f\n", ret);
+      }
+      // else if the Python module returns a string
+#ifdef IS_PY3K
+      else if (PyUnicode_Check(pyRet))
+      {
+      }
+#else
+      else if (PyBytes_Check(pyRet))
+      {
+      }
+#endif
+      // else if the Python module returns a list of floats
+      else if (PyList_Check(pyRet))
+      {
+         for (unsigned int i = 0; i < mOutputList.size(); i++)
+         {
+            PyObject* pyItem = PyList_GetItem(pyRet, i);
+            if (PyFloat_Check(pyItem))
+            {
+               ret = PyFloat_AsDouble(pyItem);
+               MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", ret);
+               argOut.push_back(&ret);
+            }
+         }
+      }
+      // else if the Python module returns a tuple of numerical values
+      else if (PyTuple_Check(pyRet))
+      {
+      }
+         
       Py_DECREF(pyRet);
 
       // Fill out the parameter out
