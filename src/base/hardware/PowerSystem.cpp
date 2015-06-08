@@ -33,6 +33,7 @@
 //#define DEBUG_POWER_SYSTEM
 //#define DEBUG_POWER_SYSTEM_SET
 //#define DEBUG_DATE_FORMAT
+//#define DEBUG_POWER_SYSTEM_SC_SUN
 
 //---------------------------------
 // static data
@@ -855,25 +856,32 @@ Real PowerSystem::EpochToReal(const std::string &ep)
 //------------------------------------------------------------------------------
 Real PowerSystem::GetSunToSCDistance(Real atEpoch) const
 {
-   Real     *state     = (spacecraft->GetState()).GetState();
-   Rvector3 origState  = scOrigin->GetMJ2000Position(atEpoch);
-   Rvector3 sunState   = sun->GetMJ2000Position(atEpoch);
-   Rvector3 sunToOrig  = origState - sunState;
-   Rvector3 scToSun(state[0] + sunToOrig[0], state[1] + sunToOrig[1],
-                    state[2] + sunToOrig[2]);
+   Real     *state     = (spacecraft->GetState()).GetState(); // wrt Earth NOT wrt Origin
 
-   Real sunSCDist      = scToSun.GetMagnitude() /
+   Rvector3 sunState   = sun->GetMJ2000Position(atEpoch);     // wrt Earth
+//   Rvector3 origState  = scOrigin->GetMJ2000Position(atEpoch);// wrt Earth
+//   Rvector3 sunToOrig  = origState - sunState;
+//   Rvector3 scToSun(state[0] + sunToOrig[0], state[1] + sunToOrig[1],
+//                    state[2] + sunToOrig[2]);
+   Rvector3 sunToSC(state[0] - sunState[0], state[1] - sunState[1],
+                    state[2] - sunState[2]);
+
+//   Real sunSCDist      = scToSun.GetMagnitude() /
+   Real sunSCDist      = sunToSC.GetMagnitude() /
                          GmatPhysicalConstants::ASTRONOMICAL_UNIT;
-   #ifdef DEBUG_POWER_SYSTEM
-      MessageInterface::ShowMessage("In GetSunToSCDistance ...\n");
+   #ifdef DEBUG_POWER_SYSTEM_SC_SUN
+      MessageInterface::ShowMessage("In GetSunToSCDistance for Spacecraft %s...\n",
+            spacecraft->GetName().c_str());
       MessageInterface::ShowMessage("state      = %12.10f  %12.10f  %12.10f\n",
              state[0], state[1], state[2]);
-      MessageInterface::ShowMessage("origState  = %12.10f  %12.10f  %12.10f\n",
-            origState[0], origState[1], origState[2]);
+//      MessageInterface::ShowMessage("origState (%s)  = %12.10f  %12.10f  %12.10f\n",
+//            scOrigin->GetName().c_str(), origState[0], origState[1], origState[2]);
       MessageInterface::ShowMessage("sunState   = %12.10f  %12.10f  %12.10f\n",
              sunState[0], sunState[1], sunState[2]);
-      MessageInterface::ShowMessage("scToSun    = %12.10f  %12.10f  %12.10f\n",
-            scToSun[0], scToSun[1], scToSun[2]);
+//      MessageInterface::ShowMessage("scToSun    = %12.10f  %12.10f  %12.10f\n",
+//            scToSun[0], scToSun[1], scToSun[2]);
+      MessageInterface::ShowMessage("sunToSC    = %12.10f  %12.10f  %12.10f\n",
+            sunToSC[0], sunToSC[1], sunToSC[2]);
        MessageInterface::ShowMessage("sunSCDist = %12.10f\n", sunSCDist);
    #endif
    return sunSCDist;
