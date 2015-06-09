@@ -289,9 +289,9 @@ bool CallPythonFunction::Execute()
   // Next call Python function Wrapper
    PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
  
-   /*------------------------------------------------------------------------------------*/
-   // Python Requirements on output paramerters from PythonInterfaceNotes_2015_01_14.txt
-   /*------------------------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------------------*/
+   // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
+   /*-----------------------------------------------------------------------------------*/
    /* GMAT will recieve Python data following these rules:
 
    * Floats are passed to GMAT Variables
@@ -308,14 +308,14 @@ bool CallPythonFunction::Execute()
    
    * Tuples of tuples must contain numerical data, and are passed to GMAT 2D arrays
   
-   ************************************************************************************/
-   Real ret = 0;
+   ------------------------------------------------------------------------------------*/
    if (pyRet)
    {
       //if the Python module returns a float value without using []
       if (PyFloat_Check(pyRet))
       {
-         ret = PyFloat_AsDouble(pyRet);
+         Real *ret = new Real;
+         *ret = PyFloat_AsDouble(pyRet);
          argOut.push_back(&ret);
          MessageInterface::ShowMessage("  ret:  %f\n", ret);
       }
@@ -337,9 +337,10 @@ bool CallPythonFunction::Execute()
             PyObject* pyItem = PyList_GetItem(pyRet, i);
             if (PyFloat_Check(pyItem))
             {
-               ret = PyFloat_AsDouble(pyItem);
-               MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", ret);
-               argOut.push_back(&ret);
+               Real *ret = new Real;
+               *ret = PyFloat_AsDouble(pyItem);
+               MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", *ret);
+               argOut.push_back(ret);
             }
          }
       }
@@ -357,6 +358,11 @@ bool CallPythonFunction::Execute()
       std::vector<void *>::iterator it;
       for (it = argIn.begin(); it != argIn.end(); ++it)
           delete *it;
+
+      // clean up the argOut
+      std::vector<void *>::iterator itO;
+      for (itO = argOut.begin(); itO != argOut.end(); ++itO)
+         delete *itO;
    }
 
    MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
