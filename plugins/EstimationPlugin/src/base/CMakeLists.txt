@@ -28,7 +28,28 @@ ADD_DEFINITIONS("-DESTIMATION_EXPORTS")
 
 # ====================================================================
 # list of directories containing source/header files
-SET(PLUGIN_DIRS command estimator event factory hardware include measurement measurement/Ionosphere measurement/Troposphere measurementfile plugin trackingsystem)
+SET(PLUGIN_DIRS
+  adapter
+  command
+  datafilter
+  errormodel
+  estimator
+  event
+  factory
+  hardware
+  include
+  measurement
+  measurement/Ionosphere
+  measurement/Troposphere
+  measurementfile
+  measurementmodel
+  plugin
+  reporter
+  signal
+  tdmReader
+  trackingfile
+  trackingsystem
+  )
 
 # ====================================================================
 # Include F2C
@@ -37,8 +58,19 @@ INCLUDE_DIRECTORIES(${F2C_DIR})
 # ====================================================================
 # source files
 SET(PLUGIN_SRCS
+    adapter/DopplerAdapter.cpp
+    adapter/DSNRangeAdapter.cpp
+    adapter/GNDopplerAdapter.cpp
+    adapter/PointRangeRateAdapterKps.cpp
+    adapter/RangeAdapterKm.cpp
+    adapter/RangeRateAdapterKps.cpp
+    adapter/TrackingDataAdapter.cpp
     command/RunEstimator.cpp
     command/RunSimulator.cpp
+    datafilter/DataFilter.cpp
+    datafilter/StatisticAcceptFilter.cpp
+    datafilter/StatisticRejectFilter.cpp
+    errormodel/ErrorModel.cpp
     estimator/BatchEstimator.cpp
     estimator/BatchEstimatorInv.cpp
     estimator/BatchEstimatorSVD.cpp
@@ -54,14 +86,18 @@ SET(PLUGIN_SRCS
     event/EventException.cpp
     event/EventManager.cpp
     event/LightTimeCorrection.cpp
+    factory/AdapterFactory.cpp
     factory/DataFileFactory.cpp
+    factory/ErrorModelFactory.cpp
     factory/EstimationCommandFactory.cpp
+    factory/EstimationDataFilterFactory.cpp
     factory/EstimatorFactory.cpp
     factory/EstimatorHardwareFactory.cpp
     factory/EventFactory.cpp
     factory/MeasurementFactory.cpp
     factory/MeasurementModelFactory.cpp
     factory/ObTypeFactory.cpp
+    factory/SignalModelFactory.cpp
     factory/TrackingDataFactory.cpp
     factory/TrackingSystemFactory.cpp
     hardware/Antenna.cpp
@@ -78,10 +114,12 @@ SET(PLUGIN_SRCS
     measurement/MeasurementData.cpp
     measurement/MeasurementManager.cpp
     measurement/MeasurementModel.cpp
+    measurement/MeasurementModelBase.cpp
     measurement/MediaCorrection.cpp
     measurement/OpticalAngles.cpp
     measurement/OpticalAzEl.cpp
     measurement/PhysicalMeasurement.cpp
+    measurement/RandomNumber.cpp
     measurement/SnTwoWayRange.cpp
     measurement/TDRSSTwoWayRange.cpp
     measurement/TrackingData.cpp
@@ -92,9 +130,26 @@ SET(PLUGIN_SRCS
     measurementfile/DataFile.cpp
     measurementfile/DataFileAdapter.cpp
     measurementfile/GmatObType.cpp
-    measurementfile/ObType.cpp
+    measurementfile/GmatData.cpp
+    measurementfile/GmatObType.cpp
+    measurementfile/GmatODDopplerType.cpp
+    measurementfile/GmatODType.cpp
     measurementfile/ObservationData.cpp
+    measurementfile/ObType.cpp
+    measurementfile/RampTableData.cpp
+    measurementfile/RampTableType.cpp
+    measurementmodel/MeasureModel.cpp
     plugin/GmatPluginFunctions.cpp
+    reporter/ProgressReporter.cpp
+    signal/PhysicalSignal.cpp
+    signal/SignalBase.cpp
+    signal/SignalData.cpp
+    signal/SinglePointSignal.cpp
+    tdmReader/TdmErrorHandler.cpp
+    tdmReader/TdmObType.cpp
+    tdmReader/TdmReadWriter.cpp
+    trackingfile/TFSMagicNumbers.cpp
+    trackingfile/TrackingFileSet.cpp
     trackingsystem/DSNTrackingSystem.cpp
     trackingsystem/OpticalTrackingSystem.cpp
     trackingsystem/TDRSSTrackingSystem.cpp
@@ -113,6 +168,7 @@ if(WIN32)
     measurement/Ionosphere/irifun.c
     measurement/Ionosphere/irisub.c
     measurement/Ionosphere/iritec.c
+    measurement/Ionosphere/loadfiles.c
     )
 endif()
 

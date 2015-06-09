@@ -25,7 +25,7 @@
 
 #include "estimation_defs.hpp"
 #include "Factory.hpp"
-
+#include "MeasurementModel.hpp"
 
 class ESTIMATION_API AdapterFactory : public Factory
 {
