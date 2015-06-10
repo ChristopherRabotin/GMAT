@@ -372,6 +372,8 @@ bool CallPythonFunction::Execute()
 
 void CallPythonFunction::RunComplete()
 {
+	pythonIf->PyFinalize();
+
 	return;
 }
 
