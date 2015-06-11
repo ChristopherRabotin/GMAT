@@ -316,7 +316,7 @@ bool CallPythonFunction::Execute()
       {
          Real *ret = new Real;
          *ret = PyFloat_AsDouble(pyRet);
-         argOut.push_back(&ret);
+         argOut.push_back(ret);
          MessageInterface::ShowMessage("  ret:  %f\n", ret);
       }
       // else if the Python module returns a string
