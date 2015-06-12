@@ -91,11 +91,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\Gmat3rdparty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdparty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;PYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\Gmat3rdparty\python\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\..\Gmat3rdparty\python\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libGmatbase.lib;python34.lib%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
