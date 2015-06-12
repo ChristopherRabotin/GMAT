@@ -1158,24 +1158,23 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &
          
          StringArray parts = GmatStringUtil::SeparateBy(line, " ,", true);
          
-         if (parts[0] == "Global")
+         // Need to extract the type from the Create line or
+         // global object form the Global line
+         #if DBGLVL_FUNCTION_OUTPUT > 1
+         if (parts[0] == "Global" || parts[0] == "Create")
          {
-            #if DBGLVL_FUNCTION_OUTPUT > 1
             for (UnsignedInt i=0; i<parts.size(); i++)
                MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-            #endif
-            
+         }
+         #endif
+         
+         if (parts[0] == "Global")
+         {
             for (UnsignedInt j=1; j<parts.size(); j++)
-               globals.push_back(parts[j]);
-            
+               globals.push_back(parts[j]);            
          }
          else if (parts[0] == "Create")
          {
-            #if DBGLVL_FUNCTION_OUTPUT > 1
-            for (UnsignedInt i=0; i<parts.size(); i++)
-               MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-            #endif
-         
             for (UnsignedInt i=0; i<outputSize; i++)
             {
                for (UnsignedInt j=2; j<parts.size(); j++)
@@ -1245,6 +1244,12 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &
             outputWrapperTypes.push_back(Gmat::ARRAY_WT);
             outputRows.push_back(row);
             outputCols.push_back(col);
+         }
+         else
+         {
+            outputWrapperTypes.push_back(Gmat::OBJECT_WT);
+            outputRows.push_back(-1);
+            outputCols.push_back(-1);
          }
       }
    }

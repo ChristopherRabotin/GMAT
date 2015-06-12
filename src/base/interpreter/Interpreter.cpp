@@ -3865,8 +3865,63 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
       }
    }
    
-   std::string desc = lhs + " = " + rhs;
-   return CreateCommand("GMAT", desc, retFlag, inCmd);
+   bool createCallFunction = false;
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage("   Checking if rhs has a only function call\n");
+   #endif
+   // Check for math symbol and create CallFunction if only calling GMAT or MATLAB Function
+   // @note Currently MatlabFunction cannot be used in the math equation.
+   // The Validator will catch this later.
+   if (!GmatStringUtil::IsThereMathSymbol(rhs))
+   {
+      std::string funcName = GmatStringUtil::ParseFunctionName(rhs);
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
+      #endif
+      if (funcName != "")
+      {
+         GmatBase *func = FindObject(funcName);
+         #ifdef DEBUG_CREATE_COMMAND
+         MessageInterface::ShowMessage
+            ("   func = <%p>'%s'\n", func, func ? func->GetName().c_str() : "NULL");
+         #endif
+         if (func && func->IsOfType(Gmat::FUNCTION))
+         {
+            #ifdef DEBUG_CREATE_COMMAND
+            MessageInterface::ShowMessage
+               ("   Rhs has a Function call '%s()' so need to create "
+                "CallFunction command\n", funcName.c_str());
+            #endif
+            createCallFunction = true;
+         }
+         else
+         {
+            // Check FileManager if function is in the GmatFunction path
+            std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(funcName);
+            if (funcPath != "")
+               createCallFunction = true;
+            else
+            {
+               #ifdef DEBUG_CREATE_COMMAND
+               MessageInterface::ShowMessage
+                  ("   '%s' is not a function\n", funcName.c_str());
+               #endif
+            }
+         }
+      }
+   }
+   
+   if (createCallFunction)
+   {
+      // Create CallFunction command
+      std::string desc = "[" + lhs + "] = " + rhs;
+      return CreateCommand("CallFunction", desc, retFlag, inCmd);
+   }
+   else
+   {
+      std::string desc = lhs + " = " + rhs;
+      return CreateCommand("GMAT", desc, retFlag, inCmd);
+   }
 }
 
 
@@ -9983,19 +10038,26 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          }
          catch (BaseException &)
          {
-            InterpreterException ex
-               ("Invalid output argument list found '" + parts[0] +
-                "' in GmatFunction \"" + fName + ".\"\n"
-                "Syntax of a GmatFunction statement is:\n"
-                "function [out1, out2, ...] = FunctionName(in1, in2, in3, ...)");
-            // InterpreterException ex
-            //    ("Invalid output argument list found in the GmatFunction file \"" +
-            //     fPath + "\" referenced in \"" + fName + "\"\n");
-            HandleError(ex, false);
-            retval = false;
-            break;
+            // It is OK to have no [] for only one output parameter (see GMT-3325)
+            if (lhsParts.size() == 2 && GmatStringUtil::IsValidName(lhsParts[1]))
+            {
+               outputArgs.push_back(lhsParts[1]);
+            }
+            else
+            {
+               InterpreterException ex
+                  ("Invalid output argument list found '" + parts[0] +
+                   "' in GmatFunction \"" + fName + ".\"\n"
+                   "Syntax of a GmatFunction statement is:\n"
+                   "function [out1, out2, ...] = FunctionName(in1, in2, in3, ...)");
+               // InterpreterException ex
+               //    ("Invalid output argument list found in the GmatFunction file \"" +
+               //     fPath + "\" referenced in \"" + fName + "\"\n");
+               HandleError(ex, false);
+               retval = false;
+               break;
+            }
          }
-         
          
          if (outputArgs.size() == 0)
          {

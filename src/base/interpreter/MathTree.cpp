@@ -306,11 +306,13 @@ bool MathTree::Validate(std::string &msg)
             MessageInterface::ShowMessage("   wrapper type = %d\n", wrapperType);
             #endif
             
-            // Check for invalid wrapper type
+            // Check for invalid wrapper type (Allow Object type since GmatFunction can take
+            // Object and return some value. LOJ: 2015.06.05)
             if (wrapperType == Gmat::STRING_WT || wrapperType == Gmat::STRING_OBJECT_WT ||
-                wrapperType == Gmat::OBJECT_WT || wrapperType == Gmat::BOOLEAN_WT ||
+                //wrapperType == Gmat::OBJECT_WT ||
+                wrapperType == Gmat::BOOLEAN_WT ||
                 wrapperType == Gmat::ON_OFF_WT || wrapperType == Gmat::UNKNOWN_WRAPPER_TYPE)
-            {
+             {
                #ifdef DEBUG_VALIDATE
                MessageInterface::ShowMessage
                   ("   '%s' has invalid wrapper type = %d\n", (iter->first).c_str(), wrapperType);
@@ -328,8 +330,8 @@ bool MathTree::Validate(std::string &msg)
    {
       // Remove last , from the errmsg
       errmsg = GmatStringUtil::RemoveLastString(errmsg, ", ");
-      msg = errmsg + " in a math equation. If it is GMAT function call, currently "
-         "[] is required on the left hand side of equal sign";
+      msg = errmsg + " in a math equation. If it is a GMAT function call, currently "
+         "[] is required on the left hand side of equal sign.";
    }
    
    #ifdef DEBUG_VALIDATE

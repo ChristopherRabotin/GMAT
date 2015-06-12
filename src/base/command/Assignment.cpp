@@ -2291,6 +2291,11 @@ void Assignment::ClearMathTree()
 //------------------------------------------------------------------------------
 ElementWrapper* Assignment::RunMathTree()
 {
+   #ifdef DEBUG_EQUATION
+   MessageInterface::ShowMessage
+      ("Assignment::RunMathTree() entered, mathTree=<%p>\n", mathTree);
+   #endif
+   
    if (mathTree == NULL)
       return NULL;
    
@@ -2352,7 +2357,7 @@ ElementWrapper* Assignment::RunMathTree()
       
       switch (returnType)
       {
-      case Gmat::REAL_TYPE:
+         case Gmat::REAL_TYPE:
          {
             #ifdef DEBUG_ASSIGNMENT_EXEC
             MessageInterface::ShowMessage("   Calling topNode->Evaluate()\n");
@@ -2377,7 +2382,7 @@ ElementWrapper* Assignment::RunMathTree()
             outWrapper->SetReal(rval);
             break;
          }
-      case Gmat::RMATRIX_TYPE:
+         case Gmat::RMATRIX_TYPE:
          {
             #ifdef DEBUG_ASSIGNMENT_EXEC
             MessageInterface::ShowMessage("   Calling topNode->MatrixEvaluate()\n");
@@ -2410,11 +2415,21 @@ ElementWrapper* Assignment::RunMathTree()
             outWrapper->SetRefObject(outArray);
             break;
          }
-      default:
-         CommandException ce;
-         ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
-                       "equation is unknown", rhs.c_str(), lhs.c_str());
-         throw ce;
+         case Gmat::OBJECT_TYPE:
+         {
+            CommandException ce;
+            ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
+                          "equation is OBJECT and it will be implemented in a future",
+                          rhs.c_str(), lhs.c_str());
+            break;
+         }
+         default:
+         {
+            CommandException ce;
+            ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
+                          "equation is unknown", rhs.c_str(), lhs.c_str());
+            throw ce;
+         }
       }
    }
    else
@@ -2422,8 +2437,12 @@ ElementWrapper* Assignment::RunMathTree()
       throw CommandException("RHS is an equation, but top node is NULL\n");
    }
    
-   return outWrapper;
+   #ifdef DEBUG_EQUATION
+   MessageInterface::ShowMessage
+      ("Assignment::RunMathTree() returning, outWrapper=<%p>\n", outWrapper);
+   #endif
    
+   return outWrapper;
 }
 
 //------------------------------------------------------------------------------
