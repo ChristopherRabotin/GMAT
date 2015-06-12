@@ -96,7 +96,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\..\Gmat3rdparty\python\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libGmatbase.lib;python34.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libGmatbase.lib;python34.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
