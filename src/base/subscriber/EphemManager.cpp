@@ -18,7 +18,6 @@
  * NOTE: currently, the EphemManager will only handle SPK Orbit files.
  */
 //------------------------------------------------------------------------------
-
 #include <stdio.h>
 #include <sstream>
 #include "EphemManager.hpp"
@@ -38,10 +37,16 @@
 #endif
 
 //#define DEBUG_EPHEM_MANAGER
+//#define DEBUG_EPHEM_MANAGER_FILES
 //#define DEBUG_EM_COVERAGE
 //#define DEBUG_OCCULTATION
 //#define DEBUG_SPK_COVERAGE
 //#define DEBUG_CONTACT
+//#define DEBUG_EM_TIME_SPENT
+
+#ifdef DEBUG_EM_TIME_SPENT
+#include <time.h>
+#endif
 
 
 /**
@@ -243,7 +248,7 @@ bool EphemManager::RecordEphemerisData()
       // If it's already recording, continue
       if (!ephemFile)
       {
-         #ifdef DEBUG_EPHEM_MANAGER
+         #ifdef DEBUG_EPHEM_MANAGER_FILES
             MessageInterface::ShowMessage(
                   "In EphemManager::RecordEphemerisData for SC %s, setting up ephemFile\n",
                   theObj->GetName().c_str());
@@ -256,27 +261,29 @@ bool EphemManager::RecordEphemerisData()
 
          // Set up the name for the EphemerisFile, and the file name
          std::stringstream ss("");
-         // @todo - put these files in the tmp directory (platform-dependent)
          ss << "tmp_" << theObjName << "_" << ephemCount;
          ephemName = ss.str();
          ss << ".bsp";
          fileName = ss.str();
          ephemFile         = new EphemerisFile(ephemName);
-         #ifdef DEBUG_EPHEM_MANAGER
+         #ifdef DEBUG_EPHEM_MANAGER_FILES
             MessageInterface::ShowMessage(
                   "In EphemManager::RecordEphemerisData, ephemFile is at <%p> with name %s\n",
                   ephemFile, ephemName.c_str());
          #endif
 
-   //      // For now, put it in the Vehicle path
-   //      FileManager *fm = FileManager::Instance();
-   //      std::string spkPath = fm->GetPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
-   //      fileName = spkPath + fileName;
          // For now, put it in the Output path << this should be put into the
          // appropriate TMPDIR for the platform
-         FileManager *fm = FileManager::Instance();
-         std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-         fileName = spkPath + fileName;
+//         FileManager *fm = FileManager::Instance();
+//         std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
+//         fileName = spkPath + fileName;
+         std::string spkTmpPath = GmatFileUtil::GetTemporaryDirectory();
+         fileName = spkTmpPath + fileName;
+         #ifdef DEBUG_EPHEM_MANAGER_FILES
+            MessageInterface::ShowMessage(
+                  "In EphemManager::RecordEphemerisData,  fileName (full path) = %s\n",
+                  fileName.c_str());
+         #endif
 
          // Set up the EphemerisFile to write what we need - currently only SPK Orbit
          ephemFile->SetStringParameter("FileFormat", "SPK");
@@ -438,7 +445,7 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       std::string theNAIFIdStr = GmatStringUtil::ToString(theNAIFId);
 
       // window we want to search
-      SPICEDOUBLE_CELL(window, 2000);
+      SPICEDOUBLE_CELL(window, 200000);
       scard_c(0, &window);   // reset (empty) the cell
 
       GetCoverageWindow(&window, s, e, useEntireIntvl);
@@ -470,11 +477,19 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
          occultationType = SPICE_GF_ANNULR;
       }
 
-      SPICEDOUBLE_CELL(result, 2000);
+      SPICEDOUBLE_CELL(result, 200000);
       scard_c(0, &result);   // reset (empty) the result cell
 
+      #ifdef DEBUG_EM_TIME_SPENT
+      clock_t t = clock();
+      #endif
       gfoclt_c(occultationType, front, fshape, fframe, back, bshape, bframe, abcorr,
                obsrvr, step, &window, &result);
+      #ifdef DEBUG_EM_TIME_SPENT
+      Real timeSpent = (Real) (clock() - t);
+      MessageInterface::ShowMessage(" -------------- time in gfoclt_c call for %s is %12.10f (sec)\n",
+            occType.c_str(), (timeSpent / CLOCKS_PER_SEC));
+      #endif
       if (failed_c())
       {
          ConstSpiceChar option[] = "LONG";
@@ -554,7 +569,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 //   std::string theNAIFFrameStr = theSc->GetStringParameter(theSc->GetParameterID("SpiceFrameName"));
 
    // window we want to search
-   SPICEDOUBLE_CELL(window, 2000);
+   SPICEDOUBLE_CELL(window, 200000);
    scard_c(0, &window);   // reset (empty) the cell
 
    Integer obsID;
@@ -590,36 +605,80 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    SpiceInt       nintvls           = 1e6;
    SpiceDouble    step              = stepSize;
 
-   SPICEDOUBLE_CELL(result, 2000);
+   SPICEDOUBLE_CELL(result, 200000);
    scard_c(0, &result);   // reset (empty) the coverage cell
-   SPICEDOUBLE_CELL(obsResults, 2000);
+   SPICEDOUBLE_CELL(obsResults, 200000);
    scard_c(0, &obsResults);   // reset (empty) the coverage cell
-   SPICEDOUBLE_CELL(occultResults, 2000);
+   SPICEDOUBLE_CELL(occultResults, 200000);
    scard_c(0, &occultResults);   // reset (empty) the coverage cell
 
    gfposc_c(target, tframe, abcorr, obsrvr, crdsys, coord, relate,
             refval, adjust, step, nintvls, &window, &obsResults);
 
-   for (Integer ii = 0; ii < occultingBodyNames.size(); ii++ )
+   SpiceInt szObs       = wncard_c(&obsResults);
+   #ifdef DEBUG_CONTACT
+      Integer numObs       = (Integer) szObs;
+      MessageInterface::ShowMessage("--- size of obsResults = %d\n",
+            numObs);
+      for (Integer ii = 0; ii < numObs; ii++)
+      {
+         SpiceDouble sObs, eObs;
+         wnfetd_c(&obsResults, ii, &sObs, &eObs);
+         Real ssObs = spice->SpiceTimeToA1(sObs);
+         Real eeObs = spice->SpiceTimeToA1(eObs);
+         MessageInterface::ShowMessage("------  start %d = %12.10f\n",
+               ii, ssObs);
+         MessageInterface::ShowMessage("------  end %d   = %12.10f\n",
+               ii, eeObs);
+      }
+   #endif
+
+   if ((Integer) szObs > 0)
    {
-      CelestialBody *body = solarSys->GetBody(occultingBodyNames.at(ii));
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++ )
+      {
+         CelestialBody *body = solarSys->GetBody(occultingBodyNames.at(ii));
 
-      theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
-      Integer bodyNaifId = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
-      theFront = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
+         theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
+         Integer bodyNaifId = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
+         theFront = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
 
-      front  = theFront.c_str();
-      fframe = theFFrame.c_str();
+         front  = theFront.c_str();
+         fframe = theFFrame.c_str();
 
-//      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, tframe, abcorr,
-//               obsrvr, step, &window, &occultResults);
-      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, " ", abcorr,
-               obsrvr, step, &obsResults, &occultResults);
-      wndifd_c(&obsResults, &occultResults, &result);
+   //      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, tframe, abcorr,
+   //               obsrvr, step, &window, &occultResults);
+         gfoclt_c(occultationType, front, fshape, fframe, target, tshape, " ", abcorr,
+                  obsrvr, step, &obsResults, &occultResults);
+         #ifdef DEBUG_CONTACT
+            SpiceInt szOcc       = wncard_c(&occultResults);
+            Integer  numOcc      = (Integer) szOcc;
+            MessageInterface::ShowMessage("--- size of occultResults = %d\n",
+                  numOcc);
+            for (Integer ii = 0; ii < numOcc; ii++)
+            {
+               SpiceDouble sOcc, eOcc;
+               wnfetd_c(&occultResults, ii, &sOcc, &eOcc);
+               Real ssOcc = spice->SpiceTimeToA1(sOcc);
+               Real eeOcc = spice->SpiceTimeToA1(eOcc);
+               MessageInterface::ShowMessage("------  start %d = %12.10f\n",
+                     ii, ssOcc);
+               MessageInterface::ShowMessage("------  end %d   = %12.10f\n",
+                     ii, eeOcc);
+            }
+         #endif
+//         wndifd_c(&obsResults, &occultResults, &result);
+      }
    }
+   wndifd_c(&obsResults, &occultResults, &result);
+
 
    SpiceInt sz = wncard_c(&result);
    numIntervals = (Integer) sz;
+   #ifdef DEBUG_CONTACT
+      MessageInterface::ShowMessage("--- size of result = %d\n",
+            numIntervals);
+   #endif
 
    for (Integer ii = 0; ii < numIntervals; ii++)
    {
@@ -649,7 +708,7 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
       errmsg += theSc->GetName() + " without SPICE included in build!\n";
       throw SubscriberException(errmsg);
    #else
-      SPICEDOUBLE_CELL(coverWindow, 2000);
+      SPICEDOUBLE_CELL(coverWindow, 200000);
       scard_c(0, &coverWindow);   // reset (empty) the cell
 
       GetCoverageWindow(&coverWindow, s, e, useEntireIntvl, includeAll);
@@ -845,7 +904,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
 
    }
    // window we want to search
-   SPICEDOUBLE_CELL(window, 2000);
+   SPICEDOUBLE_CELL(window, 200000);
    scard_c(0, &window);   // reset (empty) the coverage cell
 
    if (useEntireIntvl)
@@ -857,7 +916,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       // create a window of the specified time span
       SpiceDouble s = spice->A1ToSpiceTime(s1);
       SpiceDouble e = spice->A1ToSpiceTime(e1);
-      SPICEDOUBLE_CELL(timespan, 2000);
+      SPICEDOUBLE_CELL(timespan, 200000);
       scard_c(0, &timespan);   // reset (empty) the coverage cell
       // Get the intersection of the timespan window and the coverage window
       wninsd_c(s, e, &timespan);
