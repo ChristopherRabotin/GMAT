@@ -59,6 +59,7 @@ using namespace GmatStringUtil;
 //#define DBGLVL_FUNCTION_OUTPUT 2
 //#define DEBUG_ABSOLUTE_PATH
 //#define DEBUG_FILE_CHECK
+//#define DEBUG_TMPDIR
 
 //------------------------------------------------------------------------------
 // std::string GetGmatPath()
@@ -114,7 +115,7 @@ std::string GmatFileUtil::GetGmatPath()
 // std::string GetPathSeparator()
 //------------------------------------------------------------------------------
 /**
- * @return path separator; "/" or "\\" dependends on the platform
+ * @return path separator; "/" or "\\" depends on the platform
  */
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::GetPathSeparator()
@@ -322,6 +323,47 @@ std::string GmatFileUtil::GetApplicationPath()
        "so just returning empty string\n");
    return "";
 #endif
+}
+
+//------------------------------------------------------------------------------
+// std::string GetTemporaryDirectory()
+//------------------------------------------------------------------------------
+/*
+ * @return  The temporary directory for the platform/user.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetTemporaryDirectory()
+{
+   // Need to handle the std thing here; this works on Linux:
+   using namespace std;
+
+   string tmpDir = "/tmp";     // linux
+
+   const char *tmpD = getenv("TMP");
+   if (tmpD)
+   {
+      tmpDir.assign(tmpD);     // Windows
+   }
+   else
+   {
+      const char *tmpD2 = getenv("TMPDIR");
+      if (tmpD2)
+      {
+         tmpDir.assign(tmpD2); // Mac
+      }
+   }
+   // Add the path separator if it's not there
+   unsigned int sz = tmpDir.length();
+   #ifdef DEBUG_TMPDIR
+      MessageInterface::ShowMessage("last character of temporary directory = %c\n", tmpDir[sz-1]);
+   #endif
+   if ((tmpDir[sz-1] != '\\') && (tmpDir[sz-1] != '/'))
+      tmpDir += GetPathSeparator();
+   #ifdef DEBUG_TMPDIR
+      MessageInterface::ShowMessage("Temporary directory = %s\n", tmpDir.c_str());
+   #endif
+   return tmpDir;
 }
 
 
