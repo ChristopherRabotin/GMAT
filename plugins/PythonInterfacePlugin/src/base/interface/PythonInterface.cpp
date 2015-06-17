@@ -24,7 +24,6 @@
 #include "MessageInterface.hpp"
 #include "InterfaceException.hpp"
 #include <iostream>
-#include <stdarg.h>
 
 PythonInterface* PythonInterface::instance = NULL;
 
@@ -100,10 +99,12 @@ bool PythonInterface::PyInitialize()
    // Initialize Python only once.
    if (!isPythonInitialized)
       Py_Initialize();
-   
+
    if (Py_IsInitialized())
    {
 	   isPythonInitialized = true;
+      MessageInterface::ShowMessage("Python is initialized/Loaded.\n");
+
 	   numPyCommands++;
    }
    else
@@ -134,6 +135,8 @@ bool PythonInterface::PyFinalize()
    if (--numPyCommands == 0)
    {
 	   Py_Finalize();
+      MessageInterface::ShowMessage("Python is Finalized/Unloaded.\n");
+
 	   isPythonInitialized = false;
    }
 	
@@ -181,7 +184,6 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 {
    wchar_t *s3K = new wchar_t[8192];
    char *destPath = new char[8192];
-   char *p = new char[128];
 
    // Platform path seperator delimiter
    PyPathSep();
@@ -199,8 +201,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
    StringArray::const_iterator it;
    for (it = path.begin(); it != path.end(); ++it)
    {
-      strcpy(p, it->c_str());
-      strcat(destPath, p);
+      strcat(destPath, it->c_str());
       strcat(destPath, plF);     
    }
  
@@ -214,7 +215,6 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 
    delete[] destPath;
    delete[] s3K;
-   delete[] p;
 
    MessageInterface::ShowMessage("  Leaving PyAddModulePath( ) \n");
 
@@ -247,8 +247,6 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    std::string msg;
 
- //  MessageInterface::ShowMessage("  First element of the argIn is %f \n", *(Real*)argIn.at(0));
-
 #ifdef IS_PY3K
    // create a python Unicode object from an UTF-8 encoded null terminated char buffer
    pyModule = PyUnicode_FromString(modName.c_str() );
@@ -256,8 +254,15 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    pyModule = PyBytes_FromString(modName.c_str() );
 #endif
   
+   if (!pyModule)
+   {
+      PyErrorMsg(pType, pValue, pTraceback, msg);
+
+      throw InterfaceException(" Python Exception Type: " + msg + "\n");
+   }
+ 
    // import the python module
-   pyPluginModule = PyImport_Import(pyModule);
+   pyPluginModule = PyImport_Import(pyModule);   
    Py_DECREF(pyModule);
 
    if (!pyPluginModule)
