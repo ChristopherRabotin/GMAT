@@ -25,12 +25,12 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_SET
-//#define DEBUG_FUNCTION_IN_OUT
+#define DEBUG_FUNCTION_IN_OUT
 //#define DEBUG_WRAPPER_CODE
-//#define DEBUG_FUNCTION_OBJ
-//#define DEBUG_AUTO_OBJ
-//#define DEBUG_OBJECT_MAP
-//#define DEBUG_FIND_OBJECT
+#define DEBUG_FUNCTION_OBJ
+#define DEBUG_AUTO_OBJ
+#define DEBUG_OBJECT_MAP
+#define DEBUG_FIND_OBJECT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
