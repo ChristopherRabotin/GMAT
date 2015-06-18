@@ -276,6 +276,8 @@ bool CallPythonFunction::Initialize()
 //------------------------------------------------------------------------------
 bool CallPythonFunction::Execute()
 {
+   MessageInterface::ShowMessage("  Calling CallPythonFunction::Execute()\n");
+
    // send the in parameters
    std::string formatIn("");
    std::vector<void *> argIn;
@@ -317,7 +319,7 @@ bool CallPythonFunction::Execute()
          Real *ret = new Real;
          *ret = PyFloat_AsDouble(pyRet);
          argOut.push_back(ret);
-         MessageInterface::ShowMessage("  ret:  %f\n", *ret);
+      //   MessageInterface::ShowMessage("  ret:  %f\n", *ret);
       }
       // else if the Python module returns a string
 #ifdef IS_PY3K
@@ -339,7 +341,7 @@ bool CallPythonFunction::Execute()
             {
                Real *ret = new Real;
                *ret = PyFloat_AsDouble(pyItem);
-               MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", *ret);
+            //   MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", *ret);
                argOut.push_back(ret);
             }
          }
@@ -365,13 +367,15 @@ bool CallPythonFunction::Execute()
          delete *itO;
    }
 
-   MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
+ //  MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
 
 	return true;
 }
 
 void CallPythonFunction::RunComplete()
 {
+   MessageInterface::ShowMessage("  Calling CallPythonFunction::RunComplete()\n");
+
    if (pythonIf != NULL)
    {
       pythonIf->PyFinalize();
