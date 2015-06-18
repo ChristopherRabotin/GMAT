@@ -102,9 +102,11 @@ bool PythonInterface::PyInitialize()
 
    if (Py_IsInitialized())
    {
-	   isPythonInitialized = true;
-      MessageInterface::ShowMessage("Python is initialized/Loaded.\n");
+      if (!isPythonInitialized)
+         MessageInterface::ShowMessage("Python is initialized/Loaded.\n");
 
+	   isPythonInitialized = true;
+      
 	   numPyCommands++;
    }
    else
@@ -130,6 +132,9 @@ bool PythonInterface::PyInitialize()
 //------------------------------------------------------------------------------
 bool PythonInterface::PyFinalize()
 {
+
+   MessageInterface::ShowMessage("numPyCommands is %d: \n", numPyCommands);
+
    // when all the Python commands in Gmat script is run and completed
    // close and finalize the Python.
    if (--numPyCommands == 0)
@@ -278,9 +283,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    if (!pyFuncAttr)
    {
-      PyErr_Print();
+      PyErrorMsg(pType, pValue, pTraceback, msg);
+   //   PyErr_Print();
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to fetch function within Python module. \n");
+      throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
 
    // Build the Python Tuple object based on the format string
@@ -316,10 +322,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    
    if (!pyTupleObj)
    {
-      PyErr_Print();
+      PyErrorMsg(pType, pValue, pTraceback, msg);
       Py_DECREF(pyFuncAttr);
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to build Python tuple. \n");
+      throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
 
    // Call the python function   
@@ -329,9 +335,9 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    if (!pyFunc)
    {
-      PyErr_Print();
+      PyErrorMsg(pType, pValue, pTraceback, msg);
 
-      throw InterfaceException(" An error occurred in PythonInterface::PyFunctionWrapper() to call Python function. \n");
+      throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
 
    return pyFunc;
@@ -372,8 +378,8 @@ void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pT
       }
    }
 
-   Py_DECREF(pType);
-   Py_DECREF(pValue);
-   Py_DECREF(pTraceback);
+//   Py_DECREF(pType);
+//   Py_DECREF(pValue);
+ //  Py_DECREF(pTraceback);
 
 }
