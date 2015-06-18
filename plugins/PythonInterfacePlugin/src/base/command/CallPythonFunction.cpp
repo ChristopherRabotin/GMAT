@@ -372,7 +372,11 @@ bool CallPythonFunction::Execute()
 
 void CallPythonFunction::RunComplete()
 {
-	pythonIf->PyFinalize();
+   if (pythonIf != NULL)
+   {
+      pythonIf->PyFinalize();
+      pythonIf = NULL;
+   }
 
 	return;
 }
