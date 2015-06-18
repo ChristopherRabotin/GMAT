@@ -2868,13 +2868,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       if (!isPythonFunction)
          func = CreateObject("GmatFunction", funcName);
       else
-      {
-         /// @todo: Decide if anything needs to happen here for Python functions
-         MessageInterface::ShowMessage("To o: Determine if code is needed in "
-               "Interface.cpp at the line generating this message\n");
-         func = NULL; //CreateObject("PythonFunction", funcName);
-
-      }
+         func = NULL;
    }
    
    // Set function pointer to CallFunction command
