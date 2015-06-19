@@ -417,6 +417,7 @@ SET(BASE_SRCS
     solarsys/ExponentialAtmosphere.cpp
     solarsys/JacchiaRobertsAtmosphere.cpp
     solarsys/LibrationPoint.cpp
+    solarsys/MediaCorrectionInterface.cpp
     solarsys/Moon.cpp
     solarsys/Msise90Atmosphere.cpp
     solarsys/PlanetaryEphemException.cpp
@@ -478,6 +479,7 @@ SET(BASE_SRCS
     util/FileManager.cpp
     util/FileUtil.cpp
     util/GmatGlobal.cpp
+    util/GmatTime.cpp
     util/GregorianDate.cpp
     util/LeapSecsFileReader.cpp
     util/Linear.cpp
