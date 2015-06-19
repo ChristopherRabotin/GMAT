@@ -132,9 +132,6 @@ bool PythonInterface::PyInitialize()
 //------------------------------------------------------------------------------
 bool PythonInterface::PyFinalize()
 {
-
-   MessageInterface::ShowMessage("numPyCommands is %d: \n", numPyCommands);
-
    // when all the Python commands in Gmat script is run and completed
    // close and finalize the Python.
    if (--numPyCommands == 0)
@@ -145,6 +142,8 @@ bool PythonInterface::PyFinalize()
 	   isPythonInitialized = false;
    }
 	
+   MessageInterface::ShowMessage("numPyCommands is %d: \n", numPyCommands);
+
    return isPythonInitialized;
 }
 
