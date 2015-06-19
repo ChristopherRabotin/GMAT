@@ -206,10 +206,10 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    areaID              (srp.areaID),
    estimatingCr        (srp.estimatingCr),
    crEpsilonID         (srp.crEpsilonID),
-   crEpsilonRow        (srp.crEpsilonRow)
+   crEpsilonRow        (srp.crEpsilonRow),
+   crInitial           (srp.crInitial)
 {
    parameterCount = SRPParamCount;
-
    shadowState = new ShadowState();
 }
 
@@ -257,6 +257,7 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       estimatingCr = srp.estimatingCr;
       crEpsilonID  = srp.crEpsilonID;
       crEpsilonRow = srp.crEpsilonRow;
+      crInitial    = srp.crInitial;
 
       if (shadowState)
       {
@@ -822,7 +823,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       throw ODEModelException(msg.str());
    }
 
-   Real distancefactor = 1.0, mag, sSquared;
+   Real distancefactor = 1.0, mag, magInitial, sSquared;
    bool inSunlight = true, inShadow = false;
 
    Real ep = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
@@ -950,6 +951,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             #endif
             mag = percentSun * fluxPressure * distancefactor /
                                 mass[i];
+
             if (srpModel == "Spherical")
             {
                #ifdef DEBUG_CR_UPDATES
@@ -1103,6 +1105,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                // All of the common terms for C_s
                mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
                                    (mass[i] * sunDistance);
+
                sSquared = sunDistance * sunDistance;
 
                // Math spec terms for SRP C submatrix of the A-matrix
@@ -1113,7 +1116,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
                // VX term for estimating Cr
                if (estimatingCr)
-                  aTilde[ix+crEpsilonRow] = deriv[i6 + 3];
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 3] * crInitial[i] / cr[i];
 
                ix = stmRowCount * 4;
                aTilde[ix]   = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
@@ -1122,7 +1125,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
                // VY term for estimating Cr
                if (estimatingCr)
-                  aTilde[ix+crEpsilonRow] = deriv[i6 + 4];
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 4] * crInitial[i] / cr[i];
 
                ix = stmRowCount * 5;
                aTilde[ix]   = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
@@ -1131,7 +1134,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
                // VZ term for estimating Cr
                if (estimatingCr)
-                  aTilde[ix+crEpsilonRow] = deriv[i6 + 5];
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 5] * crInitial[i] / cr[i];
 
             }
             else // SPADFile
@@ -1897,9 +1900,17 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
     if (parmName == "Cr")
     {
         if (parmNumber < cr.size())
-            cr[i] = parm;
+        {
+           cr[i] = parm;
+           if (crInitial[i] == -99999999.9999)
+              crInitial[i] = parm;
+        }
         else
-            cr.push_back(parm);
+        {
+           cr.push_back(parm);
+           crInitial.push_back(parm);
+        }
+
         if (parmID >= 0)
            crID = parmID;
     }
@@ -1999,7 +2010,10 @@ void SolarRadiationPressure::ClearSatelliteParameters(
    if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
    if ((parmName == "Cr") || (parmName == ""))
+   {
       cr.clear();
+      crInitial.clear();
+   }
    if ((parmName == "CrEpsilon") || (parmName == ""))
       crEpsilon.clear();
    if ((parmName == "SRPArea") || (parmName == ""))

@@ -234,6 +234,7 @@ protected:
    Integer crEpsilonID;
    Integer crEpsilonRow;
    std::vector<Real> crEpsilon;
+   std::vector<Real> crInitial;
 
 //   void     FindShadowState(bool &lit, bool &dark, Real *state);
 //   Real     ShadowFunction(Real *state);

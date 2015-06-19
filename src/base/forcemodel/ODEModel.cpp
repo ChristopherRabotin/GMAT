@@ -90,11 +90,14 @@
 //#define DEBUG_FORMATION_PROPERTIES
 //#define DEBUG_NAN_CONDITIONS
 //#define DEBUG_AMATRIX
+//#define DEBUG_RANGECHECK_TOGGLES
+
  
 //#define DUMP_ERROR_ESTIMATE_DATA
 //#define DUMP_TOTAL_DERIVATIVE
 //#define DUMP_INITIAL_STATE_DERIVATIVES_ONLY
 
+#define TEMPORARILY_DISABLE_CR_RANGE_CHECK
 
 
 //#ifndef DEBUG_MEMORY
@@ -261,6 +264,8 @@ ODEModel::ODEModel(const std::string &modelName, const std::string typeName) :
    coverageStartDetermined (false),
    forceMembersNotInitialized (true),
    satCount          (0),
+   constrainCd       (true),
+   constrainCr       (true),
    stateStart        (-1),
    stateEnd          (-1),
    cartStateSize     (0),
@@ -356,6 +361,8 @@ ODEModel::ODEModel(const ODEModel& fdf) :
    coverageStartDetermined    (fdf.coverageStartDetermined),
    forceMembersNotInitialized (true),
    satCount                   (0),
+   constrainCd                (fdf.constrainCd),
+   constrainCr                (fdf.constrainCr),
    stateStart                 (fdf.stateStart),
    stateEnd                   (fdf.stateEnd),
    cartStateSize              (0),
@@ -445,6 +452,9 @@ ODEModel& ODEModel::operator=(const ODEModel& fdf)
    state = NULL;
    psm   = NULL;
    satCount = 0;
+   constrainCd = fdf.constrainCd;
+   constrainCr = fdf.constrainCr;
+
    stateStart = fdf.stateStart;
    stateEnd   = fdf.stateEnd;
 
@@ -2225,7 +2235,7 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                
                // ... Coefficient of drag ...
                parm = sat->GetRealParameter(satIds[3]);
-               if (parm < 0)
+               if ((parm < 0) && constrainCd)
                   throw ODEModelException("Drag coefficient (Cd) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
                pm->SetSatelliteParameter(i, "Cd", parm, satIds[3]);
@@ -2246,9 +2256,11 @@ Integer ODEModel::SetupSpacecraftData(ObjectArray *sats, Integer i)
                
                // ... and Coefficient of reflectivity
                parm = sat->GetRealParameter(satIds[6]);
-               if (parm < 0)
+#ifndef TEMPORARILY_DISABLE_CR_RANGE_CHECK
+               if ((parm < 0) && constrainCr)
                   throw ODEModelException("SRP coefficient (Cr) is less than zero for Spacecraft \"" +
                                     sat->GetName() + "\"" +  " used by Forcemodel \"" + instanceName + "\"");
+#endif
                pm->SetSatelliteParameter(i, "Cr", parm, satIds[6]);
                
                ((SpaceObject*)sat)->ParametersHaveChanged(false);
@@ -2351,16 +2363,22 @@ Integer ODEModel::UpdateDynamicSpacecraftData(ObjectArray *sats, Integer i)
 
             // ... Cd ...
             parm = sat->GetRealParameter(satIds[3]);
-            if (parm < 0)
-               throw ODEModelException("Cr parameter unphysical on object " +
+            if ((parm < 0) && constrainCd)
+               throw ODEModelException("Cd parameter unphysical on object " +
                   sat->GetName());
             pm->SetSatelliteParameter(i, satIds[3], parm);
 
             // ... Cr ...
             parm = sat->GetRealParameter(satIds[6]);
-            if (parm < 0)
-               throw ODEModelException("Cd parameter unphysical on object " +
-                  sat->GetName());
+#ifndef TEMPORARILY_DISABLE_CR_RANGE_CHECK
+            if ((parm < 0) && constrainCr)
+            {
+               char addy[32];
+               sprintf(addy, "%p", this);
+               throw ODEModelException("Cr parameter unphysical on object " +
+                  sat->GetName() + " at address " + addy);
+            }
+#endif
             pm->SetSatelliteParameter(i, satIds[6], parm);
          }
          else if (sat->GetType() == Gmat::FORMATION)
@@ -3115,6 +3133,22 @@ bool ODEModel::TakeAction(const std::string &action, const std::string &actionDa
    {
       UpdateDynamicSpacecraftData(&stateObjects, 0);
       UpdateDynamicSpacecraftData(&stateObjects, 0);
+   }
+
+   if (action == "SolveForCd")
+   {
+      #ifdef DEBUG_RANGECHECK_TOGGLES
+         MessageInterface::ShowMessage("Cd on %p is no longer constrained\n", this);
+      #endif
+      constrainCd = false;
+   }
+
+   if (action == "SolveForCr")
+   {
+      #ifdef DEBUG_RANGECHECK_TOGGLES
+         MessageInterface::ShowMessage("Cr on %p is no longer constrained\n", this);
+      #endif
+      constrainCr = false;
    }
 
    return true;

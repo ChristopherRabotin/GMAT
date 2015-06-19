@@ -907,6 +907,10 @@ void RunEstimator::PrepareToEstimate()
 
    estimationOffset = fm[0]->GetTime();
 
+   // @todo Temporary -- Turn off range check for Cr.  This needs to be made conditional,
+   // and only active is Cr is a solve-for
+   fm[0]->TakeAction("SolveForCr");
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(
             "Exit RunEstimator::PrepareToEstimate()\n");
