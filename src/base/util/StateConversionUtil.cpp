@@ -5765,6 +5765,96 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
 
 
 //------------------------------------------------------------------------------
+// derivative conversion methods
+//------------------------------------------------------------------------------
+Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
+   Real mu, const Rvector6 &state, AnomalyType anomalyType)
+{
+   Rmatrix66 m = KeplerianToCartesianDerivativeConversion(mu, state, anomalyType);
+   static Rmatrix66 result = m.Inverse();
+
+   return result;
+}
+
+
+Real StateConversionUtil::CalculateEccentricAnomaly(Real e, Real M)
+{
+   Real tolerance = 1.0e-12;
+   Real E, newE, D, f;
+   
+   newE = M + e*Sin(M);
+   E = newE + 1;
+   while (Abs(newE - E) > tolerance)
+   {
+      E = newE;
+      f = E - e*Sin(E) - M;
+      D = 1 - e*Cos(E - 0.5*f);
+      newE = E - f/D;
+   }
+
+   return newE;
+}
+
+Rmatrix66 StateConversionUtil::KeplerianToCartesianDerivativeConversion(
+   Real mu, const Rvector6 &state, AnomalyType anomalyType)
+{
+   static Rmatrix66 result;
+   
+   
+   // Specify a,e,M, Ohm, omega, i
+   Real a, e, M, Ohm, omega, iAngle;
+   a = state(0);
+   e = state(1);
+   M = state(2);
+   Ohm = state(3);
+   omega = state(4);
+   iAngle = state(5);
+
+   // Specify E from e and M
+   Real E;         // eccentric anomaly
+   E = CalculateEccentricAnomaly(e,M);
+
+   // Specify Rp:
+   Rvector3 rpVec;
+   rpVec[0] = Cos(E) - e;
+   rpVec[1] = Sin(E)*Sqrt(1 - e*e);
+   rpVec[2] = 0;
+   rpVec = a*rpVec;
+
+   Rvector3 rpdotVec;
+   rpdotVec[0] = -Sin(E);
+   rpdotVec[1] = Cos(E)*Sqrt(1 - e*e);
+   rpdotVec[2] = 0;
+   rpdotVec = (Sqrt(mu/a)/(1 - e*Cos(E))) * rpdotVec;
+   Rvector6 RpVec;
+   RpVec.Set(rpVec[0], rpVec[1], rpVec[2], rpdotVec[0], rpdotVec[1], rpdotVec[2]);
+
+   // Specify P
+   Rmatrix33 P;
+   P(0,0) = Cos(Ohm)*Cos(omega) - Sin(Ohm)*Cos(iAngle)*Sin(omega);
+   P(0,1) = -Cos(Ohm)*Sin(omega) - Sin(Ohm)*Cos(iAngle)*Cos(omega);
+   P(0,2) = Sin(Ohm)*Sin(iAngle);
+   P(1,0) = Sin(Ohm)*Cos(omega) + Cos(Ohm)*Cos(iAngle)*Sin(omega);
+   P(1,1) = -Sin(Ohm)*Sin(omega) + Cos(Ohm)*Cos(iAngle)*Cos(omega);
+   P(1,2) = -Cos(Ohm)*Sin(iAngle);
+   P(2,0) = Sin(iAngle)*Sin(omega);
+   P(2,1) = Sin(iAngle)*Cos(omega);
+   P(2,2) = Cos(iAngle);
+
+   // Specify rVec and rdotVec
+   Rvector3 rVec = P * rpVec;
+   Rvector3 rdotVec = P * rpdotVec;
+
+   //// Derivative of Rp w.r.t. a:
+   //Rvector6 dRpda, dRpde;
+   //dRpda.Set(Rp[0]/a, Rp[1]/a, 0, -Rp[3]/(2*a), -Rp[4]/(2*a), 0);
+   //dRpde.Set(-a-Rp[1]*Rp[1]/ rVec.Norm()/(1-e*e), Rp[0]*Rp[1]/rVec.Norm()/(1-e*e), 0, 
+   //   - a*Rp[1]/ rVec.Norm()/(1-e*e), 0, 0, 0);
+
+   return result;
+}
+
+//------------------------------------------------------------------------------
 // other methods
 //------------------------------------------------------------------------------
 
