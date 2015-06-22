@@ -1396,6 +1396,10 @@ void BatchEstimator::RunComplete()
 //------------------------------------------------------------------------------
 std::string BatchEstimator::GetProgressString()
 {
+   Real taiMjdEpoch, utcMjdEpoch;
+   std::string utcEpoch;
+   Rmatrix finalCovariance;
+
    StringArray::iterator current;
 
    std::stringstream progress;
@@ -1431,7 +1435,15 @@ std::string BatchEstimator::GetProgressString()
                {
                   char s[100];
                   sprintf(&s[0], "%22.12lf", estimationEpoch);
-                  progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+                  //progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+                  progress << "   Estimation Epoch:\n";
+                  progress << "   " << s << " A.1 modified Julian\n";
+                  taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+                  utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+                  sprintf(&s[0], "%22.12lf", taiMjdEpoch);
+                  progress << "   " << s << " TAI modified Julian\n";
+                  utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+                  progress << "   " << utcEpoch << " UTCG\n";
                }
 
                GetEstimationState(outputEstimationState);
@@ -1494,7 +1506,16 @@ std::string BatchEstimator::GetProgressString()
                      << "\n\nCurrent estimated state:\n";
             char s[100];
             sprintf(&s[0], "%22.12lf", estimationEpoch);
-            progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+            //progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+            taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+            utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+            utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+            progress << "   Estimation Epoch:\n";
+            progress << "   " << s << " A.1 modified Julian\n";
+            sprintf(&s[0], "%22.12lf", taiMjdEpoch);
+            progress << "   " << s << " TAI modified Julian\n";
+            progress << "   " << utcEpoch << " UTCG\n";
+
 
             GetEstimationState(outputEstimationState);
 
@@ -1577,7 +1598,15 @@ std::string BatchEstimator::GetProgressString()
             {
                char s[100];
                sprintf(&s[0],"%22.12lf", estimationEpoch);
-               progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+               //progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+               progress << "   Estimation Epoch:\n";
+               progress << "   " << s << " A.1 modified Julian\n";
+               taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+               utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+               sprintf(&s[0], "%22.12lf", taiMjdEpoch);
+               progress << "   " << s << " TAI modified Julian\n";
+               utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+               progress << "   " << utcEpoch << " UTCG\n";
             }
 
             GetEstimationState(outputEstimationState);
@@ -1591,17 +1620,6 @@ std::string BatchEstimator::GetProgressString()
                      << outputEstimationState[i] << "\n";
             }
 
-            { // Switch statement scoping
-               Rmatrix finalCovariance = information.Inverse();
-               progress << "\nFinal Covariance Matrix:\n\n";
-               for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-               {
-                  for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
-                     progress << "   " << finalCovariance(i, j);
-                  progress << "\n";
-               }
-            }
-
             if (textFileMode == "Verbose")
             {
                progress << "\n   WeightedRMS residuals for previous iteration: "
@@ -1611,6 +1629,27 @@ std::string BatchEstimator::GetProgressString()
                progress << "\n   BestRMS residuals for this iteration: "
                      << bestResidualRMS << "\n\n";
             }
+
+            finalCovariance = information.Inverse();
+
+            progress.precision(12);
+            progress.scientific;
+            progress << "\nFinal Covariance Matrix:\n\n";
+            for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+            {
+               for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+                  progress << "   " << finalCovariance(i, j);
+               progress << "\n";
+            }
+
+            progress << "\nFinal Correlation Matrix:\n\n";
+            for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+            {
+               for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+                  progress << "   " << finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
+               progress << "\n";
+            }
+            progress.fixed;
 
             progress << "\n****************************"
                      << "****************************\n\n"
@@ -1873,6 +1912,9 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 
 void BatchEstimator::WriteConclusion()
 {
+   Real taiMjdEpoch, utcMjdEpoch;
+   std::string utcEpoch;
+
    GmatState outputEstimationState;
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
@@ -1908,9 +1950,18 @@ void BatchEstimator::WriteConclusion()
       textFile << "   Estimation Epoch (" << estEpochFormat
                << "): " << estEpoch << "\n";
    else
-      textFile << "   Estimation Epoch (A.1 Mod. Julian): "
-               << estimationEpoch << "\n";
-
+   {
+      //textFile << "   Estimation Epoch (A.1 Mod. Julian): "
+      //         << estimationEpoch << "\n";
+      char s[100];
+      textFile << "   Estimation Epoch:\n"
+               << "   " << estimationEpoch <<  " A.1 Mod. Julian\n";
+      taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+      utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
+      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+      textFile << "   " << utcEpoch << " UTCG\n";
+   }
    
    /// 3. Write final state
    GetEstimationState(outputEstimationState);
@@ -1940,25 +1991,82 @@ void BatchEstimator::WriteConclusion()
    textFile << "\n";
 
 
-   /// 4. Write final coveriance matrix 
-   Rmatrix finalCovariance = information.Inverse();
-   textFile << "\nFinal Covariance Matrix:\n";
-   textFile.precision(12);
-   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-   {
-      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
-         textFile << "   " << finalCovariance(i, j);
-      textFile << "\n";
-   }
-
-
    /// 5. Write previous RMS, current RMS, and the best RMS
+   textFile.precision(12);
    textFile << "\n   WeightedRMS residuals for previous iteration: "
             << oldResidualRMS;
    textFile << "\n   WeightedRMS residuals for this iteration:     "
             << newResidualRMS ;
    textFile << "\n   BestRMS residuals for this iteration: "
             << bestResidualRMS << "\n\n";
+
+   /// 4. Write covariance matrix and correlation matrix
+   /// 4.1. Write a table containing a list of solve-fors an their index
+   // @todo: add code to do section 4.1. here
+   textFile << "Solve-for variables and their index used in covariance and correlation matrixes:\n";
+   textFile << " Index      Solve-for's Name\n";
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      textFile << "    " << i+1 << "     ";
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+          ((*map)[i]->elementName == "Bias"))
+      {
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         textFile << mm->GetStringParameter("Type") << " ";
+         for( UnsignedInt j=0; j < sa.size(); ++j)
+            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+         textFile << (*map)[i]->subelement;
+      }
+      else
+      {
+         //textFile << (*map)[i]->objectName << "."
+         //         << (*map)[i]->elementName << "."
+         //         << (*map)[i]->subelement;
+         textFile << GetElementFullName((*map)[i], false);
+      }
+      textFile << "\n";
+   }
+   textFile << "\n\n";
+
+   /// 4.2. Write final covariance and correlation matrix 
+   Rmatrix finalCovariance = information.Inverse();
+   
+   textFile << std::scientific;
+
+   textFile << "Covariance Matrix:\n";
+   textFile << "---------------------------------------------------------------------------------\n";
+   textFile << " Row Index |                     Column Index\n";
+   textFile << "           |---------------------------------------------------------------------\n";
+   textFile << "           |  ";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+      textFile << i+1 << "                     ";
+   textFile << "\n---------------------------------------------------------------------------------\n";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+   {
+      textFile << "  " << i+1 << "      ";
+      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+         textFile << "   " << finalCovariance(i, j);
+      textFile << "\n";
+   }
+
+   textFile << "\nCorrelation Matrix:\n";
+   textFile << "---------------------------------------------------------------------------------\n";
+   textFile << " Row Index |                     Column Index\n";
+   textFile << "           |---------------------------------------------------------------------\n";
+   textFile << "           |  ";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+      textFile << i+1 << "                     ";
+   textFile << "\n---------------------------------------------------------------------------------\n";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+   {
+      textFile << "  " << i+1 << "      ";
+      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+         textFile << "   " << finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
+      textFile << "\n";
+   }
+
+   textFile << std::fixed;
 
    textFile << "\n********************************************************\n\n";
    textFile.flush();
@@ -1968,7 +2076,9 @@ void BatchEstimator::WriteConclusion()
 
 void BatchEstimator::WriteHeader()
 {
-   
+   Real taiMjdEpoch, utcMjdEpoch;
+   std::string utcEpoch;
+
    GmatState outputEstimationState;
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
@@ -1986,8 +2096,18 @@ void BatchEstimator::WriteHeader()
       textFile << "   Estimation Epoch (" << estEpochFormat
                << "): " << estEpoch << "\n";
    else
-      textFile << "   Estimation Epoch (A.1 Mod. Julian): "
-               << estimationEpoch << "\n";
+   {
+      //textFile << "   Estimation Epoch (A.1 Mod. Julian): "
+      //         << estimationEpoch << "\n";
+      char s[100];
+      textFile << "   Estimation Epoch:\n"
+               << "   " << estimationEpoch <<  " A.1 Mod. Julian\n";
+      taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+      utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
+      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+      textFile << "   " << utcEpoch << " UTCG\n";
+   }
 
    // Convert state to participants' coordinate system:
    GetEstimationState(outputEstimationState);
