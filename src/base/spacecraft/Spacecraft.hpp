@@ -629,6 +629,10 @@ protected:
    Real              cdEpsilon;
    /// Epsilon value used when solving for the Cr parameter
    Real              crEpsilon;
+   /// Internal flag used to relax constraint for Cd
+   bool              constrainCd;
+   /// Internal flag used to relax constraint for Cr
+   bool              constrainCr;
 
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;

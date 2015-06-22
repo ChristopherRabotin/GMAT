@@ -386,7 +386,9 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    ephemMgr             (NULL),
    includeCartesianState(0),
    cdEpsilon            (0.0),
-   crEpsilon            (0.0)
+   crEpsilon            (0.0),
+   constrainCd          (true),
+   constrainCr          (true)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -646,7 +648,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    includeCartesianState(a.includeCartesianState),
    solveforNames        (a.solveforNames),                        // made changes by TUAN NGUYEN
    cdEpsilon            (a.cdEpsilon),
-   crEpsilon            (a.crEpsilon)
+   crEpsilon            (a.crEpsilon),
+   constrainCd          (a.constrainCd),
+   constrainCr          (a.constrainCr)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -865,6 +869,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
    cdEpsilon          = a.cdEpsilon;
    crEpsilon          = a.crEpsilon;
+   constrainCd        = a.constrainCd;
+   constrainCr        = a.constrainCr;
+
 
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -3155,14 +3162,16 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
    if (id == CD_EPSILON)
    {
       cdEpsilon = value;
-      MessageInterface::ShowMessage("Setting Cd_epsilon to %.12lf\n", crEpsilon);
+      // Turn off strict constraint because we are estimating
+      constrainCd = false;
       return cdEpsilon;
    }
 
    if (id == CR_EPSILON)
    {
       crEpsilon = value;
-      MessageInterface::ShowMessage("Setting Cr_epsilon to %.12lf\n", crEpsilon);
+      // Turn off strict constraint because we are estimating
+      constrainCr = false;
       return crEpsilon;
    }
 
@@ -3298,10 +3307,13 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    }
    if (label == "Cr")
    {
-      if ((value >= 0.0) && (value <= 2.0))
+      if (((value >= 0.0) && (value <= 2.0)) || (constrainCr == false))
       {
          reflectCoeff = value;
          crEpsilon = 0.0;
+         if ((value < 0.0) || (value > 2.0))
+            MessageInterface::ShowMessage("Warning: The Cr value %lf is "
+                  "outside of the expected range of 0.0 <= Cr <= 2.0\n", value);
       }
       else
       {
@@ -3317,11 +3329,13 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    if (label == "Cd_Epsilon")
    {
       cdEpsilon = value;
+      constrainCd = false;
       return cdEpsilon;
    }
    if (label == "Cr_Epsilon")
    {
       crEpsilon = value;
+      constrainCr = false;
       return crEpsilon;
    }
 

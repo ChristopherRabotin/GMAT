@@ -653,7 +653,10 @@ bool RunEstimator::Execute()
 
    // Respond to the state in the state machine
    Solver::SolverState state = theEstimator->GetState();
-
+   
+   // Set run state to SOLVING here (for fixing GMT-5101 LOJ: 2015.06.16)
+   publisher->SetRunState(Gmat::SOLVING);
+   
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
    #endif
@@ -735,6 +738,9 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): FINISHED state\n");
          #endif
+
+         // Set run state to SOLVEDPASS here (for fixing GMT-5101 LOJ: 2015.06.16)
+         publisher->SetRunState(Gmat::SOLVEDPASS);
 
          // Why is Finalize commented out???  There is no command summary because of this change.
 //         Finalize();
@@ -906,6 +912,10 @@ void RunEstimator::PrepareToEstimate()
    }
 
    estimationOffset = fm[0]->GetTime();
+
+   // @todo Temporary -- Turn off range check for Cr.  This needs to be made conditional,
+   // and only active is Cr is a solve-for
+   fm[0]->TakeAction("SolveForCr");
 
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(
