@@ -52,12 +52,12 @@ PLUGIN                 = ../plugins/libDataInterface
 PLUGIN                 = ../plugins/libProductionPropagators
 
 # Alpha plugins
-PLUGIN                = ./libCInterface
-PLUGIN                = ../plugins/libExtraPropagators
-PLUGIN                = ../plugins/libGmatEstimation
-PLUGIN                = ../plugins/libGeometricMeasurements
-PLUGIN                = ../plugins/libGmatFunction
-PLUGIN                = ../plugins/libSaveCommand
+#PLUGIN                = ./libCInterface
+#PLUGIN                = ../plugins/libExtraPropagators
+#PLUGIN                = ../plugins/libGmatEstimation
+#PLUGIN                = ../plugins/libGeometricMeasurements
+#PLUGIN                = ../plugins/libGmatFunction
+#PLUGIN                = ../plugins/libSaveCommand
 
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
@@ -65,7 +65,6 @@ PLUGIN                 = ../plugins/proprietary/libMsise86
 PLUGIN                 = ../plugins/proprietary/libNewParameters
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ../plugins/proprietary/libSNOptimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
@@ -88,13 +87,9 @@ MEASUREMENT_PATH       = OUTPUT_PATH/
 VEHICLE_EPHEM_PATH     = OUTPUT_PATH/
 #-----------------------------------------------------------
 GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
-GMAT_FUNCTION_PATH     = C:/Projects/GMAT/RoutineTests/GmatFunctions
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
-MATLAB_FUNCTION_PATH   = C:/Projects/GMAT/RoutineTests/MatlabFunctions
-GMAT_FUNCTION_PATH     = C:\Projects\JazzScriptTest\input\Functions\MonteCarlo
-GMAT_FUNCTION_PATH     = C:\Projects\JazzScriptTest\input\Functions\GMAT
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------
@@ -153,7 +148,6 @@ NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
 PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
 #-----------------------------------------------------------
 BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
-RQ36_3D_MODEL_FILE     = BODY_MODEL_PATH/RQ36.3ds
 #-----------------------------------------------------------
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
@@ -175,10 +169,10 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #-----------------------------------------------------------
 # Debug options
 #-----------------------------------------------------------
-RUN_MODE              = TESTING
+#RUN_MODE              = TESTING
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
-#DEBUG_PARAMETERS      = ON
+#DEBUG_PARAMETERS      = OFF
 #DEBUG_FILE_PATH       = ON
 #HIDE_SAVEMISSION      = TRUE
-PLOT_MODE             = TILE
+#PLOT_MODE             = TILE
