@@ -208,7 +208,7 @@ void EditorPanel::LoadData()
    
    #ifdef DEBUG_EDITORPANEL_LOAD
    MessageInterface::ShowMessage
-      ("   '%s' %sexist\n", mScriptFilename.c_str(), mFileExists ? "" : "does not ");
+      ("   '%s' %sexist\n", mScriptFilename.WX_TO_C_STRING, mFileExists ? "" : "does not ");
    #endif
    
    theSaveAsButton->Enable(true);
