@@ -2469,12 +2469,12 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    if (!ParseAndSetCommandName(cmd, cmdTypeName, desc, newDesc))
    {
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-         MessageInterface::ShowMessage("The command is not named\n");
+         MessageInterface::ShowMessage("   The command is not named\n");
       #endif
    }
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
       else
-         MessageInterface::ShowMessage("The command is named \"%s\"\n",
+         MessageInterface::ShowMessage("   The command is named \"%s\"\n",
                cmd->GetName().c_str());
    #endif
 
@@ -2647,15 +2647,25 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          // Parameter or object property
          else if (inArray[i].find('.') != std::string::npos)
          {
+            #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+            MessageInterface::ShowMessage
+               ("   Check if '%s' is a system Parameter\n", inArray[i].c_str());
+            #endif
             // if input parameter is a system Parameter then create
             if (IsParameterType(inArray[i]))
             {
+               #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   '%s' is a system Parameter so call CreateSystemParameter()\n",
+                   inArray[i].c_str());
+               #endif
                Parameter *param = CreateSystemParameter(inArray[i]);
                if (param != NULL)
                {
                   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
                   MessageInterface::ShowMessage
-                     ("   The parameter <%s> is created\n", inArray[i].c_str());
+                     ("   The Parameter <%s> is created, param->GetOwner() = <%p>\n",
+                      inArray[i].c_str(), param->GetOwner());
                   #endif
                   validInput = true;
                }
@@ -3960,7 +3970,8 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
    
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("   Parameter '%s'%screated\n", str.c_str(), paramCreated ? " " : " NOT ");
+      ("   Parameter '%s'%screated, it %s a System Parameter\n", str.c_str(),
+       paramCreated ? " " : " NOT ", param ? "is" : "is NOT");
    MessageInterface::ShowMessage
       ("Interpreter::CreateSystemParameter() returning <%p><%s>'%s'\n", param,
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),

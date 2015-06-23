@@ -25,12 +25,12 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_SET
-#define DEBUG_FUNCTION_IN_OUT
+//#define DEBUG_FUNCTION_IN_OUT
 //#define DEBUG_WRAPPER_CODE
-#define DEBUG_FUNCTION_OBJ
-#define DEBUG_AUTO_OBJ
-#define DEBUG_OBJECT_MAP
-#define DEBUG_FIND_OBJECT
+//#define DEBUG_FUNCTION_OBJ
+//#define DEBUG_AUTO_OBJ
+//#define DEBUG_OBJECT_MAP
+//#define DEBUG_FIND_OBJECT
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -935,6 +935,9 @@ GmatBase* Function::FindObject(const std::string &name)
    MessageInterface::ShowMessage
       ("Function::FindObject() '%s' entered, name = '%s'\n", functionName.c_str(),
        name.c_str());
+   ShowObjectMap(objectStore, "In FindObject()", "objectStore");
+   ShowObjectMap(globalObjectStore, "In FindObject()", "globalObjectStore");
+   ShowObjectMap(&functionObjectMap, "In FindObject()", "functionObjectMap");
    #endif
    
    std::string newName = name;
@@ -1324,49 +1327,54 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
          ("   ownerName='%s', owner=<%p>[%s]'%s'\n", ownerName.c_str(), owner,
           owner ? owner->GetTypeName().c_str() : "NULL",
           owner ? owner->GetName().c_str() : "NULL");
-         #ifdef DEBUG_OBJECT_MAP
-         ShowObjectMap(objectStore, "In Function::AddAutomaticObject", "objectStore");
-         #endif
+      #ifdef DEBUG_OBJECT_MAP
+      ShowObjectMap(objectStore, "In Function::AddAutomaticObject", "objectStore");
       #endif
-      if (owner == NULL)
-      {
-         FunctionException fe;;
-         fe.SetDetails("Cannot find the object named \"%s\" in the function "
-                       "object store", ownerName.c_str());
-         throw fe;
-      }
-      
-      // Check if owner is from the right object store      
-      GmatBase *refObj = obj->GetRefObject(owner->GetType(), ownerName);
-      #ifdef DEBUG_AUTO_OBJ
-      MessageInterface::ShowMessage
-         ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
-          refObj ? refObj->GetName().c_str() : "NULL");
       #endif
       
-      if (owner != refObj)
-      {
-         #ifdef DEBUG_AUTO_OBJ
-         MessageInterface::ShowMessage
-            ("*** WARNING *** The ref object \"%s\" of the Parameter \"%s\" "
-             "does not point to object in object store\n", ownerName.c_str(),
-             withName.c_str());
-         #endif
-
-         //================================================================
-         // Do not throw exception, since objects from Global command will be
-         // moved to global object store when Global command is executing until
-         // then the refobj will be the configured object since the Moderator
-         // sets it. (LOJ: 2015.03.03)
-         #if 0
-         FunctionException fe;;
-         fe.SetDetails("The ref object \"%s\" of the Parameter \"%s\" "
-                       "does not point to object in object store", ownerName.c_str(),
-                       withName.c_str());
-         throw fe;
-         #endif
-         //================================================================
-      }
+      //========================================================================
+      // Do not check for the owner here, it will find it when wrapper is created
+      // Fix for GMT-2380 LOJ: 2015.06.18)
+      // if (owner == NULL)
+      // {
+      //    FunctionException fe;;
+      //    fe.SetDetails("Cannot find the object named \"%s\" in the function "
+      //                  "object store", ownerName.c_str());
+      //    throw fe;
+      // }
+      
+      // // Check if owner is from the right object store      
+      // GmatBase *refObj = obj->GetRefObject(owner->GetType(), ownerName);
+      // #ifdef DEBUG_AUTO_OBJ
+      // MessageInterface::ShowMessage
+      //    ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+      //     refObj ? refObj->GetName().c_str() : "NULL");
+      // #endif
+      
+      // if (owner != refObj)
+      // {
+      //    #ifdef DEBUG_AUTO_OBJ
+      //    MessageInterface::ShowMessage
+      //       ("*** WARNING *** The ref object \"%s\" of the Parameter \"%s\" "
+      //        "does not point to object in object store. owner=<%p>, refObj=<%p>\n",
+      //        ownerName.c_str(), withName.c_str(), owner, refObj);
+      //    #endif
+         
+      //    //================================================================
+      //    // Do not throw exception, since objects from Global command will be
+      //    // moved to global object store when Global command is executing until
+      //    // then the refobj will be the configured object since the Moderator
+      //    // sets it. (LOJ: 2015.03.03)
+      //    #if 0
+      //    FunctionException fe;;
+      //    fe.SetDetails("The ref object \"%s\" of the Parameter \"%s\" "
+      //                  "does not point to object in object store", ownerName.c_str(),
+      //                  withName.c_str());
+      //    throw fe;
+      //    #endif
+      //    //================================================================
+      // }
+      //========================================================================
    }
    
    if (alreadyManaged)
