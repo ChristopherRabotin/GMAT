@@ -382,7 +382,7 @@ void CallPythonFunction::RunComplete()
       pythonIf = NULL;
    }
 
-	return;
+   CallFunction::RunComplete();
 }
 
 
