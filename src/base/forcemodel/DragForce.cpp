@@ -2243,6 +2243,22 @@ AtmosphereModel* DragForce::GetInternalAtmosphereModel()
 
 
 //------------------------------------------------------------------------------
+// AtmosphereModel* GetInternalAtmosphereModel()
+//------------------------------------------------------------------------------
+/**
+ * Gets the internal atmosphere model for the DragForce.
+ *
+ * @return pointer to the internal atmosphere model used by the DragForce
+ *         object when useExternalAtmosphere is set to false.
+ */
+//------------------------------------------------------------------------------
+AtmosphereModel* DragForce::GetAtmosphereModel()
+{
+   return (internalAtmos ? internalAtmos : atmos);
+}
+
+
+//------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)
 //------------------------------------------------------------------------------
 /**

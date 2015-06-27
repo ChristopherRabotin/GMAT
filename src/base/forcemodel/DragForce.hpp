@@ -122,6 +122,7 @@ public:
    // Special access methods used by drag forces
    bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
    AtmosphereModel*     GetInternalAtmosphereModel();
+   AtmosphereModel*     GetAtmosphereModel();
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
