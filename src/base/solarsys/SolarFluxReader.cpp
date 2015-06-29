@@ -25,6 +25,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FILE_INDEXING
+//#define DEBUG_GETFLUXINPUTS
 
 
 //------------------------------------------------------------------------------
@@ -464,6 +465,11 @@ bool SolarFluxReader::LoadObsData()
 	   }
    }
 
+   #ifdef DEBUG_GETFLUXINPUTS
+      MessageInterface::ShowMessage("Loaded %d flux observation data records\n",
+            obsFluxData.size());
+   #endif
+
    return true;
 }
 
@@ -541,6 +547,11 @@ bool SolarFluxReader::LoadPredictData()
       it->id = (it-1)->id + 1;
    }
 
+   #ifdef DEBUG_GETFLUXINPUTS
+      MessageInterface::ShowMessage("Loaded %d flux predict data records\n",
+            predictFluxData.size());
+   #endif
+
    return true;
 }
 
@@ -586,10 +597,19 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
       index = 0;
    }
 
+   #ifdef DEBUG_GETFLUXINPUTS
+      MessageInterface::ShowMessage("GetInputs(%.12lf): index = %d, using ",
+            epoch, index);
+   #endif
+
    // if the requested epoch fall beyond the 
    // last item in the obsFluxData, then search in predictFluxData
    if (index >= (Integer) obsFluxData.size())
    {
+      #ifdef DEBUG_GETFLUXINPUTS
+         MessageInterface::ShowMessage("predict data\n");
+      #endif
+
       if ((predictFluxData.size() > 0))
       {
          epoch_1st = predictFluxData.at(0).epoch;
@@ -638,6 +658,10 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    }
    else
    {
+      #ifdef DEBUG_GETFLUXINPUTS
+         MessageInterface::ShowMessage("observed data\n");
+      #endif
+
       fD = obsFluxData[index];
       fD.index = index;
    }
@@ -768,8 +792,6 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       // Average value from detected day
       fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
    }
-
-   return;
 }
 
 
@@ -814,6 +836,4 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       fD.adjF107 = obsFluxData[f107index].adjF107;
       fD.adjCtrF107a = obsFluxData[f107index].adjCtrF107a;
    }
-
-   return;
 }
