@@ -1384,13 +1384,19 @@ bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
 
       // Set up the file names for the SPK and FK kernels
       std::stringstream ss("");
-      // @todo - put these files in the tmp directory (platform-dependent)
       ss << "tmp_" << instanceName;
       // For now, put it in the Output path << this should be put into the
       // appropriate TMPDIR for the platform
-      FileManager *fm     = FileManager::Instance();
-      std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-      kernelBaseName      = spkPath + ss.str();
+//      FileManager *fm     = FileManager::Instance();
+//      std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
+//      kernelBaseName      = spkPath + ss.str();
+      std::string tmpPath = GmatFileUtil::GetTemporaryDirectory();
+      kernelBaseName = tmpPath + ss.str();
+      #ifdef DEBUG_EPHEM_MANAGER_FILES
+         MessageInterface::ShowMessage(
+               "In EphemManager::RecordEphemerisData,  fileName (full path) = %s\n",
+               fileName.c_str());
+      #endif
 
       kernelNamesDetermined = true;
    }

@@ -4828,7 +4828,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptNames = "";
       
       // Will this fix allocation error in the MessageInterface
-      if (mBuildErrorCount <= 50)
+      if (mBuildErrorCount <= 100)
       {
          msg1.Printf("Script errors found in the following %d script(s):\n",
                      mBuildErrorCount);
@@ -4924,7 +4924,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       wxString msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6;
       
       // Show errors to message window
-      MessageInterface::ShowMessage(msg);
+      MessageInterface::ShowMessage(msg.WX_TO_STD_STRING);
       
       // Show errors to view text dialog
       ViewTextDialog *dlg =
@@ -4938,7 +4938,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       summaryFile += "FolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
-      MessageInterface::LogMessage(msg);
+      MessageInterface::LogMessage(msg.WX_TO_STD_STRING);
       MessageInterface::SetLogFile(oldLogFile);
    }
    

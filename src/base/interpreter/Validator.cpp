@@ -45,6 +45,7 @@
 //#define DEBUG_HANDLE_ERROR
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_CHECK_OBJECT
+//#define DEBUG_PARAM_CREATABLES
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_CREATE_ARRAY
 //#define DEBUG_AUTO_PARAM
@@ -2197,6 +2198,8 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
             ("   Parameter created with paramType='%s', ownerName='%s', depName='%s', "
              "theFunction=<%p>'%s'\n", paramType.c_str(), ownerName.c_str(), depName.c_str(),
              theFunction, theFunction ? theFunction->GetName().c_str() : "NULL");
+         MessageInterface::ShowMessage
+            ("   param->GetOwner() = <%p>\n", param->GetOwner());
          #endif
          
          // Add unmanaged Parameter to function
@@ -2204,15 +2207,15 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
          {
             #ifdef DEBUG_AUTO_PARAM
             MessageInterface::ShowMessage
-               ("Validator::CreateSystemParameter() Adding <%p><%s> '%s' to "
+               ("Validator::CreateSystemParameter() Adding <%p><%s>'%s' to "
                 "function's automatic object map\n", param, param->GetTypeName().c_str(),
                 param->GetName().c_str());
             #endif
-            
-            // if automatic parameter is in the objectMap, set flag so that
+                        
+            // If automatic parameter is in the objectMap, set flag so that
             // it won't be deleted in the function since it is deleted in the
             // Sandbox. (LOJ: 2009.03.16)
-            theFunction->AddAutomaticObject(param->GetName(),(GmatBase*)param,
+            theFunction->AddAutomaticObject(param->GetName(), (GmatBase*)param,
                                             alreadyManaged);
          }
       }
@@ -3279,8 +3282,8 @@ bool Validator::UpdateLists()
       copy(parms.begin(), parms.end(), back_inserter(theParameterList));
       retval = true;
    }
-
-   #ifdef DEBUG_CREATE_PARAM
+   
+   #ifdef DEBUG_PARAM_CREATABLES
       MessageInterface::ShowMessage("Validator knows about %d Parameters:\n",
          parms.size());
       for (UnsignedInt i = 0; i < parms.size(); ++i)
@@ -3604,7 +3607,7 @@ Validator::Validator()
    StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
    copy(parms.begin(), parms.end(), back_inserter(theParameterList));
    
-   #ifdef DEBUG_CREATE_PARAM
+   #ifdef DEBUG_PARAM_CREATABLES
       MessageInterface::ShowMessage("Validator knows about %d Parameters:\n",
          parms.size());
       for (UnsignedInt i = 0; i < parms.size(); ++i)

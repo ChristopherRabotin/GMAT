@@ -978,8 +978,7 @@ bool ContactLocator::Initialize()
          for (UnsignedInt ii= 0; ii < stations.size(); ii++)
          {
             GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
-//            if (!gsi->InitializeForContactLocation(false))
-            if (!gsi->InitializeForContactLocation(true))
+            if (!gsi->InitializeForContactLocation(true))  // use false for testing resulting files
             {
                std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
                errmsg            += stationNames.at(ii) + " used by ContactLocator ";
@@ -1141,13 +1140,43 @@ void ContactLocator::FindEvents()
 
       Real  minElAngle  = stations.at(j)->GetRealParameter("MinimumElevationAngle");
 
+      // The ground station's central body should not be an occulting body
+      StringArray bodiesToUse;
+      std::string currentBody;
+      std::string centralBody = stations.at(j)->GetStringParameter(
+                                stations.at(j)->GetParameterID("CentralBody"));
+      for (unsigned int ii = 0; ii < occultingBodyNames.size(); ii++)
+      {
+         currentBody = occultingBodyNames.at(ii);
+         if (currentBody == centralBody)
+         {
+//            if (!centralBodyWarningWritten)
+//            {
+               MessageInterface::ShowMessage(
+                     "*** WARNING *** Body %s is the central body for "
+                     "GroundStation %s and so will not be considered an occulting body "
+                     "for contact location.\n", centralBody.c_str(),
+                     (stations.at(j)->GetName()).c_str());
+//               centralBodyWarningWritten = true;
+//            }
+         }
+         else
+         {
+            bodiesToUse.push_back(currentBody);
+         }
+      }
+
+
       #ifdef DEBUG_CONTACT_EVENTS
          MessageInterface::ShowMessage("Calling GetContactIntervals with: \n");
          MessageInterface::ShowMessage("   theObsrvr         = %s(%s)\n",
                (stations.at(j))->GetName().c_str(), theObsrvr.c_str());
          MessageInterface::ShowMessage("   occultingBodies   = \n");
-         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
-            MessageInterface::ShowMessage("      %d     %s\n", ii, occultingBodyNames.at(ii).c_str());
+          for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+             MessageInterface::ShowMessage("      %d     %s\n", ii, occultingBodyNames.at(ii).c_str());
+          MessageInterface::ShowMessage("   bodiesToUse   = \n");
+           for (Integer ii = 0; ii < bodiesToUse.size(); ii++)
+              MessageInterface::ShowMessage("      %d     %s\n", ii, bodiesToUse.at(ii).c_str());
          MessageInterface::ShowMessage("   theAbCorr         = %s\n", theAbCorr.c_str());
          MessageInterface::ShowMessage("   initialEp         = %12.10f\n", initialEp);
          MessageInterface::ShowMessage("   finalEp           = %12.10f\n", finalEp);
@@ -1155,9 +1184,12 @@ void ContactLocator::FindEvents()
          MessageInterface::ShowMessage("   stepSize          = %12.10f\n", stepSize);
       #endif
       bool transmit = (GmatStringUtil::ToUpper(lightTimeDirection) == "TRANSMIT");
-      em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, occultingBodyNames, theAbCorr,
+      em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, bodiesToUse, theAbCorr,
             initialEp, finalEp, useEntireInterval, useLightTimeDelay, transmit, stepSize, numContacts,
             starts, ends);
+//      em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, occultingBodyNames, theAbCorr,
+//            initialEp, finalEp, useEntireInterval, useLightTimeDelay, transmit, stepSize, numContacts,
+//            starts, ends);
       #ifdef DEBUG_CONTACT_EVENTS
          MessageInterface::ShowMessage("After GetContactIntervals: \n");
          MessageInterface::ShowMessage("   numContacts       = %d\n", numContacts);

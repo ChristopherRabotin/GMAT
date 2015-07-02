@@ -38,6 +38,11 @@
 //#define DEBUG_ECLIPSE_ACTION
 //#define DEBUG_ECLIPSE_LOCATOR_WRITE
 //#define DEBUG_ECLIPSE_SET
+//#define DEBUG_TIME_SPENT
+
+#ifdef DEBUG_TIME_SPENT
+#include <time.h>
+#endif
 
 //------------------------------------------------------------------------------
 // Static data
@@ -839,9 +844,17 @@ void EclipseLocator::FindEvents()
       throw EventException(errmsg);
    }
 
+   #ifdef DEBUG_TIME_SPENT
+   clock_t t = clock();
+   #endif
    scNow = sat->GetEpoch();
    em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
                                findStart, findStop);
+   #ifdef DEBUG_TIME_SPENT
+   Real timeSpent = (Real) (clock() - t);
+   MessageInterface::ShowMessage(" --- time spent in GetCoverageStartAndStop = %12.10f (sec)\n",
+         (timeSpent / CLOCKS_PER_SEC));
+   #endif
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
       MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
@@ -876,6 +889,9 @@ void EclipseLocator::FindEvents()
    RealArray          ends;
    std::string        bodyName;
 
+   #ifdef DEBUG_TIME_SPENT
+   t = clock();
+   #endif
    for (Integer ii = 0; ii < occultingBodies.size(); ii++)
    {
       CelestialBody *body = (CelestialBody*) occultingBodies.at(ii);
@@ -909,6 +925,11 @@ void EclipseLocator::FindEvents()
          }
       }
    }
+   #ifdef DEBUG_TIME_SPENT
+   timeSpent = (Real) (clock() - t);
+   MessageInterface::ShowMessage(" --- TOTAL time spent in getting occultation intervals = %12.10f (sec)\n",
+         (timeSpent / CLOCKS_PER_SEC));
+   #endif
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("rawList has been set up ...\n");
    #endif
@@ -927,6 +948,9 @@ void EclipseLocator::FindEvents()
             numEventsInTotal);
    #endif
 
+   #ifdef DEBUG_TIME_SPENT
+   t = clock();
+   #endif
    // Rearrange the events into the proper order
    EclipseEvent *a, *b;
    // @todo Check this algorithm for correctness and performance
@@ -948,6 +972,12 @@ void EclipseLocator::FindEvents()
    b = NULL;
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Events have been ordered\n");
+   #endif
+   #ifdef DEBUG_TIME_SPENT
+   timeSpent = (Real) (clock() - t);
+   MessageInterface::ShowMessage(" --- time spent in ordering the raw list of events = %12.10f (sec)\n",
+         (timeSpent / CLOCKS_PER_SEC));
+   t = clock();
    #endif
 
 
@@ -989,6 +1019,11 @@ void EclipseLocator::FindEvents()
          theEvents.at(currentIndex)->AddEvent(currentEvent);
       }
    }
+   #ifdef DEBUG_TIME_SPENT
+   timeSpent = (Real) (clock() - t);
+   MessageInterface::ShowMessage(" --- time spent in creating lists of umbra/penumbra = %12.10f (sec)\n",
+         (timeSpent / CLOCKS_PER_SEC));
+   #endif
 
    // Compute the maximum duration of the events
    maxIndex    = -1;
