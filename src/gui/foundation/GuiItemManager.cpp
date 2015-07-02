@@ -4425,10 +4425,10 @@ wxSizer* GuiItemManager::CreateParameterSizer
    //-----------------------------------------------------------------
    // Arrows
    //-----------------------------------------------------------------
-   wxSize buttonSize(25, 20);
+   wxSize buttonSize(60, -1);
    
    #ifdef __WXMAC__
-   buttonSize.Set(40, 20);
+   buttonSize.Set(60, -1);
    #endif
    
    *upButton = new wxButton
