@@ -465,6 +465,12 @@ void FunctionRunner::GetOutputInfo(Integer &type,
          colCount = colCounts[0];
          matrix.SetSize(rowCount, colCount);
       }
+      else if (outputTypes[0] == Gmat::OBJECT_WT)
+      {
+         type = Gmat::OBJECT_TYPE;
+         rowCount = 1;
+         colCount = 1;
+      }
    }
    
    elementType = type;

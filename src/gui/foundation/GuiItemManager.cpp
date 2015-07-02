@@ -784,7 +784,9 @@ void GuiItemManager::UpdateAll(Gmat::ObjectType objType)
          break;
       case Gmat::HARDWARE:
       case Gmat::FUEL_TANK:
+      case Gmat::CHEMICAL_FUEL_TANK:
       case Gmat::THRUSTER:
+      case Gmat::CHEMICAL_THRUSTER:
          UpdateFuelTank(true);
          UpdateThruster(true);
       case Gmat::POWER_SYSTEM:
@@ -1856,8 +1858,8 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
       ("GuiItemManager::GetPropertyList() entered, objName='%s', ownedObjName='%s', "
-       "showOption=%d, showSettableOnly=%d, forStopCondition\n", objName.c_str(),
-       ownedObjName.c_str(), showOption, showSettableOnly, forStopCondition);
+       "showOption=%d, showSettableOnly=%d, forStopCondition\n", objName.WX_TO_C_STRING,
+       ownedObjName.WX_TO_C_STRING, showOption, showSettableOnly, forStopCondition);
    #endif
    
    wxArrayString array;
@@ -1900,8 +1902,8 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
    
    #if DBGLVL_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
-      ("   objTypeName='%s', ownedObjTypeName='%s'\n", objTypeName.c_str(),
-       ownedObjTypeName.c_str());
+      ("   objTypeName='%s', ownedObjTypeName='%s', ownedObjType=%d\n",
+       objTypeName.WX_TO_C_STRING, ownedObjTypeName.WX_TO_C_STRING, ownedObjType);
    #endif
    
    if (objTypeName == "Spacecraft")
@@ -1914,7 +1916,17 @@ wxArrayString GuiItemManager::GetPropertyList(const wxString &objName,
          for (int i = 0; i < numScOwnedObjProperty; i++)
          {
             paramName = theScAttachedObjPropertyList[i].c_str();
-            if (theParamInfo->GetOwnedObjectType(paramName) == ownedObjType)
+            Gmat::ObjectType paramOwnedObjType = theParamInfo->GetOwnedObjectType(paramName);
+            #if DBGLVL_GUI_ITEM_PROPERTY > 1
+            MessageInterface::ShowMessage
+               ("   '%s' ownedObjType=%d, paramOwnedObjType=%d \n", paramName.c_str(),
+                ownedObjType, paramOwnedObjType);
+            #endif
+            
+            // Use IsOfType() for checking owned object type
+            // (LOJ: 2015-05-27 Fix for GMT5128)
+            // if (paramOwnedObjType == ownedObjType)
+            if (obj->IsOfType(paramOwnedObjType))
             {
                // Currently all spacecraft owned object (hardware) Parameters are plottable
                #if DBGLVL_GUI_ITEM_PROPERTY > 1
@@ -4413,10 +4425,10 @@ wxSizer* GuiItemManager::CreateParameterSizer
    //-----------------------------------------------------------------
    // Arrows
    //-----------------------------------------------------------------
-   wxSize buttonSize(25, 20);
+   wxSize buttonSize(60, -1);
    
    #ifdef __WXMAC__
-   buttonSize.Set(40, 20);
+   buttonSize.Set(60, -1);
    #endif
    
    *upButton = new wxButton

@@ -35,6 +35,7 @@ namespace GmatFileUtil
    std::string GMAT_API GetCurrentWorkingDirectory();
    bool        GMAT_API SetCurrentWorkingDirectory(const std::string &newDir);
    std::string GMAT_API GetApplicationPath();
+   std::string GMAT_API GetTemporaryDirectory();
    std::string GMAT_API ParseFirstPathName(const std::string &fullPath, bool appendSep = true);
    std::string GMAT_API ParsePathName(const char *fullPath, bool appendSep = true);
    std::string GMAT_API ParsePathName(const std::string &fullPath, bool appendSep = true);

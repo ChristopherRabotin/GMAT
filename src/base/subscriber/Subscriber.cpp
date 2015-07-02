@@ -467,6 +467,11 @@ bool Subscriber::SetEndOfRun()
 //------------------------------------------------------------------------------
 void Subscriber::SetRunState(Gmat::RunState rs)
 {
+   #ifdef DEBUG_RUN_STATE
+   MessageInterface::ShowMessage
+      ("Subscriber::SetRunState() setting new runstate to %d, prevRunState=%d\n",
+       rs, prevRunState);
+   #endif
    prevRunState = runstate;
    runstate = rs;
 }

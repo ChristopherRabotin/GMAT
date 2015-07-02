@@ -47,6 +47,7 @@ public:
    bool AddScriptItem(wxString path);
    void PanelObjectChanged( GmatBase *obj );
    void UpdateFormation();
+   void UpdateSpacecraft();
    void UpdateVariable();
    void UpdateRecentFiles(wxString filename);
    void OnAddScript(wxCommandEvent &event);

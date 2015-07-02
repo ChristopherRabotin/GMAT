@@ -6313,10 +6313,10 @@ void GmatMainFrame::CompareFiles()
    
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
-      ("   baseDir=%s\n   compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
+      ("   baseDir=%s\n   compDirs[0]=%s\n", baseDir.WX_TO_C_STRING, compDirs[0].WX_TO_C_STRING);
    MessageInterface::ShowMessage
       ("   basePrefix='%s', comparePrefixex[0]='%s', numDirsToCompare=%d, "
-       "numFilesToCompare=%d\n", basePrefix.c_str(), compStrings[0].c_str(),
+       "numFilesToCompare=%d\n", basePrefix.WX_TO_C_STRING, compStrings[0].WX_TO_C_STRING,
        numDirsToCompare, numFilesToCompare);
    #endif
 
@@ -6404,8 +6404,8 @@ void GmatMainFrame::CompareFiles()
       wxArrayString compareNames;
 
       #ifdef DEBUG_FILE_COMPARE
-      MessageInterface::ShowMessage("   baseFileName='%s'\n", baseFileName.c_str());
-      MessageInterface::ShowMessage("   noPrefixName='%s'\n", noPrefixName.c_str());
+      MessageInterface::ShowMessage("   baseFileName='%s'\n", baseFileName.WX_TO_C_STRING);
+      MessageInterface::ShowMessage("   noPrefixName='%s'\n", noPrefixName.WX_TO_C_STRING);
       #endif
 
       for (int j=0; j<numDirsToCompare; j++)
@@ -6414,7 +6414,7 @@ void GmatMainFrame::CompareFiles()
 
          #ifdef DEBUG_FILE_COMPARE
          MessageInterface::ShowMessage
-            ("   compareNames[%d]='%s'\n", j, compareNames[j].c_str());
+            ("   compareNames[%d]='%s'\n", j, compareNames[j].WX_TO_C_STRING);
          #endif
       }
       
@@ -6528,7 +6528,7 @@ void GmatMainFrame::CompareFiles()
       #ifdef DEBUG_FILE_COMPARE
       int numLines = textCtrl->GetNumberOfLines();
       for (int i = 0; i < numLines; i++)
-         MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).c_str());
+         MessageInterface::ShowMessage("%s\n", textCtrl->GetLineText(i).WX_TO_C_STRING);
       #endif
       
       textCtrl->SetInsertionPointEnd();
@@ -6553,7 +6553,7 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
       ("GmatMainFrame::GetBaseFilesToCompare() entered, compareOption=%d\n   baseDir='%s', "
-       "baseString='%s'\n", compareOption, baseDir.c_str(), baseString.c_str());
+       "baseString='%s'\n", compareOption, baseDir.WX_TO_C_STRING, baseString.WX_TO_C_STRING);
    #endif
    
    // Get files in the base directory
@@ -6567,7 +6567,10 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
    {
       // Skip GmatLog.txt since it will be always different (LOJ: 2015.04.01)
       if (filename == "GmatLog.txt")
+      {
          cont = dir.GetNext(&filename);
+         continue;
+      }
       
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script") ||
@@ -6588,7 +6591,7 @@ void GmatMainFrame::GetBaseFilesToCompare(Integer compareOption, const wxString 
                noPrefixNameArray.push_back(noPrefixName.c_str());
                baseFileNameArray.push_back(filepath.c_str());
                #ifdef DEBUG_FILE_COMPARE
-               MessageInterface::ShowMessage("   Adding '%s'\n", noPrefixName.c_str());
+               MessageInterface::ShowMessage("   Adding '%s'\n", noPrefixName.WX_TO_C_STRING);
                #endif
             }
          }

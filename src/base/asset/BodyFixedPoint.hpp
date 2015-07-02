@@ -170,6 +170,10 @@ protected:
    bool              deleteSPK;
    /// delete FK file on destruction?
    bool              deleteFK;
+   /// has he NaifID been determined?
+   bool              naifIDDetermined;
+   /// have the kernel names been figured out?
+   bool              kernelNamesDetermined;
    /// Were the kernels written?
    bool              kernelsWritten;
 
@@ -193,9 +197,6 @@ protected:
    bool WriteFK(bool deleteFile = true);
 
    Rvector3 GetTopocentricConversion(const std::string &centralNaifId);
-
-   /// Conversion code used to transform from lat-long-height to body fixed
-//   LatLonHgt      llh;
 
 public:
    /// Published parameters for body-fixed points

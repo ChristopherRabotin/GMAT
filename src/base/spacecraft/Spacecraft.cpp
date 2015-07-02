@@ -1272,7 +1272,7 @@ void Spacecraft::RecordEphemerisData()
 {
    if (!ephemMgr)
    {
-      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+      ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
       ephemMgr->SetObject(this);
       // @todo - do I need to resend this, if the internalCoordSys ever changes?
       ephemMgr->SetCoordinateSystem(internalCoordSystem);
@@ -1910,6 +1910,8 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
             return powerSystem;
 
       case Gmat::FUEL_TANK:
+      case Gmat::CHEMICAL_FUEL_TANK:
+      case Gmat::ELECTRIC_FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin();
               i < tanks.end(); ++i)
          {
@@ -1918,6 +1920,8 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          }
 
       case Gmat::THRUSTER:
+      case Gmat::CHEMICAL_THRUSTER:
+      case Gmat::ELECTRIC_THRUSTER:
          for (ObjectArray::iterator i = thrusters.begin();
               i < thrusters.end(); ++i)
          {
@@ -4635,7 +4639,7 @@ bool Spacecraft::Initialize()
 
       if (!ephemMgr)
       {
-         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+         ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
          ephemMgr->SetObject(this);
          // @todo - do I need to resend this, if the internalCoordSys ever changes?
          ephemMgr->SetCoordinateSystem(internalCoordSystem);
@@ -4647,11 +4651,6 @@ bool Spacecraft::Initialize()
       isInitialized = true;
       retval = true;
    }
-
-   // *********** testing ************************
-//   RecordEphemerisData();    // ******************<<<<<<<<<<<<<<< for testing
-   // *********** testing ************************
-
    return retval;
 }
 

@@ -1195,7 +1195,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Handle EventLocators
       else if (find(eventLocatorList.begin(), eventLocatorList.end(), type) !=
                eventLocatorList.end())
-         obj = (GmatBase*)theModerator->CreateEventLocator(type, name);
+         obj = (GmatBase*)theModerator->CreateEventLocator(type, name, createDefault);
 
       // Handle EphemerisFile
       else if (find(ephemFileList.begin(), ephemFileList.end(), type) != 
@@ -2469,12 +2469,12 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    if (!ParseAndSetCommandName(cmd, cmdTypeName, desc, newDesc))
    {
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
-         MessageInterface::ShowMessage("The command is not named\n");
+         MessageInterface::ShowMessage("   The command is not named\n");
       #endif
    }
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
       else
-         MessageInterface::ShowMessage("The command is named \"%s\"\n",
+         MessageInterface::ShowMessage("   The command is named \"%s\"\n",
                cmd->GetName().c_str());
    #endif
 
@@ -2647,15 +2647,25 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          // Parameter or object property
          else if (inArray[i].find('.') != std::string::npos)
          {
+            #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+            MessageInterface::ShowMessage
+               ("   Check if '%s' is a system Parameter\n", inArray[i].c_str());
+            #endif
             // if input parameter is a system Parameter then create
             if (IsParameterType(inArray[i]))
             {
+               #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   '%s' is a system Parameter so call CreateSystemParameter()\n",
+                   inArray[i].c_str());
+               #endif
                Parameter *param = CreateSystemParameter(inArray[i]);
                if (param != NULL)
                {
                   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
                   MessageInterface::ShowMessage
-                     ("   The parameter <%s> is created\n", inArray[i].c_str());
+                     ("   The Parameter <%s> is created, param->GetOwner() = <%p>\n",
+                      inArray[i].c_str(), param->GetOwner());
                   #endif
                   validInput = true;
                }
@@ -3865,8 +3875,63 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
       }
    }
    
-   std::string desc = lhs + " = " + rhs;
-   return CreateCommand("GMAT", desc, retFlag, inCmd);
+   bool createCallFunction = false;
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage("   Checking if rhs has a only function call\n");
+   #endif
+   // Check for math symbol and create CallFunction if only calling GMAT or MATLAB Function
+   // @note Currently MatlabFunction cannot be used in the math equation.
+   // The Validator will catch this later.
+   if (!GmatStringUtil::IsThereMathSymbol(rhs))
+   {
+      std::string funcName = GmatStringUtil::ParseFunctionName(rhs);
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage("   funcName = '%s'\n", funcName.c_str());
+      #endif
+      if (funcName != "")
+      {
+         GmatBase *func = FindObject(funcName);
+         #ifdef DEBUG_CREATE_COMMAND
+         MessageInterface::ShowMessage
+            ("   func = <%p>'%s'\n", func, func ? func->GetName().c_str() : "NULL");
+         #endif
+         if (func && func->IsOfType(Gmat::FUNCTION))
+         {
+            #ifdef DEBUG_CREATE_COMMAND
+            MessageInterface::ShowMessage
+               ("   Rhs has a Function call '%s()' so need to create "
+                "CallFunction command\n", funcName.c_str());
+            #endif
+            createCallFunction = true;
+         }
+         else
+         {
+            // Check FileManager if function is in the GmatFunction path
+            std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(funcName);
+            if (funcPath != "")
+               createCallFunction = true;
+            else
+            {
+               #ifdef DEBUG_CREATE_COMMAND
+               MessageInterface::ShowMessage
+                  ("   '%s' is not a function\n", funcName.c_str());
+               #endif
+            }
+         }
+      }
+   }
+   
+   if (createCallFunction)
+   {
+      // Create CallFunction command
+      std::string desc = "[" + lhs + "] = " + rhs;
+      return CreateCommand("CallFunction", desc, retFlag, inCmd);
+   }
+   else
+   {
+      std::string desc = lhs + " = " + rhs;
+      return CreateCommand("GMAT", desc, retFlag, inCmd);
+   }
 }
 
 
@@ -3905,7 +3970,8 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
    
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("   Parameter '%s'%screated\n", str.c_str(), paramCreated ? " " : " NOT ");
+      ("   Parameter '%s'%screated, it %s a System Parameter\n", str.c_str(),
+       paramCreated ? " " : " NOT ", param ? "is" : "is NOT");
    MessageInterface::ShowMessage
       ("Interpreter::CreateSystemParameter() returning <%p><%s>'%s'\n", param,
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
@@ -4837,7 +4903,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
       {
          InterpreterException ex
             ("The value of \"" + objName + "\" for field \"" + toProp +
-             "\" on ForceModel \"" + toOwner->GetName() + "\" is not an allowed value");
+             "\" on ForceModel \"" + toOwner->GetName() + "\" is not an allowed value.");
          HandleError(ex);
          return false;
       }
@@ -4934,7 +5000,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
          {
             InterpreterException ex
                ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
-                "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+                "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
             HandleError(ex);
             return false;
          }
@@ -4994,7 +5060,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             {
                InterpreterException ex
                   ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
-                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
                HandleError(ex);
                return false;
             }
@@ -5074,7 +5140,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toOwner, const std::string &toPr
             {
                InterpreterException ex
                   ("The value of \"" + fromObj->GetName() + "\" for field \"" + toProp +
-                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+                   "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
                HandleError(ex);
                return false;
             }
@@ -5246,7 +5312,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
       {
          InterpreterException ex
             (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
-             toOwner->GetName() + "\" is not an allowed value" + errorMsg2);
+             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
          HandleError(ex);
       }
    }
@@ -5306,7 +5372,7 @@ bool Interpreter::SetPropertyToArray(GmatBase *toOwner, const std::string &toPro
    {
       InterpreterException ex
          ("The value of \"" + fromArray + "\" for field \"" + toProp +
-          "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value");
+          "\" on object " + "\"" + toOwner->GetName() + "\" is not an allowed value.");
       HandleError(ex);
       return false;
    }
@@ -5448,7 +5514,7 @@ bool Interpreter::SetPropertyToValue(GmatBase *toOwner, const std::string &toPro
       {
          InterpreterException ex
             (errorMsg1 + "for field \"" + toProp + "\" on object " + "\"" +
-             toOwner->GetName() + "\" is not an allowed value" + errorMsg2);
+             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
          HandleError(ex);
       }
    }
@@ -9931,8 +9997,10 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       catch (BaseException &)
       {
          InterpreterException ex
-            ("Invalid output argument list found in the GmatFunction file \"" +
-             fPath + "\" referenced in \"" + fName + "\"\n");
+            ("Invalid output argument list found '" + parts[0] +
+             "' in GmatFunction \"" + fName + ".\"\n"
+             "Syntax of a GmatFunction statement is:\n"
+             "function [out1, out2, ...] = FunctionName(in1, in2, in3, ...)");
          HandleError(ex, false);
          retval = false;
          break;
@@ -9981,14 +10049,26 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          }
          catch (BaseException &)
          {
-            InterpreterException ex
-               ("Invalid output argument list found in the GmatFunction file \"" +
-                fPath + "\" referenced in \"" + fName + "\"\n");
-            HandleError(ex, false);
-            retval = false;
-            break;
+            // It is OK to have no [] for only one output parameter (see GMT-3325)
+            if (lhsParts.size() == 2 && GmatStringUtil::IsValidName(lhsParts[1]))
+            {
+               outputArgs.push_back(lhsParts[1]);
+            }
+            else
+            {
+               InterpreterException ex
+                  ("Invalid output argument list found '" + parts[0] +
+                   "' in GmatFunction \"" + fName + ".\"\n"
+                   "Syntax of a GmatFunction statement is:\n"
+                   "function [out1, out2, ...] = FunctionName(in1, in2, in3, ...)");
+               // InterpreterException ex
+               //    ("Invalid output argument list found in the GmatFunction file \"" +
+               //     fPath + "\" referenced in \"" + fName + "\"\n");
+               HandleError(ex, false);
+               retval = false;
+               break;
+            }
          }
-         
          
          if (outputArgs.size() == 0)
          {
@@ -10039,8 +10119,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       catch (BaseException &)
       {
          InterpreterException ex
-            ("The invalid input argument list found in the GmatFunction file \"" +
-             fPath + "\" referenced in \"" + fName + "\"\n");
+            ("The invalid input argument list found '" + parts[1] + "' in "
+             "GmatFunction file \"" + fPath + "\"");
          HandleError(ex, false);
          retval = false;
          break;
@@ -10091,8 +10171,11 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          catch (BaseException &)
          {
             InterpreterException ex
-               ("Invalid input argument list found in the GmatFunction file \"" +
-                fPath + "\" referenced in \"" + fName + "\"\n");
+               ("The invalid input argument list found '" + rhsParts[1] + "' in "
+                "GmatFunction file \"" + fPath + "\"");
+            // InterpreterException ex
+            //    ("Invalid input argument list found in the GmatFunction file \"" +
+            //     fPath + "\" referenced in \"" + fName + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;

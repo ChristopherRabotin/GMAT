@@ -102,6 +102,8 @@ OPTION(PLUGIN_FORMATION "Formation Plugin" ON)
 OPTION(PLUGIN_GEOMETRICMEASUREMENT "GeometricMeasurement Plugin" ON)
 OPTION(PLUGIN_GMATFUNCTION "GmatFunction Plugin" ON)
 OPTION(PLUGIN_MATLABINTERFACE "MatlabInterface Plugin" ON)
+OPTION(PLUGIN_NEWPARAMETERS "NewParameter Plugin" ON)
+OPTION(PLUGIN_POLYHEDRONGRAVITY "PolyhedronGravity Plugin" ON)
 OPTION(PLUGIN_PRODUCTIONPROPAGATORS "ProductionPropagators Plugin" ON)
 OPTION(PLUGIN_SAVECOMMAND "SaveCommand Plugin" ON)
 OPTION(PLUGIN_STATION "Station Plugin" ON)
@@ -222,6 +224,24 @@ endif()
 # MatlabInterface Plugin
 if (PLUGIN_MATLABINTERFACE)
   SET(PLUGINDIR "MatlabInterfacePlugin/src/base")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
+# NewParameters Plugin
+if (PLUGIN_NEWPARAMETERS)
+  SET(PLUGINDIR "NewParameterPlugin/src/base")
+  ADD_SUBDIRECTORY(${PLUGINDIR})
+  GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
+  SET(PluginTargets ${PluginTargets} ${tmp})
+endif()
+
+# ====================================================================
+# PolyhedronGravity Plugin
+if (PLUGIN_POLYHEDRONGRAVITY)
+  SET(PLUGINDIR "PolyhedronGravityPlugin/src/base")
   ADD_SUBDIRECTORY(${PLUGINDIR})
   GET_DIRECTORY_PROPERTY(tmp DIRECTORY ${PLUGINDIR} DEFINITION TargetName)
   SET(PluginTargets ${PluginTargets} ${tmp})
