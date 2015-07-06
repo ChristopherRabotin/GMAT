@@ -283,7 +283,6 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    if (!pyFuncAttr)
    {
       PyErrorMsg(pType, pValue, pTraceback, msg);
-   //   PyErr_Print();
 
       throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
