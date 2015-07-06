@@ -499,7 +499,8 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
 
             break;
          }
-         case Gmat::STRING:
+
+         case Gmat::STRING_TYPE:
          {
             if (i == 0)
                formatIn.append("(s");
@@ -510,9 +511,34 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
             str = const_cast<char *>(param->EvaluateString().c_str());
             argIn.push_back(str);
 
-            break; 
+            break;
          }
-         case Gmat::ARRAY:
+
+         case Gmat::RVECTOR_TYPE:
+            break;
+
+         case Gmat::RMATRIX_TYPE:
+         {
+            Array *arr = dynamic_cast<Array *>(param);
+            if (arr != NULL)
+            {
+               Integer r = arr->GetRowCount();
+               Integer c = arr->GetColCount();
+               for (int i = 0; i < r; ++i)
+               {
+                  for (int j = 0; j < c; ++j)
+                  {
+                     Real ret = arr->GetRealParameter(std::string("SingleValue"), i, j);
+                     MessageInterface::ShowMessage("value of ret is %f", ret);
+                  }
+               }
+            }
+
+            break;
+         }
+
+         default:
+            MessageInterface::ShowMessage("Unkown type: %d\n", type);
             break;
       }
    }
