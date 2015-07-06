@@ -201,23 +201,12 @@ endif()
 MESSAGE(STATUS "Searching for Python")
 SET(Python_LIB_DIR "" CACHE PATH "Path to user-specified Python location. Leave empty to auto-find Python.")
 MESSAGE(STATUS "Python dir set")
-#SET(Python_ADDITIONAL_VERSIONS
-#  # Additional Python versions should be included here
-#  "3.4"
-#  CACHE STRING "Additional searched Python versions. Format as semicolon-separated Release=Version pairs, e.g. R20YYx=V.v"
-#  )
-MESSAGE(STATUS "Trying FindPackage")
 FIND_PACKAGE(PythonLibs)
-MESSAGE(STATUS "FindPackage ran")
 
 if(Python_LIB_DIR)
   MESSAGE(STATUS "Found Python: " ${Python_Lib_DIR})
 else()
-  MESSAGE(WARNING "Python NOT FOUND. Set Python_ROOT_DIR to path to Python.h and re-configure.")
-endif()
-
-if(NOT Python_LIB_DIR)
-  MESSAGE(WARNING "Python NOT FOUND. Set Python_LIB_DIR to the path to Python and ensure you have a working installation.")
+  MESSAGE(WARNING "Python NOT FOUND. Set Python_LIBRARY to your Python library, Python_LIB_DIR to your Python library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
 endif()
 
 # ====================================================================
