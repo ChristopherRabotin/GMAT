@@ -3938,10 +3938,12 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
       if (funcName != "")
       {
          GmatBase *func = FindObject(funcName);
+
          #ifdef DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage
             ("   func = <%p>'%s'\n", func, func ? func->GetName().c_str() : "NULL");
          #endif
+
          if (func && func->IsOfType(Gmat::FUNCTION))
          {
             #ifdef DEBUG_CREATE_COMMAND
@@ -3953,16 +3955,26 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
          }
          else
          {
-            // Check FileManager if function is in the GmatFunction path
-            std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(funcName);
-            if (funcPath != "")
-               createCallFunction = true;
+            // May be a Python function, which has no Function object
+            if (func == NULL)
+            {
+               Integer loc = funcName.find("Python.");
+               if (loc == 0)
+                  createCallFunction = true;
+            }
             else
             {
-               #ifdef DEBUG_CREATE_COMMAND
-               MessageInterface::ShowMessage
-                  ("   '%s' is not a function\n", funcName.c_str());
-               #endif
+               // Check FileManager if function is in the GmatFunction path
+               std::string funcPath = FileManager::Instance()->GetGmatFunctionPath(funcName);
+               if (funcPath != "")
+                  createCallFunction = true;
+               else
+               {
+                  #ifdef DEBUG_CREATE_COMMAND
+                  MessageInterface::ShowMessage
+                     ("   '%s' is not a function\n", funcName.c_str());
+                  #endif
+               }
             }
          }
       }
