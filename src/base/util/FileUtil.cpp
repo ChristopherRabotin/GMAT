@@ -59,6 +59,7 @@ using namespace GmatStringUtil;
 //#define DBGLVL_FUNCTION_OUTPUT 2
 //#define DEBUG_ABSOLUTE_PATH
 //#define DEBUG_FILE_CHECK
+//#define DEBUG_TMPDIR
 
 //------------------------------------------------------------------------------
 // std::string GetGmatPath()
@@ -114,7 +115,7 @@ std::string GmatFileUtil::GetGmatPath()
 // std::string GetPathSeparator()
 //------------------------------------------------------------------------------
 /**
- * @return path separator; "/" or "\\" dependends on the platform
+ * @return path separator; "/" or "\\" depends on the platform
  */
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::GetPathSeparator()
@@ -322,6 +323,47 @@ std::string GmatFileUtil::GetApplicationPath()
        "so just returning empty string\n");
    return "";
 #endif
+}
+
+//------------------------------------------------------------------------------
+// std::string GetTemporaryDirectory()
+//------------------------------------------------------------------------------
+/*
+ * @return  The temporary directory for the platform/user.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetTemporaryDirectory()
+{
+   // Need to handle the std thing here; this works on Linux:
+   using namespace std;
+
+   string tmpDir = "/tmp";     // linux
+
+   const char *tmpD = getenv("TMP");
+   if (tmpD)
+   {
+      tmpDir.assign(tmpD);     // Windows
+   }
+   else
+   {
+      const char *tmpD2 = getenv("TMPDIR");
+      if (tmpD2)
+      {
+         tmpDir.assign(tmpD2); // Mac
+      }
+   }
+   // Add the path separator if it's not there
+   unsigned int sz = tmpDir.length();
+   #ifdef DEBUG_TMPDIR
+      MessageInterface::ShowMessage("last character of temporary directory = %c\n", tmpDir[sz-1]);
+   #endif
+   if ((tmpDir[sz-1] != '\\') && (tmpDir[sz-1] != '/'))
+      tmpDir += GetPathSeparator();
+   #ifdef DEBUG_TMPDIR
+      MessageInterface::ShowMessage("Temporary directory = %s\n", tmpDir.c_str());
+   #endif
+   return tmpDir;
 }
 
 
@@ -1158,24 +1200,23 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &
          
          StringArray parts = GmatStringUtil::SeparateBy(line, " ,", true);
          
-         if (parts[0] == "Global")
+         // Need to extract the type from the Create line or
+         // global object form the Global line
+         #if DBGLVL_FUNCTION_OUTPUT > 1
+         if (parts[0] == "Global" || parts[0] == "Create")
          {
-            #if DBGLVL_FUNCTION_OUTPUT > 1
             for (UnsignedInt i=0; i<parts.size(); i++)
                MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-            #endif
-            
+         }
+         #endif
+         
+         if (parts[0] == "Global")
+         {
             for (UnsignedInt j=1; j<parts.size(); j++)
-               globals.push_back(parts[j]);
-            
+               globals.push_back(parts[j]);            
          }
          else if (parts[0] == "Create")
          {
-            #if DBGLVL_FUNCTION_OUTPUT > 1
-            for (UnsignedInt i=0; i<parts.size(); i++)
-               MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
-            #endif
-         
             for (UnsignedInt i=0; i<outputSize; i++)
             {
                for (UnsignedInt j=2; j<parts.size(); j++)
@@ -1245,6 +1286,12 @@ GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream, const StringArray &
             outputWrapperTypes.push_back(Gmat::ARRAY_WT);
             outputRows.push_back(row);
             outputCols.push_back(col);
+         }
+         else
+         {
+            outputWrapperTypes.push_back(Gmat::OBJECT_WT);
+            outputRows.push_back(-1);
+            outputCols.push_back(-1);
          }
       }
    }

@@ -61,6 +61,7 @@
 #include "BodyFixedAxes.hpp"        // for SetEopFile(), SetCoefficientsFile()
 #include "ICRFAxes.hpp"
 #include "ObjectReferencedAxes.hpp"
+#include "ParameterInfo.hpp"        // for ParameterInfo
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"          // for GetCommandSeq()
 #include "StringTokenizer.hpp"      // for StringTokenizer
@@ -4568,19 +4569,21 @@ ObType* Moderator::GetObType(const std::string &name)
 
 //------------------------------------------------------------------------------
 // EventLocator* Moderator::CreateEventLocator(const std::string &type,
-//                          const std::string &name)
+//                          const std::string &name, bool createDefault = false)
 //------------------------------------------------------------------------------
 /**
  * Calls the FactoryManager to create an EventLocator
  *
  * @param type The type of event locator to be created
  * @param name The name of the new EventLocator
+ * @param createDefault if this is set, it will create/set the default SC on the
+ *                      new locator
  *
  * @return The named EventLocator
  */
 //------------------------------------------------------------------------------
 EventLocator* Moderator::CreateEventLocator(const std::string &type,
-                         const std::string &name)
+                         const std::string &name, bool createDefault)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
@@ -4625,6 +4628,16 @@ EventLocator* Moderator::CreateEventLocator(const std::string &type,
          ("Moderator::CreateEventLocator() returning new EventLocator <%p>\n", el);
       #endif
       
+      if (createDefault)
+      {
+         // set spacecraft
+         std::string scOrTarget = "Spacecraft";
+         if (el->IsOfType("ContactLocator"))
+               scOrTarget = "Target";
+         Integer id = el->GetParameterID(scOrTarget);
+         el->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
+      }
+
       return el;
    }
    else
@@ -5979,6 +5992,21 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetStringParameter(id, "=");          
          id = cmd->GetParameterID("ConstraintArg2");
          cmd->SetStringParameter(id, "7000"); 
+      }
+      else if (type == "FindEvents")
+      {
+         id = cmd->GetParameterID("EventLocator");
+         EventLocator *defaultLocator = GetDefaultEventLocator();
+         if (!defaultLocator)
+         {
+            // can't create new one because can't count on having
+            // the plugins available
+            cmd->SetStringParameter(id, "No Event Locators");
+         }
+         else
+         {
+            cmd->SetStringParameter(id, defaultLocator->GetName());
+         }
       }
       else
       {
@@ -8399,8 +8427,8 @@ void Moderator::CreateDefaultMission()
       // Hardware 
       if (GmatGlobal::Instance()->IsWritingParameterInfo())
       {
-         CreateHardware("FuelTank", "DefaultFuelTank");
-         CreateHardware("Thruster", "DefaultThruster");
+         CreateHardware("ChemicalTank", "DefaultFuelTank");
+         CreateHardware("ChemicalThruster", "DefaultThruster");
          
          #if DEBUG_DEFAULT_MISSION > 0
          MessageInterface::ShowMessage("-->default hardware created\n");
@@ -8592,8 +8620,20 @@ void Moderator::CheckParameterType(Parameter **param, const std::string &type,
             }
             else
             {
+               // Build detailed Parameter error message (LOJ: 2015.05.18)
+               // throw GmatBaseException
+               //    ("Parameter type: " + type + " should be property of " +
+               //     paramOwnerType);
+               ParameterInfo *paramInfo = ParameterInfo::Instance();
+               std::string subMsg;
+               if (paramInfo->IsForAttachedObject(type))
+               {
+                  Gmat::ObjectType ownedObjType = paramInfo->GetOwnedObjectType(type);
+                  subMsg = GmatBase::GetObjectTypeString(ownedObjType) + " attached to ";
+               }
+               
                throw GmatBaseException
-                  ("Parameter type: " + type + " should be property of " +
+                  ("Parameter type \"" + type + "\" should be property of " + subMsg +
                    paramOwnerType);
             }
          }
@@ -9153,9 +9193,9 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
    Hardware *hw = NULL;
    
    if (type == "FuelTank")
-      hw = CreateHardware("FuelTank", "DefaultFuelTank");
+      hw = CreateHardware("ChemicalTank", "DefaultFuelTank");
    else if (type == "Thruster")
-      hw = CreateHardware("Thruster", "DefaultThruster");
+      hw = CreateHardware("ChemicalThruster", "DefaultThruster");
    
    return hw;
 }
@@ -9347,6 +9387,47 @@ Solver* Moderator::GetDefaultOptimizer()
    // Create default Optimizer
    return CreateSolver("FminconOptimizer", "DefaultSQP");
 }
+
+//------------------------------------------------------------------------------
+// EventLocator* GetDefaultEventLocator()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves configured EventLocator object. If none exist, it creates an
+ * EclipseLocator as a default (if it is available; else none)
+ */
+//------------------------------------------------------------------------------
+EventLocator* Moderator::GetDefaultEventLocator()
+{
+   StringArray configList = GetListOfObjects(Gmat::EVENT_LOCATOR);
+   Integer numLocator     = configList.size();
+   GmatBase *obj = NULL;
+
+   if (numLocator > 0)
+   {
+      // return 1st EventLocator
+      EventLocator *el = GetEventLocator(configList[0]);
+      #ifdef DEBUG_DEFAULT_COMMAND
+      MessageInterface::ShowMessage
+         ("Moderator::GetDefaultEventLocator() returning existing event locator <%p>'%s'\n",
+          el, el->GetName().c_str());
+      #endif
+      return (EventLocator*)el;
+   }
+
+   StringArray locatorsAvailable = theFactoryManager->GetListOfItems(Gmat::EVENT_LOCATOR);
+   for (unsigned int ii = 0; ii < locatorsAvailable.size(); ii++)
+   {
+      if (locatorsAvailable.at(ii) == "EclipseLocator")
+      {
+         // Create default EventLocator if EclipseLocator is available
+         return CreateEventLocator("EclipseLocator", "DefaultEclipseLocator");
+      }
+   }
+   // Cannot create a default EventLocator so returning NULL
+   return NULL;
+
+}
+
 
 //------------------------------------------------------------------------------
 // StopCondition* CreateDefaultStopCondition()

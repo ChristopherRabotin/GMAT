@@ -606,8 +606,9 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
       
       #ifdef DEBUG_EW_SET_VALUE
       MessageInterface::ShowMessage
-         ("   ==> Now assign \"%s\" to \"%s\", rhsObj=<%p>, sval='%s'\n",
-          lhs.c_str(), rhs.c_str(), rhsObj, sval.c_str());
+         ("   ==> Now assign \"%s\" to \"%s\", rhsObj=<%p>[%s]'%s', sval='%s'\n",
+          lhs.c_str(), rhs.c_str(), rhsObj, rhsObj ? rhsObj->GetTypeName().c_str() : "NULL",
+          rhsObj ? rhsObj->GetName().c_str() : "NULL", sval.c_str());
       #endif
       
       // Now assign to RHS
@@ -849,6 +850,11 @@ bool ElementWrapper::SetValue(ElementWrapper *lhsWrapper, ElementWrapper *rhsWra
             if (setRefObj)
             {
                #ifdef DEBUG_EW_SET_VALUE
+               GmatBase *lhsObj = lhsWrapper->GetRefObject();
+               MessageInterface::ShowMessage
+                  ("   lhsObj=<%p>[%s]'%s'\n", lhsObj,
+                   lhsObj ? lhsObj->GetTypeName().c_str() : "NULL",
+                   lhsObj ? lhsObj->GetName().c_str() : "NULL");
                MessageInterface::ShowMessage("   calling lhsWrapper->SetObject(rhsObj)\n");
                #endif
                lhsWrapper->SetObject(rhsObj);

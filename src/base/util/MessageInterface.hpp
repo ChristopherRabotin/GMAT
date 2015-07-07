@@ -53,13 +53,13 @@ public:
    static void SetLogFile(const std::string &filename);
 
    static void LogMessage(const std::string &msg);
-   static void LogMessage(const char *msg, ...);
+   static void LogMessage(const char *format, ...);
 
    static void ClearMessage();
    
    static std::string GetQueuedMessage();
    static void PutMessage(const std::string &msg);
-   static void PutMessage(const char *msg, ...);
+   static void PutMessage(const char *format, ...);
    static void ClearMessageQueue();
    
 private:

@@ -18,7 +18,7 @@
 #include "MessageInterface.hpp"
 #include <stdarg.h>              // for va_start() and va_end()
 #include <cstdlib>               // for malloc() and free() - Required for GCC 4.3
-#include <stdio.h>               // for vsprintf()
+#include <stdio.h>               // for vsprintf(), vsnprintf()
 
 //---------------------------------
 //  static data
@@ -113,8 +113,35 @@ void MessageInterface::ShowMessage(const char *format, ...)
    {
       int      ret;
       size_t   size;
-      va_list  marker;
-      char     *msgBuffer = NULL;
+      va_list  args;
+      
+      // Try using fixed size buffer and vsnprintf to prevent buffer
+      // overrrun (LOJ: 2015.05.21)
+      //==============================================================
+      #if 1
+      //==============================================================
+      
+      char msgBuffer[MAX_MESSAGE_LENGTH];
+      va_start(args, format);
+      
+      // Used vsnprintf (LOJ: 2015.05.21)
+      // int vsnprintf (char * s, size_t n, const char * format, va_list arg );
+      
+      ret = vsnprintf(msgBuffer, MAX_MESSAGE_LENGTH, format, args);
+      
+      if (ret < 0) // vsnprintf failed
+         theMessageReceiver->ShowMessage("Unable to complete messaging\n");
+      else
+      {
+         va_end(args);
+         theMessageReceiver->ShowMessage(std::string(msgBuffer));
+      }
+      
+      //==============================================================
+      #else
+      //==============================================================
+      
+      char *msgBuffer = NULL;
       std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
       
       // format is vsprintf format
@@ -126,14 +153,14 @@ void MessageInterface::ShowMessage(const char *format, ...)
       {
          for (unsigned int i=0; i<size; i++)
             msgBuffer[i] = '\0';
-         va_start(marker, format);
-         ret = vsprintf(msgBuffer, format, marker);
+         va_start(args, format);
+         ret = vsprintf(msgBuffer, format, args);
          //LogMessage("return from vsprintf() is %d\n", ret);
          if (ret < 0)
             theMessageReceiver->ShowMessage("Unable to complete messaging");
          else
          {
-            va_end(marker);
+            va_end(args);
             theMessageReceiver->ShowMessage(std::string(msgBuffer));
          }
       }
@@ -142,6 +169,10 @@ void MessageInterface::ShowMessage(const char *format, ...)
          theMessageReceiver->ShowMessage(msgStr);
       }
       free(msgBuffer);
+      
+      //==============================================================
+      #endif
+      //==============================================================
    }
 } // end ShowMessage()
 
@@ -182,28 +213,64 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *forma
 {
    if (theMessageReceiver != NULL)
    {
-      short    ret;
-      short    size;
-      va_list  marker;
-      char     *msgBuffer = NULL;
+      int          ret;
+      unsigned int size;
+      va_list      args;
+      
+      // Try using fixed size buffer and vsnprintf to prevent buffer
+      // overrrun (LOJ: 2015.05.21)
+      //==============================================================
+      #if 1
+      //==============================================================
+      
+      char msgBuffer[MAX_MESSAGE_LENGTH];
+      va_start(args, format);
+      
+      // Used vsnprintf (LOJ: 2015.05.21)
+      // int vsnprintf (char * s, size_t n, const char * format, va_list arg );      
+      ret = vsnprintf(msgBuffer, MAX_MESSAGE_LENGTH, format, args);
+      
+      if (ret < 0) // vsnprintf failed
+         theMessageReceiver->PopupMessage(msgType, "Unable to complete messaging\n");
+      else
+      {
+         va_end(args);
+         
+         // if no EOL then append it
+         if (msgBuffer[ret-1] != '\n')
+         {
+            if ((ret+1) < MAX_MESSAGE_LENGTH)
+            {
+               msgBuffer[ret] = '\n';
+               msgBuffer[ret+1] = '\0';
+            }
+         }
+         theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
+      }
+      
+      //==============================================================
+      #else
+      //==============================================================
+      
+      char *msgBuffer = NULL;
       std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
-
+      
       // format is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
       size = strlen(format) + MAX_MESSAGE_LENGTH;
       
       if ( (msgBuffer = (char *)malloc(size)) != NULL )
       {
-         for (int i=0; i<size; i++)
+         for (unsigned int i=0; i<size; i++)
             msgBuffer[i] = '\0';
-         va_start(marker, format);
-         ret = vsprintf(msgBuffer, format, marker);
+         va_start(args, format);
+         ret = vsprintf(msgBuffer, format, args);
          if (ret < 0)
             theMessageReceiver->PopupMessage(msgType,
                   "Unable to complete messaging");
          else
          {
-            va_end(marker);
+            va_end(args);
 
             // if no EOL then append it
             if (msgBuffer[strlen(msgBuffer)-1] != '\n')
@@ -217,6 +284,10 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *forma
       }
       
       free(msgBuffer);
+      
+      //==============================================================
+      #endif
+      //==============================================================
    }
 } // end PopupMessage()
 
@@ -315,43 +386,82 @@ void MessageInterface::LogMessage(const std::string &msg)
 }
 
 //------------------------------------------------------------------------------
-//  void LogMessage(const std::string &msg)
+//  void LogMessage(const char *format, ...)
 //------------------------------------------------------------------------------
 /**
  * Sends a variable argument message to the MessageReceiver for logging.
  *
- * @param msg The message, possibly including markers for variable argument
+ * @param format The format, possibly including markers for variable argument
  *            substitution.
- * @param ... The optional list of parameters that are inserted into the msg
+ * @param ... The optional list of parameters that are inserted into the format
  *            string.
  */
 //------------------------------------------------------------------------------
-void MessageInterface::LogMessage(const char *msg, ...)
+void MessageInterface::LogMessage(const char *format, ...)
 {
    if (theMessageReceiver != NULL)
    {
-      short    ret;
-      short    size;
-      va_list  marker;
-      char     *msgBuffer = NULL;
-      std::string msgStr("*** WARNING *** Cannot allocate enough memory to log the message.\n");
+      int     ret;
+      size_t  size;
+      va_list args;
       
-      // msg is vsprintf format
-      // actual max message length is MAX_MESSAGE_LENGTH
-      size = strlen(msg) + MAX_MESSAGE_LENGTH;
-      //LogMessage("strlen(msg)=%d, size=%d\n", strlen(msg), size);
+      // Try using fixed size buffer and vsnprintf to prevent buffer
+      // overrrun (LOJ: 2015.05.21)
+      //==============================================================
+      #if 1
+      //==============================================================
       
-      if( (msgBuffer = (char *)malloc(size)) != NULL )
+      char msgBuffer[MAX_MESSAGE_LENGTH];
+      va_start(args, format);
+      
+      // Used vsnprintf (LOJ: 2015.05.21)
+      // int vsnprintf (char * s, size_t n, const char * format, va_list arg );
+      // Composes a string with the same text that would be printed if format was
+      // used on printf, but using the elements in the variable argument list
+      // identified by arg instead of additional function arguments and storing
+      // the resulting content as a C string in the buffer pointed by s
+      // (taking n as the maximum buffer capacity to fill).
+      // If the resulting string would be longer than n-1 characters, the remaining
+      // characters are discarded and not stored, but counted for the value returned
+      // by the function.
+      
+      ret = vsnprintf(msgBuffer, MAX_MESSAGE_LENGTH, format, args);
+      
+      if (ret < 0) // vsnprintf failed
+         theMessageReceiver->LogMessage("Unable to complete messaging\n");
+      else
       {
-         for (int i=0; i<size; i++)
+         va_end(args);
+         theMessageReceiver->LogMessage(std::string(msgBuffer));
+      }
+
+      //==============================================================
+      #else
+      //==============================================================
+      
+      char *msgBuffer = NULL;
+      std::string msgStr("*** WARNING *** Cannot allocate enough memory to log the message.\n");
+
+      // format is vsprintf format
+      // actual max message length is MAX_MESSAGE_LENGTH
+      size = strlen(format) + MAX_MESSAGE_LENGTH;
+      
+      // If allocation failes, try with smaller size
+      if ( (msgBuffer = (char *)malloc(size)) == NULL)
+         msgBuffer = (char *)malloc(10000);
+      
+      //if ( (msgBuffer = (char *)malloc(size)) != NULL )
+      if (msgBuffer != NULL )
+      {
+         for (size_t i=0; i<size; i++)
             msgBuffer[i] = '\0';
-         va_start(marker, msg);
-         ret = vsprintf(msgBuffer, msg, marker);
+         va_start(args, format);
+         ret = vsprintf(msgBuffer, format, args);
          if (ret < 0) // vsprintf failed
             theMessageReceiver->LogMessage("Unable to complete messaging\n");
          else
          {
-            va_end(marker);
+            va_end(args);
             theMessageReceiver->LogMessage(std::string(msgBuffer));
          }
       }
@@ -361,6 +471,10 @@ void MessageInterface::LogMessage(const char *msg, ...)
       }
       
       free(msgBuffer);
+      
+      //==============================================================
+      #endif
+      //==============================================================
    }
 }
 
@@ -412,40 +526,38 @@ void MessageInterface::PutMessage(const std::string &msg)
  * Tells the MessageReceiver to push the message into queue
  */
 //------------------------------------------------------------------------------
-void MessageInterface::PutMessage(const char *msg, ...)
+void MessageInterface::PutMessage(const char *format, ...)
 {
    if (theMessageReceiver != NULL)
    {
-      short    ret;
-      short    size;
-      va_list  marker;
-      char     *msgBuffer = NULL;
+      int     ret;
+      size_t  size;
+      va_list args;
+      char    *msgBuffer = NULL;
       std::string msgStr("*** WARNING *** Cannot allocate enough memory to show the message.\n");
       
       // msg is vsprintf format
       // actual max message length is MAX_MESSAGE_LENGTH
-      size = strlen(msg) + MAX_MESSAGE_LENGTH;
-      //LogMessage("strlen(msg)=%d, size=%d\n", strlen(msg), size);
+      size = strlen(format) + MAX_MESSAGE_LENGTH;
+      //LogMessage("strlen(format)=%d, size=%d\n", strlen(format), size);
       
       if( (msgBuffer = (char *)malloc(size)) != NULL )
       {
-         for (int i=0; i<size; i++)
+         for (size_t i=0; i<size; i++)
             msgBuffer[i] = '\0';
-         va_start(marker, msg);
-         ret = vsprintf(msgBuffer, msg, marker);
+         va_start(args, format);
+         ret = vsprintf(msgBuffer, format, args);
          if (ret < 0) // vsprintf failed
             theMessageReceiver->PutMessage("Unable to complete messaging\n");
          else
          {
-            va_end(marker);
+            va_end(args);
             theMessageReceiver->PutMessage(std::string(msgBuffer));
          }
       }
       else
       {
          theMessageReceiver->PutMessage(msgStr);
-//         msgBuffer = "*** WARNING *** Cannot allocate enough memory to show "
-//            "the message.\n";
       }
       
 //      theMessageReceiver->LogMessage(std::string(msgBuffer));

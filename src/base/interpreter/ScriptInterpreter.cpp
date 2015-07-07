@@ -1249,6 +1249,9 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
                return false;
             }
             
+            // Check if [] can be removed for single output (see GMT-3325).
+            // If so make it assignment command
+            
             #ifdef DEBUG_PARSE
             MessageInterface::ShowMessage
                ("   About to create CallFunction of '%s'\n", actualScript.c_str());
@@ -2098,13 +2101,30 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
    if (!GmatStringUtil::IsEnclosedWith(rhs, "'"))
    {
       #ifdef DEBUG_PARSE_ASSIGNMENT
-      MessageInterface::ShowMessage("   Checking for unexpected symbols\n");
+      MessageInterface::ShowMessage
+         ("   Checking for unexpected symbols in lhs = '%s'\n", lhs.c_str());
       #endif
       InterpreterException ex;
       std::string cmd, part;
-     
-      if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos ||
-          rhs.find_first_of("=~<>\"") != rhs.npos)
+      
+      // Check if [] can be removed for single output
+      if (GmatStringUtil::IsEnclosedWithBrackets(lhs))
+      {
+         #ifdef DEBUG_PARSE_ASSIGNMENT
+         MessageInterface::ShowMessage("   Checking if [] can be removed from lhs\n");
+         #endif
+         std::string output = GmatStringUtil::RemoveOuterString(lhs, "[", "]");
+         if (GmatStringUtil::IsValidName(output))
+         {
+            #ifdef DEBUG_PARSE_ASSIGNMENT
+            MessageInterface::ShowMessage
+               ("   [] removed from lhs, now lhs = '%s'\n", output.c_str());
+            #endif
+            lhs = output;
+         }
+      }
+      else if (lhs.find_first_of("=~<>[]{}\"") != lhs.npos ||
+               rhs.find_first_of("=~<>\"") != rhs.npos)
       {
          if (lhs == "")
          {
@@ -2126,7 +2146,6 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
             
             if (rhs.find_first_of("=~<>\"") != rhs.npos)
                ex.SetDetails("\"" + rhs + "\" is not a valid RHS of assignment");
-            
          }
          
          HandleError(ex);

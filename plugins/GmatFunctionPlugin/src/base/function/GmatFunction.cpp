@@ -273,8 +273,6 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       MessageInterface::ShowMessage("   First command in fcs is %s\n",
             (fcs->GetTypeName()).c_str());
       MessageInterface::ShowMessage("   internalCS is %p\n", internalCoordSys);
-      MessageInterface::ShowMessage
-         ("   prevFuncManager=<%p>, currFuncManager=<%p>\n", prevFuncManager, currFuncManager);
    #endif
    if (!fcs) return false;
    
@@ -295,10 +293,12 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    for (omi = functionObjectMap.begin(); omi != functionObjectMap.end(); ++omi)
    {
       std::string funcObjName = omi->first;
+      GmatBase *funcObj = omi->second;
       
       #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
-         ("   Add if funcObj '%s' is not already in objectStore\n", funcObjName.c_str());
+         ("   Add if funcObj [%s]'%s' is not already in objectStore\n",
+          funcObjName.c_str(), funcObj ? funcObj->GetTypeName().c_str() : "NULL");
       #endif
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
@@ -306,13 +306,13 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       {
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   About to clone <%p>[%s]'%s'\n", (omi->second), (omi->second)->GetTypeName().c_str(),
-             (omi->second)->GetName().c_str());
+            ("   About to clone <%p>[%s]'%s'\n", (omi->second),
+             (omi->second)->GetTypeName().c_str(), (omi->second)->GetName().c_str());
          #endif
-         GmatBase *funcObj = (omi->second)->Clone();
+         GmatBase *funcObjClone = (omi->second)->Clone();
          #ifdef DEBUG_MEMORY
          MemoryTracker::Instance()->Add
-            (funcObj, funcObjName, "GmatFunction::Initialize()",
+            (funcObjClone, funcObjName, "GmatFunction::Initialize()",
              "funcObj = (omi->second)->Clone()");
          #endif
          
@@ -321,7 +321,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          {
             MessageInterface::ShowMessage
                ("   funcObj(%s)->EvaluateReal() = %f\n", funcObjName.c_str(),
-                funcObj->GetRealParameter("Value"));
+                funcObjClone->GetRealParameter("Value"));
          }
          catch (BaseException &e)
          {
@@ -331,10 +331,37 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   Adding clone of funcObj <%p>'%s' to objectStore\n", funcObj, funcObjName.c_str());
+            ("   Adding clone of funcObj <%p>'%s' to objectStore\n", funcObjClone,
+             funcObjName.c_str());
          #endif
-         funcObj->SetIsLocal(true);
-         objectStore->insert(std::make_pair(funcObjName, funcObj));
+         funcObjClone->SetIsLocal(true);
+         objectStore->insert(std::make_pair(funcObjName, funcObjClone));
+      }
+      else
+      {
+         std::map<std::string, GmatBase *>::iterator mapi;
+         mapi = objectStore->find(funcObjName);
+         if (mapi != objectStore->end())
+         {
+            GmatBase *mapObj = (mapi->second);
+            #ifdef DEBUG_FUNCTION_INIT
+            MessageInterface::ShowMessage
+               ("   '%s' already exist: <%p>[%s]'%s'\n", funcObjName.c_str(), mapObj,
+                mapObj->GetTypeName().c_str(), mapObj->GetName().c_str());
+            MessageInterface::ShowMessage
+               ("   Now checking if input parameter is redefined to different type\n");
+            #endif
+            
+            // Check if input parameter is redefined in a function
+            if (funcObj->GetTypeName() != mapObj->GetTypeName())
+            {
+               throw FunctionException
+                  ("Redefinition of formal input parameter '" + funcObjName +
+                   "' to different type is not allowed in GMAT function '" +
+                   functionPath + "'.  It's expected type is '" +
+                   mapObj->GetTypeName() + "'.\n");
+            }
+         }
       }
    }
    
@@ -417,26 +444,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       current->SetGlobalObjectMap(globalObjectStore);
       current->SetSolarSystem(solarSys);
       current->SetInternalCoordSystem(internalCoordSys);
-      current->SetTransientForces(forces);
-      
-      
-      // #if 0
-      // /// Can we move this to before going through commands?
-      // #ifdef DEBUG_FUNCTION_INIT
-      //    MessageInterface::ShowMessage
-      //       ("   Now about to set object map of type %s to Validator\n",
-      //        (current->GetTypeName()).c_str());      
-      // #endif
-      // // (Re)set object map on Validator (necessary because objects may have been added to the 
-      // // Local Object Store or Global Object Store during initialization of previous commands)
-      // validatorStore.clear();
-      // for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
-      //    validatorStore.insert(std::make_pair(omi->first, omi->second));
-      // for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-      //    validatorStore.insert(std::make_pair(omi->first, omi->second));
-      // validator->SetObjectMap(&validatorStore);
-      // #endif
-      
+      current->SetTransientForces(forces);      
       
       // See if commands can be validated only once (LOJ: 2015.04.21)
       if (fcsInitialized)
@@ -549,8 +557,6 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
        "GmatFunction::Execute() entered for '%s'\n   internalCS is <%p>, "
        "reinitialize = %d, fcs=<%p><%s>\n", functionName.c_str(), internalCoordSys,
        reinitialize, fcs, fcs ? fcs->GetTypeName().c_str() : "NULL");
-   MessageInterface::ShowMessage
-      ("   prevFuncManager=<%p>, currFuncManager=<%p>\n", prevFuncManager, currFuncManager);
    #endif
    
    GmatCommand *current = fcs;
@@ -712,44 +718,6 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
          throw FunctionException
             ("In " + current->GetGeneratingString(Gmat::NO_COMMENTS) + ", " +
              e.GetFullMessage());
-         
-         // Since GmatFunction is parsed in object and command modes,
-         // we may not need this section (LOJ: 2014.12.16)
-         // #if 0
-         // // Let's try initialzing local objects here again (2008.10.14)
-         // try
-         // {
-         //    #ifdef DEBUG_FUNCTION_EXEC
-         //    MessageInterface::ShowMessage
-         //       ("============================ Reinitializing LocalObjects at current\n"
-         //        "%s\n", current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-         //    #endif
-            
-         //    InitializeLocalObjects(objInit, current, false);
-            
-         //    #ifdef DEBUG_FUNCTION_EXEC
-         //    MessageInterface::ShowMessage
-         //       ("......Function re-executing <%p><%s> [%s]\n", current,
-         //        current->GetTypeName().c_str(),
-         //        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
-         //    #endif
-            
-         //    if (!(current->Execute()))
-         //       return false;
-         // }
-         // catch (HardwareException &)
-         // {
-         //    // Ignore for hardware exception since spacecraft is associated with Thruster
-         //    // but Thruster binds with Tank later in the fcs
-         // }
-         // catch (BaseException &)
-         // {
-         //    throw FunctionException
-         //       ("During initialization of local objects before \"" +
-         //        current->GetGeneratingString(Gmat::NO_COMMENTS) + "\", " +
-         //        e.GetFullMessage());
-         // }
-         // #endif
       }
       
       // If current command is BranchCommand and still executing, continue to next

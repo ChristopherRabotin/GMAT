@@ -1,0 +1,71 @@
+//$Id$
+//------------------------------------------------------------------------------
+//                           SolverData
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2014 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under the FDSS 
+// contract, Task Order 28
+//
+// Author: Darrel J. Conway, Thinking Systems, Inc.
+// Created: Oct 4, 2013
+/**
+ * 
+ */
+//------------------------------------------------------------------------------
+
+#ifndef SolverData_hpp
+#define SolverData_hpp
+
+#include "newparameter_defs.hpp"
+#include "GmatBase.hpp"
+#include "RefData.hpp"
+#include "Solver.hpp"
+
+
+/**
+ * Data class for Solver parameters
+ */
+class NEW_PARAMETER_API SolverData : public RefData
+{
+public:
+   SolverData();
+   virtual ~SolverData();
+   SolverData(const SolverData& sd);
+   SolverData& operator=(const SolverData& sd);
+
+   Real GetSolverReal(const std::string &str);
+   std::string GetSolverString(const std::string &str);
+
+   // The inherited methods from RefData
+   virtual bool ValidateRefObjects(GmatBase *param);
+   virtual const std::string* GetValidObjectList() const;
+
+   const static Real SOLVER_REAL_UNDEFINED;// = -9876543210.1234;
+   const static std::string SOLVER_STRING_UNDEFINED;
+
+protected:
+   // The inherited methods from RefData
+   virtual void InitializeRefObjects();
+   virtual bool IsValidObjectType(Gmat::ObjectType type);
+   virtual bool AddRefObject(const Gmat::ObjectType type,
+                             const std::string &name, GmatBase *obj = NULL,
+                             bool replaceName = false);
+
+
+   Solver *mSolver;
+
+   enum
+   {
+      SOLVER = 0,
+      SolverDataObjectCount
+   };
+
+   static const std::string VALID_OBJECT_TYPE_LIST[SolverDataObjectCount];
+};
+
+#endif /* SolverData_hpp */

@@ -183,7 +183,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
 
    #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
-      ("TextParser::EvaluateBlock() length=%d\n", length);
+      ("TextParser::EvaluateBlock() length=%d, isFunctionCall=%d\n", length, isFunctionCall);
    #endif
 
    #if DEBUG_TP_EVAL_BLOCK > 1
@@ -324,8 +324,37 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
                theBlockType = Gmat::COMMAND_BLOCK;
                isFunctionCall = true;
             }
+            else
+            {
+               // There is math symbol, so make it assignment command,
+               // so that [out] = GmatFunc(x) + 1 can be parsed (see GMT-3325).
+               // Check if [] has only one output
+               StringArray parts = SeparateBy(str, "=");
+               if (parts.size() == 2)
+               {
+                  std::string lhs = parts[0];
+                  if (GmatStringUtil::IsEnclosedWithBrackets(lhs))
+                  {
+                     #if DEBUG_TP_EVAL_BLOCK > 1
+                     MessageInterface::ShowMessage
+                        ("   Checking if [] has single output\n");
+                     #endif
+                     std::string output = GmatStringUtil::RemoveOuterString(lhs, "[", "]");
+                     if (GmatStringUtil::IsValidName(output))
+                     {                  
+                        #if DEBUG_TP_EVAL_BLOCK > 1
+                        MessageInterface::ShowMessage
+                           ("   There is only one output name, so setting block "
+                            "type to ASSIGNMENT_BLOCK\n");
+                        #endif
+                        theBlockType = Gmat::ASSIGNMENT_BLOCK;
+                        isFunctionCall = false;
+                     }
+                  }
+               }
+            }
          }
-
+         
          if (noCommentLine >= 0)
          {
             // if % found in the no-comment line, it is inline comment

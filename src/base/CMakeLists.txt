@@ -479,7 +479,6 @@ SET(BASE_SRCS
     util/FileUtil.cpp
     util/GmatGlobal.cpp
     util/GregorianDate.cpp
-    util/LatLonHgt.cpp
     util/LeapSecsFileReader.cpp
     util/Linear.cpp
     util/MemoryTracker.cpp

@@ -107,6 +107,8 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    zeroFill        (false),
    usingDefaultFileName (true),
    fixedWidth      (true),
+   writeFinalSolverData (false),
+   finalSolverDataPosition (0),
    delimiter       (' '),
    lastUsedProvider(-1),
    mLastReportTime (0.0),
@@ -181,6 +183,8 @@ ReportFile::ReportFile(const ReportFile &rf) :
    zeroFill        (rf.zeroFill),
    usingDefaultFileName (rf.usingDefaultFileName),
    fixedWidth      (rf.fixedWidth),
+   writeFinalSolverData (rf.writeFinalSolverData),
+   finalSolverDataPosition (0),
    delimiter       (rf.delimiter),
    lastUsedProvider(-1),
    mLastReportTime (rf.mLastReportTime),
@@ -230,6 +234,8 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    zeroFill = rf.zeroFill;
    usingDefaultFileName = rf.usingDefaultFileName;
    fixedWidth = rf.fixedWidth;
+   writeFinalSolverData = rf.writeFinalSolverData;
+   finalSolverDataPosition = 0;
    delimiter = rf.delimiter;
    mParams = rf.mParams; 
    mNumParams = rf.mNumParams;
@@ -490,6 +496,15 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
        maxRow, output[0][0].c_str());
    #endif
    
+   if (writeFinalSolverData)
+   {
+      #if DBGLVL_WRITE_DATA > 0
+      MessageInterface::ShowMessage
+         ("   ===> Setting stream position to %ld\n", (long)finalSolverDataPosition);
+      #endif
+      dstream.seekp(finalSolverDataPosition, std::ios_base::beg);
+   }
+   
    if (leftJustify)
       dstream.setf(std::ios::left);
 
@@ -508,22 +523,33 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
          #endif
          
          UnsignedInt numRow = output[param].size();
-		 if (fixedWidth)
-		 {
-			 if (numRow >= row+1)
-				dstream << output[param][row];
-			 else if (numRow < maxRow)
-				dstream << "  ";
-		 }
-		 else
-		 {
-			 if (numRow >= row+1)
-				dstream << output[param][row];
-			 if (param < (numData-1))
-				dstream << delimiter;
-		 }
+         if (fixedWidth)
+         {
+            if (numRow >= row+1)
+               dstream << output[param][row];
+            else if (numRow < maxRow)
+               dstream << "  ";
+         }
+         else
+         {
+            if (numRow >= row+1)
+               dstream << output[param][row];
+            if (param < (numData-1))
+               dstream << delimiter;
+         }
       }
       dstream << std::endl;
+      
+      // Save current data position for use in writing final solver solution
+      if (!writeFinalSolverData)
+      {
+         finalSolverDataPosition = dstream.tellp();
+         #if DBGLVL_WRITE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ==> Saving stream position to %ld for final solver data\n",
+             (long)finalSolverDataPosition);
+         #endif
+      }
       
       #if DBGLVL_WRITE_DATA > 1
       MessageInterface::ShowMessage("\n");
@@ -1702,6 +1728,17 @@ bool ReportFile::Distribute(int len)
          
          dstream << data;
          dstream << std::endl;
+         
+         // Save current data position for use in writing final solver solution
+         if (!writeFinalSolverData)
+         {
+            finalSolverDataPosition = dstream.tellp();
+            #if DBGLVL_WRITE_DATA > 0
+            MessageInterface::ShowMessage
+               ("   ==> Saving stream position to %ld for final solver data\n",
+                (long)finalSolverDataPosition);
+            #endif
+         }
       }
       return true;
    }
@@ -1732,6 +1769,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    MessageInterface::ShowMessage
       ("   active=%d, isEndOfReceive=%d, mSolverIterOption=%d, runstate=%d, prevRunState=%d\n",
        active, isEndOfReceive, mSolverIterOption, runstate, prevRunState);
+   MessageInterface::ShowMessage("   mLastReportTime=%f\n", mLastReportTime);
    if (len > 0)
       MessageInterface::ShowMessage("   dat[0]=%f, dat[1]=%f\n", dat[0], dat[1]);
    #endif
@@ -1739,55 +1777,91 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    if (!active)
       return true;
    
+   bool writeData = true;
    //------------------------------------------------------------
-   // if writing current iteration only and solver is not finished,
-   // just return
-   //------------------------------------------------------------
-   if (mSolverIterOption == SI_CURRENT && runstate == Gmat::SOLVING)
-   {
-      #if DBGLVL_REPORTFILE_DATA > 0
-      MessageInterface::ShowMessage
-         ("   ===> Just returning; writing current iteration only and solver "
-          "is not finished\n");
-      #endif
-      return true;
-   }
-   
-   if (len == 0)
-      return true;
-   
-   bool writeFinalData = false;
-   //------------------------------------------------------------
-   // if not writing solver iteration data and solver is running, just return
+   // If not writing solver iteration data and solver is running,
+   // do not write data
    //------------------------------------------------------------
    if (mSolverIterOption == SI_NONE)
    {
       if (runstate == Gmat::SOLVING)
-         writeFinalData = false;
-      else if ((runstate == Gmat::SOLVEDPASS) && prevRunState == Gmat::SOLVING)
-         writeFinalData = true; // To write final iteration data
-      
-      if (!writeFinalData)
       {
          #if DBGLVL_REPORTFILE_DATA > 0
          MessageInterface::ShowMessage
-            ("   ===> Just returning; not writing solver itertion data and solver is running\n");
+            ("   ===> Just returning; not writing solver itertion data and solver "
+             "is running\n");
          #endif
-         
-         return true;
+         writeData = false;
+      }
+      else if (runstate == Gmat::SOLVEDPASS)
+      {
+         // Write final solution
+         // Note: Cannot use isEndOfReceive since data length is 0
+         // So scheme is to save the last stream position and overwrite for
+         // all iterations, so that only final solver data will be written
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ===> Setting flag to write final solver solution for SI_NONE, runstate is SOLVEDPASS\n");
+         #endif
+         writeData = true;
+         writeFinalSolverData = true;
       }
    }
    
-   if (!writeFinalData)
+   //------------------------------------------------------------
+   // If writing current iteration only and solver is not finished,
+   // do not write data
+   //------------------------------------------------------------
+   else if (mSolverIterOption == SI_CURRENT)
+   {
+      if (runstate == Gmat::SOLVING)
+      {
+         writeData = false;
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+            ("   ===> Just returning; writing current iteration only and solver "
+             "is not finished\n");
+         #endif
+      }
+      else if (runstate == Gmat::SOLVEDPASS && prevRunState == Gmat::SOLVING)
+         writeData = true;
+   }
+   
+   // Reset writeFinalSolverData
+   if (isEndOfReceive)
+      writeFinalSolverData = false;
+   
+   
+   #if DBGLVL_REPORTFILE_DATA > 0
+   MessageInterface::ShowMessage
+      ("   writeData=%d, writeFinalSolverData=%d, len=%d\n", writeData, writeFinalSolverData, len);
+   #endif
+   
+   if (len == 0)
+      return true;
+   
+   if (!writeData)
+   {
+      #if DBGLVL_REPORTFILE_DATA > 0
+      MessageInterface::ShowMessage
+         ("ReportFile::Distribute() this=<%p>'%s' returning true, not writing data\n",
+          this, GetName().c_str());
+      #endif
+      return true;
+   }
+   
+   // Skip duplicate data.
+   if (mLastReportTime == dat[0])
    {
       // If data time is the same as previous time and not reporting all solver
       // iterations, just return
-      if (mLastReportTime == dat[0] &&
-          (mSolverIterOption != SI_ALL && runstate != Gmat::SOLVING))
+      if (mSolverIterOption != SI_ALL && runstate != Gmat::SOLVING)
       {
          #if DBGLVL_REPORTFILE_DATA > 0
          MessageInterface::ShowMessage
-            ("   ===> Just returning; current time is the same as last report time\n");
+            ("ReportFile::Distribute() this=<%p>'%s' returning true, duplicate data: "
+             "mLastReportTime = %f, dat[0] = %f\n", this, GetName().c_str(),
+             mLastReportTime, dat[0]);
          #endif
          return true;
       }

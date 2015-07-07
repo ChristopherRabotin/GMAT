@@ -1288,8 +1288,12 @@ bool FunctionManager::ValidateFunctionArguments()
 bool FunctionManager::CreatePassingArgWrappers()
 {
    #ifdef DEBUG_FM_INIT
+   MessageInterface::ShowMessage("\n==================================================\n");
    MessageInterface::ShowMessage
       ("FunctionManager::CreatePassingArgWrappers() entered for '%s'\n", functionName.c_str());
+   ShowObjectMap(functionObjectStore, "functionObjectStore in CreatePassingArgWrappers()");
+   ShowObjectMap(localObjectStore, "localObjectStore in CreatePassingArgWrappers()");
+   ShowObjectMap(globalObjectStore, "globalObjectStore in CreatePassingArgWrappers()");
    #endif
    
    GmatBase *obj, *objFOS;
@@ -1309,6 +1313,10 @@ bool FunctionManager::CreatePassingArgWrappers()
    ClearInOutWrappers();
    numVarsCreated = 0;
    
+   #ifdef DEBUG_FM_INIT
+   MessageInterface::ShowMessage
+      ("   There are %d passed inputs\n", passedIns.size());
+   #endif
    // set up the FOS with the input objects
    for (unsigned int ii=0; ii<passedIns.size(); ii++)
    {
@@ -1317,6 +1325,11 @@ bool FunctionManager::CreatePassingArgWrappers()
       // if it makes sense (e.g. numeric literal, string literal, array element)
       formalName = inFormalNames.at(ii);
       passedName = passedIns.at(ii);
+      #ifdef DEBUG_FM_INIT
+      MessageInterface::ShowMessage
+         ("   Checking if '%s' exists in the map\n", passedName.c_str());
+      #endif
+      
       if (!(obj = FindObject(passedName)))
       {
          #ifdef DEBUG_FM_INIT
@@ -1434,9 +1447,11 @@ bool FunctionManager::CreatePassingArgWrappers()
    }
    
    #ifdef DEBUG_FM_INIT
-   MessageInterface::ShowMessage
-      ("FunctionManager::CreatePassingArgWrappers() for '%s' exiting\n", functionName.c_str());
    ShowObjectMap(functionObjectStore, "in CreatePassingArgWrappers()");
+   MessageInterface::ShowMessage
+      ("FunctionManager::CreatePassingArgWrappers() returning true for '%s'\n",
+       functionName.c_str());
+   MessageInterface::ShowMessage("==================================================\n");
    #endif
    
    return true;
@@ -1660,40 +1675,81 @@ void FunctionManager::RefreshFormalInputObjects()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* FunctionManager::FindObject(const std::string &name, bool arrayElementsAllowed = false)
+// GmatBase* FindObject(const std::string &name, bool arrayElementsAllowed = false)
 //------------------------------------------------------------------------------
 GmatBase* FunctionManager::FindObject(const std::string &name, bool arrayElementsAllowed)
 {
+   #ifdef DEBUG_FIND_OBJ
+   MessageInterface::ShowMessage
+      ("FunctionManager::FindObject() entered, name=%s', arrayElementsAllowed=%d\n",
+       name.c_str(), arrayElementsAllowed);
+   #endif
+   
    std::string newName = name;
    
    // Ignore array indexing of Array
    std::string::size_type index = name.find('(');
    if (index != name.npos)
    {
-      if (!arrayElementsAllowed) return NULL; // we deal with array elements separately
-      else                       newName = name.substr(0, index);
-   // Check for the object in the Local Object Store (LOS) first
-   }
-   if (localObjectStore->find(newName) == localObjectStore->end())
-   {
-     // If not found in the LOS, check the Global Object Store (GOS)
-      if (globalObjectStore->find(newName) == globalObjectStore->end())
-         return NULL;
-      else
+      if (!arrayElementsAllowed)
       {
          #ifdef DEBUG_FIND_OBJ
-         MessageInterface::ShowMessage("   '%s' found in GOS\n", newName.c_str());
+         MessageInterface::ShowMessage
+            ("FunctionManager::FindObject() returning NULL, '%s' is array "
+             "element and array element is not allowed in this call\n", name.c_str());
          #endif
-         return (*globalObjectStore)[newName];
+         return NULL; // we deal with array elements separately
+      }
+      else
+         newName = name.substr(0, index);
+   }
+   
+   #ifdef DEBUG_FIND_OBJ
+   MessageInterface::ShowMessage
+      ("   After removing array index, newName='%s'\n", newName.c_str());
+   MessageInterface::ShowMessage
+      ("   Checking if '%s' in the LOS\n", newName.c_str());
+   #endif
+   
+   // Check for the object in the Local Object Store (LOS) first
+   if (localObjectStore->find(newName) == localObjectStore->end())
+   {
+      #ifdef DEBUG_FIND_OBJ
+      MessageInterface::ShowMessage
+         ("   Checking if '%s' in the GOS\n", newName.c_str());
+      #endif
+      // It is not found in the LOS, check the Global Object Store (GOS)
+      if (globalObjectStore->find(newName) == globalObjectStore->end())
+      {
+         #ifdef DEBUG_FIND_OBJ
+         MessageInterface::ShowMessage
+            ("FunctionManager::FindObject() returning NULL, '%s' not in LOS nor GOS\n",
+             name.c_str());
+         #endif
+         return NULL;
+      }
+      else
+      {
+         GmatBase *objFound = (*globalObjectStore)[newName];
+         #ifdef DEBUG_FIND_OBJ
+         MessageInterface::ShowMessage
+            ("FunctionManager::FindObject() returning <%p>, '%s' found in GOS\n",
+             objFound, newName.c_str());
+         #endif
+         return objFound; //(*globalObjectStore)[newName];
       }
    }
    else
    {
+      GmatBase *objFound = (*localObjectStore)[newName];
       #ifdef DEBUG_FIND_OBJ
-      MessageInterface::ShowMessage("   '%s' found in LOS\n", newName.c_str());
+      MessageInterface::ShowMessage
+         ("FunctionManager::FindObject() returning <%p>, '%s' found in LOS\n",
+          objFound, newName.c_str());
       #endif
-      return (*localObjectStore)[newName];
+      return objFound; //(*localObjectStore)[newName];
    }
+   
    return NULL; // should never get to this point
 }
 
