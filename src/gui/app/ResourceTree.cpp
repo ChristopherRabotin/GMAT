@@ -666,6 +666,31 @@ void ResourceTree::UpdateRecentFiles(wxString filename)
 
 }
 
+//------------------------------------------------------------------------------
+// void UpdateSpacecraft()
+//------------------------------------------------------------------------------
+/**
+ * Updates Spacecraft node.
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateSpacecraft()
+{
+   #ifdef DEBUG_UPDATE
+   MessageInterface::ShowMessage
+      ("ResourceTree::UpdateSpacecraft() entered, number of spacecraft: %d\n",
+       GetChildrenCount(mSpacecraftItem));
+   #endif
+
+   // Update GUI spacecraft list
+   theGuiManager->UpdateSpacecraft();
+   
+   // If Spacecraft node is empty, populate with default spacecraft
+   if (GetChildrenCount(mSpacecraftItem) == 0)
+   {
+      DeleteChildren(mSpacecraftItem);
+      AddDefaultSpacecraft(mSpacecraftItem);
+   }
+}
 
 //------------------------------------------------------------------------------
 // void UpdateVariable()
@@ -3438,8 +3463,9 @@ void ResourceTree::OnAddLocator(wxCommandEvent &event)
       MessageInterface::ShowMessage("Creating a Locator of type %s named %s\n",
             selected.c_str(), newName.c_str());
    #endif
-      
-   GmatBase *obj = CreateObject(selected, newName);
+
+   // Call with createDefault set to true so we get the default spacecraft
+   GmatBase *obj = CreateObject(selected, newName, true);
 
    if (obj != NULL)
    {
@@ -3484,6 +3510,8 @@ void ResourceTree::OnAddReportFile(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
+      // Repopulate Spacecraft node as default ReportFile creates default Spacecraft
+      UpdateSpacecraft();
    }
 }
 
@@ -3510,6 +3538,8 @@ void ResourceTree::OnAddXyPlot(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
+      // Repopulate Spacecraft node as default XYPlot creates default Spacecraft
+      UpdateSpacecraft();
    }
 }
 
@@ -3536,6 +3566,8 @@ void ResourceTree::OnAddOrbitView(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
+      // Repopulate Spacecraft node as default XYPlot creates default Spacecraft
+      UpdateSpacecraft();
    }
 }
 
@@ -3562,6 +3594,8 @@ void ResourceTree::OnAddEphemerisFile(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
+      // Repopulate Spacecraft node as default XYPlot creates default Spacecraft
+      UpdateSpacecraft();
    }
 }
 
@@ -3590,6 +3624,8 @@ void ResourceTree::OnAddSubscriber(wxCommandEvent &event)
       Expand(item);
       SelectItem(GetLastChild(item));
       theGuiManager->UpdateSubscriber();
+      // Repopulate Spacecraft node as default ReportFile creates default Spacecraft
+      UpdateSpacecraft();
    }
 }
 
@@ -4792,7 +4828,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptNames = "";
       
       // Will this fix allocation error in the MessageInterface
-      if (mBuildErrorCount <= 50)
+      if (mBuildErrorCount <= 100)
       {
          msg1.Printf("Script errors found in the following %d script(s):\n",
                      mBuildErrorCount);
@@ -4888,7 +4924,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       wxString msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6;
       
       // Show errors to message window
-      MessageInterface::ShowMessage(msg);
+      MessageInterface::ShowMessage(msg.WX_TO_STD_STRING);
       
       // Show errors to view text dialog
       ViewTextDialog *dlg =
@@ -4902,7 +4938,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       summaryFile += "FolderRunSummary.txt";
       MessageInterface::ShowMessage("Writing folder run summary to '%s'\n", summaryFile.c_str());
       MessageInterface::SetLogFile(summaryFile);
-      MessageInterface::LogMessage(msg);
+      MessageInterface::LogMessage(msg.WX_TO_STD_STRING);
       MessageInterface::SetLogFile(oldLogFile);
    }
    

@@ -642,7 +642,7 @@ void EventLocatorPanel::LoadData()
 
    #ifdef DEBUG_EVENTPANEL_LOAD
    MessageInterface::ShowMessage
-      ("   epochFormat=%s, initEpochStr=%s, finalEpochStr\n", epochFormat.c_str(),
+      ("   epochFormat=%s, initEpochStr=%s, finalEpochStr=%s\n", epochFormat.c_str(),
             initEpochStr.c_str(), finalEpochStr.c_str());
    #endif
 
@@ -716,6 +716,73 @@ void EventLocatorPanel::LoadData()
    stepSizeTxtCtrl->SetValue(ToString(step));
 
    #ifdef DEBUG_EVENTPANEL_LOAD
+      MessageInterface::ShowMessage
+         ("  about to enable or disable widgets as needed\n");
+      MessageInterface::ShowMessage("is useEntireInterval box checked? %s\n",
+            (entireIntervalCheckBox->IsChecked()? "true": "false"));
+      MessageInterface::ShowMessage("is lightTimeDelay box checked? %s\n",
+            (lightTimeDelayCheckBox->IsChecked()? "true": "false"));
+   #endif
+   // Enable/disable as needed
+   if (entireIntervalCheckBox->IsChecked())
+   {
+//      epochFormatTxt->Disable();
+      epochFormatComboBox->Disable();
+//      initialEpochTxt->Disable();
+      initialEpochTxtCtrl->Disable();
+//      finalEpochTxt->Disable();
+      finalEpochTxtCtrl->Disable();
+      #ifdef DEBUG_EVENTPANEL_LOAD
+         MessageInterface::ShowMessage
+            ("  time-related ones disabled\n");
+      #endif
+   }
+   else
+   {
+//      epochFormatTxt->Enable();
+      epochFormatComboBox->Enable();
+//      initialEpochTxt->Enable();
+      initialEpochTxtCtrl->Enable();
+//      finalEpochTxt->Enable();
+      finalEpochTxtCtrl->Enable();
+      #ifdef DEBUG_EVENTPANEL_LOAD
+         MessageInterface::ShowMessage
+            ("  time-related ones enabled\n");
+      #endif
+   }
+   if (lightTimeDelayCheckBox->IsChecked())
+   {
+      stellarAberrationCheckBox->Enable();
+      if (!isEclipse)
+      {
+//         lightTimeDirectionTxt->Enable();
+         lightTimeDirectionComboBox->Enable();
+      }
+      #ifdef DEBUG_EVENTPANEL_LOAD
+         MessageInterface::ShowMessage
+            ("  light-time-related ones enabled\n");
+      #endif
+   }
+   else
+   {
+      stellarAberrationCheckBox->Disable();
+      #ifdef DEBUG_EVENTPANEL_LOAD
+         MessageInterface::ShowMessage
+            ("  stellar-aberration-related ones disabled\n");
+      #endif
+      if (!isEclipse)
+      {
+//         lightTimeDirectionTxt->Disable();
+         lightTimeDirectionComboBox->Disable();
+      }
+      #ifdef DEBUG_EVENTPANEL_LOAD
+         MessageInterface::ShowMessage
+            ("  light-time-related ones disabled\n");
+      #endif
+   }
+
+
+   #ifdef DEBUG_EVENTPANEL_LOAD
    MessageInterface::ShowMessage("EventLocatorPanel::LoadData() exiting\n");
    #endif
 }
@@ -751,8 +818,8 @@ void EventLocatorPanel::SaveData()
       #ifdef DEBUG_EVENTPANEL_SAVE
       MessageInterface::ShowMessage("EventLocatorPanel::SaveData() about to reset changed flags\n");
       #endif
-      // reset changed flags
-	   ResetChangedFlags();
+//      // reset changed flags
+//	   ResetChangedFlags();
    }
 
    #ifdef DEBUG_EVENTPANEL_SAVE
@@ -799,11 +866,10 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
    try
    {
       Integer paramID;
-
       std::string epochFormat     = epochFormatComboBox->GetValue().WX_TO_STD_STRING;
 
       std::string newInitEpoch    = initialEpochTxtCtrl->GetValue().WX_TO_STD_STRING;
-      std::string newFinalEpoch   = initialEpochTxtCtrl->GetValue().WX_TO_STD_STRING;
+      std::string newFinalEpoch   = finalEpochTxtCtrl->GetValue().WX_TO_STD_STRING;
       Real        fromMjd         = -999.999;
       Real        a1mjd           = -999.999;
       std::string outStr;
@@ -826,48 +892,56 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
          isFileNameTextChanged = false;
       }
 
-      // Save epoch format and epoch
-      if (isEpochFormatChanged      || isInitialEpochChanged ||
-          isInitialEpochTextChanged || isFinalEpochChanged   ||
-          isFinalEpochTextChanged)
+      // Only save the epoch information if the UseEntireInterval box is NOT checked
+      if (!entireIntervalCheckBox->IsChecked())
       {
-         bool timeOK = CheckTimeFormatAndValue(epochFormat, newInitEpoch,
-               "InitialEpoch", true);
-         timeOK = timeOK && CheckTimeFormatAndValue(epochFormat, newFinalEpoch,
-               "FinalEpoch", true);
+         // Save epoch format and epoch
+         if (isEpochFormatChanged      || isInitialEpochChanged ||
+             isInitialEpochTextChanged || isFinalEpochChanged   ||
+             isFinalEpochTextChanged)
+         {
+            bool timeOK = CheckTimeFormatAndValue(epochFormat, newInitEpoch,
+                  "InitialEpoch", true);
+            timeOK = timeOK && CheckTimeFormatAndValue(epochFormat, newFinalEpoch,
+                  "FinalEpoch", true);
 
-         #ifdef DEBUG_EVENTPANEL_SAVE
-         MessageInterface::ShowMessage
-            ("   timeOK = %s\n", (timeOK? "YES!" : "no"));
-         #endif
-         if (timeOK)
-         {
             #ifdef DEBUG_EVENTPANEL_SAVE
             MessageInterface::ShowMessage
-               ("   About to set format and time on the object ---------\n");
+               ("   timeOK = %s\n", (timeOK? "YES!" : "no"));
+            MessageInterface::ShowMessage("    new init epoch  = %s\n",
+                  newInitEpoch.c_str());
+            MessageInterface::ShowMessage("    new final epoch = %s\n",
+                  newFinalEpoch.c_str());
             #endif
-            paramID = forObject->GetParameterID("InputEpochFormat");
-            forObject->SetStringParameter(paramID, epochFormat);
-            paramID = forObject->GetParameterID("InitialEpoch");
-            forObject->SetStringParameter(paramID, newInitEpoch);
-            paramID = forObject->GetParameterID("FinalEpoch");
-            forObject->SetStringParameter(paramID, newFinalEpoch);
-            #ifdef DEBUG_EVENTPANEL_SAVE
-            MessageInterface::ShowMessage
-               ("   DONE setting format and time on the object ---------\n");
-            #endif
-            isEpochFormatChanged        = false;
-            isInitialEpochChanged       = false;
-            isInitialEpochTextChanged   = false;
-            isFinalEpochChanged         = false;
-            isFinalEpochTextChanged     = false;
-         }
-         else
-         {
-            #ifdef DEBUG_EVENTPANEL_SAVE
-               MessageInterface::ShowMessage("EventLocatorPanel::SaveData() setting canClose to false inside (epoch) try\n");
-            #endif
-            canClose = false;
+            if (timeOK)
+            {
+               #ifdef DEBUG_EVENTPANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   About to set format and time on the object ---------\n");
+               #endif
+               paramID = forObject->GetParameterID("InputEpochFormat");
+               forObject->SetStringParameter(paramID, epochFormat);
+               paramID = forObject->GetParameterID("InitialEpoch");
+               forObject->SetStringParameter(paramID, newInitEpoch);
+               paramID = forObject->GetParameterID("FinalEpoch");
+               forObject->SetStringParameter(paramID, newFinalEpoch);
+               #ifdef DEBUG_EVENTPANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("   DONE setting format and time on the object ---------\n");
+               #endif
+               isEpochFormatChanged        = false;
+               isInitialEpochChanged       = false;
+               isInitialEpochTextChanged   = false;
+               isFinalEpochChanged         = false;
+               isFinalEpochTextChanged     = false;
+            }
+            else
+            {
+               #ifdef DEBUG_EVENTPANEL_SAVE
+                  MessageInterface::ShowMessage("EventLocatorPanel::SaveData() setting canClose to false inside (epoch) try\n");
+               #endif
+               canClose = false;
+            }
          }
       }
       // Save Real Data
@@ -996,24 +1070,27 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
             forObject->SetBooleanParameter(paramID, false);
          isLightTimeDelayChanged = false;
       }
-      if (isStellarAberrationChanged)
+      if (lightTimeDelayCheckBox->IsChecked())
       {
-         paramID = forObject->GetParameterID("UseStellarAberration");
-         if (stellarAberrationCheckBox->IsChecked())
-            forObject->SetBooleanParameter(paramID, true);
-         else
-            forObject->SetBooleanParameter(paramID, false);
-         isStellarAberrationChanged = false;
-      }
+         if (isStellarAberrationChanged)
+         {
+            paramID = forObject->GetParameterID("UseStellarAberration");
+            if (stellarAberrationCheckBox->IsChecked())
+               forObject->SetBooleanParameter(paramID, true);
+            else
+               forObject->SetBooleanParameter(paramID, false);
+            isStellarAberrationChanged = false;
+         }
 
-      // light time direction
-      // SC/Target
-      if (!isEclipse && isLightTimeDirectionChanged)
-      {
-         str     = lightTimeDirectionComboBox->GetValue().WX_TO_STD_STRING;
-         paramID = forObject->GetParameterID("LightTimeDirection");
-         forObject->SetStringParameter(paramID, str);
-         isLightTimeDirectionChanged = false;
+         // light time direction
+         // SC/Target
+         if (!isEclipse && isLightTimeDirectionChanged)
+         {
+            str     = lightTimeDirectionComboBox->GetValue().WX_TO_STD_STRING;
+            paramID = forObject->GetParameterID("LightTimeDirection");
+            forObject->SetStringParameter(paramID, str);
+            isLightTimeDirectionChanged = false;
+         }
       }
    }
    catch(BaseException &ex)
@@ -1098,8 +1175,8 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
                                        toEpochFormat, outMjd, outStr);
 
             initialEpochTxtCtrl->SetValue(outStr.c_str());
-            isInitialEpochChanged = false;
-            fromEpochFormat       = toEpochFormat;
+//            isInitialEpochChanged = false;
+//            fromEpochFormat       = toEpochFormat;
          }
          else
          {
@@ -1113,7 +1190,7 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
                                        toEpochFormat, outMjd, outStr);
 
             initialEpochTxtCtrl->SetValue(outStr.c_str());
-            fromEpochFormat = toEpochFormat;
+//            fromEpochFormat = toEpochFormat;
          }
          // if modified by user, check if final epoch is valid first
          if (isFinalEpochTextChanged)
@@ -1138,8 +1215,8 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
                                        toEpochFormat, outMjd, outStr);
 
             finalEpochTxtCtrl->SetValue(outStr.c_str());
-            isFinalEpochChanged   = false;
-            fromEpochFormat       = toEpochFormat;
+//            isFinalEpochChanged   = false;
+//            fromEpochFormat       = toEpochFormat;
          }
          else
          {
@@ -1153,8 +1230,9 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
                                        toEpochFormat, outMjd, outStr);
 
             finalEpochTxtCtrl->SetValue(outStr.c_str());
-            fromEpochFormat = toEpochFormat;
+//            fromEpochFormat = toEpochFormat;
          }
+         fromEpochFormat       = toEpochFormat;
       }
       catch (BaseException &e)
       {
@@ -1174,13 +1252,10 @@ void EventLocatorPanel::OnComboBoxChange(wxCommandEvent &event)
       runModeStr       = runModeComboBox->GetValue().WX_TO_STD_STRING;
       isRunModeChanged = true;
    }
-   else if (event.GetEventObject() == lightTimeDirectionComboBox)
+   else if (!isEclipse && event.GetEventObject() == lightTimeDirectionComboBox)
    {
-      if (!isEclipse)
-      {
-         lightTimeDirectionStr       = lightTimeDirectionComboBox->GetValue().WX_TO_STD_STRING;
-         isLightTimeDirectionChanged = true;
-      }
+      lightTimeDirectionStr       = lightTimeDirectionComboBox->GetValue().WX_TO_STD_STRING;
+      isLightTimeDirectionChanged = true;
    }
 
    EnableUpdate(true);
@@ -1227,10 +1302,46 @@ void EventLocatorPanel::OnCheckBoxChange(wxCommandEvent& event)
    else if (event.GetEventObject() == entireIntervalCheckBox)
    {
       isEntireIntervalChanged = true;
+      if (entireIntervalCheckBox->IsChecked())
+      {
+//         epochFormatTxt->Disable();
+         epochFormatComboBox->Disable();
+//         initialEpochTxt->Disable();
+         initialEpochTxtCtrl->Disable();
+//         finalEpochTxt->Disable();
+         finalEpochTxtCtrl->Disable();
+      }
+      else
+      {
+//         epochFormatTxt->Enable();
+         epochFormatComboBox->Enable();
+//         initialEpochTxt->Enable();
+         initialEpochTxtCtrl->Enable();
+//         finalEpochTxt->Enable();
+         finalEpochTxtCtrl->Enable();
+      }
    }
    else if (event.GetEventObject() == lightTimeDelayCheckBox)
    {
       isLightTimeDelayChanged = true;
+      if (lightTimeDelayCheckBox->IsChecked())
+      {
+         stellarAberrationCheckBox->Enable();
+         if (!isEclipse)
+         {
+//            lightTimeDirectionTxt->Enable();
+            lightTimeDirectionComboBox->Enable();
+         }
+      }
+      else
+      {
+         stellarAberrationCheckBox->Disable();
+         if (!isEclipse)
+         {
+//            lightTimeDirectionTxt->Disable();
+            lightTimeDirectionComboBox->Disable();
+         }
+      }
    }
    else if (event.GetEventObject() == stellarAberrationCheckBox)
    {

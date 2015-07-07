@@ -434,7 +434,12 @@ bool EventLocator::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 bool EventLocator::IsParameterCommandModeSettable(const Integer id) const
 {
-   return true;   // all settable for now
+   if ((id == EVENT_FILENAME)      || (id == INPUT_EPOCH_FORMAT)  ||
+       (id == INITIAL_EPOCH)       || (id == FINAL_EPOCH)         ||
+       (id == USE_ENTIRE_INTERVAL) || (id == WRITE_REPORT)          )
+      return true;
+
+   return false;
 }
 
 
@@ -1222,9 +1227,9 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
       epochString = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
    {
-      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
-         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
-      else
+//      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
+//         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
+//      else
          epochString = ep;
    }
 

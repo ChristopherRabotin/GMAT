@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\plugin">
+      <UniqueIdentifier>{82e13e04-2570-4966-8c03-ce1e9491eb18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\parameter">
+      <UniqueIdentifier>{aa482b67-f071-418b-9d6d-52da36778861}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\factory">
+      <UniqueIdentifier>{80fa6bcd-69bb-4367-b6d6-79227c38a43a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\include">
+      <UniqueIdentifier>{1ee7a1c5-2127-4dc4-9801-ee47772e4825}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\base\include\newparameter_defs.hpp">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\NewParameterFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\FMAcceleration.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\FMDensity.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\OdeData.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\OdeReal.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\plugin\GmatPluginFunctions.hpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\SolverData.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\SolverReal.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\SolverState.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\SolverStatus.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\parameter\SolverString.hpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\base\factory\NewParameterFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\FMAcceleration.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\FMDensity.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\OdeData.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\OdeReal.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\plugin\GmatPluginFunctions.cpp">
+      <Filter>Source Files\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\SolverData.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\SolverReal.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\SolverState.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\SolverStatus.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\parameter\SolverString.cpp">
+      <Filter>Source Files\parameter</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
