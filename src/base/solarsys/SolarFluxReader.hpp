@@ -100,6 +100,7 @@ private:
 
    bool LoadObsData();
    bool LoadPredictData();
+   Real ConvertApToKp(Real ap);
 
 public:
    /// Open CSSI and Schatten files if opened

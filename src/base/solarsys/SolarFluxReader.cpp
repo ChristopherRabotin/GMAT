@@ -366,6 +366,8 @@ bool SolarFluxReader::LoadObsData()
    }
 
    inObs.seekg(begObs, std::ios_base::beg);
+
+   /// @todo: Rework logic here so that it isn't this type of loop
    while (true)
    {
       inObs.getline(line, 256);
@@ -374,72 +376,73 @@ bool SolarFluxReader::LoadObsData()
       
       if (strlen(line) > 8)
       {
-		 // Read geomagnetic and F107 data
-		 sscanf(line, format, s1, s2);
-		 // s1 corresponds to geomagnetics data with formatted string (format1) defined above.
-		 sscanf(s1, format1, s11, s12, s13, s6[0], s6[1], s6[2], s6[3], s6[4], s6[5], s6[6], s6[7], s8[0], s8[1], s8[2], s8[3], s8[4], s8[5], s8[6], s8[7], s9);
-		 // s2 corresponds to F107 data with formatted string (format2) defined above.
-		 sscanf(s2, format2, s21, s22[0], s22[1], s22[2], s22[3], s22[4]);
+         // Read geomagnetic and F107 data
+         sscanf(line, format, s1, s2);
+         // s1 corresponds to geomagnetics data with formatted string (format1) defined above.
+         sscanf(s1, format1, s11, s12, s13, s6[0], s6[1], s6[2], s6[3], s6[4], s6[5], s6[6], s6[7], s8[0], s8[1], s8[2], s8[3], s8[4], s8[5], s8[6], s8[7], s9);
+         // s2 corresponds to F107 data with formatted string (format2) defined above.
+         sscanf(s2, format2, s21, s22[0], s22[1], s22[2], s22[3], s22[4]);
 
-		 /*
-		 std::istringstream buf(line);
-		 std::istream_iterator<std::string> beg(buf), end;
-		 std::vector<std::string> tokens(beg, end);
+         /*
+          std::istringstream buf(line);
+          std::istream_iterator<std::string> beg(buf), end;
+          std::vector<std::string> tokens(beg, end);
 
-         Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), atoi(tokens[2].c_str()), hour, minute, sec);
+            Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), atoi(tokens[2].c_str()), hour, minute, sec);
+            // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
+            fD.epoch = mjd - 0.5;
+
+            // The CSSI file conains Kp * 10, then rounded to an int.  Undo that here.
+            for (Integer l=0; l<8; l++)
+               fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str()) / 10.0;
+            for (Integer l=0; l<8; l++)
+               fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
+            fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
+            fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
+            fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
+            fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
+            fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
+         */
+
+         FluxData fD;
+         Real mjd = ModifiedJulianDate((YearNumber)atof(s11), (MonthOfYear)atof(s12), (DayOfMonth)atof(s13), hour, minute, sec);
          // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
          fD.epoch = mjd - 0.5;
 
-         // The CSSI fole conains Kp * 10, then rouded to an int.  Undo that here.
-         for (Integer l=0; l<8; l++)
-            fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str()) / 10.0;
-         for (Integer l=0; l<8; l++)
-            fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
-         fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
-         fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
-         fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
-         fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
-         fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
-		 */
+         // The CSSI fole conains Kp * 10, then rouded to an int. Undo that here.
+         for (Integer l = 0; l < 8; l++)
+         {
+            fD.kp[l] = atof(s6[l]) / 10.0;
+            memset(s6[l], 0, 2);
+         }
+         for (Integer l = 0; l < 8; l++)
+         {
+            fD.ap[l] = atof(s8[l]);
+            memset(s8[l], 0, 3);
+         }
 
-		 FluxData fD;
-		 Real mjd = ModifiedJulianDate((YearNumber)atof(s11), (MonthOfYear)atof(s12), (DayOfMonth)atof(s13), hour, minute, sec);
-		 // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
-		 fD.epoch = mjd - 0.5;
+         fD.apAvg = atof(s9);
+         fD.adjF107 = atof(s21);
+         fD.adjCtrF107a = atof(s22[0]);
+         fD.obsF107 = atof(s22[2]);
+         fD.obsCtrF107a = atof(s22[3]);
+         memset(s22[0], 0, 5);
+         memset(s22[2], 0, 5);
+         memset(s22[3], 0, 5);
+         memset(s9, 0, 3);
+         memset(s21, 0, 5);
 
-		 // The CSSI fole conains Kp * 10, then rouded to an int. Undo that here.
-		 for (Integer l = 0; l < 8; l++)
-		 {
-			 fD.kp[l] = atof(s6[l]) / 10.0;
-			 memset(s6[l], 0, 2);
-		 }
-		 for (Integer l = 0; l < 8; l++)
-		 {
-			 fD.ap[l] = atof(s8[l]);
-			 memset(s8[l], 0, 3);
-		 }
-		 fD.apAvg = atof(s9);
-		 fD.adjF107 = atof(s21);
-		 fD.adjCtrF107a = atof(s22[0]);
-		 fD.obsF107 = atof(s22[2]);
-		 fD.obsCtrF107a = atof(s22[3]);
-		 memset(s22[0], 0, 5);
-		 memset(s22[2], 0, 5);
-		 memset(s22[3], 0, 5);
-		 memset(s9, 0, 3);
-		 memset(s21, 0, 5);
          fD.index = -1;
          for (Integer l = 0; l<9; l++)
             fD.F107a[l] = -1;
          for (Integer l =0; l<3; l++)
             fD.apSchatten[l] = -1;
-	
-         obsFluxData.push_back(fD);
 
+         obsFluxData.push_back(fD);
       }
    }
 
-   //delete newed array
+   //delete new'd array
    for (Integer i = 0; i < 8; i++)
    {
 	   if (s6[i] != NULL)
@@ -454,7 +457,7 @@ bool SolarFluxReader::LoadObsData()
 	   }
    }
 
-   //delete newed array
+   //delete new'd array
    for (Integer i = 0; i < 5; i++)
    {
 	   if (s22[i] != NULL)
@@ -605,6 +608,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
             if ( index >= it->index && (it+1) != predictFluxData.end() && index < (it+1)->index)
             {
                fD = predictFluxData[it->id];
+               fD.index = -1;
                break;
             }
             else if ( (it+1) == predictFluxData.end())
@@ -670,103 +674,115 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    
    if (fD.index < (Integer)obsFluxData.size())
    {
-      // Fill in fD.ap so it contains these data:
-      /*  (1) DAILY AP */
-      /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
-      /*  (3) 3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME */   
-      /*  (4) 3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME */
-      /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
-      /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
-      /*        TO CURRENT TIME */
-      /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
-      /*        TO CURRENT TIME */
-      Real fracEpoch = (epoch - 0.5) - fD.epoch;
-      Integer subIndex = (Integer)floor(fracEpoch * 8);
-      
-      // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for 
-      // data from 8 am on the current day to 8 am the next day.  f107index is 
-      // used to track that piece.
-      if (fracEpoch < 8.0/24.0)
-         f107index = (f107index > 0 ? f107index - 1 : 0);
-      
-      if (subIndex >= 8) // Off the end of the array
+      // Index >= 0 means obs data; -1 means predict data
+      if (fD.index >= 0)
       {
-         subIndex = 7;
-      }
+         // Fill in fD.ap so it contains these data:
+         /*  (1) DAILY AP */
+         /*  (2) 3 HR AP INDEX FOR CURRENT TIME */
+         /*  (3) 3 HR AP INDEX FOR 3 HRS BEFORE CURRENT TIME */
+         /*  (4) 3 HR AP INDEX FOR 6 HRS BEFORE CURRENT TIME */
+         /*  (5) 3 HR AP INDEX FOR 9 HRS BEFORE CURRENT TIME */
+         /*  (6) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 12 TO 33 HRS PRIOR */
+         /*        TO CURRENT TIME */
+         /*  (7) AVERAGE OF EIGHT 3 HR AP INDICIES FROM 36 TO 57 HRS PRIOR */
+         /*        TO CURRENT TIME */
+         Real fracEpoch = (epoch - 0.5) - fD.epoch;
+         Integer subIndex = (Integer)floor(fracEpoch * 8);
 
-      Real apValues[32];
-      Integer i = 0,j = 0;
-      
-      #ifdef DEBUG_FILE_INDEXING
-         MessageInterface::ShowMessage("   subindex = %d\n", subIndex);
-      #endif
-      for (i = subIndex, j = 0; i >= 0; --i, ++j)
-         apValues[j] = fD.ap[i];
-      if (fD.index > 0)
-      {
-         FluxData fD_OneBefore = obsFluxData[fD.index - 1];
-         for (i = 7; i >= 0; j++,i--)
-            apValues[j] = fD_OneBefore.ap[i];
-      }
-      else
-      {
-         for (i = 7; i >= 0; j++,i--)
-            apValues[j] = obsFluxData[0].ap[0];
-      }
-      if (fD.index > 1)
-      {
-         FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
-         for (i = 7; i >= 0; j++,i--)
-            apValues[j] = fD_TwoBefore.ap[i];
-      }
-      else
-      {
-         for (i = 7; i >= 0; j++,i--)
-            apValues[j] = obsFluxData[0].ap[0];
-      }
-      
-      if ( fD.index > 2)
-      {
-         FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
-         for (i = 7; i >= 0; j++,i--)
-            apValues[j] = fD_ThreeBefore.ap[i];
-      }
-      else
-      {
-         for (i = 7; i >= 0; j++,i--)
-            apValues[j] = obsFluxData[0].ap[0];
-      }
-            
+         // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for
+         // data from 8 am on the current day to 8 am the next day.  f107index is
+         // used to track that piece.
+         if (fracEpoch < 8.0/24.0)
+            f107index = (f107index > 0 ? f107index - 1 : 0);
 
-      for (i = 0; i < 7; i++)
-      {
-         if (i == 0)
-            fD.ap[i] = fD.apAvg;
-         if (i >= 1 && i <= 4)
-            fD.ap[i] = apValues[i-1];
-         if (i == 5)
+         if (subIndex >= 8) // Off the end of the array
          {
-            fD.ap[i] = 0;
-            for (Integer l = 0; l < 8; l++)
-               fD.ap[i] += apValues[i+l-1];
-            fD.ap[i] /= 8.0;
+            subIndex = 7;
          }
-         if (i == 6)
+
+         Real apValues[32];
+         Integer i = 0,j = 0;
+
+         #ifdef DEBUG_FILE_INDEXING
+            MessageInterface::ShowMessage("   subindex = %d\n", subIndex);
+         #endif
+         for (i = subIndex, j = 0; i >= 0; --i, ++j)
+            apValues[j] = fD.ap[i];
+         if (fD.index > 0)
          {
-            fD.ap[i] = 0;
-            for (Integer l = 8; l < 16; l++)
-               if ( apValues[i+l-2] >= 0)
-                  fD.ap[i] += apValues[i+l-2];
-            fD.ap[i] /= 8.0;
+            FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+            for (i = 7; i >= 0; j++,i--)
+               apValues[j] = fD_OneBefore.ap[i];
          }
+         else
+         {
+            for (i = 7; i >= 0; j++,i--)
+               apValues[j] = obsFluxData[0].ap[0];
+         }
+         if (fD.index > 1)
+         {
+            FluxData fD_TwoBefore = obsFluxData[fD.index - 2];
+            for (i = 7; i >= 0; j++,i--)
+               apValues[j] = fD_TwoBefore.ap[i];
+         }
+         else
+         {
+            for (i = 7; i >= 0; j++,i--)
+               apValues[j] = obsFluxData[0].ap[0];
+         }
+
+         if ( fD.index > 2)
+         {
+            FluxData fD_ThreeBefore = obsFluxData[fD.index - 3];
+            for (i = 7; i >= 0; j++,i--)
+               apValues[j] = fD_ThreeBefore.ap[i];
+         }
+         else
+         {
+            for (i = 7; i >= 0; j++,i--)
+               apValues[j] = obsFluxData[0].ap[0];
+         }
+
+
+         for (i = 0; i < 7; i++)
+         {
+            if (i == 0)
+               fD.ap[i] = fD.apAvg;
+            if (i >= 1 && i <= 4)
+               fD.ap[i] = apValues[i-1];
+            if (i == 5)
+            {
+               fD.ap[i] = 0;
+               for (Integer l = 0; l < 8; l++)
+                  fD.ap[i] += apValues[i+l-1];
+               fD.ap[i] /= 8.0;
+            }
+            if (i == 6)
+            {
+               fD.ap[i] = 0;
+               for (Integer l = 8; l < 16; l++)
+                  if ( apValues[i+l-2] >= 0)
+                     fD.ap[i] += apValues[i+l-2];
+               fD.ap[i] /= 8.0;
+            }
+         }
+
+         // Update the F10.7 data
+         // Daily value from previous day
+         fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
+                                       obsFluxData[f107index].obsF107);
+         // Average value from detected day
+         fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
       }
-      
-      // Update the F10.7 data
-      // Daily value from previous day
-      fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 : 
-                                    obsFluxData[f107index].obsF107);
-      // Average value from detected day
-      fD.obsCtrF107a = obsFluxData[f107index].obsCtrF107a;
+      else // predict data
+      {
+         // For now, use nominal mean Schatten data
+         fD.obsF107     = fD.F107a[4];
+         fD.obsCtrF107a = fD.F107a[4];
+         for (Integer i = 0; i < 8; i++)
+            fD.ap[i] = fD.apSchatten[1];
+      }
    }
 
    return;
@@ -789,31 +805,206 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    Integer f107index = fD.index;
    if ((fD.index < (Integer)obsFluxData.size()) && ((fD.index - 2) >= 0))
    {
-      FluxData fD_OneBefore = obsFluxData[fD.index - 1];
+      // Index >= 0 means obs data; -1 means predict data
+      if (fD.index >= 0)
+      {
+         FluxData fD_OneBefore = obsFluxData[fD.index - 1];
 
-      // Fill in fD.kp[0] so it contains the reading at epoch - 6.7 Hrs, per
-      // Vallado and Finkleman
-      Real fracEpoch = (epoch - 0.5) - fD.epoch - 6.7/24.0;
-      Integer subIndex = (Integer)floor(fracEpoch * 8);
-      
-      // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for 
-      // data from 8 am on the current day to 8 am the next day.  f107index is 
-      // used to track that piece.
-      if (fracEpoch < 8.0/24.0)
-         f107index = (f107index > 0 ? f107index - 1 : 0);
-      
-      if (subIndex >= 8)
-         subIndex = 7;
+         // Fill in fD.kp[0] so it contains the reading at epoch - 6.7 Hrs, per
+         // Vallado and Finkleman
+         Real fracEpoch = (epoch - 0.5) - fD.epoch - 6.7/24.0;
+         Integer subIndex = (Integer)floor(fracEpoch * 8);
 
-      if (subIndex > 0)
-         fD.kp[0] = fD.kp[subIndex];
+         // F10.7 is measured at 8 pm (5pm before ???), so we use the current row for
+         // data from 8 am on the current day to 8 am the next day.  f107index is
+         // used to track that piece.
+         if (fracEpoch < 8.0/24.0)
+            f107index = (f107index > 0 ? f107index - 1 : 0);
 
-      if (subIndex < 0)
-         fD.kp[0] = fD_OneBefore.kp[8+subIndex];
+         if (subIndex >= 8)
+            subIndex = 7;
 
-      fD.adjF107 = obsFluxData[f107index].adjF107;
-      fD.adjCtrF107a = obsFluxData[f107index].adjCtrF107a;
+         if (subIndex > 0)
+            fD.kp[0] = fD.kp[subIndex];
+
+         if (subIndex < 0)
+            fD.kp[0] = fD_OneBefore.kp[8+subIndex];
+
+         fD.adjF107 = obsFluxData[f107index].adjF107;
+         fD.adjCtrF107a = obsFluxData[f107index].adjCtrF107a;
+      }
+   }
+   else if (fD.index == -1) // predict data
+   {
+      // For now, use nominal mean Schatten data
+      fD.obsF107     = fD.F107a[4];
+      fD.obsCtrF107a = fD.F107a[4];
+      Real kp = ConvertApToKp(fD.apSchatten[1]);
+      for (Integer i = 0; i < 8; i++)
+         fD.kp[i] = kp;
    }
 
    return;
+}
+
+
+//------------------------------------------------------------------------------
+// Real ConvertApToKp(Real ap)
+//------------------------------------------------------------------------------
+/**
+ * Conversion routine to go Ap -> Kp
+ *
+ * The current implementation performs linear interpolation.  Vallado recommends
+ * cubic splines instead.
+ *
+ * @param ap The input Ap value
+ *
+ * @return The corresponding Kp
+ */
+//------------------------------------------------------------------------------
+Real SolarFluxReader::ConvertApToKp(Real ap)
+{
+   Real kp = 0.0;
+   Real apl, apr, kpl, kpr;
+
+   // For now, linear interpolate.  Vallado recommeds splines.
+   if (ap <= 2.0)
+   {
+      apl = 0.0;      apr = 2.0;
+      kpl = 0.0;      kpr = 0.33;
+   }
+   else if (ap <= 3.0)
+   {
+      apl = 2.0;      apr = 3.0;
+      kpl = 0.33;     kpr = 0.67;
+   }
+   else if (ap <= 4.0)
+   {
+      apl = 3.0;      apr = 4.0;
+      kpl = 0.67;     kpr = 1.0;
+   }
+   else if (ap <= 5.0)
+   {
+      apl = 4.0;      apr = 5.0;
+      kpl = 1.0;      kpr = 1.33;
+   }
+   else if (ap <= 6.0)
+   {
+      apl = 5.0;      apr = 6.0;
+      kpl = 1.33;     kpr = 1.67;
+   }
+   else if (ap <= 7.0)
+   {
+      apl = 6.0;      apr = 7.0;
+      kpl = 1.67;     kpr = 2.0;
+   }
+   else if (ap <= 9.0)
+   {
+      apl = 7.0;      apr = 9.0;
+      kpl = 2.0;      kpr = 2.33;
+   }
+   else if (ap <= 12.0)
+   {
+      apl = 9.0;      apr = 12.0;
+      kpl = 2.33;     kpr = 2.67;
+   }
+   else if (ap <= 15.0)
+   {
+      apl = 12.0;     apr = 15.0;
+      kpl = 2.67;     kpr = 3.0;
+   }
+   else if (ap <= 18.0)
+   {
+      apl = 15.0;     apr = 18.0;
+      kpl = 3.0;      kpr = 3.33;
+   }
+   else if (ap <= 22.0)
+   {
+      apl = 18.0;     apr = 22.0;
+      kpl = 3.33;     kpr = 3.67;
+   }
+   else if (ap <= 27.0)
+   {
+      apl = 22.0;     apr = 27.0;
+      kpl = 3.67;     kpr = 4.0;
+   }
+   else if (ap <= 32.0)
+   {
+      apl = 27.0;     apr = 32.0;
+      kpl = 4.0;      kpr = 4.33;
+   }
+   else if (ap <= 39.0)
+   {
+      apl = 32.0;     apr = 39.0;
+      kpl = 4.33;     kpr = 4.67;
+   }
+   else if (ap <= 48.0)
+   {
+      apl = 39.0;     apr = 48.0;
+      kpl = 4.67;     kpr = 5.0;
+   }
+   else if (ap <= 56.0)
+   {
+      apl = 48.0;     apr = 56.0;
+      kpl = 5.0;      kpr = 5.33;
+   }
+   else if (ap <= 67.0)
+   {
+      apl = 56.0;     apr = 67.0;
+      kpl = 5.33;     kpr = 5.67;
+   }
+   else if (ap <= 80.0)
+   {
+      apl = 67.0;     apr = 80.0;
+      kpl = 5.67;     kpr = 6.0;
+   }
+   else if (ap <= 94.0)
+   {
+      apl = 80.0;     apr = 94.0;
+      kpl = 6.0;      kpr = 6.33;
+   }
+   else if (ap <= 111.0)
+   {
+      apl = 94.0;     apr = 111.0;
+      kpl = 6.33;     kpr = 6.67;
+   }
+   else if (ap <= 132.0)
+   {
+      apl = 111.0;    apr = 132.0;
+      kpl = 6.67;     kpr = 7.0;
+   }
+   else if (ap <= 154.0)
+   {
+      apl = 132.0;    apr = 154.0;
+      kpl = 7.0;      kpr = 7.33;
+   }
+   else if (ap <= 179.0)
+   {
+      apl = 154.0;    apr = 179.0;
+      kpl = 7.33;     kpr = 7.67;
+   }
+   else if (ap <= 207.0)
+   {
+      apl = 179.0;    apr = 207.0;
+      kpl = 7.67;     kpr = 8.0;
+   }
+   else if (ap <= 236.0)
+   {
+      apl = 207.0;    apr = 236.0;
+      kpl = 8.0;      kpr = 8.33;
+   }
+   else if (ap <= 300.0)
+   {
+      apl = 236.0;    apr = 300.0;
+      kpl = 8.33;     kpr = 8.67;
+   }
+   else
+   {
+      apl = 300.0;    apr = 400.0;
+      kpl = 8.67;     kpr = 9.0;
+   }
+
+   kp = kpl + (ap - apl) * (kpr - kpl) / (apr - apl);
+
+   return kp;
 }
