@@ -107,6 +107,9 @@ public:
                                             const bool value,
                                             const Integer index);
 
+   virtual Gmat::ObjectType
+                        GetPropertyObjectType(const Integer id) const;
+
    DEFAULT_TO_NO_CLONES
 
    virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
@@ -139,6 +142,8 @@ public:
    const StringArray&   GetParticipants() const;           // made changes by TUAN NGUYEN
    std::vector<TrackingDataAdapter*> *GetAdapters();
 
+   bool                 GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList);   // made changes by TUAN NGUYEN
+
 protected:
    /**
     * Internal class used to match strand and model descriptions together, as
@@ -153,6 +158,7 @@ protected:
       MeasurementDefinition& operator=(const MeasurementDefinition& md);
 
       std::string GetDefinitionString() const;
+      bool        SetDefinitionString(StringArray strand, std::string measType);      // made changes by TUAN NGUYEN
 
       /// The strings describing signal paths                             // made changes by TUAN NGUYEN
       std::vector<StringArray> strands;
@@ -169,20 +175,21 @@ protected:
    /// Name of the associate ramped table
    StringArray rampedTablenames;
    /// Flag for the inclusion of light time solution
-   bool useLighttime;
+   bool        useLighttime;
 
    /// Flag for the inclusion of relativity correction
-   bool useRelativityCorrection;
+   bool        useRelativityCorrection;
    /// Flag for the inclusion of ET-TAI correction
-   bool useETminusTAICorrection;
+   bool        useETminusTAICorrection;
 
    /// Range modulo constant
-   Real rangeModulo;
+   Real        rangeModulo;
    /// Doppler count interval
-   Real dopplerCountInterval;
+   Real        dopplerCountInterval;
 
-   // Doppler interval
-   //Real dopplerInterval;
+   /// Data filters
+   StringArray dataFilterNames;
+   ObjectArray dataFilters;
 
    /// Solar system used in the measurements
    SolarSystem *solarsystem;
@@ -205,6 +212,7 @@ protected:
       USE_ETMINUSTAI,
       RANGE_MODULO,
       DOPPLER_COUNT_INTERVAL,
+      DATA_FILTERS,
       TrackingFileSetParamCount,
    };
 

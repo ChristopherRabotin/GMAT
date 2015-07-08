@@ -112,6 +112,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_SHOW_SKIP 1
 //#define DEBUG_ROTATE_BODY 1
 //#define DEBUG_DATA_BUFFERRING
+//#define DEBUG_DRAW_3D_BODY
 
 #define MODE_CENTERED_VIEW 0
 #define MODE_FREE_FLYING 1
@@ -226,7 +227,7 @@ OrbitViewCanvas::OrbitViewCanvas(wxWindow *parent, wxWindowID id,
    mPolygonMode = GL_FILL;
    
    mXyPlaneColor = GmatColor::NAVY;
-   mEcPlaneColor = 0x00002266; //dark red
+   mEcPlaneColor = GmatColor::MAROON;
    mSunLineColor = GmatColor::YELLOW;
    
    // animation
@@ -1998,7 +1999,6 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
              objName.c_str(), sat->GetModelId(), mModelsAreLoaded);
          #endif
          
-         //if (sat->modelID != -1)
          if (sat->GetModelId() != -1)
          {
             DrawSpacecraft3dModel(sat, objId, frame);
@@ -2025,10 +2025,24 @@ void OrbitViewCanvas::DrawObjectTexture(const wxString &objName, int obj,
       MessageInterface::ShowMessage("   Drawing body '%s'\n", objName.c_str());
       #endif
       
+      GmatBase* tmpObj = mObjectArray[obj];
+      CelestialBody *body = NULL;
+      if (tmpObj->IsOfType(Gmat::CELESTIAL_BODY))
+         body = (CelestialBody*)tmpObj;
+      
       // put object at final position
       // Dunn took out minus signs
       glTranslatef(mObjectViewPos[index1+0],mObjectViewPos[index1+1],mObjectViewPos[index1+2]);
-      DrawObject(objName, obj);
+      
+      // If body has 3d model file, use it
+      if (body != NULL && body->Get3dViewModelId() != -1)
+      {
+         DrawCelestialBody3dModel(body, objName, objId, frame);
+      }
+      else
+      {
+         DrawObject(objName, obj);
+      }
    }
    
    if (mEnableLightSource)
@@ -2597,7 +2611,7 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    float EAng2Deg = float(EARad(1)) * RTD;
    float EAng3Deg = float(EARad(2)) * RTD;
 
-   // Get offset rotation and scale from Spacecraft Visualization Tab in GUI.
+   // Get offset rotation and scale from Spacecraft
    float     offset[3];
    float     rotation[3];
    float     scale;
@@ -2678,6 +2692,96 @@ void OrbitViewCanvas::DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame
    MessageInterface::ShowMessage
       ("OrbitViewCanvas::DrawSpacecraft3dModel() leaving, sc=<%p>'%s', objId=%d, "
        "frame=%d\n", sc, sc ? sc->GetName().c_str() : "NULL", objId, frame);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DrawCelestialBody3dModel(CelestialBody *body, int objId, int frame)
+//------------------------------------------------------------------------------
+void OrbitViewCanvas::DrawCelestialBody3dModel(CelestialBody *body, const wxString &objName,
+                                               int objId, int frame)
+{
+   #ifdef DEBUG_DRAW_3D_BODY
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawCelestialBody3dModel() entered, body=<%p>'%s', objName='%s', "
+       "objId=%d, frame=%d\n", body, body ? body->GetName().c_str() : "NULL", objName.WX_TO_C_STRING,
+       objId, frame);
+   #endif
+   
+   // Rotate body before drawing model
+   RotateBodyUsingAttitude(objName, objId);
+   
+   ModelManager *mm = ModelManager::Instance();
+   ModelObject *bodyModel = mm->GetModel(body->Get3dViewModelId());
+
+   // Comment out attitude for now. Add it later if needed (LOJ: 2015.01.30)
+   float RTD = (float)GmatMathConstants::DEG_PER_RAD;
+   
+   int index1 = objId * MAX_DATA * 3 + frame * 3;
+   // int attIndex = objId * MAX_DATA * 4 + mObjLastFrame[objId] * 4;
+   
+   // Rvector quat = Rvector(4, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+   //                        mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   
+   // #ifdef DEBUG_ATTITUDE_DISPLAY
+   // MessageInterface::ShowMessage
+   //    ("Quat[%d - %d]: [%lf  %lf  %lf  %lf]\n", 
+   //     attIndex, attIndex+3, mObjectQuat[attIndex+0], mObjectQuat[attIndex+1],
+   //     mObjectQuat[attIndex+2], mObjectQuat[attIndex+3]);
+   // #endif
+   
+   // Rvector3 EARad = AttitudeConversionUtility::ToEulerAngles(quat, 1,2,3);
+   Rvector3 EARad;
+   
+   #ifdef DEBUG_BODY_ATTITUDE
+   MessageInterface::ShowMessage
+      ("DrawCelestialBody3dModel(), '%s', model=<%p>, 3DModelId=%d, EARad=%s",
+       body->GetName().c_str(), model, body->GetModelId(),  EARad.ToString().c_str());
+   #endif
+   
+   float EAng1Deg = float(EARad(0)) * RTD;
+   float EAng2Deg = float(EARad(1)) * RTD;
+   float EAng3Deg = float(EARad(2)) * RTD;
+   
+   // Get offset rotation and scale from CelestialBody.
+   float     offset[3];
+   float     rotation[3];
+   float     scale = 1.0;
+   for (int i = 0; i < 3; i++)
+   {
+      offset[i] = 0.0;
+      rotation[i] = 0.0;
+   }
+   
+   offset[0]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetX"));
+   offset[1]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetY"));
+   offset[2]   = body->GetRealParameter(body->GetParameterID("3DModelOffsetZ"));
+   rotation[0] = body->GetRealParameter(body->GetParameterID("3DModelRotationX"));
+   rotation[1] = body->GetRealParameter(body->GetParameterID("3DModelRotationY"));
+   rotation[2] = body->GetRealParameter(body->GetParameterID("3DModelRotationZ"));
+   scale = body->GetRealParameter(body->GetParameterID("3DModelScale"));
+   bodyModel->SetBaseOffset(offset[0], offset[1], offset[2]);
+   bodyModel->SetBaseRotation(true, rotation[0], rotation[1], rotation[2]);
+   bodyModel->SetBaseScale(scale, scale, scale);
+   
+   #ifdef DEBUG_BODY_ATTITUDE
+   MessageInterface::ShowMessage
+      ("Model angles: [%lf  %lf  %lf]\n", EAng1Deg, EAng2Deg, EAng3Deg);
+   #endif
+
+   // Dunn's new attitude call.  Need to change to quaternions.  Also need
+   // to concatenate with BaseRotation.  Also need this to work for replay
+   // animation buttons.
+   bodyModel->Rotate(true, EAng1Deg, EAng2Deg, EAng3Deg);
+   
+   // Set isLit to true
+   bodyModel->Draw(true);
+   
+   #ifdef DEBUG_DRAW_3D_BODY
+   MessageInterface::ShowMessage
+      ("OrbitViewCanvas::DrawCelestialBody3dModel() leaving, body=<%p>'%s', objId=%d, "
+       "frame=%d\n", body, body ? body->GetName().c_str() : "NULL", objId, frame);
    #endif
 }
 

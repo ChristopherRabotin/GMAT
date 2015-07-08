@@ -13,6 +13,8 @@
 //
 // Author: Darrel J. Conway, Thinking Systems, Inc.
 // Created: 2008/04/18
+// Updated: 2014/12/23 Ravi Mathur, Emergent Space Technologies, Inc.
+//                     Updated to properly use rpaths across systems
 //
 /**
  * Implementation for library code loaded at run time.
@@ -131,20 +133,38 @@ DynamicLibrary& DynamicLibrary::operator=(const DynamicLibrary& dlib)
  * Loads the library into memory, and sets the MessageReceiver if necessary.
  *
  * @return true if the library was loaded.
+ *
+ * @note
+ * The library is defined by its filename (libName) and pathname (libPath).
+ * Search order is OS-dependent, as described below. In Mac/Linux, rpath is
+ * defined in the GMAT top-level CMakeLists.txt file.
+ *
+ * Linux: (see dlopen manpage, modified here so pathname comes last)
+ * - $LD_LIBRARY_PATH/<libName>.so
+ * - runpath/<libName>.so (runpath = rpath, does NOT use libPath)
+ * - <libPath><libName>.so (relative to cwd if libPath is relative path)
+ *
+ * Mac: (see dlopen manpage)
+ * - $DYLD_LIBRARY_PATH/<libName>.dylib
+ * - rpath/<libPath><libName>.dylib
+ * - <libPath><libName>.dylib (relative to cwd if libPath is relative path)
+ *
+ * Windows: (see http://msdn.microsoft.com/en-us/library/ms682586.aspx)
+ * - <libPath><libName>.dll (relative to cwd if libPath is relative path)
+ * - %Path%\<libPath><libName>.dll (System %Path%)
+ * - %Path%\<libPath><libName>.dll (User %Path%)
  */
 //------------------------------------------------------------------------------
 bool DynamicLibrary::LoadDynamicLibrary()
 {
-   std::string nameWithPath;
-
-   nameWithPath = libPath + libName;
+   std::string nameWithPath = libPath + libName;
 
    #ifdef __WIN32__
       #ifdef _UNICODE
-         std::wstring libNameW = GmatStringUtil::StringToWideString(libName);
-         libHandle = LoadLibrary(libNameW.c_str());
+         std::wstring nameWithPathW = GmatStringUtil::StringToWideString(nameWithPath);
+         libHandle = LoadLibrary(nameWithPathW.c_str());
       #else
-         libHandle = LoadLibrary(libName.c_str());
+         libHandle = LoadLibrary(nameWithPath.c_str());
       #endif
       
       #ifdef DEBUG_LIBRARY_LOAD
@@ -156,8 +176,25 @@ bool DynamicLibrary::LoadDynamicLibrary()
          }
       #endif
    #else
-      nameWithPath += UNIX_EXTENSION;
-      libHandle = dlopen(nameWithPath.c_str(), RTLD_LAZY);
+      // Linux dlopen() treats input paths as standalone, and ignores any
+      // embedded rpaths or system LD_LIBRARY_PATH settings. So to increase
+      // compatibility, first try opening with just the plugin filename so
+      // that dlopen() will search rpaths and LD_LIBRARY_PATH.
+      // See dlopen manpage for more info.
+      #ifdef __linux__
+         std::string libFullName = libName + UNIX_EXTENSION;
+         libHandle = dlopen(libFullName.c_str(), RTLD_LAZY);
+      #endif
+
+      // On Linux this will only be true if the library couldn't be found
+      // using its filename alone from above.
+      // On Mac, dlopen() appends input paths to DYLD_LIBRARY_PATH or rpath,
+      // so no special treatment is needed. Se dlopen manpage for more info.
+      if(libHandle == NULL)
+      {
+         nameWithPath += UNIX_EXTENSION;
+         libHandle = dlopen(nameWithPath.c_str(), RTLD_LAZY);
+      }
 
       if (libHandle == NULL)
          MessageInterface::ShowMessage("\n%s\n", dlerror());

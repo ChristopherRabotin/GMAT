@@ -81,6 +81,8 @@
 //#define DEBUG_FILEPATH
 //#define DEBUG_DELETE_OWNED_OBJ
 //#define DEBUG_POWER_SYSTEM
+//#define DEBUG_SPACECRAFT_STM
+//#define DEBUG_SC_NAIF_ID
 
 #ifdef DEBUG_SPACECRAFT
 #include <iostream>
@@ -132,6 +134,9 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::OBJECT_TYPE,      // Attitude
       Gmat::RMATRIX_TYPE,     // OrbitSTM
       Gmat::RMATRIX_TYPE,     // OrbitAMatrix
+      Gmat::RMATRIX_TYPE,     // FullSTM,
+      Gmat::RMATRIX_TYPE,     // FullAMatrix,
+      Gmat::INTEGER_TYPE,     // FullSTMRowCount,
       Gmat::FILENAME_TYPE,    // SPADSRPFile
       Gmat::FILENAME_TYPE,    // SPADSRPFileFullPath
       Gmat::REAL_TYPE,        // SPADSRPScaleFactor
@@ -143,6 +148,9 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::REAL_TYPE,        // CartesianVZ
       Gmat::REAL_TYPE,        // Mass Flow
       Gmat::OBJECTARRAY_TYPE, // AddHardware
+      Gmat::STRINGARRAY_TYPE, // SolveFors                  // made changes by TUAN NGUYEN
+      Gmat::REAL_TYPE,        // CD_EPSILON
+      Gmat::REAL_TYPE,        // CR_EPSILON
       Gmat::FILENAME_TYPE,    // Model File
       Gmat::FILENAME_TYPE,    // ModelFileFullPath
       Gmat::REAL_TYPE,        // Model Offset X
@@ -186,8 +194,11 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "TotalMass",
       "Id",
       "Attitude",
-      "OrbitSTM",
-      "OrbitAMatrix",
+      "OrbitSTM",                   // May be able to replace with FullSTM
+      "OrbitAMatrix",               // May be able to replace with FullAMatrix
+      "FullSTM",
+      "FullAMatrix",
+      "FullSTMRowCount",
       "SPADSRPFile",
       "SPADSRPFileFullPath",
       "SPADSRPScaleFactor",
@@ -199,6 +210,9 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "CartesianVZ",
       "MassFlow",
       "AddHardware",
+      "SolveFors",                             // made changes by TUAN NGUYEN      // move solve-for parameter from batch estimator to solve-for object 
+      "Cd_Epsilon",
+      "Cr_Epsilon",
       "ModelFile",
       "ModelFileFullPath",
       "ModelOffsetX",
@@ -302,6 +316,8 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
 
 const Integer  Spacecraft::ATTITUDE_ID_OFFSET  = 20000;
 const Real     Spacecraft::UNSET_ELEMENT_VALUE = -999.999;
+Integer        Spacecraft::scNaifId = 10000;
+
 
 //-------------------------------------
 // public methods
@@ -357,15 +373,22 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    initialDisplay       (false),
    csSet                (false),
    isThrusterSettingMode(false),
-   orbitSTM             (6,6),
-   orbitAMatrix         (6,6),
+//   orbitSTM             (6,6),
+//   orbitAMatrix         (6,6),
+   fullSTM              (6,6),
+   fullAMatrix          (6,6),
+   fullSTMRowCount      (6),
    spadSRPFile          (""),
    spadSrpFileFullPath  (""),
    spadSRPScaleFactor   (1.0),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
    ephemMgr             (NULL),
-   includeCartesianState(0)
+   includeCartesianState(0),
+   cdEpsilon            (0.0),
+   crEpsilon            (0.0),
+   constrainCd          (true),
+   constrainCr          (true)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -377,6 +400,18 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    ownedObjectCount = 0;
    blockCommandModeAssignment = false;
       
+   // Set up the appropriate naifID defaults
+   naifId         = -(scNaifId * 1000) - 1;
+   scNaifId++;
+   naifIdRefFrame = naifId + 1000000;
+
+   #ifdef DEBUG_SC_NAIF_ID
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s set to %d\n",
+            instanceName.c_str(), naifId);
+      MessageInterface::ShowMessage("NAIF ID for spacecraft %s reference frame set to %d\n",
+            instanceName.c_str(), naifIdRefFrame);
+   #endif
+
    std::stringstream ss("");
    ss << GmatTimeConstants::MJD_OF_J2000;
    scEpochStr = ss.str();
@@ -460,11 +495,25 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    BuildStateElementLabelsAndUnits();
 
    // Initialize the STM to the identity matrix
-   orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
-   orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
+//   orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
+//   orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
 
-   orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
-   orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+   fullSTM(0,0) = fullSTM(1,1) = fullSTM(2,2) =
+   fullSTM(3,3) = fullSTM(4,4) = fullSTM(5,5) = 1.0;
+
+   stmIndices.push_back(CARTESIAN_X);
+   stmIndices.push_back(CARTESIAN_Y);
+   stmIndices.push_back(CARTESIAN_Z);
+   stmIndices.push_back(CARTESIAN_VX);
+   stmIndices.push_back(CARTESIAN_VY);
+   stmIndices.push_back(CARTESIAN_VZ);
+
+//   orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
+//   orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+
+   fullAMatrix(0,0) = fullAMatrix(1,1) = fullAMatrix(2,2) =
+   fullAMatrix(3,3) = fullAMatrix(4,4) = fullAMatrix(5,5) = 1.0;
+
    // Initialize the covariance matrix
    covariance.AddCovarianceElement("CartesianState", this);
    covariance.ConstructLHS();
@@ -589,15 +638,19 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    initialDisplay       (false),
    csSet                (a.csSet),
    isThrusterSettingMode(a.isThrusterSettingMode),
-   orbitSTM             (a.orbitSTM),
-   orbitAMatrix         (a.orbitAMatrix),
+   fullSTMRowCount      (a.fullSTMRowCount),
    spadSRPFile          (a.spadSRPFile),
    spadSrpFileFullPath  (a.spadSrpFileFullPath),
    spadSRPScaleFactor   (a.spadSRPScaleFactor),
    spadSRPReader        (NULL),
    spadBFCS             (NULL),
    ephemMgr             (NULL),
-   includeCartesianState(a.includeCartesianState)
+   includeCartesianState(a.includeCartesianState),
+   solveforNames        (a.solveforNames),                        // made changes by TUAN NGUYEN
+   cdEpsilon            (a.cdEpsilon),
+   crEpsilon            (a.crEpsilon),
+   constrainCd          (a.constrainCd),
+   constrainCr          (a.constrainCr)
 {
    #ifdef DEBUG_SPACECRAFT
    MessageInterface::ShowMessage
@@ -623,6 +676,29 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    representations   = a.representations;
    tankNames         = a.tankNames;
    thrusterNames     = a.thrusterNames;
+
+   // resize the matrices first, then copy the contents
+   Integer r,c;
+//   r = a.orbitSTM.GetNumRows();
+//   c = a.orbitSTM.GetNumColumns();
+//   orbitSTM.SetSize(r,c);
+//   orbitSTM = a.orbitSTM;
+//
+//   r = a.orbitAMatrix.GetNumRows();
+//   c = a.orbitAMatrix.GetNumColumns();
+//   orbitAMatrix.SetSize(r,c);
+//   orbitAMatrix = a.orbitAMatrix;
+
+   r = a.fullSTM.GetNumRows();
+   c = a.fullSTM.GetNumColumns();
+   fullSTM.SetSize(r,c);
+   fullSTM = a.fullSTM;
+   stmIndices = a.stmIndices;
+
+   r = a.fullAMatrix.GetNumRows();
+   c = a.fullAMatrix.GetNumColumns();
+   fullAMatrix.SetSize(r,c);
+   fullAMatrix = a.fullAMatrix;
 
    hardwareNames     = a.hardwareNames;
 //   hardwareList      = a.hardwareList;
@@ -751,18 +827,50 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    // Build element labels and units
    BuildStateElementLabelsAndUnits();
 
-   orbitSTM = a.orbitSTM;
-   orbitAMatrix = a.orbitAMatrix;
+   // resize the matrices first, then copy the contents
+   Integer r,c;
+//   r = a.orbitSTM.GetNumRows();
+//   c = a.orbitSTM.GetNumColumns();
+//   orbitSTM.SetSize(r,c);
+//   orbitSTM = a.orbitSTM;
+//
+//   r = a.orbitAMatrix.GetNumRows();
+//   c = a.orbitAMatrix.GetNumColumns();
+//   orbitAMatrix.SetSize(r,c);
+//   orbitAMatrix = a.orbitAMatrix;
+
+   r = a.fullSTM.GetNumRows();
+   c = a.fullSTM.GetNumColumns();
+   fullSTM.SetSize(r,c);
+   fullSTM = a.fullSTM;
+   stmIndices = a.stmIndices;
+
+   r = a.fullAMatrix.GetNumRows();
+   c = a.fullAMatrix.GetNumColumns();
+   fullAMatrix.SetSize(r,c);
+   fullAMatrix = a.fullAMatrix;
+
+   fullSTMRowCount = a.fullSTMRowCount;
+
 
    spadSRPFile        = a.spadSRPFile;
    spadSrpFileFullPath = a.spadSrpFileFullPath;
    spadSRPScaleFactor = a.spadSRPScaleFactor;
    spadSRPReader      = NULL;
    spadBFCS           = NULL;
-   if (ephemMgr) delete ephemMgr;
-   ephemMgr           = NULL;
+   // We don't want to delete any ephem manager here or the event
+   // location will not work
+//   if (ephemMgr) delete ephemMgr;
+//   ephemMgr           = NULL;
 
    includeCartesianState = a.includeCartesianState;
+
+   solveforNames      = a.solveforNames;                                 // made changes by TUAN NGUYEN
+
+   cdEpsilon          = a.cdEpsilon;
+   crEpsilon          = a.crEpsilon;
+   constrainCd        = a.constrainCd;
+   constrainCr        = a.constrainCr;
 
 
    #ifdef DEBUG_SPACECRAFT
@@ -815,6 +923,14 @@ void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 CoordinateSystem* Spacecraft::GetInternalCoordSystem()
 {
    return internalCoordSystem;
+}
+
+//---------------------------------------------------------------------------
+// EphemManager* GetEphemManager()
+//---------------------------------------------------------------------------
+EphemManager* Spacecraft::GetEphemManager()
+{
+   return ephemMgr;
 }
 
 
@@ -1247,16 +1363,19 @@ void Spacecraft::RecordEphemerisData()
 {
    if (!ephemMgr)
    {
-      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+//      ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+      ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
       ephemMgr->SetObject(this);
       // @todo - do I need to resend this, if the internalCoordSys ever changes?
       ephemMgr->SetCoordinateSystem(internalCoordSystem);
+      ephemMgr->SetSolarSystem(solarSystem);
+      ephemMgr->Initialize();
    }
    ephemMgr->RecordEphemerisData();
 }
 
 //------------------------------------------------------------------------------
-// ProvideEphemeris()
+// ProvideEphemerisData()
 // Load the recorded ephemeris and start up another file to continue recording
 //------------------------------------------------------------------------------
 void Spacecraft::ProvideEphemerisData()
@@ -1883,6 +2002,8 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
             return powerSystem;
 
       case Gmat::FUEL_TANK:
+      case Gmat::CHEMICAL_FUEL_TANK:
+      case Gmat::ELECTRIC_FUEL_TANK:
          for (ObjectArray::iterator i = tanks.begin();
               i < tanks.end(); ++i)
          {
@@ -1891,6 +2012,8 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          }
 
       case Gmat::THRUSTER:
+      case Gmat::CHEMICAL_THRUSTER:
+      case Gmat::ELECTRIC_THRUSTER:
          for (ObjectArray::iterator i = thrusters.begin();
               i < thrusters.end(); ++i)
          {
@@ -2352,12 +2475,17 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
             return i;
          }
       }
-      if (str == "STM")
-         return ORBIT_STM;
+      if ((str == "STM") || (str == "OrbitSTM"))
+         return FULL_STM;
 
-      if (str == "AMatrix")
-         return ORBIT_A_MATRIX;
+      if ((str == "AMatrix") || (str == "OrbitAMatrix"))
+         return FULL_A_MATRIX;
 
+//      if (str == "STM")
+//         return ORBIT_STM;
+//
+//      if (str == "AMatrix")
+//         return ORBIT_A_MATRIX;
 
       if ((str == "CartesianState") || (str == "CartesianX")) return CARTESIAN_X;
       if (str == "CartesianY" )  return CARTESIAN_Y;
@@ -2443,12 +2571,12 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
 
-   if (id == ORBIT_STM)
+   if ((id == ORBIT_STM) || (id == ORBIT_A_MATRIX))
    {
       return true;
    }
 
-   if (id == ORBIT_A_MATRIX)
+   if ((id == FULL_STM) || (id == FULL_A_MATRIX) || (id == FULL_STM_ROWCOUNT))
    {
       return true;
    }
@@ -2468,6 +2596,9 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       else
          return false;
    }
+
+   if ((id == CD_EPSILON) || (id == CR_EPSILON))
+      return true;
 
    // NAIF ID is not read-only for spacecraft
    if (id == NAIF_ID)  return false;
@@ -2568,21 +2699,32 @@ bool Spacecraft::ParameterAffectsDynamics(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// bool ParameterDvInitializesNonzero(const Integer id) const
+// bool ParameterDvInitializesNonzero(const Integer id, const Integer r,
+//       const Integer c) const
+//------------------------------------------------------------------------------
+/**
+ * Specifies elements that initialize, for derivatives, to non-zero values
+ *
+ * @param id The parameter ID for the data
+ * @param r The row index for matrix data
+ * @param c The column index for matrix data
+ *
+ * @return true if the initial value is not 0, false if it is zero
+ */
 //------------------------------------------------------------------------------
 bool Spacecraft::ParameterDvInitializesNonzero(const Integer id,
       const Integer r, const Integer c) const
 {
-   if (id == ORBIT_STM)
+   if ((id == ORBIT_STM) || (id == FULL_STM))
    {
-      if (r == c-3)
+      if ((r == c-3) && (r < 3))
          return true;
       return false;
    }
 
-   if (id == ORBIT_A_MATRIX)
+   if ((id == ORBIT_A_MATRIX) || (id == FULL_A_MATRIX))
    {
-      if (r == c-3)
+      if ((r == c-3) && (r < 3))
          return true;
       return false;
    }
@@ -2591,13 +2733,23 @@ bool Spacecraft::ParameterDvInitializesNonzero(const Integer id,
 }
 
 //------------------------------------------------------------------------------
-// Real ParameterDvInitialValue(const Integer id, const Integer r,
-//                              const Integer c) const
+// Real Spacecraft::ParameterDvInitialValue(const Integer id, const Integer r,
+//       const Integer c) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the initial derivative value for non-zero initialization
+ *
+ * @param id The parameter ID for the data
+ * @param r The row index for matrix data
+ * @param c The column index for matrix data
+ *
+ * @return The initial value for the derivative
+ */
 //------------------------------------------------------------------------------
 Real Spacecraft::ParameterDvInitialValue(const Integer id, const Integer r,
       const Integer c) const
 {
-   if (r == c-3)
+   if ((r == c-3) && (r < 3))
       return 1.0;
    return 0.0;
 }
@@ -2729,8 +2881,13 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    }
 
    if (id == DRY_MASS_ID)   return dryMass;
-   if (id == CD_ID)         return coeffDrag;
-   if (id == CR_ID)         return reflectCoeff;
+
+   if (id == CD_ID)
+      return coeffDrag * (1.0 + cdEpsilon);
+
+   if (id == CR_ID)
+      return reflectCoeff * (1.0 + crEpsilon);
+
    if (id == DRAG_AREA_ID)  return dragArea;
    if (id == SRP_AREA_ID)   return srpArea;
    if (id == TOTAL_MASS_ID) return UpdateTotalMass();
@@ -2764,6 +2921,9 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    if (id == MODEL_ROTATION_Y)   return modelRotationY;
    if (id == MODEL_ROTATION_Z)   return modelRotationZ;
    if (id == MODEL_SCALE)        return modelScale;
+
+   if (id == CD_EPSILON)         return cdEpsilon;
+   if (id == CR_EPSILON)         return crEpsilon;
 
    return SpaceObject::GetRealParameter(id);
 }
@@ -2999,6 +3159,21 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
       return newVal;
    }
 
+   if (id == CD_EPSILON)
+   {
+      cdEpsilon = value;
+      // Turn off strict constraint because we are estimating
+      constrainCd = false;
+      return cdEpsilon;
+   }
+
+   if (id == CR_EPSILON)
+   {
+      crEpsilon = value;
+      // Turn off strict constraint because we are estimating
+      constrainCr = false;
+      return crEpsilon;
+   }
 
    return SpaceObject::SetRealParameter(id, value);
 }
@@ -3085,7 +3260,10 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    if (label == "Cd")
    {
       if (value >= 0.0)
+      {
          coeffDrag = value;
+         cdEpsilon = 0.0;
+      }
       else
       {
          SpaceObjectException soe("");
@@ -3129,8 +3307,14 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    }
    if (label == "Cr")
    {
-      if ((value >= 0.0) && (value <= 2.0))
+      if (((value >= 0.0) && (value <= 2.0)) || (constrainCr == false))
+      {
          reflectCoeff = value;
+         crEpsilon = 0.0;
+         if ((value < 0.0) || (value > 2.0))
+            MessageInterface::ShowMessage("Warning: The Cr value %lf is "
+                  "outside of the expected range of 0.0 <= Cr <= 2.0\n", value);
+      }
       else
       {
          SpaceObjectException soe("");
@@ -3142,6 +3326,18 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       parmsChanged = true;
       return reflectCoeff;
    }
+   if (label == "Cd_Epsilon")
+   {
+      cdEpsilon = value;
+      constrainCd = false;
+      return cdEpsilon;
+   }
+   if (label == "Cr_Epsilon")
+   {
+      crEpsilon = value;
+      constrainCr = false;
+      return crEpsilon;
+   }
 
    if (label == "TotalMass")// return totalMass;    // Don't change the total mass
       throw SpaceObjectException("The parameter \"TotalMass\" is a calculated "
@@ -3149,6 +3345,106 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 
    return SpaceObject::SetRealParameter(label, value);
 }
+
+
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an integer parameter value
+ *
+ * @param id Parameter ID for the requested field
+ *
+ * @return The value of the field
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::GetIntegerParameter(const Integer id) const
+{
+   if (id == FULL_STM_ROWCOUNT)
+      return fullSTMRowCount;
+
+   return SpaceObject::GetIntegerParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer field
+ *
+ * @param id Parameter ID for the requested field
+ * @param value The new value
+ *
+ * @return The value of the field
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::SetIntegerParameter(const Integer id, const Integer value)
+{
+   if (id == FULL_STM_ROWCOUNT)
+   {
+      fullSTMRowCount = value;
+      fullSTM.SetSize(fullSTMRowCount, fullSTMRowCount, true);
+      for (Integer i = 0; i < fullSTMRowCount; ++i)
+         fullSTM(i,i) = 1.0;
+      return fullSTMRowCount;
+   }
+
+   return SpaceObject::SetIntegerParameter(id, value);
+}
+
+//Integer Spacecraft::GetIntegerParameter(const Integer id, const Integer index) const
+//{
+//   return SpaceObject::GetIntegerParameter(id, index);
+//}
+//Integer Spacecraft::SetIntegerParameter(const Integer id, const Integer value, const Integer index)
+//{
+//   return SpaceObject::SetIntegerParameter(id, value, index);
+//}
+
+
+//------------------------------------------------------------------------------
+// Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves an integer parameter value
+ *
+ * @param label Parameter label for the requested field
+ *
+ * @return The value of the field
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// Integer SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for an integer field
+ *
+ * @param label Parameter label for the requested field
+ * @param value The new value
+ *
+ * @return The value of the field
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
+//Integer Spacecraft::GetIntegerParameter(const std::string &label, const Integer index) const
+//{
+//   return GetIntegerParameter(GetParameterID(label), index);
+//}
+//Integer Spacecraft::SetIntegerParameter(const std::string &label, const Integer value, const Integer index)
+//{
+//   return SetIntegerParameter(GetParameterID(label), value, index);
+//}
 
 //------------------------------------------------------------------------------
 //  const Rvector& GetRvectorParameter(const Integer id)
@@ -3356,8 +3652,17 @@ std::string Spacecraft::GetStringParameter(const Integer id,
                return "";
          }
 
+      case SOLVEFORS:                                                          // made changes by TUAN NGUYEN
+         {                                                                     // made changes by TUAN NGUYEN
+            if ((0 <= index)&(index < (Integer)(solveforNames.size())))        // made changes by TUAN NGUYEN
+               return solveforNames[index];                                    // made changes by TUAN NGUYEN
+            else                                                               // made changes by TUAN NGUYEN
+               return "";                                                      // made changes by TUAN NGUYEN
+         }                                                                     // made changes by TUAN NGUYEN
+
       default:
          break;
+
    }
    return SpaceObject::GetStringParameter(id, index);
 }
@@ -3398,6 +3703,8 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
 {
    if (id == ADD_HARDWARE)
       return hardwareNames;
+   if (id == SOLVEFORS)                                         // made changes by TUAN NGUYEN
+      return solveforNames;                                     // made changes by TUAN NGUYEN
    if (id == FUEL_TANK_ID)
       return tankNames;
    if (id == THRUSTER_ID)
@@ -3537,6 +3844,42 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       }
       return true;
    }
+
+   if (id == SOLVEFORS)                                                       // made changes by TUAN NGUYEN
+   {                                                                          // made changes by TUAN NGUYEN
+      if ((value.substr(0,2) == "{}"))                                        // made changes by TUAN NGUYEN
+      {                                                                       // made changes by TUAN NGUYEN
+         solveforNames.clear();                                               // made changes by TUAN NGUYEN
+         return true;                                                         // made changes by TUAN NGUYEN
+      }                                                                       // made changes by TUAN NGUYEN
+
+      Integer length = 6;
+
+      stmIndices.clear();
+      stmIndices.push_back(GetEstimationParameterID("CartesianX"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianY"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianZ"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianVX"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianVY"));
+      stmIndices.push_back(GetEstimationParameterID("CartesianVZ"));
+
+      // Only add the solvefor parameter if it is not in the list already     // made changes by TUAN NGUYEN
+      if (find(solveforNames.begin(), solveforNames.end(), value) ==          // made changes by TUAN NGUYEN
+          solveforNames.end())                                                // made changes by TUAN NGUYEN
+      {                                                                       // made changes by TUAN NGUYEN
+         solveforNames.push_back(value);                                      // made changes by TUAN NGUYEN
+         if (value != "CartesianState")
+         {
+            length += GetEstimationParameterSize(GetParameterID(value));
+            for (Integer i = 0; i < GetEstimationParameterSize(GetParameterID(value)); ++i)
+            {
+               stmIndices.push_back(GetEstimationParameterID(value));
+            }
+         }
+      }                                                                       // made changes by TUAN NGUYEN
+      SetIntegerParameter(FULL_STM_ROWCOUNT, length);
+      return true;                                                            // made changes by TUAN NGUYEN
+   }                                                                          // made changes by TUAN NGUYEN
 
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
@@ -3816,6 +4159,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
+   case SOLVEFORS:                                                                                 // made changes by TUAN NGUYEN
+      {                                                                                            // made changes by TUAN NGUYEN
+         if (index < (Integer)solveforNames.size())                                                // made changes by TUAN NGUYEN
+            solveforNames[index] = value;                                                          // made changes by TUAN NGUYEN
+         else                                                                                      // made changes by TUAN NGUYEN
+            // Only add the solvefor parameter if it is not in the list already                    // made changes by TUAN NGUYEN
+            if (find(solveforNames.begin(), solveforNames.end(), value) == solveforNames.end())    // made changes by TUAN NGUYEN
+               solveforNames.push_back(value);                                                     // made changes by TUAN NGUYEN
+
+         return true;                                                                              // made changes by TUAN NGUYEN
+      }                                                                                            // made changes by TUAN NGUYEN
    case FUEL_TANK_ID:
       {
          if (index < (Integer)tankNames.size())
@@ -3839,7 +4193,6 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value,
 
          return true;
       }
-
 
    default:
       return SpaceObject::SetStringParameter(id, value, index);
@@ -3869,10 +4222,32 @@ bool Spacecraft::SetStringParameter(const std::string &label,
 const Rmatrix& Spacecraft::GetRmatrixParameter(const Integer id) const
 {
    if (id == ORBIT_STM)
-      return orbitSTM;
+   {
+//      // Copy over upper left 6x6 of the full matrix
+//      for (UnsignedInt i = 0; i < 6; ++i)
+//         for (UnsignedInt j = 0; j < 6; ++j)
+//            // Cast to handle const for now
+//            ((Rmatrix)orbitSTM)(i,j) = fullSTM(i,j);
+//      return orbitSTM;
+      return fullSTM;
+   }
 
    if (id == ORBIT_A_MATRIX)
-      return orbitAMatrix;
+   {
+//      // Copy over upper left 6x6 of the full matrix
+//      for (UnsignedInt i = 0; i < 6; ++i)
+//         for (UnsignedInt j = 0; j < 6; ++j)
+//            // Cast to handle const for now
+//            ((Rmatrix)orbitAMatrix)(i,j) = fullAMatrix(i,j);
+//      return orbitAMatrix;
+      return fullAMatrix;
+   }
+
+   if (id == FULL_STM)
+      return fullSTM;
+
+   if (id == FULL_A_MATRIX)
+      return fullAMatrix;
 
 //   if (id == ORBIT_COVARIANCE)
 //      return covariance;
@@ -3888,14 +4263,42 @@ const Rmatrix& Spacecraft::SetRmatrixParameter(const Integer id,
 {
    if (id == ORBIT_STM)
    {
-      orbitSTM = value;
-      return orbitSTM;
+      #ifdef DEBUG_STM
+         MessageInterface::ShowMessage("Setting orbit STM\n");
+      #endif
+//         orbitSTM = value;
+//         return orbitSTM;
+      fullSTM = value;
+      return fullSTM;
    }
 
    if (id == ORBIT_A_MATRIX)
    {
-      orbitAMatrix = value;
-      return orbitAMatrix;
+      #ifdef DEBUG_STM
+         MessageInterface::ShowMessage("Setting orbit A Matrix\n");
+      #endif
+//      orbitAMatrix = value;
+//      return orbitAMatrix;
+      fullAMatrix = value;
+      return fullAMatrix;
+   }
+
+   if (id == FULL_STM)
+   {
+      #ifdef DEBUG_STM
+         MessageInterface::ShowMessage("Setting full STM\n");
+      #endif
+      fullSTM = value;
+      return fullSTM;
+   }
+
+   if (id == FULL_A_MATRIX)
+   {
+      #ifdef DEBUG_STM
+         MessageInterface::ShowMessage("Setting full A Matrix\n");
+      #endif
+      fullAMatrix = value;
+      return fullAMatrix;
    }
 
 //   if (id == ORBIT_COVARIANCE)
@@ -3933,10 +4336,18 @@ Real Spacecraft::GetRealParameter(const Integer id, const Integer row,
                                   const Integer col) const
 {
    if (id == ORBIT_STM)
-      return orbitSTM(row, col);
+//      return orbitSTM(row, col);
+      return fullSTM(row, col);
 
    if (id == ORBIT_A_MATRIX)
-      return orbitAMatrix(row, col);
+//      return orbitAMatrix(row, col);
+      return fullAMatrix(row, col);
+
+   if (id == FULL_STM)
+      return fullSTM(row, col);
+
+   if (id == FULL_A_MATRIX)
+      return fullAMatrix(row, col);
 
    return SpaceObject::GetRealParameter(id, row, col);
 }
@@ -3961,22 +4372,66 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value,
 {
    if (id == ORBIT_STM)
    {
-      if ((row < 0) || (row >= orbitSTM.GetNumRows()))
+//      if ((row < 0) || (row >= orbitSTM.GetNumRows()))
+//         throw SpaceObjectException("SetRealParameter: row requested for orbitSTM is out-of-range\n");
+//      if ((col < 0) || (col >= orbitSTM.GetNumColumns()))
+//         throw SpaceObjectException("SetRealParameter: col requested for orbitSTM is out-of-range\n");
+//      orbitSTM(row, col) = value;
+//      return orbitSTM(row, col);
+      if ((row < 0) || (row >= fullSTM.GetNumRows()))
          throw SpaceObjectException("SetRealParameter: row requested for orbitSTM is out-of-range\n");
-      if ((col < 0) || (col >= orbitSTM.GetNumColumns()))
+      if ((col < 0) || (col >= fullSTM.GetNumColumns()))
          throw SpaceObjectException("SetRealParameter: col requested for orbitSTM is out-of-range\n");
-      orbitSTM(row, col) = value;
-      return orbitSTM(row, col);
+      fullSTM(row, col) = value;
+
+      #ifdef DEBUG_SPACECRAFT_STM
+         if ((row == col) && (row + 1 == fullSTMRowCount))
+            MessageInterface::ShowMessage("Full STM:\n%s\n", fullSTM.ToString().c_str());
+      #endif
+
+      return fullSTM(row, col);
    }
 
    if (id == ORBIT_A_MATRIX)
    {
-      if ((row < 0) || (row >= orbitAMatrix.GetNumRows()))
+//      if ((row < 0) || (row >= orbitAMatrix.GetNumRows()))
+//         throw SpaceObjectException("SetRealParameter: row requested for orbitAMatrix is out-of-range\n");
+//      if ((col < 0) || (col >= orbitAMatrix.GetNumColumns()))
+//         throw SpaceObjectException("SetRealParameter: col requested for orbitAMatrix is out-of-range\n");
+//      orbitAMatrix(row, col) = value;
+//      return orbitAMatrix(row, col);
+      if ((row < 0) || (row >= fullAMatrix.GetNumRows()))
          throw SpaceObjectException("SetRealParameter: row requested for orbitAMatrix is out-of-range\n");
-      if ((col < 0) || (col >= orbitAMatrix.GetNumColumns()))
+      if ((col < 0) || (col >= fullAMatrix.GetNumColumns()))
          throw SpaceObjectException("SetRealParameter: col requested for orbitAMatrix is out-of-range\n");
-      orbitAMatrix(row, col) = value;
-      return orbitAMatrix(row, col);
+      fullAMatrix(row, col) = value;
+      return fullAMatrix(row, col);
+   }
+
+   if (id == FULL_STM)
+   {
+      if ((row < 0) || (row >= fullSTM.GetNumRows()))
+         throw SpaceObjectException("SetRealParameter: row requested for fullSTM is out-of-range\n");
+      if ((col < 0) || (col >= fullSTM.GetNumColumns()))
+         throw SpaceObjectException("SetRealParameter: col requested for fullSTM is out-of-range\n");
+      fullSTM(row, col) = value;
+
+      #ifdef DEBUG_SPACECRAFT_STM
+         if ((row == col) && (row == fullSTMRowCount-1))
+            MessageInterface::ShowMessage("Full STM; setting rc %d, %d:  \n%s\n", row, col, fullSTM.ToString(12).c_str());
+      #endif
+
+      return fullSTM(row, col);
+   }
+
+   if (id == FULL_A_MATRIX)
+   {
+      if ((row < 0) || (row >= fullAMatrix.GetNumRows()))
+         throw SpaceObjectException("SetRealParameter: row requested for fullAMatrix is out-of-range\n");
+      if ((col < 0) || (col >= fullAMatrix.GetNumColumns()))
+         throw SpaceObjectException("SetRealParameter: col requested for fullAMatrix is out-of-range\n");
+      fullAMatrix(row, col) = value;
+      return fullAMatrix(row, col);
    }
 
    return SpaceObject::SetRealParameter(id, value, row, col);
@@ -4312,33 +4767,51 @@ bool Spacecraft::TakeAction(const std::string &action,
 
    if (action == "ResetSTM")
    {
-      orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
-      orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
+      for (Integer i = 0; i < fullSTMRowCount; ++i)
+      {
+         fullSTM(i,i) = 1.0;
+         for (Integer j = i+1; j < fullSTMRowCount; ++j)
+         {
+            fullSTM(i,j) = fullSTM(j,i) = 0.0;
+         }
+      }
 
-      orbitSTM(0,1)=orbitSTM(0,2)=orbitSTM(0,3)=orbitSTM(0,4)=orbitSTM(0,5)=
-      orbitSTM(1,0)=orbitSTM(1,2)=orbitSTM(1,3)=orbitSTM(1,4)=orbitSTM(1,5)=
-      orbitSTM(2,0)=orbitSTM(2,1)=orbitSTM(2,3)=orbitSTM(2,4)=orbitSTM(2,5)=
-      orbitSTM(3,0)=orbitSTM(3,1)=orbitSTM(3,2)=orbitSTM(3,4)=orbitSTM(3,5)=
-      orbitSTM(4,0)=orbitSTM(4,1)=orbitSTM(4,2)=orbitSTM(4,3)=orbitSTM(4,5)=
-      orbitSTM(5,0)=orbitSTM(5,1)=orbitSTM(5,2)=orbitSTM(5,3)=orbitSTM(5,4)
-            = 0.0;
+//      orbitSTM(0,0) = orbitSTM(1,1) = orbitSTM(2,2) =
+//      orbitSTM(3,3) = orbitSTM(4,4) = orbitSTM(5,5) = 1.0;
+//
+//      orbitSTM(0,1)=orbitSTM(0,2)=orbitSTM(0,3)=orbitSTM(0,4)=orbitSTM(0,5)=
+//      orbitSTM(1,0)=orbitSTM(1,2)=orbitSTM(1,3)=orbitSTM(1,4)=orbitSTM(1,5)=
+//      orbitSTM(2,0)=orbitSTM(2,1)=orbitSTM(2,3)=orbitSTM(2,4)=orbitSTM(2,5)=
+//      orbitSTM(3,0)=orbitSTM(3,1)=orbitSTM(3,2)=orbitSTM(3,4)=orbitSTM(3,5)=
+//      orbitSTM(4,0)=orbitSTM(4,1)=orbitSTM(4,2)=orbitSTM(4,3)=orbitSTM(4,5)=
+//      orbitSTM(5,0)=orbitSTM(5,1)=orbitSTM(5,2)=orbitSTM(5,3)=orbitSTM(5,4)
+//            = 0.0;
    }
 
    if (action == "ResetAMatrix")
    {
-      orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
-      orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+      for (Integer i = 0; i < fullSTMRowCount; ++i)
+      {
+         fullAMatrix(i,i) = 1.0;
+         for (Integer j = i+1; j < fullSTMRowCount; ++j)
+         {
+            fullAMatrix(i,j) = fullAMatrix(j,i) = 0.0;
+         }
+      }
 
-      orbitAMatrix(0,1) = orbitAMatrix(0,2) = orbitAMatrix(0,3) =
-      orbitAMatrix(0,4) = orbitAMatrix(0,5) = orbitAMatrix(1,0) =
-      orbitAMatrix(1,2) = orbitAMatrix(1,3) = orbitAMatrix(1,4) =
-      orbitAMatrix(1,5) = orbitAMatrix(2,0) = orbitAMatrix(2,1) =
-      orbitAMatrix(2,3) = orbitAMatrix(2,4) = orbitAMatrix(2,5) =
-      orbitAMatrix(3,0) = orbitAMatrix(3,1) = orbitAMatrix(3,2) =
-      orbitAMatrix(3,4) = orbitAMatrix(3,5) = orbitAMatrix(4,0) =
-      orbitAMatrix(4,1) = orbitAMatrix(4,2) = orbitAMatrix(4,3) =
-      orbitAMatrix(4,5) = orbitAMatrix(5,0) = orbitAMatrix(5,1) =
-      orbitAMatrix(5,2) = orbitAMatrix(5,3) = orbitAMatrix(5,4) = 0.0;
+//      orbitAMatrix(0,0) = orbitAMatrix(1,1) = orbitAMatrix(2,2) =
+//      orbitAMatrix(3,3) = orbitAMatrix(4,4) = orbitAMatrix(5,5) = 1.0;
+//
+//      orbitAMatrix(0,1) = orbitAMatrix(0,2) = orbitAMatrix(0,3) =
+//      orbitAMatrix(0,4) = orbitAMatrix(0,5) = orbitAMatrix(1,0) =
+//      orbitAMatrix(1,2) = orbitAMatrix(1,3) = orbitAMatrix(1,4) =
+//      orbitAMatrix(1,5) = orbitAMatrix(2,0) = orbitAMatrix(2,1) =
+//      orbitAMatrix(2,3) = orbitAMatrix(2,4) = orbitAMatrix(2,5) =
+//      orbitAMatrix(3,0) = orbitAMatrix(3,1) = orbitAMatrix(3,2) =
+//      orbitAMatrix(3,4) = orbitAMatrix(3,5) = orbitAMatrix(4,0) =
+//      orbitAMatrix(4,1) = orbitAMatrix(4,2) = orbitAMatrix(4,3) =
+//      orbitAMatrix(4,5) = orbitAMatrix(5,0) = orbitAMatrix(5,1) =
+//      orbitAMatrix(5,2) = orbitAMatrix(5,3) = orbitAMatrix(5,4) = 0.0;
    }
 
    return SpaceObject::TakeAction(action, actionData);
@@ -4605,6 +5078,18 @@ bool Spacecraft::Initialize()
       }
 
       if (powerSystem) powerSystem->Initialize();
+
+      if (!ephemMgr)
+      {
+//         ephemMgr = new EphemManager(false);  // false is temporary - to not delete files at the end
+         ephemMgr = new EphemManager(true);  // false is temporary - to not delete files at the end
+         ephemMgr->SetObject(this);
+         // @todo - do I need to resend this, if the internalCoordSys ever changes?
+         ephemMgr->SetCoordinateSystem(internalCoordSystem);
+         ephemMgr->SetSolarSystem(solarSystem);
+         ephemMgr->Initialize();
+      }
+
 
       isInitialized = true;
       retval = true;
@@ -4919,6 +5404,7 @@ Real* Spacecraft::GetPropItem(const Integer item)
       // All other values call up the class hierarchy
       default:
          retval = SpaceObject::GetPropItem(item);
+         break;
    }
 
    return retval;
@@ -4937,11 +5423,11 @@ Integer Spacecraft::GetPropItemSize(const Integer item)
          break;
 
       case Gmat::ORBIT_STATE_TRANSITION_MATRIX:
-         retval = 36;
+         retval = fullSTMRowCount * fullSTMRowCount;
          break;
 
       case Gmat::ORBIT_A_MATRIX:
-         retval = 36;
+         retval = fullSTMRowCount * fullSTMRowCount;
          break;
       case Gmat::MASS_FLOW:
          // todo: Access tanks for mass information to handle mass flow
@@ -4953,6 +5439,7 @@ Integer Spacecraft::GetPropItemSize(const Integer item)
       // All other values call up the hierarchy
       default:
          retval = SpaceObject::GetPropItemSize(item);
+         break;
    }
 
    return retval;
@@ -4975,10 +5462,67 @@ bool Spacecraft::PropItemNeedsFinalUpdate(const Integer item)
 
       // All other values call up the hierarchy
       default:
-         ;        // Intentional drop through
+         break;        // Intentional drop through
    }
 
    return SpaceObject::PropItemNeedsFinalUpdate(item);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GmatBase::GetEstimationParameterID(const std::string &param)
+//------------------------------------------------------------------------------
+/**
+ * This method builds the parameter ID used in the estimation subsystem
+ *
+ * @param param The text name of the estimation parameter
+ *
+ * @return The ID used in estimation for the parameter
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::GetEstimationParameterID(const std::string &param)
+{
+   Integer id = type * ESTIMATION_TYPE_ALLOCATION; // Base for estimation ID
+
+   try
+   {
+      Integer parmID = GetParameterID(param);
+
+      // Handle special cases that do not directly manipulate the parameter
+      if (param == "Cd")
+         parmID = CD_EPSILON;
+      if (param == "Cr")
+         parmID = CR_EPSILON;
+
+      id += parmID;
+   }
+   catch (BaseException &)
+   {
+      return -1;
+   }
+
+   return id;
+}
+
+
+std::string Spacecraft::GetParameterNameForEstimationParameter(const std::string &parmName)
+{
+   if (parmName == "Cd")
+      return (GetParameterText(CD_EPSILON));
+   if (parmName == "Cr")
+      return (GetParameterText(CR_EPSILON));
+
+   return SpaceObject::GetParameterNameForEstimationParameter(parmName);
+}
+
+std::string Spacecraft::GetParameterNameFromEstimationParameter(const std::string &parmName)
+{
+   if (parmName == "Cd_Epsilon")
+      return (GetParameterText(CD_ID));
+   if (parmName == "Cr_Epsilon")
+      return (GetParameterText(CR_ID));
+
+   return SpaceObject::GetParameterNameFromEstimationParameter(parmName);
 }
 
 
@@ -5004,10 +5548,12 @@ bool Spacecraft::IsEstimationParameterValid(const Integer item)
       // All other values call up the hierarchy
       default:
          retval = SpaceObject::IsEstimationParameterValid(item);
+         break;
    }
 
    return retval;
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetEstimationParameterSize(const Integer item)
@@ -5017,7 +5563,8 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
    Integer retval = 1;
 
 
-   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+   Integer id = (item > ESTIMATION_TYPE_ALLOCATION ?
+                 item - type * ESTIMATION_TYPE_ALLOCATION : item);
 
    #ifdef DEBUG_ESTIMATION
       MessageInterface::ShowMessage("Spacecraft::GetEstimationParameterSize(%d)"
@@ -5030,6 +5577,9 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
       case CARTESIAN_X:
          retval = 6;
          break;
+      case CR_ID:
+         retval = 1;
+         break;
 
       case Gmat::MASS_FLOW:
          // todo: Access tanks for mass information to handle mass flow
@@ -5038,6 +5588,7 @@ Integer Spacecraft::GetEstimationParameterSize(const Integer item)
       // All other values call up the hierarchy
       default:
          retval = SpaceObject::GetEstimationParameterSize(item);
+         break;
    }
 
    return retval;
@@ -5058,6 +5609,10 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
          retval = state.GetState();
          break;
 
+      case CR_ID:
+         retval = &reflectCoeff;
+         break;
+
 //      case Gmat::MASS_FLOW:
 //         // todo: Access tanks for mass information to handle mass flow
 //         break;
@@ -5065,6 +5620,7 @@ Real* Spacecraft::GetEstimationParameterValue(const Integer item)
       // All other values call up the class heirarchy
       default:
          retval = SpaceObject::GetEstimationParameterValue(item);
+         break;
    }
 
    return retval;
@@ -5681,7 +6237,9 @@ void Spacecraft::CloneOwnedObjects(Attitude *att, const ObjectArray &tnks,
 
       // If not found, clone otherHardware[i] and add to hardwareList
       if (j == hardwareList.size())
+      {
          hardwareList.push_back(otherHardware[i]->Clone());
+      }
    }
 }
 
@@ -6912,8 +7470,36 @@ bool Spacecraft::HasDynamicParameterSTM(Integer parameterId)
 Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
 {
    if (parameterId == CARTESIAN_X)
-      return &orbitSTM;
+      return &fullSTM;
+   if (parameterId == CR_EPSILON)
+      return &fullSTM;
+//      return &orbitSTM;
+
    return SpaceObject::GetParameterSTM(parameterId);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetStmRowId(const Integer forRow)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID associated with a given row/column of the STM
+ *
+ * Note that since the STM is of the form d(r(t)) / d(r(t_o)), the numerator
+ * setting for each row matches the denominator setting for each column.
+ *
+ * @param forRow The associated row (for the numerator) or column (denominator)
+ *
+ * @return The ID
+ */
+//------------------------------------------------------------------------------
+Integer Spacecraft::GetStmRowId(const Integer forRow)
+{
+   Integer retval = -1;
+
+
+
+   return retval;
 }
 
 //-------------------------------------------------------------------------
@@ -6922,7 +7508,8 @@ Rmatrix* Spacecraft::GetParameterSTM(Integer parameterId)
 Integer Spacecraft::HasParameterCovariances(Integer parameterId)
 {
    if (parameterId == CARTESIAN_X)
-      return 6;
+      return fullSTMRowCount;
+//      return 6;
    return SpaceObject::HasParameterCovariances(parameterId);
 }
 

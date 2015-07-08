@@ -295,6 +295,18 @@
     <Filter Include="Source Files\plugins\VF13OptimizerPlugin\solver">
       <UniqueIdentifier>{4430f3a6-34e0-44dc-88e8-c08af67682a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\plugins\NewParameterPlugin">
+      <UniqueIdentifier>{553a748c-ae92-484a-8089-605c8de96041}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\NewParameterPlugin\factory">
+      <UniqueIdentifier>{2bf96436-1fe7-4077-935e-36cc072ea3a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\plugins\NewParameterPlugin\parameter">
+      <UniqueIdentifier>{47fc0132-1b82-42cd-982b-7804c15e1669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\event">
+      <UniqueIdentifier>{b26c0f23-bfd3-4b3f-8385-93fa6bdf5d7e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\base\attitude\Attitude.cpp">
@@ -1242,9 +1254,6 @@
     <ClCompile Include="..\..\..\src\base\util\GregorianDate.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\util\LatLonHgt.cpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\util\LeapSecsFileReader.cpp">
       <Filter>Source Files\base\util</Filter>
     </ClCompile>
@@ -1947,9 +1956,6 @@
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.cpp">
-      <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.cpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClCompile>
@@ -2354,6 +2360,63 @@
     </ClCompile>
     <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory\VF13Factory.cpp">
       <Filter>Source Files\plugins\VF13OptimizerPlugin\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solarsys\SolarFluxReader.cpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseEvent.cpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.cpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\command\FindEvents.cpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\factory\NewParameterFactory.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMAcceleration.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMDensity.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeData.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeReal.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverData.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverReal.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverState.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverStatus.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverString.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactEvent.cpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactResult.cpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp">
+      <Filter>Source Files\gui\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3344,9 +3407,6 @@
     <ClInclude Include="..\..\..\src\base\util\GregorianDate.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\base\util\LatLonHgt.hpp">
-      <Filter>Source Files\base\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\base\util\LeapSecsFileReader.hpp">
       <Filter>Source Files\base\util</Filter>
     </ClInclude>
@@ -4079,9 +4139,6 @@
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventData.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventException.hpp">
-      <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\EstimationPlugin\src\base\event\EventManager.hpp">
       <Filter>Source Files\plugins\EstimationPlugin\event</Filter>
     </ClInclude>
@@ -4489,6 +4546,63 @@
     </ClInclude>
     <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solarsys\SolarFluxReader.hpp">
+      <Filter>Source Files\base\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp">
+      <Filter>Source Files\gui\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseEvent.hpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\EclipseTotalEvent.hpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\command\FindEvents.hpp">
+      <Filter>Source Files\base\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp">
+      <Filter>Source Files\gui\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\factory\NewParameterFactory.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMAcceleration.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMDensity.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeData.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeReal.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverData.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverReal.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverState.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverStatus.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverString.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactEvent.hpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactResult.hpp">
+      <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp">
+      <Filter>Source Files\gui\event</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

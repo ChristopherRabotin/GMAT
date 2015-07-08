@@ -46,6 +46,7 @@
 //#define DEBUG_ORBITDATA_OBJREF_EPOCH
 //#define DEBUG_ORBITDATA_OBJNAME
 //#define DEBUG_BROUWER_LONG
+//#define DEBUG_FULL_STM
 
 using namespace GmatMathUtil;
 
@@ -564,6 +565,22 @@ Rvector6 OrbitData::GetCartState()
       if ((mParameterCS->AreAxesOfType("ObjectReferencedAxes")) && !firstTimeEpochWarning)
       {
          GmatBase *objRefOrigin = mParameterCS->GetOrigin();
+         if (objRefOrigin == NULL)
+         {
+            std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
+            errmsg += mParameterCS->GetName() + " coordinate system. \n";
+            errmsg += "The origin of " + mParameterCS->GetName() + " is NULL\n";
+            ParameterException pe(errmsg);
+            pe.SetFatal(true);
+            throw pe;
+         }
+         
+         #ifdef DEBUG_ORBITDATA_CONVERT
+         MessageInterface::ShowMessage
+            ("   Origin of '%s' is '%s'\n", mParameterCS->GetName().c_str(),
+             objRefOrigin->GetName().c_str());
+         #endif
+         
          if (objRefOrigin->IsOfType("Spacecraft"))
          {
             std::string objRefScName = ((Spacecraft*) objRefOrigin)->GetName();
@@ -606,13 +623,17 @@ Rvector6 OrbitData::GetCartState()
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage
-            ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
-             mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
+         // MessageInterface::ShowMessage
+         //    ("OrbitData::GetCartState() Failed to convert to %s coordinate system.\n   %s\n",
+         //     mParameterCS->GetName().c_str(), e.GetFullMessage().c_str());
          std::string errmsg = "OrbitData::GetCartState() Failed to convert to " ;
          errmsg += mParameterCS->GetName() + " coordinate system.\n";
          errmsg += "Message: " + e.GetFullMessage() + "\n";
-         throw ParameterException(errmsg);
+         // Set fatal to true so that caller can handle fatal exception (LOJ: 2015.01.06)
+         //throw ParameterException(errmsg);
+         ParameterException pe(errmsg);
+         pe.SetFatal(true);
+         throw pe;
       }
    }
    
@@ -1703,7 +1724,22 @@ const Rmatrix66& OrbitData::GetStmRmat66(Integer item)
    {
    case ORBIT_STM:
       {
-         mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+         Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
+
+         #ifdef DEBUG_FULL_STM
+            MessageInterface::ShowMessage("Full Spacecraft STM:\n%s\n",
+                  fullSTM.ToString(17).c_str());
+         #endif
+
+         for (Integer i = 0; i < 6; ++i)
+         {
+            mSTM(i,i) = fullSTM(i,i);
+            for (Integer j = i+1; j < 6; ++j)
+            {
+               mSTM(i,j) = fullSTM(i,j);
+               mSTM(j,i) = fullSTM(j,i);
+            }
+         }
          return mSTM;
       }
    default:
@@ -1727,21 +1763,53 @@ const Rmatrix33& OrbitData::GetStmRmat33(Integer item)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
    
-   mSTM = mSpacecraft->GetRmatrixParameter("OrbitSTM");
+   Rmatrix fullSTM(mSpacecraft->GetRmatrixParameter("OrbitSTM"));
    
    switch (item)
    {
    case ORBIT_STM_A:
-      mSTMSubset = mSTM.UpperLeft();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i,i);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i,j);
+            mSTMSubset(j,i) = fullSTM(j,i);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_B:
-      mSTMSubset = mSTM.UpperRight();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i,i+3);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i,j+3);
+            mSTMSubset(j,i) = fullSTM(j,i+3);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_C:
-      mSTMSubset = mSTM.LowerLeft();
+      for (Integer i = 0; i < 3; ++i)
+      {
+         mSTMSubset(i,i) = fullSTM(i+3,i);
+         for (Integer j = i+1; j < 3; ++j)
+         {
+            mSTMSubset(i,j) = fullSTM(i+3,j);
+            mSTMSubset(j,i) = fullSTM(j+3,i);
+         }
+      }
       return mSTMSubset;
    case ORBIT_STM_D:
-      mSTMSubset = mSTM.LowerRight();
+      for (Integer i = 3; i < 6; ++i)
+      {
+         mSTMSubset(i-3,i-3) = fullSTM(i,i);
+         for (Integer j = i+1; j < 6; ++j)
+         {
+            mSTMSubset(i-3,j-3) = fullSTM(i,j);
+            mSTMSubset(j-3,i-3) = fullSTM(j,i);
+         }
+      }
       return mSTMSubset;
    default:
       // otherwise, there is an error   
@@ -2091,13 +2159,18 @@ void OrbitData::InitializeRefObjects()
       {
          #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
-            ("OrbitData::InitializeRefObjects() origin not found: " +
-             mParameterCS->GetOriginName() + "\n");
+            ("OrbitData::InitializeRefObjects() The origin '%s' of CS '%s' is NULL, "
+             "so try to find it again...\n",
+             mParameterCS->GetOriginName().c_str(), mParameterCS->GetName().c_str());
          #endif
-      
-         throw ParameterException
-            ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
-             mParameterCS->GetOriginName() + "\" is NULL");
+         
+         // Try to find origin again for GmatFunction (LOJ: 2014.01.12)
+         mOrigin = (SpacePoint*)FindObject(Gmat::SPACE_POINT, mParameterCS->GetOriginName());
+         
+         if (!mOrigin)
+            throw ParameterException
+               ("OrbitData::InitializeRefObjects() The origin of CoordinateSystem \"" +
+                mParameterCS->GetOriginName() + "\" is NULL");
       }
       
       // get gravity constant if out coord system origin is CelestialBody

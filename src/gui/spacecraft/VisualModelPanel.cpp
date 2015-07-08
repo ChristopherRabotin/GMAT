@@ -74,6 +74,12 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
                        Spacecraft *spacecraft, SolarSystem *solarsystem)
    : wxPanel(parent)
 {
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel() constructor entered, spacecraft=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
+   
    // initalize data members
    theScPanel = scPanel;
    theGuiManager = GuiItemManager::GetInstance();
@@ -81,10 +87,27 @@ VisualModelPanel::VisualModelPanel(GmatPanel *scPanel, wxWindow *parent,
    theSolarSystem = solarsystem;
    
    FileManager *fm = FileManager::Instance();
-   modelPath = wxString(fm->GetPathname("MODEL_PATH").c_str());
+   try
+   {
+      modelPath = wxString(fm->GetPathname("VEHICLE_MODEL_PATH").c_str());
+   }
+   catch (BaseException &be)
+   {
+      MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+   }
+   
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage("   modelPath = '%s'\n", modelPath.WX_TO_C_STRING);
+   #endif
    
    Create();
    LoadData();
+   
+   #ifdef DEBUG_PANEL_CREATE
+   MessageInterface::ShowMessage
+      ("VisualModelPanel() constructor leaving, spacecraft=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL");
+   #endif
 }
 
 
@@ -202,7 +225,7 @@ void VisualModelPanel::Create()
 
    // Text and button for the file loader
    modelTextCtrl =
-      new wxTextCtrl(this, ID_MODELFILE_TEXT, wxT(""), wxDefaultPosition, wxSize(180, 20), wxTE_PROCESS_ENTER);
+      new wxTextCtrl(this, ID_MODELFILE_TEXT, wxT(""), wxDefaultPosition, wxSize(180, -1), wxTE_PROCESS_ENTER);
    wxButton *browseButton =
       new wxButton(this, ID_BROWSE_BUTTON, wxT("Browse..."));
 	browseButton->SetToolTip(wxT("Find a model file to attach to the spacecraft"));
@@ -213,14 +236,14 @@ void VisualModelPanel::Create()
    wxStaticText *xRotMin =
       new wxStaticText(this, ID_TEXT, wxT("-180"), wxDefaultPosition, wxDefaultSize, 0);
    xRotSlider =
-      new wxSlider(this, ID_ROT_SLIDER, 0, -180, 180, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_ROT_SLIDER, 0, -180, 180, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *xRotMax =
       new wxStaticText(this, ID_TEXT, wxT("180"), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *xRotDegrees =
       new wxStaticText(this, ID_TEXT, wxT("Degrees"), wxDefaultPosition, wxDefaultSize, 0);
    xRotValueText =
-	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, -1),
                     wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    
@@ -230,14 +253,14 @@ void VisualModelPanel::Create()
    wxStaticText *yRotMin =
       new wxStaticText(this, ID_TEXT, wxT("-180"), wxDefaultPosition, wxDefaultSize, 0);
    yRotSlider =
-      new wxSlider(this, ID_ROT_SLIDER, 0, -180, 180, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_ROT_SLIDER, 0, -180, 180, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *yRotMax =
       new wxStaticText(this, ID_TEXT, wxT("180"), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *yRotDegrees =
       new wxStaticText(this, ID_TEXT, wxT("Degrees"), wxDefaultPosition, wxDefaultSize, 0);
    yRotValueText =
-	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, -1),
                     wxTE_PROCESS_ENTER ,wxTextValidator(wxGMAT_FILTER_NUMERIC));
    
    // Labels and slider for z rotation
@@ -246,14 +269,14 @@ void VisualModelPanel::Create()
    wxStaticText *zRotMin =
       new wxStaticText(this, ID_TEXT, wxT("-180"), wxDefaultPosition, wxDefaultSize, 0);
    zRotSlider =
-      new wxSlider(this, ID_ROT_SLIDER, 0, -180, 180, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_ROT_SLIDER, 0, -180, 180, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *zRotMax =
       new wxStaticText(this, ID_TEXT, wxT("180"), wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *zRotDegrees =
       new wxStaticText(this, ID_TEXT, wxT("Degrees"), wxDefaultPosition, wxDefaultSize, 0);
    zRotValueText =
-	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+	  new wxTextCtrl(this, ID_ROT_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, -1),
                     wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Label and slider for x translation
@@ -262,12 +285,12 @@ void VisualModelPanel::Create()
    wxStaticText *xTranMin =
       new wxStaticText(this, ID_TEXT, wxT("-3.5"), wxDefaultPosition, wxDefaultSize, 0);
    xTranSlider =
-      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *xTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
    xTranValueText =
-	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, -1),
                     wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Label and slider for y translation
@@ -276,12 +299,12 @@ void VisualModelPanel::Create()
    wxStaticText *yTranText =
       new wxStaticText(this, ID_TEXT, wxT("Y"), wxDefaultPosition, wxDefaultSize, 0);
    yTranSlider =
-      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *yTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
    yTranValueText =
-	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+	  new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, -1),
                     wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Label and slider for z translation
@@ -290,24 +313,24 @@ void VisualModelPanel::Create()
    wxStaticText *zTranText =
       new wxStaticText(this, ID_TEXT, wxT("Z"), wxDefaultPosition, wxDefaultSize, 0);
    zTranSlider =
-      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_TRAN_SLIDER, 0, -350, 350, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *zTranMax =
       new wxStaticText(this, ID_TEXT, wxT("3.5"), wxDefaultPosition, wxDefaultSize, 0);
    zTranValueText =
-		new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, 20),
+		new wxTextCtrl(this, ID_TRAN_TEXT, wxT("0.000000"), wxDefaultPosition, wxSize(70, -1),
                      wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // Slider for scale
    wxStaticText *scaleMinLabel =
       new wxStaticText(this, ID_TEXT, wxT("0.001"), wxDefaultPosition, wxDefaultSize, 0);
    scaleSlider =
-      new wxSlider(this, ID_SCALE_SLIDER, 0, -999, 1000, wxDefaultPosition, wxSize(120, 25),
+      new wxSlider(this, ID_SCALE_SLIDER, 0, -999, 1000, wxDefaultPosition, wxSize(120, -1),
       wxSL_HORIZONTAL);
    wxStaticText *scaleMaxLabel =
       new wxStaticText(this, ID_TEXT, wxT("1000.0"), wxDefaultPosition, wxDefaultSize, 0);
    scaleValueText =
-		new wxTextCtrl(this, ID_SCALE_TEXT, wxT("1.000000"), wxDefaultPosition, wxSize(70, 20),
+		new wxTextCtrl(this, ID_SCALE_TEXT, wxT("1.000000"), wxDefaultPosition, wxSize(70, -1),
                      wxTE_PROCESS_ENTER, wxTextValidator(wxGMAT_FILTER_NUMERIC));
 
    // The recentering button
@@ -411,7 +434,7 @@ void VisualModelPanel::LoadData()
    #ifdef DEBUG_PANEL_LOAD
    MessageInterface::ShowMessage
       ("VisualModelPanel::LoadData() entered.   modelFile() = '%s'\n",
-       modelFile().c_str());
+       modelFile.c_str());
    #endif
    
    modelTextCtrl->SetValue(wxString(modelFile.c_str()));

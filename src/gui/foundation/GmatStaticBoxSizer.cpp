@@ -53,7 +53,7 @@
       : wxBoxSizer(orient)
    {
       labelText =
-         new wxStaticText(parent, -1, label, wxDefaultPosition, wxSize(220,20), style);
+         new wxStaticText(parent, -1, label, wxDefaultPosition, wxSize(220,-1), style);
       labelText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                 false, _T(""), wxFONTENCODING_SYSTEM));
       Add(labelText);

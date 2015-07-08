@@ -273,7 +273,7 @@ bool OwnedPlot::Initialize()
       
       PlotInterface::CreateXyPlotWindow(instanceName, mOldName, 0.0, 0.0, 0.0, 0.0, false, mPlotTitle,
             mXAxisTitle, mYAxisTitle, (mDrawGrid == "On"), false);
-      
+      PlotInterface::TakeXYAction(instanceName, "AlwaysRedraw");
       PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
       mIsOwnedPlotWindowSet = true;
             
@@ -1196,7 +1196,7 @@ bool OwnedPlot::SetBooleanParameter(const Integer id, const bool value)
  * @return true
  */
 //------------------------------------------------------------------------------
-bool OwnedPlot::Activate()
+bool OwnedPlot::Activate(bool)
 {
    PlotInterface::ActivateXyPlot(instanceName);
    return true;

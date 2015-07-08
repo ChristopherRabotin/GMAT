@@ -25,6 +25,8 @@
 #include "DateUtil.hpp"
 #include "GmatBase.hpp"
 #include "MessageInterface.hpp"
+#include "StatisticAcceptFilter.hpp"
+#include "StatisticRejectFilter.hpp"
 #include <sstream>
 #include "MeasurementException.hpp"
 
@@ -36,6 +38,8 @@
 //#define DEBUG_OBSERVATION_DATA
 //#define DEBUG_RAMP_TABLE_READ
 //#define DEBUG_RAMP_TABLE_DATA
+//#define DEBUG_FILTER
+//#define DEBUG_FILTER_NEW
 
 //------------------------------------------------------------------------------
 // static data
@@ -128,6 +132,7 @@ DataFile::DataFile(const DataFile& df) :
    GmatBase          (df),
    streamName        (df.streamName),
    obsType           (df.obsType),
+   filterList        (df.filterList),                           // made changes by TUAN NGUYEN
    thinningRatio     (df.thinningRatio),
    selectedStationIDs(df.selectedStationIDs),
    estimationStart   (df.estimationStart),
@@ -173,19 +178,24 @@ DataFile& DataFile::operator=(const DataFile& df)
 
       streamName = df.streamName;
       obsType    = df.obsType;
-	  thinningRatio			= df.thinningRatio;
-	  selectedStationIDs	= df.selectedStationIDs;
+
+      // This section is for new design filter 
+      filterList = df.filterList;                       // made changes by TUAN NGUYEN
+
+	   // This section is for old design filter
+      thinningRatio			= df.thinningRatio;
+	   selectedStationIDs	= df.selectedStationIDs;
+	   estimationStart      = df.estimationStart;
+	   estimationEnd        = df.estimationEnd;
+	   epochFormat          = df.epochFormat;
+	   startEpoch           = df.startEpoch;
+	   endEpoch             = df.endEpoch;
 
       if (df.theDatastream)
          theDatastream = (ObType*)df.theDatastream->Clone();
       else
          theDatastream = NULL;
 
-	  estimationStart      = df.estimationStart;
-	  estimationEnd        = df.estimationEnd;
-	  epochFormat          = df.epochFormat;
-	  startEpoch           = df.startEpoch;
-	  endEpoch             = df.endEpoch;
    }
 
    return *this;
@@ -227,13 +237,19 @@ bool DataFile::Initialize()
    if (theDatastream)
    {
       retval = theDatastream->Initialize();
-	  obsType = theDatastream->GetTypeName();
+	   obsType = theDatastream->GetTypeName();
       #ifdef DEBUG_INITIALIZATION
 	     MessageInterface::ShowMessage("DataFile::Initialize():   theDatastream = '%s'\n", theDatastream->GetStreamName().c_str());
 	     MessageInterface::ShowMessage("DataFile::Initialize():   obsType = '%s'\n", obsType.c_str());
       #endif
 
    }
+
+   // Initialize privated variables
+   od_old.epoch = -1.0;
+   acc = 1.0;
+   epoch1 = 0.0;
+   epoch2 = 0.0;
 
 #ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage(" DataFile <%s,%p> script: \n%s\n", GetName().c_str(), this, this->GetGeneratingString().c_str()); 
@@ -825,6 +841,187 @@ void DataFile::WriteMeasurement(MeasurementData* theMeas)
 }
 
 
+ObservationData* DataFile::FilteringDataForNewSyntax(ObservationData* dataObject, Integer& rejectedReason)
+{
+#ifdef DEBUG_FILTER_NEW
+   MessageInterface::ShowMessage("Enter DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, rejectedReason = %d).\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+
+   rejectedReason = 0;
+   ObservationData* obdata = dataObject;
+
+   // Run statistic reject filters when it passes accept filters
+   //MessageInterface::ShowMessage("I am here 0: There are %d filter.\n  List of statistics reject filters:\n", filterList.size());
+   if (obdata)
+   {
+      for (UnsignedInt i = 0; i < filterList.size(); ++i)
+      {
+         if (filterList[i]->IsOfType("StatisticsRejectFilter"))
+         {
+            //MessageInterface::ShowMessage("reject filter: <%s>\n", filterList[i]->GetName().c_str());
+            obdata = ((StatisticRejectFilter*)filterList[i])->FilteringData(dataObject, rejectedReason);
+
+            // it is rejected when it is rejected by one reject filter
+            if (obdata == NULL)
+               break;
+         }
+      }
+   }
+
+   //MessageInterface::ShowMessage("I am here 1\n");
+   // Run statistic accept filters
+   if (obdata)
+   {
+      Integer rejReason = 0;
+      for (UnsignedInt i = 0; i < filterList.size(); ++i)
+      {
+         if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
+         {
+            //MessageInterface::ShowMessage("accept filter: <%s>\n", filterList[i]->GetName().c_str());
+            obdata = ((StatisticAcceptFilter*)filterList[i])->FilteringData(dataObject, rejReason);
+
+            // it needs to pass only one accept filter
+            if (obdata)
+               break;         // for this case, rejReason = 0
+         }
+      }
+
+      rejectedReason = rejReason;
+   }
+   //MessageInterface::ShowMessage("I am here 2\n");
+
+   // Increasing record counters in all accept filters
+   for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   {
+      if (filterList[i]->IsOfType("StatisticsAcceptFilter"))
+         ((StatisticAcceptFilter*)filterList[i])->IncreasingRecordCounter();
+   }
+   //MessageInterface::ShowMessage("I am here 3\n");
+#ifdef DEBUG_FILTER_NEW
+   if (rejectedReason != 0)
+      MessageInterface::ShowMessage("Exit DataFile<%s,%p>::FilteringDataForNewSyntax(dataObject = <%p>, rejectedReason = %d)\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+
+   return obdata;
+}
+
+
+ObservationData* DataFile::FilteringDataForOldSyntax(ObservationData* dataObject, Integer& rejectedReason)
+{
+#ifdef DEBUG_FILTER
+   //MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringDataForOldSyntax(dataObject = <%p>, rejectedReason = %d)   enter\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+
+   ObservationData* od = dataObject;
+   rejectedReason = 0;            // 0; no reject
+
+   if (od != NULL)
+   {
+      // Get start epoch and end epoch when od != NULL
+      if (epoch1 == 0.0)
+      {
+         epoch1 = TimeConverterUtil::Convert(estimationStart, TimeConverterUtil::A1MJD, od->epochSystem);
+         epoch2 = TimeConverterUtil::Convert(estimationEnd, TimeConverterUtil::A1MJD, od->epochSystem);
+      }
+      
+      // Data thinning filter
+      acc = acc + thinningRatio;
+      if (acc < 1.0)
+      {
+         #ifdef DEBUG_FILTER
+         MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to data thinning\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 1;             // rejected due to Thinning Ratio
+      }
+      else
+         acc = acc -1.0;
+      
+      // Time span filter
+      if ((od->epoch < epoch1)||(od->epoch > epoch2))
+      {
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to time span filter\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 2;            // rejected due to Time Span
+      }
+      
+      // Invalid measurement value filter
+      if (od->value.size() > 0)
+      {
+         if (od->value[0] == -1.0)      // throw away this observation data if it is invalid
+         {
+            #ifdef DEBUG_FILTER
+               MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to invalid observation data\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+            #endif
+            rejectedReason = 3;         // rejected due to invalid measurement value
+         }
+      }
+      
+      // Duplication or time order filter
+      if (od_old.epoch >= (od->epoch + 2.0e-12))
+      {
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to duplication or time order\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 4;           // filter due to duplication or time order filter
+      }
+      
+      // Selected stations filter
+      bool choose = false;
+      if (selectedStationIDs.size() == 0)
+         choose = true;
+      else
+      {
+         for (int j=0; j < selectedStationIDs.size(); ++j)
+         {
+            if (selectedStationIDs[j] == od->participantIDs[0])
+            {
+               choose = true;
+               break;
+            }
+         }
+      }
+      if (choose == false)
+      {
+         #ifdef DEBUG_FILTER
+            MessageInterface::ShowMessage(" Data type = %s    A1MJD epoch: %.15lf   measurement type = <%s, %d>   participants: %s   %s   observation data: %.12lf :Throw away this record due to station is not in SelectedStationID\n", obsType.c_str(), od->epoch, od->typeName.c_str(), od->type, od->participantIDs[0].c_str(), od->participantIDs[1].c_str(), od->value[0]);
+         #endif
+         rejectedReason = 5;          // rejected due to Selected Stations
+      }
+   }
+   
+   if (rejectedReason != 0)
+      od = NULL;
+   else
+      od_old = *od;
+
+#ifdef DEBUG_FILTER
+   if (rejectedReason != 0)
+      MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringDataForOldSyntax(dataObject = <%p>, rejectedReason = %d)   exit\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+   return od;
+}
+
+   
+ObservationData* DataFile::FilteringData(ObservationData* dataObject, Integer& rejectedReason)
+{
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)   enter\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+   // filter data using data filters
+   ObservationData* od;
+
+   od = FilteringDataForOldSyntax(dataObject, rejectedReason);
+   if (od)
+      od = FilteringDataForNewSyntax(od, rejectedReason);
+
+#ifdef DEBUG_FILTER
+   MessageInterface::ShowMessage("DataFile<%s,%p>::FilteringData(dataObject = <%p>, rejectedReason = %d)   exit\n", GetName().c_str(), this, dataObject, rejectedReason);
+#endif
+   return od;
+}
+
+
 //------------------------------------------------------------------------------
 // MeasurementData* ReadMeasurement()
 //------------------------------------------------------------------------------
@@ -997,3 +1194,30 @@ Real DataFile::ConvertToRealEpoch(const std::string &theEpoch,
    return retval;
 }
 
+
+// made changes by TUAN NGUYEN
+//-------------------------------------------------------------------------------
+// bool SetDataFilter(DataFilter *filter)
+//-------------------------------------------------------------------------------
+/**
+* This function is used to set a data filter for DataFile object. It adds filter
+* to it's data filter list. 
+*/
+//------------------------------------------------------------------------------
+bool DataFile::SetDataFilter(DataFilter *filter)
+{
+   bool found = false;
+   for (UnsignedInt i = 0; i < filterList.size(); ++i)
+   {
+      if (filterList[i]->GetName() == filter->GetName())
+      {
+         found = true;
+         break;
+      }
+   }
+
+   if (!found)
+      filterList.push_back(filter);
+
+   return true;
+}

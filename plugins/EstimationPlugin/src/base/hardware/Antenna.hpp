@@ -32,48 +32,18 @@ public:
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
 
-//   virtual Integer      GetIntegerParameter(const Integer id) const;
-//   virtual Integer      SetIntegerParameter(const Integer id,
-//                                            const Integer value);
-//   virtual Integer      GetIntegerParameter(const std::string &label) const;
-//   virtual Integer      SetIntegerParameter(const std::string &label,
-//                                            const Integer value);
 
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id,
                                          const Real value);
-//   virtual Real         GetRealParameter(const Integer id,
-//                                      const Integer index) const;
-//   virtual Real         GetRealParameter(const Integer id, const Integer row,
-//                                      const Integer col) const;
-//   virtual Real         SetRealParameter(const Integer id,
-//                                      const Real value,
-//                                      const Integer index);
-//   virtual Real         SetRealParameter(const Integer id, const Real value,
-//                                      const Integer row, const Integer col);
-
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label,
                                          const Real value);
-//   virtual Real         GetRealParameter(const std::string &label,
-//                                      const Integer index) const;
-//   virtual Real         SetRealParameter(const std::string &label,
-//                                      const Real value,
-//                                      const Integer index);
-//   virtual Real         GetRealParameter(const std::string &label,
-//                                      const Integer row,
-//                                      const Integer col) const;
-//   virtual Real         SetRealParameter(const std::string &label,
-//                                      const Real value, const Integer row,
-//                                      const Integer col);
 
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   Real        antennaDelay;
-//   Integer       phaseCenterLocation1;
-//   Integer       phaseCenterLocation2;
-//   Integer       phaseCenterLocation3;
+   Real       antennaDelay;
    Real       phaseCenterLocation1;
    Real       phaseCenterLocation2;
    Real       phaseCenterLocation3;

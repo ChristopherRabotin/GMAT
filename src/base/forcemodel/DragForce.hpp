@@ -76,6 +76,7 @@ public:
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual bool         IsParameterReadOnly(const std::string &label) const;
+   virtual bool         WriteEmptyStringParameter(const Integer id) const;
    
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         GetRealParameter(const std::string &label) const;
@@ -125,7 +126,7 @@ public:
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
    virtual bool SetStart(Gmat::StateElementId id, Integer index, 
-                         Integer quantity);
+                         Integer quantity, Integer sizeOfType);
 
    // Made public so it can be called for the AtmosDensity parameter
    Real                 GetDensity(Real *state,
@@ -157,10 +158,10 @@ protected:
    AtmosphereModel      *internalAtmos;
    /// Array of densities
    Real                 *density;
-   /// Density model: "High", "Low", or "Mean"							// made changes for GMT-4299
-   std::string			densityModel;									      // made changes for GMT-4299
-   /// Inputfile containing all setting parameters for MarsGRAM	// made changes for GMT-4299
-   std::string          inputFile;										   // made changes for GMT-4299
+   /// Density model: "High", "Low", or "Mean"
+   std::string          densityModel;
+   /// Inputfile containing all setting parameters for MarsGRAM
+   std::string          inputFile;
    /// Array of products of spacecraft properties
    Real                 *prefactor;
    /// Flag used to determine if data has changed for the prefactors
@@ -198,13 +199,23 @@ protected:
    Integer F107AID;
    /// ID used to set Geomagnetic index
    Integer KPID;
+   /// ID used to set Historic Weather File name
+   Integer cssiWFileID;
+   /// ID used to set Schatten Weather File name
+   Integer schattenWFileID;
 
 
    // Optional input parameters used by atmospheric models
    /// Type of input data -- "File" or "Constant"
    std::string          dataType;
-   /// Solar flux file name
-   std::string          fluxFile;
+   /// Historic Weather data type
+   std::string          historicWSource;
+   /// Predicted Weather data type
+   std::string          predictedWSource;
+   /// Historic Weather File name
+   std::string          cssiWFile;
+   /// Schatten Weather File name
+   std::string          schattenWFile;
    /// "Current" value of F10.7
    Real                 fluxF107;
    /// Running average of the F10.7
@@ -213,6 +224,10 @@ protected:
    Real                 ap;
    /// Magnetic field index, Kp (user specified)
    Real                 kp;
+   /// Schatten Error Model
+   std::string          schattenErrorModel;
+   /// Schatten Timing Model
+   std::string          schattenTimingModel;
 
    /// Start index for the Cartesian state
    Integer              cartIndex;
@@ -240,10 +255,15 @@ protected:
       ATMOSPHERE_MODEL = PhysicalModelParamCount, 
       ATMOSPHERE_BODY,
       SOURCE_TYPE,
-      FLUX_FILE,
+      HISTORIC_WEATHER_SOURCE,
+      PREDICTED_WEATHER_SOURCE,
+      CSSI_WEATHER_FILE,
+      SCHATTEN_WEATHER_FILE,
       FLUX,
       AVERAGE_FLUX,
       MAGNETIC_INDEX,
+      SCHATTEN_ERROR_MODEL,
+      SCHATTEN_TIMING_MODEL,
       FIXED_COORD_SYSTEM,
       W_UPDATE_INTERVAL,
       KP2AP_METHOD,

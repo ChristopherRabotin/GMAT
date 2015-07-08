@@ -267,7 +267,10 @@ bool RFHardware::SetStringParameter(const Integer id, const std::string &value)
    switch (id)
    {
    case PRIMARY_ANTENNA:
-        primaryAntennaName = value;
+      if (value == "")
+         throw GmatBaseException("Error: Name of primary antenna set to " + GetName() + "is an empty string.\n");
+
+      primaryAntennaName = value;
       return true;
    default:
       return Sensor::SetStringParameter(id, value);
@@ -354,6 +357,9 @@ std::string RFHardware::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if ((type == Gmat::HARDWARE)||(type == Gmat::UNKNOWN_OBJECT))
    {
+      if (primaryAntennaName == "")
+         throw GmatBaseException("Error: value of " + GetName() + ".PrimaryAntenna parameter was not set in GMAT script.\n");
+
       return primaryAntennaName;
    }
 
@@ -377,6 +383,9 @@ const StringArray& RFHardware::GetRefObjectNameArray(const Gmat::ObjectType type
    case Gmat::UNKNOWN_OBJECT:
    case Gmat::HARDWARE:
       refObjectNames.clear();
+      if (primaryAntennaName == "")
+         throw GmatBaseException("Error: value of " + GetName() + ".PrimaryAntenna was not set in GMAT script.\n");
+
       refObjectNames.push_back(primaryAntennaName);
       return refObjectNames;
         break;

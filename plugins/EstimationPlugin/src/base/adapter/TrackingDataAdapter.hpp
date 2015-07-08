@@ -179,6 +179,11 @@ public:
    virtual MeasureModel * GetMeasurementModel();
 
    virtual void         AddBias(bool isAdd) {addBias = isAdd;}
+   virtual void         AddNoise(bool isAdd) {addNoise = isAdd;}                                           // made changes by TUAN NGUYEN
+   virtual void         SetRangeOnly(bool isRangeOnly) {rangeOnly = isRangeOnly;}                          // made changes by TUAN NGUYEN
+   
+   // Set solve-for and consider objects                                                                   // made changes by TUAN NGUYEN
+   virtual bool         SetUsedForObjects(ObjectArray objArray) {forObjects = objArray; return true;};     // made changes by TUAN NGUYEN
 
 protected:
    /// The ordered list of participants in the measurement
@@ -237,13 +242,18 @@ protected:
    bool                      addNoise;
    /// Add bias to measurement
    bool                      addBias;
-   
+   /// Flag indicating to compute range only (w/o bias and noise model).                     // made changes by TUAN NGUYEN
+   /// It is used in Doppler measurement for E and S-paths before adding noise and bias,     // made changes by TUAN NGUYEN
+   bool                      rangeOnly;                                                      // made changes by TUAN NGUYEN
+
    /// Measurement error covariance matrix
    Covariance                measErrorCovariance;
 
    /// Measurement type
-   std::string               measurementType;  // it's value could be "Range", "DSNRange", "Doppler", etc
+   std::string               measurementType;  // it's value could be "Range_KM", "DSNRange", "Doppler", "Doppler_RangeRate", etc
 
+   /// A list of all objects used for measurement calculation (specificly it contains solver-for objects and consider objects)    // made changes by TUAN NGUYEN
+   ObjectArray               forObjects;                                                                                          // made changes by TUAN NGUYEN
 
    /// Parameter IDs for the TrackingDataAdapter
    enum
@@ -252,9 +262,6 @@ protected:
       OBS_DATA,
       RAMPTABLES,
       MEASUREMENT_TYPE,
-      BIAS,
-      //NOISE_SIGMA,
-      //ERROR_MODEL,
       ADD_NOISE,
       UPLINK_FREQUENCY,
       UPLINK_BAND,
@@ -271,8 +278,10 @@ protected:
 
    StringArray*         DecomposePathString(const std::string &value);
    
-   void                 ComputeMeasurementBias(const std::string biasName);
-   void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName);
+   //void                 ComputeMeasurementBias(const std::string biasName);                       // This code will be removed after complete ErrorModel
+   //void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName);           // This code will be removed after complete ErrorModel
+   void                 ComputeMeasurementBias(const std::string biasName, const std::string measType, Integer numTrip);
+   void                 ComputeMeasurementNoiseSigma(const std::string noiseSigmaName, const std::string measType, Integer numTrip);
    void                 ComputeMeasurementErrorCovarianceMatrix();
 
    void                 BeginEndIndexesOfRampTable(Integer & err);

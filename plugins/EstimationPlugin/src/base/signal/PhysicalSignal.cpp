@@ -91,10 +91,10 @@ PhysicalSignal::~PhysicalSignal()
    if (troposphere != NULL)
       delete troposphere;
 
-#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
-   if (ionosphere != NULL)
-      delete troposphere;
-#endif
+//#ifdef IONOSPHERE    // Required until the f2c issues for Mac and Linux have been resolved
+//   if (ionosphere != NULL)
+//      delete troposphere;
+//#endif
 }
 
 
@@ -230,269 +230,6 @@ void PhysicalSignal::InitializeSignal(bool chainForwards)
  * @return true if the signal was modeled, false if not
  */
 //------------------------------------------------------------------------------
-#ifndef USE_PRECISION_TIME
-// This function will be removed and replaced by bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
-bool PhysicalSignal::ModelSignal(const GmatEpoch atEpoch, bool epochAtReceive)
-{
-   bool retval = false;
-   satEpoch = atEpoch;
-   relCorrection = 0.0;
-   ettaiCorrection = 0.0;                                                                     // unit: km
-   
-   #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("ModelSignal(%.12lf, %s) called\n", atEpoch,
-            epochAtReceive ? "with fixed Receiver" : "with fixed Transmitter");
-
-      MessageInterface::ShowMessage("Modeling %s -> %s\n",
-            theData.transmitParticipant.c_str(),
-            theData.receiveParticipant.c_str());
-
-      MessageInterface::ShowMessage("tTime = %.12lf, rTime = %.12lf satEpoch = "
-            "%.12lf\n", theData.tTime, theData.rTime, satEpoch);
-   #endif
-
-   #ifdef DEBUG_RANGE_CALCULATION 
-      MessageInterface::ShowMessage("   +++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-      MessageInterface::ShowMessage("   ++++    For leg from %s to %s :\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
-      MessageInterface::ShowMessage("   +++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-   #endif
-   
-   if (!isInitialized)
-   {
-      #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("   Calling signal initialization\n");
-      #endif
-      InitializeSignal(!epochAtReceive);
-   }
-   
-   if (isInitialized)
-   {
-      #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("   Signal initialized; Computing data\n");
-      #endif
-      
-      // 1. First make sure we start at the desired epoch
-      MoveToEpoch(satEpoch, epochAtReceive, true);
-      CalculateRangeVectorInertial();
-      Real geoRange = theData.rangeVecInertial.GetMagnitude();
-     
-      #ifdef DEBUG_RANGE_CALCULATION 
-         MessageInterface::ShowMessage("   1. Compute Range Vector before light time correction for the Leg from <TNode = %s> to <RNode = %s>:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
-         MessageInterface::ShowMessage("      . %s position in %sMJ2000 cs : (%.12lf,   %.12lf,   %.12lf)km at time tT= %.12lf\n", theData.tNode->GetName().c_str(), tcs->GetOriginName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2], theData.tTime);
-         MessageInterface::ShowMessage("      . %s position in %sMJ2000 cs : (%.12lf,   %.12lf,   %.12lf)km at time tR = %.12lf\n", theData.rNode->GetName().c_str(), rcs->GetOriginName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2], theData.rTime);
-         Rvector3 tCSorigin =  theData.tOStateSSB.GetR();
-         Rvector3 rCSorigin =  theData.rOStateSSB.GetR();
-         Rvector3 tLocSSB = theData.tLoc + theData.tOStateSSB.GetR();
-         Rvector3 rLocSSB = theData.rLoc + theData.rOStateSSB.GetR();
-         MessageInterface::ShowMessage("      . %s in SSBMJ2000 : (%.12lf,   %.12lf,   %.12lf)km at time tT = %.12lf\n", theData.tNode->GetName().c_str(), tLocSSB[0], tLocSSB[1], tLocSSB[2], theData.tTime);
-         MessageInterface::ShowMessage("      . %s in SSBMJ2000 : (%.12lf,   %.12lf,   %.12lf)km at time tR = %.12lf\n", theData.rNode->GetName().c_str(), rLocSSB[0], rLocSSB[1], rLocSSB[2], theData.rTime);
-         MessageInterface::ShowMessage("      . Range vector in SSBMJ2000: (%.12lf,   %.12lf,   %.12lf)km\n", theData.rangeVecInertial[0], theData.rangeVecInertial[1], theData.rangeVecInertial[2]);
-         MessageInterface::ShowMessage("      . Range vector in obs CS   : (%.12lf,   %.12lf,   %.12lf)km\n", theData.rangeVecObs[0], theData.rangeVecObs[1], theData.rangeVecObs[2]);
-         MessageInterface::ShowMessage("      . R_Obs_j2k matrix  : (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(0,0), R_Obs_j2k(0,1), R_Obs_j2k(0,2));
-         MessageInterface::ShowMessage("                            (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(1,0), R_Obs_j2k(1,1), R_Obs_j2k(1,2));
-         MessageInterface::ShowMessage("                            (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(2,0), R_Obs_j2k(2,1), R_Obs_j2k(2,2));
-      #endif
-
-
-      // 2. Compute light time solution if it is needed and solve for range vector
-      if (includeLightTime)
-      {
-         GenerateLightTimeData(satEpoch, epochAtReceive);
-      }
-      else
-      {
-         // Build the other data vectors
-         CalculateRangeVectorObs();
-         CalculateRangeRateVectorObs();
-      }
-     
-      #ifdef DEBUG_RANGE_CALCULATION 
-         MessageInterface::ShowMessage("   2. Compute Range Vector after light time correction for the Leg from <TNode = %s> to <RNode = %s>:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
-         MessageInterface::ShowMessage("      . %s position in %sMJ2000 cs : (%.12lf,   %.12lf,   %.12lf)km at time tT= %.12lf\n", theData.tNode->GetName().c_str(), tcs->GetOriginName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2], theData.tTime);
-         MessageInterface::ShowMessage("      . %s position in %sMJ2000 cs : (%.12lf,   %.12lf,   %.12lf)km at time tR = %.12lf\n", theData.rNode->GetName().c_str(), rcs->GetOriginName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2], theData.rTime);
-         tCSorigin =  theData.tOStateSSB.GetR();
-         rCSorigin =  theData.rOStateSSB.GetR();
-         tLocSSB = theData.tLoc + theData.tOStateSSB.GetR();
-         rLocSSB = theData.rLoc + theData.rOStateSSB.GetR();
-         MessageInterface::ShowMessage("      . %s in SSBMJ2000 : (%.12lf,   %.12lf,   %.12lf)km at time tT = %.12lf\n", theData.tNode->GetName().c_str(), tLocSSB[0], tLocSSB[1], tLocSSB[2], theData.tTime);
-         MessageInterface::ShowMessage("      . %s in SSBMJ2000 : (%.12lf,   %.12lf,   %.12lf)km at time tR = %.12lf\n", theData.rNode->GetName().c_str(), rLocSSB[0], rLocSSB[1], rLocSSB[2], theData.rTime);
-         MessageInterface::ShowMessage("      . Range vector in SSBMJ2000: (%.12lf,   %.12lf,   %.12lf)km\n", theData.rangeVecInertial[0], theData.rangeVecInertial[1], theData.rangeVecInertial[2]);
-         MessageInterface::ShowMessage("      . Range vector in obs CS   : (%.12lf,   %.12lf,   %.12lf)km\n", theData.rangeVecObs[0], theData.rangeVecObs[1], theData.rangeVecObs[2]);
-         MessageInterface::ShowMessage("      . R_Obs_j2k matrix  : (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(0,0), R_Obs_j2k(0,1), R_Obs_j2k(0,2));
-         MessageInterface::ShowMessage("                            (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(1,0), R_Obs_j2k(1,1), R_Obs_j2k(1,2));
-         MessageInterface::ShowMessage("                            (%.12lf   %.12lf   %.12lf)\n", R_Obs_j2k(2,0), R_Obs_j2k(2,1), R_Obs_j2k(2,2));
-      #endif
-
-      // 3. Calculate ET-TAI correction for this signal leg
-      if (useETTAI)
-      {
-         // Compute ET-TAI at trasnmite node
-         Real tETTAI = ETminusTAI(theData.tTime, theData.tNode);
-         // Compute ET-TAI at receive node
-         Real rETTAI = ETminusTAI(theData.rTime, theData.rNode);
-         // Compute ET-TAI correction for this signal leg
-         ettaiCorrection = (tETTAI - rETTAI)*GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;      // unit: km
-         UnsignedInt i = 0;
-         for (; i < theData.correctionIDs.size(); ++i)
-         {
-            if (theData.correctionIDs[i] == "ET-TAI")
-               break;
-         }
-         theData.corrections[i] = ettaiCorrection;                                                         // unit: km
-      }
-     
-      // 4. Perform feasibility check
-      if (theData.stationParticipant)
-      {
-         const Real* elData;
-         bool signalIsFeasibleT, signalIsFeasibleR;
-         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
-         {
-            Rvector6 state_sez(theData.rangeVecObs,
-                  theData.rangeRateVecObs);
-            elData = ((GroundstationInterface*)(theData.tNode))->
-                  IsValidElevationAngle(state_sez);
-            signalIsFeasibleT = (elData[2] > 0.0);
-            theData.feasibility = signalIsFeasibleT;
-            if (!theData.feasibility)
-               theData.feasibilityReason = "B";
-            theData.feasibilityValue = elData[0];
-
-            #ifdef DEBUG_FEASIBILITY
-            MessageInterface::ShowMessage("At transmit node: Obs vector = [%.3lf %.3lf %.3lf] "
-                  "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
-                  theData.rangeVecObs(2), (signalIsFeasibleT ? "feasible" :
-                  "infeasible"));
-            #endif
-
-         }
-
-         if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
-         {
-            Rvector6 state_sez(-theData.rangeVecObs,
-                  -theData.rangeRateVecObs);
-            elData = ((GroundstationInterface*)(theData.rNode))->
-                  IsValidElevationAngle(state_sez);
-            signalIsFeasibleR = (elData[2] > 0.0);
-            theData.feasibility = signalIsFeasibleR;
-            if (!theData.feasibility)
-               theData.feasibilityReason = "B";
-            theData.feasibilityValue = elData[0];
-
-            #ifdef DEBUG_FEASIBILITY
-            MessageInterface::ShowMessage("At receive node: Obs vector = [%.3lf %.3lf %.3lf] "
-                  "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
-                  theData.rangeVecObs(2), (signalIsFeasibleR ? "feasible" :
-                  "infeasible"));
-            #endif
-         }
-
-         signalIsFeasible = signalIsFeasibleT && signalIsFeasibleR;
-
-         #ifdef DEBUG_FEASIBILITY
-            MessageInterface::ShowMessage("Obs vector = [%.3lf %.3lf %.3lf] "
-                  "so %s\n", theData.rangeVecObs(0), theData.rangeVecObs(1),
-                  theData.rangeVecObs(2), (signalIsFeasible ? "feasible" :
-                  "infeasible"));
-         #endif
-      }
-      else
-      ///@todo: Put in test for obstructing bodies; for now, always feasible
-      {
-         signalIsFeasible = true;
-      }
-
-      #ifdef DEBUG_RANGE_CALCULATION 
-         MessageInterface::ShowMessage("   3. Summary of signal leg from %s to %s:\n", theData.tNode->GetName().c_str(), theData.rNode->GetName().c_str());
-
-         MessageInterface::ShowMessage("      . Geometric range       = %.12lf km\n", geoRange);
-         if (includeLightTime)
-         {
-            Real lightTimeRange = theData.rangeVecInertial.GetMagnitude();
-            MessageInterface::ShowMessage("      . Light time solution range = %.12lf km\n", lightTimeRange);
-         }
-         MessageInterface::ShowMessage("      . Relativity correction = %.12lf km\n", relCorrection);
-         MessageInterface::ShowMessage("      . ET-TAI correction     = %.12lf km\n", ettaiCorrection);
-         MessageInterface::ShowMessage("      . Feasibility           = %s\n", (signalIsFeasible?"true":"false"));
-      #endif
-      
-      // 5. Report raw data
-      if (navLog)
-      {
-         std::stringstream data;
-         data.precision(16);
-
-         if (logLevel <= 1)
-         {
-            Real range = theData.rangeVecInertial.GetMagnitude();
-            if (range >= 0.0)
-               data << "   " << GetPathDescription(false)
-                    << " Range at A.1 epoch " << satEpoch
-                    << " = " << range << "\n";
-            else
-               data << "   Range not valid\n";
-         }
-
-         if (logLevel == 0)
-         {
-            data.str() = "";
-            data << "      Range vector:         "
-                 << (theData.rangeVecInertial.ToString())
-                 << "      Range vector Obs:     "
-                 << (theData.rangeVecObs.ToString())
-                 << "      RangeRate vector Obs: "
-                 << (theData.rangeRateVecObs.ToString())
-                 << "\n      Transmitter location: "
-                 << (theData.tLoc.ToString())
-                 << "      Receiver location:    "
-                 << (theData.rLoc.ToString());
-         }
-         navLog->WriteData(data.str());
-      }
-      
-      // 6. Run ModelSignal for the next leg in signal path:
-      // if epoctAtReceive was true, transmitter moved and we need its epoch,
-      // if false, we need the receiver epoch
-      GmatEpoch nextEpoch = (epochAtReceive ? theData.tTime : theData.rTime);
-
-      // This transmitter is the receiver for the next node
-      bool nextFixed = (epochAtReceive ? true : false);
-
-      bool nodePassed = true;
-
-      if (epochAtReceive)
-      {
-         if (previous)
-         {
-            previous->SetSignalData(theData);
-
-            /// @todo: If there is a transponder delay, apply it here, moving
-            /// nextEpoch back by the delay time
-            nodePassed = previous->ModelSignal(nextEpoch, nextFixed);
-         }
-      }
-      else
-      {
-         if (next)
-         {
-            next->SetSignalData(theData);
-
-            /// @todo: If there is a transponder delay, apply it here, moving
-            /// nextEpoch ahead by the delay time
-            nodePassed = next->ModelSignal(nextEpoch, nextFixed);
-         }
-      }
-      
-      retval = nodePassed;
-   }
-   
-   #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("ModelSignal() call complete\n");
-   #endif
-
-   return retval;
-}
-#else
 
 bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 {
@@ -780,7 +517,6 @@ bool PhysicalSignal::ModelSignal(const GmatTime atEpoch, bool epochAtReceive)
 
    return retval;
 }
-#endif
 
 //------------------------------------------------------------------------------
 // const std::vector<RealArray>& ModelSignalDerivative(GmatBase* obj,
@@ -817,7 +553,7 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       parameterID = forId;
    std::string paramName = obj->GetParameterText(parameterID);
    #ifdef DEBUG_DERIVATIVES
-   MessageInterface::ShowMessage("Solver-for parameter: %s\n", obj->GetParameterText(parameterID).c_str());
+   MessageInterface::ShowMessage("Solver-for parameter: %s.%s\n", obj->GetName().c_str(), obj->GetParameterText(parameterID).c_str());
    #endif
 
    // Verify initialization
@@ -868,20 +604,10 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
       objPtr = theData.tNode;
    if (theData.rNode == obj)
       objPtr = theData.rNode;
-
+   
    //Integer parameterID = -1;
-   if (objPtr != NULL)
+   if (objPtr != NULL)                    // Derivative object is a participant (either GroundStation or Spacecraft):
    {
-      //if (forId > 250)
-      //   parameterID = GetParmIdFromEstID(forId, obj);
-      //else
-      //   parameterID = forId;
-
-      //#ifdef DEBUG_DERIVATIVES
-      //MessageInterface::ShowMessage("Solver-for parameter: %s\n", objPtr->GetParameterText(parameterID).c_str());
-      //#endif
-
-      //std::string paramName = objPtr->GetParameterText(parameterID);
       if (paramName == "Position")
       {
          Rvector3 result;
@@ -938,13 +664,14 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
 
          #endif
       }
-      else
-      {
-         UnsignedInt startIndex = paramName.size()-4;
-         if (paramName.substr(startIndex) == "Bias")
+   }
+   else         // Derivative object is not a participant (neither a GroundStation nor a Spacecraft): such as ErrorModel object
+   {
+         //MessageInterface::ShowMessage(" paramName = %s\n", paramName.c_str());
+         if (paramName == "Bias")
          {
             if (previous == NULL)
-            {  // This signal leg  object is the first one in signal path  
+            {  // This signal leg  object is the first one in signal path. 
                SignalBase* firstleg = this;
                // Get last signal leg
                SignalBase* lastleg = this;
@@ -953,8 +680,38 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                
                if ((firstleg->GetSignalData().tNode->IsOfType(Gmat::GROUND_STATION)) && (lastleg->GetSignalData().rNode->IsOfType(Gmat::GROUND_STATION) == false))
                {
-                  for (Integer i = 0; i < size; ++i)
-                     theDataDerivatives[0][i] += 1.0;
+                  // if ground station is only at first transmit node in signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
+
+                  // Get full name of the derivitive object
+                  std::string derivObjName = obj->GetFullName();                                     // made changes by TUAN NGUYEN
+
+                  // Get names of all error models defined in the ground station
+                  GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().tNode;
+                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();            // made changes by TUAN NGUYEN
+
+                  // Search for error model
+                  bool found = false;
+                  for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
+                     mapIndex != errmodelMap.end(); ++mapIndex)
+                  {
+                     for (UnsignedInt j = 0; j < mapIndex->second.size(); ++j)                     // made changes by TUAN NGUYEN
+                     {
+                        //MessageInterface::ShowMessage("Errormodel in map: <%s>   dirivative object: <%s>\n", mapIndex->second.at(j)->GetFullName().c_str(), derivObjName.c_str());
+                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
+                        {
+                           found = true;
+                           break;                                                                    // made changes by TUAN NGUYEN
+                        }
+                        if (found)
+                           break;
+                     }
+                  }
+
+                  if (found)
+                  {                                                                                  // made changes by TUAN NGUYEN
+                     for (Integer i = 0; i < size; ++i)                                              // made changes by TUAN NGUYEN
+                        theDataDerivatives[0][i] += 1.0;                                             // made changes by TUAN NGUYEN
+                  }                                                                                  // made changes by TUAN NGUYEN
                }
             }
             else if (next == NULL)
@@ -962,17 +719,43 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
                // This signal leg is the last one in signal path
                if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
                {
-                  for (Integer i = 0; i < size; ++i)
-                     theDataDerivatives[0][i] += 1.0;
+                  // if ground station is at the end of signal path, take derivative w.r.t the bias associate to ground station's error mode, otherwise keep default value 0
+                  // Get full name of the derivitive object
+                  std::string derivObjName = obj->GetFullName();                                     // made changes by TUAN NGUYEN
+
+                  // Get names of all error models defined in the ground station
+                  GroundstationInterface* gs = (GroundstationInterface*)this->GetSignalData().rNode;
+                  std::map<std::string,ObjectArray> errmodelMap = gs->GetErrorModelMap();            // made changes by TUAN NGUYEN
+
+                  // Search for error model
+                  bool found = false;
+                  for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); 
+                     mapIndex != errmodelMap.end(); ++mapIndex)
+                  {
+                     for (UnsignedInt j = 0; j < (mapIndex)->second.size(); ++j)                                 // made changes by TUAN NGUYEN
+                     {
+                        //MessageInterface::ShowMessage("Errormodel in map: <%s>   dirivative object: <%s>\n", mapIndex->second.at(j)->GetFullName().c_str(), derivObjName.c_str());
+                        if ((mapIndex)->second.at(j)->GetFullName() == derivObjName)                 // made changes by TUAN NGUYEN
+                        {
+                           found = true;
+                           break;                                                                    // made changes by TUAN NGUYEN
+                        }
+                        if (found)
+                           break;
+                     }
+                  }
+
+                  if (found)
+                  {
+                     for (Integer i = 0; i < size; ++i)
+                        theDataDerivatives[0][i] += 1.0;
+                  }
                }
             }
 
             #ifdef DEBUG_DERIVATIVES
             MessageInterface::ShowMessage("   Deriv is w.r.t. %s  it value %lf\n", paramName.c_str(), theDataDerivatives[0][0]);
             #endif
-
-            //for (Integer i = 0; i < size; ++i)
-            //   theDataDerivatives[0][i] += 1.0;
          }
          else
          {
@@ -983,8 +766,8 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
             for (UnsignedInt i = 0; i < 3; ++i)
                theDataDerivatives[0][i] += 0.0;
          }
-      }
    }
+   
 
 
    if ((parameterID >= 0) && (logLevel < 2))
@@ -1033,103 +816,6 @@ const std::vector<RealArray>& PhysicalSignal::ModelSignalDerivative(
  *         that did not throw
  */
 //------------------------------------------------------------------------------
-#ifndef USE_PRECISION_TIME
-bool PhysicalSignal::GenerateLightTimeData(const GmatEpoch atEpoch,
-      const bool epochAtReceive)
-{
-   #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("Called GenerateLightTimeData(%.12lf, "
-            "%s)\n", atEpoch, (epochAtReceive ? "Receiver fixed" :
-            "Transmitter fixed"));
-   #endif
-
-   bool retval = false;
-
-   if (includeLightTime)
-   {
-      // First make sure we start at the desired epoch
-      MoveToEpoch(atEpoch, epochAtReceive, true);
-
-      // Then compute the initial data
-      Rvector3 rangeGeoInertial = theData.rLoc - theData.tLoc;                                              // Range vector as seen from geocentric inertial obeserver (GMAT MathSpec Eq. 6.10)
-      Rvector3 displacement = rangeGeoInertial + (theData.rOStateSSB.GetR() - theData.tOStateSSB.GetR());   // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)
-
-      Real deltaR = displacement.GetMagnitude();
-      Real deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
-            (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
-
-      #ifdef DEBUG_LIGHTTIME
-         MessageInterface::ShowMessage("   DeltaT for light travel over "
-               "distance %.3lf km = %le\n", deltaR, deltaT);
-      #endif
-
-      // Here we go; iterating for a light time solution
-      Integer loopCount = 0;
-
-      // Epoch difference, in seconds
-      Real deltaE = (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
-
-      #ifdef DEBUG_LIGHTTIME
-         MessageInterface::ShowMessage("      Starting: dEpoch = %.12le, dR = "
-               "%.3lf, dT = %.12le\n", deltaE, deltaR, deltaT);
-         MessageInterface::ShowMessage("Initial x Positions: %s  %.3lf -->  "
-               "%s  %.3lf\n", theData.tNode->GetName().c_str(), theData.tLoc(0),
-               theData.rNode->GetName().c_str(), theData.rLoc(0));
-      #endif
-
-      // Loop to half microsecond precision or 10 times, whichever comes first
-      while ((GmatMathUtil::Abs(deltaE - deltaT) > 5e-7) && (loopCount < 10))
-      {
-         #ifdef DEBUG_LIGHTTIME
-            MessageInterface::ShowMessage("      Loop iteration %d\n",
-                  loopCount);
-         #endif
-         MoveToEpoch(atEpoch + deltaT / GmatTimeConstants::SECS_PER_DAY,
-               !epochAtReceive, false);
-         deltaE = (epochAtReceive ? -1.0 : 1.0) *
-               (theData.rTime - theData.tTime) * GmatTimeConstants::SECS_PER_DAY;
-         Rvector3 rLocSSB = theData.rLoc + theData.rOStateSSB.GetR();
-         Rvector3 tLocSSB = theData.tLoc + theData.tOStateSSB.GetR();
-         // Range vector as seen from Barycentric inertial observer (GMAT MathSpec Eq. 6.12)
-         displacement = rLocSSB - tLocSSB;
-       
-         #ifdef DEBUG_LIGHTTIME
-            MessageInterface::ShowMessage("Positions in SSBMJ2000 cs: %s  (%.12lf   %.12lf   %.12lf)km -->  %s  "
-                  "(%.12lf   %.12lf   %.12lf)km\n", theData.tNode->GetName().c_str(), tLocSSB(0), tLocSSB(1), tLocSSB(2),
-                  theData.rNode->GetName().c_str(), rLocSSB(0), rLocSSB(1), rLocSSB(2));
-         #endif
-
-         relCorrection = 0.0;
-         if (useRelativity)
-         {
-            relCorrection = RelativityCorrection(theData.tLoc+theData.tOStateSSB.GetR(), theData.rLoc+theData.rOStateSSB.GetR(),theData.tTime, theData.rTime);
-         }
-
-         Real lightTimeRange = displacement.GetMagnitude();
-         deltaR = lightTimeRange + relCorrection;
-         deltaT = (epochAtReceive ? -1.0 : 1.0) * deltaR /
-                     (GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM / 1000.0);
-
-         #ifdef DEBUG_LIGHTTIME
-            MessageInterface::ShowMessage("Ligh Time range       = %.12lf km\n", lightTimeRange);  
-            MessageInterface::ShowMessage("Relativity correction = %.12lf km\n", relCorrection);
-            MessageInterface::ShowMessage("      ===> dEpoch = %.12le, dR = "
-                  "%.3lf, dT = %.12le, trigger = %le\n", deltaE, deltaR, deltaT,
-                  deltaE-deltaT);
-         #endif
-         ++loopCount;
-      }
-   }
-
-   // Temporary check on data flow
-   // Build the other data vectors
-   CalculateRangeVectorInertial();
-   CalculateRangeVectorObs();
-   CalculateRangeRateVectorObs();
-
-   return retval;
-}
-#else
 
 
 bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
@@ -1230,7 +916,6 @@ bool PhysicalSignal::GenerateLightTimeData(const GmatTime atEpoch,
 
    return retval;
 }
-#endif
 
 
 bool PhysicalSignal::HardwareDelayCalculation()
@@ -1622,7 +1307,10 @@ bool PhysicalSignal::MediaCorrectionCalculation(std::vector<RampTableData>* ramp
    if (ionosphereModel == "IRI2007")
    {
       if (ionosphere == NULL)
-         ionosphere = new Ionosphere(gs->GetName()+"_Ionosphere");
+      {
+         // ionosphere = new Ionosphere(gs->GetName()+"_Ionosphere");                  // made changes by TUAN NGUYEN
+         ionosphere = IonosphereCorrectionModel::Instance()->GetIonosphereInstance();  // made changes by TUAN NGUYEN
+      }
       theData.useCorrection.push_back(true);
    }
    else

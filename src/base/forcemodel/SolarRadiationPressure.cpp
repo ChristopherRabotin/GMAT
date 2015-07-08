@@ -156,7 +156,10 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    satCount            (0),
    massID              (-1),
    crID                (-1),
-   areaID              (-1)
+   areaID              (-1),
+   estimatingCr        (false),
+   crEpsilonID         (-1),
+   crEpsilonRow        (6)
 {
    parameterCount = SRPParamCount;
    derivativeIds.push_back(Gmat::CARTESIAN_STATE);
@@ -200,10 +203,13 @@ SolarRadiationPressure::SolarRadiationPressure(const SolarRadiationPressure &srp
    satCount            (srp.satCount),
    massID              (srp.massID),
    crID                (srp.crID),
-   areaID              (srp.areaID)
+   areaID              (srp.areaID),
+   estimatingCr        (srp.estimatingCr),
+   crEpsilonID         (srp.crEpsilonID),
+   crEpsilonRow        (srp.crEpsilonRow),
+   crInitial           (srp.crInitial)
 {
    parameterCount = SRPParamCount;
-
    shadowState = new ShadowState();
 }
 
@@ -243,10 +249,15 @@ SolarRadiationPressure& SolarRadiationPressure::operator=(const SolarRadiationPr
       percentSun   = srp.percentSun;
       bodyID       = srp.bodyID;
    
-      satCount      = srp.satCount;
-      massID        = srp.massID;
-      crID          = srp.crID;
-      areaID        = srp.areaID;
+      satCount     = srp.satCount;
+      massID       = srp.massID;
+      crID         = srp.crID;
+      areaID       = srp.areaID;
+
+      estimatingCr = srp.estimatingCr;
+      crEpsilonID  = srp.crEpsilonID;
+      crEpsilonRow = srp.crEpsilonRow;
+      crInitial    = srp.crInitial;
 
       if (shadowState)
       {
@@ -812,7 +823,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
       throw ODEModelException(msg.str());
    }
 
-   Real distancefactor = 1.0, mag, sSquared;
+   Real distancefactor = 1.0, mag, magInitial, sSquared;
    bool inSunlight = true, inShadow = false;
 
    Real ep = epoch + dt / GmatTimeConstants::SECS_PER_DAY;
@@ -848,7 +859,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
    if (order > 2)
       return false;
 
-   Integer i6;
+   Integer i6, ix;
    Real sunSat[3];
    Rvector3 spadArea;
     
@@ -940,8 +951,12 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             #endif
             mag = percentSun * fluxPressure * distancefactor /
                                 mass[i];
+
             if (srpModel == "Spherical")
             {
+               #ifdef DEBUG_CR_UPDATES
+                  MessageInterface::ShowMessage("SRP using Cr = %.12lf\n", cr[i]);
+               #endif
                mag *= cr[i] * area[i];
                if (order == 1)
                {
@@ -1009,26 +1024,30 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
 
    if (fillSTM || fillAMatrix)
    {
-      Real aTilde[36];
+      Integer stmSize = stmRowCount * stmRowCount;
+      Real *aTilde;
+      aTilde = new Real[stmSize];
+
+      /// @todo Temporary; needs generalization
+      if (stmRowCount == 7)
+         estimatingCr = true;
+
       Integer associate, element;
       for (Integer i = 0; i < stmCount; ++i)
       {
          #ifdef DEBUG_STM_MATRIX
             MessageInterface::ShowMessage("Filling STM for spacecraft %d\n", i);
          #endif
-         i6 = stmStart + i * 36;
-         associate = theState->GetAssociateIndex(i6);
+         Integer iStart = stmStart + i * stmRowCount*stmRowCount;
+         associate = theState->GetAssociateIndex(iStart);
 
          // Calculate A-tilde
-         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
-         aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
-         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-         aTilde[ 9] = aTilde[10] = aTilde[11] =
-         aTilde[12] = aTilde[13] = aTilde[14] =
-         aTilde[15] = aTilde[16] = aTilde[17] =
-         aTilde[21] = aTilde[22] = aTilde[23] =
-         aTilde[27] = aTilde[28] = aTilde[29] =
-         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix+k] = 0.0;
+         }
 
          // Build vector from Sun to the current spacecraft; (-s in math spec)
          sunSat[0] = state[ associate ] - cbSunVector[0];
@@ -1075,21 +1094,48 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          {
             if (srpModel == "Spherical")
             {
+               /// @todo Make Cr value reporting more elegant
+               static Real old_cr = 0.0;
+               if ((old_cr != cr[i]))
+               {
+                  old_cr = cr[i];
+                  MessageInterface::ShowMessage("Cr = %.12lf\n", cr[i]);
+               }
+
                // All of the common terms for C_s
                mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor /
                                    (mass[i] * sunDistance);
+
                sSquared = sunDistance * sunDistance;
 
                // Math spec terms for SRP C submatrix of the A-matrix
-               aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
-               aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
-               aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
-               aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
-               aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
-               aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
-               aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
-               aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
-               aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+               ix = stmRowCount * 3;
+               aTilde[ix]   = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
+               aTilde[ix+1] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
+               aTilde[ix+2] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+
+               // VX term for estimating Cr
+               if (estimatingCr)
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 3] * crInitial[i] / cr[i];
+
+               ix = stmRowCount * 4;
+               aTilde[ix]   = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
+               aTilde[ix+1] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
+               aTilde[ix+2] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+
+               // VY term for estimating Cr
+               if (estimatingCr)
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 4] * crInitial[i] / cr[i];
+
+               ix = stmRowCount * 5;
+               aTilde[ix]   = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
+               aTilde[ix+1] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
+               aTilde[ix+2] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+
+               // VZ term for estimating Cr
+               if (estimatingCr)
+                  aTilde[ix+crEpsilonRow] = deriv[i6 + 5] * crInitial[i] / cr[i];
+
             }
             else // SPADFile
             {
@@ -1130,15 +1176,19 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                theState[2]     = nominalState[2] + dz;
                accelPertZ      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
                // Fill in aTilde
-               aTilde[18] = (accelPertX[3] - nominalAccel[3]) / dx;
-               aTilde[24] = (accelPertX[4] - nominalAccel[4]) / dx;
-               aTilde[30] = (accelPertX[5] - nominalAccel[5]) / dx;
-               aTilde[19] = (accelPertY[3] - nominalAccel[3]) / dy;
-               aTilde[25] = (accelPertY[4] - nominalAccel[4]) / dy;
-               aTilde[31] = (accelPertY[5] - nominalAccel[5]) / dy;
-               aTilde[20] = (accelPertZ[3] - nominalAccel[3]) / dz;
-               aTilde[26] = (accelPertZ[4] - nominalAccel[4]) / dz;
-               aTilde[32] = (accelPertZ[5] - nominalAccel[5]) / dz;
+               ix = stmRowCount * 3;
+               aTilde[ix]   = (accelPertX[3] - nominalAccel[3]) / dx;
+               aTilde[ix+1] = (accelPertY[3] - nominalAccel[3]) / dy;
+               aTilde[ix+2] = (accelPertZ[3] - nominalAccel[3]) / dz;
+               ix = stmRowCount * 4;
+               aTilde[ix]   = (accelPertX[4] - nominalAccel[4]) / dx;
+               aTilde[ix+1] = (accelPertY[4] - nominalAccel[4]) / dy;
+               aTilde[ix+2] = (accelPertZ[4] - nominalAccel[4]) / dz;
+               ix = stmRowCount * 5;
+               aTilde[ix]   = (accelPertX[5] - nominalAccel[5]) / dx;
+               aTilde[ix+1] = (accelPertY[5] - nominalAccel[5]) / dy;
+               aTilde[ix+2] = (accelPertZ[5] - nominalAccel[5]) / dz;
+
                #ifdef DEBUG_SPAD_DATA
                   MessageInterface::ShowMessage("    accelPertX          = %12.16le  %12.16le  %12.16le  %12.16le  %12.16le  %12.16le\n",
                         accelPertX[0], accelPertX[1], accelPertX[2],accelPertX[3],accelPertX[4],accelPertX[5]);
@@ -1169,17 +1219,20 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
          }
          else
          {
-            aTilde[18] = aTilde[19] = aTilde[20] =
-            aTilde[24] = aTilde[25] = aTilde[26] =
-            aTilde[30] = aTilde[31] = aTilde[32] = 0.0;
+            ix = stmRowCount * 3;
+            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
+            ix = stmRowCount * 4;
+            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
+            ix = stmRowCount * 5;
+            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
          }
 
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmRowCount; ++j)
          {
-            for (Integer k = 0; k < 6; ++k)
+            for (Integer k = 0; k < stmRowCount; ++k)
             {
-               element = j * 6 + k;
-               deriv[i6+element] = aTilde[element];
+               element = j * stmRowCount + k;
+               deriv[iStart+element] = aTilde[element];
             }
          }
       }
@@ -1190,19 +1243,16 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             MessageInterface::ShowMessage(
                   "Filling A-matrix for spacecraft %d\n", i);
          #endif
-         i6 = aMatrixStart + i * 36;
-         associate = theState->GetAssociateIndex(i6);
+         Integer iStart = aMatrixStart + i * stmRowCount*stmRowCount;
+         associate = theState->GetAssociateIndex(iStart);
 
          // Calculate A-tilde
-         aTilde[ 0] = aTilde[ 1] = aTilde[ 2] =
-         aTilde[ 3] = aTilde[ 4] = aTilde[ 5] =
-         aTilde[ 6] = aTilde[ 7] = aTilde[ 8] =
-         aTilde[ 9] = aTilde[10] = aTilde[11] =
-         aTilde[12] = aTilde[13] = aTilde[14] =
-         aTilde[15] = aTilde[16] = aTilde[17] =
-         aTilde[21] = aTilde[22] = aTilde[23] =
-         aTilde[27] = aTilde[28] = aTilde[29] =
-         aTilde[33] = aTilde[34] = aTilde[35] = 0.0;
+         for (Integer j = 0; j < stmRowCount; ++j)
+         {
+            ix = j * stmRowCount;
+            for (Integer k = 0; k < stmRowCount; ++k)
+               aTilde[ix+k] = 0.0;
+         }
 
          // Build vector from Sun to the current spacecraft; (-s in math spec)
          sunSat[0] = state[ associate ] - cbSunVector[0];
@@ -1256,15 +1306,18 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                sSquared = sunDistance * sunDistance;
 
                // Math spec terms for SRP C submatrix of the A-matrix
-               aTilde[18] = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
-               aTilde[19] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
-               aTilde[20] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
-               aTilde[24] = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
-               aTilde[25] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
-               aTilde[26] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
-               aTilde[30] = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
-               aTilde[31] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
-               aTilde[32] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
+               ix = stmRowCount*3;
+               aTilde[ix]   = mag * (1.0 - 3.0 * sunSat[0]*sunSat[0] / sSquared);
+               aTilde[ix+1] = mag * (    - 3.0 * sunSat[0]*sunSat[1] / sSquared);
+               aTilde[ix+2] = mag * (    - 3.0 * sunSat[0]*sunSat[2] / sSquared);
+               ix = stmRowCount*4;
+               aTilde[ix]   = mag * (    - 3.0 * sunSat[1]*sunSat[0] / sSquared);
+               aTilde[ix+1] = mag * (1.0 - 3.0 * sunSat[1]*sunSat[1] / sSquared);
+               aTilde[ix+2] = mag * (    - 3.0 * sunSat[1]*sunSat[2] / sSquared);
+               ix = stmRowCount*5;
+               aTilde[ix]   = mag * (    - 3.0 * sunSat[2]*sunSat[0] / sSquared);
+               aTilde[ix+1] = mag * (    - 3.0 * sunSat[2]*sunSat[1] / sSquared);
+               aTilde[ix+2] = mag * (1.0 - 3.0 * sunSat[2]*sunSat[2] / sSquared);
             }
             else // SPADFile
             {
@@ -1297,35 +1350,42 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
                theState[1]     = nominalState[1];
                theState[2]     = nominalState[2] + dz;
                accelPertZ      = ComputeSPADAcceleration(i, ep, theState, cbSunVector);
+
                // Fill in aTilde
-               aTilde[18] = (accelPertX[3] - nominalAccel[3]) / dx;
-               aTilde[24] = (accelPertX[4] - nominalAccel[4]) / dx;
-               aTilde[30] = (accelPertX[5] - nominalAccel[5]) / dx;
-               aTilde[19] = (accelPertY[3] - nominalAccel[3]) / dy;
-               aTilde[25] = (accelPertY[4] - nominalAccel[4]) / dy;
-               aTilde[31] = (accelPertY[5] - nominalAccel[5]) / dy;
-               aTilde[20] = (accelPertZ[3] - nominalAccel[3]) / dz;
-               aTilde[26] = (accelPertZ[4] - nominalAccel[4]) / dz;
-               aTilde[32] = (accelPertZ[5] - nominalAccel[5]) / dz;
+               ix = stmRowCount*3;
+               aTilde[ix] = (accelPertX[3] - nominalAccel[3]) / dx;
+               aTilde[ix+1] = (accelPertY[3] - nominalAccel[3]) / dy;
+               aTilde[ix+2] = (accelPertZ[3] - nominalAccel[3]) / dz;
+               ix = stmRowCount*4;
+               aTilde[ix]   = (accelPertX[4] - nominalAccel[4]) / dx;
+               aTilde[ix+1] = (accelPertY[4] - nominalAccel[4]) / dy;
+               aTilde[ix+2] = (accelPertZ[4] - nominalAccel[4]) / dz;
+               ix = stmRowCount*5;
+               aTilde[ix]   = (accelPertX[5] - nominalAccel[5]) / dx;
+               aTilde[ix+1] = (accelPertY[5] - nominalAccel[5]) / dy;
+               aTilde[ix+2] = (accelPertZ[5] - nominalAccel[5]) / dz;
             }
          }
          else
          {
-            aTilde[18] = aTilde[19] = aTilde[20] =
-            aTilde[24] = aTilde[25] = aTilde[26] =
-            aTilde[30] = aTilde[31] = aTilde[32] = 0.0;
+            ix = stmRowCount * 3;
+            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
+            ix = stmRowCount * 4;
+            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
+            ix = stmRowCount * 5;
+            aTilde[ix] = aTilde[ix+1] = aTilde[ix+2] = 0.0;
          }
 
          #ifdef DEBUG_A_MATRIX
             MessageInterface::ShowMessage(
                   "A-Matrix contribution[%d] from SRP:\n", i);
          #endif
-         for (Integer j = 0; j < 6; ++j)
+         for (Integer j = 0; j < stmRowCount; ++j)
          {
-            for (Integer k = 0; k < 6; ++k)
+            for (Integer k = 0; k < stmRowCount; ++k)
             {
-               element = j * 6 + k;
-               deriv[i6+element] = aTilde[element];
+               element = j * stmRowCount + k;
+               deriv[iStart+element] = aTilde[element];
                #ifdef DEBUG_A_MATRIX
                   MessageInterface::ShowMessage("  %le  ", deriv[i6+element]);
                #endif
@@ -1335,6 +1395,8 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order,
             #endif
          }
       }
+
+	  delete [] aTilde;
    }
     
    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
@@ -1838,9 +1900,17 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
     if (parmName == "Cr")
     {
         if (parmNumber < cr.size())
-            cr[i] = parm;
+        {
+           cr[i] = parm;
+           if (crInitial[i] == -99999999.9999)
+              crInitial[i] = parm;
+        }
         else
-            cr.push_back(parm);
+        {
+           cr.push_back(parm);
+           crInitial.push_back(parm);
+        }
+
         if (parmID >= 0)
            crID = parmID;
     }
@@ -1853,7 +1923,17 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
         if (parmID >= 0)
             areaID = parmID;
     }
+    if (parmName == "CrEpsilon")
+    {
+        if (parmNumber < crEpsilon.size())
+            crEpsilon[i] = parm;
+        else
+            crEpsilon.push_back(parm);
+        if (parmID >= 0)
+           crEpsilonID = parmID;
+    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SetSatelliteParameter(const Integer i, Integer parmID, const Real parm)
@@ -1873,7 +1953,7 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
 
    #ifdef DEBUG_SOLAR_RADIATION_PRESSURE
         std::stringstream msg;
-        msg << "Setting satellite parameter " << parmName << " for Spacecraft "
+        msg << "Setting satellite parameter " << parmID << " for Spacecraft "
             << i << " to " << parm << "\n";
         MessageInterface::ShowMessage(msg.str());
    #endif
@@ -1899,6 +1979,13 @@ void SolarRadiationPressure::SetSatelliteParameter(const Integer i,
       else
          area.push_back(parm);
    }
+   if (parmID == crEpsilonID)
+   {
+      if (parmNumber < crEpsilon.size())
+         crEpsilon[i] = parm;
+      else
+         crEpsilon.push_back(parm);
+   }
 }
 
 
@@ -1923,7 +2010,12 @@ void SolarRadiationPressure::ClearSatelliteParameters(
    if ((parmName == "Mass") || (parmName == ""))
       mass.clear();
    if ((parmName == "Cr") || (parmName == ""))
+   {
       cr.clear();
+      crInitial.clear();
+   }
+   if ((parmName == "CrEpsilon") || (parmName == ""))
+      crEpsilon.clear();
    if ((parmName == "SRPArea") || (parmName == ""))
       area.clear();
    if ((parmName == "scObjs")  || (parmName == ""))
@@ -2001,12 +2093,14 @@ bool SolarRadiationPressure::SupportsDerivative(Gmat::StateElementId id)
  * @param id State Element ID for the derivative type
  * @param index Starting index in the state vector for this type of derivative
  * @param quantity Number of objects that supply this type of data
+ * @param sizeOfType For sizable types, the size to use.  For example, for STM,
+ *                   this is the number of rows or columns in the STM
  * 
  * @return true if the type is supported, false otherwise. 
  */
 //------------------------------------------------------------------------------
 bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("SolarRadiationPressure setting start data "
@@ -2030,6 +2124,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
          stmCount = quantity;
          stmStart = index;
          fillSTM = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
          
@@ -2037,6 +2132,7 @@ bool SolarRadiationPressure::SetStart(Gmat::StateElementId id, Integer index,
          aMatrixCount = quantity;
          aMatrixStart = index;
          fillAMatrix = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
 

@@ -19,7 +19,6 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "BatchEstimatorInv.hpp"
 #include "MessageInterface.hpp"
 #include "EstimatorException.hpp"
@@ -34,6 +33,7 @@
 //#define DEBUG_WEIGHTS
 //#define DEBUG_O_MINUS_C
 //#define DEBUG_SCHUR
+//#define DEBUG_INVERSION
 
 //------------------------------------------------------------------------------
 // BatchEstimatorInv(const std::string &name)
@@ -152,6 +152,8 @@ void BatchEstimatorInv::Accumulate()
    const MeasurementData *calculatedMeas;
    std::vector<RealArray> stateDeriv;
    
+   for (UnsignedInt i = 0; i < hTilde.size(); ++i)
+      hTilde[i].clear();
    hTilde.clear();
 
    // Get state map, measurement models, and measurement data
@@ -226,10 +228,10 @@ void BatchEstimatorInv::Accumulate()
 
          if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
             sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-         else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler"))
-            sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+         else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))                        // made changes by TUAN NGUYEN
+            sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
          else
-            sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
+            sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
          sLine << s;
       }
       sLine << "\n";
@@ -262,10 +264,10 @@ void BatchEstimatorInv::Accumulate()
 
             if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
                sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-            else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler"))
-               sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+            else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
+               sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
             else
-               sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
+               sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
             sLine << s;
          }
          sLine << "\n";
@@ -310,7 +312,7 @@ void BatchEstimatorInv::Accumulate()
                weight = 1.0 / (*(calculatedMeas->covariance))(0,0);
             else
                weight = 1.0;
-            sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+            sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[0], currentObs->value[0], calculatedMeas->value[0], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
             sLine << s;
 
             if (textFileMode != "Normal")
@@ -321,10 +323,10 @@ void BatchEstimatorInv::Accumulate()
 
                if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
                   sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-               else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler"))
-                  sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+               else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
+                  sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
                else
-                  sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
+                  sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
                sLine << s;
             }
             sLine << "\n";
@@ -438,7 +440,7 @@ void BatchEstimatorInv::Accumulate()
             #endif
             for (UnsignedInt k = 0; k < currentObs->value.size(); ++k)
             {
-               // Caluclate residual O-C
+               // Calculate residual O-C
                ocDiff = currentObs->value[k] - calculatedMeas->value[k];
                #ifdef DEBUG_O_MINUS_C
                   Real OD_Epoch = TimeConverterUtil::Convert(currentObs->epoch,
@@ -487,7 +489,6 @@ void BatchEstimatorInv::Accumulate()
                    #endif
                }
                Weight.push_back(weight);
-
             
                for (UnsignedInt i = 0; i < stateSize; ++i)
                {
@@ -506,13 +507,13 @@ void BatchEstimatorInv::Accumulate()
                //sLine << ss << "     ";
                sLine << GmatStringUtil::GetAlignmentString(ss, 10, GmatStringUtil::LEFT);
 
-               sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %18.12lf   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
+               sprintf(&s[0],"%22.6lf   %22.6lf   %22.6lf   %18.6lf    %.12le   %.12le   %.12le   %18.12lf", currentObs->value_orig[k], currentObs->value[k], calculatedMeas->value[k], ocDiff, weight, ocDiff*ocDiff*weight, sqrt(weight)*abs(ocDiff), calculatedMeas->feasibilityValue);
                sLine << s;
             
                if (textFileMode != "Normal")
                {
                   // fill out N/A for partial derivative
-                  for (int p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
+                  for (UnsignedInt p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
                   {
                      sprintf(&s[0],"   %18.12le", hAccum[hAccum.size()-1][p]);
                      ss.assign(s); 
@@ -522,10 +523,10 @@ void BatchEstimatorInv::Accumulate()
 
                   if ((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange"))
                      sprintf(&s[0],"            %d   %.15le   %.15le                     N/A", currentObs->uplinkBand, currentObs->uplinkFreq, currentObs->rangeModulo);
-                  else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler"))
-                     sprintf(&s[0],"            %d                      N/A                      N/A                  %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
+                  else if ((currentObs->typeName == "DSNTwoWayDoppler")||(currentObs->typeName == "Doppler")||(currentObs->typeName == "Doppler_RangeRate"))
+                     sprintf(&s[0],"            %d                      N/A                      N/A                 %.4lf", currentObs->uplinkBand, currentObs->dopplerCountInterval);
                   else
-                     sprintf(&s[0],"            N/A                     N/A                      N/A                    N/A");
+                     sprintf(&s[0],"          N/A                      N/A                      N/A                     N/A");
                   sLine << s;
                }
                sLine << "\n";
@@ -816,17 +817,29 @@ void BatchEstimatorInv::Estimate()
       } 
       catch (...)
       {
-         throw EstimatorException("Error: Normal matrix is sigular\n");
+         #ifdef DEBUG_INVERSION
+            MessageInterface::ShowMessage("Information matrix:\n");
+            for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
+            {
+               MessageInterface::ShowMessage("      [");
+               for (UnsignedInt j = 0; j < information.GetNumColumns(); ++j)
+               {
+                  MessageInterface::ShowMessage(" %.12lf ", information(i,j));
+               }
+               MessageInterface::ShowMessage("]\n");
+            }
+         #endif
+         throw EstimatorException("Error: Normal matrix is singular\n");
       }
    }
 
    #ifdef DEBUG_VERBOSE
-      MessageInterface::ShowMessage(" residuals: [\n");
+      MessageInterface::ShowMessage(" residuals: [");
       for (UnsignedInt i = 0; i < stateSize; ++i)
          MessageInterface::ShowMessage("  %.12lf  ", residuals(i));
       MessageInterface::ShowMessage("]\n");
 
-      MessageInterface::ShowMessage("   covarian matrix:\n");
+      MessageInterface::ShowMessage("   covariance matrix:\n");
       for (UnsignedInt i = 0; i < cov.GetNumRows(); ++i)
       {
          MessageInterface::ShowMessage("      [");
@@ -838,7 +851,7 @@ void BatchEstimatorInv::Estimate()
       }
    #endif
 
-   // Calculalte state change dx 
+   // Calculate state change dx
    dx.clear();
    Real delta;
    for (UnsignedInt i = 0; i < stateSize; ++i)
@@ -899,7 +912,6 @@ void BatchEstimatorInv::Estimate()
    OData.clear();
    CData.clear();
 
-   
    currentState = CHECKINGRUN;
 }
 

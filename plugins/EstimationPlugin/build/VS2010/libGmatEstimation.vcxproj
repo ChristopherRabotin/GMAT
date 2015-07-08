@@ -186,7 +186,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\tdmReader;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\Xerces\include;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\datafilter;..\..\src\base\errormodel;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\tdmReader;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\datafilter;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\errormodel;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\Xerces\include;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;ESTIMATION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -220,7 +220,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\factory;..\..\src\base\command;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\base\adapter;..\..\src\base\command;..\..\src\base\datafilter;..\..\src\base\errormodel;..\..\src\base\estimator;..\..\src\base\event;..\..\src\base\factory;..\..\src\base\hardware;..\..\src\base\measurement;..\..\src\base\measurement\Ionosphere;..\..\src\base\measurement\Troposphere;..\..\src\base\measurementfile;..\..\src\base\measurementmodel;..\..\src\base\include;..\..\src\base\plugin;..\..\src\base\reporter;..\..\src\base\signal;..\..\src\base\tdmReader;..\..\src\base\trackingfile;..\..\src\base\trackingsystem;..\..\..\..\src\base\include;..\..\..\..\src\base\asset;..\..\..\..\src\base\attitude;..\..\..\..\src\base\burn;..\..\..\..\src\base\configs;..\..\..\..\src\base\coordsystem;..\..\..\..\src\base\command;..\..\..\..\src\base\util;..\..\..\..\src\base\solarsys;..\..\..\..\src\base\hardware;..\..\..\..\src\base\interpolator;..\..\..\..\src\base\math;..\..\..\..\src\base\spacecraft;..\..\..\..\src\base\event;..\..\..\..\src\base\foundation;..\..\..\..\src\base\factory;..\..\..\..\src\base\function;..\..\..\..\src\base\parameter;..\..\..\..\src\base\plugin;..\..\..\..\src\base\solver;..\..\..\..\src\base\stopcond;..\..\..\..\src\base\subscriber;..\..\..\..\src\base\interface;..\..\..\..\src\base\executive;..\..\..\..\src\base\interpreter;..\..\..\..\src\base\forcemodel;..\..\..\..\src\base\propagator;..\..\..\..\src\gui\include;..\..\..\..\src\gui\app;..\..\..\..\..\Gmat3rdParty\Xerces-3.1.2\include;..\..\..\..\..\Gmat3rdParty\cspice\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
@@ -230,23 +230,30 @@
       <DisableSpecificWarnings>4996;4231;4251;4430</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libGmatBase.lib;cspice.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\application\bin;..\..\..\..\..\Gmat3rdParty\cspice\lib;..\..\..\..\..\Gmat3rdParty\Xerces-3.1.2\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatBase.lib;cspice.lib;xerces-c_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\adapter\DopplerAdapter.hpp" />
     <ClInclude Include="..\..\src\base\adapter\DSNRangeAdapter.hpp" />
+    <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp" />
     <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeAdapterKm.hpp" />
     <ClInclude Include="..\..\src\base\adapter\RangeRateAdapterKps.hpp" />
     <ClInclude Include="..\..\src\base\adapter\TrackingDataAdapter.hpp" />
     <ClInclude Include="..\..\src\base\command\RunEstimator.hpp" />
     <ClInclude Include="..\..\src\base\command\RunSimulator.hpp" />
+    <ClInclude Include="..\..\src\base\datafilter\DataFilter.hpp" />
+    <ClInclude Include="..\..\src\base\datafilter\StatisticAcceptFilter.hpp" />
+    <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp" />
+    <ClInclude Include="..\..\src\base\errormodel\ErrorModel.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimator.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimatorInv.hpp" />
     <ClInclude Include="..\..\src\base\estimator\BatchEstimatorSVD.hpp" />
@@ -259,10 +266,10 @@
     <ClInclude Include="..\..\src\base\event\EstimationRootFinder.hpp" />
     <ClInclude Include="..\..\src\base\event\Event.hpp" />
     <ClInclude Include="..\..\src\base\event\EventData.hpp" />
-    <ClInclude Include="..\..\src\base\event\EventException.hpp" />
     <ClInclude Include="..\..\src\base\event\EventManager.hpp" />
     <ClInclude Include="..\..\src\base\event\LightTimeCorrection.hpp" />
     <ClInclude Include="..\..\src\base\factory\DataFileFactory.hpp" />
+    <ClInclude Include="..\..\src\base\factory\ErrorModelFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\EstimationCommandFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\EstimatorFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\EstimatorHardwareFactory.hpp" />
@@ -270,6 +277,7 @@
     <ClInclude Include="..\..\src\base\factory\MeasurementFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\MeasurementModelFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\ObTypeFactory.hpp" />
+    <ClInclude Include="..\..\src\base\factory\EstimationDataFilterFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\TrackingDataFactory.hpp" />
     <ClInclude Include="..\..\src\base\factory\TrackingSystemFactory.hpp" />
     <ClInclude Include="..\..\src\base\hardware\Antenna.hpp" />
@@ -304,6 +312,7 @@
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\irifun.h" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\irisub.h" />
     <ClInclude Include="..\..\src\base\measurement\Ionosphere\iritec.h" />
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\loadfiles.h" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementData.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementException.hpp" />
     <ClInclude Include="..\..\src\base\measurement\MeasurementManager.hpp" />
@@ -341,12 +350,17 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\base\adapter\DopplerAdapter.cpp" />
     <ClCompile Include="..\..\src\base\adapter\DSNRangeAdapter.cpp" />
+    <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp" />
     <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeAdapterKm.cpp" />
     <ClCompile Include="..\..\src\base\adapter\RangeRateAdapterKps.cpp" />
     <ClCompile Include="..\..\src\base\adapter\TrackingDataAdapter.cpp" />
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp" />
     <ClCompile Include="..\..\src\base\command\RunSimulator.cpp" />
+    <ClCompile Include="..\..\src\base\datafilter\DataFilter.cpp" />
+    <ClCompile Include="..\..\src\base\datafilter\StatisticAcceptFilter.cpp" />
+    <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp" />
+    <ClCompile Include="..\..\src\base\errormodel\ErrorModel.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimator.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimatorInv.cpp" />
     <ClCompile Include="..\..\src\base\estimator\BatchEstimatorSVD.cpp" />
@@ -359,11 +373,12 @@
     <ClCompile Include="..\..\src\base\event\EstimationRootFinder.cpp" />
     <ClCompile Include="..\..\src\base\event\Event.cpp" />
     <ClCompile Include="..\..\src\base\event\EventData.cpp" />
-    <ClCompile Include="..\..\src\base\event\EventException.cpp" />
     <ClCompile Include="..\..\src\base\event\EventManager.cpp" />
     <ClCompile Include="..\..\src\base\event\LightTimeCorrection.cpp" />
     <ClCompile Include="..\..\src\base\factory\DataFileFactory.cpp" />
+    <ClCompile Include="..\..\src\base\factory\ErrorModelFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\EstimationCommandFactory.cpp" />
+    <ClCompile Include="..\..\src\base\factory\EstimationDataFilterFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\EstimatorFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\EstimatorHardwareFactory.cpp" />
     <ClCompile Include="..\..\src\base\factory\EventFactory.cpp" />
@@ -402,6 +417,7 @@
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\irifun.c" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\irisub.c" />
     <ClCompile Include="..\..\src\base\measurement\Ionosphere\iritec.c" />
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\loadfiles.c" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementData.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementManager.cpp" />
     <ClCompile Include="..\..\src\base\measurement\MeasurementModel.cpp" />
@@ -433,9 +449,6 @@
     <ClCompile Include="..\..\src\base\trackingsystem\TDRSSTrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\TrackingSystem.cpp" />
     <ClCompile Include="..\..\src\base\trackingsystem\USNTrackingSystem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

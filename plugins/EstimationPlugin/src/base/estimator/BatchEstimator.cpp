@@ -31,12 +31,13 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 #include "SpaceObject.hpp"    // To access epoch data
+#include "Spacecraft.hpp"
 #include "StringUtil.hpp"
 
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_SIMULATOR_WRITE
-//#define DEBUG_SIMULATOR_INITIALIZATION
+//#define DEBUG_INITIALIZATION
 //#define DEBUG_EXECUTION
 //#define DEBUG_EVENT
 //#define DEBUG_ACCUMULATION_RESULTS
@@ -290,6 +291,17 @@ std::string BatchEstimator::GetParameterTypeString(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+//  Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * This method returns value of an integer parameter given the input parameter ID.
+ *
+ * @param id ID for the requested parameter.
+ *
+ * @return value of the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Integer BatchEstimator::GetIntegerParameter(const Integer id) const
 {
    if (id == MAX_CONSECUTIVE_DIVERGENCES)
@@ -298,6 +310,19 @@ Integer BatchEstimator::GetIntegerParameter(const Integer id) const
    return Estimator::GetIntegerParameter(id);
 }
 
+
+//------------------------------------------------------------------------------
+//  Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets value to an integer parameter specified by the input parameter ID.
+ *
+ * @param id       ID for the requested parameter.
+ * @param value    integer value used to set to the request parameter. 
+ *
+ * @return value set to the requested parameter.
+ */
+//------------------------------------------------------------------------------
 Integer BatchEstimator::SetIntegerParameter(const Integer id, const Integer value)
 {
    if (id == MAX_CONSECUTIVE_DIVERGENCES)
@@ -316,6 +341,7 @@ Integer BatchEstimator::SetIntegerParameter(const Integer id, const Integer valu
 
    return Estimator::SetIntegerParameter(id, value);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id) const
@@ -612,15 +638,11 @@ const StringArray& BatchEstimator::GetPropertyEnumStrings(const Integer id) cons
    if (id == ESTIMATION_EPOCH_FORMAT)
    {
       enumStrings.push_back("FromParticipants");
-      // todo This list should come from TimeSystemConverter in the util folder
-      enumStrings.push_back("A1ModJulian");
-      enumStrings.push_back("TAIModJulian");
-      enumStrings.push_back("UTCModJulian");
-      enumStrings.push_back("TTModJulian");
-      enumStrings.push_back("A1Gregorian");
-      enumStrings.push_back("TAIGregorian");
-      enumStrings.push_back("UTCGregorian");
-      enumStrings.push_back("TTGregorian");
+
+      StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      for (UnsignedInt i = 0; i < nameList.size(); ++i)
+         enumStrings.push_back(nameList[i]);
+
       return enumStrings;
    }
    return Estimator::GetPropertyEnumStrings(id);
@@ -871,21 +893,36 @@ void BatchEstimator::CompleteInitialization()
       }
       currentEpoch         = gs->GetEpoch();
       
-      // Tell the measManager to complete its initialization
-      bool measOK = measManager.SetPropagator(propagator);
-      measOK = measOK && measManager.Initialize();
-      if (!measOK)
-         throw SolverException(
-               "BatchEstimator::CompleteInitialization - error initializing "
-               "MeasurementManager.\n");
+      // This code was moved to Estimator::Reinitilaize()                              // made changes by TUAN NGUYEN
+      //// Tell the measManager to complete its initialization                         // made changes by TUAN NGUYEN
+      //bool measOK = measManager.SetPropagator(propagator);                           // made changes by TUAN NGUYEN
+      //measOK = measOK && measManager.Initialize();                                   // made changes by TUAN NGUYEN
+      //if (!measOK)                                                                   // made changes by TUAN NGUYEN
+      //   throw SolverException(                                                      // made changes by TUAN NGUYEN
+      //         "BatchEstimator::CompleteInitialization - error initializing "        // made changes by TUAN NGUYEN
+      //         "MeasurementManager.\n");                                             // made changes by TUAN NGUYEN
       
+      
+      // Set all solve-for and consider objects to tracking data adapters
+      // Note that: it only sets for tracking data adapters. For measurement models, 
+      // it does not has this option due to old GMAT Nav syntax will be removed, 
+      // so we do not need to implement this option.
+      ObjectArray objects;                                                                     // made changes by TUAN NGUYEN
+      esm.GetStateObjects(objects);                                                            // made changes by TUAN NGUYEN
+      std::vector<TrackingDataAdapter*> adapters = measManager.GetAllTrackingDataAdapters();   // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < adapters.size(); ++i)                                        // made changes by TUAN NGUYEN
+         adapters[i]->SetUsedForObjects(objects);                                              // made changes by TUAN NGUYEN
+
+
       // Now load up the observations
       measManager.PrepareForProcessing(false);
-      UnsignedInt numRec = measManager.LoadObservations();
-      if (numRec == 0)
-      {
-         throw EstimatorException("No observation data is used for estimation\n");
-      }
+
+      // This code was moved to Estimator::Reinitialize() function                      // made changes by TUAN NGUYEN
+      //UnsignedInt numRec = measManager.LoadObservations();                            // made changes by TUAN NGUYEN
+      //if (numRec == 0)                                                                // made changes by TUAN NGUYEN
+      //{                                                                               // made changes by TUAN NGUYEN
+      //   throw EstimatorException("No observation data is used for estimation\n");    // made changes by TUAN NGUYEN
+      //}                                                                               // made changes by TUAN NGUYEN
       
 ///// Check for more generic approach
       measManager.LoadRampTables();
@@ -919,7 +956,7 @@ void BatchEstimator::CompleteInitialization()
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage(
             "Init complete!\n   STM = %s\n   Covariance = %s\n",
-            stm->ToString().c_str(), covariance->ToString().c_str());
+            stm->ToString().c_str(), stateCovariance->GetCovariance()->ToString().c_str());
    #endif
 
    hAccum.clear();
@@ -1090,7 +1127,7 @@ void BatchEstimator::FindTimeStep()
 void BatchEstimator::CalculateData()
 {
    #ifdef WALK_STATE_MACHINE
-     MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
+      MessageInterface::ShowMessage("Entered BatchEstimator::CalculateData()\n");
    #endif
 
    // Update the STM
@@ -1222,9 +1259,9 @@ void BatchEstimator::CheckCompletion()
          PlotResiduals();
 
       // Reset to the new initial state, clear the processed data, etc
-      esm.RestoreObjects(&outerLoopBuffer);
-      esm.MapVectorToObjects();
-      esm.MapObjectsToSTM();
+      esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state 
+      esm.MapVectorToObjects();                                       // update objects state to current state
+      esm.MapObjectsToSTM();                                          // update object STM to current STM
       currentEpoch = estimationEpoch;
       measManager.Reset();                                            // set current observation data to be the first one in observation data table
       // Note that: all unused data records will be handled in BatchEstimatorInv::Accumulate() function
@@ -1328,6 +1365,25 @@ void BatchEstimator::RunComplete()
 
    if (showAllResiduals)
       PlotResiduals();
+
+
+   // Clean up memory
+   for (UnsignedInt i = 0; i < hTilde.size(); ++i)
+      hTilde[i].clear();
+   hTilde.clear();
+   
+   for (UnsignedInt i = 0; i < hAccum.size(); ++i)
+      hAccum[i].clear();
+   hAccum.clear();
+
+   Weight.clear();
+   OData.clear();
+   CData.clear();
+
+   measurementResiduals.clear();
+   measurementEpochs.clear();
+   measurementResidualID.clear();
+
 }
 
 
@@ -1589,12 +1645,12 @@ std::string BatchEstimator::GetProgressString()
 }
 
 
-#include "Spacecraft.hpp"
 std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalCS) const
 {
    std::stringstream ss;
    
-   ss << infor->objectName << ".";
+   //ss << infor->objectName << ".";                        // made changes by TUAN NGUYEN
+   ss << infor->objectFullName << ".";                      // made changes by TUAN NGUYEN
    if (infor->elementName == "CartesianState")
    {
       if (isInternalCS)

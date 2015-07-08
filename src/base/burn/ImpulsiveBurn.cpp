@@ -31,6 +31,10 @@
 //#define DEBUG_IMPBURN_FIRE
 //#define DEBUG_IMPBURN_DECMASS
 //#define DEBUG_IMPBURN_RENAME
+//#define DEBUG_BACKPROP
+
+#define BACKPROP_PRECISION 1.0e-15
+#define BACKPROP_ITERATIONS 50
 
 //---------------------------------
 // static data
@@ -196,11 +200,12 @@ void ImpulsiveBurn::SetSpacecraftToManeuver(Spacecraft *sat)
  * 
  * @param <burnData>    Array of data specific to the derived burn class.
  * @param <epoch>       Epoch of the burn fire
+ * @param backwards     Flag used by to indicate application as if in backprop
  *
  * @return true on success, throws on failure.
  */
 //------------------------------------------------------------------------------
-bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
+bool ImpulsiveBurn::Fire(Real *burnData, Real epoch, bool backwards)
 {
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage
@@ -249,11 +254,102 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    
    // The returned vector here is not rotated correctly because one of the bodies is not centered correctly
    ConvertDeltaVToInertial(deltaV, deltaVInertial, epoch);
+
+   if (backwards)
+   {
+      // theDv is the burn we will apply, in the burn frame
+      Real theV[3], trialBurn[3], endState[3];
+
+      theV[0] = satState[3];
+      theV[1] = satState[4];
+      theV[2] = satState[5];
+
+      // Seed the burn to be applied
+      trialBurn[0] = -deltaVInertial[0];
+      trialBurn[1] = -deltaVInertial[1];
+      trialBurn[2] = -deltaVInertial[2];
+//      ConvertDeltaVToInertial(theDv, trialBurn, epoch);
+
+      Real eps = 0.0, mag, tbMag;
+      Integer count = 0;
+      mag = sqrt(deltaV[0]*deltaV[0] + deltaV[1]*deltaV[1] + deltaV[2]*deltaV[2]);
+
+      #ifdef DEBUG_BACKPROP
+         MessageInterface::ShowMessage("BackProp Seed dv: [%lf  %lf  %lf]\n", trialBurn[0], trialBurn[1], trialBurn[2]);
+      #endif
+
+      // For BackProp, iterate the coordinate system conversion
+      do
+      {
+         if (eps != 0.0)  // After the first pass through...
+         {
+            // Reset spacecraft V
+            satState[3] = theV[0];
+            satState[4] = theV[1];
+            satState[5] = theV[2];
+
+            // Calc how different achieved was from desired
+            trialBurn[0] += satState[3] - endState[0];
+            trialBurn[1] += satState[4] - endState[1];
+            trialBurn[2] += satState[5] - endState[2];
+
+            // Apply dV with right mag in the adjusted direction
+            tbMag = sqrt(trialBurn[0]*trialBurn[0] + trialBurn[1]*trialBurn[1] + trialBurn[2]*trialBurn[2]);
+            trialBurn[0] *= mag/tbMag;
+            trialBurn[1] *= mag/tbMag;
+            trialBurn[2] *= mag/tbMag;
+         }
+
+         #ifdef DEBUG_BACKPROP
+            MessageInterface::ShowMessage("%d dv: [%lf  %lf  %lf]\n",
+                  count, trialBurn[0], trialBurn[1], trialBurn[2]);
+         #endif
+         satState[3] += trialBurn[0];
+         satState[4] += trialBurn[1];
+         satState[5] += trialBurn[2];
+
+         // Now apply the forward burn
+         ConvertDeltaVToInertial(deltaV, deltaVInertial, epoch);
+
+         endState[0] = satState[3] + deltaVInertial[0];
+         endState[1] = satState[4] + deltaVInertial[1];
+         endState[2] = satState[5] + deltaVInertial[2];
+
+         // and see how different it is from the starting velocity
+         eps = fabs(theV[0] - endState[0]) +
+               fabs(theV[1] - endState[1]) +
+               fabs(theV[2] - endState[2]);
+         ++count;
+         #ifdef DEBUG_BACKPROP
+            MessageInterface::ShowMessage("%d: eps = %le\n", count, eps);
+         #endif
+      }
+      while ((eps > BACKPROP_PRECISION) && (count < BACKPROP_ITERATIONS));
+
+      if (count == BACKPROP_ITERATIONS)
+      {
+         MessageInterface::ShowMessage("Warning!!! Maneuver BackProp did not "
+               "converge to a solution that inverts the forward maneuver in "
+               "direction,\nso the raw maneuver has been applied for the "
+               "ImpulsiveBurn %s\n", instanceName.c_str());
+
+         satState[3] = theV[0] - deltaVInertial[0];
+         satState[4] = theV[1] - deltaVInertial[1];
+         satState[5] = theV[2] - deltaVInertial[2];
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_BACKPROP
+         MessageInterface::ShowMessage("FrwdProp used dv: [%lf  %lf  %lf]\n",
+               deltaVInertial[0], deltaVInertial[1], deltaVInertial[2]);
+      #endif
+
+      satState[3] += deltaVInertial[0];
+      satState[4] += deltaVInertial[1];
+      satState[5] += deltaVInertial[2];
+   }
    
-   satState[3] += deltaVInertial[0];
-   satState[4] += deltaVInertial[1];
-   satState[5] += deltaVInertial[2];
-      
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage
       ("   Velocity after burn:  %18le  %18le  %18le\n",
@@ -263,7 +359,7 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
    #endif
    
    if (decrementMass)
-      DecrementMass();
+      DecrementMass(backwards);
       
    #ifdef DEBUG_IMPBURN_FIRE
    MessageInterface::ShowMessage("ImpulsiveBurn::Fire() returning true\n");
@@ -1052,7 +1148,7 @@ bool ImpulsiveBurn::SetTankFromSpacecraft()
 //------------------------------------------------------------------------------
 // void DecrementMass()
 //------------------------------------------------------------------------------
-void ImpulsiveBurn::DecrementMass()
+void ImpulsiveBurn::DecrementMass(bool backwards)
 {
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage
@@ -1068,7 +1164,10 @@ void ImpulsiveBurn::DecrementMass()
    #endif
    
    Real dv = sqrt( deltaV[0]*deltaV[0] + deltaV[1]*deltaV[1] + deltaV[2]*deltaV[2]);
-   deltaTankMass = totalTankMass * (exp(-dv * 1000/(isp * gravityAccel)) - 1.0);
+   if (!backwards)
+      deltaTankMass = totalTankMass * (exp(-dv * 1000/(isp * gravityAccel)) - 1.0);
+   else
+      deltaTankMass = totalTankMass * (exp(dv * 1000/(isp * gravityAccel)) - 1.0);
    
    #ifdef DEBUG_IMPBURN_DECMASS
    MessageInterface::ShowMessage

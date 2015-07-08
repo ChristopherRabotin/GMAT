@@ -29,12 +29,16 @@
 #include "EstimatorException.hpp"
 #include "Spacecraft.hpp"
 #include "GroundstationInterface.hpp"
+#include "StringUtil.hpp"
 
 #include <sstream>
 
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_ESTIMATOR_WRITE
 //#define DEBUG_ESTIMATOR_INITIALIZATION
+//#define DEBUG_INITIALIZE
+//#define DEBUG_CLONED_PARAMETER UPDATES
 
 //------------------------------------------------------------------------------
 // static data
@@ -54,7 +58,6 @@ Estimator::PARAMETER_TEXT[] =
    "OLSEMultiplicativeConstant",
    "OLSEAdditiveConstant",
    "ConvergentStatus",
-//   "SolveForState",
 };
 
 const Gmat::ParameterType
@@ -71,7 +74,6 @@ Estimator::PARAMETER_TYPE[] =
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
-//   Gmat::STRING_TYPE,
 };
 
 
@@ -121,6 +123,8 @@ Estimator::Estimator(const std::string &type, const std::string &name) :
    maxIterations = 15;
 
    esm.SetMeasurementManager(&measManager);
+
+   delayInitialization = true;                          // made changes by TUAN NGUYEN
 }
 
 
@@ -177,6 +181,10 @@ Estimator::Estimator(const Estimator& est) :
    constMult            (est.constMult),
    additiveConst        (est.additiveConst)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("Estimator::Estimator() enter: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
+#endif
+
    if (est.propagator)
       propagator = (PropSetup*)est.propagator->Clone();
    else
@@ -185,8 +193,13 @@ Estimator::Estimator(const Estimator& est) :
    measManager = est.measManager;
    esm         = est.esm;
    addedPlots  = est.addedPlots;
-
    esm.SetMeasurementManager(&measManager);
+
+   delayInitialization = true;                                // made changes by TUAN NGUYEN
+
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("Estimator::Estimator() exit: <%p,%s> copy constructor from <%p,%s>\n", this, GetName().c_str(), &est, est.GetName().c_str());  
+#endif
 }
 
 
@@ -258,6 +271,23 @@ Estimator& Estimator::operator=(const Estimator& est)
 //------------------------------------------------------------------------------
 bool Estimator::Initialize()
 {
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Enter Estimator::Initialize()\n");
+#endif
+
+   // it the delay flag is on, skip initialization to the next time
+   if (delayInitialization)
+   {
+      #ifdef DEBUG_INITIALIZE
+         MessageInterface::ShowMessage("Exit Estimator::Initialize(): delay initialization.\n");
+      #endif
+      return true;
+   }
+
+   // If initialized, do not do it again
+   if (isInitialized)
+      return true;
+
    bool retval = Solver::Initialize();
 
    if (retval)
@@ -268,14 +298,112 @@ bool Estimator::Initialize()
       // Check to make sure required objects have been set
       if (!propagator)
          throw SolverException(
-               "Estimator error - no propagator set for the estimator object"
-               /*" named %s.", GetName().c_str()*/);
+               "Estimator error - no propagators are set for estimation or propagators are not defined in your script.\n");
 
       if (measurementNames.empty())
          throw EstimatorException("Error: no measurements are set for estimation.\n");
+
+
+      // Check the names of measurement models shown in est.AddData have to be the names of created objects               // made changes by TUAN NGUYEN
+      std::vector<MeasurementModel*> measModels = measManager.GetAllMeasurementModels();   // made changes by TUAN NGUYEN
+      std::vector<TrackingSystem*> tkSystems = measManager.GetAllTrackingSystems();        // made changes by TUAN NGUYEN
+      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
+      StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
+
+      for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
+      {                                                                            // made changes by TUAN NGUYEN
+         std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
+         //MessageInterface::ShowMessage("name = <%s>\n", name.c_str());
+
+         bool found = false;                                                       // made changes by TUAN NGUYEN
+         for(UnsignedInt j = 0; j < measModels.size(); ++j)                        // made changes by TUAN NGUYEN
+         {
+            //MessageInterface::ShowMessage("measModels[%d] = <%s>\n", j, measModels[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+            if (measModels[j]->GetName() == name)                                  // made changes by TUAN NGUYEN
+            {                                                                      // made changes by TUAN NGUYEN
+               found = true;                                                       // made changes by TUAN NGUYEN
+               break;                                                              // made changes by TUAN NGUYEN
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
+         if (!found)
+         {
+            for(UnsignedInt j = 0; j < tkSystems.size(); ++j)                      // made changes by TUAN NGUYEN
+            {
+               //MessageInterface::ShowMessage("tkSystems[%d] = <%s>\n", j, tkSystems[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+               if (tkSystems[j]->GetName() == name)                                // made changes by TUAN NGUYEN
+               {                                                                   // made changes by TUAN NGUYEN
+                  found = true;                                                    // made changes by TUAN NGUYEN
+                  break;                                                           // made changes by TUAN NGUYEN
+               }
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+      
+         if (!found)
+         {
+            for(UnsignedInt j = 0; j < tfs.size(); ++j)                            // made changes by TUAN NGUYEN
+            {
+               //MessageInterface::ShowMessage("tfs[%d] = <%s>\n", j, tfs[j]->GetName().c_str());          // made changes by TUAN NGUYEN
+               if (tfs[j]->GetName() == name)                                      // made changes by TUAN NGUYEN
+               {                                                                   // made changes by TUAN NGUYEN
+                  found = true;                                                    // made changes by TUAN NGUYEN
+                  break;                                                           // made changes by TUAN NGUYEN
+               }
+            }                                                                      // made changes by TUAN NGUYEN
+         }                                                                         // made changes by TUAN NGUYEN
+
+         if (!found)                                                               // made changes by TUAN NGUYEN
+            throw SolverException("Cannot initialize estimator; '" + name +
+                  "' object is not defined in script.\n");                         // made changes by TUAN NGUYEN
+      }                                                                            // made changes by TUAN NGUYEN
+
+      measModels.clear();                                                          // made changes by TUAN NGUYEN
+      tkSystems.clear();                                                           // made changes by TUAN NGUYEN
+      tfs.clear();                                                                 // made changes by TUAN NGUYEN
+      measNames.clear();                                                           // made changes by TUAN NGUYEN
+
    }
-   
+
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Exit Estimator::Initialize()   retval = %s\n", (retval?"true":"false"));
+#endif
+
    return retval;
+}
+
+
+bool Estimator::Reinitialize()
+{
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Enter Estimator::Reinitialize()\n");
+#endif
+      // Tell the measManager to complete its initialization
+      bool measOK = measManager.SetPropagator(propagator);
+      measOK = measOK && measManager.Initialize();
+      if (!measOK)
+         throw SolverException(
+           "BatchEstimator::CompleteInitialization - error initializing "
+            "MeasurementManager.\n");
+      
+      //@todo: auto generate tracking data adapters from observation data
+      //1. Read observation data from files and create a list of all tracking configs
+      UnsignedInt numRec = measManager.LoadObservations();
+      if (numRec == 0)
+         throw EstimatorException("No observation data is used for estimation\n");
+
+      //2. Generate tracking data adapters based on the list of tracking configs
+      measManager.AutoGenerateTrackingDataAdapters();
+   
+#ifdef DEBUG_INITIALIZE
+   MessageInterface::ShowMessage("Exit Estimator::Reinitialize()\n");
+#endif
+   return true;
+}
+
+
+void Estimator::SetDelayInitialization(bool delay)
+{
+   delayInitialization = delay;
 }
 
 
@@ -571,9 +699,6 @@ std::string Estimator::GetStringParameter(const Integer id) const
       }
    }
 
-//   if (id == SOLVEFOR_STATE)
-//      return "";
-
    return Solver::GetStringParameter(id);
 }
 
@@ -594,11 +719,37 @@ std::string Estimator::GetStringParameter(const Integer id,
                                           const Integer index) const
 {
    if (id == MEASUREMENTS)
-      return measurementNames.at(index);
+   {
+      if (((Integer)measurementNames.size() > index) && (index >= 0))
+         return measurementNames[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a measurement");
+      
+      //return measurementNames.at(index);
+   }
+
    if (id == SOLVEFORS)
-      return solveForStrings.at(index);
+   {
+      if (((Integer)solveForStrings.size() > index) && (index >= 0))
+         return solveForStrings[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a solve-for");
+
+      //return solveForStrings.at(index);
+   }
+
    if (id == ADD_RESIDUAL_PLOT)
-      return addedPlots.at(index);
+   {
+      if (((Integer)addedPlots.size() > index) && (index >= 0))
+         return addedPlots[index];
+      else
+         throw EstimatorException("Index out of bounds when trying to access "
+               "a plot");
+
+      //return addedPlots.at(index);
+   }
 
    return Solver::GetStringParameter(id, index);
 }
@@ -626,6 +777,15 @@ bool Estimator::SetStringParameter(const Integer id,
       propagatorName = value;
       return true;
    }
+
+   //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
+   if (id == MEASUREMENTS)                                                                                          // made changes by TUAN NGUYEN
+   {                                                                                                                // made changes by TUAN NGUYEN
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));              // made changes by TUAN NGUYEN
+      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+      return SetStringParameter(id, measName, measurementNames.size());                                             // made changes by TUAN NGUYEN
+   }                                                                                                                // made changes by TUAN NGUYEN
 
    return Solver::SetStringParameter(id, value);
 }
@@ -1101,6 +1261,10 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
           !(obj->IsOfType(Gmat::TRACKING_SYSTEM)))
       {
          // Handle MeasurmentModel and TrackingFileSet
+         #ifdef DEBUG_ESTIMATOR_INITIALIZATION
+            MessageInterface::ShowMessage("Handle MeasurementModel and TrackingFileSet: <%s>\n", name.c_str());
+         #endif
+
          modelNames.push_back(obj->GetName());
          measManager.AddMeasurement((MeasurementModel *)obj);         
          return true;
@@ -1109,8 +1273,11 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       {
          // Handle for TrackingSystem
          #ifdef DEBUG_ESTIMATOR_INITIALIZATION
-            MessageInterface::ShowMessage("Handle for TrackingSystem\n");
+            MessageInterface::ShowMessage("Handle TrackingSystem: <%s>\n", name.c_str());
          #endif
+
+         // Add to tracking system list                           // made changes by TUAN NGUYEN
+         measManager.AddMeasurement((TrackingSystem*)obj);        // made changes by TUAN NGUYEN
          
          MeasurementModel *meas;
          // Retrieve each measurement model from the tracking system ...
@@ -1134,6 +1301,7 @@ bool Estimator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 
             modelNames.push_back(meas->GetName());
             measManager.AddMeasurement(meas);
+
          }
          return true;
       }
@@ -1362,6 +1530,32 @@ void Estimator::UpdateClonedObject(GmatBase *obj)
          "for " + obj->GetTypeName() + " objects");
 }
 
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * Added method to remove message in the Message window.
+ *
+ * The current implementation needs to be updated to actually process parameters
+ * when they are updated in the system.  For now, it is just overriding the base
+ * class "do nothing" method so that the message traffic is not shown to the
+ * user.
+ *
+ * Turn on the debug to figure out the updates being requested.
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void Estimator::UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+{
+#ifdef DEBUG_CLONED_PARAMETER UPDATES
+   MessageInterface::ShowMessage("Estimator updating parameter %d (%s) using "
+         "object %s\n", updatedParameterId, obj->GetParameterText(updatedParameterId).c_str(),
+         obj->GetName().c_str());
+#endif
+}
+
 
 //------------------------------------------------------------------------------
 // bool TestForConvergence(std::string &reason)
@@ -1432,7 +1626,8 @@ void Estimator::BuildResidualPlot(const std::string &plotName,
    {
       // Register measurement ID for this curve
       IntegerArray id = measManager.GetMeasurementId(measurementNames[i]);
-      std::vector<TrackingFileSet*> tfs = measManager.GetTrackingSets();
+      //std::vector<TrackingFileSet*> tfs = measManager.GetTrackingSets();
+      std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();
 
       UnsignedInt k;
       for (k = 0; k < tfs.size(); ++k)

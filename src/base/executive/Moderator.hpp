@@ -271,7 +271,8 @@ public:
 
    // EventLocator
    EventLocator* CreateEventLocator(const std::string &type,
-                            const std::string &name);
+                                    const std::string &name,
+                                    bool createDefault = false);
    EventLocator* GetEventLocator(const std::string &name);
 
    // Interpolator
@@ -388,6 +389,7 @@ public:
    
    // Sandbox
    void ClearAllSandboxes();
+   Sandbox* GetSandbox(Integer sandboxNum = 1);                                         // made changes by TUAN NGUYEN
    GmatBase* GetInternalObject(const std::string &name, Integer sandboxNum = 1);
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
@@ -439,6 +441,8 @@ private:
    
    // Object map
    GmatBase* FindObject(const std::string &name);
+   void AddObjectToObjectMapInUse(const std::string &name, GmatBase *obj,
+                                  Gmat::ObjectType objType = Gmat::UNKNOWN_OBJECT);
    bool AddObject(GmatBase *obj);
    void SetSolarSystemAndObjectMap(SolarSystem *ss, ObjectMap *objMap,
                                    bool forFunction,
@@ -450,17 +454,18 @@ private:
    const StringArray& GetSequenceStarters();
    
    // Default objects
-   Spacecraft* GetDefaultSpacecraft();
-   PropSetup*  GetDefaultPropSetup();
-   Burn*       GetDefaultBurn(const std::string &type);
-   Hardware*   GetDefaultHardware(const std::string &type);
-   Solver*     GetDefaultBoundaryValueSolver();
-   Solver*     GetDefaultOptimizer();
-   Subscriber* GetDefaultSubscriber(const std::string &type,
+   Spacecraft*   GetDefaultSpacecraft();
+   PropSetup*    GetDefaultPropSetup();
+   Burn*         GetDefaultBurn(const std::string &type);
+   Hardware*     GetDefaultHardware(const std::string &type);
+   Solver*       GetDefaultBoundaryValueSolver();
+   Solver*       GetDefaultOptimizer();
+   EventLocator* GetDefaultEventLocator();
+   Subscriber*   GetDefaultSubscriber(const std::string &type,
                                     bool addObjects = true,
                                     bool createIfNoneFound = true);
-   Parameter*  GetDefaultX();
-   Parameter*  GetDefaultY();
+   Parameter*    GetDefaultX();
+   Parameter*    GetDefaultY();
    StopCondition* CreateDefaultStopCondition();
    
    // Sandbox

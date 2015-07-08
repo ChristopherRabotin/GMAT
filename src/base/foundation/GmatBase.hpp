@@ -85,6 +85,10 @@ public:
                                 const std::string &oldName = "");
    virtual bool         SetName(const char *who,
                                 const std::string &oldName = "");
+
+   virtual const std::string  GetFullName();                                       // made changes by TUAN NGUYEN
+   virtual bool         SetFullName(const std::string name);                       // made changes by TUAN NGUYEN
+
    virtual Integer      GetParameterCount() const;
 
    bool                 IsOfType(Gmat::ObjectType ofType) const;
@@ -155,7 +159,7 @@ public:
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual bool         IncludeOwnedObjectsInValidation();
    virtual bool         SetIsGlobal(bool globalFlag);
-   virtual bool         GetIsGlobal() const;
+   virtual bool         IsGlobal() const;
 	virtual bool         IsAutomaticGlobal() const;
    virtual bool         SetIsLocal(bool localFlag);
    virtual bool         IsLocal() const;
@@ -208,7 +212,7 @@ public:
                                          const std::string &value);
    virtual bool         IsParameterVisible(const Integer id) const;
    virtual bool         IsParameterVisible(const std::string &label) const;
-
+   
    virtual bool         ParameterAffectsDynamics(const Integer id) const;
    virtual bool         ParameterDvInitializesNonzero(const Integer id,
                               const Integer r = 0, const Integer c = 0) const;
@@ -401,6 +405,8 @@ public:
    virtual const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual bool         WriteEmptyStringArray(Integer id);
+   virtual bool         WriteEmptyStringParameter(const Integer id) const;
+   
    virtual const std::string&
                         GetGeneratingString(
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
@@ -469,6 +475,8 @@ public:
    virtual std::string     GetAssociateName(UnsignedInt val = 0);
 
    virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual Integer         SetEstimationParameter(const std::string &param);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
@@ -476,6 +484,7 @@ public:
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
 
    // Covariance handling code
    virtual Integer         HasParameterCovariances(Integer parameterId);
@@ -490,6 +499,13 @@ public:
    bool IsCommandModeAssignable() const;
    virtual bool IsParameterCommandModeSettable(const Integer id) const;
    void CopyParameter(const GmatBase& fromObject, const Integer forParameter);
+
+   
+   /// Functions use information from Moderator                               // made changes by TUAN NGUYEN
+   ObjectMap               GetConfiguredObjectMap();                          // made changes by TUAN NGUYEN
+   GmatBase*               GetConfiguredObject(const std::string &name);      // made changes by TUAN NGUYEN
+   const StringArray&      GetListOfObjects(Gmat::ObjectType type);           // made changes by TUAN NGUYEN
+   const StringArray&      GetListOfObjects(const std::string &typeName);     // made changes by TUAN NGUYEN
 
 protected:
    /// Parameter IDs
@@ -514,6 +530,10 @@ protected:
    std::string         typeName;
    /// Name of the object -- empty if it is nameless
    std::string         instanceName;
+   
+   /// Full name of this object                               // made changes by TUAN NGUYEN
+   std::string         instanceFullName;                      // made changes by TUAN NGUYEN
+
    /// Enumerated base type of the object
    Gmat::ObjectType    type;
    /// Number of owned objects that belong to this instance
@@ -585,10 +605,10 @@ protected:
    IntegerArray        covarianceSizes;
    // Covariance matrix for parameters identified in covarianceList
    Covariance          covariance;
-
+   
    // Some string arrays need to be written even if they are empty
    bool                writeEmptyStringArray;
-
+   
    // Scripting interfaces
    void                CopyParameters(const GmatBase &a);
    virtual void        WriteParameters(Gmat::WriteMode mode,

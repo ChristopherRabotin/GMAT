@@ -369,11 +369,10 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
             int  markerStyle = (*curve)->GetMarker();
             int  markerSize  = (*curve)->GetMarkerSize();
 
+            bool showErrorBars = (*curve)->UseHiLow();
             for (j = (*curve)->lastPointPlotted;
                  j < (int)((*curve)->abscissa.size())-1; ++j)
             {
-               bool showErrorBars = (*curve)->UseHiLow();
-
                if (j == ccLoc)
                {
                   plotPens[n].SetColour((*curve)->GetColour(ccIndex));

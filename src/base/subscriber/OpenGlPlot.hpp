@@ -49,7 +49,7 @@ public:
    
    // methods inherited from Subscriber
    virtual bool         Initialize();
-   virtual void         Activate(bool state = true);
+   virtual bool         Activate(bool state = true);
    
    // methods inherited from GmatBase
    virtual GmatBase*    Clone() const;

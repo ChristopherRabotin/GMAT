@@ -92,7 +92,8 @@ public:
    int  GetTickCount(bool isXAxis = true);
    void SetMinorTickCount(int count, bool isXAxis = true);
    int  GetMinorTickCount(bool isXAxis = true);
-      
+   void AlwaysDraw(bool tf);
+
 protected:
    /// borders
    int left, right, top, bottom;
@@ -181,6 +182,7 @@ protected:
    bool hasLegend;
    bool allowPlotOptions;
    bool initializeLegendLoc;
+   bool alwaysDraw;
 
    long zoomLeft, zoomTop, zoomWidth, zoomHeight;
    int  xLabelPrecision, yLabelPrecision;
@@ -224,6 +226,8 @@ protected:
    wxRect  legendRect;
    /// Number of columns in the legend (0 to make it 1 row)
    int legendColumns;
+   /// Flag triggered by a size event
+   bool resized;
 
 //private:
    DECLARE_EVENT_TABLE()

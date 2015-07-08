@@ -64,6 +64,8 @@ RunSimulator::~RunSimulator()
 {
    if (theSimulator)
       delete theSimulator;
+
+   eventList.clear();
 }
 
 
@@ -298,6 +300,7 @@ bool RunSimulator::Initialize()
             "object named " + solverName + " is not a simulator.");
 
    theSimulator = (Simulator*)(simObj->Clone());
+   theSimulator->Initialize();                                                   // made changes by TUAN NGUYEN
 
    // Set the observation data streams for the measurement manager
    MeasurementManager *measman = theSimulator->GetMeasurementManager();

@@ -302,12 +302,12 @@ SpiceInterface* SpiceInterface::Clone() const
 bool SpiceInterface::LoadKernel(const std::string &fileName)
 {
    #ifdef DEBUG_SPK_LOADING
-      char *path=NULL;
-      size_t size = 0;
-      path=getcwd(path,size);
+//      char *path=NULL;
+//      size_t size = 0;
+//      path=getcwd(path,size);
       MessageInterface::ShowMessage("SpiceInterface: Attempting to load kernel %s <---------\n",
                   fileName.c_str());
-      MessageInterface::ShowMessage( "   and CURRENT PATH = %s\n", path);
+//      MessageInterface::ShowMessage( "   and CURRENT PATH = %s\n", path);
    #endif
 
    std::map<std::string, std::string>::iterator ii;
@@ -315,6 +315,10 @@ bool SpiceInterface::LoadKernel(const std::string &fileName)
    {
       if ((*ii).first == fileName)
       {
+         #ifdef DEBUG_SPK_LOADING
+            MessageInterface::ShowMessage("SpiceInterface: kernel %s is ALREADY LOADED!!!\n",
+                        fileName.c_str());
+         #endif
          return false;  // already loaded
       }
    }
@@ -438,11 +442,12 @@ bool SpiceInterface::UnloadKernel(const std::string &fileName)
       SpiceChar      err[MAX_LONG_MESSAGE];
       getmsg_c(option, numChar, err);
       std::string errStr(err);
-      std::string errmsg = "Error unloading kernel \"";
+      std::string errmsg = "*** WARNING *** Error unloading kernel \"";
       errmsg += fileName + "\".  Message received from CSPICE is: ";
       errmsg += errStr + "\n";
       reset_c();
-      throw UtilityException(errmsg);
+//      throw UtilityException(errmsg);
+      MessageInterface::ShowMessage("%s", errmsg.c_str());
    }
 
    #ifdef DEBUG_SPK_LOADING
@@ -708,6 +713,7 @@ SpiceDouble SpiceInterface::A1ToSpiceTime(Real a1Time)
    return spiceTime;
 }
 
+
 //---------------------------------
 // protected methods
 //---------------------------------
@@ -761,6 +767,7 @@ void SpiceInterface::InitializeInterface()
          reset_c();
          throw UtilityException(errmsg);
       }
+
 
       // set actions for cspice error writing
       char  report[5] = "LONG"; // "ALL";

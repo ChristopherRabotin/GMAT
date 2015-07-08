@@ -30,6 +30,7 @@
 //#define DEBUG_STATE
 //#define DEBUG_STATE_RESETS
 //#define DEBUG_EVENT_STATE
+//#define DEBUG_LOAD_SOLVEFORS
 
 
 //------------------------------------------------------------------------------
@@ -52,6 +53,8 @@ RunEstimator::RunEstimator() :
    eventMan                (NULL)
 {
    overridePropInit = true;
+//   needReinitialize = false;                 // made changes by TUAN NGUYEN
+   delayInitialization = true;                 // made changes by TUAN NGUYEN
 }
 
 
@@ -91,6 +94,8 @@ RunEstimator::RunEstimator(const RunEstimator & rs) :
    eventMan                (NULL)
 {
    overridePropInit = true;
+//   needReinitialize = false;                  // made changes by TUAN NGUYEN
+   delayInitialization = true;                 // made changes by TUAN NGUYEN
 }
 
 //------------------------------------------------------------------------------
@@ -280,6 +285,27 @@ const std::string& RunEstimator::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 bool RunEstimator::Initialize()
 {
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Start RunEstimator::Initialize()\n");
+#endif
+
+   // This step is used to delay to initialize until it runs Execute() function.
+   // It is needed due to no observation data available before simulation. As a result,
+   // no tracking configurations are auto generated for estimation. After simulation 
+   // step is completed, based on simulation data, GMAT generates tracking 
+   // configuration automatically for estimation step. 
+   if (delayInitialization)
+   {
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Exit RunEstimator::Initialize():   delay initialization to the next time\n"); 
+      #endif
+      return true;
+   }
+
+   // if it is initizlized, does not need to do it again
+   if (isInitialized)
+      return true;
+
    bool retval = false;
 
    // First set the Estimator object
@@ -300,7 +326,18 @@ bool RunEstimator::Initialize()
       throw CommandException("Cannot initialize RunEstimator command -- the "
             "object named " + solverName + " is not a Estimator.");
 
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1\n"); 
+      #endif
    theEstimator = (Estimator*)(simObj->Clone());
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.1\n"); 
+      #endif
+   theEstimator->SetDelayInitialization(false);                           // made changes by TUAN NGUYEN
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("RunEstimator::Initialize():   step 1.2\n"); 
+      #endif
+   theEstimator->Initialize();                                            // made changes by TUAN NGUYEN
 
    theEstimator->TakeAction("ResetInstanceCount");
    simObj->TakeAction("ResetInstanceCount");
@@ -349,118 +386,46 @@ bool RunEstimator::Initialize()
       }
    }
 
-   // Next initialize the estimation subsystem
-   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
-   // Load the participant list into the esm
-   StringArray participants = measman->GetParticipantList();
-   esm->SetParticipantList(participants);
+   // All the code of initialize was moved to PreExcecution() function
 
-   // Pass in the objects
-   StringArray objList = esm->GetObjectList("");
-   for (UnsignedInt i = 0; i < objList.size(); ++i)
-   {
-      GmatBase* obj = FindObject(objList[i]);
-      if (obj != NULL)
-      {
-         esm->SetObject(obj);
-      }
-   }
+   retval = true;
+   isInitialized = retval;
 
-   esm->BuildState();
-
-   // Find the event manager and store its pointer
-   if (triggerManagers == NULL)
-      throw CommandException("The Event Manager pointer was not set on the "
-            "RunEstimator command");
-
-   for (UnsignedInt i = 0; i < triggerManagers->size(); ++i)
-   {
-      #ifdef DEBUG_INITIALIZATION
-         MessageInterface::ShowMessage("RunEstimator has an TriggerManager of "
-               "type %s, id %d\n",
-               (*triggerManagers)[i]->GetTriggerTypeString().c_str(),
-               (*triggerManagers)[i]->GetTriggerType());
-      #endif
-      if ((*triggerManagers)[i]->GetTriggerType() == Gmat::EVENT)
-      {
-         eventMan = (EventManager*)(*triggerManagers)[i];
-         #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("RunEstimator has an EventManager of "
-                  "type %s\n", eventMan->GetTriggerTypeString().c_str());
-         #endif
-      }
-   }
-   if (eventMan == NULL)
-      throw CommandException("The EventManager pointer was not set on the "
-            "RunEstimator command");
-
-   // Next comes the propagator
-   PropSetup *obj = theEstimator->GetPropagator();
-
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Propagator at address %p ", obj);
-      if (obj != NULL)
-         MessageInterface::ShowMessage("is named %s\n",
-               obj->GetName().c_str());
-      else
-         MessageInterface::ShowMessage("is not yet set\n");
-   #endif
-
-   if (obj != NULL)
-   {
-      if (obj->IsOfType(Gmat::PROP_SETUP))
-      {
-         PropSetup *ps = (PropSetup*)obj->Clone();
-
-         // RunEstimator only manages one PropSetup.  If that changes, so
-         // does this code
-         if (propagators.size() > 0)
-         {
-            for (std::vector<PropSetup*>::iterator pp = propagators.begin();
-                  pp != propagators.end(); ++pp)
-            {
-               delete (*pp);
-            }
-            propagators.clear();
-            p.clear();
-            fm.clear();
-         }
-
-         propagators.push_back(ps);
-         p.push_back(ps->GetPropagator());
-         fm.push_back(ps->GetODEModel());
-         eventMan->SetObject(ps);
-
-         retval = true;
-      }
-   }
-   else
-      throw CommandException("Cannot initialize RunEstimator command; the "
-            "propagator pointer in the Estimator " +
-            theEstimator->GetName() + " is NULL.");
-
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("RunEstimator command found %d "
-            "participants\n", participants.size());
-   #endif
-
-   propObjectNames.clear();
-   propObjectNames.push_back(participants);
-   propPrepared = false;
-
-   // Now we can initialize the propagation subsystem by calling up the
-   // inheritance tree.
-   if (retval)
-      retval = RunSolver::Initialize();
-
-   #ifdef DEBUG_INITIALIZATION
-      if (retval == false)
-         MessageInterface::ShowMessage("RunEstimator command failed to "
-               "initialize; RunSolver::Initialize() call failed.\n");
-   #endif
-
+#ifdef DEBUG_INITIALIZATION
+   MessageInterface::ShowMessage("Exit RunEstimator::Initialize()\n");
+#endif
    return retval;
 }
+
+
+
+void RunEstimator::LoadSolveForsToESM()
+{
+#ifdef DEBUG_LOAD_SOLVEFORS
+   MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  enter\n");
+#endif
+
+   EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+   StringArray names = theEstimator->GetMeasurementManager()->GetParticipantList();
+
+   ObjectMap objectmap = GetConfiguredObjectMap();
+
+   for (ObjectMap::iterator i = objectmap.begin(); i != objectmap.end(); ++i)
+   {
+      if (find(names.begin(), names.end(), (*i).first) != names.end())
+      {
+         // Set solve-for for all participants. If participant does not have solve-for defined in it, 
+         // esm->SetProperty rejects the set request and return false otherwise return true
+         esm->SetProperty((*i).second);
+      }
+   }
+
+#ifdef DEBUG_LOAD_SOLVEFORS
+   MessageInterface::ShowMessage("RunEstimator::LoadSolveForsToEMS()  exit\n");
+#endif
+
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -490,6 +455,157 @@ void RunEstimator::SetPropagationProperties(PropagationStateManager *psm)
 
 
 //------------------------------------------------------------------------------
+// bool PreExecution()
+//------------------------------------------------------------------------------
+/**
+* This function plays the role as Initialize() function due to RunEstimator 
+* delays initialization til before execution step.
+*
+* Note that: codes in the old Initialize function were moved here
+*
+*/
+//------------------------------------------------------------------------------
+bool RunEstimator::PreExecution()
+{
+   bool retval = false;
+   if (Initialize())                                                       // made changes by TUAN NGUYEN
+   {
+      retval = theEstimator->Reinitialize();                               // made changes by TUAN NGUYEN
+
+      // Load participant names to estimation state manager 
+      MeasurementManager *measman = theEstimator->GetMeasurementManager();
+      EstimationStateManager *esm = theEstimator->GetEstimationStateManager();
+      StringArray participants = measman->GetParticipantList();
+      esm->SetParticipantList(participants);
+      
+      // Load solve for objects to esm                                   // made changes by TUAN NGUYEN
+      LoadSolveForsToESM();                                              // made changes by TUAN NGUYEN
+
+      // Pass in the objects
+      StringArray objList = esm->GetObjectList("");
+      for (UnsignedInt i = 0; i < objList.size(); ++i)
+      {
+         std::string propName = objList[i];
+         std::string objName = propName;
+         std::string refObjectName = "";
+         size_t loc = propName.find('.');              // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+         if (loc != propName.npos)
+         {
+            objName = propName.substr(0, loc);
+            refObjectName = propName.substr(loc+1);
+         }
+
+         GmatBase* obj = FindObject(objName);
+         // if referent object is used, set referent object to be solve-for object 
+         // ex: propName = "CAN.ErrorModel1". Referent object is "ErrorModel1". It needs to set object ErrorModel1 to estimation state mananger   
+         if (refObjectName != "")
+         { 
+            GmatBase* refObj = obj->GetRefObject(Gmat::UNKNOWN_OBJECT, propName);         // made changes by TUAN NGUYEN
+            obj = refObj;
+         }
+
+         if (obj != NULL)
+            esm->SetObject(obj);
+      }
+
+      esm->BuildState();
+
+      // Find the event manager and store its pointer
+      if (triggerManagers == NULL)
+          throw CommandException("The Event Manager pointer was not set on the "
+            "RunEstimator command");
+
+      for (UnsignedInt i = 0; i < triggerManagers->size(); ++i)
+      {
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("RunEstimator has an TriggerManager of "
+               "type %s, id %d\n",
+               (*triggerManagers)[i]->GetTriggerTypeString().c_str(),
+               (*triggerManagers)[i]->GetTriggerType());
+         #endif
+         if ((*triggerManagers)[i]->GetTriggerType() == Gmat::EVENT)
+         {
+            eventMan = (EventManager*)(*triggerManagers)[i];
+            #ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("RunEstimator has an EventManager of "
+                  "type %s\n", eventMan->GetTriggerTypeString().c_str());
+            #endif
+         }
+      }
+      if (eventMan == NULL)
+         throw CommandException("The EventManager pointer was not set on the "
+            "RunEstimator command");
+
+      // Next comes the propagator
+      PropSetup *obj = theEstimator->GetPropagator();
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("Propagator at address %p ", obj);
+         if (obj != NULL)
+            MessageInterface::ShowMessage("is named %s\n",
+               obj->GetName().c_str());
+         else
+            MessageInterface::ShowMessage("is not yet set\n");
+      #endif
+
+      if (obj != NULL)
+      {
+         if (obj->IsOfType(Gmat::PROP_SETUP))
+         {
+            PropSetup *ps = (PropSetup*)obj->Clone();
+
+            // RunEstimator only manages one PropSetup.  If that changes, so
+            // does this code
+            if (propagators.size() > 0)
+            {
+               for (std::vector<PropSetup*>::iterator pp = propagators.begin();
+                  pp != propagators.end(); ++pp)
+               {
+                  delete (*pp);
+               }
+               propagators.clear();
+               p.clear();
+               fm.clear();
+            }
+
+            propagators.push_back(ps);
+            p.push_back(ps->GetPropagator());
+            fm.push_back(ps->GetODEModel());
+            eventMan->SetObject(ps);
+
+            //retval = true;
+         }
+      }
+      else
+         throw CommandException("Cannot initialize RunEstimator command; the "
+            "propagator pointer in the Estimator " +
+            theEstimator->GetName() + " is NULL.");
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("RunEstimator command found %d "
+            "participants\n", participants.size());
+      #endif
+
+      propObjectNames.clear();
+      propObjectNames.push_back(participants);
+      propPrepared = false;
+
+      // Now we can initialize the propagation subsystem by calling up the
+      // inheritance tree.
+      try
+      {
+         isInitialized = RunSolver::Initialize();
+      } catch(GmatBaseException e)
+      {
+         MessageInterface::ShowMessage(" *** message: %s\n", e.GetDetails().c_str());
+      }
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // bool Execute()
 //------------------------------------------------------------------------------
 /**
@@ -508,6 +624,19 @@ bool RunEstimator::Execute()
    #ifdef DEBUG_STATE
      MessageInterface::ShowMessage("*** Enter RunEstimator:Execute()\n");
    #endif
+
+   //--------------------------------------------------------------------
+   // Steps to run before running Execute()
+   //--------------------------------------------------------------------
+   // Initialization step is moved here:               // made changes by TUAN NGUYEN
+   if (delayInitialization)                            // made changes by TUAN NGUYEN
+   {                                                   // made changes by TUAN NGUYEN
+      // It needs to run initialization now            // made changes by TUAN NGUYEN
+      delayInitialization = false;                     // made changes by TUAN NGUYEN
+      PreExecution();                                  // made changes by TUAN NGUYEN
+   }                                                   // made changes by TUAN NGUYEN
+
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\n\nThe \"%s\" command is running...\n",
             GetTypeName().c_str());
@@ -524,7 +653,10 @@ bool RunEstimator::Execute()
 
    // Respond to the state in the state machine
    Solver::SolverState state = theEstimator->GetState();
-
+   
+   // Set run state to SOLVING here (for fixing GMT-5101 LOJ: 2015.06.16)
+   publisher->SetRunState(Gmat::SOLVING);
+   
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("\nEstimator state is %d\n", state);
    #endif
@@ -606,6 +738,9 @@ bool RunEstimator::Execute()
          #ifdef DEBUG_STATE
             MessageInterface::ShowMessage("Entered RunEstimator::Execute(): FINISHED state\n");
          #endif
+
+         // Set run state to SOLVEDPASS here (for fixing GMT-5101 LOJ: 2015.06.16)
+         publisher->SetRunState(Gmat::SOLVEDPASS);
 
          // Why is Finalize commented out???  There is no command summary because of this change.
 //         Finalize();
@@ -778,6 +913,10 @@ void RunEstimator::PrepareToEstimate()
 
    estimationOffset = fm[0]->GetTime();
 
+   // @todo Temporary -- Turn off range check for Cr.  This needs to be made conditional,
+   // and only active is Cr is a solve-for
+   fm[0]->TakeAction("SolveForCr");
+
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage(
             "Exit RunEstimator::PrepareToEstimate()\n");
@@ -812,6 +951,7 @@ void RunEstimator::Propagate()
       #endif
       
       fm[0]->UpdateFromSpaceObject();
+      fm[0]->TakeAction("UpdateSpacecraftParameters");
       
       #ifdef DEBUG_STATE_RESETS
          Real* newState = fm[0]->GetState();
@@ -825,6 +965,7 @@ void RunEstimator::Propagate()
    {
       fm[0]->UpdateFromSpaceObject();
       fm[0]->SetTime(estimationOffset);
+      fm[0]->TakeAction("UpdateSpacecraftParameters");
       startNewPass = false;
    }
    

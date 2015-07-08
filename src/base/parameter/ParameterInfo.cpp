@@ -327,15 +327,15 @@ void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
       if (mNumParams == 0)
       {
          MessageInterface::ShowMessage
-            ("\n==========================================================================================\n"
-             "=================================== GMAT Parameter List ==================================\n"
-             "==========================================================================================\n"
+            ("\n================================================================================================\n"
+             "====================================== GMAT Parameter List =====================================\n"
+             "================================================================================================\n"
              "(R = Reportable, P = Plottable, S = Settable)\n"
-             "No   ParameterType       ObjectType     DependencyType              R  P  S  Description\n"
-             "---  ----------------    -------------  ----------------------      -  -  -  -----------\n");
+             "No   ParameterType              ObjectType     DependencyType                        R  P  S  Description\n"
+             "---  ----------------           -------------  --------------------------------      -  -  -  -----------\n");
       }
       MessageInterface::ShowMessage
-         ("%3d  %-18s  %-13s  %-16s%10s  %s  %s  %s  %s\n", mNumParams+1, type.c_str(),
+         ("%3d  %-25s  %-13s  %-16s%20s  %s  %s  %s  %s\n", mNumParams+1, type.c_str(),
           objTypeStr.c_str(), depTypeStr.c_str(), ownedObjTypeStr.c_str(), reportableStr.c_str(),
           plottableStr.c_str(), settableStr.c_str(), desc.c_str());
    }

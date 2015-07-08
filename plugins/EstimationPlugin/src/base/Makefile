@@ -77,7 +77,8 @@ IONOSPHERE_C_OBJECTS = \
 	measurement/Ionosphere/iridreg.o \
 	measurement/Ionosphere/irifun.o \
 	measurement/Ionosphere/iritec.o \
-	measurement/Ionosphere/irisub.o
+	measurement/Ionosphere/irisub.o \
+	measurement/Ionosphere/loadfiles.o
 IONOSPHERE_CPP_OBJECTS = \
 	measurement/Ionosphere/Ionosphere.o 
 else
@@ -162,6 +163,7 @@ CPP_OBJECTS = \
     adapter/PointRangeRateAdapterKps.o \
     adapter/DSNRangeAdapter.o \
     adapter/DopplerAdapter.o \
+    adapter/GNDopplerAdapter.o \
     command/RunEstimator.o \
     command/RunSimulator.o \
     datafilter/DataFilter.o \

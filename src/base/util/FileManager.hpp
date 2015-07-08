@@ -57,12 +57,13 @@ public:
       MARS_POT_PATH,
       OTHER_POT_PATH,
       TEXTURE_PATH, //Notes: TEXTURE_PATH is used in SetPathname()
+      BODY_3D_MODEL_PATH, // For celestial body 3D model path
       MEASUREMENT_PATH,
       GUI_CONFIG_PATH,
       SPLASH_PATH,
       ICON_PATH,
       STAR_PATH,
-      MODEL_PATH,
+      VEHICLE_MODEL_PATH,
       SPAD_PATH,
       ATMOSPHERE_PATH,
       
@@ -153,6 +154,10 @@ public:
    bool GetTextureMapFile(const std::string &inFileName, const std::string &bodyName,
                           const std::string &objName, std::string &outFileName,
                           std::string &outFullPathName, bool writeWarning);
+   // Methods for celestial body model file
+   bool GetBody3dModelFile(const std::string &inFileName, const std::string &bodyName,
+                           const std::string &objName, std::string &outFileName,
+                           std::string &outFullPathName, bool writeWarning);
    
    // Methods returning path
    std::string GetPathname(const FileType type);

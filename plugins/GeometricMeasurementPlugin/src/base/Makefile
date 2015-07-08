@@ -1,4 +1,3 @@
-# $Id: Makefile 1343 2011-03-31 18:47:39Z wshoan@NDC $
 # Makefile for GMAT's OD Plugin
 # This is the base level makefile 
 #

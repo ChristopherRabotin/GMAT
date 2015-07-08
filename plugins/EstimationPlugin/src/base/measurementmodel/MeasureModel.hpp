@@ -161,6 +161,8 @@ protected:
    /// @todo: Extend this code to support multiple propagators
    /// Mapping of participants to (cloned) propagators
    std::map<SpacePoint*,PropSetup*> propMap;
+   /// Number of rows/columns in the state transition matrix
+   UnsignedInt stmRowCount;
    /// Collection of the potential participants
    ObjectArray candidates;
    /// The list of Signals, path by path

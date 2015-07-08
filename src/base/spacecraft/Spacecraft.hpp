@@ -52,6 +52,8 @@ public:
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    CoordinateSystem*    GetInternalCoordSystem();
 
+   EphemManager*        GetEphemManager();
+
    std::string          GetModelFile();
    std::string          GetModelFileFullPath();
    int                  GetModelId();
@@ -148,6 +150,23 @@ public:
                                          const Real value,
                                          const Integer index);
    
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+//   virtual Integer      GetIntegerParameter(const Integer id,
+//                                            const Integer index) const;
+//   virtual Integer      SetIntegerParameter(const Integer id,
+//                                            const Integer value,
+//                                            const Integer index);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+//   virtual Integer      GetIntegerParameter(const std::string &label,
+//                                            const Integer index) const;
+//   virtual Integer      SetIntegerParameter(const std::string &label,
+//                                            const Integer value,
+//                                            const Integer index);
+
    virtual const Rvector& GetRvectorParameter(const Integer id) const;
    virtual const Rvector& GetRvectorParameter(const std::string &label) const;
    virtual const Rvector& SetRvectorParameter(const Integer id,
@@ -232,12 +251,16 @@ public:
    virtual Integer         GetPropItemSize(const Integer item);
    virtual bool            PropItemNeedsFinalUpdate(const Integer item);
 
+   virtual Integer         GetEstimationParameterID(const std::string &param);
+   virtual std::string     GetParameterNameForEstimationParameter(const std::string &parmName);
+   virtual std::string     GetParameterNameFromEstimationParameter(const std::string &parmName);
    virtual bool            IsEstimationParameterValid(const Integer id);
    virtual Integer         GetEstimationParameterSize(const Integer id);
    virtual Real*           GetEstimationParameterValue(const Integer id);
 
    virtual bool            HasDynamicParameterSTM(Integer parameterId);
    virtual Rmatrix*        GetParameterSTM(Integer parameterId);
+   virtual Integer         GetStmRowId(const Integer forRow);
    virtual Integer         HasParameterCovariances(Integer parameterId);
 
    // Cloned object update management
@@ -283,6 +306,9 @@ protected:
       ATTITUDE,
       ORBIT_STM,
       ORBIT_A_MATRIX,
+      FULL_STM,
+      FULL_A_MATRIX,
+      FULL_STM_ROWCOUNT,
 //      ORBIT_COVARIANCE,
 
       // SPAD SRP parameters
@@ -301,6 +327,9 @@ protected:
 
       // Hardware for spacecraft
       ADD_HARDWARE,
+      SOLVEFORS,                                                    // made changes by TUAN NGUYEN
+      CD_EPSILON,
+      CR_EPSILON,
       // The filename used for the spacecraft's model 
       MODEL_FILE,
       MODEL_FILE_FULL_PATH, // read-only
@@ -443,6 +472,8 @@ protected:
    static const Integer ATTITUDE_ID_OFFSET;
    static const Real    UNSET_ELEMENT_VALUE;
    
+   static Integer scNaifId;
+
    std::map <std::string, std::string> attribCommentLineMap;
    std::map <std::string, std::string> inlineAttribCommentMap;
    std::map<std::string, std::string> defaultStateTypeMap;
@@ -555,10 +586,18 @@ protected:
    bool              csSet;
    bool              isThrusterSettingMode;
 
-   /// The orbit State Transition Matrix
-   Rmatrix           orbitSTM;
-   /// The orbit State A Matrix
-   Rmatrix           orbitAMatrix;
+//   /// The orbit State Transition Matrix
+//   Rmatrix           orbitSTM;
+//   /// The orbit State A Matrix
+//   Rmatrix           orbitAMatrix;
+   /// The full State Transition Matrix used for propagation
+   Rmatrix           fullSTM;
+   /// The full State A Matrix
+   Rmatrix           fullAMatrix;
+   /// full STM number of rows (and columns)
+   Integer           fullSTMRowCount;
+   /// Mapping of the rows/columns in the STM
+   IntegerArray      stmIndices;
 
    /// The name of the SPAD SRP file
    std::string       spadSRPFile;
@@ -581,6 +620,19 @@ protected:
    StringArray       hardwareNames;
    /// List of hardware objects used in the spacecraft
    ObjectArray       hardwareList;
+
+   // Solve-for parameters                                               // made changes by TUAN NGUYEN
+   /// List of solve-for parameters in Spacecraft object                 // made changes by TUAN NGUYEN
+   StringArray       solveforNames;                                      // made changes by TUAN NGUYEN
+
+   /// Epsilon value used when solving for the Cd parameter
+   Real              cdEpsilon;
+   /// Epsilon value used when solving for the Cr parameter
+   Real              crEpsilon;
+   /// Internal flag used to relax constraint for Cd
+   bool              constrainCd;
+   /// Internal flag used to relax constraint for Cr
+   bool              constrainCr;
 
    Real              UpdateTotalMass();
    Real              UpdateTotalMass() const;

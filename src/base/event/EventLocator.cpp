@@ -32,6 +32,7 @@
 #include "TimeSystemConverter.hpp"
 #include "GregorianDate.hpp"
 #include "MessageInterface.hpp"
+//#include "EphemManager.hpp"
 
 
 //#define DEBUG_DUMPEVENTDATA
@@ -39,6 +40,12 @@
 //#define DEBUG_EVENT_INITIALIZATION
 //#define DEBUG_OBJECTS
 //#define DEBUG_DATE_FORMAT
+//#define DEBUG_EVENTLOCATOR_OBJECT
+//#define DEBUG_EVENTLOCATOR_WRITE
+//#define DEBUG_EVENTLOCATOR_DATA
+//#define DEBUG_EVENTLOCATOR_SET
+//#define DEBUG_EVENTLOCATOR_GET
+//#define DEBUG_EVENTLOCATOR_COPY
 
 #ifdef DEBUG_DUMPEVENTDATA
    #include <fstream>
@@ -61,6 +68,7 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
    "UseLightTimeDelay",    // USE_LIGHT_TIME_DELAY
    "UseStellarAberration", // USE_STELLAR_ABERRATION
    "WriteReport",          // WRITE_REPORT
+   "RunMode",              // RUN_MODE
    "UseEntireInterval",    // USE_ENTIRE_INTERVAL
 //   "AppendToReport",       // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
@@ -78,10 +86,22 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
    Gmat::BOOLEAN_TYPE,     // USE_LIGHT_TIME_DELAY
    Gmat::BOOLEAN_TYPE,     // USE_STELLAR_ABERRATION
    Gmat::BOOLEAN_TYPE,     // WRITE_REPORT
+   Gmat::ENUMERATION_TYPE, // RUN_MODE
    Gmat::BOOLEAN_TYPE,     // USE_ENTIRE_INTERVAL
 //   Gmat::BOOLEAN_TYPE,     // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
 
+const std::string EventLocator::RUN_MODES[3] =
+{
+      "Automatic",
+      "Manual",
+      "Disabled",
+};
+
+const Integer EventLocator::numModes = 3;
+
+// Used for light-time calculations
+const Real EventLocator::STEP_MULTIPLE = 0.5;
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -106,18 +126,21 @@ EventLocator::EventLocator(const std::string &typeStr,
    useLightTimeDelay       (false),
    useStellarAberration    (false),
    writeReport             (true),
+   runMode                 ("Automatic"),
    useEntireInterval       (true),
    appendReport            (false),
-   epochFormat             ("UTCGregorian"),
-   initialEpoch            ("01 Jan 2000 11:59:28.000"),
-   finalEpoch              ("01 Jan 2000 14:59:28.000"),
-   stepSize                (60.0),
+   epochFormat             ("TAIModJulian"),
+   initialEpoch            ("21545"),
+   finalEpoch              ("21545.138"),
+   stepSize                (10.0),
    initialEp               (0.0),
    finalEp                 (0.0),
-   satStartEpoch           (0.0),  // review these
    fromEpoch               (0.0),
    toEpoch                 (0.0),
-   numEventsFound          (0),
+   findStart               (0.0),
+   findStop                (0.0),
+   scStart                 (0.0),
+   scNow                   (0.0),
    satName                 (""),
    sat                     (NULL),
    solarSys                (NULL)
@@ -127,8 +150,13 @@ EventLocator::EventLocator(const std::string &typeStr,
 
    filename = instanceName + ".txt";  // default filename
 
+   blockCommandModeAssignment = false;
+
    occultingBodyNames.clear();
    occultingBodies.clear();
+   defaultOccultingBodies.clear();
+   defaultOccultingBodies.push_back("Earth");
+   defaultOccultingBodies.push_back("Luna");
 }
 
 
@@ -150,6 +178,7 @@ EventLocator::~EventLocator()
       occultingBodyNames.clear();
    if (!occultingBodies.empty())
       occultingBodies.clear();
+   defaultOccultingBodies.clear();
 }
 
 
@@ -168,7 +197,8 @@ EventLocator::EventLocator(const EventLocator& el) :
    fileWasWritten          (false),
    useLightTimeDelay       (el.useLightTimeDelay),
    useStellarAberration    (el.useStellarAberration),
-   writeReport             (el.writeReport), // or true?
+   writeReport             (el.writeReport),
+   runMode                 (el.runMode),
    useEntireInterval       (el.useEntireInterval),
    appendReport            (el.appendReport),
    epochFormat             (el.epochFormat),
@@ -177,20 +207,28 @@ EventLocator::EventLocator(const EventLocator& el) :
    stepSize                (el.stepSize),
    initialEp               (el.initialEp),
    finalEp                 (el.finalEp),
-   satStartEpoch           (el.satStartEpoch),
    fromEpoch               (el.fromEpoch),
    toEpoch                 (el.toEpoch),
-   numEventsFound          (el.numEventsFound),   // or 0?
+   findStart               (el.findStart),
+   findStop                (el.findStop),
+   scStart                 (el.scStart),
+   scNow                   (el.scNow),
    satName                 (el.satName),
    sat                     (NULL),
    solarSys                (el.solarSys)
 {
    occultingBodyNames.clear();
    occultingBodies.clear();
+   defaultOccultingBodies.clear();
 
-   UnsignedInt sz = occultingBodyNames.size();
+   UnsignedInt sz = el.occultingBodyNames.size();
    for (UnsignedInt ii = 0; ii < sz; ii++)
       occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
+   // copy the list of default occulting body names
+   for (unsigned int i = 0; i < (el.defaultOccultingBodies).size(); i++)
+   {
+      defaultOccultingBodies.push_back((el.defaultOccultingBodies).at(i));
+   }
 
    isInitialized    = false;
 }
@@ -219,6 +257,7 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       useLightTimeDelay    = el.useLightTimeDelay;
       useStellarAberration = el.useStellarAberration;
       writeReport          = el.writeReport;
+      runMode              = el.runMode;
       useEntireInterval    = el.useEntireInterval;
       appendReport         = el.appendReport;
       epochFormat          = el.epochFormat;
@@ -227,25 +266,41 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       stepSize             = el.stepSize;
       initialEp            = el.initialEp;
       finalEp              = el.finalEp;
-      satStartEpoch        = el.satStartEpoch;
       fromEpoch            = el.fromEpoch;
       toEpoch              = el.toEpoch;
-      numEventsFound       = el.numEventsFound;
+      findStart            = el.findStart;
+      findStop             = el.findStop;
+      scStart              = el.scStart;
+      scNow                = el.scNow;
       satName              = el.satName;
       sat                  = NULL;
       solarSys             = el.solarSys;
 
       occultingBodyNames.clear();
       occultingBodies.clear();
-
-      UnsignedInt sz = occultingBodyNames.size();
+      defaultOccultingBodies.clear();
+      #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("In EventLocator::operator=, current body names:\n");
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", occultingBodyNames.at(ii).c_str());
+      MessageInterface::ShowMessage("In EventLocator::operator=, body names of input are:\n");
+      for (Integer ii = 0; ii < (el.occultingBodyNames).size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", (el.occultingBodyNames.at(ii)).c_str());
+      #endif
+      UnsignedInt sz = el.occultingBodyNames.size();
       for (UnsignedInt ii = 0; ii < sz; ii++)
          occultingBodyNames.push_back(el.occultingBodyNames.at(ii));
 
-      sz = occultingBodies.size();
+      sz = el.occultingBodies.size();
       for (UnsignedInt ii = 0; ii < sz; ii++)
          occultingBodies.push_back(el.occultingBodies.at(ii));
-   }
+
+      // copy the list of default occulting body names
+      for (unsigned int i = 0; i < (el.defaultOccultingBodies).size(); i++)
+      {
+         defaultOccultingBodies.push_back((el.defaultOccultingBodies).at(i));
+      }
+}
 
    return *this;
 }
@@ -366,6 +421,28 @@ bool EventLocator::IsParameterReadOnly(const std::string &label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::IsParameterCommandModeSettable(const Integer id) const
+{
+   if ((id == EVENT_FILENAME)      || (id == INPUT_EPOCH_FORMAT)  ||
+       (id == INITIAL_EPOCH)       || (id == FINAL_EPOCH)         ||
+       (id == USE_ENTIRE_INTERVAL) || (id == WRITE_REPORT)          )
+      return true;
+
+   return false;
+}
+
+
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
@@ -479,6 +556,8 @@ std::string EventLocator::GetStringParameter(const Integer id) const
       return initialEpoch;
    if (id == FINAL_EPOCH)
       return finalEpoch;
+   if (id == RUN_MODE)
+      return runMode;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -538,8 +617,38 @@ bool EventLocator::SetStringParameter(const Integer id,
       SetEpoch(value, id);
       return true;
    }
+
+   if (id == RUN_MODE)
+   {
+      for (Integer jj = 0; jj < numModes; jj++)
+      {
+         if (GmatStringUtil::ToUpper(value) == GmatStringUtil::ToUpper(RUN_MODES[jj]))
+         {
+            runMode = value;
+            return true;
+         }
+      }
+      EventException ee("");
+      std::string allowed = "One of ";
+      for (Integer jj = 0; jj < numModes; jj++)
+      {
+         allowed += RUN_MODES[jj];
+         if (jj != (numModes -1))
+            allowed += ", ";
+      }
+      ee.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            "RunMode", allowed.c_str());
+      throw ee;
+   }
    if (id == OCCULTING_BODIES)
    {
+      #ifdef DEBUG_EVENTLOCATOR_SET
+         MessageInterface::ShowMessage("About to set occulting body on EventLocator %s\n",
+               instanceName.c_str());
+         MessageInterface::ShowMessage("Current occulting bodies list:\n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
+      #endif
       if (value != satName)
       {
          if (value != "Sun")
@@ -556,6 +665,11 @@ bool EventLocator::SetStringParameter(const Integer id,
             return false;
          }
       }
+      #ifdef DEBUG_EVENTLOCATOR_SET
+         MessageInterface::ShowMessage("And THEN occulting bodies list:\n");
+         for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+            MessageInterface::ShowMessage("   %s\n", occultingBodyNames.at(ii).c_str());
+      #endif
       return true;
    }
 
@@ -641,8 +755,17 @@ bool EventLocator::SetStringParameter(const Integer id,
 //------------------------------------------------------------------------------
 const StringArray& EventLocator::GetStringArrayParameter(const Integer id) const
 {
+   #ifdef DEBUG_EVENTLOCATOR_GET
+      MessageInterface::ShowMessage("In EL::GetStringArrayP, occulting bodies are:\n");
+      for (Integer ii = 0; ii < occultingBodyNames.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", occultingBodyNames.at(ii).c_str());
+   #endif
    if (id == OCCULTING_BODIES)
+   {
+      if (occultingBodyNames.empty())
+         return defaultOccultingBodies;
       return occultingBodyNames;
+   }
 
    return GmatBase::GetStringArrayParameter(id);
 }
@@ -904,8 +1027,12 @@ bool EventLocator::SetBooleanParameter(const std::string &label,
  */
 //------------------------------------------------------------------------------
 bool EventLocator::TakeAction(const std::string &action,
-      const std::string &actionData)
+                              const std::string &actionData)
 {
+   #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("In EL::TakeAction, action = %s and actionData = %s\n",
+            action.c_str(), actionData.c_str());
+   #endif
    if (action == "Clear")
    {
       if ((actionData == "OccultingBodies") || (actionData == ""))
@@ -947,6 +1074,34 @@ Gmat::ObjectType EventLocator::GetPropertyObjectType(const Integer id) const
       return GmatBase::GetPropertyObjectType(id);
    }
 }
+
+//---------------------------------------------------------------------------
+// const StringArray& GetPropertyEnumStrings(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves eumeration symbols of parameter of given id.
+ *
+ * @param <id> ID for the parameter.
+ *
+ * @return list of enumeration symbols
+ */
+//---------------------------------------------------------------------------
+const StringArray& EventLocator::GetPropertyEnumStrings(const Integer id) const
+{
+   static StringArray enumStrings;
+   switch (id)
+   {
+   case RUN_MODE:
+      enumStrings.clear();
+      for (Integer ii = 0; ii < numModes; ii++)
+         enumStrings.push_back(RUN_MODES[ii]);
+
+      return enumStrings;
+   default:
+      return GmatBase::GetPropertyEnumStrings(id);
+   }
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1013,6 +1168,38 @@ void EventLocator::SetSolarSystem(SolarSystem *ss)
 }
 
 //------------------------------------------------------------------------------
+// virtual bool HasRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::HasRefObjectTypeArray()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ *
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& EventLocator::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   refObjectTypes.push_back(Gmat::CELESTIAL_BODY);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
 //  void SetEpoch(std::string ep)
 //------------------------------------------------------------------------------
 /**
@@ -1040,9 +1227,9 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
       epochString = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
    {
-      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
-         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
-      else
+//      if (!GmatStringUtil::IsEnclosedWith(ep, "'"))
+//         epochString = GmatStringUtil::AddEnclosingString(ep, "'");
+//      else
          epochString = ep;
    }
 
@@ -1157,9 +1344,14 @@ const StringArray& EventLocator::GetRefObjectNameArray(
    }
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::CELESTIAL_BODY)
    {
-      // Add ref. objects for requesting type from this class
-      refObjectNames.insert(refObjectNames.begin(), occultingBodyNames.begin(),
-            occultingBodyNames.end());
+      if (occultingBodyNames.empty())
+         // Add ref. objects for requesting type from this class
+         refObjectNames.insert(refObjectNames.begin(), defaultOccultingBodies.begin(),
+               defaultOccultingBodies.end());
+      else
+         // Add ref. objects for requesting type from this class
+         refObjectNames.insert(refObjectNames.begin(), occultingBodyNames.begin(),
+               occultingBodyNames.end());
 
       #ifdef DEBUG_EVENTLOCATOR_OBJECT
          MessageInterface::ShowMessage
@@ -1171,6 +1363,11 @@ const StringArray& EventLocator::GetRefObjectNameArray(
                   refObjectNames[i].c_str());
       #endif
    }
+   #ifdef DEBUG_EVENTLOCATOR_SET
+      MessageInterface::ShowMessage("refObjectNames = \n");
+      for (Integer ii = 0; ii < refObjectNames.size(); ii++)
+         MessageInterface::ShowMessage("   %s\n", refObjectNames.at(ii).c_str());
+   #endif
 
    return refObjectNames;
 }
@@ -1198,17 +1395,56 @@ bool EventLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       sat = (Spacecraft*) obj;
       return true;
    }
-   for (UnsignedInt i = 0; i < occultingBodyNames.size(); ++i)
+   if (obj->IsOfType(Gmat::CELESTIAL_BODY))
    {
-      if (occultingBodyNames.at(i) == name)
+      // check to see if it's already in the list
+      std::vector<CelestialBody*>::iterator pos =
+         find(occultingBodies.begin(), occultingBodies.end(), obj);
+      if (pos != occultingBodies.end())
       {
-         if (obj->IsOfType(Gmat::CELESTIAL_BODY))
-         {
-            occultingBodies.at(i) = (CelestialBody*) obj;
-            return true;
-         }
-         return false;
+         #ifdef DEBUG_CP_OBJECT
+         MessageInterface::ShowMessage
+            ("EventLocator::SetRefObject() the body <%p> '%s' already exist, so "
+             "returning true\n", (*pos), name.c_str());
+         #endif
+         return true;
       }
+
+      // If ref object has the same name, reset it
+      pos = occultingBodies.begin();
+      std::string bodyName;
+      bool bodyFound = false;
+      while (pos != occultingBodies.end())
+      {
+         bodyName = (*pos)->GetName();
+         if (bodyName == name)
+         {
+            #ifdef DEBUG_CP_OBJECT
+            MessageInterface::ShowMessage
+               ("EventLocator::SetRefObject() resetting the pointer of body '%s' <%p> to "
+                "<%p>\n", bodyName.c_str(), (*pos), (CelestialBody*)obj);
+            #endif
+
+            (*pos) = (CelestialBody*)obj;
+            bodyFound = true;
+         }
+         ++pos;
+      }
+
+      // If ref object not found, add it
+      if (!bodyFound)
+      {
+         #ifdef DEBUG_CP_OBJECT
+         MessageInterface::ShowMessage
+            ("EventLocator::SetRefObject() this=<%p> '%s', adding <%p> '%s' "
+             "to bodyList for object %s\n", this, GetName().c_str(), obj, name.c_str(),
+             instanceName.c_str());
+         #endif
+
+         occultingBodies.push_back((CelestialBody*) obj);
+      }
+
+      return true;
    }
    return GmatBase::SetRefObject(obj, type, name);
 }
@@ -1251,6 +1487,14 @@ bool EventLocator::RenameRefObject(const Gmat::ObjectType type,
             if (occultingBodyNames.at(ii) == oldName)
             {
                occultingBodyNames.at(ii) = newName;
+               retval = true;
+            }
+         }
+         for (UnsignedInt ii = 0; ii < defaultOccultingBodies.size(); ii++)
+         {
+            if (defaultOccultingBodies.at(ii) == oldName)
+            {
+               defaultOccultingBodies.at(ii) = newName;
                retval = true;
             }
          }
@@ -1313,7 +1557,7 @@ bool EventLocator::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool EventLocator::Initialize()
 {
-   bool retval = false;
+   bool retval = true;
 
    #ifdef DEBUG_EVENT_INITIALIZATION
       MessageInterface::ShowMessage("Initializing event locator at <%p>\n", this);
@@ -1354,28 +1598,57 @@ bool EventLocator::Initialize()
       errmsg += instanceName + ".\n";
       throw EventException(errmsg);
    }
-
-   satStartEpoch = sat->GetEpoch(); // or do I need to get this at some other time??
+   // StellarAberration can only be set if LightTimeCorrection is also set
+   if (useStellarAberration && !useLightTimeDelay)
+   {
+      std::string errmsg = "UseLightTimeDelay must be set to true ";
+      errmsg += "when UseStellarAberration is set to true for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
+   }
 
    /// Get the occulting bodies from the solar system??? OR put them on the ref object list ??  TBD
    // @todo <<<<<<<<<<  Currently have them in the ref object list
+   if (occultingBodyNames.size() < 1)
+   {
+      // Use default list here
+      for (Integer ii = 0; ii < 2; ii++)
+         occultingBodyNames.push_back(defaultOccultingBodies[ii]);
+   }
+
+   if (occultingBodyNames.size() > occultingBodies.size())
+   {
+      std::string errmsg = "Specified occulting bodies not set for EventLocator ";
+      errmsg += instanceName + ".\n";
+      throw EventException(errmsg);
+   }
 
    // For now, call this method here to load the planetary PCKs
-   solarSys->LoadPCKs();
+   #ifdef __USE_SPICE__
+      solarSys->LoadPCKs();
+   #endif
 
-   // Tell the spacecraft to start recording its data
-   sat->RecordEphemerisData();
+   #ifdef DEBUG_EVENT_INITIALIZATION
+      MessageInterface::ShowMessage(">>> About to tell spacecraft to record its data ...\n");
+   #endif
+   if (runMode != "Disabled")
+   {
+      // Tell the spacecraft to start recording its data
+      sat->RecordEphemerisData();
+   }
 
 
    fileWasWritten = false;
    isInitialized = true;
+
+   scStart = sat->GetEpoch();
 
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
-// void ReportEventData()
+// bool ReportEventData(const std::string &reportNotice = "")
 //------------------------------------------------------------------------------
 /**
  * Writes the event data to file and optionally displays the event data plot.
@@ -1384,14 +1657,15 @@ bool EventLocator::Initialize()
  * be handled here) *******
  */
 //------------------------------------------------------------------------------
-void EventLocator::ReportEventData(const std::string &reportNotice)
+bool EventLocator::ReportEventData(const std::string &reportNotice)
 {
-   bool openOK = OpenReportFile();
+   // renameFile set to false here because renaming does not work on Windows
+   bool openOK = OpenReportFile(false);
 
    if (!openOK)
    {
       // TBD - do we want to throw an exception or just continue without writing?
-      return;
+      return false;
    }
 
    // Write the data here
@@ -1399,17 +1673,7 @@ void EventLocator::ReportEventData(const std::string &reportNotice)
    theReport << instanceName << "!!!!!!\n";
 
    theReport.close();
-
-//   fileWasWritten = eventTable.WriteToFile(fullFileName, reportNotice);
-//   if (showPlot)
-//   {
-//      if (fileWasWritten)
-//         eventTable.ShowPlot();
-//      else
-//         MessageInterface::ShowMessage("No events were found, so the event "
-//               "plot is not displayed.\n");
-//   }
-
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1428,25 +1692,25 @@ void EventLocator::ReportEventData(const std::string &reportNotice)
 //------------------------------------------------------------------------------
 void EventLocator::LocateEvents(const std::string &reportNotice)
 {
-   if (useEntireInterval)
-   {
-      fromEpoch = satStartEpoch;
-      toEpoch   = sat->GetEpoch();
-   }
-   else
-   {
-      fromEpoch = initialEp;
-      toEpoch   = finalEp;
-   }
-   // Locate events here and store them as you have decided to do so
-   FindEvents(fromEpoch, toEpoch);
+   #ifdef DEBUG_EVENTLOCATOR_DATA
+      MessageInterface::ShowMessage("In EL::LocateEvents, about to call ProvideEphemerisData\n");
+   #endif
 
-   // Write the report
-   // appendReport should already have been set by a call to SetAppend
-   if (writeReport)
+   if (runMode != "Disabled")
    {
-      ReportEventData(reportNotice);
-      fileWasWritten = true;  // or set this in ReportEventData in the derived class?
+      // Stop the data recording so that the kernel will be loaded
+      sat->ProvideEphemerisData();
+
+      // Locate events in derived class and store them as you have decided to do so
+      FindEvents();
+
+      // Write the report
+      // appendReport should already have been set by a call to SetAppend
+      if (writeReport)
+      {
+         bool wasOK = ReportEventData(reportNotice);
+         if (wasOK) fileWasWritten = true;
+      }
    }
 }
 
@@ -1462,6 +1726,20 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 bool EventLocator::FileWasWritten()
 {
    return fileWasWritten;
+}
+
+//------------------------------------------------------------------------------
+// bool IsInAutomaticMode()
+//------------------------------------------------------------------------------
+/**
+ * Returns a flag indicating if the EventLocation run mode is "Automatic"
+ *
+ * @return The flag.
+ */
+//------------------------------------------------------------------------------
+bool EventLocator::IsInAutomaticMode()
+{
+   return (runMode == "Automatic");
 }
 
 
@@ -1548,14 +1826,22 @@ bool EventLocator::OpenReportFile(bool renameOld)
       withoutExt = fullFileName.substr(0, lastDot);
    }
 
+   bool fileDoesExist = GmatFileUtil::DoesFileExist(fullFileName);
+
+   #ifdef DEBUG_EVENTLOCATOR_WRITE
+      MessageInterface::ShowMessage("In ReportEventData, fullFileName  = %s\n", fullFileName.c_str());
+      MessageInterface::ShowMessage("                    withoutExt    = %s\n", withoutExt.c_str());
+      MessageInterface::ShowMessage("                    fileDoesExist = %s\n", (fileDoesExist? "true" : "false"));
+   #endif
+
    if (appendReport)
-      theReport.open(fullFileName.c_str(), std::fstream::app);
+      theReport.open(fullFileName.c_str(), std::fstream::out | std::fstream::app);
    else
    {
       // Rename any old existing files here if necessary
-      if (renameOld)
+      if (renameOld) // renaming does NOT WORK on Windows, so we will overwrite all the time
       {
-         if (GmatFileUtil::DoesFileExist(fullFileName))
+         if (fileDoesExist)
          {
             // Get the FileManager pointer
             FileManager *fm = FileManager::Instance();
@@ -1567,6 +1853,10 @@ bool EventLocator::OpenReportFile(bool renameOld)
             {
                fileRename.str("");
                fileRename << withoutExt << "__" << fileCounter << fileExt;
+               #ifdef DEBUG_EVENTLOCATOR_WRITE
+                  MessageInterface::ShowMessage("------>>> Renaming %s to %s\n",
+                        fullFileName.c_str(), fileRename.str().c_str());
+               #endif
                if (fm->RenameFile(fullFileName, fileRename.str(), retCode))
                {
                   done = true;
@@ -1601,7 +1891,7 @@ bool EventLocator::OpenReportFile(bool renameOld)
       }
       else // if not renaming, if it already exists, delete it
       {
-         if (GmatFileUtil::DoesFileExist(fullFileName))
+         if (fileDoesExist)
             remove(fullFileName.c_str());
       }
       theReport.open(fullFileName.c_str(), std::fstream::out);
@@ -1640,3 +1930,35 @@ std::string EventLocator::GetAbcorrString()
    }
    return correction;
 }
+
+CelestialBody* EventLocator::GetCelestialBody(const std::string &withName)
+{
+   Integer sz = (Integer) occultingBodies.size();
+   for (Integer ii = 0; ii < sz; ii++)
+      if (occultingBodies.at(ii)->GetName() == withName)
+         return occultingBodies.at(ii);
+   return NULL;
+}
+
+std::string EventLocator::GetNoEventsString(const std::string &forType)
+{
+   std::string outputFormat = "UTCGregorian";  // will use epochFormat in the future?
+   std::string fromGregorian, toGregorian;
+   Real        resultMjd;
+   std::string noEvents;
+
+
+   TimeConverterUtil::Convert("A1ModJulian", findStart, "",
+                              outputFormat, resultMjd, fromGregorian);
+   TimeConverterUtil::Convert("A1ModJulian", findStop, "",
+                              outputFormat, resultMjd, toGregorian);
+
+   noEvents  = "There are no ";
+   noEvents += forType;
+   noEvents += " events in the time interval ";
+   noEvents += fromGregorian + " to " + toGregorian;
+
+   return noEvents;
+}
+
+

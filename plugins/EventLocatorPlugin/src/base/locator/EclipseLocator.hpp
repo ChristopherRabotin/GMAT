@@ -26,6 +26,7 @@
 #include "EventLocator.hpp"
 #include "EventLocatorDefs.hpp"
 #include "Star.hpp"
+#include "EclipseTotalEvent.hpp"
 
 /**
  * The EventLocator used for shadow entry and exit location
@@ -75,14 +76,15 @@ public:
                         GetStringArrayParameter(const std::string &label,
                                                 const Integer index) const;
    virtual bool         TakeAction(const std::string &action,
-                                   const std::string &actionData);
+                                   const std::string &actionData = "");
 
    const ObjectTypeArray& GetTypesForList(const Integer id);
    const ObjectTypeArray& GetTypesForList(const std::string &label);
 
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    virtual bool         Initialize();
-   virtual void         ReportEventData(const std::string &reportNotice = "");
+   virtual bool         ReportEventData(const std::string &reportNotice = "");
 
    DEFAULT_TO_NO_CLONES
 
@@ -91,6 +93,15 @@ protected:
    StringArray eclipseTypes;
    /// The Sun
    Star        *sun;
+   /// The stored events
+   std::vector<EclipseTotalEvent*> theEvents;
+   /// the maximum index of the stored events
+   Integer     maxIndex;
+   /// The maximum duration of the found events
+   Real        maxDuration;
+   /// the default types of eclipse
+   StringArray defaultEclipseTypes;
+
 
    /// Published parameters for eclipse locators
     enum
@@ -106,7 +117,7 @@ protected:
     static const Gmat::ParameterType
        PARAMETER_TYPE[EclipseLocatorParamCount - EventLocatorParamCount];
 
-    virtual void FindEvents(Real fromTime, Real toTime);
+    virtual void FindEvents();
 };
 
 #endif /* EclipseLocator_hpp */

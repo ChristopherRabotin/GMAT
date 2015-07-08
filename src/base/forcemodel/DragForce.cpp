@@ -38,6 +38,7 @@
 //#define DEBUG_DRAGFORCE_REFOBJ
 //#define DEBUG_ANGVEL
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_NAN_CONDITIONS
 
 //#define DUMP_DERIVATIVE
 //#define DUMP_DENSITY
@@ -74,10 +75,15 @@ DragForce::PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount] =
    "AtmosphereModel",               // ATMOSPHERE_MODEL
    "AtmosphereBody",                // ATMOSPHERE_BODY
    "InputSource",                   // SOURCE_TYPE
-   "SolarFluxFile",                 // FLUX_FILE
+   "HistoricWeatherSource",         // HISTORIC_WEATHER_SOURCE
+   "PredictedWeatherSource",        // PREDICTED_WEATHER_SOURCE
+   "CSSISpaceWeatherFile",          // CSSI_WEATHER_FILE
+   "SchattenFile",                  // SCHATTEN_WEATHER_FILE
    "F107",                          // FLUX
    "F107A",                         // AVERAGE_FLUX
    "MagneticIndex",                 // MAGNETIC_INDEX
+   "SchattenErrorModel",            // SCHATTEN_ERROR_MODEL
+   "SchattenTimingModel",           // SCHATTEN_TIMING_MODEL
    "FixedCoordinateSystem",         // FIXED_COORD_SYSTEM  (Read-only parameter)
    "AngularMomentumUpdateInterval", // W_UPDATE_INTERVAL (in days, Read-only)
    "KpToApMethod",                  // KP2AP_METHOD (Read-only)
@@ -89,10 +95,15 @@ DragForce::PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount] =
    Gmat::OBJECT_TYPE,   // "AtmosphereModel"
    Gmat::STRING_TYPE,   // "AtmosphereBody",
    Gmat::STRING_TYPE,   // "InputSource", ("File" or "Constant" for now)
-   Gmat::STRING_TYPE,   // "SolarFluxFile",
+   Gmat::STRING_TYPE,   // "HistoricWeatherSource",
+   Gmat::STRING_TYPE,   // "PredictedWeatherSource",
+   Gmat::STRING_TYPE,   // "CSSISpaceWeatherFile",
+   Gmat::STRING_TYPE,   // "SchattenFile",
    Gmat::REAL_TYPE,     // "F107",
    Gmat::REAL_TYPE,     // "F107A",
    Gmat::REAL_TYPE,     // "MagneticIndex",
+   Gmat::STRING_TYPE,   // "SchattenError",
+   Gmat::STRING_TYPE,   // "SchattenTiming",
    Gmat::STRING_TYPE,   // "FixedCoordinateSystem"
    Gmat::REAL_TYPE,     // "AngularMomentumUpdateInterval"
    Gmat::INTEGER_TYPE,  // "KpToApMethod"
@@ -117,6 +128,8 @@ DragForce::DragForce(const std::string &name) :
    atmos                   (NULL),
    internalAtmos           (NULL),
    density                 (NULL),
+   densityModel            (""),
+   inputFile               (""),
    prefactor               (NULL),
    firedOnce               (false),
    hasWindModel            (false),
@@ -133,21 +146,26 @@ DragForce::DragForce(const std::string &name) :
    KPID                    (-1),
    //bodyName               ("Earth"),
    dataType                ("Constant"),
-   fluxFile                (""),
+   historicWSource         ("ConstantFluxAndGeoMag"),
+   predictedWSource        ("ConstantFluxAndGeoMag"),
+   cssiWFile               (""),
+   schattenWFile           (""),
    fluxF107                (150.0),
    fluxF107A               (150.0),
    kp                      (3.0),
+   schattenErrorModel      ("Nominal"),
+   schattenTimingModel     ("NominalCycle"),
    cartIndex               (0),
    fillCartesian           (false),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (0),
-   densityModel            (""),									   // made changes for GMT-4299
-   inputFile               ("")										// made changes for GMT-4299
+   kpApConversion          (0)
 {
-#ifdef DEBUG_CONSTRUCTION
-	MessageInterface::ShowMessage("DragForce default construction <'%s',%p>\n", GetName().c_str(), this);
-#endif
+   #ifdef DEBUG_CONSTRUCTION
+      MessageInterface::ShowMessage("DragForce default construction "
+            "<'%s',%p>\n", GetName().c_str(), this);
+   #endif
+
    dimension = 6;
    parameterCount = DragForceParamCount;
    objectTypeNames.push_back("DragForce");
@@ -259,6 +277,8 @@ DragForce::DragForce(const DragForce& df) :
    atmosphereType          (df.atmosphereType),
    atmos                   (NULL),
    density                 (NULL),
+   densityModel            (df.densityModel),
+   inputFile               (df.inputFile),
    prefactor               (NULL),
    firedOnce               (false),
    hasWindModel            (df.hasWindModel),
@@ -272,17 +292,20 @@ DragForce::DragForce(const DragForce& df) :
    areaID                  (df.areaID),
    //bodyName                (df.bodyName),
    dataType                (df.dataType),
-   fluxFile                (df.fluxFile),
+   historicWSource         (df.historicWSource),
+   predictedWSource        (df.predictedWSource),
+   cssiWFile               (df.cssiWFile),
+   schattenWFile           (df.schattenWFile),
    fluxF107                (df.fluxF107),
    fluxF107A               (df.fluxF107A),
    kp                      (df.kp),
+   schattenErrorModel      (df.schattenErrorModel),
+   schattenTimingModel     (df.schattenTimingModel),
    cartIndex               (df.cartIndex),
    fillCartesian           (df.fillCartesian),
    cbFixed                 (NULL),
    internalCoordSystem     (NULL),
-   kpApConversion          (df.kpApConversion),
-   densityModel            (df.densityModel),					   // made changes for GMT-4299
-   inputFile               (df.inputFile)								// made changes for GMT-4299
+   kpApConversion          (df.kpApConversion)
 {
 #ifdef DEBUG_CONSTRUCTION
 	MessageInterface::ShowMessage("DragForce copy construction from <'%s',%p> to <'%s',%p>   enetered\n", df.GetName().c_str(), &df, GetName().c_str(), &(*this));
@@ -389,6 +412,8 @@ DragForce& DragForce::operator=(const DragForce& df)
          (internalAtmos, "internalAtmos", "DragForce::operator=()",
           "deleting internal atmosphere model");
       #endif
+      if (atmos == internalAtmos)
+         atmos = NULL;
       delete internalAtmos;
    }
    
@@ -426,9 +451,14 @@ DragForce& DragForce::operator=(const DragForce& df)
    wUpdateInterval       = df.wUpdateInterval;
    wUpdateEpoch          = df.wUpdateEpoch;
    dataType              = df.dataType;
-   fluxFile              = df.fluxFile;
+   historicWSource       = df.historicWSource;
+   predictedWSource      = df.predictedWSource;
+   cssiWFile             = df.cssiWFile;
+   schattenWFile         = df.schattenWFile;
    fluxF107              = df.fluxF107;
    fluxF107A             = df.fluxF107A;
+   schattenErrorModel    = df.schattenErrorModel;
+   schattenTimingModel   = df.schattenTimingModel;
    kpApConversion        = df.kpApConversion;
    kp                    = df.kp;
    ap                    = CalculateAp(kp);
@@ -777,9 +807,9 @@ bool DragForce::Initialize()
          }
          
 		 if (dragBody.size() > 0)
-            bodyName = dragBody[0];
-         else
-            bodyName = "Earth";
+          bodyName = dragBody[0];
+      else
+         bodyName = "Earth";
          centralBody = solarSystem->GetBody(bodyName);
    
          if (!centralBody)
@@ -837,7 +867,7 @@ bool DragForce::Initialize()
                throw ODEModelException("No central body is defined for DragForce\n");
 
             if (body->GetName() != atmos->GetCentralBodyName())
-				throw ODEModelException("Force model's central body ('" + body->GetName() + "') and Atmosphere model's central body ('" + atmos->GetCentralBodyName() + "')are different\n"); 
+				   throw ODEModelException("Force model's central body ('" + body->GetName() + "') and Atmosphere model's central body ('" + atmos->GetCentralBodyName() + "')are different\n"); 
 
             atmos->SetSunVector(sunLoc);
             atmos->SetCentralBodyVector(cbLoc);
@@ -852,21 +882,23 @@ bool DragForce::Initialize()
             F107ID = atmos->GetParameterID("F107");
             F107AID = atmos->GetParameterID("F107A");
             KPID = atmos->GetParameterID("MagneticIndex");
+            cssiWFileID = atmos->GetParameterID("CSSISpaceWeatherFile");
+            schattenWFileID = atmos->GetParameterID("SchattenFile");
 
-            if (fluxFile == "")
-            {
-               if (F107ID < 0)
-                  throw ODEModelException("Atmosphere model initialization is "
-                        "incomplete");
-               atmos->SetRealParameter(F107ID, fluxF107);
-               atmos->SetRealParameter(F107AID, fluxF107A);
-               atmos->SetRealParameter(KPID, kp);
-            }
+            if (F107ID < 0)
+               throw ODEModelException("Atmosphere model initialization is incomplete");
+            atmos->SetRealParameter(F107ID, fluxF107);
+            atmos->SetRealParameter(F107AID, fluxF107A);
+            atmos->SetRealParameter(KPID, kp);
 
-			if (cbFixed != NULL)
-               atmos->SetFixedCoordinateSystem(cbFixed);
-            if (internalCoordSystem != NULL)
-               atmos->SetInternalCoordSystem(internalCoordSystem);
+            // Set the file names
+            atmos->SetStringParameter(cssiWFileID, cssiWFile);
+            atmos->SetStringParameter(schattenWFileID, schattenWFile);
+
+            if (cbFixed != NULL)										// made changes by TUAN NGUYEN
+               atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
+            if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
+               atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
 			try
 			{
 //				MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
@@ -1192,6 +1224,28 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order,
                      "   Density:    %16.9le\n", density[i]);
                }
             #endif
+
+         #ifdef DEBUG_NAN_CONDITIONS
+            for (Integer j = 0; j < 6; ++j)
+            if (GmatMathUtil::IsNaN(deriv[j6+j]))
+            {
+               MessageInterface::ShowMessage("NAN found in drag force"
+                     " element %d, Value is %lf at epoch %.12lf\n", j,
+                     deriv[j], now);
+               MessageInterface::ShowMessage(
+                  "   Position:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6], state[i6+1], state[i6+2]);
+               MessageInterface::ShowMessage(
+                  "   Velocity:   %16.9le  %16.9le  %16.9le\n",
+                  state[i6+3], state[i6+4], state[i6+5]);
+               MessageInterface::ShowMessage(
+                  "   Drag Accel: %16.9le  %16.9le  %16.9le\n",
+                  deriv[3+i6], deriv[4+i6], deriv[5+i6]);
+               MessageInterface::ShowMessage(
+                  "   Density:    %16.9le\n", density[i]);
+            }
+         #endif
+
          }
          else
          {
@@ -1427,12 +1481,22 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool DragForce::IsParameterReadOnly(const Integer id) const
 {
-   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+   if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX ||
+       id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE ||
+       id == CSSI_WEATHER_FILE || id == SCHATTEN_WEATHER_FILE)
    {
       if (atmosphereType == "Exponential")
          return true;
       else
-         return false;
+      {
+         if (bodyName == "Earth")
+            return false;
+
+         // Only support the CSSI file and Schatten file at the Earth
+         if (id == FLUX || id == AVERAGE_FLUX || id == MAGNETIC_INDEX)
+            return false;
+         return true;
+      }
    }
    
    if (id == ATMOSPHERE_BODY || id == SOURCE_TYPE ||
@@ -1450,6 +1514,19 @@ bool DragForce::IsParameterReadOnly(const Integer id) const
 bool DragForce::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+bool DragForce::WriteEmptyStringParameter(const Integer id) const
+{
+   if (id == HISTORIC_WEATHER_SOURCE || id == PREDICTED_WEATHER_SOURCE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+      else
+         return true;
+   }
+
+   return PhysicalModel::WriteEmptyStringParameter(id);
 }
 
 
@@ -1650,9 +1727,24 @@ std::string DragForce::GetStringParameter(const Integer id) const
    
    if (id == SOURCE_TYPE)
       return dataType;
+
+   if (id == HISTORIC_WEATHER_SOURCE)
+      return historicWSource;
+
+   if (id == PREDICTED_WEATHER_SOURCE)
+      return predictedWSource;
     
-   if (id == FLUX_FILE)
-      return fluxFile;
+   if (id == CSSI_WEATHER_FILE)
+      return cssiWFile;
+
+   if (id == SCHATTEN_WEATHER_FILE)
+      return schattenWFile;
+
+   if(id == SCHATTEN_ERROR_MODEL)
+      return schattenErrorModel;
+
+   if (id == SCHATTEN_TIMING_MODEL)
+      return schattenTimingModel;
     
    if (id == FIXED_COORD_SYSTEM)
       return bodyName + "Fixed";
@@ -1748,18 +1840,106 @@ bool DragForce::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
     
-   if (id == FLUX_FILE)
+   if (id == HISTORIC_WEATHER_SOURCE)
    {
-      fluxFile = value;
-      if (!internalAtmos)
-         throw ODEModelException(
-            "Cannot set flux file: Atmosphere Model undefined");
-         
-      internalAtmos->SetSolarFluxFile(fluxFile);
-      internalAtmos->SetNewFileFlag(true);
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "CSSISpaceWeatherFile") ||
+          (value == "ConstantFluxAndGeoMag"))
+      {
+         historicWSource = value;
+         return true;
+      }
+      
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag'");
+      throw badVal;
+   }
+
+   if (id == PREDICTED_WEATHER_SOURCE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "CSSISpaceWeatherFile") ||
+          (value == "ConstantFluxAndGeoMag") ||
+          (value == "SchattenFile"))
+      {
+         predictedWSource = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'CSSISpaceWeatherFile', 'ConstantFluxAndGeoMag', 'SchattenFile'");
+      throw badVal;
+   }
+
+   if (id == CSSI_WEATHER_FILE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if (value == "")
+         return false;
+
+      cssiWFile = value;
       return true;
    }
 
+   if (id == SCHATTEN_WEATHER_FILE)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if (value == "")
+         return false;
+
+      schattenWFile = value;
+      return true;
+   }
+
+   if (id == SCHATTEN_ERROR_MODEL)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "Nominal") || (value == "PlusTwoSigma") ||
+          (value == "MinusTwoSigma"))
+      {
+         schattenErrorModel = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'Nominal', 'PlusTwoSigma', 'MinusTwoSigma'");
+      throw badVal;
+   }
+
+   if (id == SCHATTEN_TIMING_MODEL)
+   {
+      if (atmosphereType == "Exponential")
+         return false;
+
+      if ((value == "NominalCycle") || (value == "EarlyCycle") ||
+          (value == "LateCycle"))
+      {
+         schattenTimingModel = value;
+         return true;
+      }
+
+      ODEModelException badVal("");
+      badVal.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+            GetParameterText(id).c_str(),
+            "'NominalCycle', 'EarlyCycle, 'LateCycle'");
+      throw badVal;
+   }
 
    return PhysicalModel::SetStringParameter(id, value);
 }
@@ -2001,16 +2181,37 @@ bool DragForce::SetInternalAtmosphereModel(AtmosphereModel* atm)
          (internalAtmos, "internalAtmos", "DragForce::SetInternalAtmosphereModel()",
           "deleting internal atmosphere model");
       #endif
+      if (atmos == internalAtmos)
+         atmos = NULL;
       delete internalAtmos;
    }
    
    internalAtmos = atm;
+   if (atmos == NULL)
+      atmos = internalAtmos;
 
    if (cbFixed != NULL)
       internalAtmos->SetFixedCoordinateSystem(cbFixed);
    if (internalCoordSystem != NULL)
       internalAtmos->SetInternalCoordSystem(internalCoordSystem);
    
+   F107ID = internalAtmos->GetParameterID("F107");
+   F107AID = internalAtmos->GetParameterID("F107A");
+   KPID = internalAtmos->GetParameterID("MagneticIndex");
+   cssiWFileID = internalAtmos->GetParameterID("CSSISpaceWeatherFile");
+   schattenWFileID = internalAtmos->GetParameterID("SchattenFile");
+
+   if (F107ID < 0)
+      throw ODEModelException("Atmosphere model initialization is incomplete");
+   internalAtmos->SetRealParameter(F107ID, fluxF107);
+   internalAtmos->SetRealParameter(F107AID, fluxF107A);
+   internalAtmos->SetRealParameter(KPID, kp);
+
+   // Set the file names
+   internalAtmos->SetStringParameter(cssiWFileID, cssiWFile);
+   internalAtmos->SetStringParameter(schattenWFileID, schattenWFile);
+
+
    #ifdef DEBUG_DRAGFORCE_REFOBJ
    MessageInterface::ShowMessage
       ("DragForce::SetInternalAtmosphereModel() returning true, internalAtmos=<%p>\n",
@@ -2085,7 +2286,7 @@ bool DragForce::SupportsDerivative(Gmat::StateElementId id)
  */
 //------------------------------------------------------------------------------
 bool DragForce::SetStart(Gmat::StateElementId id, Integer index, 
-                      Integer quantity)
+                      Integer quantity, Integer sizeOfType)
 {
    #ifdef DEBUG_REGISTRATION
       MessageInterface::ShowMessage("DragForce setting start data for id = %d"
@@ -2100,6 +2301,7 @@ bool DragForce::SetStart(Gmat::StateElementId id, Integer index,
          satCount = quantity;
          cartIndex = index;
          fillCartesian = true;
+         stmRowCount = Integer(sqrt((Real)sizeOfType));
          retval = true;
          break;
          

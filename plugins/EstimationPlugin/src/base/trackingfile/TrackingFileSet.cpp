@@ -22,16 +22,21 @@
 #include "TFSMagicNumbers.hpp"
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <sstream>                  // For magic number mapping code
 /// Temporarily here; needs to move into a factory
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
+#include "GNDopplerAdapter.hpp"                           // made changes by TUAN NGUYEN
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
+//#define DEBUG_CONSTRUCTION
 //#define DEBUG_INITIALIZATION
+//#define DEBUG_INITIALIZE
 //#define DEBUG_GET_PARAMETER
+//#define DEBUG_BUILD_ADAPTER
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -47,8 +52,9 @@ const std::string TrackingFileSet::PARAMETER_TEXT[
    "UseLightTime",                  // USELIGHTTIME
    "UseRelativityCorrection",       // USE_RELATIVITY
    "UseETminusTAI",                 // USE_ETMINUSTAI
-   "SimRangeModuloConstant",           // RANGE_MODULO
-   "SimDopplerCountInterval",          // DOPPLER_COUNT_INTERVAL
+   "SimRangeModuloConstant",        // RANGE_MODULO
+   "SimDopplerCountInterval",       // DOPPLER_COUNT_INTERVAL
+   "DataFilters",                   // DATA_FILTERS
 };
 
 /// Types of the BatchEstimator parameters
@@ -63,6 +69,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
    Gmat::BOOLEAN_TYPE,              // USE_ETMINUSTAI
    Gmat::REAL_TYPE,                 // RANGE_MODULO
    Gmat::REAL_TYPE,                 // DOPPLER_COUNT_INTERVAL
+   Gmat::OBJECTARRAY_TYPE,          // DATA_FILLTERS
 };
 
 
@@ -77,7 +84,7 @@ const Gmat::ParameterType TrackingFileSet::PARAMETER_TYPE[
 //------------------------------------------------------------------------------
 TrackingFileSet::TrackingFileSet(const std::string &name) :
    MeasurementModelBase      (name, "TrackingFileSet"),
-   useLighttime              (true),          //(false),    // Default to true once implemented
+   useLighttime              (true),
    solarsystem               (NULL),
    thePropagator             (NULL),
    useRelativityCorrection   (false),
@@ -85,6 +92,10 @@ TrackingFileSet::TrackingFileSet(const std::string &name) :
    rangeModulo               (1.0e18),
    dopplerCountInterval      (1.0)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet <%s,%p> default construction \n", GetName().c_str(), this);
+#endif
+
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
    objectTypeNames.push_back("TrackingFileSet");
 
@@ -107,6 +118,14 @@ TrackingFileSet::~TrackingFileSet()
       if (measurements[i])
          delete measurements[i];
    }
+
+   // remove all data filter objects
+   for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+   {
+      if (dataFilters[i])
+         delete dataFilters[i];
+   }
+   dataFilters.clear();
 
    // clear tracking configs
    trackingConfigs.clear();
@@ -138,10 +157,25 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
    useRelativityCorrection   (tfs.useRelativityCorrection),
    useETminusTAICorrection   (tfs.useETminusTAICorrection),
    rangeModulo               (tfs.rangeModulo),
-   dopplerCountInterval      (tfs.dopplerCountInterval)
+   dopplerCountInterval      (tfs.dopplerCountInterval),
+   dataFilterNames           (tfs.dataFilterNames)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet <%s,%p> copy construction from <%s,%p>\n", GetName().c_str(), this, tfs.GetName().c_str(), &tfs);
+#endif
+   
    for (UnsignedInt i = 0; i < tfs.trackingConfigs.size(); ++i)
       trackingConfigs.push_back(tfs.trackingConfigs[i]);
+
+   // Each tracking file set contains a set of filters in which they have their own thinning frequency counters.
+   // Therefore, it needs to have seperate set of data filter objects for each tracking file set object. 
+   // Note that: If 2 different tracking file set objects share the same set of data filter objects, values 
+   // of frequency counters are mixed up by both tracking file set objects. 
+   for (UnsignedInt i = 0; i < tfs.dataFilters.size(); ++i)
+   {
+      if (tfs.dataFilters[i])
+         dataFilters.push_back(tfs.dataFilters[i]->Clone());
+   }
 
    isInitialized = false;
 }
@@ -160,6 +194,10 @@ TrackingFileSet::TrackingFileSet(const TrackingFileSet& tfs) :
 //------------------------------------------------------------------------------
 TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet <%s,%p> operator =  from <%s,%p>\n", GetName().c_str(), this, tfs.GetName().c_str(), &tfs);
+#endif
+
    if (this != &tfs)
    {
       MeasurementModelBase::operator=(tfs);
@@ -187,7 +225,22 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
       useETminusTAICorrection = tfs.useETminusTAICorrection;
       rangeModulo             = tfs.rangeModulo;
       dopplerCountInterval    = tfs.dopplerCountInterval;
-//      dopplerInterval         = tfs.dopplerInterval;         
+      dataFilterNames         = tfs.dataFilterNames;
+
+      // Remove all dataFilters
+      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+      {
+         if (dataFilters[i])
+            delete dataFilters[i];
+      }
+      dataFilters.clear();
+
+      // Create clones of data filters
+      for(UnsignedInt i = 0; i < tfs.dataFilters.size(); ++i)
+      {
+         if (tfs.dataFilters[i])
+            dataFilters.push_back(tfs.dataFilters[i]->Clone());
+      }
 
       isInitialized = false;
    }
@@ -207,6 +260,10 @@ TrackingFileSet& TrackingFileSet::operator=(const TrackingFileSet& tfs)
 //------------------------------------------------------------------------------
 GmatBase* TrackingFileSet::Clone() const
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::Clone() \n", GetName().c_str(), this);
+#endif
+
    return new TrackingFileSet(*this);
 }
 
@@ -241,15 +298,15 @@ std::string TrackingFileSet::GetParameterText(const Integer id) const
  * @return parameter unit for the requested parameter.
  */
 //------------------------------------------------------------------------------
-std::string TrackingFileSet::GetParameterUnit(const Integer id) const            // made changes by TUAN NGUYEN
-{                                                                                // made changes by TUAN NGUYEN
-   if (id == RANGE_MODULO)                                                       // made changes by TUAN NGUYEN
-      return "RU";                                                               // made changes by TUAN NGUYEN
-   if (id == DOPPLER_COUNT_INTERVAL)                                             // made changes by TUAN NGUYEN
-      return "sec";                                                              // made changes by TUAN NGUYEN
+std::string TrackingFileSet::GetParameterUnit(const Integer id) const
+{
+   if (id == RANGE_MODULO)
+      return "RU";
+   if (id == DOPPLER_COUNT_INTERVAL)
+      return "sec";
 
-   MeasurementModelBase::GetParameterUnit(id);                                   // made changes by TUAN NGUYEN
-}                                                                                // made changes by TUAN NGUYEN
+   return MeasurementModelBase::GetParameterUnit(id);
+}
 
 
 //------------------------------------------------------------------------------
@@ -265,47 +322,13 @@ std::string TrackingFileSet::GetParameterUnit(const Integer id) const           
 //------------------------------------------------------------------------------
 Integer TrackingFileSet::GetParameterID(const std::string& str) const
 {
-   // process all changes of parameter name
-   std::string str1 = str;
-   if (str1 == "DopplerInterval")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.DopplerInterval was renamed to %s.SimDopplerCountInterval in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "SimDopplerCountInterval";
-   }
-   else if (str1 == "Filename")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.Filename was renamed to %s.FileName in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "FileName";
-   }
-   else if (str1 == "RampedTable")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.RampedTable was renamed to %s.RampTable in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "RampTable";
-   }
-   else if (str1 == "UseLighttime")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.UseLighttime was renamed to %s.UseLightTime in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "UseLightTime";
-   }
-   else if (str1 == "RangeModuloConstant")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.RangeModuloConstant was renamed to %s.SimRangeModuloConstant in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "SimRangeModuloConstant";
-   }
-   else if (str1 == "DopplerCountInterval")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.DopplerCountInterval was renamed to %s.SimDopplerCountInterval in this GMAT version. Please change its name in your script file.\n", GetName().c_str(), GetName().c_str()); 
-      str1 = "SimDopplerCountInterval";
-   }
-
-
    for (Integer i = MeasurementModelBaseParamCount; i < TrackingFileSetParamCount; i++)
    {
-      if (str1 == PARAMETER_TEXT[i - MeasurementModelBaseParamCount])
+      if (str == PARAMETER_TEXT[i - MeasurementModelBaseParamCount])
          return i;
    }
 
-   return MeasurementModelBase::GetParameterID(str1);
+   return MeasurementModelBase::GetParameterID(str);
 }
 
 
@@ -476,24 +499,49 @@ std::string TrackingFileSet::GetStringParameter(const Integer id) const
 bool TrackingFileSet::SetStringParameter(const Integer id,
       const std::string& value)
 {
-   if (id == FILENAME)
-   {
-      if (find(filenames.begin(), filenames.end(), value) == filenames.end())
-      {
-         filenames.push_back(value);
-         return true;
-      }
-      return false;
-   }
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::SetStringParameter(id = %d, "
+            "value = '%s') called\n", GetName().c_str(), this, id, value.c_str());
+   #endif
 
-   if (id == RAMPED_TABLENAME)
+   //if (id == FILENAME)
+   //{
+   //   if (find(filenames.begin(), filenames.end(), value) == filenames.end())
+   //   {
+   //      filenames.push_back(value);
+   //      return true;
+   //   }
+   //   else
+   //      throw MeasurementException("Error: File name is replicated ('" + value + "')\n");
+   //}
+
+   //if (id == RAMPED_TABLENAME)
+   //{
+   //   if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
+   //   {
+   //      rampedTablenames.push_back(value);
+   //      return true;
+   //   }
+   //   else
+   //      throw MeasurementException("Error: ramped table name is replicated ('" + value + "')\n");
+
+   //}
+
+   if (id == DATA_FILTERS)
    {
-      if (find(rampedTablenames.begin(), rampedTablenames.end(), value) == rampedTablenames.end())
+      if (value.substr(0,1) == "{")
       {
-         rampedTablenames.push_back(value);
+         if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")                           // made changes by TUAN NGUYEN
+            return true;
+      }
+
+      if (find(dataFilterNames.begin(), dataFilterNames.end(), value) == dataFilterNames.end())
+      {
+         dataFilterNames.push_back(value);
          return true;
       }
-      return false;
+      else
+         throw MeasurementException("Error: name of data filter is replicated ('" + value + "')\n");      
    }
 
    return MeasurementModelBase::SetStringParameter(id, value);
@@ -542,6 +590,15 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
                "a ramped table file name");
    }
 
+   if (id == DATA_FILTERS)
+   {
+      if (((Integer)dataFilterNames.size() > index) && (index >= 0))
+         return dataFilterNames[index];
+      else
+         throw MeasurementException("Index out of bounds when trying to access "
+               "a data filter name");
+   }
+
    return MeasurementModelBase::GetStringParameter(id, index);
 }
 
@@ -565,18 +622,22 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 {
    std::string value = value1;                                                                              // made changes by TUAN NGUYEN
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("TrackingFileSet::SetStringParameter(%d, "
-            "'%s', %d) called\n", id, value.c_str(), index);
+      MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::SetStringParameter(%d, "
+            "'%s', %d) called\n", GetName().c_str(), this, id, value.c_str(), index);
    #endif
 
    if (id == TRACKINGCONFIG)
    {
+      // return true when it is an empty list                                                               // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                      // made changes by TUAN NGUYEN
+         return true;                                                                                       // made changes by TUAN NGUYEN
+
       if ((value.size() > 1) && (value.c_str()[0] == '{') && (value.c_str()[value.size()-1] == '}'))        // made changes by TUAN NGUYEN
       {
          // Processing a tracking config:
          value = value.substr(1,value.size()-2);                                                            // made changes by TUAN NGUYEN
          std::string term;                                                                                  // made changes by TUAN NGUYEN
-         Integer pos = value.find_first_of(',');                                                            // made changes by TUAN NGUYEN
+         size_t pos = value.find_first_of(',');       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
          Integer newIndex = 0;                                                                              // made changes by TUAN NGUYEN
          bool retVal;                                                                                       // made changes by TUAN NGUYEN
 
@@ -624,7 +685,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
 
       // Strip off trailing '}', and leading and trailing white space
-      UnsignedInt loc = rawName.find('}');
+      size_t loc = rawName.find('}');                           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
       if (loc != std::string::npos)
          rawName = rawName.substr(0,loc);
       valarray = rawName.c_str();
@@ -652,12 +713,18 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == FILENAME)
    {
+      // throw an error message when it is an empty list                                                           // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                             // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: No file name was set to " + GetName() + ".Filenames parameter.\n");    // made changes by TUAN NGUYEN
+
+      if ((!filenames.empty())&&
+          (find (filenames.begin(), filenames.end(), value) != filenames.end()))                                   // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of file name ('" + value + "').\n");                       // made changes by TUAN NGUYEN
+
       if (((Integer)filenames.size() > index) && (index >= 0))
          filenames[index] = value;
       else if ((Integer)filenames.size() == index)
-      {
          filenames.push_back(value);
-      }
       else
          throw MeasurementException("Index out of bounds when trying to "
                "set a tracking data file name");
@@ -673,12 +740,18 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == RAMPED_TABLENAME)
    {
+      // return true when it is an empty list                                                           // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                  // made changes by TUAN NGUYEN
+         return true;                                                                                   // made changes by TUAN NGUYEN
+
+      if ((!rampedTablenames.empty())&&
+          (find(rampedTablenames.begin(), rampedTablenames.end(), value) != rampedTablenames.end()))    // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of ramped table name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+
       if (((Integer)rampedTablenames.size() > index) && (index >= 0))
          rampedTablenames[index] = value;
       else if ((Integer)rampedTablenames.size() == index)
-      {
          rampedTablenames.push_back(value);
-      }
       else
          throw MeasurementException("Index out of bounds when trying to "
                "set a ramped table file name");
@@ -688,6 +761,33 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
                rampedTablenames.size());
          for (UnsignedInt i = 0; i < rampedTablenames.size(); ++i)
             MessageInterface::ShowMessage("   %s\n", rampedTablenames[i].c_str());
+      #endif
+      return true;
+   }
+
+   if (id == DATA_FILTERS)
+   {
+      // return true when it is an empty list                                                          // made changes by TUAN NGUYEN
+      if (index == -1)                                                                                 // made changes by TUAN NGUYEN
+         return true;                                                                                  // made changes by TUAN NGUYEN
+
+      if ((!dataFilterNames.empty())&&
+          (find(dataFilterNames.begin(), dataFilterNames.end(), value) != dataFilterNames.end()))      // made changes by TUAN NGUYEN
+         throw MeasurementException("Error: replication of data filter name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+      
+      if (((Integer)dataFilterNames.size() > index) && (index >= 0))
+         dataFilterNames[index] = value;
+      else if ((Integer)dataFilterNames.size() == index)
+         dataFilterNames.push_back(value);
+      else
+         throw MeasurementException("Index out of bounds when trying to "
+               "set a data filter name");
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%d members in DataFilters:\n",
+               dataFilterNames.size());
+         for (UnsignedInt i = 0; i < dataFilterNames.size(); ++i)
+            MessageInterface::ShowMessage("   %s\n", dataFilterNames[i].c_str());
       #endif
       return true;
    }
@@ -720,12 +820,7 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
    {
       tconfigs.clear();
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
-         tconfigs.push_back(trackingConfigs[i].GetDefinitionString());                     // made changes by TUAN NGUYEN
-         //for (UnsignedInt j = 0; j < trackingConfigs[i].strands.size(); ++j)             // made changes by TUAN NGUYEN
-         //   for (UnsignedInt k=0; k < trackingConfigs[i].strands[j].size(); ++k)         // made changes by TUAN NGUYEN
-         //      if (find(tconfigs.begin(), tconfigs.end(),                                // made changes by TUAN NGUYEN
-         //            trackingConfigs[i].strands[j][k]) == tconfigs.end())                // made changes by TUAN NGUYEN
-         //         tconfigs.push_back(trackingConfigs[i].strands[j][k]);                  // made changes by TUAN NGUYEN
+         tconfigs.push_back(trackingConfigs[i].GetDefinitionString());
       return tconfigs;
    }
 
@@ -735,6 +830,9 @@ const StringArray& TrackingFileSet::GetStringArrayParameter(
    if (id == RAMPED_TABLENAME)
       return rampedTablenames;
 
+   if (id == DATA_FILTERS)
+      return dataFilterNames;
+   
    return MeasurementModelBase::GetStringArrayParameter(id);
 }
 
@@ -1054,6 +1152,26 @@ bool TrackingFileSet::SetBooleanParameter(const std::string& label,
 }
 
 
+//---------------------------------------------------------------------------
+// Gmat::ObjectType GetPropertyObjectType(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieves object type of parameter of given id.
+ *
+ * @param id ID for the parameter.
+ *
+ * @return parameter ObjectType
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType TrackingFileSet::GetPropertyObjectType(const Integer id) const
+{
+   if (id == DATA_FILTERS)
+      return Gmat::DATA_FILTER;
+
+   return MeasurementModelBase::GetPropertyObjectType(id);
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
@@ -1085,6 +1203,7 @@ const ObjectTypeArray& TrackingFileSet::GetRefObjectTypeArray()
    refObjectTypes.push_back(Gmat::SPACE_POINT);
    /// @todo: remove when they are autogenerated
    refObjectTypes.push_back(Gmat::DATA_FILE);
+   refObjectTypes.push_back(Gmat::DATA_FILTER);
 
    return refObjectTypes;
 }
@@ -1105,8 +1224,8 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Called TrackingFileSet::"
-            "GetRefObjectNameArray(%d)\n", type);
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "GetRefObjectNameArray(%d)\n", GetName().c_str(), this, type);
    #endif
 
    refObjectNames.clear();
@@ -1132,6 +1251,12 @@ const StringArray& TrackingFileSet::GetRefObjectNameArray(
    {
       for (UnsignedInt i = 0; i <  filenames.size(); ++i)
          refObjectNames.push_back(filenames[i]);
+   }
+
+   if ((type == Gmat::UNKNOWN_OBJECT) || (type == Gmat::DATA_FILTER))
+   {
+      for (UnsignedInt i = 0; i <  dataFilterNames.size(); ++i)
+         refObjectNames.push_back(dataFilterNames[i]);
    }
 
    #ifdef DEBUG_INITIALIZATION
@@ -1180,7 +1305,10 @@ bool TrackingFileSet::SetRefObjectName(const Gmat::ObjectType type,
 bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
       const std::string& oldName, const std::string& newName)
 {
-   bool retval = false;
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "RenameRefObject(type = %d, oldName = '%s', newName = '%s')\n", GetName().c_str(), this, type, oldName.c_str(), newName.c_str());
+   #endif
 
    if ((type == Gmat::DATA_FILE) || (type == Gmat::UNKNOWN_OBJECT))
    {
@@ -1189,8 +1317,7 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
          if (filenames[i] == oldName)
          {
             filenames[i] = newName;
-            retval = true;
-            break;
+            return true;
          }
       }
    }
@@ -1206,14 +1333,26 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
                if (trackingConfigs[i].strands[j][k] == oldName)
                {
                   trackingConfigs[i].strands[j][k] = newName;
-                  retval = true;
+                  return true;
                }
             }
          }
       }
    }
 
-   return retval;
+   if ((type == Gmat::DATA_FILTER) || (type == Gmat::UNKNOWN_OBJECT))
+   {
+      for (UnsignedInt i = 0; i < dataFilterNames.size(); ++i)
+      {
+         if (dataFilterNames[i] == oldName)
+         {
+            dataFilterNames[i] = newName;
+            return true;
+         }
+      }
+   }
+
+   return MeasurementModelBase::RenameRefObject(type, oldName, newName);
 }
 
 
@@ -1232,6 +1371,15 @@ bool TrackingFileSet::RenameRefObject(const Gmat::ObjectType type,
 GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
       const std::string& name)
 {
+   if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
+   {
+      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+      {
+         if (dataFilters[i]->GetName() == name)
+            return dataFilters[i];
+      }
+   }
+
    return MeasurementModelBase::GetRefObject(type, name);
 }
 
@@ -1280,6 +1428,12 @@ GmatBase* TrackingFileSet::GetRefObject(const Gmat::ObjectType type,
 bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "SetRefObject(obj = %p, type = %d, name = '%s')\n", GetName().c_str(), this, obj, type, name.c_str());
+   #endif
+
+
    bool retval = false;
 
    if (obj->IsOfType(Gmat::DATA_FILE))
@@ -1290,6 +1444,28 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Adding datafile %s\n", name.c_str());
          #endif
          datafiles.push_back((DataFile*)obj);
+         return true;
+      }
+   }
+   else if (obj->IsOfType(Gmat::DATA_FILTER))
+   {
+      bool found = false;
+      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+      {
+         if (obj->GetName() == dataFilters[i]->GetName())
+         {
+            found = true;
+            break;
+         }
+      }
+
+      if (!found)
+      {
+         #ifdef DEBUG_INITIALIZATION
+            MessageInterface::ShowMessage("Adding data filter %s\n", name.c_str());
+         #endif
+            dataFilters.push_back(obj->Clone());                                     // It needs to clone in order to avoid error when deleting dataFilters in destructor
+            return true;
       }
    }
    else
@@ -1300,7 +1476,7 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
             MessageInterface::ShowMessage("Adding node %s\n", name.c_str());
          #endif
          references.push_back(obj);
-         retval = true;
+         return true;
       }
    }
 
@@ -1325,6 +1501,11 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
       const std::string& name, const Integer index)
 {
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Called TrackingFileSet<%s,%p>::"
+            "SetRefObject(obj = %p, type = %d, name = '%s', index = %d)\n", GetName().c_str(), this, obj, type, name.c_str(), index);
+   #endif
+
    bool retval = false;
 
    if (find(references.begin(), references.end(), obj) == references.end())
@@ -1352,6 +1533,16 @@ bool TrackingFileSet::SetRefObject(GmatBase* obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 ObjectArray& TrackingFileSet::GetRefObjectArray(const Gmat::ObjectType type)
 {
+   static ObjectArray objectList;
+   objectList.clear();
+
+   if ((type == Gmat::DATA_FILTER)||(type == Gmat::UNKNOWN_OBJECT))
+   {
+      for(UnsignedInt i = 0; i < dataFilters.size(); ++i)
+         objectList.push_back(dataFilters[i]);
+      return objectList;
+   }
+
    return MeasurementModelBase::GetRefObjectArray(type);
 }
 
@@ -1417,8 +1608,8 @@ void TrackingFileSet::SetPropagator(PropSetup* ps)
 //------------------------------------------------------------------------------
 bool TrackingFileSet::Initialize()
 {
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize() <%p>\n", this);
+   #ifdef DEBUG_INITIALIZE
+      MessageInterface::ShowMessage("Entered TrackingFileSet::Initialize() <%s,%p>\n", GetName().c_str(), this);
    #endif
    
    if (this->IsInitialized())
@@ -1451,8 +1642,8 @@ bool TrackingFileSet::Initialize()
 //         throw MeasurementException("No ramp table is set to " + GetName() + " object.\n");
 
       // Build the adapters
-      if (trackingConfigs.size() == 0)
-         throw MeasurementException("No TrackingConfig is defined for " + GetName() + " object.\n");
+      //if (trackingConfigs.size() == 0)
+      //   throw MeasurementException("No TrackingConfig is defined for " + GetName() + " object.\n");
 
       for (UnsignedInt i = 0; i < trackingConfigs.size(); ++i)
       {
@@ -1466,10 +1657,6 @@ bool TrackingFileSet::Initialize()
 
          for (UnsignedInt j = 0; j < trackingConfigs[i].types.size(); ++j)
          {
-            //if (trackingConfigs[i].strands.size() != 1)
-            //   throw MeasurementException("Multiple strands and empty strands "
-            //         "are not yet implemented");
-            
             TrackingDataAdapter *tda =
                   BuildAdapter(trackingConfigs[i].strands[0],
                         trackingConfigs[i].types[j], i);
@@ -1552,19 +1739,20 @@ bool TrackingFileSet::Initialize()
             measurements[i]->SetStringParameter("RampTables", rampedTablenames[k], k);
          }
 
+         std::string measType = measurements[i]->GetStringParameter("MeasurementType");
          // Set range modulo constant for DSNRange
-         if (measurements[i]->GetStringParameter("MeasurementType") == "DSNRange")
+         if (measType == "DSNRange")
          {
             measurements[i]->SetRealParameter("RangeModuloConstant", rangeModulo);
          }
 
          // Set doppler count interval for Doppler
-         if (measurements[i]->GetStringParameter("MeasurementType") == "Doppler")
+         if ((measType == "Doppler")||(measType == "Doppler_RangeRate"))                            // made changes by TUAN NGUYEN
          {
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
          }
          // Set range modulo constant for RangeRate
-         if (measurements[i]->GetStringParameter("MeasurementType") == "RangeRate")
+         if (measType == "RangeRate")
          {
             //measurements[i]->SetRealParameter("DopplerInterval", dopplerInterval);
             measurements[i]->SetRealParameter("DopplerInterval", dopplerCountInterval);      // unit: second
@@ -1574,11 +1762,19 @@ bool TrackingFileSet::Initialize()
          retval = retval && measurements[i]->Initialize();
       }
       
+      // Initialize data filters
+      for (UnsignedInt i = 0; i < dataFilters.size(); ++i)
+         dataFilters[i]->Initialize();
+
       isInitialized = true;
    }
    
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Exit TrackingFileSet::Initialize() <%p>\n", this);
+   #ifdef DEBUG_INITIALIZE
+      MessageInterface::ShowMessage("dataFilters.size() = %d\n", dataFilters.size());
+      for (UnsignedInt i = 0; i < dataFilters.size(); ++i)
+         MessageInterface::ShowMessage("filter %d: name = '%s'   pointer = <%p>\n", i, dataFilters[i]->GetName().c_str(), dataFilters[i]);
+
+      MessageInterface::ShowMessage("Exit TrackingFileSet::Initialize() <%s,%p>\n", GetName().c_str(), this);
    #endif
 
    return retval;
@@ -1651,6 +1847,10 @@ std::vector<TrackingDataAdapter*> *TrackingFileSet::GetAdapters()
 TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       const std::string& type, Integer configIndex)
 {
+#ifdef DEBUG_BUILD_ADAPTER
+   MessageInterface::ShowMessage("TrackingFileSet::BuildAdapter(, type = <%s>, configIndex = %d)   enter\n", type.c_str(), configIndex);
+#endif
+
    TrackingDataAdapter *retval = NULL;
    std::vector<StringArray> nodelist;
    StringArray currentStrand;
@@ -1725,10 +1925,19 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    /// @todo Move this into a Factory so that plugin adapters work
    // 3. Create TrackingDataAdapter for a given measurement type
    std::stringstream ss;
-   ss << instanceName << "_Cfig" << configIndex+1 << "_" << type;
+   //ss << instanceName << "_Cfig" << configIndex+1 << "_" << type;
+   ss << instanceName << "_{";
+   for (UnsignedInt i = 0; i < strand.size(); ++i)
+   {
+      ss << strand[i];
+      if (i < strand.size()-1)
+         ss << ",";
+   }
+   ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    
-   if (type == "Range")
+   // if (type == "Range")                             // made changes by TUAN NGUYEN
+   if (type == "Range_KM")                             // made changes by TUAN NGUYEN
    {
       retval = new RangeAdapterKm(adapterName);
       if (retval)
@@ -1751,12 +1960,23 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new DopplerAdapter(adapterName);
       if (retval)
       {
-         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex); 
+         // ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);            // made changes by TUAN NGUYEN
+         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);            // made changes by TUAN NGUYEN
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
    }                                                                  
-   else if (type == "RangeRate")                                       
+   else if (type == "Doppler_RangeRate")                                                                                  // made changes by TUAN NGUYEN
+   {                                                                                                                      // made changes by TUAN NGUYEN
+      retval = new GNDopplerAdapter(adapterName);                                                                         // made changes by TUAN NGUYEN
+      if (retval)                                                                                                         // made changes by TUAN NGUYEN
+      {                                                                                                                   // made changes by TUAN NGUYEN
+         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);          // made changes by TUAN NGUYEN
+         retval->UsesLightTime(useLighttime);                                                                             // made changes by TUAN NGUYEN
+         retval->SetStringParameter("MeasurementType", type);                                                             // made changes by TUAN NGUYEN
+      }                                                                                                                   // made changes by TUAN NGUYEN
+   }                                                                                                                      // made changes by TUAN NGUYEN
+   else if (type == "RangeRate")
    {                                                                  
       retval = new RangeRateAdapterKps(instanceName + type);              
       if (retval)                                                     
@@ -1790,7 +2010,47 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval->SetModelTypeID(magicNumber, type, multiplier);
    }
 
+#ifdef DEBUG_BUILD_ADAPTER
+   MessageInterface::ShowMessage("TrackingFileSet::BuildAdapter(, type = <%s>, configIndex = %d)   exit\n", type.c_str(), configIndex);
+#endif
+
    return retval;
+}
+
+
+bool TrackingFileSet::GenerateTrackingConfigs(std::vector<StringArray> strandsList, StringArray typesList)
+{
+   if (strandsList.empty())
+      return true;
+
+   // Generate a list of tracking configs
+   MessageInterface::ShowMessage("Total of %d tracking configurations are generated for tracking file set %s:\n", strandsList.size(), GetName().c_str());
+   for(UnsignedInt i = 0; i < strandsList.size(); ++i)
+   {
+      MeasurementDefinition md;
+      md.SetDefinitionString(strandsList[i], typesList[i]);
+      trackingConfigs.push_back(md);
+      trackingConfigs[i].GetDefinitionString();
+      MessageInterface::ShowMessage("   Tracking config %d: %s\n", i, md.GetDefinitionString().c_str());
+   }
+
+   // This step was removed due to those participants were initialized in sand box
+   //// Initialize all participants
+   //for (UnsignedInt i = 0; i < references.size(); ++i)
+   //{
+   //   if ((references[i]->IsOfType(Gmat::GROUND_STATION))||(references[i]->IsOfType(Gmat::SPACECRAFT)))
+   //   {
+   //      references[i]->SetSolarSystem(solarsystem);
+
+   //      // Initialize paticipants
+   //      references[i]->Initialize();
+   //   }
+   //}
+
+   // Reinitialize
+   isInitialized = false;
+   
+   return Initialize();
 }
 
 
@@ -1873,6 +2133,16 @@ TrackingFileSet::MeasurementDefinition&
    }
 
    return *this;
+}
+
+
+// made changes by TUAN NGUYEN
+bool TrackingFileSet::MeasurementDefinition::SetDefinitionString(StringArray strand, std::string measType)
+{
+   strands.push_back(strand);
+   types.push_back(measType);
+
+   return true;
 }
 
 

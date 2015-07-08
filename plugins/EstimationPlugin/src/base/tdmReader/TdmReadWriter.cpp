@@ -188,7 +188,7 @@ ObservationData *TdmReadWriter::ProcessMetadata()
       DOMElement *pMetaData = theSegment->getFirstElementChild();
       DOMNodeList *pChilds = pMetaData->getChildNodes();
 					
-		for (Integer i = 0; i < pChilds->getLength(); i++)
+		for (UnsignedInt i = 0; i < pChilds->getLength(); i++)
 		{
 			DOMElement *pChild = (DOMElement *)pChilds->item(i);
 			if (pChild->getNodeType() == DOMNode::ELEMENT_NODE)
@@ -344,7 +344,7 @@ ObservationData *TdmReadWriter::LoadRecord(ObservationData *newData)
 
    strPrevEpoch = std::string(XMLString::transcode(theObservation->getFirstElementChild()->getTextContent()));
   
-   for (Integer i = observationIndex; i < theData->getChildNodes()->getLength(); i++)
+   for (UnsignedInt i = observationIndex; i < theData->getChildNodes()->getLength(); i++)
    {
       theObservation = (DOMElement *) theData->getChildNodes()->item(i);
       if (theObservation->getNodeType() == DOMNode::ELEMENT_NODE)

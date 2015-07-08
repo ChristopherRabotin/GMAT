@@ -190,6 +190,8 @@ public:
 
    virtual bool DeactivateXyPlot(const std::string &plotName) = 0;
    virtual bool ActivateXyPlot(const std::string &plotName) = 0;
+   virtual bool TakeXYAction(const std::string &plotName,
+                        const std::string &action) = 0;
 
 protected:
    GmatPlot::ViewType currentView;

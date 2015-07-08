@@ -109,7 +109,7 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
    measurementNeedsObjects (false)
 {
 #ifdef DEBUG_CONSTRUCTION
-   MessageInterface::ShowMessage("MeasurementModel default construction <%p>\n", this);
+   MessageInterface::ShowMessage("MeasurementModel default construction <%p,%s>\n", this, GetName().c_str());
 #endif
 
    objectTypes.push_back(Gmat::MEASUREMENT_MODEL);
@@ -127,6 +127,9 @@ MeasurementModel::MeasurementModel(const std::string &nomme) :
 //------------------------------------------------------------------------------
 MeasurementModel::~MeasurementModel()
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel destructor <%p,%s>\n", this, GetName().c_str());
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -144,16 +147,19 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
    rampTableStreamName     (mm.rampTableStreamName),
    participantNames        (mm.participantNames),
    participants            (mm.participants),                // made changes for Bug 12 in ticket GMT-4314
-   participantHardwareNames(mm.participantHardwareNames),
+//   participantHardwareNames(mm.participantHardwareNames),         // made changes by TUAN NGUYEN
    measurementType         (mm.measurementType),
    theData                 (NULL),
    theDataDerivatives      (NULL),
    useRelativityCorrection (mm.useRelativityCorrection),
    useETminusTAICorrection (mm.useETminusTAICorrection),
-// residualMax             (mm.residualMax),
    modelID                 (mm.modelID),
    measurementNeedsObjects (false)
 {
+#ifdef DEBUG_CONSTRUCTION
+   MessageInterface::ShowMessage("MeasurementModel copy construction enter: <%p,%s> copy from <%p,%s>\n", this, GetName().c_str(), &mm, mm.GetName().c_str());
+#endif
+
    if (mm.measurement != NULL)
    {
       measurement = (CoreMeasurement*)mm.measurement->Clone();
@@ -162,15 +168,17 @@ MeasurementModel::MeasurementModel(const MeasurementModel &mm) :
       noiseSigma.SetSize(measurement->GetMeasurementSize());
       noiseSigma = mm.noiseSigma;
    }
+
    if (participants.size() > 0)
          measurementNeedsObjects = true;
 
-   for (UnsignedInt i = 0; i < participantHardwareNames.size(); ++i)
-      participantHardwareNames[i] = mm.participantHardwareNames[i];
+   participantHardwareNames.clear();
+   for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)        // made changes by TUAN NGUYEN
+      participantHardwareNames.push_back(mm.participantHardwareNames[i]);
 
 #ifdef DEBUG_CONSTRUCTION
-   MessageInterface::ShowMessage("MeasurementModel copy construction <%p> name = '%s':   measurement<%p '%s'>\n", this, this->GetName().c_str(), measurement, measurement->GetName().c_str());
    MessageInterface::ShowMessage("participants.size() = %d\n",participants.size());
+   MessageInterface::ShowMessage("MeasurementModel copy construction exit: <%p,%s> copy from <%p,%s>\n", this, GetName().c_str(), &mm, mm.GetName().c_str());
 #endif
 
 }
@@ -199,13 +207,12 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       rampTableStreamName     = mm.rampTableStreamName;
       participantNames        = mm.participantNames;
       participants            = mm.participants;                    // made changes for Bug 12 in ticket GMT-4314
-      participantHardwareNames= mm.participantHardwareNames;
+//      participantHardwareNames= mm.participantHardwareNames;            // made changes by TUAN NGUYEN
       measurementType         = mm.measurementType;
       theData                 = NULL;
       theDataDerivatives      = NULL;
       useRelativityCorrection = mm.useRelativityCorrection;
       useETminusTAICorrection = mm.useETminusTAICorrection;
-//    residualMax             = mm.residualMax;
       modelID                 = mm.modelID;
 
       if (mm.measurement != NULL)
@@ -218,10 +225,10 @@ MeasurementModel& MeasurementModel::operator=(const MeasurementModel &mm)
       }
 
       // Clear participant list so it can be filled with the local pointers
-      participants.clear();
-
-      for (UnsignedInt i = 0; i < participantHardwareNames.size(); ++i)
-         participantHardwareNames[i] = mm.participantHardwareNames[i];
+      //participants.clear();                                                 // made changes by TUAN NGUYEN
+      participantHardwareNames.clear();                                       // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < mm.participantHardwareNames.size(); ++i)    // made changes by TUAN NGUYEN
+         participantHardwareNames.push_back(mm.participantHardwareNames[i]);
    }
 
    return *this;
@@ -262,7 +269,7 @@ GmatBase *MeasurementModel::Clone() const
 bool MeasurementModel::Initialize()
 {
    #ifdef DEBUG_MEASUREMENT_INITIALIZATION
-      MessageInterface::ShowMessage("Entered MeasurementModel::Initialize()\n");
+      MessageInterface::ShowMessage("Entered MeasurementModel::Initialize() <%p,%s>\n", this, GetName().c_str());
    #endif
 
    bool retval = false;
@@ -271,7 +278,7 @@ bool MeasurementModel::Initialize()
    {
       if (measurement != NULL)
       {
-         // Pass in the participants and hardware lists
+         // Pass in the participants                             // Note that: hardware objects are stored in participant objects. Therefore, nothing has to do for hardware
          for (UnsignedInt i = 0; i < participants.size(); ++i)
          {
             #ifdef DEBUG_MEASUREMENT_INITIALIZATION
@@ -283,26 +290,27 @@ bool MeasurementModel::Initialize()
                measurement->SetRefObject(participants[i],
                      participants[i]->GetType(), participants[i]->GetName());
 
-            #ifdef DEBUG_MEASUREMENT_INITIALIZATION
-               MessageInterface::ShowMessage("   Setting hardware for %s\n",
-                     participants[i]->GetName().c_str());
-               MessageInterface::ShowMessage("      %d hardware name arrays\n",
-                     participantHardwareNames.size());
-               MessageInterface::ShowMessage(
-                     "      %d hardware array has %d elements\n", i,
-                     participantHardwareNames[i].size());
-            #endif
+            //#ifdef DEBUG_MEASUREMENT_INITIALIZATION
+            //   MessageInterface::ShowMessage("   Setting hardware for %s\n",
+            //         participants[i]->GetName().c_str());
+            //   MessageInterface::ShowMessage("      %d hardware name arrays\n",
+            //         participantHardwareNames.size());
+            //   MessageInterface::ShowMessage(
+            //         "      %d hardware array has %d elements\n", i,
+            //         participantHardwareNames[i].size());
+            //#endif
 
-            for (UnsignedInt j = 0; j < participantHardwareNames[i].size(); ++j)
-            {
-               if (measurement->SetParticipantHardware(participants[i],
-                     participantHardwareNames[i][j], j) == false)
-                  throw MeasurementException("The measurement participant " +
-                        participants[i]->GetName() +
-                        " does not have a hardware component named " +
-                        participantHardwareNames[i][j]);
-            }
+            //for (UnsignedInt j = 0; j < participantHardwareNames[i].size(); ++j)    // made changes by TUAN NGUYEN
+            //{                                                                       // made changes by TUAN NGUYEN
+            //   if (measurement->SetParticipantHardware(participants[i],             // made changes by TUAN NGUYEN
+            //         participantHardwareNames[i][j], j) == false)                   // made changes by TUAN NGUYEN
+            //      throw MeasurementException("The measurement participant " +       // made changes by TUAN NGUYEN
+            //            participants[i]->GetName() +                                // made changes by TUAN NGUYEN
+            //            " does not have a hardware component named " +              // made changes by TUAN NGUYEN
+            //            participantHardwareNames[i][j]);                            // made changes by TUAN NGUYEN
+            //}                                                                       // made changes by TUAN NGUYEN
          }
+
 
          // Pass flags to use relativity correction and ET-TAI correction to CoreMeasurement object:
          ((PhysicalMeasurement*)measurement)->SetRelativityCorrection(useRelativityCorrection);
@@ -345,6 +353,10 @@ bool MeasurementModel::Initialize()
          }
       }
    }
+
+   #ifdef DEBUG_MEASUREMENT_INITIALIZATION
+      MessageInterface::ShowMessage("Exit MeasurementModel::Initialize() <%p,%s>\n", this, GetName().c_str());
+   #endif
 
    return retval;
 }
@@ -1053,7 +1065,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
 
    if (id == Participants)
    {
-      UnsignedInt loc = value.find(".");
+      size_t loc = value.find(".");           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
       std::string parName;
       if (loc != std::string::npos)
          parName = value.substr(0, loc);
@@ -1230,7 +1242,7 @@ bool MeasurementModel::SetStringParameter(const Integer id,
    {
    case Participants:
       {
-         UnsignedInt loc = value.find(".");
+         size_t loc = value.find(".");         // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
          std::string parName;
          std::string hwName;
          if (loc != std::string::npos)

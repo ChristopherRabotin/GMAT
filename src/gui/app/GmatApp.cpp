@@ -883,9 +883,10 @@ void GmatApp::BuildAndRunScript(bool runScript)
    if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::EXIT_AFTER_RUN)
    {
       #ifdef __LINUX__
-      // Early exit in Linux due to wx race condition issues
-      exit(0);
+         // Linux needs this to run in the test system successfully
+         exit(0);
       #endif
+
       //Set auto exit mode to GmatMainFrame
       theMainFrame->SetAutoExitAfterRun(true);
       theMainFrame->Close();

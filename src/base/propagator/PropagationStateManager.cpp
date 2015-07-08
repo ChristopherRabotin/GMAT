@@ -837,6 +837,11 @@ Integer PropagationStateManager::SortVector()
                   " on object " + current->GetName() + ", a " +
                   current->GetTypeName());
          size = current->GetPropItemSize(id);
+
+         #ifdef DEBUG_STATE_CONSTRUCTION
+            MessageInterface::ShowMessage("%s has size %d;  ", j->c_str(), size);
+         #endif
+
          if (size <= 0)
             throw PropagatorException("State element " + (*j) +
                   " has size set less than or equal to 0; unable to continue.");
@@ -881,7 +886,7 @@ Integer PropagationStateManager::SortVector()
 
    #ifdef DEBUG_STATE_CONSTRUCTION
       MessageInterface::ShowMessage(
-            "State size is %d()\n", stateSize);
+            "State size is %d\n", stateSize);
    #endif
    
    for (Integer i = 0; i < stateSize; ++i)

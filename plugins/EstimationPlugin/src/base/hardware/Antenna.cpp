@@ -19,7 +19,6 @@
 #include "Antenna.hpp"
 #include "MessageInterface.hpp"
 
-#define DISABLE_ALL_ANTENNA_PARAMETERS
 
 //------------------------------------------------------------------------------
 // Static data
@@ -121,7 +120,7 @@ Antenna & Antenna::operator=(const Antenna & ant)
    {
       Hardware::operator=(ant);
 
-      antennaDelay          = ant.antennaDelay;
+      antennaDelay         = ant.antennaDelay;
       phaseCenterLocation1 = ant.phaseCenterLocation1;
       phaseCenterLocation2 = ant.phaseCenterLocation2;
       phaseCenterLocation3 = ant.phaseCenterLocation3;
@@ -167,7 +166,12 @@ Integer Antenna::GetParameterID(const std::string & str) const
    for (Integer i = HardwareParamCount; i < AntennaParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - HardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw GmatBaseException("Error: Parameter '" + str + "' was not defined in GMAT Antenna's syntax.\n");
+
          return i;
+      }
    }
 
    return Hardware::GetParameterID(str);
@@ -320,112 +324,6 @@ bool Antenna::IsParameterReadOnly(const Integer id) const
    return Hardware::IsParameterReadOnly(id);
 }
 
-//------------------------------------------------------------------------------
-// Integer GetIntegerParameter(const Integer id) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value of an integer property.
- *
- * @param id The integer ID of the property
- *
- * @return The property's value
- */
-//------------------------------------------------------------------------------
-/*
-Integer Antenna::GetIntegerParameter(const Integer id) const
-{
-   switch (id)
-   {
-      case PHASE_CENTER_LOCATION1:
-         return phaseCenterLocation1;
-
-      case PHASE_CENTER_LOCATION2:
-         return phaseCenterLocation2;
-
-      case PHASE_CENTER_LOCATION3:
-         return phaseCenterLocation3;
-
-      default:
-         break;
-   }
-
-   return Hardware::GetIntegerParameter(id);
-}
-*/
-
-//------------------------------------------------------------------------------
-// Integer SetRealParameter(const Integer id, const Integer value)
-//------------------------------------------------------------------------------
-/**
- * Sets the value of an integer property.
- *
- * @param id The integer ID of the property
- * @param value The new value for the property
- *
- * @return The property's value at the end of the call
- */
-//------------------------------------------------------------------------------
-/*
-Integer Antenna::SetIntegerParameter(const Integer id, const Integer value)
-{
-   switch (id)
-   {
-      case PHASE_CENTER_LOCATION1:
-            phaseCenterLocation1 = value;
-         return phaseCenterLocation1;
-
-      case PHASE_CENTER_LOCATION2:
-            phaseCenterLocation2 = value;
-         return phaseCenterLocation2;
-
-      case PHASE_CENTER_LOCATION3:
-            phaseCenterLocation3 = value;
-         return phaseCenterLocation3;
-
-      default:
-         break;
-   }
-
-   return Hardware::SetIntegerParameter(id, value);
-}
-*/
-
-//------------------------------------------------------------------------------
-// Integer GetIntegerParameter(const std::string & label) const
-//------------------------------------------------------------------------------
-/**
- * Retrieves the value of an integer property.
- *
- * @param label The scriptable label for the property
- *
- * @return The property's value
- */
-//------------------------------------------------------------------------------
-/*
-Integer Antenna::GetIntegerParameter(const std::string & label) const
-{
-   return GetIntegerParameter(GetParameterID(label));
-}
-*/
-
-//------------------------------------------------------------------------------
-// Integer SetIntegerParameter(const std::string & label, const Integer value)
-//------------------------------------------------------------------------------
-/**
- * Sets the value of an integer property.
- *
- * @param label The scriptable label for the property
- * @param value The new value for the property
- *
- * @return The property's value at the end of the call
- */
-//------------------------------------------------------------------------------
-/*
-Integer Antenna::SetIntegerParameter(const std::string & label, const Integer value)
-{
-   return SetIntegerParameter(GetParameterID(label), value);
-}
-*/
 
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
@@ -476,18 +374,6 @@ Real Antenna::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Antenna::SetRealParameter(const Integer id, const Real value)
 {
-#ifdef DISABLE_ALL_ANTENNA_PARAMETERS
-   switch (id)
-   {
-      case ANTENNA_DELAY:
-      case PHASE_CENTER_LOCATION1:
-      case PHASE_CENTER_LOCATION2:
-      case PHASE_CENTER_LOCATION3:
-         MessageInterface::ShowMessage("Warning: the setting %lf to '%s.%s' parameter in script was ignored. In the current version, GMAT does not allow to use this paramter!!!\n", value, GetName().c_str(), GetParameterText(id).c_str());
-         return 0.0;
-   }
-
-#else
    switch (id)
    {
       case ANTENNA_DELAY:
@@ -507,10 +393,9 @@ Real Antenna::SetRealParameter(const Integer id, const Real value)
             phaseCenterLocation3 = value;
          return phaseCenterLocation3;
 
-//      default:
-//         break;
+      default:
+         break;
    }
-#endif
 
    return Hardware::SetRealParameter(id, value);
 }

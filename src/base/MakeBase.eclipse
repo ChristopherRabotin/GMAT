@@ -35,7 +35,7 @@ ifeq ($(LINUX_MAC), 1)
 
 ifdef MAC_SPECIFIC
 SHARED_EXTENSION = .dylib
-SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dylib -dynamiclib -Wl -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
+SHARED_LIB_FLAGS = -L$(SPICE_LIB_DIR) $(SPICE_LIBRARIES) -dynamiclib -Wl -undefined dynamic_lookup $(MAC_ARCHITECTURE_FLAGS)
 MSISE_C_OBJECTS  = solarsys/msise90_sub.o
 else
 SHARED_EXTENSION = .so
@@ -120,7 +120,6 @@ archclean :
 HEADERS = -Iinclude \
           -Ifoundation \
           -Ihardware \
-          -Ierrormodel \
           -Iexecutive \
           -Ievent \
           -Iattitude \
@@ -201,6 +200,7 @@ OBJECTS = \
     command/EndScript.o \
     command/EndTarget.o \
     command/EndWhile.o \
+    command/FindEvents.o \
     command/For.o \
     command/If.o \
     command/ManageObject.o \
@@ -260,13 +260,12 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TopocentricAxes.o \
     coordsystem/TrueOfDateAxes.o \
-    errormodel/ErrorModel.o \
     event/Brent.o \
     event/EventException.o \
     event/EventFunction.o \
     event/EventLocator.o \
-    event/LocatedEventTable.o \
     event/LocatedEvent.o \
+    event/LocatedEventTable.o \
     event/RootFinder.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
@@ -283,7 +282,6 @@ OBJECTS = \
     factory/CelestialBodyFactory.o \
     factory/CommandFactory.o \
     factory/CoordinateSystemFactory.o \
-    factory/ErrorModelFactory.o \
     factory/FactoryException.o \
     factory/FactoryManager.o \
     factory/Factory.o \
@@ -492,6 +490,7 @@ OBJECTS = \
     solarsys/ShadowState.o \
     solarsys/SlpFile.o \
     solarsys/SolarFluxFileReader.o \
+    solarsys/SolarFluxReader.o \
     solarsys/SolarSystemException.o \
     solarsys/SolarSystem.o \
     solarsys/SpecialCelestialPoint.o \
@@ -549,7 +548,6 @@ OBJECTS = \
     util/GmatTime.o \
     util/GravityFileUtil.o \
     util/GregorianDate.o \
-    util/LatLonHgt.o \
     util/LeapSecsFileReader.o \
     util/Linear.o \
     util/MemoryTracker.o \

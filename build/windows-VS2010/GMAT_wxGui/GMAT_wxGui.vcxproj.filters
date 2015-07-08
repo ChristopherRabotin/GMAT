@@ -76,6 +76,9 @@
     <Filter Include="Source Files\output">
       <UniqueIdentifier>{c1881724-ab38-41e9-b3fb-5eff8254158b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\event">
+      <UniqueIdentifier>{49127ca3-f312-43a9-8f46-4a92fa0e5dcd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\gui\app\GmatToolBar.cpp">
@@ -524,6 +527,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\controllogic\ForPanel.cpp">
       <Filter>Source Files\controllogic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp">
+      <Filter>Source Files\command</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp">
+      <Filter>Source Files\event</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -988,6 +1000,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\controllogic\ForPanel.hpp">
       <Filter>Source Files\controllogic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp">
+      <Filter>Source Files\solarsys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp">
+      <Filter>Source Files\command</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp">
+      <Filter>Source Files\event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -23,7 +23,7 @@
 #define AtmosphereModel_hpp
 
 #include "GmatBase.hpp"
-#include "SolarFluxFileReader.hpp"
+#include "SolarFluxReader.hpp"
 #include "AtmosphereException.hpp"
 #include "TimeTypes.hpp"
 
@@ -68,6 +68,7 @@ public:
    virtual bool Density(Real *position, Real *density, Real epoch = GmatTimeConstants::MJD_OF_J2000,
                         Integer count = 1) = 0;
 
+   virtual bool Initialize();
    void         SetSunVector(Real *sv);
    void         SetCentralBodyVector(Real *cv);
    virtual void SetSolarSystem(SolarSystem *ss);
@@ -112,26 +113,35 @@ public:
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
 
-   // Flux file methods
-   void SetSolarFluxFile(const std::string &file);
-   void SetNewFileFlag(bool flag);
-   void SetOpenFileFlag(bool flag);
-   void CloseFile();
+   virtual Real        GetRealParameter(const Integer id,
+                                        const Integer index) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value,
+                                        const Integer index);
+
+
+   virtual bool SetStringParameter(const Integer id,
+                                          const std::string &value);
+   virtual bool SetStringParameter(const std::string &label,
+                                  const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
 protected:
-   /// Solar flux binary file reader
-   SolarFluxFileReader     *fileReader;
+   /// Solar flux file reader
+   SolarFluxReader         *fluxReader;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
    CelestialBody           *mCentralBody;
-   /// Pointer to the binary file
-   FILE                    *solarFluxFile;
-   /// Solar flux file name
-   std::string             fileName;
+   /// CSSI Solar flux file name
+   std::string             obsFileName;
+   /// Schatten Solar flux file name
+   std::string             predictFileName;
    /// Vector from the central body to the sun
    Real                    *sunVector;
    /// Name of the central body
@@ -142,11 +152,9 @@ protected:
    Real                    cbRadius;
    /// Central body flattening factor
    Real                    cbFlattening;
-   /// Flag indicating that the flux file name is set to a new value
-   bool                    newFile;
-   /// Flag indicating that the flux file has been opened and read once already
-   bool                    fileRead;
-    
+   /// SolarFlux files are loaded ?
+   bool fluxReaderLoaded;
+
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
    Real                    nominalF107;
@@ -183,6 +191,23 @@ protected:
    /// GHA epoch
    Real                    ghaEpoch;
 
+
+   // Fields used when retrieving data from a flux file
+
+   /// Second of day
+   Real                    sod;
+   /// Year + Day of year, in the form YYYYDDD
+   Integer                 yd;
+   /// Value of F10.7 to use
+   Real                    f107;
+   /// 3 month average of the F10.7 data
+   Real                    f107a;
+   /// Geomagnetic index (Ap, not Kp)
+   Real                    ap[7];
+
+
+   // Input method shared by all MSISE models
+   void                    GetInputs(GmatEpoch epoch);
    
    Real                    CalculateGeodetics(Real *position,
                                  GmatEpoch when = -1.0,
@@ -197,6 +222,8 @@ protected:
       NOMINAL_FLUX = GmatBaseParamCount,
       NOMINAL_AVERAGE_FLUX,
       NOMINAL_MAGNETIC_INDEX,
+      CSSI_WEATHER_FILE,
+      SCHATTEN_WEATHER_FILE,
       AtmosphereModelParamCount
    };
    

@@ -135,6 +135,53 @@ struct {
 #define blotn_1 blotn_
 
 struct {
+    integer nmax_shc__[14];
+    real erad_shc__[14], shcfiles[11200]	/* was [4][200][14] */;
+} shc1_;
+
+#define shc1_1 shc1_
+
+struct {
+    char filmod[168];
+} shc2_;
+
+#define shc2_1 shc2_
+
+struct {
+    real dtemod[14];
+} shc3_;
+
+#define shc3_1 shc3_
+
+struct {
+    integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
+	    imend_igrz__, iyend_igrz__;
+    real ionoindx_igrz__[722], indrz_igrz__[722];
+} igrz1_;
+
+#define igrz1_1 igrz1_
+
+struct {
+    integer num_records_ap__, ints_ap__[440000]	/* was [11][40000] */;
+    real reals_ap__[40000];
+} ap_;
+
+#define ap_1 ap_
+
+struct {
+    real f2_ccir__[23712]	/* was [13][76][2][12] */, f3_ccir__[10584]	
+	    /* was [9][49][2][12] */;
+} ccir_;
+
+#define ccir_1 ccir_
+
+struct {
+    real f2_ursi__[23712]	/* was [13][76][2][12] */;
+} ursi_;
+
+#define ursi_1 ursi_
+
+struct {
     integer konsol;
 } iounit_;
 
@@ -267,6 +314,11 @@ static real c_b311 = (float).15;
 /* 2007.05 07/23/09 STORM/CONVER: long. discont. [R. Conde, E. Araujo] */
 /* 2007.05 07/23/09 APF,APF_ONLY: use YearBegin from ap.dat [R. Conde] */
 /* 2007.06 02/03/10 APF: text if eof; clean-up APF and APF_only */
+/*         04/16/15 Bugfix: Added IER parameter to call */
+/*                  to igrf_sub [Joseph Nicholas] */
+/*         04/16/15 Bugfix: IF condition in ELTEIK [Joseph Nicholas] */
+/*         04/16/15 Load data from memory instead of file (J. Nicholas) */
+/*         04/27/15 Error checking bugfixes (J. Nicholas) */
 
 /* ************************************************************** */
 /* ********** INTERNATIONAL REFERENCE IONOSPHERE **************** */
@@ -312,7 +364,7 @@ static real c_b311 = (float).15;
     double atan(doublereal);
 
     /* Local variables */
-    static real pi;
+    real pi;
 
     argexp_1.argmax = (float)88.;
     pi = atan((float)1.) * (float)4.;
@@ -336,10 +388,10 @@ doublereal xe1_(real *h__)
     double r_sign(real *, real *), exp(doublereal);
 
     /* Local variables */
-    static real dxdh, xred, tcor;
+    real x, y, x0, rco, xmx0, dxdh, xred, tcor;
     extern doublereal eptr_(real *, real *, real *), topq_(real *, real *, 
 	    real *, real *);
-    static real eptr1, eptr2, x, y, x0, rco, xmx0;
+    real eptr1, eptr2;
 
 /* ---------------------------------------------------------------- */
 /* REPRESENTING ELECTRON DENSITY(M-3) IN THE TOPSIDE IONOSPHERE */
@@ -387,7 +439,7 @@ doublereal topq_(real *h__, real *no, real *hmax, real *ho)
     double exp(doublereal);
 
     /* Local variables */
-    static real z__, g1, ee, dh, ep;
+    real z__, g1, ee, dh, ep;
 
 /* ---------------------------------------------------------------- */
 /*  NeQuick formula */
@@ -423,7 +475,7 @@ doublereal zero_(real *delta)
     double exp(doublereal);
 
     /* Local variables */
-    static real z1, z2, arg1;
+    real z1, z2, arg1;
 
 /* FOR A PEAK AT X0 THE FUNCTION ZERO HAS TO BE EQUAL TO 0. */
     arg1 = *delta / (float)100.;
@@ -454,8 +506,9 @@ doublereal dxe1n_(real *h__)
     real ret_val;
 
     /* Local variables */
+    real x, x0;
     extern doublereal epst_(real *, real *, real *);
-    static real epst1, epst2, x, x0;
+    real epst1, epst2;
 
 /* LOGARITHMIC DERIVATIVE OF FUNCTION XE1 (KM-1). */
     x0 = (float)300. - blo10_1.delta;
@@ -480,7 +533,7 @@ doublereal xe2_(real *h__)
 	    doublereal);
 
     /* Local variables */
-    static real x, z__;
+    real x, z__;
 
 /* ELECTRON DENSITY FOR THE BOTTOMSIDE F-REGION (HMF1...HMF2). */
     x = (block1_1.hmf2 - *h__) / block2_1.b0;
@@ -509,8 +562,8 @@ doublereal xe3_1__(real *h__)
     double pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real h1bar;
     extern doublereal xe2_(real *);
+    real h1bar;
 
 /* ELECTRON DENSITY FOR THE F1-LAYER (HZ.....HMF1) */
 /* USING THE NEW DEFINED F1-LAYER FUNCTION (Reinisch and Huang, Advances */
@@ -538,7 +591,7 @@ doublereal xe4_1__(real *h__)
 
     /* Local variables */
     extern doublereal xe3_1__(real *);
-    static real h1bar;
+    real h1bar;
 
 /* ELECTRON DENSITY FOR THE INTERMEDIATE REGION (HEF...HZ) */
 /* USING THE NEW DEFINED FUNCTION */
@@ -569,7 +622,7 @@ doublereal xe5_(real *h__)
     double exp(doublereal);
 
     /* Local variables */
-    static real t1, t3;
+    real t1, t3;
 
 /* ELECTRON DENSITY FOR THE E AND VALLEY REGION (HME..HEF). */
     t3 = *h__ - block4_1.hme;
@@ -597,7 +650,7 @@ doublereal xe6_(real *h__)
     double exp(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real z__, fp3;
+    real z__, fp3;
 
 /* ELECTRON DENSITY FOR THE D REGION (HA...HME). */
     if (*h__ > block6_1.hdx) {
@@ -627,9 +680,9 @@ doublereal xe_1__(real *h__)
     real ret_val;
 
     /* Local variables */
-    extern doublereal xe3_1__(real *), xe4_1__(real *), xe1_(real *), xe2_(
-	    real *), xe5_(real *), xe6_(real *);
-    static real hmf1;
+    extern doublereal xe1_(real *), xe2_(real *), xe5_(real *), xe6_(real *);
+    real hmf1;
+    extern doublereal xe3_1__(real *), xe4_1__(real *);
 
 /* ELECTRON DENSITY BEETWEEN HA(KM) AND 1000 KM */
 /* SUMMARIZING PROCEDURES  NE1....6; */
@@ -997,7 +1050,7 @@ L600:
     double r_lg10(real *), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real nneh, nnel;
+    real nneh, nnel;
     extern /* Subroutine */ int nelow_(integer *, real *, real *, real *, 
 	    real *, real *, real *, real *, integer *, real *, real *), 
 	    nehigh_(integer *, real *, real *, real *, real *, real *, real *,
@@ -1087,20 +1140,22 @@ L600:
     double log(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real n0a100, n0b100, n0a400, n0b400, n0a650, n0b650;
-    static integer seza, sezb;
-    static real dtor;
-    extern doublereal eptr_(real *, real *, real *);
-    static real rmlt, c__[49];
-    static integer i__, sezai, sezbi;
-    static real invdp;
+    real c__[49];
+    integer i__;
     extern /* Subroutine */ int spharm_ik__(real *, integer *, integer *, 
 	    real *, real *);
-    static real aa, bb, ah[3], st[2];
+    real aa, bb, ah[3], st[2], n400, n650, st1, st2, n1000, ano[3], dno[1], 
+	    sum, n100a, n100b, n400a, n400b, n650a, n650b;
+    integer ddda, dddb, dddd;
+    real n0a100, n0b100, n0a400, n0b400, n0a650, n0b650;
+    integer seza, sezb;
+    real dtor;
+    extern doublereal eptr_(real *, real *, real *);
+    real rmlt;
+    integer sezai, sezbi;
+    real invdp;
     extern doublereal invdpc_(real *, real *, real *, real *, real *);
-    static real rcolat, n400, n650, st1, st2, n1000, ano[3], dno[1], sum, 
-	    n100a, n100b, n400a, n400b, n650a, n650b;
-    static integer ddda, dddb, dddd;
+    real rcolat;
 
 /* NELOW calculates electron density in the outer */
 /* ionosphere for a low solar activity (F107 < 100). */
@@ -1277,21 +1332,23 @@ L600:
     double log(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real n0a150, n0b150, n0a250, n0a900, n0a550, n0b550, n0b900, 
-	    n0b250;
-    static integer seza, sezb;
-    static real dtor;
-    extern doublereal eptr_(real *, real *, real *);
-    static real rmlt, c__[49];
-    static integer i__, sezai, sezbi;
-    static real invdp;
+    real c__[49];
+    integer i__;
     extern /* Subroutine */ int spharm_ik__(real *, integer *, integer *, 
 	    real *, real *);
-    static real aa, bb, ah[4], st[3];
+    real aa, bb, ah[4], st[3], n900, n550, st1, st2, n1500, n2500, ano[4], 
+	    dno[2], sum, n150a, n150b, n250a, n900a, n550a, n550b, n900b, 
+	    n250b;
+    integer ddda, dddb, dddd;
+    real n0a150, n0b150, n0a250, n0a900, n0a550, n0b550, n0b900, n0b250;
+    integer seza, sezb;
+    real dtor;
+    extern doublereal eptr_(real *, real *, real *);
+    real rmlt;
+    integer sezai, sezbi;
+    real invdp;
     extern doublereal invdpc_(real *, real *, real *, real *, real *);
-    static real rcolat, n900, n550, st1, st2, n1500, n2500, ano[4], dno[2], 
-	    sum, n150a, n150b, n250a, n900a, n550a, n550b, n900b, n250b;
-    static integer ddda, dddb, dddd;
+    real rcolat;
 
 /* NEHIGH calculates electron density in the outer */
 /* ionosphere for high solar activity (F107 >= 150). */
@@ -2363,23 +2420,22 @@ L600:
 	    real *);
 
     /* Local variables */
-    static real alfa, t0a150, beta, t0b150, t0a900, t0a550, t0b550, t1a550, 
-	    t1b550, t2a550, t2b550, t3a550, t3b550, t0b900, t1a900, t1b900, 
-	    t2a900, t2b900, t3a900, t3b900, t1a150, t1b150, t2a150;
-    static integer seza, sezb;
-    static real t2b150, t3a150, t3b150, t0a250, dtor, invl, t0b250, t1a250, 
-	    t1b250, t2a250, rmlt, t2b250, t3a250, t3b250;
-    static doublereal a;
-    static real c__[82];
-    static integer i__;
-    static real rdipl;
-    static integer sezai, sezbi;
-    static real invdp, rinvl;
+    doublereal a;
+    real c__[82];
+    integer i__;
     extern /* Subroutine */ int spharm_ik__(real *, integer *, integer *, 
 	    real *, real *);
-    static real rcolat, t900, t550, asa, t1500, t2500, csz[25], cf107[49], 
-	    t150a, t150b, t900a, t550a, t550b, t900b, t250a, t250b;
-    static integer ddda, dddb, dddd;
+    real t900, t550, asa, t1500, t2500, csz[25], cf107[49], t150a, t150b, 
+	    t900a, t550a, t550b, t900b, t250a, t250b;
+    integer ddda, dddb, dddd;
+    real alfa, t0a150, beta, t0b150, t0a900, t0a550, t0b550, t1a550, t1b550, 
+	    t2a550, t2b550, t3a550, t3b550, t0b900, t1a900, t1b900, t2a900, 
+	    t2b900, t3a900, t3b900, t1a150, t1b150, t2a150;
+    integer seza, sezb;
+    real t2b150, t3a150, t3b150, t0a250, dtor, invl, t0b250, t1a250, t1b250, 
+	    t2a250, rmlt, t2b250, t3a250, t3b250, rdipl;
+    integer sezai, sezbi;
+    real invdp, rinvl, rcolat;
 
 /* Version 2000 (released 30.12.1999) */
 /* Empirical model of electron temperature (Te) in the outer ionosphere */
@@ -2663,7 +2719,7 @@ L600:
 	t900b = t0b900 + *f107y * (t1b900 * *f107 + t2b900) + *seasy * t3b900;
 	t900 = (t900b - t900a) / (dddb - ddda) * (dddd - ddda) + t900a;
     }
-    if (*alt > (float)900.) {
+    if (*alt >= (float)900.) {
 /*     1500km level */
 	t0a150 = (float)0.;
 	t0b150 = (float)0.;
@@ -2760,10 +2816,10 @@ L600:
     double cos(doublereal), sin(doublereal), pow_ri(real *, integer *);
 
     /* Local variables */
-    static integer i__, k, n;
-    static real x, y;
-    static integer mt;
-    static real caz, saz;
+    integer i__, k, n;
+    real x, y;
+    integer mt;
+    real caz, saz;
 
 /* CALCULATES THE COEFFICIENTS OF THE SPHERICAL HARMONIC */
 /* FROM IRI 95 MODEL */
@@ -2990,14 +3046,15 @@ L16:
     double pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static integer kend;
-    static real a[82];
-    static integer i__, j, k;
-    static real colat, az;
-    static integer is;
+    real a[82];
+    integer i__, j, k;
+    real az;
+    integer is;
+    real ste;
+    integer kend;
+    real colat;
     extern /* Subroutine */ int spharm_(real *, integer *, integer *, real *, 
 	    real *);
-    static real ste;
 
 /* CALCULATES ELECTRON TEMPERATURES TE(1) TO TE(4) AT ALTITUDES */
 /* 300, 400, 1400 AND 3000 KM FOR DIP-LATITUDE DIPL/DEG AND */
@@ -3076,10 +3133,10 @@ L16:
     double cos(doublereal), sin(doublereal), pow_ri(real *, integer *);
 
     /* Local variables */
-    static integer i__, k, n;
-    static real x, y;
-    static integer mt;
-    static real caz, saz;
+    integer i__, k, n;
+    real x, y;
+    integer mt;
+    real caz, saz;
 
 /* CALCULATES THE COEFFICIENTS OF THE SPHERICAL HARMONIC */
 /* EXPANSION THAT WAS USED FOR THE BRACE-THEIS-MODELS. */
@@ -3143,9 +3200,9 @@ doublereal elte_(real *h__)
     real ret_val;
 
     /* Local variables */
+    integer i__;
+    real aa, bb, sum;
     extern doublereal eptr_(real *, real *, real *);
-    static integer i__;
-    static real aa, bb, sum;
 
 /* ---------------------------------------------------------------- */
 /* ELECTRON TEMPERATURE PROFILE BASED ON THE TEMPERATURES AT 120 */
@@ -3177,7 +3234,7 @@ doublereal tede_(real *h__, real *den, real *cov)
     double exp(doublereal);
 
     /* Local variables */
-    static real acov, y, yc;
+    real y, yc, acov;
 
 /* ELECTRON TEMEPERATURE MODEL AFTER BRACE,THEIS . */
 /* FOR NEG. COV THE MEAN COV-INDEX (3 SOLAR ROT.) IS EXPECTED. */
@@ -3210,9 +3267,9 @@ doublereal ti_(real *h__)
     real ret_val;
 
     /* Local variables */
+    integer i__;
+    real aa, bb, sum;
     extern doublereal eptr_(real *, real *, real *);
-    static integer i__;
-    static real aa, bb, sum;
 
 /* ---------------------------------------------------------------- */
 /* ION TEMPERATURE FOR HEIGHTS NOT GREATER 1000 KM AND NOT LESS HS */
@@ -3240,10 +3297,9 @@ doublereal teder_(real *h__)
     real ret_val;
 
     /* Local variables */
-    static real dtdx;
-    extern doublereal dtndh_(real *, real *, real *, real *), tn_(real *, 
-	    real *, real *, real *);
-    static real tnh;
+    extern doublereal tn_(real *, real *, real *, real *);
+    real tnh, dtdx;
+    extern doublereal dtndh_(real *, real *, real *, real *);
 
 /* THIS FUNCTION ALONG WITH PROCEDURE REGFA1 ALLOWS TO FIND */
 /* THE  HEIGHT ABOVE WHICH TN BEGINS TO BE DIFFERENT FROM TI */
@@ -3264,7 +3320,7 @@ doublereal tn_(real *h__, real *tinf, real *tlbd, real *s)
     double exp(doublereal);
 
     /* Local variables */
-    static real zg2;
+    real zg2;
 
 /* -------------------------------------------------------------------- */
 /*       Calculate Temperature for MSIS/CIRA-86 model */
@@ -3285,7 +3341,7 @@ doublereal dtndh_(real *h__, real *tinf, real *tlbd, real *s)
     double exp(doublereal);
 
     /* Local variables */
-    static real zg1, zg2, zg3;
+    real zg1, zg2, zg3;
 
 /* --------------------------------------------------------------------- */
     zg1 = *h__ + (float)6356.77;
@@ -3313,9 +3369,9 @@ doublereal rpid_(real *h__, real *h0, real *n0, integer *m, real *st, integer
     double exp(doublereal);
 
     /* Local variables */
+    integer i__;
+    real aa, bb, sm, xi, sum;
     extern doublereal eptr_(real *, real *, real *);
-    static integer i__;
-    static real aa, bb, sm, xi, sum;
 
 /* ------------------------------------------------------------------ */
 /* D.BILITZA,1977,THIS ANALYTIC FUNCTION IS USED TO REPRESENT THE */
@@ -3356,7 +3412,7 @@ doublereal rpid_(real *h__, real *h0, real *n0, integer *m, real *st, integer
 /* Subroutine */ int rdhhe_(real *h__, real *hb, real *rdoh, real *rdo2h, 
 	real *rno, real *pehe, real *rdh, real *rdhe)
 {
-    static real rest;
+    real rest;
 
 /* BILITZA,FEB.82,H+ AND HE+ RELATIVE PERECENTAGE DENSITY BELOW */
 /* 1000 KM. THE O+ AND O2+ REL. PER. DENSITIES SHOULD BE GIVEN */
@@ -3417,7 +3473,7 @@ L200:
 	    float).01,(float).05,(float).09,(float)167.,(float)185.,(float)
 	    .015,(float).18 };
 
-    static integer i__, k;
+    integer i__, k;
 
 /* THIEMANN,1979,COEFFICIENTS PG1O FOR CALCULATING  O+ PROFILES */
 /* BELOW THE F2-MAXIMUM. CHOSEN TO APPROACH DANILOV- */
@@ -3449,7 +3505,7 @@ L200:
 	    float)-11.,(float)-11.,(float)2.,(float)575.,(float)-.00126,(
 	    float)-.00524,(float)1380. };
 
-    static integer i__, k;
+    integer i__, k;
 
 /* THIEMANN,1979,COEFFICIENTS FOR CALCULATION OF O+ PROFILES */
 /* ABOVE THE F2-MAXIMUM (DUMBS,SPENNER:AEROS-COMPILATION) */
@@ -3489,7 +3545,7 @@ L200:
 	    float)-9.,(float)181.,(float)-26.,(float).02994,(float)-.04879,(
 	    float)-.01396,(float)8.9e-4,(float)-.09929,(float).05589 };
 
-    static integer i__, k;
+    integer i__, k;
 
 /* THIEMANN,1979,COEFFICIENTS FOR CALCULATING O2+ PROFILES. */
 /* CHOSEN AS TO APPROACH DANILOV-SEMENOV'S COMPILATION. */
@@ -3514,8 +3570,8 @@ L200:
     integer i__1;
 
     /* Local variables */
-    static integer i__, k;
-    static real efe[4];
+    integer i__, k;
+    real efe[4];
 
 /* SELECTS THE REQUIRED ION DENSITY PARAMETER SET. */
 /* THE INPUT FIELD INCLUDES DIFFERENT SETS OF DIMENSION M EACH */
@@ -4169,10 +4225,9 @@ L100:
     double r_nint(real *);
 
     /* Local variables */
-    static real h__, z__;
+    real h__, z__, r170, r270, r1140, r2140;
     extern /* Subroutine */ int aprok_(integer *, integer *, real *, real *, 
 	    real *, real *, real *, real *, real *, real *, real *, real *);
-    static real r170, r270, r1140, r2140;
 
 /* ---------------------------------------------------------------- */
 /*     INPUT DATA : */
@@ -4289,11 +4344,11 @@ L100:
     integer i__1;
 
     /* Local variables */
-    static real h__;
-    static integer i__;
-    static real z__;
-    static integer j1, j2, i1, i2, i3;
-    static real h01, h02, r01, r02, r11, r12, rk, rk1, rk2;
+    real h__;
+    integer i__;
+    real z__;
+    integer j1, j2, i1, i2, i3;
+    real h01, h02, r01, r02, r11, r12, rk, rk1, rk2;
 
 /* ----------------------------------------------------------------- */
     /* Parameter adjustments */
@@ -4374,22 +4429,22 @@ L33:
 /* Subroutine */ int ioncomp_(real *xy, integer *id, integer *ismo, real *xm, 
 	real *hx, real *zd, real *fd, real *fp, real *fs, real *dion)
 {
-    static integer iddd;
-    static real babs, dipl, dimo;
     extern /* Subroutine */ int igrf_sub__(real *, real *, real *, real *, 
-	    real *, integer *, real *, real *);
-    static real xmlt, h__;
-    static integer i__, icode;
-    static real diont[7], xlati, ryear;
-    static integer month_sea__;
+	    real *, integer *, real *, real *, integer *);
+    real h__;
+    integer i__, month_sea__;
+    real ro, xl, xioncomp_h__, ro2, xioncomp_n__, xioncomp_o__;
+    integer ier;
+    real rcl, cov, xhi, rno, xioncomp_he__;
+    integer iddd;
+    real babs, dipl, dimo, xmlt;
+    integer icode;
+    real diont[7], xlati, ryear;
     extern /* Subroutine */ int ionco2_(real *, real *, integer *, real *, 
-	    real *, real *, real *, real *);
-    static real ro, xl;
-    extern /* Subroutine */ int calion_(integer *, real *, real *, real *, 
-	    real *, real *, real *, real *, integer *, real *, real *, real *,
-	     real *, real *);
-    static real xlongi, xioncomp_h__, ro2, xioncomp_n__, xioncomp_o__, rcl, 
-	    cov, xhi, rno, xinvdip, xioncomp_he__;
+	    real *, real *, real *, real *), calion_(integer *, real *, real *
+	    , real *, real *, real *, real *, real *, integer *, real *, real 
+	    *, real *, real *, real *);
+    real xlongi, xinvdip;
 
 /* ------------------------------------------------------- */
 /*       xy      decimal year */
@@ -4428,7 +4483,8 @@ L33:
     xlongi = *fp;
     cov = *fs;
     if (h__ > (float)300.) {
-	igrf_sub__(&xlati, &xlongi, &ryear, &h__, &xl, &icode, &dipl, &babs);
+	igrf_sub__(&xlati, &xlongi, &ryear, &h__, &xl, &icode, &dipl, &babs, &
+		ier);
 	if (xl > (float)10.) {
 	    xl = (float)10.;
 	}
@@ -4493,10 +4549,10 @@ L33:
     double cos(doublereal), exp(doublereal);
 
     /* Local variables */
-    static real beth[4], betl[4], f;
-    static integer i__, j;
-    static real p[120]	/* was [5][6][4] */, s, z__, cm[4], hm[4], hx, alh[4],
-	     all[4], arg, var[6];
+    real f;
+    integer i__, j;
+    real p[120]	/* was [5][6][4] */, s, z__, cm[4], hm[4], hx, alh[4], all[4],
+	     arg, var[6], beth[4], betl[4];
 
 /* --------------------------------------------------------------- */
 /* ion composition model */
@@ -4714,7 +4770,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_390 = { (float)-.012838, (float)-.11873, (float)-.50096, (
+	} equiv_391 = { (float)-.012838, (float)-.11873, (float)-.50096, (
 		float)-.75121, (float)-.013612, (float)-.114, (float)-.38369, 
 		(float)-.8219, {0}, (float)3.3892e-9, (float)-7.9543e-8, (
 		float)3.9699e-7, (float)4.7106e-6, (float)-.005555, (float)
@@ -4838,7 +4894,7 @@ L4:
 		.0078412, (float).0014431, (float)1.3591e-4, (float)-.0032403,
 		 (float).0010792, (float)-.014069 };
 
-#define doh ((real *)&equiv_390)
+#define doh ((real *)&equiv_391)
 
     static struct {
 	real e_1[8];
@@ -4939,7 +4995,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_391 = { (float)-3.1678, (float)-1.5293, (float)-.81841, (
+	} equiv_392 = { (float)-3.1678, (float)-1.5293, (float)-.81841, (
 		float)-.66978, (float)-2.8141, (float)-1.3652, (float)-.815, (
 		float)-.56899, {0}, (float)3.6289e-7, (float)1.9563e-7, (
 		float)1.3246e-7, (float)4.5698e-7, (float)-.44836, (float)
@@ -5059,7 +5115,7 @@ L4:
 		(float).0061813, (float).0068488, (float)-3.7978e-4, (float)
 		-8.071e-4 };
 
-#define dhh ((real *)&equiv_391)
+#define dhh ((real *)&equiv_392)
 
     static struct {
 	real e_1[8];
@@ -5160,7 +5216,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_392 = { (float)-3.0827, (float)-1.71, (float)-1.2078, (float)
+	} equiv_393 = { (float)-3.0827, (float)-1.71, (float)-1.2078, (float)
 		-1.123, (float)-2.976, (float)-2.0393, (float)-1.5728, (float)
 		-1.3029, {0}, (float)4.4643e-7, (float)5.254e-7, (float)
 		-8.3889e-8, (float)-2.9419e-7, (float)-.86799, (float)-.81007,
@@ -5279,7 +5335,7 @@ L4:
 		-.0051509, (float)-7.739e-4, (float)-.0021051, (float).01086, 
 		(float).0049376, (float).001845 };
 
-#define dheh ((real *)&equiv_392)
+#define dheh ((real *)&equiv_393)
 
     static struct {
 	real e_1[8];
@@ -5380,7 +5436,7 @@ L4:
 	integer fill_96[4];
 	real e_97[8];
 	integer fill_98[4];
-	} equiv_393 = { (float)-1.6313, (float)-1.4724, (float)-1.6315, (
+	} equiv_394 = { (float)-1.6313, (float)-1.4724, (float)-1.6315, (
 		float)-1.7525, (float)-1.595, (float)-1.4816, (float)-1.5647, 
 		(float)-1.752, {0}, (float)3.3826e-9, (float)6.2234e-7, (
 		float)1.1175e-7, (float)-1.0714e-6, (float).12602, (float)
@@ -5501,7 +5557,7 @@ L4:
 		-6.3752e-4, (float)-.0051806, (float)-.010009, (float)
 		-.0058925, (float)-.016702 };
 
-#define dnh ((real *)&equiv_393)
+#define dnh ((real *)&equiv_394)
 
     static real dol[441]	/* was [3][3][49] */ = { (float)-.0034295,(
 	    float)-.26245,(float)-.89352,(float)-.0075061,(float)-.31262,(
@@ -5856,14 +5912,11 @@ L4:
     double r_lg10(real *), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real nheh, nhel, ntot;
+    real nhh, nhl, nnh, noh, nnl, nol, nheh, nhel, ntot;
     extern /* Subroutine */ int ionlow_(integer *, real *, real *, real *, 
 	    real *, real *, real *, real *, integer *, real *, integer *, 
-	    real *);
-    static real nhh, nhl, nnh, noh, nnl, nol;
-    extern /* Subroutine */ int ionhigh_(integer *, real *, real *, real *, 
-	    real *, real *, real *, real *, integer *, real *, integer *, 
-	    real *);
+	    real *), ionhigh_(integer *, real *, real *, real *, real *, real 
+	    *, real *, real *, integer *, real *, integer *, real *);
 
 /* Version 1.0 (released 20.12.2002) */
 /* CALION calculates relative density of O+, H+, He+ and N+  in the outer */
@@ -6054,20 +6107,22 @@ L4:
     double log(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real n0a100, n0b100, n0a400, n0b400, n0a650, n0b650;
-    static integer seza, sezb;
-    static real dtor;
-    extern doublereal eptr_(real *, real *, real *);
-    static real rmlt, c__[49];
-    static integer i__, sezai, sezbi;
-    static real invdp;
+    real c__[49];
+    integer i__;
     extern /* Subroutine */ int spharm_ik__(real *, integer *, integer *, 
 	    real *, real *);
-    static real aa, bb, ah[3], st[2];
+    real aa, bb, ah[3], st[2], n400, n650, st1, st2, n1000, ano[3], dno[1], 
+	    sum, n100a, n100b, n400a, n400b, n650a, n650b;
+    integer ddda, dddb, dddd;
+    real n0a100, n0b100, n0a400, n0b400, n0a650, n0b650;
+    integer seza, sezb;
+    real dtor;
+    extern doublereal eptr_(real *, real *, real *);
+    real rmlt;
+    integer sezai, sezbi;
+    real invdp;
     extern doublereal invdpc_(real *, real *, real *, real *, real *);
-    static real rcolat, n400, n650, st1, st2, n1000, ano[3], dno[1], sum, 
-	    n100a, n100b, n400a, n400b, n650a, n650b;
-    static integer ddda, dddb, dddd;
+    real rcolat;
 
 /* IONLOW calculates relative density of O+, H+, He+ or N+  in the outer */
 /* ionosphere for a low solar activity (F107 < 100). */
@@ -6248,21 +6303,23 @@ L4:
     double log(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real n0a150, n0b150, n0a250, n0a900, n0a550, n0b550, n0b900, 
-	    n0b250;
-    static integer seza, sezb;
-    static real dtor;
-    extern doublereal eptr_(real *, real *, real *);
-    static real rmlt, c__[49];
-    static integer i__, sezai, sezbi;
-    static real invdp;
+    real c__[49];
+    integer i__;
     extern /* Subroutine */ int spharm_ik__(real *, integer *, integer *, 
 	    real *, real *);
-    static real aa, bb, ah[4], st[3];
+    real aa, bb, ah[4], st[3], n900, n550, st1, st2, n1500, n2500, ano[4], 
+	    dno[2], sum, n150a, n150b, n250a, n900a, n550a, n550b, n900b, 
+	    n250b;
+    integer ddda, dddb, dddd;
+    real n0a150, n0b150, n0a250, n0a900, n0a550, n0b550, n0b900, n0b250;
+    integer seza, sezb;
+    real dtor;
+    extern doublereal eptr_(real *, real *, real *);
+    real rmlt;
+    integer sezai, sezbi;
+    real invdp;
     extern doublereal invdpc_(real *, real *, real *, real *, real *);
-    static real rcolat, n900, n550, st1, st2, n1500, n2500, ano[4], dno[2], 
-	    sum, n150a, n150b, n250a, n900a, n550a, n550b, n900b, n250b;
-    static integer ddda, dddb, dddd;
+    real rcolat;
 
 /* IONHIGH calculates relative density of O+, H+, He+ or N+  in the outer */
 /* ionosphere for high solar activity conditions (F107 >= 100). */
@@ -6467,9 +6524,8 @@ doublereal invdpc_(real *fl, real *dimo, real *b0, real *dipl, real *dtor)
 	    real *);
 
     /* Local variables */
-    static real alfa, beta, invl;
-    static doublereal a;
-    static real rdipl, rinvl, asa;
+    doublereal a;
+    real asa, alfa, beta, invl, rdipl, rinvl;
 
 /*      calculation of INVDIP from FL, DIMO, BO, and DIPL */
 /*      invariant latitude calculated by highly */
@@ -6584,7 +6640,7 @@ doublereal hmf2ed_(real *xmagbr, real *r__, real *x, real *xm3)
     double exp(doublereal);
 
     /* Local variables */
-    static real delm, f1, f2, f3;
+    real f1, f2, f3, delm;
 
 /* CALCULATES THE PEAK HEIGHT HMF2/KM FOR THE MAGNETIC */
 /* LATITUDE XMAGBR/DEG. AND THE SMOOTHED ZUERICH SUNSPOT */
@@ -6611,7 +6667,7 @@ doublereal xm3000hm_(real *xmagbr, real *r__, real *x, real *hmf2)
     double exp(doublereal);
 
     /* Local variables */
-    static real delm, f1, f2, f3;
+    real f1, f2, f3, delm;
 
 /* CALCULATES THE PROPAGATION FACTOR M3000 FOR THE MAGNETIC LATITUDE */
 /* XMAGBR/DEG. AND THE SMOOTHED ZUERICH SUNSPOT NUMBER R USING THE */
@@ -6639,7 +6695,7 @@ doublereal fof1ed_(real *ylati, real *r__, real *chi)
     double cos(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real chim, xmue, chi100, f0, fs, f100, dla, chi0, fof1;
+    real f0, fs, f100, dla, chi0, fof1, chim, xmue, chi100;
 
 /* -------------------------------------------------------------- */
 /* CALCULATES THE F1 PEAK PLASMA FREQUENCY (FOF1/MHZ) */
@@ -6686,7 +6742,7 @@ doublereal f1_c1__(real *xmodip, real *hour, real *suxnon, real *saxnon)
     double exp(doublereal), cos(doublereal);
 
     /* Local variables */
-    static real dela, c1old, c1, pi, absmdp;
+    real c1, pi, dela, c1old, absmdp;
 
 /* F1 layer shape parameter C1 after Reinisch and Huang, Advances in */
 /* Space Research, Volume 25, Number 1, 81-88, 2000. */
@@ -6722,7 +6778,7 @@ doublereal f1_c1__(real *xmodip, real *hour, real *suxnon, real *saxnon)
     double cos(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real xarg, f1prl, a, b, c__, gamma, f1pr;
+    real a, b, c__, f1pr, xarg, f1prl, gamma;
 
 /* Occurrence probability of F1 layer after Scotto et al., Advances in */
 /* Space Research, Volume 20, Number 9, 1773-1775, 1997. */
@@ -6764,7 +6820,7 @@ doublereal foeedi_(real *cov, real *xhi, real *xhim, real *xlati)
 	    doublereal), log(doublereal);
 
     /* Local variables */
-    static real xhic, smin, r4foe, a, b, c__, d__, sl, sm, sp;
+    real a, b, c__, d__, sl, sm, sp, xhic, smin, r4foe;
 
 /* ------------------------------------------------------- */
 /* CALCULATES FOE/MHZ BY THE EDINBURGH-METHOD. */
@@ -6831,7 +6887,7 @@ doublereal xmded_(real *xhi, real *r__, real *yw)
 	    doublereal);
 
     /* Local variables */
-    static real y, yy, ymd, yyy;
+    real y, yy, ymd, yyy;
 
 /* D. BILITZA, 1978, CALCULATES ELECTRON DENSITY OF D MAXIMUM. */
 /* XHI/DEG. IS SOLAR ZENITH ANGLE, R SMOOTHED ZURICH SUNSPOT NUMBER */
@@ -6876,14 +6932,15 @@ doublereal gamma1_(real *smodip, real *slat, real *slong, real *hour, integer
     double sin(doublereal), cos(doublereal);
 
     /* Local variables */
-    static doublereal coef[100], c__[12];
-    static integer i__, j, l;
-    static doublereal s[12];
-    static integer index;
-    static real s0, s1, s3, s2, xsinx[13];
-    static integer mi, np;
-    static real ss, hou;
-    static doublereal sum;
+    doublereal c__[12];
+    integer i__, j, l;
+    doublereal s[12];
+    real s0, s1, s2, s3;
+    integer mi, np;
+    real ss, hou;
+    doublereal sum, coef[100];
+    integer index;
+    real xsinx[13];
 
 /* CALCULATES GAMMA1=FOF2 OR M3000 USING CCIR NUMERICAL MAP */
 /* COEFFICIENTS SFE(M3) FOR MODIFIED DIP LATITUDE (SMODIP/DEG) */
@@ -6986,19 +7043,20 @@ doublereal b0_98__(real *hour, real *sax, real *sux, integer *nseasn, real *
     real ret_val;
 
     /* Local variables */
+    real g[6];
+    integer i__;
+    real aa, bb, zz, zx1, zz0, zx2, zx3, zx4, zx5, bfd[6]	/* was [2][3] 
+	    */, bfr[12]	/* was [2][2][3] */;
+    integer isd, isl, iss;
+    real sum;
     extern doublereal hpol_(real *, real *, real *, real *, real *, real *, 
 	    real *);
-    static real dsum;
+    real dsum;
     extern doublereal eptr_(real *, real *, real *);
-    static real g[6];
-    static integer i__;
-    static real aa, bb, dayval;
-    static integer jseasn;
-    static real zz, nitval, zx1, zz0, zx2, zx3, zx4, zx5, bfd[6]	/* 
-	    was [2][3] */, bfr[12]	/* was [2][2][3] */;
-    static integer isd, isl, iss;
-    static real sum;
-    static integer num_lat__;
+    real dayval;
+    integer jseasn;
+    real nitval;
+    integer num_lat__;
 
 /* ----------------------------------------------------------------- */
 /* Interpolation procedure for bottomside thickness parameter B0. */
@@ -7121,7 +7179,7 @@ doublereal b0_98__(real *hour, real *sax, real *sux, integer *nseasn, real *
     double log(doublereal), sqrt(doublereal);
 
     /* Local variables */
-    static real b, c__, z1, z2, z3, z4;
+    real b, c__, z1, z2, z3, z4;
 
 /* CALCULATES THE COEFFICIENTS SPT FOR THE POLYNOMIAL */
 /* Y(X)=1+SPT(1)*X**2+SPT(2)*X**3+SPT(3)*X**4+SPT(4)*X**5 */
@@ -7192,7 +7250,7 @@ L300:
     double cos(doublereal), log(doublereal);
 
     /* Local variables */
-    static real cs, abc, arl, zzz;
+    real cs, abc, arl, zzz;
 
 /* --------------------------------------------------------------------- */
 /*   CALCULATES E-F VALLEY PARAMETERS; T.L. GULYAEVA, ADVANCES IN */
@@ -7233,7 +7291,7 @@ L300:
 	    doublereal), acos(doublereal);
 
     /* Local variables */
-    static real ci, si, cbg, cbm, clg, clm, sbg, sbm, slg, slm, ylg, zpi;
+    real ci, si, cbg, cbm, clg, clm, sbg, sbm, slg, slm, ylg, zpi;
 
 /* CALCULATES GEOMAGNETIC LONGITUDE (MLONG) AND LATITUDE (MLAT) */
 /* FROM GEOGRAFIC LONGITUDE (LONG) AND LATITUDE (LATI) FOR ART=0 */
@@ -7353,18 +7411,17 @@ L10:
 	    real *), asin(doublereal);
 
     /* Local variables */
-    static integer imax;
-    static real rlat;
-    static integer nmax, last;
-    static real d__, g[144], h__[144];
-    static integer i__, k, m;
-    static real s;
-    static integer ihmax;
-    static real rlong, zdivf, f1, ydivs, x1, y1, z1;
-    static integer ih;
-    static real cp;
-    static integer il;
-    static real ct, xi[3], sp, rq, st, xt, dipdiv, rho, xxx, yyy, brh0, zzz;
+    real d__, g[144], h__[144];
+    integer i__, k, m;
+    real s, f1, x1, y1, z1;
+    integer ih;
+    real cp;
+    integer il;
+    real ct, xi[3], sp, rq, st, xt, rho, xxx, yyy, brh0, zzz;
+    integer imax;
+    real rlat;
+    integer nmax, last, ihmax;
+    real rlong, zdivf, ydivs, dipdiv;
 
 /* THIS IS A SPECIAL VERSION OF THE POGO 68/10 MAGNETIC FIELD */
 /* LEGENDRE MODEL. TRANSFORMATION COEFF. G(144) VALID FOR 1973. */
@@ -7492,13 +7549,14 @@ L400:
     real r__1;
 
     /* Local variables */
-    static logical k, links;
-    static real f1, f2;
-    static logical l1;
-    static real x1, x2, ep;
-    static integer ng;
-    static real dx, fx;
-    static integer lfd;
+    logical k;
+    real f1, f2;
+    logical l1;
+    real x1, x2, ep;
+    integer ng;
+    real dx, fx;
+    integer lfd;
+    logical links;
 
 /* REGULA-FALSI-PROCEDURE TO FIND X WITH F(X)-FW=0. X1,X2 ARE THE */
 /* STARTING VALUES. THE COMUTATION ENDS WHEN THE X-INTERVAL */
@@ -7582,8 +7640,8 @@ L800:
 	    doublereal), sqrt(doublereal);
 
     /* Local variables */
-    static real chih, cosx, wlon, a, b, h__, dc, fa, ch, td, te, tf, et, 
-	    secphi, cosphi, dcl, phi, eqt;
+    real a, b, h__, dc, fa, ch, td, te, tf, et, dcl, phi, eqt, chih, cosx, 
+	    wlon, secphi, cosphi;
 
 /* -------------------------------------------------------------------- */
 /*       s/r to calculate the solar declination, zenith angle, and */
@@ -7728,7 +7786,7 @@ doublereal hpol_(real *hour, real *tw, real *xnw, real *sa, real *su, real *
     integer i__1;
 
     /* Local variables */
-    static integer mobe, i__, moold, mosum, imo;
+    integer i__, imo, mobe, moold, mosum;
 
 /* ------------------------------------------------------------------- */
 /* CALCULATES DAY OF YEAR (IDOY, ddd) FROM YEAR (IYEAR, yy or yyyy), */
@@ -7787,8 +7845,8 @@ L55:
 /* Subroutine */ int ut_lt__(integer *mode, real *ut, real *slt, real *glong, 
 	integer *iyyy, integer *ddd)
 {
-    static real xlong;
-    static integer dddend;
+    real xlong;
+    integer dddend;
 
 /* ----------------------------------------------------------------- */
 /* Converts Universal Time UT (decimal hours) into Solar Local Time */
@@ -7893,9 +7951,9 @@ doublereal rlay_(real *x, real *xm, real *sc, real *hx)
     real ret_val;
 
     /* Local variables */
+    real y1, y1m, y2m;
     extern doublereal eptr_(real *, real *, real *), epst_(real *, real *, 
 	    real *);
-    static real y1, y1m, y2m;
 
 /* -------------------------------------------------------- RAWER  LAYER */
     y1 = eptr_(x, sc, hx);
@@ -7946,7 +8004,7 @@ doublereal eptr_(real *x, real *sc, real *hx)
     double exp(doublereal), log(doublereal);
 
     /* Local variables */
-    static real d1;
+    real d1;
 
 /* --------------------------------------------------------- TRANSITION */
     d1 = (*x - *hx) / *sc;
@@ -7975,7 +8033,7 @@ doublereal epst_(real *x, real *sc, real *hx)
     double exp(doublereal);
 
     /* Local variables */
-    static real d1;
+    real d1;
 
 /* -------------------------------------------------------------- STEP */
     d1 = (*x - *hx) / *sc;
@@ -8019,7 +8077,7 @@ doublereal epla_(real *x, real *sc, real *hx)
     double exp(doublereal);
 
     /* Local variables */
-    static real d0, d1, d2;
+    real d0, d1, d2;
 
 /* ------------------------------------------------------------ PEAK */
     d1 = (*x - *hx) / *sc;
@@ -8049,10 +8107,10 @@ doublereal xe2to5_(real *h__, real *hmf2, integer *nl, real *hx, real *sc,
     double pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
+    integer i__;
+    real sum;
     extern doublereal rlay_(real *, real *, real *, real *);
-    static real ylay, zlay;
-    static integer i__;
-    static real sum;
+    real ylay, zlay;
 
 /* ---------------------------------------------------------------------- */
 /* NORMALIZED ELECTRON DENSITY (N/NMF2) FOR THE MIDDLE IONOSPHERE FROM */
@@ -8086,8 +8144,8 @@ doublereal xen_(real *h__, real *hmf2, real *xnmf2, real *hme, integer *nl,
     real ret_val;
 
     /* Local variables */
-    extern doublereal xe2to5_(real *, real *, integer *, real *, real *, real 
-	    *), xe1_(real *), xe6_(real *);
+    extern doublereal xe1_(real *), xe6_(real *), xe2to5_(real *, real *, 
+	    integer *, real *, real *, real *);
 
 /* ---------------------------------------------------------------------- */
 /* ELECTRON DENSITY WITH NEW MIDDLE IONOSPHERE */
@@ -8123,7 +8181,7 @@ L200:
     double cos(doublereal), exp(doublereal);
 
     /* Local variables */
-    static real xs;
+    real xs;
 
 /* --------------------------------------------------------------------- */
 /*   CALCULATES RATIO H0.5/HMF2 FOR HALF-DENSITY POINT (NE(H0.5)=0.5* */
@@ -8153,9 +8211,9 @@ L200:
     real r__1;
 
     /* Local variables */
-    static real amax;
-    static integer imax, k, l, m, nn, izg;
-    static real hsp, azv[10];
+    integer k, l, m, nn, izg;
+    real hsp, azv[10], amax;
+    integer imax;
 
 /* -------------------------------------------------------------------- */
 /* SOLVES QUADRATIC SYSTEM OF LINEAR EQUATIONS: */
@@ -8273,12 +8331,12 @@ L1:
     integer i__1, i__2, i__3;
 
     /* Local variables */
+    integer i__, j, k, m01;
+    real ali[25]	/* was [5][5] */, bli[5], scm, xli[50]	/* was [5][10]
+	     */;
     extern doublereal rlay_(real *, real *, real *, real *), d1lay_(real *, 
 	    real *, real *, real *), d2lay_(real *, real *, real *, real *);
-    static integer i__, j, k, m01;
     extern /* Subroutine */ int lnglsn_(integer *, real *, real *, logical *);
-    static real ali[25]	/* was [5][5] */, bli[5], scm, xli[50]	/* was [5][10]
-	     */;
 
 /* -------------------------------------------------------------------- */
 /*   DETERMINES LAY-FUNCTIONS AMPLITUDES FOR A NUMBER OF CONSTRAINTS: */
@@ -8372,16 +8430,17 @@ L1:
     double r_lg10(real *);
 
     /* Local variables */
-    static real hfff, xfff;
+    real ww[8], xx[8], yy[8];
+    integer nc0, nc1;
+    real zet, scl0, hfff, xfff;
     extern doublereal epst_(real *, real *, real *);
-    static logical ssin;
-    static real alg102, hxl1t, alogf, xhalf;
+    logical ssin;
+    real alg102, hxl1t, alogf, xhalf;
     extern /* Subroutine */ int lsknm_(integer *, integer *, integer *, 
 	    integer *, real *, real *, real *, real *, real *, real *, real *,
 	     logical *);
-    static real alogef, ww[8], xx[8], yy[8];
-    static integer numcon, nc0, nc1, numlay;
-    static real zet, scl0;
+    real alogef;
+    integer numcon, numlay;
 
 /* ------------------------------------------------------------------- */
 /* CALCULATES AMPLITUDES FOR LAY FUNCTIONS */
@@ -8555,6 +8614,10 @@ L1937:
 /* Subroutine */ int tcon_(integer *yr, integer *mm, integer *day, integer *
 	idn, real *rz, real *ig, real *rsn, integer *nmonth)
 {
+    /* Initialized data */
+
+    static integer iflag = 0;
+
     /* Format strings */
     static char fmt_8000[] = "(1x,i10,\002** OUT OF RANGE **\002/,5x,\002The\
  file IG_RZ.DAT which contains the indices Rz12\002,\002 and IG12\002/5x,\
@@ -8563,37 +8626,34 @@ L1937:
 
     /* System generated locals */
     integer i__1;
-    olist o__1;
-    cllist cl__1;
 
     /* Builtin functions */
-    integer f_open(olist *), s_rsle(cilist *), do_lio(integer *, integer *, 
-	    char *, ftnlen), e_rsle();
     double sqrt(doublereal);
-    integer f_clos(cllist *), s_wsfe(cilist *), do_fio(integer *, char *, 
-	    ftnlen), e_wsfe();
+    integer s_wsfe(cilist *), do_fio(integer *, char *, ftnlen), e_wsfe();
 
     /* Local variables */
+    static real ionoindx[722];
+    integer i__, inum_vals__, jj;
+    real zi;
+    integer num;
+    real rrr;
+    integer idd1, idd2, imm2, iyy2;
     extern /* Subroutine */ int moda_(integer *, integer *, integer *, 
 	    integer *, integer *, integer *);
-    static integer midm, iupd;
-    static real covr;
-    static integer iupm, imst, iupy, iyst;
-    static real ionoindx[722];
-    static integer i__, iflag, imend, iyend;
+    integer midm, iupd;
+    real covr;
+    integer iupm;
+    static integer imst;
+    integer iupy;
+    static integer iyst;
+    integer imend, iyend;
     static real indrz[722];
-    static integer iytmp, iymst, inum_vals__, jj;
-    static real zi;
-    static integer iymend, nrdaym, num;
-    static real rrr;
-    static integer idd1, idd2, imm2, iyy2;
+    integer iytmp;
+    static integer iymst, iymend;
+    integer nrdaym;
 
     /* Fortran I/O blocks */
-    static cilist io___719 = { 0, 12, 0, 0, 0 };
-    static cilist io___723 = { 0, 12, 0, 0, 0 };
-    static cilist io___731 = { 0, 12, 0, 0, 0 };
-    static cilist io___734 = { 0, 12, 0, 0, 0 };
-    static cilist io___741 = { 0, 0, 0, fmt_8000, 0 };
+    static cilist io___738 = { 0, 0, 0, fmt_8000, 0 };
 
 
 /* ---------------------------------------------------------------- */
@@ -8614,6 +8674,16 @@ L1937:
 /* the indices are obtained from the indices file ig_rz.dat that is */
 /* read in subroutine initialize and stored in COMMON/indices/ */
 /* ---------------------------------------------------------------- */
+/*     Fortran include file storing common blocks and associated */
+/*     parameters. */
+
+/*     Changelog: */
+/*       2015-04-16     Created (Joseph Nicholas) */
+    /* Parameter adjustments */
+    --ig;
+    --rz;
+
+    /* Function Body */
 
 /* Rz12 and IG are determined from the file IG_RZ.DAT which has the */
 /* following structure: */
@@ -8644,59 +8714,30 @@ L1937:
 /* the file) and onward the indices are therefore based on indices */
 /* predictions. */
 
-    /* Parameter adjustments */
-    --ig;
-    --rz;
-
-    /* Function Body */
     if (iflag == 0) {
-	o__1.oerr = 0;
-	o__1.ounit = 12;
-	o__1.ofnm = "./../data/IonosphereData/ig_rz.dat";				// made changes by Tuan Nguyen on Jan 11, 2013
-	o__1.ofnmlen = strlen(o__1.ofnm);	// o__1.ofnmlen = 9;	// made changes by Tuan Nguyen
-	o__1.orl = 0;
-	o__1.osta = "old";
-	o__1.oacc = 0;
-	o__1.ofm = 0;
-	o__1.oblnk = 0;
-	f_open(&o__1);
-/* -web- special for web version */
-/*          open(unit=12,file= */
-/*     *'/usr/local/etc/httpd/cgi-bin/models/IRI/ig_rz.dat', */
-/*     *status='old') */
 /* Read the update date, the start date and the end date (mm,yyyy), and */
 /* get number of data points to read. */
-	s_rsle(&io___719);
-	do_lio(&c__3, &c__1, (char *)&iupd, (ftnlen)sizeof(integer));
-	do_lio(&c__3, &c__1, (char *)&iupm, (ftnlen)sizeof(integer));
-	do_lio(&c__3, &c__1, (char *)&iupy, (ftnlen)sizeof(integer));
-	e_rsle();
-	s_rsle(&io___723);
-	do_lio(&c__3, &c__1, (char *)&imst, (ftnlen)sizeof(integer));
-	do_lio(&c__3, &c__1, (char *)&iyst, (ftnlen)sizeof(integer));
-	do_lio(&c__3, &c__1, (char *)&imend, (ftnlen)sizeof(integer));
-	do_lio(&c__3, &c__1, (char *)&iyend, (ftnlen)sizeof(integer));
-	e_rsle();
+	iupd = igrz1_1.iupd_igrz__;
+	iupm = igrz1_1.iupm_igrz__;
+	iupy = igrz1_1.iupy_igrz__;
+	imst = igrz1_1.imst_igrz__;
+	iyst = igrz1_1.iyst_igrz__;
+	imend = igrz1_1.imend_igrz__;
+	iyend = igrz1_1.iyend_igrz__;
 	iymst = iyst * 100 + imst;
 	iymend = iyend * 100 + imend;
 /* inum_vals= 12-imst+1+(iyend-iyst-1)*12 +imend + 2 */
 /*            1st year \ full years       \last y\ before & after */
 	inum_vals__ = 3 - imst + (iyend - iyst) * 12 + imend;
 /* Read all the ionoindx and indrz values */
-	s_rsle(&io___731);
 	i__1 = inum_vals__;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    do_lio(&c__4, &c__1, (char *)&ionoindx[i__ - 1], (ftnlen)sizeof(
-		    real));
+	    ionoindx[i__ - 1] = igrz1_1.ionoindx_igrz__[i__ - 1];
 	}
-	e_rsle();
-	s_rsle(&io___734);
 	i__1 = inum_vals__;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    do_lio(&c__4, &c__1, (char *)&indrz[i__ - 1], (ftnlen)sizeof(real)
-		    );
+	    indrz[i__ - 1] = igrz1_1.indrz_igrz__[i__ - 1];
 	}
-	e_rsle();
 	i__1 = inum_vals__;
 	for (jj = 1; jj <= i__1; ++jj) {
 	    rrr = indrz[jj - 1];
@@ -8721,17 +8762,13 @@ L1937:
 L1:
 	    ;
 	}
-	cl__1.cerr = 0;
-	cl__1.cunit = 12;
-	cl__1.csta = 0;
-	f_clos(&cl__1);
 	iflag = 1;
     }
     iytmp = *yr * 100 + *mm;
     if (iytmp < iymst || iytmp > iymend) {
 	if (iounit_1.konsol > 1) {
-	    io___741.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___741);
+	    io___738.ciunit = iounit_1.konsol;
+	    s_wsfe(&io___738);
 	    do_fio(&c__1, (char *)&iytmp, (ftnlen)sizeof(integer));
 	    do_fio(&c__1, (char *)&iymst, (ftnlen)sizeof(integer));
 	    do_fio(&c__1, (char *)&iymend, (ftnlen)sizeof(integer));
@@ -8895,19 +8932,17 @@ L1927:
     double exp(doublereal), pow_dd(doublereal *, doublereal *);
 
     /* Local variables */
-    static real a[84]	/* was [7][2][3][2] */, b[84]	/* was [7][2][3][2] */
-	    , c__[84]	/* was [7][2][3][2] */, d__[84]	/* was [7][2][3][2] */
-	    ;
-    static integer i__, j, k, m, n;
-    static real t, a1[28]	/* was [7][2][2] */, b1[28]	/* was [7][2][
-	    2] */;
-    static integer n1;
-    static real ts, df1, df2, dh1, dh2;
-    static integer inn;
+    real a[84]	/* was [7][2][3][2] */, b[84]	/* was [7][2][3][2] */, c__[
+	    84]	/* was [7][2][3][2] */, d__[84]	/* was [7][2][3][2] */;
+    integer i__, j, k, m, n;
+    real t, a1[28]	/* was [7][2][2] */, b1[28]	/* was [7][2][2] */;
+    integer n1;
+    real ts, df1, df2, dh1, dh2;
+    integer inn;
 
     /* Fortran I/O blocks */
-    static cilist io___768 = { 0, 6, 0, 0, 0 };
-    static cilist io___770 = { 0, 6, 0, 0, 0 };
+    static cilist io___765 = { 0, 6, 0, 0, 0 };
+    static cilist io___767 = { 0, 6, 0, 0, 0 };
 
 
 /* ***************************************************************** */
@@ -8974,7 +9009,7 @@ L1927:
 	}
     }
     if (*fi > (float)65. || *ae < (float)500.) {
-	s_wsle(&io___768);
+	s_wsle(&io___765);
 	do_lio(&c__9, &c__1, "LSTID are for AE>500. and ABS(FI)<65.", (ftnlen)
 		37);
 	e_wsle();
@@ -8982,7 +9017,7 @@ L1927:
     }
     ts = *ts70 + (*fi * (float)-1.5571 + (float)109.) / (float)60.;
     if (ts < *sux && ts > *sax) {
-	s_wsle(&io___770);
+	s_wsle(&io___767);
 	do_lio(&c__9, &c__1, " LSTID are only at night", (ftnlen)24);
 	e_wsle();
 	goto L4;
@@ -9071,30 +9106,21 @@ L5:
     static integer lm[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
     /* Format strings */
-    static char fmt_10[] = "(3i3,8i3,f5.1)";
     static char fmt_100[] = "(1x,\002Date is outside range of Ap indices fil\
 e.\002,\002 STORM model is turned off.\002)";
 
     /* System generated locals */
     integer i__1;
-    olist o__1;
-    cllist cl__1;
 
     /* Builtin functions */
-    integer f_open(olist *), s_rdfe(cilist *), do_fio(integer *, char *, 
-	    ftnlen), e_rdfe(), f_clos(cllist *), s_wsfe(cilist *), e_wsfe();
+    integer s_wsfe(cilist *), e_wsfe();
 
     /* Local variables */
-    static integer iiap[8];
-    static real f;
-    static integer i__, iybeg, ihour, j1, j2, i9, jd, is, jy, jmn, nyd, iss;
+    real f;
+    integer i__, j1, j2, i9, jd, is, jy, jmn, nyd, iss, iiap[8], iybeg, ihour;
 
     /* Fortran I/O blocks */
-    static cilist io___777 = { 1, 13, 0, fmt_10, 1 };
-    static cilist io___788 = { 1, 13, 0, fmt_10, 0 };
-    static cilist io___792 = { 1, 13, 0, fmt_10, 0 };
-    static cilist io___794 = { 1, 13, 0, fmt_10, 0 };
-    static cilist io___795 = { 0, 0, 0, fmt_100, 0 };
+    static cilist io___788 = { 0, 0, 0, fmt_100, 0 };
 
 
 /* -------------------------------------------------------------------- */
@@ -9105,55 +9131,17 @@ e.\002,\002 STORM model is turned off.\002)";
 /* 12-15,15-18,18-21,)21-24(. */
 /* If date is outside the range of the Ap indices file than iap(1)=-5 */
 /* -------------------------------------------------------------------- */
+/*     Fortran include file storing common blocks and associated */
+/*     parameters. */
+
+/*     Changelog: */
+/*       2015-04-16     Created (Joseph Nicholas) */
     /* Parameter adjustments */
     --iap;
 
     /* Function Body */
-    o__1.oerr = 0;
-    o__1.ounit = 13;
-    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
-    o__1.ofnmlen = strlen(o__1.ofnm);	// o__1.ofnmlen = 6;// made changes by Tuan Nguyen
-    o__1.orl = 39;
-    o__1.osta = "OLD";
-    o__1.oacc = "DIRECT";
-    o__1.ofm = "FORMATTED";
-    o__1.oblnk = 0;
-    f_open(&o__1);
-/* -web-sepcial vfor web version */
-/*        OPEN(13,FILE='/var/www/omniweb/cgi/vitmo/IRI/ap.dat', */
-    i__1 = s_rdfe(&io___777);
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jy, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jmn, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jd, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__8, (char *)&iiap[0], (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&f, (ftnlen)sizeof(real));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = e_rdfe();
-    if (i__1 != 0) {
-	goto L21;
-    }
+    jy = ap_1.ints_ap__[0];
     iybeg = jy + 1900;
-    cl__1.cerr = 0;
-    cl__1.cunit = 13;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
     for (i__ = 1; i__ <= 8; ++i__) {
 	iap[i__] = -1;
     }
@@ -9161,18 +9149,6 @@ e.\002,\002 STORM model is turned off.\002)";
 	goto L21;
     }
 /* file starts at Jan 1, 1958 */
-    o__1.oerr = 0;
-    o__1.ounit = 13;
-    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
-    o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 6;	// made changes by Tuan Nguyen
-    o__1.orl = 39;
-    o__1.osta = "OLD";
-    o__1.oacc = "DIRECT";
-    o__1.ofm = "FORMATTED";
-    o__1.oblnk = 0;
-    f_open(&o__1);
-/* -web-sepcial vfor web version */
-/*      OPEN(13,FILE='/usr/local/etc/httpd/cgi-bin/models/IRI/ap.dat', */
     is = 0;
     if (*iyyyy > iybeg) {
 	i__1 = *iyyyy - 1;
@@ -9201,35 +9177,16 @@ e.\002,\002 STORM model is turned off.\002)";
 	goto L21;
     }
 /* at least 13 indices available */
-    io___788.cirec = is;
-    i__1 = s_rdfe(&io___788);
-    if (i__1 != 0) {
+    if (is < 1 || is > ap_1.num_records_ap__) {
 	goto L21;
     }
-    i__1 = do_fio(&c__1, (char *)&jy, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
+    jy = ap_1.ints_ap__[is * 11 - 11];
+    jmn = ap_1.ints_ap__[is * 11 - 10];
+    jd = ap_1.ints_ap__[is * 11 - 9];
+    for (i__ = 1; i__ <= 8; ++i__) {
+	iiap[i__ - 1] = ap_1.ints_ap__[i__ + 3 + is * 11 - 12];
     }
-    i__1 = do_fio(&c__1, (char *)&jmn, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jd, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__8, (char *)&iiap[0], (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&f, (ftnlen)sizeof(real));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = e_rdfe();
-    if (i__1 != 0) {
-	goto L21;
-    }
+    f = ap_1.reals_ap__[is - 1];
     for (i9 = 1; i9 <= 8; ++i9) {
 	if (iiap[i9 - 1] < -2) {
 	    goto L21;
@@ -9241,35 +9198,16 @@ e.\002,\002 STORM model is turned off.\002)";
 	iap[j1 + i__] = iiap[i__ - 1];
     }
     iss = is - 1;
-    io___792.cirec = iss;
-    i__1 = s_rdfe(&io___792);
-    if (i__1 != 0) {
+    if (iss < 1 || iss > ap_1.num_records_ap__) {
 	goto L21;
     }
-    i__1 = do_fio(&c__1, (char *)&jy, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
+    jy = ap_1.ints_ap__[iss * 11 - 11];
+    jmn = ap_1.ints_ap__[iss * 11 - 10];
+    jd = ap_1.ints_ap__[iss * 11 - 9];
+    for (i__ = 1; i__ <= 8; ++i__) {
+	iiap[i__ - 1] = ap_1.ints_ap__[i__ + 3 + iss * 11 - 12];
     }
-    i__1 = do_fio(&c__1, (char *)&jmn, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jd, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__8, (char *)&iiap[0], (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&f, (ftnlen)sizeof(real));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = e_rdfe();
-    if (i__1 != 0) {
-	goto L21;
-    }
+    f = ap_1.reals_ap__[iss - 1];
     for (i9 = 1; i9 <= 8; ++i9) {
 	if (iiap[i9 - 1] < -2) {
 	    goto L21;
@@ -9286,35 +9224,16 @@ e.\002,\002 STORM model is turned off.\002)";
 	    iap[j2 + i__] = iiap[i__ - 1];
 	}
 	iss = is - 2;
-	io___794.cirec = iss;
-	i__1 = s_rdfe(&io___794);
-	if (i__1 != 0) {
+	if (iss < 1 || iss > ap_1.num_records_ap__) {
 	    goto L21;
 	}
-	i__1 = do_fio(&c__1, (char *)&jy, (ftnlen)sizeof(integer));
-	if (i__1 != 0) {
-	    goto L21;
+	jy = ap_1.ints_ap__[iss * 11 - 11];
+	jmn = ap_1.ints_ap__[iss * 11 - 10];
+	jd = ap_1.ints_ap__[iss * 11 - 9];
+	for (i__ = 1; i__ <= 8; ++i__) {
+	    iiap[i__ - 1] = ap_1.ints_ap__[i__ + 3 + iss * 11 - 12];
 	}
-	i__1 = do_fio(&c__1, (char *)&jmn, (ftnlen)sizeof(integer));
-	if (i__1 != 0) {
-	    goto L21;
-	}
-	i__1 = do_fio(&c__1, (char *)&jd, (ftnlen)sizeof(integer));
-	if (i__1 != 0) {
-	    goto L21;
-	}
-	i__1 = do_fio(&c__8, (char *)&iiap[0], (ftnlen)sizeof(integer));
-	if (i__1 != 0) {
-	    goto L21;
-	}
-	i__1 = do_fio(&c__1, (char *)&f, (ftnlen)sizeof(real));
-	if (i__1 != 0) {
-	    goto L21;
-	}
-	i__1 = e_rdfe();
-	if (i__1 != 0) {
-	    goto L21;
-	}
+	f = ap_1.reals_ap__[iss - 1];
 	for (i9 = 1; i9 <= 8; ++i9) {
 	    if (iiap[i9 - 1] < -2) {
 		goto L21;
@@ -9325,15 +9244,11 @@ e.\002,\002 STORM model is turned off.\002)";
 	    iap[i__] = iiap[8 - j2 + i__ - 1];
 	}
     }
-    cl__1.cerr = 0;
-    cl__1.cunit = 13;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
     goto L20;
 L21:
     if (iounit_1.konsol > 1) {
-	io___795.ciunit = iounit_1.konsol;
-	s_wsfe(&io___795);
+	io___788.ciunit = iounit_1.konsol;
+	s_wsfe(&io___788);
 	e_wsfe();
     }
     iap[1] = -5;
@@ -9351,29 +9266,23 @@ L20:
     static integer lm[12] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
 
     /* Format strings */
-    static char fmt_10[] = "(3i3,8i3,f5.1)";
     static char fmt_100[] = "(1x,\002Date is outside range of F10.7D indices\
  file\002,\002 (F10.7D = F10.7M = F10.7RM12).\002)";
 
     /* System generated locals */
-    integer i__1, i__2;
-    olist o__1;
-    cllist cl__1;
+    integer i__1;
 
     /* Builtin functions */
-    integer f_open(olist *), s_rdfe(cilist *), do_fio(integer *, char *, 
-	    ftnlen), e_rdfe(), f_clos(cllist *), s_wsfe(cilist *), e_wsfe();
+    integer s_wsfe(cilist *), e_wsfe();
 
     /* Local variables */
-    static integer iiap[8], mend;
-    static real f;
-    static integer i__, iybeg, jd, is, jy, jmn, nyd;
-    static real sum;
+    real f;
+    integer i__, j, jd, is, jy, jmn, nyd;
+    real sum;
+    integer iiap[8], mend, iybeg;
 
     /* Fortran I/O blocks */
-    static cilist io___797 = { 1, 13, 0, fmt_10, 1 };
-    static cilist io___809 = { 1, 13, 0, fmt_10, 0 };
-    static cilist io___810 = { 0, 0, 0, fmt_100, 0 };
+    static cilist io___802 = { 0, 0, 0, fmt_100, 0 };
 
 
 /* -------------------------------------------------------------------- */
@@ -9382,67 +9291,17 @@ L20:
 /* UNIT=13. Is used for vdrift and foeedi. */
 /* If date is outside the range of indices file than F107D=-5 */
 /* -------------------------------------------------------------------- */
-    o__1.oerr = 0;
-    o__1.ounit = 13;
-    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
-    o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 6;	// made changes by Tuan Nguyen
-    o__1.orl = 39;
-    o__1.osta = "OLD";
-    o__1.oacc = "DIRECT";
-    o__1.ofm = "FORMATTED";
-    o__1.oblnk = 0;
-    f_open(&o__1);
-/* -web-sepcial vfor web version */
-/*        OPEN(13,FILE='/var/www/omniweb/cgi/vitmo/IRI/ap.dat', */
-    i__1 = s_rdfe(&io___797);
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jy, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jmn, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&jd, (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__8, (char *)&iiap[0], (ftnlen)sizeof(integer));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = do_fio(&c__1, (char *)&f, (ftnlen)sizeof(real));
-    if (i__1 != 0) {
-	goto L21;
-    }
-    i__1 = e_rdfe();
-    if (i__1 != 0) {
-	goto L21;
-    }
+/*     Fortran include file storing common blocks and associated */
+/*     parameters. */
+
+/*     Changelog: */
+/*       2015-04-16     Created (Joseph Nicholas) */
+    jy = ap_1.ints_ap__[0];
     iybeg = jy + 1900;
-    cl__1.cerr = 0;
-    cl__1.cunit = 13;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
     if (*iyyyy < iybeg) {
 	goto L21;
     }
 /* AP.DAT starts at Jan 1, 1958 */
-    o__1.oerr = 0;
-    o__1.ounit = 13;
-    o__1.ofnm = "./../data/IonosphereData/ap.dat";			// made changes by Tuan Nguyen on Jan 11, 2013
-    o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 6;	// made changes by Tuan Nguyen
-    o__1.orl = 39;
-    o__1.osta = "OLD";
-    o__1.oacc = "DIRECT";
-    o__1.ofm = "FORMATTED";
-    o__1.oblnk = 0;
-    f_open(&o__1);
-/* -web-sepcial vfor web version */
-/*      OPEN(13,FILE='/var/www/omniweb/cgi/vitmo/IRI/ap.dat', */
     is = 0;
     i__1 = *iyyyy - 1;
     for (i__ = iybeg; i__ <= i__1; ++i__) {
@@ -9467,35 +9326,16 @@ L20:
     i__1 = mend;
     for (i__ = 1; i__ <= i__1; ++i__) {
 	++is;
-	io___809.cirec = is;
-	i__2 = s_rdfe(&io___809);
-	if (i__2 != 0) {
+	if (is < 1 || is > ap_1.num_records_ap__) {
 	    goto L21;
 	}
-	i__2 = do_fio(&c__1, (char *)&jy, (ftnlen)sizeof(integer));
-	if (i__2 != 0) {
-	    goto L21;
+	jy = ap_1.ints_ap__[is * 11 - 11];
+	jmn = ap_1.ints_ap__[is * 11 - 10];
+	jd = ap_1.ints_ap__[is * 11 - 9];
+	for (j = 1; j <= 8; ++j) {
+	    iiap[j - 1] = ap_1.ints_ap__[j + 3 + is * 11 - 12];
 	}
-	i__2 = do_fio(&c__1, (char *)&jmn, (ftnlen)sizeof(integer));
-	if (i__2 != 0) {
-	    goto L21;
-	}
-	i__2 = do_fio(&c__1, (char *)&jd, (ftnlen)sizeof(integer));
-	if (i__2 != 0) {
-	    goto L21;
-	}
-	i__2 = do_fio(&c__8, (char *)&iiap[0], (ftnlen)sizeof(integer));
-	if (i__2 != 0) {
-	    goto L21;
-	}
-	i__2 = do_fio(&c__1, (char *)&f, (ftnlen)sizeof(real));
-	if (i__2 != 0) {
-	    goto L21;
-	}
-	i__2 = e_rdfe();
-	if (i__2 != 0) {
-	    goto L21;
-	}
+	f = ap_1.reals_ap__[is - 1];
 	if (f < (float)-4.) {
 	    goto L21;
 	}
@@ -9505,15 +9345,11 @@ L20:
 	sum += f;
     }
     *f107m = sum / mend;
-    cl__1.cerr = 0;
-    cl__1.cunit = 13;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
     goto L20;
 L21:
     if (iounit_1.konsol > 1) {
-	io___810.ciunit = iounit_1.konsol;
-	s_wsfe(&io___810);
+	io___802.ciunit = iounit_1.konsol;
+	s_wsfe(&io___802);
 	e_wsfe();
     }
     *f107d = (float)-111.;
@@ -9909,11 +9745,11 @@ L20:
 	    8.15,(float)8.15,(float)8.15,(float)8.15,(float)8.15,(float)8.15,(
 	    float)8.15,(float)8.15 };
 
-    static real gmla, rlan, x, y;
-    static integer la1, la2;
-    static real gm1, gm2, gm3, gm4;
-    static integer lo1, lo2;
-    static real rla, rlo;
+    real x, y;
+    integer la1, la2;
+    real gm1, gm2, gm3, gm4;
+    integer lo1, lo2;
+    real rla, rlo, gmla, rlan;
 
 /*     This subroutine converts a geographic latitude and longitude */
 /*     location to a corrected geomagnetic latitude. */
@@ -10023,33 +9859,32 @@ L20:
 	    e_wsle();
 
     /* Local variables */
-    static real facl, facs, rapf;
-    static integer i__, j, k, dayno, l1, l2, n1, n2, n3, n4, s1, s2;
-    static real rl, rs, cf1, cf2;
+    integer i__, j, k, l1, l2, n1, n2, n3, n4, s1, s2;
+    real rl, rs, cf1, cf2, cf3, cf4;
+    integer ape[39];
+    real rap, cf300, facl, facs, rapf;
+    integer dayno;
     extern /* Subroutine */ int conver_(real *, real *, real *);
-    static real cf3, cf4;
-    static integer ape[39];
-    static real rap, cf300;
 
     /* Fortran I/O blocks */
+    static cilist io___825 = { 0, 6, 0, 0, 0 };
+    static cilist io___826 = { 0, 6, 0, 0, 0 };
+    static cilist io___827 = { 0, 6, 0, 0, 0 };
+    static cilist io___828 = { 0, 6, 0, 0, 0 };
+    static cilist io___832 = { 0, 6, 0, 0, 0 };
     static cilist io___833 = { 0, 6, 0, 0, 0 };
     static cilist io___834 = { 0, 6, 0, 0, 0 };
     static cilist io___835 = { 0, 6, 0, 0, 0 };
-    static cilist io___836 = { 0, 6, 0, 0, 0 };
+    static cilist io___838 = { 0, 6, 0, 0, 0 };
+    static cilist io___839 = { 0, 6, 0, 0, 0 };
     static cilist io___840 = { 0, 6, 0, 0, 0 };
     static cilist io___841 = { 0, 6, 0, 0, 0 };
     static cilist io___842 = { 0, 6, 0, 0, 0 };
     static cilist io___843 = { 0, 6, 0, 0, 0 };
+    static cilist io___844 = { 0, 6, 0, 0, 0 };
+    static cilist io___845 = { 0, 6, 0, 0, 0 };
     static cilist io___846 = { 0, 6, 0, 0, 0 };
     static cilist io___847 = { 0, 6, 0, 0, 0 };
-    static cilist io___848 = { 0, 6, 0, 0, 0 };
-    static cilist io___849 = { 0, 6, 0, 0, 0 };
-    static cilist io___850 = { 0, 6, 0, 0, 0 };
-    static cilist io___851 = { 0, 6, 0, 0, 0 };
-    static cilist io___852 = { 0, 6, 0, 0, 0 };
-    static cilist io___853 = { 0, 6, 0, 0, 0 };
-    static cilist io___854 = { 0, 6, 0, 0, 0 };
-    static cilist io___855 = { 0, 6, 0, 0, 0 };
 
 
 /* ---------------------------------------------------------------------- */
@@ -10093,18 +9928,18 @@ L20:
     } else if (*coor == 2) {
 	*rgma = *rga;
     } else {
-	s_wsle(&io___833);
+	s_wsle(&io___825);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___834);
+	s_wsle(&io___826);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___835);
+	s_wsle(&io___827);
 	do_lio(&c__9, &c__1, "   Wrong Coordinates Selection -------- >>", (
 		ftnlen)42);
 	do_lio(&c__3, &c__1, (char *)&(*coor), (ftnlen)sizeof(integer));
 	e_wsle();
-	s_wsle(&io___836);
+	s_wsle(&io___828);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
 	goto L100;
@@ -10149,18 +9984,18 @@ L20:
 	    ut == 17 || *ut == 20 || *ut == 23) {
 	k = 3;
     } else {
-	s_wsle(&io___840);
+	s_wsle(&io___832);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___841);
+	s_wsle(&io___833);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___842);
+	s_wsle(&io___834);
 	do_lio(&c__9, &c__1, "  Wrong Universal Time value -------- >>", (
 		ftnlen)40);
 	do_lio(&c__3, &c__1, (char *)&(*ut), (ftnlen)sizeof(integer));
 	e_wsle();
-	s_wsle(&io___843);
+	s_wsle(&io___835);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
 	goto L100;
@@ -10174,41 +10009,41 @@ L20:
 	goto L100;
     }
     if (*doy > 366 || *doy < 1) {
-	s_wsle(&io___846);
+	s_wsle(&io___838);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___847);
+	s_wsle(&io___839);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___848);
+	s_wsle(&io___840);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___849);
+	s_wsle(&io___841);
 	do_lio(&c__9, &c__1, "      Wrong Day of Year value --- >>", (ftnlen)
 		36);
 	do_lio(&c__3, &c__1, (char *)&(*doy), (ftnlen)sizeof(integer));
 	e_wsle();
-	s_wsle(&io___850);
+	s_wsle(&io___842);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
 	goto L100;
     }
     if (*rgma > (float)90. || *rgma < (float)-90.) {
-	s_wsle(&io___851);
+	s_wsle(&io___843);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___852);
+	s_wsle(&io___844);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___853);
+	s_wsle(&io___845);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
-	s_wsle(&io___854);
+	s_wsle(&io___846);
 	do_lio(&c__9, &c__1, "   Wrong GEOMAGNETIC LATITUDE value --- >>", (
 		ftnlen)42);
 	do_lio(&c__4, &c__1, (char *)&(*rgma), (ftnlen)sizeof(real));
 	e_wsle();
-	s_wsle(&io___855);
+	s_wsle(&io___847);
 	do_lio(&c__9, &c__1, " ", (ftnlen)1);
 	e_wsle();
 	goto L100;
@@ -10507,13 +10342,12 @@ L100:
     integer i__1, i__2, i__3;
 
     /* Local variables */
-    static real bspl4;
     extern /* Subroutine */ int g_(real *, real *, real *);
-    static integer i__, j;
-    static real coeff[624], funct[6];
+    integer i__, j;
     extern doublereal bspl4_time__(integer *, real *), bspl4_long__(integer *,
 	     real *);
-    static integer il, kk, ind;
+    integer il, kk, ind;
+    real bspl4, coeff[624], funct[6];
 
 /* ------------------------------------------------------------------- */
 /*       SUBROUTINE CALCULATES EQUATORIAL VERTICAL DRIFT AS DESCRIBED */
@@ -10582,10 +10416,10 @@ doublereal bspl4_time__(integer *i__, real *x1)
     real ret_val;
 
     /* Local variables */
-    static real b[400]	/* was [20][20] */;
-    static integer j, k;
-    static real x;
-    static integer order;
+    real b[400]	/* was [20][20] */;
+    integer j, k;
+    real x;
+    integer order;
 
 /*       ************************************************* */
 /*        implicit REAL*8 (A-H,O-Z) */
@@ -10637,10 +10471,10 @@ doublereal bspl4_long__(integer *i__, real *x1)
     real ret_val;
 
     /* Local variables */
-    static real b[400]	/* was [20][20] */;
-    static integer j, k;
-    static real x;
-    static integer order;
+    real b[400]	/* was [20][20] */;
+    integer j, k;
+    real x;
+    integer order;
 
 /*        real*8 function bspl4_long(i,x1) */
 /*       ************************************************* */
@@ -10687,9 +10521,9 @@ doublereal bspl4_long__(integer *i__, real *x1)
     double exp(doublereal);
 
     /* Local variables */
-    static real flux, a;
-    static integer i__;
-    static real sigma, cflux, gauss;
+    real a;
+    integer i__;
+    real flux, sigma, cflux, gauss;
 
 /*       ************************************************* */
 /*        implicit real*8 (A-H,O-Z) */
@@ -10815,15 +10649,14 @@ doublereal bspl4_long__(integer *i__, real *x1)
 	    e_wsle();
 
     /* Local variables */
-    static real alfa, beta, ae1_12__, aed1_6__;
-    static integer i__, j;
-    static real aed7_12__, ae7_12s__, aed22_28__, daet_30__, aed1_6s__, 
-	    daet_90__, daet_75__, aed7_12s__, aed22_28p__, aed22_28s__;
+    integer i__, j;
     extern doublereal bspl4_ptime__(integer *, real *);
-    static real daet_7p5__, ae1_6__;
+    real ae1_6__, alfa, beta, ae1_12__, aed1_6__, aed7_12__, ae7_12s__, 
+	    aed22_28__, daet_30__, aed1_6s__, daet_90__, daet_75__, 
+	    aed7_12s__, aed22_28p__, aed22_28s__, daet_7p5__;
 
     /* Fortran I/O blocks */
-    static cilist io___930 = { 0, 6, 0, 0, 0 };
+    static cilist io___922 = { 0, 6, 0, 0, 0 };
 
 
 /* ******************************************************************* */
@@ -11026,7 +10859,7 @@ doublereal bspl4_long__(integer *i__, real *x1)
 		    bspl4_ptime__(&j, slt);
 	}
 	*dynamovd = (float)0.;
-	s_wsle(&io___930);
+	s_wsle(&io___922);
 	do_lio(&c__4, &c__1, (char *)&aed1_6__, (ftnlen)sizeof(real));
 	do_lio(&c__4, &c__1, (char *)&aed7_12__, (ftnlen)sizeof(real));
 	do_lio(&c__4, &c__1, (char *)&aed22_28p__, (ftnlen)sizeof(real));
@@ -11061,10 +10894,10 @@ doublereal bspl4_ptime__(integer *i__, real *x1)
     real ret_val;
 
     /* Local variables */
-    static real b[400]	/* was [20][20] */;
-    static integer j, k;
-    static real x;
-    static integer order;
+    real b[400]	/* was [20][20] */;
+    integer j, k;
+    real x;
+    integer order;
 
 /*       real*8 function bspl4_ptime(i,x1) */
 /* ************************************************* */
@@ -11340,13 +11173,11 @@ doublereal bspl4_ptime__(integer *i__, real *x1)
 	    float)0.,(float).02,(float)0.,(float).03,(float).02,(float).03,(
 	    float).01,(float).02,(float).01 };
 
-    static real sosf[2304]	/* was [2][32][3][12] */, osft, bspl4;
-    static integer i__, j, k, l, m;
-    static real param[3];
+    integer i__, j, k, l, m, kc, il, kk, jl, ml, it, iii;
+    real slt, sosf[2304]	/* was [2][32][3][12] */, osft, bspl4, param[
+	    3];
     extern doublereal bspl2f_(integer *, real *), bspl2l_(integer *, real *), 
 	    bspl2s_(integer *, real *), bspl4t_(integer *, real *);
-    static integer kc, il, kk, jl, ml, it, iii;
-    static real slt;
 
 /* ********************************************************************* */
 
@@ -11521,9 +11352,9 @@ doublereal bspl4t_(integer *i__, real *t1)
     real ret_val;
 
     /* Local variables */
-    static real b[900]	/* was [30][30] */;
-    static integer j, k;
-    static real t;
+    real b[900]	/* was [30][30] */;
+    integer j, k;
+    real t;
 
 /* ********************************************************************* */
 
@@ -11576,9 +11407,9 @@ doublereal bspl2s_(integer *i__, real *t1)
     real ret_val;
 
     /* Local variables */
-    static real b[900]	/* was [30][30] */;
-    static integer j, k;
-    static real t;
+    real b[900]	/* was [30][30] */;
+    integer j, k;
+    real t;
 
 /* ***************************************************************** */
 
@@ -11624,9 +11455,9 @@ doublereal bspl2l_(integer *i__, real *t1)
     real ret_val;
 
     /* Local variables */
-    static real b[900]	/* was [30][30] */;
-    static integer j, k;
-    static real t;
+    real b[900]	/* was [30][30] */;
+    integer j, k;
+    real t;
 
 /* ****************************************************************** */
 
@@ -11677,9 +11508,9 @@ doublereal bspl2f_(integer *i__, real *t1)
     real ret_val;
 
     /* Local variables */
-    static real b[900]	/* was [30][30] */;
-    static integer j, k;
-    static real t, ts[10];
+    real b[900]	/* was [30][30] */;
+    integer j, k;
+    real t, ts[10];
 
 /* ************************************************************************ */
 

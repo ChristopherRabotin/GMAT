@@ -78,6 +78,7 @@ MeasureModel::PARAMETER_TYPE[MeasurementParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const std::string &name) :
    GmatBase          (Gmat::MEASUREMENT_MODEL, "SignalBasedMeasurement", name),
+   stmRowCount       (6),
    feasible          (false),
    withLighttime     (true),
    propsNeedInit     (false),          // Only need init if one is set
@@ -170,6 +171,7 @@ MeasureModel::~MeasureModel()
 //------------------------------------------------------------------------------
 MeasureModel::MeasureModel(const MeasureModel& mm) :
    GmatBase          (mm),
+   stmRowCount       (mm.stmRowCount),
    feasible          (false),
    withLighttime     (mm.withLighttime),
    propsNeedInit     (false),
@@ -211,6 +213,7 @@ MeasureModel& MeasureModel::operator=(const MeasureModel& mm)
       GmatBase::operator=(mm);
 
       theData.clear();
+      stmRowCount         = mm.stmRowCount;
       feasible            = false;
       withLighttime       = mm.withLighttime;
       navLog              = mm.navLog;
@@ -625,7 +628,7 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
       const Gmat::ObjectType type)
 {
    refObjectNames.clear();
-
+   
    // Build the list
    for (std::vector<StringArray*>::iterator sa = participantLists.begin();
          sa != participantLists.end(); ++sa)
@@ -635,7 +638,7 @@ const StringArray& MeasureModel::GetRefObjectNameArray(
          std::string candidate = (*sa)->at(i);
          if (find(refObjectNames.begin(), refObjectNames.end(), candidate) ==
                refObjectNames.end())
-            refObjectNames.push_back(candidate);
+         refObjectNames.push_back(candidate);
       }
    }
 
@@ -798,6 +801,13 @@ void MeasureModel::SetPropagator(PropSetup* ps)
    {
       SpacePoint *obj = i->first;
       
+      bool updateSTMRowCount = false;
+      if (obj->IsOfType(Gmat::SPACECRAFT))
+      {
+         stmRowCount = obj->GetIntegerParameter("FullSTMRowCount");
+         updateSTMRowCount = true;
+      }
+
       if (obj->IsOfType(Gmat::SPACEOBJECT))
       {
          // Clone the propagator for each SpaceObject
@@ -809,6 +819,10 @@ void MeasureModel::SetPropagator(PropSetup* ps)
             for (UnsignedInt i = 0; i < signalPaths.size(); ++i)
             {
                signalPaths[i]->SetPropagator(propagator, obj);
+               if (updateSTMRowCount)
+               {
+                  signalPaths[i]->SetStmRowCount(stmRowCount);
+               }
             }
          }
       }
@@ -828,7 +842,7 @@ void MeasureModel::SetPropagator(PropSetup* ps)
 bool MeasureModel::Initialize()
 {
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("Start MeasurementModel<%p>::Initialize()\n", this);
+      MessageInterface::ShowMessage("Start MeasurementModel<%s,%p>::Initialize()\n", GetName().c_str(), this);
    #endif
 
    bool retval = false;
@@ -976,6 +990,42 @@ bool MeasureModel::Initialize()
             for(UnsignedInt i = 0; i < correctionTypeList.size(); ++i)
                AddCorrection(correctionModelList[i], correctionTypeList[i]);
 
+            // For each ground station, clone all ErrorModel objects for each signal path                // made changes by TUAN NGUYEN
+            for (UnsignedInt i = 0; i < participants.size(); ++i)                                        // made changes by TUAN NGUYEN
+            {                                                                                            // made changes by TUAN NGUYEN
+               GmatBase* firstPart = participants[i]->at(0);                                             // made changes by TUAN NGUYEN
+               GmatBase* lastPart = participants[i]->at(participants[i]->size()-1);                      // made changes by TUAN NGUYEN
+               
+               if (firstPart->IsOfType(Gmat::GROUND_STATION))                                            // made changes by TUAN NGUYEN
+               {                                                                                         // made changes by TUAN NGUYEN
+                  // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
+                  std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
+                  if (participants[i]->at(1)->IsOfType(Gmat::SPACECRAFT))                                // made changes by TUAN NGUYEN
+                     spacecraftName = participants[i]->at(1)->GetName();                                 // made changes by TUAN NGUYEN
+                  else                                                                                   // made changes by TUAN NGUYEN
+                     throw MeasurementException("Error: It has 2 ground stations (" + 
+                          firstPart->GetName() + ", " + participants[i]->at(1)->GetName() + 
+                          ") next to each other in signal path.\n");                                     // made changes by TUAN NGUYEN
+
+                  ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName);  // made changes by TUAN NGUYEN
+               }
+
+               // It is one-way or three-ways range measurement                                          // made changes by TUAN NGUYEN
+               if ((lastPart != firstPart)&&(lastPart->IsOfType(Gmat::GROUND_STATION)))                  // made changes by TUAN NGUYEN
+               {                                                                                         // made changes by TUAN NGUYEN
+                  // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
+                  std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
+                  if (participants[i]->at(participants[i]->size()-2)->IsOfType(Gmat::SPACECRAFT))        // made changes by TUAN NGUYEN
+                     spacecraftName = participants[i]->at(participants[i]->size()-2)->GetName();         // made changes by TUAN NGUYEN
+                  else                                                                                   // made changes by TUAN NGUYEN
+                     throw MeasurementException("Error: It has 2 ground stations (" + 
+                            participants[i]->at(participants[i]->size()-2)->GetName() + ", " + 
+                            lastPart->GetName() + ") next to each other in signal path.\n");             // made changes by TUAN NGUYEN
+
+                  ((GroundstationInterface*) lastPart)->CreateErrorModelForSignalPath(spacecraftName);   // made changes by TUAN NGUYEN
+               }                                                                                         // made changes by TUAN NGUYEN
+            }                                                                                            // made changes by TUAN NGUYEN
+
             retval = true;
          }
          else
@@ -1014,7 +1064,7 @@ bool MeasureModel::Initialize()
    }
 
    #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("End MeasurementModel<%p>::Initialize()\n", this);
+      MessageInterface::ShowMessage("End MeasurementModel<%s,%p>::Initialize()\n", GetName().c_str(), this);
    #endif
 
    return retval;
@@ -1139,11 +1189,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       MessageInterface::ShowMessage("2. Find the measurement epoch needed for the computation\n");
    #endif
 
-#ifdef USE_PRECISION_TIME
    GmatTime forEpoch;
-#else
-   GmatEpoch forEpoch;
-#endif
    if (forObservation)
       forEpoch = forObservation->epoch;
    else // Grab epoch from the first SpaceObject in the participant data
@@ -1173,11 +1219,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    // 3. Synchronize the propagators to the measurement epoch by propagating each
    // spacecraft that is off epoch to that epoch
    #ifdef DEBUG_TIMING
-      #ifdef USE_PRECISION_TIME
       MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch.GetMjd());
-      #else
-      MessageInterface::ShowMessage("3. Synchronizing in MeasureModel at time = %.12lf\n", forEpoch);
-      #endif
    #endif
 
    for (std::map<SpacePoint*,PropSetup*>::iterator i = propMap.begin();
@@ -1186,20 +1228,11 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       if (i->first->IsOfType(Gmat::SPACEOBJECT) && (i->second != NULL))
       {
          GmatEpoch satTime = ((SpaceObject*)i->first)->GetEpoch();
-#ifdef USE_PRECISION_TIME
          Real dt = (forEpoch - satTime).GetTimeInSec();
-#else
-         Real dt = (forEpoch - satTime) * GmatTimeConstants::SECS_PER_DAY;
-#endif
 
          #ifdef DEBUG_EXECUTION
-#ifdef USE_PRECISION_TIME
             MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
                   "dt = %le\n", forEpoch.GetMjd(), satTime, dt);
-#else
-            MessageInterface::ShowMessage("forEpoch: %.12lf, satTime = %.12lf, "
-                  "dt = %le\n", forEpoch, satTime, dt);
-#endif
          #endif
 
          // Make sure the propagators are set to the spacecraft data
@@ -1219,11 +1252,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
    #ifdef DEBUG_CALCULATE_MEASUREMENT
       MessageInterface::ShowMessage("*************************************************************\n");
 
-      #ifdef USE_PRECISION_TIME
       MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch.GetMjd());
-      #else
-      MessageInterface::ShowMessage("*          Calculate Measurement Data %s at Epoch (%.12lf) \n", (withEvents?"with Event":"w/o Event"), forEpoch);
-      #endif
      
       MessageInterface::ShowMessage("*************************************************************\n");
    #endif
@@ -1237,7 +1266,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
          i = forStrand;
 
       #ifdef DEBUG_CALCULATE_MEASUREMENT
-         MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d:  ", i);
+         MessageInterface::ShowMessage("*** Calculate Measurement Data for Path %d of %d:  ", i, signalPaths.size());
          SignalBase* s = signalPaths[i];
          SignalData* sdata; 
          while (s != NULL)
@@ -1287,15 +1316,14 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
       // 4.3. Sync transmitter and receiver epochs to forEpoch, and Spacecraft state
       // data to the state known in the PropSetup for the starting Signal
       leg = signalPaths[i];
+
+      /// @todo Adjust the following code for multiple spacecraft
+
       while (leg != NULL)
       {
          SignalData *sdObj = leg->GetSignalDataObject();
 
-         #ifdef USE_PRECISION_TIME
             sdObj->tPrecTime = sdObj->rPrecTime = forEpoch;
-         #else
-            sdObj->tTime = sdObj->rTime = forEpoch;
-         #endif
          if (sdObj->tNode->IsOfType(Gmat::SPACECRAFT))
          {
             const Real* propState =
@@ -1303,11 +1331,10 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
             Rvector6 state(propState);
             sdObj->tLoc = state.GetR();
             sdObj->tVel = state.GetV();
-
             // transmit participant STM at measurement time tm
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
-                  sdObj->tSTMtm(ii,jj) = propState[6 + ii*6 + jj];
+                  sdObj->tSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
 
             // transmit participant STM at transmite time t1
             sdObj->tSTM = sdObj->tSTMtm;
@@ -1324,7 +1351,7 @@ bool MeasureModel::CalculateMeasurement(bool withEvents,
             // receive participant STM at measurement type tm
             for (UnsignedInt ii = 0; ii < 6; ++ii)
                for (UnsignedInt jj = 0; jj < 6; ++jj)
-                  sdObj->rSTMtm(ii,jj) = propState[6 + ii*6 + jj];
+                  sdObj->rSTMtm(ii,jj) = propState[6 + ii*stmRowCount + jj];
 
             // receive participant STM at receive time t2
             sdObj->rSTM = sdObj->rSTMtm;

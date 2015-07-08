@@ -48,6 +48,9 @@ class FunctionManager;
 // Forward reference for the function containing this command
 class Function;
 
+// Other forward references
+class Parameter;
+
 /**
  * GmatCommand Base Class, used for Mission Control Sequence elements in scripts
  *
@@ -341,8 +344,6 @@ protected:
    virtual void         BuildCommandSummaryString(bool commandCompleted = true);
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
-   virtual const std::string
-                        BuildNumber(Real value, bool useExp = false, Integer length = 17);
    // for command name
    virtual void         InsertCommandName(std::string &genString);
    
@@ -364,7 +365,10 @@ protected:
                                        std::string &lhs, std::string &rhs,
                                        bool checkOp = false);
    
+   // For objects
    GmatBase* FindObject(const std::string &name);
+   // For referencing cloned objects
+   virtual void        HandleReferencesToClones(Parameter *param);
    
    // Method(s) used for ParametersInCommands
    bool                SetWrapperReferences(ElementWrapper &wrapper);

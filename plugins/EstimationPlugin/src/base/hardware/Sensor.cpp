@@ -195,7 +195,12 @@ Integer Sensor::GetParameterID(const std::string & str) const
    for (Integer i = HardwareParamCount; i < SensorParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - HardwareParamCount])
+      {
+         if (IsParameterReadOnly(i))
+            throw GmatBaseException("Error: '" + str + "' parameter was not defined in GMAT " + typeName + "'s syntax.\n");
+         
          return i;
+      }
    }
 
    return Hardware::GetParameterID(str);

@@ -123,6 +123,8 @@ public:
 
    virtual bool         HasLocalClones();
    virtual void         UpdateClonedObject(GmatBase *obj);
+   virtual void         UpdateClonedObjectParameter(GmatBase *obj,
+                              Integer updatedParameterId);
 
 protected:
    /// Enumeration for the scripted parameters on the Simulator
@@ -131,9 +133,7 @@ protected:
       MEASUREMENTS = SolverParamCount,
       PROPAGATOR,
       EPOCH_FORMAT,
-//      INITIAL_EPOCH_FORMAT,
       INITIAL_EPOCH,
-//      FINAL_EPOCH_FORMAT,
       FINAL_EPOCH,
       MEASUREMENT_TIME_STEP,
       ADD_NOISE,

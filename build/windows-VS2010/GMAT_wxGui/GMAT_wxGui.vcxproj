@@ -122,7 +122,7 @@
     <TargetName>GMAT_D</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
-    <GenerateManifest>false</GenerateManifest>
+    <GenerateManifest>true</GenerateManifest>
     <OutDir>..\..\..\application\bin\</OutDir>
     <TargetName>GMAT</TargetName>
   </PropertyGroup>
@@ -167,7 +167,7 @@
       <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -260,7 +260,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\cspice\include;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include\msvc;..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;..\..\..\src\gui\include\bitmaps;..\..\..\src\gui\foundation;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\subscriber;..\..\..\src\gui\view;..\..\..\src\gui\app;..\..\..\src\base\include;..\..\..\src\base\util;..\..\..\src\base\foundation;..\..\..\src\base\interpolator;..\..\..\src\base\solarsys;..\..\..\src\base\coordsystem;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\hardware;..\..\..\src\base\spacecraft;..\..\..\src\base\burn;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\propagator;..\..\..\src\base\parameter;..\..\..\src\base\math;..\..\..\src\base\stopcond;..\..\..\src\base\solver;..\..\..\src\base\command;..\..\..\src\base\factory;..\..\..\src\base\function;..\..\..\src\base\interpreter;..\..\..\src\base\plugin;..\..\..\src\base\configs;..\..\..\src\base\executive;..\..\..\src\base\interface;..\..\..\src\base\subscriber;..\..\..\src\base\event;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DYNAMICLINK;WXUSINGDLL;__USE_STC_EDITOR__;__DISABLE_EMAIL__;__USE_SPICE__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -278,7 +278,7 @@
       <AdditionalDependencies>opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\wxWidgets-3.0\include;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -316,6 +316,7 @@
     <ClCompile Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\CallFunctionPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\EndFiniteBurnPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\GmatCommandPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\ManageObjectPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\command\ManeuverPanel.cpp" />
@@ -333,6 +334,7 @@
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\forcemodel\DragInputsDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupDialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\foundation\ArraySetupPanel.cpp" />
@@ -383,6 +385,7 @@
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.cpp" />
+    <ClCompile Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\LibrationPointPanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solarsys\UniversePanel.cpp" />
     <ClCompile Include="..\..\..\src\gui\solver\DCSetupPanel.cpp" />
@@ -521,6 +524,7 @@
     <ClInclude Include="..\..\..\src\gui\command\BeginFiniteBurnPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\CallFunctionPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\EndFiniteBurnPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\GmatCommandPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\ManageObjectPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\command\ManeuverPanel.hpp" />
@@ -538,6 +542,7 @@
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSysCreateDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\coordsystem\CoordSystemConfigPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\forcemodel\DragInputsDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupDialog.hpp" />
     <ClInclude Include="..\..\..\src\gui\foundation\ArraySetupPanel.hpp" />
@@ -591,6 +596,7 @@
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyOrientationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyPropertiesPanel.hpp" />
+    <ClInclude Include="..\..\..\src\gui\solarsys\CelestialBodyVisualizationPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\LibrationPointPanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solarsys\UniversePanel.hpp" />
     <ClInclude Include="..\..\..\src\gui\solver\DCSetupPanel.hpp" />

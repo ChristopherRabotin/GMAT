@@ -3,13 +3,59 @@
 	-lf2c -lm   (in that order)
 */
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 #include "f2c.h"
 
 /* Common Block Declarations */
+
+struct {
+    integer nmax_shc__[14];
+    real erad_shc__[14], shcfiles[11200]	/* was [4][200][14] */;
+} shc1_;
+
+#define shc1_1 shc1_
+
+struct {
+    char filmod[168];
+} shc2_;
+
+#define shc2_1 shc2_
+
+struct {
+    real dtemod[14];
+} shc3_;
+
+#define shc3_1 shc3_
+
+struct {
+    integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
+	    imend_igrz__, iyend_igrz__;
+    real ionoindx_igrz__[722], indrz_igrz__[722];
+} igrz1_;
+
+#define igrz1_1 igrz1_
+
+struct {
+    integer num_records_ap__, ints_ap__[440000]	/* was [11][40000] */;
+    real reals_ap__[40000];
+} ap_;
+
+#define ap_1 ap_
+
+struct {
+    real f2_ccir__[23712]	/* was [13][76][2][12] */, f3_ccir__[10584]	
+	    /* was [9][49][2][12] */;
+} ccir_;
+
+#define ccir_1 ccir_
+
+struct {
+    real f2_ursi__[23712]	/* was [13][76][2][12] */;
+} ursi_;
+
+#define ursi_1 ursi_
 
 struct {
     real umr;
@@ -129,35 +175,33 @@ static real c_b71 = (float)80.;
 static real c_b72 = (float)110.;
 static real c_b73 = (float)200.;
 static real c_b75 = (float)12.;
-static integer c__1976 = 1976;
-static integer c__882 = 882;
-static real c_b121 = (float)1.;
-static real c_b125 = (float)1.9;
-static real c_b126 = (float)2.6;
-static real c_b129 = (float)28.;
-static real c_b134 = (float)81.;
-static real c_b137 = (float).06;
-static real c_b145 = (float)4e8;
-static real c_b147 = (float)88.;
-static real c_b150 = (float).05;
-static real c_b153 = (float)4.6;
-static real c_b154 = (float)4.5;
-static real c_b157 = (float)-11.5;
-static real c_b158 = (float)-4.;
-static doublereal c_b161 = 10.;
-static real c_b170 = (float).001;
-static real c_b188 = (float)0.;
-static doublereal c_b195 = 2.;
-static real c_b196 = (float)1.5;
-static real c_b206 = (float)3.;
-static real c_b213 = (float)130.;
-static real c_b214 = (float)500.;
-static real c_b217 = (float).01;
+static real c_b96 = (float)1.;
+static real c_b100 = (float)1.9;
+static real c_b101 = (float)2.6;
+static real c_b104 = (float)28.;
+static real c_b109 = (float)81.;
+static real c_b112 = (float).06;
+static real c_b120 = (float)4e8;
+static real c_b122 = (float)88.;
+static real c_b125 = (float).05;
+static real c_b128 = (float)4.6;
+static real c_b129 = (float)4.5;
+static real c_b132 = (float)-11.5;
+static real c_b133 = (float)-4.;
+static doublereal c_b136 = 10.;
+static real c_b145 = (float).001;
+static real c_b163 = (float)0.;
+static doublereal c_b170 = 2.;
+static real c_b171 = (float)1.5;
+static real c_b181 = (float)3.;
+static real c_b188 = (float)130.;
+static real c_b189 = (float)500.;
+static real c_b192 = (float).01;
 static integer c__12 = 12;
 static integer c__4 = 4;
 static integer c__2 = 2;
-static real c_b239 = (float)10.;
-static real c_b246 = (float)50.;
+static real c_b214 = (float)10.;
+static real c_b221 = (float)50.;
 
 /* irisub.for, version number can be found at the end of this comment. */
 /* ----------------------------------------------------------------------- */
@@ -264,6 +308,9 @@ static real c_b246 = (float)50.;
 /* 2007.05 03/26/09 call for APF_ONLY includes F107M */
 /* 2007.06 08/17/09 STROM off if input; fof2in, fof1in,foein corr */
 /* 2007.07 02/03/10 F10.7D = F10.7M = COV if EOF */
+/*         04/16/15 Bugfix: Init IER=0 in IRI_SUB/IRI_WEB (J. Nicholas) */
+/*         04/16/15 Load data from memory instead of file (J. Nicholas) */
+/*         04/27/15 Error checking bugfixes (J. Nicholas) */
 
 /* ***************************************************************** */
 /* ********* INTERNATIONAL REFERENCE IONOSPHERE (IRI). ************* */
@@ -312,13 +359,7 @@ or\002,\002 NmF2 user input\002)";
 ed.\002)";
     static char fmt_9033[] = "(\002Te: Aeros/ISIS model\002)";
     static char fmt_9034[] = "(\002Te: Interkosmos model\002)";
-//    static char fmt_104[] = "(\002ccir\002,i2,\002.asc\002)";
-    static char fmt_104[] = "('./../data/IonosphereData/ccir',i2,'.asc')";		// made changes by TUAN NGUYEN on Jan 11, 2013
-    static char fmt_4689[] = "(1x,4e15.8)";
-//    static char fmt_1144[] = "(\002ursi\002,i2,\002.asc\002)";
-    static char fmt_1144[] = "('./../data/IonosphereData/ursi',i2,'.asc')";		// made changes by TUAN NGUYEN on Jan 11, 2013
-    static char fmt_8449[] = "(1x////,\002 The file \002,a30,\002is not in y\
-our directory.\002)";
+    static char fmt_8449[] = "(1x////,\002 Invalid month.\002)";
     static char fmt_650[] = "(1x,\002*NE* E-REGION VALLEY CAN NOT BE MODEL\
 LED\002)";
     static char fmt_11[] = "(1x,\002*NE* HMF1 IS NOT EVALUATED BY THE FUNCTI\
@@ -333,20 +374,16 @@ ON XE3\002)";
 .\002)";
 
     /* System generated locals */
-    integer i__1;
     real r__1, r__2;
     doublereal d__1, d__2;
-    olist o__1;
-    cllist cl__1;
 
     /* Builtin functions */
     double atan(doublereal), log(doublereal), sqrt(doublereal);
     integer s_wsfe(cilist *), e_wsfe();
-    double tan(doublereal), exp(doublereal);
-    integer s_wsfi(icilist *), do_fio(integer *, char *, ftnlen), e_wsfi(), 
-	    f_open(olist *), s_rsfe(cilist *), e_rsfe(), f_clos(cllist *);
-    double cos(doublereal), pow_dd(doublereal *, doublereal *), r_sign(real *,
-	     real *);
+    double tan(doublereal), exp(doublereal), cos(doublereal), pow_dd(
+	    doublereal *, doublereal *);
+    integer do_fio(integer *, char *, ftnlen);
+    double r_sign(real *, real *);
 
     /* Local variables */
     static logical sam_date__;
@@ -372,11 +409,12 @@ ON XE3\002)";
     static real xl, ff0[988], b2k, hf1, hf2;
     static integer do2[2];
     static real fm3[882]	/* was [9][49][2] */, f2n[1976]	/* was [13][
-	    76][2] */, ho2[2], r2d, x1d, mo2[3];
+	    76][2] */, ho2[2], r2d, mo2[3];
     extern doublereal xe2_(real *);
     static real ex1;
     extern doublereal xe6_(real *);
-    static real r2n, xm0[441], rr2, rr1, x1n, xf1, xf2, ti1, h0o, xl1, dec;
+    static real xm0[441], rr2, rr1, r2n, x1n, x1d, xf1, xf2, ti1, h0o, xl1, 
+	    dec;
     static integer icd, ddo[4];
     static real elg[7], ate[7], tea[6], amp[4], rif[4], scl[4], dip, xma, yma,
 	     hxl[4], zma, bet;
@@ -424,23 +462,23 @@ ON XE3\002)";
     extern doublereal fout_(real *, real *, real *, real *, real *);
     static real alg100, rssn, sux80, zm3000;
     static integer midm;
-    static real xm3000, afof1, afof2, ahmf2, ahmf1, epin, zmp11, anmf1, anmf2,
-	     alog2, zmp22;
+    static real xm3000, afof1, afof2, ahmf2, ahmf1, epin, zmp11, anmf1, alog2,
+	     anmf2, zmp22;
     extern doublereal hpol_(real *, real *, real *, real *, real *, real *, 
 	    real *);
-    static real b2bot;
     static logical gulb0;
-    static real f107dx, fof2n, sax110, sax200, nobo2, sax300, seax, f107mx, 
-	    grat, oarr1, xm300n, oarr3, oarr5, zfof2, yfof2, zmp111, zmp222, 
-	    f1pbw, f1pbl, f1pbo, xdel, sux110, sux200, sux300, vner, hmex, 
-	    dxdx, bnmf1, hmf1m, hhmf2;
+    static real f107dx, fof2n, sax110, sax200, nobo2, sax300, b2bot, f107mx, 
+	    seax, oarr1, xm300n, oarr3, oarr5, zfof2, yfof2, zmp111, zmp222, 
+	    grat, f1pbw, f1pbl, f1pbo, sux110, sux200, sux300, xdel, vner, 
+	    hmex, dxdx, bnmf1, hmf1m, hhmf2;
     static integer iiqu;
-    static real utni, tn1ni;
+    static real utni, tn1ni, bcoef;
     extern /* Subroutine */ int teba_(real *, real *, integer *, real *);
-    static real bcoef, dimo, dipl, sdte, hhalf;
+    static real dimo, dipl, hhalf;
     static integer icode;
+    static real sdte, hdeep;
     extern doublereal tede_(real *, real *, real *);
-    static real hdeep, stte1, aigin, magbr;
+    static real aigin, magbr;
     static integer indap[13];
     static real cglat, ddens[55]	/* was [5][11] */, dlndh, param[2];
     static logical foein, hmein, noden;
@@ -469,64 +507,66 @@ ON XE3\002)";
 	     real *, real *);
     extern /* Subroutine */ int regfa1_(real *, real *, real *, real *, real *
 	    , real *, E_fp, logical *, real *);
-    static real texni, signi, tlbdn, hmaxd;
+    static real texni, signi, tlbdn;
     extern doublereal xmout_(real *, real *, real *, real *, real *);
-    static real hmaxn, b0cnew, tmaxd, tmaxn, stte2;
+    static real hmaxd, b0cnew, hmaxn, tmaxd, tmaxn;
     static logical fof1in, fof2in, hmf2in, hmf1in;
-    static real tnahh2, ten1;
+    static real tnahh2, stte1, stte2, ten1;
     extern doublereal elte_(real *);
-    static real tnn1, ti13, ti50;
+    static real tnn1, sunde1, ti13, ti50;
     extern doublereal dtndh_(real *, real *, real *, real *);
-    static real sunde1, xtts, tex, tix, xteti, hnia, hnie;
+    static real xtts, tex, tix, xteti, hnia, hnie;
+    static logical ursif2;
     extern /* Subroutine */ int koefp1_(real *), koefp2_(real *), koefp3_(
 	    real *), sufe_(real *, real *, integer *, real *);
-    static logical ursif2;
     static real zzz1;
     static integer msumo;
     static real ho05, hfixo, delx, ymaxx;
     extern doublereal rpid_(real *, real *, real *, integer *, real *, 
 	    integer *, real *);
-    static real yo2h0o, yoh0o, hfixo2, rdo2mx, ymo2z, aldo21, xhmf1;
+    static real yo2h0o, yoh0o;
     extern /* Subroutine */ int fieldg_(real *, real *, real *, real *, real *
 	    , real *, real *, real *, real *, real *);
     extern doublereal foeedi_(real *, real *, real *, real *);
-    static real elede;
+    static real hfixo2, rdo2mx, ymo2z, aldo21, dndhbr, hefold, xhmf1, elede;
     extern doublereal xen_(real *, real *, real *, real *, integer *, real *, 
-	    real *, real *), xe_1__(real *);
-    static real dipl1, dndhbr, hefold, babs1;
-    extern /* Subroutine */ int calne_(integer *, real *, real *, real *, 
-	    real *, real *, real *, real *, integer *, real *, real *);
-    static real tnh;
+	    real *, real *);
     static integer seaday;
-    static char filnam[120];	//static char filnam[12];	// made changes by Tuan Nguyen
     extern /* Subroutine */ int geodip_(integer *, real *, real *, real *, 
 	    real *, integer *);
-    static real abslat, absmdp, absmbr;
+    static real abslat;
     static logical dnight, schalt, fnight;
     static integer iuccir;
-    static real absmlt, sundec;
-    static integer numhei, icoord, nseasn, season;
+    static real absmlt, absmdp;
+    static integer numhei;
+    static real absmbr;
+    static integer nseasn, season;
     static real invdip;
     static logical sam_ut__, teneop;
     static integer nrdaym;
-    static real covsat, dndhmx;
-    extern /* Subroutine */ int inilay_(logical *, logical *, real *, real *, 
-	    real *, real *, real *, real *, real *, real *, real *, real *, 
-	    real *, real *, real *, integer *);
+    static real covsat, sundec;
+    static integer icoord;
     static logical layver;
     static integer nmonth, montho;
     static real xhinon;
     static logical ursifo;
-    static real xkkmax, diplat;
+    static real dndhmx, xkkmax;
+    extern /* Subroutine */ int inilay_(logical *, logical *, real *, real *, 
+	    real *, real *, real *, real *, real *, real *, real *, real *, 
+	    real *, real *, real *, integer *);
+    static real diplat;
     extern /* Subroutine */ int elteik_(integer *, integer *, integer *, real 
 	    *, real *, real *, real *, real *, real *, real *, integer *, 
 	    real *, real *, real *);
     static real tnahhi, rdomax;
     extern doublereal epstep_(real *, real *, real *, real *, real *);
-    static real height, tih, teh, rox, rhx, rnx, rhex, rnox, hourut, ro2x;
-    extern /* Subroutine */ int f1_prob__(real *, real *, real *, real *, 
-	    real *);
-    static real rclust;
+    static real height;
+    extern doublereal xe_1__(real *);
+    static real dipl1, babs1, hourut;
+    extern /* Subroutine */ int calne_(integer *, real *, real *, real *, 
+	    real *, real *, real *, real *, integer *, real *, real *), 
+	    f1_prob__(real *, real *, real *, real *, real *);
+    static real tnh, tih, teh, rox, rhx, rnx, rhex, rnox, ro2x, rclust;
     extern /* Subroutine */ int rdhhe_(real *, real *, real *, real *, real *,
 	     real *, real *, real *);
     extern doublereal rdno_(real *, real *, real *, real *, real *);
@@ -577,22 +617,14 @@ ON XE3\002)";
     static cilist io___77 = { 0, 0, 0, fmt_9032, 0 };
     static cilist io___78 = { 0, 0, 0, fmt_9033, 0 };
     static cilist io___79 = { 0, 0, 0, fmt_9034, 0 };
-    static icilist io___155 = { 0, filnam, 0, fmt_104, 120, 1 };	// made changes by Tuan Nguyen
-    static cilist io___156 = { 0, 0, 0, fmt_4689, 0 };
-    static icilist io___159 = { 0, filnam, 0, fmt_1144, 120, 1 };	// made changes by Tuan Nguyen
-    static cilist io___160 = { 0, 0, 0, fmt_4689, 0 };
-    static icilist io___161 = { 0, filnam, 0, fmt_104, 120, 1 };	// made changes by Tuan Nguyen
-    static cilist io___162 = { 0, 0, 0, fmt_4689, 0 };
-    static icilist io___165 = { 0, filnam, 0, fmt_1144, 120, 1 };	// made changes by Tuan Nguyen
-    static cilist io___166 = { 0, 0, 0, fmt_4689, 0 };
-    static cilist io___167 = { 0, 0, 0, fmt_8449, 0 };
-    static cilist io___235 = { 0, 0, 0, fmt_650, 0 };
-    static cilist io___253 = { 0, 0, 0, fmt_11, 0 };
-    static cilist io___254 = { 0, 0, 0, fmt_650, 0 };
-    static cilist io___260 = { 0, 0, 0, fmt_100, 0 };
-    static cilist io___262 = { 0, 0, 0, fmt_901, 0 };
-    static cilist io___272 = { 0, 0, 0, fmt_7733, 0 };
-    static cilist io___273 = { 0, 0, 0, fmt_7722, 0 };
+    static cilist io___161 = { 0, 0, 0, fmt_8449, 0 };
+    static cilist io___226 = { 0, 0, 0, fmt_650, 0 };
+    static cilist io___244 = { 0, 0, 0, fmt_11, 0 };
+    static cilist io___245 = { 0, 0, 0, fmt_650, 0 };
+    static cilist io___251 = { 0, 0, 0, fmt_100, 0 };
+    static cilist io___253 = { 0, 0, 0, fmt_901, 0 };
+    static cilist io___263 = { 0, 0, 0, fmt_7733, 0 };
+    static cilist io___264 = { 0, 0, 0, fmt_7722, 0 };
 
 
 /* ----------------------------------------------------------------- */
@@ -741,14 +773,22 @@ ON XE3\002)";
 /* ***************************************************************** */
 /* ***************************************************************** */
 /* ***************************************************************** */
+/*     Fortran include file storing common blocks and associated */
+/*     parameters. */
+
+/*     Changelog: */
+/*       2015-04-16     Created (Joseph Nicholas) */
+/*      CHARACTER  FILNAM*12 */
 /* -web-for webversion */
 /*      CHARACTER FILNAM*53 */
+/* for GMATversion */
     /* Parameter adjustments */
     --oarr;
     outf -= 21;
     --jf;
 
     /* Function Body */
+    *ier = 0;
     for (ki = 1; ki <= 20; ++ki) {
 	for (kk = 1; kk <= 500; ++kk) {
 /* L7397: */
@@ -994,7 +1034,6 @@ ON XE3\002)";
 	oarr[16] = (float)-1.;
     }
 
-
 /* lists the selected options before starting the table */
 
     if (const2_1.icalls > 1 || iounit_1.konsol == 1) {
@@ -1137,6 +1176,7 @@ L2889:
 	e_wsfe();
     }
 L8201:
+
 /* CALCULATION OF DAY OF YEAR OR MONTH/DAY AND DECIMAL YEAR */
 
 /*  leap year rule: years evenly divisible by 4 are leap years, except */
@@ -1179,10 +1219,8 @@ L8201:
 	lati = *alati;
 	longi = *along;
     }
-
     geodip_(&iyear, &lati, &longi, &mlat, &mlong, jmag);
 /*        CALL GGM(JMAG,XLONGI1,XLATI1,XMLONG1,XMLAT1) */
-
     igrf_dip__(&lati, &longi, &ryear, &c_b66, &dip, &magbr, &modip, ier);
     if (*ier != 0) {
 	return 0;
@@ -1232,7 +1270,6 @@ L8201:
 /* Northern hemisphere season */
     seaday = daynr;
     iseamon = month;
-
     if (lati >= (float)0.) {
 	goto L5592;
     }
@@ -1455,81 +1492,40 @@ L1334:
 
 L7797:
     ursifo = ursif2;
-    s_wsfi(&io___155);
-    i__1 = month + 10;
-    do_fio(&c__1, (char *)&i__1, (ftnlen)sizeof(integer));
-    e_wsfi();
-/* -binary- if binary files than use: */
-/* -binary-104   FORMAT('ccir',I2,'.bin') */
-/* -web- special for web-version: */
-/* 104   FORMAT('/usr/local/etc/httpd/cgi-bin/models/IRI/ccir',I2,'.asc') */
-/* -web- special for web-version: */
-
-    o__1.oerr = 1;
-    o__1.ounit = iuccir;
-    o__1.ofnm = filnam;											// made changes by Tuan Nguyen
-    o__1.ofnmlen = strlen(o__1.ofnm);	// o__1.ofnmlen = 12;	// made changes by Tuan Nguyen
-    o__1.orl = 0;
-    o__1.osta = "OLD";
-    o__1.oacc = 0;
-    o__1.ofm = "FORMATTED";
-    o__1.oblnk = 0;
-    i__1 = f_open(&o__1);
-    if (i__1 != 0) {
+    if (month < 1 || month > 12) {
 	goto L8448;
     }
-/* -binary- if binary files than use: */
-/* -binary-     &          FORM='UNFORMATTED') */
-
-    io___156.ciunit = iuccir;
-    s_rsfe(&io___156);
-    do_fio(&c__1976, (char *)&f2[0], (ftnlen)sizeof(real));
-    do_fio(&c__882, (char *)&fm3[0], (ftnlen)sizeof(real));
-    e_rsfe();
-/* -binary- if binary files than use: */
-/* -binary-        READ(IUCCIR) F2,FM3 */
-
-    cl__1.cerr = 0;
-    cl__1.cunit = iuccir;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
+    for (k = 1; k <= 2; ++k) {
+	for (j = 1; j <= 76; ++j) {
+	    for (i__ = 1; i__ <= 13; ++i__) {
+		f2[i__ + (j + k * 76) * 13 - 1002] = ccir_1.f2_ccir__[i__ + (
+			j + (k + (month << 1)) * 76) * 13 - 2978];
+	    }
+	}
+    }
+    for (k = 1; k <= 2; ++k) {
+	for (j = 1; j <= 49; ++j) {
+	    for (i__ = 1; i__ <= 9; ++i__) {
+		fm3[i__ + (j + k * 49) * 9 - 451] = ccir_1.f3_ccir__[i__ + (j 
+			+ (k + (month << 1)) * 49) * 9 - 1333];
+	    }
+	}
+    }
 
 /* then URSI if chosen .................................... */
 
+    if (month < 1 || month > 12) {
+	goto L8448;
+    }
     if (ursif2) {
-	s_wsfi(&io___159);
-	i__1 = month + 10;
-	do_fio(&c__1, (char *)&i__1, (ftnlen)sizeof(integer));
-	e_wsfi();
-/* -web- special for web-version: */
-/* 1144  FORMAT('/usr/local/etc/httpd/cgi-bin/models/IRI/ursi',I2,'.asc') */
-/* -binary- if binary files than use: */
-/* -binary-1144          FORMAT('ursi',I2,'.bin') */
-	o__1.oerr = 1;
-	o__1.ounit = iuccir;
-	o__1.ofnm = filnam;											// made changes by Tuan Nguyen
-	o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 12;	// made changes by Tuan Nguyen
-	o__1.orl = 0;
-	o__1.osta = "OLD";
-	o__1.oacc = 0;
-	o__1.ofm = "FORMATTED";
-	o__1.oblnk = 0;
-	i__1 = f_open(&o__1);
-	if (i__1 != 0) {
-	    goto L8448;
+	for (k = 1; k <= 2; ++k) {
+	    for (j = 1; j <= 76; ++j) {
+		for (i__ = 1; i__ <= 13; ++i__) {
+		    f2[i__ + (j + k * 76) * 13 - 1002] = ursi_1.f2_ursi__[i__ 
+			    + (j + (k + (month << 1)) * 76) * 13 - 2978];
+		}
+	    }
 	}
-/* -binary- if binary files than use: */
-/* -binary-     &         FORM='UNFORMATTED') */
-	io___160.ciunit = iuccir;
-	s_rsfe(&io___160);
-	do_fio(&c__1976, (char *)&f2[0], (ftnlen)sizeof(real));
-	e_rsfe();
-/* -binary- if binary files than use: */
-/* -binary-          READ(IUCCIR) F2 */
-	cl__1.cerr = 0;
-	cl__1.cunit = iuccir;
-	cl__1.csta = 0;
-	f_clos(&cl__1);
     }
 
 /* READ CCIR AND URSI COEFFICIENT SET FOR NMONTH, i.e. previous */
@@ -1539,75 +1535,45 @@ L4293:
 
 /* first CCIR .............................................. */
 
-    s_wsfi(&io___161);
-    i__1 = nmonth + 10;
-    do_fio(&c__1, (char *)&i__1, (ftnlen)sizeof(integer));
-    e_wsfi();
-    o__1.oerr = 1;
-    o__1.ounit = iuccir;
-    o__1.ofnm = filnam;											// made changes by Tuan Nguyen
-    o__1.ofnmlen = strlen(o__1.ofnm);	// o__1.ofnmlen = 12;	// made changes by Tuan Nguyen
-    o__1.orl = 0;
-    o__1.osta = "OLD";
-    o__1.oacc = 0;
-    o__1.ofm = "FORMATTED";
-    o__1.oblnk = 0;
-    i__1 = f_open(&o__1);
-    if (i__1 != 0) {
+    if (nmonth < 1 || nmonth > 12) {
 	goto L8448;
     }
-/* -binary- if binary files than use: */
-/* -binary-     &          FORM='unFORMATTED') */
-    io___162.ciunit = iuccir;
-    s_rsfe(&io___162);
-    do_fio(&c__1976, (char *)&f2n[0], (ftnlen)sizeof(real));
-    do_fio(&c__882, (char *)&fm3n[0], (ftnlen)sizeof(real));
-    e_rsfe();
-/* -binary- if binary files than use: */
-/* -binary-        READ(IUCCIR) F2N,FM3N */
-    cl__1.cerr = 0;
-    cl__1.cunit = iuccir;
-    cl__1.csta = 0;
-    f_clos(&cl__1);
+    for (k = 1; k <= 2; ++k) {
+	for (j = 1; j <= 76; ++j) {
+	    for (i__ = 1; i__ <= 13; ++i__) {
+		f2n[i__ + (j + k * 76) * 13 - 1002] = ccir_1.f2_ccir__[i__ + (
+			j + (k + (nmonth << 1)) * 76) * 13 - 2978];
+	    }
+	}
+    }
+    for (k = 1; k <= 2; ++k) {
+	for (j = 1; j <= 49; ++j) {
+	    for (i__ = 1; i__ <= 9; ++i__) {
+		fm3n[i__ + (j + k * 49) * 9 - 451] = ccir_1.f3_ccir__[i__ + (
+			j + (k + (nmonth << 1)) * 49) * 9 - 1333];
+	    }
+	}
+    }
 
 /* then URSI if chosen ..................................... */
 
+    if (nmonth < 1 || nmonth > 12) {
+	goto L8448;
+    }
     if (ursif2) {
-	s_wsfi(&io___165);
-	i__1 = nmonth + 10;
-	do_fio(&c__1, (char *)&i__1, (ftnlen)sizeof(integer));
-	e_wsfi();
-	o__1.oerr = 1;
-	o__1.ounit = iuccir;
-	o__1.ofnm = filnam;											// made changes by Tuan Nguyen
-	o__1.ofnmlen = strlen(o__1.ofnm);	//o__1.ofnmlen = 12;	// made changes by Tuan Nguyen
-	o__1.orl = 0;
-	o__1.osta = "OLD";
-	o__1.oacc = 0;
-	o__1.ofm = "FORMATTED";
-	o__1.oblnk = 0;
-	i__1 = f_open(&o__1);
-	if (i__1 != 0) {
-	    goto L8448;
+	for (k = 1; k <= 2; ++k) {
+	    for (j = 1; j <= 76; ++j) {
+		for (i__ = 1; i__ <= 13; ++i__) {
+		    f2n[i__ + (j + k * 76) * 13 - 1002] = ursi_1.f2_ursi__[
+			    i__ + (j + (k + (nmonth << 1)) * 76) * 13 - 2978];
+		}
+	    }
 	}
-/* -binary- if binary files than use: */
-/* -binary-     &         FORM='unFORMATTED') */
-	io___166.ciunit = iuccir;
-	s_rsfe(&io___166);
-	do_fio(&c__1976, (char *)&f2n[0], (ftnlen)sizeof(real));
-	e_rsfe();
-/* -binary- if binary files than use: */
-/* -binary-          READ(IUCCIR) F2N */
-	cl__1.cerr = 0;
-	cl__1.cunit = iuccir;
-	cl__1.csta = 0;
-	f_clos(&cl__1);
     }
     goto L4291;
 L8448:
-    io___167.ciunit = iounit_1.konsol;
-    s_wsfe(&io___167);
-    do_fio(&c__1, filnam, (ftnlen)120);	//do_fio(&c__1, filnam, (ftnlen)12);	// made changes by Tuan Nguyen
+    io___161.ciunit = iounit_1.konsol;
+    s_wsfe(&io___161);
     e_wsfe();
     goto L3330;
 
@@ -1749,8 +1715,8 @@ L501:
 	r2d = (float)-.84 - zmp111 * (float).64;
 	x1n = (float)230. - zmp222 * (float)700.;
 	x1d = (float)550. - zmp222 * (float)1900.;
-	r2 = hpol_(&hour, &r2d, &r2n, &sax300, &sux300, &c_b121, &c_b121);
-	x1 = hpol_(&hour, &x1d, &x1n, &sax300, &sux300, &c_b121, &c_b121);
+	r2 = hpol_(&hour, &r2d, &r2n, &sax300, &sux300, &c_b96, &c_b96);
+	x1 = hpol_(&hour, &x1d, &x1n, &sax300, &sux300, &c_b96, &c_b96);
 	blo11_1.hcor1 = block1_1.hmf2 + x1;
 	x12 = (float)1500. - x1;
 	blo11_1.tc3 = r2 / x12;
@@ -1773,8 +1739,8 @@ L501:
 
 /* F layer - bottomside thickness parameter B0 and shape parameters B1 */
 
-    block2_1.b1 = hpol_(&hour, &c_b125, &c_b126, &sax200, &sux200, &c_b121, &
-	    c_b121);
+    block2_1.b1 = hpol_(&hour, &c_b100, &c_b101, &sax200, &sux200, &c_b96, &
+	    c_b96);
     if (gulb0) {
 	rogul_(&seaday, &xhi, &seax, &grat);
 	if (fnight) {
@@ -1830,13 +1796,12 @@ L501:
     xdel = xdels[season - 1] / dela;
     dndhbr = dnds[season - 1] / dela;
     r__1 = (float)10.5 / dela;
-    hdeep = hpol_(&hour, &r__1, &c_b129, &sax110, &sux110, &c_b121, &c_b121);
+    hdeep = hpol_(&hour, &r__1, &c_b104, &sax110, &sux110, &c_b96, &c_b96);
     r__1 = (float)17.8 / dela;
     r__2 = (float)22. / dela + (float)45.;
-    width = hpol_(&hour, &r__1, &r__2, &sax110, &sux110, &c_b121, &c_b121);
-    depth = hpol_(&hour, &xdel, &c_b134, &sax110, &sux110, &c_b121, &c_b121);
-    dlndh = hpol_(&hour, &dndhbr, &c_b137, &sax110, &sux110, &c_b121, &c_b121)
-	    ;
+    width = hpol_(&hour, &r__1, &r__2, &sax110, &sux110, &c_b96, &c_b96);
+    depth = hpol_(&hour, &xdel, &c_b109, &sax110, &sux110, &c_b96, &c_b96);
+    dlndh = hpol_(&hour, &dndhbr, &c_b112, &sax110, &sux110, &c_b96, &c_b96);
     if (depth < (float)1.) {
 	goto L600;
     }
@@ -1848,8 +1813,8 @@ L501:
 	goto L667;
     }
     if (iounit_1.konsol > 1) {
-	io___235.ciunit = iounit_1.konsol;
-	s_wsfe(&io___235);
+	io___226.ciunit = iounit_1.konsol;
+	s_wsfe(&io___226);
 	e_wsfe();
     }
 L600:
@@ -1863,13 +1828,13 @@ L667:
 
 /* L2727: */
     hmex = block4_1.hme - (float)9.;
-    block6_1.nmd = xmded_(&xhi, &rssn, &c_b145);
-    block6_1.hmd = hpol_(&hour, &c_b134, &c_b147, &sax80, &sux80, &c_b121, &
-	    c_b121);
+    block6_1.nmd = xmded_(&xhi, &rssn, &c_b120);
+    block6_1.hmd = hpol_(&hour, &c_b109, &c_b122, &sax80, &sux80, &c_b96, &
+	    c_b96);
     r__1 = (float).03 / dela + (float).02;
-    f[0] = hpol_(&hour, &r__1, &c_b150, &sax80, &sux80, &c_b121, &c_b121);
-    f[1] = hpol_(&hour, &c_b153, &c_b154, &sax80, &sux80, &c_b121, &c_b121);
-    f[2] = hpol_(&hour, &c_b157, &c_b158, &sax80, &sux80, &c_b121, &c_b121);
+    f[0] = hpol_(&hour, &r__1, &c_b125, &sax80, &sux80, &c_b96, &c_b96);
+    f[1] = hpol_(&hour, &c_b128, &c_b129, &sax80, &sux80, &c_b96, &c_b96);
+    f[2] = hpol_(&hour, &c_b132, &c_b133, &sax80, &sux80, &c_b96, &c_b96);
     block7_1.fp1 = f[0];
     block7_1.fp2 = -block7_1.fp1 * block7_1.fp1 / (float)2.;
     block7_1.fp30 = (-f[1] * block7_1.fp2 - block7_1.fp1 + (float)1. / f[1]) /
@@ -1916,7 +1881,7 @@ L667:
 	    ddens[ii * 5 - 5] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 5] = pow_dd(&c_b161, &d__1);
+		ddens[ii * 5 - 5] = pow_dd(&c_b136, &d__1);
 	    }
 	}
 	f5sw = (float).5;
@@ -1926,7 +1891,7 @@ L667:
 	    ddens[ii * 5 - 4] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 4] = pow_dd(&c_b161, &d__1);
+		ddens[ii * 5 - 4] = pow_dd(&c_b136, &d__1);
 	    }
 	}
 	f5sw = (float)1.;
@@ -1936,7 +1901,7 @@ L667:
 	    ddens[ii * 5 - 3] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 3] = pow_dd(&c_b161, &d__1);
+		ddens[ii * 5 - 3] = pow_dd(&c_b136, &d__1);
 	    }
 	}
 	f5sw = (float)0.;
@@ -1946,7 +1911,7 @@ L667:
 	    ddens[ii * 5 - 2] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 2] = pow_dd(&c_b161, &d__1);
+		ddens[ii * 5 - 2] = pow_dd(&c_b136, &d__1);
 	    }
 	}
 	f5sw = (float)0.;
@@ -1956,7 +1921,7 @@ L667:
 	    ddens[ii * 5 - 1] = (float)-1.;
 	    if (ii < 8) {
 		d__1 = (doublereal) (elg[ii - 1] + 6);
-		ddens[ii * 5 - 1] = pow_dd(&c_b161, &d__1);
+		ddens[ii * 5 - 1] = pow_dd(&c_b136, &d__1);
 	    }
 	}
     }
@@ -1984,7 +1949,7 @@ L9245:
 	}
 	goto L9245;
     }
-    regfa1_(&block4_1.hef, &block1_1.hmf2, &xe2h, &block1_1.nmf2, &c_b170, &
+    regfa1_(&block4_1.hef, &block1_1.hmf2, &xe2h, &block1_1.nmf2, &c_b145, &
 	    nmf1, (E_fp)xe2_, &schalt, &block1_1.hmf1);
     if (! schalt) {
 	goto L3801;
@@ -1994,8 +1959,8 @@ L9245:
 
 L9427:
     if (iounit_1.konsol > 1) {
-	io___253.ciunit = iounit_1.konsol;
-	s_wsfe(&io___253);
+	io___244.ciunit = iounit_1.konsol;
+	s_wsfe(&io___244);
 	e_wsfe();
     }
     block1_1.hmf1 = (float)0.;
@@ -2016,8 +1981,8 @@ L3801:
 	    goto L380;
 	}
 	if (iounit_1.konsol > 1) {
-	    io___254.ciunit = iounit_1.konsol;
-	    s_wsfe(&io___254);
+	    io___245.ciunit = iounit_1.konsol;
+	    s_wsfe(&io___245);
 	    e_wsfe();
 	}
 	width = (float)0.;
@@ -2041,7 +2006,7 @@ L380:
     if (xf2 > block4_1.nme) {
 	goto L3885;
     }
-    regfa1_(&hf1, &hf2, &xf1, &xf2, &c_b170, &block4_1.nme, (E_fp)xe3_1__, &
+    regfa1_(&hf1, &hf2, &xf1, &xf2, &c_b145, &block4_1.nme, (E_fp)xe3_1__, &
 	    schalt, &block3_1.hst);
     if (schalt) {
 	goto L3885;
@@ -2055,15 +2020,15 @@ L380:
 
 L3885:
     if (iounit_1.konsol > 1) {
-	io___260.ciunit = iounit_1.konsol;
-	s_wsfe(&io___260);
+	io___251.ciunit = iounit_1.konsol;
+	s_wsfe(&io___251);
 	e_wsfe();
     }
     block3_1.hz = (block4_1.hef + hf1) / (float)2.;
     xnehz = xe3_1__(&block3_1.hz);
     if (iounit_1.konsol > 1) {
-	io___262.ciunit = iounit_1.konsol;
-	s_wsfe(&io___262);
+	io___253.ciunit = iounit_1.konsol;
+	s_wsfe(&io___253);
 	do_fio(&c__1, (char *)&block3_1.hz, (ftnlen)sizeof(real));
 	do_fio(&c__1, (char *)&block4_1.hef, (ftnlen)sizeof(real));
 	e_wsfe();
@@ -2088,13 +2053,13 @@ L6153:
 	    vner, &hhmf2, &hmf1m, &block4_1.hme, &hv1r, &hv2r, &hhalf, hxl, 
 	    scl, amp, &iiqu);
     if (iiqu == 1 && iounit_1.konsol > 1) {
-	io___272.ciunit = iounit_1.konsol;
-	s_wsfe(&io___272);
+	io___263.ciunit = iounit_1.konsol;
+	s_wsfe(&io___263);
 	e_wsfe();
     }
     if (iiqu == 2 && iounit_1.konsol > 1) {
-	io___273.ciunit = iounit_1.konsol;
-	s_wsfe(&io___273);
+	io___264.ciunit = iounit_1.konsol;
+	s_wsfe(&io___264);
 	e_wsfe();
     }
 
@@ -2114,10 +2079,10 @@ L4933:
 	if (jf[18]) {
 	    secni = ((float)24. - longi / 15) * (float)3600.;
 	} else {
-	    ut_lt__(&c__1, &utni, &c_b188, &longi, &iyz, &idz);
+	    ut_lt__(&c__1, &utni, &c_b163, &longi, &iyz, &idz);
 	    secni = utni * (float)3600.;
 	}
-	cira86_(&daynr, &secni, &lati, &longi, &c_b188, &cov, &texni, &tn1ni, 
+	cira86_(&daynr, &secni, &lati, &longi, &c_b163, &cov, &texni, &tn1ni, 
 		&signi);
     } else {
 	texni = blotn_1.texos;
@@ -2138,13 +2103,13 @@ L4933:
     r__1 = mlat / (float)22.41;
     hmaxd = exp(-(r__1 * r__1)) * (float)60. + (float)210.;
     hmaxn = (float)150.;
-    blote_1.ahh[1] = hpol_(&hour, &hmaxd, &hmaxn, &sax200, &sux200, &c_b121, &
-	    c_b121);
+    blote_1.ahh[1] = hpol_(&hour, &hmaxd, &hmaxn, &sax200, &sux200, &c_b96, &
+	    c_b96);
 /* Computing 2nd power */
     r__1 = mlat / (float)33.;
     tmaxd = exp(-(r__1 * r__1)) * (float)800. + (float)1500.;
     tmaxn = tn_(&hmaxn, &texni, &tlbdn, &signi) + 20;
-    ate[1] = hpol_(&hour, &tmaxd, &tmaxn, &sax200, &sux200, &c_b121, &c_b121);
+    ate[1] = hpol_(&hour, &tmaxd, &tmaxn, &sax200, &sux200, &c_b96, &c_b96);
 /* Te(300km), Te(400km) from AE-C, Te(1400km), Te(3000km) from */
 /* ISIS, Brace and Theis */
     diplat = magbr;
@@ -2165,10 +2130,10 @@ L4933:
 /* Te(600km) from AEROS, Spenner and Plugge (1979) */
 	ett = exp(-mlat / (float)11.35);
 	d__1 = (doublereal) (ett + 1);
-	tet = (float)2900. - ett * (float)5600. / pow_dd(&d__1, &c_b195);
+	tet = (float)2900. - ett * (float)5600. / pow_dd(&d__1, &c_b170);
 	ten = (float)1161. / (exp(-(absmlt - (float)45.) / (float)5.) + (
 		float)1.) + (float)839.;
-	ate[4] = hpol_(&hour, &tet, &ten, &sax300, &sux300, &c_b196, &c_b196);
+	ate[4] = hpol_(&hour, &tet, &ten, &sax300, &sux300, &c_b171, &c_b171);
     } else {
 /* Te at fixed heights from IK, Truhlik, Triskova, Smilauer */
 	blote_1.ahh[2] = (float)300.;
@@ -2245,18 +2210,18 @@ L4933:
     z1 = exp(mlat * (float)-.09);
     z2 = z1 + (float)1.;
     tid1 = (float)1240. - z1 * (float)1400. / (z2 * z2);
-    block8_1.mm[1] = hpol_(&hour, &c_b206, &c_b188, &sax300, &sux300, &c_b121,
-	     &c_b121);
+    block8_1.mm[1] = hpol_(&hour, &c_b181, &c_b163, &sax300, &sux300, &c_b96, 
+	    &c_b96);
 /* Ti(430km) duirng nighttime from AEROS data */
     z1 = absmlt;
     z2 = z1 * (z1 * (float).024 + (float).47) * const_1.umr;
     z3 = cos(z2);
-    tin1 = (float)1200. - r_sign(&c_b121, &z3) * (float)300. * sqrt((dabs(z3))
-	    );
+    tin1 = (float)1200. - r_sign(&c_b96, &z3) * (float)300. * sqrt((dabs(z3)))
+	    ;
 /* Ti(430km) for specified time using HPOL */
     ti1 = tin1;
     if (tid1 > tin1) {
-	ti1 = hpol_(&hour, &tid1, &tin1, &sax300, &sux300, &c_b121, &c_b121);
+	ti1 = hpol_(&hour, &tid1, &tin1, &sax300, &sux300, &c_b96, &c_b96);
     }
 /* Tn < Ti < Te enforced */
     ten1 = elte_(&blotn_1.xsm1);
@@ -2271,9 +2236,9 @@ L4933:
 	ti1 = tnn1;
     }
 /* Tangent on Tn profile determines HS */
-    ti13 = teder_(&c_b213);
-    ti50 = teder_(&c_b214);
-    regfa1_(&c_b213, &c_b214, &ti13, &ti50, &c_b217, &ti1, (E_fp)teder_, &
+    ti13 = teder_(&c_b188);
+    ti50 = teder_(&c_b189);
+    regfa1_(&c_b188, &c_b189, &ti13, &ti50, &c_b192, &ti1, (E_fp)teder_, &
 	    schalt, &block8_1.hs);
     if (schalt) {
 	block8_1.hs = (float)200.;
@@ -2566,7 +2531,7 @@ L7108:
     } else {
 	rox = rpid_(&height, &hfixo, &rdomax, &msumo, mo, ddo, ho);
 	ro2x = rpid_(&height, &hfixo2, &rdo2mx, &c__2, mo2, do2, ho2);
-	rdhhe_(&height, &h0o, &rox, &ro2x, &nobo2, &c_b239, &rhx, &rhex);
+	rdhhe_(&height, &h0o, &rox, &ro2x, &nobo2, &c_b214, &rhx, &rhex);
 	rnox = rdno_(&height, &h0o, &ro2x, &rox, &nobo2);
 	rnx = (float)-1.;
 	rclust = (float)-1.;
@@ -2744,10 +2709,10 @@ L3330:
     real r__1;
 
     /* Local variables */
-    static integer i__, ii, iii;
-    static real tec, oar[50], tecb, tect, oarr[50], outf[10000]	/* was [20][
+    integer i__, ii, iii;
+    real tec, oar[50], tecb, tect, oarr[50], outf[10000]	/* was [20][
 	    500] */, xvar[8], xhour;
-    static integer numstp;
+    integer numstp;
     extern /* Subroutine */ int iri_tec__(real *, real *, integer *, real *, 
 	    real *, real *), iri_sub__(logical *, integer *, real *, real *, 
 	    integer *, integer *, real *, real *, real *, real *, real *, 
@@ -2781,7 +2746,7 @@ L3330:
     --jf;
 
     /* Function Body */
-
+    *ier = 0;
     numstp = (integer) ((*vend - *vbeg) / *vstp) + 1;
     if (numstp > 500) {
 	numstp = 500;
@@ -2802,7 +2767,7 @@ L3330:
 	    return 0;
 	}
 	if (*h_tec_max__ > (float)50.) {
-	    iri_tec__(&c_b246, h_tec_max__, &c__2, &tec, &tect, &tecb);
+	    iri_tec__(&c_b221, h_tec_max__, &c__2, &tec, &tect, &tecb);
 	    oarr[36] = tec;
 	    oarr[37] = tect;
 	}
@@ -2839,12 +2804,12 @@ L3330:
 	    oarr[iii - 1] = b[iii + i__ * 50];
 	}
 	iri_sub__(&jf[1], jmag, alati, along, iyyyy, mmdd, dhour, height, 
-		height, &c_b121, outf, oarr, ier);
+		height, &c_b96, outf, oarr, ier);
 	if (*ier != 0) {
 	    return 0;
 	}
 	if (*h_tec_max__ > (float)50.) {
-	    iri_tec__(&c_b246, h_tec_max__, &c__2, &tec, &tect, &tecb);
+	    iri_tec__(&c_b221, h_tec_max__, &c__2, &tec, &tect, &tecb);
 	    oarr[36] = tec;
 	    oarr[37] = tect;
 	}

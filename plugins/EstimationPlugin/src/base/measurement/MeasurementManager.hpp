@@ -95,7 +95,8 @@ public:
 
    // Observation reader methods needed for estimation
    UnsignedInt             LoadObservations();
-   
+   UnsignedInt             LoadObservationsOld();             // made changes by TUAN NGUYEN    // This function will be removed after the new one working OK
+
 ///// TBD: Do we want something more generic here?
    // Ramp tables reader method needed for simulator
    void                    LoadRampTables();
@@ -103,6 +104,7 @@ public:
    const std::vector<MeasurementModel*>& GetAllMeasurementModels();
    const std::vector<TrackingSystem*>&   GetAllTrackingSystems();
    const std::vector<TrackingFileSet*>&  GetAllTrackingFileSets();
+   const std::vector<TrackingDataAdapter*>& GetAllTrackingDataAdapters();
 
    UnsignedInt             GetCurrentRecordNumber();
    
@@ -115,8 +117,12 @@ public:
    
    std::vector<ObservationData>* GetObservationDataList();
 
-   const std::vector<TrackingFileSet*>     GetTrackingSets() const ;
-   const std::vector<TrackingDataAdapter*> GetTrackingDataAdapters() const;
+   //const std::vector<TrackingFileSet*>     GetTrackingSets() const ;              // It is the same as GetAllTrackingFileSets() function
+
+   /// This function is used to generate tracking data adapters for tracking file set objects having no tracking configs     // made changes by TUAN NGUYEN
+   bool                    AutoGenerateTrackingDataAdapters();                                                               // made changes by TUAN NGUYEN
+
+   bool                    SetStatisticsDataFiltersToDataFiles();                                                           // made changes by TUAN NGUYEN
 
 protected:
    /// List of the managed measurement models
@@ -194,6 +200,11 @@ protected:
    bool                             inSimulationMode;
 
    Integer                          FindModelForObservation();
+
+private:
+   /// Maping between data file index and a list of tracking configuration         // made changes by TUAN NGUYEN
+   std::map<UnsignedInt, StringArray> trackingConfigsMap;                          // made changes by TUAN NGUYEN
+
 };
 
 #endif /*MeasurementManager_hpp*/

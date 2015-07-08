@@ -39,10 +39,13 @@ protected:
 
    wxComboBox *burnCB;
    wxComboBox *satCB;
+   wxCheckBox *backpropCheckBox;
+
     
    // member functions
    void OnBurnComboBoxChange(wxCommandEvent& event);
    void OnSatComboBoxChange(wxCommandEvent& event);
+   void OnBackpropCheckBoxChange(wxCommandEvent &event);
 
    // methods inherited from GmatPanel
    virtual void Create();
@@ -58,7 +61,8 @@ protected:
       ID_TEXT = 80000,
         
       ID_BURN_COMBOBOX,
-      ID_SAT_COMBOBOX
+      ID_SAT_COMBOBOX,
+      ID_BACKPROP_CHECKBOX
    };
 };
 

@@ -312,6 +312,12 @@ protected:
    /// Parameter IDs on spacecraft needed to access the parms during integration
    Integer satIds[7];
 
+   /// Internal flag used to relax constraint for Cd
+   bool constrainCd;
+   /// Internal flag used to relax constraint for Cr
+   bool constrainCr;
+
+
    /// ID for CartesianState start for processing dynamic state data
    Integer stateStart;
    /// ID for CartesianState end for processing dynamic state data
@@ -384,7 +390,8 @@ protected:
 
    bool                      BuildModelElement(Gmat::StateElementId id, 
                                                Integer start, 
-                                               Integer objectCount);
+                                               Integer objectCount,
+                                               Integer size);
    bool                      PrepareDerivativeArray();
    bool                      CompleteDerivativeCalculations(Real *state);
    

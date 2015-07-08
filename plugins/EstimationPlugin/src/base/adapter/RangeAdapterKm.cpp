@@ -23,6 +23,7 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include "SignalBase.hpp"
+#include "ErrorModel.hpp"
 #include <sstream>
 
 
@@ -303,20 +304,6 @@ bool RangeAdapterKm::Initialize()
 
    }
 
-   //std::vector<SignalData*> data = calcData->GetSignalData();
-   //Integer measurementSize = data.size();
-   //measErrorCovariance.SetDimension(measurementSize);
-   //for (Integer i = 0; i < measurementSize; ++i)
-   //{
-   //   for (Integer j = 0; j < measurementSize; ++j)
-   //   {
-   //      measErrorCovariance(i,j) = (i == j ?
-   //                     (noiseSigma[0] != 0.0 ? (noiseSigma[0] * noiseSigma[0]) : 1.0) :            // noiseSigma[0] is used for Range in Km. Its unit is Km
-   //                     0.0);
-   //   }
-   //}
-   
-   
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("End Initializing a RangeAdapterKm <%p>\n", this);
    #endif
@@ -367,7 +354,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
       cMeasurement.isFeasible = false;
       cMeasurement.unfeasibleReason = "";
       cMeasurement.feasibilityValue = 90.0;
-
+      
       RealArray values;
       for (UnsignedInt i = 0; i < paths.size(); ++i)           // In the current version of GmatEstimation plugin, it has only 1 signal path. The code has to be modified for multiple signal paths 
       {
@@ -403,7 +390,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                   cMeasurement.feasibilityValue = current->feasibilityValue;
                }
             }
-
+            
             // accumulate all light time range for signal path ith 
             Rvector3 signalVec = current->rangeVecInertial;
             values[i] += signalVec.GetMagnitude();
@@ -418,11 +405,10 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             // accumulate all hardware delays for signal path ith
             values[i] += ((current->tDelay + current->rDelay)*
                   GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM);
-
+            
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
-#ifdef USE_PRECISION_TIME
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
@@ -434,33 +420,22 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
                   cMeasurement.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
-#else
-               if (calcData->GetTimeTagFlag())
-               {
-                  // Measurement epoch will be at the end of signal path when time tag is at the receiver
-                  if (current->next == NULL)
-                     cMeasurement.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
-               }
-               else
-               {
-                  // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  cMeasurement.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
-               }
-#endif
             }
-
+            
             currentleg = currentleg->GetNext();
             current = ((currentleg == NULL)?NULL:(currentleg->GetSignalDataObject()));
 
          }// while loop
-
+         
       }// for i loop
       
-
-      if (measurementType == "Range")
+      
+      // if (measurementType == "Range")                  // made changes by TUAN NGUYEN
+      if (measurementType == "Range_KM")                  // made changes by TUAN NGUYEN
       {
-         ComputeMeasurementBias("RangeBias");
-         ComputeMeasurementNoiseSigma("RangeNoiseSigma");
+         // @todo: it needs to specify number of trips instead of using 2
+         ComputeMeasurementBias("Bias", "Range_KM", 2);
+         ComputeMeasurementNoiseSigma("NoiseSigma", "Range_KM", 2);
          ComputeMeasurementErrorCovarianceMatrix();
       }
 
@@ -486,7 +461,8 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . C-value w/o noise and bias : %.12lf km \n", values[i]);
             MessageInterface::ShowMessage("      . Noise adding option        : %s\n", (addNoise?"true":"false"));
             MessageInterface::ShowMessage("      . Bias adding option        : %s\n", (addBias?"true":"false"));
-            if (measurementType == "Range")
+            // if (measurementType == "Range")            // made changes by TUAN NGUYEN
+            if (measurementType == "Range_KM")            // made changes by TUAN NGUYEN
             {
                MessageInterface::ShowMessage("      . Range noise sigma          : %.12lf km \n", noiseSigma[i]);
                MessageInterface::ShowMessage("      . Range bias                 : %.12lf km \n", measurementBias[i]);
@@ -494,25 +470,32 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             }
          #endif
 
-         // This section is only done when measurement type is 'Range'. For other types such as DSNRange or Doppler, it will be done in their adapters  
-         if (measurementType == "Range")
+         // This section is only done when measurement type is "Range_KM". For other types such as DSNRange or Doppler, it will be done in their adapters  
+         // if (measurementType == "Range")                                          // made changes by TUAN NGUYEN
+         if (measurementType == "Range_KM")                                          // made changes by TUAN NGUYEN
          {
-            // Add noise to measurement value
-            if (addNoise)
+            // Apply multiplier for "Range_KM" measurement model. This step has to   // made changes by TUAN NGUYEN
+            // be done before adding bias and noise                               // made changes by TUAN NGUYEN
+            measVal = measVal*multiplier;                                         // made changes by TUAN NGUYEN
+
+            // if need range value only, skip this section, otherwise add noise and bias as possible
+            // Note: for Doppler measurement for E and S paths, we only need range value only and no noise and bias are added to measurement value. 
+            if (!rangeOnly)
             {
-               // Add noise here
-               RandomNumber* rn = RandomNumber::Instance();
-               Real val = rn->Gaussian(measVal, noiseSigma[i]);
-               val = rn->Gaussian(measVal, noiseSigma[i]);
-               measVal = val;
+               // Add noise to measurement value
+               if (addNoise)
+               {
+                  // Add noise here
+                  RandomNumber* rn = RandomNumber::Instance();
+                  Real val = rn->Gaussian(measVal, noiseSigma[i]);                  // noise sigma unit: Km
+                  //val = rn->Gaussian(measVal, noiseSigma[i]);
+                  measVal = val;
+               }
+
+               // Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+               if (addBias)
+                  measVal = measVal + measurementBias[i];                          // bias unit: Km
             }
-
-            // Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
-            if (addBias)
-               measVal = measVal + measurementBias[i];
-
-            // Apply multiplier for "Range" measurement model
-            measVal = measVal*multiplier;
          }
          cMeasurement.value[i] = measVal;
 
@@ -522,6 +505,21 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurement(bool withEvents,
             MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
             MessageInterface::ShowMessage("      . Feasibility reason          : %s\n", cMeasurement.unfeasibleReason.c_str());
             MessageInterface::ShowMessage("      . Elevation angle             : %.12lf degree\n", cMeasurement.feasibilityValue);
+            MessageInterface::ShowMessage("      . Covariance matrix           : <%p>\n", cMeasurement.covariance);
+            if (cMeasurement.covariance)
+            {
+               MessageInterface::ShowMessage("      . Covariance matrix size = %d\n", cMeasurement.covariance->GetDimension());
+               MessageInterface::ShowMessage("     [ ");
+               for (UnsignedInt i = 0; i < cMeasurement.covariance->GetDimension(); ++i)
+               {
+                  if ( i > 0)
+                     MessageInterface::ShowMessage("\n");
+                  for (UnsignedInt j = 0; j < cMeasurement.covariance->GetDimension(); ++j)
+                     MessageInterface::ShowMessage("%le   ", cMeasurement.covariance->GetCovariance()->GetElement(i,j));
+               }
+               MessageInterface::ShowMessage("]\n");
+            }
+
             MessageInterface::ShowMessage("===================================================================\n");
          #endif
 
@@ -630,7 +628,6 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
             // Get measurement epoch in the first signal path. It will apply for all other paths
             if (i == 0)
             {
-#ifdef USE_PRECISION_TIME
                if (calcData->GetTimeTagFlag())
                {
                   // Measurement epoch will be at the end of signal path when time tag is at the receiver
@@ -642,20 +639,6 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
                   // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
                   offsetMeas.epoch = first->tPrecTime.GetMjd() - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
                }
-#else
-               //cMeasurement.epoch = current->rTime;
-               if (calcData->GetTimeTagFlag())
-               {
-                  // Measurement epoch will be at the end of signal path when time tag is at the receiver
-                  if (current->next == NULL)
-                     offsetMeas.epoch = current->rTime + current->rDelay/GmatTimeConstants::SECS_PER_DAY;
-               }
-               else
-               {
-                  // Measurement epoch will be at the begin of signal path when time tag is at the transmiter
-                  offsetMeas.epoch = first->tTime - first->tDelay/GmatTimeConstants::SECS_PER_DAY;
-               }
-#endif
             }
 
             current = current->next;
@@ -663,18 +646,21 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
 
       }// for i loop
 
-      // Specify noise sigma value
-      Real nsigma = 0.0;
-      if ((measurementType == "Range")||(measurementType == "DSNRange"))
-         nsigma = noiseSigma[0];
-      else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))
-         nsigma = noiseSigma[1];
+      //// Specify noise sigma value
+      //Real nsigma = 0.0;
+      //// if ((measurementType == "Range")||(measurementType == "DSNRange"))           // made changes by TUAN NGUYEN
+      //if ((measurementType == "Range_KM")||(measurementType == "DSNRange"))           // made changes by TUAN NGUYEN
+      //   nsigma = noiseSigma[0];
+      ////else if ((measurementType == "Doppler")||(measurementType == "DSNDoppler"))   // made changes by TUAN NGUYEN
+      //else if (measurementType == "Doppler")                                          // made changes by TUAN NGUYEN
+      //   nsigma = noiseSigma[1];
 
       // Set measurement values
       offsetMeas.value.clear();
       for (UnsignedInt i = 0; i < values.size(); ++i)
          offsetMeas.value.push_back(0.0);
 
+      Real nsigma;                                                                      // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < values.size(); ++i)
       {
          Real measVal = values[i];
@@ -685,6 +671,7 @@ const MeasurementData& RangeAdapterKm::CalculateMeasurementAtOffset(
          #endif
 
          // Add noise to measurement value
+         nsigma = noiseSigma[i];                  // noiseSigma[i] is noise sigma associated with measurement values[i]           // made changes by TUAN NGUYEN
          if (addNoise)
          {
             // Add noise here
@@ -723,54 +710,95 @@ const std::vector<RealArray>& RangeAdapterKm::CalculateMeasurementDerivatives(
       throw MeasurementException("Measurement derivative data was requested "
             "for " + instanceName + " before the measurement was set");
 
-   Integer parmId = GetParmIdFromEstID(id, obj);
+   //Integer parmId = GetParmIdFromEstID(id, obj);
+   Integer parameterID;
+   if (id > 250)
+      parameterID = id - obj->GetType() * 250; //GetParmIdFromEstID(id, obj);
+   else
+      parameterID = id;
+   std::string paramName = obj->GetParameterText(parameterID);
+
+   #ifdef DEBUG_DERIVATIVE_CALCULATION
+      MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
+   #endif
 
    // Perform the calculations
    #ifdef DEBUG_ADAPTER_DERIVATIVES
       MessageInterface::ShowMessage("RangeAdapterKm::CalculateMeasurement"
             "Derivatives(%s, %d) called; parm ID is %d; Epoch %.12lf\n",
-            obj->GetName().c_str(), id, parmId, cMeasurement.epoch);
+            obj->GetFullName().c_str(), id, parameterID, cMeasurement.epoch);
    #endif
 
-   const std::vector<RealArray> *derivativeData =
+   // Clear derivative variable
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      theDataDerivatives[i].clear();
+   theDataDerivatives.clear();                                                        // made changes by TUAN NGUYEN
+
+   if (paramName == "Bias")
+   {
+      //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+      //theDataDerivatives.clear();                                                     // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_KM")               // made changes by TUAN NGUYEN
+         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
+      else                                                                            // made changes by TUAN NGUYEN
+      {                                                                               // made changes by TUAN NGUYEN
+         Integer size = obj->GetEstimationParameterSize(id);                          // made changes by TUAN NGUYEN
+         RealArray oneRow;                                                            // made changes by TUAN NGUYEN
+         oneRow.assign(size, 0.0);                                                    // made changes by TUAN NGUYEN
+         theDataDerivatives.push_back(oneRow);                                        // made changes by TUAN NGUYEN
+      }                                                                               // made changes by TUAN NGUYEN
+
+   }
+   else
+   {
+
+      const std::vector<RealArray> *derivativeData =
          &(calcData->CalculateMeasurementDerivatives(obj, id));
 
-   #ifdef DEBUG_ADAPTER_DERIVATIVES
-      MessageInterface::ShowMessage("   Derivatives: [");
-      for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
-      {
-         if (i > 0)
-            MessageInterface::ShowMessage("]\n                [");
-         for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
+      #ifdef DEBUG_ADAPTER_DERIVATIVES
+         MessageInterface::ShowMessage("   Derivatives: [");
+         for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
          {
-            if (j > 0)
-               MessageInterface::ShowMessage(", ");
-            MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
+            if (i > 0)
+               MessageInterface::ShowMessage("]\n                [");
+            for (UnsignedInt j = 0; j < derivativeData->at(i).size(); ++j)
+            {
+               if (j > 0)
+                  MessageInterface::ShowMessage(", ");
+               MessageInterface::ShowMessage("%.12le", (derivativeData->at(i))[j]);
+            }
+         }
+         MessageInterface::ShowMessage("]\n");
+      #endif
+
+      // Now assemble the derivative data into the requested derivative
+      // Note that: multiplier is only applied for elements of spacecraft's state, position, and velocity
+      Real factor = 1.0;
+      // if (measurementType == "Range")                    // made changes by TUAN NGUYEN
+      if (measurementType == "Range_KM")                    // made changes by TUAN NGUYEN
+      {
+         if (obj->IsOfType(Gmat::SPACECRAFT))
+         {
+            factor = multiplier;
          }
       }
-      MessageInterface::ShowMessage("]\n");
-   #endif
 
-   // Now assemble the derivative data into the requested derivative
-   Real factor = 1.0;
-   if (measurementType == "Range")
-      factor = multiplier;
-
-   UnsignedInt size = derivativeData->at(0).size();
-   theDataDerivatives.clear();
-   for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
-   {
-      RealArray oneRow;
-      oneRow.assign(size, 0.0);
-      theDataDerivatives.push_back(oneRow);
-
-      if (derivativeData->at(i).size() != size)
-         throw MeasurementException("Derivative data size is a different size "
-               "than expected");
-
-      for (UnsignedInt j = 0; j < size; ++j)
+      UnsignedInt size = derivativeData->at(0).size();
+      //theDataDerivatives.clear();                          // made changes by TUAN NGUYEN
+      for (UnsignedInt i = 0; i < derivativeData->size(); ++i)
       {
-         theDataDerivatives[i][j] = (derivativeData->at(i))[j] * factor;
+         RealArray oneRow;
+         oneRow.assign(size, 0.0);
+         theDataDerivatives.push_back(oneRow);
+
+         if (derivativeData->at(i).size() != size)
+            throw MeasurementException("Derivative data size is a different size "
+                  "than expected");
+
+         for (UnsignedInt j = 0; j < size; ++j)
+         {
+            theDataDerivatives[i][j] = (derivativeData->at(i))[j] * factor;
+         }
       }
    }
 

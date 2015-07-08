@@ -1519,7 +1519,7 @@ void ParameterSelectDialog::ShowHardwareProperties(const wxString &scName,
    #ifdef DEBUG_SHOW_HARDWARE
    MessageInterface::ShowMessage
       ("ShowHardwareProperties() entered, scName='%s', hwName='%s'\n",
-       scName.c_str(), hwName.c_str());
+       scName.WX_TO_C_STRING, hwName.WX_TO_C_STRING);
    #endif
    
    mPropertyListBox->Clear();   
@@ -1532,7 +1532,7 @@ void ParameterSelectDialog::ShowHardwareProperties(const wxString &scName,
    #ifdef DEBUG_SHOW_HARDWARE
    MessageInterface::ShowMessage
       ("ShowHardwareProperties() leaving, scName='%s', hwName='%s'\n",
-       scName.c_str(), hwName.c_str());
+       scName.WX_TO_C_STRING, hwName.WX_TO_C_STRING);
    #endif
 }
 

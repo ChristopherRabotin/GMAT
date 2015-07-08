@@ -35,6 +35,9 @@
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 
+#ifdef __USE_SPICE__
+   #include "SpiceInterface.hpp"
+#endif
 
 class GMAT_API BodyFixedPoint : public SpacePoint
 {
@@ -120,6 +123,8 @@ public:
    virtual void            SetSolarSystem(SolarSystem *ss);
    virtual bool            IsValidID(const std::string &id) = 0;
 
+   virtual bool            InitializeForContactLocation(bool deleteFiles = true);
+
 protected:
    /// The point is attached to this body
    std::string       cBodyName;
@@ -155,18 +160,43 @@ protected:
    A1Mjd             lastStateTime;
    Rvector6          lastState;
 
+   /// Base filename for the SPK and FK kernels
+   std::string       kernelBaseName;
+   /// The SPK kernel written for this Asset
+   std::string       spkName;
+   /// The FK kernel written for this Asset
+   std::string       fkName;
+   /// delete SPK file on destruction?
+   bool              deleteSPK;
+   /// delete FK file on destruction?
+   bool              deleteFK;
+   /// has he NaifID been determined?
+   bool              naifIDDetermined;
+   /// have the kernel names been figured out?
+   bool              kernelNamesDetermined;
+   /// Were the kernels written?
+   bool              kernelsWritten;
+
+   #ifdef __USE_SPICE__
+      SpiceInterface  *spice;
+   #endif
+
+   Rvector3       j2000Pos;
+   Rvector3       j2000Vel;
+   Rvector6       j2000PosVel;
+
+
+   static Integer gsNaifId;
+
    /// Converter helper
    CoordinateConverter ccvtr;
 
    void UpdateBodyFixedLocation();
 
+   bool WriteSPK(bool deleteFile = true);
+   bool WriteFK(bool deleteFile = true);
 
-   /// Conversion code used to transform from lat-long-height to body fixed
-//   LatLonHgt      llh;
-
-   Rvector3       j2000Pos;
-   Rvector3       j2000Vel;
-   Rvector6       j2000PosVel;
+   Rvector3 GetTopocentricConversion(const std::string &centralNaifId);
 
 public:
    /// Published parameters for body-fixed points

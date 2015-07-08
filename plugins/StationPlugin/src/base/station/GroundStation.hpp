@@ -32,7 +32,6 @@
 #include "StationDefs.hpp"
 #include "SpacePoint.hpp"
 #include "GroundstationInterface.hpp"
-#include "LatLonHgt.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
 #include "Hardware.hpp"
@@ -84,12 +83,10 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
 
-   
    virtual Real         GetRealParameter(const Integer id) const;
    virtual Real         SetRealParameter(const Integer id, const Real value);
    virtual Real         GetRealParameter(const std::string &label) const;
    virtual Real         SetRealParameter(const std::string &label, const Real value);
-
 
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
@@ -111,7 +108,7 @@ public:
 
    virtual bool         Initialize();
 
-//   virtual Integer         GetEstimationParameterID(const std::string &param);
+//   virtual Integer      GetEstimationParameterID(const std::string &param);
 //   virtual Integer         SetEstimationParameter(const std::string &param);
    virtual bool         IsEstimationParameterValid(const Integer id);
    virtual Integer      GetEstimationParameterSize(const Integer id);
@@ -121,9 +118,10 @@ public:
 
 
    virtual Real*        IsValidElevationAngle(const Rvector6 &state_sez);
-   //RealArray            CalculateTroposphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
-   //RealArray            CalculateIonosphereCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
-   //RealArray            CalculateMediaCorrection(A1Mjd& atTime, SpacePoint* sp, Real frequency);
+
+   virtual bool         CreateErrorModelForSignalPath(std::string spacecraftName);          // made changes by TUAN NGUYEN
+   virtual std::map<std::string,ObjectArray>& 
+                        GetErrorModelMap();                                                 // made changes by TUAN NGUYEN
 
    DEFAULT_TO_NO_CLONES
 
@@ -150,18 +148,15 @@ protected:
    /// Visibility vector
    Real az_el_visible[3];
 
-   /// Noise
-   Real            rangeNoiseSigma;       // unit: Km
-   std::string     rangeErrorModel;
-   Real            dsnrangeNoiseSigma;    // unit: RU
-   std::string     dsnrangeErrorModel;
-   Real            dopplerNoiseSigma;     // unit: Hz
-   std::string     dopplerErrorModel;
-   
-   /// Bias
-   Real            rangeBias;              // unit: Km
-   Real            dsnrangeBias;           // unit: RU
-   Real            dopplerBias;            // unit: Hz
+   /// Error models used for measurements in this gound station               // made changes by TUAN NGUYEN
+   StringArray     errorModelNames;                                           // made changes by TUAN NGUYEN
+   ObjectArray     errorModels;                                               // made changes by TUAN NGUYEN
+
+   /// Containing all clones of ErrorModels associated with a signal path.
+   // The first element containing name of spacecraft in uplink signal. 
+   // The second element is an object array containing error model clones.
+   std::map<std::string,ObjectArray>     errorModelMap;                       // made changes by TUAN NGUYEN
+
 public:
    /// Published parameters for ground stations
    enum
@@ -175,15 +170,7 @@ public:
       PRESSURE,                     // pressure (in hPa) at ground station. It is used for Troposphere correction
       HUMIDITY,                     // humidity (in %) at ground station. It is used for Troposphere correction
       MINIMUM_ELEVATION_ANGLE,      // It is needed for verifying measurement feasibility
-      RANGE_NOISESIGMA,
-      RANGE_ERRORMODEL,
-      DSNRANGE_NOISESIGMA,
-      DSNRANGE_ERRORMODEL,
-      DOPPLER_NOISESIGMA,
-      DOPPLER_ERRORMODEL,
-      RANGE_BIAS,
-      DSNRANGE_BIAS,
-      DOPPLER_BIAS,
+      ERROR_MODELS,                 // ErrorModel contains all information about noise sigma, bias for given measurement types. Therefore, the following parameters have to be removed        // made change by TUAN NGUYEN
       GroundStationParamCount,
    };
 

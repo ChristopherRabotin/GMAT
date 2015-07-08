@@ -276,7 +276,7 @@ bool EventModel::SupportsDerivative(Gmat::StateElementId id)
  */
 //-----------------------------------------------------------------------------
 bool EventModel::SetStart(Gmat::StateElementId id, Integer index,
-      Integer quantity)
+      Integer quantity, Integer sizeOfType)
 {
    bool retval = false;
 

@@ -67,6 +67,12 @@
     <Filter Include="Source Files\tdmReader">
       <UniqueIdentifier>{bd163232-214a-48be-9c8c-bcb3e35e0970}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\datafilter">
+      <UniqueIdentifier>{cb2b4d2b-6bef-4f27-8b11-a305bf37f64c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\errormodel">
+      <UniqueIdentifier>{397421b8-c0a7-4b17-870c-21169c8ca7bc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\base\include\estimation_defs.hpp">
@@ -104,9 +110,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\base\estimator\BatchEstimatorSVD.hpp">
       <Filter>Source Files\estimator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\base\event\EventException.hpp">
-      <Filter>Source Files\event</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\base\event\EventManager.hpp">
       <Filter>Source Files\event</Filter>
@@ -363,6 +366,30 @@
     <ClInclude Include="..\..\src\base\adapter\PointRangeRateAdapterKps.hpp">
       <Filter>Source Files\adapter</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\StatisticAcceptFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\EstimationDataFilterFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\factory\ErrorModelFactory.hpp">
+      <Filter>Source Files\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\errormodel\ErrorModel.hpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\DataFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\datafilter\StatisticRejectFilter.hpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\adapter\GNDopplerAdapter.hpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\base\measurement\Ionosphere\loadfiles.h">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\base\command\RunEstimator.cpp">
@@ -408,9 +435,6 @@
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\event\EventData.cpp">
-      <Filter>Source Files\event</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\base\event\EventException.cpp">
       <Filter>Source Files\event</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\base\factory\EventFactory.cpp">
@@ -647,8 +671,29 @@
     <ClCompile Include="..\..\src\base\adapter\PointRangeRateAdapterKps.cpp">
       <Filter>Source Files\adapter</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
+    <ClCompile Include="..\..\src\base\datafilter\StatisticAcceptFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\EstimationDataFilterFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\factory\ErrorModelFactory.cpp">
+      <Filter>Source Files\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\errormodel\ErrorModel.cpp">
+      <Filter>Source Files\errormodel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\DataFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\datafilter\StatisticRejectFilter.cpp">
+      <Filter>Source Files\datafilter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\adapter\GNDopplerAdapter.cpp">
+      <Filter>Source Files\adapter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\base\measurement\Ionosphere\loadfiles.c">
+      <Filter>Source Files\measurement\Ionosphere</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

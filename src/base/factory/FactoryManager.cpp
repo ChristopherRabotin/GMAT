@@ -644,10 +644,10 @@ CoreMeasurement* FactoryManager::CreateMeasurement(const std::string &ofType,
 //                                          const std::string &withName)
 //------------------------------------------------------------------------------
 /**
- * This method creates the measurement primitive used in a ErrorModel
+ * This method creates an ErrorModel object
  *
- * @param ofType The type of measurement primitive
- * @param withName The name of the measurement prinitive.  This should be an
+ * @param ofType The type of ErrorModel object
+ * @param withName The name of ErrorModel object.  This should be an
  *                 empty string in the current implementation.
  *
  * @return The pointer to the new object
@@ -659,6 +659,30 @@ ErrorModel* FactoryManager::CreateErrorModel(const std::string &ofType,         
    Factory* f = FindFactory(Gmat::ERROR_MODEL, ofType);                                 // made changes by TUAN NGUYEN
    if (f != NULL)                                                                       // made changes by TUAN NGUYEN
       return f->CreateErrorModel(ofType, withName);                                     // made changes by TUAN NGUYEN
+   return NULL;                                                                         // made changes by TUAN NGUYEN
+}                                                                                       // made changes by TUAN NGUYEN
+
+
+//------------------------------------------------------------------------------
+// DataFilter* FactoryManager::CreateDataFilter(
+//              const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * This method creates a DataFilter object
+ *
+ * @param ofType The type of DataFilter object
+ * @param withName The name of DataFilter object.  This should be an
+ *                 empty string in the current implementation.
+ *
+ * @return The pointer to the new object
+ */
+//------------------------------------------------------------------------------
+DataFilter* FactoryManager::CreateDataFilter(const std::string &ofType,                 // made changes by TUAN NGUYEN
+                                         const std::string &withName)                   // made changes by TUAN NGUYEN
+{                                                                                       // made changes by TUAN NGUYEN
+   Factory* f = FindFactory(Gmat::DATA_FILTER, ofType);                                 // made changes by TUAN NGUYEN
+   if (f != NULL)                                                                       // made changes by TUAN NGUYEN
+      return f->CreateDataFilter(ofType, withName);                                     // made changes by TUAN NGUYEN
    return NULL;                                                                         // made changes by TUAN NGUYEN
 }                                                                                       // made changes by TUAN NGUYEN
 
@@ -1096,7 +1120,13 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
                objType = GmatStringUtil::Capitalize(objType);
             
             if (find(listObj.begin(), listObj.end(), objType) != listObj.end())
+            {
+               #ifdef DEBUG_FACTORY_CREATE
+               MessageInterface::ShowMessage
+                  ("FactoryManager::FindFactory() found factory and returning <%p>\n", (*f));
+               #endif
                return (*f);
+            }
          }
       }
       ++f;

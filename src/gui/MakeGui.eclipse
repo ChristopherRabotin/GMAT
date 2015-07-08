@@ -132,6 +132,7 @@ HEADERS = -I../base/include \
           -Icommand \
           -Icontrollogic \
           -Icoordsystem \
+          -Ievent \
           -Iforcemodel \
           -Ifoundation \
           -Ifunction \
@@ -193,6 +194,7 @@ OBJECTS = \
     command/BeginFiniteBurnPanel.o \
     command/CallFunctionPanel.o \
     command/EndFiniteBurnPanel.o \
+    command/FindEventsPanel.o \
     command/GmatCommandPanel.o \
     command/ManeuverPanel.o \
     command/MinimizePanel.o \
@@ -210,6 +212,7 @@ OBJECTS = \
     coordsystem/CoordPanel.o \
     coordsystem/CoordSysCreateDialog.o \
     coordsystem/CoordSystemConfigPanel.o \
+    event/EventLocatorPanel.o \
     forcemodel/DragInputsDialog.o \
     foundation/ArraySetupDialog.o \
     foundation/ArraySetupPanel.o \
@@ -260,6 +263,7 @@ OBJECTS = \
     solarsys/CelestialBodyOrientationPanel.o \
     solarsys/CelestialBodyPanel.o \
     solarsys/CelestialBodyPropertiesPanel.o \
+    solarsys/CelestialBodyVisualizationPanel.o \
     solarsys/LibrationPointPanel.o \
     solarsys/UniversePanel.o \
     solver/DCSetupPanel.o \
@@ -321,6 +325,7 @@ else
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
+	chrpath -r '$$ORIGIN:$$ORIGIN/lib:$$ORIGIN/../plugins' $(WXTARGET)
 	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.
 else
@@ -343,6 +348,7 @@ else
 ifeq ($(LINUX_MAC), 1)
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
+	chrpath -r '$$ORIGIN:$$ORIGIN/lib:$$ORIGIN/../plugins' $(WXTARGET)
 	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)

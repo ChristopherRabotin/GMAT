@@ -249,6 +249,9 @@ private:
    
    // spacecraft model
    void DrawSpacecraft3dModel(Spacecraft *sc, int objId, int frame);
+   // Celestial body model
+   void DrawCelestialBody3dModel(CelestialBody *body, const wxString &objName,
+                                 int objId, int frame);
    
    // drawing stars
    void DrawStars();

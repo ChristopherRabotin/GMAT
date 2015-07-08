@@ -22,6 +22,7 @@
 #include "MeasurementException.hpp"
 #include "MessageInterface.hpp"
 #include "RandomNumber.hpp"
+#include "ErrorModel.hpp"
 #include <sstream>
 
 //#define DEBUG_ADAPTER_EXECUTION
@@ -441,27 +442,37 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
       
       if (measurementType == "DSNRange")
       {
-         // Compute bias, noise sigma, and measurement error covariance matrix
-         ComputeMeasurementBias("DSNRangeBias");
-         ComputeMeasurementNoiseSigma("DSNRangeNoiseSigma");
+         // Compute bias
+         ComputeMeasurementBias("Bias", "Range_RU", 2);
+         // Compute noise sigma
+         ComputeMeasurementNoiseSigma("NoiseSigma", "Range_RU", 2);
+         // Compute measurement error covariance matrix
          ComputeMeasurementErrorCovarianceMatrix();
 
-         // Add noise to measurement value
-         if (addNoise)
+         // if need range value only, skip this section, otherwise add noise and bias as possible
+         if (!rangeOnly)
          {
-            // Add noise here
-            if (cMeasurement.unfeasibleReason != "R")
+            // Add noise to measurement value
+            if (addNoise)
             {
-               RandomNumber* rn = RandomNumber::Instance();
-               Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
-               cMeasurement.value[i] = val;
+               // Add noise here
+               if (cMeasurement.unfeasibleReason != "R")
+               {
+                  RandomNumber* rn = RandomNumber::Instance();
+                  Real val = rn->Gaussian(cMeasurement.value[i], noiseSigma[i]);
+                  cMeasurement.value[i] = val;
+               }
+            }
+
+            //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
+            if (addBias)
+            {
+               #ifdef DEBUG_RANGE_CALCULATION
+                  MessageInterface::ShowMessage("      . Add bias...\n");
+               #endif
+               cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
             }
          }
-         //Add bias to measurement value only after noise had been added in order to avoid adding bias' noise 
-         #ifdef DEBUG_RANGE_CALCULATION
-            MessageInterface::ShowMessage("      . Add bias...\n");
-         #endif
-         cMeasurement.value[i] = cMeasurement.value[i] + measurementBias[i];
       }
 
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
@@ -492,6 +503,21 @@ const MeasurementData& DSNRangeAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("      . Measurement is %s\n", (cMeasurement.isFeasible?"feasible":"unfeasible"));
          MessageInterface::ShowMessage("      . Feasibility reason         : %s\n", cMeasurement.unfeasibleReason.c_str());
          MessageInterface::ShowMessage("      . Elevation angle            : %.12lf degree\n", cMeasurement.feasibilityValue);
+         MessageInterface::ShowMessage("      . Covariance matrix          : <%p>\n", cMeasurement.covariance);
+         if (cMeasurement.covariance)
+         {
+            MessageInterface::ShowMessage("      . Covariance matrix size = %d\n", cMeasurement.covariance->GetDimension());
+            MessageInterface::ShowMessage("     [ ");
+            for (UnsignedInt i = 0; i < cMeasurement.covariance->GetDimension(); ++i)
+            {
+               if ( i > 0)
+                  MessageInterface::ShowMessage("\n");
+               for (UnsignedInt j = 0; j < cMeasurement.covariance->GetDimension(); ++j)
+                  MessageInterface::ShowMessage("%le   ", cMeasurement.covariance->GetCovariance()->GetElement(i,j));
+            }
+            MessageInterface::ShowMessage("]\n");
+         }
+
          MessageInterface::ShowMessage("===================================================================\n");
       #endif
 
@@ -540,23 +566,25 @@ const std::vector<RealArray>& DSNRangeAdapter::CalculateMeasurementDerivatives(
       MessageInterface::ShowMessage("Solver-for parameter: %s\n", paramName.c_str());
    #endif
 
-   
-   if (paramName.substr(paramName.size()-4) == "Bias")
+   // Clear derivative variable
+   for (UnsignedInt i = 0; i < theDataDerivatives.size(); ++i)
+      theDataDerivatives[i].clear();
+   theDataDerivatives.clear();                                                     // made changes by TUAN NGUYEN
+
+   if (paramName == "Bias")
    {
-      // Compute measurement derivatives w.r.t Bias:
-      if (paramName == "DSNRangeBias")
-      {
-         RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
-      }
-      else
-      {
-         // for RangeBias and DopplerBias, derivative is 0.0
-         Integer size = obj->GetEstimationParameterSize(id);
-         theDataDerivatives.clear();
-         RealArray val;
-         val.assign(size, 0.0);
-         theDataDerivatives.push_back(val);
-      }
+      //RangeAdapterKm::CalculateMeasurementDerivatives(obj, id);
+      //theDataDerivatives.clear();                                                   // made changes by TUAN NGUYEN
+      if (((ErrorModel*)obj)->GetStringParameter("Type") == "Range_RU")               // made changes by TUAN NGUYEN
+         theDataDerivatives = calcData->CalculateMeasurementDerivatives(obj, id);     // made changes by TUAN NGUYEN
+      else                                                                            // made changes by TUAN NGUYEN
+      {                                                                               // made changes by TUAN NGUYEN
+         Integer size = obj->GetEstimationParameterSize(id);                          // made changes by TUAN NGUYEN
+         RealArray oneRow;                                                            // made changes by TUAN NGUYEN
+         oneRow.assign(size, 0.0);                                                    // made changes by TUAN NGUYEN
+         theDataDerivatives.push_back(oneRow);                                        // made changes by TUAN NGUYEN
+      }                                                                               // made changes by TUAN NGUYEN
+
    }
    else
    {

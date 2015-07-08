@@ -28,6 +28,7 @@
 #include "GmatConstants.hpp"
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 #include <sstream>
 
 //#define DEBUG_STATE_MACHINE
@@ -37,6 +38,7 @@
 //#define DEBUG_TIMESTEP
 //#define DEBUG_EVENT
 //#define DEBUG_INITIALIZE
+//#define DEBUG_CLONED_PARAMETER UPDATES
 
 //------------------------------------------------------------------------------
 // static data
@@ -48,9 +50,7 @@ Simulator::PARAMETER_TEXT[SimulatorParamCount -SolverParamCount] =
    "AddData",
    "Propagator",
    "EpochFormat",
-//   "InitialEpochFormat",
    "InitialEpoch",
-//   "FinalEpochFormat",
    "FinalEpoch",
    "MeasurementTimeStep",
    "AddNoise",
@@ -62,9 +62,7 @@ Simulator::PARAMETER_TYPE[SimulatorParamCount - SolverParamCount] =
    Gmat::OBJECTARRAY_TYPE,
    Gmat::OBJECT_TYPE,
    Gmat::ENUMERATION_TYPE,
-//   Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
-//   Gmat::ENUMERATION_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
    Gmat::ON_OFF_TYPE,
@@ -87,25 +85,25 @@ Simulator::Simulator(const std::string& name) :
    propagator          (NULL),
    propagatorName      (""),
    simState            (NULL),
-   simulationStart     (GmatTimeConstants::MJD_OF_J2000),
-   simulationEnd       (GmatTimeConstants::MJD_OF_J2000 + 1.0),
-   nextSimulationEpoch (GmatTimeConstants::MJD_OF_J2000),
+//   simulationStart     (GmatTimeConstants::MJD_OF_J2000),
+//   simulationEnd       (GmatTimeConstants::MJD_OF_J2000 + 1.0),
+//   nextSimulationEpoch (GmatTimeConstants::MJD_OF_J2000),
    simEpochCounter     (0),
-   currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
-   epochFormat  ("TAIModJulian"),
-//   initialEpochFormat  ("TAIModJulian"),
-//   finalEpochFormat    ("TAIModJulian"),
+//   currentEpoch        (GmatTimeConstants::MJD_OF_J2000),
+   epochFormat         ("TAIModJulian"),
+   initialEpoch        ("21545"),
+   finalEpoch          ("21546"),          // ("21545"),  It has 1 day time interval to simulate data
    simulationStep      (60.0),
    locatingEvent       (false),
    timeStep            (60.0),
    addNoise            (false)
 {
    objectTypeNames.push_back("Simulator");
-   std::stringstream ss("");
-   ss << GmatTimeConstants::MJD_OF_J2000;
-   initialEpoch = ss.str();
-   finalEpoch   = ss.str();
    parameterCount = SimulatorParamCount;
+
+   simulationStart = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(initialEpoch.c_str()));
+   simulationEnd = TimeConverterUtil::ConvertFromTaiMjd(TimeConverterUtil::A1MJD, atof(finalEpoch.c_str()));
+   currentEpoch = nextSimulationEpoch = simulationStart;
 }
 
 
@@ -129,9 +127,7 @@ Simulator::Simulator(const Simulator& sim) :
    simEpochCounter     (0),
    currentEpoch        (sim.currentEpoch),
    epochFormat         (sim.epochFormat),
-//   initialEpochFormat  (sim.initialEpochFormat),
    initialEpoch        (sim.initialEpoch),
-//   finalEpochFormat    (sim.finalEpochFormat),
    finalEpoch          (sim.finalEpoch),
    simulationStep      (sim.simulationStep),
    locatingEvent       (false),
@@ -165,9 +161,12 @@ Simulator& Simulator::operator =(const Simulator& sim)
 
       if (propagator != NULL)
          delete propagator;
-      if (sim.propagator) propagator          = ((PropSetup*)
-                                                    (sim.propagator)->Clone());
-      else                propagator          = NULL;
+
+      if (sim.propagator) 
+         propagator = ((PropSetup*) (sim.propagator)->Clone());
+      else
+         propagator = NULL;
+
       propagatorName      = sim.propagatorName;
       simState            = NULL;   // or clone it here??
       simulationStart     = sim.simulationStart;
@@ -175,17 +174,15 @@ Simulator& Simulator::operator =(const Simulator& sim)
       nextSimulationEpoch = sim.nextSimulationEpoch;
       simEpochCounter     = sim.simEpochCounter;
       currentEpoch        = sim.currentEpoch;
-      epochFormat  = sim.epochFormat;
-//      initialEpochFormat  = sim.initialEpochFormat;
+      epochFormat         = sim.epochFormat;
       initialEpoch        = sim.initialEpoch;
-//      finalEpochFormat    = sim.finalEpochFormat;
       finalEpoch          = sim.finalEpoch;
       simulationStep      = sim.simulationStep;
       timeStep            = sim.timeStep;
       locatingEvent       = false;
       measManager         = sim.measManager;
       measList            = sim.measList;
-     addNoise            = sim.addNoise;
+      addNoise            = sim.addNoise;
    }
 
    return *this;
@@ -203,6 +200,14 @@ Simulator::~Simulator()
 {
    if (propagator)
       delete propagator;
+
+   if (simState)                       // made changes by TUAN NGUYEN
+      delete simState;                 // made changes by TUAN NGUYEN
+
+   activeEvents.clear();               // made changes by TUAN NGUYEN
+   measList.clear();                   // made changes by TUAN NGUYEN
+   measModelList.clear();              // made changes by TUAN NGUYEN
+   refObjectList.clear();              // made changes by TUAN NGUYEN
 }
 
 
@@ -423,17 +428,6 @@ Integer Simulator::GetParameterID(const std::string &str) const
 {
    std::string str1 = str;
 
-   // @todo: This section will be remove after for a later GMAT version
-   if (str1 == "InitialEpochFormat")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.InitialEpochFormat was renamed to %s.EpochFormat in this GMAT version. Please change its name in yours script file.\n", GetName().c_str(), GetName().c_str());
-      str1 = "EpochFormat";
-   }
-   else if (str1 == "FinalEpochFormat")
-   {
-      MessageInterface::ShowMessage("Warning: parameter %s.FinalEpochFormat was renamed to %s.EpochFormat in this GMAT version. Please change its name in yours script file.\n", GetName().c_str(), GetName().c_str());
-      str1 = "EpochFormat";
-   }
 
    // This section is used to throw an exception for unused parameters
    if ((str1 == "ShowProgress")||(str1 == "ReportFile")||(str1 == "ReportStyle")||(str1 == "MaximumIterations"))
@@ -569,9 +563,7 @@ std::string Simulator::GetStringParameter(const Integer id) const
 {
    if (id == PROPAGATOR)             return propagatorName;
    if (id == EPOCH_FORMAT)           return epochFormat;
-//   if (id == INITIAL_EPOCH_FORMAT)   return initialEpochFormat;
    if (id == INITIAL_EPOCH)          return initialEpoch;
-//   if (id == FINAL_EPOCH_FORMAT)     return finalEpochFormat;
    if (id == FINAL_EPOCH)            return finalEpoch;
 
    return Solver::GetStringParameter(id);
@@ -628,14 +620,17 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_SIMULATOR_INITIALIZATION
       MessageInterface::ShowMessage(
-               "Simulator::SetStringParameter(%d, %s)\n",
+               "Simulator<%s,%p>::SetStringParameter(%d, %s)\n",GetName().c_str(), this, 
             id, value.c_str());
    #endif
 
+   //@Todo: this code will be removed when the bug in Interperter is fixed                                          // made changes by TUAN NGUYEN
    if (id == MEASUREMENTS)
    {
-      Integer sz = (Integer) measList.size();
-      return SetStringParameter(id, value, sz);
+      std::string measName = GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}"));
+      if (measName == "")                                                                                           // made changes by TUAN NGUYEN
+         throw EstimatorException("Error: No measurement is set to " + GetName() + ".Measurements parameter.\n");   // made changes by TUAN NGUYEN
+      return SetStringParameter(id, measName, measList.size());
    }
 
    if (id == PROPAGATOR)
@@ -648,11 +643,6 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
       epochFormat = value;
       return true;
    }
-   //if (id == INITIAL_EPOCH_FORMAT)
-   //{
-   //   initialEpochFormat = value;
-   //   return true;
-   //}
    if (id == INITIAL_EPOCH)
    {
       initialEpoch = value;
@@ -661,11 +651,6 @@ bool Simulator::SetStringParameter(const Integer id, const std::string &value)
       simulationStart = ConvertToRealEpoch(initialEpoch, epochFormat);
       return true;
    }
-   //if (id == FINAL_EPOCH_FORMAT)
-   //{
-   //   finalEpochFormat = value;
-   //   return true;
-   //}
    if (id == FINAL_EPOCH)
    {
       finalEpoch = value;
@@ -852,22 +837,13 @@ bool Simulator::SetOnOffParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 {
-   static StringArray enumStrings;
-   enumStrings.clear();
+   static StringArray typeList;
+   typeList.clear();
 
-   // todo This list should come from TimeSystemConverter in the util folder
-   //if ((id == INITIAL_EPOCH_FORMAT) || (id == FINAL_EPOCH_FORMAT))
    if (id == EPOCH_FORMAT)
    {
-      enumStrings.push_back("A1ModJulian");
-      enumStrings.push_back("TAIModJulian");
-      enumStrings.push_back("UTCModJulian");
-      enumStrings.push_back("TTModJulian");
-      enumStrings.push_back("A1Gregorian");
-      enumStrings.push_back("TAIGregorian");
-      enumStrings.push_back("UTCGregorian");
-      enumStrings.push_back("TTGregorian");
-      return enumStrings;
+      typeList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      return typeList;
    }
 
    return Solver::GetPropertyEnumStrings(id);
@@ -983,9 +959,10 @@ bool Simulator::SetRefObjectName(const Gmat::ObjectType type,
 //-----------------------------------------------------------------------------
 const ObjectTypeArray & Simulator::GetRefObjectTypeArray()
 {
-   ObjectTypeArray objTypes = Solver::GetRefObjectTypeArray();         // made changes by TUAN NGUYEN
+   static ObjectTypeArray objTypes = Solver::GetRefObjectTypeArray();         // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::PROP_SETUP);                               // made changes by TUAN NGUYEN
    objTypes.push_back(Gmat::MEASUREMENT_MODEL);                        // made changes by TUAN NGUYEN
+   objTypes.push_back(Gmat::DATA_FILTER);                              // made changes by TUAN NGUYEN
 //   objTypes.push_back(Gmat::TRACKING_SYSTEM);                          // made changes by TUAN NGUYEN
    return objTypes;                                                    // made changes by TUAN NGUYEN
 
@@ -1362,7 +1339,6 @@ bool Simulator::Initialize()
    std::vector<TrackingFileSet*> tfs = measManager.GetAllTrackingFileSets();            // made changes by TUAN NGUYEN
    StringArray measNames = measManager.GetMeasurementNames();                           // made changes by TUAN NGUYEN
    
-   
    for(UnsignedInt i = 0; i < measNames.size(); ++i)                            // made changes by TUAN NGUYEN
    {                                                                            // made changes by TUAN NGUYEN
       std::string name = measNames[i];                                          // made changes by TUAN NGUYEN
@@ -1407,6 +1383,17 @@ bool Simulator::Initialize()
       if (!found)                                                               // made changes by TUAN NGUYEN
          throw SolverException("Cannot initialize simulator; '" + name + "' object is not defined in script.\n");        // made changes by TUAN NGUYEN
    }                                                                            // made changes by TUAN NGUYEN
+
+
+   // Check for TrackingConfig to be defined in TrackingFileSet                    // made changes by TUAN NGUYEN
+   for(UnsignedInt i = 0; i < tfs.size(); ++i)                                     // made changes by TUAN NGUYEN
+   {                                                                               // made changes by TUAN NGUYEN
+      StringArray list = tfs[i]->GetStringArrayParameter("AddTrackingConfig");     // made changes by TUAN NGUYEN
+      if (list.size() == 0)                                                        // made changes by TUAN NGUYEN
+         throw SolverException("Cannot initialize simulator; TrackingFileSet '" +  // made changes by TUAN NGUYEN
+                 tfs[i]->GetName() + "' object which is defined in simulator '" +  // made changes by TUAN NGUYEN
+                 GetName() + "' has no tracking configuration.\n");                // made changes by TUAN NGUYEN
+   }                                                                               // made changes by TUAN NGUYEN
 
    measModels.clear();                                                          // made changes by TUAN NGUYEN
    tkSystems.clear();                                                           // made changes by TUAN NGUYEN
@@ -1557,6 +1544,33 @@ void Simulator::UpdateClonedObject(GmatBase *obj)
       return;
    throw SolverException("To do: implement Simulator::UpdateClonedObject "
          "for " + obj->GetTypeName() + " objects");
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+//------------------------------------------------------------------------------
+/**
+ * Added method to remove message in the Message window.
+ *
+ * The current implementation needs to be updated to actually process parameters
+ * when they are updated in the system.  For now, it is just overriding the base
+ * class "do nothing" method so that the message traffic is not shown to the
+ * user.
+ *
+ * Turn on the debug to figure out the updates being requested.
+ *
+ * @param obj The master object holding the new parameter value
+ * @param updatedParameterId The ID of the updated parameter
+ */
+//------------------------------------------------------------------------------
+void Simulator::UpdateClonedObjectParameter(GmatBase *obj, Integer updatedParameterId)
+{
+#ifdef DEBUG_CLONED_PARAMETER UPDATES
+   MessageInterface::ShowMessage("Simulator updating parameter %d (%s) using "
+         "object %s\n", updatedParameterId, obj->GetParameterText(updatedParameterId).c_str(),
+         obj->GetName().c_str());
+#endif
 }
 
 
