@@ -32,6 +32,7 @@
 #include "GmatBaseException.hpp"
 #include "SubscriberException.hpp"
 #include "Publisher.hpp"
+#include <algorithm>               // for find()
 
 //#define DEBUG_OBJECT_INITIALIZER
 //#define DEBUG_OBJECT_INITIALIZER_DETAILED
@@ -185,8 +186,8 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
       ("ObjectInitializer::InitializeObjects() entered, registerSubs = %s, "
-       "objType = %d, inFunction = %d\n", registerSubs ? "true" : "false",
-       objType, inFunction);
+       "objType = %d, objTypeStr = '%s', inFunction = %d\n", registerSubs ? "true" : "false",
+       objType, GmatBase::GetObjectTypeString(objType).c_str(), inFunction);
    #endif
    
    #ifdef DEBUG_OBJECT_MAP
@@ -446,7 +447,6 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
       #ifdef DEBUG_INITIALIZE_OBJ
       MessageInterface::ShowMessage("--- Initialize Subscriber in LOS\n");
       #endif
-      //InitializeObjectsInTheMap(LOS, Gmat::SUBSCRIBER);
       InitializeSubscribers(LOS);
       
       if (includeGOS)
@@ -454,7 +454,6 @@ bool ObjectInitializer::InitializeObjects(bool registerSubs,
          #ifdef DEBUG_INITIALIZE_OBJ
          MessageInterface::ShowMessage("--- Initialize Subscriber in GOS\n");
          #endif
-         //InitializeObjectsInTheMap(GOS, Gmat::SUBSCRIBER);
          InitializeSubscribers(GOS);
       }
    }
@@ -726,18 +725,24 @@ void ObjectInitializer::InitializeSystemParameters(ObjectMap *objMap)
 void ObjectInitializer::InitializeSubscribers(ObjectMap *objMap)
 {
    #ifdef DEBUG_SUBSCRIBER
-   MessageInterface::ShowMessage("ObjectInitializer::InitializeSubscribers() entered\n");
+   MessageInterface::ShowMessage
+      ("ObjectInitializer::InitializeSubscribers() entered, registerSubscribers = %d\n",
+       registerSubscribers);
    #endif
-      
+   
    std::list<Subscriber*>::iterator subiter;
    std::list<Subscriber*> subList = publisher->GetSubscriberList();
    /// Initialize in z-order here, if relative z-order values have been saved from a previous run
    std::list<Subscriber*> orderedList = GetSubscribersInZOrder(subList);
-
+   std::map<std::string, GmatBase *>::iterator omi;
+   
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage("   Number of configured substribers is %d\n", subList.size());
+   #endif
+   
    for (subiter = orderedList.begin(); subiter != orderedList.end(); ++subiter)
    {
       std::string subName = (*subiter)->GetName();      
-      std::map<std::string, GmatBase *>::iterator omi;
       for (omi = objMap->begin(); omi != objMap->end(); ++omi)
       {
          GmatBase *obj = omi->second;
@@ -754,12 +759,67 @@ void ObjectInitializer::InitializeSubscribers(ObjectMap *objMap)
             {
                #if defined(DEBUG_OBJECT_INITIALIZER) || defined(DEBUG_SUBSCRIBER)
                MessageInterface::ShowMessage
-                  ("ObjectInitializer::Initialize objTypeName = %s, objName = %s\n",
-                   obj->GetTypeName().c_str(), obj->GetName().c_str());
+                  ("   Calling BuildReferencesAndInitialize() for <%p>[%s]'%s'\n",
+                   obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
                #endif
                
                BuildReferencesAndInitialize(obj);
             }
+         }
+      }
+   }
+   
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("   Checking if function subscribers needs to be initialized and registered\n");
+   #endif
+   // Check if we need to initialize and register function subscribers to the publisher
+   // (Fix for GMT-1552 LOJ: 2015.06.24)
+   for (omi = objMap->begin(); omi != objMap->end(); ++omi)
+   {
+      GmatBase *obj = omi->second;
+      std::string objName = obj->GetName(); // obj pointer is already checked above
+      
+      // Current status on plots inside a function:
+      // OrbieView, GroundTrackPlot, XyPlot: Draws plots but they get deleted when function run finishes
+      // (Plot behavior inside a function has not been specified as of 2015.07.09)
+      
+      // If we only allow local ReportFile or EphemerisFile inside a function
+      // uncomment this line(LOJ: 2015.07.09)
+      //if (obj->IsOfType(Gmat::SUBSCRIBER) && obj->IsOfType("FileOutput"))
+      if (obj->IsOfType(Gmat::SUBSCRIBER))
+      {
+         Subscriber *sub = (Subscriber*)obj;
+         
+         // If name not found from the ordered list, then assumed it is a function subscriber
+         if (find(orderedList.begin(), orderedList.end(), sub) == orderedList.end())
+         {
+            #if defined(DEBUG_OBJECT_INITIALIZER) || defined(DEBUG_SUBSCRIBER)
+            MessageInterface::ShowMessage
+               ("   Calling BuildReferencesAndInitialize() for subscriber <%p>[%s]'%s'\n",
+                obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+            #endif
+            
+            BuildReferencesAndInitialize(obj);
+            
+            if (registerSubscribers)
+            {
+               #ifdef DEBUG_SUBSCRIBER
+               MessageInterface::ShowMessage
+                  ("   About to register a function subscriber <%p>[%s]'%s'\n", obj,
+                   obj->GetTypeName().c_str(), obj->GetName().c_str());
+               #endif
+               
+               publisher->Subscribe((Subscriber*)obj);
+            }
+         }
+         else
+         {
+            #ifdef DEBUG_SUBSCRIBER
+            MessageInterface::ShowMessage
+               ("Skipping configured subscriber '%s', building and initialization "
+                "is already handled\n", objName.c_str());
+            #endif
          }
       }
    }
@@ -1003,12 +1063,13 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
 {   
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage
-		("--- In BuildReferencesAndInitialize, Calling BuildReferences(), obj = <%p>[%s]'%s'\n", obj, obj->GetTypeName().c_str(),
-		 obj->GetName().c_str());
+		("BuildReferencesAndInitialize() entered, obj = <%p>[%s]'%s'\n",
+       obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+   MessageInterface::ShowMessage("--- Calling BuildReferences()\n");
 	#endif
 	
    BuildReferences(obj);
-
+   
    #ifdef DEBUG_INITIALIZE_OBJ
    MessageInterface::ShowMessage("--- Calling '%s'->Initialize()\n", obj->GetName().c_str());
 	#endif
@@ -1019,6 +1080,9 @@ void ObjectInitializer::BuildReferencesAndInitialize(GmatBase *obj)
    MessageInterface::ShowMessage
       ("--- The object <%p>[%s]'%s' initialized\n",  obj,
        obj->GetTypeName().c_str(), obj->GetName().c_str());
+   MessageInterface::ShowMessage
+		("BuildReferencesAndInitialize() leaving, obj = <%p>[%s]'%s'\n",
+       obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
 }
 
@@ -1034,8 +1098,8 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
 {
    #ifdef DEBUG_OBJECT_INITIALIZER
       MessageInterface::ShowMessage
-         ("Entering ObjectInitializer::BuildReferences, object type = '%s'\n",
-          obj->GetTypeName().c_str());
+         ("Entering ObjectInitializer::BuildReferences, object type = '%s', name = '%s'\n",
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
    std::string oName;
    
@@ -1241,6 +1305,11 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
    }
    catch (SubscriberException &ex)
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER_DETAILED
+      MessageInterface::ShowMessage
+         ("Caught SubscriberException while setting individual reference "
+          "objects and rethrowing %s\n", ex.GetFullMessage().c_str());
+      #endif
       throw ex;
    }
    catch (GmatBaseException &ex) // ************
@@ -1270,6 +1339,9 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
    // Next handle the array version
    try
    {
+      #ifdef DEBUG_OBJECT_INITIALIZER
+      MessageInterface::ShowMessage("Attempting to set reference object arrays...\n");
+      #endif
       StringArray oNameArray = obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
       for (StringArray::iterator i = oNameArray.begin();
            i != oNameArray.end(); ++i)
@@ -1298,6 +1370,11 @@ void ObjectInitializer::BuildReferences(GmatBase *obj)
          }
          catch (SubscriberException &ex)
          {
+            #ifdef DEBUG_OBJECT_INITIALIZER_DETAILED
+            MessageInterface::ShowMessage
+               ("Caught SubscriberException while setting reference "
+                "object arrays and rethrowing %s\n", ex.GetFullMessage().c_str());
+            #endif
             throw ex;
          }
          catch (BaseException &ex)
@@ -1459,7 +1536,7 @@ void ObjectInitializer::BuildAssociations(GmatBase * obj)
          // all hardware are cloned in the Spacecraft::SetRefObject() method. (LOJ: 2009.07.24)
          GmatBase *newElem = elem;
          
-         // Now a function is parsed in resource and command mode, so we don't
+         // Now a function is parsed in two-modes (resource and command), so we don't
          // need to check this (LOJ: 2015.02.06)
          #if 0
          // If hardware is local object inside a function then skip

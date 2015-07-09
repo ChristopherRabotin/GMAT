@@ -63,7 +63,9 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+   
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
    
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
@@ -196,6 +198,7 @@ protected:
    bool        code500WriteFailed;
    bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
+   bool        isEphemFileOpened;
    
    CoordinateConverter coordConverter;
    

@@ -184,13 +184,24 @@ Subscriber::Subscriber(const Subscriber &copy) :
    
    mPlotUpperLeft    = Rvector(2,copy.mPlotUpperLeft[0], copy.mPlotUpperLeft[1]);
    mPlotSize         = Rvector(2,copy.mPlotSize[0],      copy.mPlotSize[1]);
-
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("Subscriber(copy) entered, copy.xParamWrappers.size()=%d, "
+       "copy.yParamWrappers.size()=%d\n", copy.xParamWrappers.size(),
+       copy.yParamWrappers.size());
+   #endif
+   
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Clear old wrappers
    ClearWrappers(true, true);
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(xParamWrappers, copy.xParamWrappers);
    CloneWrappers(yParamWrappers, copy.yParamWrappers);
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Subscriber(copy) cloned wrappers\n");
+   WriteWrappers();
+   #endif
 #else
    // Copy wrappers
    xParamWrappers = copy.xParamWrappers;
@@ -259,6 +270,10 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(xParamWrappers, rhs.xParamWrappers);
    CloneWrappers(yParamWrappers, rhs.yParamWrappers);
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Subscriber(=) cloned wrappers\n");
+   WriteWrappers();
+   #endif
 #else
    // Copy wrappers
    xParamWrappers = rhs.xParamWrappers;
@@ -851,6 +866,9 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
    MessageInterface::ShowMessage
       ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
        xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   MessageInterface::ShowMessage
+      ("   xParamWrappers.size() = %d, yParamWrappers.size() = %d\n",
+       xParamWrappers.size(), yParamWrappers.size());
    for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage
          ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
@@ -859,10 +877,12 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
          ("   yWrapperObjectNames[%d] = '%s'\n", i, yWrapperObjectNames[i].c_str());
    #endif
    
-   if (xWrapperObjectNames.size() > 0)
+   //if (xWrapperObjectNames.size() > 0)
+   if (xParamWrappers.size() > 0)
       retval1 = SetActualElementWrapper(xWrapperObjectNames, xParamWrappers, toWrapper, name);  
    
-   if (yWrapperObjectNames.size() > 0)
+   //if (yWrapperObjectNames.size() > 0)
+   if (yParamWrappers.size() > 0)
       retval2 = SetActualElementWrapper(yWrapperObjectNames, yParamWrappers, toWrapper, name);
    
    // Delete old wrappers
@@ -907,7 +927,7 @@ void Subscriber::ClearWrappers(bool clearX, bool clearY)
    #endif
    
    ElementWrapper *wrapper;
-
+   
    if (clearX)
    {
       for (UnsignedInt i = 0; i < xParamWrappers.size(); ++i)
@@ -1786,6 +1806,11 @@ bool Subscriber::CloneWrappers(WrapperArray &toWrappers,
              "ew = fromWrappers[i]->Clone()");
          #endif         
       }
+      else
+      {
+         // Need to keep the size, so add NULL (Fix for GMT1552 LOJ: 2015.06.24)
+         toWrappers.push_back(NULL);
+      }
    }
    
    return true;
@@ -1804,6 +1829,9 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
    MessageInterface::ShowMessage
       ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
        xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   MessageInterface::ShowMessage
+      ("   xParamWrappers.size() = %d, yParamWrappers.size() = %d\n",
+       xParamWrappers.size(), yParamWrappers.size());
    for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage
          ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
@@ -2008,10 +2036,16 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
    for (Integer i = 0; i < sz; i++)
    {
       if (wrappers[i] == NULL)
+      {
+         #ifdef DEBUG_WRAPPER_CODE   
+         MessageInterface::ShowMessage
+            ("===> Subscriber::SetActualWrapperReference() throwing exception, wrappers[%d] is NULL\n", i);
+         #endif
          throw SubscriberException
             ("Subscriber::SetActualWrapperReference() \"" + GetName() +
              "\" failed to set reference for object named \"" + name +
              ".\" The wrapper is NULL.\n");
+      }
       
       refname = wrappers[i]->GetDescription();
       if (wrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)

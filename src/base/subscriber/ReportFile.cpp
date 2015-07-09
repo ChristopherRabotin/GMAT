@@ -117,6 +117,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
 {
    objectTypes.push_back(Gmat::REPORT_FILE);
    objectTypeNames.push_back("ReportFile");
+   objectTypeNames.push_back("FileOutput");
    blockCommandModeAssignment = false;
    
    mNumParams = 0;
@@ -330,6 +331,8 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
          #ifdef DEBUG_REPORTFILE_SET
          MessageInterface::ShowMessage
             ("   '%s' added, size=%d\n", paramName.c_str(), mNumParams);
+         MessageInterface::ShowMessage
+            ("   yParamWrappers.size()=%d\n", yParamWrappers.size());
          #endif
          
          return true;
@@ -365,6 +368,17 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    MessageInterface::ShowMessage("ReportFile::WriteData() has %d wrappers\n", numData);
    MessageInterface::ShowMessage("   ==> Now start buffering data\n");
    #endif
+   
+   // Check for empty wrapper array
+   if (wrapperArray.empty())
+   {
+      #if DBGLVL_WRITE_DATA > 0
+      MessageInterface::ShowMessage
+         ("ReportFile::WriteData() just returning true, wrapperArray is empty\n");
+      #endif
+      
+      return true;
+   }
    
    // buffer formatted data
    for (Integer i=0; i < numData; i++)
@@ -612,8 +626,9 @@ bool ReportFile::Initialize()
       if ((mNumParams == 0) && !usedByReport)
       {
          MessageInterface::ShowMessage
-            ("*** WARNING *** The ReportFile named \"%s\" will not be created.\n"
-             "No parameters were added to ReportFile.\n", GetName().c_str());
+            ("*** WARNING *** The ReportFile named \"%s\" may not be created.  "
+             "Currently parameter list of reporting every integration step is "
+             "empty and it may not be used by the Report command.\n", GetName().c_str());
          
          active = false;
          return false;
@@ -1124,31 +1139,10 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
          se.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Filename", msg.c_str());
          throw se;
       }
-      
-      // This checking will be done in FileManager::FindPath()
-      // // Check for non-existing directory
-      // if (!GmatFileUtil::DoesDirectoryExist(value))
-      // {
-      //    SubscriberException se;
-      //    se.SetDetails("Path does not exist in '%s'", value.c_str());
-      //    throw se;
-      // }
-      
+           
       usingDefaultFileName = false;
       fileName = value;
-      
-      // Moved to GetFullPathFileName() - (LOJ: 2014.06.23)
-      // // If file extension is blank, append .txt
-      // if (GmatFileUtil::ParseFileExtension(fileName) == "")
-      // {
-      //    if (fileName != "")
-      //    {
-      //       fileName = fileName + ".txt";
-      //       MessageInterface::ShowMessage
-      //          ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
-      //    }
-      // }
-      
+           
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
          ("ReportFile::SetStringParameter() '%s' calling GetFullPathFileName()\n",
@@ -1156,8 +1150,8 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       #endif
       
       fullPathFileName =
-         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt",
-                                       true);
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE",
+                                       false, ".txt", true);
       
       // Check for invalid output directory
       if (fullPathFileName == "")
@@ -1467,7 +1461,8 @@ const StringArray& ReportFile::GetWrapperObjectNameArray(bool completeSet)
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("ReportFile::GetWrapperObjectNameArray() size=%d\n",  yWrapperObjectNames.size());
+      ("ReportFile::GetWrapperObjectNameArray() '%s' size=%d\n", GetName().c_str(),
+       yWrapperObjectNames.size());
    for (UnsignedInt i=0; i<yWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", yWrapperObjectNames[i].c_str());
    #endif

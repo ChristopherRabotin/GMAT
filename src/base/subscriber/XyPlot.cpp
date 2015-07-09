@@ -102,6 +102,7 @@ XyPlot::XyPlot(const std::string &name, Parameter *xParam,
    // GmatBase data
    objectTypes.push_back(Gmat::XY_PLOT);
    objectTypeNames.push_back("XYPlot");
+   objectTypeNames.push_back("Plot");
    parameterCount = XyPlotParamCount;
    
    mDrawGrid = true;
@@ -509,6 +510,11 @@ bool XyPlot::TakeAction(const std::string &action,
    else if (action == "Remove")
    {
       return RemoveYParameter(actionData);
+   }
+   else if (action == "Finalize")
+   {
+      // This action is usually called when GMAT function finalizes
+      PlotInterface::DeleteXyPlot(instanceName);
    }
    else if (action == "ClearData")
    {
@@ -1142,7 +1148,7 @@ bool XyPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    #if DEBUG_XYPLOT_OBJECT
    MessageInterface::ShowMessage
-      ("\nXyPlot::SetRefObject() this=<%p>'%s'entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
+      ("\nXyPlot::SetRefObject() this=<%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
        this, GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
        obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
    #endif
@@ -1706,7 +1712,8 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    if (len > 0)
    {
       // Now using wrappers and supports only one X parameter (LOJ: 2012.08.02)
-      if (xParamWrappers[0] != NULL && mNumYParams > 0)
+      //if (xParamWrappers[0] != NULL && mNumYParams > 0)
+      if (!xParamWrappers.empty() && mNumYParams > 0)
       {
          // Get x param value
          Real xval = xParamWrappers[0]->EvaluateReal();

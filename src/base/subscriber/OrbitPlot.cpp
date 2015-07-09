@@ -94,6 +94,7 @@ OrbitPlot::OrbitPlot(const std::string &type, const std::string &name)
    // GmatBase data
    parameterCount = OrbitPlotParamCount;
    objectTypeNames.push_back("OrbitPlot");
+   objectTypeNames.push_back("Plot");
    
    mViewCoordSystem = NULL;
    
@@ -572,6 +573,7 @@ bool OrbitPlot::TakeAction(const std::string &action,
    }
    else if (action == "Finalize")
    {
+      // This action is usually called when GMAT function finalizes
       PlotInterface::DeleteGlPlot(instanceName);
    }
    else if (action == "PenUp")
@@ -1293,8 +1295,8 @@ const StringArray& OrbitPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d\n",
-       refObjectNames.size(), type);
+      ("OrbitPlot::GetRefObjectNameArray() returning %d names for type:%d typeName:%s\n",
+       refObjectNames.size(), type, GmatBase::GetObjectTypeString(type).c_str());
    for (unsigned int i=0; i<refObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
