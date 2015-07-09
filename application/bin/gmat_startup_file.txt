@@ -60,9 +60,9 @@ PLUGIN                 = ../plugins/libProductionPropagators
 #PLUGIN                = ../plugins/libExtraPropagators
 #PLUGIN                = ../plugins/libGmatEstimation
 #PLUGIN                = ../plugins/libGeometricMeasurements
-#PLUGIN                = ../plugins/libGmatFunction
+PLUGIN                = ../plugins/libGmatFunction
 #PLUGIN                = ../plugins/libSaveCommand
-#PLUGIN                = ../plugins/libNewParameters
+PLUGIN                = ../plugins/libNewParameters
 #PLUGIN                = ../plugins/libPolyhedronGravity
 
 # Internal-only plugins
