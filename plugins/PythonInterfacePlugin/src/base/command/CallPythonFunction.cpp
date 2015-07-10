@@ -283,13 +283,15 @@ bool CallPythonFunction::Execute()
    std::vector<void *> argIn;
    // send the out parameters
    std::vector<void *> argOut;
+   Gmat::ParameterType paramType = Gmat::UNKNOWN_PARAMETER_TYPE;
 
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
-   SendInParam(formatIn, argIn);
+   SendInParam(formatIn, argIn, paramType);
+   MessageInterface::ShowMessage("parameter type is %d\n", paramType);
 
   // Next call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn);
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType);
  
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
@@ -477,7 +479,7 @@ Integer CallPythonFunction::FillOutputList()
 * @return void
 */
 //------------------------------------------------------------------------------
-void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn)
+void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType& paramType)
 {
    for (unsigned int i = 0; i < mInputList.size(); i++)
    {
@@ -489,13 +491,14 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
          case Gmat::REAL_TYPE:
          {
             if (i == 0)
-               formatIn.append("(f");
+               formatIn.append("(d");
             else
-               formatIn.append("f");
+               formatIn.append("d");
         
             Real *r = new Real;
             *r = param->EvaluateReal();
             argIn.push_back(r);
+            paramType = Gmat::REAL_TYPE;
 
             break;
          }
@@ -510,6 +513,7 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
             char *str = new char[64];
             str = const_cast<char *>(param->EvaluateString().c_str());
             argIn.push_back(str);
+            paramType = Gmat::STRING_TYPE;
 
             break;
          }
@@ -528,13 +532,22 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
                {
                   for (int j = 0; j < c; ++j)
                   {
-                     Real ret = arr->GetRealParameter(std::string("SingleValue"), i, j);
-                     MessageInterface::ShowMessage("value of ret is %f", ret);
+                     if (i == 0)
+                        formatIn.append("(d");
+                     else
+                        formatIn.append("d");
+
+                     Real *ret = new Real;
+                     *ret = arr->GetRealParameter(std::string("SingleValue"), i, j);
+                     argIn.push_back(ret);
+
                   }
                }
-            }
 
-            break;
+               paramType = Gmat::RMATRIX_TYPE;
+
+               break;
+            }
          }
 
          default:
