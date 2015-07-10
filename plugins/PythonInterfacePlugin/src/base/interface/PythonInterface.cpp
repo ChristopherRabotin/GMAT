@@ -23,6 +23,7 @@
 #include "PythonInterface.hpp"
 #include "MessageInterface.hpp"
 #include "InterfaceException.hpp"
+#include "Array.hpp"
 #include <iostream>
 
 PythonInterface* PythonInterface::instance = NULL;
@@ -236,7 +237,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 */
 //------------------------------------------------------------------------------
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                                const std::string &formatIn, const std::vector<void *> &argIn)
+                                                const std::string &formatIn, const std::vector<void *> &argIn, Gmat::ParameterType paramType)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -286,56 +287,65 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
       throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
-
-   // Build the Python Tuple object based on the format string
-   PyObject* pyTupleObj = PyTuple_New(argIn.size());
-   char* pch = NULL;
-   char key[3] = "fs";
-   int i = 0;
-   //Locate characters in string
-   pch = (char*)strpbrk(formatIn.c_str(), key);
-  
-   //Fill in the Python Tuple object with parameter Ins
-   while (pch != NULL)
-   {
-      std::string str(pch);
-      if (str.find_first_of("f") != std::string::npos)
-      {
-         PyObject* pyFloatObj = PyFloat_FromDouble(*(Real*)argIn.at(i));
-         PyTuple_SetItem(pyTupleObj, i, pyFloatObj);
-      } 
-      else if (str.find_first_of("s") != std::string::npos)
-      {
-#ifdef IS_PY3K
-         PyObject* pyStringObj = PyUnicode_FromString((char*)argIn.at(i));
-#else
-         pyObject* pyStringObj = PyBytes_FromString((char*)argIn.at(i));
-#endif
-         PyTuple_SetItem(pyTupleObj, i, pyStringObj);
-      }
-      
-      i++;
-      pch = strpbrk(pch + 1, key);
-   }
    
-   if (!pyTupleObj)
+   // The Array requirement which is listed below needs to be rephrased  in PythonInterfaceNotes_2015-01-14.txt
+   // Array data is passed into a list of floats for one dimensional arrays
+   if (paramType == Gmat::RMATRIX_TYPE)
    {
-      PyErrorMsg(pType, pValue, pTraceback, msg);
-      Py_DECREF(pyFuncAttr);
-
-      throw InterfaceException(" Python Exception Type:" + msg + "\n");
+      ;
    }
-
-   // Call the python function   
-   pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
-   Py_DECREF(pyFuncAttr);
-   Py_DECREF(pyTupleObj);
-
-   if (!pyFunc)
+   else
    {
-      PyErrorMsg(pType, pValue, pTraceback, msg);
+      // Build the Python Tuple object based on the format string
+      PyObject* pyTupleObj = PyTuple_New(argIn.size());
+      char* pch = NULL;
+      char key[3] = "ds";
+      int i = 0;
+      //Locate characters in string
+      pch = (char*)strpbrk(formatIn.c_str(), key);
 
-      throw InterfaceException(" Python Exception Type:" + msg + "\n");
+      //Fill in the Python Tuple object with parameter Ins
+      while (pch != NULL)
+      {
+         std::string str(pch);
+         if (str.find_first_of("d") != std::string::npos)
+         {
+            PyObject* pyFloatObj = PyFloat_FromDouble(*(Real*)argIn.at(i));
+            PyTuple_SetItem(pyTupleObj, i, pyFloatObj);
+         }
+         else if (str.find_first_of("s") != std::string::npos)
+         {
+#ifdef IS_PY3K
+            PyObject* pyStringObj = PyUnicode_FromString((char*)argIn.at(i));
+#else
+            pyObject* pyStringObj = PyBytes_FromString((char*)argIn.at(i));
+#endif
+            PyTuple_SetItem(pyTupleObj, i, pyStringObj);
+         }
+
+         i++;
+         pch = strpbrk(pch + 1, key);
+      }
+
+      if (!pyTupleObj)
+      {
+         PyErrorMsg(pType, pValue, pTraceback, msg);
+         Py_DECREF(pyFuncAttr);
+
+         throw InterfaceException(" Python Exception Type:" + msg + "\n");
+      }
+
+      // Call the python function   
+      pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
+      Py_DECREF(pyFuncAttr);
+      Py_DECREF(pyTupleObj);
+
+      if (!pyFunc)
+      {
+         PyErrorMsg(pType, pValue, pTraceback, msg);
+
+         throw InterfaceException(" Python Exception Type:" + msg + "\n");
+      }
    }
 
    return pyFunc;
