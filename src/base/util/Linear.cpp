@@ -477,7 +477,9 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
       ss.setf(std::ios::showpoint);
    
    if (isScientific)
-      ss.setf(std::ios::scientific);
+      ss.setf(std::ios::scientific, std::ios::floatfield);
+   else
+      ss.setf(std::ios::fixed, std::ios::floatfield);
 
    ss << rval;
    //return ss.str();
