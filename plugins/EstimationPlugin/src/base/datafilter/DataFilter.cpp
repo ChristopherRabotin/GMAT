@@ -406,8 +406,9 @@ bool DataFilter::SetStringParameter(const Integer id, const std::string &value)
 
    if (id == EPOCH_FORMAT)
    {
-      StringArray nameList = GetListOfValidEpochFormats();
-      if (find(nameList.begin(), nameList.end(), value) == nameList.end())
+      //StringArray nameList = GetListOfValidEpochFormats();
+      //if (find(nameList.begin(), nameList.end(), value) == nameList.end())
+      if (TimeConverterUtil::IsValidTimeSystem(value) == false)
          throw MeasurementException("Error: Value '" + value + "' set to " + GetName() + ".EpochFormat parameter is invalid.\n");
 
       epochFormat = value;
@@ -1249,10 +1250,10 @@ ObjectArray DataFilter::GetListOfGroundStations()
 }
 
 
-StringArray DataFilter::GetListOfValidEpochFormats()
-{
-   return TimeConverterUtil::GetListOfTimeSystemTypes();
-}
+//StringArray DataFilter::GetListOfValidEpochFormats()
+//{
+//   return TimeConverterUtil::GetListOfTimeSystemTypes();
+//}
 
 
 bool DataFilter::ValidateInput()
