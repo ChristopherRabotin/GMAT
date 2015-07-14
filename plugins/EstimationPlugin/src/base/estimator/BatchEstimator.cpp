@@ -639,7 +639,8 @@ const StringArray& BatchEstimator::GetPropertyEnumStrings(const Integer id) cons
    {
       enumStrings.push_back("FromParticipants");
 
-      StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      // StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();     // made changes by TUAN NGUYEN
+      StringArray nameList = TimeConverterUtil::GetValidTimeRepresentations();     // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < nameList.size(); ++i)
          enumStrings.push_back(nameList[i]);
 
@@ -2080,7 +2081,7 @@ void BatchEstimator::WriteConclusion()
    textFile << "---------------------------------------------------------------------------------\n";
    textFile << " Row Index |                     Column Index\n";
    textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |  ";
+   textFile << "           |      ";
    for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
       textFile << i+1 << "                       ";
    textFile << "\n---------------------------------------------------------------------------------\n";
@@ -2091,7 +2092,7 @@ void BatchEstimator::WriteConclusion()
       for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
       {
          char s[100];
-         sprintf(&s[0],"  %22.12le\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j))); 
+         sprintf(&s[0],"  %22.12lf\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j))); 
          std::string ss(s);
          textFile << ss.substr(ss.size() - 24); //finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
       }
@@ -2168,7 +2169,7 @@ void BatchEstimator::WriteConclusion()
    textFile << "---------------------------------------------------------------------------------\n";
    textFile << " Row Index |                     Column Index\n";
    textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |  ";
+   textFile << "           |      ";
    for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
       textFile << i+1 << "a                      ";
    textFile << "\n---------------------------------------------------------------------------------\n";
@@ -2178,7 +2179,7 @@ void BatchEstimator::WriteConclusion()
       for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
       {
          char s[100];
-         sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
+         sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
          std::string ss(s);
          textFile << ss.substr(ss.size() - 24);
       }
