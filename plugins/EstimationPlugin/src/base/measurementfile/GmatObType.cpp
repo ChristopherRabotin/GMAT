@@ -310,8 +310,25 @@ bool GmatObType::AddMeasurement(MeasurementData *md)
    }
    else
    {
-      for (UnsignedInt j = 0; j < md->participantIDs.size()-1; ++j)
-         dataLine << md->participantIDs[j] << "    ";
+      if ((md->participantIDs[0] == md->participantIDs[md->participantIDs.size()-1])&&(md->participantIDs.size() == 3))
+      {
+         // if the first participant and the last participant are the same, write in a list w/o brackets containing all but the last one 
+         for (UnsignedInt j = 0; j < md->participantIDs.size()-1; ++j)
+            dataLine << md->participantIDs[j] << "    ";
+      }
+      else
+      {
+         // otherwise write all participants in signal path as a list inside brackets 
+         dataLine << "{ ";
+         for (UnsignedInt j = 0; j < md->participantIDs.size(); ++j)
+         {
+            dataLine << md->participantIDs[j];
+            if (j < md->participantIDs.size()-1)
+               dataLine << "    ";
+            else
+               dataLine << " }    ";
+         }
+      }
    }
 
 #else
@@ -488,6 +505,12 @@ ObservationData* GmatObType::ReadObservation()
             dataSize = 0;
             break;
       }
+
+      for (Integer i = 0; i < participantSize; ++i)           // made changes by TUAN NGUYEN
+      {
+         theLine >> str;
+         currentObs.participantIDs.push_back(str);
+      }
    }
    else
    {
@@ -512,18 +535,44 @@ ObservationData* GmatObType::ReadObservation()
       {
          dataSize = 1;
       }
-   }
 
-
-   for (Integer i = 0; i < participantSize; ++i)
-   {
       theLine >> str;
-      currentObs.participantIDs.push_back(str);
+      if (str.substr(0,1) == "{")
+      {
+         if (str.size() == 1)
+            theLine >> str;
+         else
+            str = str.substr(1);
+
+         while(str.substr(str.length()-1) != "}")
+         {
+            currentObs.participantIDs.push_back(str);
+            theLine >> str;
+         }
+         str = str.substr(0,str.length()-1);
+         if (str != "")
+            currentObs.participantIDs.push_back(str);
+      }
+      else
+      {
+         currentObs.participantIDs.push_back(str);
+         std::string str1;
+         theLine >> str1;
+         currentObs.participantIDs.push_back(str1);
+         currentObs.participantIDs.push_back(str);
+      }
    }
-#ifdef USE_OLD_GMDFILE_FORMAT
-   if (type >= 9000)
-      currentObs.participantIDs.push_back(currentObs.participantIDs[0]);
-#endif
+
+
+   //for (Integer i = 0; i < participantSize; ++i)
+   //{
+   //   theLine >> str;
+   //   currentObs.participantIDs.push_back(str);
+   //}
+//#ifdef USE_OLD_GMDFILE_FORMAT
+//   if (type >= 9000)
+//      currentObs.participantIDs.push_back(currentObs.participantIDs[0]);
+//#endif
 
 
    currentObs.unit = "Km";
