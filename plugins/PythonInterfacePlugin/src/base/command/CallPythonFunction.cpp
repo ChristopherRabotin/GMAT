@@ -290,7 +290,7 @@ bool CallPythonFunction::Execute()
    SendInParam(formatIn, argIn, paramType);
    MessageInterface::ShowMessage("parameter type is %d\n", paramType);
 
-  // Next call Python function Wrapper
+  // Next, call Python function Wrapper
    PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType);
  
    /*-----------------------------------------------------------------------------------*/
@@ -327,6 +327,7 @@ bool CallPythonFunction::Execute()
 #ifdef IS_PY3K
       else if (PyUnicode_Check(pyRet))
       {
+         MessageInterface::ShowMessage("Python String is returned.\n");
       }
 #else
       else if (PyBytes_Check(pyRet))
@@ -352,6 +353,10 @@ bool CallPythonFunction::Execute()
       else if (PyTuple_Check(pyRet))
       {
       }
+      else
+      {
+         MessageInterface::ShowMessage("Unknow Python type is returned.\n");
+      }
          
       Py_DECREF(pyRet);
 
@@ -367,6 +372,10 @@ bool CallPythonFunction::Execute()
       std::vector<void *>::iterator itO;
       for (itO = argOut.begin(); itO != argOut.end(); ++itO)
          delete *itO;
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Unknown error happend in Python Interface.\n");
    }
 
  //  MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
