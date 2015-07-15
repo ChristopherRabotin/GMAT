@@ -292,7 +292,93 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    // Array data is passed into a list of floats for one dimensional arrays
    if (paramType == Gmat::RMATRIX_TYPE)
    {
-      ;
+      Py_buffer *pybuffer;
+      Real *v = new Real(argIn.size());
+      std::vector<void *>::const_iterator it = argIn.begin();
+      Integer i = 0;
+      for (it, i; it != argIn.end(); ++it,++i)
+         v[i] = *(Real*)*it;
+
+      
+      pybuffer->obj = NULL;
+      pybuffer->format = "d";
+      pybuffer->ndim = 1;
+      pybuffer->shape[0] = 6;
+      pybuffer->readonly = 0;
+      pybuffer->suboffsets = 0;
+      pybuffer->buf = v;
+      Py_ssize_t *strides;
+      PyBuffer_FillContiguousStrides(1, pybuffer->shape, strides, 8, 'C');
+      pybuffer->strides = strides;
+      pybuffer->itemsize = sizeof(Real);
+      pybuffer->len = pybuffer->shape[0] * pybuffer->itemsize ;
+      
+      
+      
+      MessageInterface::ShowMessage("length, shape,strides, itemsize  is %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+      
+   /*   int res = PyBuffer_FillInfo(pybuffer, 0, v,  argIn.size()*sizeof(Real), false, PyBUF_C_CONTIGUOUS);
+      if (res == -1)
+         return NULL;*/
+
+      /*
+      pybuffer->buf = v;
+      pybuffer->obj = NULL;
+    //  pybuffer->len = sizeof(Real)* argIn.size();
+      pybuffer->ndim = 1;
+      pybuffer->shape[0] = 6;
+      
+     // pybuffer->readonly = PyBUF_CONTIG;
+      pybuffer->format = "d\n";
+    
+
+      Real *data = (Real*)(pybuffer->buf);
+      for (Integer i = 0; i < pybuffer->len / 8; ++i)
+         MessageInterface::ShowMessage(" [%d]: %lf\n", i, data[i]);*/
+
+  //    Real ll = ((Real*)(pybuffer->buf))[0] ;
+      
+  //    MessageInterface::ShowMessage("length, shape,strides, itemsize  is %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+     
+   //   pybuffer->shape[0] = 6;
+    
+   //   pybuffer->itemsize = 8;
+
+   //   PyBuffer_FillContiguousStrides(1, pybuffer->shape, pybuffer->strides, 8, 'C');
+
+  //    MessageInterface::ShowMessage("length, shape,strides, itemsize is %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+
+      int c =  PyBuffer_IsContiguous(pybuffer, 'C');
+      if (c == 1)
+      {
+         PyObject *pyobj = NULL;
+         MessageInterface::ShowMessage("calling PyMemoryView_FromBuffer() \n");
+         pyobj = PyMemoryView_FromBuffer(pybuffer);
+         
+         int l = 0;
+         l = PyMemoryView_Check(pyobj);
+         if (l == 1)
+         {
+            Py_buffer *view;
+            int ret = PyBuffer_FillInfo(view, pyobj, v, 48, 0, PyBUF_CONTIG);
+            if (ret != -1)
+            {
+               MessageInterface::ShowMessage("First value is %lf\n", ((Real*)(view->buf))[0]);
+            }
+         }
+         pyFunc = PyObject_CallObject(pyFuncAttr, pyobj);
+         MessageInterface::ShowMessage("pyObject_CallObject() is called\n");
+
+         Py_DECREF(pyFuncAttr);
+         Py_DECREF(pyobj);
+      }
+      if (!pyFunc)
+      {
+         PyErrorMsg(pType, pValue, pTraceback, msg);
+
+      //   MessageInterface::ShowMessage("Msg is %S\n", msg);
+         throw InterfaceException(" Python Exception Type:" + msg + "\n");
+      }
    }
    else
    {
@@ -385,9 +471,5 @@ void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pT
          
       }
    }
-
-//   Py_DECREF(pType);
-//   Py_DECREF(pValue);
- //  Py_DECREF(pTraceback);
 
 }
