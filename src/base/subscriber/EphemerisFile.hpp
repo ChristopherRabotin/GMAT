@@ -121,6 +121,7 @@ protected:
    /// ephemeris full file name including the path
    std::string fullPathFileName;
    std::string spacecraftName;
+   std::string spacecraftId;
    std::string fileName;
    std::string fileFormat;
    std::string epochFormat;

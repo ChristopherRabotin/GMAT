@@ -156,6 +156,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    outputPath           (""),
    fullPathFileName     (""),
    spacecraftName       (""),
+   spacecraftId         (""),
    fileName             (""),
    fileFormat           ("CCSDS-OEM"),
    epochFormat          ("UTCGregorian"),
@@ -382,6 +383,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    outputPath           (ef.outputPath),
    fullPathFileName     (ef.fullPathFileName),
    spacecraftName       (ef.spacecraftName),
+   spacecraftId         (ef.spacecraftId),
    fileName             (ef.fileName),
    fileFormat           (ef.fileFormat),
    epochFormat          (ef.epochFormat),
@@ -480,6 +482,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    outputPath           = ef.outputPath;
    fullPathFileName     = ef.fullPathFileName;
    spacecraftName       = ef.spacecraftName;
+   spacecraftId         = ef.spacecraftId;
    fileName             = ef.fileName;
    fileFormat           = ef.fileFormat;
    epochFormat          = ef.epochFormat;
@@ -1705,6 +1708,8 @@ bool EphemerisFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    if (type == Gmat::SPACECRAFT && name == spacecraftName)
    {
       spacecraft = (Spacecraft*)obj;
+      if (spacecraft)
+         spacecraftId = spacecraft->GetStringParameter("Id");
       return true;
    }
    else if (type == Gmat::COORDINATE_SYSTEM && name == outCoordSystemName)
@@ -4166,7 +4171,7 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    
    std::string origin = "UNKNOWN";
    std::string csType = "UNKNOWN";
-   std::string objId  = spacecraft->GetStringParameter("Id");
+   //std::string objId  = spacecraft->GetStringParameter("Id");
    
    if (outCoordSystem)
    {
@@ -4204,7 +4209,8 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    ss << std::endl;
    ss << "META_START" << std::endl;
    ss << "OBJECT_NAME          = " << spacecraftName << std::endl;
-   ss << "OBJECT_ID            = " << objId << std::endl;
+   //ss << "OBJECT_ID            = " << objId << std::endl;
+   ss << "OBJECT_ID            = " << spacecraftId << std::endl;
    ss << "CENTER_NAME          = " << origin << std::endl;
    ss << "REF_FRAME            = " << csType << std::endl;
    ss << "TIME_SYSTEM          = " << ccsdsEpochFormat << std::endl;
@@ -4304,7 +4310,7 @@ void EphemerisFile::WriteOrbitData(Real reqEpochInSecs, const Real state[6])
 void EphemerisFile::WriteCcsdsAemMetaData()
 {
    #if !defined(__USE_DATAFILE__) || defined(DEBUG_EPHEMFILE_TEXT)
-   std::string objId  = spacecraft->GetStringParameter("Id");
+   //std::string objId  = spacecraft->GetStringParameter("Id");
    //std::string origin = spacecraft->GetOriginName();
    std::string origin = outCoordSystem->GetOriginName();
    std::string csType = "UNKNOWN";
@@ -4315,7 +4321,7 @@ void EphemerisFile::WriteCcsdsAemMetaData()
    std::stringstream ss("");
    ss << "META_START" << std::endl;
    ss << "OBJECT_NAME = " << spacecraftName << std::endl;
-   ss << "OBJECT_ID = " << objId << std::endl;
+   ss << "OBJECT_ID = " << spacecraftId << std::endl;
    ss << "CENTER_NAME = " << origin << std::endl;
    ss << "REF_FRAME_A = " << csType << std::endl;
    ss << "REF_FRAME_B = " << "@TODO_REFB" << std::endl;
