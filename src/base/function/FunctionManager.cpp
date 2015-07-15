@@ -33,7 +33,7 @@
 
 //#define DO_NOT_EXECUTE_NESTED_GMAT_FUNCTIONS
 
-// Deleting subscribers needs more testing but try
+// Deleting subscribers needs more testing
 //#define __DO_NOT_DELETE_SUBSCRIBERS__
 
 //#define DEBUG_FUNCTION_MANAGER
@@ -47,6 +47,7 @@
 //#define DEBUG_FM_STACK
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_WRAPPERS
+//#define DEBUG_SUBSCRIBER
 //#define DEBUG_CLEANUP
 //#define DEBUG_FIND_OBJ
 
@@ -2281,7 +2282,9 @@ bool FunctionManager::PopFromStack(ObjectMap* cloned, const StringArray &outName
 void FunctionManager::Cleanup()
 {
    #ifdef DEBUG_CLEANUP
-   MessageInterface::ShowMessage("==> FunctionManager::Cleanup() entered, f=<%p>\n", f);
+   MessageInterface::ShowMessage
+      ("==> FunctionManager::Cleanup() entered, currentFunction=<%p>'%s'\n",
+       currentFunction, currentFunction ? currentFunction->GetName().c_str() : "NULL");
    #endif
    
    if (currentFunction != NULL)
@@ -2335,18 +2338,27 @@ void FunctionManager::Cleanup()
 //------------------------------------------------------------------------------
 void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
 {
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage("FunctionManager::UnsubscribeSubscribers() entered\n");
+   #endif
    std::map<std::string, GmatBase *>::iterator omi;
    for (omi = om->begin(); omi != om->end(); ++omi)
    {
       if (omi->second != NULL)
       {
-         if ((omi->second)->IsOfType(Gmat::SUBSCRIBER))
+         GmatBase *obj = omi->second;
+         if (obj->IsOfType(Gmat::SUBSCRIBER))
          {
             // Finalize subscriber
-            Subscriber *sub = (Subscriber*)omi->second;
+            Subscriber *sub = (Subscriber*)obj;
+            #ifdef DEBUG_SUBSCRIBER
+            MessageInterface::ShowMessage
+               ("   Calling <%p>'%s'->TakeAction('Finalize')\n", sub, sub->GetName().c_str());
+            #endif
+            
             sub->TakeAction("Finalize");
             
-            #ifdef DEBUG_FM_SUBSCRIBER
+            #ifdef DEBUG_SUBSCRIBER
             MessageInterface::ShowMessage
                ("   '%s' Unsubscribe <%p>'%s' from the publisher <%p>\n",
                 functionName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
@@ -2359,7 +2371,7 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
             }
             else
             {
-               #ifdef DEBUG_FM_SUBSCRIBER
+               #ifdef DEBUG_SUBSCRIBER
                MessageInterface::ShowMessage
                   ("   '%s' Cannot unsubscribe, the publisher is NULL\n", functionName.c_str());
                #endif
@@ -2367,6 +2379,9 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
          }
       }
    }
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage("FunctionManager::UnsubscribeSubscribers() leaving\n");
+   #endif
 }
 
 
@@ -2396,6 +2411,9 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
    
    StringArray toDelete;
    std::map<std::string, GmatBase *>::iterator omi;
+   
+   // Delete subscribers first since CCSDS EphemerisFile needs to access spacecraft for
+   // writing final metadata (LOJ: 2015.07.07)
    for (omi = om->begin(); omi != om->end(); ++omi)
    {
       if (omi->second != NULL)
@@ -2424,6 +2442,7 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             
             // Unsubscribe subscriber before deleting (LOJ: 2009.04.07)
             Subscriber *sub = (Subscriber*)omi->second;
+            
             // Instead of deleting OpenGL plot from the OpenGlPlot destructor
             // call TakeAction() to delete it (LOJ:2009.04.22)
             sub->TakeAction("Finalize");
@@ -2434,7 +2453,7 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             #ifdef DEBUG_CLEANUP
             MessageInterface::ShowMessage
                ("   '%s' Unsubscribe <%p>'%s' from the publisher <%p>\n",
-                functionName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
+                functionName.c_str(), sub, sub->GetName().c_str(), publisher);
             #endif
             
             if (publisher)
@@ -2453,14 +2472,26 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
                (omi->second, (omi->second)->GetName(), "FunctionManager::EmptyObjectMap()",
                 "deleting subscriber from ObjectMap");
             #endif
+            #ifdef DEBUG_CLEANUP
+            MessageInterface::ShowMessage
+               ("   Deleting subscriber <%p>'%s' from om\n", sub, sub->GetName().c_str());
+            #endif
             delete omi->second;
             omi->second = NULL;
-            
             //=============================================================
             #endif
             //=============================================================
          }
-         else
+      }
+   }
+
+   
+   // Delete the rest of objects (LOJ: 2015.07.07)
+   for (omi = om->begin(); omi != om->end(); ++omi)
+   {
+      if (omi->second != NULL)
+      {
+         if (!(omi->second)->IsOfType(Gmat::SUBSCRIBER))
          {
             #ifdef DEBUG_MEMORY
             MemoryTracker::Instance()->Remove

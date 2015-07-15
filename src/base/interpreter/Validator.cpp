@@ -690,6 +690,10 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
       ("   and trimmed string is <%s>\n", theDescription.c_str(), "\"\n");
    MessageInterface::ShowMessage
       ("   parametersFirst=%d, manage=%d\n", parametersFirst, manage);
+   #ifdef DEBUG_OBJECT_MAP
+   if (theFunction)
+      ShowObjectMap("Validator::CreateElementWrapper()");
+   #endif
    #endif
    
    // first, check to see if it is enclosed with single quotes

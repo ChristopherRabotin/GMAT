@@ -55,6 +55,7 @@ using namespace GmatStringUtil;
 
 //#define DEBUG_FIRST_10_LINES
 //#define DEBUG_REAL_COLUMNS
+//#define DEBUG_PARSE_FILENAME
 //#define DBGLVL_COMPARE_FILES 1
 //#define DBGLVL_FUNCTION_OUTPUT 2
 //#define DEBUG_ABSOLUTE_PATH

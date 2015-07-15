@@ -331,7 +331,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   Adding clone of funcObj <%p>'%s' to objectStore\n", funcObjClone,
+            ("   Adding funcObj clone <%p>'%s' to objectStore\n", funcObjClone,
              funcObjName.c_str());
          #endif
          funcObjClone->SetIsLocal(true);
@@ -399,7 +399,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   Adding clone of autoObj <%p>'%s' to objectStore\n", autoObj, autoObjName.c_str());
+            ("   Adding autoObj clone <%p>'%s' to objectStore\n", autoObj, autoObjName.c_str());
          #endif
          
          autoObj->SetIsLocal(true);
@@ -410,19 +410,10 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    
    GmatCommand *current = fcs;
    
-   if (!objectsInitialized ||
-       objectsInitialized && reinitialize)
-   {
-      // Initialize function objects here. Moved from Execute() (LOJ: 2015.02.27)
-      objectsInitialized = true;
-      validator->HandleCcsdsEphemerisFile(objectStore, true);
-      InitializeLocalObjects(objInit, current, true);
-   }
-   
+   // Set object map on Validator (moved here from below) LOJ: 2015.04.09 
    #ifdef DEBUG_FUNCTION_INIT
    MessageInterface::ShowMessage("   Now about to set object map to Validator\n");
    #endif
-   // Set object map on Validator (moved here from below) LOJ: 2015.04.09 
    validatorStore.clear();
    for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
       validatorStore.insert(std::make_pair(omi->first, omi->second));
@@ -430,8 +421,29 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       validatorStore.insert(std::make_pair(omi->first, omi->second));
    validator->SetObjectMap(&validatorStore);
    
+   // Create wrappers for local subscribers (fix for GMT1552 LOJ: 2015.06.24)
+   // This must be done before initialization
+   #ifdef DEBUG_FUNCTION_INIT
+   MessageInterface::ShowMessage("   Now about to create subscriber wrappers\n");
+   #endif
+   CreateSubscriberWrappers();
    
-   // first, send all the commands the object store, solar system, etc
+   
+   // Initialize function objects here. Moved from Execute() (LOJ: 2015.02.27)
+   if (!objectsInitialized ||
+       objectsInitialized && reinitialize)
+   {
+      objectsInitialized = true;
+      validator->HandleCcsdsEphemerisFile(objectStore, true);
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("GmatFunction::Initialize() calling InitializeLocalObjects()\n");
+      #endif
+      InitializeLocalObjects(objInit, current, true);
+   }
+   
+   // Set object store, solar system, etc to all the commands and
+   // validate command to create necessary wrappers
    while (current)
    {
       #ifdef DEBUG_FUNCTION_INIT
@@ -765,7 +777,7 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
       }
       std::string outName = outputNames.at(jj);
       ElementWrapper *outWrapper =
-         validator->CreateElementWrapper(outName, false, false);
+         validator->CreateElementWrapper(outName, false, 0);
       #ifdef DEBUG_MORE_MEMORY
       MessageInterface::ShowMessage
          ("+++ GmatFunction::Execute() *outWrapper = validator->"
@@ -1002,6 +1014,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
    MessageInterface::ShowMessage
       ("\n============================ BEGIN INITIALIZATION of local objects in '%s'\n",
        functionName.c_str());
+   MessageInterface::ShowMessage("GmatFunction::InitializeLocalObjects() entered\n");
    MessageInterface::ShowMessage
       ("Now at command <%p><%s> \"%s\"\n", current, current->GetTypeName().c_str(),
        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
@@ -1019,8 +1032,16 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
    {
       if (!objInit->InitializeObjects(true, Gmat::UNKNOWN_OBJECT,
                                       unusedGlobalObjectList))
+      {
          // Should we throw an exception instead?
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("GmatFunction::InitializeLocalObjects() returning false, failed to initialize\n");
+         MessageInterface::ShowMessage
+            ("============================ END INITIALIZATION of local objects\n");
+         #endif
          return false;
+      }
    }
    catch (BaseException &e)
    {
@@ -1055,6 +1076,89 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// void CreateSubscriberWrappers()
+//------------------------------------------------------------------------------
+void GmatFunction::CreateSubscriberWrappers()
+{
+   #ifdef DEBUG_FUNCTION_INIT
+   MessageInterface::ShowMessage("GmatFunction::CreateSubscriberWrappers() entered\n");
+   MessageInterface::ShowMessage("   Create wrappers for subscribers if any\n");
+   #endif
+   std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
+   {
+      std::string funcObjName = omi->first;
+      GmatBase *funcObj = omi->second;
+      
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("   Create wrappers if funcObj [%s]'%s' is a subscriber\n",
+          funcObjName.c_str(), funcObj ? funcObj->GetTypeName().c_str() : "NULL");
+      #endif
+      
+      if (funcObj->IsOfType(Gmat::SUBSCRIBER))
+      {
+         Subscriber *sub = (Subscriber*)funcObj;
+         const StringArray wrapperNames = sub->GetWrapperObjectNameArray();
+         
+         #ifdef DEBUG_FUNCTION_INIT
+         MessageInterface::ShowMessage
+            ("   '%s' has %d wrapper names:\n", funcObjName.c_str(), wrapperNames.size());
+         for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
+            MessageInterface::ShowMessage("   '%s'\n", wrapperNames[ii].c_str());
+         #endif
+         
+         for (StringArray::const_iterator i = wrapperNames.begin();
+              i != wrapperNames.end(); ++i)
+         {
+            std::string wname = (*i);
+            // Skip blank name
+            if (wname == "")
+               continue;
+            
+            try
+            {
+               #ifdef DEBUG_FUNCTION_INIT
+               MessageInterface::ShowMessage
+                  ("   About to create wrapper for '%s'\n", wname.c_str());
+               #endif
+               ElementWrapper *ew = validator->CreateElementWrapper(wname, true, 2);
+               
+               if (sub->SetElementWrapper(ew, wname) == false)
+               {
+                  #ifdef DEBUG_FUNCTION_INIT
+                  MessageInterface::ShowMessage
+                     ("Throwing exception: cannot create an item wrapper '%s' for the "
+                      "%s '%s' in the function '%s'\n", wname.c_str(),
+                      funcObj->GetTypeName().c_str(), funcObj->GetName().c_str(),
+                      functionPath.c_str());
+                  #endif
+                  FunctionException fe;
+                  fe.SetDetails("Error occurred during validation of '%s' for the "
+                                "%s '%s' in the function \"%s\"",
+                                wname.c_str(), funcObj->GetTypeName().c_str(),
+                                funcObj->GetName().c_str(), functionPath.c_str());
+               }
+            }
+            catch (BaseException &ex)
+            {
+               #ifdef DEBUG_FUNCTION_INIT
+               MessageInterface::ShowMessage
+                  ("GmatFunction::InitializeLocalObjects() returning false, "
+                   "failed to create a wrapper for '%s'\n%s\n", wname.c_str(),
+                   ex.GetFullMessage().c_str());
+               #endif
+               throw FunctionException(ex.GetFullMessage() + " in the function \"" + functionPath + "\"");
+            }
+         }
+      }
+   }
+   #ifdef DEBUG_FUNCTION_INIT
+   MessageInterface::ShowMessage("GmatFunction::CreateSubscriberWrappers() leaving\n");
+   #endif
+}
 
 //------------------------------------------------------------------------------
 // bool SetGmatFunctionPath(const std::string &path)

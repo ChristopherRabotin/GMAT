@@ -346,7 +346,6 @@ SET(BASE_SRCS
     parameter/CartesianParameters.cpp
     parameter/DelaunayParameters.cpp
     parameter/EnvData.cpp
-    parameter/EnvParameters.cpp
     parameter/EnvReal.cpp
     parameter/EquinoctialParameters.cpp
     parameter/ExpressionParser.cpp

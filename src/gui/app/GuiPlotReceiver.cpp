@@ -655,10 +655,21 @@ bool GuiPlotReceiver::DeleteGlPlot(const std::string &plotName)
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
          frame = (MdiChildViewFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
-
-         if (frame && frame->GetPlotName().IsSameAs(owner.c_str()))
+         
+         if (frame)
          {
-            gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_ORBIT_VIEW);
+            // Delete GL plot by plot name and type
+            GmatTree::ItemType plotType = frame->GetItemType();
+            wxString plotName = frame->GetPlotName();
+            if (plotName.IsSameAs(owner.c_str()))
+            {
+               #if DEBUG_PLOTIF_GL_DELETE
+               MessageInterface::ShowMessage
+                  ("GuiPlotReceiver::DeleteGlPlot() closing child '%s' from the "
+                   "output tab\n", plotName.WX_TO_C_STRING);
+               #endif
+               gmatAppData->GetMainFrame()->CloseChild(owner, plotType);
+            }
          }
       }
    }
