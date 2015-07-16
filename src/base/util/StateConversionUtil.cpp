@@ -5784,16 +5784,23 @@ Rvector6 StateConversionUtil::CartesianToAngularMomentum(Real mu, const Rvector3
 Rmatrix66 StateConversionUtil::CartesianToKeplerianDerivativeConversion(
    Real mu, const Rvector6 &cartesianState)
 {
+   static Rmatrix66 result;
+   
    // 1. Convert Cartesian state to Keplerian state (angles in degree)
    Rvector6 keplerState = StateConversionUtil::CartesianToKeplerian(mu, cartesianState, StateConversionUtil::MA);
 
-   // 2. Convert INC, RAAN, AOP, MA from degree to radian
-   for (UnsignedInt i = 2; i < 6; ++i)
-      keplerState[i] = keplerState[i] * GmatMathConstants::RAD_PER_DEG;
+   if ((keplerState[1] > 0.0)&&(keplerState[1] < 1.0))
+   {
+      // 2. Convert INC, RAAN, AOP, MA from degree to radian
+      for (UnsignedInt i = 2; i < 6; ++i)
+         keplerState[i] = keplerState[i] * GmatMathConstants::RAD_PER_DEG;
 
-   // 3. Calculate derivative conversion matrix
-   Rmatrix66 m = KeplerianToCartesianDerivativeConversion(mu, keplerState);
-   static Rmatrix66 result = m.Inverse();
+      // 3. Calculate derivative conversion matrix
+      Rmatrix66 m = KeplerianToCartesianDerivativeConversion(mu, keplerState);
+      result = m.Inverse();
+   }
+   else
+      throw UtilityException("Error: Eccentricity (" + GmatStringUtil::ToString(keplerState[1]) + ") is out of range (0,1)\n");
 
    return result;
 }
