@@ -33,6 +33,7 @@
 #include "SpaceObject.hpp"    // To access epoch data
 #include "Spacecraft.hpp"
 #include "StringUtil.hpp"
+#include "StateConversionUtil.hpp"              // made changes by TUAN NGUYEN
 
 
 //#define DEBUG_STATE_MACHINE
@@ -2048,8 +2049,8 @@ void BatchEstimator::WriteConclusion()
 
    // Calculate current Cartesian state map:
    std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
-   // Calculate Keplerian covariance matrix
-   Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+   //// Calculate Keplerian covariance matrix
+   //Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
 
 
    /// 4.2. Write final covariance and correlation matrix 
@@ -2100,91 +2101,106 @@ void BatchEstimator::WriteConclusion()
    }
    textFile << "\n\n\n";
 
-   // Specify covariance matrix for Keplerian Coordinate
-   
-   /// 4.3. Write final covariance and correlation matrix for Keplerian coordinate system 
-   textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Keplerian coordinate system:\n";
-   textFile << "  Index      Solve-for's Name\n";
-   for (UnsignedInt i = 0; i < map->size(); ++i)
+   // Calculate and display covariance and correlation matrix for Keplerian Coordinate
+   // Calculate Keplerian covariance matrix
+   Rmatrix convmatrix;
+   bool valid = true;
+   try
    {
-      Integer index = i+1;
-      textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "a    ";
-      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-          ((*map)[i]->elementName == "Bias"))
-      {
-         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-         StringArray sa = mm->GetStringArrayParameter("Participants");
-         textFile << mm->GetStringParameter("Type") << " ";
-         for( UnsignedInt j=0; j < sa.size(); ++j)
-            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-         textFile << (*map)[i]->subelement;
-      }
-      else
-      {
-         std::string name = GetElementFullName((*map)[i], false);
-         Integer pos = name.find_last_of('.');
-         std::string paraName = name.substr(pos + 1);
-         std::string paraPrefix = name.substr(0, pos);
-         if (paraName == "X")
-            name = paraPrefix + ".SMA";
-         else if (paraName == "Y")
-            name = paraPrefix + ".ECC";
-         else if (paraName == "Z")
-            name = paraPrefix + ".INC";
-         else if (paraName == "VX")
-            name = paraPrefix + ".RAAN";
-         else if (paraName == "VY")
-            name = paraPrefix + ".AOP";
-         else if (paraName == "VZ")
-            name = paraPrefix + ".MA";
-         textFile << name;
-      }
-      textFile << "\n";
+      convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
    }
-   textFile << "\n\n";
-
-   Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
-   textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
-   textFile << "---------------------------------------------------------------------------------\n";
-   textFile << " Row Index |                     Column Index\n";
-   textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |  ";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-      textFile << i+1 << "a                      ";
-   textFile << "\n---------------------------------------------------------------------------------\n";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+   catch(...)
    {
-      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
-      for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
-      {
-         char s[100];
-         sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)); 
-         std::string ss(s);
-         textFile << ss.substr(ss.size() - 24);
-      }
-      textFile << "\n";
+      valid = false;
    }
 
-   textFile << "\nCorrelation Matrix in Keplerian Coordinate System:\n";
-   textFile << "---------------------------------------------------------------------------------\n";
-   textFile << " Row Index |                     Column Index\n";
-   textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |      ";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-      textFile << i+1 << "a                      ";
-   textFile << "\n---------------------------------------------------------------------------------\n";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+   if (valid)
    {
-      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
-      for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+      /// 4.3. Write final covariance and correlation matrix for Keplerian coordinate system 
+      textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Keplerian coordinate system:\n";
+      textFile << "  Index      Solve-for's Name\n";
+      for (UnsignedInt i = 0; i < map->size(); ++i)
       {
-         char s[100];
-         sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
-         std::string ss(s);
-         textFile << ss.substr(ss.size() - 24);
+         Integer index = i+1;
+         textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "a    ";
+         if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+             ((*map)[i]->elementName == "Bias"))
+         {
+            MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+            StringArray sa = mm->GetStringArrayParameter("Participants");
+            textFile << mm->GetStringParameter("Type") << " ";
+            for( UnsignedInt j=0; j < sa.size(); ++j)
+               textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+            textFile << (*map)[i]->subelement;
+         }
+         else
+         {
+            std::string name = GetElementFullName((*map)[i], false);
+            Integer pos = name.find_last_of('.');
+            std::string paraName = name.substr(pos + 1);
+            std::string paraPrefix = name.substr(0, pos);
+            if (paraName == "X")
+               name = paraPrefix + ".SMA";
+            else if (paraName == "Y")
+               name = paraPrefix + ".ECC";
+            else if (paraName == "Z")
+               name = paraPrefix + ".INC";
+            else if (paraName == "VX")
+               name = paraPrefix + ".RAAN";
+            else if (paraName == "VY")
+               name = paraPrefix + ".AOP";
+            else if (paraName == "VZ")
+               name = paraPrefix + ".MA";
+            textFile << name;
+         }
+         textFile << "\n";
       }
-      textFile << "\n";
+      textFile << "\n\n";
+
+      Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+      textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
+      textFile << "---------------------------------------------------------------------------------\n";
+      textFile << " Row Index |                     Column Index\n";
+      textFile << "           |---------------------------------------------------------------------\n";
+      textFile << "           |  ";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+         textFile << i+1 << "a                      ";
+      textFile << "\n---------------------------------------------------------------------------------\n";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+      {
+         textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
+         for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+         {
+            char s[100];
+            sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)); 
+            std::string ss(s);
+            textFile << ss.substr(ss.size() - 24);
+         }
+         textFile << "\n";
+      }
+
+      textFile << "\nCorrelation Matrix in Keplerian Coordinate System:\n";
+      textFile << "---------------------------------------------------------------------------------\n";
+      textFile << " Row Index |                     Column Index\n";
+      textFile << "           |---------------------------------------------------------------------\n";
+      textFile << "           |      ";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+         textFile << i+1 << "a                      ";
+      textFile << "\n---------------------------------------------------------------------------------\n";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+      {
+         textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
+         for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+         {
+            char s[100];
+            sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
+            std::string ss(s);
+            textFile << ss.substr(ss.size() - 24);
+         }
+         textFile << "\n";
+      }
    }
+
 
    textFile << "\n********************************************************\n\n";
    textFile.flush();
@@ -2337,10 +2353,8 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
       std::map<GmatBase*, Rvector6> aprioriKeplerianStateMap = CalculateKeplerianStateMap(map, aprioriSolveForState);
       std::map<GmatBase*, Rvector6> previousKeplerianStateMap = CalculateKeplerianStateMap(map, previousSolveForState);
       std::map<GmatBase*, Rvector6> currentKeplerianStateMap = CalculateKeplerianStateMap(map, currentSolveForState);
-      std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
 
-      // Calculate Keplerian covariance matrix
-      Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+      std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
 
       // Write state information
       textFile << "\n";
@@ -2350,7 +2364,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 
       textFile.precision(8);
       Rmatrix covar = information.Inverse();
-      Rmatrix keplerianCovar = convmatrix * covar * convmatrix.Transpose();                 // Equation 8-49 GTDS MathSpec
       for (int i = 0; i < map->size(); ++i) 
       {
          textFile << "   ";
@@ -2383,61 +2396,77 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
       }
       textFile << "\n";
       
-      // Display Keplerian apriori, previous, current states
-      std::vector<std::string> nameList;
-      RealArray aprioriArr, previousArr, currentArr, stdArr;
-      for (std::map<GmatBase*,Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
-      {
-         std::string csName = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM,"")->GetName();
-         nameList.push_back(i->first->GetName() + "." + csName + ".SMA");
-         nameList.push_back(i->first->GetName() + "." + csName + ".ECC");
-         nameList.push_back(i->first->GetName() + "." + csName + ".INC");
-         nameList.push_back(i->first->GetName() + "." + csName + ".RAAN");
-         nameList.push_back(i->first->GetName() + "." + csName + ".AOP");
-         nameList.push_back(i->first->GetName() + "." + csName + ".MA");
-         for (UnsignedInt j = 0; j < 6; ++j)
-            aprioriArr.push_back(i->second[j]);
-      }
-      
-      for (std::map<GmatBase*,Rvector6>::iterator i = previousKeplerianStateMap.begin(); i != previousKeplerianStateMap.end(); ++i)
-      {
-         for (UnsignedInt j = 0; j < 6; ++j)
-            previousArr.push_back(i->second[j]);
-      }
-      
-      for (std::map<GmatBase*,Rvector6>::iterator i = currentKeplerianStateMap.begin(); i != currentKeplerianStateMap.end(); ++i)
-      {
-         for (UnsignedInt j = 0; j < 6; ++j)
-            currentArr.push_back(i->second[j]);
 
-         UnsignedInt k = 0;
-         for(; k < map->size(); ++k)
+      // Caluclate Keplerian covariance matrix
+      Rmatrix convmatrix;
+      bool valid = true;
+      try
+      {
+         convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+      }
+      catch(...)
+      {
+         valid = false;
+      }
+      
+      if (valid)
+      {
+         Rmatrix keplerianCovar = convmatrix * covar * convmatrix.Transpose();                 // Equation 8-49 GTDS MathSpec
+         
+         // Display Keplerian apriori, previous, current states
+         std::vector<std::string> nameList;
+         RealArray aprioriArr, previousArr, currentArr, stdArr;
+         for (std::map<GmatBase*,Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
          {
-            if (((*map)[k]->elementName == "CartesianState")&&((*map)[k]->object == i->first))
-               break;
+            std::string csName = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM,"")->GetName();
+            nameList.push_back(i->first->GetName() + "." + csName + ".SMA");
+            nameList.push_back(i->first->GetName() + "." + csName + ".ECC");
+            nameList.push_back(i->first->GetName() + "." + csName + ".INC");
+            nameList.push_back(i->first->GetName() + "." + csName + ".RAAN");
+            nameList.push_back(i->first->GetName() + "." + csName + ".AOP");
+            nameList.push_back(i->first->GetName() + "." + csName + ".MA");
+            for (UnsignedInt j = 0; j < 6; ++j)
+               aprioriArr.push_back(i->second[j]);
+         }
+         
+         for (std::map<GmatBase*,Rvector6>::iterator i = previousKeplerianStateMap.begin(); i != previousKeplerianStateMap.end(); ++i)
+         {
+            for (UnsignedInt j = 0; j < 6; ++j)
+               previousArr.push_back(i->second[j]);
+         }
+         
+         for (std::map<GmatBase*,Rvector6>::iterator i = currentKeplerianStateMap.begin(); i != currentKeplerianStateMap.end(); ++i)
+         {
+            for (UnsignedInt j = 0; j < 6; ++j)
+               currentArr.push_back(i->second[j]);
+
+            UnsignedInt k = 0;
+            for(; k < map->size(); ++k)
+            {
+               if (((*map)[k]->elementName == "CartesianState")&&((*map)[k]->object == i->first))
+                  break;
+            }
+
+            for(UnsignedInt j = 0; j < 6; ++j)
+            {
+               stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
+               ++k;
+            }
          }
 
-         for(UnsignedInt j = 0; j < 6; ++j)
+         for(UnsignedInt i = 0; i < nameList.size(); ++i)
          {
-            stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
-            ++k;
-         }
+            textFile << "   ";
+            textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+         }         
       }
       
-
-      for(UnsignedInt i = 0; i < nameList.size(); ++i)
-      {
-         textFile << "   ";
-         textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
-         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
-      }         
-
-
       /// 2. Write statistics
       textFile << "\n\n";
       textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
@@ -2491,8 +2520,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 }
 
 
-#include "StateConversionUtil.hpp"
-
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -2530,7 +2557,7 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const s
          kState = StateConversionUtil::CartesianToKeplerian(mu, cState, "MA");
 
          if ((kState[1] <= 0)||(kState[1] >= 1.0))
-            MessageInterface::ShowMessage("Warning: eccentricity is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+            MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
 
          stateMap[(*map)[i]->object] = kState;
          i = i + 5;
