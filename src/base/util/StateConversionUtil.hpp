@@ -286,7 +286,7 @@ static Rvector6 CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
 //------------------------------------------------------------------------------
 // derivative conversion methods
 //------------------------------------------------------------------------------
-static Real StateConversionUtil::CalculateEccentricAnomaly(Real e, Real M);
+static Real CalculateEccentricAnomaly(Real e, Real M);
 static Rmatrix66 CartesianToKeplerianDerivativeConversion(Real mu, const Rvector6 &cartesianState);
 static Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu, const Rvector6 &keplerState);
 
