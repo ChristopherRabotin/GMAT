@@ -166,8 +166,8 @@ protected:
    ObjectArray  GetListOfSpacecrafts();
    /// Get a list of all ground stations 
    ObjectArray  GetListOfGroundStations();
-   /// Get a list of valid epoch formats
-   StringArray  GetListOfValidEpochFormats();
+   ///// Get a list of valid epoch formats
+   //StringArray  GetListOfValidEpochFormats();
 
 private:
    Real    ConvertToRealEpoch(const std::string &theEpoch,

@@ -639,7 +639,8 @@ const StringArray& BatchEstimator::GetPropertyEnumStrings(const Integer id) cons
    {
       enumStrings.push_back("FromParticipants");
 
-      StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      // StringArray nameList = TimeConverterUtil::GetListOfTimeSystemTypes();     // made changes by TUAN NGUYEN
+      StringArray nameList = TimeConverterUtil::GetValidTimeRepresentations();     // made changes by TUAN NGUYEN
       for (UnsignedInt i = 0; i < nameList.size(); ++i)
          enumStrings.push_back(nameList[i]);
 
@@ -1396,6 +1397,10 @@ void BatchEstimator::RunComplete()
 //------------------------------------------------------------------------------
 std::string BatchEstimator::GetProgressString()
 {
+   Real taiMjdEpoch, utcMjdEpoch;
+   std::string utcEpoch;
+   Rmatrix finalCovariance;
+
    StringArray::iterator current;
 
    std::stringstream progress;
@@ -1431,7 +1436,15 @@ std::string BatchEstimator::GetProgressString()
                {
                   char s[100];
                   sprintf(&s[0], "%22.12lf", estimationEpoch);
-                  progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+                  //progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+                  progress << "   Estimation Epoch:\n";
+                  progress << "   " << s << " A.1 modified Julian\n";
+                  taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+                  utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+                  sprintf(&s[0], "%22.12lf", taiMjdEpoch);
+                  progress << "   " << s << " TAI modified Julian\n";
+                  utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+                  progress << "   " << utcEpoch << " UTCG\n";
                }
 
                GetEstimationState(outputEstimationState);
@@ -1458,9 +1471,9 @@ std::string BatchEstimator::GetProgressString()
             break;
 
          case CHECKINGRUN:
-            progress << "\n   WeightedRMS residuals for this iteration: "
+            progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration: "
+            progress << "\n   BestRMS residuals for this iteration     : "
                      << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
@@ -1494,7 +1507,16 @@ std::string BatchEstimator::GetProgressString()
                      << "\n\nCurrent estimated state:\n";
             char s[100];
             sprintf(&s[0], "%22.12lf", estimationEpoch);
-            progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+            //progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+            taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+            utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+            utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+            progress << "   Estimation Epoch:\n";
+            progress << "   " << s << " A.1 modified Julian\n";
+            sprintf(&s[0], "%22.12lf", taiMjdEpoch);
+            progress << "   " << s << " TAI modified Julian\n";
+            progress << "   " << utcEpoch << " UTCG\n";
+
 
             GetEstimationState(outputEstimationState);
 
@@ -1510,9 +1532,9 @@ std::string BatchEstimator::GetProgressString()
             break;
 
          case FINISHED:
-            progress << "\n   WeightedRMS residuals for this iteration: "
+            progress << "\n   WeightedRMS residuals for this iteration : "
                      << newResidualRMS;
-            progress << "\n   BestRMS residuals for this iteration: "
+            progress << "\n   BestRMS residuals for this iteration     : "
                      << bestResidualRMS;
             progress << "\n   PredictedRMS residuals for next iteration: "
                      << predictedRMS << "\n";
@@ -1577,7 +1599,15 @@ std::string BatchEstimator::GetProgressString()
             {
                char s[100];
                sprintf(&s[0],"%22.12lf", estimationEpoch);
-               progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+               //progress << "   Estimation Epoch (A.1 modified Julian): " << s << "\n";
+               progress << "   Estimation Epoch:\n";
+               progress << "   " << s << " A.1 modified Julian\n";
+               taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+               utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+               sprintf(&s[0], "%22.12lf", taiMjdEpoch);
+               progress << "   " << s << " TAI modified Julian\n";
+               utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+               progress << "   " << utcEpoch << " UTCG\n";
             }
 
             GetEstimationState(outputEstimationState);
@@ -1591,26 +1621,46 @@ std::string BatchEstimator::GetProgressString()
                      << outputEstimationState[i] << "\n";
             }
 
-            { // Switch statement scoping
-               Rmatrix finalCovariance = information.Inverse();
-               progress << "\nFinal Covariance Matrix:\n\n";
-               for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
-               {
-                  for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
-                     progress << "   " << finalCovariance(i, j);
-                  progress << "\n";
-               }
-            }
-
             if (textFileMode == "Verbose")
             {
                progress << "\n   WeightedRMS residuals for previous iteration: "
                         << oldResidualRMS;
-               progress << "\n   WeightedRMS residuals for this iteration:     "
+               progress << "\n   WeightedRMS residuals for this iteration    : "
                         << newResidualRMS;
-               progress << "\n   BestRMS residuals for this iteration: "
+               progress << "\n   BestRMS residuals for this iteration        : "
                      << bestResidualRMS << "\n\n";
             }
+
+            finalCovariance = information.Inverse();
+
+            //progress.precision(12);
+            //progress.scientific;
+            progress << "\nFinal Covariance Matrix:\n\n";
+            for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+            {
+               for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+               {
+                  char s[100];
+                  sprintf(&s[0], "   %22.12le\0", finalCovariance(i, j));
+                  std::string ss(s);
+                  progress << "   " << ss.substr(ss.size()-24); //finalCovariance(i, j);
+               }
+               progress << "\n";
+            }
+
+            progress << "\nFinal Correlation Matrix:\n\n";
+            for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+            {
+               for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+               {
+                  char s[100];
+                  sprintf(&s[0], "   %22.12le\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j)));
+                  std::string ss(s);
+                  progress << "   " << ss.substr(ss.size()-24); //finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
+               }
+               progress << "\n";
+            }
+            //progress.fixed;
 
             progress << "\n****************************"
                      << "****************************\n\n"
@@ -1873,6 +1923,9 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
 
 void BatchEstimator::WriteConclusion()
 {
+   Real taiMjdEpoch, utcMjdEpoch;
+   std::string utcEpoch;
+
    GmatState outputEstimationState;
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
@@ -1908,9 +1961,18 @@ void BatchEstimator::WriteConclusion()
       textFile << "   Estimation Epoch (" << estEpochFormat
                << "): " << estEpoch << "\n";
    else
-      textFile << "   Estimation Epoch (A.1 Mod. Julian): "
-               << estimationEpoch << "\n";
-
+   {
+      //textFile << "   Estimation Epoch (A.1 Mod. Julian): "
+      //         << estimationEpoch << "\n";
+      char s[100];
+      textFile << "   Estimation Epoch:\n"
+               << "   " << estimationEpoch <<  " A.1 Mod. Julian\n";
+      taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+      utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
+      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+      textFile << "   " << utcEpoch << " UTCG\n";
+   }
    
    /// 3. Write final state
    GetEstimationState(outputEstimationState);
@@ -1940,35 +2002,200 @@ void BatchEstimator::WriteConclusion()
    textFile << "\n";
 
 
-   /// 4. Write final coveriance matrix 
-   Rmatrix finalCovariance = information.Inverse();
-   textFile << "\nFinal Covariance Matrix:\n";
+   /// 5. Write previous RMS, current RMS, and the best RMS
    textFile.precision(12);
+   textFile << "\n   WeightedRMS residuals for previous iteration: "
+            << oldResidualRMS;
+   textFile << "\n   WeightedRMS residuals for this iteration    : "
+            << newResidualRMS ;
+   textFile << "\n   BestRMS residuals for this iteration        : "
+            << bestResidualRMS << "\n\n";
+
+   /// 4. Write covariance matrix and correlation matrix
+   /// 4.1. Write a table containing a list of solve-fors an their index
+   // @todo: add code to do section 4.1. here
+   textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Cartesian coordinate system:\n";
+   textFile << " Index      Solve-for's Name\n";
+   Integer indexLen = 1;
+   for (; GmatMathUtil::Pow(10,indexLen) < map->size(); ++indexLen);
+
+      
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      Integer index = i+1;
+      textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "     ";
+      //textFile << "    " << i+1 << "     ";
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+          ((*map)[i]->elementName == "Bias"))
+      {
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         textFile << mm->GetStringParameter("Type") << " ";
+         for( UnsignedInt j=0; j < sa.size(); ++j)
+            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+         textFile << (*map)[i]->subelement;
+      }
+      else
+      {
+         //textFile << (*map)[i]->objectName << "."
+         //         << (*map)[i]->elementName << "."
+         //         << (*map)[i]->subelement;
+         textFile << GetElementFullName((*map)[i], false);
+      }
+      textFile << "\n";
+   }
+   textFile << "\n\n";
+
+   // Calculate current Cartesian state map:
+   std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
+   // Calculate Keplerian covariance matrix
+   Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+
+
+   /// 4.2. Write final covariance and correlation matrix 
+   Rmatrix finalCovariance = information.Inverse();
+   
+   textFile << "Covariance Matrix in Cartesian Coordinate System:\n";
+   textFile << "---------------------------------------------------------------------------------\n";
+   textFile << " Row Index |                     Column Index\n";
+   textFile << "           |---------------------------------------------------------------------\n";
+   textFile << "           |  ";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+      textFile << i+1 << "                       ";
+   textFile << "\n---------------------------------------------------------------------------------\n";
    for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
    {
+      //textFile << "  " << i+1 << "      ";
+      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "    ";
       for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
-         textFile << "   " << finalCovariance(i, j);
+      {
+         char s[100];
+         sprintf(&s[0],"  %22.12le\0", finalCovariance(i, j)); 
+         std::string ss(s);
+         textFile << ss.substr(ss.size() - 24); //finalCovariance(i, j);
+      }
       textFile << "\n";
    }
 
+   textFile << "\nCorrelation Matrix in Cartesian Coordinate System:\n";
+   textFile << "---------------------------------------------------------------------------------\n";
+   textFile << " Row Index |                     Column Index\n";
+   textFile << "           |---------------------------------------------------------------------\n";
+   textFile << "           |      ";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+      textFile << i+1 << "                       ";
+   textFile << "\n---------------------------------------------------------------------------------\n";
+   for (Integer i = 0; i < finalCovariance.GetNumRows(); ++i)
+   {
+      //textFile << "  " << i+1 << "      ";
+      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "    ";
+      for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
+      {
+         char s[100];
+         sprintf(&s[0],"  %22.12lf\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j))); 
+         std::string ss(s);
+         textFile << ss.substr(ss.size() - 24); //finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
+      }
+      textFile << "\n";
+   }
+   textFile << "\n\n\n";
 
-   /// 5. Write previous RMS, current RMS, and the best RMS
-   textFile << "\n   WeightedRMS residuals for previous iteration: "
-            << oldResidualRMS;
-   textFile << "\n   WeightedRMS residuals for this iteration:     "
-            << newResidualRMS ;
-   textFile << "\n   BestRMS residuals for this iteration: "
-            << bestResidualRMS << "\n\n";
+   // Specify covariance matrix for Keplerian Coordinate
+   
+   /// 4.3. Write final covariance and correlation matrix for Keplerian coordinate system 
+   textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Keplerian coordinate system:\n";
+   textFile << "  Index      Solve-for's Name\n";
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      Integer index = i+1;
+      textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "a    ";
+      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+          ((*map)[i]->elementName == "Bias"))
+      {
+         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+         StringArray sa = mm->GetStringArrayParameter("Participants");
+         textFile << mm->GetStringParameter("Type") << " ";
+         for( UnsignedInt j=0; j < sa.size(); ++j)
+            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+         textFile << (*map)[i]->subelement;
+      }
+      else
+      {
+         std::string name = GetElementFullName((*map)[i], false);
+         Integer pos = name.find_last_of('.');
+         std::string paraName = name.substr(pos + 1);
+         std::string paraPrefix = name.substr(0, pos);
+         if (paraName == "X")
+            name = paraPrefix + ".SMA";
+         else if (paraName == "Y")
+            name = paraPrefix + ".ECC";
+         else if (paraName == "Z")
+            name = paraPrefix + ".INC";
+         else if (paraName == "VX")
+            name = paraPrefix + ".RAAN";
+         else if (paraName == "VY")
+            name = paraPrefix + ".AOP";
+         else if (paraName == "VZ")
+            name = paraPrefix + ".MA";
+         textFile << name;
+      }
+      textFile << "\n";
+   }
+   textFile << "\n\n";
+
+   Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+   textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
+   textFile << "---------------------------------------------------------------------------------\n";
+   textFile << " Row Index |                     Column Index\n";
+   textFile << "           |---------------------------------------------------------------------\n";
+   textFile << "           |  ";
+   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+      textFile << i+1 << "a                      ";
+   textFile << "\n---------------------------------------------------------------------------------\n";
+   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+   {
+      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
+      for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+      {
+         char s[100];
+         sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)); 
+         std::string ss(s);
+         textFile << ss.substr(ss.size() - 24);
+      }
+      textFile << "\n";
+   }
+
+   textFile << "\nCorrelation Matrix in Keplerian Coordinate System:\n";
+   textFile << "---------------------------------------------------------------------------------\n";
+   textFile << " Row Index |                     Column Index\n";
+   textFile << "           |---------------------------------------------------------------------\n";
+   textFile << "           |      ";
+   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+      textFile << i+1 << "a                      ";
+   textFile << "\n---------------------------------------------------------------------------------\n";
+   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+   {
+      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
+      for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+      {
+         char s[100];
+         sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
+         std::string ss(s);
+         textFile << ss.substr(ss.size() - 24);
+      }
+      textFile << "\n";
+   }
 
    textFile << "\n********************************************************\n\n";
    textFile.flush();
-
 }
 
 
 void BatchEstimator::WriteHeader()
 {
-   
+   Real taiMjdEpoch, utcMjdEpoch;
+   std::string utcEpoch;
+
    GmatState outputEstimationState;
    const std::vector<ListItem*> *map = esm.GetStateMap();
 
@@ -1986,8 +2213,18 @@ void BatchEstimator::WriteHeader()
       textFile << "   Estimation Epoch (" << estEpochFormat
                << "): " << estEpoch << "\n";
    else
-      textFile << "   Estimation Epoch (A.1 Mod. Julian): "
-               << estimationEpoch << "\n";
+   {
+      //textFile << "   Estimation Epoch (A.1 Mod. Julian): "
+      //         << estimationEpoch << "\n";
+      char s[100];
+      textFile << "   Estimation Epoch:\n"
+               << "   " << estimationEpoch <<  " A.1 Mod. Julian\n";
+      taiMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::TAIMJD);
+      utcMjdEpoch = TimeConverterUtil::Convert(estimationEpoch, TimeConverterUtil::A1MJD, TimeConverterUtil::UTCMJD);
+      textFile << "   " << taiMjdEpoch << " TAI Mod. Julian\n";
+      utcEpoch = TimeConverterUtil::ConvertMjdToGregorian(utcMjdEpoch);
+      textFile << "   " << utcEpoch << " UTCG\n";
+   }
 
    // Convert state to participants' coordinate system:
    GetEstimationState(outputEstimationState);
@@ -2021,9 +2258,23 @@ void BatchEstimator::WriteHeader()
    /// 3. Write data editing criteria:
    textFile.precision(2);
    textFile << "Data Editing Criteria:\n"
-            << "   " << GetName() << ".OLSEInitialRMSSigma        = " << maxResidualMult << "\n"
-            << "   " << GetName() << ".OLSEMultiplicativeConstant = " << constMult << "\n"
-            << "   " << GetName() << ".OLSEAdditiveConstant       = " << additiveConst << "\n\n";
+            << "   " << GetName() << ".OLSEInitialRMSSigma        = ";
+   if ((maxResidualMult == 0.0)||((GmatMathUtil::Abs(maxResidualMult) < 1.0e6)&&(GmatMathUtil::Abs(maxResidualMult) > 1.0e-2)))
+      textFile << maxResidualMult << "\n";
+   else
+      textFile << GmatStringUtil::ToString(maxResidualMult, false, true) << "\n";
+
+   textFile << "   " << GetName() << ".OLSEMultiplicativeConstant = ";
+   if ((constMult == 0.0)||((GmatMathUtil::Abs(constMult) < 1.0e6)&&(GmatMathUtil::Abs(constMult) > 1.0e-2)))
+      textFile << constMult << "\n";
+   else
+      textFile << GmatStringUtil::ToString(constMult, false, true) << "\n";
+
+   textFile << "   " << GetName() << ".OLSEAdditiveConstant       = ";
+   if ((additiveConst == 0.0)||((GmatMathUtil::Abs(additiveConst) < 1.0e6)&&(GmatMathUtil::Abs(additiveConst) > 1.0e-2)))
+      textFile << additiveConst << "\n";
+   else
+      textFile << GmatStringUtil::ToString(additiveConst, false, true) << "\n";
 
    /// 4. Write notations used in report file:
    textFile << "Notations Used In Report File: \n" 
@@ -2036,10 +2287,10 @@ void BatchEstimator::WriteHeader()
 
    /// 5. Write report header
    if (textFileMode == "Normal")
-      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants        Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants         Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
    else
    {
-      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants        Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants         Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
          textFile << "                         ";
@@ -2054,6 +2305,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 {
    const std::vector<ListItem*> *map = esm.GetStateMap();
    GmatState outputEstimationState;
+
 
    if (sState == ESTIMATING)
    {
@@ -2080,12 +2332,25 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          max_len = GmatMathUtil::Max(max_len, ss.str().length());
       }
 
+
+      // Calculate Keplerian state for apriori, previous, current states:
+      std::map<GmatBase*, Rvector6> aprioriKeplerianStateMap = CalculateKeplerianStateMap(map, aprioriSolveForState);
+      std::map<GmatBase*, Rvector6> previousKeplerianStateMap = CalculateKeplerianStateMap(map, previousSolveForState);
+      std::map<GmatBase*, Rvector6> currentKeplerianStateMap = CalculateKeplerianStateMap(map, currentSolveForState);
+      std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
+
+      // Calculate Keplerian covariance matrix
+      Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+
+      // Write state information
       textFile << "\n";
       textFile << "Iteration " << iterationsTaken << ": State Information \n"
                << "   " << GmatStringUtil::GetAlignmentString("State Component", max_len, GmatStringUtil::LEFT)                                                
-               << "               Apriori State              Previous State               Current State             Current-Apriori            Current-Previous\n";
+               << "               Apriori State              Previous State               Current State             Current-Apriori            Current-Previous          Standard Deviation\n";
 
       textFile.precision(8);
+      Rmatrix covar = information.Inverse();
+      Rmatrix keplerianCovar = convmatrix * covar * convmatrix.Transpose();                 // Equation 8-49 GTDS MathSpec
       for (int i = 0; i < map->size(); ++i) 
       {
          textFile << "   ";
@@ -2109,32 +2374,90 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          }
      
          textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 3, GmatStringUtil::LEFT);
-         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriSolveForState[i]), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousSolveForState[i]), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i]), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i]), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i]), 25, GmatStringUtil::RIGHT) << "\n";   // Previous - Current state
+         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
       }
       textFile << "\n";
+      
+      // Display Keplerian apriori, previous, current states
+      std::vector<std::string> nameList;
+      RealArray aprioriArr, previousArr, currentArr, stdArr;
+      for (std::map<GmatBase*,Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
+      {
+         std::string csName = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM,"")->GetName();
+         nameList.push_back(i->first->GetName() + "." + csName + ".SMA");
+         nameList.push_back(i->first->GetName() + "." + csName + ".ECC");
+         nameList.push_back(i->first->GetName() + "." + csName + ".INC");
+         nameList.push_back(i->first->GetName() + "." + csName + ".RAAN");
+         nameList.push_back(i->first->GetName() + "." + csName + ".AOP");
+         nameList.push_back(i->first->GetName() + "." + csName + ".MA");
+         for (UnsignedInt j = 0; j < 6; ++j)
+            aprioriArr.push_back(i->second[j]);
+      }
+      
+      for (std::map<GmatBase*,Rvector6>::iterator i = previousKeplerianStateMap.begin(); i != previousKeplerianStateMap.end(); ++i)
+      {
+         for (UnsignedInt j = 0; j < 6; ++j)
+            previousArr.push_back(i->second[j]);
+      }
+      
+      for (std::map<GmatBase*,Rvector6>::iterator i = currentKeplerianStateMap.begin(); i != currentKeplerianStateMap.end(); ++i)
+      {
+         for (UnsignedInt j = 0; j < 6; ++j)
+            currentArr.push_back(i->second[j]);
+
+         UnsignedInt k = 0;
+         for(; k < map->size(); ++k)
+         {
+            if (((*map)[k]->elementName == "CartesianState")&&((*map)[k]->object == i->first))
+               break;
+         }
+
+         for(UnsignedInt j = 0; j < 6; ++j)
+         {
+            stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
+            ++k;
+         }
+      }
+      
+
+      for(UnsignedInt i = 0; i < nameList.size(); ++i)
+      {
+         textFile << "   ";
+         textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
+         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+      }         
 
 
       /// 2. Write statistics
+      textFile << "\n\n";
       textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
-               << "   Total Number Of Records : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
-               << "   Records Removed Due To :\n"
+               << "   Total Number Of Records     : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
+               << "   Records Used For Estimation : " << measurementResiduals.size() << "\n"
+               << "   Records Removed Due To      : \n"
                << "      No Computed Value Configuration Available : " << numRemovedRecords["U"] << "\n"
-               << "      Out of Ramped Table Range : " << numRemovedRecords["R"] << "\n"
-               << "      Signal Blocked : " << numRemovedRecords["B"] << "\n"
-               << "      Sigma Editing : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n"
-               << "   Records Used For Estimation : " << measurementResiduals.size() << "\n";
+               << "      Out of Ramped Table Range                 : " << numRemovedRecords["R"] << "\n"
+               << "      Signal Blocked                            : " << numRemovedRecords["B"] << "\n"
+               << "      Sigma Editing                             : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n\n";
+               
       textFile.precision(12);
-      textFile << "   WeightedRMS Residuals : " << newResidualRMS << "\n"
+      textFile << "   WeightedRMS Residuals  : " << newResidualRMS << "\n"
                << "   PredictedRMS Residuals : " << predictedRMS << "\n";
    }
+   
 
    if ((sState == CHECKINGRUN)||(sState == FINISHED))
    {
-      textFile << "   DC Status : ";
+      textFile << "   DC Status              : ";
       switch(estimationStatus)
       {
       case ABSOLUTETOL_CONVERGED:
@@ -2165,9 +2488,134 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
    }
 
    textFile.flush();
-
 }
 
+
+#include "StateConversionUtil.hpp"
+
+std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state)
+{
+   static std::map<GmatBase*, Rvector6> stateMap;
+   stateMap.clear();
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->elementName == "CartesianState")
+      {
+         Rvector6 cState;
+         cState.Set(state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+         stateMap[(*map)[i]->object] = cState;
+         i = i + 5;
+      }
+   }
+   return stateMap;
+}
+
+
+std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state)
+{
+   static std::map<GmatBase*, Rvector6> stateMap;
+   stateMap.clear();
+
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->elementName == "CartesianState")
+      {
+         Rvector6 cState,kState;
+
+         cState.Set(state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+         GmatBase* cs = ((Spacecraft*)((*map)[i]->object))->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
+         CelestialBody * body = (CelestialBody*)(((CoordinateSystem*)cs)->GetOrigin());
+         Real mu = body->GetRealParameter(body->GetParameterID("Mu"));
+         kState = StateConversionUtil::CartesianToKeplerian(mu, cState, "MA");
+
+         if ((kState[1] <= 0)||(kState[1] >= 1.0))
+            MessageInterface::ShowMessage("Warning: eccentricity is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+
+         stateMap[(*map)[i]->object] = kState;
+         i = i + 5;
+      }
+   }
+   return stateMap;
+}
+
+
+//--------------------------------------------------------------------------------------------
+// Rmatrix66 CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state)
+//--------------------------------------------------------------------------------------------
+/**
+* This function is use to calculate derivative state conversion matrix for a spacecraft state. 
+* It converts from Cartesian to Keplerian (with mean anomaly) coordiate system.
+*
+* @param obj      it is a spacecraft object
+* @param state    Cartesian state of the spacecraft 
+*
+* return          6x6 derivative state conversion matrix
+*/
+//--------------------------------------------------------------------------------------------
+Rmatrix66 BatchEstimator::CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state)
+{
+   // 1. Get mu value 
+   Spacecraft* spacecraft = (Spacecraft*)obj;
+   CoordinateSystem* cs = (CoordinateSystem*)(spacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""));
+   CelestialBody* body = (CelestialBody*)(cs->GetOrigin());
+   Real mu = body->GetRealParameter(body->GetParameterID("Mu"));
+   
+   // 2. Specify conversion matrix
+   Rmatrix66 convMatrix = StateConversionUtil::CartesianToKeplerianDerivativeConversion(mu, state);
+   
+   return convMatrix;
+}
+
+
+//--------------------------------------------------------------------------------------------
+// Rmatrix BatchEstimator::CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap)
+//--------------------------------------------------------------------------------------------
+/**
+* This function is use to calculate derivative state conversion matrix for all solve-for variables. 
+* It converts from Cartesian to Keplerian (with mean anomaly) coordiate system.
+*
+* @param stateMap a map of spacecrafts and their Cartisian state
+*
+* return          derivative state conversion matrix
+*/
+//--------------------------------------------------------------------------------------------
+Rmatrix BatchEstimator::CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap)
+{
+   const std::vector<ListItem*> *map = esm.GetStateMap();
+
+   // 1. Specify conversion sub matrixes for all spacecrafts
+   std::map<GmatBase*, Rmatrix66> matrixMap;
+   for (std::map<GmatBase*, Rvector6>::iterator i = stateMap.begin(); i != stateMap.end(); ++i)
+      matrixMap[i->first] = CartesianToKeplerianCoverianceConvertionMatrix(i->first, i->second);
+
+   // 2. Assemly whole conversion matrix
+   Rmatrix conversionMatrix(map->size(),map->size());        // It is a zero matrix
+   for(UnsignedInt i = 0; i < map->size(); )
+   {
+      if ((*map)[i]->elementName == "CartesianState")
+      {
+         // fill in conversion submatrix
+         Rmatrix66 m = matrixMap[(*map)[i]->object];
+         for(UnsignedInt row = 0; row < 6; ++row)
+         {
+            for(UnsignedInt col = 0; col < 6; ++col)
+            {
+               conversionMatrix.SetElement(i+row, i+col, m(row,col));
+            }
+         }
+         // skip to next
+         i = i + 6;
+      }
+      else
+      {
+         conversionMatrix(i,i) = 1.0;
+         ++i;
+      }
+   }
+   
+   return conversionMatrix;
+}
 
 
 //-------------------------------------------------------------------------
@@ -2182,9 +2630,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 //-------------------------------------------------------------------------
 bool BatchEstimator::DataFilter()
 {
-
-   //MeasurementModel* measModel = measManager.GetMeasurementObject(modelsToAccess[0]);         // Get measurement model
-   //Real maxLimit = measModel->GetRealParameter("ResidualMax");                        // Get value of MeasurementModel.ResidualMax parameter
    const ObservationData *currentObs =  measManager.GetObsData();                        // Get observation measurement data O
    const MeasurementData *calculatedMeas = measManager.GetMeasurement(modelsToAccess[0]);      // Get calculated measurement data C
 
@@ -2193,20 +2638,6 @@ bool BatchEstimator::DataFilter()
    {
       for (Integer i=0; i < currentObs->value.size(); ++i)
      {
-         //1.Data filtered based on measurement model's residual limits:
-         //if (abs(currentObs->value[i] - calculatedMeas->value[i]) > maxLimit)   // if (abs(O-C) > max limit) then throw away this data record
-         //{
-         //   measManager.GetObsDataObject()->inUsed = false;
-         //   measManager.GetObsDataObject()->removedReason = "M";   // "M": represent for maximum residual limit
-         //   std::string filterName = measModel->GetName() + " maximum residual";
-         //   if (numRemovedRecords.find(filterName) == numRemovedRecords.end())
-         //      numRemovedRecords[filterName] = 1;
-         //   else
-         //      numRemovedRecords[filterName]++;
-         //   retVal = true;      // IsReuseableType("ResidualMax");
-         //   break;
-         //}
-
          // 2.Data filtered based on sigma editting
          // 2.1. Specify Weight
          Real weight = 1.0;

@@ -184,6 +184,13 @@ private:
    void                   WriteSummary(Solver::SolverState sState);
    void                   WriteConclusion();
    std::string            GetElementFullName(ListItem* infor, bool isInternalCS) const;
+   Rmatrix                CovarianceConvertionMatrix(std::map<GmatBase*, Rvector6> stateMap);                    // made changes by TUAN NGUYEN
+
+   std::map<GmatBase*, Rvector6> 
+                          CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
+   std::map<GmatBase*, Rvector6> 
+                          CalculateKeplerianStateMap(const std::vector<ListItem*> *map, GmatState state);           // made changes by TUAN NGUYEN
+   Rmatrix66              CartesianToKeplerianCoverianceConvertionMatrix(GmatBase* obj, const Rvector6 state);   // made changes by TUAN NGUYEN
 
 };
 

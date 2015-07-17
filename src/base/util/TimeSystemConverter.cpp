@@ -991,30 +991,30 @@ bool TimeConverterUtil::IsValidTimeSystem(const std::string& system)
 }
 
 
-// made changes by TUAN NGUYEN
-//-----------------------------------------------------------------------------
-// StringArray GetListOfTimeSystemTypes()
-//-----------------------------------------------------------------------------
-/**
-* Get a list of time system types
-*
-* @return a list of time system type used by GMAT
-*/
-//-----------------------------------------------------------------------------
-StringArray TimeConverterUtil::GetListOfTimeSystemTypes()
-{
-   StringArray enumStrings;
-
-   //@todo: this list has to be updated whenever a new time system type is defined in GMAT code. 
-   enumStrings.push_back("A1ModJulian");
-   enumStrings.push_back("TAIModJulian");
-   enumStrings.push_back("UTCModJulian");
-   enumStrings.push_back("TTModJulian");
-   enumStrings.push_back("A1Gregorian");
-   enumStrings.push_back("TAIGregorian");
-   enumStrings.push_back("UTCGregorian");
-   enumStrings.push_back("TTGregorian");
-
-   return enumStrings;
-}
+//// made changes by TUAN NGUYEN
+////-----------------------------------------------------------------------------
+//// StringArray GetListOfTimeSystemTypes()
+////-----------------------------------------------------------------------------
+///**
+//* Get a list of time system types
+//*
+//* @return a list of time system type used by GMAT
+//*/
+////-----------------------------------------------------------------------------
+//StringArray TimeConverterUtil::GetListOfTimeSystemTypes()
+//{
+//   StringArray enumStrings;
+//
+//   //@todo: this list has to be updated whenever a new time system type is defined in GMAT code. 
+//   enumStrings.push_back("A1ModJulian");
+//   enumStrings.push_back("TAIModJulian");
+//   enumStrings.push_back("UTCModJulian");
+//   enumStrings.push_back("TTModJulian");
+//   enumStrings.push_back("A1Gregorian");
+//   enumStrings.push_back("TAIGregorian");
+//   enumStrings.push_back("UTCGregorian");
+//   enumStrings.push_back("TTGregorian");
+//
+//   return enumStrings;
+//}
 

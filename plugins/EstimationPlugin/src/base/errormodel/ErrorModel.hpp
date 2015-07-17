@@ -99,10 +99,10 @@ public:
 protected:
    /// Measurement type 
    std::string   measurementType;               // Its value to be "Range_KM", "Range_RU", "Doppler_RangeRate", or "Doppler_HZ"
-   /// Measurement trip
-   Integer       measurementTrip;               // specify number of ways of a measurement. It would be 1 for one-way, 2 for two-ways, 3 for three-ways, and so on. It is 0 for all trips
-   /// Participant name list
-   StringArray   participantNameList;           // It contains a list of participant name
+   ///// Measurement trip
+   //Integer       measurementTrip;               // specify number of ways of a measurement. It would be 1 for one-way, 2 for two-ways, 3 for three-ways, and so on. It is 0 for all trips
+   ///// Participant name list
+   //StringArray   participantNameList;           // It contains a list of participant name
    /// Measurement noise sigma
    Real          noiseSigma;                    // specify noise sigma of a measurement
    /// Noise Model
@@ -116,8 +116,8 @@ protected:
    enum
    {
       TYPE = GmatBaseParamCount,
-      TRIP,
-      STRAND,
+      //TRIP,
+      //STRAND,
       NOISE_SIGMA,
       NOISE_MODEL,
       BIAS,

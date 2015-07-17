@@ -36,8 +36,8 @@
 const std::string ErrorModel::PARAMETER_TEXT[] =
 {
    "Type",
-   "Trip",
-   "Strand",
+//   "Trip",
+//   "Strand",
    "NoiseSigma",
    "NoiseModel",
    "Bias",
@@ -47,8 +47,8 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
 const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 {
    Gmat::STRING_TYPE,			// TYPE                  // Its value will be "Range_KM", "Range_RU", "Doppler_RangeRate", "Doppler_HZ"
-   Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
-   Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
+//   Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
+//   Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
    Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
@@ -69,7 +69,7 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 ErrorModel::ErrorModel(const std::string name) :
    GmatBase          (Gmat::ERROR_MODEL, "ErrorModel", name),
    measurementType   ("Range_KM"),
-   measurementTrip   (2),
+//   measurementTrip   (2),
 //   strand            (""),
    noiseSigma        (0.01),                   // 0.01 Km
    noiseModel        ("NoiseConstant"), 
@@ -110,8 +110,8 @@ ErrorModel::~ErrorModel()
 ErrorModel::ErrorModel(const ErrorModel& em) :
    GmatBase              (em),
    measurementType       (em.measurementType),
-   measurementTrip       (em.measurementTrip),
-   participantNameList   (em.participantNameList),
+//   measurementTrip       (em.measurementTrip),
+//   participantNameList   (em.participantNameList),
    noiseSigma            (em.noiseSigma),
    noiseModel            (em.noiseModel),
    bias                  (em.bias),
@@ -146,8 +146,8 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
       GmatBase::operator=(em);
 
       measurementType     = em.measurementType;
-      measurementTrip     = em.measurementTrip;
-      participantNameList = em.participantNameList;
+//      measurementTrip     = em.measurementTrip;
+//      participantNameList = em.participantNameList;
       noiseSigma          = em.noiseSigma;
       noiseModel          = em.noiseModel;
       bias                = em.bias;
@@ -181,9 +181,10 @@ bool ErrorModel::operator==(const ErrorModel& em)
       //retVal = GmatBase::operator==(em);
 
       if ((GetName() != em.GetName())||
-          (measurementType != em.measurementType)||
-          (measurementTrip != em.measurementTrip)||
-          (participantNameList != em.participantNameList))
+          (measurementType != em.measurementType)   //||
+//          (measurementTrip != em.measurementTrip)||
+//          (participantNameList != em.participantNameList)
+         )
          return false;
    }
    return true;
@@ -457,17 +458,17 @@ bool ErrorModel::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string ErrorModel::GetStringParameter(const Integer id, const Integer index) const
 {
-   if (id == STRAND)
-   {
-      if ((index < 0)||(index >= (Integer)participantNameList.size()))
-      {
-         std::stringstream ss;
-         ss << "Error: participant index (" << index << ") is out of bound.\n";
-         throw GmatBaseException(ss.str());
-      }
+   //if (id == STRAND)
+   //{
+   //   if ((index < 0)||(index >= (Integer)participantNameList.size()))
+   //   {
+   //      std::stringstream ss;
+   //      ss << "Error: participant index (" << index << ") is out of bound.\n";
+   //      throw GmatBaseException(ss.str());
+   //   }
 
-      return participantNameList[index];
-   }
+   //   return participantNameList[index];
+   //}
 
    if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
    {                                                                                // made changes by TUAN NGUYEN
@@ -500,33 +501,33 @@ std::string ErrorModel::GetStringParameter(const Integer id, const Integer index
 bool ErrorModel::SetStringParameter(const Integer id, const std::string &value,
                                            const Integer index)
 {
-   if (id == STRAND)
-   {
-      if ((0 <= index)&&(index < (Integer)participantNameList.size()))
-      {
-         participantNameList[index] = value;
-         return true;
-      }
-      else
-      {
-         if (index == -1)
-         {
-            participantNameList.clear();
-            return true;
-         }
-         else if (index == participantNameList.size())
-         {
-            participantNameList.push_back(value);
-            return true;
-         }
-         else
-         {
-            std::stringstream ss;
-            ss << "Error: participant name's index (" << index << ") is out of bound.\n"; 
-            throw GmatBaseException(ss.str());
-         }
-      }
-   }
+   //if (id == STRAND)
+   //{
+   //   if ((0 <= index)&&(index < (Integer)participantNameList.size()))
+   //   {
+   //      participantNameList[index] = value;
+   //      return true;
+   //   }
+   //   else
+   //   {
+   //      if (index == -1)
+   //      {
+   //         participantNameList.clear();
+   //         return true;
+   //      }
+   //      else if (index == participantNameList.size())
+   //      {
+   //         participantNameList.push_back(value);
+   //         return true;
+   //      }
+   //      else
+   //      {
+   //         std::stringstream ss;
+   //         ss << "Error: participant name's index (" << index << ") is out of bound.\n"; 
+   //         throw GmatBaseException(ss.str());
+   //      }
+   //   }
+   //}
 
    if (id == SOLVEFORS)                                                             // made changes by TUAN NGUYEN
    {                                                                                // made changes by TUAN NGUYEN
@@ -610,8 +611,8 @@ bool ErrorModel::SetStringParameter(const std::string &label, const std::string 
 //------------------------------------------------------------------------------
 const StringArray& ErrorModel::GetStringArrayParameter(const Integer id) const
 {
-   if (id == STRAND)
-      return participantNameList;
+   //if (id == STRAND)
+   //   return participantNameList;
 
    if (id == SOLVEFORS)                           // made changes by TUAN NGUYEN
       return solveforNames;                       // made changes by TUAN NGUYEN
@@ -685,8 +686,8 @@ Real ErrorModel::SetRealParameter(const std::string& label, const Real value)
 
 Integer ErrorModel::GetIntegerParameter(const Integer id) const
 {
-   if (id == TRIP)
-      return measurementTrip;
+   //if (id == TRIP)
+   //   return measurementTrip;
 
    return GmatBase::GetIntegerParameter(id);
 }
@@ -694,14 +695,14 @@ Integer ErrorModel::GetIntegerParameter(const Integer id) const
 
 Integer ErrorModel::SetIntegerParameter(const Integer id, const Integer value)
 {
-   if (id == TRIP)
-   {
-      if (value < 0)
-         throw GmatBaseException("Error: value of "+ GetName() +".Trip has to be a non-positive integer.\n");
+   //if (id == TRIP)
+   //{
+   //   if (value < 0)
+   //      throw GmatBaseException("Error: value of "+ GetName() +".Trip has to be a non-positive integer.\n");
 
-	   measurementTrip = value;
-	   return measurementTrip;
-   }
+	  // measurementTrip = value;
+	  // return measurementTrip;
+   //}
 
    return GmatBase::SetIntegerParameter(id, value);
 }

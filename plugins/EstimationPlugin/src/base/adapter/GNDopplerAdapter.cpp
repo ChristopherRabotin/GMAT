@@ -70,7 +70,9 @@ GNDopplerAdapter::GNDopplerAdapter(const std::string& name) :
    turnaround             (1.0),
    uplinkFreqE            (1.0e9),
    freqBandE              (1),
-   dopplerCountInterval   (1.0)        // 1 second
+   dopplerCountInterval   (1.0),        // unit: 1 second
+   multiplierS            (1.0),        // unit: 1/1second
+   multiplierE            (1.0)         // unit: 1/1second
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter default constructor <%p>\n", this);
@@ -112,15 +114,17 @@ GNDopplerAdapter::GNDopplerAdapter(const GNDopplerAdapter& da) :
    turnaround             (da.turnaround),
    uplinkFreqE            (da.uplinkFreqE),
    freqBandE              (da.freqBandE),
-   dopplerCountInterval   (da.dopplerCountInterval)
+   dopplerCountInterval   (da.dopplerCountInterval),
+   multiplierS            (da.multiplierS),
+   multiplierE            (da.multiplierE)
 {
 #ifdef DEBUG_CONSTRUCTION
    MessageInterface::ShowMessage("GNDopplerAdapter copy constructor   from <%p> to <%p>\n", &da, this);
 #endif
 
-   // Specify multiplier for S-path and E-path
-   multiplierS = 1.0;
-   multiplierE = 1.0;
+   //// Specify multiplier for S-path and E-path
+   //multiplierS = 1.0;
+   //multiplierE = 1.0;
 }
 
 
@@ -149,6 +153,8 @@ GNDopplerAdapter& GNDopplerAdapter::operator=(const GNDopplerAdapter& da)
       uplinkFreqE          = da.uplinkFreqE;
       freqBandE            = da.freqBandE;
       dopplerCountInterval = da.dopplerCountInterval;
+      multiplierS          = da.multiplierS;
+      multiplierE          = da.multiplierE;
 
       if (adapterS)
       {
@@ -765,7 +771,7 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
    // 4. Convert range from km to Hz and store in cMeasurement:
    Real dtS, dtE, dtdt;
    //GmatTime t1TE, t3RE;
-   Real interval = dopplerCountInterval;
+   //Real interval = dopplerCountInterval;
    //Real speedoflightkm = GmatPhysicalConstants::SPEED_OF_LIGHT_VACUUM*GmatMathConstants::M_TO_KM;
    
    std::vector<SignalBase*> paths = calcData->GetSignalPaths();
@@ -800,18 +806,18 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
       }// while
 
       // 4.2. Specify multiplier for S-path and E-path
-      multiplierS = 1.0;
-      multiplierE = 1.0;
+      multiplierS = 1/dopplerCountInterval;             // Its value is 1/Tc
+      multiplierE = multiplierS;                        // Its value is 1/Tc
 
       // 4.1. Calculate GN Doppler w/o noise and bias
       dtS  = measDataS.value[0];              // real travel length for S-path   (unit: Km)
       dtE  = measDataE.value[0];              // real travel length for S-path   (unit: Km)
       dtdt = dtE - dtS;                       // real travel difference          (unit: Km)
-      cMeasurement.value[i] = dtdt/interval;  // GN doppler                      (unit: km/s)
+      cMeasurement.value[i] = dtdt/dopplerCountInterval;  // GN doppler                      (unit: km/s)
 
       cMeasurement.uplinkFreq = uplinkFreq*1.0e6;         // convert Mhz to Hz due cMeasurement.uplinkFreq's unit is Hz
       cMeasurement.uplinkBand = freqBand;
-      cMeasurement.dopplerCountInterval = interval;
+      cMeasurement.dopplerCountInterval = dopplerCountInterval;
 
       // 4.2. Add noise and bias if possible
       Real C_idealVal = cMeasurement.value[i];
@@ -858,7 +864,7 @@ const MeasurementData& GNDopplerAdapter::CalculateMeasurement(bool withEvents,
          MessageInterface::ShowMessage("===================================================================\n");
          MessageInterface::ShowMessage("      . Measurement type              : <%s>\n", measurementType.c_str());
          MessageInterface::ShowMessage("      . Noise adding option           : %s\n", (addNoise?"true":"false"));
-         MessageInterface::ShowMessage("      . Doppler count interval        : %.12lf seconds\n", interval);
+         MessageInterface::ShowMessage("      . Doppler count interval        : %.12lf seconds\n", dopplerCountInterval);
          MessageInterface::ShowMessage("      . Real travel lenght for S-path : %.12lf Km\n", dtS);
          MessageInterface::ShowMessage("      . Real travel lenght for E-path : %.12lf Km\n", dtE);
          MessageInterface::ShowMessage("      . Travel length difference dtdt : %.12lf Km\n", dtdt);

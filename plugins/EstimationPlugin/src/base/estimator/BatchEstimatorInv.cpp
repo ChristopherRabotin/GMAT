@@ -197,10 +197,10 @@ void BatchEstimatorInv::Accumulate()
    sLine << ss.substr(0,4) << " ";
 
    ss = "";
-   for(int n=0; n < currentObs->participantIDs.size(); ++n)
+   for(UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
       ss = ss + currentObs->participantIDs[n] + (((n+1) == currentObs->participantIDs.size())?"":",");
    ss = ss + "                    ";
-   sLine << ss.substr(0,20);
+   sLine << ss.substr(0,20) << " ";
 
    if (modelsToAccess.size() == 0)
    {

@@ -1541,16 +1541,20 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
          sc = last->tNode;
       }
 
-      // Search for ErrorModel associated with measType, numTrip,  and spacecraft (It has to serach in GroundStation::errorModelMap)
+      //// Search for ErrorModel associated with measType, numTrip,  and spacecraft (It has to search in GroundStation::errorModelMap)
+      // Search for ErrorModel associated with measType and spacecraft (It has to search in GroundStation::errorModelMap)
       std::map<std::string,ObjectArray> errmodelMap = ((GroundstationInterface*)gs)->GetErrorModelMap();
+      //MessageInterface::ShowMessage("errmodelMap = <%p>   size = %d\n", errmodelMap, errmodelMap.size()); 
       ErrorModel* errmodel = NULL;
       for (std::map<std::string,ObjectArray>::iterator mapIndex = errmodelMap.begin(); mapIndex != errmodelMap.end(); ++mapIndex)
       {
+         //MessageInterface::ShowMessage("errormodelMap.first = <%s>\n", (*mapIndex).first.c_str());
          if (sc->GetName() == mapIndex->first)
          {
             for(UnsignedInt j = 0; j < mapIndex->second.size(); ++j)
             {
-               if ((mapIndex->second.at(j)->GetStringParameter("Type") == measType)&&(mapIndex->second.at(j)->GetIntegerParameter("Trip") == numTrip))
+               //if ((mapIndex->second.at(j)->GetStringParameter("Type") == measType)&&(mapIndex->second.at(j)->GetIntegerParameter("Trip") == numTrip))
+               if (mapIndex->second.at(j)->GetStringParameter("Type") == measType)
                {
                   errmodel = (ErrorModel*) mapIndex->second.at(j);
                   break;
@@ -1566,7 +1570,8 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
       if (errmodel == NULL)
       {
          std::stringstream ss;
-         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         //ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
 
@@ -1574,16 +1579,11 @@ void TrackingDataAdapter::ComputeMeasurementBias(const std::string biasName, con
       bias = 0.0;
       if (forObjects.size() > 0)
       {
-         //MessageInterface::ShowMessage("TrackingDataAdapter %s: List of all forObjects (size = %d):\n", GetName().c_str(), forObjects.size());
-         //for (UnsignedInt j = 0; j < forObjects.size(); ++j)
-         //   MessageInterface::ShowMessage("%d:%s\n", j, forObjects[j]->GetFullName().c_str());
-
          // This is case for running estimation: solve-for objects are stored in forObjects array
          // Search for object with the same name with errmodels[k]
          UnsignedInt j;
          for (j = 0; j < forObjects.size(); ++j)
          {
-            //if (forObjects[j]->GetName() == errmodels[k]->GetName())                 // made changes by TUAN NGUYEN
             if (forObjects[j]->GetFullName() == errmodel->GetFullName())               // made changes by TUAN NGUYEN
                break;
          }
@@ -1654,13 +1654,15 @@ void TrackingDataAdapter::ComputeMeasurementNoiseSigma(const std::string noiseSi
       UnsignedInt k;
       for (k = 0; k < errmodels.size(); ++k)
       {
-         if ((errmodels[k]->GetStringParameter("Type") == measType)&&(errmodels[k]->GetIntegerParameter("Trip") == numTrip))
+         //if ((errmodels[k]->GetStringParameter("Type") == measType)&&(errmodels[k]->GetIntegerParameter("Trip") == numTrip))
+         if (errmodels[k]->GetStringParameter("Type") == measType)
             break;
       }
       if (k >= errmodels.size())
       {
          std::stringstream ss;
-         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         //ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << "' and Trip = " << numTrip << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
+         ss << "Error: ErrorModel mismatched. No error model with Type = '" << measType << " was set to GroundStation " << gs->GetName() << ".ErrorModels\n";
          throw MeasurementException(ss.str());
       }
 

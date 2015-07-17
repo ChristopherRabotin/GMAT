@@ -842,7 +842,8 @@ const StringArray& Simulator::GetPropertyEnumStrings(const Integer id) const
 
    if (id == EPOCH_FORMAT)
    {
-      typeList = TimeConverterUtil::GetListOfTimeSystemTypes();
+      // typeList = TimeConverterUtil::GetListOfTimeSystemTypes();           // made changes by TUAN NGUYEN
+      typeList = TimeConverterUtil::GetValidTimeRepresentations();           // made changes by TUAN NGUYEN
       return typeList;
    }
 

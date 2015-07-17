@@ -33,6 +33,7 @@
 #include "GmatConstants.hpp"
 #include "GmatDefaults.hpp"
 #include "Rmatrix33.hpp"
+#include "Rmatrix66.hpp"                    // made changes by TUAN NGUYEN
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 
@@ -280,6 +281,15 @@ static Rvector3 CartesianToDirOfLineOfNode(const Rvector3 &pos,
                                            const Rvector3 &vel);
 static Rvector6 CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
                                            const Rvector3 &vel);
+
+// made changes by TUAN NGUYEN
+//------------------------------------------------------------------------------
+// derivative conversion methods
+//------------------------------------------------------------------------------
+static Real StateConversionUtil::CalculateEccentricAnomaly(Real e, Real M);
+static Rmatrix66 CartesianToKeplerianDerivativeConversion(Real mu, const Rvector6 &cartesianState);
+static Rmatrix66 KeplerianToCartesianDerivativeConversion(Real mu, const Rvector6 &keplerState);
+
 
 //------------------------------------------------------------------------------
 // other methods

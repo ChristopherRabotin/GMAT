@@ -996,7 +996,8 @@ bool MeasureModel::Initialize()
                GmatBase* firstPart = participants[i]->at(0);                                             // made changes by TUAN NGUYEN
                GmatBase* lastPart = participants[i]->at(participants[i]->size()-1);                      // made changes by TUAN NGUYEN
                
-               if (firstPart->IsOfType(Gmat::GROUND_STATION))                                            // made changes by TUAN NGUYEN
+               if ((firstPart->IsOfType(Gmat::GROUND_STATION))&&
+                   (lastPart->IsOfType(Gmat::GROUND_STATION) == false))                                   // made changes by TUAN NGUYEN
                {                                                                                         // made changes by TUAN NGUYEN
                   // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
                   std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
@@ -1010,8 +1011,8 @@ bool MeasureModel::Initialize()
                   ((GroundstationInterface*) firstPart)->CreateErrorModelForSignalPath(spacecraftName);  // made changes by TUAN NGUYEN
                }
 
-               // It is one-way or three-ways range measurement                                          // made changes by TUAN NGUYEN
-               if ((lastPart != firstPart)&&(lastPart->IsOfType(Gmat::GROUND_STATION)))                  // made changes by TUAN NGUYEN
+               else
+               //if ((lastPart != firstPart)&&(lastPart->IsOfType(Gmat::GROUND_STATION)))                  // made changes by TUAN NGUYEN
                {                                                                                         // made changes by TUAN NGUYEN
                   // clone all ErrorModel objects belonging to groundstation firstPart                   // made changes by TUAN NGUYEN
                   std::string spacecraftName = "";                                                       // made changes by TUAN NGUYEN
