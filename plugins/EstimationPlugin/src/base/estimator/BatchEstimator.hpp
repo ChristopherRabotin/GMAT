@@ -133,6 +133,11 @@ protected:
    /// Maximum consecutive divergences
    Integer               maxConsDivergences;
 
+
+   /// Variables used for statistics calculation
+   std::map<std::string, std::map<std::string, Real>> statisticsTable;        // this table is for groundstation and measurement type 
+   std::map<std::string, std::map<std::string, Real>> statisticsTable1;       // this table is for measurement type only
+
    /// Parameter IDs for the BatchEstimators
    enum
    {
@@ -180,6 +185,7 @@ protected:
 
 private:
 //   bool                    IsReuseableType(const std::string& value);
+   void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
    void                   WriteHeader();
    void                   WriteSummary(Solver::SolverState sState);
    void                   WriteConclusion();

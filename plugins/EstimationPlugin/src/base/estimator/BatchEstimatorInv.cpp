@@ -161,6 +161,16 @@ void BatchEstimatorInv::Accumulate()
    modelsToAccess = measManager.GetValidMeasurementList();            // Get valid measurement models
    const ObservationData *currentObs =  measManager.GetObsData();      // Get current observation data
 
+   
+   // Get ground station and measurement type from current observation data
+   std::string gsName = currentObs->participantIDs[0];
+   std::string typeName = currentObs->typeName;
+   std::string keyword = gsName + " " + typeName;
+   // count total number of observation data for a pair of groundstation and measurement type
+   statisticsTable["TOTAL NUM RECORDS"][keyword] += 1;
+   statisticsTable1["TOTAL NUM RECORDS"][typeName] += 1;
+
+
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());
       MessageInterface::ShowMessage("Found %d models\n", modelsToAccess.size());
@@ -276,7 +286,7 @@ void BatchEstimatorInv::Accumulate()
       {
          // Currently assuming uniqueness; modify if more than 1 possible here
          // Case: ((modelsToAccess.size() > 0) && (measManager.Calculate(modelsToAccess[0], true) >= 1))
-
+         
          // It has to make correction for observation value before running data filter
          if ((iterationsTaken == 0)&&((currentObs->typeName == "DSNTwoWayRange")||(currentObs->typeName == "DSNRange")))
          {
@@ -433,6 +443,7 @@ void BatchEstimatorInv::Accumulate()
             }
 
             Real ocDiff;
+            Real weight;
             #ifdef DEBUG_ACCUMULATION
                MessageInterface::ShowMessage("Accumulating the O-C differences\n");
                MessageInterface::ShowMessage("   Obs size = %d, calc size = %d\n",
@@ -462,7 +473,7 @@ void BatchEstimatorInv::Accumulate()
                measurementResidualID.push_back(calculatedMeas->uniqueID);
             
                // Calculate weight
-               Real weight = 1.0;
+               weight = 1.0;
                if (currentObs->noiseCovariance == NULL)
                {
                   #ifdef DEBUG_WEIGHTS
@@ -532,6 +543,17 @@ void BatchEstimatorInv::Accumulate()
                sLine << "\n";
 
             }
+
+            // Count number of observation data accepted for estimation calculation
+            statisticsTable["ACCEPTED RECORDS"][keyword] += 1;
+            statisticsTable["WEIGHTED RMS"][keyword] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
+            statisticsTable["MEAN RESIDUAL"][keyword] += ocDiff;                                 // sum of residual
+            statisticsTable["STANDARD DEVIATION"][keyword] += ocDiff*ocDiff;                     // sum of residual square
+            
+            statisticsTable1["ACCEPTED RECORDS"][typeName] += 1;
+            statisticsTable1["WEIGHTED RMS"][typeName] += weight*ocDiff*ocDiff;                    // sum of weighted residual square
+            statisticsTable1["MEAN RESIDUAL"][typeName] += ocDiff;                                 // sum of residual
+            statisticsTable1["STANDARD DEVIATION"][typeName] += ocDiff*ocDiff;                     // sum of residual square
 
             #ifdef DEBUG_ACCUMULATION_RESULTS
                MessageInterface::ShowMessage("Observed measurement value:\n");
@@ -648,7 +670,6 @@ void BatchEstimatorInv::Estimate()
    }
    MessageInterface::ShowMessage("Number of records used for estimation: %d\n", measurementResiduals.size());
    
-
    if (measurementResiduals.size() < esm.GetStateMap()->size())
    {
       std::stringstream ss;
