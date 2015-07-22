@@ -290,8 +290,14 @@ bool EstimationStateManager::SetObject(GmatBase *obj)
 
             // Set the property ID
             Integer id = obj->GetEstimationParameterID(solveForIDNames[i]);
+            
+            // verify valid ID
             if (id == -1)
-               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");     // made changes by TUAN NGUYEN
+               throw EstimatorException("Error: Solve-for parameter " + obj->GetName() + "." + solveForIDNames[i] + " does not exist.\n");                                               // made changes by TUAN NGUYEN
+            if (obj->IsEstimationParameterValid(id) == false)
+               throw EstimatorException("Error: parameter " + obj->GetName() + "." + solveForIDNames[i] + " is not allowed to use as a solve-for variable in this GMAT version.\n");     // made changes by TUAN NGUYEN
+
+            // set the object property
             solveForIDs[i] = id;
             elements[obj]->push_back(solveForIDNames[i]);
             retval = true;
