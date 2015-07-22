@@ -724,15 +724,23 @@ Integer ErrorModel::SetIntegerParameter(const std::string& label, const Integer 
 //------------------------------------------------------------------------------
 // bool IsEstimationParameterValid(const Integer item)
 //------------------------------------------------------------------------------
+/**
+* This function is used to verify an estimation paramter is either valid or not
+*
+* @param item      Estimation parameter ID (Note that: it is defferent from object ParameterID)
+*
+* return           true if it is valid, false otherwise 
+*/
+//------------------------------------------------------------------------------
 bool ErrorModel::IsEstimationParameterValid(const Integer item)
 {
    bool retval = false;
 
-   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;    // convert Estimation ID to object parameter ID
 
    switch (id)
    {
-   case BIAS:
+      case BIAS:
          retval = true;
          break;
 
