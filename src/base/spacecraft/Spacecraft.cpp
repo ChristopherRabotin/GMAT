@@ -5529,19 +5529,37 @@ std::string Spacecraft::GetParameterNameFromEstimationParameter(const std::strin
 //------------------------------------------------------------------------------
 // bool IsEstimationParameterValid(const Integer item)
 //------------------------------------------------------------------------------
+/**
+* This function is used to verify an estimation paramter is either valid or not
+*
+* @param item      Estimation parameter ID (Note that: it is defferent from object ParameterID)
+*
+* return           true if it is valid, false otherwise 
+*/
+//------------------------------------------------------------------------------
 bool Spacecraft::IsEstimationParameterValid(const Integer item)
 {
    bool retval = false;
 
-   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
-
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;    // convert Estimation ID to object parameter ID
+   
    switch (id)
    {
-      case Gmat::CARTESIAN_STATE:
+      //case Gmat::CARTESIAN_STATE:          // made changes by TUAN NGUYEN
+      case CARTESIAN_X:                      // It is compared to Spacecraft CARTESIAN_X parameter's ID
          retval = true;
          break;
+      
+      case CR_EPSILON:                       // made changes by TUAN NGUYEN
+         retval = true;                      // made changes by TUAN NGUYEN
+         break;                              // made changes by TUAN NGUYEN
 
-      case Gmat::MASS_FLOW:
+      case CD_EPSILON:                       // made changes by TUAN NGUYEN
+         // @todo: when code for Cd is completed. It need to add the following line.
+         //retval = true;                      // made changes by TUAN NGUYEN
+         break;                              // made changes by TUAN NGUYEN
+
+      case Gmat::MASS_FLOW:          /// Is it correct ???? Spacecraft::SC_Param_ID::MASS_FLOW or Gmat::MASS_FLOW ???
          // todo: Access tanks for mass information to handle mass flow
          break;
 

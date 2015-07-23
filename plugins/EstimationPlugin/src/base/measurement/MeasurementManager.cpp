@@ -291,9 +291,12 @@ bool MeasurementManager::Initialize()
    for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
    {
       // For each tracking set, It needs to do the following steps to process
+      //MessageInterface::ShowMessage("*** Processing TrackingFileSet %s:\n", trackingSets[i]->GetName().c_str());
+
       // Step 1: Initialize trackingSets[i]
       if (trackingSets[i]->Initialize() == false)
          return false;
+      //MessageInterface::ShowMessage("Step 1: Initialize %s\n", trackingSets[i]->GetName().c_str());
 
       // Step 2: Load data adapters from tracking file sets to measurement manager
       std::vector<TrackingDataAdapter*> *setAdapters =
@@ -309,15 +312,19 @@ bool MeasurementManager::Initialize()
          // Set retval?
       }
       adapterFromTFSMap[trackingSets[i]] = names;
-      
+      //MessageInterface::ShowMessage("Step 2: Load adapters from TrackingFileSet to measurement nananger\n");
+
       // Step 3: Set stream objects and data filters for all observation data files in trackingSet[i]
       // 3.1. Create DataFile object for each file name
+      //MessageInterface::ShowMessage("Step 3.1: Create DataFile object for each file name:\n");
+
       StringArray filenames = trackingSets[i]->GetStringArrayParameter("FileName");
       for (UnsignedInt k = 0; k < filenames.size(); ++k)
       {
          // 3.1.1 Create DataFile object
          DataFile *newStream = new DataFile(filenames[k]);
          newStream->SetStringParameter("Filename", filenames[k]);
+         //MessageInterface::ShowMessage("Step 3.1.1: Create DataFile object for %s\n", filenames[k].c_str());
 
          // 3.1.2 Create and set a data stream associated with the DataFile object
          GmatObType *got = new GmatObType();                      // ??? what happen for GMAT_OD and GMAT_ODDoppler???   // In new design, GMATInteral data file contains data records with different measurement type
@@ -329,6 +336,7 @@ bool MeasurementManager::Initialize()
          #endif
 
          SetStreamObject(newStream);
+         //MessageInterface::ShowMessage("Step 3.1.2: Create and set data stream with DataFile '%s'\n", newStream->GetName().c_str());
 
          // Associate the adapters with the stream
          for (UnsignedInt j = 0; j < setAdapters->size(); ++j)
@@ -344,16 +352,16 @@ bool MeasurementManager::Initialize()
          if (inSimulationMode)
          {
             if (newStream->OpenStream(inSimulationMode) == false)
-               throw MeasurementException("The stream " + filenames[i] +
+               throw MeasurementException("The stream " + filenames[k] + 
                      " failed to open in simulation mode");
          }
       }// for k loop
-      
+      //MessageInterface::ShowMessage("Step 3.1: Create DataFile object for each file name: complete\n");
 
       // 3.2. Set data filters to data file (only set data filters in estimation mode)           // made changes by TUAN NGUYEN
       if (!inSimulationMode)                                                                     // made changes by TUAN NGUYEN
-         SetStatisticsDataFiltersToDataFiles();                                                  // made changes by TUAN NGUYEN
-
+         SetStatisticsDataFiltersToDataFiles(i);                                                 // made changes by TUAN NGUYEN
+      //MessageInterface::ShowMessage("Step 3.2: Set data filters to data file\n");
 
       // Step 4: Set stream objects for all ramped tables in trackingSet[i] 
       StringArray rampedTablenames = trackingSets[i]->GetStringArrayParameter("RampTable");
@@ -398,6 +406,8 @@ bool MeasurementManager::Initialize()
                      " failed to open in simulation mode");
          }
       }// for k1 loop
+      //MessageInterface::ShowMessage("Step 4: Set stream objects for all ramped tables in %s\n", trackingSets[i]->GetName().c_str());
+      //MessageInterface::ShowMessage("*** Complete processing TrackingFileSet %s:\n", trackingSets[i]->GetName().c_str());
 
    }// for i loop
 
@@ -415,6 +425,7 @@ bool MeasurementManager::Initialize()
       if (rampTableDataStreamList[i]->IsInitialized() == false)
          rampTableDataStreamList[i]->Initialize();
    }
+
 
    #ifdef DEBUG_INITIALIZE
       MessageInterface::ShowMessage(
@@ -437,13 +448,15 @@ bool MeasurementManager::Initialize()
 /** This function is used to set statistics data filters to approriated data file
 * as specified in tracking file set objects.
 *
+* @param i      TrackingFileSet index
+*
 */
 //-----------------------------------------------------------------------------------
-bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
+bool MeasurementManager::SetStatisticsDataFiltersToDataFiles(UnsignedInt i)
 {
 
-   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
-   {
+//   for (UnsignedInt i = 0; i < trackingSets.size(); ++i)
+//   {
       // 1. Get tracking configs in ID from TrackingFileSet trackingSet[i]
       StringArray tkconfigs;
       std::stringstream ss;
@@ -550,7 +563,7 @@ bool MeasurementManager::SetStatisticsDataFiltersToDataFiles()
             }
          }// for k loop
       }// for j loop
-   }// for i loop
+//   }// for i loop
 
    return true;
 }

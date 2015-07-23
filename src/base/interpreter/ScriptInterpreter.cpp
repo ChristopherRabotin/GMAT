@@ -38,7 +38,7 @@
 //#define DEBUG_PARSE_ASSIGNMENT
 //#define DEBUG_PARSE_FOOTER
 //#define DEBUG_SET_COMMENTS
-//#define DEBUG_SCRIPT_WRITING
+#define DEBUG_SCRIPT_WRITING
 //#define DEBUG_SCRIPT_WRITING_PARAMETER
 //#define DEBUG_SECTION_DELIMITER
 //#define DEBUG_SCRIPT_WRITING_COMMANDS
@@ -1315,6 +1315,12 @@ bool ScriptInterpreter::Parse(GmatCommand *inCmd)
    #endif
    
    return retval;
+}
+
+
+std::string ScriptInterpreter::GetScriptFileName()
+{
+   return scriptFilename;
 }
 
 

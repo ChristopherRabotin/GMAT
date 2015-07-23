@@ -33,6 +33,7 @@
 #include "SpaceObject.hpp"    // To access epoch data
 #include "Spacecraft.hpp"
 #include "StringUtil.hpp"
+#include "StateConversionUtil.hpp"              // made changes by TUAN NGUYEN
 
 
 //#define DEBUG_STATE_MACHINE
@@ -861,20 +862,6 @@ void BatchEstimator::CompleteInitialization()
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
    #endif
 
-   //// Show all residuals plots
-   //if (showAllResiduals)
-   //{
-   //   StringArray plotMeasurements;
-   //   for (UnsignedInt i = 0; i < modelNames.size(); ++i)
-   //   {
-   //      plotMeasurements.clear();
-   //      plotMeasurements.push_back(modelNames[i]);
-   //      std::string plotName = instanceName + "_" + modelNames[i] +
-   //            "_Residuals";
-   //      BuildResidualPlot(plotName, plotMeasurements);
-   //   }
-   //}
-   
    if (advanceToEstimationEpoch == false)
    {
       PropagationStateManager *psm = propagator->GetPropStateManager();
@@ -917,13 +904,6 @@ void BatchEstimator::CompleteInitialization()
 
       // Now load up the observations
       measManager.PrepareForProcessing(false);
-
-      // This code was moved to Estimator::Reinitialize() function                      // made changes by TUAN NGUYEN
-      //UnsignedInt numRec = measManager.LoadObservations();                            // made changes by TUAN NGUYEN
-      //if (numRec == 0)                                                                // made changes by TUAN NGUYEN
-      //{                                                                               // made changes by TUAN NGUYEN
-      //   throw EstimatorException("No observation data is used for estimation\n");    // made changes by TUAN NGUYEN
-      //}                                                                               // made changes by TUAN NGUYEN
       
 ///// Check for more generic approach
       measManager.LoadRampTables();
@@ -1088,19 +1068,18 @@ void BatchEstimator::FindTimeStep()
    {
       // Estimate and check for convergence after processing measurements
       currentState = ESTIMATING;
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("Next state will be ESTIMATING\n");
-   #endif
-
+      #ifdef WALK_STATE_MACHINE
+         MessageInterface::ShowMessage("Next state will be ESTIMATING\n");
+      #endif
    }
    //else if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))       // value of accuray is set to 5.0e-12 due to the accuracy limit of double
    else if (fabs((currentEpoch - nextMeasurementEpoch)/currentEpoch) < GmatRealConstants::REAL_EPSILON)
    {
       // We're at the next measurement, so process it
       currentState = CALCULATING;
-   #ifdef WALK_STATE_MACHINE
-      MessageInterface::ShowMessage("Next state will be CALCULATING\n");
-   #endif
+      #ifdef WALK_STATE_MACHINE
+         MessageInterface::ShowMessage("Next state will be CALCULATING\n");
+      #endif
    }
    else
    {
@@ -1134,25 +1113,6 @@ void BatchEstimator::CalculateData()
    // Update the STM
    esm.MapObjectsToSTM();
    
-   // Tell the measurement manager to calculate the simulation data
-//   measManager.CalculateMeasurements();
-
-   //if (measManager.CalculateMeasurements() == false)
-   //{
-   //   // No measurements were possible
-   //   bool endOfDataSet = measManager.AdvanceObservation();
-   //   if (endOfDataSet)
-   //      currentState = ESTIMATING;
-     //else
-     //{
-   //      nextMeasurementEpoch = measManager.GetEpoch();
-   //      FindTimeStep();
-     //    if (currentEpoch <= nextMeasurementEpoch)
-   //         currentState = PROPAGATING;
-   //      else
-   //         currentState = ESTIMATING;
-     //}
-   //}
    if (measManager.CalculateMeasurements() == false)
    {
       currentState = ACCUMULATING;
@@ -1164,6 +1124,7 @@ void BatchEstimator::CalculateData()
    }
    else
       currentState = ACCUMULATING;
+
    #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("Exit BatchEstimator::CalculateData()\n");
    #endif
@@ -1265,12 +1226,6 @@ void BatchEstimator::CheckCompletion()
       esm.MapObjectsToSTM();                                          // update object STM to current STM
       currentEpoch = estimationEpoch;
       measManager.Reset();                                            // set current observation data to be the first one in observation data table
-      // Note that: all unused data records will be handled in BatchEstimatorInv::Accumulate() function
-      // Therefore, there is no prblem when passing those records to Accumulate() 
-      //if (measManager.GetObsDataObject()->inUsed == false)         // if the first observation data is not in used, then go to the next in-used data record
-      //{
-      //   measManager.AdvanceObservation();
-      //}
       nextMeasurementEpoch = measManager.GetEpoch();
 
       // Need to reset STM and covariances
@@ -1333,6 +1288,10 @@ void BatchEstimator::CheckCompletion()
       numRemovedRecords["OLSE"] = 0;
       numRemovedRecords["IRMS"] = 0;
 
+      // reset value for statistics table                               // made changes by TUAN NGUYEN
+      statisticsTable.clear();                                          // made changes by TUAN NGUYEN
+      statisticsTable1.clear();                                         // made changes by TUAN NGUYEN
+
       if (GmatMathUtil::IsEqual(currentEpoch, nextMeasurementEpoch))
          currentState = CALCULATING;
       else
@@ -1384,6 +1343,9 @@ void BatchEstimator::RunComplete()
    measurementResiduals.clear();
    measurementEpochs.clear();
    measurementResidualID.clear();
+
+   statisticsTable.clear();                              // made changes by TUAN NGUYEN
+   statisticsTable1.clear();                             // made changes by TUAN NGUYEN
 
 }
 
@@ -1896,6 +1858,7 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
    switch (theState)
    {
       case INITIALIZING:
+         WriteScript();
          WriteHeader();
          break;
       case ACCUMULATING:
@@ -1918,6 +1881,27 @@ void BatchEstimator::WriteToTextFile(Solver::SolverState sState)
       default:
          break;
    }
+}
+
+
+#include "Moderator.hpp"
+void BatchEstimator::WriteScript()
+{
+   textFile << "********************************************************\n";
+   textFile << "***  GMAT Script\n";
+   textFile << "********************************************************\n";
+   std::string filename = Moderator::Instance()->GetScriptInterpreter()->GetScriptFileName();
+   std::ifstream inFile;
+   inFile.open(filename.c_str(),std::ios_base::out);
+
+   char s[1000];
+   while (!inFile.eof())
+   {
+      inFile.getline(s, 1000);
+      std::string st(s);
+      textFile << st << "\n";
+   }
+   textFile << "*** End of GMAT Script *********************************\n\n\n";
 }
 
 
@@ -2048,8 +2032,8 @@ void BatchEstimator::WriteConclusion()
 
    // Calculate current Cartesian state map:
    std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
-   // Calculate Keplerian covariance matrix
-   Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+   //// Calculate Keplerian covariance matrix
+   //Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
 
 
    /// 4.2. Write final covariance and correlation matrix 
@@ -2100,91 +2084,106 @@ void BatchEstimator::WriteConclusion()
    }
    textFile << "\n\n\n";
 
-   // Specify covariance matrix for Keplerian Coordinate
-   
-   /// 4.3. Write final covariance and correlation matrix for Keplerian coordinate system 
-   textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Keplerian coordinate system:\n";
-   textFile << "  Index      Solve-for's Name\n";
-   for (UnsignedInt i = 0; i < map->size(); ++i)
+   // Calculate and display covariance and correlation matrix for Keplerian Coordinate
+   // Calculate Keplerian covariance matrix
+   Rmatrix convmatrix;
+   bool valid = true;
+   try
    {
-      Integer index = i+1;
-      textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "a    ";
-      if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
-          ((*map)[i]->elementName == "Bias"))
-      {
-         MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
-         StringArray sa = mm->GetStringArrayParameter("Participants");
-         textFile << mm->GetStringParameter("Type") << " ";
-         for( UnsignedInt j=0; j < sa.size(); ++j)
-            textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
-         textFile << (*map)[i]->subelement;
-      }
-      else
-      {
-         std::string name = GetElementFullName((*map)[i], false);
-         Integer pos = name.find_last_of('.');
-         std::string paraName = name.substr(pos + 1);
-         std::string paraPrefix = name.substr(0, pos);
-         if (paraName == "X")
-            name = paraPrefix + ".SMA";
-         else if (paraName == "Y")
-            name = paraPrefix + ".ECC";
-         else if (paraName == "Z")
-            name = paraPrefix + ".INC";
-         else if (paraName == "VX")
-            name = paraPrefix + ".RAAN";
-         else if (paraName == "VY")
-            name = paraPrefix + ".AOP";
-         else if (paraName == "VZ")
-            name = paraPrefix + ".MA";
-         textFile << name;
-      }
-      textFile << "\n";
+      convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
    }
-   textFile << "\n\n";
-
-   Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
-   textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
-   textFile << "---------------------------------------------------------------------------------\n";
-   textFile << " Row Index |                     Column Index\n";
-   textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |  ";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-      textFile << i+1 << "a                      ";
-   textFile << "\n---------------------------------------------------------------------------------\n";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+   catch(...)
    {
-      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
-      for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
-      {
-         char s[100];
-         sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)); 
-         std::string ss(s);
-         textFile << ss.substr(ss.size() - 24);
-      }
-      textFile << "\n";
+      valid = false;
    }
 
-   textFile << "\nCorrelation Matrix in Keplerian Coordinate System:\n";
-   textFile << "---------------------------------------------------------------------------------\n";
-   textFile << " Row Index |                     Column Index\n";
-   textFile << "           |---------------------------------------------------------------------\n";
-   textFile << "           |      ";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
-      textFile << i+1 << "a                      ";
-   textFile << "\n---------------------------------------------------------------------------------\n";
-   for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+   if (valid)
    {
-      textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
-      for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+      /// 4.3. Write final covariance and correlation matrix for Keplerian coordinate system 
+      textFile << "Solve-for variables and their index used in covariance and correlation matrixes in Keplerian coordinate system:\n";
+      textFile << "  Index      Solve-for's Name\n";
+      for (UnsignedInt i = 0; i < map->size(); ++i)
       {
-         char s[100];
-         sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
-         std::string ss(s);
-         textFile << ss.substr(ss.size() - 24);
+         Integer index = i+1;
+         textFile << "    " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(index), indexLen, GmatStringUtil::RIGHT) << "a    ";
+         if (((*map)[i]->object->IsOfType(Gmat::MEASUREMENT_MODEL))&&
+             ((*map)[i]->elementName == "Bias"))
+         {
+            MeasurementModel* mm = (MeasurementModel*)((*map)[i]->object);
+            StringArray sa = mm->GetStringArrayParameter("Participants");
+            textFile << mm->GetStringParameter("Type") << " ";
+            for( UnsignedInt j=0; j < sa.size(); ++j)
+               textFile << sa[j] << (((j+1) != sa.size())?",":" Bias.");
+            textFile << (*map)[i]->subelement;
+         }
+         else
+         {
+            std::string name = GetElementFullName((*map)[i], false);
+            Integer pos = name.find_last_of('.');
+            std::string paraName = name.substr(pos + 1);
+            std::string paraPrefix = name.substr(0, pos);
+            if (paraName == "X")
+               name = paraPrefix + ".SMA";
+            else if (paraName == "Y")
+               name = paraPrefix + ".ECC";
+            else if (paraName == "Z")
+               name = paraPrefix + ".INC";
+            else if (paraName == "VX")
+               name = paraPrefix + ".RAAN";
+            else if (paraName == "VY")
+               name = paraPrefix + ".AOP";
+            else if (paraName == "VZ")
+               name = paraPrefix + ".MA";
+            textFile << name;
+         }
+         textFile << "\n";
       }
-      textFile << "\n";
+      textFile << "\n\n";
+
+      Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+      textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
+      textFile << "---------------------------------------------------------------------------------\n";
+      textFile << " Row Index |                     Column Index\n";
+      textFile << "           |---------------------------------------------------------------------\n";
+      textFile << "           |  ";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+         textFile << i+1 << "a                      ";
+      textFile << "\n---------------------------------------------------------------------------------\n";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+      {
+         textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
+         for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+         {
+            char s[100];
+            sprintf(&s[0],"  %22.12le\0", finalKeplerCovariance(i, j)); 
+            std::string ss(s);
+            textFile << ss.substr(ss.size() - 24);
+         }
+         textFile << "\n";
+      }
+
+      textFile << "\nCorrelation Matrix in Keplerian Coordinate System:\n";
+      textFile << "---------------------------------------------------------------------------------\n";
+      textFile << " Row Index |                     Column Index\n";
+      textFile << "           |---------------------------------------------------------------------\n";
+      textFile << "           |      ";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+         textFile << i+1 << "a                      ";
+      textFile << "\n---------------------------------------------------------------------------------\n";
+      for (Integer i = 0; i < finalKeplerCovariance.GetNumRows(); ++i)
+      {
+         textFile << "  " << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(i+1), indexLen, GmatStringUtil::RIGHT) << "a   ";
+         for (Integer j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+         {
+            char s[100];
+            sprintf(&s[0],"  %22.12lf\0", finalKeplerCovariance(i, j)/ sqrt(finalKeplerCovariance(i, i)*finalKeplerCovariance(j, j))); 
+            std::string ss(s);
+            textFile << ss.substr(ss.size() - 24);
+         }
+         textFile << "\n";
+      }
    }
+
 
    textFile << "\n********************************************************\n\n";
    textFile.flush();
@@ -2337,10 +2336,8 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
       std::map<GmatBase*, Rvector6> aprioriKeplerianStateMap = CalculateKeplerianStateMap(map, aprioriSolveForState);
       std::map<GmatBase*, Rvector6> previousKeplerianStateMap = CalculateKeplerianStateMap(map, previousSolveForState);
       std::map<GmatBase*, Rvector6> currentKeplerianStateMap = CalculateKeplerianStateMap(map, currentSolveForState);
-      std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
 
-      // Calculate Keplerian covariance matrix
-      Rmatrix convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+      std::map<GmatBase*, Rvector6> currentCartesianStateMap = CalculateCartesianStateMap(map, currentSolveForState);
 
       // Write state information
       textFile << "\n";
@@ -2350,7 +2347,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 
       textFile.precision(8);
       Rmatrix covar = information.Inverse();
-      Rmatrix keplerianCovar = convmatrix * covar * convmatrix.Transpose();                 // Equation 8-49 GTDS MathSpec
       for (int i = 0; i < map->size(); ++i) 
       {
          textFile << "   ";
@@ -2383,62 +2379,79 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
       }
       textFile << "\n";
       
-      // Display Keplerian apriori, previous, current states
-      std::vector<std::string> nameList;
-      RealArray aprioriArr, previousArr, currentArr, stdArr;
-      for (std::map<GmatBase*,Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
-      {
-         std::string csName = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM,"")->GetName();
-         nameList.push_back(i->first->GetName() + "." + csName + ".SMA");
-         nameList.push_back(i->first->GetName() + "." + csName + ".ECC");
-         nameList.push_back(i->first->GetName() + "." + csName + ".INC");
-         nameList.push_back(i->first->GetName() + "." + csName + ".RAAN");
-         nameList.push_back(i->first->GetName() + "." + csName + ".AOP");
-         nameList.push_back(i->first->GetName() + "." + csName + ".MA");
-         for (UnsignedInt j = 0; j < 6; ++j)
-            aprioriArr.push_back(i->second[j]);
-      }
-      
-      for (std::map<GmatBase*,Rvector6>::iterator i = previousKeplerianStateMap.begin(); i != previousKeplerianStateMap.end(); ++i)
-      {
-         for (UnsignedInt j = 0; j < 6; ++j)
-            previousArr.push_back(i->second[j]);
-      }
-      
-      for (std::map<GmatBase*,Rvector6>::iterator i = currentKeplerianStateMap.begin(); i != currentKeplerianStateMap.end(); ++i)
-      {
-         for (UnsignedInt j = 0; j < 6; ++j)
-            currentArr.push_back(i->second[j]);
 
-         UnsignedInt k = 0;
-         for(; k < map->size(); ++k)
+      // Caluclate Keplerian covariance matrix
+      Rmatrix convmatrix;
+      bool valid = true;
+      try
+      {
+         convmatrix = CovarianceConvertionMatrix(currentCartesianStateMap);
+      }
+      catch(...)
+      {
+         valid = false;
+      }
+      
+      if (valid)
+      {
+         Rmatrix keplerianCovar = convmatrix * covar * convmatrix.Transpose();                 // Equation 8-49 GTDS MathSpec
+         
+         // Display Keplerian apriori, previous, current states
+         std::vector<std::string> nameList;
+         RealArray aprioriArr, previousArr, currentArr, stdArr;
+         for (std::map<GmatBase*,Rvector6>::iterator i = aprioriKeplerianStateMap.begin(); i != aprioriKeplerianStateMap.end(); ++i)
          {
-            if (((*map)[k]->elementName == "CartesianState")&&((*map)[k]->object == i->first))
-               break;
+            std::string csName = ((Spacecraft*)(i->first))->GetRefObject(Gmat::COORDINATE_SYSTEM,"")->GetName();
+            nameList.push_back(i->first->GetName() + "." + csName + ".SMA");
+            nameList.push_back(i->first->GetName() + "." + csName + ".ECC");
+            nameList.push_back(i->first->GetName() + "." + csName + ".INC");
+            nameList.push_back(i->first->GetName() + "." + csName + ".RAAN");
+            nameList.push_back(i->first->GetName() + "." + csName + ".AOP");
+            nameList.push_back(i->first->GetName() + "." + csName + ".MA");
+            for (UnsignedInt j = 0; j < 6; ++j)
+               aprioriArr.push_back(i->second[j]);
+         }
+         
+         for (std::map<GmatBase*,Rvector6>::iterator i = previousKeplerianStateMap.begin(); i != previousKeplerianStateMap.end(); ++i)
+         {
+            for (UnsignedInt j = 0; j < 6; ++j)
+               previousArr.push_back(i->second[j]);
+         }
+         
+         for (std::map<GmatBase*,Rvector6>::iterator i = currentKeplerianStateMap.begin(); i != currentKeplerianStateMap.end(); ++i)
+         {
+            for (UnsignedInt j = 0; j < 6; ++j)
+               currentArr.push_back(i->second[j]);
+
+            UnsignedInt k = 0;
+            for(; k < map->size(); ++k)
+            {
+               if (((*map)[k]->elementName == "CartesianState")&&((*map)[k]->object == i->first))
+                  break;
+            }
+
+            for(UnsignedInt j = 0; j < 6; ++j)
+            {
+               stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
+               ++k;
+            }
          }
 
-         for(UnsignedInt j = 0; j < 6; ++j)
+         for(UnsignedInt i = 0; i < nameList.size(); ++i)
          {
-            stdArr.push_back(GmatMathUtil::Sqrt(keplerianCovar(k,k)));
-            ++k;
-         }
+            textFile << "   ";
+            textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+         }         
       }
       
-
-      for(UnsignedInt i = 0; i < nameList.size(); ++i)
-      {
-         textFile << "   ";
-         textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
-         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
-      }         
-
-
       /// 2. Write statistics
+      /// 2.1. Write statistics summary
       textFile << "\n\n";
       textFile << "Iteration " << iterationsTaken << ":  Statistics \n"
                << "   Total Number Of Records     : " << GetMeasurementManager()->GetObservationDataList()->size() << "\n"
@@ -2448,7 +2461,308 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                << "      Out of Ramped Table Range                 : " << numRemovedRecords["R"] << "\n"
                << "      Signal Blocked                            : " << numRemovedRecords["B"] << "\n"
                << "      Sigma Editing                             : " << ((iterationsTaken == 0)?numRemovedRecords["IRMS"]:numRemovedRecords["OLSE"]) << "\n\n";
-               
+      
+      /// 2.2. Write statistics table:
+      if (statisticsTable["TOTAL NUM RECORDS"].size() > 0)
+      {
+         // Only write out statistics table when at least 1 measurement type is used for estimation
+         // 2.2.1. Write statistics table for ground station and measuremnet type
+         std::vector<Real> numberAllRec;                 // store number of all records for each groundstation and measurement type
+         std::vector<Real> numberAcceptedRec;            // store number of accepted records for each groundstation and measurement type
+         std::vector<Real> residual;                     // store residual for each groundstation and measurement type
+         std::vector<Real> allRecSubTotal;               // store number of all records for each ground station
+         std::vector<Real> acceptedRecSubTotal;          // store number of accepted records for each groundstation
+         std::vector<Real> residualSubTotal;             // store residual for each groundstation
+
+         StringArray sa; 
+         sa.push_back("TOTAL NUM RECORDS");
+         sa.push_back("ACCEPTED RECORDS");
+         sa.push_back("WEIGHTED RMS");
+         sa.push_back("MEAN RESIDUAL");
+         sa.push_back("STANDARD DEVIATION");
+
+         Real sumWeightedResSquare = 0.0;                // sum weighted residual quare
+         Real allNumRec = 0.0;                           // number of records
+         Real numRec = 0.0;                              // number of accepted records 
+         Real sumRes = 0.0;                              // sum of residual
+         Real sumResSquare = 0.0;                        // sum of residual square
+
+         for (UnsignedInt i = 0; i < sa.size(); ++i)
+         {
+            std::string gsName;
+
+            if (i == 0)
+            {
+               // Step 1: write table header:
+               std::stringstream ss1, ss2, ss3;
+               gsName = "";
+               ss1 << "                         ";
+               ss2 << "                         ";
+               ss3 << "-------------------------";
+               for (std::map<std::string, Real>::iterator column = statisticsTable[sa[i]].begin(); column != statisticsTable[sa[i]].end(); ++column)
+               {
+                  std::string name = column->first;
+                  std::string gs = name.substr(0, name.find_first_of(' '));
+                  std::string typeName = name.substr(name.find_first_of(' ')+1);
+                  if (gs != gsName)
+                  {
+                     ss1 << GmatStringUtil::GetAlignmentString(gs, 20, GmatStringUtil::RIGHT);
+                     ss2 << GmatStringUtil::GetAlignmentString("All", 20, GmatStringUtil::RIGHT);
+                     ss3 << "--------------------";
+                     gsName = gs;
+                  }
+                  ss1 << GmatStringUtil::GetAlignmentString(gs, 20, GmatStringUtil::RIGHT);
+                  ss2 << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::RIGHT);
+                  ss3 << "--------------------";
+               }
+               textFile << ss1.str() << "\n";
+               textFile << ss2.str() << "\n";
+               textFile << ss3.str() << "\n";
+            }
+   
+            // Step 2: Write table contents:
+            gsName = statisticsTable[sa[i]].begin()->first;
+            std::stringstream ss4;
+
+            UnsignedInt index = 0;
+            UnsignedInt index1 = 0;
+            for (std::map<std::string, Real>::iterator column = statisticsTable[sa[i]].begin(); column != statisticsTable[sa[i]].end(); ++column)
+            {
+               std::string name = column->first;
+               std::string gs = name.substr(0, name.find_first_of(' '));
+               std::string typeName = name.substr(name.find_first_of(' ')+1);
+
+               if (column == statisticsTable[sa[i]].begin())
+                  textFile << GmatStringUtil::GetAlignmentString(sa[i],25);
+
+               switch (i)
+               {
+               case 0:
+                  {
+                     numberAllRec.push_back(column->second);
+                     allNumRec += column->second;                           // sum of all number of records
+                     Integer value = column->second;                        // convert real to integer
+                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 1:
+                  {
+                     numberAcceptedRec.push_back(column->second);
+                     numRec += column->second;                               // sum of all number of accepted records
+                     Integer value = column->second;                         // convert real to integer
+                     Real percent = column->second*100/numberAllRec[index];   // calculate percentage
+                     std::string sval = GmatStringUtil::ToString(percent, 2) + "% " + GmatStringUtil::ToString(value, 8);
+                     ss4 << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 2:
+                  {
+                     sumWeightedResSquare += column->second;                 // sum of all weighted residual
+                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(column->second/numberAcceptedRec[index]), 8), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 3:
+                  {
+                     residual.push_back(column->second);
+                     sumRes += column->second;                               // sum of all residual
+                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(column->second/numberAcceptedRec[index], 8), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 4:
+                  {
+                     Real res_aver = residual[index]/ numberAcceptedRec[index];
+                     sumResSquare += column->second;                         // sum of all residual square
+                     Real value = GmatMathUtil::Sqrt(column->second/numberAcceptedRec[index] - res_aver*res_aver);
+                     ss4 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               }
+
+
+               if (gs != gsName)
+               {
+                  switch (i)
+                  {
+                  case 0:
+                     {
+                        allRecSubTotal.push_back(allNumRec);
+                        Integer value = allNumRec;                           // change type from real to integer
+                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
+                     }
+                     break;
+                  case 1:
+                     {
+                        acceptedRecSubTotal.push_back(numRec);
+                        Integer value = numRec;                              // change type from real to integer
+                        Real percent = numRec*100/allRecSubTotal[index1];    // calculate percentage
+                        std::string sval = GmatStringUtil::ToString(percent, 2) + "% " + GmatStringUtil::ToString(value, 8);
+                        textFile << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
+                     }
+                     break;
+                  case 2:
+                     textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(sumWeightedResSquare/acceptedRecSubTotal[index1]), 8), 20, GmatStringUtil::RIGHT);
+                     break;
+                  case 3:
+                     {
+                        residualSubTotal.push_back(sumRes);
+                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/acceptedRecSubTotal[index1], 8), 20, GmatStringUtil::RIGHT);
+                     }
+                     break;
+                  case 4:
+                     {
+                        Real res_aver = residualSubTotal[index1]/acceptedRecSubTotal[index1];
+                        Real resSquare_aver = sumResSquare/acceptedRecSubTotal[index1];
+                        Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
+                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                     }
+                     break;
+                  }
+                  ++index1;
+
+                  textFile << ss4.str();
+                  ss4.str(""); 
+                  allNumRec = 0.0;
+                  numRec = 0.0;
+                  sumWeightedResSquare = 0.0;
+                  sumRes = 0.0;
+                  sumResSquare = 0.0;
+
+                  gsName = gs;
+               }
+
+               ++index;
+            }
+            textFile << "\n";
+         }
+         textFile << "\n\n";
+
+
+         // 2.2.2. Write statistics table for measuremnet type
+         numberAllRec.clear();
+         numberAcceptedRec.clear();
+         residual.clear();
+
+         sumWeightedResSquare = 0.0;          // sum of weighted residual square
+         allNumRec = 0.0;                     // sum of number of all records
+         numRec = 0.0;                        // sum of number of accepted records
+         sumRes = 0.0;                        // sum of residual
+         sumResSquare = 0.0;                  // sum of residual square
+         for (UnsignedInt i = 0; i < sa.size(); ++i)
+         {
+            std::string typeName;
+
+            if (i == 0)
+            {
+               // Step 1: write table header:
+               std::stringstream ss1, ss2;
+               ss1 << "                         " << "            All";
+               ss2 << "-------------------------" << "---------------";
+               for (std::map<std::string, Real>::iterator column = statisticsTable1[sa[i]].begin(); column != statisticsTable1[sa[i]].end(); ++column)
+               {
+                  typeName = column->first;
+                  ss1 << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::RIGHT);
+                  ss2 << "--------------------";
+               }
+               textFile << ss1.str() << "\n";
+               textFile << ss2.str() << "\n";
+            }
+   
+            // Step 2: Write table contents:   
+            std::stringstream ss5;
+            UnsignedInt index = 0;
+            for (std::map<std::string, Real>::iterator column = statisticsTable1[sa[i]].begin(); column != statisticsTable1[sa[i]].end(); ++column)
+            {
+               switch (i)
+               {
+               case 0:
+                  {
+                     numberAllRec.push_back(column->second);
+                     allNumRec += column->second;                  // sum of all number of records
+                     Integer value = column->second;               // convert real to integer
+                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 1:
+                  {
+                     numberAcceptedRec.push_back(column->second);
+                     numRec += column->second;                    // sum of all accepted records
+                     Integer value = column->second;              // convert real to integer
+                     Real percent = column->second*100/ numberAllRec[index];
+                     std::string sval = GmatStringUtil::ToString(percent, 2) + "% " + GmatStringUtil::ToString(value, 8);
+                     ss5 << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 2:
+                  {
+                     sumWeightedResSquare += column->second;      // sum of weighted residual square 
+                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(column->second/numberAcceptedRec[index]), 8), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 3:
+                  {
+                     residual.push_back(column->second);
+                     sumRes += column->second;                    // sum of residuals
+                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(column->second/numberAcceptedRec[index], 8), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               case 4:
+                  {
+                     sumResSquare += column->second;             // sum of residual square 
+                     Real res_aver = residual[index]/ numberAcceptedRec[index];
+                     Real resSquare_aver = column->second/numberAcceptedRec[index];
+                     Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
+                     ss5 << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                  }
+                  break;
+               }
+
+               ++index;
+            }
+            
+            // Calculate total:
+            textFile << GmatStringUtil::GetAlignmentString(sa[i], 20);
+
+            switch(i)
+            {
+            case 0:
+               {
+                  Integer value = allNumRec;
+                  textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
+               }
+               break;
+            case 1:
+               {
+                  Integer value = numRec;                            // convert real to integer
+                  Real percent = numRec*100/allNumRec;
+                  std::string sval = GmatStringUtil::ToString(percent, 2) + "% "+ GmatStringUtil::ToString(value, 8);
+                  textFile << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
+               }
+               break;
+            case 2:
+               textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(sumWeightedResSquare/numRec), 8), 20, GmatStringUtil::RIGHT);
+               break;
+            case 3:
+               textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/numRec, 8), 20, GmatStringUtil::RIGHT);
+               break;
+            case 4:
+               {
+                  Real res_aver = sumRes/numRec;
+                  Real resSquare_aver = sumResSquare/numRec;
+                  Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
+                  textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+               }
+               break;
+            }
+
+            textFile << ss5.str() << "\n";
+            ss5.str("");
+         }
+
+
+      }
+      textFile << "\n\n";
+
+      /// 2.3. Write WRMS and Predicted WRMS:
       textFile.precision(12);
       textFile << "   WeightedRMS Residuals  : " << newResidualRMS << "\n"
                << "   PredictedRMS Residuals : " << predictedRMS << "\n";
@@ -2491,8 +2805,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
 }
 
 
-#include "StateConversionUtil.hpp"
-
 std::map<GmatBase*, Rvector6> BatchEstimator::CalculateCartesianStateMap(const std::vector<ListItem*> *map, GmatState state)
 {
    static std::map<GmatBase*, Rvector6> stateMap;
@@ -2530,7 +2842,7 @@ std::map<GmatBase*, Rvector6> BatchEstimator::CalculateKeplerianStateMap(const s
          kState = StateConversionUtil::CartesianToKeplerian(mu, cState, "MA");
 
          if ((kState[1] <= 0)||(kState[1] >= 1.0))
-            MessageInterface::ShowMessage("Warning: eccentricity is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
+            MessageInterface::ShowMessage("Warning: eccentricity (%lf) is out of range (0,1) when convert Cartesian state (%lf, %lf, %lf, %lf, %lf, %lf) to Keplerian state.\n", kState[1], state[i], state[i+1], state[i+2], state[i+3], state[i+4], state[i+5]);
 
          stateMap[(*map)[i]->object] = kState;
          i = i + 5;
