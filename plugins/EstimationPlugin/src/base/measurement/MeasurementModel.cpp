@@ -581,6 +581,88 @@ bool MeasurementModel::IsParameterReadOnly(const std::string & label) const
    return IsParameterReadOnly(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsEstimationParameterValid(const Integer item)
+//------------------------------------------------------------------------------
+/**
+* This function is used to verify an estimation paramter is either valid or not
+*
+* @param item      Estimation parameter ID (Note that: it is defferent from object ParameterID)
+*
+* return           true if it is valid, false otherwise 
+*/
+//------------------------------------------------------------------------------
+bool MeasurementModel::IsEstimationParameterValid(const Integer item)
+{
+   bool retval = false;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;    // convert Estimation ID to object parameter ID
+
+   switch (id)
+   {
+      case Bias:
+         retval = true;
+         break;
+
+      // All other values call up the hierarchy
+      default:
+         retval = GmatBase::IsEstimationParameterValid(item);
+   }
+
+   return retval;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Integer GetEstimationParameterSize(const Integer item)
+//------------------------------------------------------------------------------
+Integer MeasurementModel::GetEstimationParameterSize(const Integer item)
+{
+   Integer retval = 1;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+   switch (id)
+   {
+      case Bias:
+         retval = 1;
+         break;
+
+      // All other values call up the hierarchy
+      default:
+         retval = GmatBase::GetEstimationParameterSize(item);
+   }
+
+   return retval;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Real* GetEstimationParameterValue(const Integer item)
+//------------------------------------------------------------------------------
+Real* MeasurementModel::GetEstimationParameterValue(const Integer item)
+{
+   Real* retval = NULL;
+
+   Integer id = item - type * ESTIMATION_TYPE_ALLOCATION;
+
+   switch (id)
+   {
+      case Bias:
+         retval = (Real*) measurementBias.GetDataVector();
+         break;
+
+      // All other values call up the class heirarchy
+      default:
+         retval = GmatBase::GetEstimationParameterValue(item);
+   }
+
+   return retval;
+}
+
+
 //------------------------------------------------------------------------------
 // Real GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
