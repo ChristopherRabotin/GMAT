@@ -465,8 +465,9 @@ void RunSimulator::SetPropagationProperties(PropagationStateManager *psm)
    {
       if ((*p)->IsOfType(Gmat::SPACEOBJECT))
       {
-         if (includeSTMPropagation)
-            psm->SetProperty("STM", *p);
+         // Always include the STM so that simulation and estimation steps are
+         // (nearly) coincident
+         psm->SetProperty("STM", *p);
       }
    }
 }
@@ -711,6 +712,33 @@ void RunSimulator::PrepareToSimulate()
 
    #ifdef DEBUG_SIMULATOR_EXECUTION
       MessageInterface::ShowMessage("Exit RunSimulator::PrepareToSimulate()\n");
+   #endif
+
+   #ifdef DEBUG_INITIAL_STATE
+      MessageInterface::ShowMessage("Object states at close of PrepareToSimulate:\n");
+      for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+      {
+         PropObjectArray *poa = propObjects[i];
+         for (UnsignedInt j = 0; j < poa->size(); ++j)
+         {
+            MessageInterface::ShowMessage("   %s:\n", poa->at(j)->GetName().c_str());
+            if (poa->at(j)->IsOfType(Gmat::SPACEOBJECT))
+            {
+               MessageInterface::ShowMessage("      Epoch: [%s]\n",
+                     poa->at(j)->GetStringParameter("Epoch").c_str());
+               MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
+                     poa->at(j)->GetRealParameter("X"),
+                     poa->at(j)->GetRealParameter("Y"),
+                     poa->at(j)->GetRealParameter("Z"));
+               MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
+                     poa->at(j)->GetRealParameter("VX"),
+                     poa->at(j)->GetRealParameter("VY"),
+                     poa->at(j)->GetRealParameter("VZ"));
+            }
+            else
+               MessageInterface::ShowMessage("      Not a SpaceObject\n");
+         }
+      }
    #endif
 }
 
