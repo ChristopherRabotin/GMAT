@@ -135,8 +135,8 @@ protected:
 
 
    /// Variables used for statistics calculation
-   std::map<std::string, std::map<std::string, Real>> statisticsTable;        // this table is for groundstation and measurement type 
-   std::map<std::string, std::map<std::string, Real>> statisticsTable1;       // this table is for measurement type only
+   std::map<std::string, std::map<std::string, Real> > statisticsTable;       // this table is for groundstation and measurement type
+   std::map<std::string, std::map<std::string, Real> > statisticsTable1;      // this table is for measurement type only
 
    /// Parameter IDs for the BatchEstimators
    enum
