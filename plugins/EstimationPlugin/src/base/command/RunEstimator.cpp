@@ -921,6 +921,33 @@ void RunEstimator::PrepareToEstimate()
       MessageInterface::ShowMessage(
             "Exit RunEstimator::PrepareToEstimate()\n");
    #endif
+
+   #ifdef DEBUG_INITIAL_STATE
+      MessageInterface::ShowMessage("Object states at close of PrepareToEstimate:\n");
+      for (UnsignedInt i = 0; i < propObjects.size(); ++i)
+      {
+         PropObjectArray *poa = propObjects[i];
+         for (UnsignedInt j = 0; j < poa->size(); ++j)
+         {
+            MessageInterface::ShowMessage("   %s:\n", poa->at(j)->GetName().c_str());
+            if (poa->at(j)->IsOfType(Gmat::SPACEOBJECT))
+            {
+               MessageInterface::ShowMessage("      Epoch: [%s]\n",
+                     poa->at(j)->GetStringParameter("Epoch").c_str());
+               MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
+                     poa->at(j)->GetRealParameter("X"),
+                     poa->at(j)->GetRealParameter("Y"),
+                     poa->at(j)->GetRealParameter("Z"));
+               MessageInterface::ShowMessage("      [%16.14lf, %16.14lf, %16.14lf]:\n",
+                     poa->at(j)->GetRealParameter("VX"),
+                     poa->at(j)->GetRealParameter("VY"),
+                     poa->at(j)->GetRealParameter("VZ"));
+            }
+            else
+               MessageInterface::ShowMessage("      Not a SpaceObject\n");
+         }
+      }
+   #endif
 }
 
 
@@ -973,9 +1000,14 @@ void RunEstimator::Propagate()
    
    // todo: This is a temporary fix; need to evaluate to find a more elegant
    //       solution here
-   Real maxStep = 600.0;
+   Real maxStep = 60.0;
    if (fabs(dt) > maxStep)
       dt = (dt > 0.0 ? maxStep : -maxStep);
+
+   #ifdef DEBUG_INITIAL_STATE
+      MessageInterface::ShowMessage("Stepping by %.12lf = ", dt);
+   #endif
+
    Step(dt);
    bufferFilled = false;
    
@@ -984,6 +1016,19 @@ void RunEstimator::Propagate()
    #ifdef DEBUG_EXECUTION
       MessageInterface::ShowMessage("Exit RunEstimator::Propagate()\n");
    #endif
+
+   #ifdef DEBUG_EVENT_STATE
+      dim = fm[0]->GetDimension();
+      Real *odeState = fm[0]->GetState();
+
+      MessageInterface::ShowMessage("State after prop:\n  ");
+      fm[0]->ReportEpochData();
+      MessageInterface::ShowMessage("  ");
+      for (Integer i = 0; i < dim; ++i)
+         MessageInterface::ShowMessage("   %.12lf", odeState[i]);
+      MessageInterface::ShowMessage("\n");
+   #endif
+
 }
 
 

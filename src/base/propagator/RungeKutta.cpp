@@ -57,6 +57,7 @@
 
 //#define DEBUG_PROPAGATOR_FLOW
 //#define DEBUG_RAW_STEP_STATE
+//#define DEBUG_STEPSIZE
 
 //---------------------------------
 // public
@@ -435,27 +436,42 @@ bool RungeKutta::RawStep()
 //------------------------------------------------------------------------------
 bool RungeKutta::Step(Real dt)
 {
-    bool stepFinished = false;
-    timeleft = dt;
-    Integer attemptsTaken = 0;
-    do
-    {
-        if (attemptsTaken > maxStepAttempts)
-        {
-           MessageInterface::ShowMessage(
-              "    Integrator attempted too many steps! (%d attempts "
-              "taken)\n", attemptsTaken);
-           return false;
-        }
-        if (!Propagator::Step(timeleft))
-            return false;
-        if (fabs(timeleft - stepTaken) <= smallestTime)
-            stepFinished = true;
-        timeleft -= stepTaken;
-        ++attemptsTaken;
-    } while (stepFinished == false);
+   bool stepFinished = false;
+   timeleft = dt;
+   Integer attemptsTaken = 0;
 
-    return true;
+   #ifdef DEBUG_STEPSIZE
+       MessageInterface::ShowMessage("Time left: ");
+   #endif
+
+   do
+   {
+      #ifdef DEBUG_STEPSIZE
+         MessageInterface::ShowMessage("%.12lf  ", timeleft);
+      #endif
+
+      if (attemptsTaken > maxStepAttempts)
+      {
+         MessageInterface::ShowMessage(
+               "    Integrator attempted too many steps! (%d attempts "
+               "taken)\n", attemptsTaken);
+         return false;
+      }
+      if (!Propagator::Step(timeleft))
+         return false;
+
+      if (fabs(timeleft - stepTaken) <= smallestTime)
+         stepFinished = true;
+
+      timeleft -= stepTaken;
+      ++attemptsTaken;
+   } while (stepFinished == false);
+
+   #ifdef DEBUG_STEPSIZE
+      MessageInterface::ShowMessage("Done!\n");
+   #endif
+
+   return true;
 }
 
 //---------------------------------
