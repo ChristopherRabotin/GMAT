@@ -224,6 +224,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    code500WriteFailed   (true),
    writeCommentAfterData (true),
    checkForLargeTimeGap (false),
+   isEphemFileOpened    (false),
    numSPKSegmentsWritten (0)
 {
    #ifdef DEBUG_EPHEMFILE
@@ -233,6 +234,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    
    objectTypes.push_back(Gmat::EPHEMERIS_FILE);
    objectTypeNames.push_back("EphemerisFile");
+   objectTypeNames.push_back("FileOutput");
    parameterCount = EphemerisFileParamCount;
    
    // // Should I give non-blank fileName?
@@ -448,6 +450,7 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    code500WriteFailed   (ef.code500WriteFailed),
    writeCommentAfterData (ef.writeCommentAfterData),
    checkForLargeTimeGap (ef.checkForLargeTimeGap),
+   isEphemFileOpened    (ef.isEphemFileOpened),
    numSPKSegmentsWritten (ef.numSPKSegmentsWritten)
 {
    coordConverter = ef.coordConverter;
@@ -545,6 +548,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    code500WriteFailed   = ef.code500WriteFailed;
    writeCommentAfterData = ef.writeCommentAfterData;
    checkForLargeTimeGap = ef.checkForLargeTimeGap;
+   isEphemFileOpened    = ef.isEphemFileOpened;
    coordConverter       = ef.coordConverter;
    numSPKSegmentsWritten = ef.numSPKSegmentsWritten;
    
@@ -560,69 +564,63 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
 //------------------------------------------------------------------------------
 void EphemerisFile::SetProperFileExtension()
 {
-   //std::string fname = fileName;
-   
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
       ("EphemerisFile::SetProperFileExtension() fileName='%s;, fileFormat='%s'\n", fileName.c_str(),
        fileFormat.c_str());
+   #endif   
+   
+   std::string fileExt = ".eph";
+   if (fileFormat == "SPK")
+      fileExt = ".bsp";
+   else if (fileFormat == "CCSDS-OEM")
+      fileExt = ".oem";
+   else if (fileFormat == "CCSDS-AEM")
+      fileExt = ".aem";
+   
+   // For fileName
+   std::string parsedFileExt = GmatFileUtil::ParseFileExtension(fileName, true);
+   
+   #ifdef DEBUG_EPHEMFILE_OPEN
+   MessageInterface::ShowMessage("   parsedFileExt = '%s'\n", parsedFileExt.c_str());
    #endif
    
-   
-   // File path is handled in GetFullPathFileName() so commented out (LOJ: 2014.06.23)
-   // try
-   // {
-   //    FileManager *fm = FileManager::Instance();
-   //    // Changed to use EPHEM_OUTPUT_PATH
-   //    // outputPath = fm->GetPathname(FileManager::EPHEM_PATH);
-   //    outputPath = fm->GetPathname(FileManager::EPHEM_OUTPUT_PATH);
-   
-   //    if (fileName == "")
-   //    {
-   //       fname = outputPath + instanceName + "." + fileFormat + ".eph";
-   //    }
-   //    else
-   //    {
-   //       // add output path if there is no path
-   //       if (fileName.find("/") == fileName.npos &&
-   //           fileName.find("\\") == fileName.npos)
-   //       {
-   //          fname = outputPath + fileName;
-   //       }
-   //    }
-   // }
-   // catch (BaseException &e)
-   // {
-   //    if (fileName == "")
-   //       fname = instanceName + ".eph";
-      
-   //    MessageInterface::ShowMessage(e.GetFullMessage());
-   // }
-   
-   
-   // If SPK file, extension should be ".bsp"
-   if (fileFormat == "SPK")
+   if (parsedFileExt != "" && parsedFileExt != fileExt)
    {
-      // For fileName
-      std::string fileExt = GmatFileUtil::ParseFileExtension(fileName, true);
-      if (fileExt != ".bsp")
+      // Replace file extension only for SPK ephem type
+      if (fileFormat == "SPK")
       {
          std::string ofname = fileName;
-         fileName = GmatStringUtil::Replace(fileName, fileExt, ".bsp");
+         fileName = GmatStringUtil::Replace(fileName, parsedFileExt, fileExt);
          MessageInterface::ShowMessage
-            ("*** WARNING *** SPK file extension should be \".bsp\", so "
-             "file name '%s' changed to '%s'\n", ofname.c_str(), fileName.c_str());
+            ("*** WARNING *** %s file extension should be \"%s\", so "
+             "file name '%s' changed to '%s'\n", fileFormat.c_str(), fileExt.c_str(),
+             ofname.c_str(), fileName.c_str());
          
          // For fullPathFileName
-         ofname = fullPathFileName;
-         fullPathFileName = GmatStringUtil::Replace(fullPathFileName, fileExt, ".bsp");
+         fullPathFileName = GmatStringUtil::Replace(fullPathFileName, parsedFileExt, fileExt);
       }
+   }
+   else if (parsedFileExt == "")
+   {
+      if (fileFormat == "Code-500")
+         fileExt = ".eph.bin";
+      
+      std::string ofname = fileName;
+      fileName = fileName + fileExt;
+      MessageInterface::ShowMessage
+         ("*** WARNING *** %s file extension should be \"%s\", so "
+          "file name '%s' changed to '%s'\n", fileFormat.c_str(), fileExt.c_str(),
+          ofname.c_str(), fileName.c_str());
+      
+      // For fullPathFileName
+      fullPathFileName = fullPathFileName + fileExt;
    }
    
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
       ("EphemerisFile::SetProperFileExtension() leaving, fullPathFileName\n   %s\n",
-       fullPathFname.c_str());
+       fullPathFileName.c_str());
    #endif
 }
 
@@ -902,7 +900,7 @@ bool EphemerisFile::Initialize()
    // Get correct file name including file extension
    // We don't want to override fileName
    //fileName = SetProperFileExtension();
-   SetProperFileExtension();
+   //SetProperFileExtension();
    
    #ifdef DEBUG_EPHEMFILE_INIT
    MessageInterface::ShowMessage
@@ -914,6 +912,9 @@ bool EphemerisFile::Initialize()
    // If active and not initialized already, open ephemeris file
    if (active && !isInitialized)
    {
+      // We don't want to open ephemeris file here, since EphemerisFile inside
+      // a function can be initialized multiple times. (LOJ: 2015.07.02)
+      #if 0
       if (!OpenTextEphemerisFile())
       {
          #ifdef DEBUG_EPHEMFILE_INIT
@@ -924,6 +925,7 @@ bool EphemerisFile::Initialize()
          throw SubscriberException
             ("Failed to open EphemerisFile \"" + fullPathFileName + "\"\n");
       }
+      #endif
       
       isInitialized = true;
    }
@@ -995,10 +997,12 @@ bool EphemerisFile::Initialize()
    
    // Set solver iteration option to none. We only writes solutions to a file
    mSolverIterOption = SI_NONE;
-   
+
+   #if 0
    // Create ephemeris file
    if (writeEphemeris)
       CreateEphemerisFile();
+   #endif
    
    // Clear maneuvers handled array
    maneuversHandled.clear();
@@ -1065,8 +1069,9 @@ bool EphemerisFile::TakeAction(const std::string &action,
 {
    #ifdef DEBUG_EPHEMFILE_ACTION
    MessageInterface::ShowMessage
-      ("EphemerisFile::TakeAction() this=<%p>'%s' entered, action='%s', actionData='%s'\n",
-       this, GetName().c_str(), action.c_str(), actionData.c_str());
+      ("EphemerisFile::TakeAction() this=<%p>'%s' entered, action='%s', actionData='%s', "
+       "isInitialized=%d\n", this, GetName().c_str(), action.c_str(), actionData.c_str(),
+       isInitialized);
    #endif
    
    bool retval = false;
@@ -1076,6 +1081,13 @@ bool EphemerisFile::TakeAction(const std::string &action,
    }
    else if (action == "Finalize")
    {
+      // Finish up writing if action is finalize. Finalize action is usually
+      // set when function run completes (LOJ: 2015.07.02)
+      if (writeEphemeris && isInitialized)
+      {
+         isEndOfRun = true;
+         FinishUpWriting(true);
+      }
       retval = true;
    }
    else if (action == "ToggleOn")
@@ -1236,6 +1248,26 @@ bool EphemerisFile::IsParameterReadOnly(const Integer id) const
    return Subscriber::IsParameterReadOnly(id);
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterCommandModeSettable(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Tests to see if an object property can be set in Command mode
+ *
+ * @param id The ID of the object property
+ *
+ * @return true if the property can be set in command mode, false if not.
+ */
+//------------------------------------------------------------------------------
+bool EphemerisFile::IsParameterCommandModeSettable(const Integer id) const
+{
+   // Override this one from the parent class
+   if (id == FILENAME || id == WRITE_EPHEMERIS)
+      return true;
+   
+   // And let the parent class handle its own
+   return Subscriber::IsParameterCommandModeSettable(id);
+}
 
 //---------------------------------------------------------------------------
 // Gmat::ObjectType GetPropertyObjectType(const Integer id) const
@@ -1466,10 +1498,11 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
    {
       #ifdef DEBUG_EPHEMFILE_SET
       MessageInterface::ShowMessage
-         ("EphemerisFile::SetStringParameter() Setting filename '%s' to "
-          "EphemerisFile '%s'\n", value.c_str(), instanceName.c_str());
+         ("EphemerisFile::SetStringParameter() Setting Filename '%s' to "
+          "EphemerisFile '%s', isInitialized=%d\n", value.c_str(), instanceName.c_str(),
+          isInitialized);
       #endif
-
+      
       // Validate filename
       if (!GmatFileUtil::IsValidFileName(value))
       {
@@ -1479,16 +1512,24 @@ bool EphemerisFile::SetStringParameter(const Integer id, const std::string &valu
          throw se;
       }
       
+      // If already initialized, close ephemeris file first
+      if (isInitialized)
+      {
+         #ifdef DEBUG_EPHEMFILE_INIT
+         MessageInterface::ShowMessage
+            ("EphemerisFile::Initialize() <%p>'%s' is already initialized so finish "
+             "it first, if ephemeris file is opened, isEphemFileOpened=%d\n", this,
+             GetName().c_str(), isEphemFileOpened);
+         #endif
+         if (isEphemFileOpened)
+            FinishUpWriting(true);
+      }
+      
       fileName = value;
       fullPathFileName =
-         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE", false, ".eph", false, true);
-      
-      // fullPathFileName = fileName;
-      
-      // if (fileName.find("/") == fileName.npos &&
-      //     fileName.find("\\") == fileName.npos)
-      //    fullPathFileName = outputPath + fileName;
-      
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE",
+                                       false, ".eph", false, true);
+            
       usingDefaultFileName = false;
       return true;
    }
@@ -1996,7 +2037,8 @@ bool EphemerisFile::OpenTextEphemerisFile()
 {
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
-      ("EphemerisFile::OpenTextEphemerisFile() entered, fileName = %s\n", fileName.c_str());
+      ("EphemerisFile::OpenTextEphemerisFile() <%p>'%s' entered, fileName = %s\n",
+       this, GetName().c_str(), fileName.c_str());
    #endif
    
    // If default file name is used, write informatinal message about the file location (LOJ: 2014.06.24)
@@ -4124,6 +4166,10 @@ void EphemerisFile::WriteCcsdsOemMetaData()
    MessageInterface::ShowMessage
       ("   metaDataStartStr='%s', metaDataStopStr='%s'\n", metaDataStartStr.c_str(),
        metaDataStopStr.c_str());
+   MessageInterface::ShowMessage
+      ("   spacecraft=<%p>'%s', outCoordSystem=<%p>'%s'\n", spacecraft,
+       spacecraft ? spacecraft->GetName().c_str() : "NULL", outCoordSystem,
+       outCoordSystem ? outCoordSystem->GetName().c_str() : "NULL");
    #endif
    
    std::string origin = "UNKNOWN";
@@ -4679,11 +4725,12 @@ void EphemerisFile::FinalizeCode500Ephemeris()
    if (isEndOfRun)
    {
       MessageInterface::ShowMessage
-         ("===> EphemerisFile::FinalizeCode500Ephemeris() calling code500EphemFile for debug output\n");
+         ("===> EphemerisFile::FinalizeCode500Ephemeris() calling code500EphemFile "
+          "for debug output\n   fullPathFileName = '%s'\n", fullPathFileName.c_str());
       bool swapByteOrder = false;
       if (outputFormat == "UNIX")
          swapByteOrder = true;
-      code500EphemFile->OpenForRead(fileName, 1, 1);
+      code500EphemFile->OpenForRead(fullPathFileName, 1, 1);
       code500EphemFile->SetSwapEndian(swapByteOrder, 1);
       code500EphemFile->ReadHeader1(1);
       code500EphemFile->ReadDataRecords(-999, 2);
@@ -5155,6 +5202,33 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
           GetName().c_str());
       #endif
       return true;
+   }
+   
+   if (!isEphemFileOpened)
+   {
+      // Open text EphemerisFile for debug or CCSDS if not already opened
+      if (!OpenTextEphemerisFile())
+      {
+         #ifdef DEBUG_EPHEMFILE_INIT
+         MessageInterface::ShowMessage
+            ("**** ERROR **** EphemerisFile::Distribute() <%p>'%s' throwing exception: Failed to "
+             "open EphemerisFile\n", this, GetName().c_str(), fullPathFileName.c_str());
+         #endif
+         throw SubscriberException
+            ("Failed to open EphemerisFile \"" + fullPathFileName + "\"\n");
+      }
+      
+      // Create binary ephemeris file
+      if (writeEphemeris && (fileType == SPK_ORBIT || fileType == CODE500_EPHEM))
+      {
+         #ifdef DEBUG_EPHEMFILE_INIT
+         MessageInterface::ShowMessage
+            ("===> EphemerisFile::Distribute() <%p>'%s' creating EphemerisFile of type '%s'\n",
+             this, GetName().c_str(), fileFormat.c_str());
+         #endif
+         CreateEphemerisFile();
+      }
+      isEphemFileOpened = true;
    }
    
    // If end of run received, finishup writing

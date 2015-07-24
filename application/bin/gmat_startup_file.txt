@@ -60,9 +60,9 @@ PLUGIN                 = ../plugins/libProductionPropagators
 #PLUGIN                = ../plugins/libExtraPropagators
 #PLUGIN                = ../plugins/libGmatEstimation
 #PLUGIN                = ../plugins/libGeometricMeasurements
-#PLUGIN                = ../plugins/libGmatFunction
+PLUGIN                = ../plugins/libGmatFunction
 #PLUGIN                = ../plugins/libSaveCommand
-#PLUGIN                = ../plugins/libNewParameters
+PLUGIN                = ../plugins/libNewParameters
 #PLUGIN                = ../plugins/libPolyhedronGravity
 
 # Internal-only plugins
@@ -177,7 +177,8 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #RUN_MODE              = TESTING
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
-#DEBUG_PARAMETERS      = OFF
+#DEBUG_MATLAB          = ON
+#DEBUG_PARAMETERS      = ON
 #DEBUG_FILE_PATH       = ON
 #HIDE_SAVEMISSION      = TRUE
 #PLOT_MODE             = TILE

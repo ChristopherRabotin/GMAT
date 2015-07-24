@@ -44,7 +44,6 @@
 
 #include "OrbitalParameters.hpp"
 #include "AngularParameters.hpp"
-#include "EnvParameters.hpp"
 #include "PlanetParameters.hpp"
 #include "Variable.hpp"
 #include "StringVar.hpp"
@@ -353,13 +352,7 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new DLA(withName);
    if (ofType == "RLA")
       return new RLA(withName);
-
-   // Environmental parameters
-   #ifdef __ENABLE_ATMOS_DENSITY__
-      if (ofType == "AtmosDensity")
-         return new AtmosDensity(withName);
-   #endif
-
+   
    // Planet parameters
    if (ofType == "MHA")
       return new MHA(withName);
