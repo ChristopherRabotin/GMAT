@@ -1597,7 +1597,6 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
       /// Write the text FK kernel
       std::ofstream fkStream(fkName.c_str(), std::ios::out);
       fkStream.precision(16);
-      fkStream << " \n";
       fkStream << "KPL/FK\n";
       fkStream << "\\begindata\n";
       fkStream << "NAIF_BODY_NAME += '" << thisName << "'\n";
