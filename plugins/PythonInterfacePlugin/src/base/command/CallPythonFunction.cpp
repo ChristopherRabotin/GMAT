@@ -373,7 +373,7 @@ bool CallPythonFunction::Execute()
       for (itO = argOut.begin(); itO != argOut.end(); ++itO)
          delete *itO;
    }
-   else
+   else   // when return value is NULL and no exception is caught/handled.
    {
       MessageInterface::ShowMessage("Unknown error happend in Python Interface.\n");
    }
