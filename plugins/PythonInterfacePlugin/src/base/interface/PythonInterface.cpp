@@ -309,15 +309,13 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       pybuffer->buf = v;
     
       pybuffer->strides = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
-      pybuffer->shape[0] = 6;
-      PyBuffer_FillContiguousStrides(1, pybuffer->shape, pybuffer->strides, 8, 'C');
+      pybuffer->shape[0] = argIn.size();
+      PyBuffer_FillContiguousStrides(1, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
    
       pybuffer->itemsize = sizeof(Real);
       pybuffer->len = pybuffer->shape[0] * pybuffer->itemsize ;
       
-      
       MessageInterface::ShowMessage("length, shape, strides, itemsize  is %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
-      
       
       int c =  PyBuffer_IsContiguous(pybuffer, 'C');
       Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
@@ -328,25 +326,33 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
          MessageInterface::ShowMessage("calling PyMemoryView_FromBuffer() \n");
          pyobj = PyMemoryView_FromBuffer(pybuffer);
          
+         //check the memory view object and read back the buffer we created earlier
          int l = 0;
          l = PyMemoryView_Check(pyobj);
          if (l == 1)
          {
             
-            int ret = PyBuffer_FillInfo(view, pyobj, v, 48, 0, PyBUF_CONTIG);
+            int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
             if (ret != -1)
             {
                MessageInterface::ShowMessage("Third value is %lf\n", ((Real*)(view->buf))[2]);
             }
          }
-         pyFunc = PyObject_CallObject(pyFuncAttr, pyobj);
+
+         // Create a Tuple to pass it to Python function
+         PyObject *pyTupleObj = PyTuple_New(1);
+         PyTuple_SetItem(pyTupleObj, 0, pyobj);
+
+         pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
          MessageInterface::ShowMessage("pyObject_CallObject() is called\n");
 
          Py_DECREF(pyFuncAttr);
-         Py_DECREF(pyobj);
+         Py_DECREF(pyTupleObj);
          
       }
 
+      // free memory
+      delete[] v;
       free(view);
       free(pybuffer->shape);
       free(pybuffer->strides);
