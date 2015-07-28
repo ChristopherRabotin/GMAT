@@ -536,7 +536,7 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
 
          case Gmat::RMATRIX_TYPE:
          {
-            Array *arr = dynamic_cast<Array *>(param);
+            Array *arr = (Array *) param;
             if (arr != NULL)
             {
                Integer r = arr->GetRowCount();
