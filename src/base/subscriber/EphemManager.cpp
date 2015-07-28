@@ -464,18 +464,14 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       ConstSpiceChar   *obsrvr           = theNAIFIdStr.c_str();
       SpiceDouble      step              = stepSize;
 
-      if (occType == "Umbra")
-      {
+      if (occType == "ALL")
+         occultationType = "ANY";   // <future> find SPICE constant for this
+      else if (occType == "Umbra")
          occultationType = SPICE_GF_FULL;
-      }
       else if (occType == "Penumbra")
-      {
          occultationType = SPICE_GF_PARTL;
-      }
       else // Antumbra
-      {
          occultationType = SPICE_GF_ANNULR;
-      }
 
       SPICEDOUBLE_CELL(result, 200000);
       scard_c(0, &result);   // reset (empty) the result cell
@@ -600,8 +596,8 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    ConstSpiceChar *tshape           = theTShape.c_str();        //
    ConstSpiceChar *front;
    ConstSpiceChar *fframe;
-   SpiceInt       refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
-   SpiceInt       adjust            = 0;
+   SpiceDouble    refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
+   SpiceDouble    adjust            = 0.0;
    SpiceInt       nintvls           = 1e6;
    SpiceDouble    step              = stepSize;
 
@@ -611,6 +607,22 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    scard_c(0, &obsResults);   // reset (empty) the coverage cell
    SPICEDOUBLE_CELL(occultResults, 200000);
    scard_c(0, &occultResults);   // reset (empty) the coverage cell
+
+#ifdef DEBUG_CONTACT
+   MessageInterface::ShowMessage("In GetContactIntervals, about to call gfposc_c\n");
+   MessageInterface::ShowMessage("   target      = %s\n",      theNAIFIdStr.c_str());
+   MessageInterface::ShowMessage("   tframe      = %s\n",      obsFrameName.c_str());
+   MessageInterface::ShowMessage("   abcorr      = %s\n",      abCorrection.c_str());
+   MessageInterface::ShowMessage("   obsrvr      = %s\n",      observerID.c_str());
+   MessageInterface::ShowMessage("   crdsys      = %s\n",      theCrdSys.c_str());
+   MessageInterface::ShowMessage("   coord       = %s\n",      theCoord.c_str());
+   MessageInterface::ShowMessage("   relate      = %s\n",      theRelate.c_str());
+   MessageInterface::ShowMessage("   refval      = %12.10f\n", refval);
+   MessageInterface::ShowMessage("   adjust      = %12.10f\n", (Real) adjust);
+   MessageInterface::ShowMessage("   step        = %12.10f\n", stepSize);
+   MessageInterface::ShowMessage("   nintvls     = %d\n",      (Integer) nintvls);
+#endif
+
 
    gfposc_c(target, tframe, abcorr, obsrvr, crdsys, coord, relate,
             refval, adjust, step, nintvls, &window, &obsResults);
