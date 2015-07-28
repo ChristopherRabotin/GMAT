@@ -312,6 +312,10 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    // bodies
    cloaking = true;
 
+   // Set the SPICE_FRAME_NAME default
+   std::string nameUpper = GmatStringUtil::ToUpper(name);
+   spiceFrameName        = "IAU_" + nameUpper;
+
    #ifdef DEBUG_CB_CONSTRUCTOR
    MessageInterface::ShowMessage
       ("CelestialBody(string) <%p> '%s' constructor entered\n", this, GetName().c_str());

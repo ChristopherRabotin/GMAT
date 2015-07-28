@@ -33,9 +33,9 @@
 #include "ContactEvent.hpp"
 
 //#define DEBUG_SET
-//#define DEBUG_SETREF
+#define DEBUG_SETREF
 //#define DEBUG_CONTACT_LOCATOR_WRITE
-//#define DEBUG_CONTACT_EVENTS
+#define DEBUG_CONTACT_EVENTS
 //#define DEBUG_INIT_FINALIZE
 //#define DEBUG_CONTACTLOCATOR_INIT
 
@@ -775,7 +775,7 @@ bool ContactLocator::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    }
    #ifdef DEBUG_SETREF
       MessageInterface::ShowMessage(
-            "--- DIDN'T match anthing!!! so caling parent ...\n");
+            "--- DIDN'T match anthing!!! so calling parent ...\n");
    #endif
    // Call parent class to add objects to bodyList
    return EventLocator::SetRefObject(obj, type, name);
@@ -1212,6 +1212,9 @@ void ContactLocator::FindEvents()
       contactResults.push_back(evList);
    }
 
+   #ifdef DEBUG_CONTACT_EVENTS
+      MessageInterface::ShowMessage("ContactLocator::FindEvents leaving ... \n");
+   #endif
    // @YRL, upto this line
 }
 

@@ -1612,7 +1612,7 @@ bool EventLocator::Initialize()
    if (occultingBodyNames.size() < 1)
    {
       // Use default list here
-      for (Integer ii = 0; ii < 2; ii++)
+      for (Integer ii = 0; ii < defaultOccultingBodies.size(); ii++)
          occultingBodyNames.push_back(defaultOccultingBodies[ii]);
    }
 
@@ -1703,15 +1703,26 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 
       // Locate events in derived class and store them as you have decided to do so
       FindEvents();
+      #ifdef DEBUG_EVENTLOCATOR_DATA
+         MessageInterface::ShowMessage("In EL::LocateEvents, after FindEvents.  About to write the report (%s) ...\n",
+               (writeReport? "true":"false"));
+      #endif
 
       // Write the report
       // appendReport should already have been set by a call to SetAppend
       if (writeReport)
       {
          bool wasOK = ReportEventData(reportNotice);
+         #ifdef DEBUG_EVENTLOCATOR_DATA
+            MessageInterface::ShowMessage("In EL::LocateEvents, after ReportEventData (wasOK = %s) ...\n",
+                  (wasOK? "true":"false"));
+         #endif
          if (wasOK) fileWasWritten = true;
       }
    }
+   #ifdef DEBUG_EVENTLOCATOR_DATA
+      MessageInterface::ShowMessage("LEAVING EL::LocateEvents ...\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
