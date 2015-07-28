@@ -626,6 +626,21 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
    gfposc_c(target, tframe, abcorr, obsrvr, crdsys, coord, relate,
             refval, adjust, step, nintvls, &window, &obsResults);
+   if (failed_c())
+   {
+      ConstSpiceChar option[] = "LONG";
+      SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+      SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+      getmsg_c(option, numChar, err);
+      std::string errStr(err);
+      std::string errmsg = "Error calling gfposc_c!!!  ";
+      errmsg += "Message received from CSPICE is: ";
+      errmsg += errStr + "\n";
+      MessageInterface::ShowMessage("----- error message = %s\n",
+            errmsg.c_str());
+      reset_c();
+      throw SubscriberException(errmsg);
+   }
 
    SpiceInt szObs       = wncard_c(&obsResults);
    #ifdef DEBUG_CONTACT
@@ -657,11 +672,39 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
          front  = theFront.c_str();
          fframe = theFFrame.c_str();
+         #ifdef DEBUG_CONTACT
+            MessageInterface::ShowMessage("Calling gfoclt_c with:\n");
+            MessageInterface::ShowMessage("   occultationType = %s\n", theOccType.c_str());
+            MessageInterface::ShowMessage("   front           = %s\n", theFront.c_str());
+            MessageInterface::ShowMessage("   fshape          = %s\n", theFShape.c_str());
+            MessageInterface::ShowMessage("   fframe          = %s\n", theFFrame.c_str());
+            MessageInterface::ShowMessage("   target          = %s\n", theNAIFIdStr.c_str());
+            MessageInterface::ShowMessage("   tshape          = %s\n", theTShape.c_str());
+            MessageInterface::ShowMessage("   tframe          = \"    \"\n");
+            MessageInterface::ShowMessage("   abcorr          = %s\n", abCorrection.c_str());
+            MessageInterface::ShowMessage("   obsrvr          = %s\n", observerID.c_str());
+            MessageInterface::ShowMessage("   step            = %12.10f\n", stepSize);
+         #endif
 
    //      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, tframe, abcorr,
    //               obsrvr, step, &window, &occultResults);
          gfoclt_c(occultationType, front, fshape, fframe, target, tshape, " ", abcorr,
                   obsrvr, step, &obsResults, &occultResults);
+         if (failed_c())
+         {
+            ConstSpiceChar option[] = "LONG";
+            SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+            SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+            getmsg_c(option, numChar, err);
+            std::string errStr(err);
+            std::string errmsg = "Error calling gfoclt_c!!!  ";
+            errmsg += "Message received from CSPICE is: ";
+            errmsg += errStr + "\n";
+            MessageInterface::ShowMessage("----- error message = %s\n",
+                  errmsg.c_str());
+            reset_c();
+            throw SubscriberException(errmsg);
+         }
          #ifdef DEBUG_CONTACT
             SpiceInt szOcc       = wncard_c(&occultResults);
             Integer  numOcc      = (Integer) szOcc;
