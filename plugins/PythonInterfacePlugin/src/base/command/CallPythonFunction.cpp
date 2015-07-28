@@ -347,6 +347,10 @@ bool CallPythonFunction::Execute()
             //   MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", *ret);
                argOut.push_back(ret);
             }
+            if (PyList_Check(pyItem))
+            {
+               MessageInterface::ShowMessage("List of list is returned.\n");
+            }
          }
       }
       // else if the Python module returns a tuple of numerical values
