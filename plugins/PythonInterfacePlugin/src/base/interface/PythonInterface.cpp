@@ -226,12 +226,12 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 }
 
 //------------------------------------------------------------------------------
-// bool PyFunctionWrapper()
+// PyObject* PyFunctionWrapper()
 //------------------------------------------------------------------------------
 /**
 * Call Python Function
 *
-* @param modName, funcName, formatIn, argIn
+* @param modName, funcName, formatIn, argIn, paramType
 *
 * @return PyObject
 */
@@ -315,7 +315,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       pybuffer->itemsize = sizeof(Real);
       pybuffer->len = pybuffer->shape[0] * pybuffer->itemsize ;
       
-      MessageInterface::ShowMessage("length, shape, strides, itemsize  is %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+      MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
       
       int c =  PyBuffer_IsContiguous(pybuffer, 'C');
       Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
@@ -335,7 +335,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
             if (ret != -1)
             {
-               MessageInterface::ShowMessage("Third value is %lf\n", ((Real*)(view->buf))[2]);
+               MessageInterface::ShowMessage("Third value is %lf\n", ((Real*)(view->buf))[4]);
             }
          }
 
