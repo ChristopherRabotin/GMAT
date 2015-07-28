@@ -253,8 +253,19 @@ bool GuiPlotReceiver::CreateGlPlotWindow(const std::string &plotName,
       
       // Tile plots if TILED_PLOT mode is set from the startup file
       if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
-         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
-      
+      {
+         // Set wxVERTICAL or wxHORIZONTAL based on main frame width and height
+         // if run mode is TESTING (LOJ: 2015.07.23)
+         wxOrientation tileMode = wxVERTICAL;
+         if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+         {
+            int w, h;
+            GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&w, &h, false);
+            if (w < h)
+               tileMode = wxHORIZONTAL;
+         }
+         GmatAppData::Instance()->GetMainFrame()->Tile(tileMode);
+      }
    }
    else
    {
@@ -947,9 +958,21 @@ bool GuiPlotReceiver::CreateXyPlotWindow(const std::string &plotName,
       // Do no tile at all (LOj: 2011.09.23)
       //if (!isPresetSizeUsed && plotCount > 5)
       //   GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
+      // Tile plots if TILED_PLOT mode is set from the startup file
       if (GmatGlobal::Instance()->GetPlotMode() == GmatGlobal::TILED_PLOT)
-         GmatAppData::Instance()->GetMainFrame()->Tile(wxVERTICAL);
-      
+      {
+         // Set wxVERTICAL or wxHORIZONTAL based on main frame width and height
+         // if run mode is TESTING (LOJ: 2015.07.23)
+         wxOrientation tileMode = wxVERTICAL;
+         if (GmatGlobal::Instance()->GetRunMode() == GmatGlobal::TESTING)
+         {
+            int w, h;
+            GmatAppData::Instance()->GetMainFrame()->GetActualClientSize(&w, &h, false);
+            if (w < h)
+               tileMode = wxHORIZONTAL;
+         }
+         GmatAppData::Instance()->GetMainFrame()->Tile(tileMode);
+      }
       frame->RedrawCurve();
    }
    
