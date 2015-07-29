@@ -166,10 +166,29 @@ void BatchEstimatorInv::Accumulate()
    std::string gsName = currentObs->participantIDs[0];
    std::string typeName = currentObs->typeName;
    std::string keyword = gsName + " " + typeName;
+   
+   // Set initial value for 2 statistics tables
+   if (statisticsTable["ACCEPTED RECORDS"].find(keyword) ==  statisticsTable["ACCEPTED RECORDS"].end())
+      statisticsTable["ACCEPTED RECORDS"][keyword] = 0.0;
+   if (statisticsTable["WEIGHTED RMS"].find(keyword) ==  statisticsTable["WEIGHTED RMS"].end())
+      statisticsTable["WEIGHTED RMS"][keyword] = 0.0;
+   if (statisticsTable["MEAN RESIDUAL"].find(keyword) ==  statisticsTable["MEAN RESIDUAL"].end())
+      statisticsTable["MEAN RESIDUAL"][keyword] = 0.0;
+   if (statisticsTable["STANDARD DEVIATION"].find(keyword) ==  statisticsTable["STANDARD DEVIATION"].end())
+      statisticsTable["STANDARD DEVIATION"][keyword] = 0.0;
+
+   if (statisticsTable1["ACCEPTED RECORDS"].find(typeName) ==  statisticsTable1["ACCEPTED RECORDS"].end())
+      statisticsTable1["ACCEPTED RECORDS"][typeName] = 0.0;
+   if (statisticsTable1["WEIGHTED RMS"].find(typeName) ==  statisticsTable1["WEIGHTED RMS"].end())
+      statisticsTable1["WEIGHTED RMS"][typeName] = 0.0;
+   if (statisticsTable1["MEAN RESIDUAL"].find(typeName) ==  statisticsTable1["MEAN RESIDUAL"].end())
+      statisticsTable1["MEAN RESIDUAL"][typeName] = 0.0;
+   if (statisticsTable1["STANDARD DEVIATION"].find(typeName) ==  statisticsTable1["STANDARD DEVIATION"].end())
+      statisticsTable1["STANDARD DEVIATION"][typeName] = 0.0;
+
    // count total number of observation data for a pair of groundstation and measurement type
    statisticsTable["TOTAL NUM RECORDS"][keyword] += 1;
    statisticsTable1["TOTAL NUM RECORDS"][typeName] += 1;
-
 
    #ifdef DEBUG_ACCUMULATION
       MessageInterface::ShowMessage("StateMap size is %d\n", stateMap->size());

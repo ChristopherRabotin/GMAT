@@ -1616,7 +1616,7 @@ std::string BatchEstimator::GetProgressString()
                for (Integer j = 0; j < finalCovariance.GetNumColumns(); ++j)
                {
                   char s[100];
-                  sprintf(&s[0], "   %22.12le\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j)));
+                  sprintf(&s[0], "   %22.12lf\0", finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j)));
                   std::string ss(s);
                   progress << "   " << ss.substr(ss.size()-24); //finalCovariance(i, j)/ sqrt(finalCovariance(i, i)*finalCovariance(j, j));
                }
@@ -2474,6 +2474,14 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          std::vector<Real> acceptedRecSubTotal;          // store number of accepted records for each groundstation
          std::vector<Real> residualSubTotal;             // store residual for each groundstation
 
+         ObjectMap objMap = GetConfiguredObjectMap();
+         ObjectArray groundStations;
+         for (std::map<std::string, GmatBase*>::iterator element = objMap.begin(); element != objMap.end(); ++element)
+         {
+            if (element->second->IsOfType(Gmat::GROUND_STATION))
+               groundStations.push_back(element->second);
+         }
+
          StringArray sa; 
          sa.push_back("TOTAL NUM RECORDS");
          sa.push_back("ACCEPTED RECORDS");
@@ -2494,24 +2502,37 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
             if (i == 0)
             {
                // Step 1: write table header:
+               textFile << "Observation Summary by Station\n";
                std::stringstream ss1, ss2, ss3;
                gsName = "";
-               ss1 << "                         ";
-               ss2 << "                         ";
-               ss3 << "-------------------------";
+               ss1 << "                    ";
+               ss2 << "                    ";
+               ss3 << "--------------------";
                for (std::map<std::string, Real>::iterator column = statisticsTable[sa[i]].begin(); column != statisticsTable[sa[i]].end(); ++column)
                {
                   std::string name = column->first;
-                  std::string gs = name.substr(0, name.find_first_of(' '));
-                  std::string typeName = name.substr(name.find_first_of(' ')+1);
+                  std::string gs = name.substr(0, name.find_first_of(' '));          // ground station ID
+                  std::string typeName = name.substr(name.find_first_of(' ')+1);     // measurment type
+
+                  // Get groundstation' name
+                  std::string strName = "";
+                  for(UnsignedInt j = 0; j < groundStations.size(); ++j)
+                  {
+                     if (groundStations[j]->GetStringParameter("Id") == gs)
+                     {
+                        strName = groundStations[j]->GetName();
+                        break;
+                     }
+                  }
+
                   if (gs != gsName)
                   {
-                     ss1 << GmatStringUtil::GetAlignmentString(gs, 20, GmatStringUtil::RIGHT);
+                     ss1 << GmatStringUtil::GetAlignmentString(strName + "  " + gs, 20, GmatStringUtil::RIGHT);
                      ss2 << GmatStringUtil::GetAlignmentString("All", 20, GmatStringUtil::RIGHT);
                      ss3 << "--------------------";
                      gsName = gs;
                   }
-                  ss1 << GmatStringUtil::GetAlignmentString(gs, 20, GmatStringUtil::RIGHT);
+                  ss1 << GmatStringUtil::GetAlignmentString(strName + "  " + gs, 20, GmatStringUtil::RIGHT);
                   ss2 << GmatStringUtil::GetAlignmentString(typeName, 20, GmatStringUtil::RIGHT);
                   ss3 << "--------------------";
                }
@@ -2533,7 +2554,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                std::string typeName = name.substr(name.find_first_of(' ')+1);
 
                if (column == statisticsTable[sa[i]].begin())
-                  textFile << GmatStringUtil::GetAlignmentString(sa[i],25);
+                  textFile << GmatStringUtil::GetAlignmentString(sa[i],20);
 
                switch (i)
                {
@@ -2654,6 +2675,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
             if (i == 0)
             {
                // Step 1: write table header:
+               textFile << "Observation Summary by Data Type\n";
                std::stringstream ss1, ss2;
                ss1 << "                         " << "            All";
                ss2 << "-------------------------" << "---------------";
