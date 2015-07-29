@@ -39,7 +39,7 @@ const std::string ErrorModel::PARAMETER_TEXT[] =
 //   "Trip",
 //   "Strand",
    "NoiseSigma",
-   "NoiseModel",
+//   "NoiseModel",
    "Bias",
    "SolveFors",
 };
@@ -50,7 +50,7 @@ const Gmat::ParameterType ErrorModel::PARAMETER_TYPE[] =
 //   Gmat::INTEGER_TYPE,			// TRIP                  // Its value is 1 for one-way, 2 for two-way, 3 for three-way, and so on
 //   Gmat::STRINGARRAY_TYPE,    // STRAND                // containing a name list of participants along signal path
    Gmat::REAL_TYPE,			   // NOISE_SIGMA           // Measurement noise sigma value
-   Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
+//   Gmat::STRING_TYPE,         // NOISE_MODEL           // Specify model of error. It is "RandomConstant" for Gausian distribution 
    Gmat::REAL_TYPE,			   // BIAS                  // Measurement bias
    Gmat::STRINGARRAY_TYPE,    // SOLVEFORS             // Contains a list of all solve-for parameters in ErrorModel 
 };
@@ -72,7 +72,7 @@ ErrorModel::ErrorModel(const std::string name) :
 //   measurementTrip   (2),
 //   strand            (""),
    noiseSigma        (0.01),                   // 0.01 Km
-   noiseModel        ("NoiseConstant"), 
+//   noiseModel        ("NoiseConstant"), 
    bias              (0.0)                    // 0.0 Km
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -113,7 +113,7 @@ ErrorModel::ErrorModel(const ErrorModel& em) :
 //   measurementTrip       (em.measurementTrip),
 //   participantNameList   (em.participantNameList),
    noiseSigma            (em.noiseSigma),
-   noiseModel            (em.noiseModel),
+//   noiseModel            (em.noiseModel),
    bias                  (em.bias),
    solveforNames         (em.solveforNames)
 {
@@ -149,7 +149,7 @@ ErrorModel& ErrorModel::operator=(const ErrorModel& em)
 //      measurementTrip     = em.measurementTrip;
 //      participantNameList = em.participantNameList;
       noiseSigma          = em.noiseSigma;
-      noiseModel          = em.noiseModel;
+//      noiseModel          = em.noiseModel;
       bias                = em.bias;
       solveforNames       = em.solveforNames;
    }
@@ -364,8 +364,8 @@ std::string ErrorModel::GetStringParameter(const Integer id) const
    if (id == TYPE)
       return measurementType;
 
-   if (id == NOISE_MODEL)
-      return noiseModel;
+   //if (id == NOISE_MODEL)
+   //   return noiseModel;
 
    return GmatBase::GetStringParameter(id);
 }
@@ -390,19 +390,19 @@ bool ErrorModel::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
-   if (id == NOISE_MODEL)
-   {
-      if (value != "RandomConstant")
-      {
-         throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
-         return false;
-      }
-      else
-      {
-         noiseModel = value;    
-	      return true;
-      }
-   }
+   //if (id == NOISE_MODEL)
+   //{
+   //   if (value != "RandomConstant")
+   //   {
+   //      throw GmatBaseException("Error: " + GetName() + "." + GetParameterText(id) + " cannot accept '" + value +"'\n");
+   //      return false;
+   //   }
+   //   else
+   //   {
+   //      noiseModel = value;    
+	  //    return true;
+   //   }
+   //}
 
    return GmatBase::SetStringParameter(id, value);
 }

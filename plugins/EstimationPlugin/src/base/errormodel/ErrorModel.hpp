@@ -105,8 +105,8 @@ protected:
    //StringArray   participantNameList;           // It contains a list of participant name
    /// Measurement noise sigma
    Real          noiseSigma;                    // specify noise sigma of a measurement
-   /// Noise Model
-   std::string   noiseModel;                    // specify noise model. It will be "RandomConstant" for Gausian noise model.
+   ///// Noise Model
+   //std::string   noiseModel;                    // specify noise model. It will be "RandomConstant" for Gausian noise model.
    /// Measurement bias
    Real          bias;                          // specify bias of a measurement
    /// Solve-for parameters
@@ -119,7 +119,7 @@ protected:
       //TRIP,
       //STRAND,
       NOISE_SIGMA,
-      NOISE_MODEL,
+      //NOISE_MODEL,
       BIAS,
       SOLVEFORS,                              // made changes by TUAN NGUYEN
       ErrorModelParamCount
