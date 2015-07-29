@@ -75,7 +75,9 @@ RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
 //------------------------------------------------------------------------------
 RefData::RefData(const RefData &copy)
 {
-   mParameter = NULL; // This will be set during initialization
+   // Copy mParameter here for GmatFunction to work (LOJ: 2015.07.28)
+   //mParameter = NULL; // This will be set during initialization
+   mParameter = copy.mParameter;
    mActualParamName = copy.mActualParamName;
    mParamOwnerName = copy.mParamOwnerName;
    mParamDepName = copy.mParamDepName;
@@ -140,6 +142,11 @@ RefData::~RefData()
 //------------------------------------------------------------------------------
 void RefData::SetParameter(Parameter *param)
 {
+   #ifdef DEBUG_PARAM
+   MessageInterface::ShowMessage
+      ("RefData::SetParameter() <%p>'%s' entered, param=<%p>'%s'\n", this,
+       mActualParamName.c_str(), param, param ? param->GetName().c_str() : "NULL");
+   #endif
    mParameter = param;
 }
 

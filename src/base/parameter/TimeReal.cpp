@@ -22,6 +22,7 @@
 
 #include "TimeReal.hpp"
 #include "ParameterException.hpp"
+#include "MessageInterface.hpp"
 
 //#define DEBUG_TIMEREAL 1
 
@@ -195,9 +196,25 @@ bool TimeReal::Validate()
 //------------------------------------------------------------------------------
 bool TimeReal::Initialize()
 {
-   mInitialEpoch = 0.0;
-   mIsInitialEpochSet = false;
-
+   #if DEBUG_TIMEREAL
+   MessageInterface::ShowMessage
+      ("TimeReal::Initialize() <%p>'%s' entered, IsGlobal=%d\n", this, GetName().c_str(),
+       IsGlobal());
+   #endif
+   
+   RealVar::Initialize();
+   
+   // Set Parameter pointer (LOJ: 2015.07.24)
+   SetParameter(this);
+   
+   // Reset initial epoch and flag unless it is global
+   // for fix of GMT5160 LOJ: 2015.07.24)
+   if (!IsGlobal())
+   {
+      mInitialEpoch = 0.0;
+      mIsInitialEpochSet = false;
+   }
+   
    try
    {
       InitializeRefObjects();
@@ -214,6 +231,10 @@ bool TimeReal::Initialize()
          ("WARNING:  " + e.GetFullMessage() + " in " + GetName() + "\n");
    }
    
+   #if DEBUG_TIMEREAL
+   MessageInterface::ShowMessage
+      ("TimeReal::Initialize() <%p>'%s' returning true", this, GetName().c_str());
+   #endif
    return true;
 }
 

@@ -927,57 +927,6 @@ bool Function::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* FindObject(const std::string &name)
-//------------------------------------------------------------------------------
-GmatBase* Function::FindObject(const std::string &name)
-{
-   #ifdef DEBUG_FIND_OBJECT
-   MessageInterface::ShowMessage
-      ("Function::FindObject() '%s' entered, name = '%s'\n", functionName.c_str(),
-       name.c_str());
-   ShowObjectMap(objectStore, "In FindObject()", "objectStore");
-   ShowObjectMap(globalObjectStore, "In FindObject()", "globalObjectStore");
-   ShowObjectMap(&functionObjectMap, "In FindObject()", "functionObjectMap");
-   #endif
-   
-   std::string newName = name;
-   GmatBase *obj = NULL;
-   
-   // Ignore array indexing of Array
-   std::string::size_type index = name.find('(');
-   if (index != name.npos)
-      newName = name.substr(0, index);
-
-   // Check for the object in the Local Object Store (LOS) first
-   if (objectStore && objectStore->find(newName) != objectStore->end())
-      //return (*objectStore)[newName];
-      obj = (*objectStore)[newName];
-   
-   // If not found in the LOS, check the Global Object Store (GOS)
-   else if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
-      //return (*globalObjectStore)[newName];
-      obj = (*globalObjectStore)[newName];
-   
-   // Let's try SolarSystem (loj: 2008.06.12)
-   else if (solarSys && solarSys->GetBody(newName))
-      //return (GmatBase*)(solarSys->GetBody(newName));
-      obj = (GmatBase*)(solarSys->GetBody(newName));
-   
-   // If still not found, try functionObjectMap
-   // Should this moved to top?
-   else if (functionObjectMap.find(newName) != functionObjectMap.end())
-      obj = functionObjectMap[newName];
-   
-   #ifdef DEBUG_FIND_OBJECT
-   MessageInterface::ShowMessage
-      ("Function::FindObject() returning <%p>\n", obj);
-   #endif
-   //return NULL;
-   return obj;
-}
-
-
-//------------------------------------------------------------------------------
 // void ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs)
 //------------------------------------------------------------------------------
 void Function::ClearInOutArgMaps(bool deleteInputs, bool deleteOutputs)
@@ -1436,7 +1385,6 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj,
    #endif
 }
 
-
 //------------------------------------------------------------------------------
 // GmatBase* FindAutomaticObject(const std::string &name)
 //------------------------------------------------------------------------------
@@ -1457,6 +1405,90 @@ ObjectMap* Function::GetAutomaticObjectMap()
    return &automaticObjectMap;
 }
 
+//---------------------------------
+// protected
+//---------------------------------
+//------------------------------------------------------------------------------
+// GmatBase* FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Function::FindObject(const std::string &name)
+{
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindObject() <%p>'%s' entered, name = '%s'\n", this,
+       functionName.c_str(), name.c_str());
+   ShowObjectMap(objectStore, "In FindObject()", "objectStore");
+   ShowObjectMap(globalObjectStore, "In FindObject()", "globalObjectStore");
+   ShowObjectMap(&functionObjectMap, "In FindObject()", "functionObjectMap");
+   #endif
+   
+   std::string newName = name;
+   GmatBase *obj = NULL;
+   
+   // Ignore array indexing of Array
+   std::string::size_type index = name.find('(');
+   if (index != name.npos)
+      newName = name.substr(0, index);
+
+   // Check for the object in the Local Object Store (LOS) first
+   if (objectStore && objectStore->find(newName) != objectStore->end())
+      obj = (*objectStore)[newName];
+   
+   // If not found in the LOS, check the Global Object Store (GOS)
+   else if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
+      obj = (*globalObjectStore)[newName];
+   
+   // Let's try SolarSystem (loj: 2008.06.12)
+   else if (solarSys && solarSys->GetBody(newName))
+      obj = (GmatBase*)(solarSys->GetBody(newName));
+   
+   // If still not found, try functionObjectMap
+   // Should this moved to top?
+   else if (functionObjectMap.find(newName) != functionObjectMap.end())
+      obj = functionObjectMap[newName];
+   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::FindObject() <%p>'%s' returning <%p> for '%s'\n", this,
+       functionName.c_str(), obj, name.c_str());
+   #endif
+   return obj;
+}
+
+
+//------------------------------------------------------------------------------
+//bool IsAutomaticObjectGlobal(const std::string &autoObjName)
+//------------------------------------------------------------------------------
+/**
+ * Checks if the owner of automatic object such as Parameter is global object.
+ */
+//------------------------------------------------------------------------------
+bool Function::IsAutomaticObjectGlobal(const std::string &autoObjName)
+{
+   #ifdef DEBUG_AUTO_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::IsAutomaticObjectGlobal() entered, autoObjName='%s'\n",
+       autoObjName.c_str());
+   #endif
+   
+   std::string type, ownerName, dep;
+   GmatStringUtil::ParseParameter(autoObjName, type, ownerName, dep);
+   #ifdef DEBUG_AUTO_OBJECT
+   MessageInterface::ShowMessage("   ownerName='%s'\n", ownerName.c_str());
+   #endif
+   
+   bool isParamOwnerGlobal = false;
+   if (globalObjectStore->find(ownerName) != globalObjectStore->end())
+      isParamOwnerGlobal = true;
+   
+   #ifdef DEBUG_AUTO_OBJECT
+   MessageInterface::ShowMessage
+      ("Function::IsAutomaticObjectGlobal() leaving, autoObjName='%s' is %s\n",
+       autoObjName.c_str(), isParamOwnerGlobal ? "global" : "not global");
+   #endif
+
+   return isParamOwnerGlobal;
+}
 
 //------------------------------------------------------------------------------
 // void ShowObjectMap(ObjectMap *objMap, const std::string &title,
@@ -1482,7 +1514,7 @@ void Function::ShowObjectMap(ObjectMap *objMap, const std::string &title,
       ("Here is %s <%p>, it has %d objects\n", objMapName.c_str(), objMap, objMap->size());
    for (ObjectMap::iterator i = objMap->begin(); i != objMap->end(); ++i)
       MessageInterface::ShowMessage
-         ("   %40s  <%p> [%s]\n", i->first.c_str(), i->second,
+         ("   %50s  <%p> [%s]\n", i->first.c_str(), i->second,
           i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
 }
 

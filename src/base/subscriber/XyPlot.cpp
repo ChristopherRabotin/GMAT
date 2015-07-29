@@ -317,7 +317,11 @@ bool XyPlot::Initialize()
    
    #if DEBUG_XYPLOT_INIT
    MessageInterface::ShowMessage
-      ("XyPlot::Initialize() active=%d, mNumYParams=%d\n", active, mNumYParams);
+      ("\nXyPlot::Initialize() <%p>'%s' entered, active=%d, mNumYParams=%d, "
+       "mNumDataPoints=%d\n", this, GetName().c_str(), active,
+       mNumYParams, mNumDataPoints);
+   MessageInterface::ShowMessage
+      ("   IsGlobal=%d, mIsXyPlotWindowSet=%d\n", IsGlobal(), mIsXyPlotWindowSet);
    #endif
    
    // Check if there are parameters selected for XyPlot
@@ -352,71 +356,101 @@ bool XyPlot::Initialize()
    Subscriber::Initialize();
    
    bool status = false;
-   DeletePlotCurves();
    
-   if (active)
+   if (IsGlobal())
    {
-      // build plot title
-      BuildPlotTitle();
-      
-      // Create XyPlotWindow, if not exist
-      #if DEBUG_XYPLOT_INIT
-      MessageInterface::ShowMessage
-         ("XyPlot::Initialize() calling CreateXyPlotWindow()\n");
-      #endif
-      
-      PlotInterface::CreateXyPlotWindow(instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
-                                        mPlotSize[0], mPlotSize[1], isMaximized, mPlotTitle,
-                                        mXAxisTitle, mYAxisTitle, mDrawGrid);
-      
-      PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
-      mIsXyPlotWindowSet = true;
-      
-      #if DEBUG_XYPLOT_INIT
-      MessageInterface::ShowMessage
-         ("XyPlot::Initialize() Get curveTitle and penColor\n");
-      #endif
-      
-      for (int i=0; i<mNumYParams; i++)
-      {
-         // Now using wrapper for curve title so that it can display array
-         // element such as MyArray(3,3) (Fix for GMT-2370 LOJ: 2012.08.03)
-         if (mYParams[i] && yParamWrappers[i])
-         {
-            std::string curveTitle = yParamWrappers[i]->GetDescription();
-            UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
-            
-            #if DEBUG_XYPLOT_INIT
-            MessageInterface::ShowMessage("XyPlot::Initialize() curveTitle = %s\n",
-                                          curveTitle.c_str());
-            #endif
-            
-            PlotInterface::AddXyPlotCurve(instanceName, i, curveTitle, penColor);
-         }
-      }
-      
-      PlotInterface::ShowXyPlotLegend(instanceName);
       status = true;
       
       #if DEBUG_XYPLOT_INIT
-      MessageInterface::ShowMessage("XyPlot::Initialize() calling ClearXyPlotData()\n");
+      MessageInterface::ShowMessage
+         ("   <%p>'%s' is global, XyPlotWindow already exist\n", this, GetName().c_str());
       #endif
-      
-      PlotInterface::ClearXyPlotData(instanceName);
-      PlotInterface::XyPlotCurveSettings(instanceName, useLines, lineWidth, 100,
-            useMarkers, markerSize, -1);
    }
    else
    {
       #if DEBUG_XYPLOT_INIT
-      MessageInterface::ShowMessage("XyPlot::Initialize() DeleteXyPlot()\n");
+      MessageInterface::ShowMessage
+         ("   <%p>'%s' calling DeletePlotCurves())\n", this, GetName().c_str());
       #endif
+      DeletePlotCurves();
       
-      status =  PlotInterface::DeleteXyPlot(instanceName);
+      mNumDataPoints = 0;
+      
+      if (active)
+      {
+         #if DEBUG_XYPLOT_INIT
+         MessageInterface::ShowMessage
+            ("   <%p>'%s' is active, building plot title and creating XyPlotWindow)\n",
+             this, GetName().c_str());
+         #endif
+         
+         // build plot title
+         BuildPlotTitle();
+         
+         // Create XyPlotWindow, if not exist
+         #if DEBUG_XYPLOT_INIT
+         MessageInterface::ShowMessage
+            ("   <%p>'%s' calling CreateXyPlotWindow()\n", this, GetName().c_str());
+         #endif
+         
+         PlotInterface::CreateXyPlotWindow
+            (instanceName, mOldName, mPlotUpperLeft[0], mPlotUpperLeft[1],
+             mPlotSize[0], mPlotSize[1], isMaximized, mPlotTitle,
+             mXAxisTitle, mYAxisTitle, mDrawGrid);
+         
+         PlotInterface::SetXyPlotTitle(instanceName, mPlotTitle);
+         mIsXyPlotWindowSet = true;
+         
+         #if DEBUG_XYPLOT_INIT
+         MessageInterface::ShowMessage
+            ("   <%p>'%s' setting curveTitle and penColor\n", this, GetName().c_str());
+         #endif
+         
+         for (int i=0; i<mNumYParams; i++)
+         {
+            // Now using wrapper for curve title so that it can display array
+            // element such as MyArray(3,3) (Fix for GMT-2370 LOJ: 2012.08.03)
+            if (mYParams[i] && yParamWrappers[i])
+            {
+               std::string curveTitle = yParamWrappers[i]->GetDescription();
+               UnsignedInt penColor = mYParams[i]->GetUnsignedIntParameter("Color");
+               
+               #if DEBUG_XYPLOT_INIT
+               MessageInterface::ShowMessage
+                  ("   <%p>'%s' curveTitle = %s\n", this, GetName().c_str(),
+                   curveTitle.c_str());
+               #endif
+               
+               PlotInterface::AddXyPlotCurve(instanceName, i, curveTitle, penColor);
+            }
+         }
+         
+         PlotInterface::ShowXyPlotLegend(instanceName);
+         status = true;
+         
+         #if DEBUG_XYPLOT_INIT
+         MessageInterface::ShowMessage("   <%p>'%s' calling ClearXyPlotData()\n");
+         #endif
+         
+         PlotInterface::ClearXyPlotData(instanceName);
+         PlotInterface::XyPlotCurveSettings(instanceName, useLines, lineWidth, 100,
+                                            useMarkers, markerSize, -1);
+      }
+      else
+      {
+         #if DEBUG_XYPLOT_INIT
+         MessageInterface::ShowMessage
+            ("   <%p>'%s' is not active, calling PlotInterface::DeleteXyPlot()\n",
+             this, GetName().c_str());
+         #endif
+         
+         status =  PlotInterface::DeleteXyPlot(instanceName);
+      }
    }
    
    #if DEBUG_XYPLOT_INIT
-   MessageInterface::ShowMessage("XyPlot::Initialize() leaving stauts=%d\n", status);
+   MessageInterface::ShowMessage
+      ("XyPlot::Initialize() <%p>'%s' leaving, stauts=%d\n", this, GetName().c_str(), status);
    #endif
    
    return status;
@@ -1469,6 +1503,10 @@ void XyPlot::BuildPlotTitle()
 //------------------------------------------------------------------------------
 bool XyPlot::ClearYParameters()
 {
+   #ifdef DEBUG_CLEAR
+   MessageInterface::ShowMessage
+      ("XyPlot::ClearYParameters() <%p>'%s' entered\n", this, GetName().c_str());
+   #endif
    DeletePlotCurves();
    mYParams.clear();
    mYParamNames.clear();
@@ -1479,6 +1517,10 @@ bool XyPlot::ClearYParameters()
    mYAxisTitle = "";
    mIsXyPlotWindowSet = false;
    ClearWrappers(false, true);
+   #ifdef DEBUG_CLEAR
+   MessageInterface::ShowMessage
+      ("XyPlot::ClearYParameters() <%p>'%s' returning true\n", this, GetName().c_str());
+   #endif
    return true;
 }
 
@@ -1687,8 +1729,8 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
    
    #if DEBUG_XYPLOT_UPDATE > 1
    MessageInterface::ShowMessage
-      ("\nXyPlot::Distribute() entered. isEndOfReceive=%d, active=%d, runState=%d\n",
-       isEndOfReceive, active, runstate);
+      ("\nXyPlot::Distribute() <%p>'%s' entered. isEndOfReceive=%d, active=%d, "
+       "runState=%d\n", this, GetName().c_str(), isEndOfReceive, active, runstate);
    #endif
    
    if (isEndOfReceive)
@@ -1697,17 +1739,39 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
       if (mSolverIterations == "None" &&
           ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
                 (runstate == Gmat::SOLVING)))
+      {
+         #if DEBUG_XYPLOT_UPDATE > 1
+         MessageInterface::ShowMessage
+            ("XyPlot::Distribute() <%p>'%s' just returning true, end of data "
+             "recieved and not writing solver data\n");
+         #endif
+         
          return true;
+      }
       
       if (active)
+      {
+         #if DEBUG_XYPLOT_UPDATE > 1
+         MessageInterface::ShowMessage
+            ("XyPlot::Distribute() <%p>'%s' returning PlotInterface::RefreshXyPlot(), "
+             "end of data received\n");
+         #endif
          return PlotInterface::RefreshXyPlot(instanceName);
+      }
    }
    
    // if targeting and draw target is None, just return
    if (mSolverIterations == "None" &&
        ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
              (runstate == Gmat::SOLVING)))
+   {
+      #if DEBUG_XYPLOT_UPDATE > 1
+      MessageInterface::ShowMessage
+         ("XyPlot::Distribute() <%p>'%s' just returning true, not writing solver data\n");
+      #endif
+      
       return true;
+   }
    
    if (len > 0)
    {

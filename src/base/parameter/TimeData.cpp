@@ -30,6 +30,7 @@
 
 //#define DEBUG_TIMEDATA
 //#define DEBUG_TIMEDATA_OBJNAME
+//#define DEBUG_TIMEDATA_GET
 
 //---------------------------------
 // static data
@@ -43,7 +44,7 @@ const std::string
 TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 {
    "Spacecraft", //loj: use spacecraft to get current time?
-   "SpacePoint" // can use times for non-Spacecraft SpacePoints
+   "SpacePoint"  // can use times for non-Spacecraft SpacePoints
 }; 
 
 
@@ -61,10 +62,20 @@ TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
 TimeData::TimeData(const std::string &name, Gmat::ObjectType paramOwnerType)
    : RefData(name, paramOwnerType)
 {
+   #ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage
+      ("TimeData::TimeData(default) <%p>'%s' entered\n", this, mActualParamName.c_str());
+   #endif
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
    mSpacecraft = NULL;
    mSpacePoint = NULL;
+   #ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage
+      ("TimeData::TimeData(default) <%p>'%s' leaving, mInitialEpoch=%f, "
+       "mIsInitialEpochSet=%d\n", this, mActualParamName.c_str(),
+       mInitialEpoch, mIsInitialEpochSet);
+   #endif
 }
 
 
@@ -80,10 +91,22 @@ TimeData::TimeData(const std::string &name, Gmat::ObjectType paramOwnerType)
 TimeData::TimeData(const TimeData &copy)
    : RefData(copy)
 {
+   #ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage
+      ("TimeData::TimeData(copy) <%p>'%s' entered, copy.mInitialEpoch=%f, "
+       "copoy.mIsInitialEpochSet=%d\n", this, mActualParamName.c_str(),
+       copy.mInitialEpoch, copy.mIsInitialEpochSet);
+   #endif
    mInitialEpoch      = copy.mInitialEpoch;
    mIsInitialEpochSet = copy.mIsInitialEpochSet;
    mSpacecraft        = copy.mSpacecraft;
    mSpacePoint        = copy.mSpacePoint;
+   #ifdef DEBUG_CONSTRUCTOR
+   MessageInterface::ShowMessage
+      ("TimeData::TimeData(copy) <%p>'%s' leaving, mInitialEpoch=%f, "
+       "mIsInitialEpochSet=%d\n", this, mActualParamName.c_str(),
+       mInitialEpoch, mIsInitialEpochSet);
+   #endif
 }
 
 
@@ -147,6 +170,12 @@ bool TimeData::IsInitialEpochSet()
 //------------------------------------------------------------------------------
 void TimeData::ClearIsInitialEpochSet()
 {
+   #ifdef DEBUG_CLEAR
+   MessageInterface::ShowMessage
+      ("TimeData::ClearIsInitialEpochSet() <%p>'%s' Setting mIsInitialEpochSet to false\n",
+       this, mActualParamName.c_str());
+   #endif
+   
    mIsInitialEpochSet = false;
 }
 
@@ -182,8 +211,7 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
    
    #ifdef DEBUG_TIMEDATA
    MessageInterface::ShowMessage
-      ("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
-       mInitialEpoch);
+      ("TimeData::SetInitialEpoch() mInitialEpoch is set to %f\n", mInitialEpoch);
    #endif
 }
 
@@ -204,11 +232,11 @@ Real TimeData::GetTimeReal(Integer id)
    
 //   Real a1Mjd = mSpacecraft->GetEpoch();
    Real a1Mjd = mSpacePoint->GetEpoch();
-
+   
    #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
-      ("TimeData::GetTimeReal() mSpacecraft=<%p>'%s', a1mjd=%f\n",
-       mSpacecraft, mSpacecraft->GetName().c_str(), a1mjd);
+      ("TimeData::GetTimeReal() mSpacecraft=<%p>'%s', a1Mjd=%f\n",
+       mSpacecraft, mSpacecraft->GetName().c_str(), a1Mjd);
    #endif
    
    Real time = -999.999;
@@ -248,7 +276,7 @@ Real TimeData::GetTimeReal(Integer id)
       ("TimeData::GetTimeReal() id=%d, a1Mjd=%.10f, return time=%.10f\n",
        id, a1Mjd, time);
    #endif
-
+   
    return time;
 }
 
@@ -440,28 +468,54 @@ void TimeData::SetTimeString(Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 Real TimeData::GetElapsedTimeReal(Integer id)
 {
+   #ifdef DEBUG_TIMEDATA_GET
+   MessageInterface::ShowMessage
+      ("TimeData::GetElapsedTimeReal() <%p>'%s' entered, id=%d\n", this,
+       mActualParamName.c_str(), id);
+   #endif
+   
    Real a1mjd = GetTimeReal(A1);
+   Real retVal = GmatBase::REAL_PARAMETER_UNDEFINED;
+   
+   #ifdef DEBUG_TIMEDATA_GET
+   MessageInterface::ShowMessage
+      ("   a1mjd=%f, mInitialEpoch=%f, mIsInitialEpochSet=%d\n", a1mjd,
+       mInitialEpoch, mIsInitialEpochSet);
+   #endif
    
    if (!mIsInitialEpochSet)
    {
       mInitialEpoch = a1mjd;
       mIsInitialEpochSet = true;
+      #ifdef DEBUG_TIMEDATA
+      MessageInterface::ShowMessage
+         ("   mInitialEpoch is set to %f and mIsInitialEpochSet to true \n",
+          mInitialEpoch);
+      #endif
    }
-
+   
    switch (id)
    {
    //case YEARS:
    //case MONTHS:
    case DAYS:
-      return a1mjd - mInitialEpoch;
+      retVal = a1mjd - mInitialEpoch;
+      break;
    //case HOURS:
    //case MINS:
    case SECS:
-      return (a1mjd - mInitialEpoch)* GmatTimeConstants::SECS_PER_DAY;
+      retVal =  (a1mjd - mInitialEpoch)* GmatTimeConstants::SECS_PER_DAY;
+      break;
    default:
       throw ParameterException("TimeData::GetElapsedTimeReal() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
    }
+   #ifdef DEBUG_TIMEDATA_GET
+   MessageInterface::ShowMessage
+      ("TimeData::GetElapsedTimeReal() <%p>'%s' id=%d, returning %f\n", this,
+       mActualParamName.c_str(), id, retVal);
+   #endif
+   return retVal;
 }
 
 
@@ -696,16 +750,23 @@ bool TimeData::ValidateRefObjects(GmatBase *param)
 void TimeData::InitializeRefObjects()
 {
    #ifdef DEBUG_TIMEDATA
-   MessageInterface::ShowMessage("TimeData::InitializeRefObjects() entered\n");
+   MessageInterface::ShowMessage
+      ("TimeData::InitializeRefObjects() <%p>'%s' entered, mIsInitialEpochSet=%d\n",
+       this, mActualParamName.c_str(), mIsInitialEpochSet);
+   MessageInterface::ShowMessage
+      ("   IsParameterGlobal=%d\n", GetParameter() ? GetParameter()->IsGlobal() : -123.123);
    #endif
    
 //   mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    mSpacePoint = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
    if (!mSpacePoint)
       mSpacePoint = (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
-
+   
    #ifdef DEBUG_TIMEDATA
-   MessageInterface::ShowMessage("   mSpacePoint=<%p>\n", mSpacePoint);
+   MessageInterface::ShowMessage
+      ("   mSpacePoint=<%p>'%s', mSpacePoint->IsGlobal=%d\n", mSpacePoint,
+       mSpacePoint ? mSpacePoint->GetName().c_str() : "NULL",
+       mSpacePoint ? mSpacePoint->IsGlobal() : -123.123);
    #endif
    
 //   if (mSpacecraft == NULL)

@@ -36,7 +36,7 @@
 
 //#define DEBUG_COLOR
 //#define DBGLVL_INIT 2
-//#define DBGLVL_DATA 2
+//#define DBGLVL_DATA 1
 //#define DBGLVL_DATA_LABELS 1
 //#define DBGLVL_UPDATE 2
 //#define DBGLVL_ADD 1
@@ -2194,7 +2194,7 @@ Integer OrbitPlot::BufferOrbitData(const Real *dat, Integer len)
 {
    #if DBGLVL_DATA
    MessageInterface::ShowMessage
-      ("OrbitPlot::BufferOrbitData() '%s' entered, len=%d\n", GetName().c_str(),
+      ("OrbitPlot::BufferOrbitData() <%p>'%s' entered, len=%d\n", this, GetName().c_str(),
        len);
    #endif
    

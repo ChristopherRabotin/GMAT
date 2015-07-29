@@ -33,7 +33,7 @@
 
 //#define DO_NOT_EXECUTE_NESTED_GMAT_FUNCTIONS
 
-// Deleting subscribers needs more testing
+// Deleting subscribers seems to work as of 2015.07.27
 //#define __DO_NOT_DELETE_SUBSCRIBERS__
 
 //#define DEBUG_FUNCTION_MANAGER
@@ -46,6 +46,7 @@
 //#define DEBUG_FM_FINALIZE
 //#define DEBUG_FM_STACK
 //#define DEBUG_OBJECT_MAP
+//#define DEBUG_INPUT
 //#define DEBUG_WRAPPERS
 //#define DEBUG_SUBSCRIBER
 //#define DEBUG_CLEANUP
@@ -364,6 +365,12 @@ Function* FunctionManager::GetFunction() const
 //------------------------------------------------------------------------------
 void FunctionManager::AddInput(const std::string &withName, Integer atIndex)
 {
+   #ifdef DEBUG_INPUT
+   MessageInterface::ShowMessage
+      ("FunctionManager::AddInput() entered, name='%s', index=%d\n", withName.c_str(),
+       atIndex);
+   #endif
+   
    // -999 means to put it at the end of the list (default value/behavior)
    if ((atIndex == -999) || (atIndex == (Integer) passedIns.size()))
    {
@@ -373,8 +380,17 @@ void FunctionManager::AddInput(const std::string &withName, Integer atIndex)
    
    if ((atIndex < 0) || (atIndex > (Integer) passedIns.size()))
       throw FunctionException("FunctionManager:: input index out of range - unable to set.\n");
+   
    // replace an entry
-   passedIns.at(atIndex) = withName;   
+   passedIns.at(atIndex) = withName;
+   
+   #ifdef DEBUG_INPUT
+   for (UnsignedInt i = 0; i < passedIns.size(); i++)
+      MessageInterface::ShowMessage("   passedIns[%d] = '%s'\n", i, passedIns[i].c_str());
+   MessageInterface::ShowMessage
+      ("FunctionManager::AddInput() entered, name='%s', index=%d\n", withName.c_str(),
+       atIndex);
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -444,6 +460,11 @@ void FunctionManager::SetInternalCoordinateSystem(CoordinateSystem *intCS)
 //------------------------------------------------------------------------------
 bool FunctionManager::SetInputWrapper(Integer index, ElementWrapper *ew)
 {
+   #ifdef DEBUG_INPUT
+   MessageInterface::ShowMessage
+      ("FunctionManager::SetInputWrapper() entered, index=%d, ew=<%p>\n", index, ew);
+   #endif
+   
    if (ew == NULL)
       return false;
    
@@ -452,8 +473,7 @@ bool FunctionManager::SetInputWrapper(Integer index, ElementWrapper *ew)
    
    #ifdef DEBUG_INPUT
    MessageInterface::ShowMessage
-      ("FunctionManager::SetInputWrapper() entered, index=%d, numWrappers=%d, "
-       "formalInput='%s'\n", index, numWrappers, formalInput.c_str());
+      ("   numWrappers=%d, formalInput='%s'\n", numWrappers, formalInput.c_str());
    #endif
    
    if (index < 0 && index >= numWrappers)
@@ -558,17 +578,23 @@ ElementWrapper* FunctionManager::GetInputWrapper(Integer index)
 //------------------------------------------------------------------------------
 bool FunctionManager::SetPassedInput(Integer index, GmatBase *obj, bool &inputAdded)
 {
-   inputAdded = false;
-   
-   if (obj == NULL)
-      return false;
-   
    #ifdef DEBUG_INPUT
    MessageInterface::ShowMessage
       ("FunctionManager::SetPassedInput() entered, index=%d, obj=<%p><%s>'%s'\n",
        index, obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
    
+   inputAdded = false;
+   
+   if (obj == NULL)
+   {
+      #ifdef DEBUG_INPUT
+      MessageInterface::ShowMessage
+         ("FunctionManager::SetPassedInput() returning false, obj is NULL\n");
+      #endif
+      return false;
+   }
+      
    if (obj->GetTypeName() == "Variable")
    {
       #ifdef DEBUG_INPUT
@@ -2051,7 +2077,7 @@ bool FunctionManager::HandleCallStack()
       #endif
       currentFunction->Finalize();
       
-      // Unsubscribe subscribers since function run is completed
+      // Unsubscribe local subscribers since function run is completed
       UnsubscribeSubscribers(functionObjectStore);
       
       // delete cloned object store
@@ -2336,11 +2362,17 @@ void FunctionManager::Cleanup()
 //------------------------------------------------------------------------------
 // void UnsubscribeSubscribers(ObjectMap *om)
 //------------------------------------------------------------------------------
+/**
+ * Unsubscribes local subscribers. Assumes input object map contains local
+ * objects.
+ */
+//------------------------------------------------------------------------------
 void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
 {
    #ifdef DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage("FunctionManager::UnsubscribeSubscribers() entered\n");
    #endif
+   bool write2ndPlotWarning = false;
    std::map<std::string, GmatBase *>::iterator omi;
    for (omi = om->begin(); omi != om->end(); ++omi)
    {
@@ -2349,8 +2381,9 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
          GmatBase *obj = omi->second;
          if (obj->IsOfType(Gmat::SUBSCRIBER))
          {
-            // Finalize subscriber
+            // Finalize local subscriber
             Subscriber *sub = (Subscriber*)obj;
+            
             #ifdef DEBUG_SUBSCRIBER
             MessageInterface::ShowMessage
                ("   Calling <%p>'%s'->TakeAction('Finalize')\n", sub, sub->GetName().c_str());
@@ -2361,8 +2394,18 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
             #ifdef DEBUG_SUBSCRIBER
             MessageInterface::ShowMessage
                ("   '%s' Unsubscribe <%p>'%s' from the publisher <%p>\n",
-                functionName.c_str(), sub, (omi->second)->GetName().c_str(), publisher);
+                functionName.c_str(), sub, sub->GetName().c_str(), publisher);
             #endif
+            
+            if (sub->IsOfType("Plot"))
+            {
+               // Write warning about local plots are deleted
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** The local %s named '%s' was closed "
+                   "upon exit of the function '%s'.\n", sub->GetTypeName().c_str(),
+                   sub->GetName().c_str(), functionName.c_str());
+               write2ndPlotWarning = true;
+            }
             
             // Unsubscribe subscriber
             if (publisher)
@@ -2379,6 +2422,14 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
          }
       }
    }
+   
+   if (write2ndPlotWarning)
+   {
+      MessageInterface::ShowMessage
+         ("*** Please make plots and drawing objects Global in the main script and "
+          "in the function to make plots remain open during the mission run.\n");
+   }
+   
    #ifdef DEBUG_SUBSCRIBER
    MessageInterface::ShowMessage("FunctionManager::UnsubscribeSubscribers() leaving\n");
    #endif
@@ -2387,6 +2438,10 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
 
 //------------------------------------------------------------------------------
 // bool EmptyObjectMap(ObjectMap *om, const std::string &mapID)
+//------------------------------------------------------------------------------
+/**
+ * Deletes local object map.
+ */
 //------------------------------------------------------------------------------
 bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
 {   
@@ -2423,11 +2478,17 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             //=============================================================
             #ifdef __DO_NOT_DELETE_SUBSCRIBERS__
             //=============================================================
+            GmatBase *obj = omi->second;
+            
+            #ifdef DEBUG_CLEANUP
+            MessageInterface::ShowMessage
+               ("   The subscriber <%p>'%s' will remain in the Publisher and will "
+                "not be deleted.\n", functionName.c_str(), obj, obj->GetName().c_str());
+            #endif
             
             // for now, don't delete subscribers as the Publisher still points to them and
             // bad things happen at the end of the run if they disappear
             #ifdef DEBUG_MEMORY
-            GmatBase *obj = omi->second;
             MessageInterface::ShowMessage
                ("*** FunctionManager::EmptyObjectMap() should delete <%p> <%s> '%s'\n",
                 obj, obj->GetTypeName().c_str(), obj->GetName().c_str());

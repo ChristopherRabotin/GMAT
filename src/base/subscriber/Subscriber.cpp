@@ -323,13 +323,27 @@ Subscriber::~Subscriber()
 //------------------------------------------------------------------------------
 bool Subscriber::Initialize()
 {
-   isEndOfReceive = false;
-   isEndOfDataBlock = false;
-   isEndOfRun = false;
-   isInitialized = false;
-   isFinalized = false;
-   isDataOn = true;
-   isDataStateChanged = false;
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("Subscriber::Initialize() <%p>'%s' entered, IsGlobal=%d\n", this,
+       GetName().c_str(), IsGlobal());
+   #endif
+   
+   if (!IsGlobal())
+   {
+      isEndOfReceive = false;
+      isEndOfDataBlock = false;
+      isEndOfRun = false;
+      isInitialized = false;
+      isFinalized = false;
+      isDataOn = true;
+      isDataStateChanged = false;
+   }
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("Subscriber::Initialize() <%p>'%s' returning true\n", this, GetName().c_str());
+   #endif
    return true;
 }
 
@@ -1824,8 +1838,9 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
 {
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("\nSubscriber::SetWrapperReference() entered, this='%s', obj=<%p>, name='%s'\n",
-       GetName().c_str(), obj, name.c_str());
+      ("\nSubscriber::SetWrapperReference() <%p>'%s' entered, obj=<%p>, name='%s', "
+       "obj->IsGlobal()=%d\n", this, GetName().c_str(), obj, name.c_str(),
+       obj->IsGlobal());
    MessageInterface::ShowMessage
       ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
        xWrapperObjectNames.size(), yWrapperObjectNames.size());
@@ -2026,8 +2041,9 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
    
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("\nSubscriber::SetActualWrapperReference() entered, obj=<%p>'%s', name='%s', size=%d\n",
-       obj, obj->GetName().c_str(), name.c_str(), sz);
+      ("\nSubscriber::SetActualWrapperReference() <%p>'%s' entered, obj=<%p>'%s', "
+       "name='%s', size=%d\n", this, GetName().c_str(), obj, obj->GetName().c_str(),
+       name.c_str(), sz);
    for (unsigned int i = 0; i < wrappers.size(); i++)
       MessageInterface::ShowMessage
          ("   wrappers[%d] = '%s'\n", i, wrappers[i] ? wrappers[i]->GetDescription().c_str() : "NULL");

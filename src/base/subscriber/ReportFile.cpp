@@ -354,6 +354,10 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
 bool ReportFile::WriteData(WrapperArray wrapperArray)
 {
+   #if DBGLVL_WRITE_DATA > 0
+   MessageInterface::ShowMessage
+      ("ReportFile::WriteData() entered, wrapperArray.size()=%d\n", wrapperArray.size());
+   #endif
    Integer numData = wrapperArray.size();
    UnsignedInt maxRow = 1;
    Real rval = -9999.999;
@@ -431,7 +435,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             else
                output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
             #ifdef DEBUG_REAL_DATA
-               MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+            MessageInterface::ShowMessage
+               ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
             #endif
             break;
          }
@@ -440,7 +445,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             Gmat::ParameterType dataType = wrapperArray[i]->GetDataType();
             #if DBGLVL_WRITE_DATA > 1
             MessageInterface::ShowMessage
-               ("      It's data type is %d\n", dataType);
+               ("      It's data type is %d, PARAMETER_WT\n", dataType);
             #endif
             switch (dataType)
             {
@@ -452,7 +457,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   else
                      output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
                   #ifdef DEBUG_REAL_DATA
-                     MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+                  MessageInterface::ShowMessage
+                     ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
                   #endif
                   break;
                }
@@ -1843,6 +1849,57 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
           this, GetName().c_str());
       #endif
       return true;
+   }
+   
+   
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this ReportFile is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.07.14)
+   if (!yParamWrappers.empty())
+   {
+      if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+      {
+         #if DBGLVL_REPORTFILE_DATA > 0
+         MessageInterface::ShowMessage
+         ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+          GetName().c_str(), IsGlobal() ? "yes" : "no", IsLocal() ? "yes" : "no");
+         #endif
+         
+         // By this time yParamWrapper should not be empty, 
+         GmatBase *refObj = yParamWrappers[0]->GetRefObject();
+         if (refObj)
+         {
+            #if DBGLVL_REPORTFILE_DATA > 0
+            MessageInterface::ShowMessage
+               ("   yParamWrappers[0]->GetRefObject() = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+                refObj, refObj->GetTypeName().c_str(), refObj->GetName().c_str(), refObj->IsGlobal(),
+                refObj->IsLocal());
+            #endif
+            
+            // Skip if this ReportFile is not a global nor a local object
+            if (!IsGlobal() && !IsLocal())
+            {
+               #if DBGLVL_REPORTFILE_DATA > 0
+               MessageInterface::ShowMessage
+                  ("ReportFile::Distribute() this=<%p>'%s' returning true, data is "
+                   "from a function and this subscriber is local\n", this, GetName().c_str());
+               #endif
+               return true;
+            }
+            
+            // Skip if this reporting Parameter is not a global nor a local object
+            if (!(refObj->IsGlobal()) && !(refObj->IsLocal()))
+            {
+               #if DBGLVL_REPORTFILE_DATA > 0
+               MessageInterface::ShowMessage
+                  ("ReportFile::Distribute() this=<%p>'%s' returning true, data is "
+                   "from a function and reporting item is not global nor local\n", this,
+                   GetName().c_str());
+               #endif
+               return true;
+            }
+         }
+      }
    }
    
    // Skip duplicate data.

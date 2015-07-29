@@ -589,7 +589,7 @@ bool OrbitView::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   Calling PlotInterface::InitializeGlPlot()\n");
+            ("   Calling PlotInterface::InitializeGlPlot() and setting isInitialized to true\n");
          #endif
          PlotInterface::InitializeGlPlot(instanceName);
          
