@@ -299,8 +299,8 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
          // will have higher priority in search path for the new file path implementation.
          // (LOJ: 2014.07.09)
          AddMatlabFunctionPath(newDir);
-		 //Python
-		 AddPythonModulePath(newDir);
+//         //Python
+//         AddPythonModulePath(newDir);
       }
       else
          return false;
@@ -2713,11 +2713,21 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
    return mMatlabFunctionFullPaths;
 }
 
+
+//------------------------------------------------------------------------------
+// void AddPythonModulePath(const std::string& path)
+//------------------------------------------------------------------------------
+/**
+ * Adds a folder to the buffer for the Python search path
+ *
+ * @param path The new folder that may contain Python modules
+ */
+//------------------------------------------------------------------------------
 void FileManager::AddPythonModulePath(const std::string& path)
 {
 #ifdef DEBUG_FUNCTION_PATH
 	MessageInterface::ShowMessage
-		("FileManager::AddPythonFunctionPath() Adding %s to PythonFunctionPath\n",
+		("FileManager::AddPythonModulePath() Adding %s to PythonModulePath\n",
 		path.c_str());
 #endif
 
@@ -2735,7 +2745,7 @@ void FileManager::AddPythonModulePath(const std::string& path)
 	while (pos != mPythonFunctionPaths.end())
 	{
 		MessageInterface::ShowMessage
-			("   mPythonFunctionPaths=%s\n", (*pos).c_str());
+			("   mPythonModulePaths=%s\n", (*pos).c_str());
 		++pos;
 	}
 #endif
