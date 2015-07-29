@@ -50,6 +50,7 @@ PLUGIN                 = ./plugins/libMatlabInterfaced
 PLUGIN                 = ./plugins/libFminconOptimizerd
 PLUGIN                 = ./plugins/libDataInterfaced
 PLUGIN                 = ./plugins/libProductionPropagatorsd
+PLUGIN                 = ./plugins/libPythonInterfaced
 
 # Alpha plugins
 #PLUGIN                = ./libCInterfaced
@@ -88,6 +89,8 @@ MEASUREMENT_PATH       = OUTPUT_PATH/
 VEHICLE_EPHEM_PATH     = OUTPUT_PATH/
 #-----------------------------------------------------------
 GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
+#-----------------------------------------------------------
+PYTHON_MODULE_PATH     = ROOT_PATH/userfunctions/python
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
