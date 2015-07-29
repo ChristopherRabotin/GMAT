@@ -1129,9 +1129,9 @@ void DifferentialCorrector::CalculateParameters()
 
             std::vector<Real> s, y, numerator;
             // Set the size for the vectors before loading them
-            s.reserve(variableCount);
-            y.reserve(goalCount);
-            numerator.reserve(goalCount);
+            s.resize(variableCount);
+            y.resize(goalCount);
+            numerator.resize(goalCount);
 
             Real denom = 0.0;
 
@@ -1173,10 +1173,10 @@ void DifferentialCorrector::CalculateParameters()
          {
             std::vector<Real> s, y, temp, v;
             // Set the size for the vectors before loading them
-            s.reserve(variableCount);
-            y.reserve(goalCount);
-            temp.reserve(variableCount);
-            v.reserve(goalCount);
+            s.resize(variableCount);
+            y.resize(goalCount);
+            temp.resize(variableCount);
+            v.resize(goalCount);
 
             for ( Integer i = 0; i < variableCount; ++i )
                s[i] = variable[i] - savedVariable[i];
