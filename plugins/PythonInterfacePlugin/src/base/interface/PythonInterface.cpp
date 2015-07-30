@@ -212,6 +212,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
  
 #ifdef IS_PY3K
    //convert char to wchar_t
+   MessageInterface::ShowMessage("System path is %s\n", destPath);
    mbstowcs(s3K, destPath, 8192);
    PySys_SetPath(s3K);
 #else
@@ -237,7 +238,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 */
 //------------------------------------------------------------------------------
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                                const std::string &formatIn, const std::vector<void *> &argIn, Gmat::ParameterType paramType)
+                                                const std::string &formatIn, const std::vector<void *> &argIn, Gmat::ParameterType paramType, Integer row, Integer col)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
