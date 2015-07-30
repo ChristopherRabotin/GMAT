@@ -284,14 +284,15 @@ bool CallPythonFunction::Execute()
    // send the out parameters
    std::vector<void *> argOut;
    Gmat::ParameterType paramType = Gmat::UNKNOWN_PARAMETER_TYPE;
+   Integer row = 1; Integer col = 1;
 
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
-   SendInParam(formatIn, argIn, paramType);
+   SendInParam(formatIn, argIn, paramType, row, col);
    MessageInterface::ShowMessage("parameter type is %d\n", paramType);
 
   // Next, call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType);
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType, row, col);
  
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
@@ -492,7 +493,7 @@ Integer CallPythonFunction::FillOutputList()
 * @return void
 */
 //------------------------------------------------------------------------------
-void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType& paramType)
+void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType &paramType, Integer &row, Integer &col)
 {
    for (unsigned int i = 0; i < mInputList.size(); i++)
    {
@@ -541,6 +542,9 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
             {
                Integer r = arr->GetRowCount();
                Integer c = arr->GetColCount();
+               row = r;
+               col = c;
+
                for (int i = 0; i < r; ++i)
                {
                   for (int j = 0; j < c; ++j)
