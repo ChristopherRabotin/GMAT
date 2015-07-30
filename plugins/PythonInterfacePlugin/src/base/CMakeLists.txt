@@ -16,7 +16,7 @@ MESSAGE("GMAT PythonInterface Plugin setup " ${VERSION})
 
 # ====================================================================
 # Major error checks
-if(NOT Python_LIB_DIR)
+if(NOT PYTHON_LIB_DIR)
   MESSAGE(WARNING "Skipping PythonInterface: Python missing")
   RETURN()
 endif()
@@ -50,22 +50,6 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-TARGET_LINK_LIBRARIES(${TargetName} ${PYTHON_LIBRARY})
-
-# Set RPATH to find shared libraries in default locations on Mac/Linux
-if(UNIX)
-  if(APPLE)
-    if(GMAT_MAC_APPBUNDLE_PATH)
-      SET(MAC_BASEPATH "../Frameworks/") # GmatBase and wxLibs in Frameworks
-    else()
-      SET(MAC_BASEPATH ";@loader_path/libwx/") # Separate base/wx dirs
-    endif()
-    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "@loader_path/${MAC_BASEPATH}"
-      )
-  else()
-    SET_TARGET_PROPERTIES(${TargetName} PROPERTIES INSTALL_RPATH
-      "\$ORIGIN/;\$ORIGIN/libwx/"
-      )
-  endif()
-endif()
+set(PYTHON_LIB ${PYTHON_LIB_DIR}/${PYTHON_LIBRARY}) 
+MESSAGE(STATUS "Python Library: " ${PYTHON_LIB})
+TARGET_LINK_LIBRARIES(${TargetName} ${PYTHON_LIB})

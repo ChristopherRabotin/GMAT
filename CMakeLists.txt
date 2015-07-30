@@ -199,14 +199,19 @@ endif()
 
 # Find Python
 MESSAGE(STATUS "Searching for Python")
-SET(Python_LIB_DIR "" CACHE PATH "Path to user-specified Python location. Leave empty to auto-find Python.")
-MESSAGE(STATUS "Python dir set")
-FIND_PACKAGE(PythonLibs)
+SET(PYTHON_DIR "${PROJECT_SOURCE_DIR}/depends/Python")
+SET(PYTHON_LIBRARY "python34.lib")
+SET(PYTHON_LIB_DIR "" CACHE PATH "Path to location of the Python library.")
+SET(PYTHON_INCLUDE_DIR "" CACHE PATH "Path to location of python.h")
+MESSAGE(STATUS "Please set the Python locations")
+# FIND_PACKAGE(PythonLibs)
 
-if(Python_LIB_DIR)
-  MESSAGE(STATUS "Found Python: " ${Python_Lib_DIR})
+MESSAGE(STATUS "Python Library: " ${PYTHON_LIBRARY})
+
+if(PYTHON_LIB_DIR)
+  MESSAGE(STATUS "Found Python: " ${PYTHON_LIB_DIR})
 else()
-  MESSAGE(WARNING "Python NOT FOUND. Set Python_LIBRARY to your Python library, Python_LIB_DIR to your Python library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
+  MESSAGE(WARNING "Python NOT FOUND. Set PYTHON_LIB_DIR to your Python34.lib library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
 endif()
 
 # ====================================================================
