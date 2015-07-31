@@ -33,9 +33,9 @@
 #include "ContactEvent.hpp"
 
 //#define DEBUG_SET
-#define DEBUG_SETREF
+//#define DEBUG_SETREF
 //#define DEBUG_CONTACT_LOCATOR_WRITE
-#define DEBUG_CONTACT_EVENTS
+//#define DEBUG_CONTACT_EVENTS
 //#define DEBUG_INIT_FINALIZE
 //#define DEBUG_CONTACTLOCATOR_INIT
 
@@ -373,9 +373,18 @@ bool ContactLocator::SetStringParameter(const Integer id,
    }
    if (id == STATIONS)
    {
+      #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("--- Attempting to add a GS to list of ground stations ...\n");
+      #endif
       if (find(stationNames.begin(), stationNames.end(), value) ==
             stationNames.end())
+      {
          stationNames.push_back(value);
+         #ifdef DEBUG_SET
+            MessageInterface::ShowMessage("--- Just added \"%s\" to list of ground stations ...\n",
+                  value.c_str());
+         #endif
+      }
       return true;
    }
 
@@ -429,15 +438,30 @@ bool ContactLocator::SetStringParameter(const Integer id,
 {
    if (id == STATIONS)
    {
-      if (index < (Integer)stationNames.size())
+      #ifdef DEBUG_SET
+         MessageInterface::ShowMessage("--- Attempting to add a GS (index = %d) to list of ground stations ...\n", index);
+      #endif
+      if (find(stationNames.begin(), stationNames.end(), value) == stationNames.end())
       {
-         stationNames[index] = value;
-         return true;
+         if (index < (Integer)stationNames.size())
+         {
+            stationNames[index] = value;
+            return true;
+         }
+         else
+         {
+            stationNames.push_back(value);
+            return true;
+         }
       }
       else
       {
-         stationNames.push_back(value);
+         // ignore duplicate station names, for now
          return true;
+//         std::string errmsg = "Observer ";
+//         errmsg += value + " is already in list for ContactLocator ";
+//         errmsg += instanceName + ".  Each observer must be listed only once.\n";
+//         throw EventException(errmsg);
       }
    }
 
@@ -1020,7 +1044,7 @@ bool ContactLocator::ReportEventData(const std::string &reportNotice)
    theReport << "Target: " << itsName << "\n\n";
 
    Integer     sz       = (Integer) contactResults.size();
-   std::string noEvents = GetNoEventsString("Contact");
+   std::string noEvents = GetNoEventsString("contact");
 
    #ifdef DEBUG_CONTACT_LOCATOR_WRITE
       MessageInterface::ShowMessage("attempting to write out %d events\n",
@@ -1032,16 +1056,19 @@ bool ContactLocator::ReportEventData(const std::string &reportNotice)
    for (Integer ii = 0; ii < sz; ii++)
    {
       ContactResult* ev = contactResults.at(ii);
+      numIndividual     = ev->NumberOfEvents();
       ev->SetNoEvents(noEvents);
 
       std::string eventString = ev->GetReportString();
       theReport << eventString << "\n";
+
+      theReport << "\nNumber of events : " << numIndividual << "\n\n\n";
    }
 
-   for (unsigned int jj = 0; jj < sz; jj++)
-      numIndividual += contactResults.at(jj)->NumberOfEvents();
+//   for (unsigned int jj = 0; jj < sz; jj++)
+//      numIndividual += contactResults.at(jj)->NumberOfEvents();
 
-   theReport << "\nNumber of events : " << numIndividual << "\n\n\n";
+//   theReport << "\nNumber of events : " << numIndividual << "\n\n\n";
 
    theReport.close();
    return true;
