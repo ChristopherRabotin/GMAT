@@ -860,6 +860,7 @@ void BatchEstimator::CompleteInitialization()
 {
    #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
+      MessageInterface::ShowMessage("advanceToEstimationEpoch = %s\n", (advanceToEstimationEpoch?"true":"false"));
    #endif
 
    if (advanceToEstimationEpoch == false)
@@ -869,6 +870,13 @@ void BatchEstimator::CompleteInitialization()
       estimationState              = esm.GetState();
       stateSize = estimationState->GetSize();
       
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("GmatState got from propagator: size = %d   epoch = %.12lf   [", gs->GetSize(), gs->GetEpoch());
+         for (UnsignedInt k=0; k < gs->GetSize(); ++k)
+            MessageInterface::ShowMessage("%.12lf,  ", (*gs)[k]);
+         MessageInterface::ShowMessage("]\n");
+      #endif
+
       Estimator::CompleteInitialization();
       
       // If estimation epoch not set, use the epoch from the prop state
@@ -907,6 +915,16 @@ void BatchEstimator::CompleteInitialization()
       
 ///// Check for more generic approach
       measManager.LoadRampTables();
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("GmatState got from propagator: size = %d [", gs->GetSize());
+         for (UnsignedInt zz=0; zz < gs->GetSize(); ++zz)
+            MessageInterface::ShowMessage("%lf,  ", (*gs)[zz]);
+         MessageInterface::ShowMessage("]\n");
+
+         MessageInterface::ShowMessage("currentEpoch = %.15lf  estimationEpoch = %.15lf\n", currentEpoch, estimationEpoch);
+      #endif
+
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
          advanceToEstimationEpoch = true;
@@ -982,7 +1000,7 @@ void BatchEstimator::CompleteInitialization()
    
    estimationStatus = UNKNOWN;
    // Convert estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(aprioriSolveForState);
+   GetEstimationStateForReport(aprioriSolveForState);
 
    isInitialized = true;
    numDivIterations = 0;                       // It need to reset it's value when starting estimatimation calculation
@@ -1409,7 +1427,7 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   " << utcEpoch << " UTCG\n";
                }
 
-               GetEstimationState(outputEstimationState);
+               GetEstimationStateForReport(outputEstimationState);
                
                for (UnsignedInt i = 0; i < map->size(); ++i)
                {
@@ -1480,7 +1498,7 @@ std::string BatchEstimator::GetProgressString()
             progress << "   " << utcEpoch << " UTCG\n";
 
 
-            GetEstimationState(outputEstimationState);
+            GetEstimationStateForReport(outputEstimationState);
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -1572,7 +1590,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "   " << utcEpoch << " UTCG\n";
             }
 
-            GetEstimationState(outputEstimationState);
+            GetEstimationStateForReport(outputEstimationState);
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -1722,6 +1740,10 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
          break;
       }
    }
+   else if (infor->elementName == "Cr_Epsilon")
+      ss << "Cr";
+   else if (infor->elementName == "Cd_Epsilon")
+      ss << "Cd";
    else
       ss << infor->elementName << "." << infor->subelement;
 
@@ -1959,7 +1981,7 @@ void BatchEstimator::WriteConclusion()
    }
    
    /// 3. Write final state
-   GetEstimationState(outputEstimationState);
+   GetEstimationStateForReport(outputEstimationState);
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
@@ -2037,8 +2059,37 @@ void BatchEstimator::WriteConclusion()
 
 
    /// 4.2. Write final covariance and correlation matrix 
+   // 4.2.1 Get covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon 
    Rmatrix finalCovariance = information.Inverse();
-   
+
+   // 4.2.2. Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->elementName == "Cr_Epsilon")
+      {
+         // Get Cr0
+         Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+         // multiply row and column i with Cr0
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+            finalCovariance(i,j) *= Cr0;
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+            finalCovariance(j,i) *= Cr0;
+      }
+      if ((*map)[i]->elementName == "Cd_Epsilon")
+      {
+         // Get Cd0
+         Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+         // multiply row and column i with Cd0
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+            finalCovariance(i,j) *= Cd0;
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+            finalCovariance(j,i) *= Cd0;
+      }
+   }
+
+   // 4.2.3. Write covariance matrix to report file 
    textFile << "Covariance Matrix in Cartesian Coordinate System:\n";
    textFile << "---------------------------------------------------------------------------------\n";
    textFile << " Row Index |                     Column Index\n";
@@ -2061,6 +2112,7 @@ void BatchEstimator::WriteConclusion()
       textFile << "\n";
    }
 
+   // 4.2.4. Write correlation matrix to report file
    textFile << "\nCorrelation Matrix in Cartesian Coordinate System:\n";
    textFile << "---------------------------------------------------------------------------------\n";
    textFile << " Row Index |                     Column Index\n";
@@ -2140,7 +2192,36 @@ void BatchEstimator::WriteConclusion()
       }
       textFile << "\n\n";
 
-      Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+      // 4.3.1. Calculate covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon
+      Rmatrix finalKeplerCovariance = convmatrix * information.Inverse() * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+
+      // 4.3.2. Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
+      for (UnsignedInt i = 0; i < map->size(); ++i)
+      {
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            // Get Cr0
+            Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+            // multiply row and column i with Cr0
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+               finalKeplerCovariance(i,j) *= Cr0;
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
+               finalKeplerCovariance(j,i) *= Cr0;
+         }
+         if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            // Get Cd0
+            Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+            // multiply row and column i with Cd0
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+               finalKeplerCovariance(i,j) *= Cd0;
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
+               finalKeplerCovariance(j,i) *= Cd0;
+         }
+      }
+
       textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
       textFile << "---------------------------------------------------------------------------------\n";
       textFile << " Row Index |                     Column Index\n";
@@ -2226,7 +2307,7 @@ void BatchEstimator::WriteHeader()
    }
 
    // Convert state to participants' coordinate system:
-   GetEstimationState(outputEstimationState);
+   GetEstimationStateForReport(outputEstimationState);
    // write out state
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
@@ -2310,7 +2391,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
    {
       /// 1. Write state summary
       // Convert state to participants' coordinate system:
-      GetEstimationState(outputEstimationState);
+      GetEstimationStateForReport(outputEstimationState);
       // Write state to report file
       Integer max_len = 15;
       for (int i = 0; i < map->size(); ++i) 
@@ -2346,7 +2427,38 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                << "               Apriori State              Previous State               Current State             Current-Apriori            Current-Previous          Standard Deviation\n";
 
       textFile.precision(8);
+
+      // covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon
       Rmatrix covar = information.Inverse();
+
+      // covariance matrix w.r.t. Cr and Cd
+      for (UnsignedInt i = 0; i < map->size(); ++i)
+      {
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            // Get Cr0
+            Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+            // multiply row and column i with Cr0
+            for(UnsignedInt j = 0; j < covar.GetNumColumns(); ++j)
+               covar(i,j) *= Cr0;
+            for(UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
+               covar(j,i) *= Cr0;
+         }
+         if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            // Get Cd0
+            Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+            // multiply row and column i with Cd0
+            for(UnsignedInt j = 0; j < covar.GetNumColumns(); ++j)
+               covar(i,j) *= Cd0;
+            for(UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
+               covar(j,i) *= Cd0;
+         }
+      }
+
+
       for (int i = 0; i < map->size(); ++i) 
       {
          textFile << "   ";
