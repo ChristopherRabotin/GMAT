@@ -50,6 +50,17 @@ _SETUPPLUGIN(${TargetName} "${PLUGIN_DIRS}" "${PLUGIN_SRCS}" plugins)
 
 # ====================================================================
 # Additional link libraries
-set(PYTHON_LIB ${PYTHON_LIB_DIR}/${PYTHON_LIBRARY}) 
-MESSAGE(STATUS "Python Library: " ${PYTHON_LIB})
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    FIND_LIBRARY(PYTHON_LIB ${PYTHON_LIBRARY} ${PYTHON_LIB_DIR})
+  else()
+    FIND_LIBRARY(PYTHON_LIB ${PYTHON_LIBRARY} ${PYTHON_LIB_DIR})
+  endif()
+else()
+  set(PYTHON_LIB ${PYTHON_LIB_DIR}/${PYTHON_LIBRARY}) 
+endif()
+
 TARGET_LINK_LIBRARIES(${TargetName} ${PYTHON_LIB})
+
+MESSAGE(STATUS "Python Library: " ${PYTHON_LIB})

@@ -198,13 +198,25 @@ if(NOT Matlab_FOUND)
 endif()
 
 # Find Python
+# todo: Python 2.7; let the user set library name?
 MESSAGE(STATUS "Searching for Python")
 SET(PYTHON_DIR "${PROJECT_SOURCE_DIR}/depends/Python")
-SET(PYTHON_LIBRARY "python34.lib")
 SET(PYTHON_LIB_DIR "" CACHE PATH "Path to location of the Python library.")
 SET(PYTHON_INCLUDE_DIR "" CACHE PATH "Path to location of python.h")
 MESSAGE(STATUS "Please set the Python locations")
 # FIND_PACKAGE(PythonLibs)
+
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    SET(PYTHON_LIBRARY "python3.4m")
+  else()
+    SET(PYTHON_LIBRARY "python3.4m")
+  endif()
+else()
+  SET(PYTHON_LIBRARY "python34.lib")
+endif()
+
 
 MESSAGE(STATUS "Python Library: " ${PYTHON_LIBRARY})
 
