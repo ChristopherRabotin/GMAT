@@ -779,7 +779,7 @@ bool EclipseLocator::ReportEventData(const std::string &reportNotice)
    Integer sz = (Integer) theEvents.size();
    if (sz == 0)
    {
-      theReport << GetNoEventsString("Eclipse") << "\n";
+      theReport << GetNoEventsString("eclipse") << "\n";
    }
    else
    {
@@ -911,8 +911,8 @@ void EclipseLocator::FindEvents()
                                      numEclipse, starts, ends);
 
          #ifdef DEBUG_ECLIPSE_EVENTS
-            MessageInterface::ShowMessage("After gfoclt_c:\n");
-            MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
+//            MessageInterface::ShowMessage("After gfoclt_c:\n");
+//            MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
          #endif
          // Create an event from the result
          for (Integer kk = 0; kk < numEclipse; kk++)
