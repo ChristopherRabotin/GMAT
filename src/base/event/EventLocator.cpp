@@ -133,8 +133,8 @@ EventLocator::EventLocator(const std::string &typeStr,
    initialEpoch            ("21545"),
    finalEpoch              ("21545.138"),
    stepSize                (10.0),
-   initialEp               (0.0),
-   finalEp                 (0.0),
+   initialEp               (21545),
+   finalEp                 (21545.138),
    fromEpoch               (0.0),
    toEpoch                 (0.0),
    findStart               (0.0),
@@ -726,15 +726,27 @@ bool EventLocator::SetStringParameter(const Integer id,
 {
    if (id == OCCULTING_BODIES)
    {
-      if (index < (Integer) occultingBodyNames.size())
+      if (find(occultingBodyNames.begin(), occultingBodyNames.end(), value) == occultingBodyNames.end())
       {
-         occultingBodyNames.at(index) = value;
-         return true;
+         if (index < (Integer) occultingBodyNames.size())
+         {
+            occultingBodyNames.at(index) = value;
+            return true;
+         }
+         else
+         {
+            occultingBodyNames.push_back(value);
+            return true;
+         }
       }
       else
       {
-         occultingBodyNames.push_back(value);
+         // ignore duplicate occulting body names, for now
          return true;
+//         std::string errmsg = "Occulting Body ";
+//         errmsg += value + " is already in list for EventLocator ";
+//         errmsg += instanceName + ".  Each body must be listed only once.\n";
+//         throw EventException(errmsg);
       }
    }
 
@@ -1223,6 +1235,11 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
    std::string timeSystem;
    std::string timeFormat;
    TimeConverterUtil::GetTimeSystemAndFormat(epochFormat, timeSystem, timeFormat);
+   #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("epochFormat = %s\n", epochFormat.c_str());
+      MessageInterface::ShowMessage("timeSystem  = %s\n", timeSystem.c_str());
+      MessageInterface::ShowMessage("timeFormat  = %s\n", timeFormat.c_str());
+   #endif
    if (timeFormat == "ModJulian") // numeric - save and output without quotes
       epochString = GmatStringUtil::RemoveEnclosingString(ep, "'");
    else // "Gregorian" - not numeric - save and output with quotes
@@ -1565,20 +1582,23 @@ bool EventLocator::Initialize()
       MessageInterface::ShowMessage("    Final   epoch is \"%s\"\n", finalEpoch.c_str());
    #endif
 
-      // Make sure the epochs are set and Real epochs computed
-   SetEpoch(initialEpoch, INITIAL_EPOCH);
-   SetEpoch(finalEpoch,   FINAL_EPOCH);
-
-   // Validate inputs here
-   if (initialEp > finalEp)
-   {
-      std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
-      errmsg += instanceName + ".\n";
-      throw EventException(errmsg);
-   }
-
-   fromEpoch = initialEp;
-   toEpoch   = finalEp;
+////      // Make sure the epochs are set and Real epochs computed
+////   SetEpoch(initialEpoch, INITIAL_EPOCH);
+////   SetEpoch(finalEpoch,   FINAL_EPOCH);
+////   #ifdef DEBUG_EVENT_INITIALIZATION
+////      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
+////   #endif
+//
+//   // Validate inputs here
+//   if (initialEp > finalEp)
+//   {
+//      std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
+//      errmsg += instanceName + ".\n";
+//      throw EventException(errmsg);
+//   }
+//
+//   fromEpoch = initialEp;
+//   toEpoch   = finalEp;
 
    if (!sat)
    {
@@ -1639,7 +1659,7 @@ bool EventLocator::Initialize()
 
 
    fileWasWritten = false;
-   isInitialized = true;
+   isInitialized  = true;
 
    scStart = sat->GetEpoch();
 
@@ -1698,6 +1718,25 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 
    if (runMode != "Disabled")
    {
+      // First, need to validate initial and final epochs here ...
+      //      // Make sure the epochs are set and Real epochs computed
+      //   SetEpoch(initialEpoch, INITIAL_EPOCH);
+      //   SetEpoch(finalEpoch,   FINAL_EPOCH);
+      //   #ifdef DEBUG_EVENT_INITIALIZATION
+      //      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
+      //   #endif
+
+      // Validate inputs here
+      if (initialEp > finalEp)
+      {
+         std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
+         errmsg += instanceName + ".\n";
+         throw EventException(errmsg);
+      }
+
+      fromEpoch = initialEp;
+      toEpoch   = finalEp;
+
       // Stop the data recording so that the kernel will be loaded
       sat->ProvideEphemerisData();
 
