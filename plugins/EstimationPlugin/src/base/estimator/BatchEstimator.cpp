@@ -34,7 +34,7 @@
 #include "Spacecraft.hpp"
 #include "StringUtil.hpp"
 #include "StateConversionUtil.hpp"              // made changes by TUAN NGUYEN
-
+#include "GroundstationInterface.hpp"           // made changes by TUAN NGUYEN
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_SIMULATOR_WRITE
@@ -1004,6 +1004,30 @@ void BatchEstimator::CompleteInitialization()
 
    isInitialized = true;
    numDivIterations = 0;                       // It need to reset it's value when starting estimatimation calculation
+
+
+   // Get list of signal paths and specify the lenght of participants' column           // made changes by TUAN NGUYEN
+   pcolumnLen = 12;                                                                      // made changes by TUAN NGUYEN
+   std::vector<StringArray> signalPaths = measManager.GetSignalPathList();              // made changes by TUAN NGUYEN
+   for(UnsignedInt i = 0; i < signalPaths.size(); ++i)                                  // made changes by TUAN NGUYEN
+   {                                                                                    // made changes by TUAN NGUYEN
+      Integer len = 0;                                                                  // made changes by TUAN NGUYEN
+      for (UnsignedInt j = 0; j < signalPaths[i].size(); ++j)                           // made changes by TUAN NGUYEN
+      {                                                                                 // made changes by TUAN NGUYEN
+         GmatBase* obj = GetConfiguredObject(signalPaths[i].at(j));                     // made changes by TUAN NGUYEN
+         std::string id = "";                                                           // made changes by TUAN NGUYEN
+         if (obj->IsOfType(Gmat::SPACECRAFT))                                           // made changes by TUAN NGUYEN
+            id = ((Spacecraft*)obj)->GetStringParameter("Id");                          // made changes by TUAN NGUYEN
+         else if (obj->IsOfType(Gmat::GROUND_STATION))                                  // made changes by TUAN NGUYEN
+            id = ((GroundstationInterface*)obj)->GetStringParameter("Id");              // made changes by TUAN NGUYEN
+         
+         len = len + id.size() + 1;                                                     // made changes by TUAN NGUYEN
+      }                                                                                 // made changes by TUAN NGUYEN
+      if (pcolumnLen < len)                                                             // made changes by TUAN NGUYEN
+         pcolumnLen = len;                                                              // made changes by TUAN NGUYEN
+   }                                                                                    // made changes by TUAN NGUYEN
+   pcolumnLen += 3;                                                                     // made changes by TUAN NGUYEN
+
 
    WriteToTextFile();
    ReportProgress();
@@ -2367,10 +2391,10 @@ void BatchEstimator::WriteHeader()
 
    /// 5. Write report header
    if (textFileMode == "Normal")
-      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants         Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
    else
    {
-      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants         Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
          textFile << "                         ";
@@ -2482,12 +2506,12 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          }
      
          textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 3, GmatStringUtil::LEFT);
-         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(aprioriSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(previousSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
       }
       textFile << "\n";
       
@@ -2553,12 +2577,12 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          {
             textFile << "   ";
             textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
-            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(aprioriArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(previousArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(stdArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
          }         
       }
       

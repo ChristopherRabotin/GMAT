@@ -133,6 +133,8 @@ protected:
    /// Maximum consecutive divergences
    Integer               maxConsDivergences;
 
+   /// particicpants column lenght. It is used for writing report file               // made changes by TUAN NGUYEN
+   Integer                pcolumnLen;                                                // made changes by TUAN NGUYEN
 
    /// Variables used for statistics calculation
    std::map<std::string, std::map<std::string, Real> > statisticsTable;       // this table is for groundstation and measurement type
@@ -185,6 +187,7 @@ protected:
 
 private:
 //   bool                    IsReuseableType(const std::string& value);
+   
    void                   WriteScript();                                                                            // made changes by TUAN NGUYEN
    void                   WriteHeader();
    void                   WriteSummary(Solver::SolverState sState);

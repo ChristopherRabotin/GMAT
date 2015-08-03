@@ -228,8 +228,9 @@ void BatchEstimatorInv::Accumulate()
    ss = "";
    for(UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
       ss = ss + currentObs->participantIDs[n] + (((n+1) == currentObs->participantIDs.size())?"":",");
-   ss = ss + "                    ";
-   sLine << ss.substr(0,20) << " ";
+   //ss = ss + "                    ";                                                                   // made changes by TUAN NGUYEN
+   //sLine << ss.substr(0,20) << " ";                                                                    // made changes by TUAN NGUYEN
+   sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);                                          // made changes by TUAN NGUYEN
 
    if (modelsToAccess.size() == 0)
    {
