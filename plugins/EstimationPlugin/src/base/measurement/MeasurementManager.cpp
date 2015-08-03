@@ -2164,6 +2164,39 @@ const StringArray& MeasurementManager::GetParticipantList()
 }
 
 
+//------------------------------------------------------------------------------
+// std::vector<StringArray> GetSignalPathList()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the complete list of all signal paths.
+ *
+ * @return The list.
+ */
+//------------------------------------------------------------------------------
+std::vector<StringArray> MeasurementManager::GetSignalPathList()
+{
+   std::vector<StringArray> signalPathList;
+   signalPathList.clear();
+
+   // Walk through the collection of measurement models...
+   for (std::vector<MeasurementModel*>::iterator i =  models.begin();
+         i !=  models.end(); ++i)
+   {
+      StringArray parts = (*i)->GetStringArrayParameter("Participants");
+      signalPathList.push_back(parts);
+   }
+
+   for (std::vector<TrackingDataAdapter*>::iterator i =  adapters.begin();
+         i !=  adapters.end(); ++i)
+   {
+      StringArray parts = (*i)->GetParticipants(0);                                        // made changes by TUAN NGUYEN
+      signalPathList.push_back(parts);
+   }
+
+   return signalPathList;
+}
+
+
 //-----------------------------------------------------------------------------
 // void AddMeasurementName(std::string measName)
 //-----------------------------------------------------------------------------
