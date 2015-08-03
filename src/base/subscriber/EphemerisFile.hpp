@@ -39,7 +39,10 @@ public:
    EphemerisFile& operator=(const EphemerisFile&);
    
    // methods for this class
-   void                 SetProperFileExtension();
+   virtual std::string  GetProperFileName(const std::string &fName,
+                                          const std::string &fType,
+                                          bool setFileName);
+   virtual void         SetProperFileExtension();
    virtual void         ValidateParameters(bool forInitialization);
    virtual void         SetBackgroundGeneration(bool inBackground);
    

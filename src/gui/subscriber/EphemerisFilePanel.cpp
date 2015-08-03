@@ -19,10 +19,11 @@
 //------------------------------------------------------------------------------
 
 #include "EphemerisFilePanel.hpp"
-#include "MessageInterface.hpp"
-#include "bitmaps/OpenFolder.xpm"
+#include "EphemerisFile.hpp"       // for GetProperFileName()
 #include "TimeSystemConverter.hpp"
 #include "DateUtil.hpp"
+#include "MessageInterface.hpp"
+#include "bitmaps/OpenFolder.xpm"
 #include <wx/config.h>
 
 /// wxWidget event mappings for the panel
@@ -37,6 +38,7 @@ END_EVENT_TABLE()
 //#define DEBUG_BUILD_CONTROL
 //#define DEBUG_LOAD_DATA
 //#define DEBUG_SAVE_DATA
+//#define DEBUG_COMBOBOX
 
 //-----------------------------------------
 // public methods
@@ -835,12 +837,25 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
       wxString newFileFormat = fileFormatComboBox->GetValue();
       #ifdef DEBUG_COMBOBOX
       MessageInterface::ShowMessage
-         ("fileFormat=%s, newFileFormat=%s\n", fileFormat.c_str(), newFileFormat.c_str());
+         ("fileFormat=%s, newFileFormat=%s\n", fileFormat.WX_TO_C_STRING,
+          newFileFormat.WX_TO_C_STRING);
       #endif
       if (fileFormat != newFileFormat)
       {
          fileFormat = newFileFormat;
-                  
+         
+         // Show proper file extension
+         std::string fileName = fileNameTextCtrl->GetValue();
+         std::string stdFileFormat = fileFormat.WX_TO_STD_STRING;
+         std::string properFileName =
+            ((EphemerisFile*)mObject)->GetProperFileName(fileName, stdFileFormat, false);
+         #ifdef DEBUG_COMBOBOX
+         MessageInterface::ShowMessage
+            ("fileName='%s', stdFileFormat='%s', properFileName='%s'\n", fileName.c_str(),
+             stdFileFormat.c_str(), properFileName.c_str());
+         #endif
+         fileNameTextCtrl->SetValue(wxString(properFileName));
+         
          // Show proper coordinate systems based on the format
          ShowCoordSystems(fileFormat);
          

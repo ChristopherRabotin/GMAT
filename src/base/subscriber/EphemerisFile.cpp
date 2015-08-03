@@ -251,7 +251,7 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    #endif
    
    fullPathFileName =
-      GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE", false, ".eph");
+      GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "EPHEM_OUTPUT_FILE", false, ".oem");
    
    // Available enumeration type list, since it is static data, clear it first
    fileFormatList.clear();
@@ -563,6 +563,83 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
 //---------------------------------
 
 //------------------------------------------------------------------------------
+// std::string GetProperFileName(const std::string &fName, const std::string &fType)
+//------------------------------------------------------------------------------
+std::string EphemerisFile::GetProperFileName(const std::string &fName,
+                                             const std::string &fType,
+                                             bool setFileName)
+{
+   #ifdef DEBUG_EPHEMFILE_EXTENSION
+   MessageInterface::ShowMessage
+      ("EphemerisFile::GetProperFileName() entered, fName='%s', fType='%s', "
+       "setFileName=%d\n", fName.c_str(), fType.c_str(), setFileName);
+   #endif
+   
+   std::string expFileName = fName;
+   std::string defaultExt = ".eph";
+   if (fType == "SPK")
+      defaultExt = ".bsp";
+   else if (fType == "CCSDS-OEM")
+      defaultExt = ".oem";
+   else if (fType == "CCSDS-AEM")
+      defaultExt = ".aem";
+   
+   std::string parsedExt = GmatFileUtil::ParseFileExtension(fName, true);
+   if (parsedExt != "" && parsedExt != defaultExt)
+   {
+      // Replace file extension only for SPK ephem type
+      if (fType == "SPK")
+      {
+         std::string ofname = expFileName;
+         expFileName = GmatStringUtil::Replace(expFileName, parsedExt, defaultExt);
+         if (setFileName)
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** %s file extension should be \"%s\", so "
+                "file name '%s' changed to '%s'\n", fType.c_str(), defaultExt.c_str(),
+                ofname.c_str(), expFileName.c_str());
+            
+            // Set filename and full path filename
+            fileName = expFileName;
+            fullPathFileName = GmatStringUtil::Replace(fullPathFileName, parsedExt, defaultExt);
+         }
+      }
+      else
+      {
+         // We don't want to change the extension for other format such as Code-500
+         // but we want to change it if creating new from the GUI. If setFileName
+         // is set to false, this method is called from the GUI.
+         if (!setFileName)
+         {
+            expFileName = GmatStringUtil::Replace(expFileName, parsedExt, defaultExt);
+         }
+      }
+   }
+   else if (parsedExt == "")
+   {
+      std::string ofname = expFileName;
+      expFileName = expFileName + defaultExt;
+      if (setFileName)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** %s file extension should be \"%s\", so "
+             "file name '%s' changed to '%s'\n", fType.c_str(), defaultExt.c_str(),
+             ofname.c_str(), expFileName.c_str());
+         
+         // Set filename and full path filename
+         fileName = expFileName;
+         fullPathFileName = fullPathFileName + defaultExt;
+      }
+   }
+   
+   #ifdef DEBUG_EPHEMFILE_EXTENSION
+   MessageInterface::ShowMessage
+      ("EphemerisFile::GetProperFileName() returning '%s'\n", expFileName.c_str());
+   #endif
+   return expFileName;
+}
+
+//------------------------------------------------------------------------------
 // void SetProperFileExtension()
 //------------------------------------------------------------------------------
 void EphemerisFile::SetProperFileExtension()
@@ -572,53 +649,9 @@ void EphemerisFile::SetProperFileExtension()
       ("EphemerisFile::SetProperFileExtension() fileName='%s;, fileFormat='%s'\n", fileName.c_str(),
        fileFormat.c_str());
    #endif   
-   
-   std::string fileExt = ".eph";
-   if (fileFormat == "SPK")
-      fileExt = ".bsp";
-   else if (fileFormat == "CCSDS-OEM")
-      fileExt = ".oem";
-   else if (fileFormat == "CCSDS-AEM")
-      fileExt = ".aem";
-   
-   // For fileName
-   std::string parsedFileExt = GmatFileUtil::ParseFileExtension(fileName, true);
-   
-   #ifdef DEBUG_EPHEMFILE_OPEN
-   MessageInterface::ShowMessage("   parsedFileExt = '%s'\n", parsedFileExt.c_str());
-   #endif
-   
-   if (parsedFileExt != "" && parsedFileExt != fileExt)
-   {
-      // Replace file extension only for SPK ephem type
-      if (fileFormat == "SPK")
-      {
-         std::string ofname = fileName;
-         fileName = GmatStringUtil::Replace(fileName, parsedFileExt, fileExt);
-         MessageInterface::ShowMessage
-            ("*** WARNING *** %s file extension should be \"%s\", so "
-             "file name '%s' changed to '%s'\n", fileFormat.c_str(), fileExt.c_str(),
-             ofname.c_str(), fileName.c_str());
-         
-         // For fullPathFileName
-         fullPathFileName = GmatStringUtil::Replace(fullPathFileName, parsedFileExt, fileExt);
-      }
-   }
-   else if (parsedFileExt == "")
-   {
-      if (fileFormat == "Code-500")
-         fileExt = ".eph.bin";
-      
-      std::string ofname = fileName;
-      fileName = fileName + fileExt;
-      MessageInterface::ShowMessage
-         ("*** WARNING *** %s file extension should be \"%s\", so "
-          "file name '%s' changed to '%s'\n", fileFormat.c_str(), fileExt.c_str(),
-          ofname.c_str(), fileName.c_str());
-      
-      // For fullPathFileName
-      fullPathFileName = fullPathFileName + fileExt;
-   }
+
+   // Pass true for setting filename and full path filename
+   std::string properFileName = GetProperFileName(fileName, fileFormat, true);
    
    #ifdef DEBUG_EPHEMFILE_OPEN
    MessageInterface::ShowMessage
