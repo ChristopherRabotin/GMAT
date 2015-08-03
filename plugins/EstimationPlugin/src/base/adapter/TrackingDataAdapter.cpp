@@ -1248,6 +1248,13 @@ MeasureModel* TrackingDataAdapter::GetMeasurementModel()
 }
 
 
+StringArray TrackingDataAdapter::GetParticipants(Integer forPathIndex)
+{
+   StringArray list = *(participantLists[0]);
+   return list;
+}
+
+
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------

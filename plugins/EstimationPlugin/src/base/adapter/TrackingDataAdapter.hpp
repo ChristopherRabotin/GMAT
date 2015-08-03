@@ -185,6 +185,8 @@ public:
    // Set solve-for and consider objects                                                                   // made changes by TUAN NGUYEN
    virtual bool         SetUsedForObjects(ObjectArray objArray) {forObjects = objArray; return true;};     // made changes by TUAN NGUYEN
 
+   virtual StringArray  GetParticipants(Integer forPathIndex);                                             // made changes by TUAN NGUYEN
+
 protected:
    /// The ordered list of participants in the measurement
    std::vector<StringArray*> participantLists;
