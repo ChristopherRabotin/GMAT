@@ -45,6 +45,10 @@ CallPythonFunction::CallPythonFunction() :
    CallFunction      ("CallPythonFunction"),
    moduleName        (""),
    functionName      (""),
+   inRow             (1),
+   inCol             (1),
+   outRow            (1),
+   outCol            (1),
    pythonIf          (NULL)
 {
 }
@@ -53,6 +57,10 @@ CallPythonFunction::CallPythonFunction(const CallPythonFunction& cpf) :
    CallFunction      (cpf),
    moduleName        (cpf.moduleName),
    functionName      (cpf.functionName),
+   inRow             (cpf.inRow),
+   inCol             (cpf.inCol),
+   outRow            (cpf.outRow),
+   outCol            (cpf.outCol),
    pythonIf          (cpf.pythonIf)
 {
 }
@@ -65,6 +73,10 @@ CallPythonFunction& CallPythonFunction::operator =(
       CallFunction::operator=(cpf);
       moduleName   = cpf.moduleName;
       functionName = cpf.functionName;
+      inRow = cpf.inRow;
+      inCol = cpf.inCol;
+      outRow = cpf.outRow;
+      outCol = cpf.outCol;
       pythonIf = cpf.pythonIf;
    }
 
@@ -284,15 +296,14 @@ bool CallPythonFunction::Execute()
    // send the out parameters
    std::vector<void *> argOut;
    Gmat::ParameterType paramType = Gmat::UNKNOWN_PARAMETER_TYPE;
-   Integer row = 1; Integer col = 1;
-
+   
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
-   SendInParam(formatIn, argIn, paramType, row, col);
+   SendInParam(formatIn, argIn, paramType);
    MessageInterface::ShowMessage("parameter type is %d\n", paramType);
 
   // Next, call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType, row, col);
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType, inRow, inCol);
  
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
@@ -493,7 +504,7 @@ Integer CallPythonFunction::FillOutputList()
 * @return void
 */
 //------------------------------------------------------------------------------
-void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType &paramType, Integer &row, Integer &col)
+void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType &paramType)
 {
    for (unsigned int i = 0; i < mInputList.size(); i++)
    {
@@ -525,7 +536,7 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
                formatIn.append("s");
 
             char *str = new char[64];
-            str = const_cast<char *>(param->EvaluateString().c_str());
+            str = (char *)param->EvaluateString().c_str();
             argIn.push_back(str);
             paramType = Gmat::STRING_TYPE;
 
@@ -540,14 +551,13 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
             Array *arr = (Array *) param;
             if (arr != NULL)
             {
-               Integer r = arr->GetRowCount();
-               Integer c = arr->GetColCount();
-               row = r;
-               col = c;
-
-               for (int i = 0; i < r; ++i)
+               // Fill in the input array dimension
+               inRow = arr->GetRowCount();
+               inCol = arr->GetColCount();
+               
+               for (int i = 0; i < inRow; ++i)
                {
-                  for (int j = 0; j < c; ++j)
+                  for (int j = 0; j < inCol; ++j)
                   {
                      if (i == 0)
                         formatIn.append("(d");
@@ -574,6 +584,28 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
    }
 
    formatIn.append(")");
+
+   // Fill in the output array dimension
+   for (unsigned int i = 0; i < mOutputList.size(); i++)
+   {
+      Parameter *param = mOutputList[i];
+      Gmat::ParameterType type = param->GetReturnType();
+
+      switch (type)
+      {
+         case Gmat::RMATRIX_TYPE:
+         {
+            Array *arr = (Array *)param;
+            if (arr != NULL)
+            {
+               outRow = arr->GetRowCount();
+               outCol = arr->GetColCount();
+            }
+
+            break;
+         }
+      }
+   }
 
 }
 
