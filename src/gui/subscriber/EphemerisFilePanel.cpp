@@ -845,7 +845,7 @@ void EphemerisFilePanel::OnComboBoxChange(wxCommandEvent& event)
          fileFormat = newFileFormat;
          
          // Show proper file extension
-         std::string fileName = fileNameTextCtrl->GetValue();
+         std::string fileName = fileNameTextCtrl->GetValue().WX_TO_STD_STRING;
          std::string stdFileFormat = fileFormat.WX_TO_STD_STRING;
          std::string properFileName =
             ((EphemerisFile*)mObject)->GetProperFileName(fileName, stdFileFormat, false);
