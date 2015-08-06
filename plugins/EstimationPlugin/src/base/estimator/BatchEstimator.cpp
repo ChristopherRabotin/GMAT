@@ -34,7 +34,7 @@
 #include "Spacecraft.hpp"
 #include "StringUtil.hpp"
 #include "StateConversionUtil.hpp"              // made changes by TUAN NGUYEN
-
+#include "GroundstationInterface.hpp"           // made changes by TUAN NGUYEN
 
 //#define DEBUG_STATE_MACHINE
 //#define DEBUG_SIMULATOR_WRITE
@@ -860,6 +860,7 @@ void BatchEstimator::CompleteInitialization()
 {
    #ifdef WALK_STATE_MACHINE
       MessageInterface::ShowMessage("BatchEstimator state is INITIALIZING\n");
+      MessageInterface::ShowMessage("advanceToEstimationEpoch = %s\n", (advanceToEstimationEpoch?"true":"false"));
    #endif
 
    if (advanceToEstimationEpoch == false)
@@ -872,6 +873,13 @@ void BatchEstimator::CompleteInitialization()
       estimationState              = esm.GetState();
       stateSize = estimationState->GetSize();
       
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("GmatState got from propagator: size = %d   epoch = %.12lf   [", gs->GetSize(), gs->GetEpoch());
+         for (UnsignedInt k=0; k < gs->GetSize(); ++k)
+            MessageInterface::ShowMessage("%.12lf,  ", (*gs)[k]);
+         MessageInterface::ShowMessage("]\n");
+      #endif
+
       Estimator::CompleteInitialization();
       
       // If estimation epoch not set, use the epoch from the prop state
@@ -915,6 +923,16 @@ void BatchEstimator::CompleteInitialization()
       
 ///// Check for more generic approach
       measManager.LoadRampTables();
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("GmatState got from propagator: size = %d [", gs->GetSize());
+         for (UnsignedInt zz=0; zz < gs->GetSize(); ++zz)
+            MessageInterface::ShowMessage("%lf,  ", (*gs)[zz]);
+         MessageInterface::ShowMessage("]\n");
+
+         MessageInterface::ShowMessage("currentEpoch = %.15lf  estimationEpoch = %.15lf\n", currentEpoch, estimationEpoch);
+      #endif
+
       if (!GmatMathUtil::IsEqual(currentEpoch, estimationEpoch))
       {
          advanceToEstimationEpoch = true;
@@ -990,10 +1008,34 @@ void BatchEstimator::CompleteInitialization()
    
    estimationStatus = UNKNOWN;
    // Convert estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(aprioriSolveForState);
+   GetEstimationStateForReport(aprioriSolveForState);
 
    isInitialized = true;
    numDivIterations = 0;                       // It need to reset it's value when starting estimatimation calculation
+
+
+   // Get list of signal paths and specify the length of participants' column           // made changes by TUAN NGUYEN
+   pcolumnLen = 12;                                                                      // made changes by TUAN NGUYEN
+   std::vector<StringArray> signalPaths = measManager.GetSignalPathList();              // made changes by TUAN NGUYEN
+   for(UnsignedInt i = 0; i < signalPaths.size(); ++i)                                  // made changes by TUAN NGUYEN
+   {                                                                                    // made changes by TUAN NGUYEN
+      Integer len = 0;                                                                  // made changes by TUAN NGUYEN
+      for (UnsignedInt j = 0; j < signalPaths[i].size(); ++j)                           // made changes by TUAN NGUYEN
+      {                                                                                 // made changes by TUAN NGUYEN
+         GmatBase* obj = GetConfiguredObject(signalPaths[i].at(j));                     // made changes by TUAN NGUYEN
+         std::string id = "";                                                           // made changes by TUAN NGUYEN
+         if (obj->IsOfType(Gmat::SPACECRAFT))                                           // made changes by TUAN NGUYEN
+            id = ((Spacecraft*)obj)->GetStringParameter("Id");                          // made changes by TUAN NGUYEN
+         else if (obj->IsOfType(Gmat::GROUND_STATION))                                  // made changes by TUAN NGUYEN
+            id = ((GroundstationInterface*)obj)->GetStringParameter("Id");              // made changes by TUAN NGUYEN
+         
+         len = len + id.size() + 1;                                                     // made changes by TUAN NGUYEN
+      }                                                                                 // made changes by TUAN NGUYEN
+      if (pcolumnLen < len)                                                             // made changes by TUAN NGUYEN
+         pcolumnLen = len;                                                              // made changes by TUAN NGUYEN
+   }                                                                                    // made changes by TUAN NGUYEN
+   pcolumnLen += 3;                                                                     // made changes by TUAN NGUYEN
+
 
    WriteToTextFile();
    ReportProgress();
@@ -1417,7 +1459,7 @@ std::string BatchEstimator::GetProgressString()
                   progress << "   " << utcEpoch << " UTCG\n";
                }
 
-               GetEstimationState(outputEstimationState);
+               GetEstimationStateForReport(outputEstimationState);
                
                for (UnsignedInt i = 0; i < map->size(); ++i)
                {
@@ -1488,7 +1530,7 @@ std::string BatchEstimator::GetProgressString()
             progress << "   " << utcEpoch << " UTCG\n";
 
 
-            GetEstimationState(outputEstimationState);
+            GetEstimationStateForReport(outputEstimationState);
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -1580,7 +1622,7 @@ std::string BatchEstimator::GetProgressString()
                progress << "   " << utcEpoch << " UTCG\n";
             }
 
-            GetEstimationState(outputEstimationState);
+            GetEstimationStateForReport(outputEstimationState);
 
             for (UnsignedInt i = 0; i < map->size(); ++i)
             {
@@ -1730,6 +1772,10 @@ std::string BatchEstimator::GetElementFullName(ListItem* infor, bool isInternalC
          break;
       }
    }
+   else if (infor->elementName == "Cr_Epsilon")
+      ss << "Cr";
+   else if (infor->elementName == "Cd_Epsilon")
+      ss << "Cd";
    else
       ss << infor->elementName << "." << infor->subelement;
 
@@ -1967,7 +2013,7 @@ void BatchEstimator::WriteConclusion()
    }
    
    /// 3. Write final state
-   GetEstimationState(outputEstimationState);
+   GetEstimationStateForReport(outputEstimationState);
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
    {
@@ -2045,8 +2091,37 @@ void BatchEstimator::WriteConclusion()
 
 
    /// 4.2. Write final covariance and correlation matrix 
+   // 4.2.1 Get covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon 
    Rmatrix finalCovariance = information.Inverse();
-   
+
+   // 4.2.2. Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
+   for (UnsignedInt i = 0; i < map->size(); ++i)
+   {
+      if ((*map)[i]->elementName == "Cr_Epsilon")
+      {
+         // Get Cr0
+         Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+         // multiply row and column i with Cr0
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+            finalCovariance(i,j) *= Cr0;
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+            finalCovariance(j,i) *= Cr0;
+      }
+      if ((*map)[i]->elementName == "Cd_Epsilon")
+      {
+         // Get Cd0
+         Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+         // multiply row and column i with Cd0
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumColumns(); ++j)
+            finalCovariance(i,j) *= Cd0;
+         for(UnsignedInt j = 0; j < finalCovariance.GetNumRows(); ++j)
+            finalCovariance(j,i) *= Cd0;
+      }
+   }
+
+   // 4.2.3. Write covariance matrix to report file 
    textFile << "Covariance Matrix in Cartesian Coordinate System:\n";
    textFile << "---------------------------------------------------------------------------------\n";
    textFile << " Row Index |                     Column Index\n";
@@ -2069,6 +2144,7 @@ void BatchEstimator::WriteConclusion()
       textFile << "\n";
    }
 
+   // 4.2.4. Write correlation matrix to report file
    textFile << "\nCorrelation Matrix in Cartesian Coordinate System:\n";
    textFile << "---------------------------------------------------------------------------------\n";
    textFile << " Row Index |                     Column Index\n";
@@ -2148,7 +2224,36 @@ void BatchEstimator::WriteConclusion()
       }
       textFile << "\n\n";
 
-      Rmatrix finalKeplerCovariance = convmatrix * finalCovariance * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+      // 4.3.1. Calculate covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon
+      Rmatrix finalKeplerCovariance = convmatrix * information.Inverse() * convmatrix.Transpose();          // Equation 8-49 GTDS MathSpec
+
+      // 4.3.2. Convert covariance matrix for Cr_Epsilon and Cd_Epsilon to covariance matrix for Cr and Cd
+      for (UnsignedInt i = 0; i < map->size(); ++i)
+      {
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            // Get Cr0
+            Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+            // multiply row and column i with Cr0
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+               finalKeplerCovariance(i,j) *= Cr0;
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
+               finalKeplerCovariance(j,i) *= Cr0;
+         }
+         if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            // Get Cd0
+            Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+            // multiply row and column i with Cd0
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumColumns(); ++j)
+               finalKeplerCovariance(i,j) *= Cd0;
+            for(UnsignedInt j = 0; j < finalKeplerCovariance.GetNumRows(); ++j)
+               finalKeplerCovariance(j,i) *= Cd0;
+         }
+      }
+
       textFile << "Covariance Matrix in Keplerian Coordinate System:\n";
       textFile << "---------------------------------------------------------------------------------\n";
       textFile << " Row Index |                     Column Index\n";
@@ -2234,7 +2339,7 @@ void BatchEstimator::WriteHeader()
    }
 
    // Convert state to participants' coordinate system:
-   GetEstimationState(outputEstimationState);
+   GetEstimationStateForReport(outputEstimationState);
    // write out state
    textFile.precision(8);
    for (UnsignedInt i = 0; i < map->size(); ++i)
@@ -2294,10 +2399,10 @@ void BatchEstimator::WriteHeader()
 
    /// 5. Write report header
    if (textFileMode == "Normal")
-      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  Participants         Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch       Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (o)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle   \n";
    else
    {
-      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  Participants         Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
+      textFile << "Iter      RecNum   UTCGregorian-Epoch      TAIModJulian-Epoch        Obs Type           Units  " << GmatStringUtil::GetAlignmentString("Participants         ", pcolumnLen) << "Edit                     Obs (O)        Obs-Correction(O)                  Cal (C)       Residual (O-C)            Weight (W)             W*(O-C)^2         sqrt(W)*|O-C|      Elevation-Angle     Partial-Derivatives";
       // fill out N/A for partial derivative
       for (int i = 0; i < esm.GetStateMap()->size()-1; ++i)
          textFile << "                         ";
@@ -2318,7 +2423,7 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
    {
       /// 1. Write state summary
       // Convert state to participants' coordinate system:
-      GetEstimationState(outputEstimationState);
+      GetEstimationStateForReport(outputEstimationState);
       // Write state to report file
       Integer max_len = 15;
       for (int i = 0; i < map->size(); ++i) 
@@ -2354,7 +2459,38 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                << "               Apriori State              Previous State               Current State             Current-Apriori            Current-Previous          Standard Deviation\n";
 
       textFile.precision(8);
+
+      // covariance matrix w.r.t. Cr_Epsilon and Cd_Epsilon
       Rmatrix covar = information.Inverse();
+
+      // covariance matrix w.r.t. Cr and Cd
+      for (UnsignedInt i = 0; i < map->size(); ++i)
+      {
+         if ((*map)[i]->elementName == "Cr_Epsilon")
+         {
+            // Get Cr0
+            Real Cr0 = (*map)[i]->object->GetRealParameter("Cr") / (1 + (*map)[i]->object->GetRealParameter("Cr_Epsilon"));
+
+            // multiply row and column i with Cr0
+            for(UnsignedInt j = 0; j < covar.GetNumColumns(); ++j)
+               covar(i,j) *= Cr0;
+            for(UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
+               covar(j,i) *= Cr0;
+         }
+         if ((*map)[i]->elementName == "Cd_Epsilon")
+         {
+            // Get Cd0
+            Real Cd0 = (*map)[i]->object->GetRealParameter("Cd") / (1 + (*map)[i]->object->GetRealParameter("Cd_Epsilon"));
+
+            // multiply row and column i with Cd0
+            for(UnsignedInt j = 0; j < covar.GetNumColumns(); ++j)
+               covar(i,j) *= Cd0;
+            for(UnsignedInt j = 0; j < covar.GetNumRows(); ++j)
+               covar(j,i) *= Cd0;
+         }
+      }
+
+
       for (int i = 0; i < map->size(); ++i) 
       {
          textFile << "   ";
@@ -2378,12 +2514,12 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          }
      
          textFile << GmatStringUtil::GetAlignmentString(ss.str(), max_len + 3, GmatStringUtil::LEFT);
-         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
-                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+         textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(aprioriSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(previousSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - aprioriSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentSolveForState[i] - previousSolveForState[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "
+                  << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(GmatMathUtil::Sqrt(covar(i,i)), false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
       }
       textFile << "\n";
       
@@ -2449,12 +2585,12 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
          {
             textFile << "   ";
             textFile << GmatStringUtil::GetAlignmentString(nameList[i], max_len + 3, GmatStringUtil::LEFT);
-            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(aprioriArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(previousArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // initial state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i], false, false), 25, GmatStringUtil::RIGHT) << "   "            // updated state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true), 25, GmatStringUtil::RIGHT) << "   "
-                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(stdArr[i], false, true), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
+            textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(aprioriArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "             // Apriori state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(previousArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // initial state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i], false, false, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "            // updated state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - aprioriArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT)  << "   "   // Apriori - Current state
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(currentArr[i] - previousArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "   "
+                     << GmatStringUtil::GetAlignmentString(GmatStringUtil::Trim(GmatStringUtil::ToString(stdArr[i], false, true, true, 12, 24)), 25, GmatStringUtil::RIGHT) << "\n";   // standard deviation
          }         
       }
       

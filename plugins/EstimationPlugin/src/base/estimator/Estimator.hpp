@@ -301,6 +301,7 @@ protected:
 ///// TBD: Do simulators need this too?  If so, move to base class
    virtual bool            ConvertToParticipantCoordSystem(ListItem* infor, Real epoch, Real inputStateElement, Real* outputStateElement);
    virtual void            GetEstimationState(GmatState& outputState);
+   virtual void            GetEstimationStateForReport(GmatState& outputState);
 
    /// Estimation status contains all status of an estimation
    enum EstimationStatus

@@ -228,8 +228,9 @@ void BatchEstimatorInv::Accumulate()
    ss = "";
    for(UnsignedInt n = 0; n < currentObs->participantIDs.size(); ++n)
       ss = ss + currentObs->participantIDs[n] + (((n+1) == currentObs->participantIDs.size())?"":",");
-   ss = ss + "                    ";
-   sLine << ss.substr(0,20) << " ";
+   //ss = ss + "                    ";                                                                   // made changes by TUAN NGUYEN
+   //sLine << ss.substr(0,20) << " ";                                                                    // made changes by TUAN NGUYEN
+   sLine << GmatStringUtil::GetAlignmentString(ss, pcolumnLen);                                          // made changes by TUAN NGUYEN
 
    if (modelsToAccess.size() == 0)
    {
@@ -545,7 +546,20 @@ void BatchEstimatorInv::Accumulate()
                   // fill out N/A for partial derivative
                   for (UnsignedInt p = 0; p < hAccum[hAccum.size()-1].size(); ++p)
                   {
-                     sprintf(&s[0],"   %18.12le", hAccum[hAccum.size()-1][p]);
+                     Real derivative = hAccum[hAccum.size()-1][p];
+                     if ((*stateMap)[p]->elementName == "Cr_Epsilon")
+                     {
+                        Real Cr = (*stateMap)[p]->object->GetRealParameter("Cr") / (1 + (*stateMap)[p]->object->GetRealParameter("Cr_Epsilon"));
+                        derivative = derivative/ Cr;
+                     }
+                     else if ((*stateMap)[p]->elementName == "Cd_Epsilon")
+                     {
+                        Real Cd = (*stateMap)[p]->object->GetRealParameter("Cd") / (1 + (*stateMap)[p]->object->GetRealParameter("Cd_Epsilon"));
+                        derivative = derivative/Cd;
+                     }
+
+                     // sprintf(&s[0],"   %18.12le", hAccum[hAccum.size()-1][p]);
+                     sprintf(&s[0],"   %18.12le", derivative);
                      ss.assign(s); 
                      ss = ss.substr(ss.size()-20,20); 
                      sLine << "     " << ss;
@@ -704,7 +718,7 @@ void BatchEstimatorInv::Estimate()
       initialEstimationState = (*estimationState);
    oldEstimationState = (*estimationState);
    // Convert previous state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(previousSolveForState);
+   GetEstimationStateForReport(previousSolveForState);
 
 
    // Specify previous, current, and the best weighted RMS:
@@ -902,8 +916,11 @@ void BatchEstimatorInv::Estimate()
       dx.push_back(delta);
       (*estimationState)[i] += delta;
    }
+   esm.RestoreObjects(&outerLoopBuffer);                           // Restore solver-object initial state           // made changes by TUAN NGUYEN
+   esm.MapVectorToObjects();                                       // update objects state to current state         // made changes by TUAN NGUYEN
+
    // Convert current estimation state from GMAT internal coordinate system to participants' coordinate system
-   GetEstimationState(currentSolveForState);
+   GetEstimationStateForReport(currentSolveForState);
 
    #ifdef DEBUG_VERBOSE
       MessageInterface::ShowMessage("   State vector change (dx):\n      [");

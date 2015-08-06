@@ -1918,3 +1918,36 @@ void Estimator::GetEstimationState(GmatState& outputState)
     }
 }
 
+
+//-------------------------------------------------------------------------
+// void Estimator::GetEstimationStateForReport(GmatState& outputState)
+//-------------------------------------------------------------------------
+/**
+ * This Method used to convert result of estimation state to participants'
+ * coordinate system. For report, it reports Cr and Cd instead of Cr_Epsilon 
+ * and Cd_Epsilon.
+ *
+ * @param outState        estimation state in participants' coordinate systems
+ *
+*/
+//-------------------------------------------------------------------------
+void Estimator::GetEstimationStateForReport(GmatState& outputState)
+{
+    const std::vector<ListItem*> *map = esm.GetStateMap();
+
+    Real outputStateElement;
+    outputState.SetSize(map->size());
+
+    for (UnsignedInt i = 0; i < map->size(); ++i)
+    {
+        ConvertToParticipantCoordSystem((*map)[i], estimationEpoch, (*estimationState)[i], &outputStateElement);
+        outputState[i] = outputStateElement;
+
+        // get Cr and Cd instead of Cr_Epsilon and Cd_Epsilon
+        if ((*map)[i]->elementName == "Cr_Epsilon")
+           outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cr");
+        else if ((*map)[i]->elementName == "Cd_Epsilon")
+           outputState[i] = ((Spacecraft*) (*map)[i]->object)->GetRealParameter("Cd");
+    }
+}
+

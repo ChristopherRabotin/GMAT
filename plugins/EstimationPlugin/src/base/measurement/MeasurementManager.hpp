@@ -78,6 +78,7 @@ public:
    const StringArray&      GetMeasurementNames() const;
    const IntegerArray      GetMeasurementId(const std::string &modelName) const;
    const StringArray&      GetParticipantList();
+   std::vector<StringArray> GetSignalPathList();                               // made changes by TUAN NGUYEN
    Integer                 Calculate(const Integer measurementToCalc,
                                      bool withEvents = false);
    const MeasurementData*  GetMeasurement(const Integer measurementToGet);
