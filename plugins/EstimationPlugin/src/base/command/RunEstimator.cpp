@@ -1008,6 +1008,18 @@ void RunEstimator::Propagate()
       MessageInterface::ShowMessage("Stepping by %.12lf = ", dt);
    #endif
 
+   #ifdef DEBUG_EVENT_STATE_STEP
+      dim = fm[0]->GetDimension();
+      Real *b4State = fm[0]->GetState();
+
+      MessageInterface::ShowMessage("State before prop:\n  ");
+      fm[0]->ReportEpochData();
+      MessageInterface::ShowMessage("  ");
+      for (Integer i = 0; i < dim; ++i)
+         MessageInterface::ShowMessage("   %.12lf", b4State[i]);
+      MessageInterface::ShowMessage("\n");
+   #endif
+
    Step(dt);
    bufferFilled = false;
    
