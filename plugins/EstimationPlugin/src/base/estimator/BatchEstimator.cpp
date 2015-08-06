@@ -866,7 +866,10 @@ void BatchEstimator::CompleteInitialization()
    if (advanceToEstimationEpoch == false)
    {
       PropagationStateManager *psm = propagator->GetPropStateManager();
-      GmatState               *gs  = psm->GetState();
+
+      ObjectArray satArray;
+      esm.GetStateObjects(satArray, Gmat::SPACECRAFT);
+
       estimationState              = esm.GetState();
       stateSize = estimationState->GetSize();
       
@@ -887,7 +890,12 @@ void BatchEstimator::CompleteInitialization()
          for (UnsignedInt i = 0; i < participants.size(); ++i)
             estimationEpoch   = ((SpaceObject *)(participants[i]))->GetEpoch();
       }
-      currentEpoch         = gs->GetEpoch();
+
+      // Set the current epoch based on the first spacecraft in the ESM
+      if(satArray.size() == 0)
+         throw EstimatorException("Cannot initialized the estimator: there are "
+               "no Spacecraft in the estimation state manager");
+      currentEpoch         = ((Spacecraft*)satArray[0])->GetEpoch();
       
       // This code was moved to Estimator::Reinitilaize()                              // made changes by TUAN NGUYEN
       //// Tell the measManager to complete its initialization                         // made changes by TUAN NGUYEN
@@ -1006,7 +1014,7 @@ void BatchEstimator::CompleteInitialization()
    numDivIterations = 0;                       // It need to reset it's value when starting estimatimation calculation
 
 
-   // Get list of signal paths and specify the lenght of participants' column           // made changes by TUAN NGUYEN
+   // Get list of signal paths and specify the length of participants' column           // made changes by TUAN NGUYEN
    pcolumnLen = 12;                                                                      // made changes by TUAN NGUYEN
    std::vector<StringArray> signalPaths = measManager.GetSignalPathList();              // made changes by TUAN NGUYEN
    for(UnsignedInt i = 0; i < signalPaths.size(); ++i)                                  // made changes by TUAN NGUYEN
