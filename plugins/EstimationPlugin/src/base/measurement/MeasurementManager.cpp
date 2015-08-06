@@ -1451,7 +1451,9 @@ bool MeasurementManager::AutoGenerateTrackingDataAdapters()
          adapterFromTFSMap[trackingSets[i]] = names;
       }
       else
-         MessageInterface::ShowMessage("****   No tracking configuartion is generated due to tracking configuration was defined in your script.\n");
+         MessageInterface::ShowMessage("****   No tracking configuration was "
+               "generated because the tracking configuration is defined in the "
+               "script.\n");
    }// for i loop
 
 
