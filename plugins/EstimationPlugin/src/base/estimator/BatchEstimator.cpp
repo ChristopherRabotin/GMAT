@@ -865,7 +865,10 @@ void BatchEstimator::CompleteInitialization()
    if (advanceToEstimationEpoch == false)
    {
       PropagationStateManager *psm = propagator->GetPropStateManager();
-      GmatState               *gs  = psm->GetState();
+
+      ObjectArray satArray;
+      esm.GetStateObjects(satArray, Gmat::SPACECRAFT);
+
       estimationState              = esm.GetState();
       stateSize = estimationState->GetSize();
       
@@ -879,7 +882,12 @@ void BatchEstimator::CompleteInitialization()
          for (UnsignedInt i = 0; i < participants.size(); ++i)
             estimationEpoch   = ((SpaceObject *)(participants[i]))->GetEpoch();
       }
-      currentEpoch         = gs->GetEpoch();
+
+      // Set the current epoch based on the first spacecraft in the ESM
+      if(satArray.size() == 0)
+         throw EstimatorException("Cannot initialized the estimator: there are "
+               "no Spacecraft in the estimation state manager");
+      currentEpoch         = ((Spacecraft*)satArray[0])->GetEpoch();
       
       // This code was moved to Estimator::Reinitilaize()                              // made changes by TUAN NGUYEN
       //// Tell the measManager to complete its initialization                         // made changes by TUAN NGUYEN
