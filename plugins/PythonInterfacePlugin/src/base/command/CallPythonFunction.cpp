@@ -18,6 +18,7 @@
 * Definition for the CallPythonFunction command class
 */
 //------------------------------------------------------------------------------
+#include "InterfaceException.hpp"
 #include "CallPythonFunction.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
@@ -333,7 +334,6 @@ bool CallPythonFunction::Execute()
          Real *ret = new Real;
          *ret = PyFloat_AsDouble(pyRet);
          argOut.push_back(ret);
-      //   MessageInterface::ShowMessage("  ret:  %f\n", *ret);
       }
       // else if the Python module returns a string
 #ifdef IS_PY3K
@@ -347,23 +347,57 @@ bool CallPythonFunction::Execute()
       }
 #endif
       // else if the Python module returns a list of floats
+      // Or a list of list of floats/Ints.
+      // In case of Python Int, we need to convert it to C++ float.
       else if (PyList_Check(pyRet))
       {
-         for (unsigned int i = 0; i < mOutputList.size(); i++)
+         // number of elements in a list
+         Integer listSz = PyList_Size(pyRet);
+         PyObject *pyItem = PyList_GetItem(pyRet, 0);
+         if (PyList_Check(pyItem))
          {
-            PyObject* pyItem = PyList_GetItem(pyRet, i);
-            if (PyFloat_Check(pyItem))
+            MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
+            for (Integer i = 1; i < listSz; i++)
+            {
+               // throw an exception if the output dimension row is not what has been return by Python, or
+               // if the size of each list within list is not the same.
+               if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(pyRet, i)) || listSz != outRow)
+                  throw InterfaceException(" Python has returned an unexpected array dimenstion. \n");
+            }
+
+            Integer elementSz = PyList_Size(pyItem);
+            // if the number of elements in each list is not equal to what Gmat script column is setup
+            if (elementSz != outCol)
+               throw InterfaceException(" Python has returned an unexpected array dimenstion. \n");
+
+            for (Integer i = 0; i < listSz; i++)
+            {
+               pyItem = PyList_GetItem(pyRet, i);
+               for (Integer j = 0; j < elementSz; j++)
+               {
+                  Real * ret = new Real;
+                  PyObject *pyElem = PyList_GetItem(pyItem, j);
+                  *ret = PyFloat_AsDouble(pyElem);
+                  MessageInterface::ShowMessage("value of ret is %lf\n", *ret);
+                  argOut.push_back(ret);
+               }
+               
+            }
+
+         }
+         // Python has returned a list of floats
+         else if (PyFloat_Check(pyItem))
+         {
+            for (Integer i = 0; i < listSz; i++)
             {
                Real *ret = new Real;
+               
+               pyItem = PyList_GetItem(pyRet, i);
                *ret = PyFloat_AsDouble(pyItem);
-            //   MessageInterface::ShowMessage("Python object converted to Real Type as: %f\n", *ret);
+               
                argOut.push_back(ret);
             }
-            if (PyList_Check(pyItem))
-            {
-               MessageInterface::ShowMessage("List of list is returned.\n");
-            }
-         }
+         }   
       }
       // else if the Python module returns a tuple of numerical values
       else if (PyTuple_Check(pyRet))
