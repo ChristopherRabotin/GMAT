@@ -212,7 +212,6 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
  
 #ifdef IS_PY3K
    //convert char to wchar_t
-   MessageInterface::ShowMessage("System path is %s\n", destPath);
    mbstowcs(s3K, destPath, 8192);
    PySys_SetPath(s3K);
 #else
@@ -336,7 +335,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
             if (ret != -1)
             {
-               MessageInterface::ShowMessage("Third value is %lf\n", ((Real*)(view->buf))[4]);
+               MessageInterface::ShowMessage("Fifth value is %lf\n", ((Real*)(view->buf))[4]);
             }
          }
 
