@@ -24,6 +24,8 @@
 #include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 #include <ctime>                   // for time()
+#include <sstream>
+#include <sys/time.h>
 
 
 //------------------------------------------------------------------------------
@@ -112,6 +114,7 @@ Integer GmatTimeUtil::GetMonth(const std::string &monthName)
  *                 1 = "Wed Apr 16 12:30:22 2008"
  *                 2 = "2008-04-16T12:30:22"
  *                 3 = "2008-04-16 12:30:22"
+ *                 4 = 1234567890_34565  (seconds and milliseconds since Jan 1, 1970)
  *
  */
 //------------------------------------------------------------------------------
@@ -123,6 +126,14 @@ std::string GmatTimeUtil::FormatCurrentTime(Integer format)
    {
       char *currTimeStr = ctime(&currTime);
       return currTimeStr;
+   }
+   else if (format == 4)
+   {
+      timeval now;
+      gettimeofday(&now, NULL);
+      std::stringstream ss("");
+      ss << (Integer) currTime << "_" << (Integer) now.tv_usec;
+      return ss.str();
    }
    else
    {
