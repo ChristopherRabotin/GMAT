@@ -46,6 +46,10 @@ public:
    virtual void         ValidateParameters(bool forInitialization);
    virtual void         SetBackgroundGeneration(bool inBackground);
    
+   // Need to be able to close background SPKs and leave ready for appending
+   // Finalization
+   void                 CloseEphemerisFile(bool done = true);
+
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
@@ -244,8 +248,8 @@ protected:
    void         CreateCode500EphemerisFile();
    bool         OpenTextEphemerisFile();
    
-   // Finalization
-   void         CloseEphemerisFile();
+//   // Finalization
+//   void         CloseEphemerisFile();
    
    // Time and data
    Real         ConvertInitialAndFinalEpoch();
@@ -319,7 +323,7 @@ protected:
    void         WriteSpkOrbitDataSegment();
    void         WriteSpkOrbitMetaData();
    void         WriteSpkComments(const std::string &comments);
-   void         FinalizeSpkFile();
+   void         FinalizeSpkFile(bool done = true);
    
    // Code500 file writing
    void         WriteCode500OrbitDataSegment(bool canFinalize = false);

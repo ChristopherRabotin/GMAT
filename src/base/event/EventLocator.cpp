@@ -32,11 +32,12 @@
 #include "TimeSystemConverter.hpp"
 #include "GregorianDate.hpp"
 #include "MessageInterface.hpp"
+#include "RealUtilities.hpp"
 //#include "EphemManager.hpp"
 
 
 //#define DEBUG_DUMPEVENTDATA
-//#define DEBUG_EVENTLOCATION
+//#define DEBUG_LOCATE_EVENTS
 //#define DEBUG_EVENT_INITIALIZATION
 //#define DEBUG_OBJECTS
 //#define DEBUG_DATE_FORMAT
@@ -70,7 +71,6 @@ EventLocator::PARAMETER_TEXT[EventLocatorParamCount - GmatBaseParamCount] =
    "WriteReport",          // WRITE_REPORT
    "RunMode",              // RUN_MODE
    "UseEntireInterval",    // USE_ENTIRE_INTERVAL
-//   "AppendToReport",       // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
 
 const Gmat::ParameterType
@@ -88,7 +88,6 @@ EventLocator::PARAMETER_TYPE[EventLocatorParamCount - GmatBaseParamCount] =
    Gmat::BOOLEAN_TYPE,     // WRITE_REPORT
    Gmat::ENUMERATION_TYPE, // RUN_MODE
    Gmat::BOOLEAN_TYPE,     // USE_ENTIRE_INTERVAL
-//   Gmat::BOOLEAN_TYPE,     // APPEND_TO_REPORT *** this may be an input to the FindEvents command instead
 };
 
 const std::string EventLocator::RUN_MODES[3] =
@@ -143,7 +142,10 @@ EventLocator::EventLocator(const std::string &typeStr,
    scNow                   (0.0),
    satName                 (""),
    sat                     (NULL),
-   solarSys                (NULL)
+   solarSys                (NULL),
+   em                      (NULL),
+   initialEpochSet         (false),
+   finalEpochSet           (false)
 {
    objectTypes.push_back(Gmat::EVENT_LOCATOR);
    objectTypeNames.push_back("EventLocator");
@@ -215,7 +217,10 @@ EventLocator::EventLocator(const EventLocator& el) :
    scNow                   (el.scNow),
    satName                 (el.satName),
    sat                     (NULL),
-   solarSys                (el.solarSys)
+   solarSys                (el.solarSys),
+   em                      (NULL),
+   initialEpochSet         (el.initialEpochSet),
+   finalEpochSet           (el.finalEpochSet)
 {
    occultingBodyNames.clear();
    occultingBodies.clear();
@@ -275,6 +280,9 @@ EventLocator& EventLocator::operator=(const EventLocator& el)
       satName              = el.satName;
       sat                  = NULL;
       solarSys             = el.solarSys;
+      em                   = NULL;
+      initialEpochSet      = el.initialEpochSet;
+      finalEpochSet        = el.finalEpochSet;
 
       occultingBodyNames.clear();
       occultingBodies.clear();
@@ -398,8 +406,6 @@ std::string EventLocator::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool EventLocator::IsParameterReadOnly(const Integer id) const
 {
-//   if (id == APPEND_TO_REPORT)
-//      return true;
 
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -939,8 +945,6 @@ bool EventLocator::GetBooleanParameter(const Integer id) const
       return writeReport;
    if (id == USE_ENTIRE_INTERVAL)
       return useEntireInterval;
-//   if (id == APPEND_TO_REPORT)
-//      return appendReport;
 
    return GmatBase::GetBooleanParameter(id);
 }
@@ -980,11 +984,6 @@ bool EventLocator::SetBooleanParameter(const Integer id, const bool value)
       useEntireInterval = value;
       return true;
    }
-//   if (id == APPEND_TO_REPORT)
-//   {
-//      appendReport = value;
-//      return true;
-//   }
 
    return GmatBase::SetBooleanParameter(id, value);
 }
@@ -1262,13 +1261,15 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
                              "A1ModJulian", epochAsReal, outStr);
    if (id == INITIAL_EPOCH)
    {
-      initialEpoch = epochString;
-      initialEp    = epochAsReal;
+      initialEpoch    = epochString;
+      initialEp       = epochAsReal;
+      initialEpochSet = true;
    }
    else  // FINAL_EPOCH
    {
-      finalEpoch   = epochString;
-      finalEp      = epochAsReal;
+      finalEpoch    = epochString;
+      finalEp       = epochAsReal;
+      finalEpochSet = true;
    }
    #ifdef DEBUG_DATE_FORMAT
    MessageInterface::ShowMessage
@@ -1657,7 +1658,6 @@ bool EventLocator::Initialize()
       sat->RecordEphemerisData();
    }
 
-
    fileWasWritten = false;
    isInitialized  = true;
 
@@ -1726,12 +1726,91 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
       //      MessageInterface::ShowMessage("Epochs Initialized!!!!\n");
       //   #endif
 
+      /// Get the ephem manager from the spacecraft, if we don't have it already
+      if (!em)
+      {
+         em  = sat->GetEphemManager();
+         if (!em)
+         {
+            std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
+            errmsg += sat->GetName() + "!!\n";
+            throw EventException(errmsg);
+         }
+      }
+      Real coverageBegin;
+      Real coverageEnd;
+      scNow = sat->GetEpoch();
+      em->GetCoverage(initialEp, finalEp, useEntireInterval, true,
+                      findStart, findStop, coverageBegin, coverageEnd);
+      #ifdef DEBUG_TIME_SPENT
+      Real timeSpent = (Real) (clock() - t);
+      MessageInterface::ShowMessage(" --- time spent in GetCoverage = %12.10f (sec)\n",
+            (timeSpent / CLOCKS_PER_SEC));
+      #endif
+      #ifdef DEBUG_LOCATE_EVENTS
+         MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
+         MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
+      #endif
+      if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
+      {
+         // ... in case there were no files to read from, we'll just use the
+         // beginning and current spacecraft times
+         findStart     = scStart;
+         findStop      = scNow;
+         coverageBegin = scStart;
+         coverageEnd   = scNow;
+      }
+      #ifdef DEBUG_LOCATE_EVENTS
+      MessageInterface::ShowMessage("---- findStart      = %12.10f\n", findStart);
+      MessageInterface::ShowMessage("---- findStop       = %12.10f\n", findStop );
+      MessageInterface::ShowMessage("---- coverageBegin  = %12.10f\n", coverageBegin);
+      MessageInterface::ShowMessage("---- coverageEnd    = %12.10f\n", coverageEnd );
+      MessageInterface::ShowMessage("---- initialEp      = %12.10f\n", initialEp);
+      MessageInterface::ShowMessage("---- finalEp        = %12.10f\n", finalEp );
+      #endif
+
       // Validate inputs here
       if (initialEp > finalEp)
       {
          std::string errmsg = "Initial Epoch must be earlier than Final Epoch for EventLocator ";
          errmsg += instanceName + ".\n";
          throw EventException(errmsg);
+      }
+      // Validate initialEpoch and finalEpoch against available range of data (coverageBegin:coverageEnd)
+      if (!useEntireInterval)
+      {
+         if (initialEpochSet && (initialEp < coverageBegin))
+         {
+            std::string errmsg = "Initial Epoch must be after the beginning of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (initialEpochSet && (initialEp > coverageEnd))
+         {
+            std::string errmsg = "Initial Epoch must be before the end of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (finalEpochSet && (finalEp < coverageBegin))
+         {
+            std::string errmsg = "Final Epoch must be after the beginning of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
+         if (finalEpochSet && (finalEp > coverageEnd))
+         {
+            std::string errmsg = "Final Epoch must be before the end of ";
+            errmsg += "coverage for spacecraft ";
+            errmsg += sat->GetName() + ", for EventLocator ";
+            errmsg += instanceName + ".\n";
+            throw EventException(errmsg);
+         }
       }
 
       fromEpoch = initialEp;

@@ -2161,9 +2161,9 @@ bool EphemerisFile::OpenTextEphemerisFile()
 
 
 //------------------------------------------------------------------------------
-// void CloseEphemerisFile()
+// void CloseEphemerisFile(bool done = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::CloseEphemerisFile()
+void EphemerisFile::CloseEphemerisFile(bool done)
 {
    // Close SPK file
    #ifdef __USE_SPICE__
@@ -2175,15 +2175,18 @@ void EphemerisFile::CloseEphemerisFile()
    if (spkWriter != NULL)
    {
       if (!spkWriteFailed)
-         FinalizeSpkFile();
+         FinalizeSpkFile(done);
       
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Remove
          (spkWriter, "SPK writer", "EphemerisFile::~EphemerisFile()()",
           "deleting local SPK writer");
       #endif
-      delete spkWriter;
-      spkWriter = NULL;
+      if (done)
+      {
+         delete spkWriter;
+         spkWriter = NULL;
+      }
    }
    #endif
    
@@ -4472,7 +4475,7 @@ void EphemerisFile::WriteSpkOrbitDataSegment()
          Real time = t->GetReal();
          Rvector6 *st = stateArray[ii];
          MessageInterface::ShowMessage
-            ("[%3d] %12.10f  %s  %s", ii, time, ToUtcGregorian(time, true).c_str(),
+            ("[%3d] %12.10f  %s  %s\n", ii, time, ToUtcGregorian(time, true).c_str(),
              (st->ToString()).c_str());
       }
       #endif
@@ -4606,9 +4609,9 @@ void EphemerisFile::WriteSpkComments(const std::string &comments)
 
 
 //------------------------------------------------------------------------------
-// void FinalizeSpkFile()
+// void FinalizeSpkFile(bool done = true)
 //------------------------------------------------------------------------------
-void EphemerisFile::FinalizeSpkFile()
+void EphemerisFile::FinalizeSpkFile(bool done)
 {
    #ifdef DEBUG_EPHEMFILE_SPICE
    MessageInterface::ShowMessage("=====> FinalizeSpkFile() entered\n");
@@ -4633,10 +4636,16 @@ void EphemerisFile::FinalizeSpkFile()
             MessageInterface::ShowMessage("   about to write SPK orbit data segment\n");
             #endif
             WriteSpkOrbitDataSegment();
+            #ifdef DEBUG_EPHEMFILE_SPICE
+            MessageInterface::ShowMessage("   DONE writing SPK orbit data segment\n");
+            #endif
          }
       }
 
-      spkWriter->FinalizeKernel();
+      #ifdef DEBUG_EPHEMFILE_SPICE
+      MessageInterface::ShowMessage("   about to call FinalizeKernel!!!\n");
+      #endif
+      spkWriter->FinalizeKernel(done);
    }
    catch (BaseException &e)
    {

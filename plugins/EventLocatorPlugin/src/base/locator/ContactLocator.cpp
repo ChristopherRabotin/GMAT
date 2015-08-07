@@ -1052,6 +1052,10 @@ bool ContactLocator::ReportEventData(const std::string &reportNotice)
    #endif
    Integer numIndividual = 0;
 
+   if (sz ==0)
+   {
+      theReport << "\n" << noEvents << "\n";
+   }
    // Loop over the total events list
    for (Integer ii = 0; ii < sz; ii++)
    {
@@ -1096,36 +1100,6 @@ void ContactLocator::FindEvents()
                ii, (stations.at(ii)->GetName()).c_str(), stations.at(ii));
    #endif
 
-   EphemManager   *em       = sat->GetEphemManager();
-   if (!em)
-   {
-      std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
-      errmsg += sat->GetName() + "!!\n";
-      throw EventException(errmsg);
-   }
-
-   #ifdef DEBUG_CONTACT_EVENTS
-      MessageInterface::ShowMessage("---- About to call GetCoverageStartAndStop for %s\n",
-            instanceName.c_str());
-   #endif
-   scNow = sat->GetEpoch();
-   em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
-                               findStart, findStop);
-   #ifdef DEBUG_CONTACT_EVENTS
-      MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
-      MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
-   #endif
-   if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
-   {
-      // ... in case there were no files to read from, we'll just use the
-      // beginning and current spacecraft times
-      findStart = scStart;
-      findStop  = scNow;
-   }
-   #ifdef DEBUG_CONTACT_EVENTS
-      MessageInterface::ShowMessage("---- findStart  = %12.10f\n", findStart);
-      MessageInterface::ShowMessage("---- findStop   = %12.10f\n", findStop );
-   #endif
 
    // Set up data for the calls to CSPICE
 
@@ -1214,16 +1188,12 @@ void ContactLocator::FindEvents()
       em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, bodiesToUse, theAbCorr,
             initialEp, finalEp, useEntireInterval, useLightTimeDelay, transmit, stepSize, numContacts,
             starts, ends);
-//      em -> GetContactIntervals(theObsrvr, minElAngle, obsFrame, occultingBodyNames, theAbCorr,
-//            initialEp, finalEp, useEntireInterval, useLightTimeDelay, transmit, stepSize, numContacts,
-//            starts, ends);
       #ifdef DEBUG_CONTACT_EVENTS
          MessageInterface::ShowMessage("After GetContactIntervals: \n");
          MessageInterface::ShowMessage("   numContacts       = %d\n", numContacts);
       #endif
       if (numContacts > 0)
       {
-//         ContactResult *evList = new ContactResult();
          // Insert the events into the array
          for (Integer kk = 0; kk < numContacts; kk++ )
          {
@@ -1232,8 +1202,6 @@ void ContactLocator::FindEvents()
             ContactEvent *newEvent = new ContactEvent(s1, e1);
             evList->AddEvent(newEvent);
          }
-//         // One result array for each station
-//         contactResults.push_back(evList);
       }
       // One result array for each station whether or not there are events
       contactResults.push_back(evList);

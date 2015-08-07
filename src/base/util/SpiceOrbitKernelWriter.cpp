@@ -96,6 +96,8 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const std::string      &objName, 
    fileFinalized   (false),
    dataWritten     (false),
    tmpTxtFile      (NULL),
+   tmpFileOK       (false),
+   appending       (false),
    fm              (NULL),
    renameSPK       (renameExistingSPK)
 {
@@ -281,6 +283,8 @@ SpiceOrbitKernelWriter::SpiceOrbitKernelWriter(const SpiceOrbitKernelWriter &cop
    fileFinalized     (copy.fileFinalized),
    dataWritten       (copy.dataWritten),
    tmpTxtFile        (copy.tmpTxtFile),
+   tmpFileOK         (copy.tmpFileOK),
+   appending         (copy.appending),
    fm                (copy.fm),
    renameSPK         (copy.renameSPK)
 {
@@ -318,6 +322,8 @@ SpiceOrbitKernelWriter& SpiceOrbitKernelWriter::operator=(const SpiceOrbitKernel
       fileFinalized     = copy.fileFinalized;
       dataWritten       = copy.dataWritten;
       tmpTxtFile        = copy.tmpTxtFile; // ??
+      tmpFileOK         = copy.tmpFileOK;
+      appending         = copy.appending;
       fm                = copy.fm;
       renameSPK         = copy.renameSPK;
 
@@ -387,6 +393,7 @@ void SpiceOrbitKernelWriter::WriteSegment(const A1Mjd &start, const A1Mjd &end,
       MessageInterface::ShowMessage("In SOKW::WriteSegment, start = %12.10, end = %12.10\n",
             start.Get(), end.Get());
       MessageInterface::ShowMessage("   writing %d states\n", (Integer) states.size());
+      MessageInterface::ShowMessage("   fileOpen = %s\n", (fileOpen? "true": "false"));
    #endif
    // If the file has not been set up yet, open it
    if (!fileOpen)
@@ -555,14 +562,14 @@ void SpiceOrbitKernelWriter::SetBasicMetaData()
 }
 
 //------------------------------------------------------------------------------
-//  FinalizeKernel()
+//  FinalizeKernel(bool done = true)
 //------------------------------------------------------------------------------
 /**
  * This method writes the meta data (comments) to the kernel and then closes it.
  *
  */
 //------------------------------------------------------------------------------
-void SpiceOrbitKernelWriter::FinalizeKernel()
+void SpiceOrbitKernelWriter::FinalizeKernel(bool done)
 {
    #ifdef DEBUG_SPK_WRITING
       MessageInterface::ShowMessage("In FinalizeKernel .... tmpFileOK = %s\n",
@@ -578,7 +585,11 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
    if ((fileOpen) && (dataWritten)) // should be both or neither are true
    {
       // write all the meta data to the file
-      if (tmpFileOK) WriteMetaData();
+      if (tmpFileOK && done) WriteMetaData();
+      #ifdef DEBUG_SPK_WRITING
+         MessageInterface::ShowMessage("In SOKW::FinalizeKernel ... is it loaded?  %s\n",
+               (IsLoaded(kernelFileName)? "true" : "false"));
+      #endif
       // close the SPK file
       spkcls_c(handle);
       if (failed_c())
@@ -600,10 +611,18 @@ void SpiceOrbitKernelWriter::FinalizeKernel()
          delete [] err;
       }
    }
-   basicMetaData.clear();
-   addedMetaData.clear();
+   if (done)
+   {
+      basicMetaData.clear();
+      addedMetaData.clear();
+      fileFinalized = true;
+      appending     = false;
+   }
+   else
+   {
+      appending  = true;
+   }
    fileOpen      = false;
-   fileFinalized = true;
 }
 
 //------------------------------------------------------------------------------
@@ -695,13 +714,23 @@ bool SpiceOrbitKernelWriter::OpenFileForWriting()
 {
    // get a file handle here
    SpiceInt        maxChar = MAX_CHAR_COMMENT;
-   std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
-   ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
    #ifdef DEBUG_SPK_INIT
       MessageInterface::ShowMessage("... attempting to open SPK file with  fileName = %s\n",
             kernelFileName.c_str());
+      MessageInterface::ShowMessage("... and appending = %s\n", (appending? "true" : "false"));
+      MessageInterface::ShowMessage("    handle = %d\n", (Integer) handle);
    #endif
-   spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
+
+   bool fileExists = GmatFileUtil::DoesFileExist(kernelFileName);
+
+   if (appending && fileExists)
+      spkopa_c(kernelNameSPICE, &handle);
+   else
+   {
+      std::string     internalFileName = "GMAT-generated SPK file for " + objectName;
+      ConstSpiceChar  *internalSPKName  = internalFileName.c_str();
+      spkopn_c(kernelNameSPICE, internalSPKName, maxChar, &handle); // CSPICE method to create and open an SPK kernel
+   }
    if (failed_c()) // CSPICE method to detect failure of previous call to CSPICE
    {
       ConstSpiceChar option[]   = "LONG"; // retrieve long error message
