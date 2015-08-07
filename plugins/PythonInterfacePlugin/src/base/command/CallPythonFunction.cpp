@@ -351,25 +351,22 @@ bool CallPythonFunction::Execute()
       // In case of Python Int, we need to convert it to C++ float.
       else if (PyList_Check(pyRet))
       {
-         // number of elements in a list
+         // number of list elements in a list, for example: [ [], [], [] ]
          Integer listSz = PyList_Size(pyRet);
          PyObject *pyItem = PyList_GetItem(pyRet, 0);
+         // number of elements in a list, for example: [ 1, 2, 3 ]
+         Integer elementSz = PyList_Size(pyItem);
+
          if (PyList_Check(pyItem))
          {
             MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
             for (Integer i = 1; i < listSz; i++)
             {
-               // throw an exception if the output dimension row is not what has been return by Python, or
+               // throw an exception if the output dimension row and column is not what has been returned by Python, or
                // if the size of each list within list is not the same.
-               if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(pyRet, i)) || listSz != outRow)
-                  throw InterfaceException(" Python has returned an unexpected array dimenstion. \n");
+               if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(pyRet, i)) || listSz != outRow || elementSz != outCol)
+                  throw InterfaceException(" Python has returned an unexpected array dimension. \n");
             }
-
-            Integer elementSz = PyList_Size(pyItem);
-            // if the number of elements in each list is not equal to what Gmat script column is setup
-            if (elementSz != outCol)
-               throw InterfaceException(" Python has returned an unexpected array dimenstion. \n");
-
             for (Integer i = 0; i < listSz; i++)
             {
                pyItem = PyList_GetItem(pyRet, i);
@@ -377,13 +374,17 @@ bool CallPythonFunction::Execute()
                {
                   Real * ret = new Real;
                   PyObject *pyElem = PyList_GetItem(pyItem, j);
-                  *ret = PyFloat_AsDouble(pyElem);
+                  // if the element is a Python Integer/Long, convert it to C++ double
+                  if (PyLong_Check(pyElem))
+                     *ret = PyLong_AsDouble(pyElem);
+                  // else if the element is a Python Float
+                  else if (PyFloat_Check(pyElem))
+                     *ret = PyFloat_AsDouble(pyElem);
+
                   MessageInterface::ShowMessage("value of ret is %lf\n", *ret);
                   argOut.push_back(ret);
                }
-               
             }
-
          }
          // Python has returned a list of floats
          else if (PyFloat_Check(pyItem))
