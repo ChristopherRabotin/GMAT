@@ -25,7 +25,10 @@
 #include "UtilityException.hpp"
 #include <ctime>                   // for time()
 #include <sstream>
-#include <sys/time.h>
+
+#ifndef _MSC_VER
+#include <sys/time.h>    // not available for MSVC?
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -129,10 +132,14 @@ std::string GmatTimeUtil::FormatCurrentTime(Integer format)
    }
    else if (format == 4)
    {
-      timeval now;
-      gettimeofday(&now, NULL);
       std::stringstream ss("");
-      ss << (Integer) currTime << "_" << (Integer) now.tv_usec;
+      ss << (Integer) currTime;
+      #ifndef _MSC_VER
+         /// Add microseconds of the current time
+         timeval now;
+         gettimeofday(&now, NULL);
+         ss << "_" << (Integer) now.tv_usec;
+      #endif
       return ss.str();
    }
    else
