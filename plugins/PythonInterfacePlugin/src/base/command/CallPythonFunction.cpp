@@ -370,6 +370,7 @@ bool CallPythonFunction::Execute()
             for (Integer i = 0; i < listSz; i++)
             {
                pyItem = PyList_GetItem(pyRet, i);
+               std::vector<Real *> *vItem = new std::vector<Real *>;
                for (Integer j = 0; j < elementSz; j++)
                {
                   Real * ret = new Real;
@@ -381,9 +382,12 @@ bool CallPythonFunction::Execute()
                   else if (PyFloat_Check(pyElem))
                      *ret = PyFloat_AsDouble(pyElem);
 
-                  MessageInterface::ShowMessage("value of ret is %lf\n", *ret);
-                  argOut.push_back(ret);
+                  MessageInterface::ShowMessage("Value in output array is %lf\n", *ret);
+                  vItem->push_back(ret);
+                  
                }
+
+               argOut.push_back(vItem);
             }
          }
          // Python has returned a list of floats
