@@ -31,6 +31,7 @@
 //#define DEBUG_STATE_RESETS
 //#define DEBUG_EVENT_STATE
 //#define DEBUG_LOAD_SOLVEFORS
+//#define DEBUG_INITIAL_STATE
 
 
 //------------------------------------------------------------------------------
