@@ -302,7 +302,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       
       pybuffer->obj = NULL;
       pybuffer->format = "d";
-      pybuffer->ndim = 1;
+      pybuffer->ndim = (row != 1 && col != 1) ? 2 : 1;
       pybuffer->shape = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
       pybuffer->readonly = 0;
       pybuffer->suboffsets = 0;
