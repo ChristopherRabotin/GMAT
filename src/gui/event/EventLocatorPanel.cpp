@@ -251,9 +251,6 @@ void EventLocatorPanel::Create()
       new wxBitmapButton(this, ID_BUTTON_BROWSE, openBitmap, wxDefaultPosition,
                          wxSize(buttonWidth, -1));
 
-   writeReportCheckBox = new wxCheckBox(this, ID_CHECKBOX, wxT("Write Report"),
-                                  wxDefaultPosition, wxDefaultSize, 0);
-
    runModeTxt = new wxStaticText( this, ID_TEXT,
          ""GUI_ACCEL_KEY"Run Mode", wxDefaultPosition, wxSize(staticTextWidth,-1), 0 );
 
@@ -262,6 +259,8 @@ void EventLocatorPanel::Create()
             emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    runModeComboBox->SetToolTip(pConfig->Read(_T("RunMode")));
 
+   writeReportCheckBox = new wxCheckBox(this, ID_CHECKBOX, wxT("Write Report"),
+                                  wxDefaultPosition, wxDefaultSize, 0);
 
    #ifdef DEBUG_EVENTPANEL_CREATE
       MessageInterface::ShowMessage("EventLocatorPanel::Create() report widgets created ...\n");
