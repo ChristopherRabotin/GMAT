@@ -359,7 +359,9 @@ bool CallPythonFunction::Execute()
 
          if (PyList_Check(pyItem))
          {
+
             MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
+
             for (Integer i = 1; i < listSz; i++)
             {
                // throw an exception if the output dimension row and column is not what has been returned by Python, or
@@ -663,7 +665,6 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
 //------------------------------------------------------------------------------
 void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
 {
-   
    for (unsigned int i = 0; i < mOutputList.size(); i++)
    {
       Parameter *param = mOutputList[i];
@@ -677,7 +678,23 @@ void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
             break;
          }
 
+         case Gmat::RMATRIX_TYPE:
+         {
+
+            for (Integer i = 0; i < argOut.size(); i++)
+            {
+               Rmatrix rMatrix;
+
+               std::vector<Real *> *vItem = (std::vector<Real *> *) argOut.at(i);
+               for (Integer j = 0; j < vItem->size(); j++)
+               {
+                  rMatrix = param->EvaluateRmatrix();
+                  param->SetReal(rMatrix.GetElement(i, j));
+               }
+            }
+
+            break;
+         }
       }
-   }
-            
+   }        
 }
