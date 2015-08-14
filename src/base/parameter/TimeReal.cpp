@@ -25,6 +25,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TIMEREAL 1
+//#define DEBUG_REF_OBJECT 1
 
 //---------------------------------
 // public methods
@@ -198,8 +199,8 @@ bool TimeReal::Initialize()
 {
    #if DEBUG_TIMEREAL
    MessageInterface::ShowMessage
-      ("TimeReal::Initialize() <%p>'%s' entered, IsGlobal=%d\n", this, GetName().c_str(),
-       IsGlobal());
+      ("TimeReal::Initialize() <%p>'%s' entered, IsGlobal=%d\n", this,
+       GetName().c_str(), IsGlobal());
    #endif
    
    RealVar::Initialize();
@@ -344,6 +345,34 @@ GmatBase* TimeReal::GetRefObject(const Gmat::ObjectType type,
 bool TimeReal::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name)
 {
-   return TimeData::SetRefObject(obj, type, name);
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("TimeReal::SetRefObject() <%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
+       this, this->GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
+   if (obj == NULL)
+      return false;
+   
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("   Is%sGlobal=%d, Is%sLocal=%d\n", name.c_str(), obj->IsGlobal(),
+       name.c_str(), obj->IsLocal());
+   #endif
+   
+   // Set owner object for Parameter here (LOJ: 2015.08.05)
+   if (obj->GetName() == mParamOwnerName)
+      SetOwner(obj);
+   
+   bool setOk = TimeData::SetRefObject(obj, type, name);
+   
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("TimeReal::SetRefObject() <%p>'%s' returning %d\n", this,
+       this->GetName().c_str(), setOk);
+   #endif
+   
+   return setOk;
 }
 

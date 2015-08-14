@@ -5345,10 +5345,64 @@ bool EphemerisFile::Distribute(const Real * dat, Integer len)
    {
       #ifdef DEBUG_EPHEMFILE_SOLVER_DATA
       MessageInterface::ShowMessage
-         ("EphemerisFile::Distribute() Just returning; solver is running\n");
+         ("EphemerisFile::Distribute() Just returning true; solver is running\n");
       #endif
       
       return true;
+   }
+   
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this EphemerisFile is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.08.13)
+   if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+   {
+      #if DBGLVL_EPHEMFILE_DATA
+      MessageInterface::ShowMessage
+         ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+          GetName().c_str(), IsGlobal() ? "Yes" : "No", IsLocal() ? "Yes" : "No");
+      #endif
+      
+      bool skipData = false;
+      if (spacecraft)
+      {
+         #if DBGLVL_EPHEMFILE_DATA
+         MessageInterface::ShowMessage
+            ("   spacecraft = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+             spacecraft, spacecraft->GetTypeName().c_str(), spacecraft->GetName().c_str(),
+             spacecraft->IsGlobal(), spacecraft->IsLocal());
+         #endif
+
+         // Skip data if EphemerisFile is global and spacecraft is local
+         if (IsGlobal() && spacecraft->IsLocal())
+         {
+            #if DBGLVL_EPHEMFILE_DATA
+            MessageInterface::ShowMessage
+               ("   Skip data since '%s' is global and spacecraft is local\n",
+                GetName().c_str());
+            #endif
+            skipData = true;
+         }
+         // Skip data if spacecraft is not a global nor a local object
+         else if (!(spacecraft->IsGlobal()) && !(spacecraft->IsLocal()))
+         {
+            #if DBGLVL_EPHEMFILE_DATA
+            MessageInterface::ShowMessage
+               ("   Skip data since spacecraft is not a global nor a local object\n");
+            #endif
+            skipData = true;
+         }
+      }
+      
+      if (skipData)
+      {
+         #if DBGLVL_EPHEMFILE_DATA
+         MessageInterface::ShowMessage
+            ("EphemerisFile::Distribute() this=<%p>'%s' just returning true\n   data is "
+             "from a function and spacecraft is not a global nor a local object\n",
+             this, GetName().c_str());
+         #endif
+         return true;
+      }
    }
    
    // Get proper id with data label

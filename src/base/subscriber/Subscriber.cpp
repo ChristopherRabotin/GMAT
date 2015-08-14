@@ -49,6 +49,7 @@
 //#define DEBUG_RECEIVE_DATA
 //#define DEBUG_RENAME
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_SKIP_DATA
 //#define DEBUG_SUBSCRIBER_PUT
 //#define DEBUG_SUBSCRIBER_SET
 //#ifndef DEBUG_MEMORY
@@ -1925,6 +1926,183 @@ Integer Subscriber::FindIndexOfElement(StringArray &labelArray,
       return distance(labelArray.begin(), pos);
 }
 
+
+//------------------------------------------------------------------------------
+// bool ShouldDataBeSkipped(Integer whichWrapper)
+//------------------------------------------------------------------------------
+/**
+ * Determins if data should be skipped. Data needs to be skipped if subscriber
+ * is not created inside a function and data is not published inside a function.
+ *
+ * @param whichWrapper  input wrapper indicator (1 = X wrapper, 2 = Y wrapper)
+ */
+//------------------------------------------------------------------------------
+bool Subscriber::ShouldDataBeSkipped(Integer whichWrapper)
+{
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ShouldDataBeSkipped() <%p>'%s' entered, whichWrapper=%d, "
+       "xParamWrappers.size()=%d, yParamWrappers.size()=%d\n", this, GetName().c_str(),
+       whichWrapper, xParamWrappers.size(), yParamWrappers.size());
+   #endif
+   
+   bool skipData = false;
+   bool isValidData = true;
+   GmatBase *refObj = NULL;
+   
+   // Check wrapper size first
+   if (whichWrapper == 1)
+   {
+      if (xParamWrappers.empty())
+         isValidData = false;
+   }
+   else if (whichWrapper == 2)
+   {
+      if (yParamWrappers.empty())
+         isValidData = false;
+   }
+   else
+      isValidData = false;
+   
+   if (!isValidData)
+   {
+      std::string wrapperName = "Unknown wrappers";
+      if (whichWrapper == 1)
+         wrapperName = "X wrappers";
+      else if (whichWrapper == 2)
+         wrapperName = "Y wrappers";
+      
+      #ifdef DEBUG_SKIP_DATA
+      MessageInterface::ShowMessage
+         ("Subscriber::ShouldDataBeSkipped() <%p>'%s' returning false, failed to "
+          "check valid data for %s\n", this, GetName().c_str(), wrapperName.c_str());
+      #endif
+      return false;
+   }
+   
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+       GetName().c_str(), IsGlobal() ? "Yes" : "No", IsLocal() ? "Yes" : "No");
+   #endif
+   
+   // By this time parameter wrappers should not be empty
+   if (whichWrapper == 1)
+      refObj = xParamWrappers[0]->GetRefObject();
+   else
+      refObj = yParamWrappers[0]->GetRefObject();
+   
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+       refObj ? refObj->GetName().c_str() : "NULL");
+   #endif
+   
+   if (refObj)
+   {
+      #ifdef DEBUG_SKIP_DATA
+      MessageInterface::ShowMessage
+         ("   refObj=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+          refObj, refObj->GetTypeName().c_str(), refObj->GetName().c_str(), refObj->IsGlobal(),
+          refObj->IsLocal());
+      GmatBase *paramOwner = ((Parameter*)refObj)->GetOwner();
+      MessageInterface::ShowMessage
+         ("   paramOwner=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n", paramOwner,
+          paramOwner ? paramOwner->GetTypeName().c_str() : "NULL",
+          paramOwner ? paramOwner->GetName().c_str() : "NULL",
+          paramOwner ? paramOwner->IsGlobal() : -999,
+          paramOwner ? paramOwner->IsLocal() : -999);
+      #endif
+      
+      // Skip if this XyPlot is not a global nor a local object
+      if (!IsGlobal() && !IsLocal())
+      {
+         #ifdef DEBUG_SKIP_DATA
+         MessageInterface::ShowMessage
+            ("   Skip data since this subscriber is not a global nor a local object\n");
+         #endif
+         skipData = true;
+      }
+      
+      // Skip if ref Parameter is not a global nor a local object
+      if (!(refObj->IsGlobal()) && !(refObj->IsLocal()))
+      {
+         #ifdef DEBUG_SKIP_DATA
+         MessageInterface::ShowMessage
+            ("   Skip data since ref Parameter is not a global nor a local object\n");
+         #endif
+         skipData = true;
+      }
+      
+      // Check all Y wrappers
+      if (!skipData)
+      {
+         int numYParams = yParamWrappers.size();
+         for (int i = 0; i < numYParams; i++)
+         {
+            #ifdef DEBUG_SKIP_DATA
+            MessageInterface::ShowMessage
+               ("   yParamWrappers[%d]=<%p>\n", i, yParamWrappers[i]);
+            #endif
+            if (yParamWrappers[i] == NULL)
+               break;
+            
+            refObj = yParamWrappers[i]->GetRefObject();
+            
+            #ifdef DEBUG_SKIP_DATA
+            MessageInterface::ShowMessage
+               ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+                refObj ? refObj->GetName().c_str() : "NULL");
+            #endif
+            
+            if (refObj)
+            {
+               #ifdef DEBUG_SKIP_DATA
+               MessageInterface::ShowMessage
+                  ("   refObj = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+                   refObj, refObj->GetTypeName().c_str(), refObj->GetName().c_str(), refObj->IsGlobal(),
+                   refObj->IsLocal());
+               GmatBase *paramOwner = ((Parameter*)refObj)->GetOwner();
+               MessageInterface::ShowMessage
+                  ("   paramOwner=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n", paramOwner,
+                   paramOwner ? paramOwner->GetTypeName().c_str() : "NULL",
+                   paramOwner ? paramOwner->GetName().c_str() : "NULL",
+                   paramOwner ? paramOwner->IsGlobal() : -999,
+                   paramOwner ? paramOwner->IsLocal() : -999);
+               #endif
+               
+               // Skip if this subscriber is not a global nor a local object
+               if (!IsGlobal() && !IsLocal())
+               {
+                  #ifdef DEBUG_SKIP_DATA
+                  MessageInterface::ShowMessage
+                     ("   Skip data since this subscriber is not a global nor a local object\n");
+                  #endif
+                  skipData = true;
+                  break;
+               }
+               // Skip if Parameter is not a global nor a local object
+               if (!(refObj->IsGlobal()) && !(refObj->IsLocal()))
+               {
+                  #ifdef DEBUG_SKIP_DATA
+                  MessageInterface::ShowMessage
+                     ("   Skip data since ref Parameter is not a global nor a local object\n");
+                  #endif
+                  skipData = true;
+                  break;
+               }
+            }
+         }
+      }
+   }
+   
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ShouldDataBeSkipped() this=<%p>'%s' returning %s\n", this,
+       GetName().c_str(), skipData ? "true" : "false");
+   #endif
+   return skipData;
+}
 
 
 //------------------------------------------------------------------------------

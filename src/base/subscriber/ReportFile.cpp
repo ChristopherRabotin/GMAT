@@ -1845,7 +1845,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    {
       #if DBGLVL_REPORTFILE_DATA > 0
       MessageInterface::ShowMessage
-         ("ReportFile::Distribute() this=<%p>'%s' returning true, not writing data\n",
+         ("ReportFile::Distribute() this=<%p>'%s' just returning true, not writing data\n",
           this, GetName().c_str());
       #endif
       return true;
@@ -1859,45 +1859,17 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    {
       if (currentProvider && currentProvider->TakeAction("IsInFunction"))
       {
-         #if DBGLVL_REPORTFILE_DATA > 0
-         MessageInterface::ShowMessage
-         ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
-          GetName().c_str(), IsGlobal() ? "yes" : "no", IsLocal() ? "yes" : "no");
-         #endif
+         bool skipDataY = ShouldDataBeSkipped(2);
          
-         // By this time yParamWrapper should not be empty, 
-         GmatBase *refObj = yParamWrappers[0]->GetRefObject();
-         if (refObj)
+         if (skipDataY)
          {
-            #if DBGLVL_REPORTFILE_DATA > 0
+            #if DEBUG_XYPLOT_UPDATE > 1
             MessageInterface::ShowMessage
-               ("   yParamWrappers[0]->GetRefObject() = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
-                refObj, refObj->GetTypeName().c_str(), refObj->GetName().c_str(), refObj->IsGlobal(),
-                refObj->IsLocal());
+               ("ReportFile::Distribute() this=<%p>'%s' just returning true\n   data is "
+                "from a function and reporting Parameter is not a global nor a local object\n",
+                this, GetName().c_str());
             #endif
-            
-            // Skip if this ReportFile is not a global nor a local object
-            if (!IsGlobal() && !IsLocal())
-            {
-               #if DBGLVL_REPORTFILE_DATA > 0
-               MessageInterface::ShowMessage
-                  ("ReportFile::Distribute() this=<%p>'%s' returning true, data is "
-                   "from a function and this subscriber is local\n", this, GetName().c_str());
-               #endif
-               return true;
-            }
-            
-            // Skip if this reporting Parameter is not a global nor a local object
-            if (!(refObj->IsGlobal()) && !(refObj->IsLocal()))
-            {
-               #if DBGLVL_REPORTFILE_DATA > 0
-               MessageInterface::ShowMessage
-                  ("ReportFile::Distribute() this=<%p>'%s' returning true, data is "
-                   "from a function and reporting item is not global nor local\n", this,
-                   GetName().c_str());
-               #endif
-               return true;
-            }
+            return true;
          }
       }
    }
@@ -1911,7 +1883,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       {
          #if DBGLVL_REPORTFILE_DATA > 0
          MessageInterface::ShowMessage
-            ("ReportFile::Distribute() this=<%p>'%s' returning true, duplicate data: "
+            ("ReportFile::Distribute() this=<%p>'%s' just returning true, duplicate data: "
              "mLastReportTime = %f, dat[0] = %f\n", this, GetName().c_str(),
              mLastReportTime, dat[0]);
          #endif
