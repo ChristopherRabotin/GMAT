@@ -26,7 +26,9 @@
 #include <ctime>                   // for time()
 #include <sstream>
 
-#ifndef _MSC_VER
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <sys/time.h>    // not available for MSVC?
 #endif
 
@@ -134,7 +136,16 @@ std::string GmatTimeUtil::FormatCurrentTime(Integer format)
    {
       std::stringstream ss("");
       ss << (Integer) currTime;
-      #ifndef _MSC_VER
+      #ifdef _MSC_VER
+         // QueryPerformanceCounter() Retrieves the current value of the
+         // performance counter, which is a high resolution (<1us) time stamp
+         // that can be used for time-interval measurements.
+         LARGE_INTEGER performanceCount;
+         QueryPerformanceCounter(&performanceCount);
+         ss << "_";
+         ss << performanceCount.HighPart;
+         ss << performanceCount.LowPart;
+      #else
          /// Add microseconds of the current time
          timeval now;
          gettimeofday(&now, NULL);
