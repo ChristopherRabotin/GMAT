@@ -25,6 +25,8 @@
 #include "TimeParameters.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_TIME_EVAL
+
 //==============================================================================
 //                              CurrA1MJD
 //==============================================================================
@@ -1370,12 +1372,23 @@ ElapsedDays::~ElapsedDays()
 //------------------------------------------------------------------------------
 bool ElapsedDays::Evaluate()
 {
-   mRealValue = GetElapsedTimeReal(DAYS);
+   #ifdef DEBUG_TIME_EVAL
+   MessageInterface::ShowMessage
+      ("ElapsedDays::Evaluate() <%p>'%s' entered, IsGlobal:%s\n", this, GetName().c_str(),
+       IsGlobal() ? "Yes" : "No");
+   #endif
    
+   mRealValue = GetElapsedTimeReal(DAYS);
+   bool retval = true;
    if (mRealValue == TIME_REAL_UNDEFINED)
-      return false;
-   else
-      return true;
+      retval = false;
+   
+   #ifdef DEBUG_TIME_EVAL
+   MessageInterface::ShowMessage
+      ("ElapsedDays::Evaluate() <%p>'%s' returning %d, mRealValue=%f\n",
+       this, GetName().c_str(),retval,  mRealValue);
+   #endif
+   return retval;
 }
 
 

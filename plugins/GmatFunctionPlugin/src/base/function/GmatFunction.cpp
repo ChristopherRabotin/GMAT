@@ -375,6 +375,8 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       MessageInterface::ShowMessage
          ("   Add clone to objectStore if autoObj '%s' is not already in objectStore\n",
           autoObjName.c_str());
+      MessageInterface::ShowMessage
+         ("   autoObj->IsGlobal=%d, autoObj->IsLocal=%d\n", autoObj->IsGlobal(), autoObj->IsLocal());
       #endif
       
       // If automatic object owner (i.e Parameter owner) is global, set it global

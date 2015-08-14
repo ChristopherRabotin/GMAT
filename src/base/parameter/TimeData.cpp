@@ -235,8 +235,11 @@ Real TimeData::GetTimeReal(Integer id)
    
    #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
-      ("TimeData::GetTimeReal() mSpacecraft=<%p>'%s', a1Mjd=%f\n",
-       mSpacecraft, mSpacecraft->GetName().c_str(), a1Mjd);
+      ("TimeData::GetTimeReal() <%p>'%s' entered, id=%d, mSpacecraft=<%p>'%s', "
+       "a1Mjd=%f, mSpacecraft->IsGlobal=%d, mSpacecraft->IsLocal=%d\n", this,
+       mActualParamName.c_str(), id, mSpacecraft, mSpacecraft->GetName().c_str(),
+       a1Mjd, mSpacecraft->IsGlobal(),
+       mSpacecraft->IsLocal());
    #endif
    
    Real time = -999.999;
@@ -273,8 +276,8 @@ Real TimeData::GetTimeReal(Integer id)
    
    #ifdef DEBUG_TIMEDATA_GET
    MessageInterface::ShowMessage
-      ("TimeData::GetTimeReal() id=%d, a1Mjd=%.10f, return time=%.10f\n",
-       id, a1Mjd, time);
+      ("TimeData::GetTimeReal() <%p>'%s' id=%d, a1Mjd=%.10f, returning time=%.10f\n",
+       this, mActualParamName.c_str(), id, a1Mjd, time);
    #endif
    
    return time;
@@ -448,7 +451,7 @@ void TimeData::SetTimeString(Integer id, const std::string &value)
       mSpacePoint->SetRealParameter(epochId, a1Mjd);
      break;
    default:
-      throw ParameterException("TimeData::GetTimeReal() Unknown parameter id: " +
+      throw ParameterException("TimeData::SetTimeString() Unknown parameter id: " +
                                GmatRealUtil::ToString(id));
    }
    

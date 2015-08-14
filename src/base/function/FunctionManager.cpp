@@ -2560,7 +2560,9 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
                 "deleting obj from ObjectMap");
             #endif
             #ifdef DEBUG_CLEANUP
-            MessageInterface::ShowMessage("   Deleting <%p>'%s' from om\n", omi->second, (omi->first).c_str());
+            MessageInterface::ShowMessage
+               ("   Deleting <%p>'%s' IsGlobal:%d IsLocal:%dfrom om\n", omi->second,
+                (omi->first).c_str(), (omi->second)->IsGlobal(), (omi->second)->IsLocal());
             #endif
             delete omi->second;
             omi->second = NULL;
@@ -2751,6 +2753,8 @@ bool FunctionManager::CopyObjectMap(ObjectMap *from, ObjectMap *to)
 //------------------------------------------------------------------------------
 void FunctionManager::ShowObjectMap(ObjectMap *om, const std::string &mapID)
 {
+   #ifdef DEBUG_OBJECT_MAP
+   
    std::string itsID = mapID;
    if (itsID == "") itsID = "unknown name";
    if (om)
@@ -2759,15 +2763,57 @@ void FunctionManager::ShowObjectMap(ObjectMap *om, const std::string &mapID)
          ("Object Map <%p> '%s' contains %u objects:\n", om, itsID.c_str(), om->size());
       if (om->size() > 0)
       {
+         GmatBase *obj = NULL;
+         GmatBase *paramOwner = NULL;
+         std::string objName;
+         std::string isGlobal;
+         std::string isLocal;
+         std::string paramOwnerType;
+         std::string paramOwnerName;
          for (std::map<std::string, GmatBase *>::iterator i = om->begin();
               i != om->end(); ++i)
+         {
+            obj = i->second;
+            objName = i->first;
+            isGlobal = "No";
+            isLocal = "No";
+            if (obj)
+            {
+               if (obj->IsGlobal())
+                  isGlobal = "Yes";
+               if (obj->IsLocal())
+                  isLocal = "Yes";
+               if (obj->IsOfType(Gmat::PARAMETER))
+               {
+                  paramOwner = ((Parameter*)obj)->GetOwner();
+                  if (paramOwner)
+                  {
+                     paramOwnerType = paramOwner->GetTypeName();
+                     paramOwnerName = paramOwner->GetName();
+                  }
+               }
+            }
             MessageInterface::ShowMessage
-               ("   name: %40s ...... pointer: %p...... object type: %s\n", i->first.c_str(),
-                i->second, i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+               ("   %50s  <%p>  %-16s   IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+                obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+                isLocal.c_str());
+            if (paramOwner)
+            {
+               MessageInterface::ShowMessage
+                  ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                   paramOwnerName.c_str());
+            }
+            else
+            {
+               MessageInterface::ShowMessage("\n");
+            }
+         }
       }
    }
    else
       MessageInterface::ShowMessage("Object Map '%s' is NULL\n", itsID.c_str());
+
+   #endif
 }
 
 //------------------------------------------------------------------------------
