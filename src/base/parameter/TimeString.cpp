@@ -52,7 +52,7 @@ TimeString::TimeString(const std::string &name, const std::string &typeStr,
                        Gmat::ObjectType paramOwnerType)
    : StringVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
                GmatParam::NO_DEP, paramOwnerType, true, isSettable),
-     TimeData(name, paramOwnerType)
+     TimeData(name, typeStr, paramOwnerType)
 {
    std::string type, ownerName, depObj;
    GmatStringUtil::ParseParameter(name, type, ownerName, depObj);

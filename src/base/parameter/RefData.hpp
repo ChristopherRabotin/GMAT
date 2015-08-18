@@ -71,7 +71,7 @@ class GMAT_API RefData
 {
 public:
 
-   RefData(const std::string &name = "",
+   RefData(const std::string &name = "", const std::string &typeName = "",
            const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT,
            GmatParam::DepObject depObj = GmatParam::NO_DEP,
            bool isSettable = false);

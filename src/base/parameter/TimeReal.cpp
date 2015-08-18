@@ -51,7 +51,7 @@ TimeReal::TimeReal(const std::string &name, const std::string &typeStr,
                    Gmat::ObjectType paramOwnerType)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
          GmatParam::NO_DEP, paramOwnerType, true, isSettable),
-     TimeData(name, paramOwnerType)
+     TimeData(name, typeStr, paramOwnerType)
 {
    AddRefObject(obj);
 }

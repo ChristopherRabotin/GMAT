@@ -38,15 +38,22 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// RefData(const std::string &name = "", Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
+// RefData(const std::string &name = "", const std::string &typeName = "",
+//         Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  */
 //------------------------------------------------------------------------------
-RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
+RefData::RefData(const std::string &name, const std::string &typeName,
+                 const Gmat::ObjectType paramOwnerType,
                  GmatParam::DepObject depObj, bool isSettable)
 {
+   #ifdef DEBUG_REFDATA_CREATE
+   MessageInterface::ShowMessage
+      ("RefData(%s) constructor entered, depObj=%d, isSettable=%d\n", name.c_str(),
+       depObj, isSettable);
+   #endif
    mParameter = NULL;
    mActualParamName = name;
    GmatStringUtil::ParseParameter(name, mParamTypeName, mParamOwnerName, mParamDepName);
@@ -55,11 +62,16 @@ RefData::RefData(const std::string &name, const Gmat::ObjectType paramOwnerType,
    mIsParamSettable = isSettable;
    mRefObjList.clear();
    mNumRefObjects = 0;
+
+   if (mParamTypeName == "")
+      mParamTypeName = typeName;
+   
    #ifdef DEBUG_REFDATA_CREATE
    MessageInterface::ShowMessage
-      ("RefData(%s) constructor leaving, mParamOwnerType=%d, mParamTypeName='%s', "
-       "mParamOwnerName='%s', mParamDepName='%s'\n", name.c_str(), mParamOwnerType,
-       mParamTypeName.c_str(), mParamOwnerName.c_str(), mParamDepName.c_str());
+      ("RefData(%s) constructor leaving, mActualParamName='%s', mParamOwnerType=%d, "
+       "mParamTypeName='%s', mParamOwnerName='%s', mParamDepName='%s'\n", name.c_str(),
+       mActualParamName.c_str(), mParamOwnerType, mParamTypeName.c_str(),
+       mParamOwnerName.c_str(), mParamDepName.c_str());
    #endif
 }
 
@@ -344,16 +356,17 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
 {
    #if DEBUG_REFDATA_OBJECT
    MessageInterface::ShowMessage
-      ("RefData::SetRefObjectName() '%s' entered, type=%d(%s), name='%s'\n",
-       mActualParamName.c_str(), type,  GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str());
+      ("RefData::SetRefObjectName() '%s' entered, type=%d(%s), name='%s', "
+       "mParamOwnerName='%s'\n", mActualParamName.c_str(), type,
+       GmatBase::OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT].c_str(), name.c_str(),
+       mParamOwnerName.c_str());
    #endif
    
    if (FindFirstObjectName(type) != "")
    {
       #if DEBUG_REFDATA_OBJECT
       MessageInterface::ShowMessage
-         ("RefData::SetRefObjectName() '%s' entered, first of type %d is %s\n",
-          mActualParamName.c_str(), type, (FindFirstObjectName(type)).c_str());
+         ("   First object name of type %d is %s\n", type, (FindFirstObjectName(type)).c_str());
       #endif
       for (int i=0; i<mNumRefObjects; i++)
       {
@@ -361,7 +374,7 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
          {
             #if DEBUG_REFDATA_OBJECT
             MessageInterface::ShowMessage
-               ("in RefData::SetRefObjectName() setting object of type %d at position %d with old name \"%s\" to new name \"%s\"\n",
+               ("   Setting object of type %d at position %d with old name \"%s\" to new name \"%s\"\n",
                 (Integer) type, (Integer) i, mRefObjList[i].objName.c_str(), name.c_str());
             #endif
             mRefObjList[i].objName = name;
@@ -374,7 +387,18 @@ bool RefData::SetRefObjectName(Gmat::ObjectType type, const std::string &name)
       }
    }
    
+   if (mParamOwnerName == "")
+   {
+      if (type == mParamOwnerType)
+         mParamOwnerName = name;
+   }
+   
    #if DEBUG_REFDATA_OBJECT
+   MessageInterface::ShowMessage
+      ("   mActualParamName='%s', mParamOwnerType=%d, mParamTypeName='%s', "
+       "mParamOwnerName='%s', mParamDepName='%s'\n", mActualParamName.c_str(),
+       mParamOwnerType, mParamTypeName.c_str(), mParamOwnerName.c_str(),
+       mParamDepName.c_str());
    MessageInterface::ShowMessage
       ("RefData::SetRefObjectName() '%s' returning AddRefObject(type, name)\n",
        mActualParamName.c_str());
@@ -453,7 +477,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             mRefObjList[i].obj = obj;
             #if DEBUG_REFDATA_OBJECT_SET > 1
             MessageInterface::ShowMessage
-               ("   The object pointer <%p> set to '%s'\n", obj, name.c_str());
+               ("   1 The object pointer <%p> set to '%s'\n", obj, name.c_str());
             #endif
             status = true;
             break;
@@ -464,7 +488,7 @@ bool RefData::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             mRefObjList[i].obj = obj;
             #if DEBUG_REFDATA_OBJECT_SET > 1
             MessageInterface::ShowMessage
-               ("   The object pointer <%p> set to '%s'\n", obj, name.c_str());
+               ("   2 The object pointer <%p> set to '%s'\n", obj, name.c_str());
             #endif
             status = true;
             break;

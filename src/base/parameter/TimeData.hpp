@@ -32,7 +32,8 @@ class GMAT_API TimeData : public RefData
 {
 public:
 
-   TimeData(const std::string &name = "", Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
+   TimeData(const std::string &name = "", const std::string &typeName = "",
+            Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT);
    TimeData(const TimeData &td);
    TimeData& operator= (const TimeData& td);
    virtual ~TimeData();

@@ -59,8 +59,9 @@ TimeData::VALID_OBJECT_TYPE_LIST[TimeDataObjectCount] =
  * Constructor.
  */
 //------------------------------------------------------------------------------
-TimeData::TimeData(const std::string &name, Gmat::ObjectType paramOwnerType)
-   : RefData(name, paramOwnerType)
+TimeData::TimeData(const std::string &name, const std::string &typeName,
+                   Gmat::ObjectType paramOwnerType)
+   : RefData(name, typeName, paramOwnerType)
 {
    #ifdef DEBUG_CONSTRUCTOR
    MessageInterface::ShowMessage
