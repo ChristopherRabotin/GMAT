@@ -2048,6 +2048,74 @@ bool OrbitPlot::UpdateData(const Real *dat, Integer len)
    if (len == 0)
       return true;
    
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this OrbitPlot is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.08.17)
+   if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+   {
+      #ifdef DEBUG_FUNCTION_DATA
+      MessageInterface::ShowMessage
+         ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+          GetName().c_str(), IsGlobal() ? "Yes" : "No", IsLocal() ? "Yes" : "No");
+      #endif
+      
+      bool skipData = false;
+      // Check for spacepoints if data should be skipped or not
+      for (int i=0; i<mAllSpCount; i++)
+      {
+         SpacePoint *sp = mAllSpArray[i];
+         #ifdef DEBUG_FUNCTION_DATA
+         MessageInterface::ShowMessage
+            ("   mAllSpNameArray[%d]=<%p>'%s'\n", i, mAllSpArray[i],
+             mAllSpNameArray[i].c_str());
+         #endif
+         
+         if (sp)
+         {
+            #ifdef DEBUG_FUNCTION_DATA
+            MessageInterface::ShowMessage
+               ("   sp = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+                sp, sp->GetTypeName().c_str(), sp->GetName().c_str(),
+                sp->IsGlobal(), sp->IsLocal());
+            #endif
+            
+            // Skip data if OrbitPlot is global and spacepoint is local
+            if (IsGlobal() && sp->IsLocal())
+            {
+               #ifdef DEBUG_FUNCTION_DATA
+               MessageInterface::ShowMessage
+                  ("   Skip data since '%s' is global and spacepoint is local\n",
+                   GetName().c_str());
+               #endif
+               skipData = true;
+               break;
+            }
+            // Skip data if spacepoint is not a global nor a local object
+            else if (!(sp->IsGlobal()) && !(sp->IsLocal()))
+            {
+               #ifdef DEBUG_FUNCTION_DATA
+               MessageInterface::ShowMessage
+                  ("   Skip data since spacepoint is not a global nor a local object\n");
+               #endif
+               skipData = true;
+               break;
+            }
+         }
+      }
+      
+      if (skipData)
+      {
+         #ifdef DEBUG_FUNCTION_DATA
+         MessageInterface::ShowMessage
+            ("OrbitPlot::Update() this=<%p>'%s' just returning true\n   data is "
+             "from a function and spacepoint is not a global nor a local object\n",
+             this, GetName().c_str());
+         #endif
+         return true;
+      }
+   }
+   
+   
    mNumData++;
    
    #if DBGLVL_UPDATE > 1
