@@ -680,18 +680,18 @@ void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
 
          case Gmat::RMATRIX_TYPE:
          {
+            Rmatrix rMatrix;
+            rMatrix = param->EvaluateRmatrix();
 
             for (Integer i = 0; i < argOut.size(); i++)
             {
-               Rmatrix rMatrix;
-
                std::vector<Real *> *vItem = (std::vector<Real *> *) argOut.at(i);
                for (Integer j = 0; j < vItem->size(); j++)
                {
-                  rMatrix = param->EvaluateRmatrix();
-                  param->SetReal(rMatrix.GetElement(i, j));
+                  rMatrix(i, j) = *(vItem->at(j));
                }
             }
+            param->SetRmatrix(rMatrix);
 
             break;
          }
