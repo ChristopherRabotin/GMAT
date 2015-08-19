@@ -412,7 +412,7 @@ bool CallPythonFunction::Execute()
       }
       else
       {
-         MessageInterface::ShowMessage("Unknow Python type is returned.\n");
+         MessageInterface::ShowMessage("An unknown Python type was returned.\n");
       }
          
       Py_DECREF(pyRet);
