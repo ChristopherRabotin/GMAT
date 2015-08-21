@@ -29,11 +29,11 @@
 #include "Spacecraft.hpp"
 #include "CelestialBody.hpp"
 #include "LocatedEvent.hpp"
-#include "EphemManager.hpp"
+//#include "EphemManager.hpp"
 
 //#include "LocatedEventTable.hpp"  // may need this
 
-//class EphemManager;
+class EphemManager;
 
 ///**
 // * Base class for the event locators.
@@ -205,8 +205,6 @@ protected:
 //   std::vector<SpaceObject*> targets;
    /// Pointer to the target spacecraft
    Spacecraft                  *sat;
-//   /// Pointer to the spacecraft's ephem manager
-//   EphemManager                *ephemMgr;
    /// The space environment
    SolarSystem                 *solarSys;
    /// The occulting body names

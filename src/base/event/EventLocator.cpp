@@ -33,7 +33,7 @@
 #include "GregorianDate.hpp"
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"
-//#include "EphemManager.hpp"
+#include "EphemManager.hpp"
 
 
 //#define DEBUG_DUMPEVENTDATA
@@ -1225,8 +1225,8 @@ void EventLocator::SetEpoch(const std::string &ep, Integer id)
 {
    #ifdef DEBUG_DATE_FORMAT
    MessageInterface::ShowMessage
-      ("EventLocator::SetEpoch() Setting epoch (%d) for spacecraft %s to \"%s\"\n",
-       id, instanceName.c_str(), ep.c_str());
+      ("EventLocator::SetEpoch() Setting %s epoch (%d) for spacecraft %s to \"%s\"\n",
+       (id == INITIAL_EPOCH? "Initial ":"Final "), id, instanceName.c_str(), ep.c_str());
    #endif
 
    std::string epochString = "";
@@ -1644,10 +1644,10 @@ bool EventLocator::Initialize()
       throw EventException(errmsg);
    }
 
-   // For now, call this method here to load the planetary PCKs
-   #ifdef __USE_SPICE__
-      solarSys->LoadPCKs();
-   #endif
+//   // For now, call this method here to load the planetary PCKs
+//   #ifdef __USE_SPICE__
+//      solarSys->LoadPCKs();
+//   #endif
 
    #ifdef DEBUG_EVENT_INITIALIZATION
       MessageInterface::ShowMessage(">>> About to tell spacecraft to record its data ...\n");
@@ -1737,6 +1737,10 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
             throw EventException(errmsg);
          }
       }
+
+      // Stop the data recording so that the kernel will be loaded
+      sat->ProvideEphemerisData();
+
       Real coverageBegin;
       Real coverageEnd;
       scNow = sat->GetEpoch();
@@ -1777,9 +1781,10 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
          throw EventException(errmsg);
       }
       // Validate initialEpoch and finalEpoch against available range of data (coverageBegin:coverageEnd)
+      Real oneMillisecond = (1.0 / GmatTimeConstants::SECS_PER_DAY) / 1000.00;
       if (!useEntireInterval)
       {
-         if (initialEpochSet && (initialEp < coverageBegin))
+         if (initialEpochSet && (initialEp < (coverageBegin - oneMillisecond)))
          {
             std::string errmsg = "Initial Epoch must be after the beginning of ";
             errmsg += "coverage for spacecraft ";
@@ -1787,7 +1792,7 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
             errmsg += instanceName + ".\n";
             throw EventException(errmsg);
          }
-         if (initialEpochSet && (initialEp > coverageEnd))
+         if (initialEpochSet && (initialEp > (coverageEnd + oneMillisecond)))
          {
             std::string errmsg = "Initial Epoch must be before the end of ";
             errmsg += "coverage for spacecraft ";
@@ -1795,7 +1800,7 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
             errmsg += instanceName + ".\n";
             throw EventException(errmsg);
          }
-         if (finalEpochSet && (finalEp < coverageBegin))
+         if (finalEpochSet && (finalEp < (coverageBegin - oneMillisecond)))
          {
             std::string errmsg = "Final Epoch must be after the beginning of ";
             errmsg += "coverage for spacecraft ";
@@ -1803,7 +1808,7 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
             errmsg += instanceName + ".\n";
             throw EventException(errmsg);
          }
-         if (finalEpochSet && (finalEp > coverageEnd))
+         if (finalEpochSet && (finalEp > (coverageEnd + oneMillisecond)))
          {
             std::string errmsg = "Final Epoch must be before the end of ";
             errmsg += "coverage for spacecraft ";
@@ -1815,9 +1820,9 @@ void EventLocator::LocateEvents(const std::string &reportNotice)
 
       fromEpoch = initialEp;
       toEpoch   = finalEp;
-
-      // Stop the data recording so that the kernel will be loaded
-      sat->ProvideEphemerisData();
+//
+//      // Stop the data recording so that the kernel will be loaded
+//      sat->ProvideEphemerisData();
 
       // Locate events in derived class and store them as you have decided to do so
       FindEvents();
