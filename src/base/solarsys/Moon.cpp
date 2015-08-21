@@ -89,6 +89,9 @@ Moon::Moon(std::string name) :
 //   sij = s;
 //   cij = c;
 
+   if (name == SolarSystem::MOON_NAME)  // HARD-CODE default PCK for now
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/moon_pa_de421_1900-2050.bpc");
+
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
 }
