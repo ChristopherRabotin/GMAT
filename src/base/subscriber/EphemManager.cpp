@@ -19,6 +19,7 @@
  */
 //------------------------------------------------------------------------------
 #include <stdio.h>
+#include <stdlib.h>
 #include <sstream>
 #include "EphemManager.hpp"
 #include "GmatBase.hpp"
@@ -359,6 +360,16 @@ void EphemManager::StopRecording(bool done)
       pub->Unsubscribe(ephemFile);
       // Delete the current ephemFile - this should finalize the SPK writing and then
       // close the <fileName> file
+      ephemFile->CloseEphemerisFile(false);
+      bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      if (notAllDataWritten)
+      {
+         std::string warn = "*** WARNING *** Insufficient ephemeris data ";
+         warn            += "available for spacecraft " + theObj->GetName();
+         warn            += " to write last segment.  Event location may be ";
+         warn            += "incomplete.  Try increasing the propagation time.\n";
+         MessageInterface::ShowMessage(warn);
+      }
       delete ephemFile;
    }
    else
@@ -376,6 +387,16 @@ void EphemManager::StopRecording(bool done)
          MessageInterface::ShowMessage("-==-==-= Calling CloseEphemerisFile\n");
       #endif
       ephemFile->CloseEphemerisFile(false);
+      bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      if (notAllDataWritten)
+      {
+         std::string warn = "*** WARNING *** Insufficient ephemeris data ";
+         warn            += "available for spacecraft " + theObj->GetName();
+         warn            += " to write last segment.  Event location may be ";
+         warn            += "incomplete.  Try increasing the propagation time.\n";
+         MessageInterface::ShowMessage(warn);
+      }
+
 //      #ifdef DEBUG_EPHEM_MANAGER
 //         MessageInterface::ShowMessage("-==-==-= Now attempting to UNload fileList \"%s\"\n",
 //               fileName.c_str());
@@ -867,6 +888,13 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
                                              Real stepSize,
                                              Integer obsID)
 {
+   #ifdef DEBUG_EM_COVERAGE
+      MessageInterface::ShowMessage("In GetRequiredCoverageWindow:\n");
+      MessageInterface::ShowMessage("   s1 = %12.10f\n", s1);
+      MessageInterface::ShowMessage("   e1 = %12.10f\n", e1);
+      MessageInterface::ShowMessage("   useEntireIntvl = %s\n",
+                        (useEntireIntvl? "true":"false"));
+    #endif
    // @todo - most of this should be moved to SpiceInterface and
    // made very general (for SPK, CK, etc.)
    Spacecraft *theSc = (Spacecraft*) theObj;
@@ -1037,7 +1065,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
    scard_c(0, &window);   // reset (empty) the coverage cell
 
    // Get the start and stop times for the complete coverage window
-   SpiceInt szCoverage = wncard_c(&window);
+   SpiceInt szCoverage = wncard_c(&cover);
    #ifdef DEBUG_SPK_COVERAGE
       MessageInterface::ShowMessage("----- number of intervals in full coverage window is %d\n",
             szCoverage);
@@ -1046,8 +1074,8 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
    if (((Integer) szCoverage) > 0)
    {
       SpiceDouble s001, e001, s002, e002;
-      wnfetd_c(&window, 0, &s001, &e001);
-      wnfetd_c(&window, szCoverage-1, &s002, &e002);
+      wnfetd_c(&cover, 0, &s001, &e001);
+      wnfetd_c(&cover, szCoverage-1, &s002, &e002);
 
       coverStart = spice->SpiceTimeToA1(s001);
       coverStop  = spice->SpiceTimeToA1(e002);
@@ -1072,6 +1100,19 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
       // Get the intersection of the timespan window and the coverage window
       wninsd_c(s, e, &timespan);
       wnintd_c(&cover, &timespan, &window);
+      if (failed_c())
+      {
+         ConstSpiceChar option[] = "LONG";
+         SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+         SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+         getmsg_c(option, numChar, err);
+         std::string errStr(err);
+         std::string errmsg = "Error calling wninsd_c or wnintd_c!!!  ";
+         errmsg += "Message received from CSPICE is: ";
+         errmsg += errStr + "\n";
+         reset_c();
+         throw SubscriberException(errmsg);
+      }
    }
 
    #ifdef DEBUG_ECLIPSE_EVENTS

@@ -49,6 +49,7 @@ public:
    // Need to be able to close background SPKs and leave ready for appending
    // Finalization
    void                 CloseEphemerisFile(bool done = true);
+   bool                 InsufficientSPKData();
 
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
@@ -212,6 +213,9 @@ protected:
    
    /// number of SPK segments that have been written
    Integer     numSPKSegmentsWritten;
+   /// Indicates whether or not there was data 'left over' that was not enough
+   /// to write to the background SPK
+   bool        insufficientSPKData;
 
    FileType    fileType;
    

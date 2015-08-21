@@ -226,7 +226,8 @@ EphemerisFile::EphemerisFile(const std::string &name, const std::string &type) :
    writeCommentAfterData (true),
    checkForLargeTimeGap (false),
    isEphemFileOpened    (false),
-   numSPKSegmentsWritten (0)
+   numSPKSegmentsWritten (0),
+   insufficientSPKData   (false)
 {
    #ifdef DEBUG_EPHEMFILE
    MessageInterface::ShowMessage
@@ -453,7 +454,8 @@ EphemerisFile::EphemerisFile(const EphemerisFile &ef) :
    writeCommentAfterData (ef.writeCommentAfterData),
    checkForLargeTimeGap (ef.checkForLargeTimeGap),
    isEphemFileOpened    (ef.isEphemFileOpened),
-   numSPKSegmentsWritten (ef.numSPKSegmentsWritten)
+   numSPKSegmentsWritten (ef.numSPKSegmentsWritten),
+   insufficientSPKData   (ef.insufficientSPKData)
 {
    coordConverter = ef.coordConverter;
 }
@@ -554,6 +556,7 @@ EphemerisFile& EphemerisFile::operator=(const EphemerisFile& ef)
    isEphemFileOpened    = ef.isEphemFileOpened;
    coordConverter       = ef.coordConverter;
    numSPKSegmentsWritten = ef.numSPKSegmentsWritten;
+   insufficientSPKData   = ef.insufficientSPKData;
    
    return *this;
 }
@@ -2193,6 +2196,14 @@ void EphemerisFile::CloseEphemerisFile(bool done)
    // Close CCSDS file
    dstream.flush();
    dstream.close();
+}
+
+//------------------------------------------------------------------------------
+// bool InsufficientSPKData()
+//------------------------------------------------------------------------------
+bool EphemerisFile::InsufficientSPKData()
+{
+   return insufficientSPKData;
 }
 
 
@@ -4492,6 +4503,7 @@ void EphemerisFile::WriteSpkOrbitDataSegment()
          spkWriter->WriteSegment(*start, *end, stateArray, a1MjdArray);
          ClearOrbitData();
          numSPKSegmentsWritten++;
+         insufficientSPKData = false;
       }
       catch (BaseException &e)
       {
@@ -4639,6 +4651,11 @@ void EphemerisFile::FinalizeSpkFile(bool done)
             #ifdef DEBUG_EPHEMFILE_SPICE
             MessageInterface::ShowMessage("   DONE writing SPK orbit data segment\n");
             #endif
+         }
+         // background SPKs need to know if there was data unwritten
+         else if (generateInBackground)
+         {
+            insufficientSPKData = true; // data is available, but has not been written yet
          }
       }
 
