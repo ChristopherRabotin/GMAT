@@ -61,6 +61,7 @@ protected:
    bool InitializeLocalObjects(ObjectInitializer *objInit,
                                GmatCommand *current,
                                bool ignoreException);
+   void CreateSubscriberWrappers();
    bool SetGmatFunctionPath(const std::string &path);
    void BuildUnusedGlobalObjectList();
    

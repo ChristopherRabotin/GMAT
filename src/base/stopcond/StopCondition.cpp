@@ -2717,15 +2717,15 @@ void StopCondition::CopyDynamicData(const StopCondition &stopCond)
    mBufferSize = stopCond.mBufferSize;
 
    if ((Integer)mEpochBuffer.size() < mBufferSize)
-      mEpochBuffer.reserve(mBufferSize);
+      mEpochBuffer.resize(mBufferSize);
    
    if ((Integer)lhsValueBuffer.size() < mBufferSize)
-      lhsValueBuffer.reserve(mBufferSize);
+      lhsValueBuffer.resize(mBufferSize);
    
    if ((Integer)rhsValueBuffer.size() < mBufferSize)
-      rhsValueBuffer.reserve(mBufferSize);
+      rhsValueBuffer.resize(mBufferSize);
    
-   for (int i=0; i<mBufferSize; i++)
+   for (int i = 0; i < mBufferSize; ++i)
    {
       mEpochBuffer[i] = stopCond.mEpochBuffer[i];
       lhsValueBuffer[i] = stopCond.lhsValueBuffer[i];

@@ -64,9 +64,9 @@ const Real BurnData::BURN_TOL            = 1.0e-10;
  * Constructor.
  */
 //------------------------------------------------------------------------------
-BurnData::BurnData(const std::string &name,
+BurnData::BurnData(const std::string &name, const std::string &typeName,
                    const Gmat::ObjectType paramOwnerType)
-   : RefData(name, paramOwnerType)
+   : RefData(name, typeName, paramOwnerType)
 {
    mImpBurn                   = NULL;
    mSpacecraft                = NULL;

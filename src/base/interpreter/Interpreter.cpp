@@ -4035,12 +4035,16 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
       ("Interpreter::CreateSystemParameter() returning <%p><%s>'%s'\n", param,
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
        (param == NULL) ? "NULL" : param->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("   param->IsGlobal=%d, param->IsLocal=%d\n",
+       param ? param->IsGlobal() : -999, param ? param->IsLocal() : -999);
    #endif
    
    // Set newly created Parameter inside function to local so it can be
    // deleted when Function destructor is called (LOJ: 2014.12.17)
-   if (param && inFunctionMode)
-      param->SetIsLocal(true);
+   // Moved this code to Validator::CreateSystemParameter() (LOJ: 2015.08.05)
+   // if (param && inFunctionMode)
+   //    param->SetIsLocal(true);
    
    return param;
 }

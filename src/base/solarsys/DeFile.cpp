@@ -548,6 +548,11 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
       arraySize = DeFile::ARRAY_SIZE_424;
       EPHEMERIS = 424;
    }
+   else if (defType == Gmat::DE_DE430)
+   {
+      arraySize = DeFile::ARRAY_SIZE_430;
+      EPHEMERIS = 430;
+   }
    else
    {
       // ERROR!  Other formats not currently supported!!!

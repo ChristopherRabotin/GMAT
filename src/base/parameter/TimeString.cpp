@@ -52,7 +52,7 @@ TimeString::TimeString(const std::string &name, const std::string &typeStr,
                        Gmat::ObjectType paramOwnerType)
    : StringVar(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
                GmatParam::NO_DEP, paramOwnerType, true, isSettable),
-     TimeData(name, paramOwnerType)
+     TimeData(name, typeStr, paramOwnerType)
 {
    std::string type, ownerName, depObj;
    GmatStringUtil::ParseParameter(name, type, ownerName, depObj);
@@ -345,7 +345,35 @@ GmatBase* TimeString::GetRefObject(const Gmat::ObjectType type,
 bool TimeString::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
-   return TimeData::SetRefObject(obj, type, name);
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("TimeString::SetRefObject() <%p>'%s' entered, obj=<%p><%s>'%s', type=%d, name='%s'\n",
+       this, this->GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
+   if (obj == NULL)
+      return false;
+   
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("   Is%sGlobal=%d, Is%sLocal=%d\n", name.c_str(), obj->IsGlobal(),
+       name.c_str(), obj->IsLocal());
+   #endif
+   
+   // Set owner object for Parameter here (LOJ: 2015.08.05)
+   if (obj->GetName() == mParamOwnerName)
+      SetOwner(obj);
+   
+   bool setOk = TimeData::SetRefObject(obj, type, name);
+   
+   #if DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("TimeString::SetRefObject() <%p>'%s' returning %d\n", this,
+       this->GetName().c_str(), setOk);
+   #endif
+   
+   return setOk;
 }
 
 

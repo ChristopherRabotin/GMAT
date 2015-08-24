@@ -105,6 +105,14 @@ Planet::Planet(std::string name) :
 //   sij = s;
 //   cij = c;
 
+
+   if (name == SolarSystem::EARTH_NAME)
+   {
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
+   }
+
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
 }

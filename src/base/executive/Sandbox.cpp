@@ -1686,14 +1686,53 @@ void Sandbox::ShowObjectMap(ObjectMap &om, const std::string &title)
    {
       std::string objName;
       GmatBase *obj = NULL;
+      GmatBase *paramOwner = NULL;
+      std::string isGlobal;
+      std::string isLocal;
+      std::string paramOwnerType;
+      std::string paramOwnerName;
+      bool isParameter = false;
+      
       for (ObjectMap::iterator i = om.begin(); i != om.end(); ++i)
       {
          objName = i->first;
          obj = i->second;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         // MessageInterface::ShowMessage
+         //    ("   %50s  <%p> [%s] %s\n", objName.c_str(), obj,
+         //     obj ? obj->GetTypeName().c_str() : "NULL",
+         //     obj->IsGlobal() ? "Global" : "");
+         
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %50s  <%p> [%s] %s\n", objName.c_str(), obj,
-             obj ? obj->GetTypeName().c_str() : "NULL",
-             obj->IsGlobal() ? "Global" : "");
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
       }
    }
    else

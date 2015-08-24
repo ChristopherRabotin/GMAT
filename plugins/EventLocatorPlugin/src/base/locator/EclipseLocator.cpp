@@ -779,7 +779,7 @@ bool EclipseLocator::ReportEventData(const std::string &reportNotice)
    Integer sz = (Integer) theEvents.size();
    if (sz == 0)
    {
-      theReport << GetNoEventsString("Eclipse") << "\n";
+      theReport << GetNoEventsString("eclipse") << "\n";
    }
    else
    {
@@ -799,7 +799,7 @@ bool EclipseLocator::ReportEventData(const std::string &reportNotice)
 
       theReport << "\nNumber of individual events : " << numIndividual << "\n";
       theReport << "Number of total events      : "   << sz            << "\n";
-      theReport << "Maximum duration (s)        : "   << maxDuration   << "\n";
+      theReport << "Maximum duration (s)        : "   << GmatStringUtil::BuildNumber(maxDuration, false, 14)   << "\n";
       theReport << "Maximum duration at the "         <<
                    GmatStringUtil::ToOrdinal(maxIndex + 1) << " eclipse.\n\n\n";
    }
@@ -836,39 +836,9 @@ void EclipseLocator::FindEvents()
       for (Integer ii = 0; ii < eclipseTypes.size(); ii++)
          MessageInterface::ShowMessage("   %s\n", eclipseTypes.at(ii).c_str());
    #endif
-   EphemManager   *em       = sat->GetEphemManager();
-   if (!em)
-   {
-      std::string errmsg = "ERROR - no EphemManager available for spacecraft ";
-      errmsg += sat->GetName() + "!!\n";
-      throw EventException(errmsg);
-   }
 
    #ifdef DEBUG_TIME_SPENT
    clock_t t = clock();
-   #endif
-   scNow = sat->GetEpoch();
-   em->GetCoverageStartAndStop(initialEp, finalEp, useEntireInterval, true,
-                               findStart, findStop);
-   #ifdef DEBUG_TIME_SPENT
-   Real timeSpent = (Real) (clock() - t);
-   MessageInterface::ShowMessage(" --- time spent in GetCoverageStartAndStop = %12.10f (sec)\n",
-         (timeSpent / CLOCKS_PER_SEC));
-   #endif
-   #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage("---- findStart (from ephemManager)  = %12.10f\n", findStart);
-      MessageInterface::ShowMessage("---- findStop (from ephemManager)   = %12.10f\n", findStop );
-   #endif
-   if (GmatMathUtil::IsEqual(findStart,0.0) && GmatMathUtil::IsEqual(findStop,0.0))
-   {
-      // ... in case there were no files to read from, we'll just use the
-      // beginning and current spacecraft times
-      findStart = scStart;
-      findStop  = scNow;
-   }
-   #ifdef DEBUG_ECLIPSE_EVENTS
-      MessageInterface::ShowMessage("---- findStart  = %12.10f\n", findStart);
-      MessageInterface::ShowMessage("---- findStop   = %12.10f\n", findStop );
    #endif
 
    // Set up data for the calls to CSPICE
@@ -911,8 +881,8 @@ void EclipseLocator::FindEvents()
                                      numEclipse, starts, ends);
 
          #ifdef DEBUG_ECLIPSE_EVENTS
-            MessageInterface::ShowMessage("After gfoclt_c:\n");
-            MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
+//            MessageInterface::ShowMessage("After gfoclt_c:\n");
+//            MessageInterface::ShowMessage("  numEclipse = %d\n", numEclipse);
          #endif
          // Create an event from the result
          for (Integer kk = 0; kk < numEclipse; kk++)

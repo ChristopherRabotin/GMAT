@@ -690,6 +690,10 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
       ("   and trimmed string is <%s>\n", theDescription.c_str(), "\"\n");
    MessageInterface::ShowMessage
       ("   parametersFirst=%d, manage=%d\n", parametersFirst, manage);
+   #ifdef DEBUG_OBJECT_MAP
+   if (theFunction)
+      ShowObjectMap("Validator::CreateElementWrapper()");
+   #endif
    #endif
    
    // first, check to see if it is enclosed with single quotes
@@ -2211,12 +2215,16 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
                 "function's automatic object map\n", param, param->GetTypeName().c_str(),
                 param->GetName().c_str());
             #endif
-                        
+            
             // If automatic parameter is in the objectMap, set flag so that
             // it won't be deleted in the function since it is deleted in the
             // Sandbox. (LOJ: 2009.03.16)
             theFunction->AddAutomaticObject(param->GetName(), (GmatBase*)param,
                                             alreadyManaged);
+            
+            // Parameter is created inside a function, so set it local
+            if (!alreadyManaged)
+               param->SetIsLocal(true);
          }
       }
       else

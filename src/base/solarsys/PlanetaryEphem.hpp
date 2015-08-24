@@ -33,6 +33,7 @@ namespace Gmat
       DE_DE405,
       DE_DE421,
       DE_DE424,
+      DE_DE430,
    };
 
    /// DE file can be ASCII or BINARY

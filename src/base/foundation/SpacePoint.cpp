@@ -24,6 +24,7 @@
  */
 //------------------------------------------------------------------------------
 
+#include <iomanip>
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "SpacePoint.hpp"
@@ -40,9 +41,6 @@
 #include "ColorDatabase.hpp"
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
-#ifdef __USE_SPICE__
-   #include "SpiceInterface.hpp"
-#endif
 
 
 //#define DEBUG_J2000_STATE
@@ -190,6 +188,7 @@ targetColorStr     ("")
    //theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
    // Use VEHICLE_EPHEM_SPK_PATH. SPK_PATH was renamed to PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
    theSpkPath = FileManager::Instance()->GetFullPathname(FileManager::VEHICLE_EPHEM_SPK_PATH);
+
    SaveAllAsDefault();
 }
 
@@ -258,6 +257,7 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    naifIdRefFrame           = sp.naifIdRefFrame;
    spiceFrameName           = sp.spiceFrameName;
    spiceSetupDone           = sp.spiceSetupDone;
+
    orbitSpiceKernelNames.clear();
    attitudeSpiceKernelNames.clear();
    scClockSpiceKernelNames.clear();
@@ -1297,14 +1297,21 @@ bool SpacePoint::SetStringParameter(const Integer id,
          for (unsigned int ii = 0; ii < kernels.size(); ii++)
          {
             parsed = ParseKernelName(kernels.at(ii));
-            ValidateKernel(parsed, "AttitudeSpiceKernelName", "ck");
+            if (IsOfType("CelestialBody"))
+               ValidateKernel(parsed, "PlanetarySpiceKernelName", "pck");
+            else
+               ValidateKernel(parsed, "AttitudeSpiceKernelName", "ck");
+
             attitudeSpiceKernelNames.push_back(parsed);
          }
       }
       else
       {
          std::string trimmed = ParseKernelName(value);
-         ValidateKernel(trimmed,"AttitudeSpiceKernelName", "ck");
+         if (IsOfType("CelestialBody"))
+            ValidateKernel(parsed, "PlanetarySpiceKernelName", "pck");
+         else
+            ValidateKernel(parsed, "AttitudeSpiceKernelName", "ck");
          if (find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(),trimmed) == attitudeSpiceKernelNames.end())
             attitudeSpiceKernelNames.push_back(trimmed);
      }
@@ -1682,7 +1689,10 @@ bool SpacePoint::SetStringParameter(const Integer id,
       }
    case ATTITUDE_SPICE_KERNEL_NAME:
       {
-         ValidateKernel(value, "AttitudeSpiceKernelName", "ck");
+         if (IsOfType("CelestialBody"))
+            ValidateKernel(value, "PlanetarySpiceKernelName", "pck");
+         else
+            ValidateKernel(value, "AttitudeSpiceKernelName", "ck");
          if (index < (Integer)attitudeSpiceKernelNames.size())
             attitudeSpiceKernelNames[index] = value;
          // Only add the orbit spice kernel name if it is not in the list already

@@ -30,9 +30,6 @@
 #include <algorithm>               // for find(), distance()
 
 //#define DBGLVL_INIT 1
-//#define DBGLVL_DATA 1
-//#define DBGLVL_DATA_LABELS 1
-//#define DBGLVL_ADD 1
 //#define DBGLVL_OBJ 2
 //#define DBGLVL_PARAM 2
 //#define DBGLVL_PARAM_STRING 2
@@ -592,7 +589,7 @@ bool OrbitView::Initialize()
          //--------------------------------------------------------
          #if DBGLVL_INIT
          MessageInterface::ShowMessage
-            ("   Calling PlotInterface::InitializeGlPlot()\n");
+            ("   Calling PlotInterface::InitializeGlPlot() and setting isInitialized to true\n");
          #endif
          PlotInterface::InitializeGlPlot(instanceName);
          
@@ -1559,6 +1556,11 @@ const ObjectTypeArray& OrbitView::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   #if DBGLVL_OBJ
+   MessageInterface::ShowMessage
+      ("OrbitView::GetRefObjectNameArray() '%s' entered, type:%d typeName:%s\n",
+       GetName().c_str(), type, GmatBase::GetObjectTypeString(type).c_str());
+   #endif
    refObjectNames.clear();
    refObjectNames = OrbitPlot::GetRefObjectNameArray(type);
    
@@ -1605,9 +1607,16 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
          ("mViewPointRefType=%s, mViewPointVecType=%s, mViewDirectionType=%s\n",
           mViewPointRefType.c_str(), mViewPointVecType.c_str(), mViewDirectionType.c_str());
       #endif
-            
-      refObjectNames.insert(refObjectNames.end(), mAllSpNameArray.begin(),
-                            mAllSpNameArray.end());
+
+      // Do not add same name
+      for (unsigned int i = 0; i < mAllSpNameArray.size(); i++)
+      {
+         if (find(refObjectNames.begin(), refObjectNames.end(),
+                  mAllSpNameArray[i]) == refObjectNames.end())
+         {
+            refObjectNames.push_back(mAllSpNameArray[i]);
+         }
+      }
       
       if (mViewCoordSysName != mViewUpCoordSysName)
          refObjectNames.push_back(mViewUpCoordSysName);
@@ -1636,7 +1645,8 @@ const StringArray& OrbitView::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    #if DBGLVL_OBJ
    MessageInterface::ShowMessage
-      ("OrbitView::GetRefObjectNameArray() returning for type:%d\n", type);
+      ("OrbitView::GetRefObjectNameArray() '%s' returning for type:%d typeName:%s\n",
+       GetName().c_str(), type, GmatBase::GetObjectTypeString(type).c_str());
    for (unsigned int i=0; i<refObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
    #endif
@@ -2059,7 +2069,19 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
    }
    
    if (!active || mScCount <= 0)
+   {
+      #if DBGLVL_UPDATE
+      if (!active)
+         MessageInterface::ShowMessage
+            ("==> OrbitView::Distribute() '%s' just returning ture, it is not active\n",
+             instanceName.c_str());
+      else
+         MessageInterface::ShowMessage
+            ("==> OrbitView::Distribute() '%s' just returning ture, no spacecraft to plot\n",
+             instanceName.c_str());
+      #endif
       return true;
+   }
    
    // test isEndOfRun first
    if (isEndOfRun)
@@ -2083,7 +2105,7 @@ bool OrbitView::Distribute(const Real *dat, Integer len)
       return true;
    
    
-   #if DBGLVL_DATA
+   #if DBGLVL_UPDATE
    MessageInterface::ShowMessage("%s, len=%d\n", GetName().c_str(), len);
    for (int i=0; i<len; i++)
       MessageInterface::ShowMessage("%.11f  ", dat[i]);
