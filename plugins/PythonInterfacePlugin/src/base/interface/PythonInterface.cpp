@@ -244,6 +244,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    PyObject* pyFuncAttr = NULL;
    PyObject* pyArgs = NULL;
    PyObject* pyFunc = NULL;
+   PyObject* pyTupleObj = NULL;
 
    //error messages
    PyObject* pType = NULL;
@@ -340,15 +341,11 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
          }
 
          // Create a Tuple to pass it to Python function
-         PyObject *pyTupleObj = PyTuple_New(1);
+         pyTupleObj = PyTuple_New(1);
          PyTuple_SetItem(pyTupleObj, 0, pyobj);
 
          pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
          MessageInterface::ShowMessage("pyObject_CallObject() is called\n");
-
-         Py_DECREF(pyFuncAttr);
-         Py_DECREF(pyTupleObj);
-         
       }
 
       // free memory
@@ -357,18 +354,23 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       free(pybuffer->shape);
       free(pybuffer->strides);
       free(pybuffer);
+   }
+   else if (paramType == Gmat::STRING_TYPE)
+   {
+      MessageInterface::ShowMessage("A string is passed to Python.\n");
+      //attention for both python version needs to be implemented.
+      PyObject * pyStr = PyUnicode_FromString((char*)argIn.at(0));
+      // Create a Tuple to pass it to Python function
+      pyTupleObj = PyTuple_New(1);
+      PyTuple_SetItem(pyTupleObj, 0, pyStr);
 
-      if (!pyFunc)
-      {
-         PyErrorMsg(pType, pValue, pTraceback, msg);
-        
-         throw InterfaceException(" Python Exception Type:" + msg + "\n");
-      }
+      pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
+      MessageInterface::ShowMessage("pyObject_CallObject() is called\n");
    }
    else
    {
       // Build the Python Tuple object based on the format string
-      PyObject* pyTupleObj = PyTuple_New(argIn.size());
+      pyTupleObj = PyTuple_New(argIn.size());
       char* pch = NULL;
       char key[3] = "ds";
       int i = 0;
@@ -408,15 +410,17 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
       // Call the python function   
       pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
-      Py_DECREF(pyFuncAttr);
-      Py_DECREF(pyTupleObj);
+      
+   }
 
-      if (!pyFunc)
-      {
-         PyErrorMsg(pType, pValue, pTraceback, msg);
+   Py_DECREF(pyFuncAttr);
+   Py_DECREF(pyTupleObj);
 
-         throw InterfaceException(" Python Exception Type:" + msg + "\n");
-      }
+   if (!pyFunc)
+   {
+      PyErrorMsg(pType, pValue, pTraceback, msg);
+
+      throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
 
    return pyFunc;
