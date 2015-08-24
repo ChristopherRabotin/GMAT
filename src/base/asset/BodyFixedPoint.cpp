@@ -934,8 +934,6 @@ bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          break;
    }
 
-   MessageInterface::ShowMessage("BodyFixedPoint::SetRefObject calling base for %s\n", name.c_str());
-
    // Not handled here -- invoke the next higher SetRefObject call
    return SpacePoint::SetRefObject(obj, type, name);
 }
