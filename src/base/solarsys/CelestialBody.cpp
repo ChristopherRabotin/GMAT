@@ -4273,8 +4273,8 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    // that may change when/if we add the reading of PCK kernels for body orientation data
 //   if (id == NAIF_ID_REFERENCE_FRAME)  return false;
 
-//   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;
-//   if (id == FRAME_SPICE_KERNEL_NAME)     return true;
+   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;
+   if (id == FRAME_SPICE_KERNEL_NAME)     return true;
    if (id == SC_CLOCK_SPICE_KERNEL_NAME)  return true;
 
    // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
@@ -5174,8 +5174,8 @@ bool CelestialBody::SetUpSPICE()
          }
       }
    }
-//   // make sure the "main" Solar System Kernel(s) are loaded first - DONE in SolarSystem
-//   theSolarSystem->LoadSpiceKernels();
+   // make sure the "main" Solar System Kernel(s) are loaded first!!!
+   theSolarSystem->LoadSpiceKernels();
 
    // Call SpacePoint method to load the specified kernels - we want orbit,
    // attitude (pck), and frame kernels loaded for celestial bodies
@@ -5549,26 +5549,31 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
    {
       for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
       {
-         #ifdef DEBUG_SP_SPICE
+         bool isItLoaded = kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii));
+         #ifdef DEBUG_CB_SPICE
             char *path=NULL;
             size_t size = 0;
             path=getcwd(path,size);
             MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
-            MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   now checking Orbit file %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   is it already loaded? %s\n", (isItLoaded? "YES!!!" : "no"));
          #endif
-         if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
+         if (!isItLoaded)
          {
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   %s IS NOT already loaded!!!\n", orbitSpiceKernelNames.at(ii).c_str());
+#endif
             try
             {
                kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
-               #ifdef DEBUG_SP_SPICE
-                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   CB::LNK -- spice has loaded file %s\n",
                         (orbitSpiceKernelNames.at(ii)).c_str());
                #endif
             }
-            catch (GmatBaseException &ue)
+            catch (UtilityException &ue)
             {
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
                #endif
                // try again with path name if no path found
@@ -5581,19 +5586,22 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                   //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
                   std::string spkPath =
                      FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   In CB, spkPath returned was %s ...\n", spkPath.c_str());
+#endif
                   spkName = spkPath + spkName;
                   try
                   {
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                         MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
                      #endif
                      kernelReader->LoadKernel(spkName);
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                      MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         spkName.c_str());
                      #endif
                   }
-                  catch (GmatBaseException &)
+                  catch (UtilityException &)
                   {
                      MessageInterface::ShowMessage("ERROR loading kernel %s\n",
                         (spkName.c_str()));
@@ -5608,32 +5616,39 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                }
             }
          }
+         #ifdef DEBUG_CB_SPICE
+         else
+         {
+            MessageInterface::ShowMessage("   %s was already loaded, so not loaded!!!\n", orbitSpiceKernelNames.at(ii).c_str());
+         }
+         #endif
+
       }
    }
    if (attitude)
    {
       for (unsigned int ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
       {
-         #ifdef DEBUG_SP_SPICE
+         #ifdef DEBUG_CB_SPICE
             char *path=NULL;
             size_t size = 0;
             path=getcwd(path,size);
             MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
-            MessageInterface::ShowMessage("   now checking %s ...\n", attitudeSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   now checking Planetary file %s ...\n", attitudeSpiceKernelNames.at(ii).c_str());
          #endif
          if (!(kernelReader->IsLoaded(attitudeSpiceKernelNames.at(ii))))
          {
             try
             {
                kernelReader->LoadKernel(attitudeSpiceKernelNames.at(ii));
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         (attitudeSpiceKernelNames.at(ii)).c_str());
                #endif
             }
-            catch (GmatBaseException &ue)
+            catch (UtilityException &ue)
             {
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
                #endif
                // try again with path name if no path found
@@ -5646,16 +5661,16 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                   pckName = pckPath + pckName;
                   try
                   {
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                         MessageInterface::ShowMessage("   now attempting to load %s ...\n", pckName.c_str());
                      #endif
                      kernelReader->LoadKernel(pckName);
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                      MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         pckName.c_str());
                      #endif
                   }
-                  catch (GmatBaseException &)
+                  catch (UtilityException &)
                   {
                      MessageInterface::ShowMessage("ERROR loading kernel %s\n",
                         (pckName.c_str()));
@@ -5676,26 +5691,26 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
    {
       for (unsigned int ii = 0; ii < frameSpiceKernelNames.size(); ii++)
       {
-         #ifdef DEBUG_SP_SPICE
+         #ifdef DEBUG_CB_SPICE
             char *path=NULL;
             size_t size = 0;
             path=getcwd(path,size);
             MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
-            MessageInterface::ShowMessage("   now checking %s ...\n", frameSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   now checking Frame file %s ...\n", frameSpiceKernelNames.at(ii).c_str());
          #endif
          if (!(kernelReader->IsLoaded(frameSpiceKernelNames.at(ii))))
          {
             try
             {
                kernelReader->LoadKernel(frameSpiceKernelNames.at(ii));
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         (frameSpiceKernelNames.at(ii)).c_str());
                #endif
             }
             catch (BaseException &ue)
             {
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
                #endif
                // try again with path name if no path found
@@ -5708,16 +5723,16 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                   fkName = fkPath + fkName;
                   try
                   {
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                         MessageInterface::ShowMessage("   now attempting to load %s ...\n", fkName.c_str());
                      #endif
                      kernelReader->LoadKernel(fkName);
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                      MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         fkName.c_str());
                      #endif
                   }
-                  catch (GmatBaseException &)
+                  catch (UtilityException &)
                   {
                      MessageInterface::ShowMessage("ERROR loading kernel %s\n",
                         (fkName.c_str()));
@@ -5738,26 +5753,26 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
    {
       for (unsigned int ii = 0; ii < scClockSpiceKernelNames.size(); ii++)
       {
-         #ifdef DEBUG_SP_SPICE
+         #ifdef DEBUG_CB_SPICE
             char *path=NULL;
             size_t size = 0;
             path=getcwd(path,size);
             MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
-            MessageInterface::ShowMessage("   now checking %s ...\n", scClockSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   now checking ScClock file %s ...\n", scClockSpiceKernelNames.at(ii).c_str());
          #endif
          if (!(kernelReader->IsLoaded(scClockSpiceKernelNames.at(ii))))
          {
             try
             {
                kernelReader->LoadKernel(scClockSpiceKernelNames.at(ii));
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         (scClockSpiceKernelNames.at(ii)).c_str());
                #endif
             }
-            catch (GmatBaseException &ue)
+            catch (UtilityException &ue)
             {
-               #ifdef DEBUG_SP_SPICE
+               #ifdef DEBUG_CB_SPICE
                   MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
                #endif
                // try again with path name if no path found
@@ -5770,16 +5785,16 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                   scClockName = scClockPath + scClockName;
                   try
                   {
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                         MessageInterface::ShowMessage("   now attempting to load %s ...\n", scClockName.c_str());
                      #endif
                      kernelReader->LoadKernel(scClockName);
-                     #ifdef DEBUG_SP_SPICE
+                     #ifdef DEBUG_CB_SPICE
                      MessageInterface::ShowMessage("   spice has loaded file %s\n",
                         scClockName.c_str());
                      #endif
                   }
-                  catch (GmatBaseException &)
+                  catch (UtilityException &)
                   {
                      MessageInterface::ShowMessage("ERROR loading kernel %s\n",
                         (scClockName.c_str()));

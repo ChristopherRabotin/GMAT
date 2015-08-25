@@ -552,10 +552,13 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    std::map<std::string, std::string>::iterator ii;
    for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
    {
-      #ifdef DEBUG_SPK_ISLOADED
-          MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
-      #endif
-      if ((*ii).first == fileName) return true;
+      if ((*ii).first == fileName)
+      {
+         #ifdef DEBUG_SPK_ISLOADED
+             MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
+         #endif
+         return true;
+      }
    }
    #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::kernel name %s NOT ALREADY LOADED\n", fileName.c_str());

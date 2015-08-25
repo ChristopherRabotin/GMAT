@@ -16,3 +16,4 @@ inputs*.txt
 /GmatConsole
 *.R2015a
 *.pyc
+/DLLs/
