@@ -4172,33 +4172,59 @@ bool SolarSystem::LoadMatchingSPK(Integer ofType)
    MessageInterface::ShowMessage("   and lastLoadedSPKType = %d (%s)\n",
          lastLoadedSPKType, Gmat::POS_VEL_SOURCE_STRINGS[lastLoadedSPKType].c_str());
    #endif
-   if (lastLoadedSPKType == ofType)  // @todo if the name of the file hasn't changed
+   if (lastLoadedSPKType == ofType)
       return true;
 
    bool isOK = true;
-   // @todo  - make sure that the path is correct
-   if (lastLoadedSPKType != Gmat::PosVelSourceCount &&
-         planetarySPK->IsLoaded(theSPKKernelNames[lastLoadedSPKType]))
-   {
-   #ifdef DEBUG_DE_SPK
-   MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
-         theSPKKernelNames[lastLoadedSPKType].c_str());
-   #endif
-      isOK = isOK && planetarySPK->UnloadKernel(theSPKKernelNames[lastLoadedSPKType]);
-   }
+
+   // Get the name of the currently-set SPK kernel
+   std::string currentSPKFile     = theSPKFilename;
 
    try
    {
-      // @todo  - make sure that the path is correct
+      // Try to set the SPK file name to the correct name, based on the
+      // specified type
+      SetSPKFile(theSPKKernelNames[ofType]); // will figure out full path, if necessary
+
+      // if we are already using the correct SPK file, just return
+      if (currentSPKFile == theSPKFilename)
+         return true;
+
+      if (theSPKFilename != "" && (lastLoadedSPKType != Gmat::PosVelSourceCount))
+      {
+         // Get the name of the last loaded SPK kernel (might NOT be the same
+         // as theSPKFilename at the start)
+         std::string lastLoadedSPKFile  = theSPKKernelNames[lastLoadedSPKType];
+
+         // UNLOAD previously-loaded Planetary SPK file
+         if (planetarySPK->IsLoaded(lastLoadedSPKFile))
+         {
+            #ifdef DEBUG_DE_SPK
+            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
+                  lastLoadedSPKFile.c_str());
+            #endif
+            isOK = isOK && planetarySPK->UnloadKernel(lastLoadedSPKFile);
+         }
+         // OR UNLOAD previous Planetary SPK file (set initially)
+         if (planetarySPK->IsLoaded(currentSPKFile))
+         {
+            #ifdef DEBUG_DE_SPK
+            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
+                  currentSPKFile.c_str());
+            #endif
+            isOK = isOK && planetarySPK->UnloadKernel(currentSPKFile);
+         }
+      }
+
       #ifdef DEBUG_DE_SPK
       MessageInterface::ShowMessage("Attempting to LOAD the SPK %s\n",
             theSPKKernelNames[ofType].c_str());
       #endif
-      bool isLoadedOK = planetarySPK->LoadKernel(theSPKKernelNames[ofType]);
+      bool isLoadedOK = planetarySPK->LoadKernel(theSPKFilename);
 
       #ifdef DEBUG_DE_SPK
       MessageInterface::ShowMessage("LOADed the SPK %s?\n",
-            theSPKKernelNames[ofType].c_str());
+            theSPKFilename.c_str());
       #endif
       isOK = isOK && isLoadedOK;
       if (!isOK)
@@ -4212,17 +4238,21 @@ bool SolarSystem::LoadMatchingSPK(Integer ofType)
    catch (BaseException &be)
    {
       MessageInterface::ShowMessage("   - ERROR unloading or loading SPK!!!!\n");
+      SetSPKFile(currentSPKFile);
       throw;
    }
 
-   SetSPKFile(theSPKKernelNames[ofType]);
+//   SetSPKFile(theSPKKernelNames[ofType]);
 
-   thePlanetarySourceNames[Gmat::SPICE] = theSPKKernelNames[ofType];
-   theSPKKernelNames[Gmat::SPICE]       = theSPKKernelNames[ofType];
+   // theSPKFilename has already been set to the requested one
+   thePlanetarySourceNames[Gmat::SPICE] = theSPKFilename;
+   theSPKKernelNames[Gmat::SPICE]       = theSPKFilename;
    lastLoadedSPKType                    = ofType;
 
    #ifdef DEBUG_DE_SPK
-   MessageInterface::ShowMessage("In LoadMatchingSPK, SET lastLoadedSPKType to %d\n",
+   MessageInterface::ShowMessage("Leaving LMSPK, theSPKFilename = %s\n",
+         theSPKFilename.c_str());
+   MessageInterface::ShowMessage("Leaving LMSPK, SET lastLoadedSPKType to %d\n",
          lastLoadedSPKType);
    #endif
 
