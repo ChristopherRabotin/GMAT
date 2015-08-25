@@ -1681,7 +1681,7 @@ Rvector3 BodyFixedPoint::GetTopocentricConversion(
           phi    = phi_gd;
           sinPhi = GmatMathUtil::Sin(phi);
           C      = R/GmatMathUtil::Sqrt(1-(e*e)*(sinPhi * sinPhi));
-          phi_gd = GmatMathUtil::ATan((z_F+C*(e*e)*sinPhi)/r_xy);
+          phi_gd = GmatMathUtil::ATan(z_F+C*(e*e)*sinPhi, r_xy);
           delta  = GmatMathUtil::Abs(phi_gd-phi);
       }
 
