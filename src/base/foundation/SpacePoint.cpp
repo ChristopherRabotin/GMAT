@@ -852,7 +852,7 @@ void SpacePoint::RemoveSpiceKernelName(const std::string &kernelType,
       i = find(orbitSpiceKernelNames.begin(), orbitSpiceKernelNames.end(), fileName);
       if (i != orbitSpiceKernelNames.end())  orbitSpiceKernelNames.erase(i);
    }
-   else if (kernelType == "Attitude")
+   else if ((kernelType == "Attitude") || (kernelType == "Planetary"))
    {
       StringArray::iterator i;
       i = find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(), fileName);
