@@ -1286,6 +1286,10 @@ bool SpacePoint::SetStringParameter(const Integer id,
    }
    if (id == ATTITUDE_SPICE_KERNEL_NAME)
    {
+      #ifdef DEBUG_SET_STRING
+      MessageInterface::ShowMessage
+         ("SpacePoint::SetStringParameter() Setting attitude/planetary file(s)\n");
+      #endif
       // if it is the whole StringArray of kernel names, handle that here
       // (needed so that assignments will work inside of GmatFunctions) wcs 2010.05.18
       std::string value1 = GmatStringUtil::Trim(value);
@@ -1308,10 +1312,15 @@ bool SpacePoint::SetStringParameter(const Integer id,
       else
       {
          std::string trimmed = ParseKernelName(value);
+         #ifdef DEBUG_SET_STRING
+         MessageInterface::ShowMessage
+            ("SpacePoint::SetStringParameter() trimmed = %s, about to validate\n",
+                  trimmed.c_str());
+         #endif
          if (IsOfType("CelestialBody"))
-            ValidateKernel(parsed, "PlanetarySpiceKernelName", "pck");
+            ValidateKernel(trimmed, "PlanetarySpiceKernelName", "pck");
          else
-            ValidateKernel(parsed, "AttitudeSpiceKernelName", "ck");
+            ValidateKernel(trimmed, "AttitudeSpiceKernelName", "ck");
          if (find(attitudeSpiceKernelNames.begin(), attitudeSpiceKernelNames.end(),trimmed) == attitudeSpiceKernelNames.end())
             attitudeSpiceKernelNames.push_back(trimmed);
      }
