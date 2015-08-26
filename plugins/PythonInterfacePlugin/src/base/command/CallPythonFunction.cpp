@@ -340,10 +340,16 @@ bool CallPythonFunction::Execute()
       else if (PyUnicode_Check(pyRet))
       {
          MessageInterface::ShowMessage("Python String is returned.\n");
+         std::string *pStr = new std::string;
+         *pStr = std::string(_PyUnicode_AsString(pyRet));
+         argOut.push_back(pStr); 
       }
 #else
       else if (PyBytes_Check(pyRet))
       {
+         std::string *pStr = new std::string;
+         *pStr = std::string(PyBytes_AsString(pyRet));
+         argOut.push_back(pStr);
       }
 #endif
       // else if the Python module returns a list of floats
@@ -421,14 +427,12 @@ bool CallPythonFunction::Execute()
       GetOutParams(argOut);
 
       // clean up the argIns.
-      std::vector<void *>::iterator it;
-      for (it = argIn.begin(); it != argIn.end(); ++it)
-          delete *it;
+      for (Integer i = 0; i < argIn.size(); ++i)
+         delete argIn.at(i);
 
       // clean up the argOut
-      std::vector<void *>::iterator itO;
-      for (itO = argOut.begin(); itO != argOut.end(); ++itO)
-         delete *itO;
+      for (Integer i = 0; i < argOut.size(); ++i)
+         delete argOut.at(i);
    }
    else   // when return value is NULL and no exception is caught/handled.
    {
@@ -672,6 +676,13 @@ void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
 
       switch (type)
       {
+         case Gmat::STRING_TYPE:
+         {
+            MessageInterface::ShowMessage("String message is %s\n", ((std::string*)(argOut.at(0)))->c_str());
+            param->SetString(*(std::string*)(argOut.at(0)));
+            break;
+         }
+
          case Gmat::REAL_TYPE:
          {
             param->SetReal(*(Real*)argOut.at(i));
