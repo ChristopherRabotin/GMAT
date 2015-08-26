@@ -108,7 +108,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    // Specific file name
    "DE405_FILE",
    "DE421_FILE",						// made change by TUAN NGUYEN
-   "DE424_FILE",						// made change by TUAN NGUYEN
+   "DE424_FILE",                 // made change by TUAN NGUYEN
+   "DE430_FILE",
    "IAUSOFA_FILE",					// made change by TUAN NGUYEN
    "ICRF_FILE",						// made change by TUAN NGUYEN
    "PLANETARY_SPK_FILE",
@@ -121,6 +122,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "EOP_FILE",
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
+   "PLANETARY_PCK_FILE",
    "LEAP_SECS_FILE",
    "LSK_FILE",
    "PERSONALIZATION_FILE",
