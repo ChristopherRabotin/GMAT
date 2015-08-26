@@ -76,6 +76,7 @@
 //#define DEBUG_TEXTURE_FILE
 //#define DEBUG_3D_MODEL_FILE
 //#define DEBUG_VALIDATION
+//#define DEBUG_CB_GET_STRING_ARRAY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -299,6 +300,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -418,6 +420,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -525,6 +528,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    
    if (cBody.atmModel)
@@ -591,6 +595,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    #ifdef __USE_SPICE__
    kernelReader        = cBody.kernelReader;
    mainSPK             = cBody.mainSPK;
+   mainPCK             = cBody.mainPCK;
    #endif
    usePotentialFile    = cBody.usePotentialFile;
    potentialFileName   = cBody.potentialFileName;
@@ -707,30 +712,31 @@ CelestialBody::~CelestialBody()
       delete atmModel;
    }
    #ifdef __USE_SPICE__
+   UnloadKernels(true, true, true, false);
    // unload the kernel(s) from the SpiceKernelReader  // @todo  ADD the other kernels here
-      if (kernelReader != NULL)
-      {
-         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
-         {
-            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
-            {
-               #ifdef DEBUG_CB_SPICE
-                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
-                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
-               #endif
-               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
-               {
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
-                  #endif
-                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
-                  #endif
-               }
-            }
-         }
-      }
+//      if (kernelReader != NULL)
+//      {
+//         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+//         {
+//            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
+//            {
+//               #ifdef DEBUG_CB_SPICE
+//                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+//                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+//               #endif
+//               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+//               {
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+//                  #endif
+//                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+//                  #endif
+//               }
+//            }
+//         }
+//      }
    #endif
    #ifdef DEBUG_CB_DESTRUCT
       MessageInterface::ShowMessage(" Exiting CelestialBody destructor for body %s .........\n", instanceName.c_str());
@@ -895,7 +901,9 @@ const Real CelestialBody::GetFirstStateTime()
             // Make sure we are looking for coverage in the main SPK kernel as well
             StringArray allKernels = orbitSpiceKernelNames;
             mainSPK                = theSolarSystem->GetStringParameter("SPKFilename");
+            mainPCK                = theSolarSystem->GetStringParameter("PCKFilename");
             if (mainSPK != "")  allKernels.push_back(mainSPK);
+            if (mainPCK != "")  allKernels.push_back(mainPCK);  // correct?
             #ifdef DEBUG_CB_SPICE
                MessageInterface::ShowMessage("Calling GetCoverage with naifId = %d\n", naifId);
                MessageInterface::ShowMessage("   and allKernels are: \n");
@@ -2977,6 +2985,10 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer CelestialBody::GetParameterID(const std::string &str) const
 {
+   #ifdef DEBUG_CB_GET_STRING_ARRAY
+      MessageInterface::ShowMessage("In CB::GetParameterID, str = %s\n",
+            str.c_str());
+   #endif
    for (Integer i = SpacePointParamCount; i < CelestialBodyParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SpacePointParamCount])
@@ -4273,8 +4285,8 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    // that may change when/if we add the reading of PCK kernels for body orientation data
 //   if (id == NAIF_ID_REFERENCE_FRAME)  return false;
 
-   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;
-   if (id == FRAME_SPICE_KERNEL_NAME)     return true;
+//   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;
+//   if (id == FRAME_SPICE_KERNEL_NAME)     return true;
    if (id == SC_CLOCK_SPICE_KERNEL_NAME)  return true;
 
    // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
@@ -5155,6 +5167,7 @@ bool CelestialBody::SetUpSPICE()
          MessageInterface::ShowMessage("   kernelReader is STILL NULL\n");
    #endif
    mainSPK = theSolarSystem->GetStringParameter("SPKFilename");
+   mainPCK = theSolarSystem->GetStringParameter("PCKFilename");
    if (orbitSpiceKernelNames.empty())
    {
       if (mainSPK == "")
@@ -5806,6 +5819,113 @@ bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                   MessageInterface::ShowMessage("ERROR loading kernel %s\n",
                      (scClockSpiceKernelNames.at(ii).c_str()));
                   throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+#endif
+   return true;
+}
+
+bool CelestialBody::UnloadKernels(bool orbit,  bool attitude,
+                                  bool frame,  bool scClock)
+{
+#ifdef __USE_SPICE__
+   if (kernelReader)
+   {
+      if (orbit)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+         {
+            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (attitude)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < attitudeSpiceKernelNames.size(); kk++)
+         {
+            if ((attitudeSpiceKernelNames.at(kk) != "") && (attitudeSpiceKernelNames.at(kk) != mainPCK))
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (attitudeSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(attitudeSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(attitudeSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (attitudeSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (frame)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < frameSpiceKernelNames.size(); kk++)
+         {
+            if (frameSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (frameSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(frameSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(frameSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (frameSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (scClock)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < scClockSpiceKernelNames.size(); kk++)
+         {
+            if (scClockSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (scClockSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(scClockSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(scClockSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (scClockSpiceKernelNames.at(kk)).c_str());
+                  #endif
                }
             }
          }

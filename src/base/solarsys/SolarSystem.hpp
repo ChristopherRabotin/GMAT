@@ -72,6 +72,7 @@ public:
    Integer              GetPlanetarySourceId(const std::string &sourceType);
    std::string          GetPlanetarySourceName(const std::string &sourceType);
    std::string          GetCurrentPlanetarySource();
+   const StringArray&   GetSpiceKernelNames();
    void                 SetIsSpiceAllowedForDefaultBodies(const bool allowSpice);
    bool                 IsSpiceAllowedForDefaultBodies() const;
 
@@ -79,7 +80,6 @@ public:
 
 #ifdef __USE_SPICE__
    void                    LoadSpiceKernels();
-//   void                    LoadPCKs();
    SpiceOrbitKernelReader* GetSpiceOrbitKernelReader();
 #endif
    
@@ -337,7 +337,8 @@ private:
    bool         default_overrideTimeForAll;
    Real         default_ephemUpdateInterval;
    
-   Integer lastLoadedSPKType;
+//   Integer     lastLoadedSPKType;
+   std::string lastLoadedSPKFile;
 
    /// method to find a body in the solar system, given its name
    CelestialBody* FindBody(const std::string &withName);
@@ -359,8 +360,8 @@ private:
    
    // method to set solar system body texture map file
    void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
-   /// load the matching SPK file to the selected DE/SPICE
-   bool           LoadMatchingSPK(Integer ofType);
+//   /// load the matching SPK file to the selected DE/SPICE
+//   bool           LoadMatchingSPK(Integer ofType);
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data

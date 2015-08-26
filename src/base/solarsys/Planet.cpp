@@ -36,6 +36,7 @@
 //#define DEBUG_PLANET 1
 //#define DEBUG_PLANET_TWO_BODY
 //#define DEBUG_PLANET_NUTATION_INTERVAL
+//#define DEBUG_PLANET_CONSTRUCT
 
 using namespace GmatMathUtil;
 
@@ -73,6 +74,10 @@ Planet::Planet(std::string name) :
    CelestialBody     ("Planet",name),
    nutationUpdateInterval    (60.0)
 {   
+   // @todo This constructor should call the other one, setting Sun as central body!!!
+   #ifdef DEBUG_PLANET_CONSTRUCT
+      MessageInterface::ShowMessage("In Planet constructor for %s\n", name.c_str());
+   #endif
    objectTypeNames.push_back("Planet");
    parameterCount      = PlanetParamCount;
    
@@ -108,6 +113,9 @@ Planet::Planet(std::string name) :
 
    if (name == SolarSystem::EARTH_NAME)
    {
+      #ifdef DEBUG_PLANET_CONSTRUCT
+         MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
+      #endif
       attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
       attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
       attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
@@ -133,6 +141,10 @@ Planet::Planet(std::string name, const std::string &cBody) :
    CelestialBody     ("Planet",name),
    nutationUpdateInterval    (60.0)
 {
+#ifdef DEBUG_PLANET_CONSTRUCT
+   MessageInterface::ShowMessage("In Planet constructor for %s, with central body %s\n",
+         name.c_str(), cBody.c_str());
+#endif
    objectTypeNames.push_back("Planet");
    parameterCount      = PlanetParamCount;
    
@@ -146,6 +158,16 @@ Planet::Planet(std::string name, const std::string &cBody) :
    else if (name == SolarSystem::NEPTUNE_NAME)
       rotationSrc      = Gmat::IAU_2002;
    
+   if (name == SolarSystem::EARTH_NAME)
+   {
+      #ifdef DEBUG_PLANET_CONSTRUCT
+         MessageInterface::ShowMessage("In Planet constructor, setting default PCKs.\n");
+      #endif
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_000101_150307_141214.bpc");
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_070425_370426_predict.bpc");
+      attitudeSpiceKernelNames.push_back("../data/planetary_coeff/earth_720101_070426.bpc");
+   }
+
    DeterminePotentialFileNameFromStartup();
    SaveAllAsDefault();
 }

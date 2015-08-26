@@ -451,6 +451,7 @@ protected:
       /// the SPICE file (kernel) reader
       SpiceOrbitKernelReader      *kernelReader;
       std::string                 mainSPK;
+      std::string                 mainPCK;
    #endif
    
    /// flag indicating whether or not to get data from potential file
@@ -614,6 +615,8 @@ protected:
                            bool writeWarning = false, bool validateOnly = false);
    bool LoadNeededKernels(bool orbit = true,  bool attitude = false,
                           bool frame = true,  bool scClock  = false);
+   bool UnloadKernels(bool orbit = true,  bool attitude = false,
+                      bool frame = true,  bool scClock  = false);
    
 private:
 

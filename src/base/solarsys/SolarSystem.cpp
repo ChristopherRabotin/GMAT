@@ -52,6 +52,7 @@
 //#define DEBUG_TEXTURE_FILE
 //#define DEBUG_SS_PLANETARY_SRC
 //#define DEBUG_DE_SPK
+//#define DEBUG_SS_CREATE
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -338,7 +339,7 @@ SolarSystem::SolarSystem(std::string withName) :
    theSPKFilename              (""),
    lskKernelName               (""),
    pckKernelName               (""),
-   lastLoadedSPKType           (Gmat::PosVelSourceCount)
+   lastLoadedSPKFile           ("")
 {
    objectTypes.push_back(Gmat::SOLAR_SYSTEM);
    objectTypeNames.push_back("SolarSystem");
@@ -349,10 +350,10 @@ SolarSystem::SolarSystem(std::string withName) :
    // pckKernelName = "../data/planetary_coeff/pck00010.tpc";  // HARD_CODED default for now
    // @todo add these to planetarySourceNames at some point?  These should be
    // added to the startup file.
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE405  // REPLACE!!
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE421  // REPLACE!!
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE424  // REPLACE!!
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE430  // REPLACE!!
+   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE405
+   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE421
+   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE424
+   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE430
    theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // SPICE
 
    #ifdef DEBUG_SS_CREATE
@@ -440,6 +441,10 @@ SolarSystem::SolarSystem(std::string withName) :
    // Add default planets, assuming for now that they all orbit the Sun
    for (unsigned int ii = 0; ii < NumberOfDefaultPlanets; ii++)
    {
+      #ifdef DEBUG_SS_CREATE
+         MessageInterface::ShowMessage("SS about to create planet %s\n",
+               PLANET_NAMES[ii].c_str());
+      #endif
       Planet *newPlanet = new Planet(PLANET_NAMES[ii], SUN_NAME);
       #ifdef DEBUG_MEMORY
       MemoryTracker::Instance()->Add
@@ -674,7 +679,7 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    default_PCKFilename               (ss.default_PCKFilename),
    default_overrideTimeForAll        (ss.default_overrideTimeForAll),
    default_ephemUpdateInterval       (ss.default_ephemUpdateInterval),
-   lastLoadedSPKType                 (ss.lastLoadedSPKType)
+   lastLoadedSPKFile                 (ss.lastLoadedSPKFile)
 {
    #ifdef DEBUG_SS_CONSTRUCT_DESTRUCT
       MessageInterface::ShowMessage("Now starting the Solar System copy constructor ...\n");
@@ -787,7 +792,7 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    default_overrideTimeForAll        = ss.default_overrideTimeForAll;
    default_ephemUpdateInterval       = ss.default_ephemUpdateInterval;
 
-   lastLoadedSPKType                 = ss.lastLoadedSPKType;
+   lastLoadedSPKFile                 = ss.lastLoadedSPKFile;
    theSPKKernelNames                 = ss.theSPKKernelNames;
 
    // create planetary source first, but do not create default
@@ -864,7 +869,9 @@ SolarSystem::~SolarSystem()
    #ifdef DEBUG_PLANETARY_SPK
       MessageInterface::ShowMessage("in SS destructor, deleting planetarySPK <%p>\n", planetarySPK);
    #endif
-   planetarySPK->UnloadKernel(theSPKFilename);
+   if (planetarySPK->IsLoaded(theSPKFilename))
+      planetarySPK->UnloadKernel(theSPKFilename);
+//   if (planetarySPK->IsLoaded(lastLoadedSPKFile)) planetarySPK->UnloadKernel(lastLoadedSPKFile);
    delete planetarySPK;
 #endif
 }
@@ -1184,7 +1191,7 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
    {
       if (id == Gmat::SPICE)
       {
-         theSPKFilename = fileName;
+         theSPKFilename = fileName;  // do I need SetSPKFile here?
          thePlanetarySourceNames[id] = fileName;
          status =  true;
       }
@@ -1224,7 +1231,7 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
             SetSourceFile(theDefaultDeFile);
          }
       }
-      LoadMatchingSPK(id); // make sure the matching SPK kernel is loaded
+//      LoadMatchingSPK(id); // make sure the matching SPK kernel is loaded
    }
 
    return status;
@@ -1586,6 +1593,14 @@ std::string SolarSystem::GetCurrentPlanetarySource()
 }
 
 //------------------------------------------------------------------------------
+// const StringArray& GetSpiceKernelNames()
+//------------------------------------------------------------------------------
+const StringArray& SolarSystem::GetSpiceKernelNames()
+{
+   return theSPKKernelNames;
+}
+
+//------------------------------------------------------------------------------
 // void SetIsSpiceAllowedForDefaultBodies(const bool allowSpice)
 //------------------------------------------------------------------------------
 /*
@@ -1662,21 +1677,37 @@ PlanetaryEphem* SolarSystem::GetPlanetaryEphem()
 //------------------------------------------------------------------------------
 void SolarSystem::LoadSpiceKernels()
 {
+   #ifdef DEBUG_SS_SPICE
+   MessageInterface::ShowMessage
+      ("   In LoadSpiceKernels, theSPKFilename = %s\n", theSPKFilename.c_str());
+   MessageInterface::ShowMessage
+      ("   In LoadSpiceKernels, lastLoadedSPKFile = %s\n", lastLoadedSPKFile.c_str());
+   #endif
+
    try
    {
-      // since we may need to add the path, try to load first, then check
-      // for valid kernel type
-      if (!planetarySPK->IsLoaded(theSPKFilename))
+      if (lastLoadedSPKFile != theSPKFilename)
       {
-         planetarySPK->LoadKernel(theSPKFilename);
-         #ifdef DEBUG_SS_SPICE
-         MessageInterface::ShowMessage
-            ("   kernelReader has successfully loaded the SPK file %s\n", theSPKFilename.c_str());
-         #endif
+         // since we may need to add the path, try to load first, then check
+         // for valid kernel type
+         if (!planetarySPK->IsLoaded(theSPKFilename))
+         {
+            planetarySPK->LoadKernel(theSPKFilename);
+            #ifdef DEBUG_SS_SPICE
+            MessageInterface::ShowMessage
+               ("   kernelReader has successfully loaded the SPK file %s\n", theSPKFilename.c_str());
+            #endif
+         }
       }
    }
    catch (UtilityException&)
    {
+      #ifdef DEBUG_SS_SPICE
+      MessageInterface::ShowMessage
+         ("   In LoadSpiceKernels, theSPKFilename %s did NOT load --- \n", theSPKFilename.c_str());
+      MessageInterface::ShowMessage
+         ("   In LoadSpiceKernels, looking for slashes or backslashes.\n");
+      #endif
       // try again with path name if no path found
       std::string spkName = theSPKFilename;
       if (spkName.find("/") == spkName.npos &&
@@ -1720,6 +1751,10 @@ void SolarSystem::LoadSpiceKernels()
             
             std::string absSpkFile =
                fm->FindPath(theSPKFilename, "PLANETARY_EPHEM_SPK_PATH", true, false, true);
+#ifdef DEBUG_SS_SPICE
+MessageInterface::ShowMessage
+   ("   In LoadSpiceKernels, absSpkFile =  %s did NOT load --- \n", absSpkFile.c_str());
+#endif
             
             if (absSpkFile == "")
             {
@@ -1755,6 +1790,9 @@ void SolarSystem::LoadSpiceKernels()
          }
       }
    }
+
+   lastLoadedSPKFile = theSPKFilename;
+
    // Load the PCK file
    try
    {
@@ -1887,46 +1925,6 @@ void SolarSystem::LoadSpiceKernels()
    }
 }
 
-////------------------------------------------------------------------------------
-//// void LoadPCKs()
-////------------------------------------------------------------------------------
-///*
-// * Calls the SpiceInterface to load the planetary Constants kernels.
-// */
-////------------------------------------------------------------------------------
-//void SolarSystem::LoadPCKs()
-//{
-//   if (!planetarySPK)
-//      throw SolarSystemException("Unable to load PCKs - no reader has been set!\n");
-//
-//   // For now, get PCK kernel name(s) from the startup file
-//   FileManager *fm = FileManager::Instance();
-//
-//   StringArray pckKernels;
-////   pckKernels.push_back("../data/planetary_data/earth_000101_150307_141214.bpc");
-////   pckKernels.push_back("../data/planetary_data/earth_070425_370426_predict.bpc");
-////   pckKernels.push_back("../data/planetary_data/earth_720101_070426.bpc");
-////   pckKernels.push_back("../data/planetary_data/moon_pa_de421_1900-2050.bpc");
-//   pckKernels.push_back(pckKernelName);
-//
-//   try
-//   {
-//      for (unsigned int ii = 0; ii < pckKernels.size(); ii++)
-//      {
-//         planetarySPK->LoadKernel(pckKernels.at(ii));
-//         #ifdef DEBUG_SS_SPICE
-//         MessageInterface::ShowMessage
-//            ("   kernelReader has loaded PCK file %s\n", pckKernels.at(ii).c_str());
-//         #endif
-//      }
-//   }
-//   catch (UtilityException&)
-//   {
-//      MessageInterface::ShowMessage("ERROR loading PCK kernels\n");
-//      throw; // rethrow the exception, for now
-//   }
-//   pckKernels.clear();
-//}
 
 //------------------------------------------------------------------------------
 // SpiceOrbitKernelReader* GetSpiceOrbitKernelReader()
@@ -2406,7 +2404,8 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
    for (Integer ii = 0; ii < thePlanetarySourceTypesInUse.size(); ii++)
       MessageInterface::ShowMessage("   %s\n", thePlanetarySourceTypesInUse.at(ii).c_str());
 #endif
-   LoadMatchingSPK(pvSrc);
+//   LoadMatchingSPK(pvSrc);
+   SetSPKFile(theSPKKernelNames[pvSrc ]);
 
    return true;
 }
@@ -2506,11 +2505,15 @@ bool SolarSystem::SetSPKFile(const std::string &spkFile)
 MessageInterface::ShowMessage("Entering SetSPKFile with spkFile = %s\n",
       spkFile.c_str());
 #endif
-   std::string fullSpkName = spkFile;
+   std::string fullSpkName = GmatStringUtil::Replace(spkFile, "\\", "/");
    if (!(GmatFileUtil::DoesFileExist(spkFile)))
    {
       // try again with path name from startup file
       std::string spkPath = FileManager::Instance()->GetPathname("PLANETARY_SPK_FILE");
+#ifdef DEBUG_DE_SPK
+MessageInterface::ShowMessage("-- That file did not exist, so checking path %s\n",
+      spkPath.c_str());
+#endif
       
       if (GmatFileUtil::ParsePathName(spkFile) == "")
          fullSpkName = spkPath + fullSpkName;
@@ -2536,6 +2539,11 @@ MessageInterface::ShowMessage("Entering SetSPKFile with spkFile = %s\n",
       }
    #endif
    theSPKFilename = fullSpkName;
+
+//   thePlanetarySourceNames[Gmat::SPICE] = theSPKFilename;
+//   Integer i = GetPlanetarySourceId(theCurrentPlanetarySource);
+//   theSPKKernelNames[i] = theSPKFilename;
+
    return true;
 }
 
@@ -3292,11 +3300,11 @@ bool SolarSystem::SetStringParameter(const Integer id,
    {
       // Get the current source index:
       int sourceindex;
-	  for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)
-	  {
-		  if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == theCurrentPlanetarySource)
-			  break;
-	  }
+	   for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)
+	   {
+		   if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == theCurrentPlanetarySource)
+			   break;
+	   }
 
 	  // if the source file name was changed then set the change in
 	  // thePlanetarySourceNames, create new DE file, and set
@@ -3321,6 +3329,19 @@ bool SolarSystem::SetStringParameter(const Integer id,
             ("SolarSystem::SetStringParameter, about to set spk filename to %s\n", value.c_str());
          #endif
          SetSPKFile(value);
+         // Get the current source index:
+         int sourceindex;
+         for(sourceindex = 0; sourceindex < Gmat::PosVelSourceCount; ++sourceindex)
+         {
+            if (Gmat::POS_VEL_SOURCE_STRINGS[sourceindex] == theCurrentPlanetarySource)
+            {
+               if (value != theSPKKernelNames[sourceindex])
+                  theSPKKernelNames[sourceindex] = value;
+               break;
+            }
+         }
+        // if the source file name was changed then set the change in
+        // thePlanetarySourceNames
          if (value != thePlanetarySourceNames[Gmat::SPICE])
          {
             thePlanetarySourceNames[Gmat::SPICE] = value;
@@ -4164,98 +4185,98 @@ void SolarSystem::SetTextureMapFile(SpacePoint *sp, const std::string &bodyName)
    #endif
 }
 
-bool SolarSystem::LoadMatchingSPK(Integer ofType)
-{
-   #ifdef DEBUG_DE_SPK
-   MessageInterface::ShowMessage("Entering LoadMatchingSPK with ofType = %d (%s)\n",
-         ofType, Gmat::POS_VEL_SOURCE_STRINGS[ofType].c_str());
-   MessageInterface::ShowMessage("   and lastLoadedSPKType = %d (%s)\n",
-         lastLoadedSPKType, Gmat::POS_VEL_SOURCE_STRINGS[lastLoadedSPKType].c_str());
-   #endif
-   if (lastLoadedSPKType == ofType)
-      return true;
-
-   bool isOK = true;
-
-   // Get the name of the currently-set SPK kernel
-   std::string currentSPKFile     = theSPKFilename;
-
-   try
-   {
-      // Try to set the SPK file name to the correct name, based on the
-      // specified type
-      SetSPKFile(theSPKKernelNames[ofType]); // will figure out full path, if necessary
-
-      // if we are already using the correct SPK file, just return
-      if (currentSPKFile == theSPKFilename)
-         return true;
-
-      if (theSPKFilename != "" && (lastLoadedSPKType != Gmat::PosVelSourceCount))
-      {
-         // Get the name of the last loaded SPK kernel (might NOT be the same
-         // as theSPKFilename at the start)
-         std::string lastLoadedSPKFile  = theSPKKernelNames[lastLoadedSPKType];
-
-         // UNLOAD previously-loaded Planetary SPK file
-         if (planetarySPK->IsLoaded(lastLoadedSPKFile))
-         {
-            #ifdef DEBUG_DE_SPK
-            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
-                  lastLoadedSPKFile.c_str());
-            #endif
-            isOK = isOK && planetarySPK->UnloadKernel(lastLoadedSPKFile);
-         }
-         // OR UNLOAD previous Planetary SPK file (set initially)
-         if (planetarySPK->IsLoaded(currentSPKFile))
-         {
-            #ifdef DEBUG_DE_SPK
-            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
-                  currentSPKFile.c_str());
-            #endif
-            isOK = isOK && planetarySPK->UnloadKernel(currentSPKFile);
-         }
-      }
-
-      #ifdef DEBUG_DE_SPK
-      MessageInterface::ShowMessage("Attempting to LOAD the SPK %s\n",
-            theSPKKernelNames[ofType].c_str());
-      #endif
-      bool isLoadedOK = planetarySPK->LoadKernel(theSPKFilename);
-
-      #ifdef DEBUG_DE_SPK
-      MessageInterface::ShowMessage("LOADed the SPK %s?\n",
-            theSPKFilename.c_str());
-      #endif
-      isOK = isOK && isLoadedOK;
-      if (!isOK)
-      {
-         std::string errmsg = "Error switching to or loading ";
-         errmsg            += "SPK kernel ";
-         errmsg            += Gmat::POS_VEL_SOURCE_STRINGS[ofType] + "\n";
-         throw SolarSystemException(errmsg);
-      }
-   }
-   catch (BaseException &be)
-   {
-      MessageInterface::ShowMessage("   - ERROR unloading or loading SPK!!!!\n");
-      SetSPKFile(currentSPKFile);
-      throw;
-   }
-
-//   SetSPKFile(theSPKKernelNames[ofType]);
-
-   // theSPKFilename has already been set to the requested one
-   thePlanetarySourceNames[Gmat::SPICE] = theSPKFilename;
-   theSPKKernelNames[Gmat::SPICE]       = theSPKFilename;
-   lastLoadedSPKType                    = ofType;
-
-   #ifdef DEBUG_DE_SPK
-   MessageInterface::ShowMessage("Leaving LMSPK, theSPKFilename = %s\n",
-         theSPKFilename.c_str());
-   MessageInterface::ShowMessage("Leaving LMSPK, SET lastLoadedSPKType to %d\n",
-         lastLoadedSPKType);
-   #endif
-
-   return true;
-}
-
+//bool SolarSystem::LoadMatchingSPK(Integer ofType)
+//{
+//   #ifdef DEBUG_DE_SPK
+//   MessageInterface::ShowMessage("Entering LoadMatchingSPK with ofType = %d (%s)\n",
+//         ofType, Gmat::POS_VEL_SOURCE_STRINGS[ofType].c_str());
+//   MessageInterface::ShowMessage("   and lastLoadedSPKType = %d (%s)\n",
+//         lastLoadedSPKType, Gmat::POS_VEL_SOURCE_STRINGS[lastLoadedSPKType].c_str());
+//   #endif
+//   if (lastLoadedSPKType == ofType)
+//      return true;
+//
+//   bool isOK = true;
+//
+//   // Get the name of the currently-set SPK kernel
+//   std::string currentSPKFile     = theSPKFilename;
+//
+//   try
+//   {
+//      // Try to set the SPK file name to the correct name, based on the
+//      // specified type
+//      SetSPKFile(theSPKKernelNames[ofType]); // will figure out full path, if necessary
+//
+//      // if we are already using the correct SPK file, just return
+//      if (currentSPKFile == theSPKFilename)
+//         return true;
+//
+//      if (theSPKFilename != "" && (lastLoadedSPKType != Gmat::PosVelSourceCount))
+//      {
+//         // Get the name of the last loaded SPK kernel (might NOT be the same
+//         // as theSPKFilename at the start)
+//         std::string lastLoadedSPKFile  = theSPKKernelNames[lastLoadedSPKType];
+//
+//         // UNLOAD previously-loaded Planetary SPK file
+//         if (planetarySPK->IsLoaded(lastLoadedSPKFile))
+//         {
+//            #ifdef DEBUG_DE_SPK
+//            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
+//                  lastLoadedSPKFile.c_str());
+//            #endif
+//            isOK = isOK && planetarySPK->UnloadKernel(lastLoadedSPKFile);
+//         }
+//         // OR UNLOAD previous Planetary SPK file (set initially)
+//         if (planetarySPK->IsLoaded(currentSPKFile))
+//         {
+//            #ifdef DEBUG_DE_SPK
+//            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
+//                  currentSPKFile.c_str());
+//            #endif
+//            isOK = isOK && planetarySPK->UnloadKernel(currentSPKFile);
+//         }
+//      }
+//
+//      #ifdef DEBUG_DE_SPK
+//      MessageInterface::ShowMessage("Attempting to LOAD the SPK %s\n",
+//            theSPKKernelNames[ofType].c_str());
+//      #endif
+//      bool isLoadedOK = planetarySPK->LoadKernel(theSPKFilename);
+//
+//      #ifdef DEBUG_DE_SPK
+//      MessageInterface::ShowMessage("LOADed the SPK %s?\n",
+//            theSPKFilename.c_str());
+//      #endif
+//      isOK = isOK && isLoadedOK;
+//      if (!isOK)
+//      {
+//         std::string errmsg = "Error switching to or loading ";
+//         errmsg            += "SPK kernel ";
+//         errmsg            += Gmat::POS_VEL_SOURCE_STRINGS[ofType] + "\n";
+//         throw SolarSystemException(errmsg);
+//      }
+//   }
+//   catch (BaseException &be)
+//   {
+//      MessageInterface::ShowMessage("   - ERROR unloading or loading SPK!!!!\n");
+//      SetSPKFile(currentSPKFile);
+//      throw;
+//   }
+//
+////   SetSPKFile(theSPKKernelNames[ofType]);
+//
+//   // theSPKFilename has already been set to the requested one
+//   thePlanetarySourceNames[Gmat::SPICE] = theSPKFilename;
+//   theSPKKernelNames[Gmat::SPICE]       = theSPKFilename;
+//   lastLoadedSPKType                    = ofType;
+//
+//   #ifdef DEBUG_DE_SPK
+//   MessageInterface::ShowMessage("Leaving LMSPK, theSPKFilename = %s\n",
+//         theSPKFilename.c_str());
+//   MessageInterface::ShowMessage("Leaving LMSPK, SET lastLoadedSPKType to %d\n",
+//         lastLoadedSPKType);
+//   #endif
+//
+//   return true;
+//}
+//
