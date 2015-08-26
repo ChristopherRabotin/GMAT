@@ -1332,7 +1332,10 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                             ssb->GetMJ2000PrecState(theData.rPrecTime);
       }
       #ifdef DEBUG_MOVETOEPOCH
-      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2]);
+         if (theData.rNode->IsOfType(Gmat::GROUND_STATION))
+            MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]   velocity [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rLoc[0], theData.rLoc[1], theData.rLoc[2], theData.rVel[0], theData.rVel[1], theData.rVel[2]);
+         else
+            MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in %s [%.12lf   %.12lf   %.12lf]   velocity [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.rNode->GetName().c_str(), theData.rNode->GetStringParameter("CoordinateSystem").c_str(),theData.rLoc[0], theData.rLoc[1], theData.rLoc[2], theData.rVel[0], theData.rVel[1], theData.rVel[2]);
       #endif
    }
 
@@ -1378,7 +1381,10 @@ void SignalBase::MoveToEpoch(const GmatTime theEpoch, bool epochAtReceive,
                             ssb->GetMJ2000PrecState(theData.tPrecTime);
       }
       #ifdef DEBUG_MOVETOEPOCH
-      MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2]);
+         if (theData.tNode->IsOfType(Gmat::GROUND_STATION))
+            MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in EarthMJ2000Eq [%.12lf   %.12lf   %.12lf]   velocity [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2], theData.tVel[0], theData.tVel[1], theData.tVel[2]);
+         else
+            MessageInterface::ShowMessage("Move to epoch: %.12lf  participant %s  position in %s [%.12lf   %.12lf   %.12lf]   velocity [%.12lf   %.12lf   %.12lf]\n", t.GetMjd(), theData.tNode->GetName().c_str(), theData.tNode->GetStringParameter("CoordinateSystem").c_str(), theData.tLoc[0], theData.tLoc[1], theData.tLoc[2], theData.tVel[0], theData.tVel[1], theData.tVel[2]);
       #endif
    }
 }
