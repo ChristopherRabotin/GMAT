@@ -198,6 +198,7 @@ protected:
       PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount];
    
    GmatBase* FindObject(const std::string &name);
+   bool      IsAutomaticObjectGlobal(const std::string &autoObjName);
    
    // for debug
    void ShowObjectMap(ObjectMap *objMap, const std::string &title = "",

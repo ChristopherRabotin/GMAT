@@ -39,10 +39,18 @@ public:
    EphemerisFile& operator=(const EphemerisFile&);
    
    // methods for this class
-   void                 SetProperFileExtension();
+   virtual std::string  GetProperFileName(const std::string &fName,
+                                          const std::string &fType,
+                                          bool setFileName);
+   virtual void         SetProperFileExtension();
    virtual void         ValidateParameters(bool forInitialization);
    virtual void         SetBackgroundGeneration(bool inBackground);
    
+   // Need to be able to close background SPKs and leave ready for appending
+   // Finalization
+   void                 CloseEphemerisFile(bool done = true);
+   bool                 InsufficientSPKData();
+
    // methods inherited from Subscriber
    virtual void         SetProvider(GmatBase *provider, Real epochInMjd = -999.999);
    
@@ -63,7 +71,9 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+   
    virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterCommandModeSettable(const Integer id) const;
    
    virtual Gmat::ObjectType
                         GetPropertyObjectType(const Integer id) const;
@@ -119,6 +129,7 @@ protected:
    /// ephemeris full file name including the path
    std::string fullPathFileName;
    std::string spacecraftName;
+   std::string spacecraftId;
    std::string fileName;
    std::string fileFormat;
    std::string epochFormat;
@@ -196,11 +207,15 @@ protected:
    bool        code500WriteFailed;
    bool        writeCommentAfterData;
    bool        checkForLargeTimeGap;
+   bool        isEphemFileOpened;
    
    CoordinateConverter coordConverter;
    
    /// number of SPK segments that have been written
    Integer     numSPKSegmentsWritten;
+   /// Indicates whether or not there was data 'left over' that was not enough
+   /// to write to the background SPK
+   bool        insufficientSPKData;
 
    FileType    fileType;
    
@@ -237,8 +252,8 @@ protected:
    void         CreateCode500EphemerisFile();
    bool         OpenTextEphemerisFile();
    
-   // Finalization
-   void         CloseEphemerisFile();
+//   // Finalization
+//   void         CloseEphemerisFile();
    
    // Time and data
    Real         ConvertInitialAndFinalEpoch();
@@ -312,7 +327,7 @@ protected:
    void         WriteSpkOrbitDataSegment();
    void         WriteSpkOrbitMetaData();
    void         WriteSpkComments(const std::string &comments);
-   void         FinalizeSpkFile();
+   void         FinalizeSpkFile(bool done = true);
    
    // Code500 file writing
    void         WriteCode500OrbitDataSegment(bool canFinalize = false);

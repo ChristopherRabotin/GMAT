@@ -72,6 +72,7 @@ public:
    Integer              GetPlanetarySourceId(const std::string &sourceType);
    std::string          GetPlanetarySourceName(const std::string &sourceType);
    std::string          GetCurrentPlanetarySource();
+   const StringArray&   GetSpiceKernelNames();
    void                 SetIsSpiceAllowedForDefaultBodies(const bool allowSpice);
    bool                 IsSpiceAllowedForDefaultBodies() const;
 
@@ -79,7 +80,6 @@ public:
 
 #ifdef __USE_SPICE__
    void                    LoadSpiceKernels();
-   void                    LoadPCKs();
    SpiceOrbitKernelReader* GetSpiceOrbitKernelReader();
 #endif
    
@@ -122,6 +122,7 @@ public:
    bool                 SetSourceFile(PlanetaryEphem *src);
    bool                 SetSPKFile(const std::string &spkFile);
    bool                 SetLSKFile(const std::string &lskFile);
+   bool                 SetPCKFile(const std::string &pckFile);
    
    bool                 SetOverrideTimeSystem(bool overrideIt);
    bool                 SetEphemUpdateInterval(Real intvl);
@@ -266,6 +267,7 @@ protected:
       DE_FILE_NAME,
       SPK_FILE_NAME,
       LSK_FILE_NAME,
+      PCK_FILE_NAME,
       OVERRIDE_TIME_SYSTEM,
       EPHEM_UPDATE_INTERVAL,
       SolarSystemParamCount
@@ -298,6 +300,8 @@ private:
    
    DeFile       *theDefaultDeFile;
    
+   StringArray  theSPKKernelNames;
+
    /// list of the celestial bodies that are included in this solar system
    std::vector<CelestialBody*> bodiesInUse;
    
@@ -320,16 +324,22 @@ private:
    std::string  theSPKFilename;
    /// name of the leap second kernel
    std::string  lskKernelName;
+   /// name of the soalr system PCK file
+   std::string  pckKernelName;
    
    /// default values for parameters
    StringArray  default_planetarySourceTypesInUse;  // deprecated!!
    std::string  default_ephemerisSource;
-   std::string  default_DEFilename[3];
+   std::string  default_DEFilename[4];
    std::string  default_SPKFilename;
    std::string  default_LSKFilename;
+   std::string  default_PCKFilename;
    bool         default_overrideTimeForAll;
    Real         default_ephemUpdateInterval;
    
+//   Integer     lastLoadedSPKType;
+   std::string lastLoadedSPKFile;
+
    /// method to find a body in the solar system, given its name
    CelestialBody* FindBody(const std::string &withName);
    // WARNING: The J200Body must be set identically for all objects in a GMAT run;
@@ -350,6 +360,8 @@ private:
    
    // method to set solar system body texture map file
    void           SetTextureMapFile(SpacePoint *sp, const std::string &bodyName);
+//   /// load the matching SPK file to the selected DE/SPICE
+//   bool           LoadMatchingSPK(Integer ofType);
    
    /// @todo review the use of the validModels and corresponding constants, e.g. PLANET_ATMOSPHERE_MODELS
    /// default values for CelestialBody data

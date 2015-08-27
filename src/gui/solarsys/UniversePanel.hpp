@@ -41,19 +41,27 @@ private:
    
    std::map<wxString, wxString> mFileTypeNameMap;
    
+   StringArray spiceKernelNames;
+
    bool        mHasFileTypesInUseChanged;
    bool        mHasFileNameChanged;
+   bool        mHasSPKFileNameChanged;
    bool        mHasLSKFileNameChanged;
+   bool        mHasPCKFileNameChanged;
    bool        mHasTextModified;
    
    wxComboBox *mFileTypeComboBox;
    
    wxTextCtrl *mIntervalTextCtrl;
-   wxTextCtrl *mFileNameTextCtrl;
+   wxTextCtrl *mDEFileNameTextCtrl;
+   wxTextCtrl *mSPKFileNameTextCtrl;
    wxTextCtrl *mLSKFileNameTextCtrl;
+   wxTextCtrl *mPCKFileNameTextCtrl;
    
    wxBitmapButton *mBrowseButton;
+   wxBitmapButton *mSPKBrowseButton;
    wxBitmapButton *mLSKBrowseButton;
+   wxBitmapButton *mPCKBrowseButton;
 
    wxCheckBox     *mOverrideCheckBox;
 
@@ -61,15 +69,21 @@ private:
    
    SolarSystem  *theSolarSystem;
    
+   wxStaticText *deFileNameLabel;
+   wxStaticText *spkNameLabel;
    wxStaticText *lskNameLabel;
-   wxStaticText *fileNameLabel;
+   wxStaticText *pckNameLabel;
 
    std::map<wxString, wxString> mPreviousFileTypeNameMap;
+   wxString      previousSpkFile;
    wxString      previousLskFile;
+   wxString      previousPckFile;
 
 
    void OnBrowseButton(wxCommandEvent& event);
+   void OnSPKBrowseButton(wxCommandEvent& event);
    void OnLSKBrowseButton(wxCommandEvent& event);
+   void OnPCKBrowseButton(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnTextCtrlChange(wxCommandEvent& event);
@@ -88,7 +102,9 @@ private:
       ID_COMBOBOX,
       ID_TEXT_CTRL,
       ID_BUTTON_BROWSE,
+      ID_SPK_BUTTON_BROWSE,
       ID_LSK_BUTTON_BROWSE,
+      ID_PCK_BUTTON_BROWSE,
       ID_CHECKBOX,
    };
 };

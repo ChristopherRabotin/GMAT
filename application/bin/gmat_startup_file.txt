@@ -40,7 +40,7 @@
 #-----------------------------------------------------------
 # base location of MATLAB libraries (required only for Mac)
 #-----------------------------------------------------------
-MATLAB_APP_PATH        = /Applications/MATLAB_R2010a/MATLAB_R2010a.app    
+MATLAB_APP_PATH        = /Applications/MATLAB_R2014b/MATLAB_R2014b.app    
 
 #-----------------------------------------------------------
 # Plugins
@@ -60,9 +60,9 @@ PLUGIN                 = ../plugins/libProductionPropagators
 #PLUGIN                = ../plugins/libExtraPropagators
 #PLUGIN                = ../plugins/libGmatEstimation
 #PLUGIN                = ../plugins/libGeometricMeasurements
-#PLUGIN                = ../plugins/libGmatFunction
+PLUGIN                = ../plugins/libGmatFunction
 #PLUGIN                = ../plugins/libSaveCommand
-#PLUGIN                = ../plugins/libNewParameters
+PLUGIN                = ../plugins/libNewParameters
 #PLUGIN                = ../plugins/libPolyhedronGravity
 
 # Internal-only plugins
@@ -112,6 +112,7 @@ VEHICLE_EPHEM_CCSDS_PATH = DATA_PATH/vehicle/ephem/ccsds/
 PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
 NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
+PLANETARY_PCK_FILE     = PLANETARY_COEFF_PATH/pck00010.tpc
 #-----------------------------------------------------------
 TIME_PATH              = DATA_PATH/time/
 LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
@@ -177,7 +178,8 @@ ICRF_FILE              = DATA_PATH/icrf/ICRF_Table.txt
 #RUN_MODE              = TESTING
 #RUN_MODE              = TESTING_NO_PLOTS
 #RUN_MODE              = EXIT_AFTER_RUN
-#DEBUG_PARAMETERS      = OFF
+#DEBUG_MATLAB          = ON
+#DEBUG_PARAMETERS      = ON
 #DEBUG_FILE_PATH       = ON
 #HIDE_SAVEMISSION      = TRUE
 #PLOT_MODE             = TILE

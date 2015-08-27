@@ -95,6 +95,11 @@ using namespace FloatAttUtil;
 // incorrectly connecting lines
 //#define SKIP_DATA_OVER_LIMIT
 
+// Currently local plots are deleted when function run completes (2015.07.09)
+// So this macro has no effects. But if plot is global we need to check if 
+// all drawing objects are global as well since plot access object pointers.
+//#define DISABLE_REPAINT_IN_FUNCTION
+
 // debug
 //#define DEBUG_INIT 1
 //#define DEBUG_ACTION 1
@@ -556,8 +561,15 @@ void OrbitViewCanvas::ViewAnimation(int interval, int frameInc)
        interval, frameInc);
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      wxString msg = "*** WARNING *** This plot data was published inside a "
+         "function, so repainting or drawing animation is disabled.\n";
+      MessageInterface::ShowMessage(msg.c_str());
       return;
+   }
+   #endif
    
    this->SetFocus(); // so that it can get key interrupt
    mIsAnimationRunning = true;
@@ -898,7 +910,9 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
    #ifdef __WXGTK__
       hasBeenPainted = true;
    #endif
+
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfRun && mInFunction)
    {
       if (mWriteRepaintDisalbedInfo)
@@ -913,6 +927,7 @@ void OrbitViewCanvas::OnPaint(wxPaintEvent& event)
       }
       return;
    }
+   #endif
    
    DrawPlot();
    
@@ -970,8 +985,22 @@ void OrbitViewCanvas::OnMouse(wxMouseEvent& event)
        mUseInitialViewPoint, mIsEndOfData);
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      if (mWriteRepaintDisalbedInfo)
+      {
+         //Freeze();
+         wxString msg = "*** WARNING *** This plot data was published inside a "
+            "function, so repainting or drawing animation is disabled.\n";
+         MessageInterface::ShowMessage(msg.c_str());
+         GmatAppData::Instance()->GetMainFrame()->EnableAnimation(false);
+         
+         mWriteRepaintDisalbedInfo = false;
+      }
       return;
+   }
+   #endif
    
    int flippedY;
    int width, height;

@@ -19,6 +19,7 @@
  */
 //------------------------------------------------------------------------------
 #include <stdio.h>
+#include <stdlib.h>
 #include <sstream>
 #include "EphemManager.hpp"
 #include "GmatBase.hpp"
@@ -31,6 +32,7 @@
 #include "SubscriberException.hpp"
 #include "FileUtil.hpp"
 #include "StringUtil.hpp"
+#include "TimeTypes.hpp"
 #include "GmatConstants.hpp"
 #ifdef __USE_SPICE__
    #include "SpiceInterface.hpp"
@@ -72,7 +74,9 @@ EphemManager::EphemManager(bool deleteFiles) :
    recording              (false),
    deleteTmpFiles         (deleteFiles),
    intStart               (0.0),
-   intStop                (0.0)
+   intStop                (0.0),
+   coverStart             (0.0),
+   coverStop              (0.0)
 {
 #ifdef __USE_SPICE__
    spice = NULL;
@@ -91,7 +95,7 @@ EphemManager::~EphemManager()
             (deleteTmpFiles? "true" : "false"));
    #endif
    // Stop recording
-   if (recording) StopRecording();
+   if (recording) StopRecording(true);
    // Unload the SPK files that we have already loaded
    for (unsigned int ii = 0; ii < fileList.size(); ii++)
    {
@@ -159,7 +163,9 @@ EphemManager::EphemManager(const EphemManager& copy) :
    recording              (copy.recording),
    deleteTmpFiles         (copy.deleteTmpFiles),
    intStart               (copy.intStart),
-   intStop                (copy.intStop)
+   intStop                (copy.intStop),
+   coverStart             (copy.coverStart),
+   coverStop              (copy.coverStop)
 {
    #ifdef __USE_SPICE__
       spice = NULL;
@@ -192,6 +198,8 @@ EphemManager& EphemManager::operator=(const EphemManager& copy)
    deleteTmpFiles           = copy.deleteTmpFiles;
    intStart                 = copy.intStart;
    intStop                  = copy.intStop;
+   coverStart               = copy.coverStart;
+   coverStop                = copy.coverStop;
 
    #ifdef __USE_SPICE__
       if (spice) delete spice;
@@ -261,7 +269,8 @@ bool EphemManager::RecordEphemerisData()
 
          // Set up the name for the EphemerisFile, and the file name
          std::stringstream ss("");
-         ss << "tmp_" << theObjName << "_" << ephemCount;
+//         ss << "tmp_" << theObjName << "_" << ephemCount << "_" << GmatTimeUtil::FormatCurrentTime(4);
+         ss << "tmp_" << theObjName << "_" << GmatTimeUtil::FormatCurrentTime(4);
          ephemName = ss.str();
          ss << ".bsp";
          fileName = ss.str();
@@ -311,6 +320,10 @@ bool EphemManager::RecordEphemerisData()
 
          ephemCount++;
       }
+      else
+      {
+         // anything to do here?
+      }
       recording = true;
       return true;
    #endif
@@ -325,31 +338,82 @@ bool EphemManager::ProvideEphemerisData()
       MessageInterface::ShowMessage("ProvideEphemerisData called -----  fileName = %s\n",
             fileName.c_str());
    #endif
-   StopRecording();
+   StopRecording(true);   //  false); SPK appending turned off for now.
    RecordEphemerisData();
    return true;
 }
 
 //------------------------------------------------------------------------------
-// StopRecording()
+// StopRecording(bool done = true)
 //------------------------------------------------------------------------------
-void EphemManager::StopRecording()
+void EphemManager::StopRecording(bool done)
 {
    #ifdef DEBUG_EPHEM_MANAGER
-      MessageInterface::ShowMessage("StopRecording -----  fileName = %s\n",
-            fileName.c_str());
+      MessageInterface::ShowMessage("StopRecording -----  fileName = %s, done = %s\n",
+            fileName.c_str(), (done? "true" : "false"));
    #endif
    // Finalize and close the SPK file
-   // Unsubscribe
-   Publisher *pub = Publisher::Instance();
-   pub->Unsubscribe(ephemFile);
-   // Delete the current ephemFile - this should finalize the SPK writing and then
-   // close the <fileName> file
-   delete ephemFile;
+   if (done)
+   {
+      // Unsubscribe
+      Publisher *pub = Publisher::Instance();
+      pub->Unsubscribe(ephemFile);
+      // Delete the current ephemFile - this should finalize the SPK writing and then
+      // close the <fileName> file
+      ephemFile->CloseEphemerisFile(false);
+      bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      if (notAllDataWritten)
+      {
+         std::string warn = "*** WARNING *** Insufficient ephemeris data ";
+         warn            += "available for spacecraft " + theObj->GetName();
+         warn            += " to write last segment.  Event location may be ";
+         warn            += "incomplete.  Try increasing the propagation time.\n";
+         MessageInterface::ShowMessage(warn);
+      }
+      delete ephemFile;
+   }
+   else
+   {
+      #ifdef __USE_SPICE__
+         #ifdef DEBUG_EPHEM_MANAGER
+            MessageInterface::ShowMessage("-==-==-= Now attempting to UNload fileList \"%s\"\n",
+                  fileName.c_str());
+         #endif
+         if (spice->IsLoaded(fileName))
+            spice->UnloadKernel(fileName);   // need to unload before re-loading?
+      #endif
+      // tell the EphemerisFile to close the SPK and leave ready for appending
+      #ifdef DEBUG_EPHEM_MANAGER
+         MessageInterface::ShowMessage("-==-==-= Calling CloseEphemerisFile\n");
+      #endif
+      ephemFile->CloseEphemerisFile(false);
+      bool notAllDataWritten = ephemFile->InsufficientSPKData();
+      if (notAllDataWritten)
+      {
+         std::string warn = "*** WARNING *** Insufficient ephemeris data ";
+         warn            += "available for spacecraft " + theObj->GetName();
+         warn            += " to write last segment.  Event location may be ";
+         warn            += "incomplete.  Try increasing the propagation time.\n";
+         MessageInterface::ShowMessage(warn);
+      }
+
+//      #ifdef DEBUG_EPHEM_MANAGER
+//         MessageInterface::ShowMessage("-==-==-= Now attempting to UNload fileList \"%s\"\n",
+//               fileName.c_str());
+//      #endif
+//      #ifdef __USE_SPICE__
+//         if (spice->IsLoaded(fileName))
+//            spice->UnloadKernel(fileName);   // need to unload before re-loading?
+//      #endif
+   }
    // Load the current SPK file, if it has been written
    if (GmatFileUtil::DoesFileExist(fileName))
    {
       #ifdef __USE_SPICE__
+         #ifdef DEBUG_EPHEM_MANAGER
+            MessageInterface::ShowMessage("-==-==-= Now attempting to re-load fileList \"%s\"\n",
+                  fileName.c_str());
+         #endif
          spice->LoadKernel(fileName);
       #endif
       #ifdef DEBUG_EPHEM_MANAGER
@@ -357,9 +421,18 @@ void EphemManager::StopRecording()
                fileName.c_str());
       #endif
       // save the just written file name
-      fileList.push_back(fileName);
+      if (find(fileList.begin(), fileList.end(), fileName) ==
+               fileList.end())
+         fileList.push_back(fileName);
    }
-   ephemFile = NULL;
+   #ifdef DEBUG_EPHEM_MANAGER
+      else
+      {
+      MessageInterface::ShowMessage("-==-==-= %s DOES NOT exist and so cannot be reloaded!!!\n",
+            fileName.c_str());
+      }
+   #endif
+   if (done) ephemFile = NULL;
    recording = false;
 }
 
@@ -448,7 +521,7 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       SPICEDOUBLE_CELL(window, 200000);
       scard_c(0, &window);   // reset (empty) the cell
 
-      GetCoverageWindow(&window, s, e, useEntireIntvl);
+      GetRequiredCoverageWindow(&window, s, e, useEntireIntvl);
 
       SpiceInt     numInt = wncard_c(&window);
 
@@ -464,21 +537,31 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
       ConstSpiceChar   *obsrvr           = theNAIFIdStr.c_str();
       SpiceDouble      step              = stepSize;
 
-      if (occType == "Umbra")
-      {
+      if (occType == "ALL")
+         occultationType = "ANY";   // <future> find SPICE constant for this
+      else if (occType == "Umbra")
          occultationType = SPICE_GF_FULL;
-      }
       else if (occType == "Penumbra")
-      {
          occultationType = SPICE_GF_PARTL;
-      }
       else // Antumbra
-      {
          occultationType = SPICE_GF_ANNULR;
-      }
 
       SPICEDOUBLE_CELL(result, 200000);
       scard_c(0, &result);   // reset (empty) the result cell
+
+      #ifdef DEBUG_OCCULTATION
+         MessageInterface::ShowMessage("Calling gfoclt_c with:\n");
+         MessageInterface::ShowMessage("   occultationType = %s\n", occultationType);
+         MessageInterface::ShowMessage("   front           = %s\n", frontBody.c_str());
+         MessageInterface::ShowMessage("   fshape          = %s\n", frontShape.c_str());
+         MessageInterface::ShowMessage("   fframe          = %s\n", frontFrame.c_str());
+         MessageInterface::ShowMessage("   back            = %s\n", backBody.c_str());
+         MessageInterface::ShowMessage("   bshape          = %s\n", backShape.c_str());
+         MessageInterface::ShowMessage("   bframe          = %s\n", backFrame.c_str());
+         MessageInterface::ShowMessage("   abcorr          = %s\n", abCorrection.c_str());
+         MessageInterface::ShowMessage("   obsrvr          = %s\n", theNAIFIdStr.c_str());
+         MessageInterface::ShowMessage("   step            = %12.10f\n", stepSize);
+      #endif
 
       #ifdef DEBUG_EM_TIME_SPENT
       clock_t t = clock();
@@ -500,8 +583,8 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
          std::string errmsg = "Error calling gfoclt_c!!!  ";
          errmsg += "Message received from CSPICE is: ";
          errmsg += errStr + "\n";
-         MessageInterface::ShowMessage("----- error message = %s\n",
-               errmsg.c_str());
+//         MessageInterface::ShowMessage("----- error message = %s\n",
+//               errmsg.c_str());
          reset_c();
          throw SubscriberException(errmsg);
       }
@@ -574,7 +657,8 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
    Integer obsID;
    GmatStringUtil::ToInteger(observerID, obsID);
-   GetCoverageWindow(&window, s, e, useEntireIntvl, true, useLightTime, transmit, stepSize, obsID);
+   GetRequiredCoverageWindow(&window, s, e, useEntireIntvl, true, useLightTime,
+                             transmit, stepSize, obsID);
 
    SpiceInt       numInt      = wncard_c(&window);
 
@@ -600,8 +684,8 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    ConstSpiceChar *tshape           = theTShape.c_str();        //
    ConstSpiceChar *front;
    ConstSpiceChar *fframe;
-   SpiceInt       refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
-   SpiceInt       adjust            = 0;
+   SpiceDouble    refval            = minElevation * GmatMathConstants::RAD_PER_DEG;
+   SpiceDouble    adjust            = 0.0;
    SpiceInt       nintvls           = 1e6;
    SpiceDouble    step              = stepSize;
 
@@ -612,8 +696,39 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
    SPICEDOUBLE_CELL(occultResults, 200000);
    scard_c(0, &occultResults);   // reset (empty) the coverage cell
 
+#ifdef DEBUG_CONTACT
+   MessageInterface::ShowMessage("In GetContactIntervals, about to call gfposc_c\n");
+   MessageInterface::ShowMessage("   target      = %s\n",      theNAIFIdStr.c_str());
+   MessageInterface::ShowMessage("   tframe      = %s\n",      obsFrameName.c_str());
+   MessageInterface::ShowMessage("   abcorr      = %s\n",      abCorrection.c_str());
+   MessageInterface::ShowMessage("   obsrvr      = %s\n",      observerID.c_str());
+   MessageInterface::ShowMessage("   crdsys      = %s\n",      theCrdSys.c_str());
+   MessageInterface::ShowMessage("   coord       = %s\n",      theCoord.c_str());
+   MessageInterface::ShowMessage("   relate      = %s\n",      theRelate.c_str());
+   MessageInterface::ShowMessage("   refval      = %12.10f\n", refval);
+   MessageInterface::ShowMessage("   adjust      = %12.10f\n", (Real) adjust);
+   MessageInterface::ShowMessage("   step        = %12.10f\n", stepSize);
+   MessageInterface::ShowMessage("   nintvls     = %d\n",      (Integer) nintvls);
+#endif
+
+
    gfposc_c(target, tframe, abcorr, obsrvr, crdsys, coord, relate,
             refval, adjust, step, nintvls, &window, &obsResults);
+   if (failed_c())
+   {
+      ConstSpiceChar option[] = "LONG";
+      SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+      SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+      getmsg_c(option, numChar, err);
+      std::string errStr(err);
+      std::string errmsg = "Error calling gfposc_c!!!  ";
+      errmsg += "Message received from CSPICE is: ";
+      errmsg += errStr + "\n";
+//      MessageInterface::ShowMessage("----- error message = %s\n",
+//            errmsg.c_str());
+      reset_c();
+      throw SubscriberException(errmsg);
+   }
 
    SpiceInt szObs       = wncard_c(&obsResults);
    #ifdef DEBUG_CONTACT
@@ -645,11 +760,39 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
          front  = theFront.c_str();
          fframe = theFFrame.c_str();
+         #ifdef DEBUG_CONTACT
+            MessageInterface::ShowMessage("Calling gfoclt_c with:\n");
+            MessageInterface::ShowMessage("   occultationType = %s\n", theOccType.c_str());
+            MessageInterface::ShowMessage("   front           = %s\n", theFront.c_str());
+            MessageInterface::ShowMessage("   fshape          = %s\n", theFShape.c_str());
+            MessageInterface::ShowMessage("   fframe          = %s\n", theFFrame.c_str());
+            MessageInterface::ShowMessage("   target          = %s\n", theNAIFIdStr.c_str());
+            MessageInterface::ShowMessage("   tshape          = %s\n", theTShape.c_str());
+            MessageInterface::ShowMessage("   tframe          = \"    \"\n");
+            MessageInterface::ShowMessage("   abcorr          = %s\n", abCorrection.c_str());
+            MessageInterface::ShowMessage("   obsrvr          = %s\n", observerID.c_str());
+            MessageInterface::ShowMessage("   step            = %12.10f\n", stepSize);
+         #endif
 
    //      gfoclt_c(occultationType, front, fshape, fframe, target, tshape, tframe, abcorr,
    //               obsrvr, step, &window, &occultResults);
          gfoclt_c(occultationType, front, fshape, fframe, target, tshape, " ", abcorr,
                   obsrvr, step, &obsResults, &occultResults);
+         if (failed_c())
+         {
+            ConstSpiceChar option[] = "LONG";
+            SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+            SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+            getmsg_c(option, numChar, err);
+            std::string errStr(err);
+            std::string errmsg = "Error calling gfoclt_c!!!  ";
+            errmsg += "Message received from CSPICE is: ";
+            errmsg += errStr + "\n";
+//            MessageInterface::ShowMessage("----- error message = %s\n",
+//                  errmsg.c_str());
+            reset_c();
+            throw SubscriberException(errmsg);
+         }
          #ifdef DEBUG_CONTACT
             SpiceInt szOcc       = wncard_c(&occultResults);
             Integer  numOcc      = (Integer) szOcc;
@@ -696,11 +839,13 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
 
 
-bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
-                                           bool useEntireIntvl,
-                                           bool includeAll,
-                                           Real &intvlStart,
-                                           Real &intvlStop)
+bool EphemManager::GetCoverage(Real s, Real e,
+                               bool useEntireIntvl,
+                               bool includeAll,
+                               Real &intvlStart,
+                               Real &intvlStop,
+                               Real &cvrStart,
+                               Real &cvrStop)
 {
    #ifndef __USE_SPICE__
       Spacecraft *theSc = (Spacecraft*) theObj;
@@ -711,10 +856,15 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
       SPICEDOUBLE_CELL(coverWindow, 200000);
       scard_c(0, &coverWindow);   // reset (empty) the cell
 
-      GetCoverageWindow(&coverWindow, s, e, useEntireIntvl, includeAll);
+      GetRequiredCoverageWindow(&coverWindow, s, e, useEntireIntvl, includeAll);
 
+      // return the start and stop times of the window we are using
       intvlStart = intStart;
       intvlStop  = intStop;
+      // return the start and stop times of the full coverage window
+      cvrStart   = coverStart;
+      cvrStop    = coverStop;
+
       return true;
    #endif
 }
@@ -722,22 +872,29 @@ bool EphemManager::GetCoverageStartAndStop(Real s, Real e,
 
 #ifdef __USE_SPICE__
 //------------------------------------------------------------------------------
-// void GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
-//                              bool useEntireIntvl,
-//                              bool includeAll = true,
-//                              bool lightTimeCorrection = false,
-//                              bool transmitDirection = false,
-//                              Real stepSize = 10.0,
-//                              Integer obsID = -999);
+// void GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
+//                                bool useEntireIntvl,
+//                                bool includeAll = true,
+//                                bool lightTimeCorrection = false,
+//                                bool transmitDirection = false,
+//                                Real stepSize = 10.0,
+//                                Integer obsID = -999);
 //------------------------------------------------------------------------------
-void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
-                                     bool useEntireIntvl,
-                                     bool includeAll,
-                                     bool lightTimeCorrection,
-                                     bool transmitDirection,
-                                     Real stepSize,
-                                     Integer obsID)
+void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
+                                             bool useEntireIntvl,
+                                             bool includeAll,
+                                             bool lightTimeCorrection,
+                                             bool transmitDirection,
+                                             Real stepSize,
+                                             Integer obsID)
 {
+   #ifdef DEBUG_EM_COVERAGE
+      MessageInterface::ShowMessage("In GetRequiredCoverageWindow:\n");
+      MessageInterface::ShowMessage("   s1 = %12.10f\n", s1);
+      MessageInterface::ShowMessage("   e1 = %12.10f\n", e1);
+      MessageInterface::ShowMessage("   useEntireIntvl = %s\n",
+                        (useEntireIntvl? "true":"false"));
+    #endif
    // @todo - most of this should be moved to SpiceInterface and
    // made very general (for SPK, CK, etc.)
    Spacecraft *theSc = (Spacecraft*) theObj;
@@ -755,7 +912,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
          inKernels.push_back(inputKernels.at(ii));
    }
    #ifdef DEBUG_EM_COVERAGE
-      MessageInterface::ShowMessage("In GetCoverageWindow:\n");
+      MessageInterface::ShowMessage("In GetRequiredCoverageWindow:\n");
       MessageInterface::ShowMessage("   forNaifId = %d\n", forNaifId);
       MessageInterface::ShowMessage("   kernels are:\n");
       if (inKernels.empty())  MessageInterface::ShowMessage("   EMPTY!!!!\n");
@@ -907,6 +1064,28 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
    SPICEDOUBLE_CELL(window, 200000);
    scard_c(0, &window);   // reset (empty) the coverage cell
 
+   // Get the start and stop times for the complete coverage window
+   SpiceInt szCoverage = wncard_c(&cover);
+   #ifdef DEBUG_SPK_COVERAGE
+      MessageInterface::ShowMessage("----- number of intervals in full coverage window is %d\n",
+            szCoverage);
+   #endif
+
+   if (((Integer) szCoverage) > 0)
+   {
+      SpiceDouble s001, e001, s002, e002;
+      wnfetd_c(&cover, 0, &s001, &e001);
+      wnfetd_c(&cover, szCoverage-1, &s002, &e002);
+
+      coverStart = spice->SpiceTimeToA1(s001);
+      coverStop  = spice->SpiceTimeToA1(e002);
+   }
+   else
+   {
+      coverStart = 0.0;
+      coverStop  = 0.0;
+   }
+
    if (useEntireIntvl)
    {
       copy_c(&cover, &window);
@@ -921,6 +1100,19 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       // Get the intersection of the timespan window and the coverage window
       wninsd_c(s, e, &timespan);
       wnintd_c(&cover, &timespan, &window);
+      if (failed_c())
+      {
+         ConstSpiceChar option[] = "LONG";
+         SpiceInt       numChar  = MAX_LONG_MESSAGE_VALUE;
+         SpiceChar      err[MAX_LONG_MESSAGE_VALUE];
+         getmsg_c(option, numChar, err);
+         std::string errStr(err);
+         std::string errmsg = "Error calling wninsd_c or wnintd_c!!!  ";
+         errmsg += "Message received from CSPICE is: ";
+         errmsg += errStr + "\n";
+         reset_c();
+         throw SubscriberException(errmsg);
+      }
    }
 
    #ifdef DEBUG_ECLIPSE_EVENTS
@@ -939,6 +1131,7 @@ void EphemManager::GetCoverageWindow(SpiceCell* w, Real s1, Real e1,
       SpiceDouble s01, e01, s02, e02;
       wnfetd_c(&window, 0, &s01, &e01);
       wnfetd_c(&window, szWin-1, &s02, &e02);
+
       if (lightTimeCorrection) // shrink window by light-time delay
       {
          #ifdef DEBUG_SPK_COVERAGE

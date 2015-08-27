@@ -934,8 +934,6 @@ bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          break;
    }
 
-   MessageInterface::ShowMessage("BodyFixedPoint::SetRefObject calling base for %s\n", name.c_str());
-
    // Not handled here -- invoke the next higher SetRefObject call
    return SpacePoint::SetRefObject(obj, type, name);
 }
@@ -1372,30 +1370,25 @@ bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
       MessageInterface::ShowMessage("Entering InitializeForC for %s\n",
             instanceName.c_str());
    #endif
+
+   if (kernelsWritten) // if we've already written them, don't do it again
+      return true;
+
    if (!kernelNamesDetermined)
    {
-//      // Initialize/set the Naif IDs
-//      Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
-//      naifId           = bodyNaif * 1000 + gsNaifId--;
-//      naifIdRefFrame   = naifId + 1000000;
-      // Upper case name
+      // Use upper case name to figure out spice frame name
       std::string thisName = GmatStringUtil::ToUpper(instanceName);
       spiceFrameName   = thisName + "_TOPO";
 
       // Set up the file names for the SPK and FK kernels
       std::stringstream ss("");
       ss << "tmp_" << instanceName;
-      // For now, put it in the Output path << this should be put into the
-      // appropriate TMPDIR for the platform
-//      FileManager *fm     = FileManager::Instance();
-//      std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-//      kernelBaseName      = spkPath + ss.str();
       std::string tmpPath = GmatFileUtil::GetTemporaryDirectory();
       kernelBaseName = tmpPath + ss.str();
-      #ifdef DEBUG_EPHEM_MANAGER_FILES
+      #ifdef DEBUG_BFP_SPICE
          MessageInterface::ShowMessage(
-               "In EphemManager::RecordEphemerisData,  fileName (full path) = %s\n",
-               fileName.c_str());
+               "In InitializeForC,  fileName (full path) = %s\n",
+               kernelBaseName.c_str());
       #endif
 
       kernelNamesDetermined = true;
@@ -1482,7 +1475,9 @@ bool BodyFixedPoint::WriteSPK(bool deleteFile)
 {
    deleteSPK = deleteFile;
 
-   spkName = kernelBaseName + ".bsp";
+   // Get the time (seconds since January 1, 1970), to make the temporary file name unique
+   std::string now = GmatTimeUtil::FormatCurrentTime(4);
+   spkName         = kernelBaseName + "_" + now + ".bsp";
 
    #ifdef DEBUG_BFP_SPICE
       MessageInterface::ShowMessage("In WriteSPK, spkName = \"%s\"\n", spkName.c_str());
@@ -1575,7 +1570,9 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
 {
    deleteFK = deleteFile;
 
-   fkName = kernelBaseName + ".tf";
+   // Get the time (seconds since January 1, 1970), to make the temporary file name unique
+   std::string now = GmatTimeUtil::FormatCurrentTime(4);
+   fkName          = kernelBaseName + "_" + now + ".tf";
 
    // We are not renaming here - just remove the existing file
    if (GmatFileUtil::DoesFileExist(fkName))
@@ -1597,7 +1594,6 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
       /// Write the text FK kernel
       std::ofstream fkStream(fkName.c_str(), std::ios::out);
       fkStream.precision(16);
-      fkStream << " \n";
       fkStream << "KPL/FK\n";
       fkStream << "\\begindata\n";
       fkStream << "NAIF_BODY_NAME += '" << thisName << "'\n";
@@ -1683,7 +1679,7 @@ Rvector3 BodyFixedPoint::GetTopocentricConversion(
           phi    = phi_gd;
           sinPhi = GmatMathUtil::Sin(phi);
           C      = R/GmatMathUtil::Sqrt(1-(e*e)*(sinPhi * sinPhi));
-          phi_gd = GmatMathUtil::ATan((z_F+C*(e*e)*sinPhi)/r_xy);
+          phi_gd = GmatMathUtil::ATan(z_F+C*(e*e)*sinPhi, r_xy);
           delta  = GmatMathUtil::Abs(phi_gd-phi);
       }
 

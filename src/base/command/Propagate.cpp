@@ -3553,10 +3553,14 @@ bool Propagate::Initialize()
    #if DEBUG_PROPAGATE_INIT
       for (UnsignedInt i=0; i<stopSats.size(); i++)
          MessageInterface::ShowMessage
-            ("   stopSats[%d]=%s\n", i, stopSats[i]->GetName().c_str());
+            ("   stopSats[%d]=<%p>%s, IsStopSatGlobal:%d, IsStopSatLocal:%d\n",
+             i, stopSats[i], stopSats[i]->GetName().c_str(), stopSats[i]->IsGlobal(),
+             stopSats[i]->IsLocal());
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
          MessageInterface::ShowMessage
-            ("   stopWhen[%d]=%s\n", i, stopWhen[i]->GetName().c_str());
+            ("   stopWhen[%d]=<%p>%s, IsStopWhenGlobal:%d, IsStopWhenLocal:%d\n",
+             i, stopWhen[i], stopWhen[i]->GetName().c_str(), stopWhen[i]->IsGlobal(),
+             stopWhen[i]->IsLocal());
    #endif
 
    if ((stopWhen.size() == 0) && !singleStepMode)

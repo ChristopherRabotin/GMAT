@@ -29,10 +29,11 @@
 #include "Spacecraft.hpp"
 #include "CelestialBody.hpp"
 #include "LocatedEvent.hpp"
+//#include "EphemManager.hpp"
 
 //#include "LocatedEventTable.hpp"  // may need this
 
-//class EphemManager;
+class EphemManager;
 
 ///**
 // * Base class for the event locators.
@@ -204,8 +205,6 @@ protected:
 //   std::vector<SpaceObject*> targets;
    /// Pointer to the target spacecraft
    Spacecraft                  *sat;
-//   /// Pointer to the spacecraft's ephem manager
-//   EphemManager                *ephemMgr;
    /// The space environment
    SolarSystem                 *solarSys;
    /// The occulting body names
@@ -217,11 +216,17 @@ protected:
    /// the default occulting bodies (if none are set)
    // names of the default bodies to use
    StringArray                 defaultOccultingBodies;
+   /// pointer ot the EphemManager for the spacecraft/target
+   EphemManager                *em;
+   /// Has the initial epoch been set?
+   bool                        initialEpochSet;
+   /// Has the final epoch been set?
+   bool                        finalEpochSet;
 
    /// Published parameters for event locators
     enum
     {
-//       SATNAMES = GmatBaseParamCount,
+//       SATNAMES = GmatBaseParamCount,  // future?
        SATNAME = GmatBaseParamCount,
        EVENT_FILENAME,
        OCCULTING_BODIES,
@@ -234,7 +239,6 @@ protected:
        WRITE_REPORT,
        RUN_MODE,
        USE_ENTIRE_INTERVAL,
-//       APPEND_TO_REPORT,   // this may be input to the FindEvents command
        EventLocatorParamCount
     };
 

@@ -101,9 +101,10 @@ const std::string OrbitData::VALID_OTHER_ORBIT_PARAM_NAMES[ENERGY - MM + 1] =
  * Constructor.
  */
 //------------------------------------------------------------------------------
-OrbitData::OrbitData(const std::string &name, Gmat::ObjectType paramOwnerType,
+OrbitData::OrbitData(const std::string &name, const std::string &typeName,
+                     Gmat::ObjectType paramOwnerType,
                      GmatParam::DepObject depObj, bool isSettable)
-   : RefData(name, paramOwnerType, depObj, isSettable),
+   : RefData(name, typeName, paramOwnerType, depObj, isSettable),
    stateTypeId (-1)
 {
    mCartEpoch     = 0.0;

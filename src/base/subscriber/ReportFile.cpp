@@ -117,6 +117,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
 {
    objectTypes.push_back(Gmat::REPORT_FILE);
    objectTypeNames.push_back("ReportFile");
+   objectTypeNames.push_back("FileOutput");
    blockCommandModeAssignment = false;
    
    mNumParams = 0;
@@ -330,6 +331,8 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
          #ifdef DEBUG_REPORTFILE_SET
          MessageInterface::ShowMessage
             ("   '%s' added, size=%d\n", paramName.c_str(), mNumParams);
+         MessageInterface::ShowMessage
+            ("   yParamWrappers.size()=%d\n", yParamWrappers.size());
          #endif
          
          return true;
@@ -351,6 +354,10 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
 bool ReportFile::WriteData(WrapperArray wrapperArray)
 {
+   #if DBGLVL_WRITE_DATA > 0
+   MessageInterface::ShowMessage
+      ("ReportFile::WriteData() entered, wrapperArray.size()=%d\n", wrapperArray.size());
+   #endif
    Integer numData = wrapperArray.size();
    UnsignedInt maxRow = 1;
    Real rval = -9999.999;
@@ -365,6 +372,17 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
    MessageInterface::ShowMessage("ReportFile::WriteData() has %d wrappers\n", numData);
    MessageInterface::ShowMessage("   ==> Now start buffering data\n");
    #endif
+   
+   // Check for empty wrapper array
+   if (wrapperArray.empty())
+   {
+      #if DBGLVL_WRITE_DATA > 0
+      MessageInterface::ShowMessage
+         ("ReportFile::WriteData() just returning true, wrapperArray is empty\n");
+      #endif
+      
+      return true;
+   }
    
    // buffer formatted data
    for (Integer i=0; i < numData; i++)
@@ -417,7 +435,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             else
                output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
             #ifdef DEBUG_REAL_DATA
-               MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+            MessageInterface::ShowMessage
+               ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
             #endif
             break;
          }
@@ -426,7 +445,7 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
             Gmat::ParameterType dataType = wrapperArray[i]->GetDataType();
             #if DBGLVL_WRITE_DATA > 1
             MessageInterface::ShowMessage
-               ("      It's data type is %d\n", dataType);
+               ("      It's data type is %d, PARAMETER_WT\n", dataType);
             #endif
             switch (dataType)
             {
@@ -438,7 +457,8 @@ bool ReportFile::WriteData(WrapperArray wrapperArray)
                   else
                      output[i].push_back(GmatStringUtil::ToString(rval, precision, zeroFill));
                   #ifdef DEBUG_REAL_DATA
-                     MessageInterface::ShowMessage("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
+                  MessageInterface::ShowMessage
+                     ("   resulting string for value of %12.10f = %s\n", rval, output[i].back().c_str());
                   #endif
                   break;
                }
@@ -612,8 +632,9 @@ bool ReportFile::Initialize()
       if ((mNumParams == 0) && !usedByReport)
       {
          MessageInterface::ShowMessage
-            ("*** WARNING *** The ReportFile named \"%s\" will not be created.\n"
-             "No parameters were added to ReportFile.\n", GetName().c_str());
+            ("*** WARNING *** The ReportFile named \"%s\" may not be created.  "
+             "Currently parameter list of reporting every integration step is "
+             "empty and it may not be used by the Report command.\n", GetName().c_str());
          
          active = false;
          return false;
@@ -1124,31 +1145,10 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
          se.SetDetails(errorMessageFormat.c_str(), value.c_str(), "Filename", msg.c_str());
          throw se;
       }
-      
-      // This checking will be done in FileManager::FindPath()
-      // // Check for non-existing directory
-      // if (!GmatFileUtil::DoesDirectoryExist(value))
-      // {
-      //    SubscriberException se;
-      //    se.SetDetails("Path does not exist in '%s'", value.c_str());
-      //    throw se;
-      // }
-      
+           
       usingDefaultFileName = false;
       fileName = value;
-      
-      // Moved to GetFullPathFileName() - (LOJ: 2014.06.23)
-      // // If file extension is blank, append .txt
-      // if (GmatFileUtil::ParseFileExtension(fileName) == "")
-      // {
-      //    if (fileName != "")
-      //    {
-      //       fileName = fileName + ".txt";
-      //       MessageInterface::ShowMessage
-      //          ("*** WARNING *** Appended .txt to file name '%s'\n", value.c_str());
-      //    }
-      // }
-      
+           
       #ifdef DEBUG_FILE_PATH
       MessageInterface::ShowMessage
          ("ReportFile::SetStringParameter() '%s' calling GetFullPathFileName()\n",
@@ -1156,8 +1156,8 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
       #endif
       
       fullPathFileName =
-         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE", false, ".txt",
-                                       true);
+         GmatBase::GetFullPathFileName(fileName, GetName(), fileName, "REPORT_FILE",
+                                       false, ".txt", true);
       
       // Check for invalid output directory
       if (fullPathFileName == "")
@@ -1467,7 +1467,8 @@ const StringArray& ReportFile::GetWrapperObjectNameArray(bool completeSet)
    
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage
-      ("ReportFile::GetWrapperObjectNameArray() size=%d\n",  yWrapperObjectNames.size());
+      ("ReportFile::GetWrapperObjectNameArray() '%s' size=%d\n", GetName().c_str(),
+       yWrapperObjectNames.size());
    for (UnsignedInt i=0; i<yWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage("   %s\n", yWrapperObjectNames[i].c_str());
    #endif
@@ -1844,10 +1845,33 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    {
       #if DBGLVL_REPORTFILE_DATA > 0
       MessageInterface::ShowMessage
-         ("ReportFile::Distribute() this=<%p>'%s' returning true, not writing data\n",
+         ("ReportFile::Distribute() this=<%p>'%s' just returning true, not writing data\n",
           this, GetName().c_str());
       #endif
       return true;
+   }
+   
+   
+   // Skip data if data publishing command such as Propagate is inside a function
+   // and this ReportFile is not a global nor a local object (i.e declared in the main script)
+   // (LOJ: 2015.07.14)
+   if (!yParamWrappers.empty())
+   {
+      if (currentProvider && currentProvider->TakeAction("IsInFunction"))
+      {
+         bool skipDataY = ShouldDataBeSkipped(2);
+         
+         if (skipDataY)
+         {
+            #if DEBUG_XYPLOT_UPDATE > 1
+            MessageInterface::ShowMessage
+               ("ReportFile::Distribute() this=<%p>'%s' just returning true\n   data is "
+                "from a function and reporting Parameter is not a global nor a local object\n",
+                this, GetName().c_str());
+            #endif
+            return true;
+         }
+      }
    }
    
    // Skip duplicate data.
@@ -1859,7 +1883,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       {
          #if DBGLVL_REPORTFILE_DATA > 0
          MessageInterface::ShowMessage
-            ("ReportFile::Distribute() this=<%p>'%s' returning true, duplicate data: "
+            ("ReportFile::Distribute() this=<%p>'%s' just returning true, duplicate data: "
              "mLastReportTime = %f, dat[0] = %f\n", this, GetName().c_str(),
              mLastReportTime, dat[0]);
          #endif

@@ -107,8 +107,8 @@ ParameterWrapper::~ParameterWrapper()
 {
    #ifdef DEBUG_PW_REFOBJ
    MessageInterface::ShowMessage
-      ("ParameterWrapper::~ParameterWrapper() <%p>'%s' entered, param=<%p><%s>\n",
-       this, description.c_str(), param, param ? param->GetName().c_str() : "NULL");
+      ("ParameterWrapper::~ParameterWrapper() <%p>'%s' entered, param=<%p>\n",
+       this, description.c_str(), param);
    #endif
 }
 

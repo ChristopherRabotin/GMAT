@@ -78,6 +78,7 @@ void HarmonicGravityGrv::Load()
    std::string isNormalized = "";
    std::string line;
    std::string firstStr;
+   unsigned long lineno = 1;
    bool allocated = false;
    bool degreeSet = false;
    bool orderSet  = false;
@@ -88,6 +89,7 @@ void HarmonicGravityGrv::Load()
    while (!inStream.eof())
    {
       getline(inStream, line);
+      lineno++;
 
       if (line == "")
          continue;
@@ -96,6 +98,8 @@ void HarmonicGravityGrv::Load()
             MessageInterface::ShowMessage("%s\n", line);
       #endif
       std::istringstream lineStream;
+      std::ostringstream linenoStream;
+      linenoStream << lineno;
       lineStream.str(line);
 
       // ignore comment lines
@@ -115,17 +119,23 @@ void HarmonicGravityGrv::Load()
          else if (upperString == "DEGREE")
          {
             lineStream >> NN;
+            if (lineStream.fail())
+               throw GravityFileException("Error reading DEGREE in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
             degreeSet = true;
          }
          else if (upperString == "ORDER")
          {
             lineStream >> MM;
+            if (lineStream.fail())
+               throw GravityFileException("Error reading ORDER in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
             orderSet = true;
          }
          else if (upperString == "GM")
          {
             Real tmpMu = 0.0;
             lineStream >> tmpMu;
+            if (lineStream.fail())
+               throw GravityFileException("Error reading GM in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
             if (tmpMu != 0.0)
                factor = -tmpMu / 1.0e09;     // -> Km^3/sec^2
          }
@@ -133,6 +143,8 @@ void HarmonicGravityGrv::Load()
          {
             Real tmpA  = 0.0;
             lineStream >> tmpA;
+            if (lineStream.fail())
+               throw GravityFileException("Error reading REFDISTANCE in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
             if (tmpA != 0.0)
                bodyRadius = tmpA / 1000.0;  // -> Km
          }
@@ -156,9 +168,19 @@ void HarmonicGravityGrv::Load()
             if ((n > 0) && (n < NN))
             {
                lineStream >> m;
+               if (lineStream.fail())
+                  throw GravityFileException("Error reading m in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
                if ((m >= 0) && (m <= n))
                {
-                  lineStream >> cnm >> snm;
+                  lineStream >> cnm;
+                  if (lineStream.fail())
+                     throw GravityFileException("Error reading cnm in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
+                  if (!lineStream.eof())
+                  {
+                     lineStream >> snm;
+                     if (lineStream.fail())
+                        throw GravityFileException("Error reading snm in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
+                  }
                   if (isNormalized == "No")
                      {
                      cnm *= V[n][m];

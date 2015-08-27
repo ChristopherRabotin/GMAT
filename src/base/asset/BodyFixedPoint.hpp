@@ -30,7 +30,6 @@
 #define BodyFixedPoint_hpp
 
 #include "SpacePoint.hpp"
-//#include "LatLonHgt.hpp"
 #include "BodyFixedStateConverter.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
@@ -198,7 +197,7 @@ protected:
 
    Rvector3 GetTopocentricConversion(const std::string &centralNaifId);
 
-public:
+public:  // needs to be public for current GroundStationPanel code to use
    /// Published parameters for body-fixed points
    enum
    {

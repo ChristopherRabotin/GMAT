@@ -34,7 +34,7 @@ class GMAT_API BurnData : public RefData
 {
 public:
 
-   BurnData(const std::string &name = "",
+   BurnData(const std::string &name = "", const std::string &typeName = "",
             const Gmat::ObjectType paramOwnerType = Gmat::IMPULSIVE_BURN);
    BurnData(const BurnData &data);
    BurnData& operator= (const BurnData& right);
