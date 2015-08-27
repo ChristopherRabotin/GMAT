@@ -498,7 +498,7 @@ void CelestialBodyVisualizationPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelOffsetYTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_OFFSET, wxT(""),
                        wxDefaultPosition, wxSize(100,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   view3dModelOffsetXTextCtrl->SetToolTip(pConfig->Read("3DModelOffsetYHint"));
+   view3dModelOffsetYTextCtrl->SetToolTip(pConfig->Read("3DModelOffsetYHint"));
    wxStaticText *view3dModelOffsetZStaticText = new wxStaticText(this, ID_TEXT, wxString("3D Model "GUI_ACCEL_KEY"Offset Z"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
    view3dModelOffsetZTextCtrl = new wxTextCtrl(this, ID_TEXT_CTRL_3D_MODEL_OFFSET, wxT(""),
