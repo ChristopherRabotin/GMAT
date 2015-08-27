@@ -253,6 +253,13 @@ protected:
    Integer         default_naifId;
    /// default value for NAIF ID for the body/spacecraft reference frame
    Integer         default_naifIdRefFrame;
+   /// default for the spice frame name
+   std::string     default_spiceFrameName;
+   /// Defaults for the kernel names
+   StringArray     default_orbitSpiceKernelNames;
+   StringArray     default_attitudeSpiceKernelNames;
+   StringArray     default_frameSpiceKernelNames;
+   StringArray     default_scClockSpiceKernelNames;
    
    /// flag indicating whether or not the SPICE code is setup
    bool            spiceSetupDone;

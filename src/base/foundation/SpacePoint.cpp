@@ -231,6 +231,14 @@ targetColor              (sp.targetColor),
 orbitColorStr            (sp.orbitColorStr),
 targetColorStr           (sp.targetColorStr)
 {
+   default_orbitSpiceKernelNames.clear();
+   default_attitudeSpiceKernelNames.clear();
+   default_frameSpiceKernelNames.clear();
+   default_scClockSpiceKernelNames.clear();
+   default_orbitSpiceKernelNames    = sp.default_orbitSpiceKernelNames;
+   default_attitudeSpiceKernelNames = sp.default_attitudeSpiceKernelNames;
+   default_frameSpiceKernelNames    = sp.default_frameSpiceKernelNames;
+   default_scClockSpiceKernelNames  = sp.default_scClockSpiceKernelNames;
 }
 
 //---------------------------------------------------------------------------
@@ -279,6 +287,15 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    orbitColorStr            = sp.orbitColorStr;
    targetColorStr           = sp.targetColorStr;
    
+   default_orbitSpiceKernelNames.clear();
+   default_attitudeSpiceKernelNames.clear();
+   default_frameSpiceKernelNames.clear();
+   default_scClockSpiceKernelNames.clear();
+   default_orbitSpiceKernelNames    = sp.default_orbitSpiceKernelNames;
+   default_attitudeSpiceKernelNames = sp.default_attitudeSpiceKernelNames;
+   default_frameSpiceKernelNames    = sp.default_frameSpiceKernelNames;
+   default_scClockSpiceKernelNames  = sp.default_scClockSpiceKernelNames;
+
    return *this;
 }
 
@@ -546,15 +563,109 @@ bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
    {
       return (defaultTargetColor == targetColor);
    }
+   if (id == SPICE_FRAME_NAME)
+   {
+#ifdef DEBUG_SP_CLOAKING
+MessageInterface::ShowMessage
+   ("SpacePoint::IsParameterEqualToDefault() '%s'\n", GetName().c_str());
+MessageInterface::ShowMessage("--- spiceFrameName = %s, default = %s\n",
+      spiceFrameName.c_str(), default_spiceFrameName.c_str());
+#endif
+      return (default_spiceFrameName == spiceFrameName);
+   }
+
+   if (id == ORBIT_SPICE_KERNEL_NAME)
+   {
+      if (default_orbitSpiceKernelNames.size() != orbitSpiceKernelNames.size())
+         return false;
+      for (Integer ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
+         if (default_orbitSpiceKernelNames.at(ii) != orbitSpiceKernelNames.at(ii))
+            return false;
+      return true;
+   }
+
+   if (id == ATTITUDE_SPICE_KERNEL_NAME)
+   {
+      #ifdef DEBUG_SP_CLOAKING
+      MessageInterface::ShowMessage
+         ("SpacePoint::IsParameterEqualToDefault() '%s'\n", GetName().c_str());
+      MessageInterface::ShowMessage("--- attitude spice kernel names ...\n");
+      MessageInterface::ShowMessage("--- defaults are:\n");
+      for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
+         MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
+      MessageInterface::ShowMessage("--- current values are:\n");
+      for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+         MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
+      #endif
+      if (default_attitudeSpiceKernelNames.size() != attitudeSpiceKernelNames.size())
+         return false;
+      for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+         if (default_attitudeSpiceKernelNames.at(ii) != attitudeSpiceKernelNames.at(ii))
+            return false;
+      return true;
+   }
+
+   if (id == FRAME_SPICE_KERNEL_NAME)
+   {
+      if (default_frameSpiceKernelNames.size() != frameSpiceKernelNames.size())
+         return false;
+      for (Integer ii = 0; ii < frameSpiceKernelNames.size(); ii++)
+         if (default_frameSpiceKernelNames.at(ii) != frameSpiceKernelNames.at(ii))
+            return false;
+      return true;
+   }
+
+   if (id == SC_CLOCK_SPICE_KERNEL_NAME)
+   {
+      if (default_scClockSpiceKernelNames.size() != scClockSpiceKernelNames.size())
+         return false;
+      for (Integer ii = 0; ii < scClockSpiceKernelNames.size(); ii++)
+         if (default_scClockSpiceKernelNames.at(ii) != scClockSpiceKernelNames.at(ii))
+            return false;
+      return true;
+   }
+
    return GmatBase::IsParameterEqualToDefault(id);    
 }
 
 bool SpacePoint::SaveAllAsDefault()
 {
+#ifdef DEBUG_SP_CLOAKING
+   MessageInterface::ShowMessage("In SaveAllAsDefault ...\n");
+   MessageInterface::ShowMessage("--- spiceFrameName = %s, default_spiceFrameName = %s\n",
+         spiceFrameName.c_str(), default_spiceFrameName.c_str());
+   MessageInterface::ShowMessage("--- defaults (attitude spice kernels) are:\n");
+   for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
+      MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
+   MessageInterface::ShowMessage("--- current values (attitude spice kernels) are:\n");
+   for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+      MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
+#endif
    GmatBase::SaveAllAsDefault();
    default_j2000BodyName  = j2000BodyName;
    default_naifId         = naifId;
    default_naifIdRefFrame = naifIdRefFrame;
+   default_spiceFrameName = spiceFrameName;
+
+   default_orbitSpiceKernelNames.clear();
+   default_attitudeSpiceKernelNames.clear();
+   default_frameSpiceKernelNames.clear();
+   default_scClockSpiceKernelNames.clear();
+   default_orbitSpiceKernelNames    = orbitSpiceKernelNames;
+   default_attitudeSpiceKernelNames = attitudeSpiceKernelNames;
+   default_frameSpiceKernelNames    = frameSpiceKernelNames;
+   default_scClockSpiceKernelNames  = scClockSpiceKernelNames;
+#ifdef DEBUG_SP_CLOAKING
+   MessageInterface::ShowMessage("At end of SaveAllAsDefault ...\n");
+   MessageInterface::ShowMessage("--- spiceFrameName = %s, default_spiceFrameName = %s\n",
+         spiceFrameName.c_str(), default_spiceFrameName.c_str());
+   MessageInterface::ShowMessage("--- defaults (attitude spice kernels) are:\n");
+   for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
+      MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
+   MessageInterface::ShowMessage("--- current values (attitude spice kernels) are:\n");
+   for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+      MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
+#endif
    return true;
 }
 
@@ -575,6 +686,37 @@ bool SpacePoint::SaveParameterAsDefault(const Integer id)
       default_naifIdRefFrame = naifIdRefFrame;
       return true;
    }
+   if (id == SPICE_FRAME_NAME)
+   {
+      default_spiceFrameName = spiceFrameName;
+      return true;
+   }
+
+   if (id == ORBIT_SPICE_KERNEL_NAME)
+   {
+      default_orbitSpiceKernelNames.clear();
+      default_orbitSpiceKernelNames = orbitSpiceKernelNames;
+      return true;
+   }
+   if (id == ATTITUDE_SPICE_KERNEL_NAME)
+   {
+      default_attitudeSpiceKernelNames.clear();
+      default_attitudeSpiceKernelNames = attitudeSpiceKernelNames;
+      return true;
+   }
+   if (id == FRAME_SPICE_KERNEL_NAME)
+   {
+      default_frameSpiceKernelNames.clear();
+      default_frameSpiceKernelNames = frameSpiceKernelNames;
+      return true;
+   }
+   if (id == SC_CLOCK_SPICE_KERNEL_NAME)
+   {
+      default_scClockSpiceKernelNames.clear();
+      default_scClockSpiceKernelNames = scClockSpiceKernelNames;
+      return true;
+   }
+
    return GmatBase::SaveParameterAsDefault(id);
 }
 
@@ -980,19 +1122,19 @@ bool SpacePoint::IsParameterReadOnly(const Integer id) const
    if (id == SPICE_FRAME_NAME) // set to false in appropriate derived classes
       return true;
 
-   // Turn off parameters for string arrays if they are empty
-   if (id == ORBIT_SPICE_KERNEL_NAME)
-      if (orbitSpiceKernelNames.size() == 0)
-         return true;
-   if (id == ATTITUDE_SPICE_KERNEL_NAME)
-      if (attitudeSpiceKernelNames.size() == 0)
-         return true;
-   if (id == SC_CLOCK_SPICE_KERNEL_NAME)
-      if (scClockSpiceKernelNames.size() == 0)
-         return true;
-   if (id == FRAME_SPICE_KERNEL_NAME)
-      if (frameSpiceKernelNames.size() == 0)
-         return true;
+//   // Turn off parameters for string arrays if they are empty
+//   if (id == ORBIT_SPICE_KERNEL_NAME)
+//      if (orbitSpiceKernelNames.size() == 0)
+//         return true;
+//   if (id == ATTITUDE_SPICE_KERNEL_NAME)
+//      if (attitudeSpiceKernelNames.size() == 0)
+//         return true;
+//   if (id == SC_CLOCK_SPICE_KERNEL_NAME)
+//      if (scClockSpiceKernelNames.size() == 0)
+//         return true;
+//   if (id == FRAME_SPICE_KERNEL_NAME)
+//      if (frameSpiceKernelNames.size() == 0)
+//         return true;
 
    // Hide A1Epoch
    if (id == EPOCH_PARAM)
@@ -1944,6 +2086,7 @@ void SpacePoint::ValidateKernel(const std::string &kName, const std::string labe
    #ifdef __USE_SPICE__
       if (!SpiceInterface::IsValidKernel(fullSpkName, ofType))
       {
+         MessageInterface::ShowMessage("File is of wrong type!!!!\n"); // *****************
          GmatBaseException gbe;
          std::string valid = "Valid ";
          valid += GmatStringUtil::ToUpper(ofType) + " kernel";

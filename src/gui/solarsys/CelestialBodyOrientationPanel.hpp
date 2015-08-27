@@ -45,11 +45,22 @@ public:
    
 private:
    
+   bool           userDef;
+   bool           allowSpiceForDefaultBodies;
+   bool           spiceAvailable;
+
    bool           dataChanged;
    bool           canClose;
+   bool           fkFilesDeleted;
+
+   StringArray    fkFiles;
+   StringArray    fkFilesToDelete;
+
    
    CelestialBody  *theBody;
+   GuiInterpreter *guiInterpreter;
    GuiItemManager *guiManager;
+   SolarSystem    *ss;
 
    std::string    rotationDataSource;
    Real           nutationUpdateInterval;;
@@ -59,6 +70,7 @@ private:
    Real           spinAxisDECRate;
    Real           rotationConstant;
    Real           rotationRate;
+   std::string    spiceFrameName;
    
    bool           rotationDataSourceChanged;
    bool           nutationUpdateIntervalChanged;
@@ -68,12 +80,13 @@ private:
    bool           spinAxisDECRateChanged;
    bool           rotationConstantChanged;
    bool           rotationRateChanged;
-   
+   bool           spiceFrameNameChanged;
+   bool           fkChanged;
+
    bool           isEarth;
    bool           isLuna;
    
    GmatPanel      *theCBPanel;
-   bool           userDef;
    
   
    void     Create();
@@ -89,6 +102,10 @@ private:
    void     OnSpinAxisDECRateTextCtrlChange(wxCommandEvent &event);
    void     OnRotationConstantTextCtrlChange(wxCommandEvent &event);
    void     OnRotationRateTextCtrlChange(wxCommandEvent &event);
+   void     OnSpiceFrameNameTextCtrlChange(wxCommandEvent &event);
+   void     OnFkFileBrowseButton(wxCommandEvent &event);
+   void     OnFkFileRemoveButton(wxCommandEvent &event);
+   void     OnFkFileListBoxChange(wxCommandEvent &event);
    
    wxString ToString(Real rval);
    
@@ -102,6 +119,8 @@ private:
    wxStaticText *spinAxisDECRateStaticText;
    wxStaticText *rotationConstantStaticText;
    wxStaticText *rotationRateStaticText;
+   wxStaticText *spiceFrameNameStaticText;
+   wxStaticText *fkStaticText;
 
    wxStaticText *nutationUpdateIntervalUnitsStaticText;
    wxStaticText *spinAxisRAConstantUnitsStaticText;
@@ -118,12 +137,19 @@ private:
    wxTextCtrl   *spinAxisDECRateTextCtrl;
    wxTextCtrl   *rotationConstantTextCtrl;
    wxTextCtrl   *rotationRateTextCtrl;
+   wxTextCtrl   *spiceFrameNameTextCtrl;
+   wxTextCtrl   *fkTextCtrl;
    
    wxComboBox   *rotationDataSourceComboBox;
    
    // strings for the combo box
    StringArray  sourceArray;
    
+   // strings for the FK kernel names
+   StringArray  fkFileArray;
+
+   wxString     *fkFileArrayWX;
+
    // wxString arrays for the combo box
    wxString     *sourceArrayWX;
    
@@ -136,8 +162,14 @@ private:
    wxString     spinAxisDECRateStringWX;
    wxString     rotationConstantStringWX;
    wxString     rotationRateStringWX;
+   wxString     spiceFrameNameStringWX;
 
    
+   wxListBox    *fkFileListBox;
+
+   wxButton     *fkFileBrowseButton;
+   wxButton     *fkFileRemoveButton;
+
    GmatStaticBoxSizer *mainBoxSizer;
    
    /// IDs for the controls 
@@ -152,6 +184,10 @@ private:
       ID_TEXT_CTRL_SPIN_AXIS_DEC_RATE,
       ID_TEXT_CTRL_ROTATION_CONSTANT,
       ID_TEXT_CTRL_ROTATION_RATE,
+      ID_TEXT_CTRL_SPICE_FRAME_NAME,
+      ID_LIST_BOX_FK_FILE,
+      ID_BROWSE_BUTTON_FK_FILE,
+      ID_REMOVE_BUTTON_FK_FILE,
    };
 };
 #endif // CelestialBodyOrientationPanel_hpp
