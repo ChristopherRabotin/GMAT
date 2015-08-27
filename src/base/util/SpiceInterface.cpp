@@ -616,11 +616,20 @@ StringArray SpiceInterface::GetValidFrames()
 //------------------------------------------------------------------------------
 void SpiceInterface::SetLeapSecondKernel(const std::string &lsk)
 {
-   #ifdef DEBUG_SPK_LOADING
-      MessageInterface::ShowMessage("NOW loading LSK kernel %s\n", lsk.c_str());
-   #endif
    lsKernel = lsk;
-   if (!IsLoaded(lsKernel))   LoadKernel(lsKernel);
+   if (!IsLoaded(lsKernel))
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel NOW loading LSK kernel %s\n", lsk.c_str());
+      #endif
+      LoadKernel(lsKernel);
+   }
+   else
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel LSK kernel %s was already loaded ...\n", lsk.c_str());
+      #endif
+   }
 }
 
 //------------------------------------------------------------------------------
