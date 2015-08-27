@@ -1653,7 +1653,7 @@ Rvector3 BodyFixedPoint::GetTopocentricConversion(
       SpiceDouble  radii[3];
       SpiceBoolean found;
       // Ask SPICE for the body Radii
-      gdpool_c(bID, 1, 3, &n, radii, &found);
+      gdpool_c(bID, 0, 3, &n, radii, &found);
       #ifdef DEBUG_BFP_SPICE
          MessageInterface::ShowMessage(
                "In GetTopocentricConversion, xyz (%s) = %12.10f   %12.10f   %12.10f\n",
