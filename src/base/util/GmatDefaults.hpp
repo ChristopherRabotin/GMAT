@@ -418,7 +418,7 @@ namespace GmatSolarSystemDefaults
    {
          "IAU_MERCURY",
          "IAU_VENUS",
-         "IAU_EARTH",     // "IAU_EARTH" is low fidelity, should be "ITRF93"
+         "ITRF93",     // "IAU_EARTH" is low fidelity, should be "ITRF93"
          "IAU_MARS",
          "IAU_JUPITER",
          "IAU_SATURN",

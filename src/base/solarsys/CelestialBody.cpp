@@ -5153,8 +5153,12 @@ bool CelestialBody::SetUpSPICE()
       MessageInterface::ShowMessage("   posVelSrc = %s\n", Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc].c_str());
       if (kernelReader == NULL)
          MessageInterface::ShowMessage("   kernelReader is NULL\n");
+      if (theSolarSystem == NULL)
+         MessageInterface::ShowMessage("   theSolarSystem is NULL\n");
    #endif
-   if (posVelSrc != Gmat::SPICE) return false;
+   // Need to do this each time, even if the source is not SPICE, because we may
+   // be doing Event Location (which currently uses SPICE each time).  2015.08.28 WCS
+//   if (posVelSrc != Gmat::SPICE) return false;
    if (kernelReader == NULL) kernelReader = theSolarSystem->GetSpiceOrbitKernelReader();
    if (kernelReader == NULL)
    {
@@ -5557,6 +5561,11 @@ bool CelestialBody::Set3dModelFileName(const std::string &fileName, bool writeWa
 bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
                                       bool frame,  bool scClock)
 {
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   INLoadNeededKernels, size of attitudeSpiceKernelNames = %d\n",
+         (Integer) attitudeSpiceKernelNames.size());
+#endif
+
 #ifdef __USE_SPICE__
    if (orbit)
    {

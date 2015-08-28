@@ -204,7 +204,7 @@ targetColorStr     ("")
 //---------------------------------------------------------------------------
 SpacePoint::SpacePoint(const SpacePoint &sp) :
 GmatBase(sp),
-theSolarSystem           (sp.theSolarSystem),
+theSolarSystem           (NULL),   // sp.theSolarSystem),
 inertialCS               (NULL),
 bodyFixedCS              (NULL),
 j2000Body                (sp.j2000Body), //(NULL),
