@@ -130,8 +130,8 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "STAR_FILE",
    "CONSTELLATION_FILE",
    "SPACECRAFT_MODEL_FILE",
-   "HELP_FILE",
-};
+   "SPAD_SRP_FILE",
+   "HELP_FILE",};
 
 FileManager* FileManager::theInstance = NULL;
 
