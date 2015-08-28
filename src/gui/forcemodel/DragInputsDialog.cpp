@@ -95,7 +95,6 @@ DragInputsDialog::~DragInputsDialog()
 {
 }
 
-
 //-------------------------------
 // private methods
 //-------------------------------
@@ -106,8 +105,8 @@ DragInputsDialog::~DragInputsDialog()
 void DragInputsDialog::Update()
 {
 
-    if (  ((predictedModelString == "ConstantFluxAndGeoMag") || (historicModelString == "ConstantFluxAndGeoMag")) && 
-         (( predictedModelString == "CSSISpaceWeatherFile") || (historicModelString == "CSSISpaceWeatherFile")) )
+    if  (( strcmp(predictedModelString.c_str(), "ConstantFluxAndGeoMag")==0 ||  strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag")==0) && 
+         (strcmp(predictedModelString.c_str() ,"CSSISpaceWeatherFile")==0 || strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile")==0))
     {
       schattenErrorComboBox->Enable(false);  
       schattenTimingComboBox->Enable(false);  
@@ -120,7 +119,7 @@ void DragInputsDialog::Update()
       cssiFileTextCtrl->Enable(true);
       cssiFileButton->Enable(true);
     }
-    else if ( (historicModelString == "CSSISpaceWeatherFile") && ( predictedModelString == "SchattenFile"))
+    else if ( strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile")==0 && strcmp( predictedModelString.c_str(),"SchattenFile")==0)
     {
       avgSolarFluxTextCtrl->Enable(false);
       solarFluxTextCtrl->Enable(false);
@@ -134,7 +133,7 @@ void DragInputsDialog::Update()
       cssiFileButton->Enable(true);
 
     }
-    else if ( ( predictedModelString == "ConstantFluxAndGeoMag" || historicModelString == "ConstantFluxAndGeoMag") )
+    else if (strcmp(predictedModelString.c_str(),"ConstantFluxAndGeoMag")==0 || strcmp(historicModelString.c_str() , "ConstantFluxAndGeoMag"))
     {
       schattenErrorComboBox->Enable(false);  
       schattenTimingComboBox->Enable(false);  
@@ -148,7 +147,7 @@ void DragInputsDialog::Update()
       geomagneticIndexTextCtrl->Enable(true);
 
     }
-    else if ( (historicModelString == "ConstantFluxAndGeoMag") && ( predictedModelString == "SchattenFile"))
+    else if ( strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag")==0 && strcmp(predictedModelString.c_str(), "SchattenFile")==0)
     {
       cssiFileTextCtrl->Enable(false);
       cssiFileButton->Enable(false);
@@ -162,7 +161,7 @@ void DragInputsDialog::Update()
       geomagneticIndexTextCtrl->Enable(true);
       
     }
-    else if ( (historicModelString == "CSSISpaceWeatherFile") && ( predictedModelString == "CSSISpaceWeatherFile"))
+    else if ( strcmp(historicModelString.c_str() ,"CSSISpaceWeatherFile")==0 && strcmp(predictedModelString.c_str(), "CSSISpaceWeatherFile")==0)
     {
       cssiFileTextCtrl->Enable(true);
       cssiFileButton->Enable(true);
@@ -398,10 +397,10 @@ void DragInputsDialog::SaveData()
       (*theForceStringArray)[0] = predictedModelString;
       (*theForceStringArray)[1] = historicModelString;
       
-      if ( ((predictedModelString=="CSSISpaceWeatherFile") || (historicModelString=="CSSISpaceWeatherFile" ))  || 
-              ((predictedModelString=="SchattenFile") || (historicModelString=="SchattenFile" ) ))
+      if ((strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile") || strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile" ))  || 
+              (strcmp(predictedModelString.c_str(),"SchattenFile") || strcmp(historicModelString.c_str(),"SchattenFile")))
       {
-          if ( (predictedModelString=="CSSISpaceWeatherFile" || historicModelString=="CSSISpaceWeatherFile" )) 
+          if (strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile") || strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile" )) 
           {
              if (cssifileName == "")
              {
@@ -415,7 +414,7 @@ void DragInputsDialog::SaveData()
              (*theForceStringArray)[2] = cssifileName;
 
           }
-          if ((predictedModelString=="SchattenFile" || historicModelString=="SchattenFile" ))
+          if (strcmp(predictedModelString.c_str(),"SchattenFile") || strcmp(historicModelString.c_str(),"SchattenFile" ))
           {
               if (schattenfileName=="")
               {
@@ -446,7 +445,7 @@ void DragInputsDialog::SaveData()
          #endif
       }
 
-      if (predictedModelString=="ConstantFluxAndGeoMag" || historicModelString=="ConstantFluxAndGeoMag" )
+      if (strcmp(predictedModelString.c_str(),"ConstantFluxAndGeoMag") || strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag" ))
       {
          if (isTextModified)
          {
@@ -519,7 +518,7 @@ void DragInputsDialog::OnModelComboChange(wxCommandEvent &event)
     predictedModelString= predictedFileComboBox->GetStringSelection();
     historicModelString=  historicFileComboBox->GetStringSelection();
 
-    if ( (historicModelString=="CSSISpaceWeatherFile") && (predictedModelString=="CSSISpaceWeatherFile"))
+    if (strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile")==0 && strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile")==0)
     {
       schattenErrorComboBox->Enable(false);  
       schattenTimingComboBox->Enable(false);  
@@ -533,7 +532,7 @@ void DragInputsDialog::OnModelComboChange(wxCommandEvent &event)
       cssiFileButton->Enable(true);
 
     }
-    else if ((historicModelString=="CSSISpaceWeatherFile") && ( predictedModelString=="SchattenFile" ))
+    else if (strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile")==0 && strcmp(predictedModelString.c_str(),"SchattenFile" )==0)
     {
       avgSolarFluxTextCtrl->Enable(false);
       solarFluxTextCtrl->Enable(false);
@@ -547,7 +546,7 @@ void DragInputsDialog::OnModelComboChange(wxCommandEvent &event)
       cssiFileButton->Enable(true);
 
     }
-    else if ((historicModelString=="ConstantFluxAndGeoMag") && ( predictedModelString=="ConstantFluxAndGeoMag" ))
+    else if (strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag")==0 &&  strcmp(predictedModelString.c_str(),"ConstantFluxAndGeoMag" )==0)
     {
       schattenErrorComboBox->Enable(false);  
       schattenTimingComboBox->Enable(false);  
@@ -561,8 +560,8 @@ void DragInputsDialog::OnModelComboChange(wxCommandEvent &event)
       geomagneticIndexTextCtrl->Enable(true);
 
     }
-    else if ( ((historicModelString=="ConstantFluxAndGeoMag") || ( predictedModelString=="ConstantFluxAndGeoMag" )) && \
-             ((historicModelString=="CSSISpaceWeatherFile") || ( predictedModelString=="CSSISpaceWeatherFile")) )
+    else if ((strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag")==0 ||  strcmp(predictedModelString.c_str(),"ConstantFluxAndGeoMag" )==0) && \
+             (strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile")==0 ||  strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile")==0))
     {
       schattenErrorComboBox->Enable(false);  
       schattenTimingComboBox->Enable(false);  
@@ -576,7 +575,7 @@ void DragInputsDialog::OnModelComboChange(wxCommandEvent &event)
       geomagneticIndexTextCtrl->Enable(true);
     
     }
-    else if ((historicModelString=="ConstantFluxAndGeoMag") && ( predictedModelString=="SchattenFile" ))
+    else if (strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag")==0 && strcmp(predictedModelString.c_str(),"SchattenFile" )==0)
     {
       cssiFileTextCtrl->Enable(false);
       cssiFileButton->Enable(false);
