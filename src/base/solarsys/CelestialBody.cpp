@@ -314,10 +314,10 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    // bodies
    cloaking = true;
 
-//   // Set the SPICE_FRAME_NAME default - we don't want to do this, as the user
+//   // Set the SPICE_FRAME_ID default - we don't want to do this, as the user
 //   // has to set this for user-defined bodies
 //   std::string nameUpper = GmatStringUtil::ToUpper(name);
-//   spiceFrameName        = "IAU_" + nameUpper;
+//   spiceFrameID        = "IAU_" + nameUpper;
 
    #ifdef DEBUG_CB_CONSTRUCTOR
    MessageInterface::ShowMessage

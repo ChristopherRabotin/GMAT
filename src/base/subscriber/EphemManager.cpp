@@ -649,7 +649,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
       MessageInterface::ShowMessage("   stepSize        = %12.10f\n", stepSize);
    #endif
 
-//   std::string theNAIFFrameStr = theSc->GetStringParameter(theSc->GetParameterID("SpiceFrameName"));
+//   std::string theNAIFFrameStr = theSc->GetStringParameter(theSc->GetParameterID("SpiceFrameID"));
 
    // window we want to search
    SPICEDOUBLE_CELL(window, 200000);
@@ -673,7 +673,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
    // CSPICE data
    ConstSpiceChar *target           = theNAIFIdStr.c_str();     // NAIF Id of the spacecraft
-   ConstSpiceChar *tframe           = obsFrameName.c_str();     // SpiceFrameName for the observer OR ' '?
+   ConstSpiceChar *tframe           = obsFrameName.c_str();     // SpiceFrameID for the observer OR ' '?
    ConstSpiceChar *abcorr           = abCorrection.c_str();     // Aberration correction
    ConstSpiceChar *obsrvr           = observerID.c_str();       // NAIF ID of the observer
    ConstSpiceChar *crdsys           = theCrdSys.c_str();        //
@@ -754,7 +754,7 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
       {
          CelestialBody *body = solarSys->GetBody(occultingBodyNames.at(ii));
 
-         theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
+         theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameID"));
          Integer bodyNaifId = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
          theFront = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
 

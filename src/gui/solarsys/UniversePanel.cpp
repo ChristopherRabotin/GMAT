@@ -406,8 +406,8 @@ void UniversePanel::LoadData()
       }
       else
       {
-         mDEFileNameTextCtrl->Enable();
-         mBrowseButton->Enable();
+//         mDEFileNameTextCtrl->Enable();
+//         mBrowseButton->Enable();
          mSPKFileNameTextCtrl->Enable();
          spkNameLabel->Enable();
          mSPKBrowseButton->Enable();
@@ -417,22 +417,26 @@ void UniversePanel::LoadData()
          mPCKFileNameTextCtrl->Enable();
          pckNameLabel->Enable();
          mPCKBrowseButton->Enable();
-//         if (mFileTypeComboBox->GetStringSelection() == "SPICE")
-//         {
+         if (mFileTypeComboBox->GetStringSelection() == "SPICE")
+         {
+            mDEFileNameTextCtrl->Disable();
+            mBrowseButton->Disable();
 //            deFilenameLabel->SetLabel(wxString("SPK "GUI_ACCEL_KEY"Kernel"));
 //            lskNameLabel->Show(true);
 //            mLSKBrowseButton->Show(true);
 //            mLSKFileNameTextCtrl->Show(true);
-//         }
-//         else
-//         {
+         }
+         else
+         {
+            mDEFileNameTextCtrl->Enable();
+            mBrowseButton->Enable();
 //            deFilenameLabel->SetLabel(wxString("DE "GUI_ACCEL_KEY"Filename"));
 //            lskNameLabel->Show(false);
 //            mLSKBrowseButton->Show(false);
 //            wxWindow *windowWithFocus = FindFocus();
 //            if (windowWithFocus == mLSKFileNameTextCtrl)  mDEFileNameTextCtrl->SetFocus();
 //            mLSKFileNameTextCtrl->Show(false);
-//         }
+         }
       }
       
       wxString selStr = mFileTypeComboBox->GetStringSelection();
@@ -910,8 +914,8 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
          mLSKBrowseButton->Enable();
          pckNameLabel->Enable();
          mPCKBrowseButton->Enable();
-//         if (type == "SPICE")
-//         {
+         if (type == "SPICE")
+         {
 //            deFilenameLabel->SetLabel(wxString("SPK "GUI_ACCEL_KEY"Kernel"));
 //            lskNameLabel->Enable();
 //            mLSKBrowseButton->Enable();
@@ -919,9 +923,11 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 //            lskNameLabel->Show(true);
 //            mLSKBrowseButton->Show(true);
 //            mLSKFileNameTextCtrl->Show(true);
-//         }
-//         else // "DE"
-//         {
+            mBrowseButton->Disable();
+            mDEFileNameTextCtrl->Disable();
+         }
+         else // "DE"
+         {
 //            deFilenameLabel->SetLabel(wxString("DE "GUI_ACCEL_KEY"Filename"));
 //            lskNameLabel->Disable();
 //            mLSKFileNameTextCtrl->Disable();
@@ -931,8 +937,10 @@ void UniversePanel::OnComboBoxChange(wxCommandEvent& event)
 //            mLSKFileNameTextCtrl->Show(false);
 //            // this next line is needed for the Mac - otherwise, when switching from SPICE,
 //            // the LSK text ctrl is still visible (even though it is disabled and hidden)
+            mBrowseButton->Enable();
+            mDEFileNameTextCtrl->Enable();
 //            mDEFileNameTextCtrl->SetFocus();
-//         }
+         }
       }
 
       mPageSizer->Layout();

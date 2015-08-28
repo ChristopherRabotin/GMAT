@@ -47,7 +47,7 @@ BEGIN_EVENT_TABLE(CelestialBodyOrientationPanel, wxPanel)
    EVT_TEXT(ID_TEXT_CTRL_SPIN_AXIS_DEC_RATE, CelestialBodyOrientationPanel::OnSpinAxisDECRateTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_ROTATION_CONSTANT, CelestialBodyOrientationPanel::OnRotationConstantTextCtrlChange)
    EVT_TEXT(ID_TEXT_CTRL_ROTATION_RATE, CelestialBodyOrientationPanel::OnRotationRateTextCtrlChange)
-   EVT_TEXT(ID_TEXT_CTRL_SPICE_FRAME_NAME, CelestialBodyOrientationPanel::OnSpiceFrameNameTextCtrlChange)
+   EVT_TEXT(ID_TEXT_CTRL_SPICE_FRAME_ID, CelestialBodyOrientationPanel::OnSpiceFrameIDTextCtrlChange)
    EVT_LISTBOX(ID_LIST_BOX_FK_FILE, CelestialBodyOrientationPanel::OnFkFileListBoxChange)
    EVT_BUTTON(ID_BROWSE_BUTTON_FK_FILE, CelestialBodyOrientationPanel::OnFkFileBrowseButton)
    EVT_BUTTON(ID_REMOVE_BUTTON_FK_FILE, CelestialBodyOrientationPanel::OnFkFileRemoveButton)
@@ -87,7 +87,7 @@ CelestialBodyOrientationPanel::CelestialBodyOrientationPanel(GmatPanel *cbPanel,
    spinAxisDECRate               (0.0),
    rotationConstant              (0.0),
    rotationRate                  (0.0),
-   spiceFrameName                (""),
+   spiceFrameID                  (""),
    rotationDataSourceChanged     (false),
    nutationUpdateIntervalChanged (false),
    spinAxisRAConstantChanged     (false),
@@ -96,7 +96,7 @@ CelestialBodyOrientationPanel::CelestialBodyOrientationPanel(GmatPanel *cbPanel,
    spinAxisDECRateChanged        (false),
    rotationConstantChanged       (false),
    rotationRateChanged           (false),
-   spiceFrameNameChanged         (false),
+   spiceFrameIDChanged           (false),
    fkChanged                     (false),
    isEarth                       (false),
    isLuna                        (false),
@@ -228,12 +228,12 @@ void CelestialBodyOrientationPanel::SaveData()
             rotationRate = tmpval;
          }
       }
-      if (spiceFrameNameChanged)
+      if (spiceFrameIDChanged)
       {
-         strval = spiceFrameNameTextCtrl->GetValue();
-         spiceFrameName = strval.c_str();
-         theBody->SetStringParameter(theBody->GetParameterID("SpiceFrameName"),
-               spiceFrameName);
+         strval       = spiceFrameIDTextCtrl->GetValue();
+         spiceFrameID = strval.c_str();
+         theBody->SetStringParameter(theBody->GetParameterID("SpiceFrameID"),
+               spiceFrameID);
       }
 
       if (!realsOK)
@@ -378,8 +378,8 @@ void CelestialBodyOrientationPanel::LoadData()
       rotationRateTextCtrl->SetValue(rotationRateStringWX);
       
       // Spice Frame Name
-      spiceFrameName = theBody->GetStringParameter(theBody->GetParameterID("SpiceFrameName"));
-      spiceFrameNameTextCtrl->SetValue(spiceFrameName.c_str());
+      spiceFrameID = theBody->GetStringParameter(theBody->GetParameterID("SpiceFrameID"));
+      spiceFrameIDTextCtrl->SetValue(spiceFrameID.c_str());
 
       // The fk frame kernel names
       if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
@@ -448,7 +448,7 @@ void CelestialBodyOrientationPanel::Create()
    spinAxisDECRateStringWX        = "";
    rotationConstantStringWX       = "";
    rotationRateStringWX           = "";
-   spiceFrameNameStringWX         = "";
+   spiceFrameIDStringWX           = "";
    
 //   // rotation data source combo box
 //   sourceArray              = theBody->GetRotationDataSourceList();
@@ -518,11 +518,11 @@ void CelestialBodyOrientationPanel::Create()
    rotationRateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/day"),
                                  wxDefaultPosition, wxSize(-1,-1), 0);
 
-   spiceFrameNameStaticText    = new wxStaticText(this, ID_TEXT,wxString(GUI_ACCEL_KEY"SpiceFrameName"),
+   spiceFrameIDStaticText    = new wxStaticText(this, ID_TEXT,wxString(GUI_ACCEL_KEY"Spice Frame ID"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
-   spiceFrameNameTextCtrl      = new wxTextCtrl(this, ID_TEXT_CTRL_SPICE_FRAME_NAME, wxT(""),
-                                   wxDefaultPosition, wxSize(150, -1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC));
-   spiceFrameNameTextCtrl->SetToolTip(pConfig->Read(_T("SpiceFrameNameHint")));
+   spiceFrameIDTextCtrl      = new wxTextCtrl(this, ID_TEXT_CTRL_SPICE_FRAME_ID, wxT(""),
+                                   wxDefaultPosition, wxSize(150, -1), 0);
+   spiceFrameIDTextCtrl->SetToolTip(pConfig->Read(_T("SpiceFrameIDHint")));
 
    wxBoxSizer *fkButtonSizer = NULL;
    if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
@@ -616,8 +616,8 @@ void CelestialBodyOrientationPanel::Create()
       rotationDataSourceComboBox->Disable();
 //   }
 
-      oneFlexGridSizer->Add(spiceFrameNameStaticText,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
-      oneFlexGridSizer->Add(spiceFrameNameTextCtrl,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
+      oneFlexGridSizer->Add(spiceFrameIDStaticText,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
+      oneFlexGridSizer->Add(spiceFrameIDTextCtrl,0, wxGROW|wxALIGN_LEFT|wxALL, bSize);
       oneFlexGridSizer->Add(20,20, 0, wxALIGN_LEFT|wxALL, bSize);
 
       if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)
@@ -675,7 +675,7 @@ void CelestialBodyOrientationPanel::ResetChangeFlags(bool discardMods)
    spinAxisDECRateChanged        = false;
    rotationConstantChanged       = false;
    rotationRateChanged           = false;
-   spiceFrameNameChanged         = false;
+   spiceFrameIDChanged           = false;
    fkChanged                     = false;
    
    if (discardMods)
@@ -688,7 +688,7 @@ void CelestialBodyOrientationPanel::ResetChangeFlags(bool discardMods)
       spinAxisDECRateTextCtrl->DiscardEdits();
       rotationConstantTextCtrl->DiscardEdits();
       rotationRateTextCtrl->DiscardEdits();
-      spiceFrameNameTextCtrl->DiscardEdits();
+      spiceFrameIDTextCtrl->DiscardEdits();
    }
 }
 
@@ -866,7 +866,7 @@ void CelestialBodyOrientationPanel::OnRotationRateTextCtrlChange(wxCommandEvent 
 }
 
 //------------------------------------------------------------------------------
-// void OnSpiceFrameNameTextCtrlChange(wxCommandEvent &event)
+// void OnSpiceFrameIDTextCtrlChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Handle the event triggered when the user modifies the spice frame name
@@ -876,11 +876,11 @@ void CelestialBodyOrientationPanel::OnRotationRateTextCtrlChange(wxCommandEvent 
  *
  */
 //------------------------------------------------------------------------------
-void CelestialBodyOrientationPanel::OnSpiceFrameNameTextCtrlChange(wxCommandEvent &event)
+void CelestialBodyOrientationPanel::OnSpiceFrameIDTextCtrlChange(wxCommandEvent &event)
 {
-   if (spiceFrameNameTextCtrl->IsModified())
+   if (spiceFrameIDTextCtrl->IsModified())
    {
-      spiceFrameNameChanged        = true;
+      spiceFrameIDChanged          = true;
       dataChanged                  = true;
       theCBPanel->EnableUpdate(true);
    }

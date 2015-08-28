@@ -70,7 +70,7 @@ private:
    Real           spinAxisDECRate;
    Real           rotationConstant;
    Real           rotationRate;
-   std::string    spiceFrameName;
+   std::string    spiceFrameID;
    
    bool           rotationDataSourceChanged;
    bool           nutationUpdateIntervalChanged;
@@ -80,7 +80,7 @@ private:
    bool           spinAxisDECRateChanged;
    bool           rotationConstantChanged;
    bool           rotationRateChanged;
-   bool           spiceFrameNameChanged;
+   bool           spiceFrameIDChanged;
    bool           fkChanged;
 
    bool           isEarth;
@@ -102,7 +102,7 @@ private:
    void     OnSpinAxisDECRateTextCtrlChange(wxCommandEvent &event);
    void     OnRotationConstantTextCtrlChange(wxCommandEvent &event);
    void     OnRotationRateTextCtrlChange(wxCommandEvent &event);
-   void     OnSpiceFrameNameTextCtrlChange(wxCommandEvent &event);
+   void     OnSpiceFrameIDTextCtrlChange(wxCommandEvent &event);
    void     OnFkFileBrowseButton(wxCommandEvent &event);
    void     OnFkFileRemoveButton(wxCommandEvent &event);
    void     OnFkFileListBoxChange(wxCommandEvent &event);
@@ -119,7 +119,7 @@ private:
    wxStaticText *spinAxisDECRateStaticText;
    wxStaticText *rotationConstantStaticText;
    wxStaticText *rotationRateStaticText;
-   wxStaticText *spiceFrameNameStaticText;
+   wxStaticText *spiceFrameIDStaticText;
    wxStaticText *fkStaticText;
 
    wxStaticText *nutationUpdateIntervalUnitsStaticText;
@@ -137,7 +137,7 @@ private:
    wxTextCtrl   *spinAxisDECRateTextCtrl;
    wxTextCtrl   *rotationConstantTextCtrl;
    wxTextCtrl   *rotationRateTextCtrl;
-   wxTextCtrl   *spiceFrameNameTextCtrl;
+   wxTextCtrl   *spiceFrameIDTextCtrl;
    wxTextCtrl   *fkTextCtrl;
    
    wxComboBox   *rotationDataSourceComboBox;
@@ -162,7 +162,7 @@ private:
    wxString     spinAxisDECRateStringWX;
    wxString     rotationConstantStringWX;
    wxString     rotationRateStringWX;
-   wxString     spiceFrameNameStringWX;
+   wxString     spiceFrameIDStringWX;
 
    
    wxListBox    *fkFileListBox;
@@ -184,7 +184,7 @@ private:
       ID_TEXT_CTRL_SPIN_AXIS_DEC_RATE,
       ID_TEXT_CTRL_ROTATION_CONSTANT,
       ID_TEXT_CTRL_ROTATION_RATE,
-      ID_TEXT_CTRL_SPICE_FRAME_NAME,
+      ID_TEXT_CTRL_SPICE_FRAME_ID,
       ID_LIST_BOX_FK_FILE,
       ID_BROWSE_BUTTON_FK_FILE,
       ID_REMOVE_BUTTON_FK_FILE,

@@ -397,7 +397,7 @@ SolarSystem::SolarSystem(std::string withName) :
    theSun->SetRadiantPower(STAR_RADIANT_POWER, STAR_REFERENCE_DISTANCE);
    theSun->SetPhotosphereRadius(STAR_PHOTOSPHERE_RADIUS);
    theSun->SetIntegerParameter(theSun->GetParameterID("NAIFId"),STAR_NAIF_IDS);
-   theSun->SetStringParameter(theSun->GetParameterID("SpiceFrameName"), STAR_SPICE_FRAME_NAME);
+   theSun->SetStringParameter(theSun->GetParameterID("SpiceFrameID"), STAR_SPICE_FRAME_ID);
 
    theSun->SetTwoBodyEpoch(STAR_TWO_BODY_EPOCH);
    theSun->SetTwoBodyElements(STAR_TWO_BODY_ELEMENTS);
@@ -488,7 +488,7 @@ SolarSystem::SolarSystem(std::string withName) :
       // Set the orientation parameters for the body (Neptune is a special case - handled in the Planet class
       newPlanet->SetOrientationParameters(PLANET_ORIENTATION_PARAMETERS[ii]);
       newPlanet->SetIntegerParameter(newPlanet->GetParameterID("NAIFId"),PLANET_NAIF_IDS[ii]);
-      newPlanet->SetStringParameter(newPlanet->GetParameterID("SpiceFrameName"), PLANET_SPICE_FRAME_NAME[ii]);
+      newPlanet->SetStringParameter(newPlanet->GetParameterID("SpiceFrameID"), PLANET_SPICE_FRAME_ID[ii]);
       
       // Set texture map file for the Planets (LOJ: 2014.06.19)
       SetTextureMapFile(newPlanet, PLANET_NAMES[ii]);
@@ -568,7 +568,7 @@ SolarSystem::SolarSystem(std::string withName) :
       // Set the orientation parameters for the body (Neptune is a special case - handled in the Planet class
       newMoon->SetOrientationParameters(PLANET_ORIENTATION_PARAMETERS[ii]);
       newMoon->SetIntegerParameter(newMoon->GetParameterID("NAIFId"),MOON_NAIF_IDS[ii]);
-      newMoon->SetStringParameter(newMoon->GetParameterID("SpiceFrameName"), MOON_SPICE_FRAME_NAME[ii]);
+      newMoon->SetStringParameter(newMoon->GetParameterID("SpiceFrameID"), MOON_SPICE_FRAME_ID[ii]);
 
       // Set texture map file for the moon (LOJ: 2014.06.19)
       SetTextureMapFile(newMoon, MOON_NAMES[ii]);
