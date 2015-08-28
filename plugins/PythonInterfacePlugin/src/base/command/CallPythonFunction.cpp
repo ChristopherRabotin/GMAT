@@ -580,9 +580,9 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
             else
                formatIn.append("s");
 
-            char *str = new char[64];
-            str = (char *)param->EvaluateString().c_str();
-            argIn.push_back(str);
+            std::string *pStr = new std::string;
+            *pStr = param->EvaluateString();
+            argIn.push_back(pStr);
             paramType = Gmat::STRING_TYPE;
 
             break;
