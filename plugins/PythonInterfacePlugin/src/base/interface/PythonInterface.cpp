@@ -237,7 +237,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 */
 //------------------------------------------------------------------------------
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                                const std::string &formatIn, const std::vector<void *> &argIn, Gmat::ParameterType paramType, Integer row, Integer col)
+                                             const std::string &formatIn, const std::vector<void *> &argIn,                                              Gmat::ParameterType paramType, Integer row, Integer col)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -310,13 +310,15 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       pybuffer->buf = v;
     
       pybuffer->strides = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
-      pybuffer->shape[0] = argIn.size();
-      PyBuffer_FillContiguousStrides(1, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
+      for (UnsignedInt m = 0; m < row; ++m)
+         pybuffer->shape[m] = col;
+
+      PyBuffer_FillContiguousStrides(pybuffer->ndim, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
    
       pybuffer->itemsize = sizeof(Real);
-      pybuffer->len = pybuffer->shape[0] * pybuffer->itemsize ;
-      
-      MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n", pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+      pybuffer->len = (pybuffer->ndim == 1 ?                        pybuffer->shape[0] * pybuffer->itemsize :                        pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
+
+      MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n",             pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
       
       int c =  PyBuffer_IsContiguous(pybuffer, 'C');
       Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
