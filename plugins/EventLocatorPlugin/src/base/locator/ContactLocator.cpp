@@ -1002,7 +1002,7 @@ bool ContactLocator::Initialize()
          for (UnsignedInt ii= 0; ii < stations.size(); ii++)
          {
             GroundstationInterface *gsi = (GroundstationInterface*) stations.at(ii);
-            if (!gsi->InitializeForContactLocation(true))  // use false for testing resulting files
+            if (!gsi->InitializeForContactLocation(false))  // use false for testing resulting files
             {
                std::string errmsg = "Error writing SPK or FK kernel for Ground Station ";
                errmsg            += stationNames.at(ii) + " used by ContactLocator ";
@@ -1137,7 +1137,7 @@ void ContactLocator::FindEvents()
       Integer obsNaifId = stations.at(j)->GetIntegerParameter(
                           stations.at(j)->GetParameterID("NAIFId"));
       theObsrvr = GmatStringUtil::ToString(obsNaifId);
-      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameName");
+      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameID");
 
       Real  minElAngle  = stations.at(j)->GetRealParameter("MinimumElevationAngle");
 

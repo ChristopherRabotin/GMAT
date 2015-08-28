@@ -868,7 +868,7 @@ void EclipseLocator::FindEvents()
       Integer bodyNaifId  = body->GetIntegerParameter(body->GetParameterID("NAIFId"));
       theFront  = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaifId));
       bodyName  = body->GetName();
-      theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameName"));
+      theFFrame = body->GetStringParameter(body->GetParameterID("SpiceFrameID"));
 
       for (Integer jj = 0; jj < eclipseTypes.size(); jj++)
       {
