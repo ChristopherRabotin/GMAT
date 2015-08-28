@@ -778,9 +778,13 @@ void RunSimulator::Propagate()
 
    // todo: This is a temporary fix; need to evaluate to find a more elegant
    //       solution here
-   Real maxStep = 600.0;
-   if (dt > maxStep)
-      dt = maxStep;
+   //Real maxStep = 600.0;
+   //if (dt > maxStep)
+   //   dt = maxStep;
+   Real maxStep = 60.0;
+   if (fabs(dt) > maxStep)
+      dt = (dt > 0.0 ? maxStep : -maxStep);
+
    Step(dt);
    bufferFilled = false;
 
