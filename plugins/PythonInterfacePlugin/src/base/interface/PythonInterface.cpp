@@ -359,7 +359,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    {
       MessageInterface::ShowMessage("A string is passed to Python.\n");
       //attention for both python version needs to be implemented.
-      PyObject * pyStr = PyUnicode_FromString((char*)argIn.at(0));
+      PyObject * pyStr = PyUnicode_FromString(((std::string *)argIn.at(0))->c_str());
       // Create a Tuple to pass it to Python function
       pyTupleObj = PyTuple_New(1);
       PyTuple_SetItem(pyTupleObj, 0, pyStr);
