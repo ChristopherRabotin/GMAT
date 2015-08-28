@@ -237,7 +237,8 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 */
 //------------------------------------------------------------------------------
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                             const std::string &formatIn, const std::vector<void *> &argIn,                                              Gmat::ParameterType paramType, Integer row, Integer col)
+                                             const std::string &formatIn, const std::vector<void *> &argIn, 
+                                             Gmat::ParameterType paramType, Integer row, Integer col)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -289,8 +290,22 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
    
-   // The Array requirement which is listed below needs to be rephrased  in PythonInterfaceNotes_2015-01-14.txt
-   // Array data is passed into a list of floats for one dimensional arrays
+   /*-----------------------------------------------------------------------------------*/
+   // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
+   /*-----------------------------------------------------------------------------------*/
+
+   /* Initially GMAT will support passing data to python using the following rules :
+
+   * Variable data is passed into a Python float
+
+   * Array data is passed into a list of floats for one dimensional arrays
+
+   * Array data is passed into a list of lists of floats, all of the same dimension,
+   * for two dimensional arrays
+
+   *  Strings are passed to Python strings
+    ------------------------------------------------------------------------------------*/
+
    if (paramType == Gmat::RMATRIX_TYPE)
    {
       Py_buffer *pybuffer = (Py_buffer *)malloc(sizeof(Py_buffer));
@@ -316,9 +331,12 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       PyBuffer_FillContiguousStrides(pybuffer->ndim, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
    
       pybuffer->itemsize = sizeof(Real);
-      pybuffer->len = (pybuffer->ndim == 1 ?                        pybuffer->shape[0] * pybuffer->itemsize :                        pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
+      pybuffer->len = (pybuffer->ndim == 1 ? 
+                       pybuffer->shape[0] * pybuffer->itemsize : 
+                       pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
 
-      MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n",             pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+      MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n", 
+            pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
       
       int c =  PyBuffer_IsContiguous(pybuffer, 'C');
       Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
