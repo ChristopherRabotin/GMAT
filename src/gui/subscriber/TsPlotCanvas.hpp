@@ -51,6 +51,7 @@ public:
                 const wxString& name = "");
 
    virtual void OnPaint(wxPaintEvent& ev);
+   virtual void OnRefresh(wxFocusEvent& ev);
    virtual void OnSize(wxSizeEvent& ev);
    void OnMouseEvent(wxMouseEvent& event);
    
@@ -228,6 +229,8 @@ protected:
    int legendColumns;
    /// Flag triggered by a size event
    bool resized;
+   /// Counter for drawall calls used when repainting a hidden window
+   int drawAllCounter;
 
 //private:
    DECLARE_EVENT_TABLE()

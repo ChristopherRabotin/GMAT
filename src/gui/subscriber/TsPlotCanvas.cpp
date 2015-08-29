@@ -38,6 +38,7 @@ bool TsPlotCanvas::defaultLabels = false;
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
    EVT_PAINT         (TsPlotCanvas::OnPaint)
+   EVT_SET_FOCUS     (TsPlotCanvas::OnRefresh)
    EVT_SIZE          (TsPlotCanvas::OnSize)
    EVT_MOUSE_EVENTS  (TsPlotCanvas::OnMouseEvent)
    EVT_MENU          (ID_TOGGLE_GRID, TsPlotCanvas::ToggleGrid)
@@ -119,7 +120,8 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    mouseRect(),
    legendRect(),
    legendColumns  (1),
-   resized        (false)
+   resized        (false),
+   drawAllCounter (0)
 {
    wxPaintDC dc(this);
 
@@ -164,6 +166,20 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
 // wx Message Handlers
 //==============================================================================
 
+void TsPlotCanvas::OnRefresh(wxFocusEvent& ev)
+{
+   #ifdef DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage
+      ("==> TsPlotCanvas::OnRefresh() entered");
+   #endif
+
+   wxPaintEvent pev;
+   pev.SetEventObject(this);
+   drawAllCounter = 2;
+   ProcessWindowEvent(pev);
+}
+
+
 void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
 {
    #ifdef DEBUG_TS_CANVAS
@@ -176,18 +192,34 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
    #ifndef __WXGTK__
       wxWindow::Refresh(false);
    #endif
-bool ownedPlotCanvas = true;
+   bool ownedPlotCanvas = true;
+
+   wxRegionIterator upd(GetUpdateRegion());
+   if (upd && dataUpdated == false)
+   {
+      #ifdef DEBUG_REGIONUPDATES
+         MessageInterface::ShowMessage("Update Regions:\n");
+      #endif
+      ++upd;
+      if (upd)
+         resized = true;
+   }
 
    wxPaintDC dc(this);
    wxCoord w, h;
    dc.GetSize(&w, &h);
+
+   if (drawAllCounter > 0)
+   {
+      resized = true;
+      --drawAllCounter;
+   }
 
    // If the legend is turned on, be sure it can be seen
    if (legendRect.x > w)
       legendRect.x = w - 5;
    if (legendRect.y > h)
       legendRect.y = h - 5;
-
    bool drawAll = (resized ? true : false);
    
    // wxRegionIterator is not used here so commented out (LOJ: 2014.10.10)
