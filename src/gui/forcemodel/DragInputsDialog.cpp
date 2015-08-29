@@ -403,42 +403,37 @@ void DragInputsDialog::SaveData()
       (*theForceStringArray)[0] = predictedModelString;
       (*theForceStringArray)[1] = historicModelString;
       
-      if ((strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile")==0 || 
-           strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile" )==0)  || 
-          (strcmp(predictedModelString.c_str(),"SchattenFile")==0 || 
-           strcmp(historicModelString.c_str(),"SchattenFile")==0))
+      if (strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile")==0 || 
+          strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile" )==0) 
       {
-          if (strcmp(predictedModelString.c_str(),"CSSISpaceWeatherFile") || 
-              strcmp(historicModelString.c_str(),"CSSISpaceWeatherFile" )) 
+         if (cssifileName == "")
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "The cssi flux file name is empty, please enter file name or");
+            canClose = false;
+            return;
+         }
+
+         // save off the data
+         (*theForceStringArray)[2] = cssifileName;
+
+      }
+      if (strcmp(predictedModelString.c_str(),"SchattenFile")==0 || 
+          strcmp(historicModelString.c_str(),"SchattenFile" )==0)
+      {
+          if (schattenfileName=="")
           {
-             if (cssifileName == "")
-             {
-                MessageInterface::PopupMessage
-                   (Gmat::ERROR_, "The cssi flux file name is empty, please enter file name or");
-                canClose = false;
-                return;
-             }
-
-             // save off the data
-             (*theForceStringArray)[2] = cssifileName;
-
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "The schatten flux file name is empty, please enter file name");
+               canClose = false;
+               return;
           }
-          if (strcmp(predictedModelString.c_str(),"SchattenFile")==0 || 
-              strcmp(historicModelString.c_str(),"SchattenFile" )==0)
-          {
-              if (schattenfileName=="")
-              {
-                   MessageInterface::PopupMessage
-                      (Gmat::ERROR_, "The schatten flux file name is empty, please enter file name");
-                   canClose = false;
-                   return;
-              }
 
-              // save the data
-              (*theForceStringArray)[3] = schattenfileName;
-              (*theForceStringArray)[4] = schattenError; 
-              (*theForceStringArray)[5] = schattenTiming;
-          }
+          // save the data
+          (*theForceStringArray)[3] = schattenfileName;
+          (*theForceStringArray)[4] = schattenError; 
+          (*theForceStringArray)[5] = schattenTiming;
+      }
 
         #ifdef DEBUG_DRAG_SAVE
            MessageInterface::ShowMessage
@@ -453,7 +448,6 @@ void DragInputsDialog::SaveData()
 //         MessageInterface::ShowMessage
 //            ("   ==> Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
          #endif
-      }
 
       if (strcmp(predictedModelString.c_str(),"ConstantFluxAndGeoMag")==0 || 
           strcmp(historicModelString.c_str(),"ConstantFluxAndGeoMag" )==0)
