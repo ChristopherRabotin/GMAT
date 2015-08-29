@@ -1138,23 +1138,6 @@ void PropagationConfigPanel::PopulateForces()
                    dragBufferReady = true;
                }
 
-               if (strcmp(dragStringBuffer[0].c_str() , "ConstantFluxAndGeoMag" )==0 || 
-                   strcmp(dragStringBuffer[1].c_str(), "ConstantFluxAndGeoMag" )==0)
-               {
-                   dragParameterBuffer[0] = theDragForce->GetRealParameter("F107");
-                   dragParameterBuffer[1] = theDragForce->GetRealParameter("F107A");
-                   dragParameterBuffer[2] = theDragForce->GetRealParameter("MagneticIndex");
-                   dragBufferReady = true;
-               }
-               else if (strcmp(dragStringBuffer[0].c_str() , "CSSISpaceWeatherFile")==0 || 
-                   strcmp(dragStringBuffer[1].c_str() , "CSSISpaceWeatherFile" )==0)
-               {
-                   dragStringBuffer[2] = theDragForce->GetStringParameter("CSSISpaceWeatherFile");
-                   dragBufferReady = true;
-
-               }
-
-
                //Warn user about bodies already added as Primary body
                Integer pmSize = (Integer)pointMassBodyList.size();
 //               Integer last = (Integer)primaryBodyList.size() - 1;
