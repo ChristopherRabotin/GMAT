@@ -3937,6 +3937,12 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
 
       dragBufferReady = true;
    }
+   else if ( dragForce==NULL && !dragBufferReady)
+   {
+      dragStringBuffer[0] = "ConstantFluxAndGeoMag";
+      dragStringBuffer[1] = "ConstantFluxAndGeoMag";
+
+   }
 
    // Buffer the settings 
    Real dragSettings[3];
