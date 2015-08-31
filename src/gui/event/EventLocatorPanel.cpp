@@ -765,6 +765,7 @@ void EventLocatorPanel::LoadData()
    else
    {
       stellarAberrationCheckBox->Disable();
+      stellarAberrationCheckBox->SetValue(false);
       #ifdef DEBUG_EVENTPANEL_LOAD
          MessageInterface::ShowMessage
             ("  stellar-aberration-related ones disabled\n");
@@ -1069,17 +1070,28 @@ void EventLocatorPanel::SaveData(GmatBase *forObject)
             forObject->SetBooleanParameter(paramID, false);
          isLightTimeDelayChanged = false;
       }
+      // Stellar aberration could be set to false if the light time delay is turned off
+      if (isStellarAberrationChanged)
+      {
+         paramID = forObject->GetParameterID("UseStellarAberration");
+         if (stellarAberrationCheckBox->IsChecked())
+            forObject->SetBooleanParameter(paramID, true);
+         else
+            forObject->SetBooleanParameter(paramID, false);
+         isStellarAberrationChanged = false;
+      }
+
       if (lightTimeDelayCheckBox->IsChecked())
       {
-         if (isStellarAberrationChanged)
-         {
-            paramID = forObject->GetParameterID("UseStellarAberration");
-            if (stellarAberrationCheckBox->IsChecked())
-               forObject->SetBooleanParameter(paramID, true);
-            else
-               forObject->SetBooleanParameter(paramID, false);
-            isStellarAberrationChanged = false;
-         }
+//         if (isStellarAberrationChanged)
+//         {
+//            paramID = forObject->GetParameterID("UseStellarAberration");
+//            if (stellarAberrationCheckBox->IsChecked())
+//               forObject->SetBooleanParameter(paramID, true);
+//            else
+//               forObject->SetBooleanParameter(paramID, false);
+//            isStellarAberrationChanged = false;
+//         }
 
          // light time direction
          // SC/Target
@@ -1335,6 +1347,8 @@ void EventLocatorPanel::OnCheckBoxChange(wxCommandEvent& event)
       else
       {
          stellarAberrationCheckBox->Disable();
+         stellarAberrationCheckBox->SetValue(false);
+         isStellarAberrationChanged = true;
          if (!isEclipse)
          {
 //            lightTimeDirectionTxt->Disable();
