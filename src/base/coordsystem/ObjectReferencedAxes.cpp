@@ -99,6 +99,9 @@ ObjectReferencedAxes::ObjectReferencedAxes(const std::string &itsName) :
 {
    objectTypeNames.push_back("ObjectReferencedAxes");
    parameterCount = ObjectReferencedAxesParamCount;
+
+   usesPrimary   = GmatCoordinate::REQUIRED;
+   usesSecondary = GmatCoordinate::OPTIONAL_USE;
 }
 
 //---------------------------------------------------------------------------
@@ -189,30 +192,6 @@ ObjectReferencedAxes::~ObjectReferencedAxes()
 {
    primary = NULL;
    secondary = NULL;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesPrimary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesPrimary() const
-{
-   return GmatCoordinate::REQUIRED;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesSecondary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage ObjectReferencedAxes::UsesSecondary() const
-{
-   return GmatCoordinate::OPTIONAL_USE;
 }
 
 //------------------------------------------------------------------------------
@@ -692,12 +671,16 @@ bool ObjectReferencedAxes::SetStringParameter(const Integer id,
       SetZAxis(value);
       OK = true;
    }
-   if ((UsesPrimary() != GmatCoordinate::NOT_USED) && (id == PRIMARY_OBJECT_NAME))
+   if ((usesPrimary != GmatCoordinate::NOT_USED) &&
+       (usesPrimary != GmatCoordinate::REQUIRED_UNMODIFIABLE) &&
+       (id == PRIMARY_OBJECT_NAME))
    {
       primaryName = value;
       OK = true;
    }
-   if ((UsesSecondary() != GmatCoordinate::NOT_USED) && (id == SECONDARY_OBJECT_NAME))
+   if ((usesSecondary != GmatCoordinate::NOT_USED) &&
+       (usesSecondary != GmatCoordinate::REQUIRED_UNMODIFIABLE) &&
+       (id == SECONDARY_OBJECT_NAME))
    {
       secondaryName = value;
       OK = true;

@@ -82,6 +82,8 @@ private:
    bool mShowUpdate;
    bool mEnableAll;
    
+   bool setThoughDisabled;
+
    wxStaticText *originStaticText;
    wxStaticText *typeStaticText;
    wxStaticText *primaryStaticText;

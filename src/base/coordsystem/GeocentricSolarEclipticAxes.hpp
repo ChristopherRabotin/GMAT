@@ -44,8 +44,6 @@ public:
 
    virtual bool                           IsParameterReadOnly(const Integer id) const;
 
-   virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
-   virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;

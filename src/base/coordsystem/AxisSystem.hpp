@@ -70,6 +70,7 @@ public:
    virtual void                  SetXAxis(const std::string &toValue);
    virtual void                  SetYAxis(const std::string &toValue);
    virtual void                  SetZAxis(const std::string &toValue);
+
    // methods to set the files to use - for those AxisSystems that 
    // need all or part of the FK5 reduction
    virtual void                  SetEopFile(EopFile *eopF);
@@ -186,6 +187,14 @@ protected:
    /// Name of the coordinate system
    std::string coordName;
    
+   /// @todo create class data to hold all of these settings (e.g.
+   /// usesXAxis, etc., similar to usesPrimary & usesSecondary),
+   /// then remove associated methods in subclasses when applicable
+   /// Does this AxisSystem use a primary object?
+   GmatCoordinate::ParameterUsage        usesPrimary;
+   /// Does this AxisSystem use a secondary object?
+   GmatCoordinate::ParameterUsage        usesSecondary;
+
    /// specifies the base inertial system for this AxisSystem
    /// valid values are: "FK5" and "ICRF" - must be set on each leaf AxisSystem-derived class
    std::string baseSystem;
