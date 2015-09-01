@@ -26,6 +26,7 @@
 #include <stdlib.h>           // For atoi
 
 //#define DEBUG_GRAVITY_GRV_FILE
+//#define DEBUG_GRAVITY_DEGREE_ORDER
 
 #ifdef DEBUG_GRAVITY_GRV_FILE
 #include "MessageInterface.hpp"
@@ -91,11 +92,12 @@ void HarmonicGravityGrv::Load()
       getline(inStream, line);
       lineno++;
 
-      if (line == "")
+//      if (line == "")
+      if (GmatStringUtil::IsBlank(line, true))
          continue;
       #ifdef DEBUG_GRAVITY_GRV_FILE
          else
-            MessageInterface::ShowMessage("%s\n", line);
+            MessageInterface::ShowMessage("Line is \"%s\"\n", line.c_str());
       #endif
       std::istringstream lineStream;
       std::ostringstream linenoStream;
@@ -109,6 +111,9 @@ void HarmonicGravityGrv::Load()
          if (firstStr == "END") break;
 
          std::string upperString = GmatStringUtil::ToUpper(firstStr);
+         #ifdef DEBUG_GRAVITY_DEGREE_ORDER
+            MessageInterface::ShowMessage("----- firstStr = %s\n", firstStr.c_str());
+         #endif
 
          // ignore the stk version and blank lines
          if ((upperString == "MODEL") ||
@@ -121,6 +126,9 @@ void HarmonicGravityGrv::Load()
             lineStream >> NN;
             if (lineStream.fail())
                throw GravityFileException("Error reading DEGREE in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
+               #ifdef DEBUG_GRAVITY_DEGREE_ORDER
+                  MessageInterface::ShowMessage("--- Setting NN (degree) = %d\n", NN);
+               #endif
             degreeSet = true;
          }
          else if (upperString == "ORDER")
@@ -128,6 +136,9 @@ void HarmonicGravityGrv::Load()
             lineStream >> MM;
             if (lineStream.fail())
                throw GravityFileException("Error reading ORDER in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
+               #ifdef DEBUG_GRAVITY_DEGREE_ORDER
+                  MessageInterface::ShowMessage("--- Setting MM (order)  = %d\n", MM);
+               #endif
             orderSet = true;
          }
          else if (upperString == "GM")
@@ -165,9 +176,15 @@ void HarmonicGravityGrv::Load()
             Real snm = 0.0;
             // Ensure that m and n fall in the allowed ranges
             n = (Integer) atoi(firstStr.c_str());
-            if ((n > 0) && (n < NN))
+            #ifdef DEBUG_GRAVITY_DEGREE_ORDER
+               MessageInterface::ShowMessage("--- n = %d\n", n);
+            #endif
+            if ((n > 0) && (n <= NN))    // change to <= NN  WCS 2015.09.01  GMT-5173
             {
                lineStream >> m;
+               #ifdef DEBUG_GRAVITY_DEGREE_ORDER
+                  MessageInterface::ShowMessage("--- and m = %d\n", m);
+               #endif
                if (lineStream.fail())
                   throw GravityFileException("Error reading m in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
                if ((m >= 0) && (m <= n))
@@ -181,11 +198,15 @@ void HarmonicGravityGrv::Load()
                      if (lineStream.fail())
                         throw GravityFileException("Error reading snm in GRV gravity file \"" + gravityFilename + "\": line " + linenoStream.str());
                   }
+                  #ifdef DEBUG_GRAVITY_DEGREE_ORDER
+                     MessageInterface::ShowMessage("------ cnm = %12.10f, snm = %12.10f, isNormalized = %s\n",
+                           cnm, snm, isNormalized.c_str());
+                  #endif
                   if (isNormalized == "No")
-                     {
+                  {
                      cnm *= V[n][m];
                      snm *= V[n][m];
-                     }
+                  }
                   C[n][m] = (Real)cnm;
                   S[n][m] = (Real)snm;
                }
