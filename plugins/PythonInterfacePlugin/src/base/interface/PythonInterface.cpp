@@ -237,8 +237,7 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 */
 //------------------------------------------------------------------------------
 PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                             const std::string &formatIn, const std::vector<void *> &argIn, 
-                                             Gmat::ParameterType paramType, Integer row, Integer col)
+                                             const std::vector<void *> &argIn, std::vector<Gmat::ParameterType> paramType, UnsignedInt row, UnsignedInt col, UnsignedInt argSz)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -253,6 +252,12 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    PyObject* pTraceback = NULL;
 
    std::string msg;
+
+   // Build the Python Tuple object based on the format string
+   pyTupleObj = PyTuple_New(argSz);
+   // index to add elements to Tuple
+   int i = 0; 
+   int n = 0;
 
 #ifdef IS_PY3K
    // create a python Unicode object from an UTF-8 encoded null terminated char buffer
@@ -305,134 +310,113 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    *  Strings are passed to Python strings
     ------------------------------------------------------------------------------------*/
-
-   if (paramType == Gmat::RMATRIX_TYPE)
+   for (UnsignedInt index = 0; index < paramType.size(); ++index)
    {
-      Py_buffer *pybuffer = (Py_buffer *)malloc(sizeof(Py_buffer));
-      Real *v = new Real[argIn.size()];
-      std::vector<void *>::const_iterator it = argIn.begin();
-      Integer i = 0;
-      for (it, i; it != argIn.end(); ++it,++i)
-         v[i] = *(Real*)*it;
+      Gmat::ParameterType parType = paramType.at(index);
+      MessageInterface::ShowMessage("Paramter Type is %d\n", parType);
+      MessageInterface::ShowMessage("INDEX is %d\n", index);
 
-      
-      pybuffer->obj = NULL;
-      pybuffer->format = "d";
-      pybuffer->ndim = (row != 1 && col != 1) ? 2 : 1;
-      pybuffer->shape = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
-      pybuffer->readonly = 0;
-      pybuffer->suboffsets = 0;
-      pybuffer->buf = v;
-    
-      pybuffer->strides = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
-      for (UnsignedInt m = 0; m < row; ++m)
-         pybuffer->shape[m] = col;
-
-      PyBuffer_FillContiguousStrides(pybuffer->ndim, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
-   
-      pybuffer->itemsize = sizeof(Real);
-      pybuffer->len = (pybuffer->ndim == 1 ? 
-                       pybuffer->shape[0] * pybuffer->itemsize : 
-                       pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
-
-      MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n", 
-            pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
-      
-      int c =  PyBuffer_IsContiguous(pybuffer, 'C');
-      Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
-
-      if (c == 1)
+      if (parType == Gmat::RMATRIX_TYPE)
       {
-         PyObject *pyobj = NULL;
-         MessageInterface::ShowMessage("calling PyMemoryView_FromBuffer() \n");
-         pyobj = PyMemoryView_FromBuffer(pybuffer);
-         
-         //check the memory view object and read back the buffer we created earlier
-         int l = 0;
-         l = PyMemoryView_Check(pyobj);
-         if (l == 1)
+         Py_buffer *pybuffer = (Py_buffer *)malloc(sizeof(Py_buffer));
+         Real *v = new Real[row*col];
+        
+         for (UnsignedInt i = 0; i < row; ++i)
          {
-            
-            int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
-            if (ret != -1)
+            for (UnsignedInt j = 0; j < col; ++j)
             {
-               MessageInterface::ShowMessage("Fifth value is %lf\n", ((Real*)(view->buf))[4]);
+               v[i*col+j] = *(Real*)argIn.at(i*col + j +n);
+               MessageInterface::ShowMessage("v[] is %lf\n", v[i*col+j]);
             }
          }
+            
+         n += col;
 
-         // Create a Tuple to pass it to Python function
-         pyTupleObj = PyTuple_New(1);
-         PyTuple_SetItem(pyTupleObj, 0, pyobj);
+         pybuffer->obj = NULL;
+         pybuffer->format = "d";
+         pybuffer->ndim = (row != 1 && col != 1) ? 2 : 1;
+         pybuffer->shape = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
+         pybuffer->readonly = 0;
+         pybuffer->suboffsets = 0;
+         pybuffer->buf = v;
 
-         pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
-         MessageInterface::ShowMessage("pyObject_CallObject() is called\n");
+         pybuffer->strides = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
+         for (UnsignedInt m = 0; m < row; ++m)
+            pybuffer->shape[m] = col;
+
+         PyBuffer_FillContiguousStrides(pybuffer->ndim, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
+
+         pybuffer->itemsize = sizeof(Real);
+         pybuffer->len = (pybuffer->ndim == 1 ?
+            pybuffer->shape[0] * pybuffer->itemsize :
+            pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
+
+         MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n",
+            pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+
+         int c = PyBuffer_IsContiguous(pybuffer, 'C');
+         Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
+
+         if (c == 1)
+         {
+            PyObject *pyobj = NULL;
+            MessageInterface::ShowMessage("calling PyMemoryView_FromBuffer() \n");
+            pyobj = PyMemoryView_FromBuffer(pybuffer);
+
+            //check the memory view object and read back the buffer we created earlier
+            int l = 0;
+            l = PyMemoryView_Check(pyobj);
+            if (l == 1)
+            {
+               int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
+               if (ret != -1)
+                  MessageInterface::ShowMessage("Fifth value is %lf\n", v[4]);
+
+               if (ret == -1)
+               {
+                  PyErrorMsg(pType, pValue, pTraceback, msg);
+
+                  throw InterfaceException(" Python Exception Type:" + msg + "\n");
+               }
+            }
+
+            PyTuple_SetItem(pyTupleObj, i, pyobj);
+            i++;
+         }
+
+         // free memory
+         delete[] v;
+         free(view);
+         free(pybuffer->shape);
+         free(pybuffer->strides);
+         free(pybuffer);
       }
-
-      // free memory
-      delete[] v;
-      free(view);
-      free(pybuffer->shape);
-      free(pybuffer->strides);
-      free(pybuffer);
-   }
-   else if (paramType == Gmat::STRING_TYPE)
-   {
-      MessageInterface::ShowMessage("A string is passed to Python.\n");
-      //attention for both python version needs to be implemented.
-      PyObject * pyStr = PyUnicode_FromString(((std::string *)argIn.at(0))->c_str());
-      // Create a Tuple to pass it to Python function
-      pyTupleObj = PyTuple_New(1);
-      PyTuple_SetItem(pyTupleObj, 0, pyStr);
-
-      pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
-      MessageInterface::ShowMessage("pyObject_CallObject() is called\n");
-   }
-   else
-   {
-      // Build the Python Tuple object based on the format string
-      pyTupleObj = PyTuple_New(argIn.size());
-      char* pch = NULL;
-      char key[3] = "ds";
-      int i = 0;
-      //Locate characters in string
-      pch = (char*)strpbrk(formatIn.c_str(), key);
-
-      //Fill in the Python Tuple object with parameter Ins
-      while (pch != NULL)
+      else if (parType == Gmat::STRING_TYPE)
       {
-         std::string str(pch);
-         if (str.find_first_of("d") != std::string::npos)
-         {
-            PyObject* pyFloatObj = PyFloat_FromDouble(*(Real*)argIn.at(i));
-            PyTuple_SetItem(pyTupleObj, i, pyFloatObj);
-         }
-         else if (str.find_first_of("s") != std::string::npos)
-         {
-#ifdef IS_PY3K
-            PyObject* pyStringObj = PyUnicode_FromString((char*)argIn.at(i));
-#else
-            pyObject* pyStringObj = PyBytes_FromString((char*)argIn.at(i));
-#endif
-            PyTuple_SetItem(pyTupleObj, i, pyStringObj);
-         }
+         MessageInterface::ShowMessage("A string is passed to Python.\n");
+         //attention for both python version needs to be implemented.
+         PyObject * pyStr = PyUnicode_FromString(((std::string *)argIn.at(n))->c_str());
 
+         PyTuple_SetItem(pyTupleObj, i, pyStr);
          i++;
-         pch = strpbrk(pch + 1, key);
+         n++;
       }
-
-      if (!pyTupleObj)
+      else if (parType == Gmat::REAL_TYPE)
       {
-         PyErrorMsg(pType, pValue, pTraceback, msg);
-         Py_DECREF(pyFuncAttr);
-
-         throw InterfaceException(" Python Exception Type:" + msg + "\n");
+         MessageInterface::ShowMessage("Reading floats %lf\n", *(Real*)argIn.at(n));
+         PyObject* pyFloatObj = PyFloat_FromDouble(*(Real*)argIn.at(n));
+         PyTuple_SetItem(pyTupleObj, i, pyFloatObj);
+            
+         i++;
+         n++;
       }
-
-      // Call the python function   
-      pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
       
    }
+   
 
+   // Call the python function   
+   pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
+  
    Py_DECREF(pyFuncAttr);
    Py_DECREF(pyTupleObj);
 
@@ -443,6 +427,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       throw InterfaceException(" Python Exception Type:" + msg + "\n");
    }
 
+   
    return pyFunc;
 }
 
