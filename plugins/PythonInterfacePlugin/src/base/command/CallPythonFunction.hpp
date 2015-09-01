@@ -83,13 +83,13 @@ protected:
 	/// Function name for the Python code
 	std::string functionName;
    /// input array row
-   Integer inRow;
+   UnsignedInt inRow;
    /// input array column
-   Integer inCol;
+   UnsignedInt inCol;
    /// output array row
-   Integer outRow;
+   UnsignedInt outRow;
    /// output array column
-   Integer outCol;
+   UnsignedInt outCol;
 	/// Python Interface singleton
 	PythonInterface *pythonIf;
    /// Fill in Input parameter list
@@ -97,11 +97,9 @@ protected:
    /// Fill in Output parameter list
    Integer FillOutputList();
    /// Create C++ variable type declared in GMAT script
-   void SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType &pType);
+   void SendInParam(std::vector<void *> &argIn, std::vector<Gmat::ParameterType> &pType);
    /// Create C++ variable type declared in GMAT script
    void GetOutParams(const std::vector<void *> &argOut);
-   /// Python function Wrapper
-   void PythonFuncWrapper();
 
    /// Published parameters for Python functions
    enum

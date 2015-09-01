@@ -292,20 +292,18 @@ bool CallPythonFunction::Execute()
    MessageInterface::ShowMessage("  Calling CallPythonFunction::Execute()\n");
 
    // send the in parameters
-   std::string formatIn("");
    std::vector<void *> argIn;
    // send the out parameters
    std::vector<void *> argOut;
-   Gmat::ParameterType paramType = Gmat::UNKNOWN_PARAMETER_TYPE;
+   std::vector<Gmat::ParameterType> paramType;
    
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
-   SendInParam(formatIn, argIn, paramType);
-   MessageInterface::ShowMessage("parameter type is %d\n", paramType);
-
+   SendInParam(argIn, paramType);
+  
   // Next, call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, formatIn, argIn, paramType, inRow, inCol);
- 
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, argIn, paramType, inRow, inCol, mInputList.size());
+  
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
    /*-----------------------------------------------------------------------------------*/
@@ -439,8 +437,6 @@ bool CallPythonFunction::Execute()
       MessageInterface::ShowMessage("Unknown error happend in Python Interface.\n");
    }
 
- //  MessageInterface::ShowMessage("  pyRet:  %p\n", pyRet); 
-
 	return true;
 }
 
@@ -549,7 +545,7 @@ Integer CallPythonFunction::FillOutputList()
 * @return void
 */
 //------------------------------------------------------------------------------
-void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> &argIn, Gmat::ParameterType &paramType)
+void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gmat::ParameterType> &paramType)
 {
    for (unsigned int i = 0; i < mInputList.size(); i++)
    {
@@ -559,31 +555,22 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
       switch (type)
       {
          case Gmat::REAL_TYPE:
-         {
-            if (i == 0)
-               formatIn.append("(d");
-            else
-               formatIn.append("d");
-        
+         {       
             Real *r = new Real;
-            *r = param->EvaluateReal();
+            *r = param->EvaluateReal();   
             argIn.push_back(r);
-            paramType = Gmat::REAL_TYPE;
+
+            paramType.push_back(Gmat::REAL_TYPE);
 
             break;
          }
 
          case Gmat::STRING_TYPE:
          {
-            if (i == 0)
-               formatIn.append("(s");
-            else
-               formatIn.append("s");
-
             std::string *pStr = new std::string;
             *pStr = param->EvaluateString();
             argIn.push_back(pStr);
-            paramType = Gmat::STRING_TYPE;
+            paramType.push_back(Gmat::STRING_TYPE);
 
             break;
          }
@@ -604,19 +591,13 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
                {
                   for (int j = 0; j < inCol; ++j)
                   {
-                     if (i == 0)
-                        formatIn.append("(d");
-                     else
-                        formatIn.append("d");
-
                      Real *ret = new Real;
                      *ret = arr->GetRealParameter(std::string("SingleValue"), i, j);
                      argIn.push_back(ret);
-
                   }
                }
 
-               paramType = Gmat::RMATRIX_TYPE;
+               paramType.push_back(Gmat::RMATRIX_TYPE);
 
                break;
             }
@@ -628,7 +609,7 @@ void CallPythonFunction::SendInParam(std::string &formatIn, std::vector<void *> 
       }
    }
 
-   formatIn.append(")");
+  
 
    // Fill in the output array dimension
    for (unsigned int i = 0; i < mOutputList.size(); i++)
@@ -678,7 +659,7 @@ void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
       {
          case Gmat::STRING_TYPE:
          {
-            MessageInterface::ShowMessage("String message is %s\n", ((std::string*)(argOut.at(0)))->c_str());
+            MessageInterface::ShowMessage("String message is %s\n", ((std::string*)(argOut.at(i)))->c_str());
             param->SetString(*(std::string*)(argOut.at(0)));
             break;
          }
