@@ -213,6 +213,8 @@ protected:
    std::string          historicWSource;
    /// Predicted Weather data type
    std::string          predictedWSource;
+   /// Default path to the flux files
+   std::string          fluxPath;
    /// Historic Weather File name
    std::string          cssiWFile;
    /// Schatten Weather File name

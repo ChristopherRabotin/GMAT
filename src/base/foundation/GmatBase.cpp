@@ -4383,7 +4383,11 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          ("   id %d has owned object of type name <%s> and name \"%s\"\n", i,
           ownedObject->GetTypeName().c_str(), ownedObject->GetName().c_str());
       #endif
-      
+
+      // Skip writing out owned Amosphere models.  A better solution for the
+      // special case bits here should be implemented.
+      if (ownedObject->IsOfType(Gmat::ATMOSPHERE)) continue;
+
       // if owned object is a propagator, don't append the propagator name
       if (ownedObject->GetType() != Gmat::PROPAGATOR)
       {
@@ -4559,7 +4563,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
             writeString = true;
          
          #ifdef DEBUG_WRITE_PARAM
-         MessageInterface::ShowMessasge("   writeString = %d\n", writeString);
+         MessageInterface::ShowMessage("   writeString = %d\n", writeString);
          #endif
          //if (inMatlabMode || (!inMatlabMode && strVal != ""))
          if (writeString)
