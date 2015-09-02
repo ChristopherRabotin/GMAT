@@ -409,7 +409,7 @@ void DragInputsDialog::SaveData()
          if (cssifileName == "")
          {
             MessageInterface::PopupMessage
-               (Gmat::ERROR_, "The cssi flux file name is empty, please enter file name or");
+               (Gmat::ERROR_, "The CSSI flux file name is empty, please enter file name");
             canClose = false;
             return;
          }
@@ -424,7 +424,7 @@ void DragInputsDialog::SaveData()
           if (schattenfileName=="")
           {
                MessageInterface::PopupMessage
-                  (Gmat::ERROR_, "The schatten flux file name is empty, please enter file name");
+                  (Gmat::ERROR_, "The Schatten flux file name is empty, please enter file name");
                canClose = false;
                return;
           }
