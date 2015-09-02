@@ -310,6 +310,8 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    *  Strings are passed to Python strings
     ------------------------------------------------------------------------------------*/
+   Real *v = new Real[row*col];
+
    for (UnsignedInt index = 0; index < paramType.size(); ++index)
    {
       Gmat::ParameterType parType = paramType.at(index);
@@ -319,8 +321,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       if (parType == Gmat::RMATRIX_TYPE)
       {
          Py_buffer *pybuffer = (Py_buffer *)malloc(sizeof(Py_buffer));
-         Real *v = new Real[row*col];
-        
+         
          for (UnsignedInt i = 0; i < row; ++i)
          {
             for (UnsignedInt j = 0; j < col; ++j)
@@ -369,9 +370,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             if (l == 1)
             {
                int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
-               if (ret != -1)
-                  MessageInterface::ShowMessage("Fifth value is %lf\n", v[4]);
-
+               
                if (ret == -1)
                {
                   PyErrorMsg(pType, pValue, pTraceback, msg);
@@ -385,7 +384,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
          }
 
          // free memory
-         delete[] v;
+   //      delete[] v;
          free(view);
          free(pybuffer->shape);
          free(pybuffer->strides);
@@ -412,8 +411,9 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       }
       
    }
-   
 
+   delete[] v;
+   
    // Call the python function   
    pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
   
