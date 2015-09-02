@@ -3924,6 +3924,12 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
       dragStringBuffer[0] = "ConstantFluxAndGeoMag";
       dragStringBuffer[1] = "ConstantFluxAndGeoMag";
 
+      // Default values
+      FileManager *fm = FileManager::Instance();
+      dragStringBuffer[2] = fm->GetFilename("CSSI_FLUX_FILE");
+      dragStringBuffer[3] = fm->GetFilename("SCHATTEN_FILE");
+      dragStringBuffer[4] = "Nominal";
+      dragStringBuffer[5] = "NominalCycle";
    }
 
    // Buffer the settings 
