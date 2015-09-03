@@ -232,7 +232,7 @@ void CelestialBodyOrientationPanel::SaveData()
       {
          strval       = spiceFrameIDTextCtrl->GetValue();
          spiceFrameID = strval.c_str();
-         theBody->SetStringParameter(theBody->GetParameterID("SpiceFrameID"),
+         theBody->SetStringParameter(theBody->GetParameterID("SpiceFrameId"),
                spiceFrameID);
       }
 
@@ -378,7 +378,7 @@ void CelestialBodyOrientationPanel::LoadData()
       rotationRateTextCtrl->SetValue(rotationRateStringWX);
       
       // Spice Frame Name
-      spiceFrameID = theBody->GetStringParameter(theBody->GetParameterID("SpiceFrameID"));
+      spiceFrameID = theBody->GetStringParameter(theBody->GetParameterID("SpiceFrameId"));
       spiceFrameIDTextCtrl->SetValue(spiceFrameID.c_str());
 
       // The fk frame kernel names
@@ -518,11 +518,11 @@ void CelestialBodyOrientationPanel::Create()
    rotationRateUnitsStaticText = new wxStaticText(this, ID_TEXT, wxT("deg/day"),
                                  wxDefaultPosition, wxSize(-1,-1), 0);
 
-   spiceFrameIDStaticText    = new wxStaticText(this, ID_TEXT,wxString(GUI_ACCEL_KEY"Spice Frame ID"),
+   spiceFrameIDStaticText    = new wxStaticText(this, ID_TEXT,wxString(GUI_ACCEL_KEY"Spice Frame Id"),
                                    wxDefaultPosition, wxSize(-1,-1), 0);
    spiceFrameIDTextCtrl      = new wxTextCtrl(this, ID_TEXT_CTRL_SPICE_FRAME_ID, wxT(""),
                                    wxDefaultPosition, wxSize(150, -1), 0);
-   spiceFrameIDTextCtrl->SetToolTip(pConfig->Read(_T("SpiceFrameIDHint")));
+   spiceFrameIDTextCtrl->SetToolTip(pConfig->Read(_T("SpiceFrameIdHint")));
 
    wxBoxSizer *fkButtonSizer = NULL;
    if ((userDef || allowSpiceForDefaultBodies) && spiceAvailable)

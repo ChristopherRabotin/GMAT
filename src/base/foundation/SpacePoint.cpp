@@ -70,7 +70,7 @@ SpacePoint::PARAMETER_TEXT[SpacePointParamCount - GmatBaseParamCount] =
    "J2000BodyName",
    "NAIFId",
    "NAIFIdReferenceFrame",
-   "SpiceFrameID",
+   "SpiceFrameId",
    "OrbitSpiceKernelName",
    "AttitudeSpiceKernelName",
    "SCClockSpiceKernelName",
@@ -86,7 +86,7 @@ SpacePoint::PARAMETER_TYPE[SpacePointParamCount - GmatBaseParamCount] =
    Gmat::STRING_TYPE,       // "J2000BodyName"
    Gmat::INTEGER_TYPE,      // "NAIFId"
    Gmat::INTEGER_TYPE,      // "NAIFIdReferenceFrame"
-   Gmat::STRING_TYPE,       // "SpiceFrameID"
+   Gmat::STRING_TYPE,       // "SpiceFrameId"
    Gmat::STRINGARRAY_TYPE,  // "OrbitSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "AttitudeSpiceKernelName"
    Gmat::STRINGARRAY_TYPE,  // "SCClockSpiceKernelName"

@@ -1520,7 +1520,7 @@ bool BodyFixedPoint::WriteSPK(bool deleteFile)
       SpiceInt       spiceId      = naifId;
       Integer        bodyNaif     = theBody->GetIntegerParameter("NAIFId");
       SpiceInt       spiceCentral = bodyNaif;
-      std::string    bodyFrame    = theBody->GetStringParameter("SpiceFrameID");
+      std::string    bodyFrame    = theBody->GetStringParameter("SpiceFrameId");
       ConstSpiceChar *bFrame      = bodyFrame.c_str();
 
       SpiceDouble    theMax       = GmatRealConstants::REAL_MAX - 10.0;
@@ -1588,7 +1588,7 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
       // Get the topocentric conversion
       Integer        bodyNaif         = theBody->GetIntegerParameter("NAIFId");
       std::string    centralNaifStr   = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaif));
-      std::string    centralBodyFrame = theBody->GetStringParameter("SpiceFrameID");
+      std::string    centralBodyFrame = theBody->GetStringParameter("SpiceFrameId");
 
       Rvector topo = GetTopocentricConversion(centralNaifStr);
       /// Write the text FK kernel

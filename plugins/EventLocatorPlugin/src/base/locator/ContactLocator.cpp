@@ -1137,7 +1137,7 @@ void ContactLocator::FindEvents()
       Integer obsNaifId = stations.at(j)->GetIntegerParameter(
                           stations.at(j)->GetParameterID("NAIFId"));
       theObsrvr = GmatStringUtil::ToString(obsNaifId);
-      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameID");
+      std::string obsFrame = stations.at(j)->GetStringParameter("SpiceFrameId");
 
       Real  minElAngle  = stations.at(j)->GetRealParameter("MinimumElevationAngle");
 
