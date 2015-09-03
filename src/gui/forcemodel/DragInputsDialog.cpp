@@ -33,7 +33,7 @@
 BEGIN_EVENT_TABLE(DragInputsDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON, DragInputsDialog::OnBrowse)
    EVT_TEXT(ID_TEXTCTRL, DragInputsDialog::OnTextChange)
-   EVT_COMBOBOX(ID_MODEL,DragInputsDialog::OnModelComboChange)
+//   EVT_COMBOBOX(ID_MODEL,DragInputsDialog::OnModelComboChange)
    EVT_BUTTON(ID_BUTTON_CSSI,DragInputsDialog::OnCSSIFileSelect)
    EVT_BUTTON(ID_BUTTON_SCHATTEN,DragInputsDialog::OnSchattenFileSelect)
 END_EVENT_TABLE()
@@ -348,7 +348,7 @@ void DragInputsDialog::LoadData()
    schattenErrorComboBox->SetValue(wxVariant((*theForceStringArray)[4]));
    schattenTimingComboBox->SetValue(wxVariant((*theForceStringArray)[5]));
 
-   Update();
+   //Update();
    
    #ifdef DEBUG_DRAG_LOAD
    MessageInterface::ShowMessage("DragInputsDialog::LoadData() leaving\n");
