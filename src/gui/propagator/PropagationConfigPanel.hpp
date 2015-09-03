@@ -261,6 +261,7 @@ private:
    bool               dragBufferReady;
    /// Buffer for the drag data (F10.7, F10.7a, geomagnetic index)
    Real               dragParameterBuffer[3];
+   std::vector<std::string> dragStringBuffer;
 
    bool useDragForce;
    bool usePropOriginForSrp;
