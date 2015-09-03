@@ -299,6 +299,9 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       MessageInterface::ShowMessage
          ("   Add clone to objectStore if funcObj <%p>[%s]'%s' is not already in objectStore\n",
           funcObj, funcObj ? funcObj->GetTypeName().c_str() : "NULL", funcObjName.c_str());
+      MessageInterface::ShowMessage
+         ("   funcObj->IsGlobal=%d, funcObj->IsLocal=%d\n", funcObj->IsGlobal(),
+          funcObj->IsLocal());
       #endif
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
@@ -331,7 +334,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   Adding funcObj clone <%p>'%s' to objectStore\n", funcObjClone,
+            ("   ==> Adding funcObj clone <%p>'%s' to objectStore\n", funcObjClone,
              funcObjName.c_str());
          #endif
          funcObjClone->SetIsLocal(true);
@@ -373,25 +376,29 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
       
       #ifdef DEBUG_FUNCTION_INIT
       MessageInterface::ShowMessage
-         ("   Add clone to objectStore if autoObj '%s' is not already in objectStore\n",
-          autoObjName.c_str());
+         ("   Add clone to objectStore if autoObj <%p>[%s]'%s' is not already in objectStore\n",
+          autoObj, autoObj ? autoObj->GetTypeName().c_str() : "NULL", autoObjName.c_str());
       MessageInterface::ShowMessage
-         ("   autoObj->IsGlobal=%d, autoObj->IsLocal=%d\n", autoObj->IsGlobal(), autoObj->IsLocal());
+         ("   autoObj->IsGlobal=%d, autoObj->IsLocal=%d\n", autoObj->IsGlobal(),
+          autoObj->IsLocal());
       #endif
       
       // If automatic object owner (i.e Parameter owner) is global, set it global
-      if (IsAutomaticObjectGlobal(autoObjName))
+      GmatBase *owner = NULL;
+      if (IsAutomaticObjectGlobal(autoObjName, &owner))
       {
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("   autoObj <%p>'%s' is global, so setting isGlobal to true\n", autoObj,
              autoObjName.c_str());
+         MessageInterface::ShowMessage(GmatBase::WriteObjectInfo("   owner=", owner));
          #endif
          autoObj->SetIsGlobal(true);
       }
       
       // if name not found, clone it and add to map (loj: 2008.12.15)
-      if (objectStore->find(autoObjName) == objectStore->end())
+      std::map<std::string, GmatBase *>::iterator foundIter = objectStore->find(autoObjName);
+      if (foundIter == objectStore->end())
       {
          GmatBase *clonedAutoObj = autoObj->Clone();
          #ifdef DEBUG_MEMORY
@@ -415,8 +422,14 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
          
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
-            ("   Adding clonedAutoObj <%p>'%s' to objectStore\n", clonedAutoObj,
-             autoObjName.c_str());
+            ("   ==> Adding clonedAutoObj <%p>'%s' to objectStore, isGlobal=%d, "
+             "isLocal=%d\n", clonedAutoObj, autoObjName.c_str(), clonedAutoObj->IsGlobal(),
+             clonedAutoObj->IsLocal());
+         if (owner)
+         {
+            GmatBase *paramOwner = clonedAutoObj->GetRefObject(owner->GetType(), owner->GetName());
+            MessageInterface::ShowMessage(GmatBase::WriteObjectInfo("   paramOwner=", paramOwner));
+         }
          #endif
          
          clonedAutoObj->SetIsLocal(true);
@@ -459,7 +472,7 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
    
    // Set object map on Validator (moved here from below) LOJ: 2015.04.09 
    #ifdef DEBUG_FUNCTION_INIT
-   MessageInterface::ShowMessage("   Now about to set object map to Validator\n");
+   MessageInterface::ShowMessage("   Now about to set combined object map to Validator\n");
    ShowObjectMap(objectStore, "In GmatFunction::Initialize()", "objectStore");
    ShowObjectMap(globalObjectStore, "In GmatFunction::Initialize()", "globalObjectStore");
    #endif
@@ -862,9 +875,9 @@ bool GmatFunction::Execute(ObjectInitializer *objInit, bool reinitialize)
 
 
 //------------------------------------------------------------------------------
-// void Finalize()
+// void Finalize(bool cleanUp = false)
 //------------------------------------------------------------------------------
-void GmatFunction::Finalize()
+void GmatFunction::Finalize(bool cleanUp)
 {
    #ifdef DEBUG_TRACE
    static Integer callCount = 0;
@@ -877,7 +890,7 @@ void GmatFunction::Finalize()
    MessageInterface::ShowMessage
       ("======================================================================\n"
        "GmatFunction::Finalize() entered for '%s', FCS %s\n",
-       functionName.c_str(), fcsFinalized ? "already finalized, so skp fcs" :
+       functionName.c_str(), fcsFinalized ? "already finalized, so skip fcs" :
        "NOT finalized, so call fcs->RunComplete");
    #endif
    
@@ -903,7 +916,11 @@ void GmatFunction::Finalize()
       }
    }
    
-   Function::Finalize();
+   #ifdef DEBUG_FUNCTION_FINALIZE
+   MessageInterface::ShowMessage("   Calling Function::Finalize()\n");
+   #endif
+   
+   Function::Finalize(cleanUp);
    
    #ifdef DEBUG_FUNCTION_FINALIZE
    MessageInterface::ShowMessage("GmatFunction::Finalize() leaving\n");

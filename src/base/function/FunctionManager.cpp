@@ -1014,7 +1014,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
          MessageInterface::ShowMessage
             ("*** ERROR *** FunctionManager \"%s\" finalizing... due to false returned "
              "from currentFunction->Execute()\n", functionName.c_str());
-         currentFunction->Finalize();
+         currentFunction->Finalize(true);
          if (publisher)
             publisher->ClearPublishedData();
          
@@ -1027,7 +1027,7 @@ bool FunctionManager::Execute(FunctionManager *callingFM)
       MessageInterface::ShowMessage
          ("*** ERROR *** FunctionManager \"%s\" finalizing... due to \n%s\n", functionName.c_str(),
           e.GetFullMessage().c_str());
-      currentFunction->Finalize();
+      currentFunction->Finalize(true);
       if (publisher)
          publisher->ClearPublishedData();
       
@@ -1136,8 +1136,9 @@ void FunctionManager::Finalize()
        " calling FM is <%p> '%s'\n", this, functionName.c_str(), callingFunction,
        callingFunction ? callingFunction->GetFunctionName().c_str() : "NULL");
    MessageInterface::ShowMessage
-       ("   functionObjectStore=<%p>, localObjectStore=<%p>, clonedObjectStores.size()=%d\n",
-        functionObjectStore, localObjectStore, clonedObjectStores.size());
+       ("   functionObjectStore=<%p>, localObjectStore=<%p>, clonedObjectStores.size()=%d, "
+        "isFinalized=%d\n", functionObjectStore, localObjectStore, clonedObjectStores.size(),
+        isFinalized);
    #ifdef DEBUG_OBJECT_MAP
    ShowObjectMap(functionObjectStore, "FOS in Finalize");
    ShowObjectMap(localObjectStore, "LOS in Finalize");
@@ -2322,10 +2323,11 @@ void FunctionManager::Cleanup()
          ////currentFunction->ClearAutomaticObjects();
          // They are deleted in the Function destructor (LOJ: 2014.12.09)
          #ifdef DEBUG_CLEANUP
-         MessageInterface::ShowMessage("   Calling currentFunction->Finalize()\n");
+         MessageInterface::ShowMessage("   Calling currentFunction->Finalize(true)\n");
          #endif
          
-         currentFunction->Finalize();
+         // Set true for cleanup
+         currentFunction->Finalize(true);
       }
    }
    

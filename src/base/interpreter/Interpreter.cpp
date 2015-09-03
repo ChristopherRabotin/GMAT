@@ -2511,8 +2511,13 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       MessageInterface::ShowMessage("   rhs=\"%s\"\n", rhs.c_str());
       #endif
       
-      // check if single quote found
-      inArray = GmatStringUtil::SeparateByComma(rhs);
+      // Ignore () without input so that function call can have empty ()
+      // ie, "a = MyFunctionCall();" (LOJ: 2015.08.19)
+      if (rhs != "")
+      {
+         // Parse input parameters
+         inArray = GmatStringUtil::SeparateByComma(rhs);
+      }
       
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
       MessageInterface::ShowMessage("   inArray.size()=%d\n", inArray.size());
@@ -2712,7 +2717,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       if (retval && inFunctionMode)
          validInput = true;
       
-      // If not in function mode, throw exception if invalid inputparameter
+      // If not in function mode, throw exception if invalid input parameter
       if (!retval || !validInput)
       {
          InterpreterException ex
@@ -10185,6 +10190,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             break;
          }
          
+         // Accept () without arguments (LOJ: 2015.08.19)
+         #if 0
          if (inputArgs.size() == 0)
          {
             InterpreterException ex
@@ -10194,6 +10201,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             retval = false;
             break;
          }
+         #endif
          
          // check for duplicate input list
          #if DBGLVL_FUNCTION_DEF > 0

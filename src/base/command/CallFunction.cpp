@@ -1093,7 +1093,7 @@ void CallFunction::RunComplete()
 {
    #ifdef DEBUG_RUN_COMPLETE
    MessageInterface::ShowMessage
-      ("CallFunction::RunComplete() entered for this=<%p> '%s',\n   "
+      ("CallFunction::RunComplete() entered, this=<%p> '%s',\n   "
        "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
        fm.IsFinalized() ? "already " : "NOT ");
    #endif
@@ -1101,12 +1101,23 @@ void CallFunction::RunComplete()
    if (!fm.IsFinalized())
    {
       #ifdef DEBUG_RUN_COMPLETE
-      MessageInterface::ShowMessage("   calling FunctionManager::Finalize()\n");
+      MessageInterface::ShowMessage("   Calling FunctionManager::Finalize()\n");
       #endif
       fm.Finalize();
    }
    
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage("   Calling GmatCommand::RunComplete()\n");
+   #endif
+   
    GmatCommand::RunComplete();
+   
+   #ifdef DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage
+      ("CallFunction::RunComplete() leaving, this=<%p> '%s',\n   "
+       "FCS %sfinalized\n", this, GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       fm.IsFinalized() ? "already " : "NOT ");
+   #endif
 }
 
 

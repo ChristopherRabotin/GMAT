@@ -482,7 +482,8 @@ private:
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
    void ShowMissionSequence(const std::string &msg = "");
    void ShowObjectMap(const std::string &title, ObjectMap *objMap = NULL);
-   
+   std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+                               bool addEol = true);
    Moderator();
    virtual ~Moderator();
    
@@ -494,11 +495,13 @@ private:
    bool showFinalState;
    bool loadSandboxAndPause;
    Integer objectManageOption;
+   std::string currentScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
    std::vector<GmatCommand*> commands;
    
    ObjectMap *objectMapInUse;
+   ObjectMap *previousObjectMap;
    Function *currentFunction;
    ObjectArray unmanagedFunctions;
    
