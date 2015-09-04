@@ -281,8 +281,10 @@ void DragInputsDialog::Create()
    wxFlexGridSizer * dataFilesSizer = new wxFlexGridSizer(2, 3, 0, 0);
    schattenErrorComboBox = new wxComboBox( this, ID_ERROR_SCHATTEN, schattenErrorArray[0], wxDefaultPosition,
                                           wxDefaultSize, schattenErrorArray, wxCB_DROPDOWN|wxCB_READONLY);
-   schattenTimingComboBox = new wxComboBox( this, ID_TIMING_SCHATTEN, schattentimingArray[0], wxDefaultPosition,
-                                          wxDefaultSize, schattentimingArray, wxCB_DROPDOWN|wxCB_READONLY);
+   
+   wxSize ecbSize(schattenErrorComboBox->GetSize());
+   schattenTimingComboBox = new wxComboBox(this, ID_TIMING_SCHATTEN, schattentimingArray[0], wxDefaultPosition,
+                                           ecbSize/*wxDefaultSize*/, schattentimingArray, wxCB_DROPDOWN | wxCB_READONLY);
    cssiFileButton = new wxBitmapButton(this, ID_BUTTON_CSSI, openBitmap, wxDefaultPosition, wxSize(buttonWidth, -1));
    schattenFileButton = new wxBitmapButton(this, ID_BUTTON_SCHATTEN, openBitmap, wxDefaultPosition, wxSize(buttonWidth, -1));
    dataFilesSizer->Add(cssiSpaceWeatherStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
