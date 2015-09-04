@@ -122,6 +122,7 @@ public:
    // Special access methods used by drag forces
    bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
    AtmosphereModel*     GetInternalAtmosphereModel();
+   AtmosphereModel*     GetAtmosphereModel();
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);
@@ -212,6 +213,8 @@ protected:
    std::string          historicWSource;
    /// Predicted Weather data type
    std::string          predictedWSource;
+   /// Default path to the flux files
+   std::string          fluxPath;
    /// Historic Weather File name
    std::string          cssiWFile;
    /// Schatten Weather File name

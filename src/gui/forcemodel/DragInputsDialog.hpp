@@ -26,21 +26,30 @@ class DragInputsDialog : public GmatDialog
 {
 public:
    
-   DragInputsDialog(wxWindow *parent, Real *dragBuffer, const wxString &title = "");
+   DragInputsDialog(wxWindow *parent, Real *dragBuffer, std::vector<std::string> * dragStringBuffer, const wxString &title = "");
    virtual ~DragInputsDialog();
    
 private:
    
    bool isTextModified;
-   bool useFile;
-   
    void Update();
    
    wxStaticText *solarFluxStaticText;
    wxStaticText *avgSolarFluxStaticText;
    wxStaticText *geomagneticIndexStaticText;
    wxStaticText *fileNameStaticText;
-    
+   
+   wxStaticText *historicIndexStaticText;
+   wxStaticText *predictedIndexStaticText;
+
+   wxTextCtrl *cssiFileTextCtrl;
+   wxTextCtrl *schattenFileTextCtrl;
+ 
+   wxStaticText *cssiSpaceWeatherStaticText;
+   wxStaticText *schattenFileStaticText;
+   wxStaticText *schattenErrorStaticText;
+   wxStaticText *schattenTimingStaticText;
+
    wxTextCtrl *solarFluxTextCtrl;
    wxTextCtrl *avgSolarFluxTextCtrl;
    wxTextCtrl *geomagneticIndexTextCtrl;
@@ -48,13 +57,29 @@ private:
    
    wxButton *browseButton;
    
-   wxRadioButton *userInputRadioButton;
-   wxRadioButton *fileInputRadioButton;
+   wxRadioButton *userConstantInputRadioButton;
+   wxRadioButton *userFileInputRadioButton;
    
    Real *theForceData;
-      
+   std::vector<std::string> *  theForceStringArray;   
+
    wxString inputSourceString;
-   
+    
+   wxComboBox * historicFileComboBox;
+   wxComboBox * predictedFileComboBox;
+   wxComboBox * schattenErrorComboBox;
+   wxComboBox * schattenTimingComboBox;
+
+   wxBitmapButton *cssiFileButton;
+   wxBitmapButton *schattenFileButton;
+
+   wxArrayString historicInputsArray;
+   wxArrayString predictedInputsArray;
+   wxArrayString schattentimingArray;
+   wxArrayString schattenErrorArray;
+
+   std::string predictedModelString;
+   std::string historicModelString;
    // Methods inherited from GmatDialog
    virtual void Create();
    virtual void LoadData();
@@ -63,9 +88,11 @@ private:
    
    // Event-handling Methods
    void OnTextChange(wxCommandEvent &event);
-   void OnRadioButtonChange(wxCommandEvent& event);
    void OnBrowse(wxCommandEvent &event);
-   
+   void OnModelComboChange(wxCommandEvent &event);
+   void OnCSSIFileSelect(wxCommandEvent &event);
+   void OnSchattenFileSelect(wxCommandEvent &event);
+
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands
@@ -74,7 +101,16 @@ private:
       ID_TEXT = 46000,
       ID_TEXTCTRL,
       ID_BUTTON,
-      ID_RADIOBUTTON
+      ID_CONSTANT_RADIO,
+      ID_HISTORIC,
+      ID_MODEL,
+      ID_BUTTON_CSSI,
+      ID_BUTTON_SCHATTEN,
+      ID_FILE_RADIO,
+      ID_TEXTCTRL_CSSI,
+      ID_TEXTCTRL_SCHATTEN,
+      ID_ERROR_SCHATTEN,
+      ID_TIMING_SCHATTEN
    };
 };
 

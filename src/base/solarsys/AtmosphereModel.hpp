@@ -127,6 +127,7 @@ public:
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
 
+   SolarFluxReader*     GetFluxReader();
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -153,7 +154,7 @@ protected:
    /// Central body flattening factor
    Real                    cbFlattening;
    /// SolarFlux files are loaded ?
-   bool fluxReaderLoaded;
+   bool                    fluxReaderLoaded;
 
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.

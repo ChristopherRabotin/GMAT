@@ -328,6 +328,7 @@ PhysicalModel::PhysicalModel(const PhysicalModel& pm) :
    else
       deriv = NULL;
 
+   /// @todo: REMOVE THIS LINE!!!  We should not be changing this here; it forces derived classes to also change the count.
    parameterCount = PhysicalModelParamCount;
 }
 
