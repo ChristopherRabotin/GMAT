@@ -829,6 +829,8 @@ bool PropagationEnabledCommand::Step(Real dt)
    // Step all of the propagators by the input amount
    while (current != p.end())
    {
+//      MessageInterface::ShowMessage("dt = %.15lf \n", dt);
+//      (*current)->TurnDebug(true);
       if (!(*current)->Step(dt))
       {
          char size[32];
@@ -837,7 +839,8 @@ bool PropagationEnabledCommand::Step(Real dt)
             "Propagator " + (*current)->GetName() +
             " failed to take a good final step (size = " + size + ")\n");
       }
-
+//      (*current)->TurnDebug(false);
+//      MessageInterface::ShowMessage("*** \n", dt);
       #ifdef DEBUG_PROP_STEPS
          MessageInterface::ShowMessage("%.12lf ", dt);
       #endif
