@@ -158,7 +158,7 @@ Real Harmonic::GetFactor() const
 }
 
 //------------------------------------------------------------------------------
-void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+void Harmonic::CalculateField1(const Real& jday,  const Real pos[3], const Integer& nn,
                               const Integer& mm, const bool& fillgradient,
                               Real  acc[3],      Rmatrix33& gradient) const
 {
@@ -249,70 +249,71 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
          sum3 +=     Avv01 * D;
          sum4 +=     Avv11 * D;
 
-         // Truncate the gradient at 20x20, if calculated
-         if (fillgradient)
-         {
-            if ((m < GRADIENT_MAX + 1) && (n < GRADIENT_MAX + 1))
-            {
-               // Pines Equation 27 (Part of)
-               Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
-               Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
-               // Correct for normalization
+         // made changes by TUAN NGUYEN
+         //// Truncate the gradient at 20x20, if calculated
+         //if (fillgradient)
+         //{
+         //   if ((m < GRADIENT_MAX + 1) && (n < GRADIENT_MAX + 1))
+         //   {
+         //      // Pines Equation 27 (Part of)
+         //      Real G = m<=2 ? 0 : (Cval*Re[m-2] + Sval*Im[m-2]) * sqrt2;
+         //      Real H = m<=2 ? 0 : (Sval*Re[m-2] - Cval*Im[m-2]) * sqrt2;
+         //      // Correct for normalization
 
-               Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
-               Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
-               Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
-               if (m==0)
-               {
-                  VR02 /= sqrt(Real(2));
-                  VR12 /= sqrt(Real(2));
-                  VR22 /= sqrt(Real(2));
-               }
-               Real Avv02 = VR02 * A[n][m+2];
-               Real Avv12 = VR12 * A[n+1][m+2];
-               Real Avv22 = VR22 * A[n+2][m+2];
-               //Real Vnm = V[n][m];
-               //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
-               //Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
-               //Real Avv22 = Vnm / V[n+2][m+2] * A[n+2][m+2];
-               if (GmatMathUtil::IsNaN(Avv02) || GmatMathUtil::IsInf(Avv02))
-                  Avv02 = 0.0;  // ************** wcs added ****
+         //      Real VR02 = sqrt(Real( (n-m)*(n-m-1)*(n+m+1)*(n+m+2))) ;
+         //      Real VR12 = sqrt(Real(2*n+1)/Real(2*n+3)*Real((n-m)*(n+m+1)*(n+m+2)*(n+m+3)));
+         //      Real VR22 = sqrt(Real(2*n+1)/Real(2*n+5)*Real((n+m+1)*(n+m+2)*(n+m+3)*(n+m+4)));
+         //      if (m==0)
+         //      {
+         //         VR02 /= sqrt(Real(2));
+         //         VR12 /= sqrt(Real(2));
+         //         VR22 /= sqrt(Real(2));
+         //      }
+         //      Real Avv02 = VR02 * A[n][m+2];
+         //      Real Avv12 = VR12 * A[n+1][m+2];
+         //      Real Avv22 = VR22 * A[n+2][m+2];
+         //      //Real Vnm = V[n][m];
+         //      //Real Avv02 = Vnm / V[n][m+2]   * A[n][m+2];
+         //      //Real Avv12 = Vnm / V[n+1][m+2] * A[n+1][m+2];
+         //      //Real Avv22 = Vnm / V[n+2][m+2] * A[n+2][m+2];
+         //      if (GmatMathUtil::IsNaN(Avv02) || GmatMathUtil::IsInf(Avv02))
+         //         Avv02 = 0.0;  // ************** wcs added ****
 
-               #ifdef DEBUG_GRADIENT
-                  MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
-                  MessageInterface::ShowMessage("************** n = %d   m = %d\n", n, m);
-                 // MessageInterface::ShowMessage("Vnm       = %12.10f\n", Vnm);
-                  MessageInterface::ShowMessage("G     = %12.10f\n", G);
-               MessageInterface::ShowMessage("H     = %12.10f\n", H);
-               MessageInterface::ShowMessage("Avv02     = %12.10f\n", Avv02);
-               MessageInterface::ShowMessage("Avv12     = %12.10f\n", Avv12);
-               MessageInterface::ShowMessage("Avv12     = %12.10f\n", Avv22);
-                 // MessageInterface::ShowMessage("V[n][m+2] = %12.10f\n", V[n][m+2]);
-                 // MessageInterface::ShowMessage("A[n][m+2] = %12.10f\n", A[n][m+2]);
-               #endif
-               // Pines Equation 36 (Part of)
-               sum11 += m*(m-1) * Avv00 * G;
-               sum12 += m*(m-1) * Avv00 * H;
-               sum13 += m       * Avv01 * E;
-               sum14 += m       * Avv11 * E;
-               sum23 += m       * Avv01 * F;
-               sum24 += m       * Avv11 * F;
-               sum33 +=           Avv02 * D;
-               sum34 +=           Avv12 * D;
-               sum44 +=           Avv22 * D;
-            }
-            else
-            {
-               if (matrixTruncationWasPosted == false)
-               {
-                  MessageInterface::ShowMessage("*** WARNING *** Gradient data "
-                        "for the state transition matrix and A-matrix "
-                        "computations are truncated at degree and order "
-                        "<= %d.\n", GRADIENT_MAX);
-                  matrixTruncationWasPosted = true;
-               }
-            }
-         }
+         //      #ifdef DEBUG_GRADIENT
+         //         MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+         //         MessageInterface::ShowMessage("************** n = %d   m = %d\n", n, m);
+         //        // MessageInterface::ShowMessage("Vnm       = %12.10f\n", Vnm);
+         //         MessageInterface::ShowMessage("G     = %12.10f\n", G);
+         //      MessageInterface::ShowMessage("H     = %12.10f\n", H);
+         //      MessageInterface::ShowMessage("Avv02     = %12.10f\n", Avv02);
+         //      MessageInterface::ShowMessage("Avv12     = %12.10f\n", Avv12);
+         //      MessageInterface::ShowMessage("Avv12     = %12.10f\n", Avv22);
+         //        // MessageInterface::ShowMessage("V[n][m+2] = %12.10f\n", V[n][m+2]);
+         //        // MessageInterface::ShowMessage("A[n][m+2] = %12.10f\n", A[n][m+2]);
+         //      #endif
+         //      // Pines Equation 36 (Part of)
+         //      sum11 += m*(m-1) * Avv00 * G;
+         //      sum12 += m*(m-1) * Avv00 * H;
+         //      sum13 += m       * Avv01 * E;
+         //      sum14 += m       * Avv11 * E;
+         //      sum23 += m       * Avv01 * F;
+         //      sum24 += m       * Avv11 * F;
+         //      sum33 +=           Avv02 * D;
+         //      sum34 +=           Avv12 * D;
+         //      sum44 +=           Avv22 * D;
+         //   }
+         //   else
+         //   {
+         //      if (matrixTruncationWasPosted == false)
+         //      {
+         //         MessageInterface::ShowMessage("*** WARNING *** Gradient data "
+         //               "for the state transition matrix and A-matrix "
+         //               "computations are truncated at degree and order "
+         //               "<= %d.\n", GRADIENT_MAX);
+         //         matrixTruncationWasPosted = true;
+         //      }
+         //   }
+         //}
       }
       // Pines Equation 30 and 30b (Part of)
       Real rr = rho_np1/bodyRadius;
@@ -320,54 +321,93 @@ void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Intege
       a2 += rr*sum2;
       a3 += rr*sum3;
       a4 -= rr*sum4;
-      if (fillgradient)
-      {
-         // Pines Equation 36 (Part of)
-         a11 += rho_np2/bodyRadius/bodyRadius*sum11;
-         a12 += rho_np2/bodyRadius/bodyRadius*sum12;
-         a13 += rho_np2/bodyRadius/bodyRadius*sum13;
-         a14 -= rho_np2/bodyRadius/bodyRadius*sum14;
-         a23 += rho_np2/bodyRadius/bodyRadius*sum23;
-         a24 -= rho_np2/bodyRadius/bodyRadius*sum24;
-         a33 += rho_np2/bodyRadius/bodyRadius*sum33;
-         a34 -= rho_np2/bodyRadius/bodyRadius*sum34;
-         a44 += rho_np2/bodyRadius/bodyRadius*sum44;
-         #ifdef DEBUG_GRADIENT
-         //   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
-         //   MessageInterface::ShowMessage("a33   = %12.10f\n", a33);
-         //   MessageInterface::ShowMessage("sum33 = %12.10f\n", sum33);
-         //   MessageInterface::ShowMessage("u     = %12.10f\n", u);
-         //   MessageInterface::ShowMessage("a44   = %12.10f\n", a44);
-         //   MessageInterface::ShowMessage("a34   = %12.10f\n", a34);
-         #endif
-      }
+
+      // made changes by TUAN NGUYEN
+      //if (fillgradient)
+      //{
+      //   // Pines Equation 36 (Part of)
+      //   a11 += rho_np2/bodyRadius/bodyRadius*sum11;
+      //   a12 += rho_np2/bodyRadius/bodyRadius*sum12;
+      //   a13 += rho_np2/bodyRadius/bodyRadius*sum13;
+      //   a14 -= rho_np2/bodyRadius/bodyRadius*sum14;
+      //   a23 += rho_np2/bodyRadius/bodyRadius*sum23;
+      //   a24 -= rho_np2/bodyRadius/bodyRadius*sum24;
+      //   a33 += rho_np2/bodyRadius/bodyRadius*sum33;
+      //   a34 -= rho_np2/bodyRadius/bodyRadius*sum34;
+      //   a44 += rho_np2/bodyRadius/bodyRadius*sum44;
+      //   #ifdef DEBUG_GRADIENT
+      //   //   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+      //   //   MessageInterface::ShowMessage("a33   = %12.10f\n", a33);
+      //   //   MessageInterface::ShowMessage("sum33 = %12.10f\n", sum33);
+      //   //   MessageInterface::ShowMessage("u     = %12.10f\n", u);
+      //   //   MessageInterface::ShowMessage("a44   = %12.10f\n", a44);
+      //   //   MessageInterface::ShowMessage("a34   = %12.10f\n", a34);
+      //   #endif
+      //}
    }
 
    // Pines Equation 31 
    acc[0] = a1+a4*s;
    acc[1] = a2+a4*t;
    acc[2] = a3+a4*u;
-   if (fillgradient)
-   {
-      // Pines Equation 37
-      gradient(0,0) =  a11 + s*s*a44 + a4/r + 2*s*a14;
-      gradient(1,1) = -a11 + t*t*a44 + a4/r + 2*t*a24;
-      gradient(2,2) =  a33 + u*u*a44 + a4/r + 2*u*a34;
-      gradient(0,1) =
-      gradient(1,0) =  a12 + s*t*a44 + s*a24 + t*a14;
-      gradient(0,2) =
-      gradient(2,0) =  a13 + s*u*a44 + s*a34 + u*a14;
-      gradient(1,2) =
-      gradient(2,1) =  a23 + t*u*a44 + u*a24 + t*a34;
-   }
-   #ifdef DEBUG_GRADIENT
-      MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
-      MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
-   #endif
+
+   // made changes by TUAN NGUYEN
+   //if (fillgradient)
+   //{
+   //   // Pines Equation 37
+   //   gradient(0,0) =  a11 + s*s*a44 + a4/r + 2*s*a14;
+   //   gradient(1,1) = -a11 + t*t*a44 + a4/r + 2*t*a24;
+   //   gradient(2,2) =  a33 + u*u*a44 + a4/r + 2*u*a34;
+   //   gradient(0,1) =
+   //   gradient(1,0) =  a12 + s*t*a44 + s*a24 + t*a14;
+   //   gradient(0,2) =
+   //   gradient(2,0) =  a13 + s*u*a44 + s*a34 + u*a14;
+   //   gradient(1,2) =
+   //   gradient(2,1) =  a23 + t*u*a44 + u*a24 + t*a34;
+   //}
+   //#ifdef DEBUG_GRADIENT
+   //   MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+   //   MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
+   //#endif
    #ifdef DEBUG_CALCULATE_FIELD
       MessageInterface::ShowMessage("Leaving Harmonic::CalculateField\n");
    #endif
 }
+
+void Harmonic::CalculateField(const Real& jday,  const Real pos[3], const Integer& nn,
+                              const Integer& mm, const bool& fillgradient,
+                              Real  acc[3],      Rmatrix33& gradient) const
+{
+   // Calculate acceleration at location pos
+   CalculateField1(jday, pos, nn, mm, fillgradient, acc, gradient);
+
+   if (fillgradient)
+   {
+      Real delta = 1.0e-3;
+      Real newAcc[3];
+      Real posVec[3];
+
+      // Specify gradient by using finite difference
+      for(UnsignedInt col = 0; col < 3; ++col)
+      {
+         posVec[0] = pos[0]; posVec[1] = pos[1]; posVec[2] = pos[2];
+         posVec[col] += delta;
+
+         // Calculate acceleration at location pos + delta
+         CalculateField1(jday, posVec, nn, mm, fillgradient, newAcc, gradient);
+         for(UnsignedInt row = 0; row < 3; ++row)
+         {
+            gradient(row,col) = (newAcc[row] - acc[row])/ delta;
+         }
+      }
+   }
+
+   #ifdef DEBUG_GRADIENT
+      MessageInterface::ShowMessage("In Harmonic::CalField, fillgradient = %s\n", (fillgradient? "true" : "false"));
+      MessageInterface::ShowMessage("gradientHarmonic = %s\n", gradient.ToString().c_str());
+   #endif
+}
+
 
 //------------------------------------------------------------------------------
 // protected methods
