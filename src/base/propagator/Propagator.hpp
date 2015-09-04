@@ -151,6 +151,8 @@ public:
    virtual bool PropagatesForward();
    virtual void SetForwardPropagation(bool tf);
 
+   virtual void TurnDebug(bool debugFlag);
+
    // Abstract methods
 
    //---------------------------------------------------------------------------
@@ -237,6 +239,7 @@ protected:
    virtual void MoveToOrigin(Real newEpoch = -1.0);
    virtual void ReturnFromOrigin(Real newEpoch = -1.0);
 
+   bool debug;
 };
 
 #endif // Propagator_hpp

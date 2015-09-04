@@ -139,6 +139,8 @@ Propagator::Propagator(const std::string &typeStr,
    objectTypes.push_back(Gmat::PROPAGATOR);
    objectTypeNames.push_back("Propagator");
    parameterCount = PropagatorParamCount;
+
+   debug = false;
 }
 
 //------------------------------------------------------------------------------
@@ -180,6 +182,7 @@ Propagator::Propagator(const Propagator& p)
       propOrigin          (NULL)
 {
    isInitialized = false;
+   debug = p.debug;
 }
 
 //------------------------------------------------------------------------------
@@ -216,6 +219,8 @@ Propagator& Propagator::operator=(const Propagator& p)
     j2kBody     = NULL;
     centralBody = p.centralBody;
     propOrigin  = NULL;
+
+    debug = p.debug;
 
     return *this;
 }
@@ -1123,4 +1128,10 @@ void Propagator::MoveToOrigin(Real newEpoch)
 //------------------------------------------------------------------------------
 void Propagator::ReturnFromOrigin(Real newEpoch)
 {
+}
+
+
+void Propagator::TurnDebug(bool debugFlag)
+{
+   debug = debugFlag;
 }

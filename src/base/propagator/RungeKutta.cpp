@@ -326,6 +326,14 @@ bool RungeKutta::Step()
         }
     } while (!goodStepTaken);
 
+    if (debug)
+    {
+       MessageInterface::ShowMessage("Propagator's step taken = %.15lf   ", stepTaken);
+       for (UnsignedInt i = 0; i < dimension; ++i)
+          MessageInterface::ShowMessage("%.12lf,   ", outState[i]);
+       MessageInterface::ShowMessage("\n");
+    }
+
     physicalModel->IncrementTime(stepTaken);
     return true;
 }
@@ -466,6 +474,9 @@ bool RungeKutta::Step(Real dt)
       timeleft -= stepTaken;
       ++attemptsTaken;
    } while (stepFinished == false);
+
+   if (debug)
+      MessageInterface::ShowMessage(" stepTaken %.15lf\n", stepTaken);
 
    #ifdef DEBUG_STEPSIZE
       MessageInterface::ShowMessage("Done!\n");
