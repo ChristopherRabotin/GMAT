@@ -25,7 +25,7 @@
 #include "FileUtil.hpp"          // for ParseFileName(), GetCurrentWorkingDirectory()
 #include "StringUtil.hpp"        // for Trim()
 #include "CommandUtil.hpp"       // for ClearCommandSeq()
-#include "HardwareException.hpp" 
+#include "Parameter.hpp"         // for GetReturnType()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_CONSTRUCT
@@ -354,15 +354,23 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
             MessageInterface::ShowMessage
                ("   Now checking if input parameter is redefined to different type\n");
             #endif
-            
+
             // Check if input parameter is redefined in a function
             if (funcObj->GetTypeName() != mapObj->GetTypeName())
             {
-               throw FunctionException
-                  ("Redefinition of formal input parameter '" + funcObjName +
-                   "' to different type is not allowed in GMAT function '" +
-                   functionPath + "'.  It's expected type is '" +
-                   mapObj->GetTypeName() + "'.\n");
+               // Check for return type if object type is Parameter?
+               // (fix for GMT-5262 LOJ: 2015.09.04)
+               if (funcObj->IsOfType(Gmat::PARAMETER) && mapObj->IsOfType(Gmat::PARAMETER))
+               {
+                  if (((Parameter*)funcObj)->GetReturnType() != ((Parameter*)mapObj)->GetReturnType())
+                  {
+                     throw FunctionException
+                        ("Redefinition of formal input parameter '" + funcObjName +
+                         "' to different type is not allowed in GMAT function '" +
+                         functionPath + "'.  It's expected type is '" +
+                         mapObj->GetTypeName() + "'.\n");
+                  }
+               }
             }
          }
       }
