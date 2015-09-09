@@ -473,6 +473,9 @@ bool SolarFluxReader::LoadObsData()
             obsFluxData.size());
    #endif
 
+   historicStart = obsFluxData[0].epoch + 0.5;
+   historicEnd = obsFluxData[obsFluxData.size() - 1].epoch  + 0.5;
+
    return true;
 }
 
@@ -554,6 +557,9 @@ bool SolarFluxReader::LoadPredictData()
       MessageInterface::ShowMessage("Loaded %d flux predict data records\n",
             predictFluxData.size());
    #endif
+
+   predictStart = predictFluxData[0].epoch + 0.5;
+   predictEnd = predictFluxData[predictFluxData.size() - 1].epoch  + 0.5;
 
    return true;
 }
@@ -865,6 +871,15 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       for (Integer i = 0; i < 8; i++)
          fD.kp[i] = kp;
    }
+}
+
+void SolarFluxReader::GetEpochs(GmatEpoch &hStart, GmatEpoch &hEnd, GmatEpoch &pStart,
+               GmatEpoch &pEnd)
+{
+   hStart = historicStart;
+   hEnd = historicEnd;
+   pStart = predictStart;
+   pEnd = predictEnd;
 }
 
 
