@@ -32,7 +32,6 @@ public:
 private:
    
    bool isTextModified;
-   void Update();
    
    wxStaticText *solarFluxStaticText;
    wxStaticText *avgSolarFluxStaticText;
@@ -78,8 +77,6 @@ private:
    wxArrayString schattentimingArray;
    wxArrayString schattenErrorArray;
 
-   std::string predictedModelString;
-   std::string historicModelString;
    // Methods inherited from GmatDialog
    virtual void Create();
    virtual void LoadData();
