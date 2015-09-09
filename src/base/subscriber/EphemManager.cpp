@@ -691,6 +691,8 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 
    SPICEDOUBLE_CELL(result, 200000);
    scard_c(0, &result);   // reset (empty) the coverage cell
+   SPICEDOUBLE_CELL(subtracted, 200000);
+   scard_c(0, &subtracted);   // reset (empty) the coverage cell
    SPICEDOUBLE_CELL(obsResults, 200000);
    scard_c(0, &obsResults);   // reset (empty) the coverage cell
    SPICEDOUBLE_CELL(occultResults, 200000);
@@ -810,10 +812,30 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
                      ii, eeOcc);
             }
          #endif
+         wndifd_c(&obsResults, &occultResults, &subtracted);
+         copy_c(&subtracted, &obsResults);
+         #ifdef DEBUG_CONTACT
+            szObs       = wncard_c(&obsResults);
+            numObs      = (Integer) szObs;
+            MessageInterface::ShowMessage("--- After subtracting occultation results, size of obsResults = %d\n",
+                  numObs);
+            for (Integer ii = 0; ii < numObs; ii++)
+            {
+               SpiceDouble sObs, eObs;
+               wnfetd_c(&obsResults, ii, &sObs, &eObs);
+               Real ssObs = spice->SpiceTimeToA1(sObs);
+               Real eeObs = spice->SpiceTimeToA1(eObs);
+               MessageInterface::ShowMessage("------  start %d = %12.10f\n",
+                     ii, ssObs);
+               MessageInterface::ShowMessage("------  end %d   = %12.10f\n",
+                     ii, eeObs);
+            }
+         #endif
 //         wndifd_c(&obsResults, &occultResults, &result);
       }
    }
-   wndifd_c(&obsResults, &occultResults, &result);
+   copy_c(&obsResults, &result);
+//   wndifd_c(&obsResults, &occultResults, &result);
 
 
    SpiceInt sz = wncard_c(&result);
