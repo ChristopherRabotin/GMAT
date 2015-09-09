@@ -3093,35 +3093,119 @@ void GmatCommand::ShowWrapper(const std::string &prefix, const std::string &titl
 //------------------------------------------------------------------------------
 void GmatCommand::ShowObjectMaps(const std::string &str)
 {
+   #ifdef DEBUG_OBJECT_MAP
    MessageInterface::ShowMessage("%s\n========================================"
          "==============================\n",
        str.c_str());
    MessageInterface::ShowMessage
-      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>\n",
-       objectMap, globalObjectMap);
+      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>, "
+       "currentFunction=<%p>'%s'\n", objectMap, globalObjectMap,
+       currentFunction, currentFunction ? currentFunction->GetName().c_str() : "NULL");
+   
+   GmatBase *obj = NULL;
+   GmatBase *paramOwner = NULL;
+   std::string objName;
+   std::string isGlobal;
+   std::string isLocal;
+   std::string paramOwnerType;
+   std::string paramOwnerName;
+   bool isParameter = false;
    
    if (objectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the local object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the local object map for %s: '%s'\n", this->GetTypeName().c_str(),
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
       for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
            i != objectMap->end(); ++i)
+      {
+         // MessageInterface::ShowMessage
+         //    ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+         //     i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
+      }
    }
    if (globalObjectMap)
    {
       MessageInterface::ShowMessage
-         ("Here is the global object map for %s:\n", this->GetTypeName().c_str());
+         ("Here is the global object map for %s: '%s'\n", this->GetTypeName().c_str(),
+          GetGeneratingString(Gmat::NO_COMMENTS).c_str());
       for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
            i != globalObjectMap->end(); ++i)
+      {
+         // MessageInterface::ShowMessage
+         //    ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
+         //     i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p> [%s]\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
+      }
    }
    MessageInterface::ShowMessage("============================================"
          "==========================\n");
+   #endif
 }
 
 
@@ -3280,7 +3364,7 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    #endif
    
    #ifdef DEBUG_OBJECT_MAP
-   ShowObjectMaps();
+   ShowObjectMaps("In GmatCommand::FindObject()");
    #endif
    
    // Check for SolarSystem (loj: 2008.06.25)

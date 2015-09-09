@@ -116,6 +116,8 @@ AxisSystem::AxisSystem(const std::string &itsType,
                        const std::string &itsName) :
 CoordinateBase(Gmat::AXIS_SYSTEM,itsType,itsName),
 coordName        (""),
+usesPrimary      (GmatCoordinate::NOT_USED),
+usesSecondary    (GmatCoordinate::NOT_USED),
 baseSystem       ("FK5"),
 eop              (NULL),
 itrf             (NULL),
@@ -174,6 +176,8 @@ rotMatrix         (axisSys.rotMatrix),
 rotDotMatrix      (axisSys.rotDotMatrix),
 epoch             (axisSys.epoch),
 coordName         (axisSys.coordName),
+usesPrimary       (axisSys.usesPrimary),
+usesSecondary     (axisSys.usesSecondary),
 baseSystem        (axisSys.baseSystem),
 eop               (axisSys.eop),
 itrf              (axisSys.itrf),
@@ -230,6 +234,8 @@ const AxisSystem& AxisSystem::operator=(const AxisSystem &axisSys)
    rotDotMatrix      = axisSys.rotDotMatrix;
    epoch             = axisSys.epoch;
    coordName         = axisSys.coordName;
+   usesPrimary       = axisSys.usesPrimary;
+   usesSecondary     = axisSys.usesSecondary;
    baseSystem        = axisSys.baseSystem;
    eop               = axisSys.eop;
    itrf              = axisSys.itrf;
@@ -370,7 +376,8 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesEpoch() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage AxisSystem::UsesPrimary() const
 {
-   return GmatCoordinate::NOT_USED;
+//   return GmatCoordinate::NOT_USED;
+   return usesPrimary;
 }
 
 //---------------------------------------------------------------------------
@@ -386,7 +393,8 @@ GmatCoordinate::ParameterUsage AxisSystem::UsesPrimary() const
 //---------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage AxisSystem::UsesSecondary() const
 {
-   return GmatCoordinate::NOT_USED;
+//   return GmatCoordinate::NOT_USED;
+   return usesSecondary;
 }
 
 //---------------------------------------------------------------------------
@@ -490,7 +498,7 @@ bool AxisSystem::UsesSpacecraft(const std::string &withName) const
    {
       if ((withName == "") || (origin->GetName() == withName))   return true;
    }
-   if (UsesPrimary())
+   if (usesPrimary)
    {
       SpacePoint *p = GetPrimaryObject();
       if (p && p->IsOfType("Spacecraft"))
@@ -498,7 +506,7 @@ bool AxisSystem::UsesSpacecraft(const std::string &withName) const
          if ((withName == "") || (p->GetName() == withName))   return true;
       }
    }
-   if (UsesSecondary())
+   if (usesSecondary)
    {
       SpacePoint *s = GetSecondaryObject();
       if (s && s->IsOfType("Spacecraft"))
@@ -557,6 +565,7 @@ void AxisSystem::SetAllowWithoutRates(bool allow)
    #endif
    allowNoRates = allow;
 }
+
 
 bool AxisSystem::AllowWithoutRates() const
 {
@@ -669,6 +678,7 @@ void AxisSystem::SetZAxis(const std::string &toValue)
 {
    // default behavior is to ignore this
 }
+
 
 //------------------------------------------------------------------------------
 //  void SetEopFile(EopFile *eopF)

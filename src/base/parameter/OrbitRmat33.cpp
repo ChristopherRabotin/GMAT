@@ -36,7 +36,7 @@ OrbitRmat33::OrbitRmat33(const std::string &name, const std::string &typeStr,
                          bool isSettable, Gmat::ObjectType paramOwnerType)
    : Rmat33Var(name, typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
                depObj, paramOwnerType, isSettable),
-     OrbitData(name, paramOwnerType)
+     OrbitData(name, typeStr, paramOwnerType)
 {
    mNeedCoordSystem = true;
    AddRefObject(obj);

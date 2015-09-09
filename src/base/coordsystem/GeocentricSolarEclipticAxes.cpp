@@ -36,8 +36,11 @@
 #include "Rvector6.hpp"
 #include "TimeSystemConverter.hpp"
 #include "CoordinateSystemException.hpp"
+#include "MessageInterface.hpp"
 
 #include <iostream>
+
+//#define DEBUG_GSE_CALC
 
 
 using namespace GmatMathUtil;      // for trig functions, etc.
@@ -70,6 +73,9 @@ ObjectReferencedAxes("GSE",itsName)
    secondaryName = SolarSystem::SUN_NAME;
    objectTypeNames.push_back("GSE");
    parameterCount = GeocentricSolarEclipticAxesParamCount;
+
+   usesPrimary   = GmatCoordinate::REQUIRED_UNMODIFIABLE;
+   usesSecondary = GmatCoordinate::REQUIRED_UNMODIFIABLE;
 }
 
 
@@ -141,31 +147,6 @@ bool GeocentricSolarEclipticAxes::IsParameterReadOnly(const Integer id) const
       default:
          return ObjectReferencedAxes::IsParameterReadOnly(id);
    }
-}
-
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesPrimary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesPrimary() const
-{
-   return GmatCoordinate::NOT_USED;
-}
-
-//------------------------------------------------------------------------------
-//  GmatCoordinate::ParameterUsage UsesSecondary() const
-//------------------------------------------------------------------------------
-/**
- * @see AxisSystem
- */
-//------------------------------------------------------------------------------
-GmatCoordinate::ParameterUsage GeocentricSolarEclipticAxes::UsesSecondary() const
-{
-   return GmatCoordinate::NOT_USED;
 }
 
 //------------------------------------------------------------------------------
@@ -242,6 +223,12 @@ GmatBase* GeocentricSolarEclipticAxes::Clone() const
 void GeocentricSolarEclipticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
                                                           bool forceComputation) 
 {
+   #ifdef DEBUG_GSE_CALC
+      MessageInterface::ShowMessage("In GSE::CalRotMat, epoch = %12.10f, forceComputtion = %s\n",
+            atEpoch.Get(), (forceComputation? "true" : "false"));
+      MessageInterface::ShowMessage("   primary   = %s\n", (primary->GetName()).c_str());
+      MessageInterface::ShowMessage("   secondary = %s\n", (secondary->GetName()).c_str());
+   #endif
    Rvector6 rvSun = secondary->GetMJ2000State(atEpoch) -
                     primary->GetMJ2000State(atEpoch);
    Rvector3 rSun  = rvSun.GetR();

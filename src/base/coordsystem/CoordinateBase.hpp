@@ -37,7 +37,8 @@ namespace GmatCoordinate
    {
       NOT_USED = 0,
       OPTIONAL_USE,
-      REQUIRED
+      REQUIRED,
+      REQUIRED_UNMODIFIABLE
    };
 };
 

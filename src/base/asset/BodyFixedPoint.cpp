@@ -934,8 +934,6 @@ bool BodyFixedPoint::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          break;
    }
 
-   MessageInterface::ShowMessage("BodyFixedPoint::SetRefObject calling base for %s\n", name.c_str());
-
    // Not handled here -- invoke the next higher SetRefObject call
    return SpacePoint::SetRefObject(obj, type, name);
 }
@@ -1372,30 +1370,25 @@ bool BodyFixedPoint::InitializeForContactLocation(bool deleteFiles)
       MessageInterface::ShowMessage("Entering InitializeForC for %s\n",
             instanceName.c_str());
    #endif
+
+   if (kernelsWritten) // if we've already written them, don't do it again
+      return true;
+
    if (!kernelNamesDetermined)
    {
-//      // Initialize/set the Naif IDs
-//      Integer bodyNaif = theBody->GetIntegerParameter("NAIFId");
-//      naifId           = bodyNaif * 1000 + gsNaifId--;
-//      naifIdRefFrame   = naifId + 1000000;
-      // Upper case name
+      // Use upper case name to figure out spice frame name
       std::string thisName = GmatStringUtil::ToUpper(instanceName);
-      spiceFrameName   = thisName + "_TOPO";
+      spiceFrameID         = thisName + "_TOPO";
 
       // Set up the file names for the SPK and FK kernels
       std::stringstream ss("");
       ss << "tmp_" << instanceName;
-      // For now, put it in the Output path << this should be put into the
-      // appropriate TMPDIR for the platform
-//      FileManager *fm     = FileManager::Instance();
-//      std::string spkPath = fm->GetPathname(FileManager::OUTPUT_PATH);
-//      kernelBaseName      = spkPath + ss.str();
       std::string tmpPath = GmatFileUtil::GetTemporaryDirectory();
       kernelBaseName = tmpPath + ss.str();
-      #ifdef DEBUG_EPHEM_MANAGER_FILES
+      #ifdef DEBUG_BFP_SPICE
          MessageInterface::ShowMessage(
-               "In EphemManager::RecordEphemerisData,  fileName (full path) = %s\n",
-               fileName.c_str());
+               "In InitializeForC,  fileName (full path) = %s\n",
+               kernelBaseName.c_str());
       #endif
 
       kernelNamesDetermined = true;
@@ -1482,7 +1475,9 @@ bool BodyFixedPoint::WriteSPK(bool deleteFile)
 {
    deleteSPK = deleteFile;
 
-   spkName = kernelBaseName + ".bsp";
+   // Get the time (seconds since January 1, 1970), to make the temporary file name unique
+   std::string now = GmatTimeUtil::FormatCurrentTime(4);
+   spkName         = kernelBaseName + "_" + now + ".bsp";
 
    #ifdef DEBUG_BFP_SPICE
       MessageInterface::ShowMessage("In WriteSPK, spkName = \"%s\"\n", spkName.c_str());
@@ -1525,7 +1520,7 @@ bool BodyFixedPoint::WriteSPK(bool deleteFile)
       SpiceInt       spiceId      = naifId;
       Integer        bodyNaif     = theBody->GetIntegerParameter("NAIFId");
       SpiceInt       spiceCentral = bodyNaif;
-      std::string    bodyFrame    = theBody->GetStringParameter("SpiceFrameName");
+      std::string    bodyFrame    = theBody->GetStringParameter("SpiceFrameId");
       ConstSpiceChar *bFrame      = bodyFrame.c_str();
 
       SpiceDouble    theMax       = GmatRealConstants::REAL_MAX - 10.0;
@@ -1575,7 +1570,9 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
 {
    deleteFK = deleteFile;
 
-   fkName = kernelBaseName + ".tf";
+   // Get the time (seconds since January 1, 1970), to make the temporary file name unique
+   std::string now = GmatTimeUtil::FormatCurrentTime(4);
+   fkName          = kernelBaseName + "_" + now + ".tf";
 
    // We are not renaming here - just remove the existing file
    if (GmatFileUtil::DoesFileExist(fkName))
@@ -1591,28 +1588,27 @@ bool BodyFixedPoint::WriteFK(bool deleteFile)
       // Get the topocentric conversion
       Integer        bodyNaif         = theBody->GetIntegerParameter("NAIFId");
       std::string    centralNaifStr   = GmatStringUtil::Trim(GmatStringUtil::ToString(bodyNaif));
-      std::string    centralBodyFrame = theBody->GetStringParameter("SpiceFrameName");
+      std::string    centralBodyFrame = theBody->GetStringParameter("SpiceFrameId");
 
       Rvector topo = GetTopocentricConversion(centralNaifStr);
       /// Write the text FK kernel
       std::ofstream fkStream(fkName.c_str(), std::ios::out);
       fkStream.precision(16);
-      fkStream << " \n";
       fkStream << "KPL/FK\n";
       fkStream << "\\begindata\n";
       fkStream << "NAIF_BODY_NAME += '" << thisName << "'\n";
       fkStream << "NAIF_BODY_CODE += " << naifId       << "\n\n";
-      fkStream << "FRAME_" << spiceFrameName << " = " << naifIdRefFrame << "\n";
-      fkStream << "FRAME_" << naifIdRefFrame << "_NAME = '" << spiceFrameName << "'\n";
+      fkStream << "FRAME_" << spiceFrameID   << " = " << naifIdRefFrame << "\n";
+      fkStream << "FRAME_" << naifIdRefFrame << "_NAME = '" << spiceFrameID << "'\n";
       fkStream << "FRAME_" << naifIdRefFrame << "_CLASS = 4\n";
       fkStream << "FRAME_" << naifIdRefFrame << "_CLASS_ID = " << naifIdRefFrame << "\n";
       fkStream << "FRAME_" << naifIdRefFrame << "_CENTER = " << naifId << "\n\n";
-      fkStream << "OBJECT_" << naifId << "_FRAME = '" << spiceFrameName << "'\n\n";
-//      fkStream << "TKFRAME_" << spiceFrameName << "_RELATIVE = '" << centralBodyFrame << "'\n";
-//      fkStream << "TKFRAME_" << spiceFrameName << "_SPEC = 'ANGLES'\n";
-//      fkStream << "TKFRAME_" << spiceFrameName << "_UNITS = 'DEGREES'\n";
-//      fkStream << "TKFRAME_" << spiceFrameName << "_AXES = " << "( 3, 2, 3 )\n";
-//      fkStream << "TKFRAME_" << spiceFrameName << "_ANGLES = ( " << topo[0]
+      fkStream << "OBJECT_" << naifId << "_FRAME = '" << spiceFrameID << "'\n\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_RELATIVE = '" << centralBodyFrame << "'\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_SPEC = 'ANGLES'\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_UNITS = 'DEGREES'\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_AXES = " << "( 3, 2, 3 )\n";
+//      fkStream << "TKFRAME_" << spiceFrameID << "_ANGLES = ( " << topo[0]
 //               << ", " << topo[1] << ", " << topo[2] << " )\n";
       fkStream << "TKFRAME_" << naifIdRefFrame << "_RELATIVE = '" << centralBodyFrame << "'\n";
       fkStream << "TKFRAME_" << naifIdRefFrame << "_SPEC = 'ANGLES'\n";
@@ -1657,7 +1653,7 @@ Rvector3 BodyFixedPoint::GetTopocentricConversion(
       SpiceDouble  radii[3];
       SpiceBoolean found;
       // Ask SPICE for the body Radii
-      gdpool_c(bID, 1, 3, &n, radii, &found);
+      gdpool_c(bID, 0, 3, &n, radii, &found);
       #ifdef DEBUG_BFP_SPICE
          MessageInterface::ShowMessage(
                "In GetTopocentricConversion, xyz (%s) = %12.10f   %12.10f   %12.10f\n",
@@ -1683,7 +1679,7 @@ Rvector3 BodyFixedPoint::GetTopocentricConversion(
           phi    = phi_gd;
           sinPhi = GmatMathUtil::Sin(phi);
           C      = R/GmatMathUtil::Sqrt(1-(e*e)*(sinPhi * sinPhi));
-          phi_gd = GmatMathUtil::ATan((z_F+C*(e*e)*sinPhi)/r_xy);
+          phi_gd = GmatMathUtil::ATan(z_F+C*(e*e)*sinPhi, r_xy);
           delta  = GmatMathUtil::Abs(phi_gd-phi);
       }
 

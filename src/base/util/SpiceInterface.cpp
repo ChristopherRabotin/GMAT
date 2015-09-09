@@ -552,10 +552,13 @@ bool SpiceInterface::IsLoaded(const std::string &fileName)
    std::map<std::string, std::string>::iterator ii;
    for (ii = loadedKernels.begin(); ii != loadedKernels.end(); ++ii)
    {
-      #ifdef DEBUG_SPK_ISLOADED
-          MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
-      #endif
-      if ((*ii).first == fileName) return true;
+      if ((*ii).first == fileName)
+      {
+         #ifdef DEBUG_SPK_ISLOADED
+             MessageInterface::ShowMessage("IsLoaded::kernel name %s WAS INDEED ALREADY LOADED\n", fileName.c_str());
+         #endif
+         return true;
+      }
    }
    #ifdef DEBUG_SPK_ISLOADED
       MessageInterface::ShowMessage("IsLoaded::kernel name %s NOT ALREADY LOADED\n", fileName.c_str());
@@ -613,11 +616,20 @@ StringArray SpiceInterface::GetValidFrames()
 //------------------------------------------------------------------------------
 void SpiceInterface::SetLeapSecondKernel(const std::string &lsk)
 {
-   #ifdef DEBUG_SPK_LOADING
-      MessageInterface::ShowMessage("NOW loading LSK kernel %s\n", lsk.c_str());
-   #endif
    lsKernel = lsk;
-   if (!IsLoaded(lsKernel))   LoadKernel(lsKernel);
+   if (!IsLoaded(lsKernel))
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel NOW loading LSK kernel %s\n", lsk.c_str());
+      #endif
+      LoadKernel(lsKernel);
+   }
+   else
+   {
+      #ifdef DEBUG_SPK_LOADING
+         MessageInterface::ShowMessage("SpiceInterface::SetLeapSecondKernel LSK kernel %s was already loaded ...\n", lsk.c_str());
+      #endif
+   }
 }
 
 //------------------------------------------------------------------------------

@@ -1050,9 +1050,6 @@
     <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp">
-      <Filter>Source Files\base\parameter</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClCompile>
@@ -2379,36 +2376,6 @@
     <ClCompile Include="..\..\..\src\gui\command\FindEventsPanel.cpp">
       <Filter>Source Files\gui\command</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\factory\NewParameterFactory.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\factory</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMAcceleration.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMDensity.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeData.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeReal.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverData.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverReal.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverState.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverStatus.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverString.cpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactEvent.cpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
     </ClCompile>
@@ -2417,6 +2384,39 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\event\EventLocatorPanel.cpp">
       <Filter>Source Files\gui\event</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\factory\NewParameterFactory.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\AtmosDensity.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMAcceleration.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMDensity.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeData.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeReal.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverData.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverReal.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverState.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverStatus.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverString.cpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3171,9 +3171,6 @@
       <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp">
-      <Filter>Source Files\base\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp">
       <Filter>Source Files\base\parameter</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp">
@@ -4565,36 +4562,6 @@
     <ClInclude Include="..\..\..\src\gui\command\FindEventsPanel.hpp">
       <Filter>Source Files\gui\command</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\factory\NewParameterFactory.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\factory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMAcceleration.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMDensity.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeData.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeReal.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverData.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverReal.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverState.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverStatus.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverString.hpp">
-      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\plugins\EventLocatorPlugin\src\base\event\ContactEvent.hpp">
       <Filter>Source Files\plugins\EventLocatorPlugin\event</Filter>
     </ClInclude>
@@ -4603,6 +4570,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\event\EventLocatorPanel.hpp">
       <Filter>Source Files\gui\event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\factory\NewParameterFactory.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\AtmosDensity.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMAcceleration.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMDensity.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeData.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeReal.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverData.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverReal.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverState.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverStatus.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverString.hpp">
+      <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

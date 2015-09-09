@@ -77,7 +77,7 @@ public:
                             const StateArray &states, const EpochArray &epochs);
    void        AddMetaData(const std::string &line,  bool done = false);
    void        AddMetaData(const StringArray &lines, bool done = false);
-   void        FinalizeKernel();
+   void        FinalizeKernel(bool done = true);
    Integer     GetMinNumberOfStates();
 
 protected:
@@ -123,6 +123,8 @@ protected:
    FILE            *tmpTxtFile;
    /// flag indicating whether or not the temporary file can be written
    bool            tmpFileOK;
+   /// do we want to open for first-write or for appending?
+   bool            appending;
    /// an instance of the FileManager to handle renaming, etc.
    FileManager     *fm;
 

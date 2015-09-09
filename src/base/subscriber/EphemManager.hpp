@@ -66,7 +66,7 @@ public:
    virtual bool         ProvideEphemerisData();
    /// Stop recording - load the last ephem data - this must be called
    /// at the end of the run for the last-written SPK to be loaded correctly
-   virtual void         StopRecording();
+   virtual void         StopRecording(bool done = true);
 
    /// method to determine occultation intervals
    bool                 GetOccultationIntervals(const std::string &occType,
@@ -101,11 +101,13 @@ public:
                                             RealArray         &starts,
                                             RealArray         &ends);
 
-   bool                 GetCoverageStartAndStop(Real s, Real e,
-                                                bool useEntireIntvl,
-                                                bool includeAll,
-                                                Real &intvlStart,
-                                                Real &intvlStop);
+   bool                 GetCoverage(Real s, Real e,
+                                    bool useEntireIntvl,
+                                    bool includeAll,
+                                    Real &intvlStart,
+                                    Real &intvlStop,
+                                    Real &cvrStart,
+                                    Real &cvrStop);
 
    /// Set reference objects
    virtual void         SetObject(GmatBase *obj);
@@ -150,6 +152,10 @@ protected:
    Real                 intStart;
    /// stop time of the observation window
    Real                 intStop;
+   /// start time of the actual coverage window (coverage of loaded SPKs)
+   Real                 coverStart;
+   /// stop time of the actual coverage window (coverage of loaded SPKs)
+   Real                 coverStop;
    #ifdef __USE_SPICE__
       /// need a SpiceInterface to load and unload kernels
       SpiceInterface       *spice;
@@ -159,13 +165,13 @@ protected:
       /// object
       SpiceCell            *window;
       /// Method to determine the coverage window(s) for the spacecraft
-      void                 GetCoverageWindow(SpiceCell* w, Real s, Real e,
-                                             bool useEntireIntvl,
-                                             bool includeAll = true,
-                                             bool lightTimeCorrection = false,
-                                             bool transmit = false,
-                                             Real stepSize = 10.0,
-                                             Integer obsID = -999);
+      void                 GetRequiredCoverageWindow(SpiceCell* w, Real s, Real e,
+                                                     bool useEntireIntvl,
+                                                     bool includeAll = true,
+                                                     bool lightTimeCorrection = false,
+                                                     bool transmit = false,
+                                                     Real stepSize = 10.0,
+                                                     Integer obsID = -999);
 
    #endif
 

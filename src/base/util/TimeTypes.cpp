@@ -24,6 +24,13 @@
 #include "GmatConstants.hpp"
 #include "UtilityException.hpp"
 #include <ctime>                   // for time()
+#include <sstream>
+
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <sys/time.h>    // not available for MSVC?
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -112,6 +119,7 @@ Integer GmatTimeUtil::GetMonth(const std::string &monthName)
  *                 1 = "Wed Apr 16 12:30:22 2008"
  *                 2 = "2008-04-16T12:30:22"
  *                 3 = "2008-04-16 12:30:22"
+ *                 4 = 1234567890_34565  (seconds and milliseconds since Jan 1, 1970)
  *
  */
 //------------------------------------------------------------------------------
@@ -123,6 +131,27 @@ std::string GmatTimeUtil::FormatCurrentTime(Integer format)
    {
       char *currTimeStr = ctime(&currTime);
       return currTimeStr;
+   }
+   else if (format == 4)
+   {
+      std::stringstream ss("");
+      ss << (Integer) currTime;
+      #ifdef _MSC_VER
+         // QueryPerformanceCounter() Retrieves the current value of the
+         // performance counter, which is a high resolution (<1us) time stamp
+         // that can be used for time-interval measurements.
+         LARGE_INTEGER performanceCount;
+         QueryPerformanceCounter(&performanceCount);
+         ss << "_";
+         ss << performanceCount.HighPart;
+         ss << performanceCount.LowPart;
+      #else
+         /// Add microseconds of the current time
+         timeval now;
+         gettimeofday(&now, NULL);
+         ss << "_" << (Integer) now.tv_usec;
+      #endif
+      return ss.str();
    }
    else
    {

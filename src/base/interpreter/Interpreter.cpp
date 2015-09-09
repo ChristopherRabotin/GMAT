@@ -2511,8 +2511,13 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       MessageInterface::ShowMessage("   rhs=\"%s\"\n", rhs.c_str());
       #endif
       
-      // check if single quote found
-      inArray = GmatStringUtil::SeparateByComma(rhs);
+      // Ignore () without input so that function call can have empty ()
+      // ie, "a = MyFunctionCall();" (LOJ: 2015.08.19)
+      if (rhs != "")
+      {
+         // Parse input parameters
+         inArray = GmatStringUtil::SeparateByComma(rhs);
+      }
       
       #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
       MessageInterface::ShowMessage("   inArray.size()=%d\n", inArray.size());
@@ -2712,7 +2717,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       if (retval && inFunctionMode)
          validInput = true;
       
-      // If not in function mode, throw exception if invalid inputparameter
+      // If not in function mode, throw exception if invalid input parameter
       if (!retval || !validInput)
       {
          InterpreterException ex
@@ -3976,12 +3981,16 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
       ("Interpreter::CreateSystemParameter() returning <%p><%s>'%s'\n", param,
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
        (param == NULL) ? "NULL" : param->GetName().c_str());
+   MessageInterface::ShowMessage
+      ("   param->IsGlobal=%d, param->IsLocal=%d\n",
+       param ? param->IsGlobal() : -999, param ? param->IsLocal() : -999);
    #endif
    
    // Set newly created Parameter inside function to local so it can be
    // deleted when Function destructor is called (LOJ: 2014.12.17)
-   if (param && inFunctionMode)
-      param->SetIsLocal(true);
+   // Moved this code to Validator::CreateSystemParameter() (LOJ: 2015.08.05)
+   // if (param && inFunctionMode)
+   //    param->SetIsLocal(true);
    
    return param;
 }
@@ -10181,6 +10190,8 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             break;
          }
          
+         // Accept () without arguments (LOJ: 2015.08.19)
+         #if 0
          if (inputArgs.size() == 0)
          {
             InterpreterException ex
@@ -10190,6 +10201,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             retval = false;
             break;
          }
+         #endif
          
          // check for duplicate input list
          #if DBGLVL_FUNCTION_DEF > 0

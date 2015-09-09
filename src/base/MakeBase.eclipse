@@ -409,7 +409,6 @@ OBJECTS = \
     parameter/CartesianParameters.o \
     parameter/DelaunayParameters.o \
     parameter/EnvData.o \
-    parameter/EnvParameters.o \
     parameter/EnvReal.o \
     parameter/EquinoctialParameters.o \
     parameter/ExpressionParser.o \

@@ -461,6 +461,8 @@ public:
                               const std::string &fileType, bool forInput,
                               const std::string &fileExt = "",
                               bool writeWarning = false, bool writeInfo = false);
+   static  std::string     WriteObjectInfo(const std::string &title, GmatBase *obj,
+                                           bool addEol = true);
    virtual Integer         GetPropItemID(const std::string &whichItem);
    virtual Integer         SetPropItem(const std::string &propItem);
    virtual StringArray     GetDefaultPropItems();

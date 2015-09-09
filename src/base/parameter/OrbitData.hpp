@@ -36,7 +36,7 @@ class GMAT_API OrbitData : public RefData
 {
 public:
 
-   OrbitData(const std::string &name = "",
+   OrbitData(const std::string &name = "", const std::string &typeName = "",
              const Gmat::ObjectType paramOwnerType = Gmat::SPACECRAFT,
              GmatParam::DepObject depObj = GmatParam::NO_DEP,
              bool isSettable = false);

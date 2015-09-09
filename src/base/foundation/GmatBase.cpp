@@ -4017,6 +4017,35 @@ std::string GmatBase::GetFullPathFileName(std::string &outFileName,
    return fullPath;
 }
 
+//------------------------------------------------------------------------------
+// static std::string WriteObjectInfo(const std::string &title, GmatBase *obj,
+//                                    bool addEol = true)
+//------------------------------------------------------------------------------
+std::string GmatBase::WriteObjectInfo(const std::string &title, GmatBase *obj,
+                                      bool addEol)
+{
+   std::stringstream objStream;
+   char buff[10];
+   sprintf(buff, "<%p>", obj);
+   objStream << title << buff;
+   
+   if (obj)
+   {
+      objStream << "[" << obj->GetTypeName() << "]" << "'" << obj->GetName() << "'";
+      objStream << ", IsGlobal:" << obj->IsGlobal() << ", IsLocal():" << obj->IsLocal();
+   }
+   else
+   {
+      objStream << "[NULL]'NULL'";
+   }
+   
+   if (addEol)
+      objStream << "\n";
+   
+   return objStream.str();
+}
+
+
 // todo: comments
 Integer GmatBase::GetPropItemID(const std::string &whichItem)
 {

@@ -208,7 +208,7 @@ protected:
       J2000_BODY_NAME = GmatBaseParamCount,
       NAIF_ID,
       NAIF_ID_REFERENCE_FRAME,
-      SPICE_FRAME_NAME,
+      SPICE_FRAME_ID,
       ORBIT_SPICE_KERNEL_NAME,
       ATTITUDE_SPICE_KERNEL_NAME,
       SC_CLOCK_SPICE_KERNEL_NAME,
@@ -243,7 +243,7 @@ protected:
    /// NAIF Id for the body/spacecraft reference frame
    Integer         naifIdRefFrame;
    /// The name of the frame neede for SPICE calls
-   std::string     spiceFrameName;
+   std::string     spiceFrameID;
    /// NAIF Id for the observer
    Integer         naifIdObserver;
 
@@ -253,6 +253,13 @@ protected:
    Integer         default_naifId;
    /// default value for NAIF ID for the body/spacecraft reference frame
    Integer         default_naifIdRefFrame;
+   /// default for the spice frame name
+   std::string     default_spiceFrameID;
+   /// Defaults for the kernel names
+   StringArray     default_orbitSpiceKernelNames;
+   StringArray     default_attitudeSpiceKernelNames;
+   StringArray     default_frameSpiceKernelNames;
+   StringArray     default_scClockSpiceKernelNames;
    
    /// flag indicating whether or not the SPICE code is setup
    bool            spiceSetupDone;

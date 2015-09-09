@@ -43,7 +43,7 @@ public:
    // inherited from Function
    virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
    virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
-   virtual void         Finalize();
+   virtual void         Finalize(bool cleanUp = false);
    
    // inherited from GmatBase
    virtual GmatBase*    Clone() const;
@@ -61,6 +61,7 @@ protected:
    bool InitializeLocalObjects(ObjectInitializer *objInit,
                                GmatCommand *current,
                                bool ignoreException);
+   void CreateSubscriberWrappers();
    bool SetGmatFunctionPath(const std::string &path);
    void BuildUnusedGlobalObjectList();
    

@@ -241,6 +241,8 @@ protected:
    void                 WriteWrappers();
    Integer              FindIndexOfElement(StringArray &labelArray,
                                            const std::string &label);
+   // For checking if data should be skipped
+   bool                 ShouldDataBeSkipped(Integer whichWrapper);
    
    // Methods that derived classes can override
    virtual bool         Distribute(Integer len);

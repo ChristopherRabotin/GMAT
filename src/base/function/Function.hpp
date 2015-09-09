@@ -51,7 +51,7 @@ public:
    virtual void         SetNewFunction(bool flag);
    virtual bool         Initialize(ObjectInitializer *objInit, bool reinitialize = false);
    virtual bool         Execute(ObjectInitializer *objInit, bool reinitialize = false);
-   virtual void         Finalize();
+   virtual void         Finalize(bool cleanUp = false);
    virtual bool         IsFcsFinalized();
    virtual void         SetObjectMap(ObjectMap *objMap);
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
@@ -198,6 +198,7 @@ protected:
       PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount];
    
    GmatBase* FindObject(const std::string &name);
+   bool      IsAutomaticObjectGlobal(const std::string &autoObjName, GmatBase **owner);
    
    // for debug
    void ShowObjectMap(ObjectMap *objMap, const std::string &title = "",

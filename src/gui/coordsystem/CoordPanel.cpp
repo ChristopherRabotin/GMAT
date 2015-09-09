@@ -55,6 +55,7 @@ CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    mShowAlignmentConstraint = false;
    
    mEnableAll               = enableAll;
+   setThoughDisabled        = false;
    
    Create();
    LoadData();
@@ -126,12 +127,14 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
    MessageInterface::ShowMessage("mEnableAll = %s\n", (mEnableAll? "true" : "false"));
    #endif
    
-   if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
+   if ((tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED) ||
+       (tmpAxis->UsesPrimary() == GmatCoordinate::REQUIRED_UNMODIFIABLE))
       mShowPrimaryBody = false;
    else
       mShowPrimaryBody = true; 
    
-   if (tmpAxis->UsesSecondary() == GmatCoordinate::NOT_USED)
+   if ((tmpAxis->UsesSecondary() == GmatCoordinate::NOT_USED) ||
+       (tmpAxis->UsesSecondary() == GmatCoordinate::REQUIRED_UNMODIFIABLE))
       mShowSecondaryBody = false;
    else
       mShowSecondaryBody = true; 
@@ -309,8 +312,9 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
          primaryComboBox->Enable(false);
          secondaryStaticText->Enable(false);
          secondaryComboBox->Enable(false);
+         setThoughDisabled = true;
       }
-      if (typeStr == "BodySpinSun")
+      else if (typeStr == "BodySpinSun")
       {
          primaryComboBox->SetStringSelection("Sun");
          secondaryComboBox->SetStringSelection(originComboBox->GetValue());
@@ -319,6 +323,11 @@ void CoordPanel::EnableOptions(AxisSystem *axis)
          primaryComboBox->Enable(false);
          secondaryStaticText->Enable(false);
          secondaryComboBox->Enable(false);
+         setThoughDisabled = true;
+      }
+      else
+      {
+         setThoughDisabled = false;
       }
    }
    else  // disable all of them
@@ -1367,31 +1376,42 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                (secondaryComboBox->IsEnabled()? "YES" : "no"));
       #endif
       // Set primary body if exist
-      if (primaryComboBox->IsEnabled())
+      if (primaryComboBox->IsEnabled() || setThoughDisabled)
       {
          wxString primaryName = primaryComboBox->GetValue().Trim();
          SpacePoint *primary = (SpacePoint*)theGuiInterpreter->
             GetConfiguredObject(primaryName.c_str());
          #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
             MessageInterface::ShowMessage("CoordPanel::SD, primary name = %s\n",
-                  primaryName.c_str());
+                  primaryName.WX_TO_STD_STRING.c_str());
             MessageInterface::ShowMessage("CoordPanel::SD, primary object is %s\n",
                   (primary? "NOT NULL" : "NULL"));
             MessageInterface::ShowMessage("CoordPanel::SD, axis pointer (%s) is %p\n",
                   axis->GetTypeName().c_str(), axis);
          #endif
-         Integer primaryID = axis->GetParameterID("Primary");
-         axis->SetStringParameter(primaryID, primaryName.c_str());
+         if (!setThoughDisabled)
+         {
+            Integer primaryID = axis->GetParameterID("Primary");
+            axis->SetStringParameter(primaryID, primaryName.c_str());
+         }
+         // when we need to set it even though it is not modifiable, we directly
+         // set the object (which sets the name) because the SetStringParameter
+         // will reject the setting of the name
          axis->SetPrimaryObject(primary);
       }
       
       // set secondary body if exist
-      if (secondaryComboBox->IsEnabled())
+      if (secondaryComboBox->IsEnabled() ||setThoughDisabled)
       {
          wxString secondaryName = secondaryComboBox->GetValue().Trim();
 
-         axis->SetStringParameter("Secondary", secondaryName.c_str());
-         
+         if (!setThoughDisabled)
+         {
+            axis->SetStringParameter("Secondary", secondaryName.c_str());
+         }
+         // when we need to set it even though it is not modifiable, we directly
+         // set the object (which sets the name) because the SetStringParameter
+         // will reject the setting of the name
          if (secondaryName != "")
          {
             SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->
@@ -1416,7 +1436,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
                               GetConfiguredObject(refName.c_str());
          #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
             MessageInterface::ShowMessage("CoordPanel::SD, ref object name = %s\n",
-                  refName.c_str());
+                  refName.WX_TO_STD_STRING.c_str());
             MessageInterface::ShowMessage("CoordPanel::SD, reference object is %s\n",
                   (refObj? "NOT NULL" : "NULL"));
             MessageInterface::ShowMessage("CoordPanel::SD, axis pointer (%s) is %p\n",
@@ -1464,7 +1484,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
             axis->SetRefObject(constraintCoord, Gmat::COORDINATE_SYSTEM, constraintCoord->GetName());
             #ifdef DEBUG_COORD_PANEL_PRIMARY_SECONDARY
                MessageInterface::ShowMessage("CoordPanel::SD, constraint CS name = %s\n",
-                     cCSName.c_str());
+                     cCSName.WX_TO_STD_STRING.c_str());
                MessageInterface::ShowMessage("CoordPanel::SD, constraint CS is %s\n",
                      (constraintCoord? "NOT NULL" : "NULL"));
             #endif

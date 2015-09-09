@@ -60,8 +60,6 @@ public:
    virtual std::string GetZAxis() const;
    virtual void        ResetAxes();
    
-   virtual GmatCoordinate::ParameterUsage UsesPrimary() const;
-   virtual GmatCoordinate::ParameterUsage UsesSecondary() const;
    virtual GmatCoordinate::ParameterUsage UsesXAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesYAxis() const;
    virtual GmatCoordinate::ParameterUsage UsesZAxis() const;

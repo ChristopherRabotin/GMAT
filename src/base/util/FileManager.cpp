@@ -107,10 +107,11 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    
    // Specific file name
    "DE405_FILE",
-   "DE421_FILE",						// made change by TUAN NGUYEN
-   "DE424_FILE",						// made change by TUAN NGUYEN
-   "IAUSOFA_FILE",					// made change by TUAN NGUYEN
-   "ICRF_FILE",						// made change by TUAN NGUYEN
+   "DE421_FILE",
+   "DE424_FILE",
+   "DE430_FILE",
+   "IAUSOFA_FILE",
+   "ICRF_FILE",
    "PLANETARY_SPK_FILE",
    "JGM2_FILE",
    "JGM3_FILE",
@@ -121,6 +122,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "EOP_FILE",
    "PLANETARY_COEFF_FILE",
    "NUTATION_COEFF_FILE",
+   "PLANETARY_PCK_FILE",
    "LEAP_SECS_FILE",
    "LSK_FILE",
    "PERSONALIZATION_FILE",
@@ -128,6 +130,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "STAR_FILE",
    "CONSTELLATION_FILE",
    "SPACECRAFT_MODEL_FILE",
+   "SPAD_SRP_FILE",
    "HELP_FILE",
 };
 
@@ -1509,7 +1512,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    WriteFiles(outStream, "PLANETARY SPK");
    outStream << "#-----------------------------------------------------------\n";
    mPathWrittenOuts.push_back("PLANETARY_EPHEM_SPK_PATH");
-   
+
    //---------------------------------------------
    // write the PLANETARY_EPHEM_DE_PATH and DE file next
    //---------------------------------------------
@@ -3187,6 +3190,7 @@ void FileManager::RefreshFiles()
    // we will leave this here as a placeholder anyway
    AddFileType("PLANETARY_COEFF_FILE", "PLANETARY_COEFF_PATH/NUT85.DAT");
    AddFileType("NUTATION_COEFF_FILE", "PLANETARY_COEFF_PATH/NUTATION.DAT");
+   AddFileType("PLANETARY_PCK_FILE", "PLANETARY_COEFF_PATH/pck00010.tpc");
 
    // time path and files
    AddFileType("TIME_PATH", "DATA_PATH/time/");

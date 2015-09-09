@@ -690,6 +690,10 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
       ("   and trimmed string is <%s>\n", theDescription.c_str(), "\"\n");
    MessageInterface::ShowMessage
       ("   parametersFirst=%d, manage=%d\n", parametersFirst, manage);
+   #ifdef DEBUG_OBJECT_MAP
+   if (theFunction)
+      ShowObjectMap("Validator::CreateElementWrapper()");
+   #endif
    #endif
    
    // first, check to see if it is enclosed with single quotes
@@ -2129,7 +2133,8 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Validator::CreateSystemParameter() str='%s', manage=%d\n", str.c_str(), manage);
+      ("\nValidator::CreateSystemParameter() entered, str='%s', manage=%d\n",
+       str.c_str(), manage);
    #endif
    
    // Since GmatFunction can have such as "GMAT XYPlot.Add = {sat.X, sat.Y};",
@@ -2198,8 +2203,11 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
             ("   Parameter created with paramType='%s', ownerName='%s', depName='%s', "
              "theFunction=<%p>'%s'\n", paramType.c_str(), ownerName.c_str(), depName.c_str(),
              theFunction, theFunction ? theFunction->GetName().c_str() : "NULL");
+         GmatBase *paramOwner = param->GetOwner();
          MessageInterface::ShowMessage
-            ("   param->GetOwner() = <%p>\n", param->GetOwner());
+            ("   paramOwner=<%p>[%s]'%s'\n", paramOwner,
+             paramOwner ? paramOwner->GetTypeName().c_str() : "NULL",
+             paramOwner ? paramOwner->GetName().c_str() : "NULL");
          #endif
          
          // Add unmanaged Parameter to function
@@ -2211,12 +2219,16 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
                 "function's automatic object map\n", param, param->GetTypeName().c_str(),
                 param->GetName().c_str());
             #endif
-                        
+            
             // If automatic parameter is in the objectMap, set flag so that
             // it won't be deleted in the function since it is deleted in the
             // Sandbox. (LOJ: 2009.03.16)
             theFunction->AddAutomaticObject(param->GetName(), (GmatBase*)param,
                                             alreadyManaged);
+            
+            // Parameter is created inside a function, so set it local
+            if (!alreadyManaged)
+               param->SetIsLocal(true);
          }
       }
       else
@@ -2240,10 +2252,9 @@ Parameter* Validator::CreateSystemParameter(bool &paramCreated,
    
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Validator::CreateSystemParameter() paramCreated=%d, returning <%p><%s>'%s'\n",
-       paramCreated, realParam,
-       (realParam == NULL) ? "NULL" : realParam->GetTypeName().c_str(),
-       (realParam == NULL) ? "NULL" : realParam->GetName().c_str());
+      ("Validator::CreateSystemParameter() returning <%p><%s>'%s', paramCreated=%d\n",
+       realParam, (realParam == NULL) ? "NULL" : realParam->GetTypeName().c_str(),
+       (realParam == NULL) ? "NULL" : realParam->GetName().c_str(), paramCreated);
    #endif
    
    return realParam;
@@ -2281,7 +2292,7 @@ Parameter* Validator::CreateAutoParameter(const std::string &type,
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Validator::CreateAutoParameter() type='%s', name='%s', ownerName='%s', "
+      ("\nValidator::CreateAutoParameter() type='%s', name='%s', ownerName='%s', "
        "depName='%s', manage=%d\n", type.c_str(), name.c_str(),
        ownerName.c_str(), depName.c_str(), manage);
    #endif
@@ -2298,7 +2309,7 @@ Parameter* Validator::CreateAutoParameter(const std::string &type,
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
       ("Validator::CreateAutoParameter() returning %s <%p><%s> '%s'\n",
-       alreadyManaged ? "old" : "new", param,
+       alreadyManaged ? "EXISTING" : "NEW", param,
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
        (param == NULL) ? "NULL" : param->GetName().c_str());
    #endif
@@ -3572,16 +3583,57 @@ void Validator::ShowObjectMap(const std::string &label)
 {
    if (theObjectMap != NULL)
    {
+      GmatBase *obj = NULL;
+      GmatBase *paramOwner = NULL;
+      std::string objName;
+      std::string isGlobal;
+      std::string isLocal;
+      std::string paramOwnerType;
+      std::string paramOwnerName;
+      bool isParameter = false;
+      
+      MessageInterface::ShowMessage("========================================\n");
       MessageInterface::ShowMessage
-         ("=====%s, Here is the object map in use <%p>, it has %d objects\n",
+         ("%s, Here is the object map in use <%p>, it has %d objects\n",
           label.c_str(), theObjectMap, theObjectMap->size());
+      
       for (std::map<std::string, GmatBase *>::iterator i = theObjectMap->begin();
            i != theObjectMap->end(); ++i)
       {
+         obj = i->second;
+         objName = i->first;
+         paramOwner = NULL;
+         isParameter = false;
+         isGlobal = "No";
+         isLocal = "No";
+         
+         if (obj)
+         {
+            if (obj->IsGlobal())
+               isGlobal = "Yes";
+            if (obj->IsLocal())
+               isLocal = "Yes";
+            if (obj->IsOfType(Gmat::PARAMETER))
+            {
+               isParameter = true;
+               paramOwner = ((Parameter*)obj)->GetOwner();
+               if (paramOwner)
+               {
+                  paramOwnerType = paramOwner->GetTypeName();
+                  paramOwnerName = paramOwner->GetName();
+               }
+            }
+         }
          MessageInterface::ShowMessage
-            ("   %30s  <%p><%s>'%s'\n", i->first.c_str(), i->second,
-             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str(),
-             i->second == NULL ? "NULL" : (i->second)->GetName().c_str());
+            ("   %50s  <%p>  %-16s  IsGlobal:%-3s  IsLocal:%-3s", objName.c_str(), obj,
+             obj == NULL ? "NULL" : (obj)->GetTypeName().c_str(), isGlobal.c_str(),
+             isLocal.c_str());
+         if (isParameter)
+            MessageInterface::ShowMessage
+               ("  ParameterOwner: <%p>[%s]'%s'\n", paramOwner, paramOwnerType.c_str(),
+                paramOwnerName.c_str());
+         else
+            MessageInterface::ShowMessage("\n");
       }
    }
    else

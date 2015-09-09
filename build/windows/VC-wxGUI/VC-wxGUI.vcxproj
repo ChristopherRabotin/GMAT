@@ -112,7 +112,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(F2C_VC32)\include;$(CSPICE_VC32)\include;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\plugins\DataInterfacePlugin\src\base\include;..\..\..\plugins\DataInterfacePlugin\src\base\factory;..\..\..\plugins\DataInterfacePlugin\src\base\datainterface;..\..\..\plugins\DataInterfacePlugin\src\base\datareader;..\..\..\plugins\DataInterfacePlugin\src\base\command;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN_30)\include\msvc;$(WXWIN_30)\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\plugin;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver;$(GMAT_INTERNAL_PLUGINS)\code\NewParameterPlugin\src\base\include;$(GMAT_INTERNAL_PLUGINS)\code\NewParameterPlugin\src\base\factory;$(GMAT_INTERNAL_PLUGINS)\code\NewParameterPlugin\src\base\parameter</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(F2C_VC32)\include;$(CSPICE_VC32)\include;..\..\..\src\base\asset;..\..\..\src\base\attitude;..\..\..\src\base\burn;..\..\..\src\base\command;..\..\..\src\base\configs;..\..\..\src\base\coordsystem;..\..\..\src\base\estimator;..\..\..\src\base\event;..\..\..\src\base\executive;..\..\..\src\base\factory;..\..\..\src\base\forcemodel;..\..\..\src\base\forcemodel\harmonic;..\..\..\src\base\foundation;..\..\..\src\base\function;..\..\..\src\base\hardware;..\..\..\src\base\include;..\..\..\src\base\interface;..\..\..\src\base\interpolator;..\..\..\src\base\interpreter;..\..\..\src\base\math;..\..\..\src\base\measurement;..\..\..\src\base\measurementfile;..\..\..\src\base\parameter;..\..\..\src\base\plugin;..\..\..\src\base\propagator;..\..\..\src\base\solarsys;..\..\..\src\base\solver;..\..\..\src\base\spacecraft;..\..\..\src\base\stopcond;..\..\..\src\base\subscriber;..\..\..\src\base\util;..\..\..\plugins\CInterfacePlugin\src\base\include;..\..\..\plugins\CInterfacePlugin\src\base\factory;..\..\..\plugins\CInterfacePlugin\src\base\command;..\..\..\plugins\EphemPropagatorPlugin\src\base\include;..\..\..\plugins\EphemPropagatorPlugin\src\base\factory;..\..\..\plugins\EphemPropagatorPlugin\src\base\propagator;..\..\..\plugins\EstimationPlugin\src\base\include;..\..\..\plugins\EstimationPlugin\src\base\factory;..\..\..\plugins\EstimationPlugin\src\base\command;..\..\..\plugins\EstimationPlugin\src\base\estimator;..\..\..\plugins\EstimationPlugin\src\base\event;..\..\..\plugins\EstimationPlugin\src\base\hardware;..\..\..\plugins\EstimationPlugin\src\base\measurement;..\..\..\plugins\EstimationPlugin\src\base\measurement\Ionosphere;..\..\..\plugins\EstimationPlugin\src\base\measurement\Troposphere;..\..\..\plugins\EstimationPlugin\src\base\measurementfile;..\..\..\plugins\EstimationPlugin\src\base\trackingsystem;..\..\..\plugins\EventLocatorPlugin\src\base\include;..\..\..\plugins\EventLocatorPlugin\src\base\factory;..\..\..\plugins\EventLocatorPlugin\src\base\event;..\..\..\plugins\EventLocatorPlugin\src\base\locator;..\..\..\plugins\ExtraPropagatorPlugin\src\base\include;..\..\..\plugins\ExtraPropagatorPlugin\src\base\factory;..\..\..\plugins\ExtraPropagatorPlugin\src\base\propagator;..\..\..\plugins\FminconOptimizerPlugin\src\base\include;..\..\..\plugins\FminconOptimizerPlugin\src\base\factory;..\..\..\plugins\FminconOptimizerPlugin\src\base\solver;..\..\..\plugins\FormationPlugin\src\base\include;..\..\..\plugins\FormationPlugin\src\base\factory;..\..\..\plugins\FormationPlugin\src\base\formation;..\..\..\plugins\GmatFunctionPlugin\src\base\include;..\..\..\plugins\GmatFunctionPlugin\src\base\factory;..\..\..\plugins\GmatFunctionPlugin\src\base\command;..\..\..\plugins\GmatFunctionPlugin\src\base\function;$(MATLAB32)\extern\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\include;..\..\..\plugins\MatlabInterfacePlugin\src\base\interface;..\..\..\plugins\MatlabInterfacePlugin\src\base\factory;..\..\..\plugins\MatlabInterfacePlugin\src\base\function;..\..\..\plugins\MatlabInterfacePlugin\src\base\command;..\..\..\plugins\SaveCommandPlugin\src\base\include;..\..\..\plugins\SaveCommandPlugin\src\base\factory;..\..\..\plugins\SaveCommandPlugin\src\base\command;..\..\..\plugins\StationPlugin\src\base\include;..\..\..\plugins\StationPlugin\src\base\factory;..\..\..\plugins\StationPlugin\src\base\Station;..\..\..\plugins\DataInterfacePlugin\src\base\include;..\..\..\plugins\DataInterfacePlugin\src\base\factory;..\..\..\plugins\DataInterfacePlugin\src\base\datainterface;..\..\..\plugins\DataInterfacePlugin\src\base\datareader;..\..\..\plugins\DataInterfacePlugin\src\base\command;..\..\..\plugins\NewParameterPlugin\src\base\include;..\..\..\plugins\NewParameterPlugin\src\base\factory;..\..\..\plugins\NewParameterPlugin\src\base\parameter;..\..\..\build\windows;..\..\..\src\gui\app;..\..\..\src\gui\asset;..\..\..\src\gui\burn;..\..\..\src\gui\command;..\..\..\src\gui\controllogic;..\..\..\src\gui\coordsystem;..\..\..\src\gui\event;..\..\..\src\gui\forcemodel;..\..\..\src\gui\foundation;..\..\..\src\gui\function;..\..\..\src\gui\hardware;..\..\..\src\gui\include;..\..\..\src\gui\mission;..\..\..\src\gui\output;..\..\..\src\gui\subscriber;..\..\..\src\gui\propagator;..\..\..\src\gui\rendering;..\..\..\src\gui\resource;..\..\..\src\gui\solarsys;..\..\..\src\gui\solver;..\..\..\src\gui\spacecraft;..\..\..\src\gui\view;$(WXWIN_30)\include\msvc;$(WXWIN_30)\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\include;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\factory;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\plugin;$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>__WIN32__;__WXMSW__;__INCLUDE_BUILTIN_PLUGINS__;__USE_MATLAB__;__USE_SPICE__;__USE_STC_EDITOR__;__DISABLE_EMAIL__;DEBUG_MEMORY_DISABLE;DEBUG_TRACE_DISABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -191,16 +191,6 @@
     <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.c" />
     <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.cpp" />
     <ClCompile Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.c" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\factory\NewParameterFactory.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMAcceleration.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMDensity.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeData.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeReal.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverData.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverReal.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverState.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverStatus.cpp" />
-    <ClCompile Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverString.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.cpp" />
     <ClCompile Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.cpp" />
@@ -311,6 +301,19 @@
     <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.cpp" />
     <ClCompile Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\factory\NewParameterFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\AtmosDensity.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMAcceleration.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMDensity.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeData.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeReal.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverData.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverReal.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverState.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverStatus.cpp" />
+    <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverString.cpp" />
     <ClCompile Include="..\..\..\plugins\SaveCommandPlugin\src\base\command\Save.cpp" />
     <ClCompile Include="..\..\..\plugins\SaveCommandPlugin\src\base\factory\SaveCommandFactory.cpp" />
     <ClCompile Include="..\..\..\plugins\StationPlugin\src\base\factory\StationFactory.cpp" />
@@ -613,7 +616,6 @@
     <ClCompile Include="..\..\..\src\base\parameter\BurnReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\CartesianParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvData.cpp" />
-    <ClCompile Include="..\..\..\src\base\parameter\EnvParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EnvReal.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\EquinoctialParameters.cpp" />
     <ClCompile Include="..\..\..\src\base\parameter\ExpressionParser.cpp" />
@@ -890,16 +892,6 @@
     <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13.h" />
     <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13ad.hpp" />
     <ClInclude Include="$(GMAT_INTERNAL_PLUGINS)\code\Vf13OptimizerPlugin\src\base\solver\VF13DEP.h" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\factory\NewParameterFactory.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMAcceleration.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\FMDensity.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeData.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\OdeReal.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverData.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverReal.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverState.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverStatus.hpp" />
-    <ClInclude Include="..\..\..\..\GmatDevInternalPlugins\code\NewParameterPlugin\src\base\parameter\SolverString.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\command\Set.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\DataInterface.hpp" />
     <ClInclude Include="..\..\..\plugins\DataInterfacePlugin\src\base\datainterface\FileInterface.hpp" />
@@ -1013,6 +1005,19 @@
     <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\factory\MatlabInterfaceFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\function\MatlabFunction.hpp" />
     <ClInclude Include="..\..\..\plugins\MatlabInterfacePlugin\src\base\interface\MatlabInterface.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\factory\NewParameterFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\AtmosDensity.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug-wx3|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMAcceleration.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\FMDensity.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeData.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\OdeReal.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverData.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverReal.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverState.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverStatus.hpp" />
+    <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverString.hpp" />
     <ClInclude Include="..\..\..\plugins\SaveCommandPlugin\src\base\command\Save.hpp" />
     <ClInclude Include="..\..\..\plugins\SaveCommandPlugin\src\base\factory\SaveCommandFactory.hpp" />
     <ClInclude Include="..\..\..\plugins\StationPlugin\src\base\factory\StationFactory.hpp" />
@@ -1318,7 +1323,6 @@
     <ClInclude Include="..\..\..\src\base\parameter\BurnReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\CartesianParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvData.hpp" />
-    <ClInclude Include="..\..\..\src\base\parameter\EnvParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EnvReal.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\EquinoctialParameters.hpp" />
     <ClInclude Include="..\..\..\src\base\parameter\ExpressionParser.hpp" />

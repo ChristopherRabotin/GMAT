@@ -59,7 +59,7 @@ OrbitReal::OrbitReal(const std::string &name, const std::string &typeStr,
                      bool isPlottable, bool isReportable, Gmat::ObjectType paramOwnerType)
    : RealVar(name, "", typeStr, GmatParam::SYSTEM_PARAM, obj, desc, unit,
              depObj, paramOwnerType, false, isSettable, isPlottable, isReportable),
-     OrbitData(name, paramOwnerType, depObj, isSettable)
+     OrbitData(name, typeStr, paramOwnerType, depObj, isSettable)
 {
    mItemId = itemId;
    mNeedCoordSystem = true;

@@ -76,6 +76,7 @@
 //#define DEBUG_TEXTURE_FILE
 //#define DEBUG_3D_MODEL_FILE
 //#define DEBUG_VALIDATION
+//#define DEBUG_CB_GET_STRING_ARRAY
 
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
@@ -299,6 +300,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -311,6 +313,11 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    // want to include the Create line either.  This will not be true for user-defined
    // bodies
    cloaking = true;
+
+//   // Set the SPICE_FRAME_ID default - we don't want to do this, as the user
+//   // has to set this for user-defined bodies
+//   std::string nameUpper = GmatStringUtil::ToUpper(name);
+//   spiceFrameID        = "IAU_" + nameUpper;
 
    #ifdef DEBUG_CB_CONSTRUCTOR
    MessageInterface::ShowMessage
@@ -413,6 +420,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    orbitSpiceKernelNames.clear();
    
@@ -520,6 +528,7 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    #ifdef __USE_SPICE__
       kernelReader = NULL;
       mainSPK      = "";
+      mainPCK      = "";
    #endif
    
    if (cBody.atmModel)
@@ -586,6 +595,7 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    #ifdef __USE_SPICE__
    kernelReader        = cBody.kernelReader;
    mainSPK             = cBody.mainSPK;
+   mainPCK             = cBody.mainPCK;
    #endif
    usePotentialFile    = cBody.usePotentialFile;
    potentialFileName   = cBody.potentialFileName;
@@ -702,30 +712,31 @@ CelestialBody::~CelestialBody()
       delete atmModel;
    }
    #ifdef __USE_SPICE__
-   // unload the kernel(s) from the SpiceKernelReader
-      if (kernelReader != NULL)
-      {
-         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
-         {
-            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
-            {
-               #ifdef DEBUG_CB_SPICE
-                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
-                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
-               #endif
-               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
-               {
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
-                  #endif
-                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
-                  #endif
-               }
-            }
-         }
-      }
+   UnloadKernels(true, true, true, false);
+   // unload the kernel(s) from the SpiceKernelReader  // @todo  ADD the other kernels here
+//      if (kernelReader != NULL)
+//      {
+//         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+//         {
+//            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
+//            {
+//               #ifdef DEBUG_CB_SPICE
+//                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+//                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+//               #endif
+//               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+//               {
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+//                  #endif
+//                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+//                  #endif
+//               }
+//            }
+//         }
+//      }
    #endif
    #ifdef DEBUG_CB_DESTRUCT
       MessageInterface::ShowMessage(" Exiting CelestialBody destructor for body %s .........\n", instanceName.c_str());
@@ -890,7 +901,9 @@ const Real CelestialBody::GetFirstStateTime()
             // Make sure we are looking for coverage in the main SPK kernel as well
             StringArray allKernels = orbitSpiceKernelNames;
             mainSPK                = theSolarSystem->GetStringParameter("SPKFilename");
+            mainPCK                = theSolarSystem->GetStringParameter("PCKFilename");
             if (mainSPK != "")  allKernels.push_back(mainSPK);
+            if (mainPCK != "")  allKernels.push_back(mainPCK);  // correct?
             #ifdef DEBUG_CB_SPICE
                MessageInterface::ShowMessage("Calling GetCoverage with naifId = %d\n", naifId);
                MessageInterface::ShowMessage("   and allKernels are: \n");
@@ -959,10 +972,11 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 //      case Gmat::TWO_BODY_PROPAGATION :   // 2012.01.24 - wcs - disallow for now
 //         state = ComputeTwoBody(atTime);
 //         break;
-      // DE405, DE421, and DE424 read data from theSourceFile
+      // DE405, DE421,DE424, and DE430 read data from theSourceFile
       case Gmat::DE405 :
       case Gmat::DE421 :
       case Gmat::DE424 :
+      case Gmat::DE430 :
       {
          if (!theSourceFile)
          {
@@ -1119,6 +1133,21 @@ void CelestialBody::GetState(const A1Mjd &atTime, Real *outState)
           {
              throw PlanetaryEphemException(
                    "DE 424 file requested, but no file specified");
+          }
+          #ifdef DEBUG_GET_STATE
+          MessageInterface::ShowMessage
+             ("   In <%p> '%s', Calling theSourceFile(%s)->GetPosVel(%d, %f, %s)\n",
+              this, GetName().c_str(), (theSourceFile->GetName()).c_str(), bodyNumber, atTime.GetReal(),
+              overrideTime ? "true" : "false");
+          #endif
+          outState     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
+          break;
+
+      case Gmat::DE430 :
+          if (!theSourceFile)
+          {
+             throw PlanetaryEphemException(
+                   "DE 430 file requested, but no file specified");
           }
           #ifdef DEBUG_GET_STATE
           MessageInterface::ShowMessage
@@ -2042,6 +2071,15 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
          throw SolarSystemException(errmsg);
       }
    }
+   if (pvSrc == Gmat::DE430)
+   {
+      if (userDefined)
+      {
+         std::string errmsg = "DE430 file option not available for user-defined body ";
+         errmsg += instanceName + "\n";
+         throw SolarSystemException(errmsg);
+      }
+   }
    if (pvSrc == Gmat::SPICE)
    {
       if ((!userDefined) && (!allowSpice))
@@ -2558,8 +2596,8 @@ bool CelestialBody::SetRotationDataSource(Gmat::RotationDataSource src)
 bool CelestialBody::SetUserDefined(bool userDefinedBody)
 {
    // make sure source makes sense
-   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405) ||(posVelSrc == Gmat::DE421 ||
-	    (posVelSrc == Gmat::DE424))))
+   if ((userDefinedBody) && ((posVelSrc == Gmat::DE405) ||(posVelSrc == Gmat::DE421) ||
+	    (posVelSrc == Gmat::DE424) || (posVelSrc == Gmat::DE430)))
 	{
       posVelSrc = Gmat::SPICE;
 //      posVelSrc = Gmat::TWO_BODY_PROPAGATION; // 2012.01.24 - wcs - disallowed for now
@@ -2926,6 +2964,10 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 {
    if (id >= SpacePointParamCount && id < CelestialBodyParamCount)
       return PARAMETER_TEXT[id - SpacePointParamCount];
+
+   // Override the PCK kernel names
+   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return "PlanetarySpiceKernelName";
+
    return SpacePoint::GetParameterText(id);
 }
 
@@ -2943,13 +2985,25 @@ std::string CelestialBody::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer CelestialBody::GetParameterID(const std::string &str) const
 {
+   #ifdef DEBUG_CB_GET_STRING_ARRAY
+      MessageInterface::ShowMessage("In CB::GetParameterID, str = %s\n",
+            str.c_str());
+   #endif
    for (Integer i = SpacePointParamCount; i < CelestialBodyParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SpacePointParamCount])
          return i;
    }
-   
-   return SpacePoint::GetParameterID(str);
+   if (str == "PlanetarySpiceKernelName")
+      return ATTITUDE_SPICE_KERNEL_NAME;
+   else if (str == "AttitudeSpiceKernelName")
+   {
+      std::string errmsg = "\"AttitudeSpiceKernelName\" not a valid field for a Celestial Body.  ";
+      errmsg += "Please use \"PlanetarySpiceKernelName\".\n";
+      throw SolarSystemException(errmsg);
+   }
+   else
+      return SpacePoint::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -3533,6 +3587,12 @@ bool CelestialBody::SetStringParameter(const Integer id,
       else if (userDefined && (value == "DE424"))
       {
          std::string errmsg = "DE424 not allowed as ephemeris source for user-defined body \"";
+         errmsg += instanceName + "\"\n";
+         throw SolarSystemException(errmsg);
+      }
+      else if (userDefined && (value == "DE430"))
+      {
+         std::string errmsg = "DE430 not allowed as ephemeris source for user-defined body \"";
          errmsg += instanceName + "\"\n";
          throw SolarSystemException(errmsg);
       }
@@ -4225,9 +4285,9 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
    // that may change when/if we add the reading of PCK kernels for body orientation data
 //   if (id == NAIF_ID_REFERENCE_FRAME)  return false;
 
-   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;  // attitude for bodies (PCK) are TBD
+//   if (id == ATTITUDE_SPICE_KERNEL_NAME)  return true;
+//   if (id == FRAME_SPICE_KERNEL_NAME)     return true;
    if (id == SC_CLOCK_SPICE_KERNEL_NAME)  return true;
-   if (id == FRAME_SPICE_KERNEL_NAME)     return true;  // for now
 
    // 2012.01.24 - wcs - disallow TWO_BODY_PROPAGATION for now
    if ((id == TWO_BODY_DATE_FORMAT)   || (id == TWO_BODY_STATE_TYPE) ||
@@ -5093,8 +5153,12 @@ bool CelestialBody::SetUpSPICE()
       MessageInterface::ShowMessage("   posVelSrc = %s\n", Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc].c_str());
       if (kernelReader == NULL)
          MessageInterface::ShowMessage("   kernelReader is NULL\n");
+      if (theSolarSystem == NULL)
+         MessageInterface::ShowMessage("   theSolarSystem is NULL\n");
    #endif
-   if (posVelSrc != Gmat::SPICE) return false;
+   // Need to do this each time, even if the source is not SPICE, because we may
+   // be doing Event Location (which currently uses SPICE each time).  2015.08.28 WCS
+//   if (posVelSrc != Gmat::SPICE) return false;
    if (kernelReader == NULL) kernelReader = theSolarSystem->GetSpiceOrbitKernelReader();
    if (kernelReader == NULL)
    {
@@ -5107,6 +5171,7 @@ bool CelestialBody::SetUpSPICE()
          MessageInterface::ShowMessage("   kernelReader is STILL NULL\n");
    #endif
    mainSPK = theSolarSystem->GetStringParameter("SPKFilename");
+   mainPCK = theSolarSystem->GetStringParameter("PCKFilename");
    if (orbitSpiceKernelNames.empty())
    {
       if (mainSPK == "")
@@ -5126,71 +5191,76 @@ bool CelestialBody::SetUpSPICE()
          }
       }
    }
-   // make sure the "main" Solar System Kernel(s) are loaded first - DONE in SolarSystem
+   // make sure the "main" Solar System Kernel(s) are loaded first!!!
    theSolarSystem->LoadSpiceKernels();
-   // now load the spice kernels specified for this body
-   for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
-   {
-      #ifdef DEBUG_CB_SPICE
-         char *path=NULL;
-         size_t size = 0;
-         path=getcwd(path,size);
-         MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
-         MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
-      #endif
-      if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
-      {
-         try
-         {
-            kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
-            #ifdef DEBUG_CB_SPICE
-               MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
-                     (orbitSpiceKernelNames.at(ii)).c_str());
-            #endif
-         }
-         catch (UtilityException &ue)
-         {
-            #ifdef DEBUG_CB_SPICE
-               MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
-            #endif
-            // try again with path name if no path found
-            std::string spkName = orbitSpiceKernelNames.at(ii);
-            if (spkName.find("/") == spkName.npos &&
-                spkName.find("\\") == spkName.npos)
-            {
-               // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
-               //std::string spkPath =
-               //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
-               std::string spkPath =
-                  FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
-               spkName = spkPath + spkName;
-               try
-               {
-                  #ifdef DEBUG_CB_SPICE
-                     MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
-                  #endif
-                  kernelReader->LoadKernel(spkName);
-                  #ifdef DEBUG_CB_SPICE
-                  MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
-                     spkName.c_str());
-                  #endif
-               }
-               catch (UtilityException &)
-               {
-                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
-                     (spkName.c_str()));
-                  throw; // rethrow the exception, for now
-               }
-            }
-            else
-            {
-               MessageInterface::ShowMessage("ERROR loading kernel %s\n",
-                  (orbitSpiceKernelNames.at(ii).c_str()));
-               throw; // rethrow the exception, for now
-            }
-         }
-      }
-   }
+
+   // Call SpacePoint method to load the specified kernels - we want orbit,
+   // attitude (pck), and frame kernels loaded for celestial bodies
+   LoadNeededKernels(true, true, true, false);
+
+//   // now load the spice kernels specified for this body
+//   for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
+//   {
+//      #ifdef DEBUG_CB_SPICE
+//         char *path=NULL;
+//         size_t size = 0;
+//         path=getcwd(path,size);
+//         MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+//         MessageInterface::ShowMessage("   now checking %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+//      #endif
+//      if (!(kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii))))
+//      {
+//         try
+//         {
+//            kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
+//            #ifdef DEBUG_CB_SPICE
+//               MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
+//                     (orbitSpiceKernelNames.at(ii)).c_str());
+//            #endif
+//         }
+//         catch (UtilityException &ue)
+//         {
+//            #ifdef DEBUG_CB_SPICE
+//               MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+//            #endif
+//            // try again with path name if no path found
+//            std::string spkName = orbitSpiceKernelNames.at(ii);
+//            if (spkName.find("/") == spkName.npos &&
+//                spkName.find("\\") == spkName.npos)
+//            {
+//               // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+//               //std::string spkPath =
+//               //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+//               std::string spkPath =
+//                  FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+//               spkName = spkPath + spkName;
+//               try
+//               {
+//                  #ifdef DEBUG_CB_SPICE
+//                     MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
+//                  #endif
+//                  kernelReader->LoadKernel(spkName);
+//                  #ifdef DEBUG_CB_SPICE
+//                  MessageInterface::ShowMessage("   kernelReader has loaded file %s\n",
+//                     spkName.c_str());
+//                  #endif
+//               }
+//               catch (UtilityException &)
+//               {
+//                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+//                     (spkName.c_str()));
+//                  throw; // rethrow the exception, for now
+//               }
+//            }
+//            else
+//            {
+//               MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+//                  (orbitSpiceKernelNames.at(ii).c_str()));
+//               throw; // rethrow the exception, for now
+//            }
+//         }
+//      }
+//   }
    // get the NAIF Id from the Spice Kernel(s)   @todo - should this be moved to SpacePoint?
    if (!naifIdSet)
    {
@@ -5486,4 +5556,391 @@ bool CelestialBody::Set3dModelFileName(const std::string &fileName, bool writeWa
 //------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
-// none
+
+
+bool CelestialBody::LoadNeededKernels(bool orbit,  bool attitude,
+                                      bool frame,  bool scClock)
+{
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   INLoadNeededKernels, size of attitudeSpiceKernelNames = %d\n",
+         (Integer) attitudeSpiceKernelNames.size());
+#endif
+
+#ifdef __USE_SPICE__
+   if (orbit)
+   {
+      for (unsigned int ii = 0; ii < orbitSpiceKernelNames.size(); ii++)
+      {
+         bool isItLoaded = kernelReader->IsLoaded(orbitSpiceKernelNames.at(ii));
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking Orbit file %s ...\n", orbitSpiceKernelNames.at(ii).c_str());
+            MessageInterface::ShowMessage("   is it already loaded? %s\n", (isItLoaded? "YES!!!" : "no"));
+         #endif
+         if (!isItLoaded)
+         {
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   %s IS NOT already loaded!!!\n", orbitSpiceKernelNames.at(ii).c_str());
+#endif
+            try
+            {
+               kernelReader->LoadKernel(orbitSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   CB::LNK -- spice has loaded file %s\n",
+                        (orbitSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (UtilityException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string spkName = orbitSpiceKernelNames.at(ii);
+               if (spkName.find("/") == spkName.npos &&
+                   spkName.find("\\") == spkName.npos)
+               {
+                  // Changed to use PLANETARY_EPHEM_SPK_PATH (LOJ: 2014.06.18)
+                  //std::string spkPath =
+                  //   FileManager::Instance()->GetFullPathname(FileManager::SPK_PATH);
+                  std::string spkPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_EPHEM_SPK_PATH);
+#ifdef DEBUG_CB_SPICE
+   MessageInterface::ShowMessage("   In CB, spkPath returned was %s ...\n", spkPath.c_str());
+#endif
+                  spkName = spkPath + spkName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", spkName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(spkName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        spkName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (spkName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (orbitSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+         #ifdef DEBUG_CB_SPICE
+         else
+         {
+            MessageInterface::ShowMessage("   %s was already loaded, so not loaded!!!\n", orbitSpiceKernelNames.at(ii).c_str());
+         }
+         #endif
+
+      }
+   }
+   if (attitude)
+   {
+      for (unsigned int ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+      {
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking Planetary file %s ...\n", attitudeSpiceKernelNames.at(ii).c_str());
+         #endif
+         if (!(kernelReader->IsLoaded(attitudeSpiceKernelNames.at(ii))))
+         {
+            try
+            {
+               kernelReader->LoadKernel(attitudeSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        (attitudeSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (UtilityException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string pckName = attitudeSpiceKernelNames.at(ii);
+               if (pckName.find("/") == pckName.npos &&
+                   pckName.find("\\") == pckName.npos)
+               {
+                  std::string pckPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+                  pckName = pckPath + pckName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", pckName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(pckName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        pckName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (pckName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (attitudeSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+   if (frame)
+   {
+      for (unsigned int ii = 0; ii < frameSpiceKernelNames.size(); ii++)
+      {
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking Frame file %s ...\n", frameSpiceKernelNames.at(ii).c_str());
+         #endif
+         if (!(kernelReader->IsLoaded(frameSpiceKernelNames.at(ii))))
+         {
+            try
+            {
+               kernelReader->LoadKernel(frameSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        (frameSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (BaseException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string fkName = frameSpiceKernelNames.at(ii);
+               if (fkName.find("/") == fkName.npos &&
+                   fkName.find("\\") == fkName.npos)
+               {
+                  std::string fkPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+                  fkName = fkPath + fkName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", fkName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(fkName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        fkName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (fkName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (frameSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+   if (scClock)
+   {
+      for (unsigned int ii = 0; ii < scClockSpiceKernelNames.size(); ii++)
+      {
+         #ifdef DEBUG_CB_SPICE
+            char *path=NULL;
+            size_t size = 0;
+            path=getcwd(path,size);
+            MessageInterface::ShowMessage("   CURRENT PATH = %s\n", path);
+            MessageInterface::ShowMessage("   now checking ScClock file %s ...\n", scClockSpiceKernelNames.at(ii).c_str());
+         #endif
+         if (!(kernelReader->IsLoaded(scClockSpiceKernelNames.at(ii))))
+         {
+            try
+            {
+               kernelReader->LoadKernel(scClockSpiceKernelNames.at(ii));
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        (scClockSpiceKernelNames.at(ii)).c_str());
+               #endif
+            }
+            catch (UtilityException &ue)
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("   EXCEPTION caught with message: %s ...\n", ue.GetFullMessage().c_str());
+               #endif
+               // try again with path name if no path found
+               std::string scClockName = scClockSpiceKernelNames.at(ii);
+               if (scClockName.find("/") == scClockName.npos &&
+                   scClockName.find("\\") == scClockName.npos)
+               {
+                  std::string scClockPath =
+                     FileManager::Instance()->GetFullPathname(FileManager::PLANETARY_COEFF_PATH);
+                  scClockName = scClockPath + scClockName;
+                  try
+                  {
+                     #ifdef DEBUG_CB_SPICE
+                        MessageInterface::ShowMessage("   now attempting to load %s ...\n", scClockName.c_str());
+                     #endif
+                     kernelReader->LoadKernel(scClockName);
+                     #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("   spice has loaded file %s\n",
+                        scClockName.c_str());
+                     #endif
+                  }
+                  catch (UtilityException &)
+                  {
+                     MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                        (scClockName.c_str()));
+                     throw; // rethrow the exception, for now
+                  }
+               }
+               else
+               {
+                  MessageInterface::ShowMessage("ERROR loading kernel %s\n",
+                     (scClockSpiceKernelNames.at(ii).c_str()));
+                  throw; // rethrow the exception, for now
+               }
+            }
+         }
+      }
+   }
+#endif
+   return true;
+}
+
+bool CelestialBody::UnloadKernels(bool orbit,  bool attitude,
+                                  bool frame,  bool scClock)
+{
+#ifdef __USE_SPICE__
+   if (kernelReader)
+   {
+      if (orbit)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < orbitSpiceKernelNames.size(); kk++)
+         {
+            if ((orbitSpiceKernelNames.at(kk) != "") && (orbitSpiceKernelNames.at(kk) != mainSPK))
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (orbitSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(orbitSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(orbitSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (orbitSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (attitude)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < attitudeSpiceKernelNames.size(); kk++)
+         {
+            if ((attitudeSpiceKernelNames.at(kk) != "") && (attitudeSpiceKernelNames.at(kk) != mainPCK))
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (attitudeSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(attitudeSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(attitudeSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (attitudeSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (frame)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < frameSpiceKernelNames.size(); kk++)
+         {
+            if (frameSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (frameSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(frameSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(frameSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (frameSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+      if (scClock)
+      {
+         // unload the kernel(s) from the SpiceKernelReader
+         for (unsigned int kk = 0; kk < scClockSpiceKernelNames.size(); kk++)
+         {
+            if (scClockSpiceKernelNames.at(kk) != "")
+            {
+               #ifdef DEBUG_CB_SPICE
+                  MessageInterface::ShowMessage("In CB (%s) destructor, attempting to unload the kernel %s\n",
+                        instanceName.c_str(), (scClockSpiceKernelNames.at(kk)).c_str());
+               #endif
+               if (kernelReader->IsLoaded(scClockSpiceKernelNames.at(kk)))
+               {
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel is still loaded ... so unloading\n");
+                  #endif
+                  kernelReader->UnloadKernel(scClockSpiceKernelNames.at(kk));
+                  #ifdef DEBUG_CB_SPICE
+                     MessageInterface::ShowMessage("... the kernel %s successfully unloaded\n", (scClockSpiceKernelNames.at(kk)).c_str());
+                  #endif
+               }
+            }
+         }
+      }
+   }
+#endif
+   return true;
+}
+

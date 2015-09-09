@@ -46,11 +46,21 @@ public:
    
 private:
    
+   bool           userDef;
+   bool           allowSpiceForDefaultBodies;
+   bool           spiceAvailable;
+
    bool           dataChanged;
    bool           canClose;
+   bool           pckFilesDeleted;
    
+   StringArray    pckFiles;
+   StringArray    pckFilesToDelete;
+
    CelestialBody  *theBody;
+   GuiInterpreter *guiInterpreter;
    GuiItemManager *guiManager;
+   SolarSystem    *ss;
    
    Real           mu;
    Real           eqRad;
@@ -59,6 +69,7 @@ private:
    bool           muChanged;
    bool           eqRadChanged;
    bool           flatChanged;
+   bool           pckChanged;
    
    GmatPanel      *theCBPanel;
    
@@ -71,15 +82,22 @@ private:
    void     OnMuTextCtrlChange(wxCommandEvent &event);
    void     OnEqRadTextCtrlChange(wxCommandEvent &event);
    void     OnFlatTextCtrlChange(wxCommandEvent &event);
-   void     OnBrowseButton(wxCommandEvent &event);
+   void     OnPckFileBrowseButton(wxCommandEvent &event);
+   void     OnPckFileRemoveButton(wxCommandEvent &event);
+   void     OnPckFileListBoxChange(wxCommandEvent &event);
    
    wxString ToString(Real rval);
    
    // wx
    
+   StringArray  pckFileArray;
+
+   wxString     *pckFileArrayWX;
+
    wxStaticText *muStaticText;
    wxStaticText *eqRadStaticText;
    wxStaticText *flatStaticText;
+   wxStaticText *pckStaticText;
 
    wxStaticText *muUnitsStaticText;
    wxStaticText *eqRadUnitsStaticText;
@@ -89,21 +107,28 @@ private:
    wxTextCtrl   *eqRadTextCtrl;
    wxTextCtrl   *flatTextCtrl;
    
+   wxListBox    *pckFileListBox;
+
    /// string versions of current data
    wxString     muString;
    wxString     eqRadString;
    wxString     flatString;
    
+   wxButton     *pckFileBrowseButton;
+   wxButton     *pckFileRemoveButton;
+
    GmatStaticBoxSizer *pageSizer;
    
    /// IDs for the controls 
    enum
    {
       ID_TEXT = 7100,
-      ID_BUTTON_BROWSE,
+      ID_BROWSE_BUTTON_PCK_FILE,
+      ID_REMOVE_BUTTON_PCK_FILE,
       ID_TEXT_CTRL_MU,
       ID_TEXT_CTRL_EQRAD,
       ID_TEXT_CTRL_FLAT,
+      ID_LIST_BOX_PCK_FILE,
    };
 };
 #endif // CelestialBodyPropertiesPanel_hpp

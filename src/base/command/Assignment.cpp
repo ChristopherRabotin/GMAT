@@ -1148,8 +1148,11 @@ bool Assignment::Execute()
       }
       
       // Check if setting object property
+      // Also check if wrapper is a parameter wrapper which may update
+      // a Parameter ref object (Fix for GMT-5247, LOJ: 2015.08.27)
       if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT ||
-          lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
+          lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT ||
+          lhsWrapper->GetWrapperType() == Gmat::PARAMETER_WT)
          HandleObjectPropertyChange(lhsWrapper);
       
       #ifdef DEBUG_ASSIGNMENT_EXEC
@@ -2457,10 +2460,14 @@ void Assignment::HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
    #endif
    
    std::string propName;
+   GmatBase *obj = NULL;
    
    // Get property name
    if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY_WT)
    {
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   The wrapper type is OBJECT_PROPERTY_WT\n");
+      #endif
       StringArray propNames = ((ObjectPropertyWrapper*)lhsWrapper)->GetPropertyNames();
       int propSize = propNames.size();
       
@@ -2476,9 +2483,24 @@ void Assignment::HandleObjectPropertyChange(ElementWrapper *lhsWrapper)
       
       // Get first property name (Why is there more than one property name?)
       propName = propNames[0];
+      obj = lhsWrapper->GetRefObject();
+   }
+   else if (lhsWrapper->GetWrapperType() == Gmat::OBJECT_WT)
+   {
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   The wrapper type is OBJECT_WT\n");
+      #endif
+      obj = lhsWrapper->GetRefObject();
+   }
+   else if (lhsWrapper->GetWrapperType() == Gmat::PARAMETER_WT)
+   {
+      #ifdef DEBUG_PROPERTY_CHANGE
+      MessageInterface::ShowMessage("   The wrapper type is PARAMETER_WT\n");
+      #endif
+      Parameter *param = (Parameter*)lhsWrapper->GetRefObject();
+      obj = param->GetOwner();
    }
    
-   GmatBase *obj = lhsWrapper->GetRefObject();
    if (obj != NULL)
    {
       // Check for the Spacecraft first

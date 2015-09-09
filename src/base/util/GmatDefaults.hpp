@@ -414,11 +414,11 @@ namespace GmatSolarSystemDefaults
          999,
    };
 
-   const std::string           PLANET_SPICE_FRAME_NAME[NumberOfDefaultPlanets] =
+   const std::string           PLANET_SPICE_FRAME_ID[NumberOfDefaultPlanets] =
    {
          "IAU_MERCURY",
          "IAU_VENUS",
-         "IAU_EARTH",
+         "ITRF93",     // "IAU_EARTH" is low fidelity, should be "ITRF93"
          "IAU_MARS",
          "IAU_JUPITER",
          "IAU_SATURN",
@@ -587,7 +587,7 @@ namespace GmatSolarSystemDefaults
    //      402,    // Deimos
    };
 
-   const std::string           MOON_SPICE_FRAME_NAME[NumberOfDefaultMoons] =
+   const std::string           MOON_SPICE_FRAME_ID[NumberOfDefaultMoons] =
    {
          "IAU_MOON",
 //         "IAU_PHOBOS",
@@ -620,7 +620,7 @@ namespace GmatSolarSystemDefaults
    const Rvector6              STAR_ORIENTATION_PARAMETERS   = Rvector6(
          286.13, 0.0, 63.87, 0.0, 84.10, 14.1844000);
    const Integer               STAR_NAIF_IDS                 = 10;
-   const std::string           STAR_SPICE_FRAME_NAME         = "IAU_SUN";
+   const std::string           STAR_SPICE_FRAME_ID           = "IAU_SUN";
 
    const Real                  STAR_RADIANT_POWER            = 1358.0;       // W / m^2
    // Units for reference distance are km (1 AU)

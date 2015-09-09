@@ -95,6 +95,8 @@ BodySpinSunAxes::BodySpinSunAxes(const std::string &itsName) :
    parameterCount = BodySpinSunAxesParamCount;
 
    needsCBOrigin  = true;
+   usesPrimary    = GmatCoordinate::NOT_USED;
+   usesSecondary  = GmatCoordinate::NOT_USED;
 }
 
 
@@ -154,17 +156,6 @@ BodySpinSunAxes::~BodySpinSunAxes()
    MessageInterface::ShowMessage("BodySpinSunAxes::~BodySpinSunAxes()   destruction.\n");
 #endif
 
-}
-
-
-GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesPrimary() const
-{
-   return GmatCoordinate::NOT_USED;
-}
-
-GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesSecondary() const
-{
-   return GmatCoordinate::NOT_USED;
 }
 
 GmatCoordinate::ParameterUsage BodySpinSunAxes::UsesXAxis() const

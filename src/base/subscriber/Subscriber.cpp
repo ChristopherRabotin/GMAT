@@ -49,6 +49,7 @@
 //#define DEBUG_RECEIVE_DATA
 //#define DEBUG_RENAME
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_SKIP_DATA
 //#define DEBUG_SUBSCRIBER_PUT
 //#define DEBUG_SUBSCRIBER_SET
 //#ifndef DEBUG_MEMORY
@@ -184,13 +185,24 @@ Subscriber::Subscriber(const Subscriber &copy) :
    
    mPlotUpperLeft    = Rvector(2,copy.mPlotUpperLeft[0], copy.mPlotUpperLeft[1]);
    mPlotSize         = Rvector(2,copy.mPlotSize[0],      copy.mPlotSize[1]);
-
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("Subscriber(copy) entered, copy.xParamWrappers.size()=%d, "
+       "copy.yParamWrappers.size()=%d\n", copy.xParamWrappers.size(),
+       copy.yParamWrappers.size());
+   #endif
+   
 #ifdef __ENABLE_CLONING_WRAPPERS__
    // Clear old wrappers
    ClearWrappers(true, true);
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(xParamWrappers, copy.xParamWrappers);
    CloneWrappers(yParamWrappers, copy.yParamWrappers);
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Subscriber(copy) cloned wrappers\n");
+   WriteWrappers();
+   #endif
 #else
    // Copy wrappers
    xParamWrappers = copy.xParamWrappers;
@@ -259,6 +271,10 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    // Create new wrappers by cloning (LOJ: 2009.03.10)
    CloneWrappers(xParamWrappers, rhs.xParamWrappers);
    CloneWrappers(yParamWrappers, rhs.yParamWrappers);
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("Subscriber(=) cloned wrappers\n");
+   WriteWrappers();
+   #endif
 #else
    // Copy wrappers
    xParamWrappers = rhs.xParamWrappers;
@@ -308,13 +324,27 @@ Subscriber::~Subscriber()
 //------------------------------------------------------------------------------
 bool Subscriber::Initialize()
 {
-   isEndOfReceive = false;
-   isEndOfDataBlock = false;
-   isEndOfRun = false;
-   isInitialized = false;
-   isFinalized = false;
-   isDataOn = true;
-   isDataStateChanged = false;
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("Subscriber::Initialize() <%p>'%s' entered, IsGlobal=%d\n", this,
+       GetName().c_str(), IsGlobal());
+   #endif
+   
+   if (!IsGlobal())
+   {
+      isEndOfReceive = false;
+      isEndOfDataBlock = false;
+      isEndOfRun = false;
+      isInitialized = false;
+      isFinalized = false;
+      isDataOn = true;
+      isDataStateChanged = false;
+   }
+   
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("Subscriber::Initialize() <%p>'%s' returning true\n", this, GetName().c_str());
+   #endif
    return true;
 }
 
@@ -851,6 +881,9 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
    MessageInterface::ShowMessage
       ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
        xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   MessageInterface::ShowMessage
+      ("   xParamWrappers.size() = %d, yParamWrappers.size() = %d\n",
+       xParamWrappers.size(), yParamWrappers.size());
    for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage
          ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
@@ -859,10 +892,12 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
          ("   yWrapperObjectNames[%d] = '%s'\n", i, yWrapperObjectNames[i].c_str());
    #endif
    
-   if (xWrapperObjectNames.size() > 0)
+   //if (xWrapperObjectNames.size() > 0)
+   if (xParamWrappers.size() > 0)
       retval1 = SetActualElementWrapper(xWrapperObjectNames, xParamWrappers, toWrapper, name);  
    
-   if (yWrapperObjectNames.size() > 0)
+   //if (yWrapperObjectNames.size() > 0)
+   if (yParamWrappers.size() > 0)
       retval2 = SetActualElementWrapper(yWrapperObjectNames, yParamWrappers, toWrapper, name);
    
    // Delete old wrappers
@@ -907,7 +942,7 @@ void Subscriber::ClearWrappers(bool clearX, bool clearY)
    #endif
    
    ElementWrapper *wrapper;
-
+   
    if (clearX)
    {
       for (UnsignedInt i = 0; i < xParamWrappers.size(); ++i)
@@ -1786,6 +1821,11 @@ bool Subscriber::CloneWrappers(WrapperArray &toWrappers,
              "ew = fromWrappers[i]->Clone()");
          #endif         
       }
+      else
+      {
+         // Need to keep the size, so add NULL (Fix for GMT1552 LOJ: 2015.06.24)
+         toWrappers.push_back(NULL);
+      }
    }
    
    return true;
@@ -1799,11 +1839,15 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
 {
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("\nSubscriber::SetWrapperReference() entered, this='%s', obj=<%p>, name='%s'\n",
-       GetName().c_str(), obj, name.c_str());
+      ("\nSubscriber::SetWrapperReference() <%p>'%s' entered, obj=<%p>, name='%s', "
+       "obj->IsGlobal()=%d\n", this, GetName().c_str(), obj, name.c_str(),
+       obj->IsGlobal());
    MessageInterface::ShowMessage
       ("   xWrapperObjectNames.size() = %d, yWrapperObjectNames.size() = %d\n",
        xWrapperObjectNames.size(), yWrapperObjectNames.size());
+   MessageInterface::ShowMessage
+      ("   xParamWrappers.size() = %d, yParamWrappers.size() = %d\n",
+       xParamWrappers.size(), yParamWrappers.size());
    for (unsigned int i = 0; i < xWrapperObjectNames.size(); i++)
       MessageInterface::ShowMessage
          ("   xWrapperObjectNames[%d] = '%s'\n", i, xWrapperObjectNames[i].c_str());
@@ -1882,6 +1926,183 @@ Integer Subscriber::FindIndexOfElement(StringArray &labelArray,
       return distance(labelArray.begin(), pos);
 }
 
+
+//------------------------------------------------------------------------------
+// bool ShouldDataBeSkipped(Integer whichWrapper)
+//------------------------------------------------------------------------------
+/**
+ * Determins if data should be skipped. Data needs to be skipped if subscriber
+ * is not created inside a function and data is not published inside a function.
+ *
+ * @param whichWrapper  input wrapper indicator (1 = X wrapper, 2 = Y wrapper)
+ */
+//------------------------------------------------------------------------------
+bool Subscriber::ShouldDataBeSkipped(Integer whichWrapper)
+{
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ShouldDataBeSkipped() <%p>'%s' entered, whichWrapper=%d, "
+       "xParamWrappers.size()=%d, yParamWrappers.size()=%d\n", this, GetName().c_str(),
+       whichWrapper, xParamWrappers.size(), yParamWrappers.size());
+   #endif
+   
+   bool skipData = false;
+   bool isValidData = true;
+   GmatBase *refObj = NULL;
+   
+   // Check wrapper size first
+   if (whichWrapper == 1)
+   {
+      if (xParamWrappers.empty())
+         isValidData = false;
+   }
+   else if (whichWrapper == 2)
+   {
+      if (yParamWrappers.empty())
+         isValidData = false;
+   }
+   else
+      isValidData = false;
+   
+   if (!isValidData)
+   {
+      std::string wrapperName = "Unknown wrappers";
+      if (whichWrapper == 1)
+         wrapperName = "X wrappers";
+      else if (whichWrapper == 2)
+         wrapperName = "Y wrappers";
+      
+      #ifdef DEBUG_SKIP_DATA
+      MessageInterface::ShowMessage
+         ("Subscriber::ShouldDataBeSkipped() <%p>'%s' returning false, failed to "
+          "check valid data for %s\n", this, GetName().c_str(), wrapperName.c_str());
+      #endif
+      return false;
+   }
+   
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("   Data is published from the function, '%s' IsGlobal:%s, IsLocal:%s\n",
+       GetName().c_str(), IsGlobal() ? "Yes" : "No", IsLocal() ? "Yes" : "No");
+   #endif
+   
+   // By this time parameter wrappers should not be empty
+   if (whichWrapper == 1)
+      refObj = xParamWrappers[0]->GetRefObject();
+   else
+      refObj = yParamWrappers[0]->GetRefObject();
+   
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+       refObj ? refObj->GetName().c_str() : "NULL");
+   #endif
+   
+   if (refObj)
+   {
+      #ifdef DEBUG_SKIP_DATA
+      MessageInterface::ShowMessage
+         ("   refObj=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+          refObj, refObj->GetTypeName().c_str(), refObj->GetName().c_str(), refObj->IsGlobal(),
+          refObj->IsLocal());
+      GmatBase *paramOwner = ((Parameter*)refObj)->GetOwner();
+      MessageInterface::ShowMessage
+         ("   paramOwner=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n", paramOwner,
+          paramOwner ? paramOwner->GetTypeName().c_str() : "NULL",
+          paramOwner ? paramOwner->GetName().c_str() : "NULL",
+          paramOwner ? paramOwner->IsGlobal() : -999,
+          paramOwner ? paramOwner->IsLocal() : -999);
+      #endif
+      
+      // Skip if this XyPlot is not a global nor a local object
+      if (!IsGlobal() && !IsLocal())
+      {
+         #ifdef DEBUG_SKIP_DATA
+         MessageInterface::ShowMessage
+            ("   Skip data since this subscriber is not a global nor a local object\n");
+         #endif
+         skipData = true;
+      }
+      
+      // Skip if ref Parameter is not a global nor a local object
+      if (!(refObj->IsGlobal()) && !(refObj->IsLocal()))
+      {
+         #ifdef DEBUG_SKIP_DATA
+         MessageInterface::ShowMessage
+            ("   Skip data since ref Parameter is not a global nor a local object\n");
+         #endif
+         skipData = true;
+      }
+      
+      // Check all Y wrappers
+      if (!skipData)
+      {
+         int numYParams = yParamWrappers.size();
+         for (int i = 0; i < numYParams; i++)
+         {
+            #ifdef DEBUG_SKIP_DATA
+            MessageInterface::ShowMessage
+               ("   yParamWrappers[%d]=<%p>\n", i, yParamWrappers[i]);
+            #endif
+            if (yParamWrappers[i] == NULL)
+               break;
+            
+            refObj = yParamWrappers[i]->GetRefObject();
+            
+            #ifdef DEBUG_SKIP_DATA
+            MessageInterface::ShowMessage
+               ("   refObj=<%p>[%s]'%s'\n", refObj, refObj ? refObj->GetTypeName().c_str() : "NULL",
+                refObj ? refObj->GetName().c_str() : "NULL");
+            #endif
+            
+            if (refObj)
+            {
+               #ifdef DEBUG_SKIP_DATA
+               MessageInterface::ShowMessage
+                  ("   refObj = <%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n",
+                   refObj, refObj->GetTypeName().c_str(), refObj->GetName().c_str(), refObj->IsGlobal(),
+                   refObj->IsLocal());
+               GmatBase *paramOwner = ((Parameter*)refObj)->GetOwner();
+               MessageInterface::ShowMessage
+                  ("   paramOwner=<%p>[%s]'%s', IsGlobal=%d, IsLocal=%d\n", paramOwner,
+                   paramOwner ? paramOwner->GetTypeName().c_str() : "NULL",
+                   paramOwner ? paramOwner->GetName().c_str() : "NULL",
+                   paramOwner ? paramOwner->IsGlobal() : -999,
+                   paramOwner ? paramOwner->IsLocal() : -999);
+               #endif
+               
+               // Skip if this subscriber is not a global nor a local object
+               if (!IsGlobal() && !IsLocal())
+               {
+                  #ifdef DEBUG_SKIP_DATA
+                  MessageInterface::ShowMessage
+                     ("   Skip data since this subscriber is not a global nor a local object\n");
+                  #endif
+                  skipData = true;
+                  break;
+               }
+               // Skip if Parameter is not a global nor a local object
+               if (!(refObj->IsGlobal()) && !(refObj->IsLocal()))
+               {
+                  #ifdef DEBUG_SKIP_DATA
+                  MessageInterface::ShowMessage
+                     ("   Skip data since ref Parameter is not a global nor a local object\n");
+                  #endif
+                  skipData = true;
+                  break;
+               }
+            }
+         }
+      }
+   }
+   
+   #ifdef DEBUG_SKIP_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ShouldDataBeSkipped() this=<%p>'%s' returning %s\n", this,
+       GetName().c_str(), skipData ? "true" : "false");
+   #endif
+   return skipData;
+}
 
 
 //------------------------------------------------------------------------------
@@ -1998,8 +2219,9 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
    
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage
-      ("\nSubscriber::SetActualWrapperReference() entered, obj=<%p>'%s', name='%s', size=%d\n",
-       obj, obj->GetName().c_str(), name.c_str(), sz);
+      ("\nSubscriber::SetActualWrapperReference() <%p>'%s' entered, obj=<%p>'%s', "
+       "name='%s', size=%d\n", this, GetName().c_str(), obj, obj->GetName().c_str(),
+       name.c_str(), sz);
    for (unsigned int i = 0; i < wrappers.size(); i++)
       MessageInterface::ShowMessage
          ("   wrappers[%d] = '%s'\n", i, wrappers[i] ? wrappers[i]->GetDescription().c_str() : "NULL");
@@ -2008,10 +2230,16 @@ bool Subscriber::SetActualWrapperReference(const WrapperArray &wrappers,
    for (Integer i = 0; i < sz; i++)
    {
       if (wrappers[i] == NULL)
+      {
+         #ifdef DEBUG_WRAPPER_CODE   
+         MessageInterface::ShowMessage
+            ("===> Subscriber::SetActualWrapperReference() throwing exception, wrappers[%d] is NULL\n", i);
+         #endif
          throw SubscriberException
             ("Subscriber::SetActualWrapperReference() \"" + GetName() +
              "\" failed to set reference for object named \"" + name +
              ".\" The wrapper is NULL.\n");
+      }
       
       refname = wrappers[i]->GetDescription();
       if (wrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT_WT)

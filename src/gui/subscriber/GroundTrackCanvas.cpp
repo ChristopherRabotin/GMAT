@@ -73,6 +73,11 @@ using namespace FloatAttUtil;
 // Skip data over the max position difference
 //#define SKIP_DATA_OVER_LIMIT
 
+// Currently local plots are deleted when function run completes (2015.07.09)
+// So this macro has no effects. But if plot is global we need to check if 
+// all drawing objects are global as well since plot access object pointers.
+//#define DISABLE_REPAINT_IN_FUNCTION
+
 // debug
 //#define DEBUG_INIT 1
 //#define DEBUG_UPDATE 1
@@ -405,9 +410,17 @@ void GroundTrackCanvas::ViewAnimation(int interval, int frameInc)
       ("GroundTrackCanvas::ViewAnimation() interval=%d, frameInc=%d\n",
        interval, frameInc);
    #endif
+
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      wxString msg = "*** WARNING *** This plot data was published inside a "
+         "function, so repainting or drawing animation is disabled.\n";
+      MessageInterface::ShowMessage(msg.c_str());
       return;
+   }
+   #endif
    
    this->SetFocus(); // so that it can get key interrupt
    mIsAnimationRunning = true;
@@ -488,6 +501,7 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
       hasBeenPainted = true;
    #endif
    
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfRun && mInFunction)
    {
       if (mWriteRepaintDisalbedInfo)
@@ -502,6 +516,7 @@ void GroundTrackCanvas::OnPaint(wxPaintEvent& event)
       }
       return;
    }
+   #endif
    
    DrawPlot();
 }
@@ -561,8 +576,23 @@ void GroundTrackCanvas::OnSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void GroundTrackCanvas::OnMouse(wxMouseEvent& event)
 {
+   #ifdef DISABLE_REPAINT_IN_FUNCTION
    if (mIsEndOfData && mInFunction)
+   {
+      if (mWriteRepaintDisalbedInfo)
+      {
+         //Freeze();
+         wxString msg = "*** WARNING *** This plot data was published inside a "
+            "function, so repainting or drawing animation is disabled.\n";
+         MessageInterface::ShowMessage(msg.c_str());
+         GmatAppData::Instance()->GetMainFrame()->EnableAnimation(false);
+         
+         mWriteRepaintDisalbedInfo = false;
+      }
       return;
+   }
+   #endif
+   
    
    #ifndef __SKIP_WRITE_MOUSE_POS__
    
