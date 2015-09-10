@@ -675,7 +675,7 @@ bool Propagator::Initialize()
 
          #ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage(
-               "Propagator::Initialize() initialized = %d\n", initialized);
+               "Propagator::Initialize() isInitialized = %d\n", isInitialized);
          #endif
 
          inState  = physicalModel->GetState();
