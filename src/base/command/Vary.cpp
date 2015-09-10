@@ -1142,15 +1142,24 @@ void Vary::ClearWrappers()
 //------------------------------------------------------------------------------
 bool Vary::Initialize()
 {
+   #ifdef DEBUG_INIT
+   MessageInterface::ShowMessage("Vary::Initialize() entered\n");
+   MessageInterface::ShowMessage("%s\n", GmatBase::WriteObjectInfo("", solver).c_str());
+   #endif
+   
    bool retval = SolverSequenceCommand::Initialize();
-
+   
    if (solver == NULL)
       throw CommandException("solver not initialized for Vary command\n  \""
                              + generatingString + "\"\n");
-
+   
+   std::string solverType = solver->GetTypeName();
+   std::string errMsg = "Upper and Lower bounds in the Vary command are required when using " +
+      solverType + " in \n   " + GetGeneratingString(Gmat::NO_COMMENTS);
+   
    Integer id = solver->GetParameterID("Variables");
    solver->SetStringParameter(id, variableName);
-        
+   
    // The solver cannot be finalized until all of the loop is initialized
    solverDataFinalized = false;
 
@@ -1178,13 +1187,19 @@ bool Vary::Initialize()
    #endif
    if (SetWrapperReferences(*variableLower) == false)
       return false;
-   CheckDataType(variableLower, Gmat::REAL_TYPE, "Vary");
+   if (solverType == "SNOPT")
+      CheckDataType(variableLower, Gmat::REAL_TYPE, "Vary", false, true, -9.999999e300, errMsg);
+   else
+      CheckDataType(variableLower, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for maximum\n");
    #endif
    if (SetWrapperReferences(*variableUpper) == false)
       return false;
-   CheckDataType(variableUpper, Gmat::REAL_TYPE, "Vary");
+   if (solverType == "SNOPT")
+      CheckDataType(variableUpper, Gmat::REAL_TYPE, "Vary", false, true, 9.999999e300, errMsg);
+   else
+      CheckDataType(variableUpper, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for max step\n");
    #endif
