@@ -310,8 +310,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
    *  Strings are passed to Python strings
     ------------------------------------------------------------------------------------*/
-   Real *v = new Real[row*col];
-
+  
    for (UnsignedInt index = 0; index < paramType.size(); ++index)
    {
       Gmat::ParameterType parType = paramType.at(index);
@@ -321,6 +320,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       if (parType == Gmat::RMATRIX_TYPE)
       {
          Py_buffer *pybuffer = (Py_buffer *)malloc(sizeof(Py_buffer));
+         Real *v = new Real[row*col];
          
          for (UnsignedInt i = 0; i < row; ++i)
          {
@@ -385,10 +385,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
 
          // free memory
    //      delete[] v;
-         free(view);
-         free(pybuffer->shape);
-         free(pybuffer->strides);
-         free(pybuffer);
+   //      free(view);
+    //     free(pybuffer->shape);
+     //    free(pybuffer->strides);
+   //      free(pybuffer);
       }
       else if (parType == Gmat::STRING_TYPE)
       {
@@ -412,7 +412,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       
    }
 
-   delete[] v;
+ //  delete[] v;
    
    // Call the python function   
    pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
