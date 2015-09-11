@@ -296,7 +296,12 @@ void DragInputsDialog::SaveData()
       CheckReal(avgFlux, str, "Average Solar Flux (F10.7A)", "Real Number >= 0.0", false, true, true, true);
       
       str = geomagneticIndexTextCtrl->GetValue();
-      CheckRealRange(str, magIndex, "Magnetic Index", 0.0, 9.0, true, true, true, true);
+      bool isValid = CheckReal(magIndex, str, "Geomagnetic Index (Kp)", "0.0 <= Real Number <= 9.0");
+      if (isValid)
+         isValid = CheckRealRange(str, magIndex, "Geomagnetic Index", 0.0, 9.0, true, true, true, true);
+
+      if (!isValid)
+         canClose = false;
       
       if (!canClose)
          return;
