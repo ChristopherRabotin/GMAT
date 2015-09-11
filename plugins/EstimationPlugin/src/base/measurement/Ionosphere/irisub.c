@@ -32,7 +32,7 @@ struct {
 struct {
     integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
 	    imend_igrz__, iyend_igrz__;
-    real ionoindx_igrz__[722], indrz_igrz__[722];
+    real ionoindx_igrz__[2000], indrz_igrz__[2000];
 } igrz1_;
 
 #define igrz1_1 igrz1_
@@ -778,6 +778,7 @@ ON XE3\002)";
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
 /*      CHARACTER  FILNAM*12 */
 /* -web-for webversion */
 /*      CHARACTER FILNAM*53 */

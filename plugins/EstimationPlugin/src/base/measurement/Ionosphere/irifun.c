@@ -156,7 +156,7 @@ struct {
 struct {
     integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
 	    imend_igrz__, iyend_igrz__;
-    real ionoindx_igrz__[722], indrz_igrz__[722];
+    real ionoindx_igrz__[2000], indrz_igrz__[2000];
 } igrz1_;
 
 #define igrz1_1 igrz1_
@@ -8506,6 +8506,8 @@ L1:
     scl[3] = (float)9.;
     scl[4] = (float)6.;
     hxl[3] = *hv2;
+    hfff = *hhalf;
+    xfff = xhalf;
 
 /* DAY CONDITION-------------------------------------------------- */
 /* earlier tested:       HXL(2) = HMF1 + SCL(2) */
@@ -8679,6 +8681,7 @@ L1937:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
     /* Parameter adjustments */
     --ig;
     --rz;
@@ -9136,6 +9139,7 @@ e.\002,\002 STORM model is turned off.\002)";
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
     /* Parameter adjustments */
     --iap;
 
@@ -9296,6 +9300,7 @@ L20:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
     jy = ap_1.ints_ap__[0];
     iybeg = jy + 1900;
     if (*iyyyy < iybeg) {

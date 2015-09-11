@@ -78,7 +78,7 @@ struct {
 struct {
     integer iupd_igrz__, iupm_igrz__, iupy_igrz__, imst_igrz__, iyst_igrz__, 
 	    imend_igrz__, iyend_igrz__;
-    real ionoindx_igrz__[722], indrz_igrz__[722];
+    real ionoindx_igrz__[2000], indrz_igrz__[2000];
 } igrz1_;
 
 #define igrz1_1 igrz1_
@@ -936,9 +936,9 @@ L30:
     xxx = rho * cp;
     yyy = rho * sp;
     goto L10;
+/* *****ENTRY POINT  FELDC  TO BE USED WITH CARTESIAN CO-ORDINATES */
 
 L_feldc:
-/* *****ENTRY POINT  FELDC  TO BE USED WITH CARTESIAN CO-ORDINATES */
     is = 2;
     xxx = v[1];
     yyy = v[2];
@@ -949,9 +949,9 @@ L10:
     igrf_2.xi[1] = yyy * rq;
     igrf_2.xi[2] = zzz * rq;
     goto L20;
+/* *****ENTRY POINT  FELDI  USED FOR L COMPUTATION */
 
 L_feldi:
-/* *****ENTRY POINT  FELDI  USED FOR L COMPUTATION */
     is = 3;
 L20:
     ihmax = model_1.nmax * model_1.nmax + 1;
@@ -1097,6 +1097,7 @@ L7:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
     numye = 13;
 
 /*  IS=0 FOR SCHMIDT NORMALIZATION   IS=1 GAUSS NORMALIZATION */
@@ -1119,13 +1120,11 @@ L7:
 /* -- GET IGRF COEFFICIENTS FOR THE BOUNDARY YEARS */
     getshc_(&iu, &l, &nmax1, &igrf1_2.erad, model_2.gh1, ier);
     if (*ier != 0) {
-/*               print *, "Program has an error" */
 	return 0;
     }
     i__1 = l + 1;
     getshc_(&iu, &i__1, &nmax2, &igrf1_2.erad, gh2, ier);
     if (*ier != 0) {
-/*               print *, "Program has an error" */
 	return 0;
     }
 /* -- DETERMINE IGRF COEFFICIENTS FOR YEAR */
@@ -1230,6 +1229,7 @@ L7:
 
 /*     Changelog: */
 /*       2015-04-16     Created (Joseph Nicholas) */
+/*     parameter (MAXRECORDLEN_IGRZ = 722) */
     /* Parameter adjustments */
     --gh;
 
@@ -1823,6 +1823,20 @@ L2:
 	g10 = (float)29556.8 - dt * (float)8.8;
 	g11 = dt * (float)10.8 - (float)1671.8;
 	h11 = (float)5080. - dt * (float)21.3;
+/*           G10=29619.4*F1+29554.63*F2 */
+/*           G11=-1728.2*F1-1669.05*F2 */
+/*           H11= 5186.1*F1+5077.99*F2 */
+/*        ELSEIF (IY.LT.2010) THEN                        !2005-2010 */
+/*           F2=(FLOAT(IY)+FLOAT(IDAY)/365.-2005.)/5. */
+/*           F1=1.D0-F2 */
+/*           G10=29554.63*F1+29496.5*F2 */
+/*           G11=-1669.05*F1-1585.9*F2 */
+/*           H11= 5077.99*F1+4945.1*F2 */
+/*        ELSE                                            !2010-2015 */
+/*           DT=FLOAT(IY)+FLOAT(IDAY)/365.-2010. */
+/*           G10=29496.5-11.4*DT */
+/*           G11=-1585.9+16.7*DT */
+/*           H11= 4945.1-28.8*DT */
     }
 /*  NOW CALCULATE THE COMPONENTS OF THE UNIT VECTOR EzMAG IN GEO COORD */
 /*  SYSTEM: */
