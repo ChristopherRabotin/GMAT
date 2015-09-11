@@ -476,18 +476,21 @@ std::string PhysicalModel::GetBodyName()
 //------------------------------------------------------------------------------
 void PhysicalModel::SetBody(CelestialBody *theBody)
 {  
-   if (theBody != NULL)
-   {
-      if (body != NULL)
-      {
-         #ifdef DEBUG_MEMORY
-         MemoryTracker::Instance()->Remove
-            (deriv, "deriv", "PhysicalModel::SetBody()",
-             "deleting deriv", this);
-         #endif
-         delete body;
-      }
-   }
+   // Comments: delete body may cause crash when body is a celestial body in solar system. 
+   // For example, if Earth object is deleted, GMAT will crash due to other part of 
+   // GMAT code is used Earth object for calculation.
+   //if (theBody != NULL)
+   //{
+   //   if (body != NULL)
+   //   {
+   //      #ifdef DEBUG_MEMORY
+   //      MemoryTracker::Instance()->Remove
+   //         (deriv, "deriv", "PhysicalModel::SetBody()",
+   //          "deleting deriv", this);
+   //      #endif
+   //      delete body;
+   //   }
+   //}
    
    body = theBody;
    bodyName = body->GetName();

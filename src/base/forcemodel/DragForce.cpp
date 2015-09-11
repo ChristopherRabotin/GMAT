@@ -303,8 +303,10 @@ DragForce::DragForce(const DragForce& df) :
    schattenTimingModel     (df.schattenTimingModel),
    cartIndex               (df.cartIndex),
    fillCartesian           (df.fillCartesian),
-   cbFixed                 (NULL),
-   internalCoordSystem     (NULL),
+//   cbFixed                 (NULL),                          // made changes for bug GMT-5282
+//   internalCoordSystem     (NULL),                          // made changes for bug GMT-5282
+   cbFixed                 (df.cbFixed),                      // made changes for bug GMT-5282
+   internalCoordSystem     (df.internalCoordSystem),          // made changes for bug GMT-5282
    kpApConversion          (df.kpApConversion)
 {
 #ifdef DEBUG_CONSTRUCTION
@@ -321,9 +323,9 @@ DragForce::DragForce(const DragForce& df) :
       #endif
    }
    
-   if (df.cbFixed)
-//      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?
-      cbFixed = (CoordinateSystem*)(df.cbFixed);
+//   if (df.cbFixed)                                                                                            // made changes for bug GMT-5282
+////      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?          // made changes for bug GMT-5282
+//      cbFixed = (CoordinateSystem*)(df.cbFixed);                                                              // made changes for bug GMT-5282
 
    parameterCount += 7;
    dimension = df.dimension;
@@ -429,13 +431,15 @@ DragForce& DragForce::operator=(const DragForce& df)
       #endif
    }
    
-   if (df.cbFixed)
-   {
-//      if (cbFixed)
-//         delete cbFixed;
-//      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());
-      cbFixed = (CoordinateSystem*)(df.cbFixed);
-   }
+//   if (df.cbFixed)                                             // made changes for bug GMT-5282
+//   {                                                           // made changes for bug GMT-5282
+////      if (cbFixed)                                           // made changes for bug GMT-5282
+////         delete cbFixed;                                     // made changes for bug GMT-5282
+////      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());    // made changes for bug GMT-5282
+//      cbFixed = (CoordinateSystem*)(df.cbFixed);               // made changes for bug GMT-5282
+//   }                                                           // made changes for bug GMT-5282
+   cbFixed               = df.cbFixed;                           // made changes for bug GMT-5282
+   internalCoordSystem   = df.internalCoordSystem;               // made changes for bug GMT-5282
 
    atmos                 = NULL;
    angVel                = NULL;
@@ -806,11 +810,12 @@ bool DragForce::Initialize()
                   "GMAT builds.");
          }
          
-		 if (dragBody.size() > 0)
-          bodyName = dragBody[0];
-      else
-         bodyName = "Earth";
+		   if (dragBody.size() > 0)
+            bodyName = dragBody[0];
+         else
+            bodyName = "Earth";
          centralBody = solarSystem->GetBody(bodyName);
+         body = solarSystem->GetBody(bodyName);                      // made changes for bug GMT-5282
    
          if (!centralBody)
             throw ODEModelException(
@@ -824,7 +829,7 @@ bool DragForce::Initialize()
             std::string modelBodyIsUsing =
                centralBody->GetAtmosphereModelType();
             
-			// Density from the body
+			   // Density from the body
             if (modelBodyIsUsing == "Undefined")
             {
                #ifdef DEBUG_DRAGFORCE_DENSITY
@@ -895,18 +900,29 @@ bool DragForce::Initialize()
             atmos->SetStringParameter(cssiWFileID, cssiWFile);
             atmos->SetStringParameter(schattenWFileID, schattenWFile);
 
-            if (cbFixed != NULL)										// made changes by TUAN NGUYEN
-               atmos->SetFixedCoordinateSystem(cbFixed);				// made changes by TUAN NGUYEN
-            if (internalCoordSystem != NULL)							// made changes by TUAN NGUYEN
-               atmos->SetInternalCoordSystem(internalCoordSystem);		// made changes by TUAN NGUYEN
-			try
-			{
-//				MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
-			   atmos->SetStringParameter("DensityModel", densityModel);	// made changes for GMT-4299
-			   atmos->SetStringParameter("InputFile", inputFile);		   // made changes for GMT-4299
-			} catch (...){}
+            if (cbFixed != NULL)
+               atmos->SetFixedCoordinateSystem(cbFixed);
+            if (internalCoordSystem != NULL)
+               atmos->SetInternalCoordSystem(internalCoordSystem);
+            if (atmos->GetCbJ2000CoordinateSystem() == NULL)                                                        // made changes for bug GMT-5282
+            {                                                                                                       // made changes for bug GMT-5282
+               // Create an cbJ2000 coordinate system if it is not ready set in atmos                               // made changes for bug GMT-5282
+               if (centralBody != NULL)                                                                             // made changes for bug GMT-5282
+               {                                                                                                    // made changes for bug GMT-5282
+                  CoordinateSystem* cbJ2000 = CoordinateSystem::CreateLocalCoordinateSystem("cbJ2000", "MJ2000Eq",  // made changes for bug GMT-5282
+                  centralBody, NULL, NULL, centralBody, solarSystem);                                               // made changes for bug GMT-5282
+                  atmos->SetCbJ2000CoordinateSystem(cbJ2000);                                                       // made changes for bug GMT-5282
+               }                                                                                                    // made changes for bug GMT-5282
+            }                                                                                                       // made changes for bug GMT-5282
 
-			atmos->Initialize();										            // Note: it needs to initialize before use. Fixed bug GMT-4124
+			   try
+			   {
+//				   MessageInterface::ShowMessage("Set densitymodel and inputfile from DragForce <'%s',%p> to atmosphere object <'%s',%p>\n",GetName().c_str(), this, atmos->GetName().c_str(), atmos); 
+			      atmos->SetStringParameter("DensityModel", densityModel);	// made changes for GMT-4299
+			      atmos->SetStringParameter("InputFile", inputFile);		   // made changes for GMT-4299
+			   } catch (...){}
+
+			   atmos->Initialize();										            // Note: it needs to initialize before use. Fixed bug GMT-4124
          }
          else
          {
