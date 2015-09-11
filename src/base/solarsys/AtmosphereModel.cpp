@@ -1104,9 +1104,13 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
    {
       if (value != "")
       {
+         bool headerFound = false;
          bool startFound = false;
          bool fileIsValid = false;
-         std::string searchFor = "BEGIN OBSERVED";
+
+         // If the file is a SCHATTEN file, we require 3 tags:
+         // "DATATYPE CSSISPACEWEATHER", "BEGIN OBSERVED", and "END OBSERVED"
+         std::string searchFor = "DATATYPE CSSISPACEWEATHER";
          std::string line;
 
          // Does it exist?
@@ -1127,12 +1131,20 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
             line = GmatStringUtil::ToUpper(line);
             if (std::string(line).find(searchFor) != std::string::npos)
             {
-               searchFor = "END OBSERVED";
-               if (startFound)
+               if (!headerFound)
+               {
+                  headerFound = true;
+                  searchFor = "BEGIN OBSERVED";
+               }
+               if (headerFound && !startFound)
+               {
+                  startFound = true;
+                  searchFor = "END OBSERVED";
+               }
+               if (headerFound && startFound)
                {
                   fileIsValid = true;
                }
-               startFound = true;
             }
          }
          inStream.close();
@@ -1150,9 +1162,13 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
    {
       if (value != "")
       {
+         bool headerFound = false;
          bool startFound = false;
          bool fileIsValid = false;
-         std::string searchFor = "BEGIN_DATA";
+
+         // If the file is a SCHATTEN file, we require 3 tags:
+         // "PREDICTED SOLAR DATA", "BEGIN_DATA", and "END_DATA"
+         std::string searchFor = "PREDICTED SOLAR DATA";
          std::string line;
 
          // Does it exist?
@@ -1173,12 +1189,20 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
             line = GmatStringUtil::ToUpper(line);
             if (std::string(line).find(searchFor) != std::string::npos)
             {
-               searchFor = "END_DATA";
-               if (startFound)
+               if (!headerFound)
+               {
+                  headerFound = true;
+                  searchFor = "BEGIN_DATA";
+               }
+               if (headerFound && !startFound)
+               {
+                  startFound = true;
+                  searchFor = "END_DATA";
+               }
+               if (headerFound && startFound)
                {
                   fileIsValid = true;
                }
-               startFound = true;
             }
          }
          inStream.close();
