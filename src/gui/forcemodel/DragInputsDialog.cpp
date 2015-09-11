@@ -290,13 +290,13 @@ void DragInputsDialog::SaveData()
       std::string str;
       
       str = solarFluxTextCtrl->GetValue();
-      CheckReal(flux, str, "Solar Flux (F10.7)", "Real Number >= 0.0");
+      CheckReal(flux, str, "Solar Flux (F10.7)", "Real Number >= 0.0", false, true, true , true);
       
       str = avgSolarFluxTextCtrl->GetValue();
-      CheckReal(avgFlux, str, "Average Solar Flux (F10.7A)", "Real Number >= 0.0");
+      CheckReal(avgFlux, str, "Average Solar Flux (F10.7A)", "Real Number >= 0.0", false, true, true, true);
       
       str = geomagneticIndexTextCtrl->GetValue();
-      CheckReal(magIndex, str, "Magnetic Index)", "0.0 <= Real Number <= 9.0");
+      CheckRealRange(str, magIndex, "Magnetic Index", 0.0, 9.0, true, true, true, true);
       
       if (!canClose)
          return;
