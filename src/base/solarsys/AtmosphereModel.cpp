@@ -37,6 +37,7 @@
 //#define DEBUG_COORDINATE_TRANSFORMS
 //#define DEBUG_CALCULATE_GEOCENTRICS
 //#define DEBUG_CALCULATE_GEODETICS
+//#define DEBUG_FLUX_FILE
 
 //------------------------------------------------------------------------------
 // static data
@@ -88,6 +89,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    nominalF107a         (150.0),
    nominalKp            (3.0),
    kpApConversion       (0),
+   historicalDataSource (0),
+   predictedDataSource  (0),
    mInternalCoordSystem (NULL),
    cbJ2000              (NULL),
    cbFixed              (NULL),
@@ -100,6 +103,10 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    useGeodetic          (true),							// made changes by TUAN NGUYEN
    gha                  (0.0),
    ghaEpoch             (0.0),
+   historicStart        (-1.0),
+   historicEnd          (-1.0),
+   predictStart         (-1.0),
+   predictEnd           (-1.0),
    sod                  (0.0),
    yd                   (0),
    f107                 (0.0),
@@ -168,6 +175,8 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    nominalF107a         (am.nominalF107a),
    nominalKp            (am.nominalKp),
    kpApConversion       (am.kpApConversion),
+   historicalDataSource (am.historicalDataSource),
+   predictedDataSource  (am.predictedDataSource),
    mInternalCoordSystem (am.mInternalCoordSystem),
    cbJ2000              (am.cbJ2000),
    cbFixed              (am.cbFixed),
@@ -179,6 +188,10 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    useGeodetic          (am.useGeodetic),						// made changes by TUAN NGUYEN
    gha                  (0.0),
    ghaEpoch             (0.0),
+   historicStart        (am.historicStart),
+   historicEnd          (am.historicEnd),
+   predictStart         (am.predictStart),
+   predictEnd           (am.predictEnd),
    sod                  (am.sod),
    yd                   (am.yd),
    f107                 (am.f107),
@@ -227,6 +240,8 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    nominalKp            = am.nominalKp;
    nominalAp            = ConvertKpToAp(nominalKp);
    kpApConversion       = am.kpApConversion;
+   historicalDataSource = am.historicalDataSource;
+   predictedDataSource  = am.predictedDataSource;
    mInternalCoordSystem = am.mInternalCoordSystem;
    cbJ2000              = am.cbJ2000;
    cbFixed              = am.cbFixed;
@@ -238,6 +253,10 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    useGeodetic          = am.useGeodetic;							// made changes by TUAN NGUYEN
    gha                  = 0.0;
    ghaEpoch             = 0.0;
+   historicStart        = am.historicStart;
+   historicEnd          = am.historicEnd;
+   predictStart         = am.predictStart;
+   predictEnd           = am.predictEnd;
 
    sod                  = am.sod;
    yd                   = am.yd;
@@ -665,6 +684,42 @@ Real AtmosphereModel::ConvertKpToAp(const Real kp)
    return ap;
 }
 
+
+//------------------------------------------------------------------------------
+// void AtmosphereModel::SetInputSource(const std::string &historical,
+//                                      const std::string &predicted)
+//------------------------------------------------------------------------------
+/**
+ * Sets teh sources for Flux and Geomagnetic indices
+ *
+ * @param historical Toggles between constants and CSSI data, using the strings
+ *                   "ConstantFluxAndGeoMag" and "CSSISpaceWeatherFile"
+ * @param predicted Toggles between constants, CSSI, and Schatten data, using
+ *                  the strings "ConstantFluxAndGeoMag", "CSSISpaceWeatherFile",
+ *                  and "SchattenFile"
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetInputSource(const std::string &historical,
+                                     const std::string &predicted)
+{
+   if (historical == "ConstantFluxAndGeoMag")
+      historicalDataSource = 0;
+   else if (historical == "CSSISpaceWeatherFile")
+      historicalDataSource = 1;
+   else
+      throw AtmosphereException("Invalid historical data source " + historical +
+            " selected");
+
+   if (predicted == "ConstantFluxAndGeoMag")
+      predictedDataSource = 0;
+   else if (predicted == "CSSISpaceWeatherFile")
+      predictedDataSource = 1;
+   else if (predicted == "SchattenFile")
+      predictedDataSource = 2;
+   else
+      throw AtmosphereException("Invalid predicted data source " + predicted +
+            " selected");
+}
 
 //-----------------------------------------------------------------------------
 // bool AtmosphereModel::HasWindModel()
@@ -1380,18 +1435,67 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
    if (!fluxReaderLoaded)
    {
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
+      if (fluxReaderLoaded)
+         fluxReader->GetEpochs(historicStart, historicEnd, predictStart,
+               predictEnd);
+
+      #ifdef DEBUG_FLUX_FILE
+         MessageInterface::ShowMessage("Epoch data: [%lf %lf %lf %lf]\n",
+               historicStart, historicEnd, predictStart, predictEnd);
+      #endif
    }
 
    if (fluxReaderLoaded && epoch > 0.0)
    {
-      SolarFluxReader::FluxData fD = fluxReader->GetInputs(epoch);
-      fluxReader->PrepareApData(fD, epoch);
-      f107 = fD.obsF107;
-      f107a = fD.obsCtrF107a;
-      for (Integer i = 0; i < 7; i++)
-          ap[i] = fD.ap[i];
+      SolarFluxReader::FluxData fD;
+
+      if (epoch < historicEnd)
+      {
+         switch(historicalDataSource)
+         {
+         case 1:
+            fD = fluxReader->GetInputs(epoch);
+            fluxReader->PrepareApData(fD, epoch);
+            f107 = fD.obsF107;
+            f107a = fD.obsCtrF107a;
+            for (Integer i = 0; i < 7; i++)
+                ap[i] = fD.ap[i];
+            break;
+
+         case 0:
+         default:
+            f107 = nominalF107;
+            f107a = nominalF107a;
+            for (Integer i = 0; i < 7; i++)
+               ap[i] = nominalAp;
+            break;
+         }
+      }
+      else
+      {
+         switch(predictedDataSource)
+         {
+         case 1:
+         case 2:
+            fD = fluxReader->GetInputs(epoch);
+            fluxReader->PrepareApData(fD, epoch);
+            f107 = fD.obsF107;
+            f107a = fD.obsCtrF107a;
+            for (Integer i = 0; i < 7; i++)
+                ap[i] = fD.ap[i];
+            break;
+
+         case 0:
+         default:
+            f107 = nominalF107;
+            f107a = nominalF107a;
+            for (Integer i = 0; i < 7; i++)
+               ap[i] = nominalAp;
+            break;
+         }
+      }
    }
-   else
+   else  // All constants all the time
    {
       f107 = nominalF107;
       f107a = nominalF107a;

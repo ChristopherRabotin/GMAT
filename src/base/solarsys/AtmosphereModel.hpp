@@ -85,6 +85,9 @@ public:
    void         SetKpApConversionMethod(Integer method);
    Real         ConvertKpToAp(const Real kp);
 
+   void         SetInputSource(const std::string &historical = "ConstantFluxAndGeoMag",
+                               const std::string &predicted = "ConstantFluxAndGeoMag");
+
    // Extra methods some models may support
    virtual bool HasWindModel();
    virtual bool Wind(Real *position, Real* wind, Real ep,
@@ -167,6 +170,10 @@ protected:
    Real                    nominalAp;
    /// Index used to select Kp/Ap conversion method.  Default is a table lookup
    Integer                 kpApConversion;
+   /// Indicator of the source for historical data: 0 for constants, 1 for CSSI
+   Integer                 historicalDataSource;
+   /// Indicator of the source for predicted data: 0 for constants, 1 for CSSI, 2 for Schatten
+   Integer                 predictedDataSource;
    /// Internal coordinate system used for conversions
    CoordinateSystem        *mInternalCoordSystem;
    /// MJ2000 CS for the central body
@@ -192,6 +199,14 @@ protected:
    /// GHA epoch
    Real                    ghaEpoch;
 
+   /// Start of the historic data when using file based history data
+   GmatEpoch historicStart;
+   /// End of the historic data when using file based history data
+   GmatEpoch historicEnd;
+      /// Start of the predict data when using file based predicted data
+   GmatEpoch predictStart;
+   /// End of the predict data when using file based predicted data
+   GmatEpoch predictEnd;
 
    // Fields used when retrieving data from a flux file
 

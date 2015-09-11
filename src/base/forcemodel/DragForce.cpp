@@ -930,6 +930,8 @@ bool DragForce::Initialize()
 
 			   atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
             
+			   // Set the source flags: constants, files, etc
+			   atmos->SetInputSource(historicWSource, predictedWSource);
          }
          else
          {
