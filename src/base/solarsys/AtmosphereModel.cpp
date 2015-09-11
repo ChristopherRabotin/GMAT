@@ -27,6 +27,7 @@
 #include "GmatConstants.hpp"
 #include "AngleUtil.hpp"            // For lat, long range setting
 #include "CoordinateConverter.hpp"
+#include "StringUtil.hpp"
 
 
 #include <cmath>                    // for exp
@@ -1102,14 +1103,92 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
    if (id == CSSI_WEATHER_FILE)
    {
       if (value != "")
-         obsFileName = value;
+      {
+         bool startFound = false;
+         bool fileIsValid = false;
+         std::string searchFor = "BEGIN OBSERVED";
+         std::string line;
+
+         // Does it exist?
+         std::ifstream inStream(value.c_str());
+         if (!inStream)
+            throw SolarSystemException("Cannot open the historic space weather "
+                  "file \"" + value + "\"");
+
+         // Is is a known format?
+         while (!inStream.eof() && !fileIsValid)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(searchFor) != std::string::npos)
+            {
+               searchFor = "END OBSERVED";
+               if (startFound)
+               {
+                  fileIsValid = true;
+               }
+               startFound = true;
+            }
+         }
+         inStream.close();
+
+         if (fileIsValid)
+            obsFileName = value;
+         else
+            throw SolarSystemException("Observed space weather measurement "
+                  "file \"" + value + "\" is in an unknown format");
+      }
       return true;
    }
 
    if (id == SCHATTEN_WEATHER_FILE)
    {
       if (value != "")
-         predictFileName = value;
+      {
+         bool startFound = false;
+         bool fileIsValid = false;
+         std::string searchFor = "BEGIN_DATA";
+         std::string line;
+
+         // Does it exist?
+         std::ifstream inStream(value.c_str());
+         if (!inStream)
+            throw SolarSystemException("Cannot open the predicted space "
+                  "weather file \"" + value + "\"");
+
+         // Is is a known format?
+         while (!inStream.eof() && !fileIsValid)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(searchFor) != std::string::npos)
+            {
+               searchFor = "END_DATA";
+               if (startFound)
+               {
+                  fileIsValid = true;
+               }
+               startFound = true;
+            }
+         }
+         inStream.close();
+
+         if (fileIsValid)
+            predictFileName = value;
+         else
+            throw SolarSystemException("Predicted space weather measurement "
+                  "file \"" + value + "\" is in an unknown format");
+      }
       return true;
    }
 

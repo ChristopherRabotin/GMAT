@@ -898,8 +898,15 @@ bool DragForce::Initialize()
             atmos->SetRealParameter(F107AID, fluxF107A);
             atmos->SetRealParameter(KPID, kp);
 
-            // Set the fully qualified file names
-            std::string weatherfile = fluxPath + cssiWFile;
+            // Set the file names, possibly with path prefixes
+            FileManager *fm = FileManager::Instance();
+
+            std::string weatherfile = cssiWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               weatherfile = fluxPath + cssiWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               throw ODEModelException("Cannot open the observated space weather file " +
+                     cssiWFile + ", nor the file at the location " + weatherfile);
             atmos->SetStringParameter(cssiWFileID, weatherfile);
 
             #ifdef DEBUG_FLUX_FILE
@@ -907,7 +914,12 @@ bool DragForce::Initialize()
                      atmos->GetStringParameter(cssiWFileID).c_str());
             #endif
 
-            weatherfile = fluxPath + schattenWFile;
+            weatherfile = schattenWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               weatherfile = fluxPath + schattenWFile;
+            if (fm->DoesFileExist(weatherfile) == false)
+               throw ODEModelException("Cannot open the predicted space weather file " +
+                     schattenWFile + ", nor the file at the location " + weatherfile);
             atmos->SetStringParameter(schattenWFileID, weatherfile);
 
             #ifdef DEBUG_FLUX_FILE
