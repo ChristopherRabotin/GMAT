@@ -399,20 +399,33 @@ bool CallPythonFunction::Execute()
          // Python has returned a list of floats
          else if (PyFloat_Check(pyItem))
          {
+            MessageInterface::ShowMessage("Python has returned a list of floats.\n");
+            std::vector<Real *> *vItem = new std::vector<Real *>;
             for (Integer i = 0; i < listSz; i++)
             {
                Real *ret = new Real;
                
                pyItem = PyList_GetItem(pyRet, i);
                *ret = PyFloat_AsDouble(pyItem);
-               
-               argOut.push_back(ret);
+               MessageInterface::ShowMessage("Value is %lf\n", *ret);
+               vItem->push_back(ret);  
             }
+
+            argOut.push_back(vItem);
          }   
       }
       // else if the Python module returns a tuple of numerical values
       else if (PyTuple_Check(pyRet))
       {
+         MessageInterface::ShowMessage("Python has returned a tuple of numerical values.\n");
+      }
+      else if (PyMemoryView_Check(pyRet))
+      {
+         MessageInterface::ShowMessage("Python has returned a memoryview object\n");
+      }
+      else if (PyLong_Check(pyRet))
+      {
+         MessageInterface::ShowMessage("Python has returned an Integer object\n");
       }
       else
       {
@@ -429,7 +442,7 @@ bool CallPythonFunction::Execute()
          delete argIn.at(i);
 
       // clean up the argOut
-      for (Integer i = 0; i < argOut.size(); ++i)
+      for (Integer i = 0; i < argOut.size(); ++i)  
          delete argOut.at(i);
    }
    else   // when return value is NULL and no exception is caught/handled.
