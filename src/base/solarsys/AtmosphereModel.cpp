@@ -28,6 +28,7 @@
 #include "AngleUtil.hpp"            // For lat, long range setting
 #include "CoordinateConverter.hpp"
 #include "StringUtil.hpp"
+#include "FileManager.hpp"
 
 
 #include <cmath>                    // for exp
@@ -1114,10 +1115,17 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
          std::string line;
 
          // Does it exist?
-         std::ifstream inStream(value.c_str());
-         if (!inStream)
-            throw SolarSystemException("Cannot open the historic space weather "
-                  "file \"" + value + "\"");
+         // Set the file names, possibly with path prefixes
+         FileManager *fm = FileManager::Instance();
+
+         std::string weatherfile = value;
+         if (fm->DoesFileExist(weatherfile) == false)
+            weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+         if (fm->DoesFileExist(weatherfile) == false)
+            throw SolarSystemException("Cannot open the observed space weather file " +
+                  value + ", nor the file at the location " + weatherfile);
+
+         std::ifstream inStream(weatherfile.c_str());
 
          // Is is a known format?
          while (!inStream.eof() && !fileIsValid)
@@ -1150,7 +1158,7 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
          inStream.close();
 
          if (fileIsValid)
-            obsFileName = value;
+            obsFileName = weatherfile;
          else
             throw SolarSystemException("Observed space weather measurement "
                   "file \"" + value + "\" is in an unknown format");
@@ -1172,10 +1180,16 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
          std::string line;
 
          // Does it exist?
-         std::ifstream inStream(value.c_str());
-         if (!inStream)
-            throw SolarSystemException("Cannot open the predicted space "
-                  "weather file \"" + value + "\"");
+         FileManager *fm = FileManager::Instance();
+
+         std::string weatherfile = value;
+         if (fm->DoesFileExist(weatherfile) == false)
+            weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+         if (fm->DoesFileExist(weatherfile) == false)
+            throw SolarSystemException("Cannot open the predicted space weather file " +
+                  value + ", nor the file at the location " + weatherfile);
+
+         std::ifstream inStream(weatherfile.c_str());
 
          // Is is a known format?
          while (!inStream.eof() && !fileIsValid)
@@ -1208,7 +1222,7 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
          inStream.close();
 
          if (fileIsValid)
-            predictFileName = value;
+            predictFileName = weatherfile;
          else
             throw SolarSystemException("Predicted space weather measurement "
                   "file \"" + value + "\" is in an unknown format");

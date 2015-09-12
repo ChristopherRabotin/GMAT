@@ -23,6 +23,7 @@
 #include "SolarSystemException.hpp"
 
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"
 
 //#define DEBUG_FILE_INDEXING
 //#define DEBUG_GETFLUXINPUTS
@@ -215,6 +216,32 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
       obsFileName = obsFile;
    if (!predictFile.empty())
       predictFileName = predictFile;
+
+   FileManager *fm = FileManager::Instance();
+
+   if (obsFileName != "")
+   {
+      std::string weatherfile = obsFileName;
+      if (fm->DoesFileExist(weatherfile) == false)
+         weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+      if (fm->DoesFileExist(weatherfile) == false)
+         throw SolarSystemException("Cannot open the predicted space weather file " +
+               obsFileName + ", nor the file at the location " + weatherfile);
+
+      obsFileName = weatherfile;
+   }
+
+   if (predictFileName != "")
+   {
+      std::string weatherfile = predictFileName;
+      if (fm->DoesFileExist(weatherfile) == false)
+         weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+      if (fm->DoesFileExist(weatherfile) == false)
+         throw SolarSystemException("Cannot open the predicted space weather file " +
+               predictFileName + ", nor the file at the location " + weatherfile);
+
+      predictFileName = weatherfile;
+   }
 
    // Open the files to load
    Open();
