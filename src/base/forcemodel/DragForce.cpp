@@ -2292,6 +2292,150 @@ AtmosphereModel* DragForce::GetAtmosphereModel()
 
 
 //------------------------------------------------------------------------------
+// bool CheckFluxFile(const std::string &filename, bool isHistoric)
+//------------------------------------------------------------------------------
+/**
+ * Checks (1) for file existence and (2) for file keywords
+ *
+ * @param filename The file to check
+ * @param isHistoric Flag indicating if the file is used for measured data
+ *
+ * @return true if the file is valid and in contains the expected keywords
+ */
+//------------------------------------------------------------------------------
+std::string DragForce::CheckFluxFile(const std::string &filename, bool isHistoric)
+{
+   std::string retval = "";
+
+   Integer loc = 0;
+
+   // This is the keyword list, consisting of a header followed by begin/end tags
+   std::vector<StringArray> keywords;
+   StringArray tags;
+   // CSSI used for historic data
+   tags.push_back("DATATYPE CSSISPACEWEATHER");
+   tags.push_back("BEGIN OBSERVED");
+   tags.push_back("END OBSERVED");
+   keywords.push_back(tags);
+   tags.clear();
+
+   // CSSI used for predict data
+   tags.push_back("DATATYPE CSSISPACEWEATHER");
+   tags.push_back("BEGIN DAILY_PREDICTED");
+   tags.push_back("END DAILY_PREDICTED");
+   tags.push_back("BEGIN MONTHLY_PREDICTED");
+   tags.push_back("END MONTHLY_PREDICTED");
+   keywords.push_back(tags);
+   tags.clear();
+
+   // Schatten
+   tags.push_back("PREDICTED SOLAR DATA");
+   tags.push_back("BEGIN_DATA");
+   tags.push_back("END_DATA");
+   keywords.push_back(tags);
+
+   // Check for file existence, possibly with path prefixes
+   FileManager *fm = FileManager::Instance();
+   std::string fluxPath = fm->GetAbsPathname("ATMOSPHERE_PATH");
+
+   std::string weatherfile = filename;
+
+   MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+
+   if (fm->DoesFileExist(weatherfile) == false)
+   {
+      MessageInterface::ShowMessage("No file; adding path %s\n", fluxPath.c_str());
+      weatherfile = fluxPath + filename;
+   }
+
+   MessageInterface::ShowMessage("%d %s\n", ++loc, weatherfile.c_str());
+
+   if (fm->DoesFileExist(weatherfile) == false)
+   {
+      MessageInterface::ShowMessage("Cannot locate\n");
+
+      std::string fileUsage = isHistoric ? "observed" : "predicted";
+      throw ODEModelException("Cannot open the " +
+            fileUsage + " space weather file " +
+            filename + ", nor the file at the location " + weatherfile);
+   }
+
+   MessageInterface::ShowMessage("The file %s exists\n", weatherfile.c_str());
+
+   // File exists; check for keywords
+   UnsignedInt count = (isHistoric ? 1 : keywords.size());
+   UnsignedInt start = (isHistoric ? 0 : 1);
+   UnsignedInt index = 9999;
+
+   bool fileIsValid = false;
+
+   std::ifstream inStream(weatherfile.c_str());
+   std::string line;
+
+   MessageInterface::ShowMessage("Checking for the header:\n");
+
+
+   // Check headers to determine the index of the keywork list
+   while (!inStream.eof() && (index == 9999))
+   {
+      getline(inStream, line);
+
+      // if the line is blank, skip it
+      if (GmatStringUtil::IsBlank(line, true)) continue;
+
+      // Make upper case, so we can check for certain keyword
+      line = GmatStringUtil::ToUpper(line);
+      for (UnsignedInt i = start; i < count; ++i)
+      {
+         if (std::string(line).find(keywords[i][0]) != std::string::npos)
+         {
+            index = i;
+            break;
+         }
+      }
+   }
+
+   if (index < 9999)
+   {
+      // Check start/end tags
+      UnsignedInt kwCount = keywords[index].size();
+      for (UnsignedInt i = 1; i < kwCount; ++i)
+      {
+         bool kwFound = false;
+         std::string currentString = keywords[index][i];
+
+         while (!inStream.eof() && !kwFound)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(currentString) != std::string::npos)
+            {
+               kwFound = true;
+               if (i == kwCount - 1)
+                  // Valid iff header and all keywords, in order, were found
+                  fileIsValid = true;
+            }
+         }
+      }
+   }
+   inStream.close();
+
+   if (fileIsValid)
+      retval = weatherfile;
+
+   MessageInterface::ShowMessage("The file %s; returning \"%s\"\n",
+         (fileIsValid ? "is valid" : "is NOT valid"), retval.c_str());
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // bool SupportsDerivative(Gmat::StateElementId id)
 //------------------------------------------------------------------------------
 /**

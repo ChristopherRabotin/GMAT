@@ -55,8 +55,8 @@ END_EVENT_TABLE()
  * @note Creates the JacchiaRoberts drag dialog
  */
 //------------------------------------------------------------------------------
-DragInputsDialog::DragInputsDialog(wxWindow *parent, Real *dragBuffer, std::vector<std::string> * dragStringBuffer,
-                                   const wxString& title)
+DragInputsDialog::DragInputsDialog(wxWindow *parent, DragForce *dragForce, Real *dragBuffer,
+      std::vector<std::string> * dragStringBuffer, const wxString& title)
    : GmatDialog(parent, -1, title)
 {
    #ifdef DEBUG_DRAG_INPUT
@@ -66,6 +66,7 @@ DragInputsDialog::DragInputsDialog(wxWindow *parent, Real *dragBuffer, std::vect
        dragForce ? dragForce->GetName().c_str() : "NULL");
    #endif
    
+   theDragForce = dragForce;
    theForceData = dragBuffer;
    theForceStringArray = dragStringBuffer;
    isTextModified = false;
@@ -302,10 +303,51 @@ void DragInputsDialog::SaveData()
 
       if (!isValid)
          canClose = false;
+
+      std::string fileToCheck;
+
+      // Check the flux files
+      if (historicFileComboBox->GetStringSelection().WX_TO_C_STRING != "ConstantFluxAndGeoMag")
+      {
+         fileToCheck = cssiFileTextCtrl->GetValue().WX_TO_C_STRING;
+
+         if (theDragForce->CheckFluxFile(fileToCheck, true) == "")
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "The flux file %s does not contain valid historic data",
+                     fileToCheck.c_str());
+            canClose = false;
+         }
+      }
       
+      if (predictedFileComboBox->GetStringSelection().WX_TO_C_STRING != "ConstantFluxAndGeoMag")
+      {
+         if (predictedFileComboBox->GetStringSelection().WX_TO_C_STRING == "CSSISpaceWeatherFile")
+         {
+            fileToCheck = cssiFileTextCtrl->GetValue().WX_TO_C_STRING;
+            if (theDragForce->CheckFluxFile(fileToCheck, false) == "")
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "The flux file %s does not contain valid predict data",
+                        fileToCheck.c_str());
+               canClose = false;
+            }
+         }
+         else
+         {
+            fileToCheck = schattenFileTextCtrl->GetValue().WX_TO_C_STRING;
+            if (theDragForce->CheckFluxFile(fileToCheck, false) == "")
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "The flux file %s does not contain valid predict data",
+                        fileToCheck.c_str());
+               canClose = false;
+            }
+         }
+      }
+
       if (!canClose)
          return;
-      
    }
    
    //-----------------------------------------------------------------
@@ -317,7 +359,7 @@ void DragInputsDialog::SaveData()
       std::string schattenfileName = schattenFileTextCtrl->GetValue().WX_TO_C_STRING;
       std::string schattenError = schattenErrorComboBox->GetValue().WX_TO_C_STRING;
       std::string schattenTiming = schattenTimingComboBox->GetValue().WX_TO_C_STRING;
-      (*theForceStringArray)[0] = predictedFileComboBox->GetStringSelection().WX_TO_C_STRING;;
+      (*theForceStringArray)[0] = predictedFileComboBox->GetStringSelection().WX_TO_C_STRING;
       (*theForceStringArray)[1] = historicFileComboBox->GetStringSelection().WX_TO_C_STRING;
       
      if (cssifileName == "")
@@ -354,8 +396,8 @@ void DragInputsDialog::SaveData()
 
 
     #ifdef DEBUG_DRAG_SAVE
-//         MessageInterface::ShowMessage
-//            ("   ==> Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
+       MessageInterface::ShowMessage
+          ("   ==> Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
     #endif
 
     if (isTextModified)
@@ -413,7 +455,6 @@ void DragInputsDialog::OnBrowse(wxCommandEvent &event)
       wxString filename;
         
       filename = dialog.GetPath().c_str();
-        
    }
    
    EnableUpdate(true);
@@ -430,6 +471,7 @@ void DragInputsDialog::OnCSSIFileSelect(wxCommandEvent &event)
         wxString filename;
         filename = dialog.GetPath().c_str();
         cssiFileTextCtrl->SetValue(filename);
+        isTextModified = true;
     }
 
 }
@@ -444,6 +486,7 @@ void DragInputsDialog::OnSchattenFileSelect(wxCommandEvent &event)
         wxString filename;
         filename = dialog.GetPath().c_str();
         schattenFileTextCtrl->SetValue(filename);
+        isTextModified = true;
     }
 
 }
