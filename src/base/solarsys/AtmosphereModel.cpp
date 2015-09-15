@@ -1605,9 +1605,8 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
             MessageInterface::ShowMessage("Setting flags: timing %d, error %d\n",
                   schattenTimingModel, schattenErrorModel);
          #endif
-
-         fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
       }
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
 
       #ifdef DEBUG_FLUX_FILE
          MessageInterface::ShowMessage("Epoch data: [%lf %lf %lf %lf]\n",

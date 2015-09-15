@@ -32,7 +32,7 @@
 //#define UNIT_TEST_90km
 //#define DEBUG_SHOW_DENSITY
 //#define DEBUG_FIRSTCALL
-
+//#define DEBUG_SCHATTEN_SETTINGS
 
 //------------------------------------------------------------------------------
 // static data
@@ -472,8 +472,16 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    {
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
       if (fluxReaderLoaded)
+      {
          fluxReader->GetEpochs(historicStart, historicEnd, predictStart,
                predictEnd);
+
+         #ifdef DEBUG_SCHATTEN_SETTINGS
+            MessageInterface::ShowMessage("Setting flags: timing %d, error %d\n",
+                  schattenTimingModel, schattenErrorModel);
+         #endif
+      }
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
    }
 
    if (fluxReaderLoaded && a1_time > 0.0)
