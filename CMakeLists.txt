@@ -197,6 +197,35 @@ if(NOT Matlab_FOUND)
   MESSAGE(WARNING "Matlab NOT FOUND. Set Matlab_ROOT_DIR to the path to Matlab and ensure you have a working license.")
 endif()
 
+# Find Python
+# todo: Python 2.7; let the user set library name?
+MESSAGE(STATUS "Searching for Python")
+SET(PYTHON_DIR "${PROJECT_SOURCE_DIR}/depends/Python")
+SET(PYTHON_LIB_DIR "" CACHE PATH "Path to location of the Python library.")
+SET(PYTHON_INCLUDE_DIR "" CACHE PATH "Path to location of python.h")
+MESSAGE(STATUS "Please set the Python locations")
+# FIND_PACKAGE(PythonLibs)
+
+if(UNIX)
+  if(APPLE)
+    # Check this for Mac
+    SET(PYTHON_LIBRARY "python3.4m")
+  else()
+    SET(PYTHON_LIBRARY "python3.4m")
+  endif()
+else()
+  SET(PYTHON_LIBRARY "python34.lib")
+endif()
+
+
+MESSAGE(STATUS "Python Library: " ${PYTHON_LIBRARY})
+
+if(PYTHON_LIB_DIR)
+  MESSAGE(STATUS "Found Python: " ${PYTHON_LIB_DIR})
+else()
+  MESSAGE(WARNING "Python NOT FOUND. Set PYTHON_LIB_DIR to your Python34.lib library path, and PYTHON_INCLUDE_DIR to the path to Python.h and re-configure.")
+endif()
+
 # ====================================================================
 # Common build options
 INCLUDE(CheckCXXCompilerFlag)

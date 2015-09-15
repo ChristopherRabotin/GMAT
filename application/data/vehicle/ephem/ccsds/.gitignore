@@ -79,3 +79,5 @@
 /CCSDS_Validation_TimeGapInUsableTime.aem
 /EulerTest.aem
 /Validation_CCSDS_DOYFormat_366ButNotLeapYear.aem
+/Comet_Hartley_Grey.3ds
+*.aem

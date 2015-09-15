@@ -204,6 +204,9 @@ protected:
    bool         hasFunctionDefinition;
    Function     *currentFunction;
    
+   /// Flag used to handle Python function call detection
+   bool isPythonFunction;
+
    /// For handling delayed blocks
    StringArray  delayedBlocks;
    StringArray  delayedBlockLineNumbers;

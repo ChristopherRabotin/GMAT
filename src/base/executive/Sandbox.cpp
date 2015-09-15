@@ -746,7 +746,8 @@ bool Sandbox::Initialize()
                MessageInterface::ShowMessage(
                   "CallFunction or Assignment found in MCS: calling HandleGmatFunction \n");
             #endif
-            HandleGmatFunction(current, &combinedObjectMap);
+            if (!current->IsOfType("CallPythonFunction"))
+               HandleGmatFunction(current, &combinedObjectMap);
          }
          
          #ifdef DEBUG_SANDBOX_INIT
