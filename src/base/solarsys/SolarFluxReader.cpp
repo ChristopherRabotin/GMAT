@@ -43,6 +43,12 @@
 SolarFluxReader::SolarFluxReader():
    obsFileName       (""),
    predictFileName   (""),
+   historicStart     (-1.0),
+   historicEnd       (-1.0),
+   predictStart      (-1.0),
+   predictEnd        (-1.0),
+   schattenFluxIndex (0),
+   schattenApIndex   (0),
    warnEpochBefore   (true),
    warnEpochAfter    (true)
 {
@@ -83,6 +89,12 @@ SolarFluxReader::~SolarFluxReader(void)
  */
 //------------------------------------------------------------------------------
 SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr) :
+   historicStart     (-1.0),
+   historicEnd       (-1.0),
+   predictStart      (-1.0),
+   predictEnd        (-1.0),
+   schattenFluxIndex (1),
+   schattenApIndex   (0),
    warnEpochBefore   (true),
    warnEpochAfter    (true)
 {
@@ -127,6 +139,12 @@ SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
    endObs = sfr.endObs;
    begData = sfr.begData;
    line = sfr.line;
+   historicStart = -1.0;
+   historicEnd = -1.0;
+   predictStart = -1.0;
+   predictEnd = -1.0;
+   schattenFluxIndex = 1;
+   schattenApIndex = 0;
    
    warnEpochBefore = true;
    warnEpochAfter = true;
@@ -544,12 +562,17 @@ bool SolarFluxReader::LoadPredictData()
       // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
       fD.epoch = mjd - 0.5;
 
+      // Nominal Timing
       for (Integer l=0; l<3; l++)
          fD.F107a[l] = atof(tokens[l+2].c_str());
       fD.apSchatten[0] = atof(tokens[5].c_str());
+
+      // Early Timing
       for (Integer l=0; l<3; l++)
          fD.F107a[l+3] = atof(tokens[l+6].c_str());
       fD.apSchatten[1] = atof(tokens[9].c_str());
+
+      // Late Timing
       for (Integer l=0; l<3; l++)
          fD.F107a[l+6] = atof(tokens[l+10].c_str());
       fD.apSchatten[2] = atof(tokens[13].c_str());
@@ -638,7 +661,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
             epoch, index);
    #endif
 
-   // if the requested epoch fall beyond the 
+   // if the requested epoch falls beyond the
    // last item in the obsFluxData, then search in predictFluxData
    if (index >= (Integer) obsFluxData.size())
    {
@@ -835,10 +858,10 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       else // predict data
       {
          // For now, use nominal mean Schatten data
-         fD.obsF107     = fD.F107a[4];
-         fD.obsCtrF107a = fD.F107a[4];
+         fD.obsF107     = fD.F107a[schattenFluxIndex];
+         fD.obsCtrF107a = fD.F107a[schattenFluxIndex];
          for (Integer i = 0; i < 8; i++)
-            fD.ap[i] = fD.apSchatten[1];
+            fD.ap[i] = fD.apSchatten[schattenApIndex];
       }
    }
 }
@@ -892,9 +915,9 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    else if (fD.index == -1) // predict data
    {
       // For now, use nominal mean Schatten data
-      fD.obsF107     = fD.F107a[4];
-      fD.obsCtrF107a = fD.F107a[4];
-      Real kp = ConvertApToKp(fD.apSchatten[1]);
+      fD.obsF107     = fD.F107a[schattenFluxIndex];
+      fD.obsCtrF107a = fD.F107a[schattenFluxIndex];
+      Real kp = ConvertApToKp(fD.apSchatten[schattenApIndex]);
       for (Integer i = 0; i < 8; i++)
          fD.kp[i] = kp;
    }
@@ -1069,4 +1092,57 @@ Real SolarFluxReader::ConvertApToKp(Real ap)
    kp = kpl + (ap - apl) * (kpr - kpl) / (apr - apl);
 
    return kp;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSchattenFlags(Integer timingSet, Integer magnitudeSet)
+//------------------------------------------------------------------------------
+/**
+ * Sets the indices into the data for Schatten predicts
+ *
+ * @param timingSet  Sets timing selection: -1 => early, 0 => nominal, +1 => late
+ * @param magnitudeSet Sets magnitude selection: -1 => -2 sigma, 0 => nominal,
+ *                                               +1 =>  +2 sigma
+ */
+//------------------------------------------------------------------------------
+void SolarFluxReader::SetSchattenFlags(Integer timingSet, Integer magnitudeSet)
+{
+   #ifdef DEBUG_SCHATTEN_SETTINGS
+      MessageInterface::ShowMessage("Setting flux reader timing to %d and "
+            "error model to %d\n", timingSet, magnitudeSet);
+   #endif
+
+   if (timingSet == -1)
+   {
+      if (magnitudeSet == -1)
+         schattenFluxIndex = 5;
+      if (magnitudeSet == 0)
+         schattenFluxIndex = 3;
+      if (magnitudeSet == 1)
+         schattenFluxIndex = 4;
+      schattenApIndex = 2;
+   }
+
+   if (timingSet == 0)
+   {
+      if (magnitudeSet == -1)
+         schattenFluxIndex = 2;
+      if (magnitudeSet == 0)
+         schattenFluxIndex = 0;
+      if (magnitudeSet == 1)
+         schattenFluxIndex = 1;
+      schattenApIndex = 0;
+   }
+
+   if (timingSet == 1)
+   {
+      if (magnitudeSet == -1)
+         schattenFluxIndex = 8;
+      if (magnitudeSet == 0)
+         schattenFluxIndex = 6;
+      if (magnitudeSet == 1)
+         schattenFluxIndex = 7;
+      schattenApIndex = 1;
+   }
 }

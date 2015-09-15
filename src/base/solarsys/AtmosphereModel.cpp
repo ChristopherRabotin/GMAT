@@ -40,6 +40,7 @@
 //#define DEBUG_CALCULATE_GEOCENTRICS
 //#define DEBUG_CALCULATE_GEODETICS
 //#define DEBUG_FLUX_FILE
+//#define DEBUG_SCHATTEN_SETTINGS
 
 //------------------------------------------------------------------------------
 // static data
@@ -109,6 +110,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    historicEnd          (-1.0),
    predictStart         (-1.0),
    predictEnd           (-1.0),
+   schattenTimingModel  (0),
+   schattenErrorModel   (0),
    sod                  (0.0),
    yd                   (0),
    f107                 (0.0),
@@ -194,6 +197,8 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    historicEnd          (am.historicEnd),
    predictStart         (am.predictStart),
    predictEnd           (am.predictEnd),
+   schattenTimingModel  (am.schattenTimingModel),
+   schattenErrorModel   (am.schattenErrorModel),
    sod                  (am.sod),
    yd                   (am.yd),
    f107                 (am.f107),
@@ -259,6 +264,8 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    historicEnd          = am.historicEnd;
    predictStart         = am.predictStart;
    predictEnd           = am.predictEnd;
+   schattenTimingModel  = am.schattenTimingModel;
+   schattenErrorModel   = am.schattenErrorModel;
 
    sod                  = am.sod;
    yd                   = am.yd;
@@ -722,6 +729,43 @@ void AtmosphereModel::SetInputSource(const std::string &historical,
       throw AtmosphereException("Invalid predicted data source " + predicted +
             " selected");
 }
+
+//------------------------------------------------------------------------------
+// void SetSchattenFlags(const std::string &timing, const std::string &magnitude)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function for the Schatten predict model selection
+ *
+ * @param timing The Schatten timing model
+ * @param magnitude The Schatten error model
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetSchattenFlags(const std::string &timing,
+                            const std::string &magnitude)
+{
+   #ifdef DEBUG_SCHATTEN_SETTINGS
+      MessageInterface::ShowMessage("AtmosphereModel::SetSchattenFlags"
+            "(%s, %s)\n", timing.c_str(), magnitude.c_str());
+   #endif
+
+   if (timing == "EarlyCycle")
+      schattenTimingModel = -1;
+   if (timing == "NominalCycle")
+      schattenTimingModel = 0;
+   if (timing == "LateCycle")
+      schattenTimingModel = 1;
+
+   if (magnitude == "MinusTwoSigma")
+      schattenErrorModel = -1;
+   if (magnitude == "Nominal")
+      schattenErrorModel = 0;
+   if (magnitude == "PlusTwoSigma")
+      schattenErrorModel = 1;
+
+   if (fluxReader != NULL)
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
+}
+
 
 //-----------------------------------------------------------------------------
 // bool AtmosphereModel::HasWindModel()
@@ -1553,8 +1597,17 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
    {
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
       if (fluxReaderLoaded)
+      {
          fluxReader->GetEpochs(historicStart, historicEnd, predictStart,
                predictEnd);
+
+         #ifdef DEBUG_SCHATTEN_SETTINGS
+            MessageInterface::ShowMessage("Setting flags: timing %d, error %d\n",
+                  schattenTimingModel, schattenErrorModel);
+         #endif
+
+         fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
+      }
 
       #ifdef DEBUG_FLUX_FILE
          MessageInterface::ShowMessage("Epoch data: [%lf %lf %lf %lf]\n",

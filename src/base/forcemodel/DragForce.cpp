@@ -944,6 +944,7 @@ bool DragForce::Initialize()
             
 			   // Set the source flags: constants, files, etc
 			   atmos->SetInputSource(historicWSource, predictedWSource);
+			   atmos->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
          }
          else
          {
