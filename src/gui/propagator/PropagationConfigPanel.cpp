@@ -3861,7 +3861,8 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
    std::vector<std::string> dragStringSettings;
    dragStringSettings = dragStringBuffer;
 
-   DragInputsDialog dragDlg(this, dragParameterBuffer, &dragStringBuffer, title.c_str());
+   DragInputsDialog dragDlg(this, dragForce, dragParameterBuffer,
+         &dragStringBuffer, title.c_str());
    dragDlg.ShowModal();
    
    int numSettings =  dragStringBuffer.size();
