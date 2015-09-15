@@ -589,7 +589,7 @@ namespace GmatSolarSystemDefaults
 
    const std::string           MOON_SPICE_FRAME_ID[NumberOfDefaultMoons] =
    {
-         "IAU_MOON",
+         "MOON_PA",
 //         "IAU_PHOBOS",
 //         "IAU_DEIMOS",
    };
