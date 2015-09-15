@@ -56,23 +56,21 @@ PLUGIN                 = ../plugins/libDataInterface
 PLUGIN                 = ../plugins/libProductionPropagators
 
 # Alpha plugins
-#PLUGIN                = ./libCInterface
-#PLUGIN                = ../plugins/libExtraPropagators
-#PLUGIN                = ../plugins/libGmatEstimation
-#PLUGIN                = ../plugins/libGeometricMeasurements
+PLUGIN                = ./libCInterface
+PLUGIN                = ../plugins/libExtraPropagators
+PLUGIN                = ../plugins/libGmatEstimation
+PLUGIN                = ../plugins/libGeometricMeasurements
 PLUGIN                = ../plugins/libGmatFunction
-#PLUGIN                = ../plugins/libSaveCommand
+PLUGIN                = ../plugins/libSaveCommand
 PLUGIN                = ../plugins/libNewParameters
-#PLUGIN                = ../plugins/libPolyhedronGravity
+PLUGIN                = ../plugins/libPolyhedronGravity
 
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
 PLUGIN                 = ../plugins/proprietary/libMsise86
 PLUGIN                 = ../plugins/proprietary/libNRLMsise00
 PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-
-# Thinking Systems plugins
-PLUGIN                 = ../plugins/proprietary/libTsiParameters
+PLUGIN                 = ../plugins/proprietary/libSNOptimizer
 
 #-----------------------------------------------------------
 # Directory/file paths
