@@ -97,6 +97,11 @@ private:
    GmatEpoch historicEnd;
    GmatEpoch predictStart;
    GmatEpoch predictEnd;
+
+   /// Index for Schatten flux setting
+   Integer schattenFluxIndex;
+   /// Index for Schatten Ap value
+   Integer schattenApIndex;
       
    /// Flag used to indicate that the "Too early" warning not yet issued
    bool warnEpochBefore;
@@ -123,6 +128,7 @@ public:
    /// Change Ap data for MSISE model
    void PrepareApData(FluxData &fD, GmatEpoch epoch);
    void PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch);
+   void SetSchattenFlags(Integer timingSet, Integer magnitudeSet);
 };
 
 

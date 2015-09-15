@@ -123,6 +123,7 @@ public:
    bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
    AtmosphereModel*     GetInternalAtmosphereModel();
    AtmosphereModel*     GetAtmosphereModel();
+   static std::string   CheckFluxFile(const std::string &filename, bool isHistoric);
    
    // Methods used by the ODEModel to set the state indexes, etc
    virtual bool SupportsDerivative(Gmat::StateElementId id);

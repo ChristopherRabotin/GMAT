@@ -87,6 +87,8 @@ public:
 
    void         SetInputSource(const std::string &historical = "ConstantFluxAndGeoMag",
                                const std::string &predicted = "ConstantFluxAndGeoMag");
+   void         SetSchattenFlags(const std::string &timing,
+                               const std::string &magnitude);
 
    // Extra methods some models may support
    virtual bool HasWindModel();
@@ -207,6 +209,10 @@ protected:
    GmatEpoch predictStart;
    /// End of the predict data when using file based predicted data
    GmatEpoch predictEnd;
+   /// Schatten timing model to use
+   Integer schattenTimingModel;
+   /// Schatten error model to use
+   Integer schattenErrorModel;
 
    // Fields used when retrieving data from a flux file
 

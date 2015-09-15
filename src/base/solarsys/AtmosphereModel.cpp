@@ -27,6 +27,8 @@
 #include "GmatConstants.hpp"
 #include "AngleUtil.hpp"            // For lat, long range setting
 #include "CoordinateConverter.hpp"
+#include "StringUtil.hpp"
+#include "FileManager.hpp"
 
 
 #include <cmath>                    // for exp
@@ -38,6 +40,7 @@
 //#define DEBUG_CALCULATE_GEOCENTRICS
 //#define DEBUG_CALCULATE_GEODETICS
 //#define DEBUG_FLUX_FILE
+//#define DEBUG_SCHATTEN_SETTINGS
 
 //------------------------------------------------------------------------------
 // static data
@@ -107,6 +110,8 @@ AtmosphereModel::AtmosphereModel(const std::string &typeStr, const std::string &
    historicEnd          (-1.0),
    predictStart         (-1.0),
    predictEnd           (-1.0),
+   schattenTimingModel  (0),
+   schattenErrorModel   (0),
    sod                  (0.0),
    yd                   (0),
    f107                 (0.0),
@@ -192,6 +197,8 @@ AtmosphereModel::AtmosphereModel(const AtmosphereModel& am) :
    historicEnd          (am.historicEnd),
    predictStart         (am.predictStart),
    predictEnd           (am.predictEnd),
+   schattenTimingModel  (am.schattenTimingModel),
+   schattenErrorModel   (am.schattenErrorModel),
    sod                  (am.sod),
    yd                   (am.yd),
    f107                 (am.f107),
@@ -257,6 +264,8 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    historicEnd          = am.historicEnd;
    predictStart         = am.predictStart;
    predictEnd           = am.predictEnd;
+   schattenTimingModel  = am.schattenTimingModel;
+   schattenErrorModel   = am.schattenErrorModel;
 
    sod                  = am.sod;
    yd                   = am.yd;
@@ -721,6 +730,43 @@ void AtmosphereModel::SetInputSource(const std::string &historical,
             " selected");
 }
 
+//------------------------------------------------------------------------------
+// void SetSchattenFlags(const std::string &timing, const std::string &magnitude)
+//------------------------------------------------------------------------------
+/**
+ * Pass-through function for the Schatten predict model selection
+ *
+ * @param timing The Schatten timing model
+ * @param magnitude The Schatten error model
+ */
+//------------------------------------------------------------------------------
+void AtmosphereModel::SetSchattenFlags(const std::string &timing,
+                            const std::string &magnitude)
+{
+   #ifdef DEBUG_SCHATTEN_SETTINGS
+      MessageInterface::ShowMessage("AtmosphereModel::SetSchattenFlags"
+            "(%s, %s)\n", timing.c_str(), magnitude.c_str());
+   #endif
+
+   if (timing == "EarlyCycle")
+      schattenTimingModel = -1;
+   if (timing == "NominalCycle")
+      schattenTimingModel = 0;
+   if (timing == "LateCycle")
+      schattenTimingModel = 1;
+
+   if (magnitude == "MinusTwoSigma")
+      schattenErrorModel = -1;
+   if (magnitude == "Nominal")
+      schattenErrorModel = 0;
+   if (magnitude == "PlusTwoSigma")
+      schattenErrorModel = 1;
+
+   if (fluxReader != NULL)
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
+}
+
+
 //-----------------------------------------------------------------------------
 // bool AtmosphereModel::HasWindModel()
 //-----------------------------------------------------------------------------
@@ -1102,14 +1148,129 @@ bool AtmosphereModel::SetStringParameter(const Integer id,
    if (id == CSSI_WEATHER_FILE)
    {
       if (value != "")
-         obsFileName = value;
+      {
+         bool headerFound = false;
+         bool startFound = false;
+         bool fileIsValid = false;
+
+         // If the file is a SCHATTEN file, we require 3 tags:
+         // "DATATYPE CSSISPACEWEATHER", "BEGIN OBSERVED", and "END OBSERVED"
+         std::string searchFor = "DATATYPE CSSISPACEWEATHER";
+         std::string line;
+
+         // Does it exist?
+         // Set the file names, possibly with path prefixes
+         FileManager *fm = FileManager::Instance();
+
+         std::string weatherfile = value;
+         if (fm->DoesFileExist(weatherfile) == false)
+            weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+         if (fm->DoesFileExist(weatherfile) == false)
+            throw SolarSystemException("Cannot open the observed space weather file " +
+                  value + ", nor the file at the location " + weatherfile);
+
+         std::ifstream inStream(weatherfile.c_str());
+
+         // Is is a known format?
+         while (!inStream.eof() && !fileIsValid)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(searchFor) != std::string::npos)
+            {
+               if (!headerFound)
+               {
+                  headerFound = true;
+                  searchFor = "BEGIN OBSERVED";
+               }
+               if (headerFound && !startFound)
+               {
+                  startFound = true;
+                  searchFor = "END OBSERVED";
+               }
+               if (headerFound && startFound)
+               {
+                  fileIsValid = true;
+               }
+            }
+         }
+         inStream.close();
+
+         if (fileIsValid)
+            obsFileName = weatherfile;
+         else
+            throw SolarSystemException("Observed space weather measurement "
+                  "file \"" + value + "\" is in an unknown format");
+      }
       return true;
    }
 
    if (id == SCHATTEN_WEATHER_FILE)
    {
       if (value != "")
-         predictFileName = value;
+      {
+         bool headerFound = false;
+         bool startFound = false;
+         bool fileIsValid = false;
+
+         // If the file is a SCHATTEN file, we require 3 tags:
+         // "PREDICTED SOLAR DATA", "BEGIN_DATA", and "END_DATA"
+         std::string searchFor = "PREDICTED SOLAR DATA";
+         std::string line;
+
+         // Does it exist?
+         FileManager *fm = FileManager::Instance();
+
+         std::string weatherfile = value;
+         if (fm->DoesFileExist(weatherfile) == false)
+            weatherfile = fm->GetAbsPathname("ATMOSPHERE_PATH") + weatherfile;
+         if (fm->DoesFileExist(weatherfile) == false)
+            throw SolarSystemException("Cannot open the predicted space weather file " +
+                  value + ", nor the file at the location " + weatherfile);
+
+         std::ifstream inStream(weatherfile.c_str());
+
+         // Is is a known format?
+         while (!inStream.eof() && !fileIsValid)
+         {
+            getline(inStream, line);
+
+            // if the line is blank, skip it
+            if (GmatStringUtil::IsBlank(line, true)) continue;
+
+            // Make upper case, so we can check for certain keyword
+            line = GmatStringUtil::ToUpper(line);
+            if (std::string(line).find(searchFor) != std::string::npos)
+            {
+               if (!headerFound)
+               {
+                  headerFound = true;
+                  searchFor = "BEGIN_DATA";
+               }
+               if (headerFound && !startFound)
+               {
+                  startFound = true;
+                  searchFor = "END_DATA";
+               }
+               if (headerFound && startFound)
+               {
+                  fileIsValid = true;
+               }
+            }
+         }
+         inStream.close();
+
+         if (fileIsValid)
+            predictFileName = weatherfile;
+         else
+            throw SolarSystemException("Predicted space weather measurement "
+                  "file \"" + value + "\" is in an unknown format");
+      }
       return true;
    }
 
@@ -1436,8 +1597,16 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
    {
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
       if (fluxReaderLoaded)
+      {
          fluxReader->GetEpochs(historicStart, historicEnd, predictStart,
                predictEnd);
+
+         #ifdef DEBUG_SCHATTEN_SETTINGS
+            MessageInterface::ShowMessage("Setting flags: timing %d, error %d\n",
+                  schattenTimingModel, schattenErrorModel);
+         #endif
+      }
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
 
       #ifdef DEBUG_FLUX_FILE
          MessageInterface::ShowMessage("Epoch data: [%lf %lf %lf %lf]\n",
