@@ -428,7 +428,8 @@ SolarSystem::SolarSystem(std::string withName) :
    // theSun->SetStringParameter(theSun->GetParameterID("TextureMapFileName"), textureFile);
    //==================== OLD CODE
 
-   
+   // Must reset the default values
+   theSun->SaveAllAsDefault();
    // add the body to the default SolarSystem
    AddBody(theSun);
 
@@ -511,6 +512,8 @@ SolarSystem::SolarSystem(std::string withName) :
       //==================== OLD CODE
       
       
+      // Must reset the default values
+      newPlanet->SaveAllAsDefault();
       // add the body to the default SolarSystem
       AddBody(newPlanet);
    }
@@ -590,6 +593,8 @@ SolarSystem::SolarSystem(std::string withName) :
       //==================== OLD CODE
 
       
+      // Must reset the default values
+      newMoon->SaveAllAsDefault();
       // add the body to the default SolarSystem
       AddBody(newMoon);
    }
