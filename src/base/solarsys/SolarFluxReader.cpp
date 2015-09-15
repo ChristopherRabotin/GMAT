@@ -914,7 +914,6 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
    }
    else if (fD.index == -1) // predict data
    {
-      // For now, use nominal mean Schatten data
       fD.obsF107     = fD.F107a[schattenFluxIndex];
       fD.obsCtrF107a = fD.F107a[schattenFluxIndex];
       Real kp = ConvertApToKp(fD.apSchatten[schattenApIndex]);
