@@ -45,6 +45,7 @@
 //#define DEBUG_SPK_COVERAGE
 //#define DEBUG_CONTACT
 //#define DEBUG_EM_TIME_SPENT
+//#define DEBUG_EM_TIME_ADJUST
 
 #ifdef DEBUG_EM_TIME_SPENT
 #include <time.h>
@@ -605,6 +606,8 @@ bool EphemManager::GetOccultationIntervals(const std::string &occType,
          starts.push_back(ss); // OR starts.at(ii) = s? (and same for e)?
          ends.push_back(ee);
       }
+      scard_c(0, &window);   // reset (empty) the window cell
+      scard_c(0, &result);   // reset (empty) the result cell
 
       return true;
    #endif
@@ -652,15 +655,77 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
 //   std::string theNAIFFrameStr = theSc->GetStringParameter(theSc->GetParameterID("SpiceFrameId"));
 
    // window we want to search
+   SPICEDOUBLE_CELL(initWindow, 200000);
+   scard_c(0, &initWindow);   // reset (empty) the cell
+
+   // window we want to search
    SPICEDOUBLE_CELL(window, 200000);
    scard_c(0, &window);   // reset (empty) the cell
 
    Integer obsID;
    GmatStringUtil::ToInteger(observerID, obsID);
-   GetRequiredCoverageWindow(&window, s, e, useEntireIntvl, true, useLightTime,
+   GetRequiredCoverageWindow(&initWindow, s, e, useEntireIntvl, true, useLightTime,
                              transmit, stepSize, obsID);
+   SpiceInt       numInt      = wncard_c(&initWindow);
 
-   SpiceInt       numInt      = wncard_c(&window);
+   // Adjust the epochs in the window so that we pass in an observer window
+   Integer        iVal;
+   GmatStringUtil::ToInteger(observerID, iVal);
+   SpiceDouble    sNew, eNew;
+   std::string    theDir = "->";
+   if (transmit)  theDir = "<-";
+   SpiceInt       tId    = theNAIFId;   // ID for the target
+   SpiceInt       oId    = iVal;
+   ConstSpiceChar *dir   = theDir.c_str();
+   SpiceDouble    elapsed;
+   #ifdef DEBUG_EM_TIME_ADJUST
+      MessageInterface::ShowMessage("Attempting to adjust the times using:\n");
+      MessageInterface::ShowMessage("  theDir      = %s\n", theDir.c_str());
+      MessageInterface::ShowMessage("  target ID   = %d\n", tId);
+      MessageInterface::ShowMessage("  observer ID = %d\n", oId);
+   #endif
+
+   for (Integer ii = 0; ii < numInt; ii++)
+   {
+      SpiceDouble sOrig, eOrig;
+      wnfetd_c(&initWindow, ii, &sOrig, &eOrig);
+      ltime_c(sOrig, tId, dir, oId, &sNew, &elapsed);
+      ltime_c(eOrig, tId, dir, oId, &eNew, &elapsed);
+      #ifdef DEBUG_EM_TIME_ADJUST
+         Real stmp = spice->SpiceTimeToA1(sOrig);
+         Real etmp = spice->SpiceTimeToA1(eOrig);
+         MessageInterface::ShowMessage("Interval %d:\n", ii);
+         MessageInterface::ShowMessage("  sOrig      = %12.10f\n", stmp);
+         MessageInterface::ShowMessage("  eOrig      = %12.10f\n", etmp);
+         Real sNewtmp = spice->SpiceTimeToA1(sNew);
+         Real eNewtmp = spice->SpiceTimeToA1(eNew);
+         Real elapsedtmp = elapsed;
+         MessageInterface::ShowMessage("  sNew       = %12.10f\n", sNewtmp);
+         MessageInterface::ShowMessage("  eNew       = %12.10f\n", eNewtmp);
+         MessageInterface::ShowMessage("  elapsed    = %12.10f\n", elapsedtmp);
+      #endif
+//      wninsd_c(sNew, eNew, &window);  // uncomment this !!!!
+   }
+//   scard_c(numInt, &window);   // size the cell  // uncomment this!!
+
+   #ifdef DEBUG_EM_TIME_ADJUST
+      SpiceInt szNew  = wncard_c(&window);
+      Integer  numNew = (Integer) szNew;
+      MessageInterface::ShowMessage("--- size of new window = %d\n",
+            numNew);
+      for (Integer ii = 0; ii < numNew; ii++)
+      {
+         SpiceDouble sWinNew, eWinNew;
+         wnfetd_c(&window, ii, &sWinNew, &eWinNew);
+         Real ssWinNew = spice->SpiceTimeToA1(sWinNew);
+         Real eeWinNew = spice->SpiceTimeToA1(eWinNew);
+         MessageInterface::ShowMessage("------  start %d = %12.10f\n",
+               ii, ssWinNew);
+         MessageInterface::ShowMessage("------  end %d   = %12.10f\n",
+               ii, eeWinNew);
+      }
+   #endif
+   copy_c(&initWindow, &window);  // TEMPORARY ******?????
 
    std::string    theCrdSys   = "LATITUDINAL";
    std::string    theCoord    = "LATITUDE";
@@ -763,7 +828,8 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
          front  = theFront.c_str();
          fframe = theFFrame.c_str();
          #ifdef DEBUG_CONTACT
-            MessageInterface::ShowMessage("Calling gfoclt_c with:\n");
+            MessageInterface::ShowMessage("Calling gfoclt_c (for body %s) with:\n",
+                  body->GetName().c_str());
             MessageInterface::ShowMessage("   occultationType = %s\n", theOccType.c_str());
             MessageInterface::ShowMessage("   front           = %s\n", theFront.c_str());
             MessageInterface::ShowMessage("   fshape          = %s\n", theFShape.c_str());
@@ -854,6 +920,12 @@ bool EphemManager::GetContactIntervals(const std::string &observerID,
       starts.push_back(ss); // OR starts.at(ii) = s? (and same for e)?
       ends.push_back(ee);
    }
+   scard_c(0, &initWindow);      // reset (empty) the window cell
+   scard_c(0, &window);          // reset (empty) the window cell
+   scard_c(0, &result);          // reset (empty) the window cell
+   scard_c(0, &subtracted);      // reset (empty) the window cell
+   scard_c(0, &obsResults);      // reset (empty) the window cell
+   scard_c(0, &occultResults);   // reset (empty) the window cell
 
    return true;
 #endif
@@ -886,6 +958,8 @@ bool EphemManager::GetCoverage(Real s, Real e,
       // return the start and stop times of the full coverage window
       cvrStart   = coverStart;
       cvrStop    = coverStop;
+
+      scard_c(0, &coverWindow);   // reset (empty) the cell
 
       return true;
    #endif
@@ -1084,7 +1158,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
    }
    // window we want to search
    SPICEDOUBLE_CELL(window, 200000);
-   scard_c(0, &window);   // reset (empty) the coverage cell
+   scard_c(0, &window);   // reset (empty) the window cell
 
    // Get the start and stop times for the complete coverage window
    SpiceInt szCoverage = wncard_c(&cover);
@@ -1122,6 +1196,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
       // Get the intersection of the timespan window and the coverage window
       wninsd_c(s, e, &timespan);
       wnintd_c(&cover, &timespan, &window);
+      scard_c(0, &timespan);   // reset (empty) the timespan cell
       if (failed_c())
       {
          ConstSpiceChar option[] = "LONG";
@@ -1136,6 +1211,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
          throw SubscriberException(errmsg);
       }
    }
+   scard_c(0, &cover);   // reset (empty) the cover cell
 
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Number of intervals = %d\n", (Integer) numInt);
@@ -1243,6 +1319,7 @@ void EphemManager::GetRequiredCoverageWindow(SpiceCell* w, Real s1, Real e1,
       MessageInterface::ShowMessage("----- intStop  =  %12.10f\n", intStop);
    #endif
    copy_c(&window, w);
+   scard_c(0, &window);   // reset (empty) the window cell
 }
 #endif //#ifdef __USE_SPICE__
 
