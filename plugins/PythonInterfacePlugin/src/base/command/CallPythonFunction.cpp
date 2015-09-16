@@ -380,10 +380,25 @@ bool CallPythonFunction::Execute()
 }
 
 
+//------------------------------------------------------------------------------
+// bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
+//------------------------------------------------------------------------------
+/**
+ * Builds a PyReturnValue struct and pushes it to the vector of returned data
+ *
+ * @param PyObject The object being handled.
+ *
+ * Note that Tuple objects are not handled here -- the calling function breaks
+ * the tuple into separate PyObjects and passes them in one at a time.
+ *
+ * @return true If a PyReturnValue was pushed onto the returned data vector.
+ */
+//------------------------------------------------------------------------------
 bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
 {
    bool retval = false;
 
+   // Reals
    if (PyFloat_Check(member))
    {
       PyReturnValue rv;
@@ -392,6 +407,8 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
       dataReturn.push_back(rv);
       retval = true;
    }
+
+   // Strings
    // else if the Python module returns a string
 #ifdef IS_PY3K
    else if (PyUnicode_Check(member))
