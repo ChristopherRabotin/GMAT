@@ -26,6 +26,10 @@
 #include "Array.hpp"
 #include <iostream>
 
+// #define DEBUG_INITIALIZATION
+// #define DEBUG_EXECUTION
+
+
 PythonInterface* PythonInterface::instance = NULL;
 
 PythonInterface* PythonInterface::PyInstance()

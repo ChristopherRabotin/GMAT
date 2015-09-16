@@ -30,9 +30,6 @@
 #define IS_PY3K
 #endif
 
-#define DEBUG_INITIALIZATION
-#define DEBUG_EXECUTION
-
 class PYTHON_API PythonInterface : public Interface
 {
 

@@ -23,7 +23,8 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_EXECUTION
+// #define DEBUG_INITIALIZATION
+// #define DEBUG_EXECUTION
 
 //------------------------------------------------------------------------------
 // Static Data
@@ -244,24 +245,32 @@ bool CallPythonFunction::Initialize()
 {
 	bool ret = false;
 
-   MessageInterface::ShowMessage("  Calling CallPythonFunction::Initialize()\n");
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("  Calling CallPythonFunction::Initialize()\n");
+   #endif
 
    ret = CallFunction::Initialize();
 
-   MessageInterface::ShowMessage("  Base class init complete\n");
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("  Base class init complete\n");
+   #endif
 
 	pythonIf = PythonInterface::PyInstance();
    FileManager *fm = FileManager::Instance();
 
-   MessageInterface::ShowMessage("  pythonIf:  %p\n", pythonIf);
-   
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("  pythonIf:  %p\n", pythonIf);
+   #endif
+
 	//Initialize Python engine
 	pythonIf->PyInitialize();
 
 	// Get all Python module paths from the startup file
 	StringArray paths = fm->GetAllPythonModulePaths();
 
-   MessageInterface::ShowMessage("  Adding %d python paths\n", paths.size());
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("  Adding %d python paths\n", paths.size());
+   #endif
 
 	pythonIf->PyAddModulePath(paths);
    
@@ -271,7 +280,10 @@ bool CallPythonFunction::Initialize()
 
    //Fill in Outputlist
    Integer sizeOut = FillOutputList();
-   MessageInterface::ShowMessage("  SizeOut is %d\n", sizeOut);
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("  SizeOut is %d\n", sizeOut);
+   #endif
 
 	return ret;
 }
@@ -339,12 +351,16 @@ bool CallPythonFunction::Execute()
       {
          if (PyTuple_Check(pyRet))
          {
-            MessageInterface::ShowMessage("Python has returned a tuple of values.\n");
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned a tuple of values.\n");
+            #endif
             Integer tupleSz = PyTuple_Size(pyRet);
             for (Integer i = 0; i < tupleSz; ++i)
             {
                PyObject *member = PyTuple_GetItem(pyRet, i);
-               MessageInterface::ShowMessage("   %d: %p\n", i, member);
+               #ifdef DEBUG_EXECUTION
+                  MessageInterface::ShowMessage("   %d: %p\n", i, member);
+               #endif
                BuildReturnFromPyObject(member);
             }
          }
