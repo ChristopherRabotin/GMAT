@@ -304,6 +304,8 @@ bool CallPythonFunction::Execute()
   // Next, call Python function Wrapper
    PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, argIn,
          paramType, inRow, inCol, mInputList.size());
+
+//   MessageInterface::ShowMessage("Python returned %d output objects\n", pyRet->);
   
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
