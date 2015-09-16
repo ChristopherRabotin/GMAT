@@ -115,6 +115,7 @@ protected:
    void SendInParam(std::vector<void *> &argIn, std::vector<Gmat::ParameterType> &pType);
    /// Create C++ variable type declared in GMAT script
    void GetOutParams();
+   bool BuildReturnFromPyObject(PyObject* member);
 //   void GetOutParams(const std::vector<void *> &argOut);
 
    /// Published parameters for Python functions

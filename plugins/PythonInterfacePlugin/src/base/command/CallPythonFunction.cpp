@@ -328,49 +328,106 @@ bool CallPythonFunction::Execute()
   
    ------------------------------------------------------------------------------------*/
    dataReturn.clear();
+
    if (pyRet)
    {
-      //if the Python module returns a float value without using []
-      if (PyFloat_Check(pyRet))
+      if (!BuildReturnFromPyObject(pyRet))
       {
-         PyReturnValue rv;
-         rv.toType = Gmat::REAL_TYPE;
-         rv.floatData.push_back(PyFloat_AsDouble(pyRet));
-         dataReturn.push_back(rv);
+         if (PyTuple_Check(pyRet))
+         {
+            MessageInterface::ShowMessage("Python has returned a tuple of values.\n");
+            Integer tupleSz = PyTuple_Size(pyRet);
+            for (Integer i = 0; i < tupleSz; ++i)
+            {
+               PyObject *member = PyTuple_GetItem(pyRet, i);
+               MessageInterface::ShowMessage("   %d: %p\n", i, member);
+               BuildReturnFromPyObject(member);
+            }
+         }
+         else if (PyMemoryView_Check(pyRet))
+         {
+            MessageInterface::ShowMessage("Python has returned a memoryview object\n");
+         }
+         else if (PyLong_Check(pyRet))
+         {
+            MessageInterface::ShowMessage("Python has returned an Integer object\n");
+         }
+         else
+         {
+            MessageInterface::ShowMessage("An unknown Python type was returned.\n");
+         }
       }
-      // else if the Python module returns a string
-#ifdef IS_PY3K
-      else if (PyUnicode_Check(pyRet))
-      {
-         #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("A Python String was returned.\n");
-         #endif
-         PyReturnValue rv;
-         rv.toType = Gmat::STRING_TYPE;
-         rv.stringData = _PyUnicode_AsString(pyRet);
-         dataReturn.push_back(rv);
-      }
-#else
-      else if (PyBytes_Check(pyRet))
-      {
-         PyReturnValue rv;
-         rv.toType = Gmat::STRING_TYPE;
-         rv.stringData.push_back(PyBytes_AsString(pyRet));
-         dataReturn.push_back(rv);
-      }
-#endif
-      // else if the Python module returns a list of floats
-      // Or a list of list of floats/Ints.
-      // In case of Python Int, we need to convert it to C++ float.
-      else if (PyList_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Return was a list of size %d\n", PyList_Size(pyRet));
 
-         // number of list elements in a list, for example: [ [], [], [] ]
-         Integer listSz = PyList_Size(pyRet);
-         PyObject *pyItem = PyList_GetItem(pyRet, 0);
-         // number of elements in a list, for example: [ 1, 2, 3 ]
-         Integer elementSz = PyList_Size(pyItem);
+      Py_DECREF(pyRet);
+
+      // Fill out the parameter out
+      GetOutParams();
+
+      // clean up the argIns.
+      for (Integer i = 0; i < argIn.size(); ++i)
+         delete argIn.at(i);
+
+//      // clean up the argOut
+//      for (Integer i = 0; i < argOut.size(); ++i)
+//         delete argOut.at(i);
+   }
+   else   // when return value is NULL and no exception is caught/handled.
+   {
+      MessageInterface::ShowMessage("Unknown error happened in Python Interface.\n");
+   }
+
+	return true;
+}
+
+
+bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
+{
+   bool retval = false;
+
+   if (PyFloat_Check(member))
+   {
+      PyReturnValue rv;
+      rv.toType = Gmat::REAL_TYPE;
+      rv.floatData.push_back(PyFloat_AsDouble(member));
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+   // else if the Python module returns a string
+#ifdef IS_PY3K
+   else if (PyUnicode_Check(member))
+   {
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("A Python String was returned.\n");
+      #endif
+      PyReturnValue rv;
+      rv.toType = Gmat::STRING_TYPE;
+      rv.stringData = _PyUnicode_AsString(member);
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+#else
+   else if (PyBytes_Check(member))
+   {
+      PyReturnValue rv;
+      rv.toType = Gmat::STRING_TYPE;
+      rv.stringData.push_back(PyBytes_AsString(member));
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+#endif
+
+   // else if the Python module returns a list of floats
+   // Or a list of list of floats/Ints.
+   // In case of Python Int, we need to convert it to C++ float.
+   else if (PyList_Check(member))
+   {
+      MessageInterface::ShowMessage("Return was a list of size %d\n", PyList_Size(member));
+
+      // number of list elements in a list, for example: [ [], [], [] ]
+      Integer listSz = PyList_Size(member);
+      PyObject *pyItem = PyList_GetItem(member, 0);
+      // number of elements in a list, for example: [ 1, 2, 3 ]
+      Integer elementSz = PyList_Size(pyItem);
 
 //         if (PyList_Check(pyItem))
 //         {
@@ -407,74 +464,27 @@ bool CallPythonFunction::Execute()
 //               argOut.push_back(vItem);
 //            }
 //         }
-         // Python has returned a list of floats
+      // Python has returned a list of floats
 //         else
 
-         if (PyFloat_Check(pyItem))
+      if (PyFloat_Check(pyItem))
+      {
+         MessageInterface::ShowMessage("Python has returned a list of floats.\n");
+         PyReturnValue rv;
+         rv.toType = Gmat::RMATRIX_TYPE;
+         for (Integer i = 0; i < listSz; ++i)
          {
-            MessageInterface::ShowMessage("Python has returned a list of floats.\n");
-            PyReturnValue rv;
-            rv.toType = Gmat::RMATRIX_TYPE;
-            for (Integer i = 0; i < listSz; ++i)
-            {
-               pyItem = PyList_GetItem(pyRet, i);
-               rv.floatData.push_back(PyFloat_AsDouble(pyItem));
-               
-               MessageInterface::ShowMessage("Value is %lf\n", rv.floatData[rv.floatData.size()-1]);
-            }
-            dataReturn.push_back(rv);
+            pyItem = PyList_GetItem(member, i);
+            rv.floatData.push_back(PyFloat_AsDouble(pyItem));
 
-//            std::vector<Real *> *vItem = new std::vector<Real *>;
-//            for (Integer i = 0; i < listSz; i++)
-//            {
-//               Real *ret = new Real;
-//
-//               pyItem = PyList_GetItem(pyRet, i);
-//               *ret = PyFloat_AsDouble(pyItem);
-//               MessageInterface::ShowMessage("Value is %lf\n", *ret);
-//               vItem->push_back(ret);
-//            }
-//
-//            argOut.push_back(vItem);
-         }   
+            MessageInterface::ShowMessage("Value is %lf\n", rv.floatData[rv.floatData.size()-1]);
+         }
+         dataReturn.push_back(rv);
+         retval = true;
       }
-      // else if the Python module returns a tuple of numerical values
-      else if (PyTuple_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python has returned a tuple of numerical values.\n");
-      }
-      else if (PyMemoryView_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python has returned a memoryview object\n");
-      }
-      else if (PyLong_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python has returned an Integer object\n");
-      }
-      else
-      {
-         MessageInterface::ShowMessage("An unknown Python type was returned.\n");
-      }
-         
-      Py_DECREF(pyRet);
-
-      // Fill out the parameter out
-      GetOutParams();
-
-      // clean up the argIns.
-      for (Integer i = 0; i < argIn.size(); ++i)
-         delete argIn.at(i);
-
-//      // clean up the argOut
-//      for (Integer i = 0; i < argOut.size(); ++i)
-//         delete argOut.at(i);
-   }
-   else   // when return value is NULL and no exception is caught/handled.
-   {
-      MessageInterface::ShowMessage("Unknown error happend in Python Interface.\n");
    }
 
-	return true;
+   return retval;
 }
 
 void CallPythonFunction::RunComplete()
