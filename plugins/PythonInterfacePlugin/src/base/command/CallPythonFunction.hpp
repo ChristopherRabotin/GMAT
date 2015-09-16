@@ -98,8 +98,10 @@ protected:
 	{
 	   /// The type GMAT expects, based on what Python returned
 	   Gmat::ParameterType toType;
-	   /// The container for numeric returns
-	   RealArray floatData;
+      /// The container for numeric returns
+      RealArray floatData;
+      /// The container for 2D (numeric) array returns
+      std::vector<RealArray> lolData;
 	   /// The container for string returns
 	   std::string stringData;
 	};
