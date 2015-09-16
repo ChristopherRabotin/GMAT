@@ -104,7 +104,10 @@ bool PythonInterface::PyInitialize()
    if (Py_IsInitialized())
    {
       if (!isPythonInitialized)
+
+#ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("Python is initialized/Loaded.\n");
+#endif
 
 	   isPythonInitialized = true;
       
@@ -138,7 +141,11 @@ bool PythonInterface::PyFinalize()
    if (--numPyCommands == 0)
    {
 	   Py_Finalize();
+
+#ifdef DEBUG_INITIALIZATION
+
       MessageInterface::ShowMessage("Python is Finalized/Unloaded.\n");
+#endif
 
 	   isPythonInitialized = false;
    }
@@ -221,7 +228,9 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
    delete[] destPath;
    delete[] s3K;
 
+#ifdef DEBUG_INITIALIZATION
    MessageInterface::ShowMessage("  Leaving PyAddModulePath( ) \n");
+#endif
 
 }
 
@@ -314,20 +323,26 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    for (UnsignedInt index = 0; index < paramType.size(); ++index)
    {
       Gmat::ParameterType parType = paramType.at(index);
+
+#ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("Paramter Type is %d\n", parType);
       MessageInterface::ShowMessage("INDEX is %d\n", index);
+#endif
 
       if (parType == Gmat::RMATRIX_TYPE)
       {
          Py_buffer *pybuffer = (Py_buffer *)malloc(sizeof(Py_buffer));
          Real *v = new Real[row*col];
          
-         for (UnsignedInt i = 0; i < row; ++i)
+         for (UnsignedInt m = 0; m < row; ++m)
          {
-            for (UnsignedInt j = 0; j < col; ++j)
+            for (UnsignedInt k = 0; k < col; ++k)
             {
-               v[i*col+j] = *(Real*)argIn.at(i*col + j +n);
-               MessageInterface::ShowMessage("v[] is %lf\n", v[i*col+j]);
+               v[m*col+k] = *(Real*)argIn.at(m*col + k +n);
+
+#ifdef DEBUG_INITIALIZATION
+               MessageInterface::ShowMessage("v[] is %lf\n", v[m*col+k]);
+#endif
             }
          }
             
@@ -352,8 +367,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             pybuffer->shape[0] * pybuffer->itemsize :
             pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
 
+#ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n",
             pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+#endif
 
          int c = PyBuffer_IsContiguous(pybuffer, 'C');
          Py_buffer *view = (Py_buffer *)malloc(sizeof(Py_buffer));
@@ -361,7 +378,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
          if (c == 1)
          {
             PyObject *pyobj = NULL;
+
+#ifdef DEBUG_INITIALIZATION
             MessageInterface::ShowMessage("calling PyMemoryView_FromBuffer() \n");
+#endif
             pyobj = PyMemoryView_FromBuffer(pybuffer);
 
             //check the memory view object and read back the buffer we created earlier
@@ -392,7 +412,9 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       }
       else if (parType == Gmat::STRING_TYPE)
       {
+#ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("A string is passed to Python.\n");
+#endif
          //attention for both python version needs to be implemented.
          PyObject * pyStr = PyUnicode_FromString(((std::string *)argIn.at(n))->c_str());
 
@@ -402,7 +424,9 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       }
       else if (parType == Gmat::REAL_TYPE)
       {
+#ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("Reading floats %lf\n", *(Real*)argIn.at(n));
+#endif
          PyObject* pyFloatObj = PyFloat_FromDouble(*(Real*)argIn.at(n));
          PyTuple_SetItem(pyTupleObj, i, pyFloatObj);
             
