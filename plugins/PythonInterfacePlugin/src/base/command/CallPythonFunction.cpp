@@ -23,6 +23,8 @@
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
+#define DEBUG_EXECUTION
+
 //------------------------------------------------------------------------------
 // Static Data
 //------------------------------------------------------------------------------
@@ -289,12 +291,14 @@ bool CallPythonFunction::Initialize()
 //------------------------------------------------------------------------------
 bool CallPythonFunction::Execute()
 {
+#ifdef DEBUG_EXECUTION
    MessageInterface::ShowMessage("  Calling CallPythonFunction::Execute()\n");
+#endif
 
    // send the in parameters
    std::vector<void *> argIn;
-   // send the out parameters
-   std::vector<void *> argOut;
+//   // send the out parameters
+//   std::vector<void *> argOut;
    std::vector<Gmat::ParameterType> paramType;
    
    // Prepare the format string specifier (const char *format) to build 
@@ -302,7 +306,10 @@ bool CallPythonFunction::Execute()
    SendInParam(argIn, paramType);
   
   // Next, call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, argIn, paramType, inRow, inCol, mInputList.size());
+   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, argIn,
+         paramType, inRow, inCol, mInputList.size());
+
+//   MessageInterface::ShowMessage("Python returned %d output objects\n", pyRet->);
   
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
@@ -324,139 +331,210 @@ bool CallPythonFunction::Execute()
    * Tuples of tuples must contain numerical data, and are passed to GMAT 2D arrays
   
    ------------------------------------------------------------------------------------*/
+   dataReturn.clear();
+
    if (pyRet)
    {
-      //if the Python module returns a float value without using []
-      if (PyFloat_Check(pyRet))
+      if (!BuildReturnFromPyObject(pyRet))
       {
-         Real *ret = new Real;
-         *ret = PyFloat_AsDouble(pyRet);
-         argOut.push_back(ret);
-      }
-      // else if the Python module returns a string
-#ifdef IS_PY3K
-      else if (PyUnicode_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python String is returned.\n");
-         std::string *pStr = new std::string;
-         *pStr = std::string(_PyUnicode_AsString(pyRet));
-         argOut.push_back(pStr); 
-      }
-#else
-      else if (PyBytes_Check(pyRet))
-      {
-         std::string *pStr = new std::string;
-         *pStr = std::string(PyBytes_AsString(pyRet));
-         argOut.push_back(pStr);
-      }
-#endif
-      // else if the Python module returns a list of floats
-      // Or a list of list of floats/Ints.
-      // In case of Python Int, we need to convert it to C++ float.
-      else if (PyList_Check(pyRet))
-      {
-         // number of list elements in a list, for example: [ [], [], [] ]
-         Integer listSz = PyList_Size(pyRet);
-         PyObject *pyItem = PyList_GetItem(pyRet, 0);
-         // number of elements in a list, for example: [ 1, 2, 3 ]
-         Integer elementSz = PyList_Size(pyItem);
-
-         if (PyList_Check(pyItem))
+         if (PyTuple_Check(pyRet))
          {
-
-            MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
-
-            for (Integer i = 1; i < listSz; i++)
+            MessageInterface::ShowMessage("Python has returned a tuple of values.\n");
+            Integer tupleSz = PyTuple_Size(pyRet);
+            for (Integer i = 0; i < tupleSz; ++i)
             {
-               // throw an exception if the output dimension row and column is not what has been returned by Python, or
-               // if the size of each list within list is not the same.
-               if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(pyRet, i)) || listSz != outRow || elementSz != outCol)
-                  throw InterfaceException(" Python has returned an unexpected array dimension. \n");
-            }
-            for (Integer i = 0; i < listSz; i++)
-            {
-               pyItem = PyList_GetItem(pyRet, i);
-               std::vector<Real *> *vItem = new std::vector<Real *>;
-               for (Integer j = 0; j < elementSz; j++)
-               {
-                  Real * ret = new Real;
-                  PyObject *pyElem = PyList_GetItem(pyItem, j);
-                  // if the element is a Python Integer/Long, convert it to C++ double
-                  if (PyLong_Check(pyElem))
-                     *ret = PyLong_AsDouble(pyElem);
-                  // else if the element is a Python Float
-                  else if (PyFloat_Check(pyElem))
-                     *ret = PyFloat_AsDouble(pyElem);
-
-                  MessageInterface::ShowMessage("Value in output array is %lf\n", *ret);
-                  vItem->push_back(ret);
-                  
-               }
-
-               argOut.push_back(vItem);
+               PyObject *member = PyTuple_GetItem(pyRet, i);
+               MessageInterface::ShowMessage("   %d: %p\n", i, member);
+               BuildReturnFromPyObject(member);
             }
          }
-         // Python has returned a list of floats
-         else if (PyFloat_Check(pyItem))
+         else if (PyMemoryView_Check(pyRet))
          {
-            MessageInterface::ShowMessage("Python has returned a list of floats.\n");
-            std::vector<Real *> *vItem = new std::vector<Real *>;
-            for (Integer i = 0; i < listSz; i++)
-            {
-               Real *ret = new Real;
-               
-               pyItem = PyList_GetItem(pyRet, i);
-               *ret = PyFloat_AsDouble(pyItem);
-               MessageInterface::ShowMessage("Value is %lf\n", *ret);
-               vItem->push_back(ret);  
-            }
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned a memoryview object\n");
+            #endif
+         }
+         else if (PyLong_Check(pyRet))
+         {
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned an Integer object\n");
+            #endif
+         }
+         else
+         {
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("An unknown Python type was returned.\n");
+            #endif
+         }
+      }
 
-            argOut.push_back(vItem);
-         }   
-      }
-      // else if the Python module returns a tuple of numerical values
-      else if (PyTuple_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python has returned a tuple of numerical values.\n");
-      }
-      else if (PyMemoryView_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python has returned a memoryview object\n");
-      }
-      else if (PyLong_Check(pyRet))
-      {
-         MessageInterface::ShowMessage("Python has returned an Integer object\n");
-      }
-      else
-      {
-         MessageInterface::ShowMessage("An unknown Python type was returned.\n");
-      }
-         
       Py_DECREF(pyRet);
 
       // Fill out the parameter out
-      GetOutParams(argOut);
+      GetOutParams();
 
       // clean up the argIns.
       for (Integer i = 0; i < argIn.size(); ++i)
          delete argIn.at(i);
 
-      // clean up the argOut
-      for (Integer i = 0; i < argOut.size(); ++i)  
-         delete argOut.at(i);
+//      // clean up the argOut
+//      for (Integer i = 0; i < argOut.size(); ++i)
+//         delete argOut.at(i);
    }
    else   // when return value is NULL and no exception is caught/handled.
    {
-      MessageInterface::ShowMessage("Unknown error happend in Python Interface.\n");
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("Unknown error happened in Python Interface.\n");
+      #endif
    }
 
 	return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
+//------------------------------------------------------------------------------
+/**
+ * Builds a PyReturnValue struct and pushes it to the vector of returned data
+ *
+ * @param PyObject The object being handled.
+ *
+ * Note that Tuple objects are not handled here -- the calling function breaks
+ * the tuple into separate PyObjects and passes them in one at a time.
+ *
+ * @return true If a PyReturnValue was pushed onto the returned data vector.
+ */
+//------------------------------------------------------------------------------
+bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
+{
+   bool retval = false;
+
+   // Reals
+   if (PyFloat_Check(member))
+   {
+      PyReturnValue rv;
+      rv.toType = Gmat::REAL_TYPE;
+      rv.floatData.push_back(PyFloat_AsDouble(member));
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+
+   // Strings
+   // else if the Python module returns a string
+#ifdef IS_PY3K
+   else if (PyUnicode_Check(member))
+   {
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("A Python String was returned.\n");
+      #endif
+      PyReturnValue rv;
+      rv.toType = Gmat::STRING_TYPE;
+      rv.stringData = _PyUnicode_AsString(member);
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+#else
+   else if (PyBytes_Check(member))
+   {
+      PyReturnValue rv;
+      rv.toType = Gmat::STRING_TYPE;
+      rv.stringData.push_back(PyBytes_AsString(member));
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+#endif
+
+   // else if the Python module returns a list of floats
+   // Or a list of list of floats/Ints.
+   // In case of Python Int, we need to convert it to C++ float.
+   else if (PyList_Check(member))
+   {
+      #ifdef DEBUG_EXECUTION
+         MessageInterface::ShowMessage("Return was a list of size %d\n", PyList_Size(member));
+      #endif
+
+      // number of list elements in a list, for example: [ [], [], [] ]
+      Integer listSz = PyList_Size(member);
+      PyObject *pyItem = PyList_GetItem(member, 0);
+      // number of elements in a list, for example: [ 1, 2, 3 ]
+      Integer elementSz = PyList_Size(pyItem);
+      PyReturnValue rv;
+
+if (PyList_Check(pyItem))
+{
+
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
+   #endif
+
+   rv.toType = Gmat::RMATRIX_TYPE;
+
+   for (Integer i = 1; i < listSz; i++)
+   {
+      // throw an exception if the output dimension row and column is not what has been returned by Python, or
+      // if the size of each list within list is not the same.
+      if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i)) || listSz != outRow || elementSz != outCol)
+         throw CommandException("Python has returned an unexpected array dimension. \n");
+   }
+   for (Integer i = 0; i < listSz; i++)
+   {
+      pyItem = PyList_GetItem(member, i);
+      RealArray vItem;
+      for (Integer j = 0; j < elementSz; j++)
+      {
+         Real ret;
+         PyObject *pyElem = PyList_GetItem(pyItem, j);
+
+         // if the element is a Python Integer/Long, convert it to C++ double
+         if (PyLong_Check(pyElem))
+            ret = PyLong_AsDouble(pyElem);
+         // else if the element is a Python Float
+         else if (PyFloat_Check(pyElem))
+            ret = PyFloat_AsDouble(pyElem);
+
+         #ifdef DEBUG_EXECUTION
+            MessageInterface::ShowMessage("Array element [%d, %d] value in output array is %lf\n", i, j, ret);
+         #endif
+
+         vItem.push_back(ret);
+      }
+      rv.lolData.push_back(vItem);
+   }
+   dataReturn.push_back(rv);
+   retval = true;
+}
+// Python has returned a list of floats
+         else
+
+      if (PyFloat_Check(pyItem))
+      {
+         #ifdef DEBUG_EXECUTION
+            MessageInterface::ShowMessage("Python has returned a list of floats.\n");
+         #endif
+         rv.toType = Gmat::RMATRIX_TYPE;
+         for (Integer i = 0; i < listSz; ++i)
+         {
+            pyItem = PyList_GetItem(member, i);
+            rv.floatData.push_back(PyFloat_AsDouble(pyItem));
+
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Value is %lf\n", rv.floatData[rv.floatData.size()-1]);
+            #endif
+         }
+         dataReturn.push_back(rv);
+         retval = true;
+      }
+   }
+
+   return retval;
+}
+
 void CallPythonFunction::RunComplete()
 {
-   MessageInterface::ShowMessage("  Calling CallPythonFunction::RunComplete()\n");
-
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("  Calling CallPythonFunction::RunComplete()\n");
+   #endif
    if (pythonIf != NULL)
    {
       pythonIf->PyFinalize();
@@ -648,58 +726,145 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
 
 }
 
+
 //------------------------------------------------------------------------------
 // void GetOutParams()
 //------------------------------------------------------------------------------
 /**
 * Get output parameters
 *
-* This method will fill in output parameters
-*
-* @param vector<void *> argOut
+* Checks match between returned data and GMAT expectations, and fills in output parameters
 *
 * @return void
 */
 //------------------------------------------------------------------------------
-void CallPythonFunction::GetOutParams(const std::vector<void *> &argOut)
+void CallPythonFunction::GetOutParams()
 {
-   for (unsigned int i = 0; i < mOutputList.size(); i++)
+   std::stringstream messages;
+
+   // First validate that the right number of parameters was returned
+   if (dataReturn.size() != mOutputList.size())
    {
-      Parameter *param = mOutputList[i];
-      Gmat::ParameterType type = param->GetReturnType();
+      messages << "Python returned " << dataReturn.size()
+               << " output parameters, and GMAT expected "
+               << mOutputList.size() << " returned values.";
 
-      switch (type)
+      throw CommandException(messages.str());
+   }
+
+   Parameter *param;
+
+   for (UnsignedInt i = 0; i < dataReturn.size(); ++i)
+   {
+      param = mOutputList[i];
+
+      switch (dataReturn[i].toType)
       {
-         case Gmat::STRING_TYPE:
+      case Gmat::STRING_TYPE:
+         if (param->GetReturnType() != Gmat::STRING_TYPE)
          {
-            MessageInterface::ShowMessage("String message is %s\n", ((std::string*)(argOut.at(i)))->c_str());
-            param->SetString(*(std::string*)(argOut.at(0)));
-            break;
+            messages << "The type returned from Python, a string, does not "
+                        "match the type expected by GMAT, a "
+                     << PARAM_TYPE_STRING[param->GetReturnType()] << ".\n";
+            continue;
          }
+         param->SetString(dataReturn[i].stringData);
+         break;
 
-         case Gmat::REAL_TYPE:
+      case Gmat::REAL_TYPE:
+         if (param->GetReturnType() != Gmat::REAL_TYPE)
          {
-            param->SetReal(*(Real*)argOut.at(i));
-            break;
+            messages << "The type returned from Python, a real number, does not "
+                        "match the type expected by GMAT, a "
+                     << PARAM_TYPE_STRING[param->GetReturnType()] << ".\n";
+            continue;
          }
+         param->SetReal(dataReturn[i].floatData[0]);
+         break;
 
-         case Gmat::RMATRIX_TYPE:
+      case Gmat::RMATRIX_TYPE:
+         if (param->GetReturnType() != Gmat::RMATRIX_TYPE)
          {
-            Rmatrix rMatrix;
-            rMatrix = param->EvaluateRmatrix();
+            messages << "The type returned from Python, an array, does not "
+                        "match the type expected by GMAT, a "
+                     << PARAM_TYPE_STRING[param->GetReturnType()] << ".\n";
+            continue;
+         }
+         {
+            // Validate size matches
+            Rmatrix rvMatrix = param->EvaluateRmatrix();
+            Integer expectedRowCount = rvMatrix.GetNumRows();
+            Integer expectedColCount = rvMatrix.GetNumColumns();
 
-            for (Integer i = 0; i < argOut.size(); i++)
+            bool is1D = expectedRowCount == 1 ? true : false;
+
+            if (is1D)
             {
-               std::vector<Real *> *vItem = (std::vector<Real *> *) argOut.at(i);
-               for (Integer j = 0; j < vItem->size(); j++)
+               if (expectedColCount != dataReturn[i].floatData.size())
                {
-                  rMatrix(i, j) = *(vItem->at(j));
+                  messages << "Size mismatch in the array returned from Python at"
+                              " index "
+                           << i << ": the returned array has "
+                           << dataReturn[i].floatData.size()
+                           << " elements and GMAT expected "
+                           << expectedColCount << " elements.\n";
+                  break;
                }
             }
-            param->SetRmatrix(rMatrix);
+            else
+            {
+               if (expectedRowCount != dataReturn[i].lolData.size())
+               {
+                  messages << "Size mismatch in the array returned from Python at"
+                              " index "
+                           << i << ": the returned array has "
+                           << dataReturn[i].lolData.size()
+                           << " rows and GMAT expected "
+                           << rvMatrix.GetNumRows() << " rows.\n";
+                  continue;
+               }
+            }
 
-            break;
+            if (is1D)
+               for (UnsignedInt j = 0; j < dataReturn[i].floatData.size(); ++j)
+                  rvMatrix(0, j) = dataReturn[i].floatData[j];
+            else
+            {
+               MessageInterface::ShowMessage("GMAT is expecting %d rows and %d "
+                     "columns.\nThe Python data has %d rows and the first row "
+                     "has %d columns\n", expectedRowCount, expectedColCount,
+                     dataReturn[i].lolData.size(), dataReturn[i].lolData[0].size());
+
+               for (UnsignedInt j = 0; j < dataReturn[i].lolData.size(); ++j)
+               {
+                  if (expectedColCount != dataReturn[i].lolData[j].size())
+                  {
+                     messages << "Size mismatch in the array returned from Python at"
+                                 " index "
+                              << i << ": the returned array has "
+                              << dataReturn[i].lolData.size()
+                              << " columns and GMAT expected "
+                              << rvMatrix.GetNumRows() << " columns.\n";
+                     continue;
+                  }
+
+                  for (Integer k = 0; k < dataReturn[i].lolData[j].size(); ++k)
+                        rvMatrix(j, k) = dataReturn[i].lolData[j][k];
+               }
+            }
+
+            param->SetRmatrix(rvMatrix);
          }
+         break;
+
+      default:
+         messages << "Type mismatch in the returned data at index "
+                  << i << ": the returned data is not a type handled by the "
+                          "Python interface.";
+         break;
       }
-   }        
+   }
+
+   if (messages.str() != "")
+      throw CommandException(messages.str());
 }
