@@ -92,6 +92,23 @@ protected:
    UnsignedInt outCol;
 	/// Python Interface singleton
 	PythonInterface *pythonIf;
+
+	/// Holder for return data from Python, for translation to GMAT objects
+	struct PyReturnValue
+	{
+	   /// The type GMAT expects, based on what Python returned
+	   Gmat::ParameterType toType;
+      /// The container for numeric returns
+      RealArray floatData;
+      /// The container for 2D (numeric) array returns
+      std::vector<RealArray> lolData;
+	   /// The container for string returns
+	   std::string stringData;
+	};
+
+	/// The returned data collection
+	std::vector<PyReturnValue> dataReturn;
+
    /// Fill in Input parameter list
    Integer FillInputList();
    /// Fill in Output parameter list
@@ -99,7 +116,9 @@ protected:
    /// Create C++ variable type declared in GMAT script
    void SendInParam(std::vector<void *> &argIn, std::vector<Gmat::ParameterType> &pType);
    /// Create C++ variable type declared in GMAT script
-   void GetOutParams(const std::vector<void *> &argOut);
+   void GetOutParams();
+   bool BuildReturnFromPyObject(PyObject* member);
+//   void GetOutParams(const std::vector<void *> &argOut);
 
    /// Published parameters for Python functions
    enum
