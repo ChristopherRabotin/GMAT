@@ -64,6 +64,7 @@ PLUGIN                = ../plugins/libGmatFunction
 PLUGIN                = ../plugins/libSaveCommand
 PLUGIN                = ../plugins/libNewParameters
 PLUGIN                = ../plugins/libPolyhedronGravity
+PLUGIN                = ../plugins/proprietary/libSNOptimizer
 
 # Internal-only plugins
 PLUGIN                 = ../plugins/proprietary/libMarsGRAM
