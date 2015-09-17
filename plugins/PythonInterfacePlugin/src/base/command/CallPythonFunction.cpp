@@ -458,6 +458,16 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
       retval = true;
    }
 
+   // Integers, passed into real number containers
+   if (PyLong_Check(member))
+   {
+      PyReturnValue rv;
+      rv.toType = Gmat::REAL_TYPE;
+      rv.floatData.push_back(PyLong_AsDouble(member));
+      dataReturn.push_back(rv);
+      retval = true;
+   }
+
    // Strings
    // else if the Python module returns a string
 #ifdef IS_PY3K
@@ -566,6 +576,14 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
 }
 
 
+
+//------------------------------------------------------------------------------
+// void CallPythonFunction::RunComplete()
+//------------------------------------------------------------------------------
+/**
+* Finalizes and closes the Python interface
+*/
+//------------------------------------------------------------------------------
 void CallPythonFunction::RunComplete()
 {
    #ifdef DEBUG_EXECUTION
@@ -748,8 +766,6 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
       }
    }
 
-  
-
    // Fill in the output array dimension
    for (unsigned int i = 0; i < mOutputList.size(); i++)
    {
@@ -878,10 +894,12 @@ void CallPythonFunction::GetOutParams()
                   rvMatrix(0, j) = dataReturn[i].floatData[j];
             else
             {
-               MessageInterface::ShowMessage("GMAT is expecting %d rows and %d "
-                     "columns.\nThe Python data has %d rows and the first row "
-                     "has %d columns\n", expectedRowCount, expectedColCount,
-                     dataReturn[i].lolData.size(), dataReturn[i].lolData[0].size());
+               #ifdef DEBUG_EXECUTION
+                  MessageInterface::ShowMessage("GMAT is expecting %d rows and %d "
+                        "columns.\nThe Python data has %d rows and the first row "
+                        "has %d columns\n", expectedRowCount, expectedColCount,
+                        dataReturn[i].lolData.size(), dataReturn[i].lolData[0].size());
+               #endif
 
                for (UnsignedInt j = 0; j < dataReturn[i].lolData.size(); ++j)
                {
