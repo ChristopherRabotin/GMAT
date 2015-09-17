@@ -27,6 +27,7 @@
 BEGIN_EVENT_TABLE(OptimizePanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBO, OptimizePanel::OnComboBoxChange)
    EVT_BUTTON(ID_APPLYBUTTON, OptimizePanel::OnApplyButtonPress)
+   EVT_CHECKBOX(ID_PROGRESS_CHECKBOX, OptimizePanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -114,8 +115,16 @@ void OptimizePanel::Create()
    
    mExitModeComboBox = 
       new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
-            theOptions, wxCB_READONLY);;
+            theOptions, wxCB_READONLY);
    
+   //----------------------------------------------------------------------
+   // ShowProgressWindow flag
+   //----------------------------------------------------------------------
+   mProgressWindowCheckBox =
+      new wxCheckBox(this, ID_PROGRESS_CHECKBOX, gmatwxT(GUI_ACCEL_KEY"Show Progress Window"),
+      wxDefaultPosition, wxDefaultSize);
+   mProgressWindowCheckBox->SetToolTip(_T("Show Progress Window during optimization"));
+
    //-------------------------------------------------------
    // Apply correction
    //-------------------------------------------------------
@@ -133,6 +142,8 @@ void OptimizePanel::Create()
    pageSizer->Add(mSolverModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(exitModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mExitModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(NULL, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mProgressWindowCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    pageSizer->Add(mApplyCorrectionsButton, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
@@ -160,6 +171,8 @@ void OptimizePanel::LoadData()
       std::string exitMode =
          theCommand->GetStringParameter("ExitMode");
       mExitModeComboBox->SetValue(exitMode.c_str());
+
+      mProgressWindowCheckBox->SetValue((wxVariant(theCommand->GetBooleanParameter("ShowProgressWindow"))));
    }
    catch (BaseException &e)
    {
@@ -185,7 +198,11 @@ void OptimizePanel::SaveData()
                                      solverMode);
       theCommand->SetStringParameter(theCommand->GetParameterID("ExitMode"), 
                                      exitMode);
-      
+      if (mProgressWindowCheckBox->IsChecked())
+         theCommand->SetBooleanParameter("ShowProgressWindow", true);
+      else
+         theCommand->SetBooleanParameter("ShowProgressWindow", false);
+
       EnableUpdate(false);
    }
    catch (BaseException &e)

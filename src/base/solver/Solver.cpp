@@ -23,6 +23,7 @@
 #include <sstream>
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
+#include "ISolverListener.hpp"
 #include "FileManager.hpp"
 #include "OwnedPlot.hpp"            // Replace with a proxy
 
@@ -1250,6 +1251,38 @@ void Solver::ReportProgress(const SolverState forState)
 
    currentState = stateBuffer;
 }
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Send to all listeners a progress report
+ *
+ */
+//------------------------------------------------------------------------------
+void Solver::ReportProgress(std::list<ISolverListener*> listeners, const SolverState forState)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      ReportProgress((*it), forState);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Send to the listener a progress report
+ *
+ */
+//------------------------------------------------------------------------------
+void Solver::ReportProgress(ISolverListener* listener, const SolverState forState)
+{
+   // descendant classes need to do stuff here
+}
+
 
 //------------------------------------------------------------------------------
 //  void SetDebugString(const std::string &str)

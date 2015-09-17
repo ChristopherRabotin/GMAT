@@ -27,12 +27,14 @@
 #include "Subscriber.hpp"
 #include "MessageInterface.hpp"
 #include "FormationInterface.hpp"
+#include "ListenerManagerInterface.hpp"
+#include "StringUtil.hpp"
 
 #include <sstream>                 // for <<
 
 //#define DEBUG_PARSING
 //#define DEBUG_OPTIONS
-
+//#define DEBUG_SOLVERBRANCHCOMMAND_INIT
 //#ifndef DEBUG_MEMORY
 //#define DEBUG_MEMORY
 //#endif
@@ -57,6 +59,7 @@ SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
    theSolver      (NULL),
    startMode      (RUN_AND_SOLVE),
    exitMode       (DISCARD_AND_CONTINUE),
+   showProgressWindow(true),
    specialState   (Solver::INITIALIZING)
 {
    parameterCount = SolverBranchCommandParamCount;
@@ -82,6 +85,8 @@ SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
 //------------------------------------------------------------------------------
 SolverBranchCommand::~SolverBranchCommand()
 {
+   // Remove listener
+   ClearListeners();
    if (theSolver)
    {
       #ifdef DEBUG_MEMORY
@@ -109,6 +114,7 @@ SolverBranchCommand::SolverBranchCommand(const SolverBranchCommand& sbc) :
    theSolver      (NULL),
    startMode      (sbc.startMode),
    exitMode       (sbc.exitMode),
+   showProgressWindow (sbc.showProgressWindow),
    specialState   (Solver::INITIALIZING)
 {
 }
@@ -134,11 +140,40 @@ SolverBranchCommand& SolverBranchCommand::operator=(
       theSolver    = NULL;
       startMode    = sbc.startMode;
       exitMode     = sbc.exitMode;
+      showProgressWindow = sbc.showProgressWindow;
       specialState = Solver::INITIALIZING;
    }
    
    return *this;
 }
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Performs the initialization needed to run the BranchCommand command.
+ *
+ * @return true if the GmatCommand is initialized, false if an error occurs.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::Initialize()
+{
+   #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
+   ShowCommand("SolverBranchCommand::Initialize() entered ", "this=", this);
+   #endif
+   
+   BranchCommand::Initialize();
+
+   if (showProgressWindow)
+      AddListener( ListenerManagerInterface::CreateSolverListener(summaryName, "", 0, 0, 0, 0, false) );
+   
+   #ifdef DEBUG_SOLVERBRANCHCOMMAND_INIT
+   ShowCommand("SolverBranchCommand::Initialize() exited ", "this=", this);
+   #endif
+   return true;
+
+}
+
 
 //------------------------------------------------------------------------------
 //  GmatCommand* GetNext()
@@ -357,6 +392,23 @@ void SolverBranchCommand::ResetLoopData()
 
 
 //------------------------------------------------------------------------------
+//  void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Tells the sequence that the run was ended, possibly before reaching the end.
+ *
+ * BranchCommands clear the "current" pointer and call RunComplete on their
+ * branches, ensuring that the command sequence has reset the branches to an
+ * idle state.
+ */
+//------------------------------------------------------------------------------
+void SolverBranchCommand::RunComplete()
+{
+   BranchCommand::RunComplete();
+   ClearListeners();
+}
+
+//------------------------------------------------------------------------------
 // void FreeLoopData()
 //------------------------------------------------------------------------------
 /**
@@ -450,8 +502,8 @@ bool SolverBranchCommand::InterpretAction()
             typeName.c_str(), generatingString.c_str(), typeName.c_str());
       MessageInterface::ShowMessage("   Solver name:     \"%s\"\n", 
             solverName.c_str());
-      MessageInterface::ShowMessage("   SolveMode:       %d\n", startMode);
-      MessageInterface::ShowMessage("   ExitMode:        %d\n", exitMode);
+      MessageInterface::ShowMessage("   SolveMode:          %d\n", startMode);
+      MessageInterface::ShowMessage("   ExitMode:           %d\n", exitMode);
    #endif
    
    return true;
@@ -590,6 +642,24 @@ void SolverBranchCommand::CheckForOptions(std::string &opts)
                   "\nAllowed values are \"DiscardAndContinue\", "
                   "\"SaveAndContinue\", and \"Stop\"\n");
       }
+      else if (option[0] == "ShowProgressWindow")
+      {
+         #ifdef DEBUG_EXITMODE
+            MessageInterface::ShowMessage("Setting ShowProgressWindow to %s\n",
+                  option[1].c_str());
+         #endif
+         std::string opt1 = GmatStringUtil::ToUpper(option[1]);
+         if (opt1 == "TRUE")
+            showProgressWindow = true;
+         else if (opt1 == "FALSE")
+            showProgressWindow = false;
+         else
+            throw CommandException(typeName + "::InterpretAction() Solver "
+                  "ShowProgressWindow option " + option[1] + 
+                  " is not a recognized value on line\n" + generatingString +
+                  "\nAllowed values are \"true\", "
+                  "\"false\"\n");
+      }
       else
       {
          throw CommandException(typeName + 
@@ -613,6 +683,11 @@ std::string SolverBranchCommand::GetSolverOptionText()
    optionString += GetStringParameter(SOLVER_SOLVE_MODE);
    optionString += ", ExitMode = ";
    optionString += GetStringParameter(SOLVER_EXIT_MODE);
+   optionString += ", ShowProgressWindow = ";
+   if (showProgressWindow)
+      optionString += "true";
+   else
+      optionString += "false";
    optionString += "}";
 
    #ifdef DEBUG_OPTIONS
@@ -726,6 +801,8 @@ std::string SolverBranchCommand::GetParameterText(const Integer id) const
       return "SolverName";
    if (id == SOLVER_SOLVE_MODE)
       return "SolveMode";
+   if (id == SOLVER_SHOW_PROGRESS)
+      return "ShowProgressWindow";
     
    return BranchCommand::GetParameterText(id);
 }
@@ -754,6 +831,8 @@ Integer SolverBranchCommand::GetParameterID(const std::string &str) const
       return SOLVER_SOLVE_MODE_OPTIONS;
    if (str == "ExitModeOptions")
       return SOLVER_EXIT_MODE_OPTIONS;
+   if (str == "ShowProgressWindow")
+      return SOLVER_SHOW_PROGRESS;
     
    return BranchCommand::GetParameterID(str);
 }
@@ -776,6 +855,8 @@ Gmat::ParameterType SolverBranchCommand::GetParameterType(const Integer id) cons
       return Gmat::STRING_TYPE;
    if (id == SOLVER_SOLVE_MODE)
       return Gmat::STRING_TYPE;
+   if (id == SOLVER_SHOW_PROGRESS)
+      return Gmat::BOOLEAN_TYPE;
    if (id == SOLVER_SOLVE_MODE_OPTIONS)
       return Gmat::STRINGARRAY_TYPE;
     
@@ -800,6 +881,8 @@ std::string SolverBranchCommand::GetParameterTypeString(const Integer id) const
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
    if (id == SOLVER_SOLVE_MODE)
       return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
+   if (id == SOLVER_SHOW_PROGRESS)
+      return PARAM_TYPE_STRING[Gmat::BOOLEAN_TYPE];
    if (id == SOLVER_SOLVE_MODE_OPTIONS)
       return PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
     
@@ -910,6 +993,89 @@ const StringArray& SolverBranchCommand::GetStringArrayParameter(const Integer id
 const StringArray& SolverBranchCommand::GetStringArrayParameter(const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+//  bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ *
+ * @return the boolean value for this parameter, or throw an exception if the
+ *         parameter access in invalid.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::GetBooleanParameter(const Integer id) const
+{
+   if (id == SOLVER_SHOW_PROGRESS)
+      return showProgressWindow;
+   
+   return BranchCommand::GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param value The new value.
+ * 
+ * @return the boolean value for this parameter, or throw an exception if the 
+ *         parameter is invalid or not boolean.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == SOLVER_SHOW_PROGRESS)
+   {
+      showProgressWindow = value;
+      return showProgressWindow;
+   }
+   
+   return BranchCommand::SetBooleanParameter(id, value);
+}
+
+//------------------------------------------------------------------------------
+//  bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::GetBooleanParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a boolean parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return the boolean value for this parameter, or false if the parameter is
+ *         not boolean.
+ */
+//------------------------------------------------------------------------------
+bool SolverBranchCommand::SetBooleanParameter(const std::string &label, const bool value)
+{
+   Integer id = GetParameterID(label);
+   return SetBooleanParameter(id, value);
 }
 
 
@@ -1281,3 +1447,44 @@ void SolverBranchCommand::ChangeRunState(Gmat::RunState newState)
          current->SetRunState(currentRunState);
    }
 }
+
+
+void SolverBranchCommand::AddListener( ISolverListener* listener )
+{
+   listeners.push_back( listener );
+}
+
+void SolverBranchCommand::RemoveListener( ISolverListener* listener )
+{
+   listeners.remove( listener );
+}
+
+void SolverBranchCommand::ClearListeners()
+{
+   listeners.clear();
+}
+
+void SolverBranchCommand::NotifyVariabledChanged(std::string name, Real value)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      (*it)->VariabledChanged(name, value);
+   }
+}
+
+void SolverBranchCommand::NotifyVariabledChanged(std::string name, std::string &value)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      (*it)->VariabledChanged(name, value);
+   }
+}
+
+void SolverBranchCommand::NotifyConstraintChanged(std::string name, Real desiredValue, Real value)
+{
+   for (std::list<ISolverListener *>::iterator it = listeners.begin(); it != listeners.end(); it++)
+   {
+      (*it)->ConstraintChanged(name, desiredValue, value);
+   }
+}
+

@@ -202,6 +202,8 @@ SET(BASE_SRCS
     event/LocatedEvent.cpp
     event/LocatedEventTable.cpp
     #event/RootFinder.cpp
+    executive/ListenerManager.cpp
+    executive/ListenerManagerInterface.cpp
     executive/Moderator.cpp
     executive/PlotInterface.cpp
     executive/PlotReceiver.cpp
@@ -254,6 +256,7 @@ SET(BASE_SRCS
     foundation/GmatBaseException.cpp
     foundation/GmatBase.cpp
     foundation/GmatState.cpp
+    foundation/IChangeListener.cpp
     foundation/ObjectInitializer.cpp
     foundation/SpacePoint.cpp
     foundation/StateManager.cpp
@@ -432,6 +435,7 @@ SET(BASE_SRCS
     solver/DifferentialCorrector.cpp
     solver/Optimizer.cpp
     solver/InternalOptimizer.cpp
+    solver/ISolverListener.cpp
     solver/ExternalOptimizer.cpp
     solver/SteepestDescent.cpp
     solver/DerivativeModel.cpp

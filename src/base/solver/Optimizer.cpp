@@ -26,6 +26,7 @@
 #include "Rmatrix.hpp"
 #include "RealUtilities.hpp"     // for GmatMathUtil::Abs()
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 
 //#define DEBUG_SET_RESULT
 
@@ -98,7 +99,13 @@ Optimizer::Optimizer(const Optimizer &opt) :
    eqConstraintNames    = opt.eqConstraintNames;
    ineqConstraintNames  = opt.ineqConstraintNames;
    eqConstraintValues   = opt.eqConstraintValues;
+   eqConstraintDesiredValues   = opt.eqConstraintDesiredValues;
+   eqConstraintAchievedValues   = opt.eqConstraintAchievedValues;
+   eqConstraintOp       = opt.eqConstraintOp;
    ineqConstraintValues = opt.ineqConstraintValues;
+   ineqConstraintDesiredValues   = opt.ineqConstraintDesiredValues;
+   ineqConstraintAchievedValues   = opt.ineqConstraintAchievedValues;
+   ineqConstraintOp     = opt.ineqConstraintOp;
    gradient             = opt.gradient;
    //eqConstraintJacobian = opt.eqConstraintJacobian;
    //ineqConstraintJacobian = opt.ineqConstraintJacobian;
@@ -126,7 +133,13 @@ Optimizer&
    eqConstraintNames    = opt.eqConstraintNames;
    ineqConstraintNames  = opt.ineqConstraintNames;
    eqConstraintValues   = opt.eqConstraintValues;
+   eqConstraintDesiredValues   = opt.eqConstraintDesiredValues;
+   eqConstraintAchievedValues   = opt.eqConstraintAchievedValues;
+   eqConstraintOp       = opt.eqConstraintOp;
    ineqConstraintValues = opt.ineqConstraintValues;
+   ineqConstraintDesiredValues   = opt.ineqConstraintDesiredValues;
+   ineqConstraintAchievedValues   = opt.ineqConstraintAchievedValues;
+   ineqConstraintOp     = opt.ineqConstraintOp;
    gradient             = opt.gradient;
    //eqConstraintJacobian = opt.eqConstraintJacobian;
    //ineqConstraintJacobian = opt.ineqConstraintJacobian;
@@ -224,6 +237,9 @@ Integer Optimizer::SetSolverResults(Real *data,
       ///eqConstraintValues[eqConstraintCount] = data[0];
       eqConstraintNames.push_back(name);
       eqConstraintValues.push_back(data[0]);
+      eqConstraintDesiredValues.push_back(-1);
+      eqConstraintAchievedValues.push_back(-1);
+      eqConstraintOp.push_back(0);
       ++eqConstraintCount;
       return EQ_CONST_START + eqConstraintCount - 1;
     }
@@ -235,6 +251,9 @@ Integer Optimizer::SetSolverResults(Real *data,
       //ineqConstraintValues[ineqConstraintCount] = data[0];
       ineqConstraintNames.push_back(name);
       ineqConstraintValues.push_back(data[0]);
+      ineqConstraintDesiredValues.push_back(-1);
+      ineqConstraintAchievedValues.push_back(-1);
+      ineqConstraintOp.push_back(0);
       ++ineqConstraintCount;
       return INEQ_CONST_START + ineqConstraintCount - 1;
     }
@@ -289,6 +308,47 @@ void Optimizer::SetResultValue(Integer id, Real value,
        throw SolverException(
            "Unknown result type passed in to SetResultValue");
     }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetConstraintValues(Integer id, Real desiredValue, Real achievedValue,
+//                                      Integer condition = 0)
+//------------------------------------------------------------------------------
+/**
+ * Passes in the constraints for the loop
+ * 
+ * @param <id>    The ID used for this result.
+ * @param <value> The corresponding result.
+ */
+//------------------------------------------------------------------------------
+void Optimizer::SetConstraintValues(Integer id, Real desiredValue, Real achievedValue,
+                                      Integer condition)
+{
+   #ifdef DEBUG_SET_RESULT // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
+      MessageInterface::ShowMessage("In Optimizer::SetConstraintValues\n");
+      MessageInterface::ShowMessage(
+      "   id = %d; desired = %.12f, achieved = %.12f, condition = %d\n",
+      id, desiredValue, achievedValue, condition);
+   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+   if (condition == 0)
+   {
+      if (id > (EQ_CONST_START + eqConstraintCount))
+         throw SolverException(
+            "id range error for equality constraint");
+      eqConstraintDesiredValues[id - EQ_CONST_START] = desiredValue;
+      eqConstraintAchievedValues[id - EQ_CONST_START] = achievedValue;
+      eqConstraintOp[id - EQ_CONST_START] = condition;
+   }
+   else 
+   {
+      if (id > (INEQ_CONST_START + ineqConstraintCount))
+      throw SolverException(
+         "id range error for inequality constraint");
+      ineqConstraintDesiredValues[id - INEQ_CONST_START] = desiredValue;
+      ineqConstraintAchievedValues[id - INEQ_CONST_START] = achievedValue;
+      ineqConstraintOp[id - INEQ_CONST_START] = condition;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -776,6 +836,131 @@ void Optimizer::FreeArrays()
    //eqConstraintCount - 0; ?????
    //ineqConstraintCount - 0; ?????
    eqConstraintValues.clear();
+   eqConstraintDesiredValues.clear();
+   eqConstraintAchievedValues.clear();
+   eqConstraintOp.clear();
    ineqConstraintValues.clear();
+   ineqConstraintDesiredValues.clear();
+   ineqConstraintAchievedValues.clear();
+   ineqConstraintOp.clear();
     
 }
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Shows the progress string to the user.
+ *
+ * This default version just passes the progress string to the MessageInterface.
+ */
+//------------------------------------------------------------------------------
+void Optimizer::ReportProgress(const SolverState forState)
+{
+   Solver::ReportProgress(forState);
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Send to all listeners a progress report
+ *
+ */
+//------------------------------------------------------------------------------
+void Optimizer::ReportProgress(std::list<ISolverListener*> listeners, const SolverState forState)
+{
+   Solver::ReportProgress(listeners, forState);
+}
+
+
+//------------------------------------------------------------------------------
+//  void ReportProgress()
+//------------------------------------------------------------------------------
+/**
+ * Send to the listener a progress report
+ *
+ */
+//------------------------------------------------------------------------------
+void Optimizer::ReportProgress(ISolverListener* listener, const SolverState forState)
+{
+   StringArray::iterator current;
+   Integer i;
+   if (isInitialized)
+   {
+      switch (currentState)
+      {
+         case NOMINAL:
+         case RUNEXTERNAL:
+            // Iterate through the variables, notifying the listener
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               listener->VariabledChanged(*current, variable[i]);
+               ++i;
+            }
+            break;
+
+         case CHECKINGRUN:
+            // Iterate through the equality constraints, notifying the listener
+            if (eqConstraintCount > 0)
+            {
+               for (current = eqConstraintNames.begin(), i = 0;
+                    current != eqConstraintNames.end(); ++current)
+               {
+                  #ifdef DEBUG_SET_RESULT
+                     MessageInterface::ShowMessage(
+                        "Optimizer::ReportProgress CHECKINGRUN: Eqname = %s, desired = %.16f, achieved = %.16f, delta = %.16f, expected =  %.16f\n", 
+                        (*current).c_str(), eqConstraintDesiredValues[i], eqConstraintAchievedValues[i], 
+                        eqConstraintDesiredValues[i]-eqConstraintAchievedValues[i], eqConstraintValues[i]);
+                  #endif
+                  listener->ConstraintChanged(*current, eqConstraintDesiredValues[i], eqConstraintAchievedValues[i]);
+                  ++i;
+               }
+            }
+
+            if (ineqConstraintCount > 0)
+            {
+               // Iterate through the inequality constraints, notifying the listener
+               for (current = ineqConstraintNames.begin(), i = 0;
+                    current != ineqConstraintNames.end(); ++current)
+               {
+                  #ifdef DEBUG_SET_RESULT
+                     MessageInterface::ShowMessage(
+                        "Optimizer::ReportProgress CHECKINGRUN: inEqname = %s, desired = %.16f, achieved = %.16f, delta = %.16f, expected =  %.16f\n", 
+                        (*current).c_str(), ineqConstraintDesiredValues[i], ineqConstraintAchievedValues[i], 
+                        ineqConstraintDesiredValues[i]-ineqConstraintAchievedValues[i], ineqConstraintValues[i]);
+                  #endif
+                  listener->ConstraintChanged(*current, ineqConstraintDesiredValues[i], 
+                     ineqConstraintAchievedValues[i], ineqConstraintOp[i]);
+                  ++i;
+               }
+            }
+             if (objectiveDefined)
+                listener->ObjectiveChanged("Cost", cost);
+             break;
+
+         case FINISHED:
+            // Iterate through the variables, notifying the listener
+            for (current = variableNames.begin(), i = 0;
+                 current != variableNames.end(); ++current)
+            {
+               listener->VariabledChanged(*current, variable[i]);
+               ++i;
+            }
+            if (converged)
+               listener->Convergence(converged, "Optimization Completed in " + 
+                  GmatStringUtil::Trim( GmatStringUtil::ToString(iterationsTaken) ) +
+                  " passes through the Solver Control Sequence");
+            else
+               listener->Convergence(converged, "Optimization did not converge in " + 
+                  GmatStringUtil::Trim( GmatStringUtil::ToString(iterationsTaken) ) +
+                  " passes through the Solver Control Sequence");
+            break;
+      }
+   }
+}
+
+

@@ -27,6 +27,7 @@
 
 #include "GmatBase.hpp"
 #include "SolverException.hpp"
+#include "ISolverListener.hpp"
 
 // This should be switched to a forward reference, but cannot be yet because
 // of plugin dependencies
@@ -164,6 +165,8 @@ public:
                                            const bool value);
                                            
    virtual void        ReportProgress(const SolverState forState = UNDEFINED_STATE);
+   virtual void        ReportProgress(std::list<ISolverListener*> listeners, const SolverState forState);
+   virtual void        ReportProgress(ISolverListener* listener, const SolverState forState);
    virtual void        SetDebugString(const std::string &str);
     
    virtual bool        Initialize();
