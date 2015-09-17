@@ -330,9 +330,8 @@ bool XyPlot::Initialize()
       if (mNumXParams == 0 || mNumYParams == 0)
       {
          active = false;
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
              "No parameters were selected for X Axis or Y Axis.\n",
              GetName().c_str());
          return false;
@@ -344,9 +343,8 @@ bool XyPlot::Initialize()
       if (xParamWrappers.empty() || yParamWrappers.empty())
       {
          active = false;
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
+         MessageInterface::ShowMessage
+            ("*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
              "The first parameter selected for X Axis or Y Axis is NULL\n",
              GetName().c_str());
          return false;
@@ -1836,9 +1834,8 @@ bool XyPlot::Distribute(const Real * dat, Integer len)
          // Now using wrappers (LOJ: 2012.08.02)
          if (yParamWrappers[i] == NULL)
          {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_,
-                "*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
+            MessageInterface::ShowMessage
+               ("*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
                 "The parameter selected for Y Axis is NULL\n",
                 GetName().c_str());
             return true;

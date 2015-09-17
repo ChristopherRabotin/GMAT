@@ -45,6 +45,9 @@ public:
    
    virtual bool        Initialize();
    virtual SolverState AdvanceState();
+   virtual void        ReportProgress(const SolverState forState = UNDEFINED_STATE);
+   virtual void        ReportProgress(std::list<ISolverListener*> listeners, const SolverState forState);
+   virtual void        ReportProgress(ISolverListener* listener, const SolverState forState = UNDEFINED_STATE);
    
    // inherited from GmatBase
    virtual GmatBase*   Clone() const;

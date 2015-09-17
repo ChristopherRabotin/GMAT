@@ -26,6 +26,7 @@
 
 #include "BranchCommand.hpp"
 #include "Solver.hpp"
+#include "ISolverListener.hpp"
 
 class Subscriber;
 
@@ -37,10 +38,20 @@ public:
    SolverBranchCommand(const SolverBranchCommand& sbc);
 
    SolverBranchCommand&    operator=(const SolverBranchCommand& sbc);
-   
+
+   // listener (solver window) code
+   virtual void        AddListener( ISolverListener* listener );
+   virtual void        RemoveListener( ISolverListener* listener );
+   virtual void        ClearListeners();
+   virtual void        NotifyVariabledChanged(std::string name, Real value);
+   virtual void        NotifyVariabledChanged(std::string name, std::string &value);
+   virtual void        NotifyConstraintChanged(std::string name, Real desiredValue, Real value);
+
    virtual GmatCommand*    GetNext();
+   virtual bool            Initialize();
    virtual bool            TakeAction(const std::string &action, 
                                       const std::string &actionData = "");
+   virtual void            RunComplete();
    
    // Handle parsing internally
    virtual bool InterpretAction();
@@ -69,6 +80,12 @@ public:
                        GetStringArrayParameter(const Integer id) const; 
    virtual const StringArray& 
                        GetStringArrayParameter(const std::string &label) const;
+   virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual bool        SetBooleanParameter(const Integer id, 
+                                           const bool value);
+   virtual bool        GetBooleanParameter(const std::string &label) const;
+   virtual bool        SetBooleanParameter(const std::string &label, 
+                                           const bool value);
 
    virtual bool        NeedsServerStartup();
    virtual Integer     GetCloneCount();
@@ -96,10 +113,12 @@ protected:
       STOP
    };
    
+   std::list<ISolverListener*> listeners;
    std::string         solverName;
    Solver              *theSolver; 
    solverStartMode     startMode;
    solverExitMode      exitMode;
+   bool                showProgressWindow;
    Solver::SolverState specialState;
    
    /// Modes used in the solver, filled in the derived classes
@@ -144,6 +163,7 @@ protected:
       SOLVER_EXIT_MODE,
       SOLVER_SOLVE_MODE_OPTIONS,
       SOLVER_EXIT_MODE_OPTIONS,
+      SOLVER_SHOW_PROGRESS,
       SolverBranchCommandParamCount
    };
    

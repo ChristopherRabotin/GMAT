@@ -1817,56 +1817,58 @@ bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
-         // Do not create a GmatFunction if inside a function
-         // since GmatFunction is created from the Sandbox as a global
-         // object (LOJ: 2015.03.25)
-         if (currentFunction != NULL && type == "GmatFunction")
+         // The issue is that if GmatFunction is not created inside function
+         // "myFunction.FunctionPath = './path'" will cause parse error because
+         // myFunction does not exist. So GmatFunction will be created in the
+         // Moderator and add it to Sandbox global object map. It will not be
+         // added to function object store. (GMT-4914 Fix, LOJ: 2015.09.16)
+         
+         obj = CreateObject(type, names[i], manageObject);
+         
+         if (obj == NULL)
          {
-            #if DBGLVL_GMAT_FUNCTION
+            // Check error message from the Validator which has more
+            // detailed error message
+            StringArray errList = theValidator->GetErrorList();
+            #ifdef DEBUG_PARSE
             MessageInterface::ShowMessage
-               ("   ==> '%s' is a GmatFunction inside a function, so skip creating\n",
-                names[i].c_str());
+               ("   Validator errList.size() = %d\n", errList.size());
             #endif
-            objCounter++;     
-         }
-         else
-         {
-            obj = CreateObject(type, names[i], manageObject);
-            
-            if (obj == NULL)
+            if (errList.size() > 0)
             {
-               // Check error message from the Validator which has more
-               // detailed error message
-               StringArray errList = theValidator->GetErrorList();
-               #ifdef DEBUG_PARSE
-               MessageInterface::ShowMessage
-                  ("   Validator errList.size() = %d\n", errList.size());
-               #endif
-               if (errList.size() > 0)
-               {
-                  for (UnsignedInt i=0; i<errList.size(); i++)
-                     HandleError(InterpreterException(errList[i]), true);
-                  
-                  // Empty Validator errors now
-                  theValidator->ClearErrorList();
-               }
-               else
-               {
-                  InterpreterException ex
-                     ("Cannot create an object \"" + names[i] + "\". The \"" + type +
-                      "\" is an unknown object type or invalid object name or dimension");
-                  HandleError(ex);
-               }
-               return false;
+               for (UnsignedInt i=0; i<errList.size(); i++)
+                  HandleError(InterpreterException(errList[i]), true);
+               
+               // Empty Validator errors now
+               theValidator->ClearErrorList();
             }
-            
-            objCounter++;     
-            obj->FinalizeCreation();
-            
-            SetComments(obj, preStr, inStr);
-            
-            // If creating insise a function, add it to function object map
-            if (currentFunction != NULL)
+            else
+            {
+               InterpreterException ex
+                  ("Cannot create an object \"" + names[i] + "\". The \"" + type +
+                   "\" is an unknown object type or invalid object name or dimension");
+               HandleError(ex);
+            }
+            return false;
+         }
+         
+         objCounter++;     
+         obj->FinalizeCreation();
+         
+         SetComments(obj, preStr, inStr);
+         
+         // If creating insise a function, add it to function object map
+         if (currentFunction != NULL)
+         {
+            if (obj->IsOfType("Function"))
+            {
+               #if DBGLVL_GMAT_FUNCTION
+               MessageInterface::ShowMessage
+                  ("   ==> function object <%p>'%s' is NOT added to function object map\n", obj,
+                   obj->GetName().c_str());
+               #endif
+            }
+            else
             {
                #if DBGLVL_GMAT_FUNCTION
                MessageInterface::ShowMessage

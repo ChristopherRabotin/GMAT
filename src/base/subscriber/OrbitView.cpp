@@ -375,8 +375,8 @@ bool OrbitView::Initialize()
    if (theInternalCoordSystem == NULL)
    {
       active = false;
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The 3DView named \"%s\" will be turned off. "
+      MessageInterface::ShowMessage
+         ("*** WARNING *** The 3DView named \"%s\" will be turned off. "
           "It has a NULL internal coordinate system pointer.\n", GetName().c_str());
       return false;
    }

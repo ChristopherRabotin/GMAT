@@ -38,6 +38,7 @@ private:
    wxComboBox *mSolverComboBox;
    wxComboBox *mSolverModeComboBox;
    wxComboBox *mExitModeComboBox;
+   wxCheckBox *mProgressWindowCheckBox;
    wxButton   *mApplyCorrectionsButton;
    
    // methods inherited from GmatPanel
@@ -59,6 +60,7 @@ private:
    {     
       ID_TEXT = 51000,
       ID_COMBO,
+      ID_PROGRESS_CHECKBOX,
       ID_APPLYBUTTON
    };
 };
