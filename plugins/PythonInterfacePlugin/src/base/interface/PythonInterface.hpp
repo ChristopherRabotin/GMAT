@@ -32,10 +32,8 @@
 
 class PYTHON_API PythonInterface : public Interface
 {
-
 public:
-	
-   /// Singleton class
+   /// The singleton instance
    static PythonInterface* PyInstance();
 
    /// Load Python engine with all built-in modules
@@ -47,7 +45,6 @@ public:
    /// Python function wrapper
    PyObject* PyFunctionWrapper(const std::string &modName, const std::string &funcName,
                                  const std::vector<void *> &argIn, std::vector<Gmat::ParameterType> paramType, UnsignedInt row, UnsignedInt col, UnsignedInt argSz);
-
 	
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -73,7 +70,6 @@ private:
    void PyPathSep();
    /// Python error/exception message
    void PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, std::string &msg);
-	
 };
 
 #endif
