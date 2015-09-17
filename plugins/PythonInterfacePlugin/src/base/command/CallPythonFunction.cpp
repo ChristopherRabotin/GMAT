@@ -32,8 +32,8 @@
 const std::string
 CallPythonFunction::PARAMETER_TEXT[PythonFunctionParamCount - CallFunctionParamCount] =
 {
-      "PythonModule",
-      "PythonFunction"
+   "PythonModule",
+   "PythonFunction"
 };
 
 
@@ -227,19 +227,18 @@ bool CallPythonFunction::SetStringParameter(const std::string& label,
 //}
 
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 /**
-* Initialize Python engine
-*
-* This method will initialize python by loading Python engine and setting the 
-* PYTHONPATH.
-*
-* @param none
-*
-* @return bool
-*/
+ * Initialize Python engine
+ *
+ * This method initializes Python by loading the Python engine and setting the 
+ * PYTHONPATH.
+ *
+ * @param none
+ *
+ * @return bool
+ */
 //------------------------------------------------------------------------------
 bool CallPythonFunction::Initialize()
 {
@@ -255,28 +254,43 @@ bool CallPythonFunction::Initialize()
       MessageInterface::ShowMessage("  Base class init complete\n");
    #endif
 
-	pythonIf = PythonInterface::PyInstance();
-   FileManager *fm = FileManager::Instance();
+   try
+   {
+      pythonIf = PythonInterface::PyInstance();
+      FileManager *fm = FileManager::Instance();
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("  pythonIf:  %p\n", pythonIf);
-   #endif
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("  pythonIf:  %p\n", pythonIf);
+      #endif
 
-	//Initialize Python engine
-	pythonIf->PyInitialize();
+	   //Initialize Python engine
+	   pythonIf->PyInitialize();
 
-	// Get all Python module paths from the startup file
-	StringArray paths = fm->GetAllPythonModulePaths();
+	   // Get all Python module paths from the startup file
+	   StringArray paths = fm->GetAllPythonModulePaths();
 
-   #ifdef DEBUG_INITIALIZATION
-      MessageInterface::ShowMessage("  Adding %d python paths\n", paths.size());
-   #endif
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("  Adding %d python paths\n", paths.size());
+      #endif
 
-	pythonIf->PyAddModulePath(paths);
-   
+	   pythonIf->PyAddModulePath(paths);
+   }
+   catch (BaseException &ex)
+   {
+      throw CommandException("Error in the CallPython command initializaton:\n" +
+         ex.GetFullMessage());
+   }
+   catch (...)
+   {
+      throw CommandException("An unhandled Python exception was thrown during initialization");
+   }
+
    //Fill in Inputlist
    Integer sizeIn = FillInputList();
-   MessageInterface::ShowMessage("  SizeIn is %d\n", sizeIn);
+
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("  SizeIn is %d\n", sizeIn);
+   #endif
 
    //Fill in Outputlist
    Integer sizeOut = FillOutputList();
@@ -287,6 +301,7 @@ bool CallPythonFunction::Initialize()
 
 	return ret;
 }
+
 
 //------------------------------------------------------------------------------
 // bool Execute()
@@ -303,9 +318,9 @@ bool CallPythonFunction::Initialize()
 //------------------------------------------------------------------------------
 bool CallPythonFunction::Execute()
 {
-#ifdef DEBUG_EXECUTION
-   MessageInterface::ShowMessage("  Calling CallPythonFunction::Execute()\n");
-#endif
+   #ifdef DEBUG_EXECUTION
+      MessageInterface::ShowMessage("  Calling CallPythonFunction::Execute()\n");
+   #endif
 
    // send the in parameters
    std::vector<void *> argIn;
@@ -316,13 +331,24 @@ bool CallPythonFunction::Execute()
    // Prepare the format string specifier (const char *format) to build 
    // Python object.
    SendInParam(argIn, paramType);
-  
-  // Next, call Python function Wrapper
-   PyObject* pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, argIn,
-         paramType, inRow, inCol, mInputList.size());
+   PyObject* pyRet;
 
-//   MessageInterface::ShowMessage("Python returned %d output objects\n", pyRet->);
-  
+  // Next, call Python function Wrapper
+   try
+   {
+      pyRet = pythonIf->PyFunctionWrapper(moduleName, functionName, argIn,
+            paramType, inRow, inCol, mInputList.size());
+   }
+   catch (BaseException &ex)
+   {
+      throw CommandException("Error in the CallPython command execution:\n" +
+         ex.GetFullMessage());
+   }
+   catch (...)
+   {
+      throw CommandException("An unhandled Python exception was thrown during execution");
+   }
+
    /*-----------------------------------------------------------------------------------*/
    // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
    /*-----------------------------------------------------------------------------------*/
@@ -392,10 +418,6 @@ bool CallPythonFunction::Execute()
       // clean up the argIns.
       for (Integer i = 0; i < argIn.size(); ++i)
          delete argIn.at(i);
-
-//      // clean up the argOut
-//      for (Integer i = 0; i < argOut.size(); ++i)
-//         delete argOut.at(i);
    }
    else   // when return value is NULL and no exception is caught/handled.
    {
@@ -477,53 +499,50 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
       Integer elementSz = PyList_Size(pyItem);
       PyReturnValue rv;
 
-if (PyList_Check(pyItem))
-{
-
-   #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
-   #endif
-
-   rv.toType = Gmat::RMATRIX_TYPE;
-
-   for (Integer i = 1; i < listSz; i++)
-   {
-      // throw an exception if the output dimension row and column is not what has been returned by Python, or
-      // if the size of each list within list is not the same.
-      if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i)) || listSz != outRow || elementSz != outCol)
-         throw CommandException("Python has returned an unexpected array dimension. \n");
-   }
-   for (Integer i = 0; i < listSz; i++)
-   {
-      pyItem = PyList_GetItem(member, i);
-      RealArray vItem;
-      for (Integer j = 0; j < elementSz; j++)
+      if (PyList_Check(pyItem))
       {
-         Real ret;
-         PyObject *pyElem = PyList_GetItem(pyItem, j);
-
-         // if the element is a Python Integer/Long, convert it to C++ double
-         if (PyLong_Check(pyElem))
-            ret = PyLong_AsDouble(pyElem);
-         // else if the element is a Python Float
-         else if (PyFloat_Check(pyElem))
-            ret = PyFloat_AsDouble(pyElem);
 
          #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("Array element [%d, %d] value in output array is %lf\n", i, j, ret);
+            MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
          #endif
 
-         vItem.push_back(ret);
-      }
-      rv.lolData.push_back(vItem);
-   }
-   dataReturn.push_back(rv);
-   retval = true;
-}
-// Python has returned a list of floats
-         else
+         rv.toType = Gmat::RMATRIX_TYPE;
 
-      if (PyFloat_Check(pyItem))
+         for (Integer i = 1; i < listSz; i++)
+         {
+            // throw an exception if the output dimension row and column is not what has been returned by Python, or
+            // if the size of each list within list is not the same.
+            if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i)) || listSz != outRow || elementSz != outCol)
+               throw CommandException("Python has returned an unexpected array dimension. \n");
+         }
+         for (Integer i = 0; i < listSz; i++)
+         {
+            pyItem = PyList_GetItem(member, i);
+            RealArray vItem;
+            for (Integer j = 0; j < elementSz; j++)
+            {
+               Real ret;
+               PyObject *pyElem = PyList_GetItem(pyItem, j);
+
+               // if the element is a Python Integer/Long, convert it to C++ double
+               if (PyLong_Check(pyElem))
+                  ret = PyLong_AsDouble(pyElem);
+               // else if the element is a Python Float
+               else if (PyFloat_Check(pyElem))
+                  ret = PyFloat_AsDouble(pyElem);
+
+               #ifdef DEBUG_EXECUTION
+                  MessageInterface::ShowMessage("Array element [%d, %d] value in output array is %lf\n", i, j, ret);
+               #endif
+
+               vItem.push_back(ret);
+            }
+            rv.lolData.push_back(vItem);
+         }
+         dataReturn.push_back(rv);
+         retval = true;
+      }
+      else if (PyFloat_Check(pyItem))
       {
          #ifdef DEBUG_EXECUTION
             MessageInterface::ShowMessage("Python has returned a list of floats.\n");
@@ -546,6 +565,7 @@ if (PyList_Check(pyItem))
    return retval;
 }
 
+
 void CallPythonFunction::RunComplete()
 {
    #ifdef DEBUG_EXECUTION
@@ -553,8 +573,20 @@ void CallPythonFunction::RunComplete()
    #endif
    if (pythonIf != NULL)
    {
-      pythonIf->PyFinalize();
-      pythonIf = NULL;
+      try 
+      {
+         pythonIf->PyFinalize();
+         pythonIf = NULL;
+      }
+      catch (BaseException &ex)
+      {
+         throw CommandException("Error in the CallPython command finalizaton:\n" +
+            ex.GetFullMessage());
+      }
+      catch (...)
+      {
+         throw CommandException("An unhandled Python exception was thrown during finalization");
+      }
    }
 
    CallFunction::RunComplete();
