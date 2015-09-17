@@ -135,7 +135,8 @@ void TargetPanel::Create()
 
    pageSizer->Add(exitModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mExitModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   pageSizer->Add(NULL, 0, wxALIGN_CENTER|wxALL, bsize);
+//   pageSizer->Add(NULL, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(20,20);
    pageSizer->Add(mProgressWindowCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    pageSizer->Add(mApplyCorrectionsButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
