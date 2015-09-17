@@ -326,7 +326,6 @@ DragForce::DragForce(const DragForce& df) :
 //      cbFixed = (CoordinateSystem*)(df.cbFixed->Clone());      // Any other initialization needed?
       cbFixed = (CoordinateSystem*)(df.cbFixed);
 
-//   parameterCount += 7;
    parameterCount = DragForceParamCount;
 
    dimension = df.dimension;
@@ -940,11 +939,11 @@ bool DragForce::Initialize()
             catch (...){}
 
 
-			   atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
+            atmos->Initialize();										// made changes by TUAN NGUYEN		Note: it needs to initialize before use. Fixed bug GMT-4124
             
-			   // Set the source flags: constants, files, etc
-			   atmos->SetInputSource(historicWSource, predictedWSource);
-			   atmos->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
+            // Set the source flags: constants, files, etc
+            atmos->SetInputSource(historicWSource, predictedWSource);
+            atmos->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
          }
          else
          {

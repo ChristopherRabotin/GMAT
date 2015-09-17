@@ -12,5 +12,8 @@
 /tdm_dsn7.txt
 /lib
 inputs*.txt
-*R2015a
+*-R201*
+/GmatConsole
+*.R2015a
+*.pyc
 /DLLs/
