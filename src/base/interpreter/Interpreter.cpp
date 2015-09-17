@@ -1797,8 +1797,29 @@ GmatBase* Interpreter::FindObject(const std::string &name,
             if (theObjectMap->find(name) != theObjectMap->end())
             {
                GmatBase *obj = (*theObjectMap)[name];
-               if (obj && obj->IsOfType("GmatFunction"))
+               if (obj && obj->IsOfType(Gmat::FUNCTION))
                   objFound = obj;
+            }
+            else
+            {
+               // Try internal object map for Function
+               try
+               {
+                  GmatBase *intObj = theModerator->GetInternalObject(name);
+                  #ifdef DEBUG_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("%s\n", (GmatBase::WriteObjectInfo("==> internal Obj=", intObj)).c_str());
+                  #endif
+                  if (intObj && intObj->IsOfType(Gmat::FUNCTION))
+                     objFound = intObj;
+               }
+               catch (BaseException &be)
+               {
+                  #ifdef DEBUG_FUNCTION
+                  MessageInterface::ShowMessage
+                     ("==> Ignoring exception: %s\n", be.GetFullMessage().c_str());
+                  #endif
+               }
             }
          }
       }

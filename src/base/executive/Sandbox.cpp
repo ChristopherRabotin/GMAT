@@ -237,6 +237,36 @@ GmatBase* Sandbox::AddObject(GmatBase *obj)
    return cloned;
 }
 
+//------------------------------------------------------------------------------
+// bool AddFunctionToGlobalObjectMap(Function *func)
+//------------------------------------------------------------------------------
+/**
+ * This method is called from the Moderator when Sandbox triggers calling
+ * Function during the Sandbox initialization, so that function created
+ * inside a function can be added to Sanbox global object map
+ */
+//------------------------------------------------------------------------------
+bool Sandbox::AddFunctionToGlobalObjectMap(Function *func)
+{
+   if (func == NULL)
+      return false;
+   
+   if (func->GetName() == "")
+      return false;
+   
+   std::string funcName = func->GetName();
+   if (globalObjectMap.find(funcName) == globalObjectMap.end())
+   {
+      #ifdef DEBUG_SANDBOX_GMATFUNCTION
+      MessageInterface::ShowMessage
+         ("==> Sandbox::AddFunctionToGlobalObjectMap() adding function <%p>'%s' "
+          "to global object map\n", func, funcName.c_str());
+      #endif
+      globalObjectMap.insert(make_pair(funcName, func));
+   }
+   
+   return true;
+}
 
 //------------------------------------------------------------------------------
 // bool AddCommand(GmatCommand *cmd)

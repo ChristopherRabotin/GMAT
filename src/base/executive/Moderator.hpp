@@ -467,6 +467,7 @@ private:
    StopCondition* CreateDefaultStopCondition();
    
    // Sandbox
+   void AddFunctionToGlobalObjectMap(Function *func);
    void AddSolarSystemToSandbox(Integer index);
    void AddTriggerManagersToSandbox(Integer index);
    void AddInternalCoordSystemToSandbox(Integer index);
@@ -495,6 +496,7 @@ private:
    bool showFinalState;
    bool loadSandboxAndPause;
    Integer objectManageOption;
+   Integer currentSandboxNumber;
    std::string currentScriptFileName;
    std::vector<Sandbox*> sandboxes;
    std::vector<TriggerManager*> triggerManagers;
