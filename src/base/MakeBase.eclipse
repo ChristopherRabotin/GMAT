@@ -265,6 +265,8 @@ OBJECTS = \
     event/EventLocator.o \
     event/LocatedEvent.o \
     event/LocatedEventTable.o \
+    executive/ListenerManager.o \
+    executive/ListenerManagerInterface.o \
     executive/Moderator.o \
     executive/PlotInterface.o \
     executive/PlotReceiver.o \
@@ -311,6 +313,7 @@ OBJECTS = \
     forcemodel/harmonic/HarmonicGravity.o \
     forcemodel/harmonic/HarmonicGravityCof.o \
     forcemodel/harmonic/HarmonicGravityGrv.o \
+    foundation/IChangeListener.o \
     foundation/Covariance.o \
     foundation/ElementWrapper.o \
     foundation/GmatBaseException.o \
@@ -501,6 +504,7 @@ OBJECTS = \
     solver/Gradient.o \
     solver/Jacobian.o \
     solver/LineSearch.o \
+    solver/ISolverListener.o \
     spacecraft/FormationInterface.o \
     spacecraft/Spacecraft.o \
     spacecraft/SpaceObject.o \
