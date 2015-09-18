@@ -22,6 +22,7 @@
 #include "NonlinearConstraint.hpp"
 #include "StringUtil.hpp"  // for ToReal()
 #include "MessageInterface.hpp"
+#include "Optimizer.hpp"
 
 //#define DEBUG_NONLINEAR_CONSTRAINT_PARSE 1
 //#define DEBUG_NONLINEAR_CONSTRAINT_INIT 1
@@ -748,6 +749,9 @@ bool NonlinearConstraint::InterpretAction()
       MessageInterface::ShowMessage("... operator = %s\n", OP_STRINGS[(Integer)op].c_str());
       MessageInterface::ShowMessage("... arg2Name = %s\n", arg2Name.c_str());
    #endif
+
+   panelDescriptor = "(" + OP_STRINGS[(Integer)op] + ") " + arg1Name;
+
    // Currently, this should not happen ..... 
    if (testForMore)
    {
@@ -984,12 +988,17 @@ bool NonlinearConstraint::Execute()
    //      desiredValue);
    //#endif
    
+   Integer ineqSign = 0;
    Real constraintValue = -999.99;
    // Evaluate variable and pass it to the optimizer
    if ( (arg1 != NULL) && (arg2 != NULL) )
    {
       desiredValue    = arg2->EvaluateReal();
       constraintValue = arg1->EvaluateReal();
+
+      panelDesired = desiredValue;
+      panelAchieved = constraintValue;
+
       #ifdef DEBUG_NLC_VALUES
          MessageInterface::ShowMessage("NLC:Execute - desiredValue = %.12f\n",
             desiredValue);
@@ -999,11 +1008,16 @@ bool NonlinearConstraint::Execute()
       switch (op)
       {
          case EQUAL:
+            constraintValue = constraintValue - desiredValue;
+            ineqSign = 0;
+            break;
          case LESS_THAN_OR_EQUAL:
             constraintValue = constraintValue - desiredValue;
+            ineqSign = -1;
             break;
          case GREATER_THAN_OR_EQUAL:
             constraintValue = desiredValue - constraintValue;
+            ineqSign = 1;
             break;
          default:
             break;
@@ -1011,8 +1025,14 @@ bool NonlinearConstraint::Execute()
       #ifdef DEBUG_NLC_VALUES
          MessageInterface::ShowMessage("NLC:Execute - (2) constraintValue now = %.12f\n",
             constraintValue);
+         MessageInterface::ShowMessage(
+            "NonlinearConstraint::Execute: ID = %d, IneqString = %s Sign=%d desired = %.16f, achieved = %.16f, delta = %.16f, expected =  %.16f\n", 
+            constraintId, isIneqString.c_str(), ineqSign, desiredValue, panelAchieved, 
+            desiredValue-panelAchieved, constraintValue);
       #endif
       optimizer->SetResultValue(constraintId, constraintValue, isIneqString);
+      ((Optimizer *) optimizer)->SetConstraintValues(constraintId, desiredValue, 
+         panelAchieved, ineqSign);
       #ifdef DEBUG_NONLINEAR_CONSTRAINT_EXEC
          MessageInterface::ShowMessage
             ("   constraint=%s, %p\n", constraint->GetTypeName().c_str(), constraint);

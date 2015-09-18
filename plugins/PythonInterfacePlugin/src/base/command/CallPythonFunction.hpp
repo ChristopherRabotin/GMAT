@@ -9,15 +9,16 @@
 // All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// FDSS II .
+// FDSS II.
 //
 // Author: Farideh Farahnak
 // Created: 2015/02/23
 //
 /**
-* Definition for the CallPythonFunction command class
-*/
+ * Definition for the CallPythonFunction command class
+ */
 //------------------------------------------------------------------------------
+
 #ifndef CALLPYTHONFUNCTION_HPP
 #define CALLPYTHONFUNCTION_HPP
 
@@ -26,6 +27,9 @@
 #include "PythonInterface.hpp"
 
 
+/**
+ * Command used to access function calls in Python
+ */
 class  PYTHON_API CallPythonFunction : public CallFunction
 {
 public:
@@ -42,8 +46,8 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
 
-   virtual bool         IsParameterReadOnly(const Integer id) const;
-   virtual bool         IsParameterReadOnly(const std::string &label) const;
+//   virtual bool         IsParameterReadOnly(const Integer id) const;
+//   virtual bool         IsParameterReadOnly(const std::string &label) const;
 
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual bool         SetStringParameter(const Integer id,
@@ -109,16 +113,11 @@ protected:
 	/// The returned data collection
 	std::vector<PyReturnValue> dataReturn;
 
-   /// Fill in Input parameter list
    Integer FillInputList();
-   /// Fill in Output parameter list
    Integer FillOutputList();
-   /// Create C++ variable type declared in GMAT script
    void SendInParam(std::vector<void *> &argIn, std::vector<Gmat::ParameterType> &pType);
-   /// Create C++ variable type declared in GMAT script
    void GetOutParams();
    bool BuildReturnFromPyObject(PyObject* member);
-//   void GetOutParams(const std::vector<void *> &argOut);
 
    /// Published parameters for Python functions
    enum
@@ -135,8 +134,5 @@ protected:
    static const Gmat::ParameterType
       PARAMETER_TYPE[PythonFunctionParamCount - CallFunctionParamCount];
 };
-
-
-
 
 #endif

@@ -95,6 +95,7 @@ SET(GUI_SRCS
     app/GmatMenuBar.cpp
     app/GmatToolBar.cpp
     app/GuiInterpreter.cpp
+    app/GuiListenerManager.cpp
     app/GuiMessageReceiver.cpp
     app/GmatNotebook.cpp
     app/GmatServer.cpp
@@ -215,6 +216,7 @@ SET(GUI_SRCS
     subscriber/MdiChildViewFrame.cpp
     subscriber/MdiChildTsFrame.cpp
     subscriber/MdiGlPlotData.cpp
+    subscriber/MdiTableViewFrame.cpp
     subscriber/MdiTsPlotData.cpp
     subscriber/OrbitViewCanvas.cpp
     subscriber/OrbitViewPanel.cpp

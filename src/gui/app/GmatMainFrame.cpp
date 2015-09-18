@@ -1725,7 +1725,8 @@ void GmatMainFrame::CloseActiveChild()
 //------------------------------------------------------------------------------
 // bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
 //                       bool closeReports = true, bool closeUndockedMissionTree = true,
-//                       bool closeWelcomePanel = true)
+//                       bool closeWelcomePanel = true,
+//                       bool closeSolverWindows = true)
 //------------------------------------------------------------------------------
 /*
  * Closes all mdi children frames.
@@ -1738,7 +1739,8 @@ void GmatMainFrame::CloseActiveChild()
 //------------------------------------------------------------------------------
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                                      bool closeReports, bool closeUndockedMissionTree,
-                                     bool closingGmat,  bool closeWelcomePanel)
+                                     bool closingGmat,  bool closeWelcomePanel,
+                                     bool closeSolverWindows)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
@@ -1862,6 +1864,13 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             gmatAppData->GetOutputTree()->UpdateOutput(true, false, false);
             canDelete = true;
          }
+
+         // delete solver windows
+         if (closeSolverWindows && type == GmatTree::OUTPUT_SOLVER_WINDOW)
+         {
+            canDelete = true;
+         }
+         
       }
       else if (type == GmatTree::MISSION_TREE_UNDOCKED)
       {

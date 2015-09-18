@@ -56,7 +56,8 @@ public:
    ~Sandbox();
    
    // Setup methods
-   GmatBase* AddObject(GmatBase *obj);   
+   GmatBase* AddObject(GmatBase *obj);
+   bool AddFunctionToGlobalObjectMap(Function *func);
    bool AddCommand(GmatCommand *cmd);
    bool AddSolarSystem(SolarSystem *ss);
    bool AddTriggerManagers(const std::vector<TriggerManager*> *trigs);

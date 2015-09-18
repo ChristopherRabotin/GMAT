@@ -15,8 +15,8 @@
 // Created: 2015/05/22
 //
 /**
-* Definition for the PythonInterface command class
-*/
+ * Definition for the PythonInterface command class
+ */
 //------------------------------------------------------------------------------
 #include "stdlib.h"
 
@@ -29,9 +29,17 @@
 // #define DEBUG_INITIALIZATION
 // #define DEBUG_EXECUTION
 
-
 PythonInterface* PythonInterface::instance = NULL;
 
+//------------------------------------------------------------------------------
+// PythonInterface* PyInstance()
+//------------------------------------------------------------------------------
+/**
+ * Access method for the Python interface singleton
+ *
+ * @return The singleton pointer
+ */
+//------------------------------------------------------------------------------
 PythonInterface* PythonInterface::PyInstance()
 {
    if (instance == NULL)
@@ -40,7 +48,16 @@ PythonInterface* PythonInterface::PyInstance()
    return instance;
 }
 
-PythonInterface::PythonInterface(const std::string &name) : Interface("PythonInterface", name)
+
+//------------------------------------------------------------------------------
+// PythonInterface(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
+PythonInterface::PythonInterface(const std::string &name) : 
+   Interface      ("PythonInterface", name)
 {
    isPythonInitialized = false;
    numPyCommands = 0;
@@ -48,12 +65,34 @@ PythonInterface::PythonInterface(const std::string &name) : Interface("PythonInt
    memset(plF, 0, 2);
 }
 
+
+//------------------------------------------------------------------------------
+// ~PythonInterface()
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 PythonInterface::~PythonInterface()
 {
    delete[] plF;
 }
 
-PythonInterface::PythonInterface(const PythonInterface& pi) : Interface(pi)
+
+//------------------------------------------------------------------------------
+// PythonInterface(const PythonInterface& pi)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param pi The interface copied to this one
+ *
+ * @note Since this is a singleton, we need to determine if this methos is ever 
+ * called
+ */
+//------------------------------------------------------------------------------
+PythonInterface::PythonInterface(const PythonInterface& pi) :
+   Interface      (pi)
 {
    plF = new char[2];
    memcpy(plF, pi.plF, 2);
@@ -62,6 +101,15 @@ PythonInterface::PythonInterface(const PythonInterface& pi) : Interface(pi)
 
 //------------------------------------------------------------------------------
 // PythonInterface& operator=(const PythonInterface& pi)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param pi The interface providing data for this one
+ *
+ * @note Since this is a singleton, we need to determine if this methos is ever
+ * called
+ */
 //------------------------------------------------------------------------------
 PythonInterface& PythonInterface::operator=(const PythonInterface& pi)
 {
@@ -76,28 +124,55 @@ PythonInterface& PythonInterface::operator=(const PythonInterface& pi)
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//------------------------------------------------------------------------------
+/**
+ * Copies settings from the input PythonInterface to this one
+ *
+ * @param orig The Interface being copied
+ *
+ * @return The new PythonInterface
+ *
+ * @note Since this is a singleton, we need to determine if this methos is ever
+ * called
+ */
+//------------------------------------------------------------------------------
 void PythonInterface::Copy(const GmatBase* orig)
 {
    operator=(*((PythonInterface *)(orig)));
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone() const
+//------------------------------------------------------------------------------
+/**
+ * This method clones the current PythonInterface to make a new one.
+ *
+ * @return The clone
+ *
+ * @note Since this is a singleton, we need to determine if this methos is ever
+ * called
+ */
+//------------------------------------------------------------------------------
 GmatBase* PythonInterface::Clone() const
 {
    return (new PythonInterface(*this));
 }
 
+
 //------------------------------------------------------------------------------
 // bool PyInitialize()
 //------------------------------------------------------------------------------
 /**
-* Load Python engine
-*
-* This method will initialize python by loading Python engine.
-*
-* @param none
-*
-* @return bool
-*/
+ * Load Python engine
+ *
+ * This method will initialize python by loading Python engine.
+ *
+ * @return bool
+ */
 //------------------------------------------------------------------------------
 bool PythonInterface::PyInitialize()
 {
@@ -124,53 +199,52 @@ bool PythonInterface::PyInitialize()
    return isPythonInitialized;
 }
 
+
 //------------------------------------------------------------------------------
 // bool PyFinalize()
 //------------------------------------------------------------------------------
 /**
-* UnLoad Python engine
-*
-* This method will shut down/unload python engine.
-*
-* @param none
-*
-* @return bool
-*/
+ * UnLoad Python engine
+ *
+ * This method will shut down/unload python engine.
+ *
+ * @return bool
+ */
 //------------------------------------------------------------------------------
 bool PythonInterface::PyFinalize()
 {
-   // when all the Python commands in Gmat script is run and completed
-   // close and finalize the Python.
+   // When all the Python commands in the Gmat script are run and completed,
+   // close and finalize Python.
    if (--numPyCommands == 0)
    {
 	   Py_Finalize();
 
       #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("Python is Finalized/Unloaded.\n");
+         MessageInterface::ShowMessage("Python was Finalized and Unloaded.\n");
       #endif
 
 	   isPythonInitialized = false;
    }
 	
    #ifdef DEBUG_EXECUTION
-      MessageInterface::ShowMessage("numPyCommands is %d: \n", numPyCommands);
+      MessageInterface::ShowMessage("numPyCommands: %d  (Python is unloaded "
+            "when this counter reaches 0)\n", numPyCommands);
    #endif
 
    return isPythonInitialized;
 }
 
+
 //------------------------------------------------------------------------------
 // void PyPathSep()
 //------------------------------------------------------------------------------
 /**
-* Operating system environment/system path delimiter
-*
-* This method will differentiate the path delimiter for different OS.
-*
-* @param none
-*
-* @return void
-*/
+ * Operating system environment/system path delimiter
+ *
+ * This method will differentiate the path delimiter for different OS.
+ *
+ * @return void
+ */
 //------------------------------------------------------------------------------
 void PythonInterface::PyPathSep()
 {
@@ -189,12 +263,10 @@ void PythonInterface::PyPathSep()
 // void PyAddModulePath()
 //------------------------------------------------------------------------------
 /**
-* Add Python module to the system path.
-*
-* @param StringArray & path
-*
-* @return void
-*/
+ * Add Python module to the system path.
+ *
+ * @param StringArray & path
+ */
 //------------------------------------------------------------------------------
 void PythonInterface::PyAddModulePath(const StringArray& path)
 {
@@ -239,18 +311,31 @@ void PythonInterface::PyAddModulePath(const StringArray& path)
 
 
 //------------------------------------------------------------------------------
-// PyObject* PyFunctionWrapper()
+// PyObject* PyFunctionWrapper(const std::string &modName, 
+//    const std::string &funcName, const std::vector<void *> &argIn,
+//    std::vector<Gmat::ParameterType> paramType, UnsignedInt row, 
+//    UnsignedInt col, UnsignedInt argSz)
 //------------------------------------------------------------------------------
 /**
-* Call Python Function
-*
-* @param modName, funcName, formatIn, argIn, paramType
-*
-* @return PyObject
-*/
+ * Method that calls the scripted Python function
+ *
+ * @param modName The name of teh Python file being called
+ * @param funcName The Python function in the module
+ * @param argIn The input parameters
+ * @param paramType The type associated with each input
+ * @param row The number of rows in the input (is this used?)
+ * @param col The number of columns in the input (is this used?)
+ * @param argSz The number of input arguments
+ *
+ * @return The PyObject containing the returned data
+ */
 //------------------------------------------------------------------------------
-PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                             const std::vector<void *> &argIn, std::vector<Gmat::ParameterType> paramType, UnsignedInt row, UnsignedInt col, UnsignedInt argSz)
+PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, 
+                                             const std::string &funcName,
+                                             const std::vector<void *> &argIn, 
+                                             std::vector<Gmat::ParameterType> paramType, 
+                                             UnsignedInt row, UnsignedInt col, 
+                                             UnsignedInt argSz)
 {
    PyObject* pyModule = NULL;
    PyObject* pyPluginModule = NULL;
@@ -282,8 +367,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    if (!pyModule)
    {
       PyErrorMsg(pType, pValue, pTraceback, msg);
-
-      throw InterfaceException(" Python Exception Type: " + msg + "\n");
+      throw InterfaceException(" Python Exception: " + msg + "\n");
    }
  
    // import the python module
@@ -293,19 +377,17 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    if (!pyPluginModule)
    {
       PyErrorMsg(pType, pValue, pTraceback, msg);
-
-      throw InterfaceException(" Python Exception Type: " + msg + "\n");
+      throw InterfaceException(" Python Exception: " + msg + "\n");
    }
 
-   // retrieve an attribute named 'funcName' from imported python module
+   // retrieve an attribute named 'funcName' from the python module
    pyFuncAttr = PyObject_GetAttrString(pyPluginModule, funcName.c_str() );
    Py_DECREF(pyPluginModule);
 
    if (!pyFuncAttr)
    {
       PyErrorMsg(pType, pValue, pTraceback, msg);
-
-      throw InterfaceException(" Python Exception Type:" + msg + "\n");
+      throw InterfaceException(" Python Exception: " + msg + "\n");
    }
    
    /*
@@ -317,7 +399,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
     *
     * Two dimensional arrays are not supported
     *
-    *  Strings are passed to Python strings
+    * Strings are passed to Python strings
     */
   
    for (UnsignedInt index = 0; index < paramType.size(); ++index)
@@ -351,16 +433,19 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
          pybuffer->obj = NULL;
          pybuffer->format = "d";
          pybuffer->ndim = (row != 1 && col != 1) ? 2 : 1;
-         pybuffer->shape = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
+         pybuffer->shape = (Py_ssize_t *)malloc(
+                            sizeof(Py_ssize_t)* pybuffer->ndim);
          pybuffer->readonly = 0;
          pybuffer->suboffsets = 0;
          pybuffer->buf = v;
 
-         pybuffer->strides = (Py_ssize_t *)malloc(sizeof(Py_ssize_t)* pybuffer->ndim);
+         pybuffer->strides = (Py_ssize_t *)malloc(
+                              sizeof(Py_ssize_t)* pybuffer->ndim);
          for (UnsignedInt m = 0; m < row; ++m)
             pybuffer->shape[m] = col;
 
-         PyBuffer_FillContiguousStrides(pybuffer->ndim, pybuffer->shape, pybuffer->strides, sizeof(Real), 'C');
+         PyBuffer_FillContiguousStrides(pybuffer->ndim, pybuffer->shape, 
+                                        pybuffer->strides, sizeof(Real), 'C');
 
          pybuffer->itemsize = sizeof(Real);
          pybuffer->len = (pybuffer->ndim == 1 ?
@@ -368,8 +453,10 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             pybuffer->shape[0] * pybuffer->shape[1] * pybuffer->itemsize);
 
          #ifdef DEBUG_INITIALIZATION
-            MessageInterface::ShowMessage("length, shape, strides, itemsize values:  %d, %d, %d, %d\n",
-                  pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], pybuffer->itemsize);
+            MessageInterface::ShowMessage("length, shape, strides, itemsize "
+                  "values:  %d, %d, %d, %d\n",
+                  pybuffer->len, pybuffer->shape[0], pybuffer->strides[0], 
+                  pybuffer->itemsize);
          #endif
 
          int c = PyBuffer_IsContiguous(pybuffer, 'C');
@@ -380,23 +467,24 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             PyObject *pyobj = NULL;
 
             #ifdef DEBUG_INITIALIZATION
-               MessageInterface::ShowMessage("calling PyMemoryView_FromBuffer() \n");
+               MessageInterface::ShowMessage("Calling PyMemoryView_"
+                     "FromBuffer()\n");
             #endif
 
             pyobj = PyMemoryView_FromBuffer(pybuffer);
 
-            //check the memory view object and read back the buffer we created earlier
+            //check the memoryview object and read back the buffer
             int l = 0;
             l = PyMemoryView_Check(pyobj);
             if (l == 1)
             {
-               int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, PyBUF_CONTIG);
+               int ret = PyBuffer_FillInfo(view, pyobj, v, pybuffer->len, 0, 
+                                           PyBUF_CONTIG);
                
                if (ret == -1)
                {
                   PyErrorMsg(pType, pValue, pTraceback, msg);
-
-                  throw InterfaceException(" Python Exception Type:" + msg + "\n");
+                  throw InterfaceException(" Python Exception: " + msg + "\n");
                }
             }
 
@@ -405,10 +493,11 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
          }
 
          // free memory
+         /// @todo: Check to see if this leaks
    //      delete[] v;
    //      free(view);
-    //     free(pybuffer->shape);
-     //    free(pybuffer->strides);
+   //      free(pybuffer->shape);
+   //      free(pybuffer->strides);
    //      free(pybuffer);
       }
       else if (parType == Gmat::STRING_TYPE)
@@ -417,7 +506,7 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
             MessageInterface::ShowMessage("A string is passed to Python.\n");
          #endif
 
-         //attention for both python version needs to be implemented.
+         /// @todo: Both python versions need to be implemented.
          PyObject * pyStr = PyUnicode_FromString(((std::string *)argIn.at(n))->c_str());
 
          PyTuple_SetItem(pyTupleObj, i, pyStr);
@@ -437,7 +526,8 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
       }
    }
 
- //  delete[] v;
+   /// @todo: Check to see if this leaks
+   // delete[] v;
    
    // Call the python function   
    pyFunc = PyObject_CallObject(pyFuncAttr, pyTupleObj);
@@ -448,24 +538,29 @@ PyObject* PythonInterface::PyFunctionWrapper(const std::string &modName, const s
    if (!pyFunc)
    {
       PyErrorMsg(pType, pValue, pTraceback, msg);
-      throw InterfaceException(" Python Exception:" + msg + "\n");
+      throw InterfaceException("Python Exception: " + msg + "\n");
    }
 
    return pyFunc;
 }
 
+
 //------------------------------------------------------------------------------
-// bool PyErrorMsg
+// void PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, 
+//       std::string &msg)
 //------------------------------------------------------------------------------
 /**
-* Fetch Internal Python error/exception messages
-*
-* @param pType, pValue, pTraceback of type PyObject, msg as string
-*
-* @return void
-*/
+ * Fetches a Python error/exception message
+ *
+ * @param pType The Python type
+ * @param pValue The Python value
+ * @param pTraceback The Python traceback object
+ * @param msg The message string that is being filled in with the exception 
+ *            information
+ */
 //------------------------------------------------------------------------------
-void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, std::string &msg)
+void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, 
+      PyObject* pTraceback, std::string &msg)
 {
    int reset_error_state = 0;
 
@@ -483,7 +578,6 @@ void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pT
 
       if (v)
       {
-
 #ifdef IS_PY3K
          msg = std::string(_PyUnicode_AsString(t));
          msg += ": " + std::string(_PyUnicode_AsString(v));
@@ -491,7 +585,6 @@ void PythonInterface::PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pT
          msg = std::string(PyString_AsString(t));
          msg += ": " + std::string(PyString_AsString(v));
 #endif
-         
       }
    }
 

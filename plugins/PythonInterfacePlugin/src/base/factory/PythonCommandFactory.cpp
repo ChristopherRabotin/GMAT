@@ -1,3 +1,24 @@
+//$Id$
+//------------------------------------------------------------------------------
+//                                 PythonCommandFactory
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool.
+//
+// Copyright (c) 2002-2014 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// FDSS II .
+//
+// Author: Farideh Farahnak
+// Created: 2015/02/23
+//
+/**
+ * Factory used to create scripted Python commands
+ */
+//------------------------------------------------------------------------------
+
 #include "PythonCommandFactory.hpp"
 #include "CallPythonFunction.hpp"
 
@@ -6,9 +27,6 @@
 //------------------------------------------------------------------------------
 /**
  * Constructor
- *
- * Replace the type Gmat::COMMAND in the base class call with the factory type
- * you need.
  */
 //------------------------------------------------------------------------------
 PythonCommandFactory::PythonCommandFactory() :
@@ -72,8 +90,6 @@ PythonCommandFactory& PythonCommandFactory::operator=(
 
       if (creatables.empty())
       {
-         // Replace the SampleClass string here with your class name.  For multiple
-         // classes of the same type, push back multiple names here
          creatables.push_back("CallPythonFunction");
       }
    }
@@ -101,7 +117,6 @@ GmatCommand* PythonCommandFactory::CreateCommand(const std::string &ofType,
 {
    if (ofType == "CallPythonFunction")
       return new CallPythonFunction();
-   // add more here .......
 
    return NULL;   // doesn't match any type of Command known by this factory
 }

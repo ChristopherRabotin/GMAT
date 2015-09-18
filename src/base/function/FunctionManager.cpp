@@ -2391,7 +2391,19 @@ void FunctionManager::UnsubscribeSubscribers(ObjectMap *om)
                ("   Calling <%p>'%s'->TakeAction('Finalize')\n", sub, sub->GetName().c_str());
             #endif
             
-            sub->TakeAction("Finalize");
+            // Catch any error encountered during subscriber finalization and
+            // rethrow if it is fatal else just write error message (Fix for GMT-5204)
+            try
+            {
+               sub->TakeAction("Finalize");
+            }
+            catch (BaseException &be)
+            {
+               if (be.IsFatal())
+                  throw;
+               else
+                  MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+            }
             
             #ifdef DEBUG_SUBSCRIBER
             MessageInterface::ShowMessage
@@ -2506,12 +2518,24 @@ bool FunctionManager::EmptyObjectMap(ObjectMap *om, const std::string &mapID)
             // Unsubscribe subscriber before deleting (LOJ: 2009.04.07)
             Subscriber *sub = (Subscriber*)omi->second;
             
-            // Instead of deleting OpenGL plot from the OpenGlPlot destructor
-            // call TakeAction() to delete it (LOJ:2009.04.22)
-            sub->TakeAction("Finalize");
-            //@todo This causes Func_AssigningWholeObjects crash
-            // in Subscriber::ClearWrappers() due to stale wrapper pointers
-            //sub->ClearWrappers();
+            // Catch any error encountered during subscriber finalization and
+            // rethrow if it is fatal else just write error message (Fix for GMT-5204)
+            try
+            {
+               // Instead of deleting OpenGL plot from the OpenGlPlot destructor
+               // call TakeAction() to delete it (LOJ:2009.04.22)
+               sub->TakeAction("Finalize");
+               //@todo This causes Func_AssigningWholeObjects crash
+               // in Subscriber::ClearWrappers() due to stale wrapper pointers
+               //sub->ClearWrappers();
+            }
+            catch (BaseException &be)
+            {
+               if (be.IsFatal())
+                  throw;
+               else
+                  MessageInterface::ShowMessage("%s\n", be.GetFullMessage().c_str());
+            }
             
             #ifdef DEBUG_CLEANUP
             MessageInterface::ShowMessage

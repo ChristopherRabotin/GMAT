@@ -21,7 +21,7 @@
 #include "GmatPluginFunctions.hpp"
 #include "MessageInterface.hpp"
 
-// Modify this line to match your factory list:
+// The list of factory headers in this plugin
 #include "PythonCommandFactory.hpp"
 
 extern "C"
@@ -78,7 +78,7 @@ extern "C"
     *
     * @param mr The message receiver
 	*
-	* @note This function is deprecaged, and may not be needed in future builds
+	* @note This function is deprecated, and may not be needed in future builds
     */
    //------------------------------------------------------------------------------
    void SetMessageReceiver(MessageReceiver* mr)

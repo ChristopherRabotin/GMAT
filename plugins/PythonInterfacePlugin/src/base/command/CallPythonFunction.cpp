@@ -9,15 +9,16 @@
 // All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
-// FDSS II .
+// FDSS II.
 //
 // Author: Farideh Farahnak
 // Created: 2015/02/23
 //
 /**
-* Definition for the CallPythonFunction command class
-*/
+ * Definition for the CallPythonFunction command class
+ */
 //------------------------------------------------------------------------------
+
 #include "InterfaceException.hpp"
 #include "CallPythonFunction.hpp"
 #include "FileManager.hpp"
@@ -45,6 +46,17 @@ CallPythonFunction::PARAMETER_TYPE[PythonFunctionParamCount - CallFunctionParamC
 };
 
 
+//------------------------------------------------------------------------------
+// Public methods
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// CallPythonFunction()
+//------------------------------------------------------------------------------
+/**
+ * Default constructor
+ */
+//------------------------------------------------------------------------------
 CallPythonFunction::CallPythonFunction() :
    CallFunction      ("CallPythonFunction"),
    moduleName        (""),
@@ -57,6 +69,16 @@ CallPythonFunction::CallPythonFunction() :
 {
 }
 
+
+//------------------------------------------------------------------------------
+// CallPythonFunction(const CallPythonFunction& cpf)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ *
+ * @param cpf The object being copied
+ */
+//------------------------------------------------------------------------------
 CallPythonFunction::CallPythonFunction(const CallPythonFunction& cpf) :
    CallFunction      (cpf),
    moduleName        (cpf.moduleName),
@@ -69,8 +91,19 @@ CallPythonFunction::CallPythonFunction(const CallPythonFunction& cpf) :
 {
 }
 
-CallPythonFunction& CallPythonFunction::operator =(
-      const CallPythonFunction& cpf)
+
+//------------------------------------------------------------------------------
+// CallPythonFunction& operator =(const CallPythonFunction& cpf)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator
+ *
+ * @param cpf The object used to set structures in this one
+ *
+ * @return This command, configured to match cpf
+ */
+//------------------------------------------------------------------------------
+CallPythonFunction& CallPythonFunction::operator=(const CallPythonFunction& cpf)
 {
    if (this != &cpf)
    {
@@ -87,18 +120,50 @@ CallPythonFunction& CallPythonFunction::operator =(
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+// ~CallPythonFunction
+//------------------------------------------------------------------------------
+/**
+ * Destructor
+ */
+//------------------------------------------------------------------------------
 CallPythonFunction::~CallPythonFunction()
 {
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the script string used for each parameter
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The descriptor
+ */
+//------------------------------------------------------------------------------
 std::string CallPythonFunction::GetParameterText(const Integer id) const
 {
    if (id >= CallFunctionParamCount && id < PythonFunctionParamCount)
       return PARAMETER_TEXT[id - CallFunctionParamCount];
-   else
-      return CallFunction::GetParameterText(id);
+
+   return CallFunction::GetParameterText(id);
 }
 
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string& str) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the ID for a parameter from its string descrition
+ *
+ * @param str The string associated with the parameter
+ *
+ * @return The parameter ID
+ */
+//------------------------------------------------------------------------------
 Integer CallPythonFunction::GetParameterID(const std::string& str) const
 {
    for (Integer i = CallFunctionParamCount; i < PythonFunctionParamCount; ++i)
@@ -108,6 +173,18 @@ Integer CallPythonFunction::GetParameterID(const std::string& str) const
    return CallFunction::GetParameterID(str);
 }
 
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Returns the type for a parameter
+ *
+ * @param id The parameter ID
+ *
+ * @return The parameter's type
+ */
+//------------------------------------------------------------------------------
 Gmat::ParameterType CallPythonFunction::GetParameterType(const Integer id) const
 {
    if (id >= CallFunctionParamCount && id < PythonFunctionParamCount)
@@ -116,6 +193,18 @@ Gmat::ParameterType CallPythonFunction::GetParameterType(const Integer id) const
       return CallFunction::GetParameterType(id);
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the string description of a parameter's type
+ *
+ * @param id The ID for the parameter
+ *
+ * @return The string describing the type
+ */
+//------------------------------------------------------------------------------
 std::string CallPythonFunction::GetParameterTypeString(const Integer id) const
 {
    if (id >= CallFunctionParamCount && id < PythonFunctionParamCount)
@@ -124,16 +213,18 @@ std::string CallPythonFunction::GetParameterTypeString(const Integer id) const
       return CallFunction::GetParameterTypeString(id);
 }
 
-bool CallPythonFunction::IsParameterReadOnly(const Integer id) const
-{
-   return CallFunction::IsParameterReadOnly(id);
-}
 
-bool CallPythonFunction::IsParameterReadOnly(const std::string& label) const
-{
-   return IsParameterReadOnly(GetParameterID(label));
-}
-
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter
+ *
+ * @param id The id for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
 std::string CallPythonFunction::GetStringParameter(const Integer id) const
 {
    if (id == MODULENAME)
@@ -144,6 +235,19 @@ std::string CallPythonFunction::GetStringParameter(const Integer id) const
    return CallFunction::GetStringParameter(id);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const char* value)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter's value
+ *
+ * @param id The id for the parameter
+ * @param value The new value for the parameter
+ *
+ * @return True on success
+ */
+//------------------------------------------------------------------------------
 bool CallPythonFunction::SetStringParameter(const Integer id, const char* value)
 {
    if (id == MODULENAME)
@@ -153,6 +257,7 @@ bool CallPythonFunction::SetStringParameter(const Integer id, const char* value)
    }
    if (id == FUNCTIONNAME)
    {
+      /// @todo: Determine if this code should match SetStringParameter below
       functionName = value;
       return true;
    }
@@ -160,6 +265,19 @@ bool CallPythonFunction::SetStringParameter(const Integer id, const char* value)
    return CallFunction::SetStringParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter's value
+ *
+ * @param id The id for the parameter
+ * @param value The new value for the parameter
+ *
+ * @return True on success
+ */
+//------------------------------------------------------------------------------
 bool CallPythonFunction::SetStringParameter(const Integer id,
       const std::string& value)
 {
@@ -170,6 +288,8 @@ bool CallPythonFunction::SetStringParameter(const Integer id,
    }
    if (id == FUNCTIONNAME)
    {
+      /// @todo: Determine if this code should match SetStringParameter above
+      /// @note I think this is the one used in the script engine
       functionName = value;
       mFunctionName = "Python." + moduleName + "." + functionName;
       return true;
@@ -178,53 +298,62 @@ bool CallPythonFunction::SetStringParameter(const Integer id,
    return CallFunction::SetStringParameter(id, value);
 }
 
-//std::string CallPythonFunction::GetStringParameter(const Integer id,
-//      const Integer index) const
-//{
-//   return CallFunction::GetStringParameter(id, index);
-//}
 
-//bool CallPythonFunction::SetStringParameter(const Integer id, const char* value,
-//      const Integer index)
-//{
-//   return CallFunction::SetStringParameter(id, value, index);
-//}
-
-//bool CallPythonFunction::SetStringParameter(const Integer id,
-//      const std::string& value, const Integer index)
-//{
-//   return CallFunction::GetStringParameter(id, value, index);
-//}
-
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string& label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a string parameter
+ *
+ * @param label The script label for the parameter
+ *
+ * @return The value of the parameter
+ */
+//------------------------------------------------------------------------------
 std::string CallPythonFunction::GetStringParameter(
       const std::string& label) const
 {
    return GetStringParameter(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const char* value)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter's value
+ *
+ * @param label The script label for the parameter
+ * @param value The new value for the parameter
+ *
+ * @return True on success
+ */
+//------------------------------------------------------------------------------
 bool CallPythonFunction::SetStringParameter(const std::string& label,
       const char* value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string& label, const std::string& value)
+//------------------------------------------------------------------------------
+/**
+ * Sets a string parameter's value
+ *
+ * @param label The script label for the parameter
+ * @param value The new value for the parameter
+ *
+ * @return True on success
+ */
+//------------------------------------------------------------------------------
 bool CallPythonFunction::SetStringParameter(const std::string& label,
       const std::string& value)
 {
    return SetStringParameter(GetParameterID(label), value);
 }
 
-//std::string CallPythonFunction::GetStringParameter(const std::string& label,
-//      const Integer index) const
-//{
-//   return GetStringParameter(GetParameterID(label), index);
-//}
-
-//bool CallPythonFunction::SetStringParameter(const std::string& label,
-//      const std::string& value, const Integer index)
-//{
-//   return SetStringParameter(GetParameterID(label), value, index);
-//}
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -282,7 +411,8 @@ bool CallPythonFunction::Initialize()
    }
    catch (...)
    {
-      throw CommandException("An unhandled Python exception was thrown during initialization");
+      throw CommandException("An unhandled Python exception was thrown during "
+            "initialization");
    }
 
    //Fill in Inputlist
@@ -307,14 +437,14 @@ bool CallPythonFunction::Initialize()
 // bool Execute()
 //------------------------------------------------------------------------------
 /**
-* Execute as a Python wrapper
-*
-* This method will execute the Python functions in a Python module.
-*
-* @param none
-*
-* @return bool
-*/
+ * Execute as a Python wrapper
+ *
+ * This method will execute the Python functions in a Python module.
+ *
+ * @param none
+ *
+ * @return bool
+ */
 //------------------------------------------------------------------------------
 bool CallPythonFunction::Execute()
 {
@@ -346,31 +476,35 @@ bool CallPythonFunction::Execute()
    }
    catch (...)
    {
-      throw CommandException("An unhandled Python exception was thrown during execution");
+      throw CommandException("An unhandled Python exception was thrown during "
+         "execution");
    }
 
-   /*-----------------------------------------------------------------------------------*/
-   // Python Requirements from PythonInterfaceNotes_2015_01_14.txt
-   /*-----------------------------------------------------------------------------------*/
-   /* GMAT will recieve Python data following these rules:
-
-   * Floats are passed to GMAT Variables
-   
-   * Ints are passed to GMAT Variables
-   
-   * Strings are passed to GMAT strings
-   * Lists are passed to GMAT arrays (and must be lists of floats) 
-   
-   * Lists of lists are passed to GMAT arrays (and must be lists of lists of floats,
-   * all of the same dimension)
-   
-   * Tuples must contain numerical data, and are passed to GMAT one-dimensional arrays
-   
-   * Tuples of tuples must contain numerical data, and are passed to GMAT 2D arrays
-  
-   ------------------------------------------------------------------------------------*/
+   /*------------------------------------------------------------------------*/
+   /* GMAT receives Python data following these rules:
+    *
+    * Floats are passed to GMAT Variables
+    *
+    * Ints are passed to GMAT Variables
+    *
+    * Strings are passed to GMAT strings
+    *
+    * Lists are passed to GMAT arrays (and must be lists of floats) 
+    *
+    * Lists of lists are passed to GMAT arrays (and must be lists of lists of
+    * floats, all of the same dimension)
+    *
+    * @note: The tuple handling is different from that described here, because
+    * Python returns multiple parameters in tuples, and that means mixed types.
+    *
+    * Tuples must contain numerical data, and are passed to GMAT one-
+    * dimensional arrays
+    *
+    * Tuples of tuples must contain numerical data, and are passed to GMAT 2D 
+    * arrays
+   --------------------------------------------------------------------------*/
    dataReturn.clear();
-
+   
    if (pyRet)
    {
       if (!BuildReturnFromPyObject(pyRet))
@@ -378,7 +512,8 @@ bool CallPythonFunction::Execute()
          if (PyTuple_Check(pyRet))
          {
             #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Python has returned a tuple of values.\n");
+               MessageInterface::ShowMessage("Python has returned a tuple of "
+                     "values.\n");
             #endif
             Integer tupleSz = PyTuple_Size(pyRet);
             for (Integer i = 0; i < tupleSz; ++i)
@@ -393,26 +528,29 @@ bool CallPythonFunction::Execute()
          else if (PyMemoryView_Check(pyRet))
          {
             #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Python has returned a memoryview object\n");
+               MessageInterface::ShowMessage("Python has returned a memory"
+                     "view object\n");
             #endif
          }
          else if (PyLong_Check(pyRet))
          {
             #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Python has returned an Integer object\n");
+               MessageInterface::ShowMessage("Python has returned an Integer "
+                     "object\n");
             #endif
          }
          else
          {
             #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("An unknown Python type was returned.\n");
+               MessageInterface::ShowMessage("An unhandled Python type was "
+                  "returned.\n");
             #endif
          }
       }
 
       Py_DECREF(pyRet);
 
-      // Fill out the parameter out
+      // Fill in the output parameters
       GetOutParams();
 
       // clean up the argIns.
@@ -422,7 +560,8 @@ bool CallPythonFunction::Execute()
    else   // when return value is NULL and no exception is caught/handled.
    {
       #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("Unknown error happened in Python Interface.\n");
+         MessageInterface::ShowMessage("Unknown error happened in Python "
+               "Interface.\n");
       #endif
    }
 
@@ -448,141 +587,158 @@ bool CallPythonFunction::BuildReturnFromPyObject(PyObject* member)
 {
    bool retval = false;
 
-   // Reals
-   if (PyFloat_Check(member))
+   try // Since we are making Python calls here, wrap in a handler
    {
-      PyReturnValue rv;
-      rv.toType = Gmat::REAL_TYPE;
-      rv.floatData.push_back(PyFloat_AsDouble(member));
-      dataReturn.push_back(rv);
-      retval = true;
-   }
+      // Reals
+      if (PyFloat_Check(member))
+      {
+         PyReturnValue rv;
+         rv.toType = Gmat::REAL_TYPE;
+         rv.floatData.push_back(PyFloat_AsDouble(member));
+         dataReturn.push_back(rv);
+         retval = true;
+      }
 
-   // Integers, passed into real number containers
-   if (PyLong_Check(member))
-   {
-      PyReturnValue rv;
-      rv.toType = Gmat::REAL_TYPE;
-      rv.floatData.push_back(PyLong_AsDouble(member));
-      dataReturn.push_back(rv);
-      retval = true;
-   }
+      // Integers, passed into real number containers
+      if (PyLong_Check(member))
+      {
+         PyReturnValue rv;
+         rv.toType = Gmat::REAL_TYPE;
+         rv.floatData.push_back(PyLong_AsDouble(member));
+         dataReturn.push_back(rv);
+         retval = true;
+      }
 
-   // Strings
-   // else if the Python module returns a string
+      // Strings
 #ifdef IS_PY3K
-   else if (PyUnicode_Check(member))
-   {
-      #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("A Python String was returned.\n");
-      #endif
-      PyReturnValue rv;
-      rv.toType = Gmat::STRING_TYPE;
-      rv.stringData = _PyUnicode_AsString(member);
-      dataReturn.push_back(rv);
-      retval = true;
-   }
+      else if (PyUnicode_Check(member))
+      {
+         #ifdef DEBUG_EXECUTION
+            MessageInterface::ShowMessage("A Python String was returned.\n");
+         #endif
+         PyReturnValue rv;
+         rv.toType = Gmat::STRING_TYPE;
+         rv.stringData = _PyUnicode_AsString(member);
+         dataReturn.push_back(rv);
+         retval = true;
+      }
 #else
-   else if (PyBytes_Check(member))
-   {
-      PyReturnValue rv;
-      rv.toType = Gmat::STRING_TYPE;
-      rv.stringData.push_back(PyBytes_AsString(member));
-      dataReturn.push_back(rv);
-      retval = true;
-   }
+      else if (PyBytes_Check(member))
+      {
+         PyReturnValue rv;
+         rv.toType = Gmat::STRING_TYPE;
+         rv.stringData.push_back(PyBytes_AsString(member));
+         dataReturn.push_back(rv);
+         retval = true;
+      }
 #endif
 
-   // else if the Python module returns a list of floats
-   // Or a list of list of floats/Ints.
-   // In case of Python Int, we need to convert it to C++ float.
-   else if (PyList_Check(member))
-   {
-      #ifdef DEBUG_EXECUTION
-         MessageInterface::ShowMessage("Return was a list of size %d\n", PyList_Size(member));
-      #endif
-
-      // number of list elements in a list, for example: [ [], [], [] ]
-      Integer listSz = PyList_Size(member);
-      PyObject *pyItem = PyList_GetItem(member, 0);
-      // number of elements in a list, for example: [ 1, 2, 3 ]
-      Integer elementSz = PyList_Size(pyItem);
-      PyReturnValue rv;
-
-      if (PyList_Check(pyItem))
+      // Lists of floats/ints or lists of lists of floats/ints
+      else if (PyList_Check(member))
       {
-
          #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("Python has returned a list of list of Floats/Integers.\n");
+            MessageInterface::ShowMessage("Return was a list of size %d\n", 
+                  PyList_Size(member));
          #endif
 
-         rv.toType = Gmat::RMATRIX_TYPE;
+         // number of list elements in a list, for example: [ [], [], [] ]
+         Integer listSz = PyList_Size(member);
+         PyObject *pyItem = PyList_GetItem(member, 0);
 
-         for (Integer i = 1; i < listSz; i++)
+         // number of elements in a list, for example: [ 1, 2, 3 ]
+         Integer elementSz = PyList_Size(pyItem);
+         PyReturnValue rv;
+
+         if (PyList_Check(pyItem))
          {
-            // throw an exception if the output dimension row and column is not what has been returned by Python, or
-            // if the size of each list within list is not the same.
-            if (PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i)) || listSz != outRow || elementSz != outCol)
-               throw CommandException("Python has returned an unexpected array dimension. \n");
-         }
-         for (Integer i = 0; i < listSz; i++)
-         {
-            pyItem = PyList_GetItem(member, i);
-            RealArray vItem;
-            for (Integer j = 0; j < elementSz; j++)
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned a list of list "
+                     "of Floats/Integers.\n");
+            #endif
+
+            rv.toType = Gmat::RMATRIX_TYPE;
+
+            for (Integer i = 1; i < listSz; i++)
             {
-               Real ret;
-               PyObject *pyElem = PyList_GetItem(pyItem, j);
+               // throw an exception if the output dimension row and column is not
+               // what has been returned by Python, or if the size of each list
+               // within the top list is not the same.
+               if ((PyList_Size(pyItem) != PyList_Size(PyList_GetItem(member, i))) ||
+                  (listSz != outRow) || (elementSz != outCol))
+                  throw CommandException("The dimension of the array returned "
+                  "from Python does not match the dimension of the "
+                  "receiving array in GMAT.");
+            }
 
-               // if the element is a Python Integer/Long, convert it to C++ double
-               if (PyLong_Check(pyElem))
-                  ret = PyLong_AsDouble(pyElem);
-               // else if the element is a Python Float
-               else if (PyFloat_Check(pyElem))
-                  ret = PyFloat_AsDouble(pyElem);
+            for (Integer i = 0; i < listSz; i++)
+            {
+               pyItem = PyList_GetItem(member, i);
+               RealArray vItem;
+               for (Integer j = 0; j < elementSz; j++)
+               {
+                  Real ret;
+                  PyObject *pyElem = PyList_GetItem(pyItem, j);
+
+                  // If element is a Python Integer/Long, convert to Real
+                  if (PyLong_Check(pyElem))
+                     ret = PyLong_AsDouble(pyElem);
+                  else if (PyFloat_Check(pyElem))
+                     ret = PyFloat_AsDouble(pyElem);
+                  else
+                     throw CommandException("An array member received from Python "
+                     "is neither a float nor an integer, so GMAT cannot "
+                     "process the returned value.");
+
+                  #ifdef DEBUG_EXECUTION
+                     MessageInterface::ShowMessage("Array element [%d, %d] value in "
+                           "output array is %lf\n", i, j, ret);
+                  #endif
+
+                  vItem.push_back(ret);
+               }
+               rv.lolData.push_back(vItem);
+            }
+            dataReturn.push_back(rv);
+            retval = true;
+         }
+         else if (PyFloat_Check(pyItem))
+         {
+            #ifdef DEBUG_EXECUTION
+               MessageInterface::ShowMessage("Python has returned a list of "
+                     "floats.\n");
+            #endif
+            rv.toType = Gmat::RMATRIX_TYPE;
+            for (Integer i = 0; i < listSz; ++i)
+            {
+               pyItem = PyList_GetItem(member, i);
+               rv.floatData.push_back(PyFloat_AsDouble(pyItem));
 
                #ifdef DEBUG_EXECUTION
-                  MessageInterface::ShowMessage("Array element [%d, %d] value in output array is %lf\n", i, j, ret);
+                  MessageInterface::ShowMessage("Value is %lf\n", 
+                        rv.floatData[rv.floatData.size()-1]);
                #endif
-
-               vItem.push_back(ret);
             }
-            rv.lolData.push_back(vItem);
+            dataReturn.push_back(rv);
+            retval = true;
          }
-         dataReturn.push_back(rv);
-         retval = true;
       }
-      else if (PyFloat_Check(pyItem))
-      {
-         #ifdef DEBUG_EXECUTION
-            MessageInterface::ShowMessage("Python has returned a list of floats.\n");
-         #endif
-         rv.toType = Gmat::RMATRIX_TYPE;
-         for (Integer i = 0; i < listSz; ++i)
-         {
-            pyItem = PyList_GetItem(member, i);
-            rv.floatData.push_back(PyFloat_AsDouble(pyItem));
-
-            #ifdef DEBUG_EXECUTION
-               MessageInterface::ShowMessage("Value is %lf\n", rv.floatData[rv.floatData.size()-1]);
-            #endif
-         }
-         dataReturn.push_back(rv);
-         retval = true;
-      }
+   }
+   catch (...)
+   {
+      throw CommandException("An error was encountered processing return data "
+            "from Python");
    }
 
    return retval;
 }
 
 
-
 //------------------------------------------------------------------------------
 // void CallPythonFunction::RunComplete()
 //------------------------------------------------------------------------------
 /**
-* Finalizes and closes the Python interface
-*/
+ * Finalizes and closes the Python interface
+ */
 //------------------------------------------------------------------------------
 void CallPythonFunction::RunComplete()
 {
@@ -615,14 +771,14 @@ void CallPythonFunction::RunComplete()
 // Integer FillInputList()
 //------------------------------------------------------------------------------
 /**
-* Fills in input parameters
-*
-* This method will fill in input parameters declared in script.
-*
-* @param none
-*
-* @return Integer
-*/
+ * Fills in input parameters
+ *
+ * This method will fill in input parameters declared in script.
+ *
+ * @param none
+ *
+ * @return Integer
+ */
 //------------------------------------------------------------------------------
 Integer CallPythonFunction::FillInputList()
 {
@@ -637,9 +793,9 @@ Integer CallPythonFunction::FillInputList()
    {
       if ((mapObj = FindObject(*it)) == NULL)
       {
-         throw CommandException("   CallPythonFunction command cannot find Parameter " +
-                                       *it + " in script line\n   \"" +
-                                          GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         throw CommandException("The CallPythonFunction command cannot find the parameter " +
+                                *it + " in script line\n   \"" +
+                                GetGeneratingString(Gmat::SCRIPTING) + "\"");
       }
          
       if (mapObj->IsOfType(Gmat::PARAMETER))
@@ -654,14 +810,14 @@ Integer CallPythonFunction::FillInputList()
 // Integer FillOutputList()
 //------------------------------------------------------------------------------
 /**
-* Fills in output parameters
-*
-* This method will fill in output parameters declared in script.
-*
-* @param none
-*
-* @return Integer
-*/
+ * Fills in output parameters
+ *
+ * This method will fill in output parameters declared in script.
+ *
+ * @param none
+ *
+ * @return Integer
+ */
 //------------------------------------------------------------------------------
 Integer CallPythonFunction::FillOutputList()
 {
@@ -676,9 +832,9 @@ Integer CallPythonFunction::FillOutputList()
    {
       if ((mapObj = FindObject(*it)) == NULL)
       {
-         throw CommandException("   CallPythonFunction command cannot find Parameter " +
-                                       *it + " in script line\n   \"" +
-                                          GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         throw CommandException("The CallPythonFunction command cannot find "
+                                "the parameter " + *it + " in script line\n   \"" +
+                                GetGeneratingString(Gmat::SCRIPTING) + "\"");
       }
 
       if (mapObj->IsOfType(Gmat::PARAMETER))
@@ -693,14 +849,12 @@ Integer CallPythonFunction::FillOutputList()
 // void SendInParam()
 //------------------------------------------------------------------------------
 /**
-* Fills in format string and input parameters for Python function
-*
-* This method will fill in format string and input parameters
-*
-* @param none
-*
-* @return void
-*/
+ * Fills in format string and input parameters for Python function
+ *
+ * This method will fill in format string and input parameters
+ *
+ * @param none
+ */
 //------------------------------------------------------------------------------
 void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gmat::ParameterType> &paramType)
 {
@@ -787,7 +941,6 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
          }
       }
    }
-
 }
 
 
@@ -795,12 +948,12 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
 // void GetOutParams()
 //------------------------------------------------------------------------------
 /**
-* Get output parameters
-*
-* Checks match between returned data and GMAT expectations, and fills in output parameters
-*
-* @return void
-*/
+ * Get output parameters
+ *
+ * Checks match between returned data and GMAT expectations, and fills in output parameters
+ *
+ * @return void
+ */
 //------------------------------------------------------------------------------
 void CallPythonFunction::GetOutParams()
 {

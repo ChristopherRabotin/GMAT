@@ -13,13 +13,11 @@
 //
 // Author: Farideh Farahnak, Thinking Systems, Inc.
 // Created: 2015/02/23
-//
+//------------------------------------------------------------------------------
 /**
  * Import/Export Definitions for the Python interface library 
  */
 //------------------------------------------------------------------------------
-
-
 
 #ifndef PYTHONINTERFACE_DEFS_HPP
 #define PYTHONINTERFACE_DEFS_HPP
