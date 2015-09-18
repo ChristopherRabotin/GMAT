@@ -33,43 +33,43 @@
 class PYTHON_API PythonInterface : public Interface
 {
 public:
-   /// The singleton instance
    static PythonInterface* PyInstance();
-
-   /// Load Python engine with all built-in modules
-   bool PyInitialize();
-   /// Unload Python modules
-   bool PyFinalize();
-   /// Add Module path to sys.path
-   void PyAddModulePath(const StringArray& path);
-   /// Python function wrapper
-   PyObject* PyFunctionWrapper(const std::string &modName, const std::string &funcName,
-                                 const std::vector<void *> &argIn, std::vector<Gmat::ParameterType> paramType, UnsignedInt row, UnsignedInt col, UnsignedInt argSz);
+   bool                    PyInitialize();
+   bool                    PyFinalize();
+   void                    PyAddModulePath(const StringArray& path);
+   PyObject*               PyFunctionWrapper(const std::string &modName, 
+                                             const std::string &funcName,
+                                             const std::vector<void *> &argIn, 
+                                             std::vector<Gmat::ParameterType> paramType, 
+                                             UnsignedInt row, UnsignedInt col, 
+                                             UnsignedInt argSz);
 	
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
 
 private:
-   static PythonInterface *instance;
-	
+   /// The interface singleton
+   static PythonInterface     *instance;
+   /// Flag indicating if the Python engine is loaded
+   bool                       isPythonInitialized;
+   /// Number of Python commands referenced in the GMAT script
+   Integer                    numPyCommands;
+   /// Identity of the the platform being run
+   char                       *plF;
+
    PythonInterface(const std::string &name);
    ~PythonInterface();
    PythonInterface(const PythonInterface &pi);
-   PythonInterface& operator=(const PythonInterface &pi);
+   PythonInterface&     operator=(const PythonInterface &pi);
 
-   // inherited from GmatBase
+   // Methods inherited from GmatBase
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);
 
-   /// Is Python engine loaded
-   bool isPythonInitialized;
-   /// Number of Python command referenced in Gmat script
-   Integer numPyCommands;
-   /// Identify the platform we are running
-   char *plF;
-   void PyPathSep();
-   /// Python error/exception message
-   void PyErrorMsg(PyObject* pType, PyObject* pValue, PyObject* pTraceback, std::string &msg);
+
+   void                 PyPathSep();
+   void                 PyErrorMsg(PyObject* pType, PyObject* pValue, 
+                                   PyObject* pTraceback, std::string &msg);
 };
 
 #endif
