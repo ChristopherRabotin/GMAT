@@ -7,8 +7,6 @@
 /*.ilk
 /*.lib
 /*.pdb
-*.so.R2015a
-/GMATd-R2015a
+*R2015a
 /GMATd
-/GmatConsoled-R2015a
 /GmatConsoled

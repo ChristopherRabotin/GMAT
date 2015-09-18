@@ -886,7 +886,7 @@ bool SolarPowerSystem::SetStringParameter(const Integer id,
       {
          if (find(shadowBodyNames.begin(), shadowBodyNames.end(), value) == shadowBodyNames.end())
          {
-               shadowBodyNames.push_back(value);
+               shadowBodyNames.push_back(GmatStringUtil::Trim(value));
                settingNoBodies = false;
                #ifdef DEBUG_SET
                   MessageInterface::ShowMessage(
@@ -897,7 +897,7 @@ bool SolarPowerSystem::SetStringParameter(const Integer id,
       // ... or, replace current name
       else
       {
-         shadowBodyNames.at(index) = value;
+         shadowBodyNames.at(index) = GmatStringUtil::Trim(value);
          settingNoBodies = false;
          #ifdef DEBUG_SET
             MessageInterface::ShowMessage(

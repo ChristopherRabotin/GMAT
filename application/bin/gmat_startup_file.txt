@@ -54,6 +54,7 @@ PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
 PLUGIN                 = ../plugins/libDataInterface
 PLUGIN                 = ../plugins/libProductionPropagators
+PLUGIN                 = ../plugins/libPythonInterface
 
 # Alpha plugins
 PLUGIN                = ./libCInterface
@@ -96,6 +97,8 @@ GMAT_FUNCTION_PATH     = ROOT_PATH/userfunctions/gmat
 #-----------------------------------------------------------
 MATLAB_FUNCTION_PATH   = ROOT_PATH/matlab
 MATLAB_FUNCTION_PATH   = ROOT_PATH/userfunctions/matlab
+#-----------------------------------------------------------
+PYTHON_MODULE_PATH     = ROOT_PATH/userfunctions/python
 #-----------------------------------------------------------
 DATA_PATH              = ROOT_PATH/data/
 #-----------------------------------------------------------

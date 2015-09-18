@@ -24,25 +24,25 @@
 
 #include "f2c.h"
 
-//#ifdef __linux__
-//
-//#ifndef integer
-//typedef int integer;
-//#endif
-//
-//#ifndef logical
-//typedef int logical;
-//#endif
-//
-//#ifndef ftnlen
-//typedef int ftnlen;
-//#endif
-//
-//#else
+#ifdef __linux__
+
+#ifndef integer
+typedef int integer;
+#endif
+
+#ifndef logical
+typedef int logical;
+#endif
+
+#ifndef ftnlen
+typedef int ftnlen;
+#endif
+
+#else
 typedef long int integer;
 typedef long int logical;
 typedef long int ftnlen;
-//#endif
+#endif
 
 typedef float real;
 typedef double doublereal;

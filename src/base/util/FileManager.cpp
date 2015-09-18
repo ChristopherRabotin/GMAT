@@ -107,11 +107,11 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    
    // Specific file name
    "DE405_FILE",
-   "DE421_FILE",
-   "DE424_FILE",
+   "DE421_FILE",						// made change by TUAN NGUYEN
+   "DE424_FILE",                 // made change by TUAN NGUYEN
    "DE430_FILE",
-   "IAUSOFA_FILE",
-   "ICRF_FILE",
+   "IAUSOFA_FILE",					// made change by TUAN NGUYEN
+   "ICRF_FILE",						// made change by TUAN NGUYEN
    "PLANETARY_SPK_FILE",
    "JGM2_FILE",
    "JGM3_FILE",
@@ -131,8 +131,7 @@ FileManager::FILE_TYPE_STRING[FileTypeCount] =
    "CONSTELLATION_FILE",
    "SPACECRAFT_MODEL_FILE",
    "SPAD_SRP_FILE",
-   "HELP_FILE",
-};
+   "HELP_FILE",};
 
 FileManager* FileManager::theInstance = NULL;
 
@@ -302,6 +301,8 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
          // will have higher priority in search path for the new file path implementation.
          // (LOJ: 2014.07.09)
          AddMatlabFunctionPath(newDir);
+//         //Python
+//         AddPythonModulePath(newDir);
       }
       else
          return false;
@@ -1512,7 +1513,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    WriteFiles(outStream, "PLANETARY SPK");
    outStream << "#-----------------------------------------------------------\n";
    mPathWrittenOuts.push_back("PLANETARY_EPHEM_SPK_PATH");
-
+   
    //---------------------------------------------
    // write the PLANETARY_EPHEM_DE_PATH and DE file next
    //---------------------------------------------
@@ -2714,6 +2715,63 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
    return mMatlabFunctionFullPaths;
 }
 
+
+//------------------------------------------------------------------------------
+// void AddPythonModulePath(const std::string& path)
+//------------------------------------------------------------------------------
+/**
+ * Adds a folder to the buffer for the Python search path
+ *
+ * @param path The new folder that may contain Python modules
+ */
+//------------------------------------------------------------------------------
+void FileManager::AddPythonModulePath(const std::string& path)
+{
+#ifdef DEBUG_FUNCTION_PATH
+	MessageInterface::ShowMessage
+		("FileManager::AddPythonModulePath() Adding %s to PythonModulePath\n",
+		path.c_str());
+#endif
+
+	std::list<std::string>::iterator pos =
+		find(mPythonModulePaths.begin(), mPythonModulePaths.end(), path);
+
+	if (pos == mPythonModulePaths.end())
+	{
+		mPythonModulePaths.push_back(path);
+	}
+	
+
+#ifdef DEBUG_FUNCTION_PATH
+	pos = mPythonFunctionPaths.begin();
+	while (pos != mPythonFunctionPaths.end())
+	{
+		MessageInterface::ShowMessage
+			("   mPythonModulePaths=%s\n", (*pos).c_str());
+		++pos;
+	}
+#endif
+}
+
+
+// ------------------------------------------------------------------------------
+// const StringArray& GetAllPythonModulePaths()
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetAllPythonModulePaths()
+{
+	mPythonModuleFullPaths.clear();
+
+	std::list<std::string>::iterator listpos = mPythonModulePaths.begin();
+	while (listpos != mPythonModulePaths.end())
+	{
+		mPythonModuleFullPaths.push_back(ConvertToAbsPath(*listpos));
+		++listpos;
+	}
+
+	return mPythonModuleFullPaths;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetLastFilePathMessage()
 //------------------------------------------------------------------------------
@@ -2859,8 +2917,10 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
       // Handle Gmat and Matlab Function path
       if (type == "GMAT_FUNCTION_PATH")
          AddGmatFunctionPath(str2, false);
-      else if (type == "MATLAB_FUNCTION_PATH")
-         AddMatlabFunctionPath(str2, false);
+	  else if (type == "MATLAB_FUNCTION_PATH")
+		  AddMatlabFunctionPath(str2, false);
+	  else if (type == "PYTHON_MODULE_PATH")
+		  AddPythonModulePath(str2);
 
    }
    else if (type.find("_FILE_ABS") != type.npos)
@@ -3190,7 +3250,6 @@ void FileManager::RefreshFiles()
    // we will leave this here as a placeholder anyway
    AddFileType("PLANETARY_COEFF_FILE", "PLANETARY_COEFF_PATH/NUT85.DAT");
    AddFileType("NUTATION_COEFF_FILE", "PLANETARY_COEFF_PATH/NUTATION.DAT");
-   AddFileType("PLANETARY_PCK_FILE", "PLANETARY_COEFF_PATH/pck00010.tpc");
 
    // time path and files
    AddFileType("TIME_PATH", "DATA_PATH/time/");

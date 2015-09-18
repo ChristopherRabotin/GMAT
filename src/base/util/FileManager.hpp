@@ -198,6 +198,10 @@ public:
    std::string GetMatlabFunctionPath(const std::string &name);
    const StringArray& GetAllMatlabFunctionPaths();
    
+   // Python methods
+   void AddPythonModulePath(const std::string &path);
+   const StringArray& GetAllPythonModulePaths();
+
    // Warning/Error message
    std::string GetLastFilePathMessage();
    
@@ -242,12 +246,17 @@ private:
    std::map<std::string, FileInfo*> mFileMap;
    std::list<std::string> mGmatFunctionPaths;
    std::list<std::string> mMatlabFunctionPaths;
+  
    StringArray mGmatFunctionFullPaths;
    StringArray mMatlabFunctionFullPaths;
    StringArray mSavedComments;
    StringArray mPathWrittenOuts;
    StringArray mFileWrittenOuts;
-   
+
+   //Python
+   StringArray mPythonModuleFullPaths;
+   std::list<std::string> mPythonModulePaths;
+
    StringArray mPluginList;
    
    std::string GetFunctionPath(FunctionType type, std::list<std::string> &pathList,
