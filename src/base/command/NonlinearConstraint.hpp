@@ -170,6 +170,9 @@ protected:
    //Integer             parmId;
    /// flag indicating whether or not the generating string has been interpreted
    bool                interpreted;
+   std::string         panelDescriptor;        // Shows "(<=) Sat.SMA" or whatever 
+   Real                panelDesired;
+   Real                panelAchieved;
    
    //bool                InterpretParameter(const std::string text,
    //                                       std::string &paramType,

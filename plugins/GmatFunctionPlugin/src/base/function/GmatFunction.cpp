@@ -25,7 +25,7 @@
 #include "FileUtil.hpp"          // for ParseFileName(), GetCurrentWorkingDirectory()
 #include "StringUtil.hpp"        // for Trim()
 #include "CommandUtil.hpp"       // for ClearCommandSeq()
-#include "HardwareException.hpp" 
+#include "Parameter.hpp"         // for GetReturnType()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION_CONSTRUCT
@@ -354,15 +354,23 @@ bool GmatFunction::Initialize(ObjectInitializer *objInit, bool reinitialize)
             MessageInterface::ShowMessage
                ("   Now checking if input parameter is redefined to different type\n");
             #endif
-            
+
             // Check if input parameter is redefined in a function
             if (funcObj->GetTypeName() != mapObj->GetTypeName())
             {
-               throw FunctionException
-                  ("Redefinition of formal input parameter '" + funcObjName +
-                   "' to different type is not allowed in GMAT function '" +
-                   functionPath + "'.  It's expected type is '" +
-                   mapObj->GetTypeName() + "'.\n");
+               // Check for return type if object type is Parameter?
+               // (fix for GMT-5262 LOJ: 2015.09.04)
+               if (funcObj->IsOfType(Gmat::PARAMETER) && mapObj->IsOfType(Gmat::PARAMETER))
+               {
+                  if (((Parameter*)funcObj)->GetReturnType() != ((Parameter*)mapObj)->GetReturnType())
+                  {
+                     throw FunctionException
+                        ("Redefinition of formal input parameter '" + funcObjName +
+                         "' to different type is not allowed in GMAT function '" +
+                         functionPath + "'.  It's expected type is '" +
+                         mapObj->GetTypeName() + "'.\n");
+                  }
+               }
             }
          }
       }
@@ -1080,7 +1088,9 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
    MessageInterface::ShowMessage
       ("\n============================ BEGIN INITIALIZATION of local objects in '%s'\n",
        functionName.c_str());
-   MessageInterface::ShowMessage("GmatFunction::InitializeLocalObjects() entered\n");
+   MessageInterface::ShowMessage
+      ("GmatFunction::InitializeLocalObjects() entered, ignoreException=%d\n",
+       ignoreException);
    MessageInterface::ShowMessage
       ("Now at command <%p><%s> \"%s\"\n", current, current->GetTypeName().c_str(),
        current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
@@ -1109,18 +1119,22 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
          return false;
       }
    }
-   catch (BaseException &e)
+   catch (BaseException &be)
    {
+      #ifdef DEBUG_FUNCTION_INIT
+      MessageInterface::ShowMessage
+         ("==> Caught exception:%s, IsFatal=%d\n", be.GetFullMessage().c_str());
+      #endif
       // We need to ignore exception thrown for the case Object is
       // created after it is used, such as
       // GMAT DefaultOpenGL.ViewPointReference = EarthSunL1;
       // Create LibrationPoint EarthSunL1;
-      if (!ignoreException || (ignoreException && e.IsFatal()))
+      if (!ignoreException || (ignoreException && be.IsFatal()))
       {
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("objInit->InitializeObjects() threw a fatal exception:\n'%s'\n"
-             "   So rethrow...\n", e.GetFullMessage().c_str());
+             "   So rethrow...\n", be.GetFullMessage().c_str());
          #endif
          throw;
       }
@@ -1129,7 +1143,7 @@ bool GmatFunction::InitializeLocalObjects(ObjectInitializer *objInit,
          #ifdef DEBUG_FUNCTION_INIT
          MessageInterface::ShowMessage
             ("objInit->InitializeObjects() threw an exception:\n'%s'\n"
-             "   So ignoring...\n", e.GetFullMessage().c_str());
+             "   So ignoring...\n", be.GetFullMessage().c_str());
          #endif
       }
    }

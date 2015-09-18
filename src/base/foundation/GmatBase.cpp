@@ -4032,7 +4032,8 @@ std::string GmatBase::WriteObjectInfo(const std::string &title, GmatBase *obj,
    if (obj)
    {
       objStream << "[" << obj->GetTypeName() << "]" << "'" << obj->GetName() << "'";
-      objStream << ", IsGlobal:" << obj->IsGlobal() << ", IsLocal():" << obj->IsLocal();
+      objStream << ", IsGlobal:" << (obj->IsGlobal() ? "true" : "false") << ", IsLocal():"
+                << (obj->IsLocal() ? "true" : "false");
    }
    else
    {

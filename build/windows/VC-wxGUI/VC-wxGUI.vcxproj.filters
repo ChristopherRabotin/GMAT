@@ -2418,6 +2418,24 @@
     <ClCompile Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverString.cpp">
       <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManager.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\executive\ListenerManagerInterface.cpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\foundation\IChangeListener.cpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\base\solver\ISolverListener.cpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\app\GuiListenerManager.cpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.cpp">
+      <Filter>Source Files\gui\subscriber</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\base\attitude\Attitude.hpp">
@@ -4603,6 +4621,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\plugins\NewParameterPlugin\src\base\parameter\SolverString.hpp">
       <Filter>Source Files\plugins\NewParameterPlugin\parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManager.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\executive\ListenerManagerInterface.hpp">
+      <Filter>Source Files\base\executive</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\foundation\IChangeListener.hpp">
+      <Filter>Source Files\base\foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\base\solver\ISolverListener.hpp">
+      <Filter>Source Files\base\solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\app\GuiListenerManager.hpp">
+      <Filter>Source Files\gui\app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\subscriber\MdiTableViewFrame.hpp">
+      <Filter>Source Files\gui\subscriber</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

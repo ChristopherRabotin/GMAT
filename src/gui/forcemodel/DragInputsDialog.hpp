@@ -26,13 +26,14 @@ class DragInputsDialog : public GmatDialog
 {
 public:
    
-   DragInputsDialog(wxWindow *parent, Real *dragBuffer, std::vector<std::string> * dragStringBuffer, const wxString &title = "");
+   DragInputsDialog(wxWindow *parent, DragForce *dragForce, Real *dragBuffer,
+         std::vector<std::string> * dragStringBuffer, const wxString &title = "");
    virtual ~DragInputsDialog();
    
 private:
    
    bool isTextModified;
-   void Update();
+   DragForce *theDragForce;         // Used for validation
    
    wxStaticText *solarFluxStaticText;
    wxStaticText *avgSolarFluxStaticText;
@@ -78,8 +79,6 @@ private:
    wxArrayString schattentimingArray;
    wxArrayString schattenErrorArray;
 
-   std::string predictedModelString;
-   std::string historicModelString;
    // Methods inherited from GmatDialog
    virtual void Create();
    virtual void LoadData();

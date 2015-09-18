@@ -626,19 +626,24 @@ void GmatCommand::ClearWrappers()
  * @param cmdName The name of the command that is being checked
  * @param ignoreUnsetReference Flag used to control exceptions when the wrapper
  *                             object is not set
+ * @param checkUnsetValue  Flag for checking unset value
+ * @param unsetValue Value used for checking unset value
+ * @param unsetValueMsg The error message to be thrown when value is unset
  */
 //------------------------------------------------------------------------------
 void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                                 Gmat::ParameterType needType,
                                 const std::string &cmdName,
-                                bool ignoreUnsetReference)
+                                bool ignoreUnsetReference,
+                                bool checkUnsetValue, Real unsetValue,
+                                const std::string &unsetValueErrMsg)
 {
    if (forWrapper == NULL)
    {
       std::string cmdEx = "Reference object not set for command " + 
                           cmdName;
       cmdEx += ".\n";
-      throw CommandException(cmdEx);
+      throw CommandException(cmdEx, Gmat::ERROR_);
    }
    bool typeOK = true;
    Gmat::ParameterType baseType;
@@ -662,7 +667,7 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
       {
          std::string errmsg = "Reference not set for \"" + desc;
          errmsg += "\", cannot check for correct data type.";
-         throw CommandException(errmsg);
+         throw CommandException(errmsg, Gmat::ERROR_);
       }
    }
    
@@ -672,7 +677,34 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                   baseStr + "\" on command \"" + cmdName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Object Property (Real), Real Number, Variable, "
-                  "Array Element, or Parameter ]. ");
+                  "Array Element, or Parameter ]. ", Gmat::ERROR_);
+   }
+   
+   if (checkUnsetValue)
+   {
+      try
+      {
+         Real realVal;
+         if (!GmatStringUtil::ToReal(desc, realVal))
+            realVal = forWrapper->EvaluateReal();
+         #ifdef DEBUG_CHECK_UNSET_VALUE
+         MessageInterface::ShowMessage
+            ("In GmatCommand::CheckDataType(), realVal = %g\n", realVal);
+         #endif
+         if (GmatMathUtil::IsEqual(realVal, unsetValue, 1.0e-16))
+            throw CommandException(unsetValueErrMsg, Gmat::ERROR_);
+      }
+      catch (CommandException &ce)
+      {
+         // If exception thrown right above, re-throw
+         throw;
+      }
+      catch (BaseException &be)
+      {
+         throw CommandException("A value of \"" + desc + "\" of base type \"" +
+                  baseStr + "\" on command \"" + cmdName + 
+                  "\" cannot be evaluated.\n", Gmat::ERROR_);
+      }
    }
 }
 

@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release-wx3.0|Win32">
+      <Configuration>Release-wx3.0</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9C5790A0-5085-4AFF-98F7-9991C350A045}</ProjectGuid>
+    <RootNamespace>libPythonInterface</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <PlatformToolset>v120</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <OutDir>..\..\..\application\plugins</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\..\..\application\plugins\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\..\..\application\plugins</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\..\Gmat3rdparty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;PYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\Gmat3rdparty\python\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatbase.lib;python34.lib%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DYNAMICLINK;PYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdParty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\function;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\plugins\PythonInterfacePlugin\src\base\plugin;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4251;4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\..\Gmat3rdparty\python\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatbase.lib;python34.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-wx3.0|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\..\..\Gmat3rdparty\python\include;..\..\..\plugins\PythonInterfacePlugin\src\base\include;..\..\..\plugins\PythonInterfacePlugin\src\base\factory;..\..\..\plugins\PythonInterfacePlugin\src\base\command;..\..\..\plugins\PythonInterfacePlugin\src\base\interface;..\..\..\src\base\include;..\..\..\src\base\attitude;..\..\..\src\base\command;..\..\..\src\base\spacecraft;..\..\..\src\base\parameter;..\..\..\src\base\foundation;..\..\..\src\base\interpreter;..\..\..\src\base\forcemodel;..\..\..\src\base\executive;..\..\..\src\base\subscriber;..\..\..\src\base\solver;..\..\..\src\base\coordsystem;..\..\..\src\base\solarsys;..\..\..\src\base\hardware;..\..\..\src\base\util;..\..\..\src\base\interface;..\..\..\src\base\function;..\..\..\src\base\factory;..\..\..\src\gui\app;..\..\..\src\gui\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DYNAMICLINK;PYTHON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>..\..\..\application\bin;..\..\..\..\Gmat3rdparty\python\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libGmatbase.lib;python34.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\command\CallPythonFunction.hpp" />
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\factory\PythonCommandFactory.hpp" />
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\function\PythonModule.hpp" />
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\include\pythoninterface_defs.hpp" />
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\interface\PythonInterface.hpp" />
+    <ClInclude Include="..\..\..\plugins\PythonInterfacePlugin\src\base\plugin\GmatPluginFunctions.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\command\CallPythonFunction.cpp" />
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\factory\PythonCommandFactory.cpp" />
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\function\PythonModule.cpp" />
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\interface\PythonInterface.cpp" />
+    <ClCompile Include="..\..\..\plugins\PythonInterfacePlugin\src\base\plugin\GmatPluginFunctions.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

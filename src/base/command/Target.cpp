@@ -858,6 +858,7 @@ bool Target::Execute()
    if (!branchExecuting)
    {
       theSolver->AdvanceState();
+      theSolver->ReportProgress(listeners, Solver::UNDEFINED_STATE);
 
       if (theSolver->GetState() == Solver::FINISHED)
       {
@@ -904,5 +905,5 @@ void Target::RunComplete()
    // Free local data (LOJ: 2009.03.17)
    FreeLoopData();
    
-   BranchCommand::RunComplete();
+   SolverBranchCommand::RunComplete();
 }

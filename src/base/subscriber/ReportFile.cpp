@@ -631,11 +631,14 @@ bool ReportFile::Initialize()
    {
       if ((mNumParams == 0) && !usedByReport)
       {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** The ReportFile named \"%s\" may not be created.  "
-             "Currently parameter list of reporting every integration step is "
-             "empty and it may not be used by the Report command.\n", GetName().c_str());
-         
+         // Write warning if ReportFile is not created inside a function
+         if (currentProvider && !(currentProvider->TakeAction("IsInFunction")))
+         {
+            MessageInterface::ShowMessage
+               ("*** WARNING *** The ReportFile named \"%s\" will not be created.  "
+                "Currently parameter list of reporting every integration step is "
+                "empty and it is not used by the Report command.\n", GetName().c_str());
+         }
          active = false;
          return false;
       }

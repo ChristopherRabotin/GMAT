@@ -204,7 +204,7 @@ targetColorStr     ("")
 //---------------------------------------------------------------------------
 SpacePoint::SpacePoint(const SpacePoint &sp) :
 GmatBase(sp),
-theSolarSystem           (NULL),   // sp.theSolarSystem),
+theSolarSystem           (sp.theSolarSystem),
 inertialCS               (NULL),
 bodyFixedCS              (NULL),
 j2000Body                (sp.j2000Body), //(NULL),
@@ -215,6 +215,8 @@ spiceFrameID             (sp.spiceFrameID),
 naifIdObserver           (sp.naifIdObserver),
 default_j2000BodyName    (sp.default_j2000BodyName),
 default_naifId           (sp.default_naifId),
+default_naifIdRefFrame   (sp.default_naifIdRefFrame),
+default_spiceFrameID     (sp.default_spiceFrameID),
 spiceSetupDone           (false),
 orbitSpiceKernelNames    (sp.orbitSpiceKernelNames),
 attitudeSpiceKernelNames (sp.attitudeSpiceKernelNames),
@@ -276,6 +278,8 @@ const SpacePoint& SpacePoint::operator=(const SpacePoint &sp)
    frameSpiceKernelNames    = sp.frameSpiceKernelNames;
    default_j2000BodyName    = sp.default_j2000BodyName;
    default_naifId           = sp.default_naifId;
+   default_naifIdRefFrame   = sp.default_naifIdRefFrame;
+   default_spiceFrameID     = sp.default_spiceFrameID;
    theSpkPath               = sp.theSpkPath;
    hasAttitude              = false;
    useOrbitColorName        = sp.useOrbitColorName;
@@ -569,7 +573,7 @@ bool SpacePoint::IsParameterEqualToDefault(const Integer id) const
 MessageInterface::ShowMessage
    ("SpacePoint::IsParameterEqualToDefault() '%s'\n", GetName().c_str());
 MessageInterface::ShowMessage("--- spiceFrameID = %s, default = %s\n",
-      spiceFrameND.c_str(), default_spiceFrameID.c_str());
+      spiceFrameID.c_str(), default_spiceFrameID.c_str());
 #endif
       return (default_spiceFrameID == spiceFrameID);
    }
@@ -631,15 +635,15 @@ MessageInterface::ShowMessage("--- spiceFrameID = %s, default = %s\n",
 bool SpacePoint::SaveAllAsDefault()
 {
 #ifdef DEBUG_SP_CLOAKING
-   MessageInterface::ShowMessage("In SaveAllAsDefault ...\n");
+   MessageInterface::ShowMessage("In SaveAllAsDefault (for %s)...\n", instanceName.c_str());
    MessageInterface::ShowMessage("--- spiceFrameID = %s, default_spiceFrameID = %s\n",
          spiceFrameID.c_str(), default_spiceFrameID.c_str());
-   MessageInterface::ShowMessage("--- defaults (attitude spice kernels) are:\n");
-   for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
-      MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
-   MessageInterface::ShowMessage("--- current values (attitude spice kernels) are:\n");
-   for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
-      MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
+//   MessageInterface::ShowMessage("--- defaults (attitude spice kernels) are:\n");
+//   for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
+//      MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
+//   MessageInterface::ShowMessage("--- current values (attitude spice kernels) are:\n");
+//   for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+//      MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
 #endif
    GmatBase::SaveAllAsDefault();
    default_j2000BodyName  = j2000BodyName;
@@ -656,15 +660,15 @@ bool SpacePoint::SaveAllAsDefault()
    default_frameSpiceKernelNames    = frameSpiceKernelNames;
    default_scClockSpiceKernelNames  = scClockSpiceKernelNames;
 #ifdef DEBUG_SP_CLOAKING
-   MessageInterface::ShowMessage("At end of SaveAllAsDefault ...\n");
+   MessageInterface::ShowMessage("At end of SaveAllAsDefault (for %s)...\n", instanceName.c_str());
    MessageInterface::ShowMessage("--- spiceFrameID = %s, default_spiceFrameID = %s\n",
          spiceFrameID.c_str(), default_spiceFrameID.c_str());
-   MessageInterface::ShowMessage("--- defaults (attitude spice kernels) are:\n");
-   for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
-      MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
-   MessageInterface::ShowMessage("--- current values (attitude spice kernels) are:\n");
-   for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
-      MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
+//   MessageInterface::ShowMessage("--- defaults (attitude spice kernels) are:\n");
+//   for (Integer ii = 0; ii < default_attitudeSpiceKernelNames.size(); ii++)
+//      MessageInterface::ShowMessage("   \"%s\"\n", default_attitudeSpiceKernelNames.at(ii).c_str());
+//   MessageInterface::ShowMessage("--- current values (attitude spice kernels) are:\n");
+//   for (Integer ii = 0; ii < attitudeSpiceKernelNames.size(); ii++)
+//      MessageInterface::ShowMessage("   \"%s\"\n", attitudeSpiceKernelNames.at(ii).c_str());
 #endif
    return true;
 }
@@ -1119,8 +1123,8 @@ bool SpacePoint::IsParameterReadOnly(const Integer id) const
       return true;
    if (id == NAIF_ID_REFERENCE_FRAME) // set to false in appropriate derived classes
       return true;
-   if (id == SPICE_FRAME_ID) // set to false in appropriate derived classes
-      return true;
+//   if (id == SPICE_FRAME_ID) // set to false in appropriate derived classes
+//      return true;
 
 //   // Turn off parameters for string arrays if they are empty
 //   if (id == ORBIT_SPICE_KERNEL_NAME)

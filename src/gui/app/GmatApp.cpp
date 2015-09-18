@@ -39,6 +39,8 @@
 
 #include "MessageInterface.hpp"
 #include "PlotInterface.hpp"
+#include "ListenerManagerInterface.hpp"
+#include "GuiListenerManager.hpp"
 #include "GuiMessageReceiver.hpp"
 #include "GuiPlotReceiver.hpp"
 #include "GuiInterpreter.hpp"
@@ -76,7 +78,10 @@ GmatApp::GmatApp()
    
    GuiPlotReceiver *thePlotReceiver = GuiPlotReceiver::Instance();
    PlotInterface::SetPlotReceiver(thePlotReceiver);
-   
+
+   GuiListenerManager *theListenerManager = GuiListenerManager::Instance();
+   ListenerManagerInterface::SetListenerManager(theListenerManager);
+
    theModerator      = (Moderator *)NULL;
    scriptToRun       = "";
    showMainFrame     = true;

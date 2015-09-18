@@ -91,6 +91,7 @@
 //#define DEBUG_CREATE_CALC_POINT
 //#define DEBUG_CREATE_PARAMETER 1
 //#define DEBUG_CREATE_EPHEMFILE 1
+//#define DEBUG_CREATE_FUNCTION 1
 //#define DEBUG_PARAMETER_REF_OBJ 1
 //#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_COMMAND_APPEND 1
@@ -5302,7 +5303,7 @@ Function* Moderator::CreateFunction(const std::string &type,
                                     const std::string &name,
                                     Integer manage)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_FUNCTION
    MessageInterface::ShowMessage
       ("Moderator::CreateFunction() type = '%s', name = '%s', manage=%d\n",
        type.c_str(), name.c_str(), manage);
@@ -5342,9 +5343,32 @@ Function* Moderator::CreateFunction(const std::string &type,
       try
       {
          if (name != "" && manage == 1)
+         {
+            #if DEBUG_CREATE_FUNCTION
+            MessageInterface::ShowMessage
+               ("==> Adding function '%s' to configuration map\n", name.c_str());
+            #endif
             theConfigManager->AddFunction(obj);
-         else if (currentFunction != NULL && manage == 0)
-            unmanagedFunctions.push_back(obj);
+         }
+         else if (currentFunction != NULL)
+         {
+            if (manage == 0)
+            {
+               #if DEBUG_CREATE_FUNCTION
+               MessageInterface::ShowMessage
+                  ("==> Adding function '%s' to unmanagedFunctions\n", name.c_str());
+               #endif
+               unmanagedFunctions.push_back(obj);
+            }
+            else if (manage == 2) // Function is created inside a function
+            {
+               #if DEBUG_CREATE_FUNCTION
+               MessageInterface::ShowMessage
+                  ("==> Adding function '%s' to Sandbox global object map\n", name.c_str());
+               #endif
+               AddFunctionToGlobalObjectMap(obj);
+            }
+         }
       }
       catch (BaseException &e)
       {
@@ -5352,7 +5376,7 @@ Function* Moderator::CreateFunction(const std::string &type,
                                        e.GetFullMessage());
       }
       
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_FUNCTION
       MessageInterface::ShowMessage
          ("Moderator::CreateFunction() returning <%p> for '%s'\n", obj,
           obj->GetName().c_str());
@@ -5361,7 +5385,7 @@ Function* Moderator::CreateFunction(const std::string &type,
    }
    else
    {
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_FUNCTION
       MessageInterface::ShowMessage
          ("Moderator::CreateFunction() Unable to create Function "
           "name: %s already exist\n", name.c_str());
@@ -6696,6 +6720,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    // Set to 1 to always run the mission and get the sandbox error message
    // Changed this code while looking at Bug 1532 (LOJ: 2009.11.13)
    isRunReady = true;
+   currentSandboxNumber = sandboxNum;
    
    #if DEBUG_CONFIG
    MessageInterface::ShowMessage
@@ -9699,7 +9724,37 @@ Parameter* Moderator::GetDefaultY()
 }
 
 
-// sandbox
+// Sandbox
+//------------------------------------------------------------------------------
+// void AddFunctionToGlobalObjectMap(GmatBase *func)
+//------------------------------------------------------------------------------
+/**
+ * This method is called when Sandbox triggers calling GmatFunction during
+ * the Sandbox initialization. So GmatFunction created inside a function
+ * should be added to Sanbox global object map
+ */
+//------------------------------------------------------------------------------
+void Moderator::AddFunctionToGlobalObjectMap(Function *func)
+{
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage
+      ("Moderator::AddFunctionToGlobalObjectMap() adding, func=<%p>'%s' to "
+       "Sandbox global object map\n", func, func ? func->GetName().c_str() : "NULL");
+   #endif
+   
+   // Will using the last sandbox number work for multiple sanbox?
+   if (currentSandboxNumber > 0 && currentSandboxNumber <= Gmat::MAX_SANDBOX)
+   {
+      sandboxes[currentSandboxNumber-1]->AddFunctionToGlobalObjectMap(func);
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Adding Function to empty or invalid Sandbox number" +
+          currentSandboxNumber);
+   }
+}
+
 //------------------------------------------------------------------------------
 // void AddSolarSystemToSandbox(Integer index)
 //------------------------------------------------------------------------------
@@ -10178,6 +10233,7 @@ Moderator::Moderator()
    runState = Gmat::IDLE;
    detailedRunState = Gmat::IDLE;
    objectManageOption = 1;
+   currentSandboxNumber = 1;
    currentScriptFileName = "";
    theMatlabInterface = NULL;
    

@@ -29,7 +29,7 @@
 
 
 //#define DEBUG_NAN_CONDITIONS
-#define DEBUG_FIRSTCALL
+//#define DEBUG_FIRSTCALL
 
 #ifndef __SKIP_MSISE90__
 extern "C" 
@@ -202,7 +202,6 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       #endif
       CalculateGeodetics(&pos[i6], epoch, true);
       lst = sod/3600.0 + geoLong/15.0;
-
 
       #ifdef DEBUG_GEODETICS
          MessageInterface::ShowMessage("Diffs:\n");

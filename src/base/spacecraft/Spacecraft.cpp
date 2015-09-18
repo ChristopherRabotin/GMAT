@@ -1614,7 +1614,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
-   refObjectTypes.push_back(Gmat::HARDWARE);
+   refObjectTypes.push_back(Gmat::HARDWARE);  // includes PowerSystem
    if (attitude)
    {
       ObjectTypeArray attRefObjTypes = attitude->GetRefObjectTypeArray();
@@ -1768,7 +1768,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
                      powerSystemName.c_str());
          #endif
          // Add Spacecraft Power System name
-         fullList.push_back(powerSystemName);  // need to check power system for ref object names
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);  // need to check power system for ref object names
          return fullList;
       }
 
@@ -1777,6 +1778,8 @@ Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
          fullList = tankNames;
          fullList.insert(fullList.end(), thrusterNames.begin(), thrusterNames.end());
          fullList.insert(fullList.end(), hardwareNames.begin(), hardwareNames.end());
+         if (powerSystemName != "")
+            fullList.push_back(powerSystemName);
          return fullList;
       }
 

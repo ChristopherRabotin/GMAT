@@ -32,7 +32,7 @@
 //#define UNIT_TEST_90km
 //#define DEBUG_SHOW_DENSITY
 //#define DEBUG_FIRSTCALL
-
+//#define DEBUG_SCHATTEN_SETTINGS
 
 //------------------------------------------------------------------------------
 // static data
@@ -471,16 +471,67 @@ Real JacchiaRobertsAtmosphere::JacchiaRoberts(Real height, Real space_craft[3],
    if (!fluxReaderLoaded)
    {
       fluxReaderLoaded = fluxReader->LoadFluxData(obsFileName, predictFileName);
+      if (fluxReaderLoaded)
+      {
+         fluxReader->GetEpochs(historicStart, historicEnd, predictStart,
+               predictEnd);
+
+         #ifdef DEBUG_SCHATTEN_SETTINGS
+            MessageInterface::ShowMessage("Setting flags: timing %d, error %d\n",
+                  schattenTimingModel, schattenErrorModel);
+         #endif
+      }
+      fluxReader->SetSchattenFlags(schattenTimingModel, schattenErrorModel);
    }
 
    if (fluxReaderLoaded && a1_time > 0.0)
    {
-      SolarFluxReader::FluxData fD = fluxReader->GetInputs(a1_time);
-   //Observed
-      geo.xtemp = 379.0 + 3.24 * fD.obsCtrF107a + 1.3 * (fD.obsF107 - fD.obsCtrF107a);
-      geo.tkp   = fD.kp[0];
-      nominalF107 = fD.obsF107;
-      nominalF107a = fD.obsCtrF107a;
+      SolarFluxReader::FluxData fD;
+
+      if (a1_time < historicEnd)
+      {
+         switch(historicalDataSource)
+         {
+         case 1:
+         {
+            SolarFluxReader::FluxData fD = fluxReader->GetInputs(a1_time);
+            geo.xtemp = 379.0 + 3.24 * fD.obsCtrF107a + 1.3 * (fD.obsF107 - fD.obsCtrF107a);
+            geo.tkp   = fD.kp[0];
+            nominalF107 = fD.obsF107;
+            nominalF107a = fD.obsCtrF107a;
+         }
+            break;
+
+         case 0:
+         default:
+            geo.xtemp = 379.0 + 3.24 * nominalF107a + 1.3 * (nominalF107 - nominalF107a);
+            geo.tkp   = nominalKp;
+            break;
+         }
+      }
+      else
+      {
+         switch(predictedDataSource)
+         {
+         case 1:
+         case 2:
+         {
+            SolarFluxReader::FluxData fD = fluxReader->GetInputs(a1_time);
+            fluxReader->PrepareKpData(fD, a1_time);
+            geo.xtemp = 379.0 + 3.24 * fD.obsCtrF107a + 1.3 * (fD.obsF107 - fD.obsCtrF107a);
+            geo.tkp   = fD.kp[0];
+            nominalF107 = fD.obsF107;
+            nominalF107a = fD.obsCtrF107a;
+         }
+            break;
+
+         case 0:
+         default:
+            geo.xtemp = 379.0 + 3.24 * nominalF107a + 1.3 * (nominalF107 - nominalF107a);
+            geo.tkp   = nominalKp;
+            break;
+         }
+      }
    }
    else
    {

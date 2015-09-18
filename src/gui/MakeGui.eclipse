@@ -177,6 +177,7 @@ OBJECTS = \
     app/GmatNotebook.o \
     app/GmatServer.o \
     app/GmatTreeItemData.o \
+    app/GuiListenerManager.o \
     app/GuiPlotReceiver.o \
     app/InteractiveMatlabDialog.o \
     app/MissionTreeItemData.o \
@@ -292,6 +293,7 @@ OBJECTS = \
     subscriber/MdiChildGroundTrackFrame.o \
     subscriber/MdiChildTsFrame.o \
     subscriber/MdiGlPlotData.o \
+    subscriber/MdiTableViewFrame.o \
     subscriber/MdiTsPlotData.o \
     subscriber/OrbitViewPanel.o \
     subscriber/ReportFileSetupPanel.o \
@@ -331,6 +333,7 @@ $(WXTARGET) : $(OBJECTS) $(LIBNAME)
 else
 $(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBNAME)
 	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS) $(GUI_LINK_FLAGS)
+	chrpath -r '$$ORIGIN:$$ORIGIN/lib' $(WXTARGET)
 	mv -f $(WXTARGET)* ../../application/$(GMAT_BIN_DIR)/.
 	cp -f $(LIBNAME) ../../application/$(GMAT_BIN_DIR)/.
 endif

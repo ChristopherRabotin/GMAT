@@ -93,7 +93,10 @@ public:
    virtual void         CheckDataType(ElementWrapper* forWrapper,
                                       Gmat::ParameterType needType,
                                       const std::string &cmdName,
-                                      bool ignoreUnsetReference = false);
+                                      bool ignoreUnsetReference = false,
+                                      bool checkUnsetValue = false,
+                                      Real unsetValue = 9.999999e300,
+                                      const std::string &unsetValueErrMsg = "");
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,

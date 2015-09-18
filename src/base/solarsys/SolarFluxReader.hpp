@@ -92,6 +92,16 @@ private:
    std::vector<FluxData> obsFluxData;
    /// Schatten data array
    std::vector<FluxData> predictFluxData;
+
+   GmatEpoch historicStart;
+   GmatEpoch historicEnd;
+   GmatEpoch predictStart;
+   GmatEpoch predictEnd;
+
+   /// Index for Schatten flux setting
+   Integer schattenFluxIndex;
+   /// Index for Schatten Ap value
+   Integer schattenApIndex;
       
    /// Flag used to indicate that the "Too early" warning not yet issued
    bool warnEpochBefore;
@@ -111,9 +121,14 @@ public:
    bool LoadFluxData(const std::string &obsFile = "", const std::string &predictFile = "");
    /// Get Flux data from either of two vectors filled in during LoadFluxData
    FluxData GetInputs(GmatEpoch epoch);
+
+   void GetEpochs(GmatEpoch &hStart, GmatEpoch &hEnd, GmatEpoch &pStart,
+                  GmatEpoch &pEnd);
+
    /// Change Ap data for MSISE model
    void PrepareApData(FluxData &fD, GmatEpoch epoch);
    void PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epoch);
+   void SetSchattenFlags(Integer timingSet, Integer magnitudeSet);
 };
 
 
