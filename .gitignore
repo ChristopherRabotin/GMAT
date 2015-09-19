@@ -24,3 +24,4 @@ CheckRepo.TestEntry
 *.swp
 *.md
 /temp/
+/WinBuild/
