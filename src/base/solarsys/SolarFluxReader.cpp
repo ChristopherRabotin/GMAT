@@ -28,6 +28,11 @@
 //#define DEBUG_FILE_INDEXING
 //#define DEBUG_GETFLUXINPUTS
 
+//#define DEBUG_FIRSTFIVE_READS
+
+#ifdef DEBUG_FIRSTFIVE_READS
+   Integer fiveReadIndex = 0;
+#endif
 
 //------------------------------------------------------------------------------
 // Public Methods
@@ -726,6 +731,22 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
       fD.index = index;
    }
 
+#ifdef DEBUG_FIRSTFIVE_READS
+   if (fiveReadIndex < 5)
+   {
+      MessageInterface::ShowMessage("Raw Data from read %d:\n", fiveReadIndex);
+      MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
+      MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
+      MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
+      MessageInterface::ShowMessage("   F107a Adj Ctr:    %lf\n", fD.adjCtrF107a);
+      MessageInterface::ShowMessage("   Ap:               %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.ap[0], fD.ap[1], fD.ap[2], fD.ap[3], fD.ap[4], fD.ap[5], fD.ap[6], fD.ap[7]);
+      MessageInterface::ShowMessage("   Ap Ave:           %lf\n", fD.apAvg);
+      MessageInterface::ShowMessage("   Kp:               %lf %lf %lf %lf %lf %lf %lf %lf\n\n", fD.kp[0], fD.kp[1], fD.kp[2], fD.kp[3], fD.kp[4], fD.kp[5], fD.kp[6], fD.kp[7]);
+      MessageInterface::ShowMessage("   F107a(Schatten):  %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.F107a[0], fD.F107a[1], fD.F107a[2], fD.F107a[3], fD.F107a[4], fD.F107a[5], fD.F107a[6], fD.F107a[7], fD.F107a[8]);
+      MessageInterface::ShowMessage("   Ap(Schatten):     %lf %lf %lf\n\n", fD.apSchatten[0], fD.apSchatten[1], fD.apSchatten[2]);
+   }
+#endif
+
    return fD;
 }
 
@@ -864,6 +885,25 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
             fD.ap[i] = fD.apSchatten[schattenApIndex];
       }
    }
+
+
+#ifdef DEBUG_FIRSTFIVE_READS
+   if (fiveReadIndex < 5)
+   {
+      MessageInterface::ShowMessage("Data after Ap Prep from read %d:\n", fiveReadIndex);
+      MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
+      MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
+      MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
+      MessageInterface::ShowMessage("   F107a Adj Ctr:    %lf\n", fD.adjCtrF107a);
+      MessageInterface::ShowMessage("   Ap:               %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.ap[0], fD.ap[1], fD.ap[2], fD.ap[3], fD.ap[4], fD.ap[5], fD.ap[6], fD.ap[7]);
+      MessageInterface::ShowMessage("   Ap Ave:           %lf\n", fD.apAvg);
+      MessageInterface::ShowMessage("   Kp:               %lf %lf %lf %lf %lf %lf %lf %lf\n\n", fD.kp[0], fD.kp[1], fD.kp[2], fD.kp[3], fD.kp[4], fD.kp[5], fD.kp[6], fD.kp[7]);
+      MessageInterface::ShowMessage("   F107a(Schatten):  %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.F107a[0], fD.F107a[1], fD.F107a[2], fD.F107a[3], fD.F107a[4], fD.F107a[5], fD.F107a[6], fD.F107a[7], fD.F107a[8]);
+      MessageInterface::ShowMessage("   Ap(Schatten):     %lf %lf %lf\n\n", fD.apSchatten[0], fD.apSchatten[1], fD.apSchatten[2]);
+
+      ++fiveReadIndex;
+   }
+#endif
 }
 
 
@@ -920,8 +960,38 @@ void SolarFluxReader::PrepareKpData(SolarFluxReader::FluxData &fD, GmatEpoch epo
       for (Integer i = 0; i < 8; i++)
          fD.kp[i] = kp;
    }
+#ifdef DEBUG_FIRSTFIVE_READS
+   if (fiveReadIndex < 5)
+   {
+      MessageInterface::ShowMessage("Data after Kp Prep from read %d:\n", fiveReadIndex);
+      MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
+      MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
+      MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
+      MessageInterface::ShowMessage("   F107a Adj Ctr:    %lf\n", fD.adjCtrF107a);
+      MessageInterface::ShowMessage("   Ap:               %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.ap[0], fD.ap[1], fD.ap[2], fD.ap[3], fD.ap[4], fD.ap[5], fD.ap[6], fD.ap[7]);
+      MessageInterface::ShowMessage("   Ap Ave:           %lf\n", fD.apAvg);
+      MessageInterface::ShowMessage("   Kp:               %lf %lf %lf %lf %lf %lf %lf %lf\n\n", fD.kp[0], fD.kp[1], fD.kp[2], fD.kp[3], fD.kp[4], fD.kp[5], fD.kp[6], fD.kp[7]);
+      MessageInterface::ShowMessage("   F107a(Schatten):  %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.F107a[0], fD.F107a[1], fD.F107a[2], fD.F107a[3], fD.F107a[4], fD.F107a[5], fD.F107a[6], fD.F107a[7], fD.F107a[8]);
+      MessageInterface::ShowMessage("   Ap(Schatten):     %lf %lf %lf\n\n", fD.apSchatten[0], fD.apSchatten[1], fD.apSchatten[2]);
+
+      ++fiveReadIndex;
+   }
+#endif
 }
 
+//------------------------------------------------------------------------------
+// void SolarFluxReader::GetEpochs(GmatEpoch &hStart, GmatEpoch &hEnd, GmatEpoch &pStart,
+//                GmatEpoch &pEnd)
+//------------------------------------------------------------------------------
+/**
+ * Accessor to retrieve the epoch data from the files
+ *
+ * @param hStart Epoch of the first historical data point
+ * @param hEnd Epoch of the last historical data point
+ * @param PStart Epoch of the first predict data point
+ * @param pEnd Epoch of the last predict data point
+ */
+//------------------------------------------------------------------------------
 void SolarFluxReader::GetEpochs(GmatEpoch &hStart, GmatEpoch &hEnd, GmatEpoch &pStart,
                GmatEpoch &pEnd)
 {
@@ -1120,7 +1190,7 @@ void SolarFluxReader::SetSchattenFlags(Integer timingSet, Integer magnitudeSet)
          schattenFluxIndex = 3;
       if (magnitudeSet == 1)
          schattenFluxIndex = 4;
-      schattenApIndex = 2;
+      schattenApIndex = 1;
    }
 
    if (timingSet == 0)
@@ -1142,6 +1212,10 @@ void SolarFluxReader::SetSchattenFlags(Integer timingSet, Integer magnitudeSet)
          schattenFluxIndex = 6;
       if (magnitudeSet == 1)
          schattenFluxIndex = 7;
-      schattenApIndex = 1;
+      schattenApIndex = 2;
    }
+
+#ifdef DEBUG_FIRSTFIVE_READS
+   fiveReadIndex = 0;
+#endif
 }
