@@ -28,7 +28,7 @@
 //#define DEBUG_FILE_INDEXING
 //#define DEBUG_GETFLUXINPUTS
 
-//#define DEBUG_FIRSTFIVE_READS
+#define DEBUG_FIRSTFIVE_READS
 
 #ifdef DEBUG_FIRSTFIVE_READS
    Integer fiveReadIndex = 0;
