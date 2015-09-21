@@ -84,6 +84,10 @@ ContactLocator::ContactLocator(const std::string &name) :
    stationNames.clear();
    stations.clear();
    contactResults.clear();
+
+   // Set default occulting bodies
+   defaultOccultingBodies.push_back("Luna");
+
    #ifdef DEBUG_INIT_FINALIZE
       MessageInterface::ShowMessage("CREATED new ContactLocator %s<%p>\n",
             instanceName.c_str(), this);
