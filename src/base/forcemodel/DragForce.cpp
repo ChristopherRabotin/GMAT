@@ -339,7 +339,11 @@ DragForce::DragForce(const DragForce& df) :
    cbLoc[1]  = df.cbLoc[1];
    cbLoc[2]  = df.cbLoc[2];
    
-   density = new Real[1];
+   //density = new Real[1];                      // made changes by TUAN NGUYEN
+   if (df.satCount < 1)                          // made changes by TUAN NGUYEN
+      density = new Real[1];                     // made changes by TUAN NGUYEN
+   else                                          // made changes by TUAN NGUYEN
+      density = new Real[df.satCount];           // made changes by TUAN NGUYEN
    ap = CalculateAp(kp);
    
    area.clear();
@@ -444,7 +448,11 @@ DragForce& DragForce::operator=(const DragForce& df)
    atmos                 = NULL;
    angVel                = NULL;
 //   density               = NULL;
-   density = new Real[1];
+   //density = new Real[1];                    // made changes by TUAN NGUYEN
+   if (df.satCount < 1)                        // made changes by TUAN NGUYEN
+      density = new Real[1];                   // made changes by TUAN NGUYEN
+   else                                        // made changes by TUAN NGUYEN
+      density = new Real[df.satCount];         // made changes by TUAN NGUYEN
    prefactor             = NULL;
    firedOnce             = false;
    hasWindModel          = df.hasWindModel;
@@ -2366,8 +2374,8 @@ Real DragForce::GetDensity(Real *state, Real when, Integer count)
    }
    else
    {
-      if (atmos)
-      {
+      //if (atmos)
+      //{
          if (sun && centralBody)
          {
             // Update the Sun vector
@@ -2381,7 +2389,7 @@ Real DragForce::GetDensity(Real *state, Real when, Integer count)
             cbLoc[1]  = cbV[1];
             cbLoc[2]  = cbV[2];
          }
-      }
+      //}
 
       #ifdef DEBUG_DRAGFORCE_DENSITY
          dragdata << "Calling atmos->Density() on " << atmos->GetTypeName()

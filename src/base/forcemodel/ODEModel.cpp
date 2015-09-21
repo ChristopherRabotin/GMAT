@@ -2578,6 +2578,8 @@ bool ODEModel::GetDerivatives(Real * state, Real dt, Integer order,
             MessageInterface::ShowMessage("Derivative %s failed\n",
                   ((*i)->GetTypeName()).c_str());
          #endif
+         throw ODEModelException("Derivative " + (*i)->GetTypeName() + " failed\n");
+
          return false;
 
       }

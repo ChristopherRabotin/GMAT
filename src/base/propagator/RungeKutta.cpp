@@ -211,6 +211,13 @@ bool RungeKutta::Initialize()
         isInitialized = false;
         return isInitialized;
     }
+    else
+    {
+       // allocate memmory for each row for matrix bij
+       for (UnsignedInt i = 0; i < stages; ++i)
+          bij[i] = new Real[stages];
+    }
+
     if ((cj = new Real [stages]) == NULL)
     {
         delete [] ai;
@@ -226,6 +233,13 @@ bool RungeKutta::Initialize()
         isInitialized = false;
         return isInitialized;
     }
+    else
+    {
+       // allocate memmory for each row for matrix ki
+       for (UnsignedInt i = 0; i < stages; ++i)
+          ki[i] = new Real[stages];
+    }
+
     if ((ee = new Real [stages]) == NULL)
     {
         delete [] ai;

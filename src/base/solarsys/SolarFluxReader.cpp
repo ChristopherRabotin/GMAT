@@ -347,13 +347,16 @@ bool SolarFluxReader::LoadObsData()
    const char * format = "%92c %38c";
    // first section
    char s11[4], s12[2], s13[2], *s6[8], *s8[8], s9[3];
-   const char * format1 = "%4c %2c %2c %*7c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
+   //const char * format1 = "%4c %2c %2c %*7c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
+   const char * format1 = "%4c %2c %2c %*5c %*3c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
    for (Integer i = 0; i < 8; i++)
    {
 	   s6[i] = new char[2];
-	   memset(s6[i], 0, 2);
+	   //memset(s6[i], 0, 2);
+      memset(s6[i], 32, 2);         // blank char = 32
 	   s8[i] = new char[3];
-	   memset(s8[i], 0, 3);
+	   //memset(s8[i], 0, 3);        // blank char = 32
+      memset(s8[i], 32, 3);
    }
 	  
    // second section
@@ -362,7 +365,8 @@ bool SolarFluxReader::LoadObsData()
    for (Integer i = 0; i < 5; i++)
    {
 	   s22[i] = new char[5];
-	   memset(s22[i], 0, 5);
+	   //memset(s22[i], 0, 5);
+      memset(s22[i], 32, 5);      // blank char = 32
    }
 
    inObs.seekg(begObs, std::ios_base::beg);
@@ -411,23 +415,31 @@ bool SolarFluxReader::LoadObsData()
 		 for (Integer l = 0; l < 8; l++)
 		 {
 			 fD.kp[l] = atof(s6[l]) / 10.0;
-			 memset(s6[l], 0, 2);
+			 //memset(s6[l], 0, 2);
+          memset(s6[l], 32, 2);          // blank char = 32
 		 }
 		 for (Integer l = 0; l < 8; l++)
 		 {
 			 fD.ap[l] = atof(s8[l]);
-			 memset(s8[l], 0, 3);
+			 //memset(s8[l], 0, 3);
+          memset(s8[l], 32, 3);          // blank char = 32
 		 }
 		 fD.apAvg = atof(s9);
 		 fD.adjF107 = atof(s21);
 		 fD.adjCtrF107a = atof(s22[0]);
 		 fD.obsF107 = atof(s22[2]);
 		 fD.obsCtrF107a = atof(s22[3]);
-		 memset(s22[0], 0, 5);
-		 memset(s22[2], 0, 5);
-		 memset(s22[3], 0, 5);
-		 memset(s9, 0, 3);
-		 memset(s21, 0, 5);
+		 //memset(s22[0], 0, 5);
+		 //memset(s22[2], 0, 5);
+		 //memset(s22[3], 0, 5);
+		 //memset(s9, 0, 3);
+		 //memset(s21, 0, 5);
+
+       memset(s22[0], 32, 5);
+		 memset(s22[2], 32, 5);
+		 memset(s22[3], 32, 5);
+		 memset(s9, 32, 3);
+		 memset(s21, 32, 5);
          fD.index = -1;
          for (Integer l = 0; l<9; l++)
             fD.F107a[l] = -1;
@@ -561,7 +573,8 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 {
    Integer index;
    GmatEpoch epoch_1st;
-   FluxData fD;
+   //FluxData fD;
+   static FluxData fD;
 
    // Requirement list in google docs:
    // HistoricAndNearTerm source is always given precedence if requested epoch
