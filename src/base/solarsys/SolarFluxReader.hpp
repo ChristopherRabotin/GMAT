@@ -33,7 +33,7 @@
 #include "GmatConstants.hpp"
 #include "GmatBase.hpp"
 
-class GMAT_API SolarFluxReader /*: public GmatBase*/
+class GMAT_API SolarFluxReader
 {
 
 public:
@@ -52,6 +52,8 @@ public:
       Real adjCtrF107a;
       Real obsF107;
       Real obsCtrF107a;
+
+      bool isObsData;
    };
 
    struct FluxData : FluxDataCSSI
@@ -64,6 +66,7 @@ public:
 
       // Assignment operator
       FluxData &operator=(const FluxData &fD);
+      
       // Used in Schatten file indexing
       Integer index;
       Integer id;
