@@ -346,27 +346,36 @@ bool SolarFluxReader::LoadObsData()
    char s1[92], s2[38];
    const char * format = "%92c %38c";
    // first section
-   char s11[4], s12[2], s13[2], *s6[8], *s8[8], s9[3];
+   //char s11[4], s12[2], s13[2], *s6[8], *s8[8], s9[3];
+   char s11[5], s12[3], s13[3], *s6[8], *s8[8], s9[4];      // Increasing the size of arrays s11, s12, s13, and s9 by 1 in order to store end of string
    //const char * format1 = "%4c %2c %2c %*7c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
    const char * format1 = "%4c %2c %2c %*5c %*3c %2c %2c %2c %2c %2c %2c %2c %2c %*3c %3c %3c %3c %3c %3c %3c %3c %3c %3c";
+
+   s11[4] = s12[2] = s13[2] = s9[3] = '\0';      // set the last array's element to be end of string char
    for (Integer i = 0; i < 8; i++)
    {
-	   s6[i] = new char[2];
+	   //s6[i] = new char[2];
 	   //memset(s6[i], 0, 2);
-      memset(s6[i], 32, 2);         // blank char = 32
-	   s8[i] = new char[3];
-	   //memset(s8[i], 0, 3);        // blank char = 32
-      memset(s8[i], 32, 3);
+      s6[i] = new char[3];               // Increasing the size of array s6[i] by 1 in order to store end of string
+      s6[i][2] = '\0';                   // set the last array's element to be end of string char
+	   //s8[i] = new char[3];
+	   //memset(s8[i], 0, 3);
+	   s8[i] = new char[4];               // Increasing the size of array s8[i] by 1 in order to store end of string
+	   s8[i][3] = '\0';                   // set the last array's element to be end of string char
    }
 	  
    // second section
-   char s21[5], *s22[5];
+   //char s21[5], *s22[5];
+   char s21[6], *s22[5];                 // Increasing the size of arrays s21 by 1 in order to store end of string
    const char * format2 = "%5c %*1c %5c %5c %5c %5c %5c";
+
+   s21[5] = '\0';                        // set the last array's element to be end of string char
    for (Integer i = 0; i < 5; i++)
    {
-	   s22[i] = new char[5];
+	   //s22[i] = new char[5];
 	   //memset(s22[i], 0, 5);
-      memset(s22[i], 32, 5);      // blank char = 32
+	   s22[i] = new char[6];              // Increasing the size of array s22[i] by 1 in order to store end of string
+	   s22[i][5] = '\0';                  // set the last array's element to be end of string char
    }
 
    inObs.seekg(begObs, std::ios_base::beg);
@@ -416,13 +425,11 @@ bool SolarFluxReader::LoadObsData()
 		 {
 			 fD.kp[l] = atof(s6[l]) / 10.0;
 			 //memset(s6[l], 0, 2);
-          memset(s6[l], 32, 2);          // blank char = 32
 		 }
 		 for (Integer l = 0; l < 8; l++)
 		 {
 			 fD.ap[l] = atof(s8[l]);
 			 //memset(s8[l], 0, 3);
-          memset(s8[l], 32, 3);          // blank char = 32
 		 }
 		 fD.apAvg = atof(s9);
 		 fD.adjF107 = atof(s21);
@@ -435,11 +442,6 @@ bool SolarFluxReader::LoadObsData()
 		 //memset(s9, 0, 3);
 		 //memset(s21, 0, 5);
 
-       memset(s22[0], 32, 5);
-		 memset(s22[2], 32, 5);
-		 memset(s22[3], 32, 5);
-		 memset(s9, 32, 3);
-		 memset(s21, 32, 5);
          fD.index = -1;
          for (Integer l = 0; l<9; l++)
             fD.F107a[l] = -1;
@@ -573,8 +575,7 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 {
    Integer index;
    GmatEpoch epoch_1st;
-   //FluxData fD;
-   static FluxData fD;
+   FluxData fD;
 
    // Requirement list in google docs:
    // HistoricAndNearTerm source is always given precedence if requested epoch
@@ -643,10 +644,11 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
                "data is later than the ending epoch on the flux file.  GMAT "
                "is using the last file entry.\n");
             warnEpochAfter = false;
-            index = obsFluxData.size() - 1;
-            fD = obsFluxData[index];
-            fD.index = index;
-         }
+         }                                          // fix bug GMT-5304
+         index = obsFluxData.size() - 1;            // fix bug GMT-5304
+         fD = obsFluxData[index];                   // fix bug GMT-5304
+         fD.index = index;                          // fix bug GMT-5304
+         //}                                        // fix bug GMT-5304
       }
    }
    else
