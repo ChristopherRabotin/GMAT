@@ -353,7 +353,7 @@ SolarSystem::SolarSystem(std::string withName) :
    theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE405
    theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // DE421
    theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE424
-   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE430
+//   theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");         // DE430
    theSPKKernelNames.push_back("../data/planetary_ephem/spk/DE421AllPlanets.bsp");  // SPICE
 
    #ifdef DEBUG_SS_CREATE
@@ -1027,14 +1027,14 @@ void SolarSystem::CreatePlanetarySource(bool setDefault)
          MessageInterface::ShowMessage("DE424 file location is not defined in gmat_startup file\n");
       }
       
-      fullpath = fm->FindPath("", "DE430_FILE", true, false);
-      if (fullpath != "")
-         thePlanetarySourceNames.push_back(fullpath);
-      else
-      {
-         thePlanetarySourceNames.push_back("UNSET");
-         MessageInterface::ShowMessage("DE430 file location is not defined in gmat_startup file\n");
-      }
+//      fullpath = fm->FindPath("", "DE430_FILE", true, false);
+//      if (fullpath != "")
+//         thePlanetarySourceNames.push_back(fullpath);
+//      else
+//      {
+//         thePlanetarySourceNames.push_back("UNSET");
+//         MessageInterface::ShowMessage("DE430 file location is not defined in gmat_startup file\n");
+//      }
 
       if (spiceAvailable)
       {
@@ -1227,16 +1227,15 @@ bool SolarSystem::SetPlanetarySourceName(const std::string &sourceType,
             SetSourceFile(theDefaultDeFile);
          }
       }
-      else if (id == Gmat::DE430)
-      {
-         status = CreateDeFile(Gmat::DE430, fileName);
-         if (status)
-         {
-            thePlanetarySourceNames[id] = fileName;
-            SetSourceFile(theDefaultDeFile);
-         }
-      }
-//      LoadMatchingSPK(id); // make sure the matching SPK kernel is loaded
+//      else if (id == Gmat::DE430)
+//      {
+//         status = CreateDeFile(Gmat::DE430, fileName);
+//         if (status)
+//         {
+//            thePlanetarySourceNames[id] = fileName;
+//            SetSourceFile(theDefaultDeFile);
+//         }
+//      }
    }
 
    return status;
@@ -1385,24 +1384,24 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             break;
          }
       }
-      else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430])
-      {
-         #ifdef DEBUG_SS_PLANETARY_FILE
-         MessageInterface::
-            ShowMessage("SolarSystem::SetPlanetarySourceTypesInUse() create DE424 (%s)\n",
-                  (thePlanetarySourceNames[Gmat::DE430]).c_str());
-         #endif
-
-         thePlanetarySourcePriority[Gmat::DE430] = 0;
-         status = CreateDeFile(Gmat::DE430, thePlanetarySourceNames[Gmat::DE430]);
-         if (status)
-         {
-            thePlanetarySourcePriority[Gmat::DE430] = HIGHEST_PRIORITY - i;
-            isPlanetarySourceInUse[Gmat::DE430] = true;
-            sourceTypeInUse = Gmat::DE430;
-            break;
-         }
-      }
+//      else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430])
+//      {
+//         #ifdef DEBUG_SS_PLANETARY_FILE
+//         MessageInterface::
+//            ShowMessage("SolarSystem::SetPlanetarySourceTypesInUse() create DE424 (%s)\n",
+//                  (thePlanetarySourceNames[Gmat::DE430]).c_str());
+//         #endif
+//
+//         thePlanetarySourcePriority[Gmat::DE430] = 0;
+//         status = CreateDeFile(Gmat::DE430, thePlanetarySourceNames[Gmat::DE430]);
+//         if (status)
+//         {
+//            thePlanetarySourcePriority[Gmat::DE430] = HIGHEST_PRIORITY - i;
+//            isPlanetarySourceInUse[Gmat::DE430] = true;
+//            sourceTypeInUse = Gmat::DE430;
+//            break;
+//         }
+//      }
       else if (thePlanetarySourceTypesInUse[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE])
       {
          #ifdef DEBUG_SS_PLANETARY_FILE
@@ -1464,11 +1463,11 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             if (SetSourceFile(theDefaultDeFile))   // Does it need to set to the default DE file?
                retCode = 1;
          break;
-      case Gmat::DE430:
-         if (SetSource(Gmat::DE430))
-            if (SetSourceFile(theDefaultDeFile))   // Does it need to set to the default DE file?
-               retCode = 1;
-         break;
+//      case Gmat::DE430:
+//         if (SetSource(Gmat::DE430))
+//            if (SetSourceFile(theDefaultDeFile))   // Does it need to set to the default DE file?
+//               retCode = 1;
+//         break;
       case Gmat::SPICE:
          if (SetSource(Gmat::SPICE))
          {
@@ -1522,11 +1521,11 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
             if (thePlanetarySourcePriority[Gmat::DE424] > 0)
                thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);
          }
-         else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430])
-         {
-            if (thePlanetarySourcePriority[Gmat::DE430] > 0)
-               thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430]);
-         }
+//         else if (theTempFileList[i] == Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430])
+//         {
+//            if (thePlanetarySourcePriority[Gmat::DE430] > 0)
+//               thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430]);
+//         }
       }
 
       #ifdef DEBUG_SS_PLANETARY_FILE
@@ -2029,7 +2028,7 @@ bool SolarSystem::AddBody(CelestialBody* cb)
    {
       if (!cb->SetSource(pvSrcForAll))  return false;
       if ((pvSrcForAll == Gmat::DE405) || (pvSrcForAll == Gmat::DE421)||
-          (pvSrcForAll == Gmat::DE424) || (pvSrcForAll == Gmat::DE430))
+          (pvSrcForAll == Gmat::DE424)) //     || (pvSrcForAll == Gmat::DE430))
       {
          if (thePlanetaryEphem)
             if (!cb->SetSourceFile(thePlanetaryEphem))  return false;
@@ -2157,7 +2156,7 @@ bool SolarSystem::AddSpecialPoint(SpecialCelestialPoint *cp)
 
    if (!cp->SetSource(pvSrcForAll))  return false;
    if ((pvSrcForAll == Gmat::DE405) || (pvSrcForAll == Gmat::DE421) ||
-       (pvSrcForAll == Gmat::DE424) || (pvSrcForAll == Gmat::DE430))
+       (pvSrcForAll == Gmat::DE424)) //       || (pvSrcForAll == Gmat::DE430))
    {
       if (thePlanetaryEphem)
          if (!cp->SetSourceFile(thePlanetaryEphem))  return false;
@@ -2409,7 +2408,6 @@ bool SolarSystem::SetSource(Gmat::PosVelSource pvSrc)
    for (Integer ii = 0; ii < thePlanetarySourceTypesInUse.size(); ii++)
       MessageInterface::ShowMessage("   %s\n", thePlanetarySourceTypesInUse.at(ii).c_str());
 #endif
-//   LoadMatchingSPK(pvSrc);
    SetSPKFile(theSPKKernelNames[pvSrc ]);
 
    return true;
@@ -3287,8 +3285,8 @@ bool SolarSystem::SetStringParameter(const Integer id,
 	  if ((sourceindex < Gmat::PosVelSourceCount) &&
 	      ((sourceindex == Gmat::DE405) ||
           (sourceindex == Gmat::DE421) ||
-          (sourceindex == Gmat::DE424) ||
-          (sourceindex == Gmat::DE430)))
+          (sourceindex == Gmat::DE424)))   //  ||
+//          (sourceindex == Gmat::DE430)))
 	  {
         // remove old DE file object, create new DE file object
         // and assign it to theDefaultDeFile
@@ -3919,7 +3917,7 @@ void SolarSystem::SetDefaultPlanetarySource()
    // put other planetary sources defined in the setup file:
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE421]);
    thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE424]);
-   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430]);
+//   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::DE430]);
 
 //   thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::TWO_BODY_PROPAGATION]); // 2012.01.24 - wcs - disallowed for now
    if (spiceAvailable) thePlanetarySourceTypesInUse.push_back(Gmat::POS_VEL_SOURCE_STRINGS[Gmat::SPICE]);
@@ -4011,9 +4009,9 @@ bool SolarSystem::CreateDeFile(Integer id, const std::string &fileName,
    case Gmat::DE424:
       deFileType = Gmat::DE_DE424;
       break;
-   case Gmat::DE430:
-      deFileType = Gmat::DE_DE430;
-      break;
+//   case Gmat::DE430:
+//      deFileType = Gmat::DE_DE430;
+//      break;
    default:
       // MessageInterface::PopupMessage
       //    (Gmat::WARNING_,
@@ -4190,98 +4188,3 @@ void SolarSystem::SetTextureMapFile(SpacePoint *sp, const std::string &bodyName)
    #endif
 }
 
-//bool SolarSystem::LoadMatchingSPK(Integer ofType)
-//{
-//   #ifdef DEBUG_DE_SPK
-//   MessageInterface::ShowMessage("Entering LoadMatchingSPK with ofType = %d (%s)\n",
-//         ofType, Gmat::POS_VEL_SOURCE_STRINGS[ofType].c_str());
-//   MessageInterface::ShowMessage("   and lastLoadedSPKType = %d (%s)\n",
-//         lastLoadedSPKType, Gmat::POS_VEL_SOURCE_STRINGS[lastLoadedSPKType].c_str());
-//   #endif
-//   if (lastLoadedSPKType == ofType)
-//      return true;
-//
-//   bool isOK = true;
-//
-//   // Get the name of the currently-set SPK kernel
-//   std::string currentSPKFile     = theSPKFilename;
-//
-//   try
-//   {
-//      // Try to set the SPK file name to the correct name, based on the
-//      // specified type
-//      SetSPKFile(theSPKKernelNames[ofType]); // will figure out full path, if necessary
-//
-//      // if we are already using the correct SPK file, just return
-//      if (currentSPKFile == theSPKFilename)
-//         return true;
-//
-//      if (theSPKFilename != "" && (lastLoadedSPKType != Gmat::PosVelSourceCount))
-//      {
-//         // Get the name of the last loaded SPK kernel (might NOT be the same
-//         // as theSPKFilename at the start)
-//         std::string lastLoadedSPKFile  = theSPKKernelNames[lastLoadedSPKType];
-//
-//         // UNLOAD previously-loaded Planetary SPK file
-//         if (planetarySPK->IsLoaded(lastLoadedSPKFile))
-//         {
-//            #ifdef DEBUG_DE_SPK
-//            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
-//                  lastLoadedSPKFile.c_str());
-//            #endif
-//            isOK = isOK && planetarySPK->UnloadKernel(lastLoadedSPKFile);
-//         }
-//         // OR UNLOAD previous Planetary SPK file (set initially)
-//         if (planetarySPK->IsLoaded(currentSPKFile))
-//         {
-//            #ifdef DEBUG_DE_SPK
-//            MessageInterface::ShowMessage("Attempting to unload the SPK %s\n",
-//                  currentSPKFile.c_str());
-//            #endif
-//            isOK = isOK && planetarySPK->UnloadKernel(currentSPKFile);
-//         }
-//      }
-//
-//      #ifdef DEBUG_DE_SPK
-//      MessageInterface::ShowMessage("Attempting to LOAD the SPK %s\n",
-//            theSPKKernelNames[ofType].c_str());
-//      #endif
-//      bool isLoadedOK = planetarySPK->LoadKernel(theSPKFilename);
-//
-//      #ifdef DEBUG_DE_SPK
-//      MessageInterface::ShowMessage("LOADed the SPK %s?\n",
-//            theSPKFilename.c_str());
-//      #endif
-//      isOK = isOK && isLoadedOK;
-//      if (!isOK)
-//      {
-//         std::string errmsg = "Error switching to or loading ";
-//         errmsg            += "SPK kernel ";
-//         errmsg            += Gmat::POS_VEL_SOURCE_STRINGS[ofType] + "\n";
-//         throw SolarSystemException(errmsg);
-//      }
-//   }
-//   catch (BaseException &be)
-//   {
-//      MessageInterface::ShowMessage("   - ERROR unloading or loading SPK!!!!\n");
-//      SetSPKFile(currentSPKFile);
-//      throw;
-//   }
-//
-////   SetSPKFile(theSPKKernelNames[ofType]);
-//
-//   // theSPKFilename has already been set to the requested one
-//   thePlanetarySourceNames[Gmat::SPICE] = theSPKFilename;
-//   theSPKKernelNames[Gmat::SPICE]       = theSPKFilename;
-//   lastLoadedSPKType                    = ofType;
-//
-//   #ifdef DEBUG_DE_SPK
-//   MessageInterface::ShowMessage("Leaving LMSPK, theSPKFilename = %s\n",
-//         theSPKFilename.c_str());
-//   MessageInterface::ShowMessage("Leaving LMSPK, SET lastLoadedSPKType to %d\n",
-//         lastLoadedSPKType);
-//   #endif
-//
-//   return true;
-//}
-//
