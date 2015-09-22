@@ -1569,6 +1569,8 @@ StringArray GmatStringUtil::SeparateByComma(const std::string &str, bool checkSi
       MessageInterface::ShowMessage
          ("GmatStringUtil::SeparateByComma() returning <%s>, no comma found\n", str.c_str());
       #endif
+      // remove leading and trailing blanks, though
+      parts[0] = Trim(parts[0], BOTH);
       return parts;
    }
    
