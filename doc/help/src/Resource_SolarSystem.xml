@@ -453,6 +453,11 @@
       change <guilabel>EphemerisSource</guilabel> via the GUI for convenience
       in early design phases when rigorous consistency in modelling is less
       important.</para>
+	  
+	  <para>Additionally, when using DE as the <guilabel>EphemerisSource</guilabel>, 
+	  modelling is with respect to planetary system barcyenter.  When using SPICE
+	  as the <guilabel>EphemerisSource</guilabel>, modelling is with respect 
+	  to the planet center. </para>
     </warning>
 
     <screenshot>
