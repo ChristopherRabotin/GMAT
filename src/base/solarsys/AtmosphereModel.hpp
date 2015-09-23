@@ -133,6 +133,7 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
 
    SolarFluxReader*     GetFluxReader();
+   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch = -1.0);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -160,6 +161,8 @@ protected:
    Real                    cbFlattening;
    /// SolarFlux files are loaded ?
    bool                    fluxReaderLoaded;
+   /// Flux data container for values from the reader
+   SolarFluxReader::FluxData fD;
 
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.
