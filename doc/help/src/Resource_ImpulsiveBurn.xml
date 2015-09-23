@@ -1029,7 +1029,7 @@ Maneuver myImpulsiveBurn(Sat);</programlisting>
       actual applied back-propagated maneuver components. (The maneuver report
       outputs the user supplied VNB coordinates). After the back-propagated
       maneuver has been applied, however, we do know what the components of
-      the maneuver are. If the VNB maneuver has user-supllied components, (Vx,
+      the maneuver are. If the VNB maneuver has user-supplied components, (Vx,
       Vy, Vz), then after the back-propagated maneuver has been applied, the
       VNB components of the maneuver are (-Vx, -Vy, -Vz).</para>
 
