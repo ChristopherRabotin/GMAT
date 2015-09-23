@@ -1024,8 +1024,10 @@ Maneuver myImpulsiveBurn(Sat);</programlisting>
       internally, uses an iterative calculation method. This iteration method
       works best when the ‘N’ and ‘B’ component magnitudes are relatively
       small as compared to the 'V' component magnitude. If the GMAT internal
-      iterative method fails to converge, a warning message will be
-      generated.</para>
+      iterative method fails to converge, a warning message will be generated.
+      Currently, there is not an easy way for the user to report out the
+      actual applied back-propagated maneuver components. (The maneuver report
+      outputs the user supplied VNB coordinates).</para>
 
       <para>To hopefully make this logic clearer, consider the script sample
       below where the ‘N’ and ‘B’ components of the maneuver are zero and the
