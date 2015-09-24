@@ -133,6 +133,7 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
 
    SolarFluxReader*     GetFluxReader();
+   SolarFluxReader::FluxData GetFluxData(GmatEpoch epoch);
 
    DEFAULT_TO_NO_CLONES
    DEFAULT_TO_NO_REFOBJECTS
@@ -140,6 +141,8 @@ public:
 protected:
    /// Solar flux file reader
    SolarFluxReader         *fluxReader;
+   /// Buffer used for flux data while moving from raw data to massaged data
+   SolarFluxReader::FluxData fDbuffer;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body

@@ -24,6 +24,8 @@
 
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
+#include <sstream>
+
 
 //#define DEBUG_FILE_INDEXING
 //#define DEBUG_GETFLUXINPUTS
@@ -31,7 +33,7 @@
 //#define DEBUG_FIRSTFEW_READS
 
 #ifdef DEBUG_FIRSTFEW_READS
-   Integer howMany = 1;
+   Integer howMany = 5;
    Integer numberReadIndex = 0;
    Integer refcount = 0;
 #endif
@@ -68,14 +70,6 @@ SolarFluxReader::SolarFluxReader():
    beg_ObsTag = "BEGIN OBSERVED";
    end_ObsTag = "END OBSERVED";
    begObs = endObs = begData = -1;
-   
-   line = new char[256];
-   memset(line, 0, 256);
-   
-#ifdef DEBUG_FIRSTFEW_READS
-   ++refcount;
-   MessageInterface::ShowMessage("Solar Flux Reader #%d: %p\n", refcount, this);
-#endif
 }
 
 
@@ -92,8 +86,6 @@ SolarFluxReader::~SolarFluxReader(void)
       --refcount;
       MessageInterface::ShowMessage("Deleting Solar Flux Reader %p, leaving %d\n", this, refcount);
    #endif
-
-   delete [] line;
 }
 
 
@@ -123,13 +115,104 @@ SolarFluxReader::SolarFluxReader(const SolarFluxReader &sfr) :
    begObs = sfr.begObs;
    endObs = sfr.endObs;
    begData = sfr.begData;
-   line = sfr.line;
+}
 
-   if (sfr.line != NULL)
+
+//------------------------------------------------------------------------------
+// FluxData()
+//------------------------------------------------------------------------------
+/**
+ * Constructor
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader::FluxData::FluxData()
+{
+   // Default all to -1
+   epoch = -1.0;
+   apAvg = -1.0;
+   adjF107 = -1.0;
+   adjCtrF107a = -1.0;
+   obsF107 = -1.0;
+   obsCtrF107a = -1.0;
+
+   for (Integer j = 0; j < 9; j++)
+      F107a[j] = -1.0;
+   for (Integer j = 0; j < 3; j++)
+      apSchatten[j] = -1.0;
+   for (Integer j = 0; j < 8; j++)
    {
-      line = new char[256];
-      strcpy(line, sfr.line);
+      kp[j] = -1.0;
+      ap[j] = -1.0;
    }
+
+   index = -1.0;
+   id = -1.0;
+   isObsData = true;
+}
+
+
+//------------------------------------------------------------------------------
+// FluxData(const FluxData& fD)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor
+ */
+//------------------------------------------------------------------------------
+SolarFluxReader::FluxData::FluxData(const FluxData& fD)
+{
+   epoch = fD.epoch;
+   for (Integer j = 0; j < 8; j++)
+   {
+      kp[j] = fD.kp[j];
+      ap[j] = fD.ap[j];
+   }
+   apAvg = fD.apAvg;
+   adjF107 = fD.adjF107;
+   adjCtrF107a = fD.adjCtrF107a;
+   obsF107 = fD.obsF107;
+   obsCtrF107a = fD.obsCtrF107a;
+   for (Integer j = 0; j < 9; j++)
+      F107a[j] = fD.F107a[j];
+   for (Integer j = 0; j < 3; j++)
+      apSchatten[j] = fD.apSchatten[j];
+   index = fD.index;
+   id = fD.id;
+   isObsData = fD.isObsData;
+}
+
+
+//------------------------------------------------------------------------------
+// SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=()
+//------------------------------------------------------------------------------
+/**
+* Operator=() for FluxData data structure
+*/
+//------------------------------------------------------------------------------
+SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
+{
+   if (this != &fD)
+   {
+      epoch = fD.epoch;
+      for (Integer j = 0; j < 8; j++)
+      {
+         kp[j] = fD.kp[j];
+         ap[j] = fD.ap[j];
+      }
+      apAvg = fD.apAvg;
+      adjF107 = fD.adjF107;
+      adjCtrF107a = fD.adjCtrF107a;
+      obsF107 = fD.obsF107;
+      obsCtrF107a = fD.obsCtrF107a;
+      for (Integer j = 0; j < 9; j++)
+         F107a[j] = fD.F107a[j];
+      for (Integer j = 0; j < 3; j++)
+         apSchatten[j] = fD.apSchatten[j];
+      index = fD.index;
+      id = fD.id;
+      isObsData = fD.isObsData;
+   }
+
+   return *this;
 }
 
 
@@ -164,41 +247,6 @@ SolarFluxReader& SolarFluxReader::operator=(const SolarFluxReader &sfr)
    
    warnEpochBefore = true;
    warnEpochAfter = true;
-
-   return *this;
-}
-
-
-//------------------------------------------------------------------------------
-// SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=()
-//------------------------------------------------------------------------------
-/**
-* Operator=() for FluxData data structure
-*/
-//------------------------------------------------------------------------------
-SolarFluxReader::FluxData& SolarFluxReader::FluxData::operator=(const SolarFluxReader::FluxData &fD)
-{
-   if (this == &fD)
-      return *this;
-
-   epoch = fD.epoch;
-   for (Integer j = 0; j < 8; j++)
-   {
-      kp[j] = fD.kp[j];
-      ap[j] = fD.ap[j];
-   }
-   apAvg = fD.apAvg;
-   adjF107 = fD.adjF107;
-   adjCtrF107a = fD.adjCtrF107a;
-   obsF107 = fD.obsF107;
-   obsCtrF107a = fD.obsCtrF107a;
-   for (Integer j = 0; j < 9; j++)
-      F107a[j] = fD.F107a[j];
-   for (Integer j = 0; j < 3; j++)
-      apSchatten[j] = fD.apSchatten[j];
-   index = fD.index;
-   id = fD.id;
-   isObsData = fD.isObsData;
 
    return *this;
 }
@@ -252,10 +300,15 @@ bool SolarFluxReader::Open()
 //------------------------------------------------------------------------------
 bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string &predictFile)
 {
+   std::string theLine;
+
    if (!obsFile.empty())
       obsFileName = obsFile;
    if (!predictFile.empty())
       predictFileName = predictFile;
+
+   obsFluxData.clear();
+   predictFluxData.clear();
 
    FileManager *fm = FileManager::Instance();
 
@@ -292,22 +345,21 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
       {
          inObs.seekg(0, std::ios_base::beg);
 
-         while (true)
+         while (!inObs.eof())
          {
-            inObs.getline(line, 256);
+            getline(inObs, theLine);
 
-            if (std::string(line).find(beg_ObsTag) != std::string::npos)
+            if (theLine.find(beg_ObsTag) != std::string::npos)
             {
                begObs = inObs.tellg();
             }
-            else if (std::string(line).find(end_ObsTag) != std::string::npos)
+            else if (theLine.find(end_ObsTag) != std::string::npos)
             {
                endObs = inObs.tellg();
-               endObs = endObs - strlen(line) - 2 ;
+               endObs = endObs - theLine.length() - 2;
                break;
             }
          }
-
          LoadObsData();
       }
       else
@@ -323,26 +375,20 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
       if (inPredict.is_open())
       {
          inPredict.seekg(0, std::ios_base::beg);
-         std::string strLine = "";
-
-         while (true)
+         while (!inPredict.eof())
          {
-            inPredict.getline(line, 256);
+            getline(inPredict, theLine);
 
-            strLine = line;
-            // if we read the line with "Nominal Timing" and "Early Timing" content, continue reading two more lines to get
-            // into the data lines.
-            if (strLine.find("NOMINAL TIMING") != std::string::npos && strLine.find("EARLY TIMING") != std::string::npos)
+            if ((theLine.find("NOMINAL TIMING") != std::string::npos) &&
+                (theLine.find("EARLY TIMING") != std::string::npos))
             {
-               inPredict.getline(line, 256);
-               inPredict.getline(line, 256);
-
+               getline(inPredict, theLine);
+               getline(inPredict, theLine);
                begData = inPredict.tellg();
 
                break;
             }
          }
-
          LoadPredictData();
       }
       else
@@ -352,6 +398,9 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
                "file " + predictFileName + " could not be opened.\n");
       }
    }
+
+   MessageInterface::ShowMessage("Spans: [%lf %lf], [%lf %lf]\n",
+         historicStart, historicEnd, predictStart, predictEnd);
 
    return(Close());
 }
@@ -434,43 +483,26 @@ bool SolarFluxReader::LoadObsData()
    }
 
    inObs.seekg(begObs, std::ios_base::beg);
+   std::string theLine;
+   getline(inObs, theLine);
 
-   /// @todo: Rework logic here so that it isn't this type of loop
-   while (true)
+   while (!inObs.eof() && (theLine.find(end_ObsTag) == std::string::npos))
    {
-      inObs.getline(line, 256);
-      if (std::string(line).find(end_ObsTag) != std::string::npos)
-            break; 
-      
+      line = theLine.c_str();
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%s\n", line);
+      #endif
+
       if (strlen(line) > 8)
       {
          // Read geomagnetic and F107 data
          sscanf(line, format, s1, s2);
          // s1 corresponds to geomagnetics data with formatted string (format1) defined above.
-         sscanf(s1, format1, s11, s12, s13, s6[0], s6[1], s6[2], s6[3], s6[4], s6[5], s6[6], s6[7], s8[0], s8[1], s8[2], s8[3], s8[4], s8[5], s8[6], s8[7], s9);
+         sscanf(s1, format1, s11, s12, s13, s6[0], s6[1], s6[2], s6[3], s6[4],
+                s6[5], s6[6], s6[7], s8[0], s8[1], s8[2], s8[3], s8[4], s8[5], s8[6], s8[7], s9);
          // s2 corresponds to F107 data with formatted string (format2) defined above.
          sscanf(s2, format2, s21, s22[0], s22[1], s22[2], s22[3], s22[4]);
-
-         /*
-          std::istringstream buf(line);
-          std::istream_iterator<std::string> beg(buf), end;
-          std::vector<std::string> tokens(beg, end);
-
-            Real mjd = ModifiedJulianDate(atoi(tokens[0].c_str()), atoi(tokens[1].c_str()), atoi(tokens[2].c_str()), hour, minute, sec);
-            // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
-            fD.epoch = mjd - 0.5;
-
-            // The CSSI file conains Kp * 10, then rounded to an int.  Undo that here.
-            for (Integer l=0; l<8; l++)
-               fD.kp[l] = atof(tokens[tokens.size()-28+l].c_str()) / 10.0;
-            for (Integer l=0; l<8; l++)
-               fD.ap[l] = atof(tokens[tokens.size()-19+l].c_str());
-            fD.apAvg = atof(tokens[tokens.size()-19+8].c_str());
-            fD.adjF107 = atof(tokens[tokens.size()-7].c_str());
-            fD.adjCtrF107a = atof(tokens[tokens.size()-5].c_str());
-            fD.obsF107 = atof(tokens[tokens.size()-3].c_str());
-            fD.obsCtrF107a = atof(tokens[tokens.size()-2].c_str());
-         */
 
          FluxData fD;
          Real mjd = ModifiedJulianDate((YearNumber)atof(s11), (MonthOfYear)atof(s12), (DayOfMonth)atof(s13), hour, minute, sec);
@@ -509,6 +541,7 @@ bool SolarFluxReader::LoadObsData()
          fD.isObsData = true;
          obsFluxData.push_back(fD);
       }
+      getline(inObs, theLine);
    }
 
    //delete new'd array
@@ -541,8 +574,11 @@ bool SolarFluxReader::LoadObsData()
             obsFluxData.size());
    #endif
 
-   historicStart = obsFluxData[0].epoch + 0.5;
-   historicEnd = obsFluxData[obsFluxData.size() - 1].epoch  + 0.5;
+   if (obsFluxData.size() > 0)
+   {
+      historicStart = obsFluxData[0].epoch + 0.5;
+      historicEnd = obsFluxData[obsFluxData.size() - 1].epoch  + 0.5;
+   }
 
    return true;
 }
@@ -565,15 +601,22 @@ bool SolarFluxReader::LoadPredictData()
 { 
    Integer hour = 0, minute = 0;
    Real sec = 0.0;
+   std::string theLine;
 
    inPredict.seekg(begData, std::ios_base::beg);
 
    while (!inPredict.eof())
    {
-      inPredict.getline(line, 256);
-      //last line in file may or may not have "END DATA" tag,
-      // if it has, break 
-      if(std::string(line).find("END_DATA") != std::string::npos)
+      getline(inPredict, theLine);
+      line = theLine.c_str();
+
+      #ifdef DEBUG_INITIALIZATION
+         MessageInterface::ShowMessage("%s\n", line);
+      #endif
+
+      // Last line in file may or may not have an "END DATA" tag,
+      // If it is found, break
+      if (theLine.find("END_DATA") != std::string::npos)
          break;
 
       std::istringstream buf(line);
@@ -581,6 +624,8 @@ bool SolarFluxReader::LoadPredictData()
       std::vector<std::string> tokens(beg, end);
 
       FluxData fD;
+      fD.isObsData = false;
+
       Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()), atoi(tokens[0].c_str()), 0, hour, minute, sec); 
       // because it starts from noon, we subtract it by 0.5 to move it back a half a day.
       fD.epoch = mjd - 0.5;
@@ -612,7 +657,6 @@ bool SolarFluxReader::LoadPredictData()
       fD.obsF107 = -1;
       fD.obsCtrF107a = -1;
 
-      fD.isObsData = false;
       predictFluxData.push_back(fD);
    }
 
@@ -631,52 +675,40 @@ bool SolarFluxReader::LoadPredictData()
             predictFluxData.size());
    #endif
 
-   predictStart = predictFluxData[0].epoch + 0.5;
-   predictEnd = predictFluxData[predictFluxData.size() - 1].epoch  + 0.5;
+   if (predictFluxData.size() > 0)
+   {
+      predictStart = predictFluxData[0].epoch + 0.5;
+      predictEnd = predictFluxData[predictFluxData.size() - 1].epoch  + 0.5;
+   }
 
    return true;
 }
 
 //------------------------------------------------------------------------------
-// bool GetInputs()
+// FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 //------------------------------------------------------------------------------
 /**
  * Gets Observed or Predicted input file data.
- *
- * This method will get Observed or Predicted input file data.
  * 
- * @param float
+ * HistoricAndNearTerm source is always given precedence if the requested epoch
+ * is in the historic data section.  Otherwise, predicted data is used from the
+ * predicted source.  If the requested data is not on a file (regardless of the
+ * file type), the closest but later data trelative to the requested epoch is
+ * returned,  and issue a (single) warning message is posted indicating that
+ * data was not available, so boundary data is being used from a specified
+ * source.
  *
- * @return bool
+ * @param epoch The epoch for the requested data
+ *
+ * @return A populated FluxData struct
  */
 //------------------------------------------------------------------------------
 SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 {
-   Integer index;
-   GmatEpoch epoch_1st = historicStart;
+   // Local instance for the return.  A more efficient approach would be to pass
+   // in the struct to be filled.
    FluxData fD;
-
-   // Requirement list in google docs:
-   // HistoricAndNearTerm source is always given precedence if requested epoch
-   // is in the historic data section.
-   // Otherwise, predicted data is used from the predicted source.
-   // If requested data is not on a file (regardless of the file type), 
-   // use closest data from the requested epoch and issue a single warning message 
-   // that data was not available so using closest data and from which file source.
-   index = (Integer) (epoch - 0.5 - epoch_1st);
-
-   if (index < 0)
-   {
-      // Warn the user that the epoch is too early
-      if (warnEpochBefore)
-      {
-         MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
-            "data is earlier than the starting epoch on the flux file.  GMAT "
-            "is using the first file entry.\n");
-         warnEpochBefore = false;
-      }
-      index = 0;
-   }
+   Integer index;
 
    #ifdef DEBUG_GETFLUXINPUTS
       MessageInterface::ShowMessage("GetInputs(%.12lf): index = %d, using ",
@@ -685,53 +717,57 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 
    // if the requested epoch falls beyond the
    // last item in the obsFluxData, then search in predictFluxData
-   if (index >= (Integer) obsFluxData.size())
+   if (epoch >= historicEnd)
    {
       #ifdef DEBUG_GETFLUXINPUTS
          MessageInterface::ShowMessage("predict data\n");
       #endif
 
+      // Init to the first predict record
+      fD = predictFluxData[0];
+
       if ((predictFluxData.size() > 0))
       {
-         epoch_1st = predictStart;
-         index = (Integer) (epoch - epoch_1st) - 1;
+         index = (Integer) (epoch - predictStart) - 1;
       
-         if (index >= 0)
+         if (epoch < predictStart)
          {
+            // Warn the user that the epoch is too early
+            if (warnEpochBefore)
+            {
+               MessageInterface::ShowMessage("Warning: Requested epoch for "
+                     "solar flux data is earlier than the starting epoch on "
+                     "the predict flux file.  GMAT is using the first file "
+                     "entry.\n");
+               warnEpochBefore = false;
+            }
+            index = 0;
+         }
+         else if (epoch > predictEnd)
+         {
+            // Warn the user that the epoch is too late
+            if (warnEpochAfter)
+            {
+               MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
+                  "data is later than the ending epoch on the predict flux file; "
+                  "using the last file entry.\n");
+               warnEpochAfter = false;
+            }
+            fD = predictFluxData[predictFluxData.size() - 1];
+         }
+         else
+         {
+            // Look up the data for epoch
             std::vector<FluxData>::iterator it;
             for ( it = predictFluxData.begin(); it != predictFluxData.end(); ++it)
             {
-               if ( index >= it->index && (it+1) != predictFluxData.end() && index < (it+1)->index)
+               if ((index >= it->index) && ((it+1) != predictFluxData.end()) && (index < (it+1)->index))
                {
                   fD = predictFluxData[it->id];
                   fD.index = -1;
                   break;
                }
-               else if ( (it+1) == predictFluxData.end())
-               {
-                  // Warn the user that the epoch is too late
-                  if (warnEpochAfter)
-                  {
-                     MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
-                        "data is later than the ending epoch on the flux file.  GMAT "
-                        "is using the last file entry.\n");
-                     warnEpochAfter = false;
-                  }
-                  fD = predictFluxData[predictFluxData.size() - 1];
-               }
             }
-         }
-         else
-         {
-            // Warn the user that the epoch is too early
-            if (warnEpochBefore)
-            {
-               MessageInterface::ShowMessage("Warning: Requested epoch for solar flux "
-                  "data is earlier than the starting epoch on the flux predict file.  GMAT "
-                  "is using the first file entry.\n");
-               warnEpochBefore = false;
-            }
-            fD = predictFluxData[0];
          }
       }
       else // Off the CSSI file and there is no predict data read
@@ -751,6 +787,21 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
    }
    else
    {
+      index = (Integer) (epoch - 0.5 - historicStart);
+
+      if (index < 0)
+      {
+         // Warn the user that the epoch is too early
+         if (warnEpochBefore)
+         {
+            MessageInterface::ShowMessage("Warning: Requested epoch for solar "
+                  "flux data is earlier than the starting epoch on the "
+                  "historical flux file.  GMAT is using the first file entry.\n");
+            warnEpochBefore = false;
+         }
+         index = 0;
+      }
+
       #ifdef DEBUG_GETFLUXINPUTS
          MessageInterface::ShowMessage("observed data\n");
       #endif
@@ -762,7 +813,8 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
 #ifdef DEBUG_FIRSTFEW_READS
    if (numberReadIndex < howMany)
    {
-      MessageInterface::ShowMessage("Raw Data from read %d:\n", numberReadIndex);
+      MessageInterface::ShowMessage("Raw Data from read %d for epoch %.12lf:\n",
+            numberReadIndex, epoch);
       MessageInterface::ShowMessage("   F107 Obs:         %lf\n", fD.obsF107);
       MessageInterface::ShowMessage("   F107 Adj:         %lf\n", fD.adjF107);
       MessageInterface::ShowMessage("   F107a Obs Ctr:    %lf\n", fD.obsCtrF107a);
@@ -771,7 +823,8 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
       MessageInterface::ShowMessage("   Ap Ave:           %lf\n", fD.apAvg);
       MessageInterface::ShowMessage("   Kp:               %lf %lf %lf %lf %lf %lf %lf %lf\n\n", fD.kp[0], fD.kp[1], fD.kp[2], fD.kp[3], fD.kp[4], fD.kp[5], fD.kp[6], fD.kp[7]);
       MessageInterface::ShowMessage("   F107a(Schatten):  %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", fD.F107a[0], fD.F107a[1], fD.F107a[2], fD.F107a[3], fD.F107a[4], fD.F107a[5], fD.F107a[6], fD.F107a[7], fD.F107a[8]);
-      MessageInterface::ShowMessage("   Ap(Schatten):     %lf %lf %lf\n\n", fD.apSchatten[0], fD.apSchatten[1], fD.apSchatten[2]);
+      MessageInterface::ShowMessage("   Ap(Schatten):     %lf %lf %lf\n", fD.apSchatten[0], fD.apSchatten[1], fD.apSchatten[2]);
+      MessageInterface::ShowMessage("   Record %s obs data\n\n", (fD.isObsData ? "is" : "is not"));
    }
 #endif
 

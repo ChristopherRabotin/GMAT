@@ -64,7 +64,8 @@ public:
       // the first is NOMINAL, the second is EARLY, and the last is LATE TIMING.
       Real apSchatten[3];
 
-      // Assignment operator
+      FluxData();
+      FluxData(const FluxData &fD);
       FluxData &operator=(const FluxData &fD);
       
       // Used in Schatten file indexing
@@ -82,7 +83,7 @@ private:
    /// offset required to start reading Schatten data
    std::streamoff begData;
    /// each line in the file
-   char * line; 
+   const char *line;
 
    std::string obsFileName;
    std::string predictFileName;
