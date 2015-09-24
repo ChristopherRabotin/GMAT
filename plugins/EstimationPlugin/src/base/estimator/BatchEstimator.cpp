@@ -2418,7 +2418,6 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
    const std::vector<ListItem*> *map = esm.GetStateMap();
    GmatState outputEstimationState;
 
-
    if (sState == ESTIMATING)
    {
       /// 1. Write state summary
@@ -2687,8 +2686,9 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
    
             // Step 2: Write table contents:
             gsName = statisticsTable[sa[i]].begin()->first;
+            gsName = gsName.substr(0, gsName.find_first_of(' '));
             std::stringstream ss4;
-
+//            MessageInterface::ShowMessage("Line %d: ", i);
             UnsignedInt index = 0;
             UnsignedInt index1 = 0;
             for (std::map<std::string, Real>::iterator column = statisticsTable[sa[i]].begin(); column != statisticsTable[sa[i]].end(); ++column)
@@ -2696,9 +2696,64 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                std::string name = column->first;
                std::string gs = name.substr(0, name.find_first_of(' '));
                std::string typeName = name.substr(name.find_first_of(' ')+1);
+//               MessageInterface::ShowMessage("<%s %s> = %f ", gs.c_str(), typeName.c_str(), column->second); 
 
                if (column == statisticsTable[sa[i]].begin())
                   textFile << GmatStringUtil::GetAlignmentString(sa[i],20);
+
+               if (gs != gsName)
+               {
+                  switch (i)
+                  {
+                  case 0:
+                     {
+                        allRecSubTotal.push_back(allNumRec);
+                        Integer value = allNumRec;                           // change type from real to integer
+                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value), 20, GmatStringUtil::RIGHT);
+                     }
+                     break;
+                  case 1:
+                     {
+                        acceptedRecSubTotal.push_back(numRec);
+                        Integer value = numRec;                              // change type from real to integer
+                        Real percent = numRec*100/allRecSubTotal[index1];    // calculate percentage
+                        std::string sval = GmatStringUtil::ToString(percent, 2) + "% " + GmatStringUtil::ToString(value, 8);
+                        textFile << GmatStringUtil::GetAlignmentString(sval, 20, GmatStringUtil::RIGHT);
+                     }
+                     break;
+                  case 2:
+                     textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(sumWeightedResSquare/acceptedRecSubTotal[index1]), 8), 20, GmatStringUtil::RIGHT);
+                     break;
+                  case 3:
+                     {
+                        residualSubTotal.push_back(sumRes);
+                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/acceptedRecSubTotal[index1], 8), 20, GmatStringUtil::RIGHT);
+                        textFile << "                 N/A";
+                     }
+                     break;
+                  case 4:
+                     {
+                        Real res_aver = residualSubTotal[index1]/acceptedRecSubTotal[index1];
+                        Real resSquare_aver = sumResSquare/acceptedRecSubTotal[index1];
+                        Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
+                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                        textFile << "                 N/A";
+                     }
+                     break;
+                  }
+                  ++index1;
+
+                  textFile << ss4.str();
+                  ss4.str(""); 
+                  allNumRec = 0.0;
+                  numRec = 0.0;
+                  sumWeightedResSquare = 0.0;
+                  sumRes = 0.0;
+                  sumResSquare = 0.0;
+
+                  gsName = gs;
+               }
+
 
                switch (i)
                {
@@ -2743,9 +2798,9 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                   break;
                }
 
+               ++index;
+            }
 
-               if (gs != gsName)
-               {
                   switch (i)
                   {
                   case 0:
@@ -2770,7 +2825,8 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                   case 3:
                      {
                         residualSubTotal.push_back(sumRes);
-                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/acceptedRecSubTotal[index1], 8), 20, GmatStringUtil::RIGHT);
+                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/acceptedRecSubTotal[index1], 8), 20, GmatStringUtil::RIGHT);
+                        textFile << "                 N/A";
                      }
                      break;
                   case 4:
@@ -2778,7 +2834,8 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                         Real res_aver = residualSubTotal[index1]/acceptedRecSubTotal[index1];
                         Real resSquare_aver = sumResSquare/acceptedRecSubTotal[index1];
                         Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
-                        textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                        //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                        textFile << "                 N/A";
                      }
                      break;
                   }
@@ -2792,12 +2849,9 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                   sumRes = 0.0;
                   sumResSquare = 0.0;
 
-                  gsName = gs;
-               }
 
-               ++index;
-            }
             textFile << "\n";
+//            MessageInterface::ShowMessage("\n");
          }
          textFile << "\n\n";
 
@@ -2908,14 +2962,17 @@ void BatchEstimator::WriteSummary(Solver::SolverState sState)
                textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(GmatMathUtil::Sqrt(sumWeightedResSquare/numRec), 8), 20, GmatStringUtil::RIGHT);
                break;
             case 3:
-               textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/numRec, 8), 20, GmatStringUtil::RIGHT);
+               //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(sumRes/numRec, 8), 20, GmatStringUtil::RIGHT);
+               textFile << "                 N/A";
+
                break;
             case 4:
                {
                   Real res_aver = sumRes/numRec;
                   Real resSquare_aver = sumResSquare/numRec;
                   Real value = GmatMathUtil::Sqrt(resSquare_aver - res_aver*res_aver);
-                  textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                  //textFile << GmatStringUtil::GetAlignmentString(GmatStringUtil::ToString(value, 8), 20, GmatStringUtil::RIGHT);
+                  textFile << "                 N/A";
                }
                break;
             }
