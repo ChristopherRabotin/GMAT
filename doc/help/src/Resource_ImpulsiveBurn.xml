@@ -994,18 +994,25 @@ DefaultIB.B = -2</code></programlisting>
     </refsection>
 
     <refsection>
-      <title>Backwards-propagated Impulsive VNB Maneuvers</title>
+      <title>Backwards-propagated Impulsive maneuvers defined using the
+      spaceraft velocity</title>
+
+      <para>Examples of axes defined using the spacecraft velocity are the VNB
+      and LVLH axes discussed above as well as some user-defined axes. The
+      behavior when applying an impulsive maneuver using these types of axes
+      during a backwards-propagation is subtle and requires some explanation.
+      In the examples that follow, we will focus our discussion on a VNB
+      maneuver. </para>
 
       <para>As will be shown in the script samples below, an impulsive
       maneuver is applied during a backwards propagation using the ‘BackProp’
-      keyword. The behavior when applying a VNB-type impulsive maneuver during
-      a backwards-propagation is subtle and requires some explanation. The
-      maneuver components that you specify for a backwards propagation are
-      used to calculate the components of the maneuver actually applied. Refer
-      to the script sample below where a backwards-propagated impulsive
-      maneuver is followed by the same maneuver using a normal formal
-      propagation. The impulsive maneuver is defined so that the velocity of
-      the spacecraft is unchanged after the script is run.</para>
+      keyword. The maneuver components that you specify for a backwards
+      propagation are used to calculate the components of the maneuver
+      actually applied. Refer to the script sample below where a
+      backwards-propagated impulsive maneuver is followed by the same maneuver
+      using a normal formal propagation. The impulsive maneuver is defined so
+      that the velocity of the spacecraft is unchanged after the script is
+      run.</para>
 
       <programlisting>Create Spacecraft Sat;
 Create ImpulsiveBurn myImpulsiveBurn;
