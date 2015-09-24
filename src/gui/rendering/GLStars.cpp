@@ -10,27 +10,22 @@
 //
 // Author: Phillip Silvia, Jr., Derived from Gene Stillman's code for Odyssey
 // Created: 2009/09/21
+// Modified: 2015/08/31:  Added constellation borders and changed colors
 /**
  * This class handles loading the star and constellation information and drawing
  * them in to the scene. 
  */
 //------------------------------------------------------------------------------
-
+#include "GmatConstants.hpp"
 #include "GLStars.hpp"
 #include "wx/textfile.h"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
 #include "Rendering.hpp"
-
-#ifndef M_PI
-// wx/math.h defines this.  So does math.h in VS 2010, but not earlier incarnations
-#define M_PI 3.1415926535897932384626433832795
-#endif
-
+#include "StringUtil.hpp"
+//------------------------------------------------------------------------------
 const GLfloat SOURCELIGHT99[] = {0.99f, 0.99f, 0.99f, 1.0f};
-
 GLStars* GLStars::theInstance = NULL;
-
 //------------------------------------------------------------------------------
 // GLStars()
 //------------------------------------------------------------------------------
@@ -40,11 +35,11 @@ GLStars* GLStars::theInstance = NULL;
 //------------------------------------------------------------------------------
 GLStars::GLStars()
     : DesiredStarCount(42000)   // Fixed uninitialzed value error
-{
+   {
+   InitStars();
    DesiredStarCount = 0;
    NumLines = 0;
-}
-
+   }
 //------------------------------------------------------------------------------
 // ~GLStars()
 //------------------------------------------------------------------------------
@@ -58,7 +53,6 @@ GLStars::~GLStars()
       delete theInstance;
    theInstance = NULL;
 }
-
 //------------------------------------------------------------------------------
 // GLStars* Instance()
 //------------------------------------------------------------------------------
@@ -67,89 +61,57 @@ GLStars::~GLStars()
  */
 //------------------------------------------------------------------------------
 GLStars* GLStars::Instance()
-{
+   {
    if (theInstance == NULL)
       theInstance = new GLStars;
    return theInstance;
-}
-
+   }
 //------------------------------------------------------------------------------
-// void ReadTextStars()
+// void ReadStars()
 //------------------------------------------------------------------------------
 /**
  * Read the star information from the file
  */
 //------------------------------------------------------------------------------
-void GLStars::ReadTextStars()
-{
-   wxString buffer, starFileName;
-   Real RightAscension;
-   Real Declination;
-   Real VisualMag;
-   Real sinRA, cosRA, cosDec;
-   int i;
+void GLStars::ReadStars()
+   {
    int index = 0;
-   Real DegToRad = M_PI / 180.0;
-   GLfloat VisMagStep = 0.0f;
+   GLfloat VisMagStep = -3.0f;
    const GLfloat VSScale = 0.30f;
    const GLfloat StarDimmest = 0.02f;
    const GLfloat BaseScale = 9.0f;
-   const GLfloat StarRange = 2.0;
-   const GLfloat RangeFactor = 0.0;
    
    FileManager *fm = FileManager::Instance();
-   // Changed to use FileManager::FindPath() (LOJ: 2014.07.08)
-   //starFileName = (fm->GetFullPathname("STAR_FILE")).c_str();
-   starFileName = (fm->FindPath("", "STAR_FILE", true, false, true)).c_str();
+   wxString starFileName = (fm->FindPath("", "STAR_FILE", true, false, true)).c_str();
    
    // Try opening the file
    wxTextFile StarsFile;
    if (!StarsFile.Open(starFileName))
-   {
-      wxString msg = "Could not open Star Catalog at ";
-      msg.Append(starFileName);
-      MessageInterface::LogMessage(msg + "\n");
+      {
+      MessageInterface::LogMessage
+         ("Could not open Star Catalog at " + starFileName + "\n");
       return;
-   }
-   
-   // The first line is the north star, so it gets special treatment
-   buffer = StarsFile.GetFirstLine();
-   // Gets its right ascension, declination, and magnitude from the star catalog
-   GetStarValues(buffer, &RightAscension, &Declination, &VisualMag);
-   
-   // Calculate the position of the star...
-   sinRA = sin(RightAscension * DegToRad);
-   cosRA = cos(RightAscension * DegToRad);
-   cosDec = cos(Declination * DegToRad);
-   
-   // ...and store it in our array. 
-   StarsVA[0][CosRAcosDec] = StarRange * cosRA * cosDec;
-   StarsVA[0][SinRAcosDec] = StarRange * sinRA * cosDec;
-   StarsVA[0][SinDec] = StarRange * sin(Declination * DegToRad);
-   StarsVA[0][Range] = RangeFactor;
-   // Store the point size and the count of its group
-   PointSize[index] = 8.0f;
-   GroupCount[index] = 1;
-   GroupIndex[index] = 0;
-   index++;
-   GroupIndex[index] = 1;
+      }
    
    // Parse through the whole file and repeat this process, storing the star in the appropriate group
-   for (i = 1, buffer = StarsFile.GetNextLine(); i < MAXSTARS && !StarsFile.Eof(); i++,
+   int i;
+   wxString buffer;
+   Real ra, dec, mag;
+   for (i=0, buffer = StarsFile.GetFirstLine(); i < MAXSTARS && !StarsFile.Eof(); i++,
            buffer = StarsFile.GetNextLine())
-   {
-      GetStarValues(buffer, &RightAscension, &Declination, &VisualMag);
-      sinRA = sin(RightAscension * DegToRad);
-      cosRA = cos(RightAscension * DegToRad);
-      cosDec = cos(Declination * DegToRad);
-      
-      StarsVA[i][CosRAcosDec] = StarRange * cosRA * cosDec;
-      StarsVA[i][SinRAcosDec] = StarRange * sinRA * cosDec;
-      StarsVA[i][SinDec] = StarRange * sin(Declination * DegToRad);
-      StarsVA[i][Range] = RangeFactor;
-      
-      if (VisualMag > VisMagStep)
       {
+      // Retrieve the pair of Right Ascensions and Declinations from the line
+      std::string line (buffer);
+      TextParser tp;
+      StringArray split = tp.SeparateSpaces (line);
+      GmatStringUtil::ToReal (split[0],ra);
+      GmatStringUtil::ToReal (split[1],dec);
+      GmatStringUtil::ToReal (split[2],mag);
+      if (i==0) mag = -2;
+      SetVector (Stars[i],ra,dec);
+      
+      if (mag > VisMagStep)
+         {
          GroupCount[index] = i - GroupIndex[index];
          PointSize[index] = StarDimmest + ((BaseScale - VisMagStep) * VSScale);
          index++;
@@ -157,7 +119,7 @@ void GLStars::ReadTextStars()
             break;
          GroupIndex[index] = i;
          VisMagStep += STARSTEP;
-      }
+         }
    }
    
    // Finalize the values and close the file
@@ -169,110 +131,38 @@ void GLStars::ReadTextStars()
    // Store how many star positions we loaded from the file
    MaxDrawStars = i - 1;
 }
-
 //------------------------------------------------------------------------------
-// void GetStarValues(wxString buffer, Real *RightAscension, Real *Declination, Real *VisualMag)
-//------------------------------------------------------------------------------
-/**
- * Retrieves the Right Ascension, Declination, and Visual Magnitude of the star from the
- * line in the file
- */
-//------------------------------------------------------------------------------
-void GLStars::GetStarValues(wxString buffer, Real *RightAscension, Real *Declination, Real *VisualMag)
-{
-   wxString str;
-   unsigned int i = 0;
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
-   {
-      if (buffer[i] == '+')
-         continue;
-      else if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
-   }
-   
-   str.ToDouble(RightAscension);
-   str.Empty();
-   buffer = buffer.AfterFirst(' ');
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
-   {
-      if (buffer[i] == '+')
-         continue;
-      else if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
-   }
-   
-   str.ToDouble(Declination);
-   str.Empty();
-   buffer = buffer.AfterFirst(' ');
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
-   {
-      if (buffer[i] == '+')
-         continue;
-      else if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
-   }
-   
-   str.ToDouble(VisualMag);
-   str.Empty();
-}
-
-//------------------------------------------------------------------------------
-// void ReadTextConstellations()
+// void ReadConstellations()
 //------------------------------------------------------------------------------
 /**
  * Read in the star information for the constellations.
  */
 //------------------------------------------------------------------------------
-void GLStars::ReadTextConstellations()
-{
-   wxString buffer, constFileName;
-   Real RightAscension1, RightAscension2, Declination1, Declination2;
-   Real sinRA, cosRA, cosDec;
-   Real DegToRad = M_PI / 180.0;
-   const GLfloat StarRange = 2.0;
-   const GLfloat RangeFactor = 0.0;
-   int i;
+void GLStars::ReadConstellations()
+   {
    
    FileManager *fm = FileManager::Instance();
-   // Changed to use FileManager::FindPath() (LOJ: 2014.07.08)
-   //constFileName = (fm->GetFullPathname("CONSTELLATION_FILE")).c_str();
-   constFileName = (fm->FindPath("", "CONSTELLATION_FILE", true, false, true)).c_str();
+   wxString constFileName = (fm->FindPath("", "CONSTELLATION_FILE", true, false, true)).c_str();
    
    // Attempt to open the constellation file
    wxTextFile ConstellationFile;
    if (!ConstellationFile.Open(constFileName))
-   {
-      wxString msg = "Could not open Constellation File at ";
-      msg.Append(constFileName);
-      MessageInterface::LogMessage(msg + "\n");
+      {
+      MessageInterface::LogMessage
+          ("Could not open Constellation File at " + constFileName + "\n");
       return;
-   }
+      }
    
    NumLines = 0;
    NumConstellations = 0;
    
    // Go through the file and store all of the star pairs that make up the constellation lines
+   int i;
+   wxString buffer;
+   Real ra1, ra2, dec1, dec2;
    for (i = 0, buffer = ConstellationFile.GetFirstLine(); i < MAXLINES && !ConstellationFile.Eof();
         buffer = ConstellationFile.GetNextLine())
-   {
+      {
       // Skip empty lines
       if(buffer.IsEmpty())
          continue;
@@ -280,126 +170,183 @@ void GLStars::ReadTextConstellations()
       if (buffer[0] == '#')
          continue;
       if (buffer[0] == 'N')
-      {
+         {
          ConstellationIndex[NumConstellations][1] = i-1;
          NumConstellations++;
          ConstellationNames[NumConstellations] = buffer.AfterFirst(' ');
          ConstellationIndex[NumConstellations][0] = i;
          continue;
-      }
+         }
       
       // Retrieve the pair of Right Ascensions and Declinations from the line
-      GetConstellationValues(buffer, &RightAscension1, &Declination1, &RightAscension2, &Declination2);
-      // Convert the Right Ascensions from days to degrees
-      RightAscension1 *= 15;
-      RightAscension2 *= 15;
-
+      std::string line (buffer);
+      TextParser tp;
+      StringArray split = tp.SeparateSpaces (line);
+      GmatStringUtil::ToReal (split[0],dec1);
+      GmatStringUtil::ToReal (split[1],ra1);
+      GmatStringUtil::ToReal (split[2],dec2);
+      GmatStringUtil::ToReal (split[3],ra2);
+      // Convert the Right Ascensions from hours to degrees
+      ra1 *= 15;
+      ra2 *= 15;
+      // Shorten each end of line by 0.5 degConvert the Right Ascensions from hours to degrees
+      Real ddec = dec2-dec1;
+      Real dra = ra2-ra1;
+      if (dra > 180) dra -= 360;
+      if (dra < -180) dra += 360;
+      Real dist = sqrt (ddec*ddec+dra*dra);
+      Real f = 0.5/dist;
+      Real fdec = f*ddec;
+      Real fra = f*dra;
+      ra1 = ra1+fra;
+      ra2 = ra2-fra;
+      dec1 = dec1+fdec;
+      dec2 = dec2-fdec;
       // Calculate the star positions and store them in the array
-      sinRA = sin(RightAscension1 * DegToRad);
-      cosRA = cos(RightAscension1 * DegToRad);
-      cosDec = cos(Declination1 * DegToRad);
-      
-      CLines[i][0] = StarRange * cosRA * cosDec;
-      CLines[i][1] = StarRange * sinRA * cosDec;
-      CLines[i][2] = StarRange * sin(Declination1 * DegToRad);
-      CLines[i][3] = RangeFactor;
-      
-      sinRA = sin(RightAscension2 * DegToRad);
-      cosRA = cos(RightAscension2 * DegToRad);
-      cosDec = cos(Declination2 * DegToRad);
-      
-      CLines[i+1][0] = StarRange * cosRA * cosDec;
-      CLines[i+1][1] = StarRange * sinRA * cosDec;
-      CLines[i+1][2] = StarRange * sin(Declination2 * DegToRad);
-      CLines[i+1][3] = RangeFactor;
+      SetVector (CLines[i],ra1,dec1);
+      SetVector (CLines[i+1],ra2,dec2);
       i+=2;
-   }
-   
-   // Close the constellation file
-   ConstellationFile.Close();
-   
+      }
    // Store how many constellation line vertices we loaded in
    NumLines = i - 1;
-
    ConstellationIndex[NumConstellations][1] = i - 1;
-}
 
+   ConstellationFile.Close();
+   }
 //------------------------------------------------------------------------------
-// void GetConstellationValues(wxString buffer, Real *RightAscension1, 
-//         Real *Declination1, Real *RightAscension2, Real *Declination2)
+// void ReadBorders()
 //------------------------------------------------------------------------------
 /**
- * Parse the line from the file and extract the pair of Right Ascensions and Declinations
+ * Read in the border information for the constellations.
  */
 //------------------------------------------------------------------------------
-void GLStars::GetConstellationValues(wxString buffer, Real *RightAscension1, 
-                                     Real *Declination1, Real *RightAscension2,
-                                     Real *Declination2)
-{
-   wxString str;
-   unsigned int i = 0;
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
+void GLStars::ReadBorders()
    {
-      if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
+   FileManager *fm = FileManager::Instance();
+   wxString borderFileName = (fm->FindPath("", "BORDER_FILE", true, false, true)).c_str();
+   
+   // Attempt to open the constellation file
+   wxTextFile BorderFile;
+   if (!BorderFile.Open(borderFileName))
+      {
+      MessageInterface::LogMessage
+          ("Could not open Constellation Border File at " + borderFileName + "\n");
+      return;
+      }
+   
+   NumBorders = 0;
+   int count = 0;  
+   int ix = 0; 
+   double oldra = 0;
+   wxString buffer;
+   Real ra, dec;
+   for (buffer = BorderFile.GetFirstLine(); ix < MAXBORDERS && !BorderFile.Eof();
+        buffer = BorderFile.GetNextLine())
+      {
+      // Skip empty lines
+      if(buffer.IsEmpty())
+         continue;
+      
+      std::string line (buffer);
+      TextParser tp;
+      StringArray split = tp.SeparateSpaces (line);
+      GmatStringUtil::ToReal (split[0],ra);
+      GmatStringUtil::ToReal (split[1],dec);
+      ra *= 15;
+      bool start = split.size() == 3;
+      if (start)
+         {
+         count = 0;
+         if (ix!=0)
+            {
+            BorderGroup[BorderGroupCount] = ix;
+            ++BorderGroupCount;
+            }
+         }
+      ++count;
+      if (count==1)
+         {
+         SetVector (Borders[ix],ra,dec);
+         Correct1875(Borders[ix]);
+         ++ix;
+         }
+      else if (ra == oldra)
+         {
+         SetVector (Borders[ix],ra,dec);
+         Correct1875(Borders[ix]);
+         ++ix;
+         }
+      else
+         {
+         double dra = ra - oldra;
+         if (dra > 180) dra -=360;
+         if (dra < -180) dra +=360;
+         double rastep = dra > 0 ? 1 : -1;
+         int steps = floor(abs(dra));
+         for (int i=1;  i<=steps;  ++i)
+            {
+            SetVector (Borders[ix],oldra+rastep*i,dec);
+            Correct1875(Borders[ix]);
+            ++ix;
+            }
+         SetVector (Borders[ix],ra,dec);
+         Correct1875(Borders[ix]);
+         ++ix;
+         }
+      oldra = ra;
+      }
+   BorderGroup[BorderGroupCount] = ix;
+   ++BorderGroupCount;
+   BorderFile.Close();
    }
-   
-   str.ToDouble(Declination1);
-   str.Empty();
-   buffer = buffer.AfterFirst(' ');
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
+//-------------------------------------------------------------------------------
+// void SetVector (GLfloat v[4], Real ra, Real dec)
+//-------------------------------------------------------------------------------
+// Sets a vector the input ra and dec
+//
+// v: Output vector
+// ra: Right Ascension of vector
+// dec: Declination of vector
+//------------------------------------------------------------------------------
+void GLStars::SetVector (GLfloat v[4], Real ra, Real dec)
    {
-      if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
+   const GLfloat StarRange = 2.0;
+   const GLfloat RangeFactor = 0.0;
+   Real ra_rad = ra * GmatMathConstants::RAD_PER_DEG;
+   Real dec_rad = dec * GmatMathConstants::RAD_PER_DEG;
+   v[0] = StarRange * cos(ra_rad) * cos(dec_rad);
+   v[1] = StarRange * sin(ra_rad) * cos(dec_rad);
+   v[2] = StarRange * sin(dec_rad);
+   v[3] = RangeFactor;
    }
-   
-   str.ToDouble(RightAscension1);
-   str.Empty();
-   buffer = buffer.AfterFirst(' ');
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
+//-------------------------------------------------------------------------------
+//void Correct1875 (GLfloat v[4])
+//-------------------------------------------------------------------------------
+// Correct a vector from B1875.0 frame to J2000 frame.  
+// Used for constellation borders
+//------------------------------------------------------------------------------
+void GLStars::Correct1875 (GLfloat v[4])
    {
-      if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
+   GLfloat copy[3];
+   GLfloat a1875[3][3];
+   a1875[0][0] =   0.99953588F;
+   a1875[0][1] =   0.02793679F;
+   a1875[0][2] =   0.01214762F;
+   a1875[1][0] =   -0.02793679F;
+   a1875[1][1] =   0.99960968F;
+   a1875[1][2] =   -0.00016969F;
+   a1875[2][0] =   -0.01214762F;
+   a1875[2][1] =   -0.00016976F;
+   a1875[2][2] =   0.99992620F;
+   for (int i=0;  i<=3-1;  ++i)
+      {
+      copy[i] = v[i];
+      v[i] = 0;
+      }
+   for (int i=0;  i<=3-1;  ++i)
+      for (int j=0;  j<=3-1;  ++j)
+         v[i] += a1875[j][i] * copy[j];
    }
-   
-   str.ToDouble(Declination2);
-   str.Empty();
-   buffer = buffer.AfterFirst(' ');
-   
-   while (buffer[0] == ' ')
-      buffer = buffer.AfterFirst(' ');
-   
-   for (i = 0; i < buffer.Length(); i++)
-   {
-      if (buffer[i] != '\n' && buffer[i] != ' ')
-         str.Append(buffer[i]);
-      else 
-         break;
-   }
-   
-   str.ToDouble(RightAscension2);
-   str.Empty();
-   buffer = buffer.AfterFirst(' ');
-}
-
 //------------------------------------------------------------------------------
 // void InitStars()
 //------------------------------------------------------------------------------
@@ -411,8 +358,9 @@ void GLStars::InitStars()
 {
    SetDesiredStarCount(42000);
    
-   ReadTextStars();
-   ReadTextConstellations();
+   ReadStars();
+   ReadConstellations();
+   ReadBorders();
    if (MaxDrawStars > DesiredStarCount)
       MaxDrawStars = DesiredStarCount;
 }
@@ -430,7 +378,9 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
    SetDesiredStarCount(starCount);
    GLfloat StarWhite[4] = {1.0f, 1.0f, 1.0f, 1.0f};
    GLfloat StarBlue[4] = {0.2f, 0.2f, 1.0f, 1.0f};
-   GLfloat LineWhite[4] = {1.0f, 1.0f, 1.0f, 0.6f};
+   GLfloat LineColor[4] = {0.2f, 0.6f, 0.6f, 1.0f};
+   GLfloat NameColor[4] = {0.5f, 0.5f, 0.2f, 1.0f};
+   GLfloat BorderColor[4] = {0.15f, 0.15f, 0.10f, 1.0f};
    
    // Set the alpha value
    StarWhite[3] = ColorAlpha;
@@ -450,7 +400,7 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
    glEnableClientState(GL_VERTEX_ARRAY);
    glDisable(GL_DEPTH_TEST);
    // Point to our array of star vertices
-   glVertexPointer(4, GL_DOUBLE, 0, StarsVA);
+   glVertexPointer(4, GL_FLOAT, 0, Stars);
 
    // First the north star
    glColor4fv(StarBlue);
@@ -464,7 +414,7 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
    // The rest of the stars are white
    glColor4fv(StarWhite);
    // Point again to the stars array
-   glVertexPointer(4, GL_DOUBLE, 0, StarsVA);
+   glVertexPointer(4, GL_FLOAT, 0, Stars);
    
    // Iterate through the groups and draw them all
    for (int i = 1; i <= LastGroupUsed; i++)
@@ -482,9 +432,8 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
    
    // Draw the constellation lines if the user wants them
    if (drawConstellations)
-   {
-      // Set the color
-      glColor4fv(LineWhite);
+      {
+      glColor4fv(LineColor);
       // Point to the vertex array
       glVertexPointer(4, GL_FLOAT, 0, CLines);
       // Enable smoothing and make these lines thin
@@ -493,24 +442,39 @@ void GLStars::DrawStarsVA(GLfloat ColorAlpha, int starCount, bool drawConstellat
       // Draw the lines
       glDrawArrays(GL_LINES, 0, NumLines);
       
+      glColor4fv(NameColor);
       for (int i = 1; i < NumConstellations; i++)
-      {
+         {
+         int count = 0;
+         double v[3] = {0,0,0};
+         for (int j=ConstellationIndex[i][0];  j<=ConstellationIndex[i][1];  ++j)
+             {
+             ++count;
+             for (int k=0;  k<=3-1;  ++k)
+                v[k] += CLines[j][k];
+             }
+         for (int k=0;  k<=3-1;  ++k)
+            v[k] /= count;
          GLfloat w = CLines[ConstellationIndex[i][0]][3];
          if (w == 0.0) w = 0.00001f;
-         DrawStringAt(ConstellationNames[i],
-                      CLines[ConstellationIndex[i][0]][0],
-                      CLines[ConstellationIndex[i][0]][1],
-                      CLines[ConstellationIndex[i][0]][2],
-                      w);
+         DrawStringAt(ConstellationNames[i],v[0],v[1],v[2],w);
+         }
+
+      glColor4fv(BorderColor);
+      // Point to the vertex array
+      glVertexPointer(4, GL_FLOAT, 0, Borders);
+      // Enable smoothing and make these lines thin
+      glEnable(GL_LINE_SMOOTH);
+      glLineWidth(0.3f);
+      // Draw the lines
+      for (int i=0;  i<=BorderGroupCount-1;  ++i)
+         glDrawArrays(GL_LINE_STRIP, BorderGroup[i], BorderGroup[i+1]-BorderGroup[i]-1);
       }
-   }
    
    glEnable(GL_DEPTH_TEST);
    // Disable vertex arrays
    glDisableClientState(GL_VERTEX_ARRAY);
-   
-   // Disable blending
    glDisable(GL_BLEND);
-   // Pop the lighting bit back
    glPopAttrib();
-}
+   }
+//------------------------------------------------------------------------------

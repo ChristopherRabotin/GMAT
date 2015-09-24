@@ -161,6 +161,7 @@ BODY_3D_MODEL_PATH     = DATA_PATH/graphics/models/
 STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
+BORDER_FILE            = STAR_PATH/inp_Border.txt
 #-----------------------------------------------------------
 VEHICLE_MODEL_PATH     = DATA_PATH/vehicle/models/
 SPACECRAFT_MODEL_FILE  = VEHICLE_MODEL_PATH/aura.3ds
