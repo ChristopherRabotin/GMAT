@@ -706,6 +706,67 @@ Rmatrix FunctionRunner::MatrixEvaluate()
    return rmatResult;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase EvaluateObject()
+//------------------------------------------------------------------------------
+/**
+ * @return the FunctionRunner of left node
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* FunctionRunner::EvaluateObject()
+{
+   Function *function = theFunctionManager.GetFunction();
+   if (function == NULL)
+      throw MathException("FunctionRunner::Evaluate() function is NULL");
+   
+   #ifdef DEBUG_PERFORMANCE
+   static Integer callCount = 0;
+   callCount++;      
+   clock_t t1 = clock();
+   MessageInterface::ShowMessage
+      ("=== FunctionRunner::EvaluateObject() entered, '%s' Count = %d\n",
+       GetName().c_str(), callCount);
+   #endif
+   
+   #ifdef DEBUG_EVALUATE
+   MessageInterface::ShowMessage
+      ("FunctionRunner::EvaluateObject() entered, this=<%p><%s>, function=<%s><%p>\n",
+       this, GetName().c_str(), function->GetName().c_str(), function);
+   #endif
+   
+   if (elementType != Gmat::OBJECT_TYPE)
+      throw MathException
+         ("The function \"" + function->GetName() + "\" does not return OBJECT_TYPE");
+   
+   GmatBase *retObj = theFunctionManager.EvaluateObject(callingFunction);
+   
+   WrapperArray wrappersToDelete = theFunctionManager.GetWrappersToDelete();
+   // Delete old output wrappers (loj: 2008.11.24)
+   for (WrapperArray::iterator ewi = wrappersToDelete.begin();
+        ewi < wrappersToDelete.end(); ewi++)
+   {
+      if ((*ewi) != NULL)
+      {
+         #ifdef DEBUG_MEMORY
+         MemoryTracker::Instance()->Remove
+            ((*ewi), (*ewi)->GetDescription(), "FunctionRunner::EvaluateObject()",
+             " deleting output wrapper");
+         #endif
+         delete (*ewi);
+         (*ewi) = NULL;
+      }
+   }
+   
+   #ifdef DEBUG_PERFORMANCE
+   clock_t t2 = clock();
+   MessageInterface::ShowMessage
+      ("=== FunctionRunner::EvaluateObject() exiting, '%s' Count = %d, Run Time: %f seconds\n",
+       GetName().c_str(), callCount, (Real)(t2-t1)/CLOCKS_PER_SEC);
+   #endif
+   
+   return retObj;
+}
 
 //------------------------------------------------------------------------------
 // void Finalize()

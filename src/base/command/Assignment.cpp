@@ -35,6 +35,7 @@
 #include "NumberWrapper.hpp"
 #include "ArrayWrapper.hpp"
 #include "ArrayElementWrapper.hpp"
+#include "ObjectWrapper.hpp"
 #include "FunctionManager.hpp"
 #include "MessageInterface.hpp"
 #include "ObjectPropertyWrapper.hpp"
@@ -1188,6 +1189,10 @@ bool Assignment::Execute()
    }
    catch (BaseException &e)
    {
+      #ifdef DEBUG_ASSIGNMENT_EXEC
+      MessageInterface::ShowMessage("   ==> Caught Exception: %s\n", e.GetFullMessage().c_str());
+      #endif
+      
       // To make error message format consistent, just add "Command Exception:"
       std::string msg = e.GetFullMessage();
       if (msg.find("Exception") == msg.npos && msg.find("exception") == msg.npos)
@@ -2324,7 +2329,8 @@ ElementWrapper* Assignment::RunMathTree()
       
       #ifdef DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage
-         ("   returnType=%d, numRow=%d, numCol=%d\n", returnType, numRow, numCol);
+         ("   lhsDataType=%d, returnType=%d, numRow=%d, numCol=%d\n", lhsDataType,
+          returnType, numRow, numCol);
       #endif
       
       if (lhsDataType != returnType)
@@ -2394,6 +2400,7 @@ ElementWrapper* Assignment::RunMathTree()
             Rmatrix rmat;
             rmat.SetSize(numRow, numCol);
             rmat = topNode->MatrixEvaluate();
+            
             // create Array, this array will be deleted when ArrayWrapper is deleted
             Array *outArray = new Array("ArrayOutput");
             #ifdef DEBUG_MEMORY
@@ -2420,10 +2427,30 @@ ElementWrapper* Assignment::RunMathTree()
          }
          case Gmat::OBJECT_TYPE:
          {
-            CommandException ce;
-            ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
-                          "equation is OBJECT and it will be implemented in a future",
-                          rhs.c_str(), lhs.c_str());
+            #ifdef DEBUG_ASSIGNMENT_EXEC
+            MessageInterface::ShowMessage("   Return type is OBJECT_TYPE\n");
+            MessageInterface::ShowMessage("   Calling topNode->MatrixEvaluate()\n");
+            #endif
+            
+            GmatBase *outObj = topNode->EvaluateObject();
+            
+            if (outObj)
+            {
+               #ifdef DEBUG_ASSIGNMENT_EXEC
+               MessageInterface::ShowMessage("   Creating ObjectWrapper for output\n");
+               #endif
+               outWrapper = new ObjectWrapper();
+               outWrapper->SetDescription(outObj->GetName());
+               outWrapper->SetRefObject(outObj->Clone());
+            }
+            else
+            {
+               CommandException ce;
+               ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
+                             "equation is OBJECT and it is NULL",
+                             rhs.c_str(), lhs.c_str());
+               throw ce;
+            }
             break;
          }
          default:

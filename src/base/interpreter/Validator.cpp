@@ -3342,23 +3342,29 @@ bool Validator::ValidateSubCommand(GmatCommand *brCmd, Integer level, Integer ma
          
          if (!ValidateCommand(nextInBranch, false, manage))
          {
+            #ifdef DEBUG_VALIDATE_COMMAND
             MessageInterface::ShowMessage
                ("==> ValidateCommand() returned false\n");
+            #endif
             return false;
          }
          
          if (!CheckUndefinedReference(nextInBranch))
          {
+            #ifdef DEBUG_VALIDATE_COMMAND
             MessageInterface::ShowMessage
                ("==> CheckUndefinedReference() returned false\n");
-             return false;
+            #endif
+            return false;
          }
          
          if (nextInBranch->GetChildCommand() != NULL)
             if (!ValidateSubCommand(nextInBranch, level+1, manage))
             {
+               #ifdef DEBUG_VALIDATE_COMMAND
                MessageInterface::ShowMessage
                   ("==> ValidateSubCommand() returned false\n");
+               #endif
                return false;
             }
          

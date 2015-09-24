@@ -85,6 +85,7 @@ public:
    virtual bool         Execute(FunctionManager *callingFM = NULL);
    virtual Real         Evaluate(FunctionManager *callingFM = NULL);
    virtual Rmatrix      MatrixEvaluate(FunctionManager *callingFM = NULL);
+   virtual GmatBase*    EvaluateObject(FunctionManager *callingFM = NULL);
    virtual void         Finalize();
    bool                 IsFinalized();
    
@@ -143,6 +144,8 @@ protected:
    Real                 realResult;
    /// Rmatrix value output
    Rmatrix              matResult;
+   /// Object output
+   GmatBase             *objectResult;
    /// Flag indicating whether or not there is one nameless result (i.e. called from FunctionRunner)
    bool                 blankResult;
    /// Which type of output was saved last - real or rmatrix?

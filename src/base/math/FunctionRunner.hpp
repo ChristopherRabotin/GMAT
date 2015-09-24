@@ -68,6 +68,7 @@ public:
    virtual bool         ValidateInputs(); 
    virtual Real         Evaluate();
    virtual Rmatrix      MatrixEvaluate();
+   virtual GmatBase*    EvaluateObject();
    virtual void         Finalize();
    
    // inherited from GmatBase
