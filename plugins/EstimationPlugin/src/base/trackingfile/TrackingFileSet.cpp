@@ -28,7 +28,7 @@
 #include "RangeAdapterKm.hpp"
 #include "DSNRangeAdapter.hpp"
 #include "DopplerAdapter.hpp"
-#include "GNDopplerAdapter.hpp"                           // made changes by TUAN NGUYEN
+#include "GNDopplerAdapter.hpp"
 #include "RangeRateAdapterKps.hpp"
 #include "PointRangeRateAdapterKps.hpp"
 
@@ -531,7 +531,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
    {
       if (value.substr(0,1) == "{")
       {
-         if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")                           // made changes by TUAN NGUYEN
+         if (GmatStringUtil::Trim(GmatStringUtil::RemoveOuterString(value, "{", "}")) == "")
             return true;
       }
 
@@ -618,9 +618,9 @@ std::string TrackingFileSet::GetStringParameter(const Integer id,
  */
 //------------------------------------------------------------------------------
 bool TrackingFileSet::SetStringParameter(const Integer id,
-      const std::string& value1, const Integer index)                                                       // made changes by TUAN NGUYEN
+      const std::string& value1, const Integer index)
 {
-   std::string value = value1;                                                                              // made changes by TUAN NGUYEN
+   std::string value = value1;
    #ifdef DEBUG_INITIALIZATION
       MessageInterface::ShowMessage("TrackingFileSet<%s,%p>::SetStringParameter(%d, "
             "'%s', %d) called\n", GetName().c_str(), this, id, value.c_str(), index);
@@ -628,35 +628,35 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == TRACKINGCONFIG)
    {
-      // return true when it is an empty list                                                               // made changes by TUAN NGUYEN
-      if (index == -1)                                                                                      // made changes by TUAN NGUYEN
-         return true;                                                                                       // made changes by TUAN NGUYEN
+      // return true when it is an empty list
+      if (index == -1)
+         return true;
 
-      if ((value.size() > 1) && (value.c_str()[0] == '{') && (value.c_str()[value.size()-1] == '}'))        // made changes by TUAN NGUYEN
+      if ((value.size() > 1) && (value.c_str()[0] == '{') && (value.c_str()[value.size()-1] == '}'))
       {
          // Processing a tracking config:
-         value = value.substr(1,value.size()-2);                                                            // made changes by TUAN NGUYEN
-         std::string term;                                                                                  // made changes by TUAN NGUYEN
-         size_t pos = value.find_first_of(',');       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
-         Integer newIndex = 0;                                                                              // made changes by TUAN NGUYEN
-         bool retVal;                                                                                       // made changes by TUAN NGUYEN
+         value = value.substr(1,value.size()-2);
+         std::string term;
+         size_t pos = value.find_first_of(',');       // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
+         Integer newIndex = 0;
+         bool retVal;
 
-         while (pos != std::string::npos)                                                                   // made changes by TUAN NGUYEN
-         {                                                                                                  // made changes by TUAN NGUYEN
-            term = value.substr(0, pos);                                                                    // made changes by TUAN NGUYEN
-            retVal = TrackingFileSet::SetStringParameter(id, term, newIndex);                               // made changes by TUAN NGUYEN
-            if (retVal == false)                                                                            // made changes by TUAN NGUYEN
-               return false;                                                                                // made changes by TUAN NGUYEN
+         while (pos != std::string::npos)
+         {
+            term = value.substr(0, pos);
+            retVal = TrackingFileSet::SetStringParameter(id, term, newIndex);
+            if (retVal == false)
+               return false;
 
-            value = value.substr(pos+1);                                                                    // made changes by TUAN NGUYEN
-            pos = value.find_first_of(',');                                                                 // made changes by TUAN NGUYEN
-            ++newIndex;                                                                                     // made changes by TUAN NGUYEN
-         }                                                                                                  // made changes by TUAN NGUYEN
+            value = value.substr(pos+1);
+            pos = value.find_first_of(',');
+            ++newIndex;
+         }
 
-         return TrackingFileSet::SetStringParameter(id, value, newIndex);                                   // made changes by TUAN NGUYEN
-      }                                                                                                     // made changes by TUAN NGUYEN
+         return TrackingFileSet::SetStringParameter(id, value, newIndex);
+      }
 
-      // MeasurementDefinition theDef;                                                                      // made changes by TUAN NGUYEN
+      
       if (index == 0)
       {
          // Starting a new definition
@@ -685,7 +685,7 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
       Integer strandIndex = trackingConfigs[defIndex].strands.size() - 1;
 
       // Strip off trailing '}', and leading and trailing white space
-      size_t loc = rawName.find('}');                           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11       // made changes by TUAN NGUYEN
+      size_t loc = rawName.find('}');                           // change from std::string::size_type to size_t in order to compatible with C++98 and C++11
       if (loc != std::string::npos)
          rawName = rawName.substr(0,loc);
       valarray = rawName.c_str();
@@ -713,13 +713,13 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == FILENAME)
    {
-      // throw an error message when it is an empty list                                                           // made changes by TUAN NGUYEN
-      if (index == -1)                                                                                             // made changes by TUAN NGUYEN
-         throw MeasurementException("Error: No file name was set to " + GetName() + ".Filenames parameter.\n");    // made changes by TUAN NGUYEN
+      // throw an error message when it is an empty list
+      if (index == -1)
+         throw MeasurementException("Error: No file name was set to " + GetName() + ".Filenames parameter.\n");
 
       if ((!filenames.empty())&&
-          (find (filenames.begin(), filenames.end(), value) != filenames.end()))                                   // made changes by TUAN NGUYEN
-         throw MeasurementException("Error: replication of file name ('" + value + "').\n");                       // made changes by TUAN NGUYEN
+          (find (filenames.begin(), filenames.end(), value) != filenames.end()))
+         throw MeasurementException("Error: replication of file name ('" + value + "').\n");
 
       if (((Integer)filenames.size() > index) && (index >= 0))
          filenames[index] = value;
@@ -740,13 +740,13 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == RAMPED_TABLENAME)
    {
-      // return true when it is an empty list                                                           // made changes by TUAN NGUYEN
-      if (index == -1)                                                                                  // made changes by TUAN NGUYEN
-         return true;                                                                                   // made changes by TUAN NGUYEN
+      // return true when it is an empty list
+      if (index == -1)
+         return true;
 
       if ((!rampedTablenames.empty())&&
-          (find(rampedTablenames.begin(), rampedTablenames.end(), value) != rampedTablenames.end()))    // made changes by TUAN NGUYEN
-         throw MeasurementException("Error: replication of ramped table name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+          (find(rampedTablenames.begin(), rampedTablenames.end(), value) != rampedTablenames.end()))
+         throw MeasurementException("Error: replication of ramped table name ('" + value + "').\n");
 
       if (((Integer)rampedTablenames.size() > index) && (index >= 0))
          rampedTablenames[index] = value;
@@ -767,13 +767,13 @@ bool TrackingFileSet::SetStringParameter(const Integer id,
 
    if (id == DATA_FILTERS)
    {
-      // return true when it is an empty list                                                          // made changes by TUAN NGUYEN
-      if (index == -1)                                                                                 // made changes by TUAN NGUYEN
-         return true;                                                                                  // made changes by TUAN NGUYEN
+      // return true when it is an empty list
+      if (index == -1)
+         return true;
 
       if ((!dataFilterNames.empty())&&
-          (find(dataFilterNames.begin(), dataFilterNames.end(), value) != dataFilterNames.end()))      // made changes by TUAN NGUYEN
-         throw MeasurementException("Error: replication of data filter name ('" + value + "').\n");    // made changes by TUAN NGUYEN
+          (find(dataFilterNames.begin(), dataFilterNames.end(), value) != dataFilterNames.end()))
+         throw MeasurementException("Error: replication of data filter name ('" + value + "').\n");
       
       if (((Integer)dataFilterNames.size() > index) && (index >= 0))
          dataFilterNames[index] = value;
@@ -1747,7 +1747,7 @@ bool TrackingFileSet::Initialize()
          }
 
          // Set doppler count interval for Doppler
-         if ((measType == "Doppler")||(measType == "Doppler_RangeRate"))                            // made changes by TUAN NGUYEN
+         if ((measType == "Doppler")||(measType == "Doppler_RangeRate"))
          {
             measurements[i]->SetRealParameter("DopplerCountInterval", dopplerCountInterval);
          }
@@ -1936,8 +1936,7 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
    ss << "}_" << type;
    std::string adapterName = ss.str();          // tracking adapter name contains TrackingFileSet name following tracking configuration index and type 
    
-   // if (type == "Range")                             // made changes by TUAN NGUYEN
-   if (type == "Range_KM")                             // made changes by TUAN NGUYEN
+   if (type == "Range_KM")
    {
       retval = new RangeAdapterKm(adapterName);
       if (retval)
@@ -1960,22 +1959,21 @@ TrackingDataAdapter* TrackingFileSet::BuildAdapter(const StringArray& strand,
       retval = new DopplerAdapter(adapterName);
       if (retval)
       {
-         // ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range", configIndex);            // made changes by TUAN NGUYEN
-         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);            // made changes by TUAN NGUYEN
+         ((DopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
          retval->UsesLightTime(useLighttime);
          retval->SetStringParameter("MeasurementType", type);
       }
    }                                                                  
-   else if (type == "Doppler_RangeRate")                                                                                  // made changes by TUAN NGUYEN
-   {                                                                                                                      // made changes by TUAN NGUYEN
-      retval = new GNDopplerAdapter(adapterName);                                                                         // made changes by TUAN NGUYEN
-      if (retval)                                                                                                         // made changes by TUAN NGUYEN
-      {                                                                                                                   // made changes by TUAN NGUYEN
-         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);          // made changes by TUAN NGUYEN
-         retval->UsesLightTime(useLighttime);                                                                             // made changes by TUAN NGUYEN
-         retval->SetStringParameter("MeasurementType", type);                                                             // made changes by TUAN NGUYEN
-      }                                                                                                                   // made changes by TUAN NGUYEN
-   }                                                                                                                      // made changes by TUAN NGUYEN
+   else if (type == "Doppler_RangeRate")
+   {
+      retval = new GNDopplerAdapter(adapterName);
+      if (retval)
+      {
+         ((GNDopplerAdapter*)retval)->adapterS = (RangeAdapterKm*)BuildAdapter(strand, "Range_KM", configIndex);
+         retval->UsesLightTime(useLighttime);
+         retval->SetStringParameter("MeasurementType", type);
+      }
+   }
    else if (type == "RangeRate")
    {                                                                  
       retval = new RangeRateAdapterKps(instanceName + type);              
