@@ -997,12 +997,13 @@ DefaultIB.B = -2</code></programlisting>
       <title>Backwards-propagated Impulsive maneuvers defined using the
       spacecraft velocity</title>
 
-      <para>Examples of axes defined using the spacecraft velocity are the VNB
-      and LVLH axes discussed above as well as some user-defined axes. The
-      behavior when applying an impulsive maneuver using these types of axes
-      during a backwards-propagation is subtle and requires some explanation.
-      In the examples that follow, we will focus our discussion on a VNB
-      maneuver.</para>
+      <para>Examples of axes defined using the spacecraft velocity are the
+      <guilabel>VNB</guilabel> and <guilabel>LVLH</guilabel> axes discussed
+      above as well as some user-defined axes. The behavior when applying an
+      impulsive maneuver using these types of axes during a
+      backwards-propagation is subtle and requires some explanation. In the
+      examples that follow, we will focus our discussion on a
+      <guilabel>VNB</guilabel> maneuver.</para>
 
       <para>As will be shown in the script samples below, an impulsive
       maneuver is applied during a backwards propagation using the ‘BackProp’
@@ -1030,22 +1031,26 @@ Maneuver myImpulsiveBurn(Sat);</programlisting>
       <para>To calculate the actual maneuver components applied, GMAT,
       internally, uses an iterative calculation method. This iteration method
       works best for maneuver magnitudes that are not an appreciable fraction
-      of the overall spacecraft velocity. In addition, for VNB maneuvers, the
-      iteration method works best for maneuvers where the ‘N’ and ‘B’
-      component magnitudes are relatively small as compared to the 'V'
-      component magnitude. If the GMAT internal iterative method fails to
-      converge, a warning message will be generated. Currently, there is not
-      an easy way for the user to report out the actual applied
-      back-propagated maneuver components. (The maneuver report outputs the
-      user supplied VNB coordinates). After the back-propagated maneuver has
-      been applied, however, we do know what the components of the maneuver
-      are. If the VNB maneuver has user-supplied components, (Vx, Vy, Vz),
-      then after the back-propagated maneuver has been applied, the VNB
-      components of the maneuver are (-Vx, -Vy, -Vz).</para>
+      of the overall spacecraft velocity. In addition, for
+      <guilabel>VNB</guilabel> maneuvers, the iteration method works best for
+      maneuvers where the ‘<guilabel>N</guilabel>’ and
+      ‘<guilabel>B</guilabel>’ component magnitudes are relatively small as
+      compared to the '<guilabel>V</guilabel>' component magnitude. If the
+      GMAT internal iterative method fails to converge, a warning message will
+      be generated. Currently, there is not an easy way for the user to report
+      out the actual applied back-propagated maneuver components. (The
+      maneuver report outputs the user supplied <guilabel>VNB</guilabel>
+      coordinates). After the back-propagated maneuver has been applied,
+      however, we do know what the components of the maneuver are. If the
+      <guilabel>VNB</guilabel> maneuver has user-supplied components, (Vx, Vy,
+      Vz), then after the back-propagated maneuver has been applied, the
+      <guilabel>VNB</guilabel> components of the maneuver are (-Vx, -Vy,
+      -Vz).</para>
 
       <para>To hopefully make this logic clearer, consider the script sample
-      below where the ‘N’ and ‘B’ components of the maneuver are zero and the
-      ‘V’ component is +5 km/s. If the spacecraft velocity is (7,0,0) km/s in
+      below where the ‘<guilabel>N</guilabel>’ and ‘<guilabel>B</guilabel>’
+      components of the maneuver are zero and the ‘<guilabel>V</guilabel>’
+      component is +5 km/s. If the spacecraft velocity is (7,0,0) km/s in
       J2000 inertial coordinates, then after the backwards-propagated
       impulsive maneuver, the velocity of the spacecraft will be (2,0,0)
       km/s.</para>
