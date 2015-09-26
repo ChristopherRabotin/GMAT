@@ -24,6 +24,7 @@
 
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
+#include "FileUtil.hpp"
 #include <sstream>
 
 
@@ -70,8 +71,8 @@ SolarFluxReader::FluxData::FluxData()
       ap[j] = -1.0;
    }
 
-   index = -1.0;
-   id = -1.0;
+   index = -1;
+   id = -1;
    isObsData = true;
 }
 
@@ -361,7 +362,7 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
 
          while (!inObs.eof())
          {
-            getline(inObs, theLine);
+            GmatFileUtil::GetLine(&inObs, theLine);
 
             if (theLine.find(beg_ObsTag) != std::string::npos)
             {
@@ -391,13 +392,13 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
          inPredict.seekg(0, std::ios_base::beg);
          while (!inPredict.eof())
          {
-            getline(inPredict, theLine);
+            GmatFileUtil::GetLine(&inPredict, theLine);
 
             if ((theLine.find("NOMINAL TIMING") != std::string::npos) &&
                 (theLine.find("EARLY TIMING") != std::string::npos))
             {
-               getline(inPredict, theLine);
-               getline(inPredict, theLine);
+               GmatFileUtil::GetLine(&inPredict, theLine);
+               GmatFileUtil::GetLine(&inPredict, theLine);
                begData = inPredict.tellg();
 
                break;
@@ -500,7 +501,7 @@ bool SolarFluxReader::LoadObsData()
 
    inObs.seekg(begObs, std::ios_base::beg);
    std::string theLine;
-   getline(inObs, theLine);
+   GmatFileUtil::GetLine(&inObs, theLine);
 
    while (!inObs.eof() && (theLine.find(end_ObsTag) == std::string::npos))
    {
@@ -559,7 +560,7 @@ bool SolarFluxReader::LoadObsData()
          fD.isObsData = true;
          obsFluxData.push_back(fD);
       }
-      getline(inObs, theLine);
+      GmatFileUtil::GetLine(&inObs, theLine);
    }
 
    //delete new'd array
@@ -623,11 +624,14 @@ bool SolarFluxReader::LoadPredictData()
    std::string theLine;
 
    inPredict.seekg(begData, std::ios_base::beg);
-
+   
+   Integer lineCounter = 0;
+   std::stringstream lineList;
    while (!inPredict.eof())
    {
-      getline(inPredict, theLine);
+      GmatFileUtil::GetLine(&inPredict, theLine);
       line = theLine.c_str();
+      ++lineCounter;
 
       #ifdef DEBUG_INITIALIZATION
          MessageInterface::ShowMessage("%s\n", line);
@@ -642,43 +646,56 @@ bool SolarFluxReader::LoadPredictData()
       std::istream_iterator<std::string> beg(buf), end;
       std::vector<std::string> tokens(beg, end);
 
-      FluxData fD;
-      fD.isObsData = false;
+      if (tokens.size() < 14)
+      {
+         if (lineList.str() != "")
+            lineList << ", ";
+         lineList << lineCounter;
+      }
+      else
+      {
+         FluxData fD;
+         fD.isObsData = false;
 
-      // Set ref epoch to midnight for the date on the current line
-      Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()),
+         // Set ref epoch to midnight for the date on the current line
+         Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()),
             atoi(tokens[0].c_str()), 1, hour, minute, sec);
-      fD.epoch = mjd;
+         fD.epoch = mjd;
 
-      // Nominal Timing
-      for (Integer l=0; l<3; l++)
-         fD.F107a[l] = atof(tokens[l+2].c_str());
-      fD.apSchatten[0] = atof(tokens[5].c_str());
+         // Nominal Timing
+         for (Integer l = 0; l < 3; l++)
+            fD.F107a[l] = atof(tokens[l + 2].c_str());
+         fD.apSchatten[0] = atof(tokens[5].c_str());
 
-      // Early Timing
-      for (Integer l=0; l<3; l++)
-         fD.F107a[l+3] = atof(tokens[l+6].c_str());
-      fD.apSchatten[1] = atof(tokens[9].c_str());
+         // Early Timing
+         for (Integer l = 0; l < 3; l++)
+            fD.F107a[l + 3] = atof(tokens[l + 6].c_str());
+         fD.apSchatten[1] = atof(tokens[9].c_str());
 
-      // Late Timing
-      for (Integer l=0; l<3; l++)
-         fD.F107a[l+6] = atof(tokens[l+10].c_str());
-      fD.apSchatten[2] = atof(tokens[13].c_str());
-      fD.index = -1;
-      fD.id = -1;
+         // Late Timing
+         for (Integer l = 0; l < 3; l++)
+            fD.F107a[l + 6] = atof(tokens[l + 10].c_str());
+         fD.apSchatten[2] = atof(tokens[13].c_str());
+         fD.index = -1;
+         fD.id = -1;
 
-      for (Integer l = 0; l<8; l++)
-         fD.kp[l] = -1;
-      for (Integer l=0; l<8; l++)
-         fD.ap[l] = -1;
-      fD.apAvg = -1;
-      fD.adjF107 = -1;
-      fD.adjCtrF107a = -1;
-      fD.obsF107 = -1;
-      fD.obsCtrF107a = -1;
+         for (Integer l = 0; l < 8; l++)
+            fD.kp[l] = -1;
+         for (Integer l = 0; l < 8; l++)
+            fD.ap[l] = -1;
+         fD.apAvg = -1;
+         fD.adjF107 = -1;
+         fD.adjCtrF107a = -1;
+         fD.obsF107 = -1;
+         fD.obsCtrF107a = -1;
 
-      predictFluxData.push_back(fD);
+         predictFluxData.push_back(fD);
+      }
    }
+
+   if (lineList.str().length() > 0)
+      MessageInterface::ShowMessage("WARNING: Line(s) [%s] of the predict data "
+            "file were not read correctly\n", lineList.str().c_str());
 
    #ifdef DEBUG_GETFLUXINPUTS
       MessageInterface::ShowMessage("Loaded %d flux predict data records\n",
