@@ -141,6 +141,8 @@ public:
 protected:
    /// Solar flux file reader
    SolarFluxReader         *fluxReader;
+   /// Buffer used for flux data while moving from raw data to massaged data
+   SolarFluxReader::FluxData fDbuffer;
    /// The solarsystem
    SolarSystem             *solarSystem;
    /// The central body
@@ -161,8 +163,6 @@ protected:
    Real                    cbFlattening;
    /// SolarFlux files are loaded ?
    bool                    fluxReaderLoaded;
-   /// Flux data container for values from the reader
-   SolarFluxReader::FluxData fD;
 
    // Values used if a file is not set
    /// Nominal value of F10.7 to use.

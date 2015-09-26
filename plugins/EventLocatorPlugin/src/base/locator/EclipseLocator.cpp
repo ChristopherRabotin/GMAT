@@ -86,6 +86,10 @@ EclipseLocator::EclipseLocator(const std::string &name) :
 
    TakeAction("Clear", "Events");
 
+   // Set default occulting bodies
+   defaultOccultingBodies.push_back("Earth");
+   defaultOccultingBodies.push_back("Luna");
+
    #ifdef DEBUG_ECLIPSE_EVENTS
       MessageInterface::ShowMessage("Creating Eclipse locator %s at <%p>\n",
             name.c_str(), this);

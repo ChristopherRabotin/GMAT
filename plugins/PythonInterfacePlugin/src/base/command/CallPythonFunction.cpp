@@ -800,6 +800,9 @@ Integer CallPythonFunction::FillInputList()
          
       if (mapObj->IsOfType(Gmat::PARAMETER))
          mInputList.push_back((Parameter *)mapObj);
+      else
+         throw CommandException("The input field " + (*it) + " was not "
+               "recognized as a valid input to the Python interface.");
    }
       
    return mInputList.size();
@@ -924,7 +927,10 @@ void CallPythonFunction::SendInParam(std::vector<void *> &argIn, std::vector<Gma
          }
 
          default:
-            MessageInterface::ShowMessage("Unkown type: %d\n", type);
+            throw CommandException("The parameter " + param->GetName() +
+                        ", with type " + PARAM_TYPE_STRING[type] +
+                        ", is not a valid input type for GMAT's Python "
+                        "interface.");
             break;
       }
    }

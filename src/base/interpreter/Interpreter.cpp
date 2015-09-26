@@ -10008,15 +10008,18 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
    }
    
    // check for no extension of .gmf or wrong extension
-   StringArray parts = GmatStringUtil::SeparateBy(fPath, ".");
-   if ((parts.size() == 1) ||
-       (parts.size() == 2 && parts[1] != "gmf"))
+   if (retval)
    {
-      InterpreterException ex
-         ("The GmatFunction file \"" + fPath + "\" has no or incorrect file "
-          "extension referenced in \"" + fName + "\"\n");
-      HandleError(ex, false);
-      retval = false;
+      StringArray parts = GmatStringUtil::SeparateBy(fPath, ".");
+      if ((parts.size() == 1) ||
+          (parts.size() == 2 && parts[1] != "gmf"))
+      {
+         InterpreterException ex
+            ("The GmatFunction file \"" + fPath + "\" has no or incorrect file "
+             "extension referenced in \"" + fName + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+      }
    }
    
    if (!retval || !fullCheck)

@@ -89,6 +89,7 @@
       <xi:include href="Command_BeginMissionSequence.xml" />
       <xi:include href="Command_BeginScript.xml" />
       <xi:include href="Command_CallMatlabFunction.xml" />
+      <xi:include href="Command_CallPythonFunction.xml" />
       <xi:include href="Command_ClearPlot.xml" />
       <xi:include href="Command_EndFiniteBurn.xml" />
       <xi:include href="Command_For.xml" />

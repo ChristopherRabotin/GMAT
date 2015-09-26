@@ -301,6 +301,8 @@ bool FileManager::SetGmatWorkingDirectory(const std::string &newDir)
          // will have higher priority in search path for the new file path implementation.
          // (LOJ: 2014.07.09)
          AddMatlabFunctionPath(newDir);
+         // Also add it to GmatFunction path (LOJ: 2015.09.18)
+         AddGmatFunctionPath(newDir);
 //         //Python
 //         AddPythonModulePath(newDir);
       }
@@ -2472,6 +2474,9 @@ void FileManager::ClearGmatFunctionPath()
 }
 
 
+//------------------------------------------------------------------------------
+// void AddGmatFunctionPath(const char *path, bool addFront)
+//------------------------------------------------------------------------------
 void FileManager::AddGmatFunctionPath(const char *path, bool addFront)
 {
    return AddGmatFunctionPath(std::string(path), addFront);
@@ -2550,6 +2555,9 @@ void FileManager::AddGmatFunctionPath(const std::string &path, bool addFront)
 }
 
 
+//------------------------------------------------------------------------------
+// std::string GetGmatFunctionPath(const char *funcName)
+//------------------------------------------------------------------------------
 std::string FileManager::GetGmatFunctionPath(const char *funcName)
 {
    return GetFunctionPath(GMAT_FUNCTION, mGmatFunctionPaths, std::string(funcName));

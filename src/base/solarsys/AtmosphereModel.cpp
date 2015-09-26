@@ -275,8 +275,6 @@ AtmosphereModel& AtmosphereModel::operator=(const AtmosphereModel& am)
    for (Integer i = 0; i < 7; i++)
       ap[i] = am.ap[i];
 
-
-
    return *this;
 }
 
@@ -1361,14 +1359,14 @@ SolarFluxReader* AtmosphereModel::GetFluxReader()
  * @param epoch The epoch for teh data,  The default, -1.0, retrieves the
  *              current record
  *
- * @return The internal fD record
+ * @return The internal fDbuffer record
  */
 //------------------------------------------------------------------------------
 SolarFluxReader::FluxData AtmosphereModel::GetFluxData(GmatEpoch epoch)
 {
    if (epoch > 0.0)
       GetInputs(epoch);
-   return fD;
+   return fDbuffer;
 }
 
 
@@ -1596,6 +1594,26 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
             (fluxReaderLoaded ? "true" : "false"));
    #endif
 
+   // Process the epoch information
+   Integer iEpoch = (Integer)(epoch);  // Truncate the epoch
+   Integer yearOffset = (Integer)((epoch + 5.5) / GmatTimeConstants::DAYS_PER_YEAR);
+   Integer year   = 1941 + yearOffset;
+   Integer doy = iEpoch - (Integer)(yearOffset * GmatTimeConstants::DAYS_PER_YEAR) + 5;
+
+   sod  = GmatTimeConstants::SECS_PER_DAY * (epoch - iEpoch + 0.5);  // Includes noon/midnight adjustment
+   if (sod < 0.0)
+   {
+      sod += GmatTimeConstants::SECS_PER_DAY;
+      doy -= 1;
+   }
+
+   if (sod > GmatTimeConstants::SECS_PER_DAY)
+   {
+      sod -= GmatTimeConstants::SECS_PER_DAY;
+      doy += 1;
+   }
+   yd = year*1000 + doy;
+
    if (!fluxReaderLoaded)
    {
       std::string theObsFile = "", thePredictFile = "";
@@ -1647,6 +1665,10 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
       #endif
     }
 
+   #ifdef DEBUG_FLUX_FILE
+      MessageInterface::ShowMessage("Data loaded; looking for epoch %lf\n", epoch);
+   #endif
+
    if (fluxReaderLoaded && epoch > 0.0)
    {
       if (epoch < historicEnd)
@@ -1654,12 +1676,12 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
          switch(historicalDataSource)
          {
          case 1:
-            fD = fluxReader->GetInputs(epoch);
-            fluxReader->PrepareApData(fD, epoch);
-            f107 = fD.obsF107;
-            f107a = fD.obsCtrF107a;
+            fDbuffer = fluxReader->GetInputs(epoch);
+            fluxReader->PrepareApData(fDbuffer, epoch);
+            f107 = fDbuffer.obsF107;
+            f107a = fDbuffer.obsCtrF107a;
             for (Integer i = 0; i < 7; i++)
-                ap[i] = fD.ap[i];
+                ap[i] = fDbuffer.ap[i];
             #ifdef DEBUG_FLUX_FILE
                MessageInterface::ShowMessage("%lf Historic flux: CSSI\n", epoch);
             #endif
@@ -1683,12 +1705,12 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
          {
          case 1:
          case 2:
-            fD = fluxReader->GetInputs(epoch);
-            fluxReader->PrepareApData(fD, epoch);
-            f107 = fD.obsF107;
-            f107a = fD.obsCtrF107a;
+            fDbuffer = fluxReader->GetInputs(epoch);
+            fluxReader->PrepareApData(fDbuffer, epoch);
+            f107 = fDbuffer.obsF107;
+            f107a = fDbuffer.obsCtrF107a;
             for (Integer i = 0; i < 7; i++)
-                ap[i] = fD.ap[i];
+                ap[i] = fDbuffer.ap[i];
             #ifdef DEBUG_FLUX_FILE
                MessageInterface::ShowMessage("%lf Predict flux: Schatten\n", epoch);
             #endif
@@ -1723,7 +1745,6 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
       MessageInterface::ShowMessage("   Ap:     [%lf %lf %lf %lf %lf %lf %lf]\n", ap[0], ap[1], ap[2], ap[3], ap[4], ap[5], ap[6]);
    #endif
 }
-
 
 
 std::string AtmosphereModel::GetCentralBodyName()
