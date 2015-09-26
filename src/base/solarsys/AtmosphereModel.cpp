@@ -41,6 +41,7 @@
 //#define DEBUG_CALCULATE_GEODETICS
 //#define DEBUG_FLUX_FILE
 //#define DEBUG_SCHATTEN_SETTINGS
+//#define DUMP_FLUX_DATA
 
 //------------------------------------------------------------------------------
 // static data
@@ -1736,6 +1737,12 @@ void AtmosphereModel::GetInputs(GmatEpoch epoch)
       for (Integer i = 0; i < 7; i++)
          ap[i] = nominalAp;
    }
+
+   #ifdef DUMP_FLUX_DATA
+      MessageInterface::ShowMessage("%.12lf   %lf  %lf    [%lf %lf %lf %lf %lf "
+            "%lf %lf]\n", epoch, f107, f107a, ap[0], ap[1], ap[2], ap[3], ap[4],
+            ap[5], ap[6]);
+   #endif
 
    #ifdef DEBUG_FLUX_FILE
       MessageInterface::ShowMessage("Flux data for %s model\n", instanceName.c_str());
