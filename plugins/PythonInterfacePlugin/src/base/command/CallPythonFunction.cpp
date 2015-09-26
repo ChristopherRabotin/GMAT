@@ -842,6 +842,9 @@ Integer CallPythonFunction::FillOutputList()
 
       if (mapObj->IsOfType(Gmat::PARAMETER))
          mOutputList.push_back((Parameter *)mapObj);
+      else
+         throw CommandException("The output field " + (*it) + " was not "
+               "recognized as a valid output from the Python interface.");
    }
 
    return mOutputList.size();
