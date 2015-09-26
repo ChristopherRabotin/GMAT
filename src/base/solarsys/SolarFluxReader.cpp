@@ -167,7 +167,7 @@ SolarFluxReader::SolarFluxReader():
    warnEpochBefore   (true),
    warnEpochAfter    (true),
    f107RefEpoch      (18408.0),  // 5/31/91, epoch when the station moved (Vallado)
-   interpolateFlux   (true)
+   interpolateFlux   (false)
 {
    if (!obsFluxData.empty())
       obsFluxData.clear();
@@ -413,8 +413,10 @@ bool SolarFluxReader::LoadFluxData(const std::string &obsFile, const std::string
       }
    }
 
-   MessageInterface::ShowMessage("Spans: [%lf %lf], [%lf %lf]\n",
-         historicStart, historicEnd, predictStart, predictEnd);
+   #ifdef DEBUG_INITIALIZATION
+      MessageInterface::ShowMessage("Spans: [%lf %lf], [%lf %lf]\n",
+            historicStart, historicEnd, predictStart, predictEnd);
+   #endif
 
    return(Close());
 }
@@ -645,7 +647,7 @@ bool SolarFluxReader::LoadPredictData()
 
       // Set ref epoch to midnight for the date on the current line
       Real mjd = ModifiedJulianDate(atoi(tokens[1].c_str()),
-            atoi(tokens[0].c_str()), 0, hour, minute, sec);
+            atoi(tokens[0].c_str()), 1, hour, minute, sec);
       fD.epoch = mjd;
 
       // Nominal Timing
@@ -739,13 +741,11 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
          MessageInterface::ShowMessage("predict data\n");
       #endif
 
-      // Init to the first predict record
-      fD = predictFluxData[0];
-
       if ((predictFluxData.size() > 0))
       {
-         index = (Integer) (epoch - predictStart) - 1;
-      
+         // Init to the first predict record
+         fD = predictFluxData[0];
+
          if (epoch < predictStart)
          {
             // Warn the user that the epoch is too early
@@ -757,7 +757,6 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
                      "entry.\n");
                warnEpochBefore = false;
             }
-            index = 0;
          }
          else if (epoch > predictEnd)
          {
@@ -774,12 +773,11 @@ SolarFluxReader::FluxData SolarFluxReader::GetInputs(GmatEpoch epoch)
          else
          {
             // Look up the data for epoch
-            std::vector<FluxData>::iterator it;
-            for ( it = predictFluxData.begin(); it != predictFluxData.end(); ++it)
+            for (UnsignedInt i = 1; i < predictFluxData.size(); ++i)
             {
-               if ((index >= it->index) && ((it+1) != predictFluxData.end()) && (index < (it+1)->index))
+               if (predictFluxData[i].epoch > epoch)
                {
-                  fD = predictFluxData[it->id];
+                  fD = predictFluxData[i-1];
                   fD.index = -1;
                   break;
                }
@@ -967,16 +965,16 @@ void SolarFluxReader::PrepareApData(SolarFluxReader::FluxData &fD, GmatEpoch epo
          }
       }
 
-//      // Update the F10.7 data and (if selected) interpolate
-//      if (interpolateFlux)
-//      {
-//         Real vals[2];
-//         Real portion = (f107Offset) + fracEpoch - 1.0/3.0;
-//         vals[1] = obsFluxData[f107index].obsF107;
-//         vals[0] = (f107index > 0 ? obsFluxData[f107index-1].obsF107 : vals[1]);
-//         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
-//      }
-//      else
+      // Update the F10.7 data and (if selected) interpolate
+      if (interpolateFlux)
+      {
+         Real vals[2];
+         Real portion = (f107Offset) + fracEpoch - 1.0/3.0;
+         vals[1] = obsFluxData[f107index].obsF107;
+         vals[0] = (f107index > 0 ? obsFluxData[f107index-1].obsF107 : vals[1]);
+         fD.obsF107 = vals[0] + portion * (vals[1] - vals[0]);
+      }
+      else
       {
          // Daily value from previous day
          fD.obsF107 = (f107index > 0 ? obsFluxData[f107index-1].obsF107 :
